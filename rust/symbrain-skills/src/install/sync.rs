@@ -15,7 +15,7 @@ use super::sync_lock::acquire_pull_lock;
 #[cfg(windows)]
 use crate::cap_root::sync_windows_dir;
 use crate::model::{MAX_RESOURCE_ENTRIES, SkillError};
-use crate::{RenderMetadata, load_bundle, render_target};
+use crate::{BundleLoader, RenderMetadata, render_target};
 
 fn fail(fault: Option<FaultPoint>, point: FaultPoint) -> Result<(), SkillError> {
     if fault == Some(point) {
@@ -178,15 +178,19 @@ pub fn sync(options: &SyncOptions) -> Result<Vec<SyncResult>, SkillError> {
     } else {
         options.scope.clone()
     };
-    let statuses = super::status(&super::status::StatusOptions {
-        home_dir: options.home_dir.clone(),
-        project_dir: options.project_dir.clone(),
-        scope: scope.clone(),
-        targets: options.targets.clone(),
-        library_dir: options.library_dir.clone(),
-        base_dir: options.base_dir.clone(),
-        skills: options.skills.clone(),
-    })?;
+    let loader = BundleLoader::default();
+    let statuses = super::status::status_with_loader(
+        &super::status::StatusOptions {
+            home_dir: options.home_dir.clone(),
+            project_dir: options.project_dir.clone(),
+            scope: scope.clone(),
+            targets: options.targets.clone(),
+            library_dir: options.library_dir.clone(),
+            base_dir: options.base_dir.clone(),
+            skills: options.skills.clone(),
+        },
+        &loader,
+    )?;
     let mut results = Vec::new();
     for status in statuses {
         if status.status == super::StatusKind::HarnessChanged {
@@ -226,7 +230,7 @@ pub fn sync(options: &SyncOptions) -> Result<Vec<SyncResult>, SkillError> {
             });
             continue;
         }
-        results.push(reinstall(&status, options, &scope, mode));
+        results.push(reinstall(&status, options, &scope, mode, &loader));
     }
     Ok(results)
 }
@@ -236,9 +240,10 @@ fn reinstall(
     options: &SyncOptions,
     scope: &str,
     mode: String,
+    loader: &BundleLoader,
 ) -> SyncResult {
     let source = options.library_dir.join(&status.name);
-    let bundle = match load_bundle(&source) {
+    let bundle = match loader.load(&source) {
         Ok(bundle) => bundle,
         Err(error) => return failed(status, error.0),
     };
@@ -367,7 +372,13 @@ mod tests {
             home_dir: home.path().to_path_buf(),
             ..Default::default()
         };
-        let result = reinstall(&status, &options, "user", "copy".to_owned());
+        let result = reinstall(
+            &status,
+            &options,
+            "user",
+            "copy".to_owned(),
+            &BundleLoader::default(),
+        );
         assert_eq!(result.action, "skipped", "{result:?}");
         assert!(
             result

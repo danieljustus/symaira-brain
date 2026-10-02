@@ -12,7 +12,7 @@ use super::drift::{DriftKind, DriftSummary, classify_drift, file_hashes, summari
 use super::marker::MarkerState;
 use super::replace::open_trusted_dir;
 use super::status::{InstallStatus, StatusKind, StatusOptions};
-use crate::load_bundle;
+use crate::BundleLoader;
 use crate::materialize::materialize;
 use crate::model::{MAX_RESOURCE_ENTRIES, SkillError};
 use crate::render::{RenderMetadata, render_target};
@@ -54,6 +54,7 @@ pub(super) fn is_regular_skill_source(path: &Path) -> Result<bool, SkillError> {
     Ok(metadata.is_file() && !metadata.file_type().is_symlink())
 }
 
+#[allow(clippy::too_many_arguments)]
 pub(super) fn compare_one<F>(
     source: &Path,
     installed: &Path,
@@ -61,12 +62,13 @@ pub(super) fn compare_one<F>(
     target: &str,
     marker: super::marker::Marker,
     options: &StatusOptions,
+    loader: &BundleLoader,
     common: F,
 ) -> Result<InstallStatus, SkillError>
 where
     F: Fn(StatusKind, Vec<super::drift::FileDrift>, Option<String>) -> InstallStatus,
 {
-    let bundle = load_bundle(source)?;
+    let bundle = loader.load(source)?;
     let rendered = render_target(&bundle, target, &RenderMetadata::default())?;
     let temp = tempfile::tempdir()
         .map_err(|error| SkillError(format!("create status staging: {error}")))?;

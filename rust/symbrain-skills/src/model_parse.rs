@@ -13,9 +13,23 @@ use super::{
 ///
 /// Returns an error when the bytes are not UTF-8 or the frontmatter is malformed.
 pub fn parse_skill_md(raw: &[u8]) -> Result<ParsedSkill, SkillError> {
-    let text = String::from_utf8(raw.to_vec())
-        .map_err(|error| SkillError(format!("parse SKILL.md as UTF-8: {error}")))?
-        .replace("\r\n", "\n");
+    if raw.len() as u64 > crate::model::MAX_INPUT_SIZE {
+        return Err(SkillError(format!(
+            "SKILL.md exceeds maximum input size of {} bytes",
+            crate::model::MAX_INPUT_SIZE
+        )));
+    }
+    frontmatter_scan(raw)?;
+    let raw_text = std::str::from_utf8(raw)
+        .map_err(|error| SkillError(format!("parse SKILL.md as UTF-8: {error}")))?;
+    let mut text = String::with_capacity(raw_text.len());
+    let mut characters = raw_text.chars().peekable();
+    while let Some(character) = characters.next() {
+        if character == '\r' && characters.peek() == Some(&'\n') {
+            continue;
+        }
+        text.push(character);
+    }
     if !text.starts_with("---\n") {
         return Err(SkillError(
             "SKILL.md must start with YAML frontmatter".into(),
@@ -36,13 +50,79 @@ pub fn parse_skill_md(raw: &[u8]) -> Result<ParsedSkill, SkillError> {
     while text.as_bytes().get(body_start) == Some(&b'\n') {
         body_start += 1;
     }
-    let body = text[body_start..].to_string();
     let frontmatter = parse_frontmatter(header)?;
+    let body_line_offset = text[..body_start].matches('\n').count();
+    text.drain(..body_start);
     Ok(ParsedSkill {
         frontmatter,
-        body,
-        body_line_offset: text[..body_start].matches('\n').count(),
+        body: text,
+        body_line_offset,
     })
+}
+
+/// Scans the leading delimiter without allocating or parsing YAML. Returns true
+/// once the input is definitively outside a valid frontmatter header.
+pub(crate) fn frontmatter_scan(raw: &[u8]) -> Result<bool, SkillError> {
+    const LF_PREFIX: &[u8] = b"---\n";
+    const CRLF_PREFIX: &[u8] = b"---\r\n";
+    if raw.len() < LF_PREFIX.len() && LF_PREFIX.starts_with(raw) {
+        return Ok(false);
+    }
+    if raw.len() < CRLF_PREFIX.len() && CRLF_PREFIX.starts_with(raw) {
+        return Ok(false);
+    }
+    let prefix_len = if raw.starts_with(LF_PREFIX) {
+        LF_PREFIX.len()
+    } else if raw.starts_with(CRLF_PREFIX) {
+        CRLF_PREFIX.len()
+    } else {
+        return Ok(true);
+    };
+    let content = &raw[prefix_len..];
+    if let Some(end) = content.windows(4).position(|window| window == b"\n---") {
+        check_frontmatter_size(&content[..end])?;
+        return Ok(true);
+    }
+
+    // The last three bytes may be the beginning of the closing delimiter.
+    let pending = (1..=3)
+        .rev()
+        .find(|length| {
+            content.len() >= *length && b"\n---".starts_with(&content[content.len() - length..])
+        })
+        .unwrap_or(0);
+    let header = &content[..content.len() - pending];
+    check_frontmatter_size(header)?;
+    let raw_header_limit = crate::model::MAX_FRONTMATTER_SIZE.saturating_mul(2) + 16;
+    if raw.len() > raw_header_limit {
+        return Err(frontmatter_size_error());
+    }
+    Ok(false)
+}
+
+fn check_frontmatter_size(header: &[u8]) -> Result<(), SkillError> {
+    // A final CR belongs to the closing newline, or awaits the next byte.
+    let header = header.strip_suffix(b"\r").unwrap_or(header);
+    let mut normalized_len = 0;
+    let mut index = 0;
+    while index < header.len() {
+        if header[index] == b'\r' && header.get(index + 1) == Some(&b'\n') {
+            index += 1;
+        }
+        normalized_len += 1;
+        index += 1;
+    }
+    if normalized_len > crate::model::MAX_FRONTMATTER_SIZE {
+        return Err(frontmatter_size_error());
+    }
+    Ok(())
+}
+
+fn frontmatter_size_error() -> SkillError {
+    SkillError(format!(
+        "SKILL.md frontmatter exceeds maximum size of {} bytes",
+        crate::model::MAX_FRONTMATTER_SIZE
+    ))
 }
 
 fn parse_frontmatter(text: &str) -> Result<Frontmatter, SkillError> {

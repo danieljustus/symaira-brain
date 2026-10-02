@@ -121,6 +121,27 @@ Primary assets now fall back to legacy names only on HTTP 404; checksum,
 publisher-verification, and other failures stay fail-closed. Version probes
 have a three-second bound and reap descendant process groups on Unix.
 
+Rust skill input hardening (#476) checks control-file and normalized frontmatter
+bounds before allocating the full document or parsing YAML. Resource traversal
+is iterative and rejects excessive depth, entry count, aggregate bytes, growth
+since inventory, and special files. Source reads share an actual-I/O budget
+through loading, hashing and materialization, including rejected headers and
+control documents. Bulk runner, status, sync and MCP-list operations retain
+that budget across bundles and targets. Growth at a read boundary is checked
+on the same open handle without an over-budget probe byte. Library rejection
+categories are typed rather than inferred from attacker-controlled diagnostics;
+installed markers use bounded regular-file reads.
+Classified input rejections stay native even with a library-directory override,
+so they cannot re-enter the legacy Go reader. Other unsupported CLI shapes still
+retain their existing fallback until #764 is complete.
+
+The Go oracle and source fixtures remain frozen. These are documented Rust-only
+security deviations, not a claim that the vulnerable Go paths have changed.
+SKL-001 remains fixture-ready until the corrected contracts have current native
+three-OS evidence. Local Rust tests pass, but the complete local CLI differential
+currently stops during Go managed-install fixture setup on the external macOS
+volume (`os.OpenRoot` through `/dev/fd/<fd>`); that is not a successful parity run.
+
 This is not the final cutover. It is the reversible dual-runtime seam that lets
 individual capabilities move without breaking the shipped `symbrain` command.
 The complete task order and acceptance gates live in

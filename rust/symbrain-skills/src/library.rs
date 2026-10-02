@@ -10,9 +10,15 @@
 use std::collections::BTreeMap;
 use std::fs;
 use std::io;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
-use crate::model::{Issue, parse_skill_md};
+use ambient_authority::ambient_authority;
+use cap_std::fs::Dir;
+
+use crate::load::{InputReadError, ReadBudget, read_skill_document};
+use crate::model::{
+    Issue, MAX_RESOURCE_ENTRIES, MAX_TOTAL_RESOURCE_BYTES, SkillError, parse_skill_md,
+};
 
 /// One library skill, as `skills list` reports it.
 #[derive(Debug, Clone)]
@@ -27,6 +33,55 @@ pub struct LibraryEntry {
     pub path: String,
 }
 
+#[derive(Debug)]
+pub(crate) enum LibraryReadError {
+    Io(io::Error),
+    InputBound,
+}
+
+impl std::fmt::Display for LibraryReadError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Io(error) => std::fmt::Display::fmt(error, formatter),
+            Self::InputBound => write!(
+                formatter,
+                "library exceeds maximum entry count of {MAX_RESOURCE_ENTRIES}"
+            ),
+        }
+    }
+}
+
+/// Reads entries without collecting beyond the shared bound, then sorts them.
+pub(crate) fn read_library_entries(
+    library_dir: &Path,
+) -> Result<Vec<fs::DirEntry>, LibraryReadError> {
+    let entries = fs::read_dir(library_dir).map_err(LibraryReadError::Io)?;
+    let mut bounded = Vec::new();
+    for entry in entries {
+        if bounded.len() >= MAX_RESOURCE_ENTRIES {
+            return Err(LibraryReadError::InputBound);
+        }
+        bounded.push(entry.map_err(LibraryReadError::Io)?);
+    }
+    bounded.sort_by_key(fs::DirEntry::file_name);
+    Ok(bounded)
+}
+
+/// Returns library paths in stable order without unbounded directory collection.
+///
+/// # Errors
+///
+/// Rejects excessive entry counts or unreadable directories; absence is empty.
+pub fn library_paths(library_dir: &Path) -> Result<Vec<PathBuf>, SkillError> {
+    match read_library_entries(library_dir) {
+        Ok(entries) => Ok(entries.into_iter().map(|entry| entry.path()).collect()),
+        Err(LibraryReadError::Io(error)) if error.kind() == io::ErrorKind::NotFound => {
+            Ok(Vec::new())
+        }
+        Err(error) => Err(SkillError(error.to_string())),
+    }
+}
+
 /// Reads every loadable skill directory in the library.
 ///
 /// Non-directory entries are ignored, exactly like the Go loader. Entries are
@@ -34,9 +89,31 @@ pub struct LibraryEntry {
 /// across the whole library.
 #[must_use]
 pub fn list_library(library_dir: &Path) -> (Vec<LibraryEntry>, Vec<Issue>) {
-    let entries = match fs::read_dir(library_dir) {
+    let entries = match read_library_entries(library_dir) {
         Ok(entries) => entries,
-        Err(error) if error.kind() == io::ErrorKind::NotFound => return (Vec::new(), Vec::new()),
+        Err(LibraryReadError::Io(error)) if error.kind() == io::ErrorKind::NotFound => {
+            return (Vec::new(), Vec::new());
+        }
+        Err(error) => {
+            let bounded = matches!(error, LibraryReadError::InputBound);
+            return (
+                Vec::new(),
+                vec![Issue {
+                    code: if bounded {
+                        "library_input_bound"
+                    } else {
+                        "library_read"
+                    }
+                    .to_owned(),
+                    severity: "error".to_owned(),
+                    message: error.to_string(),
+                    path: library_dir.display().to_string(),
+                }],
+            );
+        }
+    };
+    let library_cap = match Dir::open_ambient_dir(library_dir, ambient_authority()) {
+        Ok(directory) => directory,
         Err(error) => {
             return (
                 Vec::new(),
@@ -50,30 +127,38 @@ pub fn list_library(library_dir: &Path) -> (Vec<LibraryEntry>, Vec<Issue>) {
         }
     };
 
-    let mut names = entries
-        .flatten()
-        .map(|entry| entry.file_name())
-        .collect::<Vec<_>>();
-    names.sort();
+    let mut budget = ReadBudget::new(MAX_TOTAL_RESOURCE_BYTES, "library skill inputs");
     let mut loaded = Vec::new();
     let mut issues = Vec::new();
-    for name in names {
-        let root = library_dir.join(&name);
+    for entry in entries {
+        let root = entry.path();
         if !root.is_dir() {
             continue;
         }
+        let name = entry.file_name();
         let issue_path = name.to_string_lossy().into_owned();
-        let bytes = match fs::read(root.join("SKILL.md")) {
+        let relative = PathBuf::from(&name).join("SKILL.md");
+        let bytes = match read_skill_document(
+            &library_cap,
+            &relative,
+            &format!("{issue_path}/SKILL.md"),
+            Some(&mut budget),
+        ) {
             Ok(bytes) => bytes,
             Err(error) => {
-                issues.push(load_issue(&error.to_string(), &issue_path));
+                let stop = matches!(error, InputReadError::Budget(_));
+                let rejected = !matches!(error, InputReadError::Read(_));
+                issues.push(load_issue(&error, &issue_path, rejected));
+                if stop {
+                    break;
+                }
                 continue;
             }
         };
         let parsed = match parse_skill_md(&bytes) {
             Ok(parsed) => parsed,
             Err(error) => {
-                issues.push(load_issue(&error.0, &issue_path));
+                issues.push(load_issue(&error, &issue_path, false));
                 continue;
             }
         };
@@ -89,11 +174,16 @@ pub fn list_library(library_dir: &Path) -> (Vec<LibraryEntry>, Vec<Issue>) {
     (loaded, issues)
 }
 
-fn load_issue(message: &str, path: &str) -> Issue {
+fn load_issue(error: &impl std::fmt::Display, path: &str, rejected: bool) -> Issue {
     Issue {
-        code: "skill_load".to_owned(),
+        code: if rejected {
+            "skill_input_rejected"
+        } else {
+            "skill_load"
+        }
+        .to_owned(),
         severity: "error".to_owned(),
-        message: message.to_owned(),
+        message: error.to_string(),
         path: path.to_owned(),
     }
 }

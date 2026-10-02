@@ -1,7 +1,7 @@
 //! Orchestration of skill rendering and installation across harness targets.
 
 use crate::install;
-use crate::load::load_bundle;
+use crate::load::BundleLoader;
 use crate::model::{Bundle, SkillError};
 use crate::render;
 use std::collections::BTreeMap;
@@ -93,6 +93,7 @@ pub fn run(
     // Build harness -> target map from the canonical registry
     let harness_map = build_harness_map();
 
+    let loader = BundleLoader::default();
     let mut results = Vec::with_capacity(harness_names.len());
     for harness in harness_names {
         let target_name = if let Some(t) = harness_map.get(harness) {
@@ -107,7 +108,7 @@ pub fn run(
         };
 
         // Process target (timeout handled per-target inside sync_target, matching Go's WithTimeout)
-        let result = sync_target(ctx, &target_name, &opts, dry_run);
+        let result = sync_target(ctx, &target_name, &opts, dry_run, &loader);
         results.push(result);
     }
 
@@ -125,6 +126,7 @@ fn sync_target(
     target_name: &str,
     opts: &Options,
     dry_run: bool,
+    loader: &BundleLoader,
 ) -> TargetResult {
     // Go wraps each target in context.WithTimeout(ctx, opts.Timeout), so the
     // deadline reported in a timeout message is this target's own budget
@@ -135,9 +137,11 @@ fn sync_target(
     }
 
     let library_path = Path::new(&opts.library_dir);
-    let entries = match std::fs::read_dir(library_path) {
-        Ok(e) => e,
-        Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
+    let entries = match crate::library::read_library_entries(library_path) {
+        Ok(entries) => entries,
+        Err(crate::library::LibraryReadError::Io(err))
+            if err.kind() == std::io::ErrorKind::NotFound =>
+        {
             return TargetResult {
                 target: target_name.to_string(),
                 status: "ok".to_string(),
@@ -153,7 +157,6 @@ fn sync_target(
         }
     };
 
-    let entries: Vec<_> = entries.flatten().collect();
     if entries.is_empty() {
         return TargetResult {
             target: target_name.to_string(),
@@ -189,7 +192,7 @@ fn sync_target(
         }
 
         // Load the skill bundle
-        let bundle = match load_bundle(&skill_root) {
+        let bundle = match loader.load(&skill_root) {
             Ok(b) => b,
             Err(err) => {
                 failed.push(format!("{name_str}: load: {err}"));

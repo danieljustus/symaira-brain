@@ -4,7 +4,23 @@ pub(crate) fn read_bundle_bytes(
     name: &str,
     limit: u64,
 ) -> Result<Vec<u8>, SkillError> {
-    read_limited(&root.root_cap, relative, name, limit)
+    let resource = root
+        .resources
+        .iter()
+        .find(|resource| Path::new(&resource.path) == relative)
+        .ok_or_else(|| SkillError(format!("resource {name} changed since inventory")))?;
+    let mut budget = root
+        .read_budget
+        .lock()
+        .map_err(|_| SkillError("skill input budget lock poisoned".into()))?;
+    read_limited_expected(
+        &root.root_cap,
+        relative,
+        name,
+        limit,
+        resource.size,
+        Some(&mut budget),
+    )
 }
 
 pub(crate) fn read_bundle_optional_bytes(
@@ -22,6 +38,8 @@ pub(crate) fn read_bundle_optional_bytes(
 fn load_overrides(
     root: &Dir,
     _anchor: &Path,
+    resources: &[Resource],
+    budget: &mut ReadBudget,
 ) -> Result<
     std::collections::BTreeMap<String, std::collections::BTreeMap<String, String>>,
     SkillError,
@@ -59,13 +77,20 @@ fn load_overrides(
             if file_type.is_dir() {
                 continue;
             }
-            let bytes = read_limited(root, &relative, &slash(&relative), MAX_INPUT_SIZE)?;
-            let metadata = open_read(root, &relative, &slash(&relative))?
-                .metadata()
-                .map_err(|error| SkillError(format!("stat overlay block: {error}")))?;
-            if !metadata.is_file() {
-                continue;
-            }
+            let path = slash(&relative);
+            let resource_size = resources
+                .iter()
+                .find(|resource| resource.path == path)
+                .map(|resource| resource.size)
+                .ok_or_else(|| SkillError(format!("resource {path} changed since inventory")))?;
+            let bytes = read_limited_expected(
+                root,
+                &relative,
+                &path,
+                MAX_INPUT_SIZE,
+                resource_size,
+                Some(budget),
+            )?;
             let text = String::from_utf8(bytes)
                 .map_err(|_| SkillError(format!("invalid_utf8_overlay: {}", relative.display())))?;
             let id = name

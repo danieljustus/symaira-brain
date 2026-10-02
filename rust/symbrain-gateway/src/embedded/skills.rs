@@ -1,13 +1,12 @@
 //! Native embedded skills MCP tools implementation.
 
 use std::collections::BTreeMap;
-use std::fs;
 use std::path::PathBuf;
 
 use serde::Serialize;
 use serde_json::{Value, json};
 use symbrain_skills::install::{self, InstallOptions};
-use symbrain_skills::{RenderMetadata, load_bundle, render_target, validate};
+use symbrain_skills::{BundleLoader, RenderMetadata, load_bundle, render_target, validate};
 
 use crate::GatewayError;
 use crate::embedded::common::pretty;
@@ -75,40 +74,38 @@ fn list(_value: &Value) -> Result<String, GatewayError> {
     let mut category_counts = BTreeMap::new();
     let mut issues = Vec::new();
 
-    if let Ok(entries) = fs::read_dir(&library_dir) {
-        let mut paths: Vec<_> = entries.flatten().map(|e| e.path()).collect();
-        paths.sort();
-
-        for path in paths {
-            if !path.is_dir() {
-                continue;
-            }
-            if path
-                .file_name()
-                .and_then(|n| n.to_str())
-                .is_some_and(|s| s.starts_with('.'))
-            {
-                continue;
-            }
-            if !path.join("SKILL.md").exists() {
-                continue;
-            }
-            match load_bundle(&path) {
-                Ok(bundle) => {
-                    let cat = bundle.frontmatter.category.clone();
-                    if !cat.is_empty() {
-                        *category_counts.entry(cat.clone()).or_insert(0) += 1;
-                    }
-                    skills.push(SkillItem {
-                        name: bundle.frontmatter.name.clone(),
-                        description: bundle.frontmatter.description.clone(),
-                        category: cat,
-                        root: path.to_string_lossy().into_owned(),
-                    });
+    let paths = symbrain_skills::library::library_paths(&library_dir)
+        .map_err(|error| GatewayError::InvalidArguments(format!("read skills library: {error}")))?;
+    let loader = BundleLoader::default();
+    for path in paths {
+        if !path.is_dir() {
+            continue;
+        }
+        if path
+            .file_name()
+            .and_then(|n| n.to_str())
+            .is_some_and(|s| s.starts_with('.'))
+        {
+            continue;
+        }
+        if !path.join("SKILL.md").exists() {
+            continue;
+        }
+        match loader.load(&path) {
+            Ok(bundle) => {
+                let cat = bundle.frontmatter.category.clone();
+                if !cat.is_empty() {
+                    *category_counts.entry(cat.clone()).or_insert(0) += 1;
                 }
-                Err(err) => {
-                    issues.push(format!("{}: {err}", path.display()));
-                }
+                skills.push(SkillItem {
+                    name: bundle.frontmatter.name.clone(),
+                    description: bundle.frontmatter.description.clone(),
+                    category: cat,
+                    root: path.to_string_lossy().into_owned(),
+                });
+            }
+            Err(err) => {
+                issues.push(format!("{}: {err}", path.display()));
             }
         }
     }

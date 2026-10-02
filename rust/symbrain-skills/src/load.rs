@@ -2,16 +2,17 @@
 
 use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use ambient_authority::ambient_authority;
+use cap_fs_ext::{FollowSymlinks, OpenOptionsFollowExt};
 #[cfg(unix)]
 use cap_std::fs::OpenOptionsExt;
 use cap_std::fs::{Dir, OpenOptions};
 
 use crate::model::{
     Bundle, MAX_INPUT_SIZE, MAX_RESOURCE_DEPTH, MAX_RESOURCE_ENTRIES, MAX_TOTAL_RESOURCE_BYTES,
-    Resource, SkillError, parse_manifest, parse_skill_md,
+    Resource, SkillError, frontmatter_scan, parse_manifest, parse_skill_md,
 };
 use crate::variant;
 
@@ -26,6 +27,41 @@ use crate::variant;
 /// Returns [`SkillError`] when the root or a bundle input cannot be opened
 /// safely, exceeds a configured limit, or fails parsing or validation.
 pub fn load_bundle(root: &Path) -> Result<Bundle, SkillError> {
+    BundleLoader::default().load(root)
+}
+
+/// One actual-read budget shared by an operation's bundles and their later reads.
+#[derive(Debug, Clone)]
+pub struct BundleLoader {
+    budget: Arc<Mutex<ReadBudget>>,
+}
+
+impl Default for BundleLoader {
+    fn default() -> Self {
+        Self {
+            budget: Arc::new(Mutex::new(ReadBudget::new(
+                MAX_TOTAL_RESOURCE_BYTES,
+                "skill operation inputs",
+            ))),
+        }
+    }
+}
+
+impl BundleLoader {
+    /// Loads a bundle without resetting this operation's actual-read budget.
+    ///
+    /// # Errors
+    ///
+    /// Returns a loader error or rejects inputs that exceed the shared budget.
+    pub fn load(&self, root: &Path) -> Result<Bundle, SkillError> {
+        load_bundle_with_budget(root, Arc::clone(&self.budget))
+    }
+}
+
+fn load_bundle_with_budget(
+    root: &Path,
+    read_budget: Arc<Mutex<ReadBudget>>,
+) -> Result<Bundle, SkillError> {
     let logical_root = std::path::absolute(root)
         .map_err(|error| SkillError(format!("resolve skill root: {error}")))?;
     let root_cap = Arc::new(
@@ -40,12 +76,20 @@ pub fn load_bundle(root: &Path) -> Result<Bundle, SkillError> {
         return Err(SkillError("skill root is not a directory".into()));
     }
 
-    let skill_bytes = read_control(&root_cap, root, "SKILL.md")?;
+    let mut retained_budget = read_budget
+        .lock()
+        .map_err(|_| SkillError("skill input budget lock poisoned".into()))?;
+    let skill_bytes = read_skill_document(
+        &root_cap,
+        Path::new("SKILL.md"),
+        "SKILL.md",
+        Some(&mut retained_budget),
+    )?;
     let parsed = parse_skill_md(&skill_bytes)?;
     let mut manifest =
         match root_cap.symlink_metadata("symskills.toml") {
             Ok(_) => {
-                let bytes = read_control(&root_cap, root, "symskills.toml")?;
+                let bytes = read_control(&root_cap, "symskills.toml", &mut retained_budget)?;
                 parse_manifest(&String::from_utf8(bytes).map_err(|error| {
                     SkillError(format!("read symskills.toml as UTF-8: {error}"))
                 })?)?
@@ -72,11 +116,13 @@ pub fn load_bundle(root: &Path) -> Result<Bundle, SkillError> {
     let mut markdown = std::collections::BTreeMap::new();
     for resource in &resources {
         if !is_overlay_path(&resource.path) && is_markdown(&resource.path) {
-            let bytes = read_limited(
+            let bytes = read_limited_expected(
                 &root_cap,
                 Path::new(&resource.path),
                 &format!("resource {}", resource.path),
                 MAX_INPUT_SIZE,
+                resource.size,
+                Some(&mut retained_budget),
             )?;
             if contains_variant_syntax(&bytes) && std::str::from_utf8(&bytes).is_err() {
                 return Err(SkillError(format!(
@@ -87,10 +133,12 @@ pub fn load_bundle(root: &Path) -> Result<Bundle, SkillError> {
             markdown.insert(resource.path.clone(), bytes);
         }
     }
-    let block_overrides = load_overrides(&root_cap, root)?;
+    let block_overrides = load_overrides(&root_cap, root, &resources, &mut retained_budget)?;
+    drop(retained_budget);
     let bundle = Bundle {
         root: logical_root,
         root_cap,
+        read_budget,
         frontmatter: parsed.frontmatter,
         manifest,
         body: parsed.body,
@@ -121,88 +169,35 @@ fn slash(path: &Path) -> String {
         .replace(std::path::MAIN_SEPARATOR, "/")
 }
 
-fn open_options() -> OpenOptions {
-    let mut options = OpenOptions::new();
-    options.read(true);
-    #[cfg(unix)]
-    options.custom_flags(rustix::fs::OFlags::NONBLOCK.bits().cast_signed());
-    options
-}
+include!("load_read.rs");
 
-fn open_read(root: &Dir, relative: &Path, name: &str) -> Result<cap_std::fs::File, SkillError> {
-    root.open_with(relative, &open_options())
-        .map_err(|error| SkillError(format!("read {name}: {}", go_io_error(&error))))
-}
-
-fn go_io_error(error: &std::io::Error) -> String {
-    let message = error.to_string();
-    #[cfg(windows)]
-    if let Some(context) = message.strip_suffix(": no such file or directory") {
-        return format!("{context}: The system cannot find the file specified.");
-    }
-    message
-}
-
-fn read_control(root: &Dir, _anchor: &Path, name: &str) -> Result<Vec<u8>, SkillError> {
-    let symlink = root
-        .symlink_metadata(name)
-        .is_ok_and(|metadata| metadata.file_type().is_symlink());
-    read_limited(
-        root,
-        Path::new(name),
-        &format!("read {name}"),
-        MAX_INPUT_SIZE,
-    )
-    .map_err(|error| {
-        if symlink {
-            SkillError(format!(
-                "{name} escapes skill root or is not a regular file"
-            ))
-        } else {
-            error
-        }
-    })
-}
-
-fn read_limited(
-    root: &Dir,
-    relative: &Path,
+fn collect_bounded_entries<T>(
+    entries: impl IntoIterator<Item = std::io::Result<T>>,
+    limit: usize,
     name: &str,
-    limit: u64,
-) -> Result<Vec<u8>, SkillError> {
-    let file = open_read(root, relative, name)?;
-    let metadata = file
-        .metadata()
-        .map_err(|error| SkillError(format!("read {name}: {error}")))?;
-    if !metadata.is_file() {
-        return Err(SkillError(format!("{name} must be a regular file")));
+    overflow_message: &str,
+) -> Result<Vec<T>, SkillError> {
+    let mut collected = Vec::new();
+    for entry in entries {
+        if collected.len() >= limit {
+            return Err(SkillError(overflow_message.to_owned()));
+        }
+        collected.push(entry.map_err(|error| SkillError(format!("read {name} entry: {error}")))?);
     }
-    if metadata.len() > limit {
-        return Err(SkillError(format!(
-            "{name} exceeds maximum input size of {limit} bytes"
-        )));
-    }
-    let mut bytes = Vec::new();
-    file.take(limit.saturating_add(1))
-        .read_to_end(&mut bytes)
-        .map_err(|error| SkillError(format!("read {name}: {error}")))?;
-    if bytes.len() as u64 > limit {
-        return Err(SkillError(format!(
-            "{name} exceeds maximum input size of {limit} bytes"
-        )));
-    }
-    Ok(bytes)
+    Ok(collected)
 }
 
 fn read_dir(
     root: &Dir,
     relative: &Path,
     name: &str,
+    limit: usize,
+    overflow_message: &str,
 ) -> Result<Vec<cap_std::fs::DirEntry>, SkillError> {
-    root.read_dir(relative)
-        .map_err(|error| SkillError(format!("read {name}: {error}")))?
-        .collect::<Result<Vec<_>, _>>()
-        .map_err(|error| SkillError(format!("read {name} entry: {error}")))
+    let entries = root
+        .read_dir(relative)
+        .map_err(|error| SkillError(format!("read {name}: {error}")))?;
+    collect_bounded_entries(entries, limit, name, overflow_message)
 }
 
 fn optional_entry_exists(root: &Dir, relative: &Path, name: &str) -> Result<bool, SkillError> {
@@ -221,7 +216,14 @@ fn read_optional_dir(
     if !optional_entry_exists(root, relative, name)? {
         return Ok(None);
     }
-    read_dir(root, relative, name).map(Some)
+    read_dir(
+        root,
+        relative,
+        name,
+        MAX_RESOURCE_ENTRIES,
+        &format!("resource tree exceeds maximum entry count of {MAX_RESOURCE_ENTRIES}"),
+    )
+    .map(Some)
 }
 
 fn load_resources(root: &Dir, _anchor: &Path) -> Result<Vec<Resource>, SkillError> {
@@ -240,7 +242,16 @@ fn load_resources(root: &Dir, _anchor: &Path) -> Result<Vec<Resource>, SkillErro
         } else {
             current.as_path()
         };
-        let mut entries = read_dir(root, directory, "bundle directory")?;
+        let overflow =
+            format!("resource tree exceeds maximum entry count of {MAX_RESOURCE_ENTRIES}");
+        let remaining_entries = MAX_RESOURCE_ENTRIES.saturating_sub(entries_seen);
+        let mut entries = read_dir(
+            root,
+            directory,
+            "bundle directory",
+            remaining_entries,
+            &overflow,
+        )?;
         entries.sort_by_key(cap_std::fs::DirEntry::file_name);
         for entry in entries.into_iter().rev() {
             entries_seen += 1;
@@ -285,7 +296,10 @@ fn load_resources(root: &Dir, _anchor: &Path) -> Result<Vec<Resource>, SkillErro
                 continue;
             }
             if !metadata.is_file() {
-                continue;
+                return Err(SkillError(format!(
+                    "resource {} must be a regular file",
+                    slash(&relative)
+                )));
             }
             append_resource(&mut resources, &mut total_bytes, &relative, &metadata)?;
         }
@@ -344,3 +358,7 @@ fn append_resource(
 }
 
 include!("load_helpers.rs");
+
+#[cfg(test)]
+#[path = "load_tests.rs"]
+mod tests;

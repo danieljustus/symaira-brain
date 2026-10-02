@@ -16,7 +16,6 @@ use symbrain_skills::install::{
 };
 use symbrain_skills::library::list_library;
 use symbrain_skills::metadata::{self, Options as MetadataOptions, Record, read_events_log};
-use symbrain_skills::parse_skill_md;
 use symbrain_skills::targets_status::{
     StatusOptions as TargetStatusOptions, TargetStatus, list_status,
 };
@@ -159,13 +158,6 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
                 None => has_dynamic_target_state(),
                 Some(_) => true,
             }
-        }
-        // The native list slice is only the empty-library report, which is the
-        // one shape whose bytes are frozen. A populated library needs the Go
-        // metadata contract (created/modified times, per-target installs,
-        // last-used and the four-column table), so it stays on Go.
-        Some(verb) if verb == "list" => {
-            parse_list_flags(&args[1..]).is_err() || has_dynamic_config() || library_needs_go()
         }
         // The native targets slice is deliberately only the no-argument,
         // user-scope/default-config contract. Keep every parsed or dynamic
@@ -350,22 +342,18 @@ fn has_dynamic_config() -> bool {
 /// `issues[]` entry carrying cap-std error text that is not reproducible here,
 /// so any such library is reported by Go instead. A library whose entries all
 /// load cleanly — including an absent or empty one — stays native.
-fn library_needs_go() -> bool {
-    let (library_dir, _, _) = resolve_skills_dirs();
-    let entries = match fs::read_dir(&library_dir) {
-        Ok(entries) => entries,
-        Err(error) => return error.kind() != std::io::ErrorKind::NotFound,
-    };
-    entries.flatten().any(|entry| {
-        let path = entry.path();
-        if !path.is_dir() {
-            return false;
-        }
-        match fs::read(path.join("SKILL.md")) {
-            Ok(bytes) => parse_skill_md(&bytes).is_err(),
-            Err(_) => true,
-        }
-    })
+fn library_needs_go(issues: &[symbrain_skills::Issue], dynamic_config: bool) -> bool {
+    // A bounded/special-file rejection must not re-enter the legacy Go loader,
+    // even if another entry also has a Go-only malformed-input diagnostic.
+    if issues.iter().any(|issue| {
+        matches!(
+            issue.code.as_str(),
+            "skill_input_rejected" | "library_input_bound"
+        )
+    }) {
+        return false;
+    }
+    dynamic_config || !issues.is_empty()
 }
 
 /// Accepts the flags `skills list` tolerates. Go parses `--target` and
@@ -520,26 +508,31 @@ fn status_name(status: StatusKind) -> &'static str {
 }
 
 /// Runs `symbrain skills`.
+/// Returns `None` only for a Go-owned invocation; list selects fallback from
+/// the same bounded inventory that it uses to build the native report.
 pub fn run(
     args: &[OsString],
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
-) -> u8 {
+) -> Option<u8> {
     if args.is_empty() {
         let _ = write!(stderr, "{SKILLS_USAGE}");
-        return exit::USAGE;
+        return Some(exit::USAGE);
+    }
+    if requires_go_fallback(args) {
+        return None;
     }
 
     let verb = args[0].to_string_lossy();
     let rest = &args[1..];
 
-    match verb.as_ref() {
+    Some(match verb.as_ref() {
         "-h" | "--help" | "help" => {
             let _ = write!(stdout, "{SKILLS_USAGE}");
             exit::OK
         }
-        "list" => run_list(rest, stdout, stderr, format),
+        "list" => return run_list(rest, stdout, format),
         "status" => run_status(rest, stdout, stderr, format),
         "targets" => run_targets(rest, stdout, stderr, format),
         "log" => run_log(rest, stdout, stderr, format),
@@ -550,17 +543,16 @@ pub fn run(
             let _ = write!(stderr, "{SKILLS_USAGE}");
             exit::USAGE
         }
-    }
+    })
 }
 
-fn run_list(
-    _args: &[OsString],
-    stdout: &mut dyn Write,
-    _stderr: &mut dyn Write,
-    format: OutputFormat,
-) -> u8 {
+fn run_list(args: &[OsString], stdout: &mut dyn Write, format: OutputFormat) -> Option<u8> {
+    parse_list_flags(args).ok()?;
     let (library_dir, _, _) = resolve_skills_dirs();
     let (entries, issues) = list_library(&library_dir);
+    if library_needs_go(&issues, has_dynamic_config()) {
+        return None;
+    }
 
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
     let log_path = home.join(".local/share/symskills/events.jsonl");
@@ -636,7 +628,7 @@ fn run_list(
         }
     }
 
-    exit::OK
+    Some(exit::OK)
 }
 
 fn or_dash(value: &str) -> &str {
@@ -1184,8 +1176,32 @@ fn doctor_project_skill_root(target: &str, project: &std::path::Path) -> Option<
 
 #[cfg(test)]
 mod tests {
-    use super::{current_project_dir, target_status_missing_root_needs_go_at};
+    use super::{current_project_dir, library_needs_go, target_status_missing_root_needs_go_at};
     use std::fs;
+
+    #[test]
+    fn list_fallback_uses_cached_typed_inventory_issues() {
+        let cases: &[(&[&str], bool, bool)] = &[
+            (&[], false, false),
+            (&[], true, true),
+            (&["skill_load"], false, true),
+            (&["skill_input_rejected"], false, false),
+            (&["library_input_bound"], true, false),
+            (&["skill_load", "skill_input_rejected"], true, false),
+        ];
+        for (codes, dynamic_config, expected) in cases {
+            let issues: Vec<_> = codes
+                .iter()
+                .map(|code| symbrain_skills::Issue {
+                    code: (*code).to_owned(),
+                    severity: "error".to_owned(),
+                    message: "must be a regular file; exceeds maximum".to_owned(),
+                    path: "escapes skill root".to_owned(),
+                })
+                .collect();
+            assert_eq!(library_needs_go(&issues, *dynamic_config), *expected);
+        }
+    }
 
     #[test]
     fn sync_project_dir_matches_absolute_working_directory() {
