@@ -3,7 +3,7 @@
 use std::os::unix::fs::PermissionsExt;
 use std::process::{Command, Output, Stdio};
 use std::thread::sleep;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use serde_json::json;
 use tempfile::TempDir;
@@ -20,6 +20,8 @@ for line in sys.stdin:
             "capabilities": {},
             "serverInfo": {"name": "fake", "version": "1"}
         }}), flush=True)
+    elif request.get("id") is not None and request.get("method") == "ping":
+        print(json.dumps({"jsonrpc": "2.0", "id": request["id"], "result": {}}), flush=True)
 "#;
 
 const BARRIER_MCP: &[u8] = br#"#!/usr/bin/python3
@@ -41,6 +43,8 @@ for line in sys.stdin:
             "capabilities": {},
             "serverInfo": {"name": "fake", "version": "1"}
         }}), flush=True)
+    elif request.get("id") is not None and request.get("method") == "ping":
+        print(json.dumps({"jsonrpc": "2.0", "id": request["id"], "result": {}}), flush=True)
 "#;
 
 const INVALID_MCP: &[u8] = br#"#!/usr/bin/python3
@@ -73,6 +77,44 @@ for line in sys.stdin:
             "capabilities": {},
             "serverInfo": {"name": "fake", "version": "1"}
         }}), flush=True)
+    elif request.get("id") is not None and request.get("method") == "ping":
+        print(json.dumps({"jsonrpc": "2.0", "id": request["id"], "result": {}}), flush=True)
+        time.sleep(30)
+"#;
+
+const ERROR_PING_MCP: &[u8] = br#"#!/usr/bin/python3
+import json
+import sys
+
+for line in sys.stdin:
+    request = json.loads(line)
+    if request.get("id") is not None and request.get("method") == "initialize":
+        print(json.dumps({"jsonrpc": "2.0", "id": request["id"], "result": {
+            "protocolVersion": "2024-11-05",
+            "capabilities": {},
+            "serverInfo": {"name": "fake", "version": "1"}
+        }}), flush=True)
+    elif request.get("id") is not None and request.get("method") == "ping":
+        print("stdio-stderr-canary", file=sys.stderr, flush=True)
+        print(json.dumps({"jsonrpc": "2.0", "id": request["id"], "error": {
+            "code": -1, "message": "stdio-body-canary"
+        }}), flush=True)
+"#;
+
+const TIMEOUT_PING_MCP: &[u8] = br#"#!/usr/bin/python3
+import json
+import sys
+import time
+
+for line in sys.stdin:
+    request = json.loads(line)
+    if request.get("id") is not None and request.get("method") == "initialize":
+        print(json.dumps({"jsonrpc": "2.0", "id": request["id"], "result": {
+            "protocolVersion": "2024-11-05",
+            "capabilities": {},
+            "serverInfo": {"name": "fake", "version": "1"}
+        }}), flush=True)
+    elif request.get("id") is not None and request.get("method") == "ping":
         time.sleep(30)
 "#;
 
@@ -126,14 +168,14 @@ fn run(root: &TempDir, args: &[&str]) -> Output {
 }
 
 #[test]
-fn native_health_probes_stdio_and_skips_other_transports() {
+fn native_health_reports_unsupported_and_probes_stdio() {
     let root = TempDir::new().unwrap();
     let fake = executable(&root, "healthy-mcp.py", HEALTHY_MCP);
     write_servers(
         &root,
         &json!({
             "zeta": {"command": fake},
-            "alpha": {"url": "https://example.test/mcp"},
+            "alpha": {"transport": "unsupported"},
             "empty": {"command": ""}
         }),
     );
@@ -145,20 +187,32 @@ fn native_health_probes_stdio_and_skips_other_transports() {
     assert!(!output.stdout[..output.stdout.len() - 1].contains(&b'\n'));
 
     let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["health_schema_version"], 1);
     let servers = report["servers"].as_array().unwrap();
     assert_eq!(servers.len(), 3);
     assert_eq!(servers[0]["server"], "alpha");
+    assert_eq!(servers[0]["outcome"], "unsupported");
     assert_eq!(
         servers[0]["error"],
-        "not probed: http transport is not stdio"
+        "configured transport is not supported for health probing"
     );
+    assert!(servers[0].get("probe_method").is_none());
+    assert!(servers[0].get("latency_ms").is_none());
     assert_eq!(servers[1]["server"], "empty");
+    assert_eq!(servers[1]["outcome"], "unsupported");
     assert_eq!(
         servers[1]["error"],
-        "not probed: stdio transport is not stdio"
+        "stdio server has no configured command"
     );
     assert_eq!(servers[2]["server"], "zeta");
     assert_eq!(servers[2]["healthy"], true);
+    assert_eq!(servers[2]["outcome"], "healthy");
+    assert_eq!(servers[2]["probe_method"], "initialize+ping");
+    assert!(
+        servers[2]["latency_ms"]
+            .as_f64()
+            .is_some_and(|ms| ms >= 0.0)
+    );
     assert!(servers[2].get("error").is_none());
 
     let table = run(&root, &["harness", "health"]);
@@ -209,7 +263,7 @@ fn empty_health_matches_go_shapes() {
 }
 
 #[test]
-fn protocol_mismatch_reports_go_diagnostic_without_fallback() {
+fn protocol_mismatch_is_redacted_without_fallback() {
     let root = TempDir::new().unwrap();
     let fake = executable(&root, "invalid-mcp.py", INVALID_MCP);
     write_servers(&root, &json!({"broken": {"command": fake}}));
@@ -227,11 +281,12 @@ fn protocol_mismatch_reports_go_diagnostic_without_fallback() {
     assert!(output.status.success(), "stderr: {:?}", output.stderr);
     assert!(output.stderr.is_empty());
     let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["health_schema_version"], 1);
     assert_eq!(report["servers"][0]["healthy"], false);
-    assert_eq!(
-        report["servers"][0]["error"],
-        "initialize: broker: protocol version mismatch: sent \"2024-11-05\", child returned \"wrong-version\""
-    );
+    assert_eq!(report["servers"][0]["outcome"], "unhealthy");
+    assert_eq!(report["servers"][0]["probe_method"], "initialize");
+    assert!(report["servers"][0]["latency_ms"].as_f64().is_some());
+    assert_eq!(report["servers"][0]["error"], "MCP initialize failed");
 }
 
 #[test]
@@ -260,6 +315,62 @@ fn multiple_missing_stdio_probes_are_reported_natively() {
     assert_eq!(servers[0]["server"], "first");
     assert_eq!(servers[1]["server"], "second");
     assert!(servers.iter().all(|server| server["healthy"] == false));
+    assert!(
+        servers
+            .iter()
+            .all(|server| server["outcome"] == "unhealthy")
+    );
+    assert!(
+        servers
+            .iter()
+            .all(|server| server.get("probe_method").is_none())
+    );
+    assert!(
+        servers
+            .iter()
+            .all(|server| server.get("latency_ms").is_none())
+    );
+}
+
+#[test]
+fn stdio_ping_error_is_redacted_and_silent_ping_hits_the_deadline() {
+    let root = TempDir::new().unwrap();
+    let error_child = executable(&root, "error-ping.py", ERROR_PING_MCP);
+    let timeout_child = executable(&root, "timeout-ping.py", TIMEOUT_PING_MCP);
+    write_servers(
+        &root,
+        &json!({
+            "error": {"command": error_child},
+            "timeout": {"command": timeout_child}
+        }),
+    );
+
+    let started = Instant::now();
+    let output = run(&root, &["harness", "health", "--json"]);
+    let elapsed = started.elapsed();
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    assert!(output.stderr.is_empty(), "stderr: {:?}", output.stderr);
+    assert!(
+        elapsed < Duration::from_secs(7),
+        "health elapsed {elapsed:?}"
+    );
+    let text = String::from_utf8_lossy(&output.stdout);
+    assert!(!text.contains("stdio-stderr-canary"));
+    assert!(!text.contains("stdio-body-canary"));
+
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    let servers = report["servers"].as_array().unwrap();
+    assert_eq!(servers.len(), 2);
+    assert_eq!(servers[0]["server"], "error");
+    assert_eq!(servers[0]["outcome"], "unhealthy");
+    assert_eq!(servers[0]["probe_method"], "initialize+ping");
+    assert!(servers[0]["latency_ms"].as_f64().is_some());
+    assert_eq!(servers[0]["error"], "MCP ping failed");
+    assert_eq!(servers[1]["server"], "timeout");
+    assert_eq!(servers[1]["outcome"], "unhealthy");
+    assert_eq!(servers[1]["probe_method"], "initialize+ping");
+    assert!(servers[1]["latency_ms"].as_f64().is_some());
+    assert_eq!(servers[1]["error"], "MCP probe timed out");
 }
 
 #[test]

@@ -44,6 +44,12 @@ symscope serve                 # stdio MCP-Server (JSON-RPC)
 
 The optional MCP `mcp_list` argument `diagnostics: true` returns the same server array plus a `configurations` array with `client`, `config_scope` (`global` or `project`), `status` (`ready`, `empty`, `invalid`, or `unavailable`), bounded `path`, and a generic optional `message`. Status comes only from Brain's inventory; free-form parse errors and resolved environment values are not returned. The default CLI/MCP list remains the original server array.
 
+### Measured MCP health
+
+`mcp health` and MCP `mcp_health` keep their server-array shape and pass through Brain's health contract (`health_schema_version: 1`). `status` distinguishes `healthy`, `unhealthy`, and `unsupported`; `probe_method` describes the actual operations, and `latency_ms` preserves measured fractional milliseconds. Unprobed servers omit the method and latency rather than reporting synthetic zero. Older Brain reports remain readable, but missing measurements stay absent; unknown health schema versions are rejected.
+
+Brain alone performs the probes: bounded stdio initialize/ping or Streamable HTTP initialize, initialized notification, and ping. Legacy SSE transports and credential-dependent configurations are unsupported; no credentials are resolved, redirects are refused, and diagnostics do not echo remote bodies or credential-bearing URLs. Scope does not implement a second transport client. Consumers must treat latency as an optional JSON number, not a mandatory integer.
+
 ## Module layout
 
 ```

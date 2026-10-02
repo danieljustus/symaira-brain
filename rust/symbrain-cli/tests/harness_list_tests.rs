@@ -200,7 +200,7 @@ fn malformed_config_health_is_native_without_go_fallback() {
 }
 
 #[test]
-fn missing_command_health_is_native_without_go_fallback() {
+fn missing_command_health_reports_redacted_error_without_go_fallback() {
     let root = TempDir::new().unwrap();
     write_claude_config(
         &root,
@@ -215,14 +215,13 @@ fn missing_command_health_is_native_without_go_fallback() {
     assert!(output.status.success(), "stderr: {:?}", output.stderr);
     assert!(output.stderr.is_empty());
     let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
-    let error = report["servers"][0]["error"].as_str().unwrap();
-    let path_var = if cfg!(windows) { "%PATH%" } else { "$PATH" };
-    assert_eq!(
-        error,
-        format!(
-            "discover: broker: \"symaira-missing-mcp-fixture\" not found on PATH or in managed directory: exec: \"symaira-missing-mcp-fixture\": executable file not found in {path_var}"
-        )
-    );
+    let server = &report["servers"][0];
+    // #598 intentionally replaces path- and environment-rich broker errors
+    // with a stable, bounded diagnostic.
+    assert_eq!(server["outcome"], "unhealthy");
+    assert_eq!(server["error"], "server command was not found");
+    assert!(server.get("probe_method").is_none());
+    assert!(server.get("latency_ms").is_none());
 }
 
 #[test]

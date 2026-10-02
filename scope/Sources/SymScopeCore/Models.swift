@@ -135,16 +135,21 @@ public struct Container: Codable, Equatable, Sendable {
 public struct MCPHealthResult: Codable, Equatable, Sendable {
     public var name: String
     public var client: String
-    public var status: String // healthy | unhealthy | unknown
-    public var latencyMs: Int64
+    public var status: String // healthy | unhealthy | unsupported | unknown
+    /// Absent when Brain did not measure a probe. Fractional milliseconds are preserved.
+    public var latencyMs: Double?
     public var error: String?
+    public var probeMethod: String?
+    public var healthSchemaVersion: Int?
 
-    public init(name: String, client: String, status: String, latencyMs: Int64, error: String? = nil) {
+    public init(name: String, client: String, status: String, latencyMs: Double?, error: String? = nil, probeMethod: String? = nil, healthSchemaVersion: Int? = nil) {
         self.name = name
         self.client = client
         self.status = status
         self.latencyMs = latencyMs
         self.error = error
+        self.probeMethod = probeMethod
+        self.healthSchemaVersion = healthSchemaVersion
     }
 
     public enum CodingKeys: String, CodingKey {
@@ -153,6 +158,8 @@ public struct MCPHealthResult: Codable, Equatable, Sendable {
         case status
         case latencyMs = "latency_ms"
         case error
+        case probeMethod = "probe_method"
+        case healthSchemaVersion = "health_schema_version"
     }
 }
 

@@ -109,6 +109,9 @@ public struct HarnessHealthEntry: Codable, Equatable, Sendable {
     public let server: String
     public let transport: String
     public let healthy: Bool
+    public let outcome: String?
+    public let probeMethod: String?
+    public let latencyMs: Double?
     public let error: String?
 
     enum CodingKeys: String, CodingKey {
@@ -117,15 +120,26 @@ public struct HarnessHealthEntry: Codable, Equatable, Sendable {
         case server
         case transport
         case healthy
+        case outcome
+        case probeMethod = "probe_method"
+        case latencyMs = "latency_ms"
         case error
     }
 }
 
 public struct HarnessHealthReport: Codable, Equatable, Sendable {
+    public let healthSchemaVersion: Int?
     public let servers: [HarnessHealthEntry]
 
     enum CodingKeys: String, CodingKey {
+        case healthSchemaVersion = "health_schema_version"
         case servers
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        healthSchemaVersion = try container.decodeIfPresent(Int.self, forKey: .healthSchemaVersion)
+        servers = try container.decodeIfPresent([HarnessHealthEntry].self, forKey: .servers) ?? []
     }
 }
 
@@ -178,13 +192,20 @@ public final class SymBrainHarnessService: HarnessInventoryProviding, @unchecked
               let report = try? JSONDecoder().decode(HarnessHealthReport.self, from: result.standardOutput) else {
             return nil
         }
+        return Self.mapHealth(report)
+    }
+
+    static func mapHealth(_ report: HarnessHealthReport) -> [MCPHealthResult]? {
+        guard report.healthSchemaVersion == nil || report.healthSchemaVersion == 1 else { return nil }
         return report.servers.map {
             MCPHealthResult(
                 name: $0.server,
                 client: $0.harness,
-                status: $0.healthy ? "healthy" : "unhealthy",
-                latencyMs: 0,
-                error: $0.error
+                status: $0.outcome ?? ($0.healthy ? "healthy" : "unhealthy"),
+                latencyMs: $0.latencyMs,
+                error: $0.error,
+                probeMethod: $0.probeMethod,
+                healthSchemaVersion: report.healthSchemaVersion
             )
         }
     }
