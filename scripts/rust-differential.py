@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Callable
 
 from external_env import ensure_external_environment
+from harness_health_contract import HEALTH_DEVIATIONS, legacy_health_view
 if os.name == "posix":
     import pty
 RELEASE_BASE_URL = ""
@@ -3260,6 +3261,16 @@ def main() -> int:
                         except AssertionError as err:
                             failures.append(f"{case.name}: {err}")
                             install_verified = False
+                if case.name in HEALTH_DEVIATIONS:
+                    # HAR-007 / #598 explicitly changes only measured health and
+                    # redacted errors. Validate the entire new shape first;
+                    # all other fixtures, stderr and exit codes remain exact.
+                    try:
+                        rust_stdout = legacy_health_view(case.name, go_stdout, rust_stdout)
+                    except (AssertionError, ValueError, TypeError, KeyError) as err:
+                        failures.append(f"{case.name}: HAR-007 health contract failed: {err}")
+                        continue
+                    print(f"ACCEPTED HAR-007 {case.name} (validated versioned health contract)")
                 observed = (rust_result.returncode, rust_stdout, rust_stderr)
                 expected = (go_result.returncode, go_stdout, go_stderr)
                 if observed != expected:
