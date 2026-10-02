@@ -28,9 +28,8 @@ pub(crate) fn acquire(paths: &[PathBuf]) -> Result<InstallLocks, SkillError> {
     acquire_with_timeout(paths, LOCK_WAIT, false, false)
 }
 
-/// Locks existing paths shared without creating missing directory components.
-/// This lets status scans coordinate with installs while remaining read-only
-/// with respect to absent target and base roots.
+/// Shares existing installer locks without creating files or directories.
+/// Legacy roots without lock files remain readable without initializing them.
 pub(crate) fn acquire_existing_shared(paths: &[PathBuf]) -> Result<InstallLocks, SkillError> {
     acquire_with_timeout(paths, LOCK_WAIT, true, true)
 }
@@ -84,11 +83,14 @@ fn open_lock_file(
         let mut options = OpenOptions::new();
         options
             .read(true)
-            .write(true)
-            .create(true)
+            .write(!existing_only)
+            .create(!existing_only)
             .follow(FollowSymlinks::No);
         match root.open_with(Path::new(lock_name), &options) {
             Ok(file) => return Ok(Some(file.into_std())),
+            Err(error) if existing_only && error.kind() == std::io::ErrorKind::NotFound => {
+                return Ok(None);
+            }
             Err(error)
                 if error.kind() == std::io::ErrorKind::NotFound && Instant::now() < deadline =>
             {
@@ -119,7 +121,8 @@ fn lock_file(file: &File, path: &Path, shared: bool, deadline: Instant) -> Resul
         };
         match result {
             Ok(()) => return Ok(()),
-            Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+            // fs2 uses ERROR_LOCK_VIOLATION on Windows, not WouldBlock.
+            Err(error) if error.raw_os_error() == fs2::lock_contended_error().raw_os_error() => {
                 let remaining = deadline.saturating_duration_since(Instant::now());
                 if remaining.is_zero() {
                     return Err(SkillError(format!(
@@ -144,7 +147,6 @@ fn lock_name(path: &Path) -> String {
     format!(".symskills-lock-{digest:x}")
 }
 
-#[cfg(unix)]
 #[cfg(test)]
 mod tests {
     use std::fs::{self, OpenOptions as StdOpenOptions};
@@ -153,7 +155,24 @@ mod tests {
     use fs2::FileExt;
     use tempfile::tempdir;
 
-    use super::{acquire_with_timeout, lock_name};
+    use super::{acquire_existing_shared, acquire_with_timeout, lock_name};
+
+    #[test]
+    fn read_locks_do_not_initialize_legacy_roots() {
+        let temp = tempdir().expect("temporary root");
+        let root = fs::canonicalize(temp.path()).expect("canonical root");
+        let install = root.join("existing/skill");
+        fs::create_dir(install.parent().expect("existing parent")).expect("legacy root");
+        let _locks = acquire_existing_shared(&[install, root.join("absent/skill")])
+            .expect("read existing roots without initializing locks");
+        assert_eq!(fs::read_dir(&root).expect("root entries").count(), 1);
+        assert_eq!(
+            fs::read_dir(root.join("existing"))
+                .expect("legacy entries")
+                .count(),
+            0
+        );
+    }
 
     #[test]
     fn timeout_releases_locks_acquired_earlier_in_the_set() {
@@ -182,7 +201,8 @@ mod tests {
             false,
             false,
         );
-        assert!(result.is_err(), "second lock must time out");
+        let error = result.err().expect("second lock must time out");
+        assert!(error.0.starts_with("timed out waiting for install lock"));
 
         let first_lock_path = first_parent.join(lock_name(&first));
         let first_lock = StdOpenOptions::new()

@@ -55,14 +55,16 @@ pub(crate) fn uninstall_inner(
     destination: &Path,
     options: &InstallOptions,
 ) -> Result<bool, SkillError> {
+    // Preserve no-op/refusal behavior without initializing lock directories.
+    // Repeat these checks below after locking to cover concurrent replacement.
+    if entry_metadata(destination)?.is_none() {
+        return Ok(false);
+    }
+    if is_unmanaged(destination, target, name)? {
+        return Err(SkillError("refusing to remove unmanaged skill".to_owned()));
+    }
     // A dry run must not create lock files or otherwise mutate state.
     if options.dry_run {
-        if entry_metadata(destination)?.is_none() {
-            return Ok(false);
-        }
-        if is_unmanaged(destination, target, name)? {
-            return Err(SkillError("refusing to remove unmanaged skill".to_owned()));
-        }
         return Ok(true);
     }
     let home = effective_home(&options.home_dir)?;

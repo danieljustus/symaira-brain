@@ -82,6 +82,21 @@ fn concurrent_process_installs_preserve_each_target_path_and_record() {
     run_concurrent_install("copy");
 }
 
+#[test]
+fn absent_uninstall_does_not_initialize_install_roots() {
+    let temp = tempfile::tempdir().expect("test root");
+    let root = fs::canonicalize(temp.path()).expect("canonical test root");
+    let options = InstallOptions {
+        home_dir: root.join("absent-home"),
+        ..Default::default()
+    };
+    assert!(
+        !symbrain_skills::install::uninstall("opencode", "missing", &options)
+            .expect("absent uninstall is a no-op")
+    );
+    assert_eq!(fs::read_dir(&root).expect("root entries").count(), 0);
+}
+
 #[cfg(unix)]
 #[test]
 fn concurrent_process_symlink_installs_preserve_each_target_path_and_record() {
