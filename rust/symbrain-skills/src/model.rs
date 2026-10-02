@@ -144,6 +144,8 @@ pub struct Bundle {
     pub root: std::path::PathBuf,
     /// Capability rooted at the trusted bundle directory.
     pub(crate) root_cap: Arc<Dir>,
+    /// Original trusted-root spelling for interpreting absolute resource links.
+    pub(crate) canonical_root: std::path::PathBuf,
     /// Retained across hashing/copying and shared by clones and bulk callers.
     pub(crate) read_budget: Arc<Mutex<crate::load::ReadBudget>>,
     /// Field `frontmatter`.

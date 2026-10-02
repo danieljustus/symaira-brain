@@ -135,6 +135,17 @@ Classified input rejections stay native even with a library-directory override,
 so they cannot re-enter the legacy Go reader. Other unsupported CLI shapes still
 retain their existing fallback until #764 is complete.
 
+Rust resource rendering (#490) accepts both relative and absolute directory
+links confined to the trusted bundle. Absolute link text is mapped to a
+root-relative path using the original trusted-root spellings; it is never
+reopened with ambient authority. Resolution follows links through the retained
+directory capability with finite depth/link limits. Inventory, Markdown reads,
+hashing and copy use the same resolver and retain the shared actual-read budget.
+Outside targets, parent traversal, link cycles and outside-target replacements
+remain rejected; replacing the ambient root path cannot redirect the retained
+source handle. This is a separate Rust-only contract deviation (SKL-006), with
+native Windows link evidence pending rather than implied by Unix tests.
+
 The Go oracle and source fixtures remain frozen. These are documented Rust-only
 security deviations, not a claim that the vulnerable Go paths have changed.
 SKL-001 remains fixture-ready until the corrected contracts have current native
