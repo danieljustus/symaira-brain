@@ -23,6 +23,7 @@
 		3C91B3618F4F1ADBE8CCCEE6 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DDFA6201EBE1C20A656FE31 /* Models.swift */; };
 		433E92DB0B45482A00A4FA09 /* VaultView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34B91F2C82B9EF019B92AA1 /* VaultView.swift */; };
 		44924707DC196AD3AF99D83E /* MobileRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC4B9E8F673FEC673FDCD831 /* MobileRootView.swift */; };
+		48B4E517D136771338846AE3 /* SymairaToolRegistryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA7C2993F5D8F89ADAC15AC /* SymairaToolRegistryTests.swift */; };
 		4E1B89482D62D0D3D192C245 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = 73556BC022BF7D1CC002C5CE /* AppIcon.icon */; };
 		4E3FFF66A833EE205EBACECC /* ModuleModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C08EA416047E1AE65072FA /* ModuleModelTests.swift */; };
 		521F6345DEFC9D796B9EAA2C /* SymairaCLIRunner in Frameworks */ = {isa = PBXBuildFile; productRef = 0054585A78E372D2085F559E /* SymairaCLIRunner */; };
@@ -52,6 +53,7 @@
 		BA728F7E6762F220A57561E7 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D84726BA5CEAA4CD07FFB898 /* DashboardView.swift */; };
 		BD582551E72C04A65130D6EA /* SymairaTheme in Frameworks */ = {isa = PBXBuildFile; productRef = 2A87C9F4E9912E7CF988285E /* SymairaTheme */; };
 		BE1D7E2E6AA817FD48DB1BD5 /* SymairaDaemonKit in Frameworks */ = {isa = PBXBuildFile; productRef = 634705A978FF032B20A7563A /* SymairaDaemonKit */; };
+		C072B1DADCAD878D68F144A5 /* SymairaToolKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7B7310EC1AE1F7F66729B693 /* SymairaToolKit */; };
 		CACB197EA57F21BA2C3C1E86 /* HarnessesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F4A368C80190BEFFF3D70B8 /* HarnessesView.swift */; };
 		CE0DC105DD4599A2094AD852 /* ProfilesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2959FD69F38959DDA732319 /* ProfilesView.swift */; };
 		D147D323A0B2486C0E7F495A /* ModuleSourceBuild.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08097C23D3DBA1E9D8DAFAA6 /* ModuleSourceBuild.swift */; };
@@ -96,6 +98,7 @@
 		361B90BF9C8858C0A72C8762 /* SymBrainClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymBrainClient.swift; sourceTree = "<group>"; };
 		37D52B395108AFAD4ACBF29E /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		3A61161A1B60801BA661D010 /* AuditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditView.swift; sourceTree = "<group>"; };
+		3EA7C2993F5D8F89ADAC15AC /* SymairaToolRegistryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SymairaToolRegistryTests.swift; sourceTree = "<group>"; };
 		4B5763A1461D47921E705869 /* ModuleViewModelBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModuleViewModelBase.swift; sourceTree = "<group>"; };
 		541AE8E66F5F6EEF650CBF12 /* MemoryListPagingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryListPagingTests.swift; sourceTree = "<group>"; };
 		557830EEEA48C7E1C6DBCE50 /* OperateViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OperateViewModel.swift; sourceTree = "<group>"; };
@@ -171,6 +174,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				05E20C88D508F172F8EA4DDD /* SymairaTheme in Frameworks */,
+				C072B1DADCAD878D68F144A5 /* SymairaToolKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,6 +213,7 @@
 				F5AE2DC101366BB5786738DF /* ModuleSourceBuildTests.swift */,
 				CFECF169381AFBFF624AA6D0 /* ModuleViewModelSkeletonTests.swift */,
 				75F7C5204E1ECB4231E64107 /* SkillsModelTests.swift */,
+				3EA7C2993F5D8F89ADAC15AC /* SymairaToolRegistryTests.swift */,
 				E3738C2274CBF0C920813692 /* SyncViewModelTests.swift */,
 				C171C21BAFD3C232CE72CCC0 /* TestTemporaryDirectory.swift */,
 				6BA4B3D6BA95C2B0343233E7 /* VaultIntakeStateMachineTests.swift */,
@@ -313,6 +318,7 @@
 			name = SymBrainMobile;
 			packageProductDependencies = (
 				E2F3DE448537FE8B9962E1BA /* SymairaTheme */,
+				7B7310EC1AE1F7F66729B693 /* SymairaToolKit */,
 			);
 			productName = SymBrainMobile;
 			productReference = F18345AFDF19C5C3527677D3 /* SymBrainMobile.app */;
@@ -521,6 +527,7 @@
 				9060A5B00F1287761356A40A /* ModuleSourceBuildTests.swift in Sources */,
 				D7828295D3B4E54D593ADB26 /* ModuleViewModelSkeletonTests.swift in Sources */,
 				040764FBB788E34657CA2390 /* SkillsModelTests.swift in Sources */,
+				48B4E517D136771338846AE3 /* SymairaToolRegistryTests.swift in Sources */,
 				F22733E3CAE501C16E32FA80 /* SyncViewModelTests.swift in Sources */,
 				59293C2017EF55064FF036F8 /* TestTemporaryDirectory.swift in Sources */,
 				263C4CD15FA59655855FD872 /* VaultIntakeStateMachineTests.swift in Sources */,
@@ -937,7 +944,7 @@
 			repositoryURL = "https://github.com/danieljustus/symaira-appkit.git";
 			requirement = {
 				kind = exactVersion;
-				version = 0.10.0;
+				version = 0.14.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -987,6 +994,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
 			productName = SymairaDaemonKit;
+		};
+		7B7310EC1AE1F7F66729B693 /* SymairaToolKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4CCA358FF179BCF2FE6FDF93 /* XCRemoteSwiftPackageReference "symaira-appkit" */;
+			productName = SymairaToolKit;
 		};
 		9480D05289AD3EDD804ECC1C /* SymairaDaemonKit */ = {
 			isa = XCSwiftPackageProductDependency;

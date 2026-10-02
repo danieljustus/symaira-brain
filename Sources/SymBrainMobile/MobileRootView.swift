@@ -1,5 +1,6 @@
 import SwiftUI
 import SymairaTheme
+import SymairaToolKit
 
 struct MobileRootView: View {
     @State private var selectedTab = 0
@@ -118,27 +119,7 @@ struct OverviewTab: View {
 
 // MARK: - Tools Tab
 
-/// Known Symaira tools — mirrors SymairaToolRegistry.all from SymairaToolKit
-/// but defined locally so iOS does not need the macOS-only CLIRunner
-/// dependency. Memory and skills are deliberately absent: they are cores
-/// inside the symbrain binary, not tools of their own.
-private struct ToolInfo: Identifiable {
-    let id: String
-    let displayName: String
-    let binaryName: String
-    let supportsMCP: Bool
-}
-
-private let knownTools: [ToolInfo] = [
-    .init(id: "symvault", displayName: "Symaira Vault", binaryName: "symvault", supportsMCP: true),
-    .init(id: "symseek", displayName: "Symaira Seek", binaryName: "symseek", supportsMCP: true),
-    .init(id: "symfetch", displayName: "Symaira Fetch", binaryName: "symfetch", supportsMCP: true),
-    .init(id: "symscope", displayName: "Symaira Scope", binaryName: "symscope", supportsMCP: true),
-    .init(id: "symfritz", displayName: "Symaira Fritz", binaryName: "symfritz", supportsMCP: true),
-    .init(id: "symprint", displayName: "Symaira Print", binaryName: "symprint", supportsMCP: true),
-    .init(id: "symguard", displayName: "Symaira Guard", binaryName: "symguard", supportsMCP: false),
-    .init(id: "symbrain", displayName: "Symaira Brain (memory + skills)", binaryName: "symbrain", supportsMCP: true),
-]
+/// Active Symaira tools from the shared appkit registry.
 
 struct ToolsTab: View {
     var body: some View {
@@ -147,7 +128,7 @@ struct ToolsTab: View {
                 SymairaBackdrop(gridStyle: .dots)
 
                 List {
-                    ForEach(knownTools) { tool in
+                    ForEach(SymairaToolRegistry.active) { tool in
                         HStack {
                             VStack(alignment: .leading, spacing: SymairaSpacing.xSmall) {
                                 Text(tool.displayName)
