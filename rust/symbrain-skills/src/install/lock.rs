@@ -7,6 +7,8 @@ use std::time::{Duration, Instant};
 
 use cap_fs_ext::{FollowSymlinks, OpenOptionsFollowExt};
 use cap_std::fs::OpenOptions;
+#[cfg(unix)]
+use cap_std::fs::OpenOptionsExt;
 use fs2::FileExt;
 use sha2::{Digest, Sha256};
 
@@ -86,8 +88,22 @@ fn open_lock_file(
             .write(!existing_only)
             .create(!existing_only)
             .follow(FollowSymlinks::No);
+        // Read-only opening of a FIFO would bypass the contention deadline.
+        #[cfg(unix)]
+        options.custom_flags(rustix::fs::OFlags::NONBLOCK.bits().cast_signed());
         match root.open_with(Path::new(lock_name), &options) {
-            Ok(file) => return Ok(Some(file.into_std())),
+            Ok(file) => {
+                let metadata = file.metadata().map_err(|error| {
+                    SkillError(format!("stat install lock {}: {error}", path.display()))
+                })?;
+                if !metadata.is_file() {
+                    return Err(SkillError(format!(
+                        "install lock {} must be a regular file",
+                        path.display()
+                    )));
+                }
+                return Ok(Some(file.into_std()));
+            }
             Err(error) if existing_only && error.kind() == std::io::ErrorKind::NotFound => {
                 return Ok(None);
             }
@@ -156,6 +172,45 @@ mod tests {
     use tempfile::tempdir;
 
     use super::{acquire_existing_shared, acquire_with_timeout, lock_name};
+
+    #[cfg(unix)]
+    #[test]
+    fn special_lock_files_are_rejected_without_blocking() {
+        let temp = tempdir().expect("temporary root");
+        let root = fs::canonicalize(temp.path()).expect("canonical root");
+        let install = root.join("skill");
+        let lock_path = root.join(lock_name(&install));
+        assert!(
+            std::process::Command::new("mkfifo")
+                .arg(&lock_path)
+                .status()
+                .expect("create FIFO fixture")
+                .success()
+        );
+
+        let (sender, receiver) = std::sync::mpsc::channel();
+        std::thread::spawn(move || {
+            let errors = [true, false].map(|shared| {
+                acquire_with_timeout(
+                    std::slice::from_ref(&install),
+                    Duration::from_millis(100),
+                    shared,
+                    shared,
+                )
+                .err()
+                .map(|error| error.0)
+            });
+            sender.send(errors).expect("send lock rejection results");
+        });
+        let errors = receiver
+            .recv_timeout(Duration::from_secs(2))
+            .expect("opening a special lock file must not block");
+        assert!(errors.iter().all(|error| {
+            error
+                .as_ref()
+                .is_some_and(|message| message.ends_with("must be a regular file"))
+        }));
+    }
 
     #[test]
     fn read_locks_do_not_initialize_legacy_roots() {
