@@ -148,8 +148,14 @@ directory capability with finite depth/link limits. Inventory, Markdown reads,
 hashing and copy use the same resolver and retain the shared actual-read budget.
 Outside targets, parent traversal, link cycles and outside-target replacements
 remain rejected; replacing the ambient root path cannot redirect the retained
-source handle. This is a separate Rust-only contract deviation (SKL-006), with
-native Windows link evidence pending rather than implied by Unix tests.
+source handle. This is a separate Rust-only contract deviation (SKL-006).
+Exact-head run `37068639832` at `682177d99816357716a3f0387733d22982a88b80`
+passed all eleven acceptance checks, including native Linux/macOS/Windows
+init/link tests. The Windows log confirms all ten cases, including root/ancestor
+aliases and protected rename refusal. Independent full-layer review found no
+code defects; its sole missing-Windows-evidence condition was resolved from that
+actual log, not relabeled as reviewer approval. PR #792 was regularly squash-merged
+as `dcddcef0df5789123c7c9a7ebe6e01f10e941f2c`; #490 is closed.
 Windows ordinary and extended drive/UNC prefixes are equivalent only for
 lexical root comparison; device namespaces remain distinct and no ambient
 resource access is added. Cap-std's Windows directory handles deliberately
@@ -157,6 +163,25 @@ exclude `FILE_SHARE_DELETE`, so a live source-root rename is refused with a
 sharing violation rather than permitted as on Unix. The regression asserts
 that refusal and continued same-source hashing/copying; handle protections
 are not loosened to make the Unix replacement scenario work on Windows.
+
+Rust-only native preflight correction #793 closes two additional bypasses found
+while scoping #764. Native `skills sync` validates missing values, unknown flags,
+Go boolean spellings, target/scope, help and positional termination before any
+filesystem work, reusing the existing Go-compatible quoter. All 23 isolated flag
+probes match stdout, stderr and exit code against the actual frozen Go binary
+built from a complete archive of `dcddcef0df5789123c7c9a7ebe6e01f10e941f2c`.
+OpenCode fallback eligibility reuses the common no-follow marker reader, which
+now uses the existing regular-file, same-handle, size/growth-bounded reader and
+its nonblocking Unix final open. Typed `MarkerState::Rejected` keeps unsafe
+marker inputs native even when an ordinary malformed marker or dynamic config
+would otherwise select Go. Ordinary malformed/future-schema fallback remains.
+Marker reads retain the existing per-file `MAX_INPUT_SIZE`; this slice does not
+claim a new aggregate marker budget or complete native config/all-target status
+coverage. Parent #476/#764 stay open and #621 no-follow/product policy is unchanged.
+Bounded child-process regressions, the affected three-package suite and host
+Clippy pass locally. Skills-only Windows cross-Clippy passes. Full CLI cross-build
+on this Mac is blocked by missing Windows C headers for existing SQLite/TLS
+dependencies; fresh native three-OS CI remains required, not inferred from Unix.
 
 The Go oracle and source fixtures remain frozen. These are documented Rust-only
 security deviations, not a claim that the vulnerable Go paths have changed.
