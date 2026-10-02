@@ -9,13 +9,17 @@ pub(crate) fn read_bundle_bytes(
         .iter()
         .find(|resource| Path::new(&resource.path) == relative)
         .ok_or_else(|| SkillError(format!("resource {name} changed since inventory")))?;
+    let mut budget = root
+        .read_budget
+        .lock()
+        .map_err(|_| SkillError("skill input budget lock poisoned".into()))?;
     read_limited_expected(
         &root.root_cap,
         relative,
         name,
         limit,
         resource.size,
-        None,
+        Some(&mut budget),
     )
 }
 

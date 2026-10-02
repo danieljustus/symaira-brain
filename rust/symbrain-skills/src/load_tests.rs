@@ -46,7 +46,7 @@ fn rejected_headers_still_consume_the_actual_read_budget() {
     let mut budget = ReadBudget::new(document.len() as u64, "test inputs");
     let error =
         super::read_skill_document(&root, Path::new("bad"), "bad", Some(&mut budget)).unwrap_err();
-    assert!(error.0.contains("frontmatter exceeds maximum"));
+    assert!(error.to_string().contains("frontmatter exceeds maximum"));
     assert_eq!(
         budget.remaining, 0,
         "rejected reads must not reset the budget"
@@ -54,7 +54,7 @@ fn rejected_headers_still_consume_the_actual_read_budget() {
     assert!(
         super::read_skill_document(&root, Path::new("next"), "next", Some(&mut budget))
             .unwrap_err()
-            .0
+            .to_string()
             .contains("exceeds maximum total size")
     );
 }
@@ -105,4 +105,84 @@ fn resource_growth_after_inventory_is_rejected() {
         .0
         .contains("changed since inventory")
     );
+}
+
+#[test]
+fn repeated_bundle_reads_and_clones_share_the_loading_budget() {
+    let temp = tempdir().unwrap();
+    let document = b"---\nname: bounded\ndescription: test\n---\nbody\n";
+    fs::write(temp.path().join("SKILL.md"), document).unwrap();
+    fs::write(temp.path().join("data.bin"), b"1234").unwrap();
+    let budget = std::sync::Arc::new(std::sync::Mutex::new(ReadBudget::new(
+        document.len() as u64 + 4,
+        "test operation",
+    )));
+    let bundle =
+        super::load_bundle_with_budget(temp.path(), std::sync::Arc::clone(&budget)).unwrap();
+    let cloned = bundle.clone();
+    assert_eq!(
+        super::read_bundle_bytes(&bundle, Path::new("data.bin"), "data.bin", 4).unwrap(),
+        b"1234"
+    );
+    assert_eq!(budget.lock().unwrap().remaining, 0);
+    assert!(
+        super::read_bundle_bytes(&cloned, Path::new("data.bin"), "data.bin", 4)
+            .unwrap_err()
+            .0
+            .contains("test operation exceeds maximum total size")
+    );
+    assert_eq!(budget.lock().unwrap().remaining, 0);
+}
+
+#[test]
+fn a_second_bundle_cannot_reset_the_operation_budget() {
+    let temp = tempdir().unwrap();
+    let document = b"---\nname: bounded\ndescription: test\n---\nbody\n";
+    for name in ["a", "b"] {
+        fs::create_dir(temp.path().join(name)).unwrap();
+        fs::write(temp.path().join(name).join("SKILL.md"), document).unwrap();
+    }
+    let loader = super::BundleLoader {
+        budget: std::sync::Arc::new(std::sync::Mutex::new(ReadBudget::new(
+            document.len() as u64,
+            "test operation",
+        ))),
+    };
+    loader.load(&temp.path().join("a")).unwrap();
+    assert!(
+        loader
+            .clone()
+            .load(&temp.path().join("b"))
+            .unwrap_err()
+            .0
+            .contains("test operation exceeds maximum total size")
+    );
+}
+
+#[test]
+fn growth_at_exhausted_budget_does_not_read_a_probe_byte() {
+    use std::io::{Read, Seek, Write};
+    let temp = tempdir().unwrap();
+    fs::write(temp.path().join("data"), b"1234").unwrap();
+    let root = Dir::open_ambient_dir(temp.path(), ambient_authority()).unwrap();
+    let mut file = super::open_read_with(&root, Path::new("data"), "data", false).unwrap();
+    let mut bytes = [0; 4];
+    file.read_exact(&mut bytes).unwrap();
+    let mut budget = ReadBudget::new(4, "test inputs");
+    budget.remaining = 0;
+    fs::OpenOptions::new()
+        .append(true)
+        .open(temp.path().join("data"))
+        .unwrap()
+        .write_all(b"5")
+        .unwrap();
+    let error =
+        super::check_read_end(&file, "data", 16, 4, None, Some(4), Some(&budget)).unwrap_err();
+    assert!(matches!(error, super::InputReadError::Budget(_)));
+    assert_eq!(
+        file.stream_position().unwrap(),
+        4,
+        "no over-budget probe was consumed"
+    );
+    assert_eq!(budget.remaining, 0);
 }

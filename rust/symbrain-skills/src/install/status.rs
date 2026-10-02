@@ -22,6 +22,7 @@ use super::status_compare::{
     compare_one, is_regular_skill_source, marker_row, read_entries, resolve_link,
     resolves_to_directory, unmanaged,
 };
+use crate::BundleLoader;
 use crate::model::SkillError;
 
 /// Status vocabulary exposed by the skills status command.
@@ -96,6 +97,13 @@ pub struct StatusOptions {
 
 /// Scans every requested target and scope in deterministic order.
 pub fn status(options: &StatusOptions) -> Result<Vec<InstallStatus>, SkillError> {
+    status_with_loader(options, &BundleLoader::default())
+}
+
+pub(super) fn status_with_loader(
+    options: &StatusOptions,
+    loader: &BundleLoader,
+) -> Result<Vec<InstallStatus>, SkillError> {
     let targets = if options.targets.is_empty() {
         crate::target::target_names()
     } else {
@@ -105,7 +113,7 @@ pub fn status(options: &StatusOptions) -> Result<Vec<InstallStatus>, SkillError>
     for target in targets {
         let mut one = options.clone();
         one.targets = vec![target.clone()];
-        rows.extend(status_target(&one, &target)?);
+        rows.extend(status_target(&one, &target, loader)?);
     }
     rows.sort_by(|left, right| {
         left.target
@@ -115,7 +123,11 @@ pub fn status(options: &StatusOptions) -> Result<Vec<InstallStatus>, SkillError>
     Ok(rows)
 }
 
-fn status_target(options: &StatusOptions, target: &str) -> Result<Vec<InstallStatus>, SkillError> {
+fn status_target(
+    options: &StatusOptions,
+    target: &str,
+    loader: &BundleLoader,
+) -> Result<Vec<InstallStatus>, SkillError> {
     let scope = if options.scope.is_empty() {
         "user"
     } else {
@@ -266,6 +278,7 @@ fn status_target(options: &StatusOptions, target: &str) -> Result<Vec<InstallSta
             target,
             marker,
             options,
+            loader,
             common,
         ) {
             Ok(row) => rows.push(row),

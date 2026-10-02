@@ -124,8 +124,13 @@ have a three-second bound and reap descendant process groups on Unix.
 Rust skill input hardening (#476) checks control-file and normalized frontmatter
 bounds before allocating the full document or parsing YAML. Resource traversal
 is iterative and rejects excessive depth, entry count, aggregate bytes, growth
-since inventory, and special files. Library reads share an actual-I/O budget,
-including rejected headers; installed markers use bounded regular-file reads.
+since inventory, and special files. Source reads share an actual-I/O budget
+through loading, hashing and materialization, including rejected headers and
+control documents. Bulk runner, status, sync and MCP-list operations retain
+that budget across bundles and targets. Growth at a read boundary is checked
+on the same open handle without an over-budget probe byte. Library rejection
+categories are typed rather than inferred from attacker-controlled diagnostics;
+installed markers use bounded regular-file reads.
 Classified input rejections stay native even with a library-directory override,
 so they cannot re-enter the legacy Go reader. Other unsupported CLI shapes still
 retain their existing fallback until #764 is complete.

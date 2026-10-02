@@ -2,7 +2,7 @@
 
 use std::collections::BTreeMap;
 use std::fmt;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use cap_std::fs::Dir;
 use serde::{Deserialize, Serialize};
@@ -144,6 +144,8 @@ pub struct Bundle {
     pub root: std::path::PathBuf,
     /// Capability rooted at the trusted bundle directory.
     pub(crate) root_cap: Arc<Dir>,
+    /// Retained across hashing/copying and shared by clones and bulk callers.
+    pub(crate) read_budget: Arc<Mutex<crate::load::ReadBudget>>,
     /// Field `frontmatter`.
     pub frontmatter: Frontmatter,
     /// Field `manifest`.

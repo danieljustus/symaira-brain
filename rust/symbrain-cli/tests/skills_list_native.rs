@@ -195,7 +195,13 @@ fn access_time_inside_the_install_gap_is_not_usage() {
 fn unloadable_library_entry_keeps_go_fallback() {
     // Go reports these with cap-std error text that the native path does not
     // reproduce, so the whole report stays on Go.
-    for (name, body) in [("broken", "no frontmatter here\n"), ("empty-dir", "")] {
+    for (name, body) in [
+        ("broken", "no frontmatter here\n"),
+        ("empty-dir", ""),
+        ("exceeds maximum", ""),
+        ("must be a regular file", ""),
+        ("escapes skill root", ""),
+    ] {
         let root = TempDir::new().unwrap();
         write_library_skill(&root, "good", "");
         let directory = root.path().join("data/symbrain/skills/library").join(name);

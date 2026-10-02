@@ -19,7 +19,7 @@ pub mod targets_status;
 mod validation;
 pub mod variant;
 
-pub use load::load_bundle;
+pub use load::{BundleLoader, load_bundle};
 pub use materialize::{Materialized, MaterializedFile, materialize, materialize_with_fault};
 pub use model::{
     Bundle, Frontmatter, Issue, MAX_BODY_LENGTH, MAX_DESCRIPTION_LENGTH, MAX_FRONTMATTER_SIZE,

@@ -102,7 +102,19 @@ fn resource_entries_exact_boundary_and_one_over() {
         load_bundle(temp.path()).unwrap().resources.len(),
         MAX_RESOURCE_ENTRIES - 1
     );
+    assert_eq!(
+        symbrain_skills::library::library_paths(temp.path())
+            .unwrap()
+            .len(),
+        MAX_RESOURCE_ENTRIES
+    );
     fs::write(temp.path().join("one-over"), []).unwrap();
+    assert!(
+        symbrain_skills::library::library_paths(temp.path())
+            .unwrap_err()
+            .0
+            .contains("maximum entry count")
+    );
     assert!(
         load_bundle(temp.path())
             .unwrap_err()
@@ -197,4 +209,42 @@ fn library_rejections_and_normal_order_are_stable() {
     .unwrap();
     let (_, issues) = symbrain_skills::library::list_library(temp.path());
     assert_eq!(issues[0].code, "skill_input_rejected");
+}
+
+#[test]
+fn runner_shares_input_budget_across_library_bundles() {
+    let temp = tempfile::tempdir().unwrap();
+    let library = temp.path().join("library");
+    for name in ["a", "b"] {
+        let root = library.join(name);
+        fs::create_dir_all(&root).unwrap();
+        skill(&root);
+        for index in 0..4 {
+            fs::File::create(root.join(format!("data{index}.md")))
+                .unwrap()
+                .set_len(MAX_TOTAL_RESOURCE_BYTES / 8)
+                .unwrap();
+        }
+    }
+    let results = symbrain_skills::runner::run(
+        &mut symbrain_skills::runner::NoopContext,
+        &["claude".into()],
+        symbrain_skills::runner::Options {
+            library_dir: library.display().to_string(),
+            render_dir: temp.path().join("rendered").display().to_string(),
+            base_dir: temp.path().join("base").display().to_string(),
+            home_dir: temp.path().display().to_string(),
+            ..Default::default()
+        },
+        true,
+    )
+    .unwrap();
+    assert_eq!(results[0].status, "error");
+    assert!(
+        results[0]
+            .message
+            .as_deref()
+            .unwrap()
+            .contains("skill operation inputs exceeds maximum total size")
+    );
 }

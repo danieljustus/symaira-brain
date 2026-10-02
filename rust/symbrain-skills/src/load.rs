@@ -2,7 +2,7 @@
 
 use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use ambient_authority::ambient_authority;
 use cap_fs_ext::{FollowSymlinks, OpenOptionsFollowExt};
@@ -27,6 +27,41 @@ use crate::variant;
 /// Returns [`SkillError`] when the root or a bundle input cannot be opened
 /// safely, exceeds a configured limit, or fails parsing or validation.
 pub fn load_bundle(root: &Path) -> Result<Bundle, SkillError> {
+    BundleLoader::default().load(root)
+}
+
+/// One actual-read budget shared by an operation's bundles and their later reads.
+#[derive(Debug, Clone)]
+pub struct BundleLoader {
+    budget: Arc<Mutex<ReadBudget>>,
+}
+
+impl Default for BundleLoader {
+    fn default() -> Self {
+        Self {
+            budget: Arc::new(Mutex::new(ReadBudget::new(
+                MAX_TOTAL_RESOURCE_BYTES,
+                "skill operation inputs",
+            ))),
+        }
+    }
+}
+
+impl BundleLoader {
+    /// Loads a bundle without resetting this operation's actual-read budget.
+    ///
+    /// # Errors
+    ///
+    /// Returns a loader error or rejects inputs that exceed the shared budget.
+    pub fn load(&self, root: &Path) -> Result<Bundle, SkillError> {
+        load_bundle_with_budget(root, Arc::clone(&self.budget))
+    }
+}
+
+fn load_bundle_with_budget(
+    root: &Path,
+    read_budget: Arc<Mutex<ReadBudget>>,
+) -> Result<Bundle, SkillError> {
     let logical_root = std::path::absolute(root)
         .map_err(|error| SkillError(format!("resolve skill root: {error}")))?;
     let root_cap = Arc::new(
@@ -41,12 +76,20 @@ pub fn load_bundle(root: &Path) -> Result<Bundle, SkillError> {
         return Err(SkillError("skill root is not a directory".into()));
     }
 
-    let skill_bytes = read_skill_document(&root_cap, Path::new("SKILL.md"), "SKILL.md", None)?;
+    let mut retained_budget = read_budget
+        .lock()
+        .map_err(|_| SkillError("skill input budget lock poisoned".into()))?;
+    let skill_bytes = read_skill_document(
+        &root_cap,
+        Path::new("SKILL.md"),
+        "SKILL.md",
+        Some(&mut retained_budget),
+    )?;
     let parsed = parse_skill_md(&skill_bytes)?;
     let mut manifest =
         match root_cap.symlink_metadata("symskills.toml") {
             Ok(_) => {
-                let bytes = read_control(&root_cap, root, "symskills.toml")?;
+                let bytes = read_control(&root_cap, "symskills.toml", &mut retained_budget)?;
                 parse_manifest(&String::from_utf8(bytes).map_err(|error| {
                     SkillError(format!("read symskills.toml as UTF-8: {error}"))
                 })?)?
@@ -70,7 +113,6 @@ pub fn load_bundle(root: &Path) -> Result<Bundle, SkillError> {
     }
 
     let resources = load_resources(&root_cap, root)?;
-    let mut retained_budget = ReadBudget::new(MAX_TOTAL_RESOURCE_BYTES, "resource tree");
     let mut markdown = std::collections::BTreeMap::new();
     for resource in &resources {
         if !is_overlay_path(&resource.path) && is_markdown(&resource.path) {
@@ -92,9 +134,11 @@ pub fn load_bundle(root: &Path) -> Result<Bundle, SkillError> {
         }
     }
     let block_overrides = load_overrides(&root_cap, root, &resources, &mut retained_budget)?;
+    drop(retained_budget);
     let bundle = Bundle {
         root: logical_root,
         root_cap,
+        read_budget,
         frontmatter: parsed.frontmatter,
         manifest,
         body: parsed.body,
