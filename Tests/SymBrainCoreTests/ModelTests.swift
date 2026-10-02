@@ -61,6 +61,69 @@ struct DoctorReportTests {
         #expect(report.harnesses[0].supportsMcpInstall == true)
         #expect(report.harnesses[1].name == "hermes")
         #expect(report.harnesses[1].supportsMcpInstall == false)
+        #expect(report.managedModules == nil)
+    }
+}
+
+struct DoctorManagedModuleReportTests {
+    @Test func decodesInstalledOptionalModulesAndTheirSidecarProvenance() throws {
+        let json = """
+        {
+          "config_dir":{"path":"/home/test/.config/symbrain","exists":true},
+          "data_dir":{"path":"/home/test/.local/share/symbrain","exists":true},
+          "cache_dir":{"path":"/home/test/.cache/symbrain","exists":true},
+          "config":{"path":"/home/test/.config/symbrain/config.toml","exists":true,"parsed":true},
+          "servers":[],"profiles":[],"harnesses":[],
+          "managed_modules":[
+            {
+              "module":"operate","binary":"symoperate","installed":true,
+              "path":"/home/test/.symaira/bin/symoperate",
+              "provenance":{
+                "binary":"symoperate","source":"brain-source","version":"",
+                "receiver_commit":"0123456789abcdef0123456789abcdef01234567",
+                "module_dir":"operate","builder":"Swift 6.2",
+                "built_at":"2026-10-02T10:00:00Z",
+                "binary_sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              }
+            },
+            {
+              "module":"browse","binary":"symbrowse","installed":true,
+              "path":"/home/test/.symaira/bin/symbrowse",
+              "provenance":{
+                "binary":"symbrowse","source":"release","version":"v1.2.3",
+                "repo":"owner/symbrowse","built_at":"2026-10-02T10:00:00Z",
+                "binary_sha256":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+              }
+            }
+          ]
+        }
+        """
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        let report = try decoder.decode(DoctorReport.self, from: Data(json.utf8))
+        let module = try #require(report.managedModules?.first)
+
+        #expect(module.module == "operate")
+        #expect(module.binary == "symoperate")
+        #expect(module.installed)
+        #expect(module.path == "/home/test/.symaira/bin/symoperate")
+        #expect(module.provenance?.source == "brain-source")
+        #expect(module.provenance?.version == "")
+        #expect(module.provenance?.receiverCommit == "0123456789abcdef0123456789abcdef01234567")
+        #expect(module.provenance?.moduleDir == "operate")
+        #expect(module.provenance?.builder == "Swift 6.2")
+        #expect(module.provenance?.binarySHA256 == "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        #expect(module.provenance?.binarySha256 == module.provenance?.binarySHA256)
+
+        let releaseModule = try #require(report.managedModules?.first { $0.module == "browse" })
+        #expect(releaseModule.installed)
+        #expect(releaseModule.path == "/home/test/.symaira/bin/symbrowse")
+        #expect(releaseModule.provenance?.version == "v1.2.3")
+        #expect(releaseModule.provenance?.repo == "owner/symbrowse")
+        #expect(releaseModule.provenance?.receiverCommit == nil)
+        #expect(releaseModule.provenance?.moduleDir == nil)
+        #expect(releaseModule.provenance?.builder == nil)
+        #expect(releaseModule.provenance?.binarySha256 == "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb")
     }
 }
 

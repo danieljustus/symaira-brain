@@ -74,36 +74,6 @@ struct OperateVersionReport: Decodable, Sendable, Equatable {
 
 // MARK: - Shared managed-module support (also used by ScopeViewModel)
 
-/// A managed binary's origin sidecar, written by `symbrain setup
-/// --from-source` / the release installer next to the binary in
-/// `~/.symaira/bin` (see internal/managed/provenance.go). Read directly from
-/// disk: there is no CLI surface for it yet (`symbrain doctor --json` only
-/// tracks `vault` in its `servers` list and the release manifest's cores,
-/// neither of which includes brain-source-built operate/scope binaries).
-struct ManagedBinaryProvenance: Decodable, Sendable, Equatable {
-    let binary: String
-    let source: String
-    let version: String
-    let repo: String?
-    let receiverCommit: String?
-    let moduleDir: String?
-    let builder: String?
-    let builtAt: String?
-    let binarySHA256: String
-
-    enum CodingKeys: String, CodingKey {
-        case binary, source, version, repo
-        case receiverCommit = "receiver_commit"
-        case moduleDir = "module_dir"
-        case builder
-        case builtAt = "built_at"
-        case binarySHA256 = "binary_sha256"
-    }
-
-    var isBrainSource: Bool { source == "brain-source" }
-    var formattedBuiltAt: String? { builtAt.map(formatModuleTimestamp) }
-}
-
 /// Whether one profile exposes a module's server, from `symbrain profile
 /// list --json` (`internal/profile`'s ServerOperate/ServerScope keys).
 struct ModuleProfileExposure: Identifiable, Sendable, Equatable {
@@ -167,19 +137,16 @@ enum ManagedModuleSupport {
         return result.stdoutText.trimmingCharacters(in: .whitespacesAndNewlines) == "true"
     }
 
-    static func readProvenance(nextTo binary: URL) -> ManagedBinaryProvenance? {
-        let sidecar = binary.deletingLastPathComponent()
-            .appendingPathComponent(binary.lastPathComponent + ".provenance.json")
-        guard let data = try? Data(contentsOf: sidecar) else { return nil }
-        return try? JSONDecoder().decode(ManagedBinaryProvenance.self, from: data)
-    }
-
     static func profileExposure(server: String, symbrain: SymBrainClient) async -> [ModuleProfileExposure] {
         guard let profiles = try? await symbrain.profileList() else { return [] }
         return profiles.map { summary in
             let ref = summary.servers.first { $0.server == server }
             return ModuleProfileExposure(profile: summary.name, enabled: ref?.enabled ?? false, mode: ref?.mode)
         }
+    }
+
+    static func installedModule(module: String, report: DoctorReport?) -> ManagedModuleStatus? {
+        report?.managedModules?.first { $0.module == module && $0.installed && !$0.path.isEmpty }
     }
 
     /// Runs `symbrain setup --from-source <source-root> --modules <module>
@@ -354,9 +321,17 @@ final class OperateViewModel: ObservableObject, ModuleViewModelProtocol {
 
         moduleEnabled = (try? await ManagedModuleSupport.isEnabled(module: "operate", symbrain: symbrain)) ?? false
 
-        if let binary = client.resolveBinary() {
+        let report = try? await symbrain.doctor()
+        if let module = ManagedModuleSupport.installedModule(module: "operate", report: report) {
+            binaryPath = module.path
+            provenance = module.provenance
+            availability = .ready
+            isBinaryNotFound = false
+        } else if let binary = client.resolveBinary() {
+            // Gracefully support older symbrain CLIs and non-managed binaries,
+            // but never fall back to reading a provenance sidecar from disk.
             binaryPath = binary.path
-            provenance = ManagedModuleSupport.readProvenance(nextTo: binary)
+            provenance = nil
             availability = .ready
             isBinaryNotFound = false
         } else {

@@ -1,4 +1,5 @@
-use std::fs;
+use std::fs::{self, File};
+use std::io::Read;
 use std::path::Path;
 
 use symbrain_audit::Degradation;
@@ -10,7 +11,8 @@ use super::doctor_core::{check_harnesses, check_memory_db, check_skills_library,
 use super::doctor_links::{check_foreign_access_risks, check_handshakes, check_links};
 use super::doctor_process::which;
 use super::doctor_types::{
-    BUILTINS, ConfigCheck, DirCheck, DoctorReport, ManagedCoreCheck, ServerCheck,
+    BUILTINS, ConfigCheck, DirCheck, DoctorReport, ManagedCoreCheck, ManagedModuleCheck,
+    ManagedModuleProvenance, OPTIONAL_MODULES, ServerCheck,
 };
 
 pub(super) fn run_checks(vault_agent: &str) -> DoctorReport {
@@ -31,6 +33,7 @@ pub(super) fn run_checks(vault_agent: &str) -> DoctorReport {
         builtins: BUILTINS.iter().map(|s| (*s).to_string()).collect(),
         servers: check_servers(&managed_dir),
         managed_cores: check_managed_cores(&managed_dir),
+        managed_modules: check_managed_modules(&managed_dir),
         memory_db: check_memory_db(),
         skills_library: check_skills_library(),
         profiles,
@@ -137,4 +140,60 @@ fn check_managed_cores(managed_dir: &Path) -> Vec<ManagedCoreCheck> {
         .collect::<Vec<_>>();
     checks.sort_by(|a, b| a.name.cmp(&b.name));
     checks
+}
+
+const MAX_MODULE_PROVENANCE_BYTES: u64 = 16 * 1024;
+
+fn check_managed_modules(managed_dir: &Path) -> Vec<ManagedModuleCheck> {
+    OPTIONAL_MODULES
+        .iter()
+        .filter_map(|(module, binary)| {
+            let path = managed_dir.join(binary);
+            let metadata = fs::symlink_metadata(&path).ok()?;
+            if !metadata.file_type().is_file() {
+                return None;
+            }
+            Some(ManagedModuleCheck {
+                module: (*module).to_string(),
+                binary: (*binary).to_string(),
+                installed: true,
+                path: path.display().to_string(),
+                provenance: read_module_provenance(managed_dir, module, binary),
+            })
+        })
+        .collect()
+}
+
+fn read_module_provenance(
+    managed_dir: &Path,
+    module: &str,
+    binary: &str,
+) -> Option<ManagedModuleProvenance> {
+    let sidecar_path = managed_dir.join(format!("{binary}.provenance.json"));
+    let metadata = fs::symlink_metadata(&sidecar_path).ok()?;
+    if !metadata.file_type().is_file() || metadata.len() > MAX_MODULE_PROVENANCE_BYTES {
+        return None;
+    }
+
+    let file = File::open(&sidecar_path).ok()?;
+    let opened_metadata = file.metadata().ok()?;
+    if !opened_metadata.is_file() || opened_metadata.len() > MAX_MODULE_PROVENANCE_BYTES {
+        return None;
+    }
+    let mut bytes = Vec::new();
+    file.take(MAX_MODULE_PROVENANCE_BYTES + 1)
+        .read_to_end(&mut bytes)
+        .ok()?;
+    if bytes.len() as u64 > MAX_MODULE_PROVENANCE_BYTES {
+        return None;
+    }
+
+    let provenance: ManagedModuleProvenance = serde_json::from_slice(&bytes).ok()?;
+    if provenance.binary != binary
+        || !matches!(provenance.source.as_str(), "brain-source" | "release")
+        || (provenance.source == "brain-source" && provenance.module_dir != module)
+    {
+        return None;
+    }
+    Some(provenance)
 }

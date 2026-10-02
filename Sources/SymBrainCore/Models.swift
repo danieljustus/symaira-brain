@@ -25,6 +25,39 @@ public struct DoctorReport: Decodable, Sendable {
     public let servers: [ServerStatus]
     public let profiles: [String]
     public let harnesses: [HarnessStatus]
+    /// Installed optional binaries reported by `symbrain doctor --json`.
+    /// Older CLI versions omit this additive field.
+    public let managedModules: [ManagedModuleStatus]?
+}
+
+/// One installed optional module binary in the managed directory.
+public struct ManagedModuleStatus: Decodable, Sendable {
+    public let module: String
+    public let binary: String
+    public let installed: Bool
+    public let path: String
+    public let provenance: ManagedBinaryProvenance?
+}
+
+/// The exact provenance sidecar recorded beside a managed module binary.
+public struct ManagedBinaryProvenance: Decodable, Sendable, Equatable {
+    public let binary: String
+    public let source: String
+    public let version: String
+    public let repo: String?
+    public let receiverCommit: String?
+    public let moduleDir: String?
+    public let builder: String?
+    public let builtAt: String?
+    /// Stored with the standard `binarySha256` spelling so
+    /// `.convertFromSnakeCase` decodes `binary_sha256` correctly.
+    public let binarySha256: String
+
+    /// Compatibility spelling used by the existing module detail views.
+    public var binarySHA256: String { binarySha256 }
+
+    public var isBrainSource: Bool { source == "brain-source" }
+    public var formattedBuiltAt: String? { builtAt.map(formatModuleTimestamp) }
 }
 
 public struct DirStatus: Decodable, Sendable {

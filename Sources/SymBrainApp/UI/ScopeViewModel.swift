@@ -154,9 +154,17 @@ final class ScopeViewModel: ObservableObject, ModuleViewModelProtocol {
 
         moduleEnabled = (try? await ManagedModuleSupport.isEnabled(module: "scope", symbrain: symbrain)) ?? false
 
-        if let binary = client.resolveBinary() {
+        let report = try? await symbrain.doctor()
+        if let module = ManagedModuleSupport.installedModule(module: "scope", report: report) {
+            binaryPath = module.path
+            provenance = module.provenance
+            availability = .ready
+            isBinaryNotFound = false
+        } else if let binary = client.resolveBinary() {
+            // Gracefully support older symbrain CLIs and non-managed binaries,
+            // but never fall back to reading a provenance sidecar from disk.
             binaryPath = binary.path
-            provenance = ManagedModuleSupport.readProvenance(nextTo: binary)
+            provenance = nil
             availability = .ready
             isBinaryNotFound = false
         } else {
