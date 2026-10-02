@@ -1,7 +1,7 @@
 // Resource links are interpreted inside the retained root, never reopened via
 // their ambient absolute pathname. Cap-std remains the authority for every stat,
 // directory walk and final file open, including concurrent replacements.
-fn resource_path(root: &Dir, anchors: &[&Path], relative: &Path) -> Result<PathBuf, SkillError> {
+fn resource_path(root: &Dir, anchors: &[PathBuf], relative: &Path) -> Result<PathBuf, SkillError> {
     use std::collections::VecDeque;
     use std::path::Component;
 
@@ -73,6 +73,41 @@ fn resource_path(root: &Dir, anchors: &[&Path], relative: &Path) -> Result<PathB
         resolved.push(".");
     }
     Ok(resolved)
+}
+
+// Capture only the explicitly trusted root's bounded link chain at bootstrap.
+// Canonicalization can rewrite ancestor aliases, so retain its original link
+// text too. Resource paths are never opened through any of these spellings.
+fn trusted_root_spellings(root: &Path) -> Result<Vec<PathBuf>, SkillError> {
+    let canonical_root = std::fs::canonicalize(root)
+        .map_err(|error| SkillError(format!("resolve skill root spelling: {error}")))?;
+    let mut spellings = vec![canonical_root, root.to_path_buf()];
+    let mut spelling = root.to_path_buf();
+    let mut links = 0;
+    loop {
+        let metadata = std::fs::symlink_metadata(&spelling)
+            .map_err(|error| SkillError(format!("stat trusted root spelling: {error}")))?;
+        if !metadata.file_type().is_symlink() {
+            return Ok(spellings);
+        }
+        if links == MAX_RESOURCE_DEPTH {
+            return Err(SkillError(format!(
+                "trusted root exceeds maximum symlink resolution depth of {MAX_RESOURCE_DEPTH}"
+            )));
+        }
+        links += 1;
+        let target = std::fs::read_link(&spelling)
+            .map_err(|error| SkillError(format!("read trusted root link: {error}")))?;
+        spelling = if target.is_absolute() {
+            target
+        } else {
+            spelling
+                .parent()
+                .unwrap_or_else(|| Path::new("."))
+                .join(target)
+        };
+        spellings.push(spelling.clone());
+    }
 }
 
 // Canonical Windows roots use extended drive/UNC prefixes, but link contents

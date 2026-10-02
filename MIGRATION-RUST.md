@@ -138,7 +138,12 @@ retain their existing fallback until #764 is complete.
 Rust resource rendering (#490) accepts both relative and absolute directory
 links confined to the trusted bundle. Absolute link text is mapped to a
 root-relative path using the original trusted-root spellings; it is never
-reopened with ambient authority. Resolution follows links through the retained
+reopened with ambient authority. Bootstrap captures the canonical root, the
+caller-supplied root, and a bounded trusted-root link chain including raw link
+text. That preserves ancestor-alias spellings lost during canonicalization.
+Those ambient metadata reads are limited to trusted-root bootstrap; resource
+targets and subsequent reads never use them as ambient paths.
+Resolution follows links through the retained
 directory capability with finite depth/link limits. Inventory, Markdown reads,
 hashing and copy use the same resolver and retain the shared actual-read budget.
 Outside targets, parent traversal, link cycles and outside-target replacements

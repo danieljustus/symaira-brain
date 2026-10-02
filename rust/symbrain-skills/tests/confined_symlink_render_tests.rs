@@ -199,7 +199,16 @@ fn a_trusted_root_alias_accepts_canonical_in_root_directory_targets() {
     link_directory(&source.join("real"), &source.join("linked"));
     let alias = temp.path().join("root-alias");
     link_directory(&source, &alias);
-    let bundle = load_bundle(&alias).unwrap();
+    let bundle = load_bundle(&alias).unwrap_or_else(|error| {
+        panic!(
+            "{error}; source={source:?}; alias={alias:?}; canonical_source={:?}; \
+             canonical_alias={:?}; alias_target={:?}; resource_target={:?}",
+            fs::canonicalize(&source),
+            fs::canonicalize(&alias),
+            fs::read_link(&alias),
+            fs::read_link(source.join("linked")),
+        )
+    });
     let result = materialize(&bundle, &rendered(&bundle), &temp.path().join("rendered")).unwrap();
     assert_eq!(
         fs::read(result.root.join("linked/nested/data.bin")).unwrap(),
@@ -231,4 +240,23 @@ fn cyclic_directory_links_hit_a_finite_resolution_bound() {
     link_directory(Path::new("a"), &source.join("b"));
     let error = load_bundle(&source).unwrap_err();
     assert!(error.0.contains("maximum symlink resolution depth"));
+}
+
+#[test]
+fn trusted_root_alias_preserves_parent_directory_alias_spellings() {
+    let temp = tempfile::tempdir().unwrap();
+    let physical_parent = temp.path().join("physical-parent");
+    fs::create_dir(&physical_parent).unwrap();
+    let parent_alias = temp.path().join("parent-alias");
+    link_directory(&physical_parent, &parent_alias);
+    let source = source_at(&parent_alias);
+    link_directory(&source.join("real"), &source.join("linked"));
+    let alias = parent_alias.join("root-alias");
+    link_directory(&source, &alias);
+    let bundle = load_bundle(&alias).unwrap();
+    let output = materialize(&bundle, &rendered(&bundle), &temp.path().join("rendered")).unwrap();
+    assert_eq!(
+        fs::read(output.root.join("linked/nested/data.bin")).unwrap(),
+        b"SAFE"
+    );
 }

@@ -9,11 +9,7 @@ pub(crate) fn read_bundle_bytes(
         .iter()
         .find(|resource| Path::new(&resource.path) == relative)
         .ok_or_else(|| SkillError(format!("resource {name} changed since inventory")))?;
-    let resolved = resource_path(
-        &root.root_cap,
-        &[root.canonical_root.as_path(), root.root.as_path()],
-        relative,
-    )?;
+    let resolved = resource_path(&root.root_cap, &root.root_spellings, relative)?;
     let mut budget = root
         .read_budget
         .lock()
@@ -34,11 +30,7 @@ pub(crate) fn read_bundle_optional_bytes(
     name: &str,
     limit: u64,
 ) -> Result<Option<Vec<u8>>, SkillError> {
-    let resolved = resource_path(
-        &root.root_cap,
-        &[root.canonical_root.as_path(), root.root.as_path()],
-        relative,
-    )?;
+    let resolved = resource_path(&root.root_cap, &root.root_spellings, relative)?;
     if !optional_entry_exists(&root.root_cap, &resolved, name)? {
         return Ok(None);
     }
@@ -47,7 +39,7 @@ pub(crate) fn read_bundle_optional_bytes(
 
 fn load_overrides(
     root: &Dir,
-    anchors: &[&Path],
+    anchors: &[PathBuf],
     resources: &[Resource],
     budget: &mut ReadBudget,
 ) -> Result<

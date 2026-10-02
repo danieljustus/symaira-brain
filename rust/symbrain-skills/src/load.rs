@@ -76,11 +76,8 @@ fn load_bundle_with_budget(
         return Err(SkillError("skill root is not a directory".into()));
     }
 
-    // Resolve only the trusted root's spelling once. Resource targets are mapped
-    // back to this retained capability, never opened through this ambient path.
-    let canonical_root = std::fs::canonicalize(root)
-        .map_err(|error| SkillError(format!("resolve skill root spelling: {error}")))?;
-    let anchors = [canonical_root.as_path(), logical_root.as_path()];
+    let root_spellings = trusted_root_spellings(&logical_root)?;
+    let anchors = root_spellings.as_slice();
 
     let mut retained_budget = read_budget
         .lock()
@@ -118,11 +115,11 @@ fn load_bundle_with_budget(
             .clone_from(&parsed.frontmatter.version);
     }
 
-    let resources = load_resources(&root_cap, &anchors)?;
+    let resources = load_resources(&root_cap, anchors)?;
     let mut markdown = std::collections::BTreeMap::new();
     for resource in &resources {
         if !is_overlay_path(&resource.path) && is_markdown(&resource.path) {
-            let resolved = resource_path(&root_cap, &anchors, Path::new(&resource.path))?;
+            let resolved = resource_path(&root_cap, anchors, Path::new(&resource.path))?;
             let bytes = read_limited_expected(
                 &root_cap,
                 &resolved,
@@ -140,12 +137,12 @@ fn load_bundle_with_budget(
             markdown.insert(resource.path.clone(), bytes);
         }
     }
-    let block_overrides = load_overrides(&root_cap, &anchors, &resources, &mut retained_budget)?;
+    let block_overrides = load_overrides(&root_cap, anchors, &resources, &mut retained_budget)?;
     drop(retained_budget);
     let bundle = Bundle {
         root: logical_root,
         root_cap,
-        canonical_root,
+        root_spellings,
         read_budget,
         frontmatter: parsed.frontmatter,
         manifest,
@@ -219,7 +216,7 @@ fn optional_entry_exists(root: &Dir, relative: &Path, name: &str) -> Result<bool
 }
 fn read_optional_dir(
     root: &Dir,
-    anchors: &[&Path],
+    anchors: &[PathBuf],
     relative: &Path,
     name: &str,
 ) -> Result<Option<Vec<cap_std::fs::DirEntry>>, SkillError> {
@@ -237,7 +234,7 @@ fn read_optional_dir(
     .map(Some)
 }
 
-fn load_resources(root: &Dir, anchors: &[&Path]) -> Result<Vec<Resource>, SkillError> {
+fn load_resources(root: &Dir, anchors: &[PathBuf]) -> Result<Vec<Resource>, SkillError> {
     let mut resources = Vec::new();
     let mut total_bytes = 0_u64;
     let mut entries_seen = 0;
