@@ -135,8 +135,8 @@ fn sync_target(
     }
 
     let library_path = Path::new(&opts.library_dir);
-    let entries = match std::fs::read_dir(library_path) {
-        Ok(e) => e,
+    let entries = match crate::library::read_library_entries(library_path) {
+        Ok(entries) => entries,
         Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
             return TargetResult {
                 target: target_name.to_string(),
@@ -153,7 +153,6 @@ fn sync_target(
         }
     };
 
-    let entries: Vec<_> = entries.flatten().collect();
     if entries.is_empty() {
         return TargetResult {
             target: target_name.to_string(),

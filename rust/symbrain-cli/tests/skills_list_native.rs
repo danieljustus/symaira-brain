@@ -231,3 +231,53 @@ fn sync_dry_run_json_matches_go_bytes() {
     assert!(output.stderr.is_empty());
     assert_eq!(output.stdout, b"{\"results\":[],\"dry_run\":true}\n");
 }
+
+#[test]
+fn classified_input_rejection_never_uses_go_even_with_an_override() {
+    for override_dir in [false, true] {
+        let root = TempDir::new().unwrap();
+        let skill = write_library_skill(&root, "large", "");
+        std::fs::File::create(skill.join("SKILL.md"))
+            .unwrap()
+            .set_len(symbrain_skills::MAX_INPUT_SIZE + 1)
+            .unwrap();
+        let mut process = command(&root, &["skills", "list", "--json"]);
+        if override_dir {
+            process.env("SYMBRAIN_SKILLS_LIBRARY_DIR", skill.parent().unwrap());
+        }
+        let output = process.output().unwrap();
+        assert!(output.status.success(), "{:?}", output.stderr);
+        let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+        assert_eq!(value["issues"][0]["code"], "skill_input_rejected");
+        assert!(output.stderr.is_empty());
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn special_installed_marker_does_not_block_or_fabricate_an_install() {
+    let root = TempDir::new().unwrap();
+    write_library_skill(&root, "demo", "");
+    let destination = root.path().join("home/.config/opencode/skills/demo");
+    std::fs::create_dir_all(&destination).unwrap();
+    assert!(
+        Command::new("mkfifo")
+            .arg(destination.join(".symskills.json"))
+            .status()
+            .unwrap()
+            .success()
+    );
+    let (sender, receiver) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        sender.send(list_json(&root)).unwrap();
+    });
+    let value = receiver
+        .recv_timeout(std::time::Duration::from_secs(2))
+        .expect("metadata must not wait for a FIFO writer");
+    assert!(
+        value["skills"][0]["installs"]
+            .as_array()
+            .unwrap()
+            .is_empty()
+    );
+}

@@ -228,7 +228,16 @@ struct Marker {
 /// Reads the install marker at `destination`. A marker without an installed
 /// timestamp and without a rendered tree is not evidence.
 fn read_marker(destination: &Path) -> Option<Marker> {
-    let bytes = fs::read(destination.join(MARKER_FILE)).ok()?;
+    let root =
+        cap_std::fs::Dir::open_ambient_dir(destination, ambient_authority::ambient_authority())
+            .ok()?;
+    let bytes = crate::load::read_limited_nofollow(
+        &root,
+        Path::new(MARKER_FILE),
+        MARKER_FILE,
+        crate::model::MAX_INPUT_SIZE,
+    )
+    .ok()?;
     let marker: Marker = serde_json::from_slice(&bytes).ok()?;
     if marker.installed.is_empty() && marker.rendered_at.is_empty() {
         return None;
@@ -326,30 +335,45 @@ fn newest_mtime(root: &Path) -> Option<String> {
 
 fn newest_file_mtime(root: &Path) -> Option<i64> {
     let mut best: Option<i64> = None;
-    walk_mtimes(root, &mut best);
-    best
+    walk_mtimes(root, &mut best).then_some(best).flatten()
 }
 
-fn walk_mtimes(directory: &Path, best: &mut Option<i64>) {
-    let Ok(entries) = fs::read_dir(directory) else {
-        return;
-    };
-    for entry in entries.flatten() {
-        let path = entry.path();
-        let Ok(file_type) = entry.file_type() else {
+fn walk_mtimes(root: &Path, best: &mut Option<i64>) -> bool {
+    let mut pending = vec![(root.to_path_buf(), 0_usize)];
+    let mut entries_seen = 0_usize;
+    while let Some((directory, depth)) = pending.pop() {
+        if depth > crate::model::MAX_RESOURCE_DEPTH
+            || entries_seen >= crate::model::MAX_RESOURCE_ENTRIES
+        {
+            return false;
+        }
+        let Ok(entries) = fs::read_dir(&directory) else {
             continue;
         };
-        if file_type.is_dir() {
-            if entry.file_name() == ".git" {
+        for entry in entries {
+            if entries_seen >= crate::model::MAX_RESOURCE_ENTRIES {
+                return false;
+            }
+            let Ok(entry) = entry else {
+                continue;
+            };
+            entries_seen += 1;
+            let path = entry.path();
+            let Ok(file_type) = entry.file_type() else {
+                continue;
+            };
+            if file_type.is_dir() {
+                if entry.file_name() != ".git" {
+                    pending.push((path, depth + 1));
+                }
                 continue;
             }
-            walk_mtimes(&path, best);
-            continue;
-        }
-        if let Some(seconds) = file_mtime(&path) {
-            *best = Some(best.map_or(seconds, |current: i64| current.max(seconds)));
+            if let Some(seconds) = file_mtime(&path) {
+                *best = Some(best.map_or(seconds, |current: i64| current.max(seconds)));
+            }
         }
     }
+    true
 }
 
 fn to_seconds(time: SystemTime) -> i64 {
