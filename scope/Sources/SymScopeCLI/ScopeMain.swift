@@ -12,16 +12,22 @@ public enum ScopeMain {
     /// 2 usage). Never calls exit() itself — except inside `watch`, which
     /// streams until interrupted, and `serve`, which blocks on stdio.
     @discardableResult
-    public static func run(_ args: [String]) async -> Int32 {
+    public static func run(
+        _ args: [String],
+        harnessService: any HarnessInventoryProviding = SymBrainHarnessService()
+    ) async -> Int32 {
         do {
-            return try await runThrowing(args)
+            return try await runThrowing(args, harnessService: harnessService)
         } catch {
             fputs("symscope: \(error.localizedDescription)\n", stderr)
             return 1
         }
     }
 
-    static func runThrowing(_ args: [String]) async throws -> Int32 {
+    static func runThrowing(
+        _ args: [String],
+        harnessService: any HarnessInventoryProviding = SymBrainHarnessService()
+    ) async throws -> Int32 {
         guard let first = args.first else {
             printUsage()
             return 2
@@ -62,7 +68,20 @@ public enum ScopeMain {
             guard args.count >= 2 else { printUsage(); return 2 }
             switch args[1] {
             case "list":
-                let (servers, notes) = MCPDiscovery.discover()
+                if args.dropFirst(2).contains("--diagnostics") {
+                    let (diagnostics, notes) = MCPDiscovery.diagnose(harnessService: harnessService)
+                    if let note = notes.first(where: { $0.contains("requires symbrain") }) {
+                        fputs("symscope: \(note)\n", stderr)
+                        return 1
+                    }
+                    guard let diagnostics else {
+                        fputs("symscope: mcp: symbrain harness inventory unavailable\n", stderr)
+                        return 1
+                    }
+                    try printJSON(diagnostics)
+                    return 0
+                }
+                let (servers, notes) = MCPDiscovery.discover(harnessService: harnessService)
                 if let note = notes.first(where: { $0.contains("requires symbrain") }) {
                     fputs("symscope: \(note)\n", stderr)
                     return 1
@@ -220,6 +239,7 @@ public enum ScopeMain {
           symcockpit scope ports list            listening ports (JSON)
           symcockpit scope ports suggest [n]     suggest free TCP ports (default 3)
           symcockpit scope mcp list              MCP servers across AI clients (JSON)
+          symcockpit scope mcp list --diagnostics MCP servers and Brain config states
           symcockpit scope mcp health            health-probe configured MCP servers
           symcockpit scope daemons list [--all]  launchd agents and Homebrew services
           symcockpit scope daemons health [--all] daemon health summary
