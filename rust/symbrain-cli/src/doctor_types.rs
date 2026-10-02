@@ -1,6 +1,11 @@
 pub(crate) const BUILTINS: [&str; 3] = ["memory", "skills", "usage"];
+pub(crate) const OPTIONAL_MODULES: [(&str, &str); 3] = [
+    ("browse", "symbrowse"),
+    ("operate", "symoperate"),
+    ("scope", "symscope"),
+];
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use symbrain_audit::Degradation;
 
 #[derive(Debug, Serialize)]
@@ -43,6 +48,33 @@ pub(crate) struct ManagedCoreCheck {
     pub(crate) pinned: String,
     #[serde(skip_serializing_if = "String::is_empty")]
     pub(crate) version: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub(crate) struct ManagedModuleProvenance {
+    pub(crate) binary: String,
+    pub(crate) source: String,
+    pub(crate) version: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub(crate) repo: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub(crate) receiver_commit: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub(crate) module_dir: String,
+    #[serde(default, skip_serializing_if = "String::is_empty")]
+    pub(crate) builder: String,
+    pub(crate) built_at: String,
+    pub(crate) binary_sha256: String,
+}
+
+#[derive(Debug, Serialize)]
+pub(crate) struct ManagedModuleCheck {
+    pub(crate) module: String,
+    pub(crate) binary: String,
+    pub(crate) installed: bool,
+    pub(crate) path: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) provenance: Option<ManagedModuleProvenance>,
 }
 
 #[derive(Debug, Serialize)]
@@ -132,6 +164,8 @@ pub(crate) struct DoctorReport {
     pub(crate) servers: Vec<ServerCheck>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub(crate) managed_cores: Vec<ManagedCoreCheck>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub(crate) managed_modules: Vec<ManagedModuleCheck>,
     pub(crate) memory_db: MemoryDbCheck,
     pub(crate) skills_library: SkillsLibraryCheck,
     pub(crate) profiles: Vec<String>,
