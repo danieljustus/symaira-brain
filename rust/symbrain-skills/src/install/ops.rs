@@ -7,7 +7,7 @@
 
 use std::path::{Path, PathBuf};
 
-use super::base::{base_path_for_scope, write_snapshot_for_scope};
+use super::base::{base_path_for_scope, write_snapshot_for_scope_locked};
 use super::core::install_path_for;
 use super::destination::{
     adoption_backup, check_destination, effective_home, effective_mode, entry_exists, is_symlink,
@@ -46,8 +46,15 @@ pub(crate) fn install_locks_for(
         name,
         options.project_dir.as_deref(),
     )?;
-    let mut paths = vec![destination, base];
+    let mut paths = vec![destination.clone(), base.clone()];
     paths.extend_from_slice(extra);
+    // Serialize mutations of sibling destinations, base snapshots, and render
+    // entries. The per-skill locks alone do not coordinate directory swaps.
+    for path in paths.clone() {
+        if let Some(parent) = path.parent() {
+            paths.push(parent.to_path_buf());
+        }
+    }
     lock::acquire(&paths)
 }
 
@@ -121,6 +128,8 @@ pub(crate) fn install_target_inner(
     if options.dry_run {
         return install_target_inner_locked(target, source, name, source_hash, options);
     }
+    // Destination, marker, and base state are inspected only after all shared
+    // directory locks are held, so queued installs re-evaluate the current disk.
     let _locks = install_locks_for(target, name, options, &[])?;
     install_target_inner_locked(target, source, name, source_hash, options)
 }
@@ -234,7 +243,7 @@ pub(crate) fn install_target_inner_locked(
         } else {
             install_copy_tree(source, &destination, &marker_bytes, options)?;
         }
-        write_snapshot_for_scope(
+        write_snapshot_for_scope_locked(
             &source_for_snapshot(source),
             &base,
             target,

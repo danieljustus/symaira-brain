@@ -164,6 +164,21 @@ pub fn write_snapshot_for_scope(
     project: Option<&Path>,
     fault: Option<FaultPoint>,
 ) -> Result<(), SkillError> {
+    let parent = destination
+        .parent()
+        .ok_or_else(|| SkillError("base destination has no parent".to_owned()))?;
+    let _locks = super::lock::acquire(&[parent.to_path_buf(), destination.to_path_buf()])?;
+    write_snapshot_for_scope_locked(source, destination, target, name, project, fault)
+}
+
+pub(crate) fn write_snapshot_for_scope_locked(
+    source: &Path,
+    destination: &Path,
+    target: &str,
+    name: &str,
+    project: Option<&Path>,
+    fault: Option<FaultPoint>,
+) -> Result<(), SkillError> {
     validate_name(name)?;
     let parent = destination
         .parent()
