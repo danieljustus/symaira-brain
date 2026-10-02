@@ -200,9 +200,15 @@ pub(crate) fn open_trusted_dir(path: &Path) -> Result<Dir, SkillError> {
         current = match next {
             Ok(next) => next,
             Err(error) if error.kind() == io::ErrorKind::NotFound => {
-                current.create_dir(name).map_err(|error| {
-                    SkillError(format!("create trusted root component: {error}"))
-                })?;
+                match current.create_dir(name) {
+                    Ok(()) => {}
+                    Err(error) if error.kind() == io::ErrorKind::AlreadyExists => {}
+                    Err(error) => {
+                        return Err(SkillError(format!(
+                            "create trusted root component: {error}"
+                        )));
+                    }
+                }
                 open_child_nofollow(&current, Path::new(name))
                     .map_err(|error| SkillError(format!("open trusted root component: {error}")))?
             }
