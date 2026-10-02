@@ -28,6 +28,7 @@ symscope scan                  # aggregierter Snapshot (Ports + MCP + Container)
 symscope ports list            # lauschende TCP/UDP-Ports mit Prozess
 symscope ports suggest [n]     # n freie TCP-Ports vorschlagen (Default 3)
 symscope mcp list              # MCP-Server über AI-Client-Configs
+symscope mcp list --diagnostics # Server plus Brain-Konfigurationsstatus
 symscope mcp health            # Health-Probe aller konfigurierten Server
 symscope daemons list          # launchd Agents/Daemons und Homebrew-Services
 symscope daemons list --all    # inklusive com.apple.* launchd-Services
@@ -40,6 +41,8 @@ symscope explain port <p>      # was nutzt Port p (Prozesse + MCP-Server)
 symscope explain server <name> # welcher Client/Config gehört zum MCP-Server
 symscope serve                 # stdio MCP-Server (JSON-RPC)
 ```
+
+The optional MCP `mcp_list` argument `diagnostics: true` returns the same server array plus a `configurations` array with `client`, `config_scope` (`global` or `project`), `status` (`ready`, `empty`, `invalid`, or `unavailable`), bounded `path`, and a generic optional `message`. Status comes only from Brain's inventory; free-form parse errors and resolved environment values are not returned. The default CLI/MCP list remains the original server array.
 
 ## Module layout
 
