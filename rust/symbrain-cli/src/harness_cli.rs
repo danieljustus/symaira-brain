@@ -3,13 +3,13 @@
 use std::ffi::OsString;
 use std::io::Write;
 use std::path::PathBuf;
-use std::time::Duration;
 
 use serde::Serialize;
-use symbrain_broker::{BrokerError, Client, Options};
 use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
-use symbrain_harness::list;
+use symbrain_harness::{ServerInfo, list};
+
+use crate::health_probe::{HEALTH_SCHEMA_VERSION, HealthOutcome, probe_server};
 
 const HARNESS_USAGE: &str = "symbrain harness — inspect configured AI harnesses
 
@@ -21,18 +21,25 @@ The global --output table|json flag (or --json) selects the output format.
 ";
 
 #[derive(Debug, Clone, Serialize)]
-pub struct HarnessHealthEntry {
+pub(crate) struct HarnessHealthEntry {
     pub harness: String,
     pub config: String,
     pub server: String,
     pub transport: String,
     pub healthy: bool,
+    pub outcome: HealthOutcome,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub probe_method: Option<&'static str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub latency_ms: Option<f64>,
     #[serde(skip_serializing_if = "String::is_empty")]
     pub error: String,
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub struct HarnessHealthReport {
+pub(crate) struct HarnessHealthReport {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub health_schema_version: Option<u32>,
     pub servers: Option<Vec<HarnessHealthEntry>>,
 }
 
@@ -281,7 +288,6 @@ fn run_health(
     }
 
     let inventory = list(project_dir.as_deref());
-    let mut entries = Vec::new();
     let mut probes = Vec::new();
 
     for h in &inventory.harnesses {
@@ -290,29 +296,14 @@ fn run_health(
         {
             continue;
         }
-
         let cfgs = std::iter::once(&h.global).chain(h.project.as_ref());
         for cfg in cfgs {
-            for s in &cfg.servers {
-                if s.transport != "stdio" || s.command.is_empty() {
-                    entries.push(HarnessHealthEntry {
-                        harness: h.name.as_str().to_string(),
-                        config: cfg.path.clone(),
-                        server: s.name.clone(),
-                        transport: s.transport.clone(),
-                        healthy: false,
-                        error: format!("not probed: {} transport is not stdio", s.transport),
-                    });
-                } else {
-                    probes.push(HealthProbe {
-                        harness: h.name.as_str().to_string(),
-                        config: cfg.path.clone(),
-                        server: s.name.clone(),
-                        transport: s.transport.clone(),
-                        command: s.command.clone(),
-                        args: s.args.clone(),
-                    });
-                }
+            for server in &cfg.servers {
+                probes.push(HealthProbe {
+                    harness: h.name.as_str().to_string(),
+                    config: cfg.path.clone(),
+                    server: server.clone(),
+                });
             }
         }
     }
@@ -324,10 +315,10 @@ fn run_health(
             .collect::<Vec<_>>();
         handles
             .into_iter()
-            .map(|handle| handle.join().ok().and_then(Result::ok))
+            .map(|handle| handle.join().ok())
             .collect::<Option<Vec<_>>>()
     });
-    entries.extend(probe_results?);
+    let mut entries = probe_results?;
 
     entries.sort_by(|left, right| {
         (
@@ -342,6 +333,7 @@ fn run_health(
             ))
     });
     let report = HarnessHealthReport {
+        health_schema_version: (!entries.is_empty()).then_some(HEALTH_SCHEMA_VERSION),
         servers: (!entries.is_empty()).then_some(entries),
     };
 
@@ -353,8 +345,8 @@ fn run_health(
             if server.healthy {
                 writeln!(
                     w,
-                    "  ✓  {:<12} {:<14} {} (stdio)",
-                    server.harness, server.server, server.config
+                    "  ✓  {:<12} {:<14} {} ({})",
+                    server.harness, server.server, server.config, server.transport
                 )?;
             } else {
                 writeln!(
@@ -377,67 +369,20 @@ fn run_health(
 struct HealthProbe {
     harness: String,
     config: String,
-    server: String,
-    transport: String,
-    command: String,
-    args: Vec<String>,
+    server: ServerInfo,
 }
 
-fn probe_health(probe: HealthProbe) -> Result<HarnessHealthEntry, ()> {
-    let path = match symbrain_broker::discover(&probe.command, "") {
-        Ok(path) => path,
-        Err(BrokerError::Io(error))
-            if error.kind() == std::io::ErrorKind::NotFound
-                && probe
-                    .command
-                    .bytes()
-                    .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_')) =>
-        {
-            let path_var = if cfg!(windows) { "%PATH%" } else { "$PATH" };
-            return Ok(HarnessHealthEntry {
-                harness: probe.harness,
-                config: probe.config,
-                server: probe.server,
-                transport: probe.transport,
-                healthy: false,
-                error: format!(
-                    "discover: broker: {:?} not found on PATH or in managed directory: exec: {:?}: executable file not found in {path_var}",
-                    probe.command, probe.command
-                ),
-            });
-        }
-        Err(_) => return Err(()),
-    };
-    let client = Client::spawn(
-        &path,
-        Options {
-            args: probe.args,
-            env: None,
-            capture_stderr: true,
-        },
-    )
-    .map_err(|_| ())?;
-    if let Err(error) = client.initialize(Duration::from_secs(5)) {
-        if let BrokerError::ProtocolMismatch { expected, actual } = error {
-            return Ok(HarnessHealthEntry {
-                harness: probe.harness,
-                config: probe.config,
-                server: probe.server,
-                transport: probe.transport,
-                healthy: false,
-                error: format!(
-                    "initialize: broker: protocol version mismatch: sent {expected:?}, child returned {actual:?}"
-                ),
-            });
-        }
-        return Err(());
-    }
-    Ok(HarnessHealthEntry {
+fn probe_health(probe: HealthProbe) -> HarnessHealthEntry {
+    let result = probe_server(&probe.server);
+    HarnessHealthEntry {
         harness: probe.harness,
         config: probe.config,
-        server: probe.server,
-        transport: probe.transport,
-        healthy: true,
-        error: String::new(),
-    })
+        server: probe.server.name,
+        transport: probe.server.transport,
+        healthy: result.outcome == HealthOutcome::Healthy,
+        outcome: result.outcome,
+        probe_method: result.probe_method,
+        latency_ms: result.latency_ms,
+        error: result.error,
+    }
 }

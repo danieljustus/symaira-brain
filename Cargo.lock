@@ -1691,6 +1691,7 @@ dependencies = [
  "symbrain-usage",
  "tempfile",
  "toml_edit",
+ "ureq",
 ]
 
 [[package]]

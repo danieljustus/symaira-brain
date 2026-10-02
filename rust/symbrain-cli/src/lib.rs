@@ -15,6 +15,7 @@ mod config_cli;
 mod doctor_cli;
 pub mod guard_cli;
 mod harness_cli;
+mod health_probe;
 mod init_cli;
 mod install_cli;
 mod mcp_cli;

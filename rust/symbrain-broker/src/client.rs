@@ -13,6 +13,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::value::RawValue;
 
 const PROTOCOL_VERSION: &str = "2024-11-05";
+/// MCP protocol revisions supported by this broker.
+pub const SUPPORTED_PROTOCOL_VERSIONS: &[&str] = &["2024-11-05", "2025-03-26", "2025-06-18"];
 const CLIENT_NAME: &str = "symbrain";
 const CLIENT_VERSION: &str = "dev";
 const MAX_LINE_BYTES: usize = 1 << 20;
@@ -330,10 +332,7 @@ impl Client {
         let raw = self.call("initialize", Some(&params), timeout, None)?;
         let result: InitializeResult = serde_json::from_str(raw.get())
             .map_err(|err| BrokerError::Parse(format!("initialize result: {err}")))?;
-        if !matches!(
-            result.protocol_version.as_str(),
-            "2024-11-05" | "2025-03-26" | "2025-06-18"
-        ) {
+        if !SUPPORTED_PROTOCOL_VERSIONS.contains(&result.protocol_version.as_str()) {
             return Err(BrokerError::ProtocolMismatch {
                 expected: PROTOCOL_VERSION.to_string(),
                 actual: result.protocol_version,
@@ -341,6 +340,14 @@ impl Client {
         }
         let _ = self.notify("notifications/initialized", None::<&()>);
         Ok(result)
+    }
+
+    /// Sends an MCP liveness ping after initialization.
+    ///
+    /// # Errors
+    /// Returns timeout, closed, RPC, or parse errors.
+    pub fn ping(&self, timeout: Duration) -> Result<(), BrokerError> {
+        self.call("ping", None::<&()>, timeout, None).map(|_| ())
     }
 
     /// Lists tools advertised by the child.
