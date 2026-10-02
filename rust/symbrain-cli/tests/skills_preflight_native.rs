@@ -1,5 +1,6 @@
 //! Native preflight regressions; every child has a bounded deadline.
 
+use std::ffi::OsString;
 use std::fs;
 use std::io::{Read, Seek};
 use std::process::{Command, Output, Stdio};
@@ -8,6 +9,11 @@ use std::time::{Duration, Instant};
 use tempfile::TempDir;
 
 fn run(root: &TempDir, args: &[&str], configured: bool) -> Output {
+    let args: Vec<_> = args.iter().map(OsString::from).collect();
+    run_os(root, &args, configured)
+}
+
+fn run_os(root: &TempDir, args: &[OsString], configured: bool) -> Output {
     let home = root.path().join("home");
     let config = root.path().join("config");
     let data = root.path().join("data");
@@ -67,13 +73,17 @@ fn run(root: &TempDir, args: &[&str], configured: bool) -> Output {
 
 #[test]
 fn native_skills_preflight_contracts() {
-    check_sync_flags();
+    check_sync_flag_errors();
+    check_sync_boolean_flags();
     check_rejected_markers_override_fallback();
+    check_marker_probe_does_not_create_directories();
     #[cfg(unix)]
     check_special_markers();
+    #[cfg(unix)]
+    check_raw_argument_values();
 }
 
-fn check_sync_flags() {
+fn check_sync_flag_errors() {
     let errors: &[(&[&str], &str)] = &[
         (
             &["--target"],
@@ -113,6 +123,14 @@ fn check_sync_flags() {
             "symbrain skills sync: unknown scope \"bad\\x1b\"",
         ),
         (
+            &["--scope", "--bad"],
+            "symbrain skills sync: unknown scope \"-bad\"",
+        ),
+        (
+            &["--target", "--bad"],
+            "symbrain skills sync: unknown target \"-bad\"",
+        ),
+        (
             &["--dry-run=bad\x1b"],
             "invalid boolean value \"bad\\x1b\" for -dry-run: parse error\nUsage of skills sync:",
         ),
@@ -134,6 +152,9 @@ fn check_sync_flags() {
             "parse failure wrote skill data"
         );
     }
+}
+
+fn check_sync_boolean_flags() {
     for (flags, expected) in [
         (vec!["--dry-run"], true),
         (vec!["--dry-run=true"], true),
@@ -190,6 +211,83 @@ fn check_rejected_markers_override_fallback() {
             symbrain_skills::install::read_marker(&unsafe_dir).unwrap(),
             symbrain_skills::install::MarkerState::Rejected(_)
         ));
+    }
+}
+
+fn check_marker_probe_does_not_create_directories() {
+    use symbrain_skills::install::{MarkerState, read_marker};
+    let root = TempDir::new().unwrap();
+    let missing = root.path().join("missing/parent/skill");
+    assert!(matches!(
+        read_marker(&missing).unwrap(),
+        MarkerState::Missing
+    ));
+    assert!(!root.path().join("missing").exists());
+    let original = root.path().join("enumerated/skill");
+    fs::create_dir_all(&original).unwrap();
+    let entry = fs::read_dir(original.parent().unwrap())
+        .unwrap()
+        .next()
+        .unwrap()
+        .unwrap()
+        .path();
+    let moved = root.path().join("moved");
+    fs::rename(&original, &moved).unwrap();
+    assert!(matches!(read_marker(&entry).unwrap(), MarkerState::Missing));
+    assert!(
+        !entry.exists(),
+        "marker preflight recreated a removed directory"
+    );
+    assert!(moved.is_dir());
+}
+
+#[cfg(unix)]
+fn check_raw_argument_values() {
+    use std::os::unix::ffi::OsStringExt;
+    for (bytes, separated, expected) in [
+        (
+            b"--scope=bad\xff".as_slice(),
+            None,
+            "unknown scope \"bad\\xff\"",
+        ),
+        (
+            b"--scope".as_slice(),
+            Some(b"bad\xff".as_slice()),
+            "unknown scope \"bad\\xff\"",
+        ),
+        (
+            b"--target=bad\xff".as_slice(),
+            None,
+            "unknown target \"bad\\xff\"",
+        ),
+        (
+            b"--target".as_slice(),
+            Some(b"bad\xff".as_slice()),
+            "unknown target \"bad\\xff\"",
+        ),
+        (
+            b"--dry-run=bad\xff".as_slice(),
+            None,
+            "invalid boolean value \"bad\\xff\"",
+        ),
+    ] {
+        let root = TempDir::new().unwrap();
+        let mut args = vec![
+            OsString::from("skills"),
+            OsString::from("sync"),
+            OsString::from_vec(bytes.to_vec()),
+        ];
+        if let Some(value) = separated {
+            args.push(OsString::from_vec(value.to_vec()));
+        }
+        let output = run_os(&root, &args, false);
+        assert_eq!(output.status.code(), Some(2));
+        assert!(output.stdout.is_empty());
+        assert!(
+            String::from_utf8_lossy(&output.stderr).contains(expected),
+            "{:?}",
+            output.stderr
+        );
     }
 }
 

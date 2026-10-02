@@ -131,7 +131,17 @@ pub(crate) fn read_marker_at(root: &Dir) -> Result<MarkerState, SkillError> {
 
 /// Reads and classifies a marker with a trusted, no-follow directory walk.
 pub fn read_marker(path: &Path) -> Result<MarkerState, SkillError> {
-    let root = super::replace::open_trusted_dir(path)?;
+    let root = match super::replace::open_existing_dir(path) {
+        Ok(root) => root,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            return Ok(MarkerState::Missing);
+        }
+        Err(error) => {
+            return Err(SkillError(format!(
+                "open existing marker directory: {error}"
+            )));
+        }
+    };
     read_marker_at(&root)
 }
 

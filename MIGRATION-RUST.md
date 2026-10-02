@@ -167,7 +167,9 @@ are not loosened to make the Unix replacement scenario work on Windows.
 Rust-only native preflight correction #793 closes two additional bypasses found
 while scoping #764. Native `skills sync` validates missing values, unknown flags,
 Go boolean spellings, target/scope, help and positional termination before any
-filesystem work, reusing the existing Go-compatible quoter. All 23 isolated flag
+filesystem work, reusing the existing Go-compatible quoter and whole-vector
+normalizer. Raw argument values survive until validation, including Unix non-UTF-8
+bytes and separated flag-like values. All 30 isolated flag
 probes match stdout, stderr and exit code against the actual frozen Go binary
 built from a complete archive of `dcddcef0df5789123c7c9a7ebe6e01f10e941f2c`.
 OpenCode fallback eligibility reuses the common no-follow marker reader, which
@@ -175,6 +177,8 @@ now uses the existing regular-file, same-handle, size/growth-bounded reader and
 its nonblocking Unix final open. Typed `MarkerState::Rejected` keeps unsafe
 marker inputs native even when an ordinary malformed marker or dynamic config
 would otherwise select Go. Ordinary malformed/future-schema fallback remains.
+Marker directory probing uses the existing-only no-follow opener; missing or
+concurrently renamed directories remain absent without status creating paths.
 Marker reads retain the existing per-file `MAX_INPUT_SIZE`; this slice does not
 claim a new aggregate marker budget or complete native config/all-target status
 coverage. Parent #476/#764 stay open and #621 no-follow/product policy is unchanged.
