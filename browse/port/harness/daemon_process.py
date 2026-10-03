@@ -39,7 +39,12 @@ def digest(path: Path) -> str:
 
 def observe(binary: Path, settings: dict[str, str], session: str,
             raw_origin: bytes | None = None, git_origin: bool = False) -> dict:
-    with tempfile.TemporaryDirectory(prefix="bd-", dir=harness.temporary_parent(os.environ)) as temporary:
+    parent = harness.temporary_parent(os.environ)
+    if sys.platform == "darwin" and os.environ.get("CI"):
+        # Darwin sockaddr_un is bounded; runner TMPDIR is often deeply nested.
+        # Keep this owned private HOME short without changing daemon endpoints.
+        parent = "/tmp"
+    with tempfile.TemporaryDirectory(prefix="bd-", dir=parent) as temporary:
         root = Path(temporary)
         home = root / "home"
         home.mkdir(mode=0o700)
@@ -54,7 +59,8 @@ def observe(binary: Path, settings: dict[str, str], session: str,
                    XDG_CONFIG_HOME=str(root / "config"), XDG_CACHE_HOME=str(root / "cache"),
                    XDG_DATA_HOME=str(root / "data"), XDG_STATE_HOME=str(root / "state"),
                    XDG_RUNTIME_DIR=str(runtime), PATH="", SYMBROWSE_NO_AUTOSTART="1",
-                   TMPDIR=str(temporary), TMP=str(temporary), TEMP=str(temporary), **settings)
+                   TMPDIR=str(temporary), TMP=str(temporary), TEMP=str(temporary))
+        env.update(settings)
         cwd = root
         if raw_origin is not None:
             cwd = root / os.fsdecode(b"origin-" + raw_origin)
