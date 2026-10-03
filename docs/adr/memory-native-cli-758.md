@@ -160,3 +160,14 @@ fixture seed/snapshot paths. Keep every comparison and all input counts; do not
 ignore cleanup errors or weaken assertions. The original complete failing job
 111293527292 is retained. This changes only fixture resource ownership; fresh
 Linux process proof and native Windows acceptance remain required.
+
+## Default-path fixture handle ownership
+
+The subsequent exact-head9c Windows run37155195743, job111297047149,
+passed the corrected configuration fixtures, then exposed the same retained
+SQLite handle in the separate default/legacy-path seed helper. Close that fourth
+owned connection after its transaction exits. Preserve all seven path cases,
+selected IDs and before/after database comparisons; do not ignore cleanup errors
+or retry deletion. The complete original Windows failure is retained as
+windows-cleanup-9c-job-111297047149.log. Fresh full Linux replay and the two
+actual process controls are repeated; corrected native Windows remains required.
