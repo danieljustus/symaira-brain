@@ -131,3 +131,9 @@ and native init checks green) and Memory parent7ca3bed0 (its Windows CLI
 fixture now passes) before fresh combined-source verification. Resolve the
 .gitattributes conflict by retaining both exact-log rules. Doctor parent
 corrections and the three current-head schema jobs remain merge gates.
+
+Clean combined source88a9981 passes fresh44 Memory/16 Doctor tests, three
+actual Go/native schema observations and rejection of unchanged Go as the
+false-green control. Strict all-target/all-feature CLI Clippy, formatting and
+actionlint pass. Complete logs/receipts bind the exact CLI and source; native
+Windows/macOS current-head jobs and corrected Doctor parent remain required.

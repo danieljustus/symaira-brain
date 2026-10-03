@@ -1,0 +1,7 @@
+    Checking symbrain-policy v0.12.1 (/workspace/symaira-memory649-doctor/rust/symbrain-policy)
+    Checking symbrain-activity v0.12.1 (/workspace/symaira-memory649-doctor/rust/symbrain-activity)
+    Checking symbrain-catalog v0.12.1 (/workspace/symaira-memory649-doctor/rust/symbrain-catalog)
+    Checking symbrain-memory v0.12.1 (/workspace/symaira-memory649-doctor/rust/symbrain-memory)
+    Checking symbrain-gateway v0.12.1 (/workspace/symaira-memory649-doctor/rust/symbrain-gateway)
+    Checking symbrain-cli v0.12.1 (/workspace/symaira-memory649-doctor/rust/symbrain-cli)
+    Finished `dev` profile [unoptimized] target(s) in 4.05s

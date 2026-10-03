@@ -1,0 +1,7 @@
+   Compiling symbrain-policy v0.12.1 (/workspace/symaira-memory649-doctor/rust/symbrain-policy)
+   Compiling symbrain-activity v0.12.1 (/workspace/symaira-memory649-doctor/rust/symbrain-activity)
+   Compiling symbrain-memory v0.12.1 (/workspace/symaira-memory649-doctor/rust/symbrain-memory)
+   Compiling symbrain-catalog v0.12.1 (/workspace/symaira-memory649-doctor/rust/symbrain-catalog)
+   Compiling symbrain-gateway v0.12.1 (/workspace/symaira-memory649-doctor/rust/symbrain-gateway)
+   Compiling symbrain-cli v0.12.1 (/workspace/symaira-memory649-doctor/rust/symbrain-cli)
+    Finished `dev` profile [unoptimized] target(s) in 5.14s
