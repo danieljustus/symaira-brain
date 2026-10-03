@@ -71,6 +71,15 @@ def cases():
             add("raw-existing-root-"+str(json_out),args,raw_root=os.fsdecode(b"owned\xff\xe2\x82"))
             add("raw-home-"+str(json_out),args,raw_home=os.fsdecode(b"owned\xff\xe2\x82"))
         add("literal-replacement-root",raw_root="owned\ufffd")
+    if os.name!="nt":
+        for fault in ("missing","file","valid","missing-payload"):
+            add("raw-worker-tmp-"+fault,raw_tmp=fault)
+        add("raw-home-obstructed",raw_home_fault=True)
+        add("raw-root-missing-browse",raw_root=os.fsdecode(b"owned\xff\xe2\x82"),remove_browse=True)
+        add("raw-root-missing-browse-human",["setup","--from-source","<source>","--modules","browse"],raw_root=os.fsdecode(b"owned\xff\xe2\x82"),remove_browse=True)
+    for mode,optin in (("empty",False),("unset",False),("empty",True)):
+        add("path-"+mode+"-"+str(optin),path_mode=mode,cwd_tool=True,
+            env={"NoDefaultCurrentDirectoryInExePath":"",**({"GODEBUG":"execerrdot=0"} if optin else {})})
     for failure in ("git","go-version","go-build","missing-payload","directory-payload","swift-version","swift-build","swift-show"):
         add("failure-"+failure,modules="browse,operate,scope",env={"SOURCE_TOOL_FAILURE":failure})
     add("relative-tools-refused",relative_tools=True)
@@ -83,6 +92,10 @@ def cases():
         add("implicit-cwd-tool-refused",cwd_tool=True)
         add("implicit-cwd-tool-disabled",cwd_tool=True,env={"NoDefaultCurrentDirectoryInExePath":""})
         add("implicit-cwd-same-file",cwd_hardlink=True)
+    if os.name=="nt":
+        for policy in ("same","different"):
+            add("explicit-relative-later-absolute-"+policy,relative_then_absolute=policy,
+                env={"NoDefaultCurrentDirectoryInExePath":""})
     add("missing-git",omit="git")
     add("missing-go",omit="go")
     add("missing-swift",omit="swift",modules="browse,operate,scope")
@@ -145,6 +158,15 @@ def configure(case,root,go,tool):
     if case.get("nonexecutable"):(tools/"go").chmod(0o644)
     if case.get("cwd_tool"):shutil.copyfile(tool,Path(env["PROJECT"])/"git")
     if case.get("cwd_hardlink"):os.link(tools/"git",Path(env["PROJECT"])/"git")
+    if case.get("relative_then_absolute"):
+        later=tools
+        if case["relative_then_absolute"]=="different":
+            later=root/"other-tools";later.mkdir()
+            for name in ("git","go","swift"):shutil.copyfile(tool,later/name)
+        env["PATH"]=os.path.relpath(tools,env["PROJECT"])+os.pathsep+str(later)
+    if case.get("path_mode"):
+        if case["path_mode"]=="unset":env.pop("PATH",None)
+        else:env["PATH"]=""
     # Go and Rust agree that an all-empty PATHEXT explicitly permits raw PE names.
     if os.name=="nt":env["PATHEXT"]=";;"
     tmp=root/"tmp";tmp.mkdir()
@@ -158,6 +180,15 @@ def configure(case,root,go,tool):
         if case["relative_tmp"]=="file":bad.write_text("owned relative obstruction")
         if case["relative_tmp"]=="valid":bad.mkdir()
         for key in ("TMPDIR","TMP","TEMP"):env[key]="worker-tmp"
+    if case.get("raw_tmp"):
+        bad=root/os.fsdecode(b"worker\xff\xe2\x82")
+        if case["raw_tmp"]=="file":bad.write_bytes(b"owned obstruction")
+        if case["raw_tmp"] in ("valid","missing-payload"):bad.mkdir()
+        for key in ("TMPDIR","TMP","TEMP"):env[key]=str(bad)
+        if case["raw_tmp"]=="missing-payload":env["SOURCE_TOOL_FAILURE"]="missing-payload"
+    if case.get("raw_home_fault"):
+        home=root/os.fsdecode(b"home\xff\xe2\x82");(home/".symaira").mkdir(parents=True)
+        (home/".symaira/bin").write_bytes(b"owned obstruction");env["HOME"]=str(home)
     if case.get("config"):
         cfg=Path(env["XDG_CONFIG_HOME"])/"symbrain/config.toml";cfg.parent.mkdir();cfg.write_text(case["config"])
     if case.get("project"):(Path(env["PROJECT"])/".symbrain.toml").write_text(case["project"])

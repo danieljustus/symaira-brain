@@ -8,7 +8,7 @@ scripts/setup-source-oracle/run.sh /tmp/setup-source-parity.json
 
 The launcher builds the full frozen production Go CLI at `dcddcef0` using the
 existing immutable oracle launcher and the candidate Rust CLI with `--locked`.
-It runs 90 real Go/Rust CLI cases on Linux/macOS (84 on Windows) and two separate deliberately failing native
+It runs 100 real Go/Rust CLI cases on Linux/macOS (89 on Windows) and two separate deliberately failing native
 process controls (`wrong-exit`, `wrong-source`). These controls execute the actual
 Rust CLI and must produce exactly their intended observable disagreement.
 The report binds runtime, native SDK, binary and source hashes, clean/dirty HEAD,
@@ -24,7 +24,11 @@ valid U+FFFD identity, Unicode whitespace and unusable worker temp roots.
 Relative missing, file and existing temp roots additionally retain original Go
 worker argv semantics and prevent implicit source-install behavior changes. Windows
 also checks distinct implicit-CWD Git ownership with explicit GODEBUG opt-in,
-CWD-only lookup and explicitly disabled implicit CWD. Instrumented toolchains
+CWD-only lookup and explicitly disabled implicit CWD. The corrected review
+adds empty/unset PATH with an owned CWD executable, Windows relative-to-absolute
+same-file continuation and different-file refusal, and raw Unix error paths for
+temp staging, missing compiler payload, missing Browse directory and obstructed
+managed publication, with successful raw temp and raw human-output controls. Instrumented toolchains
 are fixtures, not real product builds.
 A separate case uses the actual Go compiler on an owned dependency-free source
 worker and checks the installed version and payload hash. The shared private

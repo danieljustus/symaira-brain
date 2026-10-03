@@ -13,7 +13,7 @@ use std::sync::{
 };
 use std::time::{Duration, Instant};
 
-use symbrain_managed::{format_io_error, format_process_exit_status};
+use symbrain_managed::{GoText, format_io_error, format_process_exit_status};
 
 pub(super) struct Output {
     pub bytes: Vec<u8>,
@@ -27,6 +27,7 @@ pub(super) fn lookup(tool: &str) -> Result<PathBuf, String> {
         .ok()
         .filter(|value| !value.is_empty())
         .unwrap_or_else(|| ".COM;.EXE;.BAT;.CMD".into())
+        .to_lowercase()
         .split(';')
         .filter(|ext| !ext.is_empty())
         .map(|ext| {
@@ -53,7 +54,7 @@ pub(super) fn lookup(tool: &str) -> Result<PathBuf, String> {
     let dot_error =
         || format!("exec: {tool:?}: cannot run executable found relative to current directory");
     #[cfg(windows)]
-    let implicit = if std::env::var_os("NoDefaultCurrentDirectoryInExePath").is_none() {
+    let mut implicit = if std::env::var_os("NoDefaultCurrentDirectoryInExePath").is_none() {
         names
             .iter()
             .map(PathBuf::from)
@@ -65,7 +66,9 @@ pub(super) fn lookup(tool: &str) -> Result<PathBuf, String> {
     if allow_relative && let Some(implicit) = &implicit {
         return Ok(implicit.clone());
     }
-    for directory in std::env::split_paths(&path) {
+    // Go filepath.SplitList("") has no entries, while Rust yields one empty
+    // entry. Nonempty Unix lists still permit explicit empty CWD entries.
+    for directory in std::env::split_paths(&path).filter(|_| !path.is_empty()) {
         #[cfg(windows)]
         if directory.as_os_str().is_empty() {
             continue;
@@ -90,6 +93,14 @@ pub(super) fn lookup(tool: &str) -> Result<PathBuf, String> {
                 return Err(dot_error());
             }
             if !candidate.is_absolute() && !allow_relative {
+                #[cfg(windows)]
+                {
+                    // Go remembers the first relative candidate and continues:
+                    // only a later absolute name for that same file may win.
+                    implicit.get_or_insert(candidate);
+                    continue;
+                }
+                #[cfg(not(windows))]
                 return Err(dot_error());
             }
             return Ok(candidate);
@@ -117,13 +128,14 @@ pub(super) fn run(
     combined: bool,
     budget: Duration,
     context: &Context,
-) -> Result<Output, String> {
+) -> Result<Output, GoText> {
     if context.cancelled.load(Ordering::Relaxed) {
         return Err("source build cancelled".into());
     }
     if let Some(cwd) = cwd {
-        fs::metadata(cwd)
-            .map_err(|error| format!("chdir {}: {}", cwd.display(), format_io_error(&error)))?;
+        fs::metadata(cwd).map_err(|error| {
+            GoText::path("chdir ", cwd, &format!(": {}", format_io_error(&error)))
+        })?;
     }
     let capture = super::temp::capture()?;
     let writer = capture
@@ -144,7 +156,8 @@ pub(super) fn run(
             return Err(format!(
                 "exec: {}: executable file not found in %PATH%",
                 symbrain_core::config::format_go_quoted(executable.as_os_str())
-            ));
+            )
+            .into());
         }
     }
     #[cfg(windows)]
@@ -179,10 +192,10 @@ pub(super) fn run(
     #[cfg(not(windows))]
     let child = command.spawn();
     let child = child.map_err(|error| {
-        format!(
-            "fork/exec {}: {}",
-            executable.display(),
-            format_io_error(&error)
+        GoText::path(
+            "fork/exec ",
+            executable,
+            &format!(": {}", format_io_error(&error)),
         )
     })?;
     let mut owned = Owned {

@@ -3,6 +3,7 @@
 #![deny(unsafe_code)]
 
 mod archive;
+mod go_text;
 mod install;
 mod json_record;
 mod json_string;
@@ -15,6 +16,7 @@ mod version_probe;
 pub use archive::{
     atomic_install, extract_binary, find_checksum, safe_archive_path, sha256_file, verify_checksum,
 };
+pub use go_text::GoText;
 pub use install::{InstallOutcome, Installer, versions_match};
 pub use json_string::go_json_string_bytes;
 pub use local_install::{SourceOrigin, install_source};

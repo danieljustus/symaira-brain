@@ -4,14 +4,14 @@ use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use super::{Spec, layout, process};
-use symbrain_managed::format_io_error;
+use symbrain_managed::{GoText, format_io_error};
 
 const TOOL_BUDGET: Duration = Duration::from_secs(30);
 const BUILD_BUDGET: Duration = Duration::from_mins(30);
 
-pub(super) fn receiver_commit(root: &Path, context: &process::Context) -> Result<String, String> {
-    let git =
-        process::lookup("git").map_err(|error| format!("resolve receiver commit: {error}"))?;
+pub(super) fn receiver_commit(root: &Path, context: &process::Context) -> Result<String, GoText> {
+    let git = process::lookup("git")
+        .map_err(|error| GoText::from(error).with_prefix("resolve receiver commit: "))?;
     output(
         &git,
         &[
@@ -27,7 +27,7 @@ pub(super) fn receiver_commit(root: &Path, context: &process::Context) -> Result
         context,
     )
     .map(|out| String::from_utf8_lossy(&out).trim().into())
-    .map_err(|error| format!("resolve receiver commit: {error}"))
+    .map_err(|error| error.with_prefix("resolve receiver commit: "))
 }
 
 pub(super) fn build(
@@ -35,7 +35,7 @@ pub(super) fn build(
     spec: Spec,
     dest: &Path,
     context: &process::Context,
-) -> Result<(PathBuf, Vec<u8>), String> {
+) -> Result<(PathBuf, Vec<u8>), GoText> {
     if spec.module == "browse" {
         browse(root, dest, context)
     } else {
@@ -47,7 +47,7 @@ fn browse(
     root: &Path,
     dest: &Path,
     context: &process::Context,
-) -> Result<(PathBuf, Vec<u8>), String> {
+) -> Result<(PathBuf, Vec<u8>), GoText> {
     let tool = process::lookup("go")
         .map_err(|error| format!("go toolchain not found on PATH: {error}"))?;
     let version = output(
@@ -59,7 +59,7 @@ fn browse(
         TOOL_BUDGET,
         context,
     )
-    .map_err(|error| format!("go version: {error}"))?;
+    .map_err(|error| error.with_prefix("go version: "))?;
     let builder = trim_identity(&version);
     let target = dest.join("symbrowse");
     let mut environment = layout::prepare(context)?.environment;
@@ -80,7 +80,7 @@ fn browse(
         BUILD_BUDGET,
         context,
     )
-    .map_err(|error| format!("go build ./cmd/symbrowse: {error}"))?;
+    .map_err(|error| error.with_prefix("go build ./cmd/symbrowse: "))?;
     Ok((target, builder))
 }
 
@@ -89,7 +89,7 @@ fn swift(
     spec: Spec,
     dest: &Path,
     context: &process::Context,
-) -> Result<(PathBuf, Vec<u8>), String> {
+) -> Result<(PathBuf, Vec<u8>), GoText> {
     let tool = process::lookup("swift")
         .map_err(|error| format!("swift toolchain not found on PATH: {error}"))?;
     let version = output(
@@ -101,7 +101,7 @@ fn swift(
         TOOL_BUDGET,
         context,
     )
-    .map_err(|error| format!("swift --version: {error}"))?;
+    .map_err(|error| error.with_prefix("swift --version: "))?;
     let version = trim_identity(&version);
     let builder = version
         .split(|byte| *byte == b'\n')
@@ -121,7 +121,7 @@ fn swift(
         .map(|base| base.join("swift-scratch").join(spec.module));
     #[cfg(target_os = "macos")]
     if let Some(scratch) = &scratch {
-        layout::mkdir(scratch).map_err(|error| format!("create Swift scratch path: {error}"))?;
+        layout::mkdir(scratch).map_err(|error| error.with_prefix("create Swift scratch path: "))?;
         args.extend([
             OsStr::new("--scratch-path"),
             scratch.as_os_str(),
@@ -140,7 +140,7 @@ fn swift(
         BUILD_BUDGET,
         context,
     )
-    .map_err(|error| format!("swift build ({}): {error}", spec.module))?;
+    .map_err(|error| error.with_prefix(&format!("swift build ({}): ", spec.module)))?;
     args.push(OsStr::new("--show-bin-path"));
     let out = output(
         &tool,
@@ -151,30 +151,35 @@ fn swift(
         TOOL_BUDGET,
         context,
     )
-    .map_err(|error| format!("swift build --show-bin-path ({}): {error}", spec.module))?;
-    let built = PathBuf::from(String::from_utf8_lossy(&out).trim()).join(spec.binary);
+    .map_err(|error| {
+        error.with_prefix(&format!("swift build --show-bin-path ({}): ", spec.module))
+    })?;
+    #[cfg(unix)]
+    let built = {
+        use std::os::unix::ffi::OsStringExt;
+        PathBuf::from(std::ffi::OsString::from_vec(
+            super::text::trim_space(&out).to_vec(),
+        ))
+    };
+    #[cfg(not(unix))]
+    let built = PathBuf::from(String::from_utf8_lossy(super::text::trim_space(&out)).as_ref());
+    let built = built.join(spec.binary);
     std::fs::metadata(&built).map_err(|error| {
-        format!(
-            "expected built binary {}: stat {}: {}",
-            built.display(),
-            built.display(),
-            format_io_error(&error)
-        )
+        let mut message = GoText::path("expected built binary ", &built, ": stat ");
+        message.push(&symbrain_core::config::os_bytes(built.as_os_str()));
+        message.with_suffix(format!(": {}", format_io_error(&error)).as_bytes())
     })?;
     let bytes = std::fs::read(&built).map_err(|error| {
-        format!(
-            "read built binary {}: open {}: {}",
-            built.display(),
-            built.display(),
-            format_io_error(&error)
-        )
+        let mut message = GoText::path("read built binary ", &built, ": open ");
+        message.push(&symbrain_core::config::os_bytes(built.as_os_str()));
+        message.with_suffix(format!(": {}", format_io_error(&error)).as_bytes())
     })?;
     let target = dest.join(spec.binary);
     std::fs::write(&target, bytes).map_err(|error| {
-        format!(
-            "stage built binary: open {}: {}",
-            target.display(),
-            format_io_error(&error)
+        GoText::path(
+            "stage built binary: open ",
+            &target,
+            &format!(": {}", format_io_error(&error)),
         )
     })?;
     #[cfg(unix)]
@@ -195,7 +200,7 @@ fn output(
     combined: bool,
     budget: Duration,
     context: &process::Context,
-) -> Result<Vec<u8>, String> {
+) -> Result<Vec<u8>, GoText> {
     let out = process::run(
         executable,
         args,
@@ -207,16 +212,18 @@ fn output(
     )
     .map_err(|error| {
         if combined {
-            format!("{error}\n")
+            error.with_suffix(b"\n")
         } else {
             error
         }
     })?;
     if let Some(error) = out.error {
         return Err(if combined {
-            format!("{error}\n{}", String::from_utf8_lossy(&out.bytes))
+            GoText::from(error)
+                .with_suffix(b"\n")
+                .with_suffix(&out.bytes)
         } else {
-            error
+            error.into()
         });
     }
     Ok(out.bytes)

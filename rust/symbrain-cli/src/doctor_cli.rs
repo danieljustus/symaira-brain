@@ -1,7 +1,11 @@
 use std::ffi::OsString;
 use std::io::Write;
 
-use symbrain_core::{exit, output::OutputFormat};
+use symbrain_core::{
+    config::{format_go_quoted_bytes, os_bytes},
+    exit,
+    output::OutputFormat,
+};
 
 const DOCTOR_USAGE: &str = "Usage of doctor:\n  -fix\n    \trepair missing or version-mismatched managed binaries\n  -force-release\n    \twith --fix: allow replacing a brain-source build with the pinned release download\n  -json\n    \temit machine-readable JSON\n  -vault-agent string\n    \tvault agent name for MCP handshake probe (default \"claude-code\")\n";
 
@@ -75,28 +79,37 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<DoctorArgs, u
     let normalized = crate::normalize_flags(args);
     let mut i = 0;
     while i < normalized.len() {
-        let arg = normalized[i].to_string_lossy();
-        if arg == "--" {
+        let arg = os_bytes(&normalized[i]);
+        if arg.as_ref() == b"--" {
             break;
         }
-        if !arg.starts_with('-') || arg == "-" {
+        if !arg.starts_with(b"-") || arg.as_ref() == b"-" {
             break;
         }
-        let flag = arg.trim_start_matches('-');
+        let flag = arg.strip_prefix(b"--").unwrap_or(&arg[1..]);
         let (name, inline) = flag
-            .split_once('=')
-            .map_or((flag, None), |(n, v)| (n, Some(v)));
+            .iter()
+            .position(|byte| *byte == b'=')
+            .map_or((flag, None), |at| (&flag[..at], Some(&flag[at + 1..])));
+        if name.is_empty() || name.starts_with(b"-") || name.starts_with(b"=") {
+            let _ = stderr.write_all(b"bad flag syntax: ");
+            let _ = stderr.write_all(&arg);
+            let _ = write!(stderr, "\n{DOCTOR_USAGE}");
+            return Err(exit::USAGE);
+        }
         match name {
-            "json" => parsed.json = parse_bool_flag(name, inline, stderr)?,
-            "force-release" => {
+            b"json" => parsed.json = parse_bool_flag(name, inline, stderr)?,
+            b"force-release" => {
                 parsed.force_release = parse_bool_flag(name, inline, stderr)?;
             }
-            "fix" => parsed.fix = parse_bool_flag(name, inline, stderr)?,
-            "vault-agent" => {
-                let value = inline.map(str::to_owned).or_else(|| {
-                    i += 1;
-                    normalized.get(i).map(|v| v.to_string_lossy().into_owned())
-                });
+            b"fix" => parsed.fix = parse_bool_flag(name, inline, stderr)?,
+            b"vault-agent" => {
+                let value = inline
+                    .map(|bytes| String::from_utf8_lossy(bytes).into_owned())
+                    .or_else(|| {
+                        i += 1;
+                        normalized.get(i).map(|v| v.to_string_lossy().into_owned())
+                    });
                 let Some(value) = value else {
                     // Go's flag package prints the parse error and then the
                     // whole flag set usage for a missing value argument.
@@ -106,12 +119,14 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<DoctorArgs, u
                 };
                 parsed.vault_agent = value;
             }
-            "h" | "help" => {
+            b"h" | b"help" => {
                 let _ = write!(stderr, "{DOCTOR_USAGE}");
                 return Err(exit::USAGE);
             }
             _ => {
-                let _ = writeln!(stderr, "flag provided but not defined: -{name}");
+                let _ = stderr.write_all(b"flag provided but not defined: -");
+                let _ = stderr.write_all(name);
+                let _ = stderr.write_all(b"\n");
                 let _ = write!(stderr, "{DOCTOR_USAGE}");
                 return Err(exit::USAGE);
             }
@@ -121,16 +136,18 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<DoctorArgs, u
     Ok(parsed)
 }
 
-fn parse_bool_flag(name: &str, value: Option<&str>, stderr: &mut dyn Write) -> Result<bool, u8> {
+fn parse_bool_flag(name: &[u8], value: Option<&[u8]>, stderr: &mut dyn Write) -> Result<bool, u8> {
     let Some(value) = value else { return Ok(true) };
-    crate::setup_cli::parse_go_bool(value).map_err(|()| {
-        let _ = writeln!(
-            stderr,
-            "invalid boolean value {value:?} for -{name}: parse error"
-        );
-        let _ = write!(stderr, "{DOCTOR_USAGE}");
-        exit::USAGE
-    })
+    std::str::from_utf8(value)
+        .ok()
+        .and_then(|text| crate::setup_cli::parse_go_bool(text).ok())
+        .ok_or_else(|| {
+            let quoted = format_go_quoted_bytes(value);
+            let _ = write!(stderr, "invalid boolean value {quoted} for -");
+            let _ = stderr.write_all(name);
+            let _ = write!(stderr, ": parse error\n{DOCTOR_USAGE}");
+            exit::USAGE
+        })
 }
 
 #[cfg(test)]

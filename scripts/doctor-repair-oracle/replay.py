@@ -113,7 +113,7 @@ def log_contract(stderr, root, started, ended):
     for line in data.splitlines(keepends=True):
         match = re.match(rb"^(\d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}) (INFO|WARN|ERROR) (.*)\n$",line)
         if not match:
-            final.append(line.decode("utf-8"))
+            final.append(base64.b64encode(line).decode("ascii"))
             finished = True
             continue
         parsed = time.strptime(match[1].decode(),"%Y/%m/%d %H:%M:%S")
@@ -126,14 +126,14 @@ def log_contract(stderr, root, started, ended):
         if core:
             assert not finished, "core event follows completion"
             assert core[1].decode() in legacy._managed_cores(), "unknown logged core"
-            groups.setdefault(core[1].decode(),[]).append(body.decode("utf-8"))
+            groups.setdefault(core[1].decode(),[]).append(base64.b64encode(body).decode("ascii"))
         else:
             assert body.startswith(b"INFO doctor --fix complete "), "unattributed event"
             finished = True
-            final.append(body.decode("utf-8"))
+            final.append(base64.b64encode(body).decode("ascii"))
     # Go ActiveCores is a map. Its core order varies in real processes, while
     # each core's sequence, every attribute, and the completion tail are exact.
-    return {"cores":groups,"tail":final}
+    return {"encoding":"base64 exact line bytes","cores":groups,"tail":final}
 
 
 def observe(binary, case, root, probe, go, control=None):

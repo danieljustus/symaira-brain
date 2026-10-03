@@ -12,6 +12,9 @@ use sha2::{Digest, Sha256};
 
 use crate::{Core, ManagedError};
 
+#[path = "provenance_read.rs"]
+mod reader;
+
 #[path = "provenance_json.rs"]
 pub(super) mod json;
 #[path = "provenance_time.rs"]
@@ -41,15 +44,10 @@ pub struct SourceRecord {
 /// leave the binary untouched on error unless force-release was explicit.
 pub fn read_provenance(bin_dir: &Path, binary_name: &str) -> Result<Option<SourceRecord>, String> {
     let path = bin_dir.join(format!("{binary_name}.provenance.json"));
-    let bytes = match std::fs::read(&path) {
+    let bytes = match reader::read(&path) {
         Ok(bytes) => bytes,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
-        Err(error) => {
-            let operation = if error.kind() == std::io::ErrorKind::IsADirectory {
-                "read"
-            } else {
-                "open"
-            };
+        Err((_, error)) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err((operation, error)) => {
             return Err(format!(
                 "managed: read provenance: {operation} {}: {}",
                 path.display(),
@@ -188,11 +186,13 @@ pub(super) fn write_record(
         };
         #[cfg(not(unix))]
         let detail = go_io_error(&error.error);
-        ManagedError::Context(format!(
-            "managed: rename provenance: rename {} {}: {detail}",
-            error.file.path().display(),
-            target.display()
-        ))
+        let mut message = crate::GoText::path(
+            "managed: rename provenance: rename ",
+            error.file.path(),
+            " ",
+        );
+        message.push(&symbrain_core::config::os_bytes(target.as_os_str()));
+        ManagedError::RawContext(message.with_suffix(format!(": {detail}").as_bytes()))
     })?;
     Ok(())
 }

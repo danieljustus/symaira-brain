@@ -277,11 +277,10 @@ pub fn atomic_install(bin_dir: &Path, binary_name: &str, data: &[u8]) -> Result<
         };
         #[cfg(not(unix))]
         let detail = crate::format_io_error(&error.error);
-        ManagedError::Context(format!(
-            "atomic install: rename: rename {} {}: {detail}",
-            error.file.path().display(),
-            target.display()
-        ))
+        let mut message =
+            crate::GoText::path("atomic install: rename: rename ", error.file.path(), " ");
+        message.push(&symbrain_core::config::os_bytes(target.as_os_str()));
+        ManagedError::RawContext(message.with_suffix(format!(": {detail}").as_bytes()))
     })?;
     Ok(())
 }

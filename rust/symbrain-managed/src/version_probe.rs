@@ -44,10 +44,10 @@ pub fn installed_version(bin_dir: &Path, binary_name: &str) -> Result<String, Ma
         .stderr(Stdio::null());
     configure_probe_process(&mut command);
     let mut child = command.spawn().map_err(|error| {
-        ManagedError::Context(format!(
-            "probe {binary_name}: fork/exec {}: {}",
-            path.display(),
-            crate::provenance::go_io_error(&error)
+        ManagedError::RawContext(crate::GoText::path(
+            &format!("probe {binary_name}: fork/exec "),
+            &path,
+            &format!(": {}", crate::provenance::go_io_error(&error)),
         ))
     })?;
     let process_group = child.id();

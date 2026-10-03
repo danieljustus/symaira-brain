@@ -52,7 +52,7 @@ struct Report {
     root: Box<serde_json::value::RawValue>,
     results: Vec<ResultRow>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    errors: Vec<String>,
+    errors: Vec<symbrain_managed::GoText>,
 }
 
 impl Report {
@@ -79,8 +79,8 @@ struct ResultRow {
     receiver_commit: String,
     #[serde(skip_serializing_if = "String::is_empty")]
     binary_sha256: String,
-    #[serde(skip_serializing_if = "String::is_empty")]
-    error: String,
+    #[serde(skip_serializing_if = "symbrain_managed::GoText::is_empty")]
+    error: symbrain_managed::GoText,
 }
 
 pub(super) fn valid_root(root: &OsStr) -> bool {
@@ -179,7 +179,7 @@ pub(super) fn run(
     };
     let mut report = match Report::new(bin_dir, &root) {
         Ok(report) => report,
-        Err(error) => return failed(stderr, &format!("encode JSON: {error}"), exit::GENERIC),
+        Err(error) => return failed(stderr, format!("encode JSON: {error}"), exit::GENERIC),
     };
     for spec in specs {
         let mut result = ResultRow {
@@ -216,11 +216,17 @@ pub(super) fn run(
                 result.status = "error";
                 // Go keeps the explanatory prefix in the row, but aggregates the underlying probe error.
                 let aggregate = error
-                    .strip_prefix("installed but version probe failed: ")
-                    .unwrap_or(&error);
-                report.errors.push(format!("{}: {aggregate}", spec.module));
+                    .as_ref()
+                    .strip_prefix(b"installed but version probe failed: ")
+                    .unwrap_or(error.as_ref());
+                report.errors.push(
+                    symbrain_managed::GoText::from(aggregate.to_vec())
+                        .with_prefix(&format!("{}: ", spec.module)),
+                );
                 if !json && build_error {
-                    let _ = writeln!(stderr, "  ✗  {}: {error}", spec.binary);
+                    let _ = write!(stderr, "  ✗  {}: ", spec.binary);
+                    let _ = stderr.write_all(error.as_ref());
+                    let _ = stderr.write_all(b"\n");
                 }
                 result.error = error;
             }
@@ -233,7 +239,7 @@ pub(super) fn run(
             .map_err(std::io::Error::other)
             .and_then(|text| writeln!(stdout, "{text}"))
         {
-            return failed(stderr, &format!("encode JSON: {error}"), exit::GENERIC);
+            return failed(stderr, format!("encode JSON: {error}"), exit::GENERIC);
         }
     } else {
         let _ = stdout.write_all(b"\nInstalled to ");
@@ -254,7 +260,7 @@ fn install(
     commit: &str,
     layout: &layout::Layout,
     context: &process::Context,
-) -> Result<(String, String), (String, bool)> {
+) -> Result<(String, String), (symbrain_managed::GoText, bool)> {
     let parent = layout.temp.clone().unwrap_or_else(std::env::temp_dir);
     let temp = temp::stage(&parent).map_err(|error| (error, false))?;
     let (binary, builder) =
@@ -266,10 +272,10 @@ fn install(
             "open"
         };
         (
-            format!(
-                "{operation} {}: {}",
-                binary.display(),
-                format_io_error(&error)
+            symbrain_managed::GoText::path(
+                &format!("{operation} "),
+                &binary,
+                &format!(": {}", format_io_error(&error)),
             ),
             false,
         )
@@ -284,11 +290,13 @@ fn install(
             builder: &builder,
         },
     )
-    .map_err(|error| (error.to_string(), false))?;
+    .map_err(|error| (error.into_go_text(), false))?;
     drop(temp);
     let version = installed_version(bin_dir, spec.binary).map_err(|error| {
         (
-            format!("installed but version probe failed: {error}"),
+            error
+                .into_go_text()
+                .with_prefix("installed but version probe failed: "),
             false,
         )
     })?;
@@ -299,8 +307,10 @@ fn install(
     Ok((version, hash))
 }
 
-fn failed(stderr: &mut dyn Write, error: &str, code: u8) -> u8 {
-    let _ = writeln!(stderr, "symbrain setup --from-source: {error}");
+fn failed(stderr: &mut dyn Write, error: impl AsRef<[u8]>, code: u8) -> u8 {
+    let _ = stderr.write_all(b"symbrain setup --from-source: ");
+    let _ = stderr.write_all(error.as_ref());
+    let _ = stderr.write_all(b"\n");
     code
 }
 

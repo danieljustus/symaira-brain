@@ -1,6 +1,6 @@
 //! Separate control capture from the unchanged worker staging/temp contract.
 use std::path::{Path, PathBuf};
-use symbrain_managed::format_io_error;
+use symbrain_managed::{GoText, format_io_error};
 
 pub(super) fn capture() -> Result<tempfile::NamedTempFile, String> {
     let requested = std::env::temp_dir();
@@ -39,7 +39,7 @@ impl Drop for Stage {
     }
 }
 
-pub(super) fn stage(parent: &Path) -> Result<Stage, String> {
+pub(super) fn stage(parent: &Path) -> Result<Stage, GoText> {
     let mut detail = None;
     // Builder supplies random names and collision retries; Stage alone owns
     // directory cleanup (the generic TempPath file cleanup is disabled).
@@ -73,17 +73,25 @@ pub(super) fn stage(parent: &Path) -> Result<Stage, String> {
                     detail = Some(if error.kind() == std::io::ErrorKind::NotFound {
                         match std::fs::metadata(parent) {
                             Err(stat) if stat.kind() == std::io::ErrorKind::NotFound => {
-                                format!("stat {}: {}", parent.display(), format_io_error(&stat))
+                                GoText::path(
+                                    "stat ",
+                                    parent,
+                                    &format!(": {}", format_io_error(&stat)),
+                                )
                             }
-                            _ => format!("mkdir {}: {}", path.display(), format_io_error(&error)),
+                            _ => GoText::path(
+                                "mkdir ",
+                                &path,
+                                &format!(": {}", format_io_error(&error)),
+                            ),
                         }
                     } else {
-                        format!("mkdir {}: {}", path.display(), format_io_error(&error))
+                        GoText::path("mkdir ", &path, &format!(": {}", format_io_error(&error)))
                     });
                     Err(error)
                 }
             }
         })
         .map(|temp| temp.into_parts().0)
-        .map_err(|error| detail.unwrap_or_else(|| format_io_error(&error)))
+        .map_err(|error| detail.unwrap_or_else(|| format_io_error(&error).into()))
 }

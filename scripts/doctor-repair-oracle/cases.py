@@ -105,6 +105,19 @@ def cases():
                    Case("terminator",args=("doctor","--fix","--","--force-release")),
                    Case("positional",args=("doctor","--fix","positional","--force-release")),
                    Case("legacy-single-dash",args=("doctor","-fix","-force-release=false"))))
+    for name,args in (
+        ("excess-dash-fix",("doctor","----fix")),
+        ("excess-dash-json",("doctor","--fix","----json")),
+        ("excess-dash-force",("doctor","--fix","----force-release")),
+        ("bad-flag-syntax",("doctor","--fix","--=bad")),
+        ("valid-triple-force",("doctor","--fix","---force-release"))):
+        result.append(Case(name,args=args,version=b'{"version":"0.0.0"}',
+                           provenance=b'{"source":"brain-source"}',verifier=True))
+    if __import__('os').name!='nt':
+        raw=__import__('os').fsdecode(b'bad\xff\xe2\x82')
+        for flag in ("fix","force-release","json"):
+            result.append(Case("raw-bool-"+flag,args=("doctor","--fix","--"+flag+"="+raw)))
+        result.append(Case("raw-unknown-flag",args=("doctor","--fix","--"+raw)))
     result.extend((
         Case("verified-repair-missing", all_missing=True, verifier=True),
         Case("verified-repair-mismatch", version=b'{"version":"0.0.0"}', verifier=True),

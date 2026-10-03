@@ -61,11 +61,9 @@ pub fn install_source(
         };
         #[cfg(not(unix))]
         let detail = crate::format_io_error(&error);
-        ManagedError::Context(format!(
-            "managed: mkdir {}: mkdir {}: {detail}",
-            bin_dir.display(),
-            bin_dir.display()
-        ))
+        let mut message = crate::GoText::path("managed: mkdir ", bin_dir, ": mkdir ");
+        message.push(&symbrain_core::config::os_bytes(bin_dir.as_os_str()));
+        ManagedError::RawContext(message.with_suffix(format!(": {detail}").as_bytes()))
     })?;
     atomic_install(bin_dir, binary_name, binary)?;
     let record = Provenance {
@@ -86,8 +84,10 @@ pub fn install_source(
         binary_sha256: format!("{:x}", Sha256::digest(binary)),
     };
     crate::provenance::write_record(bin_dir, binary_name, &record).map_err(|error| {
-        ManagedError::Context(format!(
-            "managed: record provenance for {binary_name}: {error}"
-        ))
+        ManagedError::RawContext(
+            error
+                .into_go_text()
+                .with_prefix(&format!("managed: record provenance for {binary_name}: ")),
+        )
     })
 }
