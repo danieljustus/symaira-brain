@@ -112,10 +112,10 @@ fn copilot_kimi_oracle_matches_fresh_go() {
         serde_json::from_slice(&std::fs::read(input).unwrap()).unwrap();
     let records: Vec<serde_json::Value> =
         serde_json::from_slice(&std::fs::read(fixture).expect("Go Copilot/Kimi evidence")).unwrap();
-    assert_eq!(records.len(), 86, "complete Copilot/Kimi corpus");
+    assert_eq!(records.len(), 89, "complete Copilot/Kimi corpus");
     let expected: BTreeSet<_> = input.iter().map(|r| r["id"].as_str().unwrap()).collect();
     let observed: BTreeSet<_> = records.iter().map(|r| r["id"].as_str().unwrap()).collect();
-    assert_eq!(expected.len(), 86, "distinct source cases");
+    assert_eq!(expected.len(), 89, "distinct source cases");
     assert_eq!(observed, expected, "exact Copilot/Kimi case coverage");
     let mut full = 0;
     let mut gated = 0;
@@ -170,8 +170,95 @@ fn copilot_kimi_oracle_matches_fresh_go() {
             );
         }
     }
-    assert_eq!(gated, if cfg!(windows) { 6 } else { 5 });
+    assert_eq!(gated, if cfg!(windows) { 9 } else { 8 });
+    baseline_routes(&input);
     if let Ok(path) = std::env::var("USAGE_COPILOT_KIMI_NATIVE") {
-        std::fs::write(path,serde_json::to_vec_pretty(&serde_json::json!({"cases":86,"passed":86,"failed":0,"full_reports":full,"gated":gated})).unwrap()).unwrap();
+        std::fs::write(path,serde_json::to_vec_pretty(&serde_json::json!({"cases":89,"passed":89,"failed":0,"full_reports":full,"gated":gated})).unwrap()).unwrap();
     }
+}
+
+// Original cases outside this increment get routing proof, not full native parity.
+fn baseline_routes(current: &[serde_json::Value]) {
+    let input = std::env::var("USAGE_LOCAL_INPUT").expect("original 97-case input");
+    let original: Vec<serde_json::Value> =
+        serde_json::from_slice(&std::fs::read(input).unwrap()).unwrap();
+    let oracle = std::env::var("USAGE_LOCAL_OUTPUT").expect("fresh original Go baseline");
+    let oracle: serde_json::Value =
+        serde_json::from_slice(&std::fs::read(oracle).unwrap()).unwrap();
+    let records = oracle["records"].as_array().unwrap();
+    assert_eq!(original.len(), 97);
+    assert_eq!(records.len(), 97);
+    let ids: BTreeSet<_> = original.iter().map(|r| r["id"].as_str().unwrap()).collect();
+    assert_eq!(ids.len(), 97);
+    assert_eq!(
+        ids,
+        records.iter().map(|r| r["id"].as_str().unwrap()).collect()
+    );
+    let mut mapping = Vec::new();
+    let mut retained = 0;
+    for source in &original {
+        let id = source["id"].as_str().unwrap();
+        if let Some(row) = current.iter().find(|r| r["id"] == source["id"]) {
+            for field in ["id", "provider", "files", "env", "home_mode"] {
+                assert_eq!(
+                    source[field], row[field],
+                    "{id}: exact retained original input"
+                );
+            }
+            retained += 1;
+            continue;
+        }
+        let record = records.iter().find(|r| r["id"] == source["id"]).unwrap();
+        prepare(record);
+        let before: BTreeMap<_, _> = record["file_sha256"]
+            .as_object()
+            .unwrap()
+            .iter()
+            .map(|(path, hash)| {
+                let bytes = std::fs::read(path).unwrap();
+                assert_eq!(
+                    format!("{:x}", Sha256::digest(&bytes)),
+                    hash.as_str().unwrap()
+                );
+                (path, bytes)
+            })
+            .collect();
+        let family = if id.contains("-base-") {
+            "custom base: existing bounded URL contract"
+        } else if id.contains("-workspace-") {
+            "workspace: existing cookie-dependent contract"
+        } else {
+            assert!(
+                id.starts_with("nous-jwt-"),
+                "{id}: explicitly mapped family"
+            );
+            "JWT expiry: existing architecture gate or missing/expired credential"
+        };
+        let expected = (id.contains("-base-") && !id.ends_with("-public-prefix"))
+            || [
+                "opencode-workspace-hyphen",
+                "opencode-workspace-unicode",
+                "opencode-workspace-slash",
+                "nous-jwt-overflow-positive",
+                "nous-jwt-overflow-negative",
+                "nous-jwt-upper-i64-boundary",
+            ]
+            .contains(&id);
+        let actual = super::needs_go_fallback();
+        assert_eq!(actual, expected, "{id}: original remaining route contract");
+        for (path, bytes) in before {
+            assert_eq!(
+                std::fs::read(path).unwrap(),
+                bytes,
+                "{id}: original route read-only"
+            );
+        }
+        mapping.push(serde_json::json!({"id":id, "provider":source["provider"],
+            "family":family, "needs_go_fallback":actual, "read_only":true,
+            "proof":"fresh original Go constructor plus native eligibility only; no full native report/request parity assertion"}));
+    }
+    assert_eq!(retained, 66);
+    assert_eq!(mapping.len(), 31);
+    let output = std::env::var("USAGE_COPILOT_KIMI_BASELINE_NATIVE").unwrap();
+    std::fs::write(output, serde_json::to_vec_pretty(&mapping).unwrap()).unwrap();
 }

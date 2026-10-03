@@ -42,10 +42,10 @@ remain. Host ACL and Windows root-confinement proof are not inferred from mocks.
 
 ## Evidence requirements and limits
 
-Retain66 file inputs from the original97 baseline and append20 actual-Go cases:
+Retain66 file inputs from the original97 baseline and append23 actual-Go cases:
 wrong known types, duplicate-map replacement, null/array roots, ignored refresh
 metadata, literal references, exact10000/10001 depth boundaries,65536/65537 size
-boundaries and credential-resolution error priority. The native gate requires86
+boundaries and credential-resolution error priority. The native gate requires89
 distinct cases, full reports/complete request byte comparison for81 eligible
 Linux/macOS cases (80 on Windows), read-only checks for every input, and explicit
 retained eligibility checks for the remainder. It never counts those gates as
@@ -65,3 +65,33 @@ three complete accepted parent process gates on one clean source, ordinary
 all-features CLI/Usage tests, strict Clippy/fmt and native CI syntax checks. Native
 macOS/Windows exact-candidate CI and independent review remain required. Linux
 validation and authorship do not establish approval or full #768 completion.
+
+
+Every original97 input is accounted for individually in `original_97_accounting`.
+The unchanged original generator and supplemental Go helper are replayed again:
+97 actual Go constructors, full reports, request/header bytes and read-only homes.
+The66 retained inputs must match every original field exactly. The other31
+(seven Kimi bases, twelve Nous base/expiry inputs, seven OpenRouter bases and five
+OpenCode workspace inputs) receive fresh native eligibility/read-only probes.
+Their mapping names the existing URL/workspace/expiry contract and actual gate;
+these31 routing observations do not claim full native constructor parity. The
+original receipt and four baseline sources are verified by SHA and against
+original Git history; frozen Copilot/Kimi fixture bytes also remain unchanged.
+
+Internal ASCII control characters in Copilot/Kimi file tokens now retain Go,
+even when a canned transport accepts the raw request. Three additional actual
+Go cases cover Copilot CRLF token, Kimi LF token and internal-LF device ID.
+The new corpus totals89:81 full native comparisons and eight eligibility gates
+on Linux/macOS,80 full comparisons and nine gates on Windows. Custom401 request
+capture bypasses real HTTP header validation. Actual CLI positive requests and
+non-ASCII token HTTP-stack behavior are not proved by that capture; the CLI
+checks only invalid-flag routing and credential-free reports. Raw header bytes
+remain preserved, including gated non-UTF8 device values. Existing numeric
+out-of-range and native Windows HOME gates stay explicit. No host-Keychain or
+full #768 cutover follows from these process seams.
+
+The original ordinary-suite failure for the old bare-GitHub priority fixture is
+retained byte-for-byte under
+`migration/evidence/usage-copilot-kimi-768/original-unit-failure/`, including its
+real64-pass/one-failure/two-ignored result. Correcting the deterministic fixture
+to the literal colon prefix does not rewrite frozen or original Go evidence.

@@ -51,8 +51,8 @@ func TestUsageCopilotKimi768(t *testing.T) {
 	if err = json.Unmarshal(data, &cases); err != nil {
 		t.Fatal(err)
 	}
-	if len(cases) != 86 {
-		t.Fatal("complete 86-case Go corpus required")
+	if len(cases) != 89 {
+		t.Fatal("complete 89-case Go corpus required")
 	}
 	records := []any{}
 	for _, entry := range cases {

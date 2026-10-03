@@ -13,7 +13,7 @@ for name in ['fixture','go_binary','rust_binary','output']:parser.add_argument(n
 parser.add_argument('--control',choices=['exit','missing-case'])
 args=parser.parse_args()
 rows=json.loads(args.fixture.read_text())
-assert len(rows)==86 and len({row['id']for row in rows})==86,'exact Copilot/Kimi corpus'
+assert len(rows)==89 and len({row['id']for row in rows})==89,'exact Copilot/Kimi corpus'
 rows=[row for row in rows if not row['gated']]
 assert len(rows)==(80 if os.name=='nt'else 81),'complete conservative file subset'
 missing=[row for row in rows if not row['report']['providers'][0]['configured']]

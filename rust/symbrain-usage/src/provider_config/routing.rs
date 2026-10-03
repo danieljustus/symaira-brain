@@ -36,7 +36,9 @@ pub fn needs_go_fallback() -> bool {
     }
     // Both successful and failed environment resolution preempt file selection.
     if env_raw("COPILOT_ACCESS_TOKEN").is_none()
-        && copilot_file_token_candidate_in(&copilot_config_dir()).is_err()
+        && copilot_file_token_candidate_in(&copilot_config_dir()).map_or(true, |token| {
+            token.is_some_and(|value| value.bytes().any(|byte| byte.is_ascii_control()))
+        })
     {
         return true;
     }
@@ -55,7 +57,11 @@ pub fn needs_go_fallback() -> bool {
     }
     let kimi_path = kimi_cli_home().join("credentials/kimi-code.json");
     let kimi_cli = kimi_file_token_candidate(&kimi_path);
-    if kimi_file_requires_go(&kimi_path) {
+    if kimi_file_requires_go(&kimi_path)
+        || kimi_cli
+            .as_ref()
+            .is_some_and(|token| token.bytes().any(|byte| byte.is_ascii_control()))
+    {
         return true;
     }
     if !kimi_device_id_is_native(&kimi_cli_home().join("device_id")) {

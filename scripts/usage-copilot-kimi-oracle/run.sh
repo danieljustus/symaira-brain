@@ -17,7 +17,7 @@ evidence_dir="${output%.json}.evidence"
 mkdir -p "$evidence_dir"
 cleanup() {
   stage_exit=$?
-  for receipt in go native input cli controls filesystem; do
+  for receipt in go native input cli controls filesystem baseline-input baseline-go baseline-native; do
     if [[ -f "$scratch/$receipt.json" ]]; then cp "$scratch/$receipt.json" "$evidence_dir/$receipt.json"; fi
   done
   if [[ $stage_exit != 0 ]]; then
@@ -37,19 +37,26 @@ run_stage() {
 }
 cd "$repo_root"
 python3 scripts/usage-copilot-kimi-oracle/cases.py "$scratch/input.json"
+python3 scripts/usage-local-files-baseline/cases.py "$scratch/baseline-input.json"
 mkdir -p "$scratch/home"
 export USAGE_COPILOT_KIMI_ORACLE="$scratch/go.json" USAGE_COPILOT_KIMI_NATIVE="$scratch/native.json" USAGE_COPILOT_KIMI_INPUT="$scratch/input.json" USAGE_COPILOT_KIMI_ROOT="$scratch/home"
 if command -v cygpath >/dev/null 2>&1; then
   export USAGE_COPILOT_KIMI_ORACLE=$(cygpath -w "$USAGE_COPILOT_KIMI_ORACLE") USAGE_COPILOT_KIMI_NATIVE=$(cygpath -w "$USAGE_COPILOT_KIMI_NATIVE") USAGE_COPILOT_KIMI_INPUT=$(cygpath -w "$USAGE_COPILOT_KIMI_INPUT") USAGE_COPILOT_KIMI_ROOT=$(cygpath -w "$USAGE_COPILOT_KIMI_ROOT")
 fi
+export USAGE_LOCAL_INPUT="$scratch/baseline-input.json" USAGE_LOCAL_OUTPUT="$scratch/baseline-go.json" USAGE_LOCAL_ROOT="$scratch/baseline-home" USAGE_COPILOT_KIMI_BASELINE_NATIVE="$scratch/baseline-native.json"
+if command -v cygpath >/dev/null 2>&1; then
+  export USAGE_LOCAL_INPUT=$(cygpath -w "$USAGE_LOCAL_INPUT") USAGE_LOCAL_OUTPUT=$(cygpath -w "$USAGE_LOCAL_OUTPUT") USAGE_LOCAL_ROOT=$(cygpath -w "$USAGE_LOCAL_ROOT") USAGE_COPILOT_KIMI_BASELINE_NATIVE=$(cygpath -w "$USAGE_COPILOT_KIMI_BASELINE_NATIVE")
+fi
 oracle_commit=dcddcef0df5789123c7c9a7ebe6e01f10e941f2c
 git -C "$repo_root" worktree add --quiet --detach "$source_root" "$oracle_commit"
 cp "$repo_root/scripts/usage-copilot-kimi-oracle/provider_test.go.txt" "$source_root/internal/usage/oracle_copilot_kimi_768_test.go"
+cp "$repo_root/scripts/usage-local-files-baseline/provider_test.go.txt" "$source_root/internal/usage/oracle_local_files_baseline_768_test.go"
 export GOTOOLCHAIN=go1.26.7 CGO_ENABLED=0
 executable_suffix=$( [[ ${OS:-} == Windows_NT ]] && echo .exe || true )
 run_stage go-build go -C "$source_root" build -trimpath -o "$scratch/go-usage$executable_suffix" ./cmd/symbrain
 run_stage go-constructors go -C "$source_root" test ./internal/usage -run '^TestUsageCopilotKimi768$' -count=1
 git -C "$source_root" diff --exit-code --quiet
+run_stage go-original-baseline go -C "$source_root" test ./internal/usage -run '^TestUsageLocalFilesBaseline768$' -count=1
 run_stage native-constructors cargo test --locked -p symbrain-usage --lib copilot_kimi_oracle_matches_fresh_go -- --ignored --nocapture
 run_stage native-build cargo build --locked -p symbrain-cli
 run_stage cli python3 "$repo_root/scripts/usage-copilot-kimi-oracle/cli.py" "$scratch/go.json" "$scratch/go-usage$executable_suffix" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix" "$scratch/cli.json"

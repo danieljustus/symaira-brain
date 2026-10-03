@@ -53,6 +53,10 @@ for size in (65536, 65537):
     prefix = '{"access_token":"retained","padding":"'
     add('kimi', 'size-'+str(size), {kimi:prefix+'x'*(size-len(prefix)-2)+'"}'})
 add('kimi', 'both-env-errors-missing', {kimi:'{}'}, {'KIMI_CODE_API_KEY':'env://USAGE_LOCAL_FILES_ABSENT','KIMI_AUTH_TOKEN':'env://USAGE_LOCAL_FILES_ABSENT'})
-assert len(cases) == len({row['id']for row in cases}) == 86
+add('copilot', 'newline-token', {copilot+'apps.json': json.dumps({'github.com:a': {'oauth_token':'owned\r\ntoken'}})})
+add('kimi', 'newline-token', {kimi: json.dumps({'access_token':'owned\ntoken'})})
+add('kimi', 'newline-device', {kimi:'{"access_token":"owned"}', '.kimi-code/device_id':'owned\ndevice'})
+for row in cases[-3:]: row['gate'] = 'unproven HTTP control-bearing header value'
+assert len(cases) == len({row['id']for row in cases}) == 89
 pathlib.Path(sys.argv[1]).write_text(json.dumps(cases, indent=2)+'\n')
 print('Copilot/Kimi source-bound cases:', len(cases))
