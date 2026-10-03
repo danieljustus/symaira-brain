@@ -171,21 +171,13 @@ fn copilot_file_token_matches_go_for_native_shapes_and_rejects_unproven_files() 
         }
         let got = copilot_file_token_candidate_in(directory.path());
         let id = case["id"].as_str().expect("case id");
-        if case["rust_candidate"] == true {
-            let expected = case["token"].as_str().expect("Go token");
-            let expected = (!expected.is_empty()).then_some(expected);
-            assert_eq!(got.ok().flatten().as_deref(), expected, "Go case {id}");
-            if case["native_route"] == true {
-                assert_eq!(copilot_file_token_in(directory.path()).as_deref(), expected);
-            }
-        } else if case["native_route"] == true {
-            assert!(
-                got.expect("both Copilot files absent").is_none(),
-                "Go case {id}"
-            );
-            assert!(copilot_file_token_in(directory.path()).is_none());
+        if case["token"].is_null() {
+            assert!(got.is_err(), "distinct Go map tokens remain gated: {id}");
         } else {
-            assert!(got.is_err(), "unproven Go case {id} must stay on Go");
+            let expected = case["token"].as_str().unwrap();
+            let expected = (!expected.is_empty()).then_some(expected);
+            assert_eq!(got.unwrap().as_deref(), expected, "Go case {id}");
+            assert_eq!(copilot_file_token_in(directory.path()).as_deref(), expected);
         }
     }
 }
@@ -258,7 +250,7 @@ fn copilot_token_prefers_the_github_host_entry() {
     write(
         directory.path(),
         "apps.json",
-        r#"{"github.com":{"oauth_token":"github-token"},"other.com":{"oauth_token":"other-token"}}"#,
+        r#"{"github.com:owned":{"oauth_token":"github-token"},"other.com":{"oauth_token":"other-token"}}"#,
     );
     assert_eq!(
         copilot_file_token_in(directory.path()).as_deref(),
@@ -286,7 +278,7 @@ fn copilot_token_reads_hosts_json_after_apps_json() {
 }
 
 #[test]
-fn literal_file_references_and_unproven_sources_keep_go_fallback() {
+fn literal_file_references_are_native_and_other_unproven_sources_keep_go() {
     assert!(!needs_go_fallback_for(&UsageFallbackSignals {
         copilot_file: Some("synthetic-copilot-file"),
         kimi_cli: Some("synthetic-kimi-file"),
@@ -309,7 +301,7 @@ fn literal_file_references_and_unproven_sources_keep_go_fallback() {
                 ..UsageFallbackSignals::default()
             },
         ] {
-            assert!(needs_go_fallback_for(&signals));
+            assert!(!needs_go_fallback_for(&signals));
         }
     }
     assert!(!needs_go_fallback_for(&UsageFallbackSignals {
@@ -384,17 +376,10 @@ fn kimi_file_candidate_matches_only_the_source_bound_native_shapes() {
             fs::remove_file(&path).expect("remove absent-file fixture");
         }
         let candidate = kimi_file_token_candidate(&path);
-        if case["native_route"].as_bool().expect("native route") {
-            assert_eq!(candidate.as_deref(), Some("synthetic-kimi-file-token"));
-            assert_eq!(
-                kimi_store(directory.path()).0.as_deref(),
-                case["token"].as_str(),
-                "production store follows Go for {}",
-                case["id"]
-            );
-        } else {
-            assert!(candidate.is_none(), "{} must remain on Go", case["id"]);
-        }
+        let expected = case["token"].as_str().unwrap();
+        let expected = (!expected.is_empty()).then_some(expected);
+        assert_eq!(candidate.as_deref(), expected, "{}", case["id"]);
+        assert_eq!(kimi_store(directory.path()).0.as_deref(), expected);
     }
 }
 
@@ -662,7 +647,7 @@ fn kimi_device_id_native_gate_accepts_only_absent_or_readable_ascii_files() {
         vec![b'x'; usize::try_from(MAX_CREDENTIAL_FILE_BYTES).expect("file size fits usize") + 1],
     )
     .expect("write oversized device id");
-    assert!(!kimi_device_id_is_native(&path));
+    assert!(kimi_device_id_is_native(&path));
 
     #[cfg(unix)]
     {

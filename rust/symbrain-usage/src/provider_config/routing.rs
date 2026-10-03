@@ -34,9 +34,12 @@ pub fn needs_go_fallback() -> bool {
     if unsupported_base {
         return true;
     }
-    let Ok(copilot_file) = copilot_file_token_candidate_in(&copilot_config_dir()) else {
+    // Both successful and failed environment resolution preempt file selection.
+    if env_raw("COPILOT_ACCESS_TOKEN").is_none()
+        && copilot_file_token_candidate_in(&copilot_config_dir()).is_err()
+    {
         return true;
-    };
+    }
     let claude_file_path = home().join(".claude/.credentials.json");
     let claude_file_token = claude_file_token_in(&claude_file_path);
     if claude_file_requires_go(&claude_file_path) {
@@ -52,7 +55,7 @@ pub fn needs_go_fallback() -> bool {
     }
     let kimi_path = kimi_cli_home().join("credentials/kimi-code.json");
     let kimi_cli = kimi_file_token_candidate(&kimi_path);
-    if path_may_exist(&kimi_path) && kimi_cli.is_none() {
+    if kimi_file_requires_go(&kimi_path) {
         return true;
     }
     if !kimi_device_id_is_native(&kimi_cli_home().join("device_id")) {
@@ -69,7 +72,7 @@ pub fn needs_go_fallback() -> bool {
     }
     needs_go_fallback_for(&UsageFallbackSignals {
         claude_oauth_env: claude_oauth_env.as_deref(),
-        copilot_file: copilot_file.as_deref(),
+        copilot_file: None,
         kimi_cli: kimi_cli.as_deref(),
         claude_file: claude_file_token.as_deref(),
         other_provider_env: false,
@@ -84,7 +87,7 @@ pub fn needs_go_fallback() -> bool {
 }
 
 /// Keeps reports native for the proven portable sources once every configured
-/// source is handled by the same provider constructors. Unproven Copilot/Kimi files
+/// source is handled by the same provider constructors. Distinct eligible Copilot tokens, unsupported file/device access,
 /// and the automatic Claude Keychain source still keep Go in charge.
 #[derive(Clone, Copy, Default)]
 struct UsageFallbackSignals<'a> {
@@ -98,10 +101,10 @@ struct UsageFallbackSignals<'a> {
 }
 
 fn needs_go_fallback_for(signals: &UsageFallbackSignals<'_>) -> bool {
-    // Environment references share the secure source-bound resolver. Claude
-    // and Codex file tokens are literal native inputs; unproven Copilot/Kimi
-    // file references retain their eligibility gate.
-    let credentials = [signals.copilot_file, signals.kimi_cli];
+    // Environment references use the shared resolver; provider-file tokens
+    // remain literal. Ambiguous Copilot entries are gated before this helper.
+    // Copilot and Kimi files are literal token sources, like Go's readers.
+    let _ = (signals.copilot_file, signals.kimi_cli);
     if signals.other_provider_env
         || signals.other_credential_source
         || (signals.local_provider_present
@@ -110,7 +113,7 @@ fn needs_go_fallback_for(signals: &UsageFallbackSignals<'_>) -> bool {
     {
         return true;
     }
-    credentials.into_iter().flatten().any(is_secret_reference)
+    false
 }
 
 /// Whether any Claude Code keychain service name exists, bare or suffixed.

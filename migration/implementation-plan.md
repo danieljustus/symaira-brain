@@ -2060,3 +2060,21 @@ explicitly), and strict all-targets/all-features Clippy/fmt/include-fragments/
 actionlint/diff checks pass. Separate corrected receipts preserve original50
 review files and all92 original input bytes. Final native targets and corrected
 independent review remain required; USE-001/#768 stays open.
+
+## Usage #768 — bounded Copilot/Kimi file successor, 2026-10-03
+
+Normal integration retains independently approved parentfdfea204 and original97
+Go-only baseline. All112 native ELF paths/74 unique binaries are archived by hash
+before reusing the released Files target in the successor worktree. Copilot uses
+ordered root replacement/typed-entry semantics, apps-before-hosts and the exact
+`github.com:` pass; distinct eligible tokens remain Go-gated. Kimi follows typed
+access-token/null/error semantics with unchanged home/strategy precedence. File
+references remain literal. Both use the shared bounded reader/depth guard;
+unreadable/unsafe sources, unproven devices and existing platform/config/host
+gates remain. New86-input process coverage preserves66 original baseline file
+inputs and adds20 cases. Require81 full comparisons/five gates on Linux/macOS,
+80/six on Windows, all read-only checks, private CLI bytes and five actual failing
+controls plus the three full parent process gates on clean final source. The
+initial WIP constructor/CLI gate passes81/111/five on Linux; final clean source
+validation and native target evidence remain required. No full USE-001/#768
+closure follows. See `docs/adr/usage-copilot-kimi-files-768.md` for rationale.

@@ -18,10 +18,7 @@ fn kimi_cli_home() -> PathBuf {
 
 /// The CLI's stored access token and device id.
 fn kimi_store(cli_home: &Path) -> (Option<String>, Option<String>) {
-    let token = json_string(
-        &cli_home.join("credentials/kimi-code.json"),
-        &["access_token"],
-    );
+    let token = kimi_file_token_candidate(&cli_home.join("credentials/kimi-code.json"));
     let device_id = read_limited(&cli_home.join("device_id"))
         .and_then(|data| String::from_utf8(data).ok())
         .map(|value| value.trim().to_owned())
@@ -29,41 +26,33 @@ fn kimi_store(cli_home: &Path) -> (Option<String>, Option<String>) {
     (token, device_id)
 }
 
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-struct KimiCredentialCandidate {
-    #[serde(rename = "access_token")]
-    access_token: Option<String>,
-    #[serde(rename = "refresh_token")]
-    _refresh_token: Option<String>,
+fn kimi_file_token_candidate(path: &Path) -> Option<String> {
+    let text = go_json_compatible_text(&read_provider_credentials(path)?);
+    go_json_credential_limits(&text, false)
+        .then(|| decode_typed_credential(&text, "access_token"))
+        .flatten()
 }
 
-/// Return only the deterministic subset of the Go Kimi file parser: the
-/// canonical field spelling, without duplicate JSON keys, case aliases,
-/// unknown fields, or secret refs.
-fn kimi_file_token_candidate(path: &Path) -> Option<String> {
-    let data = read_limited(path)?;
-    let candidate: KimiCredentialCandidate = serde_json::from_slice(&data).ok()?;
-    candidate
-        .access_token
-        .filter(|token| !token.is_empty() && !is_secret_reference(token))
+// Invalid regular JSON is native missing credentials. Keep unsupported file
+// access on Go until its own source-bound filesystem evidence is accepted.
+fn kimi_file_requires_go(path: &Path) -> bool {
+    read_optional_credential_file(path).is_err()
 }
 
 /// The Go Kimi provider converts the device-id file's raw bytes to a string,
 /// while Rust reads UTF-8. Keep existing non-ASCII or unreadable forms on Go
 /// until their header encoding has source-bound parity evidence.
 fn kimi_device_id_is_native(path: &Path) -> bool {
-    if !path_may_exist(path) {
-        return true;
-    }
-    read_limited(path).is_some_and(|bytes| {
-        std::str::from_utf8(&bytes).is_ok_and(|value| {
+    match read_optional_credential_file(path) {
+        Ok(None) => true,
+        Ok(Some(bytes)) => std::str::from_utf8(&bytes).is_ok_and(|value| {
             value
                 .trim()
                 .bytes()
                 .all(|byte| byte == b' ' || byte.is_ascii_graphic())
-        })
-    })
+        }),
+        Err(()) => false,
+    }
 }
 
 fn supported_custom_base(raw: &str) -> bool {

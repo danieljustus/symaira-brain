@@ -874,7 +874,9 @@ fn copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go() {
             .output()
             .unwrap();
         let stderr = String::from_utf8(output.stderr).unwrap();
-        if case["native_route"] == true {
+        // Historical routing flags are preserved; deterministic token results
+        // now have the expanded source-bound native contract.
+        if !case["token"].is_null() {
             assert_eq!(output.status.code(), Some(2), "{id}: {stderr}");
             assert!(
                 stderr.starts_with("flag provided but not defined: -not-a-usage-flag\n"),
@@ -1045,15 +1047,7 @@ fn kimi_default_file_routes_follow_the_source_bound_candidate_contract() {
         let output = command(&root, &["usage", "--not-a-usage-flag"])
             .output()
             .unwrap();
-        if case["file_present"] != true || id == "canonical-with-ignored-refresh-token" {
-            assert_native_usage_parser(output, id);
-        } else {
-            let stderr = String::from_utf8(output.stderr).unwrap();
-            assert!(
-                stderr.contains("not ported yet and no Go fallback was found"),
-                "unproven Kimi case {id} must remain on Go: {stderr}"
-            );
-        }
+        assert_native_usage_parser(output, id);
     }
 }
 

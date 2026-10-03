@@ -11,8 +11,10 @@
 //! or supported home paths. Supported providers may be combined; any unproven
 //! source keeps the report on Go.
 
+#[cfg(test)]
+use super::Value;
 use super::provider_requests::{trusted_https_url, validated_base};
-use super::{AuthStatus, MAX_CREDENTIAL_FILE_BYTES, Provider, Value};
+use super::{AuthStatus, MAX_CREDENTIAL_FILE_BYTES, Provider};
 use serde::de::{IgnoredAny, MapAccess, Visitor};
 use serde::{Deserialize, Deserializer};
 use std::env;
@@ -46,6 +48,7 @@ include!("provider_config/credential_json.rs");
 include!("provider_config/files.rs");
 include!("provider_config/claude_file.rs");
 include!("provider_config/codex_file.rs");
+include!("provider_config/copilot_file.rs");
 include!("provider_config/kimi_nous.rs");
 include!("provider_config/hermes.rs");
 include!("provider_config/jwt.rs");
@@ -62,3 +65,7 @@ mod tests;
 #[cfg(test)]
 #[path = "provider_file_oracle_tests.rs"]
 mod provider_file_oracle_tests;
+
+#[cfg(test)]
+#[path = "copilot_kimi_oracle_tests.rs"]
+mod copilot_kimi_oracle_tests;
