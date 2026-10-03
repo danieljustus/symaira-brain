@@ -2049,3 +2049,14 @@ reference gates on the same clean source, plus355 ordinary tests/strict checks.
 See `docs/adr/usage-hermes-depth-limit-768.md`. These are required gates at this
 checkpoint, not claimed completed results. Native macOS/Windows, host Keychain,
 Copilot/Kimi and other residual USE-001/#768 requirements remain open.
+
+The focused correction's clean source `7bdde611` now passes all three complete
+process gates: Hermes96/104/five controls, provider-files86 (85 full reports and
+one retained ambiguity gate)/151/five controls, references44/110/five controls.
+All53/51/47 source manifests match and44 common entries agree. Exact10000
+outer/claims boundaries are configured;10001 inputs are missing/no request/native
+route. Ordinary355 tests pass (zero failures, three ignored process gates run
+explicitly), and strict all-targets/all-features Clippy/fmt/include-fragments/
+actionlint/diff checks pass. Separate corrected receipts preserve original50
+review files and all92 original input bytes. Final native targets and corrected
+independent review remain required; USE-001/#768 stays open.

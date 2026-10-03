@@ -38,3 +38,23 @@ strict checks before review. Native macOS/Windows evidence remains required;
 Linux results do not establish those targets. The Go-only Copilot/Kimi baseline
 is an independent future lane. No additional credential family or host Keychain
 cutover, full #768 closure or publication follows from this correction.
+
+## Corrected Linux verification
+
+Clean source `7bdde611aef63b1700fed5cbc12d5ce2bafe7a4d` passes all three complete
+process gates: Hermes96 reports/104 CLI/five real rejection controls;
+provider-files86 inputs (85 full comparisons and one retained ambiguity gate)/151
+CLI/five controls; references44 full reports/110 CLI/five controls. All source
+manifests match current bytes and their44 common entries agree. The exact10000
+boundary remains configured with one canned authenticated request; both10001
+cases are missing with no request and require no Go routing fallback.
+
+The ordinary CLI/Usage all-features suite passes355 tests, zero failures and three
+ignored fresh process oracles; all three oracles were explicitly executed above.
+Strict all-targets/all-features Clippy, workspace and included-fragment formatting,
+CI actionlint and diff checks pass. Frozen Go and historical fixture diffs are
+empty. Reports and verification logs are retained separately as
+`migration/evidence/usage-hermes-depth-768/linux-corrected-*`; original5111 proof
+is preserved. The final evidence/documentation commit leaves every validated
+production/comparator manifest hash unchanged. Independent corrected review and
+native macOS/Windows exact-candidate gates remain required.
