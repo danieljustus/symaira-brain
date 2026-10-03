@@ -250,3 +250,14 @@ for example `make GO_ORACLE_REF=<commit> rust-check parity-smoke`.
 
 The SwiftUI applications remain Swift. Their CLI JSON contracts are migration
 inputs, not candidates for translation to Rust.
+
+For #770, Guard CLI handlers now live in the Guard-owned `symguard-cli` crate,
+shared by the Brain compatibility route and an independently buildable native
+`symguard` binary. The standalone graph includes no Brain gateway, broker or
+memory dependencies and cannot invoke Go. The real reachable command inventory
+and remaining doctor/audit diagnostics are recorded in
+`migration/guard-standalone-tree-770.md`; nonexistent planned CLI verbs are not
+invented or treated as retired. The scoped process runner executes 80 actual
+Go/Rust cases, with 76 full matches and four explicitly retained fail-closed
+states/deviations. Native three-OS acceptance, remaining diagnostics and release
+are still pending; #770 stays open. Production Go and frozen fixtures are unchanged.
