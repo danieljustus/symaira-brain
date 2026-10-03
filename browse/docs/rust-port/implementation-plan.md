@@ -217,6 +217,16 @@ redirect/proxy/error coverage and missing production-pipeline integration; the
 existing fixtures are representative slices, not full FETCH-001/003/004/005
 parity. Browser profiles remain on the explicit Go fallback.
 
+**#773 supplement:** Real frozen-Go/native request comparisons now cover honest
+header precedence, request defaults, redirect/body/deadline boundaries, ephemeral
+cookies, explicit/implicit proxy peers and environment routing. Routing-only
+observations are counted separately from HTTP exchanges. Five executable mutants
+must fail; the benchmark preserves exact 30 pairs and unchanged thresholds while
+binding executable identity to clean source/build receipts. See
+[the decision](adr-honest-fetch-control-773.md) and
+`port/evidence/fetch-control-773/`. Native CI and complete pipeline/value parity
+remain pending; matrix rows are fixture-ready rather than full-parity claims.
+
 **Files:**
 
 - Create: `crates/symbrowse-fetch/src/{client,honest,robots,retry,rate_limit}.rs`
