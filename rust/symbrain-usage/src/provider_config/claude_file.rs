@@ -4,7 +4,11 @@ fn claude_file_token() -> Option<String> {
 }
 
 fn claude_accounts(contents: &[u8]) -> Option<std::collections::BTreeMap<String, String>> {
-    let root: CredentialFields = serde_json::from_str(&go_json_compatible_text(contents)).ok()?;
+    let text = go_json_compatible_text(contents);
+    if !go_json_credential_limits(&text, false) {
+        return None;
+    }
+    let root: CredentialFields = serde_json::from_str(&text).ok()?;
     let mut accounts = std::collections::BTreeMap::new();
     for (name, value) in root.0 {
         if !go_json_field_matches(&name, "oauthAccount") {

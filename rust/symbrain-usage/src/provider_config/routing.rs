@@ -98,9 +98,9 @@ struct UsageFallbackSignals<'a> {
 }
 
 fn needs_go_fallback_for(signals: &UsageFallbackSignals<'_>) -> bool {
-    // Environment reference schemes share the source-bound resolver. File
-    // credential values remain literal and retain their existing eligibility
-    // gate until their complete typed-decoder contracts are accepted.
+    // Environment references share the secure source-bound resolver. Claude
+    // and Codex file tokens are literal native inputs; unproven Copilot/Kimi
+    // file references retain their eligibility gate.
     let credentials = [signals.copilot_file, signals.kimi_cli];
     if signals.other_provider_env
         || signals.other_credential_source

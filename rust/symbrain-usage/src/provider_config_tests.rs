@@ -141,26 +141,19 @@ fn claude_file_token_accepts_only_go_equivalent_deterministic_shapes() {
         );
         let got = claude_file_token_in(&path);
         let id = case["id"].as_str().expect("case id");
-        match id {
-            "default-account-precedes-other-accounts"
-            | "single-nondefault-account-is-unambiguous"
-            | "duplicate-account-key-uses-last-token" => {
-                assert_eq!(
-                    got.as_deref(),
-                    case["token"].as_str(),
-                    "safe candidate must match Go case {id}"
-                );
-            }
-            _ => {
-                assert!(
-                    case["token"].is_string() || case["possible_tokens"].is_array(),
-                    "Go oracle case {id} must record an exact token or its normalized choices"
-                );
-                assert!(
-                    got.is_none(),
-                    "unproven Go case {id} must remain on the Go path, got {got:?}"
-                );
-            }
+        if case["possible_tokens"].is_array() {
+            assert!(
+                got.is_none(),
+                "ambiguous account selection stays gated: {id}"
+            );
+            assert!(super::claude_file_requires_go(&path));
+        } else {
+            assert_eq!(
+                got.unwrap_or_default(),
+                case["token"].as_str().unwrap(),
+                "Go case {id}"
+            );
+            assert!(!super::claude_file_requires_go(&path));
         }
     }
 }
@@ -297,7 +290,6 @@ fn literal_file_references_and_unproven_sources_keep_go_fallback() {
     assert!(!needs_go_fallback_for(&UsageFallbackSignals {
         copilot_file: Some("synthetic-copilot-file"),
         kimi_cli: Some("synthetic-kimi-file"),
-        codex_file: Some("synthetic-codex-file"),
         claude_file: Some("synthetic-claude-file"),
         ..UsageFallbackSignals::default()
     }));
@@ -316,18 +308,14 @@ fn literal_file_references_and_unproven_sources_keep_go_fallback() {
                 kimi_cli: Some(reference),
                 ..UsageFallbackSignals::default()
             },
-            UsageFallbackSignals {
-                codex_file: Some(reference),
-                ..UsageFallbackSignals::default()
-            },
-            UsageFallbackSignals {
-                claude_file: Some(reference),
-                ..UsageFallbackSignals::default()
-            },
         ] {
             assert!(needs_go_fallback_for(&signals));
         }
     }
+    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
+        claude_file: Some("symvault://literal-file-token"),
+        ..UsageFallbackSignals::default()
+    }));
     for signals in [
         UsageFallbackSignals {
             other_provider_env: true,

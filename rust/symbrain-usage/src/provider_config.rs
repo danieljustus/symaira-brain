@@ -5,9 +5,10 @@
 //! available texts and the source tag each state reports. Resolution order per
 //! provider is: environment variable (symvault/keychain capable), then the
 //! provider's own credential file, then — Claude on macOS only — the login
-//! keychain. Claude, Codex, Copilot, Kimi CLI, and Hermes files use native
-//! reporting only for proven deterministic shapes at their default or
-//! supported home paths. Supported providers may be combined; any unproven
+//! keychain. Claude and Codex files use Go-compatible native decoding; distinct
+//! nondefault Claude tokens retain Go's unspecified map selection. Copilot,
+//! Kimi CLI, and Hermes sources use their proven native contracts at default
+//! or supported home paths. Supported providers may be combined; any unproven
 //! source keeps the report on Go.
 
 use super::provider_requests::{trusted_https_url, validated_base};
@@ -44,6 +45,7 @@ include!("provider_config/references.rs");
 include!("provider_config/credential_json.rs");
 include!("provider_config/files.rs");
 include!("provider_config/claude_file.rs");
+include!("provider_config/codex_file.rs");
 include!("provider_config/kimi_nous.rs");
 include!("provider_config/hermes.rs");
 include!("provider_config/jwt.rs");
@@ -56,3 +58,7 @@ include!("provider_config/other_accounts.rs");
 #[cfg(test)]
 #[path = "provider_config_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "provider_file_oracle_tests.rs"]
+mod provider_file_oracle_tests;

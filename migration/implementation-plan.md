@@ -2008,3 +2008,28 @@ gate remain required. Native macOS/Windows execution and all other #768 gates
 remain open; Linux evidence alone does not establish those target contracts.
 The decision and pinned Go slice semantics are recorded in
 `docs/adr/usage-hermes-file-jwt-768.md`.
+
+
+## #768: native deterministic Claude/Codex credential files
+
+The isolated provider-files lane preserves its unvalidated checkpoint and merges
+`9b37c53` normally, including original Hermes failure evidence and all 92 repaired
+Hermes cases. Shared reader/ordered-field extraction is private and preserves
+that slice's visible-length/backing-slot distinction.
+
+Claude now follows typed ordered map merging, scalar-null behavior, aliases and
+ignored metadata; distinct nondefault tokens still route to Go. Codex follows
+exact-key generic map replacement, finite float64 validation throughout the file,
+10000-container depth, top-level preference and nested fallback. File reference
+schemes are literal request credentials. CODEX_HOME explicit/empty overrides and
+read-only 64 KiB boundaries are included in fresh actual Go contracts.
+
+Required new proof is 86 source cases (85 full constructor/report/header/no-write
+comparisons and one retained ambiguous gate), 151 real CLI byte/exit comparisons,
+five actual failed replay controls and owned Codex Unix filesystem observations.
+The private constructor injection proves last-source ordering without reading
+operator Keychain items; host inventory/ACL and other #768 gates remain unported.
+All three native CI jobs retain full/partial receipts for 14 days. Re-run the
+92/100/five-control Hermes gate and 44/110/five-control reference gate on the same
+clean source revision because the read-only helper is shared. Decisions and
+limits are recorded in `docs/adr/usage-provider-files-768.md`.

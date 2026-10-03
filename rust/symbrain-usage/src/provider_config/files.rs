@@ -45,25 +45,6 @@ fn codex_home() -> PathBuf {
     env_path("CODEX_HOME", home().join(".codex"))
 }
 
-/// `$CODEX_HOME/auth.json`: a top-level `access_token` or the nested
-/// `tokens.access_token` the newer CLI writes.
-fn codex_file_token(home_dir: &Path) -> Option<String> {
-    let contents = read_provider_credentials(&home_dir.join("auth.json"))?;
-    // Go decodes this file to map[string]any: exact keys, last duplicate wins,
-    // and an overflowing number anywhere invalidates the entire document.
-    let root: Value = serde_json::from_str(&go_json_compatible_text(&contents)).ok()?;
-    root.get("access_token")
-        .and_then(Value::as_str)
-        .filter(|token| !token.is_empty())
-        .or_else(|| {
-            root.get("tokens")?
-                .get("access_token")
-                .and_then(Value::as_str)
-                .filter(|token| !token.is_empty())
-        })
-        .map(Into::into)
-}
-
 fn copilot_config_dir() -> PathBuf {
     copilot_config_dir_for(&home())
 }

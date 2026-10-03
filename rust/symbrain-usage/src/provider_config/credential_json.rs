@@ -44,3 +44,52 @@ impl<'de> Deserialize<'de> for CredentialFields {
         deserializer.deserialize_any(FieldsVisitor)
     }
 }
+
+// Supplement JSON syntax decoding with Go's 10000-container depth limit.
+// Generic map[string]any also converts every number to finite float64; typed
+// credential objects ignore numbers in unknown raw metadata.
+// Scan validated text iteratively so ignored metadata cannot overflow a stack.
+fn go_json_credential_limits(text: &str, convert_numbers: bool) -> bool {
+    let bytes = text.as_bytes();
+    let mut index = 0;
+    let mut depth = 0;
+    let mut quoted = false;
+    while index < bytes.len() {
+        let byte = bytes[index];
+        if quoted {
+            if byte == b'\\' {
+                index += 2;
+                continue;
+            }
+            if byte == b'"' {
+                quoted = false;
+            }
+        } else {
+            match byte {
+                b'"' => quoted = true,
+                b'{' | b'[' => {
+                    depth += 1;
+                    if depth > 10_000 {
+                        return false;
+                    }
+                }
+                b'}' | b']' => depth -= 1,
+                b'-' | b'0'..=b'9' if convert_numbers => {
+                    let start = index;
+                    while index < bytes.len()
+                        && matches!(bytes[index], b'0'..=b'9' | b'-' | b'+' | b'.' | b'e' | b'E')
+                    {
+                        index += 1;
+                    }
+                    if !text[start..index].parse::<f64>().is_ok_and(f64::is_finite) {
+                        return false;
+                    }
+                    continue;
+                }
+                _ => {}
+            }
+        }
+        index += 1;
+    }
+    true
+}

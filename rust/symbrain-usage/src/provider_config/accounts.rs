@@ -4,7 +4,9 @@ fn claude() -> Provider {
 }
 
 // Keep system Keychain access injectable privately, as in the Go constructor.
-fn claude_with_keychain(read_keychain: impl FnOnce() -> Option<(String, SystemTime)>) -> Provider {
+fn claude_with_keychain(
+    read_keychain: impl FnOnce() -> Option<(String, Option<SystemTime>)>,
+) -> Provider {
     let admin = resolve_env("ANTHROPIC_ADMIN_KEY");
     let oauth = resolve_env_or_file("ANTHROPIC_OAUTH_TOKEN", claude_file_token);
     let (admin_value, admin_error) = match admin {
