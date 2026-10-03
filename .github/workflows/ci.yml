@@ -217,6 +217,20 @@ jobs:
           cargo build -p symbrain-cli --bin symbrain --locked
           python3 scripts/mcp-differential.py "$RUNNER_TEMP/symbrain-go-mcp" target/debug/symbrain
 
+      - name: Go/Rust vault administration process parity
+        run: |
+          python3 -m unittest discover -s scripts/vault-admin-oracle -p test_replay.py -v
+          python3 scripts/vault-admin-oracle/replay.py --go-ref dcddcef0df5789123c7c9a7ebe6e01f10e941f2c --rust target/debug/symbrain --out "$RUNNER_TEMP/vault-admin-parity.json"
+
+      - name: Preserve vault process parity evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vault-admin-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/vault-admin-parity.json
+          if-no-files-found: error
+          retention-days: 7
+
   # Keep raw invalid-UTF-8 diagnostics and persisted audit fields pinned to
   # the immutable Go 1.26.7 checkpoint using the real production binaries.
   # native_repair.py also checks the checked-in fixture byte-for-byte against
@@ -304,6 +318,20 @@ jobs:
 
       - name: Rust MCP stdio and lifecycle gate on macOS
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
+
+      - name: Go/Rust vault administration process parity
+        run: |
+          python3 -m unittest discover -s scripts/vault-admin-oracle -p test_replay.py -v
+          python3 scripts/vault-admin-oracle/replay.py --go-ref dcddcef0df5789123c7c9a7ebe6e01f10e941f2c --rust target/debug/symbrain --out "$RUNNER_TEMP/vault-admin-parity.json"
+
+      - name: Preserve vault process parity evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vault-admin-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/vault-admin-parity.json
+          if-no-files-found: error
+          retention-days: 7
 
   # Run the complete root Rust workspace and Go-derived fixture gates on the
   # native Windows target. The parity-smoke comparators receive explicit .exe
@@ -403,6 +431,21 @@ jobs:
           SYMBRAIN_VERSION=dev cargo build --workspace --locked
           ./guard/scripts/guard-scan-oracle/run.sh parity target/debug/symbrain.exe
           python3 scripts/rust-differential.py "$RUNNER_TEMP/symbrain-go.exe" target/debug/symbrain.exe
+
+      - name: Go/Rust vault administration process parity
+        shell: bash
+        run: |
+          python3 -m unittest discover -s scripts/vault-admin-oracle -p test_replay.py -v
+          python3 scripts/vault-admin-oracle/replay.py --go-ref dcddcef0df5789123c7c9a7ebe6e01f10e941f2c --rust target/debug/symbrain.exe --out "$RUNNER_TEMP/vault-admin-parity.json"
+
+      - name: Preserve vault process parity evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: vault-admin-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/vault-admin-parity.json
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Rust MCP stdio subprocess tests on native Windows
         shell: bash
