@@ -123,6 +123,18 @@ veröffentlichte Doctor-Windows-Testkorrektur durch normale Merge-Commits.
   vollständig auf. Dieses Verfahren erhält dateibasierte kombinierte Ausgabe
   und vermeidet neue Pipe-Nachkommen-Hänger oder eine stille Build-Ausweichwurzel.
 
-Der erweiterte tatsächliche Prozess-Gate umfasst 87 Fälle auf Linux/macOS und
-81 auf Windows sowie dieselben zwei echten negativen Prozesskontrollen.
+Der erweiterte tatsächliche Prozess-Gate umfasst 90 Fälle auf Linux/macOS und
+84 auf Windows sowie dieselben zwei echten negativen Prozesskontrollen.
 Native Drei-OS-CI und erneute vollständige unabhängige Prüfung bleiben erforderlich.
+
+Eine zusätzliche eigene tatsächliche Go-/Rust-Prüfung des sauberen korrigierten
+Zwischenstands `42490d21` fand drei weitere relative Temp-Fälle. Seine grünen
+Baselines und vollständigen tatsächlichen Fehlwirkungen bleiben unter
+`migration/evidence/setup-source-765/corrected-42490/` erhalten und gelten wegen
+dieser Zusatzbefunde nicht als finale Abnahme. Nur die Kontroll-Capture-Wurzel
+wird relativ zum CLI-Arbeitsverzeichnis aufgelöst. Die zufällig und atomisch
+angelegte Worker-Stage behält dagegen die angeforderte relative Darstellung in
+Compiler-argv und Fehlern; ihr Cleanup-Besitzer hält separat den absoluten Pfad.
+Das verhindert, dass `tempfile` den historischen relativen Source-Build unbemerkt
+in einen erfolgreichen, zusätzlichen Installationsvorgang umwandelt. Eine echte
+missing/file/valid-Relative-Temp-Fallgruppe bleibt im gemeinsamen Prozess-Gate.

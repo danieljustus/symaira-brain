@@ -57,6 +57,7 @@ def cases():
                  ["setup","--from-source","<source>","--modules","browse","---json"]):
         add("flag-grammar-"+str(len(result)),args)
     for fault in ("missing","file"):add("tmp-root-"+fault,tmp_fault=fault)
+    for fault in ("missing","file","valid"):add("relative-tmp-root-"+fault,relative_tmp=fault)
     if os.name!="nt":
         raw=os.fsdecode(b"bad\xff\xe2\x82")
         add("raw-module-separate",modules=raw)
@@ -152,6 +153,11 @@ def configure(case,root,go,tool):
         bad=root/"tmp-obstruction"
         if case["tmp_fault"]=="file":bad.write_text("owned tempfile obstruction")
         for key in ("TMPDIR","TMP","TEMP"):env[key]=str(bad)
+    if case.get("relative_tmp"):
+        bad=Path(env["PROJECT"])/"worker-tmp"
+        if case["relative_tmp"]=="file":bad.write_text("owned relative obstruction")
+        if case["relative_tmp"]=="valid":bad.mkdir()
+        for key in ("TMPDIR","TMP","TEMP"):env[key]="worker-tmp"
     if case.get("config"):
         cfg=Path(env["XDG_CONFIG_HOME"])/"symbrain/config.toml";cfg.parent.mkdir();cfg.write_text(case["config"])
     if case.get("project"):(Path(env["PROJECT"])/".symbrain.toml").write_text(case["project"])

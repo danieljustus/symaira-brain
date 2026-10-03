@@ -4,6 +4,13 @@ use symbrain_managed::format_io_error;
 
 pub(super) fn capture() -> Result<tempfile::NamedTempFile, String> {
     let requested = std::env::temp_dir();
+    let requested = if requested.is_absolute() {
+        requested
+    } else {
+        std::env::current_dir()
+            .map_err(|error| format!("resolve control capture root: {error}"))?
+            .join(requested)
+    };
     // A malformed worker temp root must fail at per-module staging, after Git.
     // Only the private control capture uses its nearest existing directory;
     // no worker environment, cache, staging root or directory is substituted.
@@ -19,6 +26,7 @@ pub(super) fn capture() -> Result<tempfile::NamedTempFile, String> {
 
 pub(super) struct Stage {
     path: PathBuf,
+    cleanup: PathBuf,
 }
 impl Stage {
     pub(super) fn path(&self) -> &Path {
@@ -27,7 +35,7 @@ impl Stage {
 }
 impl Drop for Stage {
     fn drop(&mut self) {
-        let _ = std::fs::remove_dir_all(&self.path);
+        let _ = std::fs::remove_dir_all(&self.cleanup);
     }
 }
 
@@ -38,7 +46,15 @@ pub(super) fn stage(parent: &Path) -> Result<Stage, String> {
     tempfile::Builder::new()
         .prefix("symbrain-source-build-")
         .disable_cleanup(true)
-        .make_in(parent, |path| {
+        .make_in(parent, |absolute| {
+            // tempfile chooses an absolute random name; Go keeps a relative
+            // worker temp path relative in compiler argv. Cleanup owns the
+            // absolute identity independently of that observable path.
+            let path = if parent.is_absolute() {
+                absolute.to_owned()
+            } else {
+                parent.join(absolute.file_name().expect("generated stage filename"))
+            };
             #[cfg(unix)]
             let mut builder = std::fs::DirBuilder::new();
             #[cfg(not(unix))]
@@ -48,9 +64,10 @@ pub(super) fn stage(parent: &Path) -> Result<Stage, String> {
                 use std::os::unix::fs::DirBuilderExt;
                 builder.mode(0o700);
             }
-            match builder.create(path) {
+            match builder.create(&path) {
                 Ok(()) => Ok(Stage {
-                    path: path.to_owned(),
+                    path,
+                    cleanup: absolute.to_owned(),
                 }),
                 Err(error) => {
                     detail = Some(if error.kind() == std::io::ErrorKind::NotFound {
