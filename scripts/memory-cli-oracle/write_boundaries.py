@@ -25,6 +25,7 @@ def execute(go,rust,wrapper,report):
         ('bad-metadata-delete','delete','victim',[],("metadata",'{"a":1}')),
         ('bad-embedding-delete','delete','victim',[],("embedding",'invalid json')),
         ('bad-time-delete','delete','victim',[],("created_at",'invalid time')),
+        ('leap-second-delete','delete','victim',[],("created_at",'2000-01-01 00:00:60 +0000 UTC')),
         ('alternate-time-delete','delete','victim',[],("created_at",'2000-01-01T00:00:00Z')),
     ]
     try:
@@ -50,7 +51,7 @@ def execute(go,rust,wrapper,report):
                 assert output=={key:delegated[key] for key in ('exit','stdout','stderr')}, (name,output,delegated)
                 after=writes.snapshot(path)
                 unchanged=before==after
-                if name in ('invalid-duplicate-metadata','invalid-scope','bad-metadata-delete','bad-embedding-delete','bad-time-delete'):
+                if name in ('invalid-duplicate-metadata','invalid-scope','bad-metadata-delete','bad-embedding-delete','bad-time-delete','leap-second-delete'):
                     assert delegated['exit'] in (1,2) and unchanged, (name,delegated,unchanged)
                 records.append(dict(name=name,match=True,transcript=output,delegated=delegated,database_before=before,database_after=after,database_unchanged=unchanged))
     finally:

@@ -129,7 +129,8 @@ def canonical(state, before, interval, expected, returned_id=None, deleted=False
     if deleted:
         assert all(row['id'] != expected['delete_id'] for row in memories)
         delete_events = [event for event in audits if event['action'] == 'delete']
-        assert len(delete_events) == 1 and delete_events[0]['memory_id'] == expected['delete_id']
+        count = 1 if expected.get('delete_audit',True) else 0
+        assert len(delete_events)==count and all(event['memory_id']==expected['delete_id'] for event in delete_events), 'delete audit observation differs'
     for row in transformed['entities']:
         if row['id'] not in old_entities:
             created = timestamp(row, 'entities', 'created_at')

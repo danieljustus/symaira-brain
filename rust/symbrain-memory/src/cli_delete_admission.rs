@@ -83,7 +83,10 @@ pub(crate) fn checked(conn: &Connection, id: &str) -> rusqlite::Result<bool> {
 pub(crate) fn canonical_time(value: &str) -> bool {
     static PATTERN: std::sync::OnceLock<Option<regex::Regex>> = std::sync::OnceLock::new();
     PATTERN.get_or_init(|| regex::Regex::new(r"^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}(?:\.[0-9]{1,9})? \+0000 UTC$").ok())
-        .as_ref().is_some_and(|pattern| pattern.is_match(value)) && crate::gotime::parse(value).is_some()
+        .as_ref().is_some_and(|pattern| pattern.is_match(value))
+        // Chrono accepts leap seconds, but Go time.Parse rejects them.
+        && value.as_bytes()[17] < b'6'
+        && crate::gotime::parse(value).is_some()
 }
 
 #[cfg(test)]
@@ -98,6 +101,7 @@ mod tests {
             ("embedding", "invalid"),
             ("embedding", "[1e39]"),
             ("created_at", "invalid"),
+            ("created_at", "2000-01-01 00:00:60 +0000 UTC"),
         ] {
             let store = Store::open_in_memory().unwrap();
             let memory = store

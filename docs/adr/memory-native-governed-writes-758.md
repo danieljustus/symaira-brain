@@ -39,10 +39,14 @@ and entity-create audits. Resolution/write/audit failures follow Go's best-effor
 boundary. Empty author stays empty; it must not silently become `mcp`.
 
 Delete follows Go's service access-feedback update before deletion, then writes
-the delete audit using the persisted creator/session/scope. Hydration admission
+the delete audit using the creator/session/scope observed after that update. A row
+removed during access feedback still succeeds and produces no delete audit, as Go
+does. A callback probe caught the earlier native adapter reading attribution too
+soon; retain the actual differing audit rows as regression evidence. Hydration admission
 refuses unknown schema, malformed typed JSON, noncanonical dates and non-UTF8
 rows; validation repeats before mutation to avoid deleting a row changed after
-routing. Exact corrupt-row/concurrent-error diagnostics remain a pending gate.
+routing. Reject leap seconds explicitly because Chrono accepts them while Go's
+hydration rejects them. Exact corrupt-row/concurrent-error diagnostics remain a pending gate.
 Go cascades evidence and query-result references, but its entity links and memory
 associations have no foreign keys and survive deletion. Preserve that observable
 contract; a cleanup policy needs a separate explicit decision and migration.

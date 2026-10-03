@@ -5,7 +5,7 @@ with the native `target/debug/symbrain` built and Go 1.26.7 on PATH. Optional
 `--go` and `--rust` select already bound executable artifacts. The runner archives
 immutable `dcddcef0`, uses an owned build HOME and records source/SDK/binary hashes.
 
-The current gate runs 60 native set pairs, twelve native delete pairs and twelve
+The current gate runs 60 native set pairs, sixteen native delete pairs and thirteen
 actual delegated-Go boundary observations, plus three executable mutants. Runtime
 HOME/USERPROFILE/XDG/cwd are disposable, PATH is empty, credentials/proxy variables
 are not inherited and every embedding endpoint is owned. Existing Go production
@@ -24,7 +24,10 @@ configured embeddings, wrong dimensions/cardinality, overflow and hash fallback,
 float32 scientific boundaries/negative zero, binary sign bits and config layering.
 The delete samples cover both output formats, creator/session audit attribution,
 missing IDs, retained rows, surviving entity/association rows, evidence cascade
-and the pre-delete access update's sync event. Routing refuses malformed hydration
+and the pre-delete access update's sync event. Real SQLite callbacks also change
+audit attribution or remove the row during that access update; replies and audits
+must follow the subsequent Go observation. Routing refuses malformed hydration,
+including Chrono's accepted leap seconds that Go rejects,
 instead of deleting a row Go cannot read.
 
 The identity mutant returns another syntactically valid UUID absent from the
