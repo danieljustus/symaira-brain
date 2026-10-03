@@ -46,7 +46,11 @@ pub(super) fn run_rules(
                 .map(symbrain_memory::RuleRow::to_go_json)
                 .collect::<Vec<_>>()
                 .join(",");
-            let _ = writeln!(stdout, "[{rendered}]");
+            let _ = writeln!(
+                stdout,
+                "{}",
+                super::search::escape_html(&format!("[{rendered}]"))
+            );
         }
         OutputFormat::Table => {
             if rules.is_empty() {

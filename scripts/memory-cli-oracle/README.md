@@ -21,10 +21,14 @@ default/clamped limits, repeated scope/actor aliases, rules and summary output.
 These cover both successful table and JSON rendering; success exits are required.
 Three configured searches compare real Go/Rust request paths and model/input
 payloads against an owned loopback server, covering global/project/env overrides.
+Rules fixtures populate the separate rules table, metadata and actor fields with
+HTML and JavaScript-separator characters; successful output must contain rule IDs.
+Seven `database_paths` cases compare absolute/relative/unset/empty XDG roots,
+shared current/legacy roots, current precedence and directory-versus-file type.
 Reflection executed against Go verifies that the Rust descriptor covers exactly
 the immutable 86-field typed schema, including `bm25_weight`.
 
-Linux/macOS execute 583 cases; Windows executes 546 because 37 argv byte cases
+Linux/macOS execute 590 cases; Windows executes 553 because 37 argv byte cases
 require Unix. `controls.py` compiles a disposable process wrapper that runs the
 actual Rust candidate and then changes one semantic stdout token or its success
 exit code. Both real replays must fail for the intended comparison assertion,

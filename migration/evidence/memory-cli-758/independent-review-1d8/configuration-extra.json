@@ -1,0 +1,233 @@
+{
+  "candidate_revision": "1d8a0904929157d7928cfcd31782c374aa98501a",
+  "candidate_dirty": false,
+  "go_sha256": "a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41",
+  "rust_sha256": "5b76d21337248d59f42b9f1f70c9296559e23ff03929c7f9d03c7323c44a650a",
+  "records": [
+    {
+      "name": "unknown=9223372036854775808",
+      "match": true,
+      "state_unchanged": true,
+      "go": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmRlZmF1bHQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWRlZmF1bHQK",
+        "stderr": ""
+      },
+      "rust": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmRlZmF1bHQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWRlZmF1bHQK",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "unknown=1e9999",
+      "match": true,
+      "state_unchanged": true,
+      "go": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmRlZmF1bHQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWRlZmF1bHQK",
+        "stderr": ""
+      },
+      "rust": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmRlZmF1bHQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWRlZmF1bHQK",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "unknown=[1e9999]",
+      "match": true,
+      "state_unchanged": true,
+      "go": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmRlZmF1bHQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWRlZmF1bHQK",
+        "stderr": ""
+      },
+      "rust": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmRlZmF1bHQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWRlZmF1bHQK",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "unknown={x=1e9999}",
+      "match": true,
+      "state_unchanged": true,
+      "go": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmRlZmF1bHQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWRlZmF1bHQK",
+        "stderr": ""
+      },
+      "rust": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmRlZmF1bHQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWRlZmF1bHQK",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "unknown=inf",
+      "match": true,
+      "state_unchanged": true,
+      "go": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      },
+      "rust": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "unknown=nan",
+      "match": true,
+      "state_unchanged": true,
+      "go": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      },
+      "rust": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "unknown=1979-05-27T07:32:00Z",
+      "match": true,
+      "state_unchanged": true,
+      "go": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      },
+      "rust": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "unknown=\"text\"",
+      "match": true,
+      "state_unchanged": true,
+      "go": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      },
+      "rust": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "security.trusted_proxies=[]",
+      "match": true,
+      "state_unchanged": true,
+      "go": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      },
+      "rust": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "server.http_port=1.5",
+      "match": true,
+      "state_unchanged": true,
+      "go": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      },
+      "rust": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "server.http_port=nan",
+      "match": true,
+      "state_unchanged": true,
+      "go": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      },
+      "rust": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "ranking.spreading_weight=inf",
+      "match": true,
+      "state_unchanged": true,
+      "go": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      },
+      "rust": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "conflict.enabled=0.0",
+      "match": true,
+      "state_unchanged": true,
+      "go": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      },
+      "rust": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "security.pii_enabled=0.0",
+      "match": true,
+      "state_unchanged": true,
+      "go": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmRlZmF1bHQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWRlZmF1bHQK",
+        "stderr": ""
+      },
+      "rust": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmRlZmF1bHQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWRlZmF1bHQK",
+        "stderr": ""
+      }
+    },
+    {
+      "name": "database={path=\"configured.db\",unknown=1}",
+      "match": true,
+      "state_unchanged": true,
+      "go": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      },
+      "rust": {
+        "exit": 0,
+        "stdout": "SUQJU0NPUEUJQ1JFQVRFRAlDT05URU5UCmNvbmZpZ3VyZWQJZ2xvYmFsCTIwMDAtMDEtMDFUMDA6MDA6MDBaCWNvbmZpZ3VyZWQK",
+        "stderr": ""
+      }
+    }
+  ]
+}

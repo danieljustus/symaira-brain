@@ -16,6 +16,7 @@ import tempfile
 import threading
 
 import cases
+import path_cases
 
 ORACLE = "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
 CONFIGKIT_SHA = "bd812ed747352c76b9f223a19ec64970b61fda59050f7ed436f5b2e74b997218"
@@ -137,6 +138,14 @@ def seeded_reads(go, rust, records):
                 "VALUES(?,?,'global',?,?,3,'2000-01-01 00:00:00 +0000 UTC')",
                 [(f"q-{index:03}", "claude" if index % 2 else "codex", "memory_list",
                   f"Unicode β query {index}") for index in range(80)])
+            database.executemany(
+                "INSERT INTO rules(id,content,scope,metadata,created_at,updated_at,created_by,updated_by) "
+                "VALUES(?,?,?,?,'2000-01-01 00:00:00 +0000 UTC',"
+                "'2000-01-01 00:00:00 +0000 UTC',?,?)",
+                [(f"r-{index}", f"Unicode rule β &<>\u2028\u2029 {index}", scope,
+                  json.dumps({"a<&>": "value &<>\u2028\u2029 β"}),
+                  "actor &<>\u2028\u2029", "updater &<>\u2028\u2029")
+                 for index, scope in enumerate(("global", "project", "agent"))])
         shapes = [
             ["list"], ["list", "--limit", "0"], ["list", "--limit=-1"],
             ["list", "--limit=0x10"], ["list", "-l", "075"], ["list", "--limit=1001"],
@@ -152,9 +161,13 @@ def seeded_reads(go, rust, records):
             args = [*shape, "--db", str(path)]
             first, second = (output(binary, args, root, env) for binary in (go, rust))
             unchanged = before == snapshot(root)
+            populated = shape[0] != "rules" or (first["stdout"] and second["stdout"]
+                and b"r-" in base64.b64decode(first["stdout"])
+                and b"r-" in base64.b64decode(second["stdout"]))
             records.append(dict(family="seeded_reads", index=index, args=shape,
-                                match=first == second and first["exit"] == 0 and unchanged,
+                                match=first == second and first["exit"] == 0 and unchanged and bool(populated),
                                 database_state_unchanged=unchanged,
+                                populated_rule_output=bool(populated) if shape[0] == "rules" else None,
                                 go=first, rust=second))
 
 
@@ -218,7 +231,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--go", type=Path, help="optional prebuilt immutable oracle; SHA recorded")
     parser.add_argument("--rust", type=Path)
-    parser.add_argument("--family", choices=("all", "arguments", "configuration", "seeded_reads", "configured_search"), default="all")
+    parser.add_argument("--family", choices=("all", "arguments", "configuration", "seeded_reads", "configured_search", "database_paths"), default="all")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
     repo = Path(__file__).resolve().parents[2]
@@ -257,6 +270,8 @@ def main():
             seeded_reads(go, rust, records)
         if args.family in ("all", "configured_search"):
             configured_search(go, rust, records)
+        if args.family in ("all", "database_paths"):
+            records.extend(path_cases.run(go, rust, output, snapshot, isolated_env))
         candidate_files = set(run(["git", "ls-files", "--cached", "--others", "--exclude-standard",
                                    "rust/symbrain-cli", "rust/symbrain-memory", "Cargo.toml", "Cargo.lock",
                                    "scripts/memory-cli-oracle", ".github/workflows/memory-cli-native.yml"], repo)

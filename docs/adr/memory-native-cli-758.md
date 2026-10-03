@@ -63,7 +63,7 @@ use a loopback-only fixture to compare the actual Go/Rust embedding request path
 and model/input payload under global/project/env overrides; no paid endpoint is
 called, and the empty store remains unchanged.
 
-The final harness executes 583 cases on Unix and 546 on Windows. Two executable
+The final harness executes 590 cases on Unix and 553 on Windows. Two executable
 negative controls run the real candidate and separately mutate a same-length
 semantic output token or success exit, requiring a real failed replay while the
 database remains identical. Source/binary hashes, SDK, exact candidate revision
@@ -87,3 +87,35 @@ This increment does not certify MCP work owned by #760/#761, nor remove `serve`
 or synchronization fallback. #649 stays open until the repair is shipped in a
 Rust release and its Doctor diagnostic is verified. Go source and frozen
 fixtures remain unchanged.
+
+## Independent review corrections
+
+Independent review of clean `1d8a090` executed all initial 583 cases, two real
+controls and fifteen additional config probes, then found two real P2 failures.
+Those original reports, literal stdout/exit/state measurements and source hashes
+remain tracked under `migration/evidence/memory-cli-758/independent-review-1d8`.
+The rejected source worktree stays unchanged; corrections use a separate worktree.
+
+Memory's frozen `internal/paths` contract differs from Brain's general data-path
+contract: only absolute XDG data roots are accepted, and current
+`base/symbrain/memory` and legacy `base/symmemory` share the same selected base.
+Directory existence takes precedence over ordinary files. The correction is
+memory-local so audit and other domains retain their independently specified
+relative-XDG behavior. Seven new real process cases prove relative/unset/empty
+XDG behavior, legacy selection, directory/file type and current precedence while
+every seeded database remains unchanged.
+
+Rules JSON also needs Go HTML and U+2028/U+2029 escaping. Initial seeded reads
+populated memories but left the separate rules table empty, so the rules shapes
+did not exercise serialization. The corrected fixture seeds real global/project/
+agent rules, metadata keys/values and both actor fields containing all escaping
+characters. Rules cases require actual rule IDs in successful output; an empty
+table cannot pass this assertion. The archived original binary fails four of
+seven new path cases and three populated rules JSON cases; the fixed binary
+passes all of them. No Go production or frozen fixture is modified.
+
+Final scoped acceptance is 590 Unix/553 Windows real process comparisons, twelve
+affected native CLI component tests and strict Clippy/format/actionlint. The
+prior 333-test record remains evidence for the earlier source; it is not claimed
+as a fresh full-suite execution of these two corrections. Native three-OS and
+the documented full #758/#649 release gates remain pending.
