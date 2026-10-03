@@ -41,47 +41,6 @@ fn env_path(name: &str, fallback: PathBuf) -> PathBuf {
 // Provider credential files
 // ---------------------------------------------------------------------------
 
-/// `~/.claude/.credentials.json`, accepting only shapes whose token choice is
-/// deterministic and matches Go: the default account, or exactly one other
-/// account with a nonempty token. Unknown metadata and other unproven shapes
-/// remain on the Go path.
-fn claude_file_token() -> Option<String> {
-    claude_file_token_in(&home().join(".claude/.credentials.json"))
-}
-
-fn claude_file_token_in(path: &Path) -> Option<String> {
-    let contents = read_limited(path)?;
-    let credentials: ClaudeCredentialFile = serde_json::from_slice(&contents).ok()?;
-    let accounts = credentials.oauth_account;
-    if let Some(token) = accounts
-        .get("default")
-        .and_then(|account| account.access_token.as_deref())
-        .filter(|token| !token.is_empty())
-    {
-        return Some(token.to_owned());
-    }
-    let mut tokens = accounts
-        .values()
-        .filter_map(|account| account.access_token.as_deref())
-        .filter(|token| !token.is_empty());
-    let token = tokens.next()?;
-    tokens.next().is_none().then(|| token.to_owned())
-}
-
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-struct ClaudeCredentialFile {
-    #[serde(rename = "oauthAccount")]
-    oauth_account: std::collections::BTreeMap<String, ClaudeOAuthAccount>,
-}
-
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-struct ClaudeOAuthAccount {
-    #[serde(rename = "accessToken")]
-    access_token: Option<String>,
-}
-
 fn codex_home() -> PathBuf {
     env_path("CODEX_HOME", home().join(".codex"))
 }
@@ -89,7 +48,10 @@ fn codex_home() -> PathBuf {
 /// `$CODEX_HOME/auth.json`: a top-level `access_token` or the nested
 /// `tokens.access_token` the newer CLI writes.
 fn codex_file_token(home_dir: &Path) -> Option<String> {
-    let root = json_value(&home_dir.join("auth.json"))?;
+    let contents = read_provider_credentials(&home_dir.join("auth.json"))?;
+    // Go decodes this file to map[string]any: exact keys, last duplicate wins,
+    // and an overflowing number anywhere invalidates the entire document.
+    let root: Value = serde_json::from_str(&go_json_compatible_text(&contents)).ok()?;
     root.get("access_token")
         .and_then(Value::as_str)
         .filter(|token| !token.is_empty())

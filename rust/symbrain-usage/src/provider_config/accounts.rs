@@ -1,5 +1,10 @@
 // Native provider accounts compatibility implementation.
 fn claude() -> Provider {
+    claude_with_keychain(claude_keychain_credential)
+}
+
+// Keep system Keychain access injectable privately, as in the Go constructor.
+fn claude_with_keychain(read_keychain: impl FnOnce() -> Option<(String, SystemTime)>) -> Provider {
     let admin = resolve_env("ANTHROPIC_ADMIN_KEY");
     let oauth = resolve_env_or_file("ANTHROPIC_OAUTH_TOKEN", claude_file_token);
     let (admin_value, admin_error) = match admin {
@@ -15,7 +20,7 @@ fn claude() -> Provider {
     // keychain read can raise an approval panel.
     if oauth_value.is_none()
         && oauth_error.is_none()
-        && let Some((token, expires_at)) = claude_keychain_credential()
+        && let Some((token, expires_at)) = read_keychain()
     {
         oauth_value = Some(("keychain".into(), token));
         oauth_expires_at = expires_at;

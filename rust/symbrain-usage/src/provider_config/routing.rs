@@ -39,13 +39,11 @@ pub fn needs_go_fallback() -> bool {
     };
     let claude_file_path = home().join(".claude/.credentials.json");
     let claude_file_token = claude_file_token_in(&claude_file_path);
-    if claude_file_token.is_none() && claude_file_path.exists() {
-        // Go accepts case-insensitive struct tags and duplicate-map merge
-        // semantics. If this strict candidate parser cannot prove equivalence,
-        // let Go interpret the existing file before any keychain probe.
+    if claude_file_requires_go(&claude_file_path) {
+        // Go iterates the account map in unspecified order. Retain its route
+        // only when multiple distinct nondefault tokens can be selected.
         return true;
     }
-    let codex_file = codex_file_token(&codex_home());
     let nous_path = nous_auth_path();
     if nous_file_requires_go(&nous_path) {
         // Go float-to-int overflow is architecture-dependent. Preserve that
@@ -73,7 +71,6 @@ pub fn needs_go_fallback() -> bool {
         claude_oauth_env: claude_oauth_env.as_deref(),
         copilot_file: copilot_file.as_deref(),
         kimi_cli: kimi_cli.as_deref(),
-        codex_file: codex_file.as_deref(),
         claude_file: claude_file_token.as_deref(),
         other_provider_env: false,
         other_credential_source: false,
@@ -87,14 +84,13 @@ pub fn needs_go_fallback() -> bool {
 }
 
 /// Keeps reports native for the proven portable sources once every configured
-/// source is handled by the same provider constructors. Unsupported files,
-/// literal file references and the Claude Keychain source still keep Go in charge.
+/// source is handled by the same provider constructors. Unproven Copilot/Kimi files
+/// and the automatic Claude Keychain source still keep Go in charge.
 #[derive(Clone, Copy, Default)]
 struct UsageFallbackSignals<'a> {
     claude_oauth_env: Option<&'a str>,
     copilot_file: Option<&'a str>,
     kimi_cli: Option<&'a str>,
-    codex_file: Option<&'a str>,
     claude_file: Option<&'a str>,
     other_provider_env: bool,
     other_credential_source: bool,
@@ -105,12 +101,7 @@ fn needs_go_fallback_for(signals: &UsageFallbackSignals<'_>) -> bool {
     // Environment reference schemes share the source-bound resolver. File
     // credential values remain literal and retain their existing eligibility
     // gate until their complete typed-decoder contracts are accepted.
-    let credentials = [
-        signals.copilot_file,
-        signals.kimi_cli,
-        signals.codex_file,
-        signals.claude_file,
-    ];
+    let credentials = [signals.copilot_file, signals.kimi_cli];
     if signals.other_provider_env
         || signals.other_credential_source
         || (signals.local_provider_present
