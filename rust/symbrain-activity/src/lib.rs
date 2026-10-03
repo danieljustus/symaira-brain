@@ -79,7 +79,10 @@ pub fn validate_search_options(options: &SearchOptions) -> Result<(), ActivityEr
     if options.query.chars().count() > MAX_QUERY_LENGTH {
         return Err(ActivityError::QueryTooLong);
     }
-    if options.to <= options.from {
+    let is_go_zero = |time: DateTime<Utc>| {
+        time.timestamp() == -62_135_596_800 && time.timestamp_subsec_nanos() == 0
+    };
+    if is_go_zero(options.from) || is_go_zero(options.to) || options.to <= options.from {
         return Err(ActivityError::WindowNotIncreasing);
     }
     if options.to - options.from > Duration::days(MAX_RANGE_DAYS) {
