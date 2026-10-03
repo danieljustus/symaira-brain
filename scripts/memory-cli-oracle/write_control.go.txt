@@ -33,7 +33,10 @@ func main() {
         if path == "" { os.Exit(96) }
         database, openErr := sql.Open("sqlite", path)
         if openErr != nil { os.Exit(97) }
-        result, updateErr := database.Exec("UPDATE audit_log SET actor='Changed' WHERE action='set'")
+        expression := regexp.MustCompile(`[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}`)
+        match := expression.Find(data)
+        if match == nil { os.Exit(95) }
+        result, updateErr := database.Exec("UPDATE audit_log SET actor='Changed' WHERE action='set' AND memory_id=?", string(match))
         if updateErr != nil { os.Exit(98) }
         count, countErr := result.RowsAffected()
         if countErr != nil || count != 1 { os.Exit(99) }

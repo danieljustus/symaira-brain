@@ -28,7 +28,8 @@ and the pre-delete access update's sync event. Routing refuses malformed hydrati
 instead of deleting a row Go cannot read.
 
 The identity mutant returns another syntactically valid UUID absent from the
-actual database. The audit mutant changes only the real stored set audit actor.
+actual database. The audit mutant changes only the returned primary row's real set audit actor;
+pre-existing seed audits remain unchanged.
 The exit mutant changes the successful exit. All execute the real candidate;
 the runner requires the intended assertion to fail and keeps literal outputs and
 state. Boundary helpers execute actual Go and record its result before forwarding
