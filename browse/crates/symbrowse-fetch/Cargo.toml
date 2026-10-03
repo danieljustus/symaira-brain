@@ -8,6 +8,8 @@ repository.workspace = true
 publish = false
 
 [dependencies]
+base64.workspace = true
+percent-encoding.workspace = true
 brotli.workspace = true
 encoding_rs.workspace = true
 flate2.workspace = true

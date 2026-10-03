@@ -1995,6 +1995,7 @@ dependencies = [
 name = "symbrowse-fetch"
 version = "0.0.0"
 dependencies = [
+ "base64",
  "brotli",
  "encoding_rs",
  "flate2",
@@ -2006,6 +2007,7 @@ dependencies = [
  "hyper-util",
  "markup5ever_rcdom",
  "native-tls",
+ "percent-encoding",
  "rand",
  "reqwest",
  "ruzstd",

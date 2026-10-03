@@ -53,7 +53,7 @@ async fn main() {
                 case.proxy.as_deref(),
             ) {
                 Ok(route) => {
-                    json!({"id":case.id,"error":"","route":route.map(|u| u.to_string()).unwrap_or_default()})
+                    json!({"id":case.id,"error":"","route":route.map(|u| u.url.to_string()).unwrap_or_default()})
                 }
                 Err(error) => json!({"id":case.id,"error":"transport","detail":error.to_string()}),
             };

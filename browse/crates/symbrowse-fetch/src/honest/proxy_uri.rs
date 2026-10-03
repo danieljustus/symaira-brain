@@ -1,16 +1,17 @@
 //! Preserve normalization-sensitive absolute-form URIs without a reqwest fork.
 use super::{
-    proxy::literal_port,
+    proxy::{SelectedProxy, literal_port},
     proxy_body::{ConnectionTask, OwnedBody},
     proxy_io,
     redirect::render,
 };
 use crate::{FetchClient, FetchError, Request};
+use base64::{Engine, engine::general_purpose::STANDARD};
 use hyper_util::rt::TokioIo;
+use percent_encoding::percent_decode_str;
 use reqwest::{
-    Method,
     cookie::CookieStore,
-    header::{AUTHORIZATION, COOKIE, HeaderMap, PROXY_AUTHORIZATION, SET_COOKIE},
+    header::{COOKIE, HeaderMap, HeaderValue, PROXY_AUTHORIZATION, SET_COOKIE},
 };
 use url::Url;
 
@@ -21,20 +22,20 @@ pub(super) fn needed(raw: &str, parsed: &Url, proxy: &Url) -> bool {
         && literal_port(raw) != literal_port(parsed.as_str())
 }
 
-pub(super) fn authorize(
-    http: &reqwest::Client,
-    proxy: &Url,
-    headers: &mut HeaderMap,
-) -> Result<(), FetchError> {
+pub(super) fn authorize(proxy: &SelectedProxy, headers: &mut HeaderMap) -> Result<(), FetchError> {
     // Go writes its transport proxy credentials after caller header values.
-    // Reuse reqwest's userinfo decoding and Basic encoding, without any I/O.
-    let auth = http
-        .request(Method::GET, proxy.clone())
-        .build()
-        .map_err(FetchError::Request)?;
-    if let Some(value) = auth.headers().get(AUTHORIZATION) {
-        headers.append(PROXY_AUTHORIZATION, value.clone());
-    }
+    // Go preserves percent-decoded octets, even when they are not UTF-8.
+    let Some(info) = &proxy.userinfo else {
+        return Ok(());
+    };
+    let (username, password) = info.split_once(':').unwrap_or((info, ""));
+    let mut bytes: Vec<u8> = percent_decode_str(username).collect();
+    bytes.push(b':');
+    bytes.extend(percent_decode_str(password));
+    let mut value = HeaderValue::from_str(&format!("Basic {}", STANDARD.encode(bytes)))
+        .map_err(|error| FetchError::InvalidProxy(error.to_string()))?;
+    value.set_sensitive(true);
+    headers.append(PROXY_AUTHORIZATION, value);
     Ok(())
 }
 

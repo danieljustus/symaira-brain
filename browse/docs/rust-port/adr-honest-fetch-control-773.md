@@ -231,3 +231,47 @@ timings or a new acceptance threshold. Connection reuse/TLS cost remains an open
 #773 optimization, alongside full pipeline/native-six-target cutover gates.
 Keep the complete current measurement, the prior loaded failure and the new
 pre-sample SDK-PATH bootstrap failure in `proxy-uri-e2`; no sample was discarded.
+
+## Proxy authentication octets (#773 focused correction)
+
+The immutable335/e2 independent full-layer review found one new P2: deriving
+proxy Basic authentication through a fictitious reqwest origin request drops
+a percent-escaped non-UTF8 password, and the raw path also drops a non-UTF8
+username. An enforcing owned proxy returns Go200/native407 for all four byte
+cases across both raw080 and ordinary81 routes; ASCII and valid UTF8 controls
+return200 in both. Preserve the complete review, all38 capture cases, eight
+enforcing cases and archived522 parent classification under
+`independent-review-335`. Inherited origin-userinfo, H2 and trailer/framing gaps
+are recorded there and are not included in this correction.
+
+Keep a selected proxy's policy/dial URL separate from its original encoded
+userinfo. WHATWG URL normalization discards empty userinfo and cannot represent
+all Go percent-decoded octets. Split the retained userinfo at its first literal
+colon, percent-decode each part directly to bytes, and append Go's Basic value
+after caller Proxy-Authorization values in the shared per-hop helper. Apply
+that helper to both HTTP-target routes, including HTTP and HTTPS proxy peers,
+without changing origin auth, HTTPS-target CONNECT/SOCKS auth, DNS protection,
+redirect bounds, deadline, cookie ownership, response decoding or transport cache.
+Empty `@`/`:@` proxy userinfo also emits Basic Og== through this same retained
+presence operation; its historical omission is distinguished from the new P2.
+
+Two explicit supported codec dependencies, base64=0.22.1 and
+percent-encoding=2.3.2, already exist at those exact versions/checksums in the
+lockfile through reqwest/url. They avoid a custom credential codec without a
+new package version or source. The process-only route example reads the selected
+URL for its unchanged display contract; it never prints the retained credential
+metadata. Synthetic proxy credentials in the owned gate are not operator secrets.
+
+`fetch_control_proxy_auth.py` adds actual ordered-header and enforcing-proxy
+observations for both target ports, caller append order, empty/ASCII/UTF8/raw-byte
+userinfo, uppercase/lowercase and schemeless environment proxies, redirects, and
+owned trusted HTTPS proxy peers. Existing251/249 comparisons and all existing
+controls remain unchanged. Three additional real native-output mutants must
+fail for truncated credentials, reversed caller order and proxy authentication
+rejection. Linux-owned CA proof does not certify macOS/Windows trust stores; all
+six native targets still require exact published-head CI. Four non-UTF8 origin
+URL cases remain mismatched in the unchanged38-case supplemental probe. Full
+#773, default cutover, unpooled normalization-sensitive route optimization and
+all previously stated native/value gates remain open. Fresh current-source
+release measurements are required after this production change; prior e2's
+240/120 samples remain historical proof and are never relabeled as current.

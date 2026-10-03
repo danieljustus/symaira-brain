@@ -64,6 +64,8 @@ jobs:
             ${{ runner.temp }}/browse-fetch-process-controls.json
             ${{ runner.temp }}/browse-fetch-process-raw-proxy.json
             ${{ runner.temp }}/browse-fetch-process-raw-proxy-controls.json
+            ${{ runner.temp }}/browse-fetch-process-proxy-auth.json
+            ${{ runner.temp }}/browse-fetch-process-proxy-auth-controls.json
           if-no-files-found: error
           retention-days: 14
 

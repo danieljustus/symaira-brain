@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/workspace/symaira-fetch773-proxy-auth/browse/port/harness/fetch_control_proxy_auth.py", line 139, in <module>
+    main()
+  File "/workspace/symaira-fetch773-proxy-auth/browse/port/harness/fetch_control_proxy_auth.py", line 73, in main
+    results = raw_proxy.pairs(args, selected, root / "plain")
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-fetch773-proxy-auth/browse/port/harness/fetch_control_raw_proxy.py", line 16, in pairs
+    left = common.execute(args.go, selected, root / "go", env)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-fetch773-proxy-auth/browse/port/harness/fetch_control_process.py", line 151, in execute
+    root.mkdir()
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1311, in mkdir
+    os.mkdir(self, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/fetch773-proxy-auth-qxb2ht9u/plain/go'

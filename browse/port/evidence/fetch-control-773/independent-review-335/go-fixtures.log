@@ -1,0 +1,14 @@
+checked port/fixtures/fetch/static.json (28 vectors, source 4924c02927471d138aef6ba9b13be237d6f4bd0ad91472e322c1a50505750ac1)
+2026/10/03 22:39:07 WARN unknown profile, defaulting to chrome profile=unknown
+2026/10/03 22:39:07 WARN unknown profile, defaulting to chrome profile=Chrome
+checked port/fixtures/fetch/control.json (11 profiles, 15 robots cases, source 1e296a9e9505337b4ecc9d66db86024b80e9df1d3831f69ce3cae5460f5dd8eb)
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/agentdom	0.011s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/archive	0.010s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/cache	0.060s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/dom	0.006s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/fetch	0.444s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/pipeline	0.101s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/relevance	0.003s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/render	0.008s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/robots	0.075s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/semantic	0.003s

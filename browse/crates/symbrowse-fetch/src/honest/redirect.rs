@@ -1,5 +1,8 @@
 //! Bounded redirect hops retain written ports before WHATWG URL normalization.
-use super::{headers::request_headers, proxy::literal_port};
+use super::{
+    headers::request_headers,
+    proxy::{SelectedProxy, literal_port},
+};
 use crate::{FetchClient, FetchError, Request};
 use reqwest::{
     Method,
@@ -13,17 +16,18 @@ pub(super) fn validate_proxy(
     raw: &str,
     explicit: Option<&str>,
     guard: &SsrfGuard,
-) -> Result<Option<Url>, FetchError> {
+) -> Result<Option<SelectedProxy>, FetchError> {
     let target =
         Url::parse(raw).map_err(|error| FetchError::InvalidRequest(format!("URL: {error}")))?;
     let selected = client.proxies.selected(&target, raw, explicit)?;
     if let Some(proxy) = &selected {
-        if !matches!(proxy.scheme(), "http" | "https" | "socks5" | "socks5h") {
+        if !matches!(proxy.url.scheme(), "http" | "https" | "socks5" | "socks5h") {
             return Err(FetchError::InvalidProxy(
                 "unsupported proxy scheme".to_owned(),
             ));
         }
         let host = proxy
+            .url
             .host_str()
             .ok_or_else(|| FetchError::InvalidProxy("proxy has no host".to_owned()))?;
         guard
@@ -139,7 +143,11 @@ pub(super) async fn send(
         let parsed =
             Url::parse(&current).map_err(|error| FetchError::Redirect(error.to_string()))?;
         let proxy = validate_proxy(client, &current, request.proxy.as_deref(), guard)?;
-        let http = client.http_client(request, guard.clone(), proxy.clone())?;
+        let http = client.http_client(
+            request,
+            guard.clone(),
+            proxy.as_ref().map(|p| p.url.clone()),
+        )?;
         let mut hop_headers = headers.clone();
         if literal_port(&current).is_some() {
             // Preserve Go's Host authority even when Url removed default-port zeroes.
@@ -163,11 +171,12 @@ pub(super) async fn send(
         if parsed.scheme() == "http"
             && let Some(proxy) = proxy
                 .as_ref()
-                .filter(|proxy| matches!(proxy.scheme(), "http" | "https"))
+                .filter(|proxy| matches!(proxy.url.scheme(), "http" | "https"))
         {
-            super::proxy_uri::authorize(&http, proxy, &mut hop_headers)?;
+            super::proxy_uri::authorize(proxy, &mut hop_headers)?;
         }
-        let raw_proxy = proxy.filter(|proxy| super::proxy_uri::needed(&current, &parsed, proxy));
+        let raw_proxy =
+            proxy.filter(|proxy| super::proxy_uri::needed(&current, &parsed, &proxy.url));
         let mut builder = http.request(method.clone(), parsed).headers(hop_headers);
         if body && !request.body.is_empty() {
             builder = builder.body(request.body.clone());
@@ -177,7 +186,7 @@ pub(super) async fn send(
                 client,
                 request,
                 &current,
-                proxy,
+                proxy.url,
                 !request.allow_private && guard.enabled(),
                 builder.build().map_err(FetchError::Request)?,
             )

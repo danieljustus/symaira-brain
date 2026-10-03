@@ -31,3 +31,7 @@ python3 port/harness/fetch_control_raw_proxy.py --go "$go_binary" --rust "$rust_
   --output "${report%.json}-raw-proxy.json"
 python3 port/harness/fetch_control_raw_proxy_negative.py --go "$go_binary" --rust "$rust_binary" \
   --output "${report%.json}-raw-proxy-controls.json"
+python3 port/harness/fetch_control_proxy_auth.py --go "$go_binary" --rust "$rust_binary" \
+  --output "${report%.json}-proxy-auth.json"
+python3 port/harness/fetch_control_proxy_auth_negative.py --go "$go_binary" --rust "$rust_binary" \
+  --output "${report%.json}-proxy-auth-controls.json"

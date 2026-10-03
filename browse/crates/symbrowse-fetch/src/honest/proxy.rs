@@ -5,10 +5,33 @@ use url::Url;
 
 #[derive(Clone, Default)]
 pub(crate) struct ProxyConfig {
-    http: Option<Url>,
-    https: Option<Url>,
+    http: Option<SelectedProxy>,
+    https: Option<SelectedProxy>,
     no_proxy: String,
     cgi: bool,
+}
+
+/// Policy/dial URL and original encoded userinfo have distinct purposes.
+/// WHATWG URLs discard empty userinfo; authentication must retain its presence.
+#[derive(Clone)]
+pub(crate) struct SelectedProxy {
+    pub(crate) url: Url,
+    pub(crate) userinfo: Option<String>,
+}
+
+impl SelectedProxy {
+    fn new(url: Url, raw: &str) -> Self {
+        let authority = raw
+            .split_once("://")
+            .map_or(raw, |(_, rest)| rest)
+            .split(['/', '?', '#'])
+            .next()
+            .unwrap_or_default();
+        Self {
+            url,
+            userinfo: authority.rsplit_once('@').map(|(info, _)| info.to_owned()),
+        }
+    }
 }
 
 impl ProxyConfig {
@@ -32,10 +55,10 @@ impl ProxyConfig {
         target: &Url,
         raw_target: &str,
         explicit: Option<&str>,
-    ) -> Result<Option<Url>, FetchError> {
+    ) -> Result<Option<SelectedProxy>, FetchError> {
         if let Some(explicit) = explicit.filter(|v| !v.is_empty()) {
             return Url::parse(explicit)
-                .map(Some)
+                .map(|url| Some(SelectedProxy::new(url, explicit)))
                 .map_err(|e| FetchError::InvalidProxy(e.to_string()));
         }
         let proxy = match target.scheme() {
@@ -75,7 +98,7 @@ impl ProxyConfig {
     }
 }
 
-fn parse_proxy(raw: &str) -> Option<Url> {
+fn parse_proxy(raw: &str) -> Option<SelectedProxy> {
     if raw.is_empty() {
         return None;
     }
@@ -102,6 +125,7 @@ fn parse_proxy(raw: &str) -> Option<Url> {
                 .ok()
                 .filter(|u| u.host_str().is_some())
         })
+        .map(|url| SelectedProxy::new(url, raw))
 }
 
 fn normalize_ip(ip: IpAddr) -> IpAddr {

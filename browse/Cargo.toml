@@ -9,6 +9,8 @@ license = "Apache-2.0"
 repository = "https://github.com/danieljustus/symaira-browse"
 
 [workspace.dependencies]
+base64 = "=0.22.1"
+percent-encoding = "=2.3.2"
 aes-gcm = { version = "=0.11.1", features = ["zeroize"] }
 async-tungstenite = { version = "=0.32.1", default-features = false, features = ["tokio-runtime"] }
 chromiumoxide = { version = "=0.9.1", default-features = false }
