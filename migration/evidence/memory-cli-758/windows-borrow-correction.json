@@ -1,0 +1,16 @@
+{
+  "rejected_head": "160f24b37faf12a4cbc38873196e61bd5d5b834c",
+  "actual_failed_jobs": [
+    111289340216,
+    111289342468
+  ],
+  "actual_failed_runs": [
+    37152590336,
+    37152590317
+  ],
+  "error": "non-Unix flags.rs:205 fn os(Vec<u8>) needless_pass_by_value under strict pedantic Clippy",
+  "correction": "borrow byte slice at helper and callers; Unix still copies exactly once from stored values, Windows avoids redundant clone; same byte decoding, no lint suppression",
+  "focused_linux_memory_cli_tests": 27,
+  "strict_linux_clippy": "passed",
+  "native_windows": "fresh native CI required"
+}

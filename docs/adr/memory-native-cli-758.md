@@ -142,3 +142,9 @@ passed59 Memory/Gateway tests,83 actual Go evidence observations,4 Go DB
 tests and3 rejecting controls. Historical333 is not relabeled as a new run.
 This keeps one reviewable domain change and avoids merging a store with an
 unverified CLI adapter. Full #758 and release-level #649 remain open.
+
+Native Windows CI found needless_pass_by_value in the non-Unix byte helper
+at160f24b. Borrow its input and preserve both platform decoding rules; no
+lint waiver. Retain both original complete job logs and require fresh native
+acceptance. Targeted Linux Memory CLI tests and strict Clippy pass, then
+replay all590 actual process contracts on the new immutable source.
