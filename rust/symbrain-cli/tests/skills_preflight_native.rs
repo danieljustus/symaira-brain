@@ -1,5 +1,6 @@
 //! Native preflight regressions; every child has a bounded deadline.
 
+#[cfg(unix)]
 use std::ffi::OsString;
 use std::fs;
 #[cfg(unix)]
