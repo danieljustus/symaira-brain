@@ -341,7 +341,7 @@
         "all"
       ],
       "status": "fixture-ready",
-      "supplemental_process_gate": "port/harness/daemon_registry.py: immutable dcddcef0 Go API overlay, 108 actual CLI observations (including 48 invalid-session CLI failures), 20 recorded raw frames, 8 concurrent autostart clients and 3 actual Go-produced persisted v3 files per binary; 6 rejecting controls; only validated owned paths/PIDs/timestamps projected; all six native exact-head receipts required before parity"
+      "supplemental_process_gate": "port/harness/daemon_registry.py: immutable dcddcef0 Go API overlay, 474 Unix or 258 Windows CLI observations (original108 including48 invalid plus360 Unix/144 Windows literal edge cases and6 supported help pairs), 20 recorded raw frames, 8 concurrent autostart clients and3 actual Go-produced persisted v3 files per binary;8 rejecting controls; raw argv/output pairs literal; only verified unsupported Go session-id root-help advertisement omitted; only validated owned paths/PIDs/timestamps projected; all six native exact-head receipts required before parity"
     },
     {
       "id": "DMN-008",
@@ -359,7 +359,7 @@
         "windows-arm64"
       ],
       "status": "fixture-ready",
-      "supplemental_process_gate": "port/harness/daemon_registry.py: immutable dcddcef0 Go API overlay, 108 actual CLI observations (including 48 invalid-session CLI failures), 20 recorded raw frames, 8 concurrent autostart clients and 3 actual Go-produced persisted v3 files per binary; 6 rejecting controls; only validated owned paths/PIDs/timestamps projected; all six native exact-head receipts required before parity"
+      "supplemental_process_gate": "port/harness/daemon_registry.py: immutable dcddcef0 Go API overlay, 474 Unix or 258 Windows CLI observations (original108 including48 invalid plus360 Unix/144 Windows literal edge cases and6 supported help pairs), 20 recorded raw frames, 8 concurrent autostart clients and3 actual Go-produced persisted v3 files per binary;8 rejecting controls; raw argv/output pairs literal; only verified unsupported Go session-id root-help advertisement omitted; only validated owned paths/PIDs/timestamps projected; all six native exact-head receipts required before parity"
     },
     {
       "id": "CFG-001",

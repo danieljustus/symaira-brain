@@ -1,7 +1,8 @@
 //! Read-only daemon/session inspection shares the unified CLI error contract.
 
-use super::{Action, ParseError, parse_format, required_value, write_stdout};
+use super::{Action, ParseError, parse_bool, parse_format, required_value, write_stdout};
 use std::{
+    ffi::{OsStr, OsString},
     io::{self, Write},
     process::ExitCode,
 };
@@ -11,10 +12,11 @@ use symbrowse_core::{
 };
 use symbrowse_daemon::{Client, ClientError, ClientOptions, Frame, default_socket_path};
 
-pub(super) fn run_daemon_lifecycle(session: String, command: String, format: Format) -> ExitCode {
-    if let Some(status) = validate_cli_session(&session, format) {
-        return status;
-    }
+pub(super) fn run_daemon_lifecycle(session: OsString, command: String, format: Format) -> ExitCode {
+    let session = match validate_cli_session(&session, format) {
+        Ok(session) => session.to_owned(),
+        Err(status) => return status,
+    };
     let client = Client::new(ClientOptions {
         socket_path: default_socket_path(&session),
         session: session.clone(),
@@ -81,14 +83,65 @@ pub(super) fn render_result(
     render_envelope(envelope, format, status)
 }
 
-fn validate_cli_session(session: &str, format: Format) -> Option<ExitCode> {
-    if symbrowse_daemon::validate_session(session) {
-        return None;
+/// Preserve root output flags consumed before a lifecycle command group.
+pub(super) fn global_output(
+    values: &[String],
+    command_index: usize,
+) -> Result<(String, bool), ParseError> {
+    let mut output = "text".to_owned();
+    let mut json = false;
+    let mut index = 0;
+    while index < command_index {
+        match values[index].as_str() {
+            "--json" => json = true,
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            "--output" => {
+                index += 1;
+                output = required_value(values, index, "--output")?.to_owned();
+            }
+            value if value.starts_with("--output=") => output = value[9..].to_owned(),
+            // Values of unrelated accepted root flags are not output flags.
+            "--log-level" | "--log-format" | "--config-dir" | "--cache-dir" | "--state-dir"
+            | "--executable-path" => index += 1,
+            _ => {}
+        }
+        index += 1;
+    }
+    Ok((output, json))
+}
+
+/// Called only at an accepted parser flag's actual value index.
+pub(super) fn session_value(value: &OsStr, inline: bool) -> OsString {
+    if !inline {
+        return value.to_owned();
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::ffi::{OsStrExt, OsStringExt};
+        OsString::from_vec(value.as_bytes()[10..].to_vec())
+    }
+    #[cfg(not(unix))]
+    {
+        OsString::from(&value.to_string_lossy()[10..])
+    }
+}
+
+fn validate_cli_session(session: &OsStr, format: Format) -> Result<&str, ExitCode> {
+    if let Some(value) = session.to_str()
+        && symbrowse_daemon::validate_session(value)
+    {
+        return Ok(value);
     }
     // Socket-path validation is a generic CLI failure in Go. It precedes
     // transport/autostart and is distinct from raw IPC's invalid_session.
-    let message = symbrowse_daemon::ServerError::InvalidSession(session.to_owned()).to_string();
-    Some(render_envelope(
+    #[cfg(unix)]
+    let message = {
+        use std::os::unix::ffi::OsStrExt;
+        symbrowse_daemon::invalid_session_message(session.as_bytes())
+    };
+    #[cfg(not(unix))]
+    let message = symbrowse_daemon::invalid_session_message(session.to_string_lossy().as_bytes());
+    Err(render_envelope(
         Envelope::failure(ErrorCode::Internal, message),
         format,
         1,
@@ -118,8 +171,12 @@ fn render_envelope(envelope: Envelope, format: Format, status: u8) -> ExitCode {
     ExitCode::from(status)
 }
 
-pub(super) fn parse_session(values: &[String], command_index: usize) -> Result<Action, ParseError> {
-    let mut session = "default".to_owned();
+pub(super) fn parse_session(
+    values: &[String],
+    raw: &[OsString],
+    command_index: usize,
+) -> Result<Action, ParseError> {
+    let mut session = OsString::from("default");
     let mut subcommand = None;
     let mut format = Format::Text;
     let mut json = false;
@@ -129,9 +186,12 @@ pub(super) fn parse_session(values: &[String], command_index: usize) -> Result<A
             _ if index == command_index => {}
             "--session" => {
                 index += 1;
-                session = required_value(values, index, "--session")?.to_owned();
+                required_value(values, index, "--session")?;
+                session = session_value(&raw[index], false);
             }
-            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with("--session=") => {
+                session = session_value(&raw[index], true);
+            }
             "--json" | "--json=true" => json = true,
             "--json=false" => json = false,
             "--output" => {
@@ -163,21 +223,22 @@ pub(super) fn parse_session(values: &[String], command_index: usize) -> Result<A
 
 pub(super) fn help(subcommand: Option<&str>) -> String {
     match subcommand {
-        Some(command @ ("list" | "info")) => format!("{}\n\nUsage:\n  symbrowse session {command} [flags]\n\nFlags:\n  -h, --help   help for {command}\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n", if command == "list" { "List daemon-owned sessions" } else { "Show session information" }),
-        _ => "Inspect daemon-owned sessions\n\nUsage:\n  symbrowse session [command]\n\nAvailable Commands:\n  info        Show session information\n  list        List daemon-owned sessions\n\nFlags:\n  -h, --help             help for session\n      --session string   session name (default \"default\")\n".into(),
+        Some(command @ ("list" | "info")) => format!("{}\n\nUsage:\n  symbrowse session {command} [flags]\n\nFlags:\n  -h, --help   help for {command}\n\nGlobal Flags:\n      --json             print the unified machine-readable output envelope (shorthand for --output json)\n      --output string    output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n      --session string   session name (default \"default\")\n", if command == "list" { "List sessions" } else { "Show session information" }),
+        _ => "Inspect browser sessions\n\nUsage:\n  symbrowse session [command]\n\nAvailable Commands:\n  info        Show session information\n  list        List sessions\n\nFlags:\n  -h, --help             help for session\n      --session string   session name (default \"default\")\n\nGlobal Flags:\n      --json            print the unified machine-readable output envelope (shorthand for --output json)\n      --output string   output format: text, json or yaml (--json is shorthand for --output json) (default \"text\")\n\nUse \"symbrowse session [command] --help\" for more information about a command.\n".into(),
     }
 }
 
 pub(super) fn run_state_operation(
-    session: String,
+    session: OsString,
     command: String,
     name: Option<String>,
     older_than: Option<i64>,
     format: Format,
 ) -> ExitCode {
-    if let Some(status) = validate_cli_session(&session, format) {
-        return status;
-    }
+    let session = match validate_cli_session(&session, format) {
+        Ok(session) => session.to_owned(),
+        Err(status) => return status,
+    };
     let args = match (name, older_than) {
         (Some(name), _) => Some(serde_json::json!({"name": name})),
         (None, Some(days)) => Some(serde_json::json!({"older_than_days": days})),
@@ -272,7 +333,12 @@ mod tests {
             let values: Vec<_> = arguments.iter().map(|v| (*v).to_owned()).collect();
             let command_index = values.iter().position(|v| v == "session").unwrap();
             assert_eq!(
-                parse_session(&values, command_index).unwrap(),
+                parse_session(
+                    &values,
+                    &values.iter().map(OsString::from).collect::<Vec<_>>(),
+                    command_index
+                )
+                .unwrap(),
                 Action::DaemonLifecycle {
                     session: "alpha".into(),
                     command: "session.list".into(),

@@ -84,3 +84,50 @@ retain invalid_session and their separate protocol message/policy. The process
 gate executes the 48 original failures in addition to its existing 60 observations,
 asserts that no daemon/profile/state files are created, and rejects mutated CLI
 exit/code as additional controls. No global Core error exit code is changed.
+
+## Preserve selected raw argv and supported session help
+
+Independent full review of clean `5ed6f17` found a second boundary gap: the CLI
+converted every argument to a lossy String before the corrected validator. The
+actual 120-pair probe has 36 byte mismatches for Unix FF, truncated E282 and
+overlong C0AF session arguments across four verbs and all three output formats.
+Valid UTF-8 U+FFFD is a distinct, matching control. Preserve that complete review,
+its byte-encoded observations and original executable. Six actual help pairs also
+retain four original wording/format differences and two matching info controls.
+
+Retain the selected session as OsString at the parser's actual flag-consumption
+index. Separated/inline values and last override must reach validation intact.
+Only a valid ASCII domain name becomes a String for transport. Extend the existing
+Go quote formatter to escape each malformed UTF-8 byte separately, preserving its
+exhaustively checked valid-scalar behavior. The shared socket diagnostic owns the
+complete grammar; raw IPC keeps its distinct invalid_session policy and message.
+On Windows, process arguments use the platform's Unicode representation; Unix raw
+byte coverage is not presented as a Windows argv claim.
+
+Adding actual flag-position observations reproduced further original5ed adapter
+differences: root output flags were ignored by lifecycle/state adapters, and a
+session flag between group and verb could select daemon-run or a usage error.
+The extended original executable gate retained 190 failed/170 matching invalid
+CLI pairs, plus four failed/two matching supported help pairs. Resolve selected
+verb and output consistently while preserving help precedence and final override.
+The corrected development executable matches all360 additional literal invalid
+pairs and six supported help comparisons. Fresh clean-source proof remains required.
+
+Restore Go's observed “Inspect browser sessions” and “List sessions” descriptions,
+global flags and help footer. The session root continues to advertise only the
+implemented list/info commands. The comparator verifies and removes exactly the
+known Go session-id advertisement from those two root observations; every other
+help byte compares literally. List/info need no projection. Implementing session
+id is outside this registry increment and is not silently advertised.
+
+The native gate retains its original108 CLI observations and now adds360 literal
+edge observations on Unix (144 on Windows) plus six help observations:474/258
+CLI observations per implementation. Each edge retains literal argument, exit,
+stdout and stderr bytes, verifies no files were created, and exercises separated,
+inline, overwritten, root-output and before-verb flag positions. Raw frames,
+eight concurrent autostart clients, seven Go constructor roots and three actual
+Go state files remain covered. Eight receipt mutation controls reject owner,
+error, timestamp, exit/code, byte-loss and help-description regressions. These
+comparator mutations are distinguished from actual executable observations.
+Six fresh exact-head native jobs and independent review remain mandatory; the
+state-key bridge stays separate and #772/RUST-006 remain incomplete.

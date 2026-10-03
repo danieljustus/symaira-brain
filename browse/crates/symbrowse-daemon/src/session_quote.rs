@@ -2,7 +2,43 @@
 use std::fmt::Write;
 
 pub(crate) fn quote(value: &str) -> String {
+    quote_bytes(value.as_bytes())
+}
+
+/// Formats the socket-validation diagnostic without discarding Unix argv bytes.
+#[must_use]
+pub fn invalid_session_message(value: &[u8]) -> String {
+    format!(
+        "invalid session {}: use 1-64 letters, digits, '.', '_' or '-'",
+        quote_bytes(value)
+    )
+}
+
+fn quote_bytes(mut value: &[u8]) -> String {
     let mut result = String::from("\"");
+    while !value.is_empty() {
+        match std::str::from_utf8(value) {
+            Ok(text) => {
+                append_text(&mut result, text);
+                break;
+            }
+            Err(error) => {
+                let (valid, rest) = value.split_at(error.valid_up_to());
+                append_text(
+                    &mut result,
+                    std::str::from_utf8(valid).expect("validated prefix"),
+                );
+                // Go's DecodeRune consumes one byte for malformed UTF-8.
+                write!(result, "\\x{:02x}", rest[0]).expect("writing to a String cannot fail");
+                value = &rest[1..];
+            }
+        }
+    }
+    result.push('"');
+    result
+}
+
+fn append_text(result: &mut String, value: &str) {
     for ch in value.chars() {
         match ch {
             '"' => result.push_str("\\\""),
@@ -30,14 +66,24 @@ pub(crate) fn quote(value: &str) -> String {
             }
         }
     }
-    result.push('"');
-    result
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use sha2::{Digest, Sha256};
+
+    #[test]
+    fn malformed_bytes_remain_distinct_from_real_replacement_scalars() {
+        for (value, expected) in [
+            (b"bad\xffsession".as_slice(), "\"bad\\xffsession\""),
+            (b"bad\xe2\x82session".as_slice(), "\"bad\\xe2\\x82session\""),
+            (b"bad\xc0\xafsession".as_slice(), "\"bad\\xc0\\xafsession\""),
+            ("bad\u{fffd}session".as_bytes(), "\"bad\u{fffd}session\""),
+        ] {
+            assert_eq!(quote_bytes(value), expected);
+        }
+    }
 
     #[test]
     fn every_valid_unicode_scalar_matches_actual_pinned_go_quote_digest() {

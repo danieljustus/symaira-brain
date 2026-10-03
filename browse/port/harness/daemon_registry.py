@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import concurrent.futures
 import copy
 from datetime import datetime
@@ -22,6 +23,9 @@ SPEC = importlib.util.spec_from_file_location("process", HERE / "daemon_process.
 process = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(process)
 harness = process.harness
+CLI_SPEC = importlib.util.spec_from_file_location("registry_cli", HERE / "daemon_registry_cli.py")
+cli_edges = importlib.util.module_from_spec(CLI_SPEC)
+CLI_SPEC.loader.exec_module(cli_edges)
 
 
 def environment(root: Path) -> dict:
@@ -91,6 +95,7 @@ def observe(binary: Path, session: str, fixtures: dict[str, str]) -> dict:
                        for name in ("bad session", "bad\x1bsession", "bad\u0301session", "bad\u00adsession")
                        for output in ([], ["--json"], ["--output", "yaml"])]
         assert sorted(p.relative_to(root).as_posix() for p in root.rglob("*")) == before_invalid, "invalid CLI created daemon/profile/state files"
+        extra_cli = cli_edges.observe(binary, root, env)
         child, endpoint = start(binary, root, env, session)
         frames = [{"cmd": "session.info"}, {"cmd": "session.info", "session": "unknown"}]
         frames += [{"cmd": "daemon.ping", "session": name} for name in
@@ -173,6 +178,7 @@ def observe(binary: Path, session: str, fixtures: dict[str, str]) -> dict:
                 pass
         return {"root": str(root), "session": session, "begin": began, "end": time.time(),
                 "pid": first_pid, "restart_pid": restart_pid, "missing": missing, "invalid_cli": invalid_cli,
+                "cli_edges": extra_cli,
                 "registry": records, "inspection": inspected, "first_stop": first_stop,
                 "restart_stop": restart_stop, "restart": restarted,
                 "autostart": clients, "owner": owner, "owner_info": info, "state_commands": state_commands}
@@ -180,6 +186,7 @@ def observe(binary: Path, session: str, fixtures: dict[str, str]) -> dict:
 
 def normalize(record: dict, *, rust: bool) -> dict:
     value = copy.deepcopy(record)
+    value.pop("cli_edges")  # compare() verifies literal bytes before this projection.
     root, begin, end = value.pop("root"), value.pop("begin"), value.pop("end")
     pids = {value["pid"], value["restart_pid"], value["owner"]["data"]["pid"]}
     assert all(isinstance(pid, int) and pid > 0 for pid in pids)
@@ -267,12 +274,13 @@ def compare(case: dict) -> bool:
     # These generic validation failures have no paths/PIDs/timestamps: preserve
     # literal arguments, exit, stdout and stderr without any projection.
     assert case["go"]["invalid_cli"] == case["rust"]["invalid_cli"], "invalid-session CLI bytes differ"
+    cli_edges.compare(case["go"]["cli_edges"], case["rust"]["cli_edges"])
     return normalize(case["go"], rust=False) == normalize(case["rust"], rust=True)
 
 
 def controls(case: dict) -> list[dict]:
     rejected = []
-    for name in ("foreign-owner", "previous-owner-after-restart", "missing-error-detail", "invalid-timestamp", "invalid-cli-exit", "invalid-cli-protocol-code"):
+    for name in ("foreign-owner", "previous-owner-after-restart", "missing-error-detail", "invalid-timestamp", "invalid-cli-exit", "invalid-cli-protocol-code", "raw-cli-byte-loss", "help-description"):
         bad = copy.deepcopy(case)
         if name == "foreign-owner":
             bad["rust"]["owner_info"]["data"]["pid"] += 1
@@ -286,6 +294,15 @@ def controls(case: dict) -> list[dict]:
             response = json.loads(bad["rust"]["invalid_cli"][1]["stdout"])
             response["error"]["code"] = "invalid_session"
             bad["rust"]["invalid_cli"][1]["stdout"] = json.dumps(response)
+        elif name in ("raw-cli-byte-loss", "help-description"):
+            group = "invalid" if name == "raw-cli-byte-loss" else "help"
+            record = bad["rust"]["cli_edges"][group][3 if group == "invalid" else 0]
+            field = "stderr_base64" if group == "invalid" else "stdout_base64"
+            raw = base64.b64decode(record[field])
+            raw = raw.replace(b"\\xff", "\ufffd".encode()) if group == "invalid" and os.name == "posix" else raw + b" changed diagnostic"
+            if group == "help":
+                raw = base64.b64decode(record[field]).replace(b"Inspect browser sessions", b"Inspect daemon-owned sessions")
+            record[field] = base64.b64encode(raw).decode()
         else:
             bad["rust"]["registry"][0]["response"]["data"]["started_at"] = "1970-01-01T00:00:00Z"
         try:
@@ -344,7 +361,8 @@ def main() -> int:
               "go_binary_sha256": process.digest(args.go), "rust_binary_sha256": process.digest(args.rust),
               "candidate_source_sha256": {f: process.digest(root / f) for f in files},
               "go_source_sha256": {f: process.digest(source / f) for f in go_files},
-              "counts_per_binary": {"cli_observations": 108, "invalid_session_cli_observations": 48, "recorded_raw_frames": 20,
+              "counts_per_binary": {"cli_observations": 108 + len(case["go"]["cli_edges"]["invalid"]) + 6, "invalid_session_cli_observations": 48,
+                                    "literal_cli_edge_observations": len(case["go"]["cli_edges"]["invalid"]), "implemented_help_observations": 6, "recorded_raw_frames": 20,
                                     "concurrent_clients": 8, "persisted_go_fixtures": 3},
               "case": case, "oracle_api": api, "matches": case["matches"], "negative_controls": controls(case)}
     args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -354,7 +372,7 @@ def main() -> int:
         for key in left:
             if left[key] != right[key]:
                 print(f"difference in {key}: Go={left[key]!r}; Rust={right[key]!r}")
-    print(f"108 CLI observations (48 invalid-session) + 20 raw frames + 8 concurrent clients per binary: matches={case['matches']}; 6 controls rejected")
+    print(f"{report['counts_per_binary']['cli_observations']} CLI observations (48 original invalid + {len(case['go']['cli_edges']['invalid'])} literal edge + 6 help) + 20 raw frames + 8 concurrent clients per binary: matches={case['matches']}; 8 controls rejected")
     return 0 if case["matches"] else 1
 
 
