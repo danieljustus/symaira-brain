@@ -85,6 +85,12 @@ def observe(binary: Path, session: str, fixtures: dict[str, str]) -> dict:
                     missing.append(cli(binary, root, env, [*command.split(), "--session", session, *output]))
         missing.append(cli(binary, root, env, ["state", "list", "--session", session, "--json"]))
         env["SYMBROWSE_NO_AUTOSTART"] = "1"
+        before_invalid = sorted(p.relative_to(root).as_posix() for p in root.rglob("*"))
+        invalid_cli = [cli(binary, root, env, [*command.split(), "--session", name, *output])
+                       for command in ("session list", "session info", "daemon status", "state list")
+                       for name in ("bad session", "bad\x1bsession", "bad\u0301session", "bad\u00adsession")
+                       for output in ([], ["--json"], ["--output", "yaml"])]
+        assert sorted(p.relative_to(root).as_posix() for p in root.rglob("*")) == before_invalid, "invalid CLI created daemon/profile/state files"
         child, endpoint = start(binary, root, env, session)
         frames = [{"cmd": "session.info"}, {"cmd": "session.info", "session": "unknown"}]
         frames += [{"cmd": "daemon.ping", "session": name} for name in
@@ -166,7 +172,7 @@ def observe(binary: Path, session: str, fixtures: dict[str, str]) -> dict:
             except OSError:
                 pass
         return {"root": str(root), "session": session, "begin": began, "end": time.time(),
-                "pid": first_pid, "restart_pid": restart_pid, "missing": missing,
+                "pid": first_pid, "restart_pid": restart_pid, "missing": missing, "invalid_cli": invalid_cli,
                 "registry": records, "inspection": inspected, "first_stop": first_stop,
                 "restart_stop": restart_stop, "restart": restarted,
                 "autostart": clients, "owner": owner, "owner_info": info, "state_commands": state_commands}
@@ -240,9 +246,9 @@ def normalize(record: dict, *, rust: bool) -> dict:
         text = re.sub(r"(?m)^(\s*(?:started_at|last_activity):\s*)([^\n]+)$", timestamp, text)
         return re.sub(r"(?m)^(\s*pid:\s*)([0-9]+(?:\.[0-9]+)?(?:[eE][+-]?[0-9]+)?)$", pid, text)
 
-    for group in ("missing", "inspection", "autostart", "state_commands"):
+    for group in ("missing", "invalid_cli", "inspection", "autostart", "state_commands"):
         for observed in value[group]:
-            failed = group == "missing" or group == "state_commands" and "missing" in observed["arguments"]
+            failed = group in ("missing", "invalid_cli") or group == "state_commands" and "missing" in observed["arguments"]
             assert observed["exit"] == (1 if failed else 0), observed
             if not failed:
                 assert not observed["stderr"], observed
@@ -258,12 +264,15 @@ def normalize(record: dict, *, rust: bool) -> dict:
 
 
 def compare(case: dict) -> bool:
+    # These generic validation failures have no paths/PIDs/timestamps: preserve
+    # literal arguments, exit, stdout and stderr without any projection.
+    assert case["go"]["invalid_cli"] == case["rust"]["invalid_cli"], "invalid-session CLI bytes differ"
     return normalize(case["go"], rust=False) == normalize(case["rust"], rust=True)
 
 
 def controls(case: dict) -> list[dict]:
     rejected = []
-    for name in ("foreign-owner", "previous-owner-after-restart", "missing-error-detail", "invalid-timestamp"):
+    for name in ("foreign-owner", "previous-owner-after-restart", "missing-error-detail", "invalid-timestamp", "invalid-cli-exit", "invalid-cli-protocol-code"):
         bad = copy.deepcopy(case)
         if name == "foreign-owner":
             bad["rust"]["owner_info"]["data"]["pid"] += 1
@@ -271,6 +280,12 @@ def controls(case: dict) -> list[dict]:
             bad["rust"]["restart"]["data"]["sessions"][0]["pid"] = bad["rust"]["pid"]
         elif name == "missing-error-detail":
             bad["rust"]["missing"][1]["stdout"] = '{"success":false,"error":{"code":"daemon_unavailable"}}'
+        elif name == "invalid-cli-exit":
+            bad["rust"]["invalid_cli"][0]["exit"] = 7
+        elif name == "invalid-cli-protocol-code":
+            response = json.loads(bad["rust"]["invalid_cli"][1]["stdout"])
+            response["error"]["code"] = "invalid_session"
+            bad["rust"]["invalid_cli"][1]["stdout"] = json.dumps(response)
         else:
             bad["rust"]["registry"][0]["response"]["data"]["started_at"] = "1970-01-01T00:00:00Z"
         try:
@@ -329,7 +344,7 @@ def main() -> int:
               "go_binary_sha256": process.digest(args.go), "rust_binary_sha256": process.digest(args.rust),
               "candidate_source_sha256": {f: process.digest(root / f) for f in files},
               "go_source_sha256": {f: process.digest(source / f) for f in go_files},
-              "counts_per_binary": {"cli_observations": 60, "recorded_raw_frames": 20,
+              "counts_per_binary": {"cli_observations": 108, "invalid_session_cli_observations": 48, "recorded_raw_frames": 20,
                                     "concurrent_clients": 8, "persisted_go_fixtures": 3},
               "case": case, "oracle_api": api, "matches": case["matches"], "negative_controls": controls(case)}
     args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -339,7 +354,7 @@ def main() -> int:
         for key in left:
             if left[key] != right[key]:
                 print(f"difference in {key}: Go={left[key]!r}; Rust={right[key]!r}")
-    print(f"60 CLI observations + 20 raw frames + 8 concurrent clients per binary: matches={case['matches']}; 4 controls rejected")
+    print(f"108 CLI observations (48 invalid-session) + 20 raw frames + 8 concurrent clients per binary: matches={case['matches']}; 6 controls rejected")
     return 0 if case["matches"] else 1
 
 

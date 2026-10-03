@@ -68,3 +68,19 @@ four original failing strings. Future toolchain Unicode changes require a fresh
 Go observation; changing to Rust's Debug tables would reintroduce the contract
 mismatch. This quoting change affects diagnostics, not session validity or
 authorization, and does not permit otherwise invalid IDs.
+
+Independent review of `b363762` reproduced 48 CLI validation differences across
+session list/info, daemon status and state list, four invalid spellings and all
+three output formats. Correct raw IPC quoting did not fix the CLI adapters:
+lifecycle commands returned internal exit7 without the complete grammar message,
+and state list returned protocol invalid_session/exit2 instead of Go's generic
+CLI internal/exit1. Preserve that original rejected review and all literal pairs.
+
+CLI session validation now precedes endpoint/client construction in both adapters.
+It uses the socket-validation grammar and the existing exhaustive Go-compatible
+quote formatter, renders internal in the requested CLI format and explicitly
+uses Go's exit1. Keep this conversion at the CLI boundary: raw daemon requests
+retain invalid_session and their separate protocol message/policy. The process
+gate executes the 48 original failures in addition to its existing 60 observations,
+asserts that no daemon/profile/state files are created, and rejects mutated CLI
+exit/code as additional controls. No global Core error exit code is changed.

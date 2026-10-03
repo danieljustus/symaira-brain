@@ -139,7 +139,8 @@ impl std::fmt::Display for ServerError {
             Self::AlreadyRunning => f.write_str("a daemon is already running for this session"),
             Self::InvalidSession(s) => write!(
                 f,
-                "invalid session {s:?}: use 1-64 letters, digits, '.', '_' or '-'"
+                "invalid session {}: use 1-64 letters, digits, '.', '_' or '-'",
+                crate::session_quote::quote(s)
             ),
             Self::Unsupported => f.write_str("daemon sockets are not supported on this platform"),
         }

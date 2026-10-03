@@ -20,9 +20,9 @@ built by Go 1.26.7. These observations precede the corrections.
   describe the original run; reruns must pass their owned binary/source paths.
 
 The new source-bound `browse/port/harness/daemon_registry.py` separately performs
-60 actual CLI observations and 20 recorded raw frames per binary, eight actual
+108 actual CLI observations and 20 recorded raw frames per binary, eight actual
 concurrent autostart clients, three actual Go-produced state files, unchanged
-retained file bytes and four rejecting controls. Native exact-head receipts on
+retained file bytes and six rejecting controls. Native exact-head receipts on
 all six workflow runners remain mandatory. No observed/schema correction
 completes the absent runtime state-key bridge or waives earlier Go failures.
 
@@ -34,3 +34,12 @@ pinned standard library in disposable executions, not modified oracle source.
 ranges and digest covering every 1,112,064 valid Unicode scalar. The Rust quote
 regression executes that full scalar set; the actual process gate separately
 verifies all four strings through the production decoder and error path.
+
+The independent rejected `b363762` review is preserved as
+`independent-review-b363.md` / `.json`, and its 48 literal mismatching pairs are
+`independent-invalid-cli-b363.json`. The original Rust executable is retained at
+`/tmp/symaira-registry-b363-rust` with SHA
+`91de2c212944e742e509bcc805136e90e98e2bda14c917e2bd553823a868a808`.
+The CLI correction adds these 48 actual pairs to the permanent gate: 108 total
+CLI observations plus 20 raw frames per implementation, with six receipt mutation
+controls. Raw protocol invalid_session remains distinct from CLI internal/exit1.

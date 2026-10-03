@@ -12,13 +12,8 @@ use symbrowse_core::{
 use symbrowse_daemon::{Client, ClientError, ClientOptions, Frame, default_socket_path};
 
 pub(super) fn run_daemon_lifecycle(session: String, command: String, format: Format) -> ExitCode {
-    if !symbrowse_daemon::validate_session(&session) {
-        return render_result(
-            Err(ClientError::Io(io::Error::other(format!(
-                "invalid session {session:?}"
-            )))),
-            format,
-        );
+    if let Some(status) = validate_cli_session(&session, format) {
+        return status;
     }
     let client = Client::new(ClientOptions {
         socket_path: default_socket_path(&session),
@@ -83,6 +78,24 @@ pub(super) fn render_result(
         .error
         .as_ref()
         .map_or(0, |error| error.code.exit_code());
+    render_envelope(envelope, format, status)
+}
+
+fn validate_cli_session(session: &str, format: Format) -> Option<ExitCode> {
+    if symbrowse_daemon::validate_session(session) {
+        return None;
+    }
+    // Socket-path validation is a generic CLI failure in Go. It precedes
+    // transport/autostart and is distinct from raw IPC's invalid_session.
+    let message = symbrowse_daemon::ServerError::InvalidSession(session.to_owned()).to_string();
+    Some(render_envelope(
+        Envelope::failure(ErrorCode::Internal, message),
+        format,
+        1,
+    ))
+}
+
+fn render_envelope(envelope: Envelope, format: Format, status: u8) -> ExitCode {
     match envelope.render(format) {
         Ok(_) if !envelope.success && format == Format::Text => {
             let message = envelope
@@ -162,6 +175,9 @@ pub(super) fn run_state_operation(
     older_than: Option<i64>,
     format: Format,
 ) -> ExitCode {
+    if let Some(status) = validate_cli_session(&session, format) {
+        return status;
+    }
     let args = match (name, older_than) {
         (Some(name), _) => Some(serde_json::json!({"name": name})),
         (None, Some(days)) => Some(serde_json::json!({"older_than_days": days})),
