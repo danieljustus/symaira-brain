@@ -1,6 +1,6 @@
 //! Profile template rendering and atomic creation for the CLI.
 
-use std::fs::{self, OpenOptions};
+use std::fs;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 
@@ -85,7 +85,7 @@ pub fn render_template(from: &str, name: &str) -> Result<String, String> {
 }
 
 /// Creates a profile below `dir`, preserving the Go command's directory and
-/// file modes and using a same-directory atomic rename for the final file.
+/// file modes and atomically publishing without replacing an existing file.
 ///
 /// # Errors
 ///
@@ -147,47 +147,23 @@ fn set_dir_mode(_path: &Path, _mode: u32) {}
 
 fn atomic_write_new(path: &Path, contents: &[u8]) -> io::Result<()> {
     let parent = path.parent().unwrap_or_else(|| Path::new("."));
-    let file_name = path
-        .file_name()
-        .and_then(|name| name.to_str())
-        .unwrap_or("profile.toml");
-    let mut temp_path = None;
-    let mut temp_file = None;
-    for attempt in 0..100u32 {
-        let candidate = parent.join(format!(".{file_name}.{attempt}.tmp"));
-        match OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&candidate)
-        {
-            Ok(file) => {
-                temp_path = Some(candidate);
-                temp_file = Some(file);
-                break;
-            }
-            Err(err) if err.kind() == io::ErrorKind::AlreadyExists => {}
-            Err(err) => return Err(err),
-        }
-    }
-    let temp_path = temp_path.ok_or_else(|| {
-        io::Error::new(
-            io::ErrorKind::AlreadyExists,
-            "could not allocate temporary profile file",
-        )
-    })?;
-    let mut file = temp_file.expect("temporary path and file are created together");
+    // Each writer owns a fresh name. Reusing deterministic temporary slots can
+    // encounter Windows delete-pending files from another concurrent writer.
+    let mut file = tempfile::Builder::new()
+        .prefix(".profile-")
+        .suffix(".tmp")
+        .tempfile_in(parent)?;
     #[cfg(unix)]
-    set_mode(&file, 0o600)?;
+    set_mode(file.as_file(), 0o600)?;
     #[cfg(not(unix))]
-    set_mode(&file, 0o600);
+    set_mode(file.as_file(), 0o600);
     file.write_all(contents)?;
-    file.sync_all()?;
-    drop(file);
-    // A hard link publishes atomically but, unlike rename, fails with
-    // AlreadyExists instead of replacing a concurrent creator's profile (#461).
-    let published = fs::hard_link(&temp_path, path);
-    let _ = fs::remove_file(&temp_path);
-    published
+    file.as_file().sync_all()?;
+    // Platform no-replace publication preserves the winner's complete bytes.
+    // On any earlier/publication error, the owned temporary file is dropped.
+    file.persist_noclobber(path)
+        .map(|_| ())
+        .map_err(|error| error.error)
 }
 
 #[cfg(unix)]
@@ -202,39 +178,78 @@ fn set_mode(_file: &std::fs::File, _mode: u32) {}
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs::OpenOptions;
 
     #[test]
     fn concurrent_creators_never_clobber_each_other() {
         let temp_dir = tempfile::tempdir().expect("tempdir");
-        let dir = temp_dir.path().join("profiles");
-        let results: Vec<_> = std::thread::scope(|scope| {
-            let handles: Vec<_> = (0..8)
-                .map(|i| {
-                    let dir = &dir;
-                    let from = if i % 2 == 0 { "personal" } else { "restricted" };
-                    scope.spawn(move || create_in(dir, "race", from).map(|_| from))
+        for round in 0..32 {
+            let dir = temp_dir.path().join(format!("profiles-{round}"));
+            let barrier = std::sync::Barrier::new(8);
+            let results: Vec<_> = std::thread::scope(|scope| {
+                let handles: Vec<_> = (0..8)
+                    .map(|i| {
+                        let dir = &dir;
+                        let from = if i % 2 == 0 { "personal" } else { "restricted" };
+                        let barrier = &barrier;
+                        scope.spawn(move || {
+                            barrier.wait();
+                            create_in(dir, "race", from).map(|_| from)
+                        })
+                    })
+                    .collect();
+                handles.into_iter().map(|h| h.join().unwrap()).collect()
+            });
+            let winners: Vec<_> = results.iter().filter_map(|r| r.as_ref().ok()).collect();
+            assert_eq!(winners.len(), 1, "{results:?}");
+            for loser in results.iter().filter_map(|r| r.as_ref().err()) {
+                assert_eq!(loser.kind(), io::ErrorKind::AlreadyExists);
+            }
+            let written = fs::read_to_string(dir.join("race.toml")).expect("profile");
+            assert_eq!(written, render_template(winners[0], "race").unwrap());
+            let leftovers = fs::read_dir(&dir).unwrap().count();
+            assert_eq!(leftovers, 1, "temporary files must be cleaned up");
+            println!(
+                "PROFILE_CREATE_THREAD_RACE {}",
+                serde_json::json!({
+                    "round": round, "creators": 8,
+                    "results": results.iter().map(|result| match result {
+                        Ok(from) => format!("winner:{from}"),
+                        Err(error) => format!("error:{:?}", error.kind()),
+                    }).collect::<Vec<_>>(),
+                    "winner_template": winners[0], "winner_bytes": written,
+                    "remaining_profile_files": leftovers
                 })
-                .collect();
-            handles.into_iter().map(|h| h.join().unwrap()).collect()
-        });
-        let winners: Vec<_> = results.iter().filter_map(|r| r.as_ref().ok()).collect();
-        assert_eq!(winners.len(), 1, "{results:?}");
-        for loser in results.iter().filter_map(|r| r.as_ref().err()) {
-            assert_eq!(loser.kind(), io::ErrorKind::AlreadyExists);
+            );
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                let mode = fs::metadata(dir.join("race.toml"))
+                    .unwrap()
+                    .permissions()
+                    .mode();
+                assert_eq!(mode & 0o777, 0o600);
+            }
         }
-        let written = fs::read_to_string(dir.join("race.toml")).expect("profile");
-        assert_eq!(written, render_template(winners[0], "race").unwrap());
-        let leftovers = fs::read_dir(&dir).unwrap().count();
-        assert_eq!(leftovers, 1, "temporary files must be cleaned up");
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            let mode = fs::metadata(dir.join("race.toml"))
-                .unwrap()
-                .permissions()
-                .mode();
-            assert_eq!(mode & 0o777, 0o600);
-        }
+    }
+
+    #[test]
+    fn failed_publication_cleans_up_only_its_owned_temporary_file() {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("winner.toml");
+        fs::write(&path, b"existing winner").unwrap();
+        assert_eq!(
+            atomic_write_new(&path, b"loser bytes").unwrap_err().kind(),
+            io::ErrorKind::AlreadyExists
+        );
+        assert_eq!(fs::read(&path).unwrap(), b"existing winner");
+        assert_eq!(fs::read_dir(root.path()).unwrap().count(), 1);
+
+        let directory = root.path().join("directory.toml");
+        fs::create_dir(&directory).unwrap();
+        assert!(atomic_write_new(&directory, b"never published").is_err());
+        assert!(directory.is_dir());
+        assert_eq!(fs::read_dir(root.path()).unwrap().count(), 2);
     }
 
     #[cfg(unix)]
