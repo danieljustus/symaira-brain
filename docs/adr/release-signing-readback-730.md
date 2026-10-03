@@ -44,3 +44,14 @@ The release scripts and their reviewed source hashes are unchanged. The three
 new Activity acceptance/artifact blocks integrate in CI; the release contract
 job is byte-identical. This binds evidence to the current combination while
 retaining the native release and actual Apple acceptance requirements.
+
+Normally integrate main `e3dbda6c` after reviewed profile publication. Clean
+combined source56db48 passes the same five portable tests/fourteen owned
+synthetic processes, strict actionlint and shell syntax. The release workflow
+and all executable/test scripts remain byte-identical. The previous ADR hash
+predates its main31 rationale; an initial metadata assertion mistakenly
+expected it to be unchanged. Retain that verification error and correct only
+the comparison scope, preserving actual successful product observations.
+The new source-bound record is `maine3-integration.json`. Fresh protected CI
+remains mandatory. No actual Apple authentication or published signed release
+is claimed; #730 remains open.
