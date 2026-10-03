@@ -169,7 +169,8 @@
         "cargo clippy --workspace --all-targets --all-features --locked -- -D warnings",
         "cargo test --workspace --locked",
         "cargo clippy --workspace --all-targets --all-features --target x86_64-pc-windows-msvc --locked -- -D warnings"
-      ]
+      ],
+      "native_evidence_gate": ".github/workflows/browse-daemon-native.yml: all six declared runners must execute nonzero daemon tests, lifecycle, 50x50 competing starts and supplemental real Go/Rust requests; retain raw logs and hashed process receipts. Historical 652453d oracle is unchanged; dcddcef0 adds process observations only."
     },
     {
       "id": "RUST-007",

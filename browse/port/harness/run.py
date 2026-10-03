@@ -389,6 +389,11 @@ def daemon_suite(root: Path, env: dict[str, str], *, rounds: int, starters: int)
             env,
             HOME=str(home),
             XDG_RUNTIME_DIR=str(runtime),
+            XDG_CONFIG_HOME=str(base / "config"),
+            XDG_CACHE_HOME=str(base / "cache"),
+            XDG_DATA_HOME=str(base / "share"),
+            XDG_STATE_HOME=str(base / "state"),
+            LOCALAPPDATA=str(base / "Local"),
             SYMBROWSE_USER_DATA_DIR=str(data),
             SYMBROWSE_NO_AUTOSTART="1",
         )

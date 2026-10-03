@@ -252,7 +252,8 @@
       "platforms": [
         "all"
       ],
-      "status": "parity"
+      "status": "parity",
+      "supplemental_process_gate": "port/harness/daemon_process.py: 21 actual requests against immutable integrated Go dcddcef0; PID/timestamps validated; only owned roots and documented Rust mode/session extensions projected; six native candidate receipts pending"
     },
     {
       "id": "DMN-002",
@@ -310,7 +311,8 @@
         "linux-amd64",
         "linux-arm64"
       ],
-      "status": "fixture-ready"
+      "status": "fixture-ready",
+      "supplemental_process_gate": "port/harness/daemon_process.py: 21 actual requests against immutable integrated Go dcddcef0; PID/timestamps validated; only owned roots and documented Rust mode/session extensions projected; six native candidate receipts pending"
     },
     {
       "id": "DMN-006",
@@ -337,7 +339,8 @@
       "platforms": [
         "all"
       ],
-      "status": "todo"
+      "status": "todo",
+      "supplemental_process_gate": "port/harness/daemon_process.py: 21 actual requests against immutable integrated Go dcddcef0; PID/timestamps validated; only owned roots and documented Rust mode/session extensions projected; six native candidate receipts pending"
     },
     {
       "id": "DMN-008",

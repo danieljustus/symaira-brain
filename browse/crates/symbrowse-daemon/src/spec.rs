@@ -108,7 +108,7 @@ impl SessionSpec {
 
     #[must_use]
     pub fn user_data_dir(&self) -> PathBuf {
-        self.state_dir.join("sessions").join(&self.session)
+        default_session_cache_root().join(&self.session)
     }
 
     #[must_use]
@@ -175,6 +175,67 @@ pub fn default_socket_path(session: &str) -> PathBuf {
     default_state_dir()
         .join("run")
         .join(format!("{session}.sock"))
+}
+
+// The Go registry owns browser profiles under the OS cache, independently of
+// output/state cache settings and the legacy fixture seam.
+pub(crate) fn default_session_cache_root() -> PathBuf {
+    if cfg!(windows) {
+        return std::env::var_os("LOCALAPPDATA").map_or_else(
+            || std::env::temp_dir().join("symbrowse/sessions"),
+            |path| PathBuf::from(path).join("symbrowse/sessions"),
+        );
+    }
+    if cfg!(target_os = "macos") {
+        return std::env::var_os("HOME").map_or_else(
+            || std::env::temp_dir().join("symbrowse/sessions"),
+            |home| PathBuf::from(home).join("Library/Caches/symbrowse/sessions"),
+        );
+    }
+    if let Some(path) = std::env::var_os("XDG_CACHE_HOME").filter(|p| !p.is_empty()) {
+        return PathBuf::from(path).join("symbrowse/sessions");
+    }
+    std::env::var_os("HOME").map_or_else(
+        || std::env::temp_dir().join("symbrowse/sessions"),
+        |home| PathBuf::from(home).join(".cache/symbrowse/sessions"),
+    )
+}
+pub(crate) fn worktree_origin() -> String {
+    let Ok(cwd) = std::env::current_dir() else {
+        return String::new();
+    };
+    // Go asks git for the worktree root and falls back to the caller's cwd.
+    // Bound child execution and reap the process before using that fallback.
+    let fallback = || cwd.display().to_string();
+    let Ok(mut child) = std::process::Command::new("git")
+        .args(["rev-parse", "--show-toplevel"])
+        .current_dir(&cwd)
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::null())
+        .spawn()
+    else {
+        return fallback();
+    };
+    let deadline = std::time::Instant::now() + Duration::from_secs(1);
+    loop {
+        match child.try_wait() {
+            Ok(Some(status)) if status.success() => {
+                return child.wait_with_output().map_or_else(
+                    |_| fallback(),
+                    |out| String::from_utf8_lossy(&out.stdout).trim().to_owned(),
+                );
+            }
+            Ok(None) if std::time::Instant::now() < deadline => {
+                std::thread::sleep(Duration::from_millis(10));
+            }
+            _ => {
+                let _ = child.kill();
+                let _ = child.wait();
+                return fallback();
+            }
+        }
+    }
 }
 
 #[cfg(test)]
