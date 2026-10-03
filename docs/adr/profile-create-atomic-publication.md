@@ -59,6 +59,8 @@ verify occupied-file and directory publication failures remove the newly owned
 temporary, and retain existing-profile/validation behavior. The native init CI
 step on all three targets explicitly runs the process suite as well as the
 original focused unit suite; the complete workspace gate also discovers it.
+Native focused runs print observed creator results and full winning template
+bytes; always-uploaded logs retain available successes/failures for14 days.
 Affected policy and CLI init/profile contracts, strict Clippy, formatting and
 CI validation must pass. Native Windows/macOS exact-candidate CI and independent
 review remain required before acceptance. This change does not itself approve
