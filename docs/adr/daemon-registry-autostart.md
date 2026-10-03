@@ -155,3 +155,23 @@ original 108 observations and six supported-help comparisons. Windows counts
 are declared native coverage, not a local execution claim. All previous raw-frame,
 constructor, concurrent client, state fixture and rejection-control gates remain.
 Independent correction review and six fresh native exact-head jobs remain required.
+
+## Corrected independent acceptance and grouped publication
+
+Full independent review of immutable cf959b725 approves the bounded Registry
+correction. All twelve original output/session process inputs now match literal
+Go bytes/exits without creating files; the six original failures are closed.
+Fresh510 CLI/20 raw/eight concurrent/seven Go roots/three persisted files/eight
+controls,63 parent pairs/three controls,13 MCP pairs/302 workspace tests and
+three real exit101 controls passed. The original360 edge/six help prefix and all
+b363/5ed/94 failure artifacts remain byte-identical.171 candidate/670 Go hashes
+verify; strict full-workspace gates pass. Exact full proof is archived under
+migration/evidence/browse-registry-772/corrected-independent-cf959/.
+
+Integrate this increment into existing PR801: registry/autostart and the prior
+daemon IPC/MCP slice share the same RUST006 boundary. Main31de722 is already
+normally integrated. Keep state-key/encrypted-startup work isolated until this
+reviewed parent is published, and keep #772 open for that work and remaining
+CLI/lifecycle surfaces. Six fresh native OS/architecture jobs plus protected
+checks on the final published head are required; Linux cannot certify the
+294 declared Windows observations or default cutover.
