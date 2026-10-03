@@ -1,0 +1,48 @@
+[
+  {
+    "binary": "go",
+    "binary_sha256": "10df8816128c4a9408ee7c00f2182eca928e079f55fd9d6f6a1d4f299267beb8",
+    "cwd_hex": "2f746d702f7265766965773830312d6e3877346e35366b2f6377642de282",
+    "response": {
+      "success": true,
+      "data": {
+        "name": "review-663621",
+        "pid": 663622,
+        "started_at": "2026-10-03T18:20:46.7418185Z",
+        "active_tabs": 0,
+        "last_activity": "2026-10-03T18:20:46.755730885Z",
+        "user_data_dir": "/tmp/review801-n8w4n56k/cache/symbrowse/sessions/review-663621",
+        "browser_context_id": "context-review-663621",
+        "ref_count": 0,
+        "scope": "worktree",
+        "origin_path": "/tmp/review801-n8w4n56k/cwd-\ufffd\ufffd"
+      }
+    },
+    "exit": 0,
+    "stdout": "",
+    "stderr": "time=2026-10-03T18:20:46.741Z level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\n"
+  },
+  {
+    "binary": "rust",
+    "binary_sha256": "37c3ffe032a38d3ef36e43a0e51535919032f4bfa05e47f5f94566b787cbd1f7",
+    "cwd_hex": "2f746d702f7265766965773830312d33627a76697770352f6377642de282",
+    "response": {
+      "success": true,
+      "data": {
+        "active_tabs": 0,
+        "browser_context_id": "context-review-663621",
+        "last_activity": "2026-10-03T18:20:46.811004467Z",
+        "name": "review-663621",
+        "origin_path": "/tmp/review801-3bzviwp5/cwd-\ufffd",
+        "pid": 663631,
+        "ref_count": 0,
+        "scope": "worktree",
+        "started_at": "2026-10-03T18:20:46.795083145Z",
+        "user_data_dir": "/tmp/review801-3bzviwp5/cache/symbrowse/sessions/review-663621"
+      }
+    },
+    "exit": 0,
+    "stdout": "",
+    "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n"
+  }
+]

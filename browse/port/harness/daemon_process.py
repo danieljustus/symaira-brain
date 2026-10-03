@@ -29,18 +29,22 @@ GO_REF = "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
 COMMANDS = ("daemon.ping", "daemon.status", "session.list", "session.info",
             "session.ensure", "unknown", "daemon.stop")
 SETTINGS = ({}, {"SYMBROWSE_ALLOW_PRIVATE": "true"},
-            {"SYMBROWSE_SSRF": "true"})
+            {"SYMBROWSE_SSRF": "true"}, {"XDG_CACHE_HOME": "relative-cache"},
+            {"LOCALAPPDATA": ""})
 
 
 def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def observe(binary: Path, settings: dict[str, str], session: str) -> dict:
+def observe(binary: Path, settings: dict[str, str], session: str,
+            raw_origin: bytes | None = None, git_origin: bool = False) -> dict:
     with tempfile.TemporaryDirectory(prefix="bd-", dir=harness.temporary_parent(os.environ)) as temporary:
         root = Path(temporary)
         home = root / "home"
         home.mkdir(mode=0o700)
+        temporary = root / "temp"
+        temporary.mkdir(mode=0o700)
         runtime = home / "Library/Caches/symbrowse/run" if sys.platform == "darwin" else root / "run"
         runtime.mkdir(parents=True, mode=0o700)
         # Keep platform launch requirements while clearing all inherited policy.
@@ -49,9 +53,25 @@ def observe(binary: Path, settings: dict[str, str], session: str) -> dict:
         env.update(HOME=str(home), USERPROFILE=str(home), LOCALAPPDATA=str(root / "Local"),
                    XDG_CONFIG_HOME=str(root / "config"), XDG_CACHE_HOME=str(root / "cache"),
                    XDG_DATA_HOME=str(root / "data"), XDG_STATE_HOME=str(root / "state"),
-                   XDG_RUNTIME_DIR=str(runtime), PATH="", SYMBROWSE_NO_AUTOSTART="1", **settings)
+                   XDG_RUNTIME_DIR=str(runtime), PATH="", SYMBROWSE_NO_AUTOSTART="1",
+                   TMPDIR=str(temporary), TMP=str(temporary), TEMP=str(temporary), **settings)
+        cwd = root
+        if raw_origin is not None:
+            cwd = root / os.fsdecode(b"origin-" + raw_origin)
+            cwd.mkdir(mode=0o700)
+        if git_origin:
+            # A private POSIX child emits raw git stdout. Require the recorded
+            # origin below to prove that both production probes executed it.
+            git_bin = root / "bin"
+            git_bin.mkdir(mode=0o700)
+            script = git_bin / "git"
+            payload = os.fsencode(root) + b"/git-result-\xe2\x82\n"
+            escaped = "".join(f"\\{byte:03o}" for byte in payload)
+            script.write_text(f"#!/bin/sh\nprintf '{escaped}'\n")
+            script.chmod(0o700)
+            env["PATH"] = str(git_bin)
         begin = time.time()
-        process = subprocess.Popen([str(binary), "daemon", "--session", session], cwd=root,
+        process = subprocess.Popen([str(binary), "daemon", "--session", session], cwd=cwd,
                                    env=env, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE, start_new_session=(os.name == "posix"))
         endpoint = harness.daemon_socket_path(runtime, session)
@@ -64,6 +84,10 @@ def observe(binary: Path, settings: dict[str, str], session: str) -> dict:
             stdout, stderr = process.communicate(timeout=10)
             if process.returncode != 0 or stdout:
                 raise AssertionError(f"daemon exit/stdout: {process.returncode}, {stdout!r}, {stderr!r}")
+            if git_origin:
+                origin = observations[3]["response"]["data"]["origin_path"]
+                if origin != str(root) + "/git-result-\ufffd\ufffd":
+                    raise AssertionError(f"production git probe did not retain raw stdout: {origin!r}")
         except Exception:
             harness.kill_tree(process)
             stdout, stderr = process.communicate(timeout=3)
@@ -151,11 +175,17 @@ def main() -> int:
     if revision != GO_REF or dirty:
         raise AssertionError("supplemental Go source must be immutable dcddcef0")
     cases = []
-    for index, settings in enumerate(SETTINGS):
+    variants = [(settings, None, False) for settings in SETTINGS]
+    if os.name == "posix":
+        variants.extend(({}, raw, False) for raw in (b"\xe2\x82", b"\xc0\xaf", b"\xef\xbf\xbd"))
+        variants.append(({}, None, True))
+    for index, (settings, raw_origin, git_origin) in enumerate(variants):
         session = f"parity{os.getpid()}-{index}"
         case = {"session": session, "settings": settings,
-                "go": observe(args.go.resolve(), settings, session),
-                "rust": observe(args.rust.resolve(), settings, session)}
+                "raw_origin_hex": None if raw_origin is None else raw_origin.hex(),
+                "git_origin": git_origin,
+                "go": observe(args.go.resolve(), settings, session, raw_origin, git_origin),
+                "rust": observe(args.rust.resolve(), settings, session, raw_origin, git_origin)}
         case["matches"] = compare(case)
         cases.append(case)
     root = HERE.parents[2]
