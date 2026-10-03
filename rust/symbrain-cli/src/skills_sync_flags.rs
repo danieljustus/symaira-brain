@@ -23,29 +23,24 @@ pub(super) fn parse(args: &[OsString], stderr: &mut dyn Write) -> Result<Flags, 
     let mut index = 0;
     while index < args.len() {
         let raw = &args[index];
-        let arg = raw.to_string_lossy();
-        if arg == "--" || arg == "-" || !arg.starts_with('-') {
+        let arg = raw.as_encoded_bytes();
+        if arg == b"--" || arg == b"-" || !arg.starts_with(b"-") {
             break;
         }
-        let name = arg
-            .strip_prefix("--")
-            .or_else(|| arg.strip_prefix('-'))
-            .unwrap_or_default();
-        if name.is_empty() || name.starts_with(['-', '=']) {
-            return flag_error(stderr, Some(format!("bad flag syntax: {arg}")));
+        let name_start = if arg.starts_with(b"--") { 2 } else { 1 };
+        let spelling = &arg[name_start..];
+        if spelling.is_empty() || matches!(spelling.first(), Some(b'-' | b'=')) {
+            return raw_flag_error(stderr, "bad flag syntax: ", raw);
         }
-        let (name, inline) = name.split_once('=').map_or((name, None), |(name, _)| {
-            // Known flag names are ASCII, so this offset is byte/unit invariant.
-            let offset = raw
-                .as_encoded_bytes()
-                .iter()
-                .position(|byte| *byte == b'=')
-                .expect("ASCII equals is preserved in flag spelling");
-            (name, Some(suffix(raw, offset + 1)))
-        });
+        let name_end = arg
+            .iter()
+            .position(|byte| *byte == b'=')
+            .unwrap_or(arg.len());
+        let name = &arg[name_start..name_end];
+        let inline = (name_end < arg.len()).then(|| suffix(raw, name_end + 1));
         match name {
-            "h" | "help" => return flag_error(stderr, None),
-            "dry-run" => {
+            b"h" | b"help" => return flag_error(stderr, None),
+            b"dry-run" => {
                 dry_run = match inline.as_deref().map(OsStr::to_str) {
                     None | Some(Some("1" | "t" | "T" | "true" | "TRUE" | "True")) => true,
                     Some(Some("0" | "f" | "F" | "false" | "FALSE" | "False")) => false,
@@ -60,7 +55,7 @@ pub(super) fn parse(args: &[OsString], stderr: &mut dyn Write) -> Result<Flags, 
                     }
                 };
             }
-            "target" | "scope" => {
+            b"target" | b"scope" => {
                 let value = if let Some(value) = inline {
                     value
                 } else {
@@ -68,21 +63,25 @@ pub(super) fn parse(args: &[OsString], stderr: &mut dyn Write) -> Result<Flags, 
                     let Some(value) = args.get(index) else {
                         return flag_error(
                             stderr,
-                            Some(format!("flag needs an argument: -{name}")),
+                            Some(format!(
+                                "flag needs an argument: -{}",
+                                if name == b"target" { "target" } else { "scope" },
+                            )),
                         );
                     };
                     value.clone()
                 };
-                if name == "target" {
+                if name == b"target" {
                     target = value;
                 } else {
                     scope = value;
                 }
             }
             _ => {
-                return flag_error(
+                return raw_flag_error(
                     stderr,
-                    Some(format!("flag provided but not defined: -{name}")),
+                    "flag provided but not defined: -",
+                    &span(raw, name_start, name_end),
                 );
             }
         }
@@ -161,15 +160,34 @@ fn trim_target(value: &OsStr) -> &OsStr {
 }
 
 fn suffix(arg: &OsStr, offset: usize) -> OsString {
+    span(arg, offset, arg.as_encoded_bytes().len())
+}
+
+fn span(arg: &OsStr, start: usize, end: usize) -> OsString {
     #[cfg(unix)]
     {
         use std::os::unix::ffi::{OsStrExt, OsStringExt};
-        OsString::from_vec(arg.as_bytes()[offset..].to_vec())
+        OsString::from_vec(arg.as_bytes()[start..end].to_vec())
     }
     #[cfg(not(unix))]
     {
-        OsString::from(&arg.to_string_lossy()[offset..])
+        OsString::from(&arg.to_string_lossy()[start..end])
     }
+}
+
+fn raw_flag_error(stderr: &mut dyn Write, prefix: &str, operand: &OsStr) -> Result<Flags, u8> {
+    let _ = stderr.write_all(prefix.as_bytes());
+    // Go writes unquoted flag operands. Unix argv bytes must remain distinct
+    // from a valid U+FFFD; Windows argv undergoes UTF-16 replacement in Go.
+    #[cfg(unix)]
+    {
+        use std::os::unix::ffi::OsStrExt;
+        let _ = stderr.write_all(operand.as_bytes());
+    }
+    #[cfg(not(unix))]
+    let _ = stderr.write_all(operand.to_string_lossy().as_bytes());
+    let _ = stderr.write_all(b"\n");
+    flag_error(stderr, None)
 }
 
 fn flag_error(stderr: &mut dyn Write, error: Option<String>) -> Result<Flags, u8> {
