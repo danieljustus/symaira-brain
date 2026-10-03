@@ -58,3 +58,11 @@ The complete original CI log is retained byte-identically under
 migration/evidence/usage-files-windows-runner/. Repeat all three real Linux
 gates on the clean corrected source; native Windows/macOS must still pass.
 This fixes test ownership/path handling and does not widen production routing.
+
+Fresh corrected clean c7b6c771 replay passed all three actual constructor/report/
+request/CLI/read-only gates: references44/110/five controls, Hermes96/104/five,
+files86 (85 exact plus one existing non-deterministic gate)/151/five. All original
+case/assertion sets are unchanged; 47/51/53 manifest hashes match the candidate,
+44 shared entries agree and actual CLI SHA remains9aed2a28. The exact explicit
+Bash copy also passed with both fixture.exe and fixture.pdb present. Full receipts
+and combined log are retained. This local proof does not claim native Windows.
