@@ -1,0 +1,15 @@
+{
+  "integrated_source": "03552514839d2fbfbbd7e37be954678fed2bd98f",
+  "main": "31de72294521701fc4b1a0bce39f03cc34d72e7e",
+  "reviewed_source": "9ae16e787ea05544db54c773a0599db6daa3712c",
+  "process_cases": 315,
+  "primary_tests": 409,
+  "failures": 0,
+  "intentional_ignored": 2,
+  "parent_summaries": 54,
+  "test_log_sha256": "81d30664d0b8960194074884095b84694481ad0a6e5975fc3533701cb2a593fa",
+  "clippy": "fresh strict all-target all-feature passed",
+  "fmt": "passed",
+  "local_platform": "Linux x86_64",
+  "native_three_os": "fresh CI required"
+}

@@ -31,3 +31,11 @@ imported Unix-only test helper under strict Clippy. Its import now has the same
 `cfg(unix)` boundary as its callers; production behavior is unchanged. The
 failure remains recorded with both job IDs in the adjacent evidence receipt.
 The corrected published head must pass fresh native checks before acceptance.
+
+After Activity PR800, normal-integrate main31de722 and repeat the complete
+315 actual raw-argument Go/native pairs on the resulting CLI. All agree.
+The fresh skills/CLI suite has409 primary tests,0 failures,2 intentional
+child-entry ignores and54 unfiltered summaries, with strict Clippy and fmt
+passing. Historical446 belongs to its earlier source, not this run. This
+checks the current combination while preserving earlier review/CI evidence;
+fresh native three-OS acceptance still gates merge and #793 completion.
