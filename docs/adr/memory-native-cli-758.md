@@ -132,3 +132,13 @@ the unchanged source passes all 117 lib tests with the lifecycle wrapper.
 The prior 333-test record remains evidence for the earlier source; it is not
 claimed as a fresh full-suite execution of these corrections. Native three-OS
 and the documented full #758/#649 release gates remain pending.
+
+Integration decision: extend existing PR803 with the independently reviewed
+native Memory CLI. Store repair, evidence and CLI share one database contract
+and both three-OS workflows must pass on the integrated head. Preserve the
+original two P2 findings and real failures alongside corrected590 pairs,265
+Activity pairs and119 independent tests. A fresh parent check separately
+passed59 Memory/Gateway tests,83 actual Go evidence observations,4 Go DB
+tests and3 rejecting controls. Historical333 is not relabeled as a new run.
+This keeps one reviewable domain change and avoids merging a store with an
+unverified CLI adapter. Full #758 and release-level #649 remain open.
