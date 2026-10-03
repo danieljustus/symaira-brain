@@ -13,7 +13,9 @@ use std::path::PathBuf;
 use cap_fs_ext::DirExt;
 use serde::Serialize;
 
+use super::base::base_path_for_scope;
 use super::destination::entry_metadata;
+use super::lock;
 use super::marker::{MarkerState, read_marker_at};
 use super::replace::open_trusted_dir;
 use super::status_compare::{
@@ -134,6 +136,31 @@ fn status_target(options: &StatusOptions, target: &str) -> Result<Vec<InstallSta
     .parent()
     .ok_or_else(|| SkillError(format!("{target} install root has no parent")))?
     .to_path_buf();
+    let base_root = base_path_for_scope(
+        &options.home_dir,
+        options.base_dir.as_deref(),
+        target,
+        scope,
+        "status-placeholder",
+        options.project_dir.as_deref(),
+    )?
+    .parent()
+    .ok_or_else(|| SkillError(format!("{target} base root has no parent")))?
+    .to_path_buf();
+    let mut lock_paths = vec![root.clone(), base_root];
+    if scope == "project" && options.project_dir.is_some() {
+        let legacy_root = super::base::legacy_project_base_path(
+            &options.home_dir,
+            options.base_dir.as_deref(),
+            target,
+            "status-placeholder",
+        )?
+        .parent()
+        .ok_or_else(|| SkillError(format!("{target} legacy base root has no parent")))?
+        .to_path_buf();
+        lock_paths.push(legacy_root);
+    }
+    let _locks = lock::acquire_existing_shared(&lock_paths)?;
     let metadata = entry_metadata(&root)?;
     let Some(metadata) = metadata else {
         return Ok(Vec::new());

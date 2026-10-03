@@ -93,7 +93,18 @@ pub(crate) fn uninstall_inner(
             lock_paths.push(legacy.clone());
         }
     }
+    for path in lock_paths.clone() {
+        if let Some(parent) = path.parent() {
+            lock_paths.push(parent.to_path_buf());
+        }
+    }
     let _locks = lock::acquire(&lock_paths)?;
+    if entry_metadata(destination)?.is_none() {
+        return Ok(false);
+    }
+    if is_unmanaged(destination, target, name)? {
+        return Err(SkillError("refusing to remove unmanaged skill".to_owned()));
+    }
 
     // Move all old state aside first. Nothing is destroyed until the
     // tombstone has been durably published. This includes the pre-identity

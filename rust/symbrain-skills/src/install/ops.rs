@@ -7,7 +7,7 @@
 
 use std::path::{Path, PathBuf};
 
-use super::base::{base_path_for_scope, write_snapshot_for_scope};
+use super::base::{base_path_for_scope, write_snapshot_for_scope_locked};
 use super::core::install_path_for;
 use super::destination::{
     adoption_backup, check_destination, effective_home, effective_mode, entry_exists, is_symlink,
@@ -46,8 +46,19 @@ pub(crate) fn install_locks_for(
         name,
         options.project_dir.as_deref(),
     )?;
-    let mut paths = vec![destination, base];
-    paths.extend_from_slice(extra);
+    // Same-target installs for different skill names still mutate the shared
+    // target/base/render parent directories; lock those directory transaction
+    // roots in addition to each skill's own destination and snapshot.
+    let mut paths = vec![destination.clone(), base.clone()];
+    for path in [destination.parent(), base.parent()].into_iter().flatten() {
+        paths.push(path.to_path_buf());
+    }
+    for path in extra {
+        paths.push(path.clone());
+        if let Some(parent) = path.parent() {
+            paths.push(parent.to_path_buf());
+        }
+    }
     lock::acquire(&paths)
 }
 
@@ -234,7 +245,7 @@ pub(crate) fn install_target_inner_locked(
         } else {
             install_copy_tree(source, &destination, &marker_bytes, options)?;
         }
-        write_snapshot_for_scope(
+        write_snapshot_for_scope_locked(
             &source_for_snapshot(source),
             &base,
             target,
