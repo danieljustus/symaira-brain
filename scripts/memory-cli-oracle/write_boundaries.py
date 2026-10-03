@@ -30,7 +30,7 @@ def execute(go,rust,wrapper,report):
     try:
         for name,verb,content,extra,mutation in scenarios:
             with tempfile.TemporaryDirectory(prefix='memory-write-boundary-') as temporary:
-                root=Path(temporary); env=replay.isolated_env(root); path=root/'memory.db'; trace=root/'delegated.json'
+                root=Path(temporary); env=writes.environment(root); path=root/'memory.db'; trace=root/'delegated.json'
                 env.update(SYMMEMORY_OLLAMA_URL=f'http://127.0.0.1:{server.server_port}/api/embeddings',SYMMEMORY_CONFLICT_ENABLED='false')
                 assert replay.output(go,['list','--db',str(path)],root,env)['exit']==0
                 if name=='default-conflict': env.pop('SYMMEMORY_CONFLICT_ENABLED')
@@ -55,5 +55,5 @@ def execute(go,rust,wrapper,report):
                 records.append(dict(name=name,match=True,transcript=output,delegated=delegated,database_before=before,database_after=after,database_unchanged=unchanged))
     finally:
         server.shutdown(); server.server_close(); thread.join()
-    report.write_text(json.dumps(dict(cases=records,passed=len(records),total=len(records)),ensure_ascii=False,indent=2)+'\n')
+    writes.save_json(report,dict(cases=records,passed=len(records),total=len(records)))
     print(json.dumps(dict(fallback_boundaries=len(records))))

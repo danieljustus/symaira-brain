@@ -28,6 +28,8 @@ def main():
         env=replay.isolated_env(home); env.update(PATH=os.environ.get('PATH',''),GOWORK='off',GOENV='off',GOMODCACHE=caches[0],GOCACHE=caches[1],CGO_ENABLED='0')
         go=args.go.resolve() if args.go else root/('oracle.exe' if os.name=='nt' else 'oracle')
         if args.go is None: replay.run(['go','build','-o',str(go),'./cmd/symbrain'],source,env)
+        configkit=Path(caches[0])/'github.com/danieljustus/symaira-corekit@v0.17.0/configkit/configkit.go'
+        assert replay.digest(configkit.read_bytes())==replay.CONFIGKIT_SHA, 'frozen configkit changed'
         control_source=source/'scripts/memory-write-control/main.go'; control_source.parent.mkdir(parents=True)
         control_source.write_bytes((repo/'scripts/memory-cli-oracle/write_control.go.txt').read_bytes())
         wrapper=root/('control.exe' if os.name=='nt' else 'control')
@@ -56,9 +58,10 @@ def main():
                      go_binary_sha256=replay.digest(go.read_bytes()),rust_binary_sha256=replay.digest(rust.read_bytes()),control_binary_sha256=replay.digest(wrapper.read_bytes()),fallback_binary_sha256=replay.digest(fallback.read_bytes()),go_version=replay.run(['go','version'],repo).stdout.decode().strip(),
                      candidate_source_sha256={name:replay.digest((repo/name).read_bytes()) for name in sorted(set(files))},
                      frozen_go_source_sha256={str(path.relative_to(source)):replay.digest(path.read_bytes()) for path in sorted(source.rglob('*.go')) if not str(path.relative_to(source)).startswith(('scripts/memory-write-control/','scripts/memory-write-fallback/'))},
-                     controls=controls,operator_home_used=False,embedding_endpoints_owned=True,paid_endpoints_used=False,
+                     corekit_configkit_sha256=replay.CONFIGKIT_SHA,go_mod_sha256=replay.digest((source/'go.mod').read_bytes()),go_sum_sha256=replay.digest((source/'go.sum').read_bytes()),
+                     controls=controls,operator_home_used=False,operator_credentials_in_runtime=False,embedding_endpoints_owned=True,paid_endpoints_used=False,
                      report_sha256={path.name:replay.digest(path.read_bytes()) for path in sorted(reports.iterdir()) if path.is_file() and path.name!='receipt.json'})
-        (reports/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+        writes.save_json(reports/'receipt.json',receipt)
 
 
 if __name__=='__main__': main()

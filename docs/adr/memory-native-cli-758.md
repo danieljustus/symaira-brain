@@ -160,3 +160,16 @@ fixture seed/snapshot paths. Keep every comparison and all input counts; do not
 ignore cleanup errors or weaken assertions. The original complete failing job
 111293527292 is retained. This changes only fixture resource ownership; fresh
 Linux process proof and native Windows acceptance remain required.
+
+## Bounded governed-write successor
+
+The next isolated increment moves supported direct writes to a dedicated store
+adapter while retaining Go for the complete redaction/extraction/conflict
+pipeline. Default conflict-enabled, non-staged writes must delegate: the earlier
+native insertion could create duplicates and omit provenance/audits. Staged and
+effectively conflict-disabled writes now persist their entire reachable service
+state, including configured embeddings, entities, audit and sync event order.
+Delete now records access feedback and its audit while preserving Go's actual
+relationship retention. New-file modes and unproven hydration/error shapes remain
+gated. See [the decision](memory-native-governed-writes-758.md) for scope and the
+strict state/identity/time proof contract. This does not mark full #758 complete.

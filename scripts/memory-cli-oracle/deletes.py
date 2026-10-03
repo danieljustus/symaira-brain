@@ -21,7 +21,7 @@ def execute(go, rust, report):
     records=[]
     for scope,author,format,deleted_id in cases:
         with tempfile.TemporaryDirectory(prefix='memory-deletes-') as temporary:
-            root=Path(temporary); env=replay.isolated_env(root); path=root/'memory.db'
+            root=Path(temporary); env=writes.environment(root); path=root/'memory.db'
             assert replay.output(go,['list','--db',str(path)],root,env)['exit']==0
             with closing(sqlite3.connect(path)) as db, db:
                 for identity in ('victim','retained'):
@@ -57,7 +57,7 @@ def execute(go, rust, report):
                 pair.append(dict(transcript=transcript,state=state,bindings=binding,comparison=dict(transcript=transcript,state=stable)))
             records.append(dict(scope=scope,author=author,format=format,id=deleted_id,go=pair[0],rust=pair[1],match=pair[0]['comparison']==pair[1]['comparison']))
     result=dict(go_binary_sha256=replay.digest(go.read_bytes()),rust_binary_sha256=replay.digest(rust.read_bytes()),cases=records,passed=sum(row['match'] for row in records),total=len(records))
-    report.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+    writes.save_json(report,result)
     assert result['passed']==result['total'], [row for row in records if not row['match']]
     print(json.dumps(dict(passed=result['passed'],total=result['total'])))
 

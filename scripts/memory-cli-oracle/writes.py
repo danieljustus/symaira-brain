@@ -21,6 +21,23 @@ UUID = re.compile(r"[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0
 TIME = re.compile(r"(\d{4}-\d\d-\d\d)[ T](\d\d:\d\d:\d\d)(?:\.(\d+))?(?: \+0000 UTC|Z)?\Z")
 
 
+
+def environment(root):
+    # Runtime processes receive only platform necessities and owned control
+    # wiring, never inherited provider credentials or proxy configuration.
+    names = ('SystemRoot','SYSTEMROOT','WINDIR','COMSPEC','PATHEXT','TEMP','TMP','TMPDIR',
+             'MEMORY_CLI_CONTROL_RUST','MEMORY_CLI_CONTROL_MODE',
+             'MEMORY_CLI_FALLBACK_GO','MEMORY_CLI_FALLBACK_RECEIPT')
+    env = {name: os.environ[name] for name in names if name in os.environ}
+    env.update(HOME=str(root),USERPROFILE=str(root),XDG_CONFIG_HOME=str(root/'config'),
+               XDG_DATA_HOME=str(root/'data'),XDG_CACHE_HOME=str(root/'cache'),
+               XDG_STATE_HOME=str(root/'state'),PATH='',SYMBRAIN_GO_BINARY=str(root/'absent-go'))
+    return env
+
+
+def save_json(path, value):
+    path.write_bytes((json.dumps(value,ensure_ascii=False,indent=2)+'\n').encode('utf-8'))
+
 def instant(value):
     match = TIME.fullmatch(value)
     assert match, ("invalid time", value)
@@ -181,6 +198,10 @@ def scenarios():
         dict(name='project-file-boundary', scope='project', project='[memory]\nstage_writes_by_default=true\n', staged=True),
         dict(name='project-git-file-boundary', scope='project', git_boundary=True, staged=True),
         dict(name='env-conflict-disable', conflict_env='false'),
+        dict(name='table-approved',format='table'),
+        dict(name='table-staged',format='table',staged=True),
+        dict(name='repeat-disabled',repeat=True),
+        dict(name='repeat-staged-bypasses-enabled-checker',repeat=True,staged=True,conflict_env='true'),
         dict(name='stage-config-is-not-cli-staged', global_config='[memory]\nstage_writes_by_default=true\n'),
         dict(name='null-after-value', metadata_raw='{"a":"first","a":null}', staged=True),
         dict(name='project-conflict-disable', global_config='[conflict]\nenabled=true\n', project='[conflict]\nenabled=false\n', conflict_env='false'),
@@ -203,7 +224,7 @@ def execute(go, rust, report):
         for case in scenarios():
             with tempfile.TemporaryDirectory(prefix='memory-writes-') as temporary:
                 root = Path(temporary)
-                env = replay.isolated_env(root)
+                env = environment(root)
                 env['SYMMEMORY_OLLAMA_URL'] = f'http://127.0.0.1:{server.server_port}/api/embeddings'
                 env['SYMMEMORY_OLLAMA_MODEL'] = 'owned-model'
                 if case.get('quantized'): env['SYMMEMORY_HYBRID_SEARCH_QUANTIZE_TO_BINARY'] = 'true'
@@ -222,11 +243,15 @@ def execute(go, rust, report):
                     db.execute("INSERT INTO entities(id,name,type,aliases,description,created_by,created_at,updated_at) VALUES('existing','Alpha','other','[null,\"ALT\"]','retained','original','2000-01-01 00:00:00 +0000 UTC','2000-01-01 00:00:00 +0000 UTC')")
                     db.execute("INSERT INTO entities_aliases(entity_id,alias) VALUES('existing','ALT')")
                     db.execute("INSERT INTO entities(id,name,type,aliases,description,created_by,created_at,updated_at) VALUES('malformed','broken','other','bad json','','original','2000-01-01 00:00:00 +0000 UTC','2000-01-01 00:00:00 +0000 UTC')")
+                if case.get('repeat'):
+                    seed_env=dict(env,SYMMEMORY_CONFLICT_ENABLED='false')
+                    assert replay.output(go,['set','hello world','--kind','fact','--db',str(path)],root,seed_env)['exit']==0
                 saved = root / 'before.sqlite'
                 with closing(sqlite3.connect(path)) as source, closing(sqlite3.connect(saved)) as backup:
                     source.backup(backup)
                 before = snapshot(path)
-                args = ['set', '  hello world  ', '--kind', case.get('kind', 'fact'), '--db', str(path), '--json', '--author', case.get('author', 'cli:symbrain')]
+                args = ['set', '  hello world  ', '--kind', case.get('kind', 'fact'), '--db', str(path), '--author', case.get('author', 'cli:symbrain')]
+                if case.get('format','json')=='json': args.append('--json')
                 if case.get('staged'): args.append('--staged')
                 args += ['--scope', case.get('scope', 'global'), '--metadata', case.get('metadata_raw', '{}'), '--entities', case.get('entities', '')]
                 expected = dict(author=case.get('author', 'cli:symbrain'), kind={'fact':'reference','USER':'user','user-pref':'user','how-to':'reference','p r o j e c t':'project'}.get(case.get('kind'), case.get('kind', 'reference')), staged=case.get('staged',False), metadata=json.loads(case.get('metadata_raw','{}').strip() or '{}') or {})
@@ -242,12 +267,15 @@ def execute(go, rust, report):
                     state = snapshot(path)
                     try:
                         assert transcript['exit'] == 0, ('native set exit must be zero',case,binary,transcript)
-                        result = json.loads(base64.b64decode(transcript['stdout']))
-                        identity = result['id']
+                        raw_output=base64.b64decode(transcript['stdout'])
+                        if case.get('format','json')=='json':
+                            identity = json.loads(raw_output)['id']
+                        else:
+                            identity = re.search(rb'Memory ([a-f0-9-]{36}) \(',raw_output)[1].decode('ascii')
                         stable, binding = canonical(state, before, (start,end), expected, identity)
                     except Exception as error:
-                        report.write_text(json.dumps(dict(failed_case=case,error=str(error),transcript=transcript,state=state,other_processes=pair,
-                                                          interval_ns=[start,end],go_binary_sha256=replay.digest(go.read_bytes()),rust_binary_sha256=replay.digest(rust.read_bytes())),ensure_ascii=False,indent=2)+'\n')
+                        save_json(report,dict(failed_case=case,error=str(error),transcript=transcript,state=state,other_processes=pair,
+                                              interval_ns=[start,end],go_binary_sha256=replay.digest(go.read_bytes()),rust_binary_sha256=replay.digest(rust.read_bytes())))
                         raise
                     stdout = base64.b64decode(transcript['stdout']).replace(identity.encode(), b'$memory')
                     assert identity.encode() in base64.b64decode(transcript['stdout'])
@@ -255,14 +283,14 @@ def execute(go, rust, report):
                     model = 'nomic-embed-text' if 'invalid-config' in case['name'] else 'owned-model'
                     assert requests == [dict(path='/v1/embeddings',body=dict(model=model,input=['hello world']))], (case, requests)
                     fts = audit_fts(path)
-                    assert fts == [(identity,'hello world',case.get('scope','global') or 'global')]
+                    assert fts == sorted((row['id'],row['content'],row['scope']) for row in state['memories'])
                     pair.append(dict(transcript=transcript, comparison=dict(exit=transcript['exit'],stderr=transcript['stderr'],stdout=base64.b64encode(stdout).decode(),state=stable, requests=requests), state=state, bindings=binding))
                 records.append(dict(case=case, match=pair[0]['comparison']==pair[1]['comparison'], go=pair[0], rust=pair[1]))
     finally:
         server.shutdown(); server.server_close(); thread.join()
         default_server.shutdown(); default_server.server_close(); default_thread.join()
     document = dict(go_binary_sha256=replay.digest(go.read_bytes()),rust_binary_sha256=replay.digest(rust.read_bytes()), cases=records, passed=sum(row['match'] for row in records), total=len(records))
-    report.write_text(json.dumps(document, ensure_ascii=False, indent=2)+'\n')
+    save_json(report,document)
     assert document['passed']==document['total'], ('actual Go/native write state differs', [(row['case']['name'],row['match']) for row in records if not row['match']])
     print(json.dumps(dict(passed=document['passed'], total=document['total'])))
 

@@ -44,6 +44,19 @@ commands and two executable failure controls. Native three-OS acceptance is
 pending. Governed writes, configured Hamming prefilter, every database open/error
 shape, new-file permission parity and JSONL decoding remain open. The decision
 and scope are recorded in `docs/adr/memory-native-cli-758.md`.
+The bounded governed-write successor adds native provenance/trust/policy,
+configured embeddings and binary storage, entity linking/audits, kind/staged
+updates and delete access-feedback/audits. Existing-store direct writes are native
+only when the full reachable redaction/extraction/conflict pipeline is bypassed:
+staged writes skip conflicts; other writes require effective config false.
+The prior unconditional default-conflict insert now delegates Go. Malformed or
+unproven hydration and new-file modes also retain Go. Stateful process proof
+compares application rows with explicit UUID/timestamp bindings and logical FTS
+integrity, with executable identity/audit/exit mutants and actual delegation
+observations. Full #758 and native three-OS acceptance remain pending; the
+rationale and exact boundaries are in
+`docs/adr/memory-native-governed-writes-758.md`.
+
 Independent review found two configured-read differences in the initial CLI
 candidate: memory-specific XDG/legacy resolution and populated rules JSON HTML/
 JavaScript-separator escaping. Corrections remain memory-local, preserve the
