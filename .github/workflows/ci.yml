@@ -1301,7 +1301,7 @@ jobs:
           go run ./scripts/dist-oracle -candidate-check -version "$version" -assets "$candidate_dir"
 
   coverage:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     needs: build-test
     runs-on: ubuntu-latest
     steps:
@@ -1324,6 +1324,9 @@ jobs:
         with:
           name: coverage-input-${{ github.sha }}
 
+      - name: Validate coverage denominator controls
+        run: python3 -m unittest discover -s scripts/rust-coverage -p test_reports.py -v
+
       - name: Generate coverage artifacts
         run: make coverage
         env:
@@ -1336,6 +1339,9 @@ jobs:
           name: coverage-${{ github.sha }}
           path: |
             coverage.json
+            coverage.out
+            coverage-combined.out
+            coverage-oracles.json
             badge.json
             badge.svg
 

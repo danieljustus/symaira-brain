@@ -23,35 +23,23 @@ endif
 endif
 EXTERNAL_RUN := SYMAIRA_EXTERNAL_BASE="$(SYMAIRA_EXTERNAL_BASE)" bash $(CURDIR)/scripts/run-external-env.sh
 
-.PHONY: build build-rust parity-smoke rust-go-printable-check usage-oracle-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test rust-guard-check rust-audit rust-deny rust-fast rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint fmt-check fmt vet clean
+.PHONY: rust-coverage build build-rust parity-smoke rust-go-printable-check usage-oracle-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test rust-guard-check rust-audit rust-deny rust-fast rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint fmt-check fmt vet clean
 
 ## coverage: Run tests and write machine-readable coverage artifacts
 coverage:
 	@set -eu; \
 	 $(EXTERNAL_RUN) mkdir -p "$(EXTERNAL_ARTIFACT_ROOT)"; \
-	 tmp_dir="$$($(EXTERNAL_RUN) sh -c 'mktemp -d "$$TMPDIR/symbrain.XXXXXX"')"; \
+	 tmp_dir="$$($(EXTERNAL_RUN) sh -c 'mktemp -d "$${TMPDIR:-/tmp}/symbrain.XXXXXX"')"; \
 	 trap 'rm -rf "$$tmp_dir"' EXIT; \
 	 profile="$${COVERAGE_PROFILE:-$(EXTERNAL_ARTIFACT_ROOT)/coverage.out}"; \
 	 test_log="$${COVERAGE_LOG:-$$tmp_dir/test.log}"; \
-	 $(EXTERNAL_RUN) go list ./... > "$$tmp_dir/packages"; \
 	 if [ -z "$${COVERAGE_PROFILE:-}" ]; then \
-		 $(EXTERNAL_RUN) go test ./... -coverprofile="$$profile" 2>&1 | tee "$$test_log"; \
+		 if ! $(EXTERNAL_RUN) go test ./... -coverprofile="$$profile" > "$$test_log" 2>&1; then cat "$$test_log"; exit 1; fi; \
+		 cat "$$test_log"; \
 	 fi; \
-	 total="$$($(EXTERNAL_RUN) go tool cover -func="$$profile" | awk '/^total:/ {gsub(/%/, "", $$3); print $$3}')"; \
-	total="$${total:-0.0}"; \
-	commit_sha="$$(git rev-parse HEAD)"; \
-	{ \
-		printf '{\n  "schema_version": 1,\n  "commit_sha": "%s",\n  "total": %s,\n  "packages": {\n' "$$commit_sha" "$$total"; \
-		first=true; \
-		while IFS= read -r package; do \
-			[ -n "$$package" ] || continue; \
-			coverage="$$(awk -v package="$$package" '$$1 == "ok" && $$2 == package { for (i = 1; i <= NF; i++) if ($$i == "coverage:") { value = $$(i + 1); sub(/%$$/, "", value); if (value ~ /^[0-9]+([.][0-9]+)?$$/) print value; exit } }' "$$test_log")"; \
-			coverage="$${coverage:-0.0}"; \
-			if [ "$$first" = true ]; then first=false; else printf ',\n'; fi; \
-			printf '    "%s": %s' "$$package" "$$coverage"; \
-		done < "$$tmp_dir/packages"; \
-		printf '\n  }\n}\n'; \
-	} > "$(EXTERNAL_ARTIFACT_ROOT)/coverage.json"; \
+	 $(EXTERNAL_RUN) python3 scripts/rust-coverage/go_oracles.py --baseline "$$profile" --out "$(EXTERNAL_ARTIFACT_ROOT)/coverage-combined.out" --receipt "$(EXTERNAL_ARTIFACT_ROOT)/coverage-oracles.json"; \
+	 $(EXTERNAL_RUN) python3 scripts/rust-coverage/go_oracles.py --summary-only "$(EXTERNAL_ARTIFACT_ROOT)/coverage-combined.out" --out "$(EXTERNAL_ARTIFACT_ROOT)/coverage.json"; \
+	 total="$$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["total"])' "$(EXTERNAL_ARTIFACT_ROOT)/coverage.json")"; \
 	 printf '{\n  "schemaVersion": 1,\n  "label": "coverage",\n  "message": "%s%%",\n  "color": "blue"\n}\n' "$$total" > "$(EXTERNAL_ARTIFACT_ROOT)/badge.json"; \
 	printf '%s\n' \
 		'<?xml version="1.0" encoding="UTF-8"?>' \
@@ -208,7 +196,7 @@ profile-remove-oracle-check:
 INIT_RUST_BINARY ?= target/debug/symbrain$(if $(filter Windows_NT,$(OS)),.exe,)
 init-differential:
 	@set -eu; \
-	 root="$$($(EXTERNAL_RUN) sh -c 'mktemp -d "$$TMPDIR/symbrain.XXXXXX"')"; source="$$root/source"; \
+	 root="$$($(EXTERNAL_RUN) sh -c 'mktemp -d "$${TMPDIR:-/tmp}/symbrain.XXXXXX"')"; source="$$root/source"; \
 	 trap 'git worktree remove --force "$$source" >/dev/null 2>&1 || true; rm -rf "$$root"' EXIT INT TERM; \
 	 git worktree add --quiet --detach "$$source" HEAD; \
 	 $(EXTERNAL_RUN) cargo build -p symbrain-cli --locked; \
@@ -225,6 +213,10 @@ rust-guard-check:
 	$(EXTERNAL_RUN) cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
 	$(EXTERNAL_RUN) cargo test --workspace --all-targets --all-features --locked
 	$(EXTERNAL_RUN) cargo test --workspace --doc --all-features --locked
+
+## rust-coverage: Enforce the tracked Rust workspace line-coverage floor
+rust-coverage:
+	$(EXTERNAL_RUN) bash scripts/rust-coverage/run.sh "$(EXTERNAL_CARGO_TARGET_DIR)/coverage"
 
 ## rust-audit: Audit the committed lockfile without resolving or updating it
 rust-audit:

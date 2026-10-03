@@ -1,5 +1,8 @@
 //! Focused native sync slice and fallback routing checks.
 
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
 use std::process::{Command, Output};
 
 use tempfile::TempDir;
@@ -16,6 +19,7 @@ fn run(root: &TempDir, args: &[&str]) -> Output {
 
     Command::new(env!("CARGO_BIN_EXE_symbrain"))
         .env_clear()
+        .envs(coverage::profile_environment())
         .env("HOME", &home)
         .env("USERPROFILE", &home)
         .env("XDG_CONFIG_HOME", &config)

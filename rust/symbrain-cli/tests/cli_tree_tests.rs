@@ -12,6 +12,9 @@
 #[path = "common/doctor_header.rs"]
 mod doctor_header;
 
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output, Stdio};
@@ -82,7 +85,7 @@ fn build_command(root: &TempDir, args: &[&str], cwd: &Path) -> Command {
     };
 
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_symbrain"));
-    cmd.env_clear();
+    cmd.env_clear().envs(coverage::profile_environment());
 
     #[cfg(windows)]
     {

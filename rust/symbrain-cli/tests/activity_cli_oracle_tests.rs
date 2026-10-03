@@ -1,3 +1,6 @@
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
 use serde::Deserialize;
 use std::fs;
 use std::path::PathBuf;
@@ -91,6 +94,7 @@ fn run_case(oracle: &Oracle) {
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
     command
         .env_clear()
+        .envs(coverage::profile_environment())
         .args(args)
         .env("HOME", &home)
         .env("XDG_CONFIG_HOME", &config)

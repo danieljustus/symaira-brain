@@ -1,5 +1,8 @@
 //! Byte-level subprocess coverage for the native `symbrain harness list` CLI.
 
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
 use std::process::{Command, Output};
 
 use tempfile::TempDir;
@@ -17,6 +20,7 @@ fn command(root: &TempDir, args: &[&str]) -> Command {
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
     command
         .env_clear()
+        .envs(coverage::profile_environment())
         .env("HOME", &home)
         .env("USERPROFILE", &home)
         .env("XDG_CONFIG_HOME", &config)

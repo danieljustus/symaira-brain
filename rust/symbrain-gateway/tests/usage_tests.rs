@@ -1,3 +1,7 @@
+#[cfg(unix)]
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
 use std::collections::BTreeMap;
 #[cfg(unix)]
 use std::fs;
@@ -266,6 +270,7 @@ fn production_usage_discovery_is_lazy_and_per_call() {
         .arg("production_usage_discovery_helper")
         .arg("--nocapture")
         .env_clear()
+        .envs(coverage::profile_environment())
         .env("SYMBRAIN_USAGE_DISCOVERY_HELPER", "1")
         .env("SYMBRAIN_TEST_PS_MARKER", &marker)
         .env("HOME", &home)
