@@ -5,3 +5,7 @@
 # Treat them as binary so Git preserves those exact bytes and diff checks do not
 # mistake the carriage returns for accidental trailing whitespace.
 fuzz/corpus/** binary
+
+# Original native Windows process evidence contains CRLF. Keep the artifact's
+# exact bytes and SHA across checkout instead of applying text normalization.
+migration/evidence/doctor-windows-765/original-windows-1288/windows-process.json binary
