@@ -1,0 +1,51 @@
+{
+  "controls": [
+    {
+      "name": "missing-case",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/workspace/symaira-fetch773-proxy-auth/browse/port/harness/fetch_control_process.py\", line 289, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/workspace/symaira-fetch773-proxy-auth/browse/port/harness/fetch_control_process.py\", line 197, in main\n    rust = execute(args.rust, selected, Path(raw) / \"rust\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/symaira-fetch773-proxy-auth/browse/port/harness/fetch_control_process.py\", line 165, in execute\n    assert [record[\"id\"] for record in records] == expected, \"missing/duplicate/reordered process case\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: missing/duplicate/reordered process case\n",
+      "mutant_sha256": "d02908732da59d3536092d6b5321ce60995d634bc29d91cd79a8c86b32d7b747"
+    },
+    {
+      "name": "wrong-body",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "honest fetch process comparisons: 239/251; failures: ['default-headers', 'env-http-implicit-private-allowed', 'env-http-loopback-bypass', 'env-http-all-proxy-ignored', 'env-http-explicit-overrides-env', 'literal-port-http', 'literal-port-relative-redirect', 'redirect-drop-body-headers', 'redirect-retain-body-headers', 'redirect-strip-cross-host-credentials', 'redirect-custom-referer', 'cache-first']\n",
+      "stderr": "",
+      "mutant_sha256": "5d95c32bafeeae0ed11a39efcc6bbddc4951178c5fcc308529c5e77c9f107779"
+    },
+    {
+      "name": "wrong-header",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "honest fetch process comparisons: 239/251; failures: ['default-headers', 'env-http-implicit-private-allowed', 'env-http-loopback-bypass', 'env-http-all-proxy-ignored', 'env-http-explicit-overrides-env', 'literal-port-http', 'literal-port-relative-redirect', 'redirect-drop-body-headers', 'redirect-retain-body-headers', 'redirect-strip-cross-host-credentials', 'redirect-custom-referer', 'cache-first']\n",
+      "stderr": "",
+      "mutant_sha256": "77f9b3128f6bec7b0ae2e5a83554392c3dbb64b2dd6827caa4ec2a94b5964ea7"
+    },
+    {
+      "name": "wrong-error",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "honest fetch process comparisons: 250/251; failures: ['body-size-7']\n",
+      "stderr": "",
+      "mutant_sha256": "fc86a4e5eb0c990c87c128c89eca6870a24ad042a42c14b96797f54881d0c0f8"
+    },
+    {
+      "name": "wrong-proxy-route",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "honest fetch process comparisons: 213/251; failures: ['env-route-http-upper-0', 'env-route-http-lower-0', 'env-route-https-upper-0', 'env-route-https-lower-0', 'env-route-bare-proxy-0', 'env-route-no-proxy-1-2', 'env-route-no-proxy-2-0', 'env-route-no-proxy-3-0', 'env-route-no-proxy-4-2', 'env-route-no-proxy-5-0', 'env-route-no-proxy-6-2', 'env-route-no-proxy-7-2', 'env-route-no-proxy-8-0', 'env-route-no-proxy-9-0', 'env-route-no-proxy-10-0', 'env-route-no-proxy-11-0', 'env-route-no-proxy-12-0', 'env-route-no-proxy-13-0', 'env-route-no-proxy-14-0', 'env-route-review-a073-0-0', 'env-route-review-a073-3-0', 'env-route-review-a073-4-0', 'env-route-review-a073-6-0', 'env-route-review-no-proxy-0-0', 'env-route-review-no-proxy-1-0', 'env-route-review-no-proxy-2-1', 'env-route-review-no-proxy-3-1', 'env-route-review-no-proxy-4-0', 'env-route-review-no-proxy-5-0', 'env-route-review-no-proxy-6-0', 'env-route-review-no-proxy-7-0', 'env-route-review-no-proxy-8-1', 'env-route-review-no-proxy-9-0', 'env-route-review-no-proxy-10-0', 'env-route-review-no-proxy-11-0', 'env-route-review-no-proxy-12-0', 'env-route-review-no-proxy-13-0', 'env-route-upper-precedence-0']\n",
+      "stderr": "",
+      "mutant_sha256": "296dc628afd85d8ad159754f514581daf7a160dbe0104daf7a0b2f882dd6b082"
+    }
+  ],
+  "rejected": 5,
+  "candidate_head": "c7beb3a7a39dbc10f7e84769fccea5cf20e7f09e",
+  "candidate_dirty": false,
+  "controls_script_sha256": "0a7b20628da27fc3c7278805233c1aec818efc1da7b9f4c6dbc770ee73578417",
+  "native_binary_sha256": "9b20e709f1c29ba2df49d1072bae4a101d038ca0de6dc54702a4f7551f5e726c",
+  "go_binary_sha256": "8e92be70d9b908c11f47720b1bf34c5717b327c246686dbb71e03b336f820786",
+  "runner_sha256": "58856451e7ed52761f994f368674c5d97dc2393fb561471394a422a9e259ddd5"
+}

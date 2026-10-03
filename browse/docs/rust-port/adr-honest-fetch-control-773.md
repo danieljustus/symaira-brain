@@ -275,3 +275,27 @@ URL cases remain mismatched in the unchanged38-case supplemental probe. Full
 all previously stated native/value gates remain open. Fresh current-source
 release measurements are required after this production change; prior e2's
 240/120 samples remain historical proof and are never relabeled as current.
+
+Clean corrected source c7beb3's Linux author proof now passes114 ordered proxy
+header exchanges, eight actual enforcing-peer exchanges and three new actual
+mutation controls. The original38 supplemental inputs yield34 equal pairs and
+four expressly retained inherited origin-auth differences. Fresh123 tests
+(0 failures, one parent-owned ignore,26 summaries/seven asserted child cases),
+strict lint, all251 old process cases/five controls, raw32/E0117+1/TLS4/jar4
+and three old supplementary controls pass. Immutable34/16/152/415 source/harness/
+release-Go manifests are retained under `proxy-auth-c7`; frozen Go and fixtures
+remain unchanged. These are author observations awaiting independent review.
+
+The coordinated single current30×4 window retains all240 samples and passes
+the unchanged comparator: Fetch p95 -55.17%, all four workloads below+10%,
+size reduction41.56% against the existing Darwin-arm64 baseline18,330,466B.
+Current Linux releases are10,711,464B Rust and26,611,127B Go. All120 separate
+owned HTTP/HTTPS wire pairs agree. Ordinary routes use one connection per30
+requests in both clients; the explicit normalization-sensitive raw route still
+uses30 native versus one Go connection. Later-response local medians on that
+route are0.706ms/0.229ms native/Go HTTP and2.535ms/0.214ms HTTPS. Keep startup
+observations and every raw interval, not just these summaries. This is a debug
+seam local-fixture cost, not isolated Fetch latency, a frequency claim or another
+acceptance threshold. The original loaded failure and all prior240/120 proof
+remain historical; no sample was discarded. Complete#773/native6/default
+cutover, inherited parity gaps and connection reuse optimization remain open.
