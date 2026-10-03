@@ -44,9 +44,15 @@ pub(in crate::doctor_cli) fn check_memory_db() -> MemoryDbCheck {
     }
     #[cfg(not(unix))]
     {
-        let _ = metadata;
-        check.mode = "0600".to_string();
-        check.mode_ok = true;
+        // Go's Windows FileMode exposes the readonly attribute as 0444/0666,
+        // not POSIX owner permissions. Neither value proves a private ACL.
+        check.mode = if metadata.permissions().readonly() {
+            "0444"
+        } else {
+            "0666"
+        }
+        .to_string();
+        check.mode_ok = false;
     }
     match rusqlite::Connection::open_with_flags(
         &path,

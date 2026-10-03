@@ -24,6 +24,10 @@ with tempfile.TemporaryDirectory(prefix='memory649-doctor-') as temporary:
    p=subprocess.run([str(rust),'doctor'],cwd=base,env=env,capture_output=True,timeout=30);line=next(l for l in p.stdout.decode().splitlines() if 'memory db' in l);assert '✗' in line and 'missing required columns' in line
   records.append({'case':label,'go':out[0],'native':out[1],'db_sha256_before_after':before,'diagnostic_difference_intentional':bool(expected_missing)})
  run('healthy-actual-Go-created-store',[])
+ if os.name == 'nt':
+  path.chmod(0o444)
+  try:run('healthy-Windows-readonly-attribute',[])
+  finally:path.chmod(0o600)
  conn=sqlite3.connect(path)
  for name,sql in conn.execute("SELECT name,sql FROM sqlite_master WHERE type='index' AND tbl_name='memories'").fetchall():
   if sql and any(c in sql for c in cols):conn.execute('DROP INDEX "'+name.replace('"','""')+'"')
@@ -33,4 +37,4 @@ with tempfile.TemporaryDirectory(prefix='memory649-doctor-') as temporary:
  p=subprocess.run([str(rust),'memory','list','--db',str(path),'--json'],cwd=base,env=env,capture_output=True,timeout=30);assert p.returncode==0,(p.stdout,p.stderr)
  run('native-open-repairs-existing-store',[])
 report={'candidate_head':subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),'candidate_dirty':bool(subprocess.check_output(['git','status','--porcelain'],cwd=root)),'local_platform':__import__('platform').platform(),'actual_go_constructor':'memory list --db owned/default.db --json; production migration constructor','actual_go_revision':'dcddcef0df5789123c7c9a7ebe6e01f10e941f2c','binary_sha256':{str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in [go,rust]},'records':records,'operator_state_used':False}
-args.report.write_text(json.dumps(report,indent=2)+'\n');print('3 actual Go/native Doctor observations, retained legacy bug and corrected read-only diagnosis')
+args.report.write_text(json.dumps(report,indent=2)+'\n');print(f'{len(records)} actual Go/native Doctor observations, retained legacy bug and corrected read-only diagnosis')

@@ -76,3 +76,17 @@ into MSYS form before tar extraction. The original Guard Windows failure
 establishes why the same Bash/Tar boundary matters; this is a static portability
 correction, not a claim that Doctor's Windows runner has been executed locally.
 Fresh exact-source proofs, corrected independent review and native CI are required.
+
+## Report actual Windows file attributes
+
+The corrected512 review closes the view finding but identifies a static native
+Windows gate blocker in inherited Doctor reporting: Go1.26.7 maps a writable
+file to0666 and a readonly file to0444, whereas Rust always reported0600 and
+mode_ok=true. Preserve the complete independent review and verbatim pinned SDK
+source. Report Go's actual readonly-bit-derived mode and false mode_ok; neither
+Windows attribute value proves the POSIX0600 requirement or a private ACL.
+Do not project away fields in the comparator or claim an unperformed ACL check.
+The supplemental native Windows gate additionally compares a real readonly
+attribute fixture and restores it before modifying the owned database. Linux
+continues to exercise its three observations; Windows requires four. These
+are static Windows changes until the actual native job executes successfully.
