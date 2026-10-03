@@ -266,7 +266,16 @@ fn explicit_engine_and_policy_checks_stop_incompatible_owner_before_dispatch() {
         [(true, false), (false, false), (true, true), (false, true)]
     {
         let root = root();
-        let endpoint = symbrowse_daemon::socket_path(&root, "guarded").unwrap();
+        // Windows listeners require an isolated named pipe, not a filesystem
+        // socket path. Retain the same owner and dispatch assertions on both.
+        let endpoint = if cfg!(windows) {
+            symbrowse_daemon::default_socket_path(&format!(
+                "guarded-{}",
+                root.file_name().unwrap().to_string_lossy()
+            ))
+        } else {
+            symbrowse_daemon::socket_path(&root, "guarded").unwrap()
+        };
         let dispatched = Arc::new(AtomicBool::new(false));
         let marker = dispatched.clone();
         let server = Arc::new(
