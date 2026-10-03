@@ -83,3 +83,20 @@ The separate Linux verification receipt and raw logs are retained under
 retained byte-for-byte. Final evidence/documentation leaves the validated source
 hashes unchanged. An independent reviewer and exact-candidate native Windows/
 macOS CI must assess this implementation before it is accepted.
+
+## Independent review and publication scope
+
+Full independent review of clean25a23/source0e71 finds no actionable defect.
+Fresh132 affected ordinary tests,264 actual creator calls,33 complete parsed
+winner templates and six real failure/path probes pass. Strict all-target
+Clippy, formatting and CI actionlint pass. The initial Windows failure and
+later success in that same job are both retained; the specific failing syscall
+was not instrumented, so the delete-pending shared-name explanation remains a
+hypothesis. Unique owned temporaries address the collision and cleanup design
+without reclassifying I/O errors, retrying profile creation or weakening races.
+Publish this as a separate bounded CI-fix PR. It affects profile creation across
+init and profile add, so mixing it into the decision-only PR would obscure the
+runtime change. Fresh corrected Linux/macOS/Windows native init races and normal
+protected CI are required before merge. Linux is not Windows runtime evidence.
+The independent report, raw race observations and additional returned write-error
+cleanup proof remain under independent-review.
