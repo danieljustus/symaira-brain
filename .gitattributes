@@ -8,3 +8,5 @@ fuzz/corpus/** binary
 
 # Preserve exact original native failure log bytes.
 migration/evidence/memory-cli-758/windows-cleanup-9c-job-111297047149.log binary
+
+migration/evidence/memory-cli-758/independent-sigpipe-458/*.log binary

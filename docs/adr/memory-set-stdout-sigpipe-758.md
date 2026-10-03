@@ -66,3 +66,14 @@ This correction does not claim the inherited Delete/general output handling,
 the delegated redaction/extraction/conflict pipeline, prefilter/JSONL decoding,
 all database error/mode shapes or related MCP/sync/serve cutovers. Native macOS
 and Windows acceptance still requires actual native execution, not type checks.
+
+Root's complete independent review approves publication1a60/source458 for this
+bounded slice. Fresh broad all-target CLI/Memory suites pass320 tests with
+zero failures/ignores and32 summaries; strict Clippy/fmt/actionlint pass. All
+60 Set/16 Delete/13 boundaries/10 failure pairs,590 baseline, three write and
+two32-case read controls pass. Both original independent closed-reader cases
+match quiet SIGPIPE and complete committed state/FTS. Verify163 current and
+1215 frozenGo source hashes,36 author/46 prior proof artifacts and all actual
+current/original executables. Complete independent report/raw receipts/logs
+are retained under `independent-sigpipe-458/`; native current-head Windows and
+macOS checks remain required. Existing delegated/full758 gates remain open.
