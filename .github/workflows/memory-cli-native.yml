@@ -71,6 +71,13 @@ jobs:
           set -euo pipefail
           umask 022
           python3 scripts/memory-cli-oracle/replay.py --report "$REPORT" 2>&1 | tee "$PROCESS_LOG"
+      - name: Verify governed direct writes and delete state
+        env:
+          REPORT_DIR: ${{ runner.temp }}/memory-cli-writes
+        run: |
+          set -euo pipefail
+          umask 022
+          python3 scripts/memory-cli-oracle/write_gate.py --report-dir "$REPORT_DIR"
       - name: Require actual replay failure controls
         env:
           REPORT: ${{ runner.temp }}/memory-cli-controls.json

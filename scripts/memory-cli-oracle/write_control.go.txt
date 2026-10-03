@@ -1,0 +1,48 @@
+// Actual executable mutation controls delegate to the real native candidate.
+package main
+
+import (
+    "bytes"
+    "database/sql"
+    "os"
+    "os/exec"
+    "regexp"
+
+    _ "modernc.org/sqlite"
+)
+
+func main() {
+    command := exec.Command(os.Getenv("MEMORY_CLI_CONTROL_RUST"), os.Args[1:]...)
+    command.Stderr = os.Stderr
+    var stdout bytes.Buffer
+    command.Stdout = &stdout
+    err := command.Run()
+    data := stdout.Bytes()
+    mode := os.Getenv("MEMORY_CLI_CONTROL_MODE")
+    if err == nil && mode == "identity" {
+        expression := regexp.MustCompile(`[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}`)
+        match := expression.Find(data)
+        if match == nil { os.Exit(95) }
+        data = bytes.Replace(data, match, []byte("00000000-0000-4000-8000-000000000000"), 1)
+    }
+    if err == nil && mode == "audit" {
+        var path string
+        for index, arg := range os.Args[1:] {
+            if arg == "--db" && index + 2 < len(os.Args) { path = os.Args[index+2] }
+        }
+        if path == "" { os.Exit(96) }
+        database, openErr := sql.Open("sqlite", path)
+        if openErr != nil { os.Exit(97) }
+        result, updateErr := database.Exec("UPDATE audit_log SET actor='Changed' WHERE action='set'")
+        if updateErr != nil { os.Exit(98) }
+        count, countErr := result.RowsAffected()
+        if countErr != nil || count != 1 { os.Exit(99) }
+        _ = database.Close()
+    }
+    _, _ = os.Stdout.Write(data)
+    if err != nil {
+        if child, ok := err.(*exec.ExitError); ok { os.Exit(child.ExitCode()) }
+        os.Exit(1)
+    }
+    if mode == "exit" { os.Exit(1) }
+}

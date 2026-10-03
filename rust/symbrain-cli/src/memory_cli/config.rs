@@ -14,6 +14,8 @@ pub(super) struct Config {
     pub ollama_url: String,
     pub ollama_model: String,
     pub prefilter: bool,
+    pub conflict_enabled: bool,
+    pub quantize_binary: bool,
 }
 
 impl Default for Config {
@@ -23,6 +25,8 @@ impl Default for Config {
             ollama_url: "http://localhost:11434/api/embeddings".to_owned(),
             ollama_model: "nomic-embed-text".to_owned(),
             prefilter: false,
+            conflict_enabled: true,
+            quantize_binary: false,
         }
     }
 }
@@ -94,8 +98,8 @@ fn merge(config: &mut Config, path: &std::path::Path) -> Option<()> {
         config_value::validate_item(kind, item)?;
         if let Some(value) = item.as_str() {
             apply(config, path, value);
-        } else if path == "hybrid_search.prefilter_enabled" {
-            config.prefilter = item.as_bool()?;
+        } else if let Some(value) = item.as_bool() {
+            apply(config, path, if value { "true" } else { "false" });
         }
     }
     Some(())
@@ -115,6 +119,12 @@ fn apply(config: &mut Config, path: &str, value: &str) {
         "ollama.model" => value.clone_into(&mut config.ollama_model),
         "hybrid_search.prefilter_enabled" => {
             config.prefilter = config_value::parse_bool(value).unwrap_or(false);
+        }
+        "conflict.enabled" => {
+            config.conflict_enabled = config_value::parse_bool(value).unwrap_or(true);
+        }
+        "hybrid_search.quantize_to_binary" => {
+            config.quantize_binary = config_value::parse_bool(value).unwrap_or(false);
         }
         _ => {}
     }

@@ -1,6 +1,6 @@
 //! Native memory routing contracts.
 
-use super::{OsString, PathBuf, flags, kind, resolve_db_path};
+use super::{OsString, flags, kind, resolve_db_path};
 
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     let Some(verb) = args.first().and_then(|value| value.to_str()) else {
@@ -38,50 +38,43 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     if verb == "set" && kind::normalize(&parsed.text("kind")).is_none() {
         return false;
     }
-    if verb == "set" {
-        let raw_kind = parsed.text("kind");
-        // Parsing aliases does not prove governed write state. Preserve the
-        // previous canonical-kind/scope cutover boundary for valid writes.
-        if kind::normalize(&raw_kind) != Some(raw_kind.as_str())
-            || !["global", "project", "agent", "user", "session"]
-                .contains(&parsed.text("scope").as_str())
-        {
-            return true;
-        }
+    if verb == "set" && !super::write::direct_write_supported(&parsed) {
+        return true;
     }
     // Valid operations still retain configuration/DB and governed-write gates
     // until their source-bound process contracts are completed.
     if verb == "search" && super::config::load().prefilter {
         return true;
     }
-    if verb == "set" && memory_config_is_dynamic() {
+    let path = resolve_db_path(Some(&parsed.raw("db")));
+    if !database_path_is_usable(&path) {
         return true;
     }
-    if !database_path_is_usable(&resolve_db_path(Some(&parsed.raw("db")))) {
+    // File/directory modes for newly created stores are still a release gate.
+    if matches!(verb, "set" | "delete") && !path.is_file() {
         return true;
     }
-    if verb == "set"
-        && (!parsed.text("metadata").is_empty()
-            || !parsed.text("entities").is_empty()
-            || parsed.text("author") != "cli:symbrain")
-    {
-        return true;
+    if verb == "set" {
+        let entities = parsed
+            .text("entities")
+            .split(',')
+            .map(str::trim)
+            .filter(|name| !name.is_empty())
+            .map(str::to_owned)
+            .collect::<Vec<_>>();
+        if !symbrain_memory::direct_entities_supported(&path, &entities) {
+            return true;
+        }
+    }
+    if verb == "delete" {
+        let Some(id) = parsed.positional[0].to_str() else {
+            return true;
+        };
+        if !symbrain_memory::direct_delete_supported(&path, id.trim()) {
+            return true;
+        }
     }
     false
-}
-
-/// Reads the shipped memory configuration lookups that change the database or
-/// the retrieval behaviour.
-pub(super) fn memory_config_is_dynamic() -> bool {
-    if std::env::vars_os().any(|(name, _)| name.to_string_lossy().starts_with("SYMMEMORY_")) {
-        return true;
-    }
-    let config_root = std::env::var_os("XDG_CONFIG_HOME")
-        .map(PathBuf::from)
-        .or_else(|| symbrain_core::xdg::home_dir().map(|home| home.join(".config")))
-        .unwrap_or_else(|| PathBuf::from(".config"));
-    config_root.join("symmemory/config.toml").is_file()
-        || std::env::current_dir().is_ok_and(|dir| dir.join(".symmemory.toml").is_file())
 }
 
 /// Reports whether the resolved database path can be opened.

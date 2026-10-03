@@ -1,0 +1,31 @@
+// Record the exact delegated oracle process; no synthetic response replaces Go.
+package main
+
+import (
+    "bytes"
+    "encoding/json"
+    "os"
+    "os/exec"
+)
+
+func main() {
+    command := exec.Command(os.Getenv("MEMORY_CLI_FALLBACK_GO"), os.Args[1:]...)
+    var stdout, stderr bytes.Buffer
+    command.Stdout = &stdout
+    command.Stderr = &stderr
+    err := command.Run()
+    code := 0
+    if err != nil {
+        if child, ok := err.(*exec.ExitError); ok { code = child.ExitCode() } else { code = 94 }
+    }
+    receipt, _ := json.Marshal(struct {
+        Args []string `json:"args"`
+        Exit int `json:"exit"`
+        Stdout []byte `json:"stdout"`
+        Stderr []byte `json:"stderr"`
+    }{os.Args[1:],code,stdout.Bytes(),stderr.Bytes()})
+    if os.WriteFile(os.Getenv("MEMORY_CLI_FALLBACK_RECEIPT"),receipt,0600) != nil { os.Exit(95) }
+    _, _ = os.Stdout.Write(stdout.Bytes())
+    _, _ = os.Stderr.Write(stderr.Bytes())
+    os.Exit(code)
+}
