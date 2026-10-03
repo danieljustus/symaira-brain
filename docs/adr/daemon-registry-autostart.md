@@ -175,3 +175,16 @@ reviewed parent is published, and keep #772 open for that work and remaining
 CLI/lifecycle surfaces. Six fresh native OS/architecture jobs plus protected
 checks on the final published head are required; Linux cannot certify the
 294 declared Windows observations or default cutover.
+
+## Windows incompatible-owner fixture endpoint
+
+Actual b427 native Windows amd64/arm64 jobs111309756720/111309756758
+fail before readiness in the incompatible-engine/policy test. The fixture
+passes socket_path(root, guarded), a filesystem socket spelling, to the
+Windows named-pipe listener, which returns OS123 InvalidFilename. Use the
+existing default_socket_path to construct a unique owned named pipe on
+Windows; keep the Unix socket and all four engine/policy/no-autostart
+combinations, operation-refusal and never-dispatched assertions. Production
+endpoint rules and timeouts remain unchanged. Retain both complete CRLF logs.
+This is a fixture correction; fresh native execution still establishes
+Windows acceptance. No extra retry, skip or relaxed owner check is introduced.

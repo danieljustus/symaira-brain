@@ -8,3 +8,6 @@ fuzz/corpus/** binary
 
 # Keep source-bound independent process/test logs exact.
 migration/evidence/browse-registry-772/corrected-independent-cf959/*.log binary
+
+# Retain exact native Windows endpoint failure bytes.
+migration/evidence/browse-registry-772/windows-endpoint-b427/*.log binary
