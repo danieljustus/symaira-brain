@@ -1,4 +1,7 @@
 #![allow(clippy::items_after_statements, clippy::manual_let_else)]
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
 use serde::Deserialize;
 use std::collections::BTreeMap;
 use std::fs;
@@ -293,6 +296,7 @@ fn run_case(case: &OracleCase) -> (i32, String, String, Vec<ObservedFile>) {
         .args(args)
         .current_dir(root.join("project"))
         .env_clear()
+        .envs(coverage::profile_environment())
         .env("HOME", root.join("home"))
         .env("XDG_CONFIG_HOME", root.join("config"))
         .env("XDG_DATA_HOME", root.join("data"))

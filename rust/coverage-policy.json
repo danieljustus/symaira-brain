@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "workspace": "Cargo.toml",
+  "ci_platform": "Linux x86_64",
+  "all_features": true,
+  "metric": "lines",
+  "minimum_percent": 80.0,
+  "cargo_llvm_cov": "0.6.21",
+  "source_filter": "cargo-llvm-cov defaults; no additional file, function or package exclusions"
+}

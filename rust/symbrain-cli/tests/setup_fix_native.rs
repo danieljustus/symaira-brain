@@ -1,5 +1,8 @@
 #![cfg(target_os = "macos")]
 
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::process::Command;
@@ -35,6 +38,7 @@ fn setup_fix_uses_native_noop_when_all_managed_versions_match() {
     let output = Command::new(env!("CARGO_BIN_EXE_symbrain"))
         .args(["setup", "--fix", "--json"])
         .env_clear()
+        .envs(coverage::profile_environment())
         .env("HOME", &home)
         .env("XDG_CONFIG_HOME", &config)
         .env("XDG_DATA_HOME", &data)
