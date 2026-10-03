@@ -40,9 +40,9 @@ for row in rows:
             observations.append({'exit':result.returncode,'stdout_b64':base64.b64encode(result.stdout).decode(),'stderr_b64':base64.b64encode(result.stderr).decode()})
         if args.control=='exit'and not records:observations[0]['exit']=42
         records.append({'id':row['id']+'-'+mode,'go':observations[0],'rust':observations[1],'matches':observations[0]==observations[1]})
-if args.control=='missing-case':records.pop()
     assert all(pathlib.Path(path).read_bytes()==value for path,value in before.items()),'actual CLI sources read-only'
     if owner:assert os.readlink(link)==target,'actual CLI owner symlink read-only'
+if args.control=='missing-case':records.pop()
 report={'schema_version':1,'cases':len(records),'expected_cases':expected,'route_cases':len(rows),'missing_file_report_cases':len(missing)*2,'passed':sum(row['matches']for row in records),'failed':sum(not row['matches']for row in records),'binary_sha256':{name:hashlib.sha256(path.read_bytes()).hexdigest()for name,path in [('go',args.go_binary),('rust',args.rust_binary)]},'records':records,'read_only_source_cases':len(rows),'operator_keychain_isolation':'both CLIs seed unresolved OAuth; selected Copilot/Kimi Go constructors never invoke Claude Keychain'}
 args.output.write_text(json.dumps(report,indent=2)+'\n')
 if len(records)!=expected:sys.exit('Copilot/Kimi CLI oracle: missing CLI case')
