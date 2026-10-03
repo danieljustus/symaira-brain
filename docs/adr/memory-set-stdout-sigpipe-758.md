@@ -46,6 +46,22 @@ released target, archive and decompression/SHA-verify the actual reviewed CLI
 `/workspace/oracles/symaira-memory758-647-binaries/receipt.json`. The original55
 source, previous14d archives and all rejected observations remain unchanged.
 
+Clean combined source `458e8fa5` passes 165 affected Rust tests (119 CLI, 44
+Memory, one integrated Activity test and one actual Unix stdout child test),
+strict Clippy, formatting and workflow actionlint. Its actual executable SHA256
+is `74baed15ec319a894fc5fc3001c0afb03572c0a12b2d0690b52802fe664fc804`.
+Fresh actual Go/native gates pass all 60 Set, 16 Delete, 13 delegated-boundary,
+six callback, two full-device and two closed-reader pairs, all three write
+controls, all 590 baseline pairs and both baseline controls. The unchanged
+independent closed-reader inputs also pass both formats with literal quiet
+SIGPIPE and matching committed state. Full source/hash-bound logs and raw
+receipts are retained separately in
+`migration/evidence/memory-cli-758/sigpipe-fix-458e8fa/verification.json`.
+All 163 candidate-file and 1,215 frozen Go source hashes, seven actual current
+executables and all six previous reviewed executable archives were verified.
+These local Linux results are author validation, pending independent approval
+and actual native macOS/Windows acceptance.
+
 This correction does not claim the inherited Delete/general output handling,
 the delegated redaction/extraction/conflict pipeline, prefilter/JSONL decoding,
 all database error/mode shapes or related MCP/sync/serve cutovers. Native macOS

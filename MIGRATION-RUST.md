@@ -78,6 +78,13 @@ writers as checked errors, adds both real closed-reader process formats and an
 actual CLI child test, and normally integrates main `e3dbda6c`. Its decision is
 in `docs/adr/memory-set-stdout-sigpipe-758.md`; exact-source independent review,
 native three-OS acceptance and full #758 remain pending.
+Clean combined source `458e8fa5` passes 165 affected Rust tests and strict lint
+gates, fresh 60/16/13 state pairs, six callback and four Unix sink/closed-reader
+pairs, all three write controls, all 590 baseline pairs and both baseline
+controls. Both original independent closed-reader inputs now match literal Go
+SIGPIPE/quiet output while retaining complete committed state. The full fresh
+source/binary-bound evidence and previous executable archives remain separate;
+these Linux author results do not replace independent or native three-OS review.
 
 Independent review found two configured-read differences in the initial CLI
 candidate: memory-specific XDG/legacy resolution and populated rules JSON HTML/
