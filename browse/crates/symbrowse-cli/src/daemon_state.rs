@@ -178,7 +178,7 @@ pub(super) fn parse_session(
 ) -> Result<Action, ParseError> {
     let mut session = OsString::from("default");
     let mut subcommand = None;
-    let mut format = Format::Text;
+    let mut output = "text".to_owned();
     let mut json = false;
     let mut index = 0;
     while index < values.len() {
@@ -196,9 +196,9 @@ pub(super) fn parse_session(
             "--json=false" => json = false,
             "--output" => {
                 index += 1;
-                format = parse_format(required_value(values, index, "--output")?)?;
+                output = required_value(values, index, "--output")?.to_owned();
             }
-            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with("--output=") => output = value[9..].to_owned(),
             "list" | "info" if index > command_index && subcommand.is_none() => {
                 subcommand = Some(values[index].clone());
             }
@@ -217,7 +217,11 @@ pub(super) fn parse_session(
     Ok(Action::DaemonLifecycle {
         session,
         command: format!("session.{subcommand}"),
-        format: if json { Format::Json } else { format },
+        format: if json {
+            Format::Json
+        } else {
+            parse_format(&output)?
+        },
     })
 }
 

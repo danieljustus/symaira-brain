@@ -361,8 +361,8 @@ def main() -> int:
               "go_binary_sha256": process.digest(args.go), "rust_binary_sha256": process.digest(args.rust),
               "candidate_source_sha256": {f: process.digest(root / f) for f in files},
               "go_source_sha256": {f: process.digest(source / f) for f in go_files},
-              "counts_per_binary": {"cli_observations": 108 + len(case["go"]["cli_edges"]["invalid"]) + 6, "invalid_session_cli_observations": 48,
-                                    "literal_cli_edge_observations": len(case["go"]["cli_edges"]["invalid"]), "implemented_help_observations": 6, "recorded_raw_frames": 20,
+              "counts_per_binary": {"cli_observations": 108 + len(case["go"]["cli_edges"]["invalid"]) + 4 + 6, "invalid_session_cli_observations": 48,
+                                    "literal_cli_edge_observations": len(case["go"]["cli_edges"]["invalid"]), "selected_invalid_output_observations": 4, "implemented_help_observations": 6, "recorded_raw_frames": 20,
                                     "concurrent_clients": 8, "persisted_go_fixtures": 3},
               "case": case, "oracle_api": api, "matches": case["matches"], "negative_controls": controls(case)}
     args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -372,7 +372,7 @@ def main() -> int:
         for key in left:
             if left[key] != right[key]:
                 print(f"difference in {key}: Go={left[key]!r}; Rust={right[key]!r}")
-    print(f"{report['counts_per_binary']['cli_observations']} CLI observations (48 original invalid + {len(case['go']['cli_edges']['invalid'])} literal edge + 6 help) + 20 raw frames + 8 concurrent clients per binary: matches={case['matches']}; 8 controls rejected")
+    print(f"{report['counts_per_binary']['cli_observations']} CLI observations (48 original invalid + {len(case['go']['cli_edges']['invalid'])} literal edge + 4 selected-output errors + 6 help) + 20 raw frames + 8 concurrent clients per binary: matches={case['matches']}; 8 controls rejected")
     return 0 if case["matches"] else 1
 
 

@@ -131,3 +131,27 @@ error, timestamp, exit/code, byte-loss and help-description regressions. These
 comparator mutations are distinguished from actual executable observations.
 Six fresh exact-head native jobs and independent review remain mandatory; the
 state-key bridge stays separate and #772/RUST-006 remain incomplete.
+
+## Select the final session output before validating it
+
+Full independent review of clean `94c5960` ran every preceding gate, then
+reproduced six failures in twelve literal CLI comparisons. `--json` overrides
+`--output invalid` in Go regardless of root/before/after flag order, but session
+list/info parsed the invalid format immediately and returned usage exit 2.
+Daemon/state controls already selected output lazily and matched. Preserve the
+complete rejected review, original twelve actual pairs and executable.
+
+Session parsing now retains the final output string and validates it only if the
+final JSON shorthand is false, after all flags are consumed. This makes session
+selection consistent with the existing lifecycle/state adapters and permits a
+later valid output override. No transport policy or global error exit changes.
+
+Append the exact twelve original pairs and twenty root-flag controls for inline
+forms, false JSON override and later output overrides. Preserve every preceding
+474 Unix / 258 Windows observation and assertion. The complete gate therefore
+executes 510 Unix / 294 Windows CLI observations: 392 / 176 literal edge pairs,
+four literal invalid-selected-format controls (JSON false still exits 2), the
+original 108 observations and six supported-help comparisons. Windows counts
+are declared native coverage, not a local execution claim. All previous raw-frame,
+constructor, concurrent client, state fixture and rejection-control gates remain.
+Independent correction review and six fresh native exact-head jobs remain required.

@@ -42,13 +42,40 @@ def observe(binary, root, env):
                     [group, b"--session", name, verb, *flags],
                 ):
                     records.append(execute(binary, root, env, arguments))
+    # Append the exact12 independently observed JSON/invalid-output cases;
+    # keep the existing360/144-case prefix unchanged.
+    for command in COMMANDS:
+        group, verb = [value.encode() for value in command]
+        selected = [group, verb, b"--session", b"bad session"]
+        for arguments in (
+            [b"--json", b"--output", b"invalid", *selected],
+            [*selected, b"--json", b"--output", b"invalid"],
+            [*selected, b"--output", b"invalid", b"--json"],
+        ):
+            records.append(execute(binary, root, env, arguments))
+    # Meaningful root-flag controls: inline forms, false overrides and later
+    # output overrides must select the final format before its validation.
+    for command in COMMANDS:
+        group, verb = [value.encode() for value in command]
+        selected = [group, verb, b"--session", b"bad session"]
+        for arguments in (
+            [b"--json=true", b"--output=invalid", *selected],
+            [b"--json=false", b"--output=yaml", *selected],
+            [b"--output=invalid", b"--output=yaml", *selected],
+            [b"--output=invalid", *selected, b"--output=text"],
+            [b"--json", *selected, b"--json=false", b"--output=yaml"],
+        ):
+            records.append(execute(binary, root, env, arguments))
+    format_errors = [execute(binary, root, env,
+        [*[value.encode() for value in command], b"--session", b"bad session",
+         b"--output", b"invalid", b"--json=false"]) for command in COMMANDS]
     help_records = []
     for arguments in ([b"session", b"--help"], [b"session"], [b"session", b"list", b"--help"],
                       [b"session", b"info", b"--help"], [b"help", b"session", b"list"],
                       [b"help", b"session", b"info"]):
         help_records.append(execute(binary, root, env, arguments))
     assert sorted(p.relative_to(root).as_posix() for p in root.rglob("*")) == before, "CLI edges created daemon/profile/state files"
-    return {"invalid": records, "help": help_records, "no_files_created": True,
+    return {"invalid": records, "format_errors": format_errors, "help": help_records, "no_files_created": True,
             "raw_unix_bytes": os.name == "posix"}
 
 
@@ -71,9 +98,12 @@ def comparable_help(observed, *, go):
 def compare(left, right):
     assert left["no_files_created"] and right["no_files_created"]
     assert left["raw_unix_bytes"] == right["raw_unix_bytes"]
-    assert len(left["invalid"]) == len(right["invalid"]) == (360 if left["raw_unix_bytes"] else 144)
+    assert len(left["invalid"]) == len(right["invalid"]) == (392 if left["raw_unix_bytes"] else 176)
     assert all(record["exit"] == 1 for record in left["invalid"] + right["invalid"])
     assert left["invalid"] == right["invalid"], "raw CLI args/exit/stdout/stderr differ"
+    assert len(left["format_errors"]) == len(right["format_errors"]) == 4
+    assert all(record["exit"] == 2 for record in left["format_errors"] + right["format_errors"])
+    assert left["format_errors"] == right["format_errors"], "selected invalid output must still fail literally"
     assert len(left["help"]) == len(right["help"]) == 6
     assert [comparable_help(record, go=True) for record in left["help"]] == [
         comparable_help(record, go=False) for record in right["help"]], "implemented help bytes differ"
