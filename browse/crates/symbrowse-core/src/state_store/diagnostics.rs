@@ -57,19 +57,7 @@ fn legacy_json_error(raw: &[u8]) -> Option<String> {
     } else {
         data
     };
-    let first = *body.iter().find(|byte| !byte.is_ascii_whitespace())?;
-    // Missing keys on legacy formats reach Go's JSON scanner. This only maps
-    // an invalid first byte, never accepts ciphertext as plaintext or data.
-    let token = match first {
-        0..=31 | 127 => format!("\\x{first:02x}"),
-        b'\'' => "\\'".to_owned(),
-        b'\\' => "\\\\".to_owned(),
-        b'{' | b'[' | b'"' | b'-' | b'0'..=b'9' | b't' | b'f' | b'n' => return None,
-        _ => char::from(first).to_string(),
-    };
-    Some(format!(
-        "parse state payload: invalid character '{token}' looking for beginning of value"
-    ))
+    crate::state::invalid_first_byte(body).map(|message| format!("parse state payload: {message}"))
 }
 
 impl Store {

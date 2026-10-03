@@ -140,6 +140,8 @@ def observe(binary: Path, case: dict, provider: Path, api: dict, control: tuple[
                                for fixture in MANIFEST["cases"]]
                     # A repeated encrypted access must reuse the startup decision.
                     frames.append({"cmd": "state.show", "session": session, "args": {"name": "encrypted-v3"}})
+                if case.get("layout"):
+                    frames.append({"cmd": "state.show", "session": session, "args": {"name": "b-checked"}})
                 for frame in frames:
                     records.append({"request": frame, "response": registry.harness.request(endpoint, frame)})
                 after = {path.name: registry.process.digest(path) for path in states.iterdir()}

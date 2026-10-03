@@ -12,6 +12,8 @@ mod model;
 use model::Header;
 pub(crate) use model::StateHeader;
 pub use model::{Cookie, OriginState, State};
+mod json_diagnostics;
+pub(crate) use json_diagnostics::invalid_first_byte;
 
 pub const SCHEMA_VERSION: u32 = 3;
 pub const FILE_MAGIC: &[u8] = b"SYMBROWSE-STATE\0";
@@ -170,7 +172,7 @@ fn decode_versioned(
         body.to_vec()
     };
     let mut state: State = serde_json::from_slice(&payload)
-        .map_err(|error| StateError::InvalidPayload(error.to_string()))?;
+        .map_err(|error| json_diagnostics::payload_error(&payload, error))?;
     if header.schema_version >= 3
         && header.key_source == "none"
         && (state.key_source != header.key_source
@@ -211,7 +213,7 @@ fn decode_legacy(data: &[u8], key: Option<&[u8]>) -> Result<State, StateError> {
 
 fn parse_legacy_payload(payload: Vec<u8>) -> Result<State, StateError> {
     let mut state: State = serde_json::from_slice(&payload)
-        .map_err(|error| StateError::InvalidPayload(error.to_string()))?;
+        .map_err(|error| json_diagnostics::payload_error(&payload, error))?;
     if state.schema_version == 0 {
         state.schema_version = 1;
     }

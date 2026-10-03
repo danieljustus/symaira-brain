@@ -106,7 +106,12 @@ validation diagnostic. An exact non-value-bearing pattern exemption avoids the
 generic redactor hiding the word key. Actual assignment, environment and JSON
 secret surfaces still redact material. Startup text/JSON/YAML failures preserve
 actual Go modes and final JSON precedence. YAML colon-containing diagnostic
-strings use Go's observed single-quoted style. Shared Core Go quoting reuses the
+strings use Go's observed single-quoted style. Two additional actual read-only
+probes preserve forged-none and authenticated non-JSON first-byte diagnostic
+failures from f1. Serde still decides acceptance; the diagnostic adapter quotes
+only the actual already-decoded first invalid byte, using exact JSON whitespace
+and the shared Go formatter. It never guesses from ciphertext or decrypts again.
+These state.show frames are additive to the authenticated-cleanup layouts. Shared Core Go quoting reuses the
 already scalar-digest-verified daemon implementation; no duplicate Unicode table
 or Rust Debug approximation is introduced.
 
