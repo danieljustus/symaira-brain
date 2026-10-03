@@ -22,3 +22,12 @@ release server, and preserve Go's config-load failure boundary without writing
 binaries. `--from-source`, `--modules`, `doctor --fix` and full native config
 diagnostics remain open in #765. Three current-head native CI reports are
 required before this repair increment merges.
+
+Windows version probes first require the original managed filename and then
+resolve executable candidates using Go's PATHEXT rules; extensionless PE files
+are not automatically accepted as current installs. Native Windows process tests
+verify absence, refusal, candidate selection and timeout without Go. Release
+downloads avoid pooled connections so an HTTP/1.0 missing-primary response
+cannot poison the alternate-asset request. The HTTP regression repeatedly
+verifies and installs the fallback archive. Failed Windows CI and the original
+Linux closed-connection replay remain in `migration/evidence/setup-repair-765/`.

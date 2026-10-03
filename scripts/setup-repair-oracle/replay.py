@@ -186,6 +186,7 @@ def main():
         'rust/symbrain-cli/src/setup_cli.rs', 'rust/symbrain-cli/src/setup_args.rs',
         'rust/symbrain-cli/src/setup_config.rs', 'rust/symbrain-cli/src/vault_config.rs',
         'rust/symbrain-managed/src/provenance.rs', 'rust/symbrain-managed/src/provenance_json.rs',
+        'rust/symbrain-managed/src/install.rs', 'rust/symbrain-managed/src/version_probe.rs',
         'scripts/setup-repair-oracle/replay.py', 'scripts/rust-differential.py')}
     Path(report).write_text(json.dumps(data, indent=2) + "\n")
     return code
