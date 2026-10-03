@@ -1,0 +1,89 @@
+# Native memory CLI parsing and configuration (#758)
+
+Status: implemented increment; native three-OS acceptance and full #758 pending.
+
+## Decision and rationale
+
+Split the former 1,613-line `memory_cli.rs` by behavior: routing, help, flags,
+paths, lightweight reads, rules, query logs, search and writes. Every changed
+production module stays below 400 lines. Keep one raw-argument flag parser for
+the six store verbs, with per-verb definitions and usage text. Independent
+parsers had drifted on aliases, duplicate flags, flags after positionals, help
+precedence and Go integer syntax; a shared parser prevents the same divergence
+from recurring in each verb.
+
+Preserve the immutable Go flag contract, including error bytes and exit codes.
+Help `-h`/`--help` takes precedence anywhere, even when supplied as another
+flag's value. The three positional verbs reorder flags before parsing, while
+read verbs stop at the first positional. Integers use Go base-zero syntax and
+overflow precedence; explicit booleans accept exactly Go's spellings. Unknown
+commands and usage failures stay native without opening a store or loading
+configuration. Unix error diagnostics preserve raw argument bytes.
+
+Implement the one-shot memory configuration seam locally. Brain has one memory
+CLI consumer and an existing TOML parser; adding a new shared CoreKit package
+would create an API/dependency obligation without a second consumer. Follow
+global `symmemory/config.toml`, then `.symmemory.toml`, then typed `SYMMEMORY_*`
+overrides. Relative XDG config roots are ignored. Validate every known field,
+including fields unused by CLI reads: any loader error makes the shipped CLI
+discard the entire partially merged configuration and start from defaults.
+Unknown fields are ignored. File zero values are ignored except pointer bools;
+nonempty environment strings can explicitly set false/zero. Configkit rejects
+file maps and skips environment maps. TOML duplication, syntax and type errors
+also reset the whole config. Database argv/environment overrides preserve raw
+OS paths. Search uses the configured Ollama endpoint/model, then the existing
+hash fallback; plain `SearchMemories` keeps its Go default ranking weights.
+Routing, path resolution and embedding generation share the first cached config
+snapshot, as Go configkit does, so a changing file cannot split one CLI invocation
+across different configurations.
+
+Fix the native list default to the shipped CLI's 100 rows, retaining its 1,000
+row maximum, and make aliases use the last supplied value. Apply Go HTML escaping
+to list JSON as search already does; parsed-JSON equivalence alone missed this
+observable byte difference. Keep dynamic governed
+writes and configured Hamming-prefilter search on Go until their complete
+stateful behavior is implemented and proven. Parser support alone is insufficient
+to remove those gates: governed set also owns provenance, conflict/deduplication,
+entities, extracted subfacts and grounded evidence.
+The prior canonical-kind/five-scope write boundary stays in place; parsing kind
+aliases does not ungate additional valid write shapes without state evidence.
+
+## Evidence and boundaries
+
+The tracked replay archives immutable Go `dcddcef0` and verifies CoreKit v0.17.0
+configkit SHA-256. A supplemental reflection program executes Go to verify all
+86 descriptor names/types. Native processes use disposable HOME/USERPROFILE/cwd
+and XDG roots; runtime PATH is empty and the explicit Go fallback binary absent.
+Literal stdout/stderr bytes and exit codes are compared. Configuration and read
+cases also compare every SQLite table, row, column and blob before/after both
+processes, with no dropped state fields. Seeded rules/list/query-log cases cover
+1,100 memory rows, 80 log rows, limits and repeated aliases.
+Both table and successful JSON output are exercised. Three additional searches
+use a loopback-only fixture to compare the actual Go/Rust embedding request path
+and model/input payload under global/project/env overrides; no paid endpoint is
+called, and the empty store remains unchanged.
+
+The final harness executes 583 cases on Unix and 546 on Windows. Two executable
+negative controls run the real candidate and separately mutate a same-length
+semantic output token or success exit, requiring a real failed replay while the
+database remains identical. Source/binary hashes, SDK, exact candidate revision
+and dirty status bind every receipt. The native Linux/macOS/Windows workflow
+must pass before accepting this increment.
+
+Initial argument probing found three boolean error-prefix differences; these
+were corrected against the actual Go process. Initial schema coverage extraction
+omitted the digit-containing `bm25_weight` name; the tracked harness now includes
+digits and fails unless executed Go reflection exactly matches all 86 entries.
+These observations are retained separately from final passing receipts.
+Eight seeded list JSON cases also exposed missing native HTML escaping while
+parsed values and every database row were already equal. That complete failed
+process receipt is retained; the final gate requires literal bytes and successful
+read/search exits, so matching usage failures cannot masquerade as JSON proof.
+
+Full #758 remains open: governed write state, every database open/error shape,
+new database file/directory permission parity, configured Hamming prefilter and
+Go-compatible evidence JSONL decoding still need implementation and proof.
+This increment does not certify MCP work owned by #760/#761, nor remove `serve`
+or synchronization fallback. #649 stays open until the repair is shipped in a
+Rust release and its Doctor diagnostic is verified. Go source and frozen
+fixtures remain unchanged.

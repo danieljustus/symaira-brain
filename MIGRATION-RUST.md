@@ -29,6 +29,16 @@ dynamic configuration, governed writes and JSONL decoding remain open; no Go
 fallback route is removed, and #649 remains pending the shipped Rust release.
 The rationale is recorded in `docs/adr/758-native-memory-evidence.md`.
 
+The follow-up #758 CLI increment splits the oversized memory module into focused
+behavior modules, ports raw Go flags/error grammar and all 86 typed memory
+configuration fields, uses configured Ollama query embeddings and corrects the
+list default to 100. The supplemental immutable-Go replay compares 583 Unix/546
+Windows cases, including full seeded database state for configuration/read
+commands and two executable failure controls. Native three-OS acceptance is
+pending. Governed writes, configured Hamming prefilter, every database open/error
+shape, new-file permission parity and JSONL decoding remain open. The decision
+and scope are recorded in `docs/adr/memory-native-cli-758.md`.
+
 The native memory embedding adapter uses CoreKit's Rust `symaira-core-llm`
 transport at the exact Git revision pinned in `Cargo.toml`. Brain retains its
 Ollama URL normalization, two-second timeout, 768-dimension gate, and local hash
