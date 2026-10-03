@@ -1,0 +1,65 @@
+// Supplemental constructor/request oracle; production Go remains unchanged.
+package usage
+
+import (
+	"context"
+	"encoding/json"
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+type credentialTransport768 struct{ Headers []map[string]string }
+
+func (r *credentialTransport768) RoundTrip(req *http.Request) (*http.Response, error) {
+	headers := map[string]string{}
+	for _, name := range []string{"Authorization", "X-Api-Key", "Cookie"} {
+		if value := req.Header.Get(name); value != "" {
+			headers[strings.ToLower(name)] = value
+		}
+	}
+	r.Headers = append(r.Headers, headers)
+	return &http.Response{StatusCode: 401, Body: io.NopCloser(strings.NewReader("{}")), Header: make(http.Header)}, nil
+}
+func TestUsageCredentialOracle768(t *testing.T) {
+	providerEnv := map[string]string{"ANTHROPIC_ADMIN_KEY": "claude", "ANTHROPIC_OAUTH_TOKEN": "claude", "CODEX_ACCESS_TOKEN": "codex", "COPILOT_ACCESS_TOKEN": "copilot", "CURSOR_COOKIE": "cursor", "KIMI_CODE_API_KEY": "kimi", "KIMI_AUTH_TOKEN": "kimi", "MOONSHOT_API_KEY": "moonshot", "NOUS_PORTAL_ACCESS_TOKEN": "nous", "OPENCODE_COOKIE": "opencode", "OPENROUTER_API_KEY": "openrouter"}
+	records := []any{}
+	for name, id := range providerEnv {
+		for _, reference := range []string{"env://USAGE_768_TOKEN", "symvault://test/token", "vault://test/token", "keychain://test/account"} {
+			home := filepath.Join(os.Getenv("USAGE_768_ROOT"), name+"-"+strings.Split(reference, ":")[0])
+			if err := os.MkdirAll(home, 0755); err != nil {
+				t.Fatal(err)
+			}
+			env := map[string]string{"HOME": home, "USERPROFILE": home, "XDG_CONFIG_HOME": filepath.Join(home, "config"), "XDG_DATA_HOME": filepath.Join(home, "data"), "XDG_CACHE_HOME": filepath.Join(home, "cache"), "PATH": os.Getenv("USAGE_768_BIN"), "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT", "USAGE_768_TOKEN": "synthetic-768-only", "OPENCODE_WORKSPACE_ID": "wrk_fixture", "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n", "SECRET_ORACLE_FAKE_EXIT": "0", "SECRET_ORACLE_FAKE_ARGS_PATH": filepath.Join(home, "args.log")}
+			for key := range providerEnv {
+				t.Setenv(key, "")
+			}
+			t.Setenv("USAGE_768_ABSENT", "")
+			for _, key := range []string{"CODEX_HOME", "HERMES_HOME", "KIMI_CODE_HOME", "KIMI_CODE_BASE_URL", "HERMES_PORTAL_BASE_URL", "OPENROUTER_API_URL", "SECRET_ORACLE_FAKE_STDERR", "SECRET_ORACLE_FAKE_SLEEP_MS", "SECRET_ORACLE_FAKE_STDOUT_BYTES"} {
+				t.Setenv(key, "")
+			}
+			env[name] = reference
+			for key, value := range env {
+				t.Setenv(key, value)
+			}
+			rt := &credentialTransport768{Headers: []map[string]string{}}
+			client := &http.Client{Transport: rt}
+			for _, provider := range allProviders(client, readClaudeKeychainCredential, antigravityOracleProbe{}) {
+				if provider.ID() == id {
+					report := BuildReport(context.Background(), []Provider{provider})
+					records = append(records, map[string]any{"id": name + "-" + reference, "provider": id, "env": env, "report": report, "headers": rt.Headers})
+				}
+			}
+		}
+	}
+	data, err := json.MarshalIndent(records, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(os.Getenv("USAGE_768_ORACLE"), append(data, '\n'), 0600); err != nil {
+		t.Fatal(err)
+	}
+}

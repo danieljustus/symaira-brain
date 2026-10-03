@@ -1,10 +1,10 @@
 use super::{
     MAX_CREDENTIAL_FILE_BYTES, UsageFallbackSignals, claude_file_token_in, codex_file_token,
     codex_from_resolved, copilot_file_token_candidate_in, copilot_file_token_in, decode_base64url,
-    is_secret_reference, json_string, kimi_device_id_is_native, kimi_file_token_candidate,
-    kimi_store, names_from_keychain_dump, needs_go_fallback_for, nous_file_token,
-    nous_file_token_candidate, nous_jwt_is_live, parse_claude_keychain_blob, path_may_exist,
-    read_limited, supported_custom_base, supported_opencode_workspace,
+    json_string, kimi_device_id_is_native, kimi_file_token_candidate, kimi_store,
+    names_from_keychain_dump, needs_go_fallback_for, nous_file_token, nous_file_token_candidate,
+    nous_jwt_is_live, parse_claude_keychain_blob, path_may_exist, read_limited,
+    supported_custom_base, supported_opencode_workspace,
 };
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -293,275 +293,80 @@ fn copilot_token_reads_hosts_json_after_apps_json() {
 }
 
 #[test]
-fn supported_provider_credentials_can_be_combined_natively() {
+fn literal_file_references_and_unproven_sources_keep_go_fallback() {
     assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_admin_env: Some("synthetic-claude-admin-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_env: Some("synthetic-copilot-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_file: Some("synthetic-copilot-file-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_file: Some("symvault://copilot/token"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_file: Some("synthetic-copilot-file-fixture"),
-        copilot_env: Some("synthetic-copilot-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_env: Some("symvault://copilot/token"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_env: Some("synthetic-copilot-fixture"),
-        other_provider_env: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_env: Some("synthetic-copilot-fixture"),
-        other_credential_source: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_env: Some("synthetic-copilot-fixture"),
-        local_provider_present: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        openrouter_env: Some("synthetic-openrouter-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        moonshot_env: Some("synthetic-moonshot-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        cursor_env: Some("synthetic-cursor-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        kimi_api_env: Some("synthetic-kimi-api-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        nous_env: Some("synthetic-nous-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        codex_env: Some("synthetic-codex-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        opencode_env: Some("synthetic-opencode-cookie"),
-        ..UsageFallbackSignals::default()
-    }));
-}
-
-#[test]
-fn claude_file_credential_can_be_combined_with_proven_sources() {
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("synthetic-claude-file-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("synthetic-claude-file-fixture"),
-        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("synthetic-claude-file-fixture"),
-        claude_admin_env: Some("synthetic-claude-admin-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("synthetic-claude-file-fixture"),
-        copilot_env: Some("synthetic-copilot-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("synthetic-claude-file-fixture"),
-        other_credential_source: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("synthetic-claude-file-fixture"),
+        copilot_file: Some("synthetic-copilot-file"),
+        kimi_cli: Some("synthetic-kimi-file"),
+        nous_file: Some("synthetic-nous-file"),
+        codex_file: Some("synthetic-codex-file"),
+        claude_file: Some("synthetic-claude-file"),
         ..UsageFallbackSignals::default()
     }));
     for reference in [
-        "symvault://claude/oauth-token",
-        "vault://claude/oauth-token",
-        "env://ANTHROPIC_OAUTH_TOKEN",
-        "keychain://Claude Code-credentials/account",
+        "symvault://test/token",
+        "vault://test/token",
+        "env://TOKEN",
+        "keychain://test/account",
     ] {
-        assert!(needs_go_fallback_for(&UsageFallbackSignals {
-            claude_file: Some(reference),
+        for signals in [
+            UsageFallbackSignals {
+                copilot_file: Some(reference),
+                ..UsageFallbackSignals::default()
+            },
+            UsageFallbackSignals {
+                kimi_cli: Some(reference),
+                ..UsageFallbackSignals::default()
+            },
+            UsageFallbackSignals {
+                nous_file: Some(reference),
+                ..UsageFallbackSignals::default()
+            },
+            UsageFallbackSignals {
+                codex_file: Some(reference),
+                ..UsageFallbackSignals::default()
+            },
+            UsageFallbackSignals {
+                claude_file: Some(reference),
+                ..UsageFallbackSignals::default()
+            },
+        ] {
+            assert!(needs_go_fallback_for(&signals));
+        }
+    }
+    for signals in [
+        UsageFallbackSignals {
+            other_provider_env: true,
             ..UsageFallbackSignals::default()
-        }));
+        },
+        UsageFallbackSignals {
+            other_credential_source: true,
+            ..UsageFallbackSignals::default()
+        },
+        UsageFallbackSignals {
+            local_provider_present: true,
+            ..UsageFallbackSignals::default()
+        },
+    ] {
+        assert!(needs_go_fallback_for(&signals));
     }
 }
 
 #[test]
 fn claude_oauth_source_preempts_keychain_fallback() {
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
-        local_provider_present: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("synthetic-claude-file-fixture"),
-        local_provider_present: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        claude_oauth_env: Some("env://SYMBRAIN_TEST_MISSING_CLAUDE_TOKEN"),
-        local_provider_present: true,
-        ..UsageFallbackSignals::default()
-    }));
-}
-
-#[test]
-fn codex_file_credential_can_be_combined_with_proven_sources() {
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        codex_file: Some("synthetic-codex-file-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        codex_file: Some("synthetic-codex-file-fixture"),
-        codex_env: Some("synthetic-codex-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        codex_file: Some("synthetic-codex-file-fixture"),
-        other_provider_env: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        codex_file: Some("synthetic-codex-file-fixture"),
-        other_credential_source: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        codex_file: Some("synthetic-codex-file-fixture"),
-        local_provider_present: true,
-        ..UsageFallbackSignals::default()
-    }));
-    for reference in [
-        "symvault://codex/access-token",
-        "vault://codex/access-token",
-        "env://CODEX_ACCESS_TOKEN",
-        "keychain://Codex/account",
+    for credential in [
+        "synthetic-claude-oauth",
+        "env://MISSING",
+        "symvault://test/token",
     ] {
-        assert!(is_secret_reference(reference));
-        assert!(needs_go_fallback_for(&UsageFallbackSignals {
-            codex_file: Some(reference),
+        assert!(!needs_go_fallback_for(&UsageFallbackSignals {
+            claude_oauth_env: Some(credential),
+            local_provider_present: true,
             ..UsageFallbackSignals::default()
         }));
     }
-}
-
-#[test]
-fn secret_references_and_unproven_sources_keep_go_fallback() {
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        claude_admin_env: Some("symvault://claude/admin-key"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        claude_oauth_env: Some("symvault://claude/oauth-token"),
-        ..UsageFallbackSignals::default()
-    }));
     assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_admin_env: Some("synthetic-claude-admin-env-fixture"),
-        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
-        other_provider_env: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
-        other_credential_source: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_admin_env: Some("synthetic-claude-admin-env-fixture"),
-        openrouter_env: Some("synthetic-openrouter-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        openrouter_env: Some("symvault://openrouter/key"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        cursor_env: Some("symvault://cursor/cookie"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        openrouter_env: Some("synthetic-openrouter-fixture"),
-        moonshot_env: Some("synthetic-moonshot-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_env: Some("synthetic-copilot-fixture"),
-        openrouter_env: Some("synthetic-openrouter-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        moonshot_env: Some("symvault://moonshot/key"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        moonshot_env: Some("synthetic-moonshot-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        openrouter_env: Some("synthetic-openrouter-fixture"),
-        moonshot_env: Some("synthetic-moonshot-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        cursor_env: Some("synthetic-cursor-fixture"),
-        other_provider_env: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        kimi_api_env: Some("symvault://kimi/api-key"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        kimi_api_env: Some("synthetic-kimi-api-fixture"),
-        kimi_cli: Some("synthetic-kimi-cli-fixture"),
-        kimi_auth_env: Some("synthetic-kimi-web-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        nous_env: Some("symvault://nous/access-token"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        nous_env: Some("synthetic-nous-env-fixture"),
-        nous_file: Some("synthetic-nous-file-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        codex_env: Some("symvault://codex/access-token"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        codex_env: Some("synthetic-codex-env-fixture"),
-        other_provider_env: true,
+        claude_file: Some("synthetic-claude-file"),
+        local_provider_present: true,
         ..UsageFallbackSignals::default()
     }));
 }

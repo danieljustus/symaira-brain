@@ -243,6 +243,21 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Native usage credential reference and CLI parity
+        shell: bash
+        run: scripts/usage-credential-oracle/run.sh "$RUNNER_TEMP/usage-credential-768.json"
+
+      - name: Preserve usage credential reference process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-credential-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-credential-768.json
+            ${{ runner.temp }}/usage-credential-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Go/Rust vault administration process parity
         run: |
           python3 -m unittest discover -s scripts/vault-admin-oracle -p test_replay.py -v
@@ -368,6 +383,21 @@ jobs:
         with:
           name: usage-fetch-620-${{ runner.os }}
           path: ${{ runner.temp }}/usage-fetch-620.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native usage credential reference and CLI parity
+        shell: bash
+        run: scripts/usage-credential-oracle/run.sh "$RUNNER_TEMP/usage-credential-768.json"
+
+      - name: Preserve usage credential reference process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-credential-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-credential-768.json
+            ${{ runner.temp }}/usage-credential-768.evidence
           if-no-files-found: error
           retention-days: 14
 
@@ -507,6 +537,21 @@ jobs:
         with:
           name: usage-fetch-620-${{ runner.os }}
           path: ${{ runner.temp }}/usage-fetch-620.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native usage credential reference and CLI parity
+        shell: bash
+        run: scripts/usage-credential-oracle/run.sh "$RUNNER_TEMP/usage-credential-768.json"
+
+      - name: Preserve usage credential reference process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-credential-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-credential-768.json
+            ${{ runner.temp }}/usage-credential-768.evidence
           if-no-files-found: error
           retention-days: 14
 

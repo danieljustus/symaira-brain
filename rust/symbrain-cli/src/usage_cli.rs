@@ -20,9 +20,10 @@ const HELP: &str = "symbrain usage — AI subscription/token usage per provider\
 /// on Go. `CODEX_HOME`, `HERMES_HOME`, and `KIMI_CODE_HOME` use the same per-file
 /// eligibility checks as their default paths; differing Windows home roots,
 /// unsupported URL/workspace forms and Claude Keychain-only credentials also
-/// keep the report on Go. Antigravity's local probe runs natively. Source-bound Go
+/// keep the report on Go. Environment secret references use the native shared
+/// resolver. Antigravity's local probe runs natively. Source-bound Go
 /// oracles use synthetic credentials and canned transport; the user-invoked
-/// live report remains unchanged.
+/// live report uses native reference resolution for these proven sources.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     if args.len() == 1 && matches!(args[0].to_str(), Some("-h" | "--help")) {
         return false;

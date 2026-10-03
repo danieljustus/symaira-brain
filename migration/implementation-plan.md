@@ -1959,3 +1959,18 @@ Go remains the production enforcement path until the full Guard-specific matrix 
 ### Completion definition
 
 The migration is complete only when every row in `migration/contract-matrix.csv` is green, no command invokes Go, the supported release matrix passes, Swift clients work unchanged at their public boundary, and the Rust release has a verified rollback to the last Go release.
+
+## #768: native environment reference adapter
+
+The native usage environment credential path now shares the already bounded
+secret resolver instead of maintaining its lossy private adapter. Valid env,
+symvault, deprecated vault and platform-appropriate Keychain references no longer
+force Go solely because of their scheme. The decision and limits are recorded
+in `docs/adr/usage-credential-routing-768.md`.
+
+`scripts/usage-credential-oracle/run.sh` executes 44 fresh immutable-Go
+constructor/report/request cases, 110 actual CLI byte/exit cases and five actual
+failure controls using private synthetic credential executables. Native Linux,
+macOS and Windows CI retain receipts and partial failure logs for 14 days.
+USE-001 and #768 remain open for unproven file/JWT/host-Keychain and other routing
+gates; no frozen fixture or production Go source changed.
