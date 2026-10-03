@@ -470,7 +470,7 @@ Implemented today:
 | `symbrain memory rules [--scope <scope>]` | List the procedural rules stored alongside memories (`--output table\|json`, default table) |
 | `symbrain memory query-log [--limit <N>] [--actor <name>]` | Inspect the memory retrieval log — totals, per-tool/per-actor breakdown, recent entries (`--output table\|json`, default table; limit default 50, max 1000) |
 | `symbrain skills list` | List the embedded skill library with each skill's install state (`--output table\|json`, default table) |
-| `symbrain skills status [--target <target>] [--scope user\|project]` | Classify installed skills against the library: in-sync, stale, harness-changed, conflict, orphaned, unmanaged (`--output table\|json`, default table) |
+| `symbrain skills status [--target <target>] [--scope user\|project]` | Classify installed skills and show retained render drift; verified render symlinks use `linked` mode ([report details](scripts/skills-render-drift/README.md); `--output table\|json`, default table) |
 | `symbrain skills targets [--scope user\|project]` | Show the harness targets skills can be installed into, with their skill roots (`--output table\|json`, default table) |
 | `symbrain skills log [--skill <name>] [--target <target>] [--limit <N>]` | Read the local skill operation log, newest first (`--output table\|json`, default table) |
 | `symbrain skills sync [--dry-run] [--target <target>] [--scope user\|project]` | Repair drifted installs; harness-side edits and conflicts are reported, never overwritten (`--output table\|json`, default table) |

@@ -1,0 +1,1076 @@
+{
+  "cases": [
+    {
+      "existing_report_matches": true,
+      "go": {
+        "installs": [
+          {
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "symlink",
+            "name": "example",
+            "path": "/tmp/.tmpyDKekQ/home/.claude/skills/example",
+            "source_hash": "cd187a46f623931eadddd049cb939b7a770669346734b39ae5e84a4f9a3507d9",
+            "status": "in-sync",
+            "target": "claude"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 0,
+          "in_sync": 1,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "rust": {
+        "installs": [
+          {
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "linked",
+            "name": "example",
+            "path": "/tmp/.tmpyDKekQ/home/.claude/skills/example",
+            "render_status": "in-sync",
+            "source_hash": "cd187a46f623931eadddd049cb939b7a770669346734b39ae5e84a4f9a3507d9",
+            "status": "in-sync",
+            "target": "claude"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 0,
+          "in_sync": 1,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "state": "clean",
+      "target": "claude"
+    },
+    {
+      "existing_report_matches": true,
+      "go": {
+        "installs": [
+          {
+            "drift": [
+              {
+                "base": "fe00634c516718c80e546ef8365f641b8e176c67fcf93a804f4258c464cf49ee",
+                "kind": "unchanged",
+                "left": "fe00634c516718c80e546ef8365f641b8e176c67fcf93a804f4258c464cf49ee",
+                "path": "SKILL.md",
+                "right": "fe00634c516718c80e546ef8365f641b8e176c67fcf93a804f4258c464cf49ee"
+              },
+              {
+                "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "kind": "harness-changed",
+                "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "symlink",
+            "name": "example",
+            "path": "/tmp/.tmpyDKekQ/home/.claude/skills/example",
+            "source_hash": "cd187a46f623931eadddd049cb939b7a770669346734b39ae5e84a4f9a3507d9",
+            "status": "harness-changed",
+            "target": "claude"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 1,
+          "in_sync": 0,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "rust": {
+        "installs": [
+          {
+            "drift": [
+              {
+                "base": "fe00634c516718c80e546ef8365f641b8e176c67fcf93a804f4258c464cf49ee",
+                "kind": "unchanged",
+                "left": "fe00634c516718c80e546ef8365f641b8e176c67fcf93a804f4258c464cf49ee",
+                "path": "SKILL.md",
+                "right": "fe00634c516718c80e546ef8365f641b8e176c67fcf93a804f4258c464cf49ee"
+              },
+              {
+                "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "kind": "harness-changed",
+                "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "linked",
+            "name": "example",
+            "path": "/tmp/.tmpyDKekQ/home/.claude/skills/example",
+            "render_drift": [
+              {
+                "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "render_hash": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "render_status": "drift",
+            "source_hash": "cd187a46f623931eadddd049cb939b7a770669346734b39ae5e84a4f9a3507d9",
+            "status": "harness-changed",
+            "target": "claude"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 1,
+          "in_sync": 0,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "state": "render-edit",
+      "target": "claude"
+    },
+    {
+      "existing_report_matches": true,
+      "go": {
+        "installs": [
+          {
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "symlink",
+            "name": "example",
+            "path": "/tmp/.tmpdtItgR/home/.config/opencode/skills/example",
+            "source_hash": "c193716902709995279a5866dcd2e2f8dc48b1275b51e73606d0a239b1caa5e0",
+            "status": "in-sync",
+            "target": "opencode"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 0,
+          "in_sync": 1,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "rust": {
+        "installs": [
+          {
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "linked",
+            "name": "example",
+            "path": "/tmp/.tmpdtItgR/home/.config/opencode/skills/example",
+            "render_status": "in-sync",
+            "source_hash": "c193716902709995279a5866dcd2e2f8dc48b1275b51e73606d0a239b1caa5e0",
+            "status": "in-sync",
+            "target": "opencode"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 0,
+          "in_sync": 1,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "state": "clean",
+      "target": "opencode"
+    },
+    {
+      "existing_report_matches": true,
+      "go": {
+        "installs": [
+          {
+            "drift": [
+              {
+                "base": "d92c0b32afad079b7481a81f5cf5b6382d8fa462849fe930b504bcc1c44b2366",
+                "kind": "unchanged",
+                "left": "d92c0b32afad079b7481a81f5cf5b6382d8fa462849fe930b504bcc1c44b2366",
+                "path": "SKILL.md",
+                "right": "d92c0b32afad079b7481a81f5cf5b6382d8fa462849fe930b504bcc1c44b2366"
+              },
+              {
+                "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "kind": "harness-changed",
+                "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "symlink",
+            "name": "example",
+            "path": "/tmp/.tmpdtItgR/home/.config/opencode/skills/example",
+            "source_hash": "c193716902709995279a5866dcd2e2f8dc48b1275b51e73606d0a239b1caa5e0",
+            "status": "harness-changed",
+            "target": "opencode"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 1,
+          "in_sync": 0,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "rust": {
+        "installs": [
+          {
+            "drift": [
+              {
+                "base": "d92c0b32afad079b7481a81f5cf5b6382d8fa462849fe930b504bcc1c44b2366",
+                "kind": "unchanged",
+                "left": "d92c0b32afad079b7481a81f5cf5b6382d8fa462849fe930b504bcc1c44b2366",
+                "path": "SKILL.md",
+                "right": "d92c0b32afad079b7481a81f5cf5b6382d8fa462849fe930b504bcc1c44b2366"
+              },
+              {
+                "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "kind": "harness-changed",
+                "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "linked",
+            "name": "example",
+            "path": "/tmp/.tmpdtItgR/home/.config/opencode/skills/example",
+            "render_drift": [
+              {
+                "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "render_hash": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "render_status": "drift",
+            "source_hash": "c193716902709995279a5866dcd2e2f8dc48b1275b51e73606d0a239b1caa5e0",
+            "status": "harness-changed",
+            "target": "opencode"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 1,
+          "in_sync": 0,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "state": "render-edit",
+      "target": "opencode"
+    },
+    {
+      "existing_report_matches": true,
+      "go": {
+        "installs": [
+          {
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "symlink",
+            "name": "example",
+            "path": "/tmp/.tmp1eThls/home/.agents/skills/example",
+            "source_hash": "e1464042ba6c2c3e09c4ce6e0ed4fc77a3f25021608c65f13feef41916f66957",
+            "status": "in-sync",
+            "target": "codex"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 0,
+          "in_sync": 1,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "rust": {
+        "installs": [
+          {
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "linked",
+            "name": "example",
+            "path": "/tmp/.tmp1eThls/home/.agents/skills/example",
+            "render_status": "in-sync",
+            "source_hash": "e1464042ba6c2c3e09c4ce6e0ed4fc77a3f25021608c65f13feef41916f66957",
+            "status": "in-sync",
+            "target": "codex"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 0,
+          "in_sync": 1,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "state": "clean",
+      "target": "codex"
+    },
+    {
+      "existing_report_matches": true,
+      "go": {
+        "installs": [
+          {
+            "drift": [
+              {
+                "base": "59ad8caed547a0a767cc98a82f4af0415a916e056cf30438bde2efb022b66d1d",
+                "kind": "unchanged",
+                "left": "59ad8caed547a0a767cc98a82f4af0415a916e056cf30438bde2efb022b66d1d",
+                "path": "SKILL.md",
+                "right": "59ad8caed547a0a767cc98a82f4af0415a916e056cf30438bde2efb022b66d1d"
+              },
+              {
+                "base": "006e16281ee2b96e4b16b68cc6c4f5b4cb954a4d3e463399e2c8a4329d30ff6a",
+                "kind": "unchanged",
+                "left": "006e16281ee2b96e4b16b68cc6c4f5b4cb954a4d3e463399e2c8a4329d30ff6a",
+                "path": "agents/openai.yaml",
+                "right": "006e16281ee2b96e4b16b68cc6c4f5b4cb954a4d3e463399e2c8a4329d30ff6a"
+              },
+              {
+                "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "kind": "harness-changed",
+                "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "symlink",
+            "name": "example",
+            "path": "/tmp/.tmp1eThls/home/.agents/skills/example",
+            "source_hash": "e1464042ba6c2c3e09c4ce6e0ed4fc77a3f25021608c65f13feef41916f66957",
+            "status": "harness-changed",
+            "target": "codex"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 1,
+          "in_sync": 0,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "rust": {
+        "installs": [
+          {
+            "drift": [
+              {
+                "base": "59ad8caed547a0a767cc98a82f4af0415a916e056cf30438bde2efb022b66d1d",
+                "kind": "unchanged",
+                "left": "59ad8caed547a0a767cc98a82f4af0415a916e056cf30438bde2efb022b66d1d",
+                "path": "SKILL.md",
+                "right": "59ad8caed547a0a767cc98a82f4af0415a916e056cf30438bde2efb022b66d1d"
+              },
+              {
+                "base": "006e16281ee2b96e4b16b68cc6c4f5b4cb954a4d3e463399e2c8a4329d30ff6a",
+                "kind": "unchanged",
+                "left": "006e16281ee2b96e4b16b68cc6c4f5b4cb954a4d3e463399e2c8a4329d30ff6a",
+                "path": "agents/openai.yaml",
+                "right": "006e16281ee2b96e4b16b68cc6c4f5b4cb954a4d3e463399e2c8a4329d30ff6a"
+              },
+              {
+                "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "kind": "harness-changed",
+                "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "linked",
+            "name": "example",
+            "path": "/tmp/.tmp1eThls/home/.agents/skills/example",
+            "render_drift": [
+              {
+                "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "render_hash": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "render_status": "drift",
+            "source_hash": "e1464042ba6c2c3e09c4ce6e0ed4fc77a3f25021608c65f13feef41916f66957",
+            "status": "harness-changed",
+            "target": "codex"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 1,
+          "in_sync": 0,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "state": "render-edit",
+      "target": "codex"
+    },
+    {
+      "existing_report_matches": true,
+      "go": {
+        "installs": [
+          {
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "symlink",
+            "name": "example",
+            "path": "/tmp/.tmpbXhEqu/home/.gemini/config/skills/example",
+            "source_hash": "d9cbe3e4ae51cdc953baa4131eb8ffa5151d26cd60de33a2d5139614f006f841",
+            "status": "in-sync",
+            "target": "antigravity"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 0,
+          "in_sync": 1,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "rust": {
+        "installs": [
+          {
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "linked",
+            "name": "example",
+            "path": "/tmp/.tmpbXhEqu/home/.gemini/config/skills/example",
+            "render_status": "in-sync",
+            "source_hash": "d9cbe3e4ae51cdc953baa4131eb8ffa5151d26cd60de33a2d5139614f006f841",
+            "status": "in-sync",
+            "target": "antigravity"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 0,
+          "in_sync": 1,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "state": "clean",
+      "target": "antigravity"
+    },
+    {
+      "existing_report_matches": true,
+      "go": {
+        "installs": [
+          {
+            "drift": [
+              {
+                "base": "cc5dfc548b2192429279f8f4c5d3b5ae75f7c059ce70580cf31e53b3ccd6ca51",
+                "kind": "unchanged",
+                "left": "cc5dfc548b2192429279f8f4c5d3b5ae75f7c059ce70580cf31e53b3ccd6ca51",
+                "path": "SKILL.md",
+                "right": "cc5dfc548b2192429279f8f4c5d3b5ae75f7c059ce70580cf31e53b3ccd6ca51"
+              },
+              {
+                "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "kind": "harness-changed",
+                "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "symlink",
+            "name": "example",
+            "path": "/tmp/.tmpbXhEqu/home/.gemini/config/skills/example",
+            "source_hash": "d9cbe3e4ae51cdc953baa4131eb8ffa5151d26cd60de33a2d5139614f006f841",
+            "status": "harness-changed",
+            "target": "antigravity"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 1,
+          "in_sync": 0,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "rust": {
+        "installs": [
+          {
+            "drift": [
+              {
+                "base": "cc5dfc548b2192429279f8f4c5d3b5ae75f7c059ce70580cf31e53b3ccd6ca51",
+                "kind": "unchanged",
+                "left": "cc5dfc548b2192429279f8f4c5d3b5ae75f7c059ce70580cf31e53b3ccd6ca51",
+                "path": "SKILL.md",
+                "right": "cc5dfc548b2192429279f8f4c5d3b5ae75f7c059ce70580cf31e53b3ccd6ca51"
+              },
+              {
+                "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "kind": "harness-changed",
+                "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "linked",
+            "name": "example",
+            "path": "/tmp/.tmpbXhEqu/home/.gemini/config/skills/example",
+            "render_drift": [
+              {
+                "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "render_hash": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "render_status": "drift",
+            "source_hash": "d9cbe3e4ae51cdc953baa4131eb8ffa5151d26cd60de33a2d5139614f006f841",
+            "status": "harness-changed",
+            "target": "antigravity"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 1,
+          "in_sync": 0,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "state": "render-edit",
+      "target": "antigravity"
+    },
+    {
+      "existing_report_matches": true,
+      "go": {
+        "installs": [
+          {
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "symlink",
+            "name": "example",
+            "path": "/tmp/.tmpebMVK4/home/.hermes/skills/symaira/example",
+            "source_hash": "48e78b86b68603c86a980edfaf0623f2db04136ec68cd719dae7003cbf1316e7",
+            "status": "in-sync",
+            "target": "hermes"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 0,
+          "in_sync": 1,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "rust": {
+        "installs": [
+          {
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "linked",
+            "name": "example",
+            "path": "/tmp/.tmpebMVK4/home/.hermes/skills/symaira/example",
+            "render_status": "in-sync",
+            "source_hash": "48e78b86b68603c86a980edfaf0623f2db04136ec68cd719dae7003cbf1316e7",
+            "status": "in-sync",
+            "target": "hermes"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 0,
+          "in_sync": 1,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "state": "clean",
+      "target": "hermes"
+    },
+    {
+      "existing_report_matches": true,
+      "go": {
+        "installs": [
+          {
+            "drift": [
+              {
+                "base": "40e78d1edcab5ef43b22bf87e0ed64eb89db1def75b6d474c96026542bc2a581",
+                "kind": "unchanged",
+                "left": "40e78d1edcab5ef43b22bf87e0ed64eb89db1def75b6d474c96026542bc2a581",
+                "path": "SKILL.md",
+                "right": "40e78d1edcab5ef43b22bf87e0ed64eb89db1def75b6d474c96026542bc2a581"
+              },
+              {
+                "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "kind": "harness-changed",
+                "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "symlink",
+            "name": "example",
+            "path": "/tmp/.tmpebMVK4/home/.hermes/skills/symaira/example",
+            "source_hash": "48e78b86b68603c86a980edfaf0623f2db04136ec68cd719dae7003cbf1316e7",
+            "status": "harness-changed",
+            "target": "hermes"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 1,
+          "in_sync": 0,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "rust": {
+        "installs": [
+          {
+            "drift": [
+              {
+                "base": "40e78d1edcab5ef43b22bf87e0ed64eb89db1def75b6d474c96026542bc2a581",
+                "kind": "unchanged",
+                "left": "40e78d1edcab5ef43b22bf87e0ed64eb89db1def75b6d474c96026542bc2a581",
+                "path": "SKILL.md",
+                "right": "40e78d1edcab5ef43b22bf87e0ed64eb89db1def75b6d474c96026542bc2a581"
+              },
+              {
+                "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "kind": "harness-changed",
+                "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "linked",
+            "name": "example",
+            "path": "/tmp/.tmpebMVK4/home/.hermes/skills/symaira/example",
+            "render_drift": [
+              {
+                "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "render_hash": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "render_status": "drift",
+            "source_hash": "48e78b86b68603c86a980edfaf0623f2db04136ec68cd719dae7003cbf1316e7",
+            "status": "harness-changed",
+            "target": "hermes"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 1,
+          "in_sync": 0,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "state": "render-edit",
+      "target": "hermes"
+    },
+    {
+      "existing_report_matches": true,
+      "go": {
+        "installs": [
+          {
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "symlink",
+            "name": "example",
+            "path": "/tmp/.tmpY9UbkF/home/.openclaw/skills/example",
+            "source_hash": "adc2fed452340980476b33b39656a19172471945a40b2904098e45e5d763ccc2",
+            "status": "in-sync",
+            "target": "openclaw"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 0,
+          "in_sync": 1,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "rust": {
+        "installs": [
+          {
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "linked",
+            "name": "example",
+            "path": "/tmp/.tmpY9UbkF/home/.openclaw/skills/example",
+            "render_status": "in-sync",
+            "source_hash": "adc2fed452340980476b33b39656a19172471945a40b2904098e45e5d763ccc2",
+            "status": "in-sync",
+            "target": "openclaw"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 0,
+          "in_sync": 1,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "state": "clean",
+      "target": "openclaw"
+    },
+    {
+      "existing_report_matches": true,
+      "go": {
+        "installs": [
+          {
+            "drift": [
+              {
+                "base": "a60afbeaa62926b0e0d07b000faebad2fed0a58bf230d9cbf90d6592d4563529",
+                "kind": "unchanged",
+                "left": "a60afbeaa62926b0e0d07b000faebad2fed0a58bf230d9cbf90d6592d4563529",
+                "path": "SKILL.md",
+                "right": "a60afbeaa62926b0e0d07b000faebad2fed0a58bf230d9cbf90d6592d4563529"
+              },
+              {
+                "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "kind": "harness-changed",
+                "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "symlink",
+            "name": "example",
+            "path": "/tmp/.tmpY9UbkF/home/.openclaw/skills/example",
+            "source_hash": "adc2fed452340980476b33b39656a19172471945a40b2904098e45e5d763ccc2",
+            "status": "harness-changed",
+            "target": "openclaw"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 1,
+          "in_sync": 0,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "rust": {
+        "installs": [
+          {
+            "drift": [
+              {
+                "base": "a60afbeaa62926b0e0d07b000faebad2fed0a58bf230d9cbf90d6592d4563529",
+                "kind": "unchanged",
+                "left": "a60afbeaa62926b0e0d07b000faebad2fed0a58bf230d9cbf90d6592d4563529",
+                "path": "SKILL.md",
+                "right": "a60afbeaa62926b0e0d07b000faebad2fed0a58bf230d9cbf90d6592d4563529"
+              },
+              {
+                "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "kind": "harness-changed",
+                "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "installed_at": "2026-10-03T11:55:14Z",
+            "mode": "linked",
+            "name": "example",
+            "path": "/tmp/.tmpY9UbkF/home/.openclaw/skills/example",
+            "render_drift": [
+              {
+                "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                "path": "references/lesson.md",
+                "render_hash": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+              }
+            ],
+            "render_status": "drift",
+            "source_hash": "adc2fed452340980476b33b39656a19172471945a40b2904098e45e5d763ccc2",
+            "status": "harness-changed",
+            "target": "openclaw"
+          }
+        ],
+        "summary": {
+          "conflict": 0,
+          "harness_changed": 1,
+          "in_sync": 0,
+          "orphaned": 0,
+          "stale": 0,
+          "unmanaged": 0
+        }
+      },
+      "state": "render-edit",
+      "target": "openclaw"
+    }
+  ],
+  "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "total": 12,
+  "runtime": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "candidate_head": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "candidate_dirty": true,
+  "go_binary_sha256": "ecc2b7aee9ee079703511e883228652bc01a499d4c278466db4c5bc39c236540",
+  "go_source_sha256": {
+    "cmd/symbrain/browse_integration_test.go": "c4e2ab70bee25096db7b37369c3511019658a2f3221408288d3c6afc170c6140",
+    "cmd/symbrain/cmd_activity.go": "0b23d53e303641e09e39129d18991a1800750ec824d7eeb4ce507896c6789658",
+    "cmd/symbrain/cmd_activity_backend_test.go": "3af36f6ea80d9f8cf8955fd994035b0b1bf4a37b74ee7aa3a2c5fac6028da1a6",
+    "cmd/symbrain/cmd_activity_edges_test.go": "1bb1dec0d7eb6c7c9c698e4b8501e8449864962d35783637e292ee9cbda1312a",
+    "cmd/symbrain/cmd_activity_table_test.go": "7ff4f9fcf23961a78e0db74076d80bda3c39130d258681557eaa1dbd5b380109",
+    "cmd/symbrain/cmd_activity_test.go": "14cd5c9fb303735fd41425fb2e509ed8934534a821270fda4260b9d00f79dcbc",
+    "cmd/symbrain/cmd_audit.go": "9db43f0f3a891d37aa159e4c0dd44646914968e12f2d94a9cafecaef26d2d08c",
+    "cmd/symbrain/cmd_config.go": "5f8a68e4226363ef29a7f3e840ff2853fa0858e21160d1bf7d67f440c1d33688",
+    "cmd/symbrain/cmd_config_test.go": "3b9ba2c840329f901bb3fc5333a14172e173ee6b25c8d54aec24d50f8297ea96",
+    "cmd/symbrain/cmd_coverage_test.go": "250a5bc39f7d00343143c9f8f31fe2217f1aca388fcd098a3799bbd8c4ba970b",
+    "cmd/symbrain/cmd_doctor.go": "cdcc85b76b970a67e795aa5ce04fb3347e6c3bc11363578a6fd3eb3c8079d2d2",
+    "cmd/symbrain/cmd_doctor_foreign.go": "8f0652461fe2de0fbc857b0115b36173c01e58ebd0f86dcd9f16e4a9d05168dd",
+    "cmd/symbrain/cmd_doctor_foreign_test.go": "0a5344b040c693dbf7e4aac27986b806e6109d0bec7100fb89a19bc07ce084e6",
+    "cmd/symbrain/cmd_doctor_handshake.go": "8a882bedcbc62eed48041a87c80f67a70543360d94c239aac735695b120fd22d",
+    "cmd/symbrain/cmd_doctor_links.go": "149633a41b51b3cafa5a00f3b2c851b8d03b25c8504d36b35a498513edc42810",
+    "cmd/symbrain/cmd_doctor_links_test.go": "a939c33f2eb57ef7306b38ec1a59b4b717b981db9ebd0c668199411259e15f63",
+    "cmd/symbrain/cmd_doctor_print.go": "7a913f40c6495f1256d171dbea3b813261ee0a4ee84487f46c1db5a77a3d7d0b",
+    "cmd/symbrain/cmd_doctor_test.go": "55ea836a2f114a1faf3d2a4c2e919d54b9482a5e675aae937fcefa0f66ce679c",
+    "cmd/symbrain/cmd_guard.go": "cb0b10ae03a69b3c5c1d6952b706710a488ac4219fc908218c254056f2432abc",
+    "cmd/symbrain/cmd_guard_test.go": "d98f3ded0d0af2c929f9bca1870966b19308fc2e064521e89187cde8c6219d58",
+    "cmd/symbrain/cmd_harness.go": "39c0177b3f9dc75dcaf890d9bcf8f1de7dea76675d6f0773f52bce061912629e",
+    "cmd/symbrain/cmd_harness_health.go": "e3b4aa060e434b4c8e83f4bf276bbf68475fae8f35e5642f866dae9d77fae94c",
+    "cmd/symbrain/cmd_harness_health_test.go": "56f75e5c4c2bfc1720b3deec2ebe68b671bed962e5704e782f64b929fa5ab24a",
+    "cmd/symbrain/cmd_harness_test.go": "394e457ecdc7cd9c5b791e2ab5121dfd55a81f346f08b0d537cd2f4cbfddd18a",
+    "cmd/symbrain/cmd_init.go": "17489c1959bea8dfe5c029537bcce97b02e2573e1a49b0558eaf93a06477ea5f",
+    "cmd/symbrain/cmd_init_test.go": "5a1dda688948637d232492f74c89904f4d985372a18849b720831935f6b0dd3b",
+    "cmd/symbrain/cmd_install.go": "5dacb736219aefb0db743fc93fba490adf54b58e6f500feb27c0c394f7cf770c",
+    "cmd/symbrain/cmd_install_migrate_test.go": "a01da090427b6c7bad9e63b74e90a5a3e4da5cd48a61ca7263c3e9f6675e37cc",
+    "cmd/symbrain/cmd_install_test.go": "cf0e349d952150b863f391f6fe9568a59b47e7caad53bff3cedbdeb3865d589a",
+    "cmd/symbrain/cmd_memory.go": "5a24474cf8407323441baab9cc40e5e909231b7eb0e8da0bcc74d42d2ac1528c",
+    "cmd/symbrain/cmd_memory_cli_test.go": "3305e384baa5391e04e1320b3c2b7d8696028f1dda4fafc4a8703926e222c6bb",
+    "cmd/symbrain/cmd_memory_log.go": "fc5065b32c42384002eec128aadf93201fe884b4739ad75bd86717922dc5acbc",
+    "cmd/symbrain/cmd_memory_read.go": "4df921c8bd982476ea1ef4eafd9d18d3f96c78b5ffaed6ece83971a777ba4ac8",
+    "cmd/symbrain/cmd_memory_read_edges_test.go": "3fce95ed3d1662393c5033d219753e94f1208b4cbf22d20ba1bdac498ef3d3cb",
+    "cmd/symbrain/cmd_memory_read_test.go": "3619f34ceeddfc75ea57ded6d694ddb08f6e287302608b67db606263166741ca",
+    "cmd/symbrain/cmd_memory_serve.go": "d2d8975835e2fe935738c9626fd132408459fdc5cc32131df64e84e603980144",
+    "cmd/symbrain/cmd_memory_serve_test.go": "5b36e9dd258171a49fa811a54847ffd0072e76a869d6e3323ea7507d771d2975",
+    "cmd/symbrain/cmd_memory_sync.go": "ae1da40efe11031b29d92bac94b6053ef385a04ac94d530a1e2a1ee7390c77ed",
+    "cmd/symbrain/cmd_memory_test.go": "8e28ff28ecddd0b79a4e5768f173c3df0dcf7d5e0bbea47f8c7dcb519357fb36",
+    "cmd/symbrain/cmd_memory_write.go": "4f7fa0560c003e058db06f82f949336a6071bd646d77f5cd3bcd7141ce897216",
+    "cmd/symbrain/cmd_memory_write_test.go": "0b1ce332e31365e35800e022c6531564bea71f83fedcaf5b19c238bb0118905e",
+    "cmd/symbrain/cmd_passthrough.go": "e550ea185a413f43d212d945e7a532d396110033aa8abfbe10ab9da668f3f0f4",
+    "cmd/symbrain/cmd_passthrough_test.go": "d624d2542ec15aba1380b9ffb6906871b3930f90bc346aaa984afb33ae574fd1",
+    "cmd/symbrain/cmd_profile.go": "a09401699e67d99cff01cfcd676f5c9ebe523b10ada3e0610f08ab5a47f509a9",
+    "cmd/symbrain/cmd_profile_add.go": "eeb735b898803c73f4e73db87c949644a14ebf4c9b1a2d575a564e515245251c",
+    "cmd/symbrain/cmd_profile_add_race_test.go": "10076384763861d9a7bcb26ce74b0b9e35bd4b957aa3b12af37523cd81516504",
+    "cmd/symbrain/cmd_profile_list.go": "4ef279efe698d861e72650c0461aebc7a3b595f7357fd95693e1add6b47ca692",
+    "cmd/symbrain/cmd_profile_print.go": "22919d26a3012df08885110efd5bfa6a21a235e368f48586a60373f26c18bbde",
+    "cmd/symbrain/cmd_profile_remove.go": "1f88a65863650c2be74578e327c22d780c5e0e149b0c85288999caf446c2a9ba",
+    "cmd/symbrain/cmd_profile_security_test.go": "2604941c64be54f9ba00054fd72aeeb7540e6697980118cd2b533c90fb8b46d3",
+    "cmd/symbrain/cmd_profile_show.go": "83c0faa9a28afd2b7ab00a7e1401347b740f07946c31037f52b6635f9a4578cf",
+    "cmd/symbrain/cmd_profile_test.go": "811a03ac1feef38c2ef1a2a3f8525a594a498452dd81e4e3eca2a722291e8859",
+    "cmd/symbrain/cmd_serve.go": "a972c45fc9b1b23b7cbad5846de47d0d7e0315ed00517b507c4aad7a7500558e",
+    "cmd/symbrain/cmd_serve_test.go": "46d87cbe4220d821055a01aab388a6b30c65905b85b80186c1fc737c5af6a3c4",
+    "cmd/symbrain/cmd_setup.go": "2efa90acdbc8d776bd2b88e6cf08e2992edb660c7a36230f8bad4c69dc3ec163",
+    "cmd/symbrain/cmd_setup_source.go": "1da7578d2af333e3676359941f769a2b4ec7bb1babc2c06bc58edacab7161492",
+    "cmd/symbrain/cmd_setup_source_test.go": "64fd8ebf2fc35ac94a9320234367b219d88361b91e2aad324e50a6c302422a1c",
+    "cmd/symbrain/cmd_setup_test.go": "ba49ec498313e4ae2c5346a2e0375f5a3ff10af4bf22c344255b99f83d88ab7b",
+    "cmd/symbrain/cmd_skills.go": "bd2a49918aa8f6a0929cba201631d8795403f5da6fefafee9c3c2b2b1f02dd1c",
+    "cmd/symbrain/cmd_skills_test.go": "4d0ecd0a11d7ac5743658a951096636cc8acf75c92f8a9e061b05ddd3dab6692",
+    "cmd/symbrain/cmd_sync.go": "0f089361e3b711fe0db2e9b9eb2da66114df1e503418a8d2ac67f206760bd83a",
+    "cmd/symbrain/cmd_sync_error_test.go": "583db10393d37d3cd6b286f35dc2bf65787e67168a0530f0a84418ff5397db3f",
+    "cmd/symbrain/cmd_uninstall.go": "b288855e6e69ea06d9cdbba5eec014b277f574e200717dbf8bb39c2e4af067b1",
+    "cmd/symbrain/cmd_uninstall_test.go": "3df94fb785aa4d28982431d95452d6f77aa4648760036a29190838b4ef7f378e",
+    "cmd/symbrain/cmd_usage.go": "9bb1b0ca99859d0b32c955f490494e8e2a61d51e6428d633e5bd4f5531cf3843",
+    "cmd/symbrain/cmd_usage_test.go": "4032ebdecef8be48ed1a86da0daa336518e8bee867a6ed368fccbd81ad5f5086",
+    "cmd/symbrain/cmd_vault_create.go": "3671612f20df30159a064ad1c196c2a758f911ec70d5d0c9315528fd815e7452",
+    "cmd/symbrain/cmd_vault_create_test.go": "f56a1a18a3e8bf9bec6b67aac500157f99c08e6ee5ec3268c6e2d443e41ff079",
+    "cmd/symbrain/cmd_vault_editdel.go": "57edb4e723a0fe07ea85796f05b5b83050013d43cf66349e3679675fbb53ede7",
+    "cmd/symbrain/cmd_vault_editdel_test.go": "7e8888a07810247371086eacf7fb84546d1e01644ff9730e064354a3cb8c7617",
+    "cmd/symbrain/cmd_version.go": "7d78bd4436ef61a26b514863a33b9c6a493ee2ab25cd5afd41b44d783d05fd46",
+    "cmd/symbrain/cmd_version_test.go": "875f17e7bf1e5c7840ece57cfb23fbaf1d08b1c923b19c5b5f2af9ab8ed5b515",
+    "cmd/symbrain/cmd_wrapper_prelude_test.go": "e52c8accf529897f1a9648c3e52124f67f4e36dcc110a24e2bbdbd629ff2e9c6",
+    "cmd/symbrain/doc_consistency_test.go": "122e5946507be7349c4758a7ee8c0368fbc26cd24fce26dee3218a504a7a7de4",
+    "cmd/symbrain/flags.go": "ea6f26ed29e884e84f0e45753dba3d8e424a6c55aaf03afb0f7b3b925920ecf3",
+    "cmd/symbrain/flags_test.go": "dad122298e27e0b12d70bb05bc518eb6586ff33602781c74ebc7662e58d44739",
+    "cmd/symbrain/harness_registry_test.go": "685b79823dbd0a1628c12d3eedf2b2183a16ac64ffa835c17ef018c49e8da957",
+    "cmd/symbrain/hygiene_test.go": "6affe77a810a64b18081c0ba78c3cef69f894aad0b852d3113e8e9e263111b4b",
+    "cmd/symbrain/lifecycle_hardening_test.go": "df1879cd73f60c20e11a3831ae864d82a1ff1e4599f1c79d0e8b05feb04eb03f",
+    "cmd/symbrain/main.go": "46a3245236f0104f34c7e0d0787fcb35c27a0eba6c6bba8d5a5098e1664c6e5b",
+    "cmd/symbrain/main_test.go": "37e6719f1c4a3a262db71a57de3c01948ca5c2defe3a42939166042fb7a4ce70",
+    "cmd/symbrain/optional_modules_test.go": "ac102d47213368c254e85dd1f065b14459a853aab2cb0f21b4b23e316433a74f",
+    "cmd/symbrain/test_helpers_test.go": "5e5564d4a83816669a9bcbc6f22cb85264e520054ff65b622d535b93a44f3c9a",
+    "go.mod": "cd360aeb19457381d88720aa1dd6b62e493c44ac5a4d0b5c5172561ecd4e9d0c",
+    "go.sum": "fb3ec3bc981beb60ae88833cab55335ce3880e68b70a8ad1e931cb02de955aab",
+    "internal/config/config.go": "64284546f2a6ddcbd3a5d23088545fde3f372507f89adaa2d44fb7a22e7c6b21",
+    "internal/config/config_test.go": "c11d0be99fb0610aa4bb9e9a7c23271a31175b6c26ecc1348d8724932fa2777f",
+    "internal/config/modules_test.go": "f37e8eaa76e43eb73deaea37f7fe86b08c6c25407a467973a886061f310058c5",
+    "internal/paths/paths.go": "6a835c898e89e734278f455245c158d5a09211ede35c98a1662610bea4bb316f",
+    "internal/paths/paths_test.go": "e7e6247a31042509a177d2eed04978f33b4711375e1623672c2787640406f749",
+    "internal/skills/config/capabilities_test.go": "16e3a49d4dc1755f126ccbe5daf6c5666601025a47c346e577ede8b5c9aded07",
+    "internal/skills/config/config.go": "020b1def72a7d737d35401cf600cd2a2103ccd5f3c3d954359d1fa6961386423",
+    "internal/skills/config/config_targets_test.go": "fb3ca1c849107990865dc6fa429f33fb6acec30b7c28b7945f96cb246f61dc20",
+    "internal/skills/config/config_test.go": "0b3c2a4f6accba5bc75723899b03ecea559fab377552071c2456096bab102b88",
+    "internal/skills/config/vcs_test.go": "8409effd7d2679cbcfaa0419f5e33cefac13fb33161a1ea0333b1fe85aa74627",
+    "internal/skills/discover/discover.go": "7e73c77e7066dd88c0d981abc9625e9a69b1846596d7b2d5f3c7475af6a9b536",
+    "internal/skills/discover/discover_test.go": "a9ba828ae8835a45b7b0c95e04b6a200747fdd8a6f698122ceb6e53c3312524e",
+    "internal/skills/events/events.go": "0d76887ef5f9011277b3ea3f7f39cfc2725ea7935272ab78503ac7dbd24f230c",
+    "internal/skills/events/events_test.go": "e72cd325225e65ba8a31c7ceb0ffa407a3c67db03028490525b1ffc5d36fadc8",
+    "internal/skills/fsutil/copytree.go": "f241c4947729cf857adec806d4a4c79cfec4c6db662cb477d3132102627bfaf3",
+    "internal/skills/fsutil/copytree_symlink_test.go": "09d96c20e217354348a88e002fb866e45df1eff45651f0e13e2f5a8104132c28",
+    "internal/skills/fsutil/copytree_test.go": "7b160bf37b30f69aa269332a9423612c83e6222f9d8388e2def284e7827ca006",
+    "internal/skills/harness/harness.go": "3e54ed75741b48191942684dca40d5faffb7d5de81200544a382ae10af46799b",
+    "internal/skills/harness/harness_managed_test.go": "e46504196a95c0ec2fd6a6f3102e24807b43e36104c7eb7e0ef5fbe23123dd76",
+    "internal/skills/harness/harness_test.go": "0f566e0df090c02d21f33b0ce126051aacfefc6ef2de3778e1bbcbc1a829778b",
+    "internal/skills/install/atomic_test.go": "7882ade593a5eef2d7fbef9ebb1c39a1ea0400ecc12f4f1c5b9a45bc1bd9780d",
+    "internal/skills/install/base.go": "60aca8b91fac8bc47f6535f7348797c6ca683b72e99e0457d25bb129b5e9d91e",
+    "internal/skills/install/base_test.go": "df35fca251fa0ed14e9ca7344455c32bcd59867dbdcd63c0932b6f256b6e8f32",
+    "internal/skills/install/classify.go": "ffe58b7332aab3ba1a3bee872a02ce9ce13c7fe71222fe75eba2e70a14c51bcf",
+    "internal/skills/install/classify_test.go": "3722a0d627958f16ca96eba7102178ce708b925f2e27cb08fa1f4d7b8f129585",
+    "internal/skills/install/custom_target_test.go": "8bbed565eddc4244f916dfd8229a50738fecb49ca2d5da8bc9242469ed06eb5c",
+    "internal/skills/install/diff.go": "48c5f0d9ad090d2cbea04ca64cdb438a50a0dec5d908fc4d2710336effe588ed",
+    "internal/skills/install/diff_errorpath_test.go": "37209104efc0ecf3cebe1a9cdf40f6b271136d095ca2678c6a58b8f12771e470",
+    "internal/skills/install/event.go": "1c6d6fd11bd59782b7d83e51c8be564b7855e93ac237e9d1f268e65a45f4696f",
+    "internal/skills/install/files.go": "4f1bfe06ed66a5c6031859f3ade108ab998ac5defe499000f23d2c5d29370228",
+    "internal/skills/install/force_test.go": "731e814dc01a4594f482e1d57d6b7e529bc5019912b63d7a59b1040ec4559265",
+    "internal/skills/install/install.go": "205bcd074fb41000716b65b577c1c2efd1378cf88b18364d36dcada52596efca",
+    "internal/skills/install/install_exec_test.go": "0b42143fd82bb5169a524b7eb6486c50c214e119ed4fc9c1bb5044be5db41dbe",
+    "internal/skills/install/install_ops.go": "69fbc1bf845598a3b5e6f74a94fdbe78120cb2c55f3400f1ec9044db9c7b0315",
+    "internal/skills/install/install_scope_test.go": "ddba763c674044490977d616f81da8461b42fe392e84ce5d6684ede3bd772493",
+    "internal/skills/install/install_test.go": "843e5ea366396f1a40438610e6cbc2e772aed7bddaaeec363719422d7952fc37",
+    "internal/skills/install/managed_symlink_test.go": "8d048a6a0bd327834374bf19061b6ee8db87f5b5ab051814072e9f8c0b7c6518",
+    "internal/skills/install/marker_test.go": "f495ae0c44e82eaa9d41ecc0fd90a14d9d3ddd7beb77e6ad418c08d317c3c161",
+    "internal/skills/install/path.go": "b6f1480bfb0648236386376d4b3048eb32491bdc7abcf0b43b58920279bd0a60",
+    "internal/skills/install/pull.go": "4b3f5962d1f65fe517f03cce649632659327b81984210eb9eb7203ee312c3db0",
+    "internal/skills/install/pull_apply.go": "eac15236b65d96218553817cd7edd596497b5bbdd81ab856ed3439f1cac06bef",
+    "internal/skills/install/pull_errorpath_extra_test.go": "fdbfbad3374fff6d875e0e0d9d404ebd6fed9567382e2a0d0d8c5c7c714f0577",
+    "internal/skills/install/pull_errorpath_test.go": "1cf159a48a3cfd72ae65aece573b6c0a90eb35db7755d8745083b6d7892ef50b",
+    "internal/skills/install/pull_helpers.go": "4c5e1c907b22fc668fe98edb8d5aa95bb060eeff0012d47e656ce41bbfb5624e",
+    "internal/skills/install/pull_lock.go": "d94fc786cf6fdba215c81553acdcf1fdbee213626d0fd78094a02aeeea418de3",
+    "internal/skills/install/pull_test.go": "464d96026ebc20d20fb86de720c3a43176641e3505f4375b216feb40b087f6ce",
+    "internal/skills/install/status.go": "a8c1ae600d79dc86fe8f001416886b64d21ec92aef48c464262f9066fdaabb33",
+    "internal/skills/install/status_project_test.go": "de3d024fb08815dcc67cc0d3ee7ea656439c7a86b2e5af030f91c049681737b4",
+    "internal/skills/install/status_test.go": "fb8ef8a6e4c3b7e5bba14568cd2b2beb16473ac700d8c66b93d09b1819334fa0",
+    "internal/skills/install/sync.go": "da07597afaabd0e966fd8d8d8d44cb1900192408e34161479d65c9471ce2c197",
+    "internal/skills/install/sync_test.go": "217e3a3eb7f533f6ce409dd134038f80e01c5c358bfdd47b014add06ed36b4c9",
+    "internal/skills/install/threeway_test.go": "dac387ab17076c8d4341b133b6f919ec6dad402f02cc9ee6e737c1ec9b83a53c",
+    "internal/skills/install/uninstall.go": "1ee8526798c0f63948106483c7d96f2fee686b8197214a2af8fcdc072ec8834a",
+    "internal/skills/mcptools/history_test.go": "cbfda174742d3c4d14985190b680ba513b1e4993d9a911646496168e8a9d8f13",
+    "internal/skills/mcptools/mcptools.go": "18d79b05da9d4d419713d370ceda80137fdc851ae934e360a1010831e9a3f07f",
+    "internal/skills/mcptools/mcptools_context.go": "1fd1dfc93f0b8391fc4e637adf6c6809939e0ef114abf175c2bec3844d886d7e",
+    "internal/skills/mcptools/mcptools_errorpath_test.go": "dedbb37a64bfe0601116d01ac2ba4e6dc31ff109e09ee5a73578c7d13b98b60a",
+    "internal/skills/mcptools/mcptools_library.go": "c0df2ad47bd3a694822df90fe3426903365128a248d1f96a4f1bbecac710ec47",
+    "internal/skills/mcptools/mcptools_profiles.go": "0e54b02475682eb98cfcb7ebc98fcbf64bc55e154f11b06a85c5fb18c98802c9",
+    "internal/skills/mcptools/mcptools_render.go": "17110f4d817ffc71fb04e6a6d945f1e98fcce9a264c31e3f2037691d4285e05b",
+    "internal/skills/mcptools/mcptools_status.go": "7e8813407adad7de3c237fde0ff7eb780e6c61ac781709636b9152bcfe62fe12",
+    "internal/skills/mcptools/mcptools_test.go": "a6094300ef63deb963384d8ff8da4995920242f838eafd8810cd559bd49886c3",
+    "internal/skills/mcptools/mcptools_versioning.go": "dd142660e107d51180be1ae2937f594254b95cf4de0659fc635977041b5b3e4c",
+    "internal/skills/mcptools/serve_test.go": "baf9b82b98d24e4c2cb0b3c8e105e4417e5b79eca24af86539320d348a7c3b70",
+    "internal/skills/metadata/atime_darwin.go": "73651c6a7669c84736662bf022a11a9333a693fdd2bb9b6636f40cb8b9a3d6e4",
+    "internal/skills/metadata/atime_linux.go": "952eabdef8bd7319b010deb5c71a84e04a464715ec8bb5d0752869a2cebf6df4",
+    "internal/skills/metadata/atime_other.go": "67a0794c95856be9d6df06810c823762f48c142fc43c5e101f803a12cc1da649",
+    "internal/skills/metadata/metadata.go": "844ec48ed2dcf21fe1ecbbb76ed46d8f4318e76ebde53db838ce96c60e663de9",
+    "internal/skills/metadata/metadata_test.go": "b9f97446ffb4cf2c1f08fee3386e157df9ac914791094867c09b8f895c6b6702",
+    "internal/skills/profile/profile.go": "db029ad9bb598a5edf0a109945fe28774d53189c4bbac2b9274fb5950869d84f",
+    "internal/skills/profile/profile_test.go": "83b46a40e04f7a70a681343ae322813c147e4cb4208bfd254a3d8c437cae2d0b",
+    "internal/skills/profile/resolve.go": "31a7b631123479251d12cfc3e6baa161dafc3593c8a4c2bee450d3d071b349d9",
+    "internal/skills/profile/resolve_test.go": "4ccb95d6861c3631a6bd9d45e2d8cc73d314b37f78dc6629dc53f54a7dbb443d",
+    "internal/skills/profile/workflow_test.go": "b39f5983a76a6f37913435061b1e32240b414aeed4fd81ccea1f9f1e15529838",
+    "internal/skills/render/antigravity_target_test.go": "c0feae3cb9d70d0413e0817c3f42f45d8fa7dedb19c449c594f4054ab0b4dbbd",
+    "internal/skills/render/atomic.go": "17cd9ea05ed3c0e6907f48becd6523215d8e8c7166957b042a5bcbcff4d19ab8",
+    "internal/skills/render/capability.go": "99cdb3fa461def2a5a55568e5de1086631b3a95e12ba8f4330b138af790f4a46",
+    "internal/skills/render/capability_test.go": "ab0d27638cfc1539a8589021fed35b536bcf4057e59ae0927c4d148434deb454",
+    "internal/skills/render/copy.go": "f8b4ad115cde251dab4b05b53774ce69542b7917aa0ee7470886cf4e49f21272",
+    "internal/skills/render/custom_targets_test.go": "b7f5ded5645e8bf1ce2cdc470d3955509494698db1f3cbae40dc664fbc745290",
+    "internal/skills/render/fingerprint.go": "53356748b6b7afb3ac6a3f3269ca749e6c2b63b1bfa86fdbbd94e2caca3455b3",
+    "internal/skills/render/flow_test.go": "78663903415ecd9129db18079229b3eb695ae98003892c503a047b70b7b4d0c9",
+    "internal/skills/render/golden_test.go": "8fff88ee162f98fd5205ccd21860b30ecac318f48ac70ed7db1f54b9d0dd7a1e",
+    "internal/skills/render/golden_variant_test.go": "25aab45774ead7404143c887d81cb02fe7ee00800006aae654d3076265eff909",
+    "internal/skills/render/lock_other.go": "14273ede80ed4e655e9e13d96e8c9d9e7033c273fb70ad277351032f3a8473bb",
+    "internal/skills/render/lock_unix.go": "d6495c1a321cb9c47e31f9d2d607183abc20c1e1c4843f1f534d3567816324d6",
+    "internal/skills/render/manifest.go": "28d50bebdc249a2d17f4e484e3435d3d0093f7a7413fce3d2d9f5fdd545bf14e",
+    "internal/skills/render/marker_read_other.go": "dd5d3c5de14efde24641e137196b2e2496ea30209d98683a01e61c2832a3e287",
+    "internal/skills/render/marker_read_unix.go": "85e35903af85d189adbbeec32d5a7cb99a72648ccc36c79eb055efe1cf8853aa",
+    "internal/skills/render/materialize.go": "556cd9426226776b27c144f5d7f4f5990e1527d856cbb1aa69391062e9bf8660",
+    "internal/skills/render/materialize_hardening_test.go": "669d56047f95b9ec39b71b36212570296cd801c10cd230127a6af615eb685509",
+    "internal/skills/render/metadata_fingerprint_test.go": "802ab7e6d2b7a39eaf88fd9a63cec637db4fc761bdbe37c8530b7da41e5d0f96",
+    "internal/skills/render/mustlookup_test.go": "27506b591c6332ce3156fb4c4b94f671ec2641d86584750176bc80192473ba6c",
+    "internal/skills/render/render_cache_test.go": "86ee8180825b3160bd5370f29fa3147b9b2582891ad57191e8b0749af749ccf1",
+    "internal/skills/render/render_metadata_test.go": "d710668e4f29ea8bdf53674b147c2fc0b9380feab31c920f5f9be521b1c89c11",
+    "internal/skills/render/render_security_test.go": "e6e4b131d438d11e314862fc5f48685b947f9fcab84dc7c0dda7fd628af40863",
+    "internal/skills/render/render_target.go": "0037a54d73f3cc4f0fa045ea2f5e458e937489fb9670e8369579fe37ca441b72",
+    "internal/skills/render/render_test.go": "2a05e62fb5c266f25c0ef1c7c44aada24aae01f7d1a64985658ddee5e0361589",
+    "internal/skills/render/root_other.go": "ee02963dcd864373b3e1e45ce53c3072ab649c4204204d0c5c4d52c805f2964e",
+    "internal/skills/render/root_unix.go": "02d399d7f2e464b107402fec5d38c56ca0fbdce7007b56bd2da2f5760d7ff19a",
+    "internal/skills/render/staging_test.go": "7dcab47df52b6ce3a97dca1ad0e6ff1f254bec593a53294740f3667dca1ef7f9",
+    "internal/skills/render/summary.go": "d5a0332d8fd71d9036df6ac06e4a51d0931b663687ac9870ca260c99b5fc5169",
+    "internal/skills/render/summary_test.go": "8358ed693daf7504fb913e158a8f76aaf77b986029c711d589127b403ee8d70d",
+    "internal/skills/render/sync_dir_other.go": "af5737d8a295322b2a264092f308a3a39c0817bdaa44d3cc94cba00b85e46fc3",
+    "internal/skills/render/sync_dir_windows.go": "13ff4eadd839fb06ac08fdc59596441ae2b18d870eb65d4df0a90db8c0574c44",
+    "internal/skills/render/targets.go": "19441e611f7e8106c39cd24ce0539a542080ea80d169416328bd0c7a0a8ec8a9",
+    "internal/skills/render/variant_test.go": "46fd2da711a9f014013618c9d2d166a8c654e6b4b9aa187ca8fbf625c2371f39",
+    "internal/skills/skill/copy.go": "e6f8fcc7b4e6bb30a7b177a1505c6319d0d94612bceffa4c47c9ddf2a8fa15e2",
+    "internal/skills/skill/flow_test.go": "184b3eecd69efa3b6fda8c3874ef5a3db3270951437d90b50281536517f34bff",
+    "internal/skills/skill/frontmatter.go": "24be34af383213f0394b8bfcf11e20851f8d0f7c10a9bce07e0c799a4a28217a",
+    "internal/skills/skill/frontmatter_only_test.go": "8c9731835eb0a10debf3fd66dd29c135eda4b75a65477357cb2a6db7501b8b7c",
+    "internal/skills/skill/frontmatter_test.go": "f5412928516b94565246327309afe7564fec107659b5bf8e67030808abcd7a74",
+    "internal/skills/skill/hardening_test.go": "17f616163aa7d4efdb79007f8770dbd9af00d1605ce801d5b4a6bce4c3cec29e",
+    "internal/skills/skill/import.go": "9ed1de5a2255c36cc583c89bb07aed9cc3b361a9712ad655b2061d24c9e28e29",
+    "internal/skills/skill/import_vcs_test.go": "a864bb84d43629434df2c1efa9ccf95b77e030da809f48239459f1e5d917781e",
+    "internal/skills/skill/library.go": "c0ae18ef314e215900cf0d0565305c40fae54120ee5496e2162fa87c41381f28",
+    "internal/skills/skill/library_test.go": "2b346dbf6ad7d7366be14be42ac8a83e5d20d8dfd15250198a1374f0c785ab40",
+    "internal/skills/skill/load.go": "c79f01fe34044a2fa86c6b96c6c09ce5a7d6c9c820fdbc3311685fe05e432989",
+    "internal/skills/skill/root.go": "67d354829e8389f1e2661817affce499776690529e0d1984e9f895dc7a92a361",
+    "internal/skills/skill/root_other.go": "8a166ead8a5a0fe372014f5e97c897e27ca5b5a8eeee9ef98a5db620198a9a25",
+    "internal/skills/skill/root_unix.go": "aca30c6272f24d2c11438534bea8b29fa06c10808a62bdb44f243ebab9c3ddad",
+    "internal/skills/skill/skill.go": "b38c27b4c24c5d3e45c32e9f203edfcaaa6146e2d6192c25849a24c8a67487f8",
+    "internal/skills/skill/skill_test.go": "cddcdca1b395fcb073d702eef55d8b4ddbce998d074208584ecee7cc810f0b35",
+    "internal/skills/skill/validation.go": "3e303a5c77f437359a349a39b9248a8a0cd23db2b0149292cead3660ae4d6a1e",
+    "internal/skills/skill/variant_validate_lines_test.go": "731a1f3c0eea020abeaffd10a6d3f641d1636ca6eaf626b6b504485ba50a9008",
+    "internal/skills/skill/variant_validate_test.go": "278a050ecdb78771bc2506bc8fe67696b67c5e249c41881c9c45c87786631f9c",
+    "internal/skills/variant/apply.go": "53a814d003cfec1c2dfd8212b28f4bc7d0ba9cb4af4e12bffd67959314d0dd50",
+    "internal/skills/variant/checks.go": "045a68883a0d06d8eba74c27de7682606dd841542101219e75d1246466fd0771",
+    "internal/skills/variant/mentions.go": "e9b88c50d57673b793edd897d9cf6221bcee016834ea746a5f50ac39b8742213",
+    "internal/skills/variant/variant.go": "a2f8aeeb0e37a886ed7f469d306d324e00638b61bae2c796fcb23de489fc3c8d",
+    "internal/skills/variant/variant_test.go": "c5c6de193e4c482730c13baa434b60cfb58b43d66a3394cf582a01c9ac3ae5c1",
+    "internal/skills/vcs/extract.go": "d2e1e1b689f812ed8b52eff1349ceef486e7f8271e1a02b11b0904c38c594328",
+    "internal/skills/vcs/gitenv_test.go": "5cd8e15c7a3b151c27610142ce8dffcfedef5c17727b15e711621562e60a8040",
+    "internal/skills/vcs/history_test.go": "6b291d9354cb64e6cf8beb9d72245ff0e8d21d1f6978e0e209e98fc16e12025c",
+    "internal/skills/vcs/restore.go": "48fab01f80e57d20765465b40538e74b1c66bf9e89ab8b161d51cff7df49741a",
+    "internal/skills/vcs/vcs.go": "ab95e8285ea2fd2ea19102969bfda3c8bd55370774570c9cf58852312314d65f",
+    "internal/skills/vcs/vcs_errorpath_test.go": "3bce084befac57cc016f0c8de6e3dab0c2b15fc41134107e4f3bb70464d4ab47",
+    "internal/skills/vcs/vcs_test.go": "edfa9757a69a98ce88bc590f904db0e9cee8d8c4adada52de450cc4b9cb49c3a"
+  },
+  "candidate_source_sha256": {
+    "rust/symbrain-cli/src/skills_cli.rs": "76f0357f4a94a2dad177084af0921b3059fec9d34c636834e0eb5d296037a4e5",
+    "rust/symbrain-skills/src/install/status.rs": "88f14bf8c76b193fdbd75f841c75221438dbf85794a345d05327f1a6adda010c",
+    "rust/symbrain-skills/src/install/status_compare.rs": "7c61239cb25bcdd71735271c111a7139066eb09254eea0e3e5983970bf4a894b",
+    "rust/symbrain-skills/src/install/render_status.rs": "65e9a8db1f7d6d9eb71781d7d441b08af3a201be8c2771fc18f772cbd8d61319",
+    "rust/symbrain-skills/src/install/drift.rs": "4d89fed7b088a72e2a1e72b22e2d57d44f5b716e38abbaff808f81e21bba0b6d",
+    "rust/symbrain-cli/tests/skills_render_drift.rs": "c571a4b772b829e3ff6a4f2c0fe5cf33d9cc3e4ae58a4ea5e0c77ece75711dff",
+    "rust/symbrain-skills/tests/render_drift_status.rs": "b55a5a843e5bca9f220949ad8137ad8742d1fdf4ef82db720546b09daab7a553",
+    "scripts/skills-render-drift/run.sh": "66f088b9ea7cf5c9e256ea263d4c18b4fd7a1f54301b6e2380e481908f85cea1"
+  },
+  "intentional_extensions": [
+    "render_status",
+    "render_drift",
+    "render_error",
+    "verified symlink presentation mode: linked"
+  ],
+  "comparison": "actual process success, empty stderr, full existing report equality after removing only the explicit #621 extensions"
+}

@@ -73,6 +73,11 @@ where
     let temp = tempfile::tempdir()
         .map_err(|error| SkillError(format!("create status staging: {error}")))?;
     let fresh = materialize(&bundle, &rendered, temp.path())?;
+    let common = |status, drift, error| {
+        let mut row = common(status, drift, error);
+        super::render_status::inspect(&mut row, options, installed, &fresh.root);
+        row
+    };
     if let Some(manifest) = read_manifest_for(
         &options.home_dir,
         options.base_dir.as_deref(),
@@ -172,6 +177,9 @@ pub(super) fn unmanaged(target: &str, name: &str, path: PathBuf) -> InstallStatu
         allow_executable: None,
         error: None,
         drift: Vec::new(),
+        render_status: None,
+        render_drift: Vec::new(),
+        render_error: None,
     }
 }
 
@@ -208,5 +216,8 @@ pub(super) fn marker_row(
         allow_executable: None,
         error,
         drift: Vec::new(),
+        render_status: None,
+        render_drift: Vec::new(),
+        render_error: None,
     }
 }
