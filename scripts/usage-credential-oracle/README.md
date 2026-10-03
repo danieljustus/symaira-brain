@@ -9,7 +9,7 @@ requests receive canned 401 responses through an injected transport. No operator
 credentials, system Keychain entries or live endpoints are read.
 
 The gate requires all 44 constructor/report/request comparisons, all 110 actual
-CLI stdout/stderr/exit comparisons with the Rust Go executable absent, and four
+CLI stdout/stderr/exit comparisons with the Rust Go executable absent, and five
 actual failing replay controls. The ordinary workspace suite marks the fresh
 oracle integration test ignored; this gate explicitly executes it with
 `--ignored`. The fresh replay requires its fixture and 44 cases, and cannot pass
