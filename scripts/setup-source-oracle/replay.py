@@ -48,9 +48,6 @@ def cases():
     add("root-missing",root="missing")
     add("root-file",root="file")
     add("root-relative",relative=True)
-    for lexical in ("dot","parent","slash"):
-        add("managed-home-"+lexical,home_lexical=lexical)
-    if os.name!="nt":add("managed-home-symlink-parent",home_lexical="symlink-parent")
     for args in (["setup","--modules=browse"],["setup","--from-source"],["setup","--modules"],["setup","--from-source","<source>","--fix"],["setup","--from-source","<source>","--allow-unsigned"],["setup","--help"],["setup","--help=true"],["setup","--unknown"],["setup","--from-source","<source>","--modules=browse","--force-release"],["setup","--from-source=<source>","--modules=browse","--json"],["setup","--from-source","<source>","--modules=browse","positional","--json"]):
         add("args-"+str(len(result)),args)
     for args in (["setup","----from-source","<source>","--modules","browse","--json"],
@@ -113,6 +110,9 @@ def cases():
         add("tool-identity-"+str(index),env={"SOURCE_TOOL_VERSION_BYTES":base64.b64encode(identity).decode() or "="})
     add("real-go-build",real_go=True)
     add("preserve-other-owner",foreign=True)
+    for lexical in ("dot","parent","slash"):
+        add("managed-home-"+lexical,home_lexical=lexical)
+    if os.name!="nt":add("managed-home-symlink-parent",home_lexical="symlink-parent")
     return result
 
 
