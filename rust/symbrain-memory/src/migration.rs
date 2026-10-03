@@ -116,31 +116,44 @@ mod tests {
 
     #[test]
     fn later_ddl_failure_rolls_back_columns_and_migration_entries() {
-        let mut conn = Connection::open_in_memory().unwrap();
-        conn.execute_batch("CREATE TABLE memories(id TEXT PRIMARY KEY); CREATE TABLE rules(id TEXT PRIMARY KEY); CREATE TABLE schema_migrations(version TEXT PRIMARY KEY);").unwrap();
+        let mut entropy = [0_u8; 8];
+        getrandom::fill(&mut entropy).unwrap();
+        let directory = std::env::temp_dir().join(format!(
+            "symbrain-schema-rollback-{:016x}",
+            u64::from_le_bytes(entropy),
+        ));
+        std::fs::create_dir(&directory).unwrap();
+        let path = directory.join("memory.db");
         {
-            let tx = conn.transaction().unwrap();
-            apply_column_parity(&tx).unwrap();
-            tx.execute(
-                "INSERT INTO schema_migrations(version) VALUES ('034_activity_store')",
-                [],
-            )
-            .unwrap();
+            let conn = Connection::open(&path).unwrap();
+            conn.execute_batch("CREATE TABLE memories(id TEXT PRIMARY KEY); CREATE TABLE rules(id TEXT PRIMARY KEY); CREATE TABLE schema_migrations(version TEXT PRIMARY KEY);").unwrap();
+        }
+        // Invoke the real public opener: schema and parity changes precede the
+        // index failure because this deliberately corrupt legacy table lacks
+        // original scope/content columns that additive repair cannot invent.
+        assert!(Store::open(&path).is_err());
+        {
+            let conn = Connection::open(&path).unwrap();
+            assert_eq!(
+                conn.query_row("SELECT count(*) FROM schema_migrations", [], |row| row
+                    .get::<_, i64>(0))
+                    .unwrap(),
+                0
+            );
             assert!(
-                tx.execute_batch("CREATE INDEX intentional_missing_column ON memories(absent);")
+                conn.prepare("SELECT embedding_binary FROM memories")
                     .is_err()
             );
-            // Drop rolls back the same transaction configure uses.
-        }
-        assert_eq!(
-            conn.query_row("SELECT count(*) FROM schema_migrations", [], |row| row
-                .get::<_, i64>(0))
+            assert_eq!(
+                conn.query_row(
+                    "SELECT count(*) FROM sqlite_master WHERE name='activity_segments'",
+                    [],
+                    |row| row.get::<_, i64>(0)
+                )
                 .unwrap(),
-            0
-        );
-        assert!(
-            conn.prepare("SELECT embedding_binary FROM memories")
-                .is_err()
-        );
+                0
+            );
+        }
+        std::fs::remove_dir_all(directory).unwrap();
     }
 }
