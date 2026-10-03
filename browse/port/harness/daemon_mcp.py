@@ -114,7 +114,7 @@ def main() -> int:
               "historical_mcp_source_hashes_match": True, "source_hashes": source_hashes,
               "binaries_sha256": {name: process_harness.digest(getattr(args, name))
                                   for name in ("go", "go_fixture", "rust")}, "observations": []}
-    with tempfile.TemporaryDirectory(prefix="bm-", dir=harness.temporary_parent(os.environ)) as directory:
+    with tempfile.TemporaryDirectory(prefix="bm-", dir=process_harness.private_temporary_parent()) as directory:
         root = Path(directory); home = root / "home"; home.mkdir(mode=0o700)
         runtime = home / "Library/Caches/symbrowse/run" if sys.platform == "darwin" else root / "run"
         runtime.mkdir(parents=True, mode=0o700)

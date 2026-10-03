@@ -37,14 +37,18 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def observe(binary: Path, settings: dict[str, str], session: str,
-            raw_origin: bytes | None = None, git_origin: bool = False) -> dict:
+def private_temporary_parent() -> str | None:
     parent = harness.temporary_parent(os.environ)
     if sys.platform == "darwin" and os.environ.get("CI"):
         # Darwin sockaddr_un is bounded; runner TMPDIR is often deeply nested.
         # Keep this owned private HOME short without changing daemon endpoints.
         parent = "/tmp"
-    with tempfile.TemporaryDirectory(prefix="bd-", dir=parent) as temporary:
+    return parent
+
+
+def observe(binary: Path, settings: dict[str, str], session: str,
+            raw_origin: bytes | None = None, git_origin: bool = False) -> dict:
+    with tempfile.TemporaryDirectory(prefix="bd-", dir=private_temporary_parent()) as temporary:
         root = Path(temporary)
         home = root / "home"
         home.mkdir(mode=0o700)

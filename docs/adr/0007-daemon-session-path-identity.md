@@ -31,3 +31,11 @@ do not claim those constructor tests are complete CLI parity.
 Fresh independent correction review and all six native acceptance runners
 remain required. The original Windows-ARM Go shutdown failure stays visible.
 Registry/autostart contracts and the full #772 cutover remain separate.
+
+The first hosted macOS ARM acceptance reached the unchanged Go daemon but
+failed with `AF_UNIX path too long`: the runner's nested default temporary
+directory plus Go's HOME-based Darwin socket path exceeded the native socket
+limit. Hosted Darwin process/MCP runners therefore use short, private owned
+HOME directories under `/tmp`, with unchanged production endpoint rules.
+Direct macOS runs retain the required external-volume policy. This correction
+does not claim the external APFS/NVMe acceptance required by #790.
