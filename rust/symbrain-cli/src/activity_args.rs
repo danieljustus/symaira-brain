@@ -90,7 +90,9 @@ fn os(bytes: Vec<u8>) -> OsString {
 }
 #[cfg(not(unix))]
 fn os(bytes: Vec<u8>) -> OsString {
-    String::from_utf8_lossy(&bytes).into_owned().into()
+    String::from_utf8(bytes)
+        .unwrap_or_else(|error| String::from_utf8_lossy(error.as_bytes()).into_owned())
+        .into()
 }
 // Go decodes each malformed UTF-8 byte as an individual RuneError.
 fn go_string(mut bytes: &[u8]) -> String {
