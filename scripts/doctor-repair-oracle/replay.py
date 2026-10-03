@@ -63,6 +63,8 @@ def configure(case, root, env, probe):
         path = bin_dir / name
         shutil.copyfile(probe, path)
         path.chmod(0o644 if name == "symdesk" and case.nonexecutable else 0o755)
+        if name == "symdesk" and case.signal:
+            path.write_text(f"#!/bin/sh\nkill -{case.signal} $$\n")
         if os.name == "nt":
             shutil.copyfile(probe, path.with_suffix(".exe"))
         version = json.dumps({"version":legacy._version_without_tag(core["version"])}).encode()
@@ -114,7 +116,10 @@ def log_contract(stderr, root, started, ended):
             final.append(line.decode("utf-8"))
             finished = True
             continue
-        observed = calendar.timegm(time.strptime(match[1].decode(),"%Y/%m/%d %H:%M:%S"))
+        parsed = time.strptime(match[1].decode(),"%Y/%m/%d %H:%M:%S")
+        # Unix children explicitly use TZ=UTC. Go and chrono on Windows
+        # obtain the native OS timezone and do not use Unix's TZ override.
+        observed = time.mktime(parsed) if os.name == "nt" else calendar.timegm(parsed)
         assert started - 1 <= observed <= ended + 1, "log timestamp outside actual run"
         body = match[2] + b" " + match[3] + b"\n"
         core = re.search(rb" binary=(sym[a-z]+)(?: |$)",body)
@@ -196,7 +201,7 @@ def main():
             "control":control,
             "complete_observations":len(observations),"exit":int(bool(failures)),"failures":failures,
             "observations":observations,
-            "comparison":"exact stdout, exit, full fixture files/modes and all per-core log sequences/attributes plus completion tail. Actual UTC timestamp in run window; only known root paths and new verified-UTC release-sidecar timestamps normalized. Frozen Go ActiveCores map order permits only between-core reorder; no per-core log or failure is discarded.",
+            "comparison":"exact stdout, exit, full fixture files/modes and all per-core log sequences/attributes plus completion tail. Actual Go-equivalent clock timestamp in run window (Unix fixture TZ=UTC; Windows native OS timezone); only known root paths and new verified-UTC release-sidecar timestamps normalized. Frozen Go ActiveCores map order permits only between-core reorder; no per-core log or failure is discarded.",
             "fallback":"every actual process has an absent SYMBRAIN_GO_BINARY; fixture PATH contains no Go CLI",
             "remaining_scope":"typed config failure diagnostics and setup source-build/module lifecycle remain Go-owned in #765"}
     names = subprocess.check_output(["git","ls-tree","-r","--name-only",ORACLE,"--","cmd/symbrain","internal/managed","internal/config","internal/xdg","go.mod","go.sum"],cwd=ROOT,text=True).splitlines()

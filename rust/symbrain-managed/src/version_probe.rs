@@ -7,6 +7,8 @@ use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
+#[path = "process_status.rs"]
+mod process_status;
 const VERSION_PROBE_TIMEOUT: Duration = Duration::from_secs(3);
 
 /// Probes `<binary> version --json`, returning an empty string when absent.
@@ -57,10 +59,7 @@ pub fn installed_version(bin_dir: &Path, binary_name: &str) -> Result<String, Ma
                 terminate_probe_descendants(process_group);
                 let bytes = fs::read(output.path()).map_err(ManagedError::Io)?;
                 if !status.success() {
-                    let status = status.code().map_or_else(
-                        || "signal: killed".to_string(),
-                        |code| format!("exit status {code}"),
-                    );
+                    let status = process_status::format(status);
                     return Err(ManagedError::Context(format!(
                         "probe {binary_name}: {status}"
                     )));

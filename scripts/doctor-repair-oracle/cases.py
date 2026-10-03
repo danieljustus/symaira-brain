@@ -16,6 +16,7 @@ class Case:
     all_missing: bool = False
     nonexecutable: bool = False
     verifier: bool = False
+    signal: str | None = None
 
 
 def cases():
@@ -27,6 +28,11 @@ def cases():
               Case("provenance-directory", version=b'{"version":"0.0.0"}', provenance="directory")]
     if __import__('os').name != 'nt':
         result.append(Case("nonexecutable", nonexecutable=True, provenance=b'{"source":"brain-source"}'))
+        for signal in ("TERM", "INT", "KILL"):
+            result.append(Case(f"signal-{signal}",signal=signal,provenance=b'{"source":"brain-source"}'))
+    else:
+        for code in (65536,0xc0000005):
+            result.append(Case(f"large-probe-exit-{code}",probe_exit=code,provenance=b'{"source":"brain-source"}'))
     payloads = [b'', b'{bad', b'null', b'{}', b'[]', b'1', b'true', b'"str"',
                 b'{"source":"brain-source"}', b'{"SOURCE":"brain-source","receiver_commit":"fixture commit=123"}',
                 '{"ſOURCE":"brain-source","RECEIVER_COMMIT":"unicode"}'.encode(),
@@ -50,7 +56,8 @@ def cases():
                 b'{"source":01}', b'{"source":[1,]}', b'{"source":[1}}',
                 b'{"source":"x"}[]', b'{"source":"bad\x01"}',
                 b'{"version":1,"built_at":"bad"}',
-                b'{"built_at":"bad","version":1}']
+                b'{"built_at":"bad","version":1}',
+                b'-',b'1.',b'1e',b'1e+',b'"\\',b'"\\u0',b'nu',b'"abc',b'{',b'[1,']
     for timestamp in ("0000-01-01T00:00:00Z", "2024-02-29T00:00:00Z", "2026-02-29T00:00:00Z",
                       "2026-00-01T00:00:00Z", "2026-13-01T00:00:00Z", "2026-01-00T00:00:00Z",
                       "2026-01-32T00:00:00Z", "2026-10-03T2:00:00Z", "2026-10-03T12:00:00,123Z",
@@ -75,6 +82,7 @@ def cases():
         b'{"version":"0.12.2","unknown":' + b'['*200+b'0'+b']'*200+b'}',
         b'{"version":"0.12.2","version":"0.0.0"}',
         b'{"version":"0.12.2"}x', b'{"version":false}',
+        b'-',b'1.',b'1e',b'1e+',b'"\\',b'"\\u0',b'nu',b'"abc',b'{',b'[1,',
     )):
         result.append(Case(f"version-{index}",version=payload,provenance=b'{"source":"brain-source"}'))
     for flag in ("fix", "force-release", "json"):

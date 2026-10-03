@@ -39,9 +39,9 @@ pub(super) fn validate(bytes: &[u8]) -> Result<(), String> {
     if matches!(state, State::Top) {
         return Ok(());
     }
-    // Go's eof feeds a space to finish scalar values, then reports EOF
-    // rather than an error involving that synthetic byte.
-    let _ = step(&mut state, &mut stack, b' ');
+    // Go eof feeds a space to finish scalar values. A malformed literal,
+    // number or escape can fail on this synthetic byte; retain that error.
+    step(&mut state, &mut stack, b' ')?;
     if matches!(state, State::Top) {
         Ok(())
     } else {
@@ -288,4 +288,39 @@ fn number_state(state: State, byte: u8) -> Result<Option<State>, String> {
         }
         _ => unreachable!("number state"),
     }))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::validate;
+    #[test]
+    fn truncated_scalar_errors_retain_go_eof_transition() {
+        for (bytes, diagnostic) in [
+            (b"-".as_slice(), "invalid character ' ' in numeric literal"),
+            (
+                b"1.".as_slice(),
+                "invalid character ' ' after decimal point in numeric literal",
+            ),
+            (
+                b"1e+".as_slice(),
+                "invalid character ' ' in exponent of numeric literal",
+            ),
+            (
+                b"\"\\".as_slice(),
+                "invalid character ' ' in string escape code",
+            ),
+            (
+                b"\"\\u0".as_slice(),
+                "invalid character ' ' in \\u hexadecimal character escape",
+            ),
+            (
+                b"nu".as_slice(),
+                "invalid character ' ' in literal null (expecting 'l')",
+            ),
+            (b"\"abc".as_slice(), "unexpected end of JSON input"),
+            (b"{".as_slice(), "unexpected end of JSON input"),
+        ] {
+            assert_eq!(validate(bytes).unwrap_err(), diagnostic);
+        }
+    }
 }
