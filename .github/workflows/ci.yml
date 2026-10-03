@@ -745,12 +745,22 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test -p symbrain-policy profile::create::tests --locked
+          mkdir -p "$RUNNER_TEMP/profile-create-race"
+          cargo test -p symbrain-policy profile::create::tests --locked -- --nocapture 2>&1 | tee "$RUNNER_TEMP/profile-create-race/threads.log"
+          cargo test -p symbrain-policy --test profile_create_races --locked -- --nocapture 2>&1 | tee "$RUNNER_TEMP/profile-create-race/processes.log"
           cargo test -p symbrain-cli --lib init_cli::tests --locked
           cargo test -p symbrain-cli --test init_cli_tests --locked
           cargo build -p symbrain-cli --locked
           python3 scripts/init-oracle/test_compare.py
           python3 scripts/init-oracle/compare.py --rust-binary "target/debug/symbrain${{ matrix.os == 'windows-2025' && '.exe' || '' }}" --output target/init-oracle/report.json
+      - name: Preserve native profile creation race evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: profile-create-race-${{ matrix.os }}
+          path: ${{ runner.temp }}/profile-create-race
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Test additional Rust contracts on native Windows
         if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
         shell: bash
