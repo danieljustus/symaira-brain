@@ -72,7 +72,7 @@ fn usage_hermes_768_matches_fresh_go_file_and_jwt_contracts() {
     let records: Vec<serde_json::Value> =
         serde_json::from_slice(&std::fs::read(fixture).expect("Go Hermes evidence"))
             .expect("oracle");
-    assert_eq!(records.len(), 92, "complete Hermes corpus");
+    assert_eq!(records.len(), 96, "complete Hermes corpus");
     let expected: BTreeSet<_> = input
         .iter()
         .map(|record| record["id"].as_str().expect("input id"))
@@ -81,7 +81,7 @@ fn usage_hermes_768_matches_fresh_go_file_and_jwt_contracts() {
         .iter()
         .map(|record| record["id"].as_str().expect("record id"))
         .collect();
-    assert_eq!(expected.len(), 92, "source cases must be distinct");
+    assert_eq!(expected.len(), 96, "source cases must be distinct");
     assert_eq!(observed, expected, "exact Hermes case coverage");
     for record in &records {
         prepare(record);
@@ -130,7 +130,7 @@ fn usage_hermes_768_matches_fresh_go_file_and_jwt_contracts() {
     if let Ok(path) = std::env::var("USAGE_HERMES_NATIVE") {
         std::fs::write(
             path,
-            serde_json::to_vec_pretty(&serde_json::json!({"cases":92,"passed":92,"failed":0}))
+            serde_json::to_vec_pretty(&serde_json::json!({"cases":96,"passed":96,"failed":0}))
                 .expect("receipt"),
         )
         .expect("write receipt");

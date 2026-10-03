@@ -19,6 +19,9 @@ fn jwt_expiry(token: &str) -> Option<f64> {
         return None;
     };
     let text = go_json_compatible_text(&decode_base64url(payload)?);
+    if !go_json_credential_limits(&text, false) {
+        return None;
+    }
     serde_json::from_str::<JwtExpiryClaims>(&text).ok()?.0
 }
 

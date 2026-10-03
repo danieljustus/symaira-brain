@@ -5,8 +5,8 @@ actual authenticated request strategies with canned 401 responses, and actual
 CLI subprocesses in disposable HOME/XDG roots. It adds only untracked supplemental
 Go tests in an owned checkout; frozen fixtures and production Go remain unchanged.
 
-The gate requires 92 full report/request/no-write cases (all 27 historical file
-cases plus typed JSON, UTF-8, size-bound and JWT extensions and twelve explicit slice-backing regressions), 100 actual CLI
+The gate requires 96 full report/request/no-write cases (all 27 historical file
+cases plus typed JSON, UTF-8, size-bound and JWT extensions and twelve explicit slice-backing regressions and four exact depth-boundary regressions), 104 actual CLI
 stdout/stderr/exit comparisons across table and JSON output, and five actual
 rejection controls. The ordinary workspace suite ignores the fresh integration
 test; this gate explicitly executes it with `--ignored`, requires its real Go

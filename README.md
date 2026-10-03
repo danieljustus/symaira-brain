@@ -723,7 +723,7 @@ The Claude/Codex file gate (`scripts/usage-provider-files-oracle/run.sh`) requir
 CLI comparisons and five actual failure controls in isolated credential roots.
 
 The Hermes usage credential gate (`scripts/usage-hermes-oracle/run.sh`) retains
-92 actual Go/native constructor and request cases, 100 CLI comparisons, and five
+96 actual Go/native constructor and request cases, 104 CLI comparisons, and five
 real failure controls, including duplicate-array shrink/regrowth regressions.
 
 ## Native Apps

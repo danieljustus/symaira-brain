@@ -62,7 +62,7 @@ comparisons and one retained nondeterministic-account gate. Real CLI comparisons
 cover every deterministic route before a request and both output modes for every
 credential-free source. Five actual failure controls must reject corrupt or
 incomplete replay inputs. The shared reader additionally receives the complete
-92-report Hermes gate, its Unix filesystem observations, and the 44-report
+96-report Hermes gate, its Unix filesystem observations, and the 44-report
 reference gate on the same source revision. Native macOS and Windows receipts
 remain required; Linux alone does not establish their contracts. Other #768
 file families, host Keychain, numeric JWT overflow and configuration gates remain

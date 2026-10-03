@@ -73,6 +73,12 @@ for name, value in {'shrink-regrow-null-slot': '{"providers":[{"id":"other"},{"i
  'shrink-regrow-grow-past-history': '{"providers":[{"id":"other"},{"id":"nous","access_token":"retained"}],"providers":[{}],"providers":[{},null,null,null,null]}',
  'shrink-regrow-fresh-tail': '{"providers":[{"id":"other"},{"id":"other","access_token":"unselected"}],"providers":[{}],"providers":[{},null,{"id":"nous","access_token":"new-token"}]}'}.items():
     add("slice-" + name, value)
+# Both typed entry points enforce Go's total 10000-container limit.
+# Append boundary cases; retain every original 92 input and ID unchanged.
+for arrays in (9999, 10000):
+    add("file-total-depth-" + str(arrays + 1), '{"providers":[{"id":"nous","access_token":"retained"}],"ignored":' + '[' * arrays + '0' + ']' * arrays + '}')
+    payload = '{"exp":4102444800,"ignored":' + '[' * arrays + '0' + ']' * arrays + '}'
+    add("jwt-total-depth-" + str(arrays + 1), json.dumps({"providers": [{"id": "nous", "invoke_jwt": token(payload)}]}, separators=(',', ':')))
 assert len({case['id'] for case in cases}) == len(cases)
 pathlib.Path(sys.argv[1]).write_text(json.dumps(cases, indent=2) + '\n')
 print(f"Hermes source-bound cases: {len(cases)}")

@@ -12,6 +12,9 @@ struct HermesProvider {
 
 fn decode_hermes_token(contents: &[u8]) -> Option<String> {
     let text = go_json_compatible_text(contents);
+    if !go_json_credential_limits(&text, false) {
+        return None;
+    }
     let root: CredentialFields = serde_json::from_str(&text).ok()?;
     // Go's decoder reuses the slice backing array across duplicate fields.
     // Keep visited slots separate from visible length: shrinking a nonempty
