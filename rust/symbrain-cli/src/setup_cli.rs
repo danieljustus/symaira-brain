@@ -3,7 +3,7 @@ use std::ffi::OsString;
 use std::io::Write;
 
 use serde::Serialize;
-use symbrain_core::{exit, xdg};
+use symbrain_core::exit;
 use symbrain_managed::{
     InstallOutcome, Installer, Manifest, Platform, installed_version, versions_match,
 };
@@ -16,33 +16,40 @@ pub(crate) use config::parse_go_bool;
 mod flags;
 use flags::{SetupArgs, parse_args};
 
-/// Whether this invocation requires the Go implementation's module lifecycle semantics.
-///
-/// Source builds remain Go-owned; release repair and source protection are native.
-pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
-    if crate::has_go_owned_flag(
-        args,
-        &[
-            "json",
-            "fix",
-            "allow-unsigned",
-            "force-release",
-            "from-source",
-            "modules",
-            "h",
-            "help",
-        ],
-        &[],
-        &["from-source", "modules"],
-        &[],
-    ) {
-        return true;
-    }
+#[path = "setup_source.rs"]
+mod source;
 
-    // Config-load diagnostics remain Go-owned until the full typed loader is
-    // ported. Never repair after accepting a config that Go would reject.
-    parse_args(args, &mut Vec::new()).is_ok_and(|parsed| parsed.fix)
-        && (!crate::vault_config::valid_configuration() || enabled_cores().is_err())
+#[cfg(windows)]
+const HOME_VARIABLE: &str = "USERPROFILE";
+#[cfg(not(windows))]
+const HOME_VARIABLE: &str = "HOME";
+
+fn setup_home() -> Option<std::path::PathBuf> {
+    std::env::var_os(HOME_VARIABLE)
+        .filter(|home| !home.is_empty())
+        .map(std::path::PathBuf::from)
+}
+
+/// Preserve full typed configuration diagnostics until their native cutover.
+pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
+    parse_args(args, &mut Vec::new()).is_ok_and(|parsed| {
+        if setup_home().is_none() {
+            return false;
+        }
+        let source = !parsed.from_source.is_empty();
+        if source && (parsed.fix || parsed.allow_unsigned) {
+            return false;
+        }
+        if !source && !parsed.modules.is_empty() {
+            return false;
+        }
+        // Go validates the source root before loading configuration.
+        if source && !source::valid_root(&parsed.from_source) {
+            return false;
+        }
+        (parsed.fix || source)
+            && (!crate::vault_config::valid_configuration() || enabled_cores().is_err())
+    })
 }
 
 #[derive(Serialize)]
@@ -78,10 +85,38 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
         Ok(args) => args,
         Err(code) => return code,
     };
-    let Some(bin_dir) = xdg::managed_bin_dir() else {
-        let _ = writeln!(stderr, "symbrain setup: user home directory not found");
+    #[cfg(windows)]
+    let home_label = "%userprofile%";
+    #[cfg(not(windows))]
+    let home_label = "$HOME";
+    let Some(bin_dir) = setup_home().map(|home| home.join(".symaira/bin")) else {
+        let _ = writeln!(
+            stderr,
+            "symbrain setup: managed: cannot determine home directory: {home_label} is not defined"
+        );
         return exit::GENERIC;
     };
+    if !parsed.from_source.is_empty() {
+        if parsed.fix || parsed.allow_unsigned {
+            let _ = writeln!(
+                stderr,
+                "symbrain setup: --from-source cannot be combined with --fix or --allow-unsigned"
+            );
+            return exit::USAGE;
+        }
+        return source::run(
+            &bin_dir,
+            &parsed.from_source,
+            &parsed.modules,
+            parsed.json,
+            stdout,
+            stderr,
+        );
+    }
+    if !parsed.modules.is_empty() {
+        let _ = writeln!(stderr, "symbrain setup: --modules requires --from-source");
+        return exit::USAGE;
+    }
     let manifest = match Manifest::load_embedded() {
         Ok(manifest) => manifest,
         Err(error) => {

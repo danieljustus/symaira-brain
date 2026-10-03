@@ -13,13 +13,16 @@ pub(super) struct SetupArgs {
     pub(super) fix: bool,
     pub(super) allow_unsigned: bool,
     pub(super) force_release: bool,
+    pub(super) from_source: OsString,
+    pub(super) modules: String,
 }
 
 pub(super) fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<SetupArgs, u8> {
     let normalized = crate::normalize_flags(args);
     let mut parsed = SetupArgs::default();
-    for argument in normalized {
-        let argument = argument.to_string_lossy();
+    let mut arguments = normalized.into_iter();
+    while let Some(raw_argument) = arguments.next() {
+        let argument = raw_argument.to_string_lossy();
         if argument == "--" || argument == "-" || !argument.starts_with('-') {
             break;
         }
@@ -31,6 +34,42 @@ pub(super) fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<Se
         let (name, value) = flag
             .split_once('=')
             .map_or((flag, None), |(name, value)| (name, Some(value)));
+        if matches!(name, "from-source" | "modules") {
+            let raw_value = if let Some(value) = value {
+                #[cfg(unix)]
+                {
+                    use std::os::unix::ffi::{OsStrExt, OsStringExt};
+                    let bytes = raw_argument.as_os_str().as_bytes();
+                    let start = bytes
+                        .iter()
+                        .position(|byte| *byte == b'=')
+                        .expect("explicit value separator")
+                        + 1;
+                    let _ = value;
+                    OsString::from_vec(bytes[start..].to_vec())
+                }
+                #[cfg(not(unix))]
+                {
+                    OsString::from(value)
+                }
+            } else if let Some(value) = arguments.next() {
+                value
+            } else {
+                let _ = writeln!(stderr, "flag needs an argument: -{name}");
+                let _ = write!(stderr, "{USAGE}");
+                return Err(exit::USAGE);
+            };
+            if name == "from-source" {
+                parsed.from_source = raw_value;
+            } else {
+                parsed.modules = raw_value.to_string_lossy().into_owned();
+            }
+            continue;
+        }
+        if matches!(name, "h" | "help") {
+            let _ = write!(stderr, "{USAGE}");
+            return Err(exit::USAGE);
+        }
         let target = match name {
             "json" => &mut parsed.json,
             "fix" => &mut parsed.fix,
@@ -90,7 +129,7 @@ mod tests {
     }
 
     #[test]
-    fn help_lists_the_go_owned_module_lifecycle_flags() {
+    fn help_lists_the_retained_module_lifecycle_flags() {
         let mut stderr = Vec::new();
         let result = parse_args(&["--help".into()], &mut stderr);
 

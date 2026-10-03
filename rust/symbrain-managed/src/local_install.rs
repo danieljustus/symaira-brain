@@ -1,0 +1,117 @@
+//! Managed publication of explicitly requested local module builds.
+use std::path::Path;
+
+use chrono::{SecondsFormat, Utc};
+use serde::Serialize;
+use sha2::{Digest, Sha256};
+
+use crate::{ManagedError, atomic_install};
+
+/// Build identity for a Brain-owned optional module, independent of a release publisher.
+#[derive(Clone, Copy)]
+pub struct SourceOrigin<'a> {
+    pub receiver_commit: &'a str,
+    pub module_dir: &'a str,
+    pub builder: &'a [u8],
+}
+
+#[derive(Serialize)]
+struct Provenance<'a> {
+    binary: &'a str,
+    source: &'static str,
+    version: &'static str,
+    #[serde(skip_serializing_if = "str::is_empty")]
+    receiver_commit: &'a str,
+    #[serde(skip_serializing_if = "str::is_empty")]
+    module_dir: &'a str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    builder: Option<Box<serde_json::value::RawValue>>,
+    built_at: String,
+    binary_sha256: String,
+}
+
+/// Publishes source bytes through the existing managed atomic installer.
+///
+/// As in Go, binary publication precedes sidecar publication: a sidecar failure
+/// leaves the installed payload visible and returns an error. The later version
+/// handshake never rewrites the source record's historically empty version.
+///
+/// # Errors
+/// Returns an error for invalid names or filesystem/publication failures.
+pub fn install_source(
+    bin_dir: &Path,
+    binary_name: &str,
+    binary: &[u8],
+    origin: SourceOrigin<'_>,
+) -> Result<(), ManagedError> {
+    if binary_name.is_empty()
+        || binary_name.contains(['/', '\\', ':', '\0'])
+        || matches!(binary_name, "." | "..")
+    {
+        return Err(ManagedError::Context(
+            "managed: install local: invalid binary name".into(),
+        ));
+    }
+    std::fs::create_dir_all(bin_dir).map_err(|error| {
+        #[cfg(unix)]
+        let detail = if bin_dir.is_file() {
+            "not a directory".into()
+        } else {
+            crate::format_io_error(&error)
+        };
+        #[cfg(not(unix))]
+        let detail = crate::format_io_error(&error);
+        ManagedError::Context(format!(
+            "managed: mkdir {}: mkdir {}: {detail}",
+            bin_dir.display(),
+            bin_dir.display()
+        ))
+    })?;
+    atomic_install(bin_dir, binary_name, binary)?;
+    let record = Provenance {
+        binary: binary_name,
+        source: "brain-source",
+        version: "",
+        receiver_commit: origin.receiver_commit,
+        module_dir: origin.module_dir,
+        builder: if origin.builder.is_empty() {
+            None
+        } else {
+            Some(
+                serde_json::value::RawValue::from_string(quote_builder(origin.builder)?)
+                    .map_err(|error| ManagedError::Context(error.to_string()))?,
+            )
+        },
+        built_at: Utc::now().to_rfc3339_opts(SecondsFormat::AutoSi, true),
+        binary_sha256: format!("{:x}", Sha256::digest(binary)),
+    };
+    crate::provenance::write_record(bin_dir, binary_name, &record).map_err(|error| {
+        ManagedError::Context(format!(
+            "managed: record provenance for {binary_name}: {error}"
+        ))
+    })
+}
+
+// Go strings retain malformed tool stdout bytes. encoding/json encodes each
+// malformed byte as \ufffd, while valid U+FFFD remains literal UTF-8.
+fn quote_builder(mut bytes: &[u8]) -> Result<String, ManagedError> {
+    let mut json = String::from("\"");
+    while !bytes.is_empty() {
+        let valid = std::str::from_utf8(bytes);
+        let count = valid
+            .as_ref()
+            .map_or_else(std::str::Utf8Error::valid_up_to, |text| text.len());
+        let text = std::str::from_utf8(&bytes[..count])
+            .map_err(|error| ManagedError::Context(error.to_string()))?;
+        let quoted = serde_json::to_string(text)
+            .map_err(|error| ManagedError::Context(error.to_string()))?;
+        json.push_str(&quoted[1..quoted.len() - 1]);
+        bytes = &bytes[count..];
+        if valid.is_err() {
+            json.push_str("\\ufffd");
+            bytes = &bytes[1..];
+        }
+    }
+    json.push('"');
+    Ok(json)
+}

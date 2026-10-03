@@ -249,7 +249,15 @@ impl Selection {
 /// Returns an error when temporary creation, writing, syncing, permissions, or
 /// atomic persistence fails.
 pub fn atomic_install(bin_dir: &Path, binary_name: &str, data: &[u8]) -> Result<(), ManagedError> {
-    let mut temporary = tempfile::NamedTempFile::new_in(bin_dir)?;
+    let mut temporary = tempfile::Builder::new()
+        .prefix(".install-")
+        .tempfile_in(bin_dir)
+        .map_err(|error| {
+            ManagedError::Context(format!(
+                "atomic install: create temp: {}",
+                crate::format_io_error(&error)
+            ))
+        })?;
     temporary.write_all(data)?;
     temporary.as_file_mut().sync_all()?;
     #[cfg(unix)]
@@ -259,8 +267,21 @@ pub fn atomic_install(bin_dir: &Path, binary_name: &str, data: &[u8]) -> Result<
             .as_file()
             .set_permissions(fs::Permissions::from_mode(0o755))?;
     }
-    temporary
-        .persist(bin_dir.join(binary_name))
-        .map_err(|error| ManagedError::Io(error.error))?;
+    let target = bin_dir.join(binary_name);
+    temporary.persist(&target).map_err(|error| {
+        #[cfg(unix)]
+        let detail = if error.error.kind() == std::io::ErrorKind::IsADirectory {
+            "file exists".into()
+        } else {
+            crate::format_io_error(&error.error)
+        };
+        #[cfg(not(unix))]
+        let detail = crate::format_io_error(&error.error);
+        ManagedError::Context(format!(
+            "atomic install: rename: rename {} {}: {detail}",
+            error.file.path().display(),
+            target.display()
+        ))
+    })?;
     Ok(())
 }

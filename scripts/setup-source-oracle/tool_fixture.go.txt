@@ -1,0 +1,143 @@
+// Native fixture executables exercise the unchanged production CLI process boundary.
+package main
+
+import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"time"
+)
+
+func main() {
+	if len(os.Args) > 1 && os.Args[1] == "__held_descendant" {
+		time.Sleep(60 * time.Second)
+		return
+	}
+	name := strings.TrimSuffix(filepath.Base(os.Args[0]), ".exe")
+	if name == "control" {
+		cmd := exec.Command(os.Getenv("SOURCE_CONTROL_TARGET"), os.Args[1:]...)
+		cmd.Env = os.Environ()
+		out, err := cmd.Output()
+		switch os.Getenv("SOURCE_CONTROL_MUTATION") {
+		case "wrong-exit":
+			os.Stdout.Write(out)
+			os.Exit(42)
+		case "wrong-source":
+			out = []byte(strings.ReplaceAll(string(out), "brain-source", "release"))
+		}
+		os.Stdout.Write(out)
+		if err != nil {
+			os.Exit(1)
+		}
+		return
+	}
+	if name == "symbrowse" || name == "symoperate" || name == "symscope" {
+		if os.Getenv("SOURCE_PROBE_DELAY") != "" {
+			time.Sleep(6 * time.Second)
+		}
+		if os.Getenv("SOURCE_PROBE_EXIT") != "" {
+			os.Exit(7)
+		}
+		out := []byte(`{"version":"0.765.0-local"}`)
+		if value := os.Getenv("SOURCE_PROBE_BYTES"); value != "" {
+			out, _ = base64.StdEncoding.DecodeString(value)
+		}
+		os.Stdout.Write(out)
+		return
+	}
+	log, err := os.OpenFile(os.Getenv("SOURCE_TOOL_LOG"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	cwd, _ := os.Getwd()
+	json.NewEncoder(log).Encode(map[string]interface{}{"tool": name, "args": os.Args[1:], "cwd": cwd, "cgo": os.Getenv("CGO_ENABLED")})
+	log.Close()
+	action := ""
+	if len(os.Args) > 1 {
+		action = os.Args[1]
+	}
+	failure := os.Getenv("SOURCE_TOOL_FAILURE")
+	if name == "git" {
+		if failure == "git" {
+			os.Exit(9)
+		}
+		fmt.Println("7650123456789abcdef0123456789abcdef0123456")
+		return
+	}
+	if action == "version" || action == "--version" {
+		if value := os.Getenv("SOURCE_TOOL_VERSION_BYTES"); value != "" {
+			raw, _ := base64.StdEncoding.DecodeString(value)
+			os.Stdout.Write(raw)
+			return
+		}
+		if failure == name+"-version" {
+			os.Exit(8)
+		}
+		if name == "go" {
+			fmt.Println("go version go1.26.7 fixture/fixture")
+		} else {
+			fmt.Println("Swift fixture 765\nTarget: fixture")
+		}
+		return
+	}
+	if failure == name+"-build" {
+		fmt.Print("fixture build stdout\n")
+		fmt.Fprint(os.Stderr, "fixture build stderr\n")
+		os.Exit(6)
+	}
+	if action == "build" && name == "go" && os.Getenv("SOURCE_DESCENDANT_PID") != "" {
+		executable, _ := os.Executable()
+		child := exec.Command(executable, "__held_descendant")
+		if err := child.Start(); err != nil {
+			panic(err)
+		}
+		if err := os.WriteFile(os.Getenv("SOURCE_DESCENDANT_PID"), []byte(fmt.Sprint(child.Process.Pid)), 0644); err != nil {
+			panic(err)
+		}
+	}
+	var target string
+	if name == "go" {
+		for i, arg := range os.Args {
+			if arg == "-o" {
+				target = os.Args[i+1]
+			}
+		}
+	}
+	if name == "swift" {
+		pkg := ""
+		for i, arg := range os.Args {
+			if arg == "--package-path" {
+				pkg = os.Args[i+1]
+			}
+		}
+		directory := filepath.Join(pkg, ".fixture-built")
+		if action == "build" && os.Args[len(os.Args)-1] == "--show-bin-path" {
+			if failure == "swift-show" {
+				os.Exit(5)
+			}
+			fmt.Println(directory)
+			return
+		}
+		os.MkdirAll(directory, 0755)
+		target = filepath.Join(directory, "sym"+filepath.Base(pkg))
+	}
+	if failure == "missing-payload" {
+		return
+	}
+	if failure == "directory-payload" {
+		os.Mkdir(target, 0755)
+		return
+	}
+	executable, _ := os.Executable()
+	data, err := os.ReadFile(executable)
+	if err != nil {
+		panic(err)
+	}
+	if err = os.WriteFile(target, data, 0755); err != nil {
+		panic(err)
+	}
+}

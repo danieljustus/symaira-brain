@@ -31,6 +31,7 @@ pub fn is_brain_source_install(bin_dir: &Path, binary_name: &str) -> bool {
 pub struct SourceRecord {
     pub source: String,
     pub receiver_commit: String,
+    pub binary_sha256: String,
 }
 
 /// Reads origin information, distinguishing an absent record from corruption.
@@ -78,6 +79,7 @@ fn decode_source_record(bytes: &[u8]) -> Result<SourceRecord, String> {
                     Ok(Some(value)) => match folded.as_str() {
                         "source" => record.source = value,
                         "receiver_commit" => record.receiver_commit = value,
+                        "binary_sha256" => record.binary_sha256 = value,
                         _ => {}
                     },
                     Ok(None) => {}
@@ -93,7 +95,9 @@ fn decode_source_record(bytes: &[u8]) -> Result<SourceRecord, String> {
     first_error.map_or(Ok(record), Err)
 }
 
-pub(super) fn go_io_error(error: &std::io::Error) -> String {
+/// Formats an operating-system error without Rust's extra numeric suffix.
+#[must_use]
+pub fn go_io_error(error: &std::io::Error) -> String {
     let text = error.to_string();
     let text = text.split(" (os error ").next().unwrap_or(&text);
     #[cfg(unix)]
@@ -130,13 +134,33 @@ pub(super) fn record_release_provenance(
         built_at: Utc::now().to_rfc3339_opts(SecondsFormat::AutoSi, true),
         binary_sha256: format!("{:x}", Sha256::digest(binary)),
     };
-    let mut data = serde_json::to_vec_pretty(&provenance)
+    write_record(bin_dir, &core.binary_name, &provenance)
+}
+
+pub(super) fn write_record(
+    bin_dir: &Path,
+    binary_name: &str,
+    provenance: &impl Serialize,
+) -> Result<(), ManagedError> {
+    let mut data = serde_json::to_vec_pretty(provenance)
         .map_err(|error| ManagedError::Context(format!("managed: marshal provenance: {error}")))?;
+    // encoding/json escapes these even when they occur inside toolchain identity strings.
+    let text = String::from_utf8(data).map_err(|error| ManagedError::Context(error.to_string()))?;
+    data = text
+        .replace('&', "\\u0026")
+        .replace('<', "\\u003c")
+        .replace('>', "\\u003e")
+        .replace('\u{2028}', "\\u2028")
+        .replace('\u{2029}', "\\u2029")
+        .into_bytes();
     data.push(b'\n');
 
-    let mut temporary = tempfile::NamedTempFile::new_in(bin_dir).map_err(|error| {
-        ManagedError::Context(format!("managed: create provenance temp: {error}"))
-    })?;
+    let mut temporary = tempfile::Builder::new()
+        .prefix(".provenance-")
+        .tempfile_in(bin_dir)
+        .map_err(|error| {
+            ManagedError::Context(format!("managed: create provenance temp: {error}"))
+        })?;
     temporary
         .write_all(&data)
         .map_err(|error| ManagedError::Context(format!("managed: write provenance: {error}")))?;
@@ -154,9 +178,21 @@ pub(super) fn record_release_provenance(
                 ManagedError::Context(format!("managed: chmod provenance: {error}"))
             })?;
     }
-    let target = bin_dir.join(format!("{}.provenance.json", core.binary_name));
-    temporary.persist(target).map_err(|error| {
-        ManagedError::Context(format!("managed: rename provenance: {}", error.error))
+    let target = bin_dir.join(format!("{binary_name}.provenance.json"));
+    temporary.persist(&target).map_err(|error| {
+        #[cfg(unix)]
+        let detail = if error.error.kind() == std::io::ErrorKind::IsADirectory {
+            "file exists".into()
+        } else {
+            go_io_error(&error.error)
+        };
+        #[cfg(not(unix))]
+        let detail = go_io_error(&error.error);
+        ManagedError::Context(format!(
+            "managed: rename provenance: rename {} {}: {detail}",
+            error.file.path().display(),
+            target.display()
+        ))
     })?;
     Ok(())
 }

@@ -279,37 +279,6 @@ fn fallback_executor_receives_unmigrated_commands_only() {
 }
 
 #[test]
-fn module_lifecycle_flags_are_forwarded_to_the_go_fallback() {
-    let executor = MockFallbackExecutor {
-        calls: std::sync::Mutex::new(Vec::new()),
-    };
-    let mut stdout = Vec::new();
-    let mut stderr = Vec::new();
-    let cases = [
-        vec!["setup", "--from-source", "/receiver"],
-        vec!["setup", "--modules", "browse,operate"],
-    ];
-
-    for case in &cases {
-        let args = case.iter().map(OsString::from).collect::<Vec<_>>();
-        assert_eq!(
-            run_with_executor(&args, &mut stdout, &mut stderr, &executor),
-            42,
-            "{case:?} should use the Go fallback"
-        );
-    }
-
-    let calls = executor.calls.lock().unwrap();
-    assert_eq!(calls.len(), cases.len());
-    for (actual, expected) in calls.iter().zip(cases) {
-        assert_eq!(
-            actual,
-            &expected.into_iter().map(OsString::from).collect::<Vec<_>>()
-        );
-    }
-}
-
-#[test]
 fn unrelated_native_doctor_and_setup_invocations_do_not_fallback() {
     let executor = MockFallbackExecutor {
         calls: std::sync::Mutex::new(Vec::new()),

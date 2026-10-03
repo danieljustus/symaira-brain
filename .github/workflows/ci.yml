@@ -243,6 +243,19 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Compare native source setup with frozen Go and process controls
+        shell: bash
+        run: scripts/setup-source-oracle/run.sh "$RUNNER_TEMP/setup-source-parity.json"
+
+      - name: Upload source setup parity and negative controls
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: setup-source-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/setup-source-parity*.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Credentialed usage requests, report JSON and table parity
         shell: bash
         run: scripts/usage-fetch-oracle/run.sh "$RUNNER_TEMP/usage-fetch-620.json"
@@ -381,6 +394,19 @@ jobs:
         with:
           name: doctor-repair-parity-${{ runner.os }}
           path: ${{ runner.temp }}/doctor-repair-parity*.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Compare native source setup with frozen Go and process controls
+        shell: bash
+        run: scripts/setup-source-oracle/run.sh "$RUNNER_TEMP/setup-source-parity.json"
+
+      - name: Upload source setup parity and negative controls
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: setup-source-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/setup-source-parity*.json
           if-no-files-found: error
           retention-days: 14
 
@@ -533,6 +559,19 @@ jobs:
         with:
           name: doctor-repair-parity-${{ runner.os }}
           path: ${{ runner.temp }}/doctor-repair-parity*.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Compare native source setup with frozen Go and process controls
+        shell: bash
+        run: scripts/setup-source-oracle/run.sh "$RUNNER_TEMP/setup-source-parity.json"
+
+      - name: Upload source setup parity and negative controls
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: setup-source-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/setup-source-parity*.json
           if-no-files-found: error
           retention-days: 14
 

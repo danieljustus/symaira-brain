@@ -36,11 +36,11 @@ symbrain-skills.workspace = true
 symbrain-usage.workspace = true
 ureq.workspace = true
 toml_edit.workspace = true
+tempfile.workspace = true
 
 [dev-dependencies]
 regex.workspace = true
 sha2.workspace = true
-tempfile.workspace = true
 
 [lints.rust]
 unsafe_code = "deny"
@@ -48,3 +48,7 @@ unsafe_code = "deny"
 [lints.clippy]
 all = { level = "deny", priority = -1 }
 pedantic = { level = "deny", priority = -1 }
+
+[target."cfg(windows)".dependencies]
+process-wrap = { version = "=10.0.1", default-features = false, features = ["std", "job-object"] }
+same-file = "=1.0.6"
