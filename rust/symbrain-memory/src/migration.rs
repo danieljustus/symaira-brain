@@ -5,7 +5,7 @@
 
 use crate::schema::{COLUMN_PARITY, INDEXES, MIGRATIONS, SCHEMA};
 use crate::{Store, StoreError};
-use rusqlite::Connection;
+use rusqlite::{Connection, TransactionBehavior};
 use std::time::Duration;
 
 pub(crate) fn configure(mut conn: Connection) -> Result<Store, StoreError> {
@@ -14,7 +14,11 @@ pub(crate) fn configure(mut conn: Connection) -> Result<Store, StoreError> {
     conn.execute_batch(
         "PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA secure_delete=ON;",
     )?;
-    let tx = conn.transaction()?;
+    // Reserve the writer before inspecting schema. A deferred read snapshot
+    // cannot be upgraded after another opener commits (BUSY_SNAPSHOT517), and
+    // busy_timeout does not retry that invalid snapshot. IMMEDIATE makes the
+    // existing bounded timeout wait before any schema inspection instead.
+    let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
     tx.execute_batch(SCHEMA)?;
     apply_column_parity(&tx)?;
     // Build indexes after legacy columns exist, and commit them together with
@@ -112,6 +116,69 @@ mod tests {
                 .len(),
             1
         );
+    }
+
+    #[test]
+    fn concurrent_public_opens_and_writes_preserve_data_without_snapshot_upgrade() {
+        use std::sync::{Arc, Barrier};
+        let mut entropy = [0_u8; 8];
+        getrandom::fill(&mut entropy).unwrap();
+        let directory = std::env::temp_dir().join(format!(
+            "symbrain-schema-concurrency-{:016x}",
+            u64::from_le_bytes(entropy),
+        ));
+        std::fs::create_dir(&directory).unwrap();
+        let path = directory.join("memory.db");
+        let id = {
+            let store = Store::open(&path).unwrap();
+            store
+                .set(
+                    "existing Unicode 世界 < & > remains",
+                    "global",
+                    "user",
+                    serde_json::Map::new(),
+                    false,
+                )
+                .unwrap()
+                .id
+        };
+        // Real public openers use independent SQLite connections. Repeated
+        // barriers force the previously failing concurrent read/write upgrade.
+        for round in 0..10 {
+            let barrier = Arc::new(Barrier::new(8));
+            let jobs = (0..8)
+                .map(|worker| {
+                    let path = path.clone();
+                    let id = id.clone();
+                    let barrier = barrier.clone();
+                    std::thread::spawn(move || {
+                        barrier.wait();
+                        let store = Store::open(&path).unwrap();
+                        assert_eq!(
+                            store.get(&id).unwrap().unwrap().content,
+                            "existing Unicode 世界 < & > remains"
+                        );
+                        store
+                            .set(
+                                &format!("round {round} worker {worker}"),
+                                "global",
+                                "user",
+                                serde_json::Map::new(),
+                                false,
+                            )
+                            .unwrap();
+                    })
+                })
+                .collect::<Vec<_>>();
+            for job in jobs {
+                job.join().unwrap();
+            }
+        }
+        {
+            let store = Store::open(&path).unwrap();
+            assert_eq!(store.list("global", 1000).unwrap().len(), 81);
+        }
+        std::fs::remove_dir_all(directory).unwrap();
     }
 
     #[test]

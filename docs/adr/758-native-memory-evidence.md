@@ -21,7 +21,9 @@ counts. JSONL encoding retains Go's compact fields, HTML escaping, omitted empty
 attributes and sorted attribute keys.
 
 Make schema creation, actual-column repair, indexes and migration bookkeeping
-one SQLite transaction. Journal-mode configuration stays outside because SQLite
+one SQLite `IMMEDIATE` transaction. Reserve the writer before reading schema
+so concurrent openers wait within the existing five-second busy timeout instead
+of attempting to upgrade a stale deferred snapshot. Journal-mode configuration stays outside because SQLite
 forbids changing it inside a transaction. Applied migration names never replace
 inspection of the real `memories` columns. This keeps the idempotent #649 repair
 while preventing a later DDL failure from committing a partly repaired schema
@@ -48,12 +50,19 @@ The supplemental oracle executes immutable Brain revision
 source hash. It supplies 32 alignment cases, 48 validation cases, three complete
 JSONL records and their SHA-256. Four existing production Go DB tests exercise
 strict persistence, cascading deletion and transactional reparenting in isolated
-HOME/XDG roots. The Linux gate passes 41 affected memory tests and 291 CLI/gateway consumer
+HOME/XDG roots. The Linux gate passes 42 affected memory tests and 291 CLI/gateway consumer
 tests, with no failures or ignored cases; formatting and strict Clippy pass.
 Rust verifies those algorithm/byte fixtures plus rollback,
 reparenting, missing-memory rejection, cascading deletion and the five-column
 #649 reproduction. Three real replay controls reject a missing fixture, changed
 alignment status and removed case with nonzero exits and the intended reason.
+
+Independent review reproduced a deferred-transaction concurrency regression:
+eight simultaneous public openers could fail with `SQLITE_BUSY_SNAPSHOT` (517).
+The implementation now reserves the writer before schema inspection, and a
+regression runs ten rounds of eight real public openers/writes while preserving
+the existing Unicode row and checking every committed row. The original review
+observation remains recorded in the evidence directory.
 
 The initial consumer-test invocation picked an unrelated system `go` executable
 and failed while building its fake MCP child. That result is retained separately;
