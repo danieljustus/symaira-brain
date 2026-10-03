@@ -1,0 +1,255 @@
+   Compiling symbrain-core v0.12.1 (/workspace/symaira-guard770-raw-paths/rust/symbrain-core)
+   Compiling symbrain-guard-core v0.12.1 (/workspace/symaira-guard770-raw-paths/rust/symbrain-guard-core)
+   Compiling symbrain-audit v0.12.1 (/workspace/symaira-guard770-raw-paths/rust/symbrain-audit)
+   Compiling symguard-cli v0.12.1 (/workspace/symaira-guard770-raw-paths/rust/symguard-cli)
+    Finished `test` profile [unoptimized] target(s) in 3.03s
+     Running unittests src/lib.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/symbrain_core-5708e2a270f7c8c8)
+
+running 104 tests
+test config::atomic::tests::rename_with_retry_exhausts_ten_attempts ... ok
+test config::atomic::tests::rename_with_retry_handles_windows_sharing_violation ... ok
+test config::atomic::tests::atomic_write_creates_and_replaces_file ... ok
+test config::atomic::tests::rename_with_retry_recovers_after_transient_failures ... ok
+test config::atomic::tests::rename_with_retry_succeeds_immediately ... ok
+test config::format::tests::format_go_datetime_matches_burnt_sushi_berlin_variants ... ok
+test config::get::bytes_tests::config_get_quotes_raw_unix_arguments_like_go ... ok
+test config::format::tests::format_go_datetime_matches_burnt_sushi_utc_variants ... ok
+test config::get::bytes_tests::invalid_utf8_key_cannot_match_replacement_character_key ... ok
+test config::get::tests::get_extra_arguments_rejected ... ok
+test config::get::tests::get_key_from_missing_file_exits_usage_with_not_set_message ... ok
+test config::atomic::tests::atomic_write_handles_relative_path_without_parent ... ok
+test config::get::tests::get_key_malformed_toml_exits_generic_with_parse_error ... ok
+test config::get::tests::get_key_missing_in_file_exits_usage ... ok
+test config::get::tests::get_missing_file_prints_note_to_stdout_and_exits_zero ... ok
+test config::get::tests::get_whole_file_preserves_comments_and_exact_bytes ... ok
+test config::get::tests::get_whole_file_succeeds_even_if_toml_malformed ... ok
+test config::lossless::tests::distinct_encoding_for_pua_and_raw_byte ... ok
+test config::lossless::tests::roundtrip_arbitrary_invalid_bytes ... ok
+test config::lossless::tests::roundtrip_literal_pua_and_sentinels ... ok
+test config::lossless::tests::roundtrip_all_single_bytes ... ok
+test config::lossless::tests::roundtrip_mixing_literal_pua_and_raw_bytes ... ok
+test config::lossless::tests::roundtrip_valid_ascii_and_unicode ... ok
+test config::set::fixtures_tests::datetime_preservation_subseconds_and_tz ... ok
+test config::set::fixtures_tests::deeply_nested_mixed_inline_tables ... ok
+test config::set::fixtures_tests::float_encoding_conventions_in_existing_tables ... ok
+test config::set::fixtures_tests::mutate_and_flatten_existing_inline_tables ... ok
+test config::format::tests::get_key_formats_floats_including_neg_zero_infinities_nan_and_scientific_boundaries ... ok
+test config::set::fixtures_tests::preserve_arrays_datetime_quoted_keys_and_arrays_of_tables ... ok
+test config::set::fixtures_tests::recursively_flatten_nested_inline_tables ... ok
+test config::set::fixtures_tests::unix_raw_non_utf8_dotted_keys ... ok
+test config::set::fixtures_tests::unix_raw_non_utf8_key_and_value_no_collision_with_ufffd ... ok
+test config::set::tests::set_creates_nested_tables_and_matches_burnt_sushi_ordering ... ok
+test config::set::flag_alias_tests::set_accepts_go_single_dash_safeguard_flags ... ok
+test config::get::tests::get_key_formats_primitives_lists_and_tables_identically_to_go ... ok
+test config::set::tests::set_preview_is_non_mutating_and_does_not_reveal_value ... ok
+test config::set::tests::set_rejects_intermediate_scalar_without_writing ... ok
+test config::set::tests::set_requires_exactly_two_arguments_and_nonempty_key ... ok
+test config::set::tests::set_rewrites_comments_and_preserves_existing_values ... ok
+test config::set::tests::set_writes_backup_and_preserves_original_when_backup_fails ... ok
+test exit::tests::exit_code_constants_match_symaira_specification ... ok
+test config::set::tests::set_handles_relative_path_without_parent ... ok
+test go_text::tests::json_escapes_html_javascript_and_controls_without_replacing_valid_text ... ok
+test go_text::tests::malformed_bytes_and_literal_replacement_character_remain_distinct ... ok
+test output::tests::extract_accepts_all_flag_variants ... ok
+test output::tests::extract_accepts_duplicate_identical_flags ... ok
+test output::tests::extract_accepts_flag_after_double_dash ... ok
+test output::tests::extract_accepts_global_flags_anywhere ... ok
+test output::tests::extract_rejects_conflicting_formats ... ok
+test output::tests::extract_defaults_to_table_without_flags ... ok
+test output::tests::missing_output_value_error_normalizes_to_double_dash ... ok
+test output::tests::parse_accepts_json_formats ... ok
+test output::tests::parse_accepts_empty_and_table_formats ... ok
+test config::set::tests::set_infers_go_bool_and_int64_spellings_then_string ... ok
+test output::tests::parse_rejects_unknown_formats ... ok
+test output::tests::render_json_escapes_html_like_go ... ok
+test output::tests::render_json_preserves_values_and_appends_newline ... ok
+test output::tests::render_table_uses_table_function ... ok
+test output::tests::render_helper_formats_json_and_table ... ok
+test output::tests::resolve_defaults_to_table_and_recognizes_json ... ok
+test paths::tests::resolve_location_defaults_to_current_namespace ... ok
+test paths::tests::live_component_paths_resolve_when_home_is_present ... ok
+test paths::tests::resolve_location_honors_absolute_xdg_env ... ok
+test paths::tests::resolve_location_ignores_relative_xdg_env ... ok
+test paths::tests::resolve_location_falls_back_to_legacy_when_only_legacy_exists ... ok
+test paths::tests::resolve_location_memory_data_dir ... ok
+test paths::tests::resolve_location_returns_none_when_no_base_or_home ... ok
+test paths::tests::resolve_location_prefers_current_when_both_exist ... ok
+test paths::tests::resolve_location_skills_cache_dir ... ok
+test paths::tests::resolve_location_skills_cache_legacy_fallback ... ok
+test paths::tests::resolve_location_skills_config_dir ... ok
+test paths::tests::resolve_location_skills_config_legacy_fallback ... ok
+test paths::tests::resolve_location_skills_data_dir ... ok
+test version::tests::current_platform_non_empty ... ok
+test version::tests::platform_mapping_os ... ok
+test version::tests::platform_mapping_arch ... ok
+test version::tests::platform_pair_formatting ... ok
+test version::tests::version_info_json_roundtrip ... ok
+test version::tests::version_info_sets_correct_fields ... ok
+test version::tests::version_info_json_serialization_matches_schema ... ok
+test xdg::tests::audit_dir_sits_under_data_dir ... ok
+test xdg::tests::cache_dir_accepts_relative_xdg_cache_home ... ok
+test version::tests::version_info_with_schema ... ok
+test xdg::tests::cache_dir_honors_env_and_falls_back_to_home ... ok
+test xdg::tests::config_dir_is_parent_of_config_path ... ok
+test xdg::tests::config_path_falls_back_to_home_when_xdg_empty ... ok
+test xdg::tests::config_path_honors_absolute_xdg_config_home ... ok
+test xdg::tests::config_path_falls_back_to_home_when_xdg_unset ... ok
+test xdg::tests::config_path_ignores_relative_xdg_config_home ... ok
+test xdg::tests::config_path_falls_back_to_default_when_both_missing ... ok
+test xdg::tests::data_dir_accepts_relative_xdg_data_home ... ok
+test xdg::tests::data_dir_honors_env_and_falls_back_to_home ... ok
+test xdg::tests::home_dir_empty_returns_none ... ok
+test xdg::tests::home_dir_unix_ignores_userprofile_and_homedrive ... ok
+test xdg::tests::home_dir_windows_falls_back_to_homedrive_and_homepath ... ok
+test xdg::tests::home_dir_unix_uses_home_only ... ok
+test xdg::tests::home_dir_windows_partial_homedrive_or_homepath_returns_none ... ok
+test xdg::tests::home_dir_windows_uses_userprofile_first ... ok
+test xdg::tests::home_dir_windows_ignores_home ... ok
+test xdg::tests::live_config_path_always_resolves ... ok
+test xdg::tests::live_env_resolves_when_home_is_present ... ok
+test xdg::tests::managed_bin_dir_sits_under_home ... ok
+test xdg::tests::patterns_dir_sits_under_data_dir_as_recipes ... ok
+test xdg::tests::profiles_dir_sits_under_config_dir ... ok
+
+test result: ok. 104 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/xdg_paths_tests.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/xdg_paths_tests-a9d04ad15a69fcdd)
+
+running 1 test
+test xdg_paths_match_go_oracle ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/symbrain_guard_core-d81f7be081ef8beb)
+
+running 18 tests
+test go_json::tests::formats_utc_seconds_from_fractional_offset_time ... ok
+test go_json::tests::matches_go_marshal_indent_layout_and_escaping ... ok
+test external_decision::tests::quote_go_char_preserves_frozen_latin1_printability ... ok
+test key_storage::tests::generate_key_has_required_size ... ok
+test go_json::tests::matches_go_html_and_line_separator_escaping ... ok
+test key_storage::tests::default_data_path_prefers_xdg_then_home_then_temp ... ok
+test key_storage::tests::regular_file_parent_fails_closed ... ok
+test sequence::tests::disabled_detector_does_not_record ... ok
+test key_storage::tests::load_or_create_is_stable_and_owner_only ... ok
+test sequence::tests::canonicalizes_object_key_order ... ok
+test key_storage::tests::short_existing_key_fails_closed ... ok
+test sequence::tests::exact_repetition_blocks_at_default_threshold ... ok
+test sequence::tests::ledger_summarizes_successes_failures_and_last_error_sorted ... ok
+test sequence::tests::fuzzy_search_and_find_tools_deduplicate_queries ... ok
+test sequence::tests::non_positive_window_size_uses_default ... ok
+test sequence::tests::only_attempt_states_count_and_denies_are_recoverable ... ok
+test sequence::tests::threshold_and_tool_are_part_of_exact_contract ... ok
+test sequence::tests::window_eviction_forgets_least_recent_signature ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/capability_oracle_tests.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/capability_oracle_tests-affe425b4f9fb2a6)
+
+running 5 tests
+test capability_scope_intersection_matches_pinned_go ... ok
+test capability_signing_matches_pinned_go_bytes ... ok
+test capability_oracle_provenance_and_case_ids_are_complete ... ok
+test capability_verification_matches_pinned_go ... ok
+test capability_wire_matches_pinned_go_bytes ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/external_decision.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/external_decision-ae62ca2a7d4b51b8)
+
+running 6 tests
+test deadline_equality_is_expired_with_injected_time ... ok
+test audit_record_preserves_received_fields_and_injected_timestamp ... ok
+test audit_failure_flips_allow_to_deny_but_keeps_existing_deny ... ok
+test trailing_json_diagnostics_match_go_byte_scanner ... ok
+test pinned_go_fixture_matches_direct_response_bytes ... ok
+test fixture_provenance_mutations_are_rejected_by_the_same_validator ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/external_decision_review.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/external_decision_review-a8f3fd549e02d2f5)
+
+running 2 tests
+test mutated_review_capture_fails_the_actual_validator ... ok
+test reviewed_counterexamples_match_go_response_and_audit ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/external_decision_serialization.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/external_decision_serialization-04ba4760dcf106c8)
+
+running 3 tests
+test audit_serialization_omits_optional_empty_fields_like_go ... ok
+test go_timestamp_is_utc_seconds_precision_for_audit_records ... ok
+test matches_pinned_go_generated_audit_and_response_fixture ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/external_repair.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/external_repair-7eb653c212d9a365)
+
+running 2 tests
+test deadline_nanosecond_boundary_is_not_rounded ... ok
+test replay_f01_f05_production_go_observations ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/oracle_tests.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/oracle_tests-1a26f6e315057fc8)
+
+running 5 tests
+test fail_closed_control_has_no_reason_bytes ... ok
+test policy_match_criteria_is_conjunctive ... ok
+test catalog_json_validation_preserves_unknown_decision_error ... ok
+test static_scope_kernel_rejects_missing_capability ... ok
+test guard_core_matches_go_oracle_bytes ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running unittests src/lib.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/symguard_cli-c118462355b514da)
+
+running 18 tests
+test guard_doctor::tests::allowlist_is_deny_by_default_and_prefix_matched ... ok
+test guard_doctor::tests::multiple_secret_keys_on_one_server_are_sorted ... ok
+test guard_doctor::tests::secret_heuristic_matches_go ... ok
+test guard_doctor::tests::audit_status_reports_all_three_states ... ok
+test guard_scan::tests::empty_format_value_resolves_to_default ... ok
+test guard_doctor::tests::unsupported_missing_equals_offenders_stay_gated ... ok
+test guard_doctor::tests::config_parses_the_healthy_fixture_and_gates_on_invalid_toml ... ok
+test guard_scan::tests::missing_source_error_classification_matches_go_platform_behavior ... ok
+test guard_scan::tests::json_typed_fields_fail_instead_of_being_dropped ... ok
+test guard_scan::tests::jsonc_preserves_urls_and_removes_comments ... ok
+test guard_scan::tests::source_paths_clean_parent_components ... ok
+test guard_version::tests::version_output_failures_are_nonzero_in_both_formats ... ok
+test tests::audit_path_prefers_xdg_then_home_then_temp ... ok
+test guard_scan::tests::opencode_environment_is_merged_and_redacted ... ok
+test tests::top_level_guard_routes_match_go ... ok
+test guard_scan::tests::yaml_environment_is_not_merged ... ok
+test tests::decide_preserves_go_trailing_json_diagnostic ... ok
+test tests::unknown_verb_matches_go_dispatch ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/symguard-8d07e3caf9244d7d)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/raw_diagnostics.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/raw_diagnostics-9d056c743f5bf445)
+
+running 1 test
+test raw_audit_path_denies_allow_and_confirm_without_overwriting_existing_denials ... FAILED
+
+failures:
+
+---- raw_audit_path_denies_allow_and_confirm_without_overwriting_existing_denials stdout ----
+
+thread 'raw_audit_path_denies_allow_and_confirm_without_overwriting_existing_denials' (2113826) panicked at rust/symguard-cli/tests/raw_diagnostics.rs:35:13:
+assertion failed: !reply["reason"].as_str().unwrap().contains("audit: ")
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    raw_audit_path_denies_allow_and_confirm_without_overwriting_existing_denials
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p symguard-cli --test raw_diagnostics`
