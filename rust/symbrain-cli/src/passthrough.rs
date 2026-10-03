@@ -10,14 +10,14 @@ use std::process::{Command, Stdio};
 use symbrain_core::config::format_go_quoted;
 use symbrain_core::exit;
 use symbrain_core::xdg;
-use toml_edit::{DocumentMut, Item, Value};
 
 const VAULT_BINARY: &str = "symvault";
 const VAULT_BINARY_ENV: &str = "SYMBRAIN_SERVERS_VAULT_BINARY_PATH";
 
 #[derive(Debug)]
-enum DiscoveryError {
+pub(super) enum DiscoveryError {
     Missing,
+    Unusable(PathBuf),
     Configured {
         path: PathBuf,
         error: std::io::Error,
@@ -40,7 +40,19 @@ pub fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
             return exit::GENERIC;
         }
         Err(DiscoveryError::Configured { path, error }) => {
-            write_configured_error(stderr, &path, &error);
+            write_configured_error(stderr, "symbrain vault", &path, &error);
+            let _ = writeln!(
+                stderr,
+                "Hint: install {VAULT_BINARY} or run `symbrain setup`."
+            );
+            return exit::GENERIC;
+        }
+        Err(DiscoveryError::Unusable(path)) => {
+            write_unusable(stderr, "symbrain vault", &path);
+            let _ = writeln!(
+                stderr,
+                "Hint: install {VAULT_BINARY} or run `symbrain setup`."
+            );
             return exit::GENERIC;
         }
     };
@@ -49,43 +61,70 @@ pub fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
     execute_child(&binary, child_args, stderr)
 }
 
-fn discover_vault_binary() -> Result<PathBuf, DiscoveryError> {
+pub(super) fn admin_binary(action: &str, stderr: &mut dyn Write) -> Option<PathBuf> {
+    match discover_vault_binary() {
+        Ok(path) => Some(path),
+        Err(DiscoveryError::Missing) => {
+            let _ = writeln!(
+                stderr,
+                "symbrain vault {action}: broker: \"{VAULT_BINARY}\" not found on PATH or in managed directory: exec: \"{VAULT_BINARY}\": {}",
+                path_not_found_message()
+            );
+            None
+        }
+        Err(DiscoveryError::Configured { path, error }) => {
+            write_configured_error(stderr, &format!("symbrain vault {action}"), &path, &error);
+            None
+        }
+        Err(DiscoveryError::Unusable(path)) => {
+            write_unusable(stderr, &format!("symbrain vault {action}"), &path);
+            None
+        }
+    }
+}
+
+pub(super) fn discover_vault_binary() -> Result<PathBuf, DiscoveryError> {
     let config_path = xdg::config_path();
-    let configured = env::var_os(VAULT_BINARY_ENV)
-        .filter(|value| !value.is_empty())
-        .map(PathBuf::from)
-        .or_else(|| configured_binary_path(&config_path));
+    let configured = crate::vault_config::configured_override(&config_path, VAULT_BINARY_ENV);
 
     if let Some(path) = configured {
-        return fs::metadata(&path)
-            .map(|_| path.clone())
-            .map_err(|error| DiscoveryError::Configured { path, error });
+        return match fs::metadata(&path) {
+            Err(error) => Err(DiscoveryError::Configured { path, error }),
+            Ok(_) if !is_executable_file(&path) => Err(DiscoveryError::Unusable(path)),
+            Ok(_) => Ok(path),
+        };
     }
 
     if let Some(home) = xdg::home_dir() {
-        let managed = home.join(".symaira").join("bin").join(VAULT_BINARY);
+        let directory = home.join(".symaira").join("bin");
+        let managed = directory.join(VAULT_BINARY);
         if is_executable_file(&managed) {
             return Ok(managed);
+        }
+        if cfg!(windows)
+            && let Some(path) = path_lookup_in(OsStr::new(VAULT_BINARY), [directory])
+        {
+            return Ok(path);
         }
     }
 
     path_lookup(OsStr::new(VAULT_BINARY)).ok_or(DiscoveryError::Missing)
 }
 
-fn configured_binary_path(path: &Path) -> Option<PathBuf> {
-    let contents = fs::read_to_string(path).ok()?;
-    let document: DocumentMut = contents.parse().ok()?;
-    let servers = document.get("servers")?.as_table_like()?;
-    let vault = servers.get("vault")?.as_table_like()?;
-    match vault.get("binary_path")? {
-        Item::Value(Value::String(value)) if !value.value().is_empty() => {
-            Some(PathBuf::from(value.value().as_str()))
-        }
-        _ => None,
-    }
+fn write_unusable(stderr: &mut dyn Write, context: &str, path: &Path) {
+    let _ = writeln!(
+        stderr,
+        "{context}: broker: configured binary_path {} for \"{VAULT_BINARY}\" is not an executable regular file",
+        format_go_quoted(path.as_os_str())
+    );
 }
 
-fn write_configured_error(stderr: &mut dyn Write, path: &Path, error: &std::io::Error) {
+fn write_configured_error(
+    stderr: &mut dyn Write,
+    context: &str,
+    path: &Path,
+    error: &std::io::Error,
+) {
     #[cfg(windows)]
     let operation = if error.kind() == std::io::ErrorKind::NotFound {
         "GetFileAttributesEx"
@@ -96,7 +135,7 @@ fn write_configured_error(stderr: &mut dyn Write, path: &Path, error: &std::io::
     let operation = "stat";
     let _ = write!(
         stderr,
-        "symbrain vault: broker: configured binary_path {} for \"{VAULT_BINARY}\": {operation} ",
+        "{context}: broker: configured binary_path {} for \"{VAULT_BINARY}\": {operation} ",
         format_go_quoted(path.as_os_str()),
     );
     #[cfg(unix)]
@@ -108,11 +147,7 @@ fn write_configured_error(stderr: &mut dyn Write, path: &Path, error: &std::io::
     {
         let _ = write!(stderr, "{}", path.display());
     }
-    let _ = writeln!(
-        stderr,
-        ": {}\nHint: install {VAULT_BINARY} or run `symbrain setup`.",
-        go_error(error)
-    );
+    let _ = writeln!(stderr, ": {}", go_error(error));
 }
 
 fn is_executable_file(path: &Path) -> bool {
@@ -276,128 +311,5 @@ fn go_error(error: &std::io::Error) -> String {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[cfg(unix)]
-    fn executable(path: &Path, body: &str) {
-        use std::os::unix::fs::PermissionsExt;
-
-        fs::write(path, body).expect("write executable");
-        let mut permissions = fs::metadata(path).expect("stat executable").permissions();
-        permissions.set_mode(0o755);
-        fs::set_permissions(path, permissions).expect("chmod executable");
-    }
-
-    #[cfg(not(unix))]
-    fn executable(path: &Path, body: &str) {
-        fs::write(path, body).expect("write executable");
-    }
-
-    #[test]
-    fn config_binary_path_is_read_from_nested_table() {
-        let root = tempfile::tempdir().expect("tempdir");
-        let config = root.path().join("config.toml");
-        fs::write(
-            &config,
-            "[servers.vault]\nbinary_path = \"/custom/symvault\"\n",
-        )
-        .expect("write config");
-        assert_eq!(
-            configured_binary_path(&config),
-            Some(PathBuf::from("/custom/symvault"))
-        );
-    }
-
-    #[test]
-    fn empty_config_binary_path_is_not_an_override() {
-        let root = tempfile::tempdir().expect("tempdir");
-        let config = root.path().join("config.toml");
-        fs::write(&config, "[servers.vault]\nbinary_path = \"\"\n").expect("write config");
-        assert_eq!(configured_binary_path(&config), None);
-    }
-
-    #[cfg(unix)]
-    #[test]
-    fn configured_path_diagnostic_preserves_non_utf8_bytes() {
-        use std::os::unix::ffi::OsStringExt;
-
-        let path = PathBuf::from(OsString::from_vec(b"/tmp/missing_\xff".to_vec()));
-        let mut stderr = Vec::new();
-        write_configured_error(
-            &mut stderr,
-            &path,
-            &std::io::Error::from(std::io::ErrorKind::NotFound),
-        );
-        assert!(
-            stderr
-                .windows(b"\"/tmp/missing_\\xff\"".len())
-                .any(|bytes| { bytes == b"\"/tmp/missing_\\xff\"" })
-        );
-        assert!(
-            stderr
-                .windows(b"stat /tmp/missing_\xff:".len())
-                .any(|bytes| { bytes == b"stat /tmp/missing_\xff:" })
-        );
-    }
-
-    #[test]
-    fn managed_binary_requires_regular_executable_file() {
-        let root = tempfile::tempdir().expect("tempdir");
-        let binary = root.path().join(VAULT_BINARY);
-        executable(&binary, "");
-        assert!(is_executable_file(&binary));
-
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::PermissionsExt;
-            let mut permissions = fs::metadata(&binary).expect("stat binary").permissions();
-            permissions.set_mode(0o644);
-            fs::set_permissions(&binary, permissions).expect("remove executable bit");
-            assert!(!is_executable_file(&binary));
-        }
-    }
-
-    #[test]
-    fn path_lookup_finds_binary_in_ordered_path_entry() {
-        let root = tempfile::tempdir().expect("tempdir");
-        let first = root.path().join("first");
-        let second = root.path().join("second");
-        fs::create_dir_all(&first).expect("first dir");
-        fs::create_dir_all(&second).expect("second dir");
-        #[cfg(windows)]
-        let expected_binary = second.join(format!("{VAULT_BINARY}.exe"));
-        #[cfg(not(windows))]
-        let expected_binary = second.join(VAULT_BINARY);
-        executable(&expected_binary, "");
-
-        let found = path_lookup_in(OsStr::new(VAULT_BINARY), vec![first, second.clone()]);
-        assert_eq!(found, Some(expected_binary.clone()));
-        assert!(is_executable_file(&expected_binary));
-    }
-
-    #[test]
-    fn windows_path_extensions_match_go_defaults() {
-        assert_eq!(
-            windows_executable_names("symvault", Some("")),
-            [
-                "symvault.com",
-                "symvault.exe",
-                "symvault.bat",
-                "symvault.cmd"
-            ]
-            .map(OsString::from)
-        );
-        assert_eq!(
-            windows_executable_names("symvault.EXE", Some(".COM;.EXE")),
-            vec![OsString::from("symvault.EXE")]
-        );
-        assert_eq!(
-            windows_executable_names("symvault", Some("COM;Exe")),
-            vec![
-                OsString::from("symvault.com"),
-                OsString::from("symvault.exe")
-            ]
-        );
-    }
-}
+#[path = "passthrough_tests.rs"]
+mod tests;
