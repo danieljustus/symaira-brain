@@ -289,8 +289,6 @@ fn module_lifecycle_flags_are_forwarded_to_the_go_fallback() {
         vec!["doctor", "--fix"],
         vec!["doctor", "--fix=TRUE"],
         vec!["doctor", "--force-release", "--fix=TRUE"],
-        vec!["setup", "--fix"],
-        vec!["setup", "--force-release"],
         vec!["setup", "--from-source", "/receiver"],
         vec!["setup", "--modules", "browse,operate"],
     ];
@@ -329,6 +327,7 @@ fn unrelated_native_doctor_and_setup_invocations_do_not_fallback() {
         vec!["doctor", "--vault-agent", "--force-release", "--help"],
         vec!["doctor", "--unknown", "--force-release"],
         vec!["setup", "--fix=false", "--help"],
+        vec!["setup", "--fix=TRUE", "--force-release", "--help"],
         vec!["setup", "--help", "--", "--from-source", "/receiver"],
         vec!["setup", "--help", "--from-source", "/receiver"],
     ];

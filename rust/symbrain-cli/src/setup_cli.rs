@@ -8,19 +8,17 @@ use symbrain_managed::{
     InstallOutcome, Installer, Manifest, Platform, installed_version, versions_match,
 };
 
-const USAGE: &str = "Usage of setup:\n  -allow-unsigned\n    \tinstall even if cosign or a core's signature is unavailable (prints a warning; skips publisher verification for that core)\n  -fix\n    \trepair missing or version-mismatched binaries (alias for doctor --fix)\n  -force-release\n    \twith --fix: allow replacing a brain-source build with the pinned release download\n  -from-source string\n    \tbuild optional module binaries from the in-repo sources at this repository root and install them into the managed directory (instead of downloading releases)\n  -json\n    \temit machine-readable JSON\n  -modules string\n    \twith --from-source: comma-separated module selection (browse,operate,scope); default: modules enabled in config\n";
-
-#[derive(Debug, Default)]
-struct SetupArgs {
-    json: bool,
-    fix: bool,
-    allow_unsigned: bool,
-}
+#[path = "setup_config.rs"]
+mod config;
+use config::enabled_cores;
+pub(crate) use config::parse_go_bool;
+#[path = "setup_args.rs"]
+mod flags;
+use flags::{SetupArgs, parse_args};
 
 /// Whether this invocation requires the Go implementation's module lifecycle semantics.
 ///
-/// Source builds and their provenance are deliberately still implemented by
-/// Go. Repair falls back unless every active binary is already correct.
+/// Source builds remain Go-owned; release repair and source protection are native.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     if crate::has_go_owned_flag(
         args,
@@ -35,52 +33,16 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
             "help",
         ],
         &[],
-        &["force-release", "from-source", "modules"],
+        &["from-source", "modules"],
         &[],
     ) {
         return true;
     }
 
-    crate::has_go_owned_flag(
-        args,
-        &[
-            "json",
-            "fix",
-            "allow-unsigned",
-            "force-release",
-            "from-source",
-            "modules",
-            "h",
-            "help",
-        ],
-        &[],
-        &[],
-        &["fix"],
-    ) && !native_fix_ready()
-}
-
-/// The native repair path is intentionally limited to the no-op repair case.
-/// Any probe/config/platform mismatch keeps the Go implementation as the oracle
-/// for its download, error, and unsupported-platform behavior.
-fn native_fix_ready() -> bool {
-    let Some(bin_dir) = xdg::managed_bin_dir() else {
-        return false;
-    };
-    let Ok(manifest) = Manifest::load_embedded() else {
-        return false;
-    };
-    let Ok(enabled) = enabled_cores() else {
-        return false;
-    };
-    let Ok(platform) = Platform::current() else {
-        return false;
-    };
-
-    manifest.active_cores(&enabled).values().all(|core| {
-        core.supports_platform(platform.os)
-            && installed_version(&bin_dir, &core.binary_name)
-                .is_ok_and(|existing| versions_match(&existing, &core.version))
-    })
+    // Config-load diagnostics remain Go-owned until the full typed loader is
+    // ported. Never repair after accepting a config that Go would reject.
+    parse_args(args, &mut Vec::new()).is_ok_and(|parsed| parsed.fix)
+        && (!crate::vault_config::valid_configuration() || enabled_cores().is_err())
 }
 
 #[derive(Serialize)]
@@ -98,6 +60,17 @@ struct CoreResult {
     status: &'static str,
     #[serde(skip_serializing_if = "Option::is_none")]
     error: Option<String>,
+}
+
+impl CoreResult {
+    fn skipped(name: String, version: &str) -> Self {
+        Self {
+            name,
+            version: version.to_owned(),
+            status: "skipped",
+            error: None,
+        }
+    }
 }
 
 pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {
@@ -134,15 +107,7 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
         }
     };
     if parsed.fix {
-        run_fix(
-            &manifest,
-            &bin_dir,
-            parsed.json,
-            parsed.allow_unsigned,
-            &enabled,
-            stdout,
-            stderr,
-        )
+        run_fix(&manifest, &bin_dir, &parsed, &enabled, stdout, stderr)
     } else {
         run_install(
             &manifest,
@@ -187,12 +152,9 @@ fn run_install(
 
     for (name, core) in manifest.active_cores(enabled) {
         if !core.supports_platform(platform.os) {
-            report.results.push(CoreResult {
-                name: name.clone(),
-                version: core.version.clone(),
-                status: "skipped",
-                error: None,
-            });
+            report
+                .results
+                .push(CoreResult::skipped(name.clone(), &core.version));
             if !json {
                 let _ = writeln!(
                     stdout,
@@ -231,33 +193,22 @@ fn run_install(
         }
     }
 
-    if json {
-        if serde_json::to_writer(&mut *stdout, &report)
-            .and_then(|()| writeln!(stdout).map_err(serde_json::Error::io))
-            .is_err()
-        {
-            let _ = writeln!(stderr, "symbrain setup: encode JSON");
-            return exit::GENERIC;
-        }
-    } else {
+    if !json {
         let _ = writeln!(stdout, "\nInstalled to {}", bin_dir.display());
     }
-    if report.errors.is_empty() {
-        exit::OK
-    } else {
-        exit::GENERIC
-    }
+    finish(&report, json, "symbrain setup", stdout, stderr)
 }
 
 fn run_fix(
     manifest: &Manifest,
     bin_dir: &std::path::Path,
-    json: bool,
-    allow_unsigned: bool,
+    parsed: &SetupArgs,
     enabled: &BTreeMap<String, bool>,
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
 ) -> u8 {
+    let (json, allow_unsigned, force_release) =
+        (parsed.json, parsed.allow_unsigned, parsed.force_release);
     let platform = match Platform::current() {
         Ok(platform) => platform,
         Err(error) => {
@@ -283,12 +234,9 @@ fn run_fix(
     for (name, core) in manifest.active_cores(enabled) {
         if !core.supports_platform(platform.os) {
             skipped += 1;
-            report.results.push(CoreResult {
-                name: name.clone(),
-                version: core.version.clone(),
-                status: "skipped",
-                error: None,
-            });
+            report
+                .results
+                .push(CoreResult::skipped(name.clone(), &core.version));
             if !json {
                 let _ = writeln!(
                     stdout,
@@ -302,14 +250,25 @@ fn run_fix(
         let existing = installed_version(bin_dir, &core.binary_name).unwrap_or_default();
         if versions_match(&existing, &core.version) {
             skipped += 1;
-            report.results.push(CoreResult {
-                name: name.clone(),
-                version: core.version.clone(),
-                status: "skipped",
-                error: None,
-            });
+            report
+                .results
+                .push(CoreResult::skipped(name.clone(), &core.version));
             if !json {
                 let _ = writeln!(stdout, "  ✓  {name} {existing} (already installed)");
+            }
+            continue;
+        }
+
+        if !force_release && symbrain_managed::is_brain_source_install(bin_dir, &core.binary_name) {
+            skipped += 1;
+            report
+                .results
+                .push(CoreResult::skipped(name.clone(), &core.version));
+            if !json {
+                let _ = writeln!(
+                    stdout,
+                    "  -  {name} {existing} (brain-source build; use --force-release to replace)"
+                );
             }
             continue;
         }
@@ -344,229 +303,30 @@ fn run_fix(
         }
     }
 
-    if json {
-        if serde_json::to_writer(&mut *stdout, &report)
+    if !json {
+        let _ = writeln!(stdout, "\n{fixed} fixed, {skipped} already correct");
+    }
+    finish(&report, json, "symbrain setup --fix", stdout, stderr)
+}
+
+fn finish(
+    report: &SetupReport,
+    json: bool,
+    prefix: &str,
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write,
+) -> u8 {
+    if json
+        && serde_json::to_writer(&mut *stdout, report)
             .and_then(|()| writeln!(stdout).map_err(serde_json::Error::io))
             .is_err()
-        {
-            let _ = writeln!(stderr, "symbrain setup --fix: encode JSON");
-            return exit::GENERIC;
-        }
-    } else {
-        let _ = writeln!(stdout, "\n{fixed} fixed, {skipped} already correct");
+    {
+        let _ = writeln!(stderr, "{prefix}: encode JSON");
+        return exit::GENERIC;
     }
     if report.errors.is_empty() {
         exit::OK
     } else {
         exit::GENERIC
-    }
-}
-
-fn enabled_cores() -> Result<BTreeMap<String, bool>, String> {
-    let mut enabled = BTreeMap::new();
-    let global = symbrain_core::xdg::config_path();
-    merge_enabled_cores_file(&mut enabled, &global)?;
-
-    // configkit's TOML merge applies only non-zero scalar values. Therefore an
-    // explicit project `browse = false` cannot clear a prior global `true`;
-    // retain that observed Go behavior here until the coordinated Go fix.
-    let project = std::env::current_dir()
-        .map_err(|error| format!("config: current directory: {error}"))?
-        .join(".symbrain.toml");
-    merge_enabled_cores_file(&mut enabled, &project)?;
-
-    // Environment values are presence-based overrides. As in configkit, an
-    // empty value is ignored, while Go's strconv.ParseBool accepts all of the
-    // listed spellings below (not just true/false).
-    if let Some(value) = std::env::var_os("SYMBRAIN_MODULES_BROWSE") {
-        let value = value.to_string_lossy();
-        if !value.is_empty() {
-            enabled.insert(
-                "symbrowse".to_string(),
-                parse_go_bool(&value).map_err(|()| {
-                    format!("config: invalid boolean SYMBRAIN_MODULES_BROWSE={value:?}")
-                })?,
-            );
-        }
-    }
-    Ok(enabled)
-}
-
-fn merge_enabled_cores_file(
-    enabled: &mut BTreeMap<String, bool>,
-    path: &std::path::Path,
-) -> Result<(), String> {
-    let bytes = match std::fs::read(path) {
-        Ok(bytes) => bytes,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(()),
-        Err(error) => return Err(format!("config: read {}: {error}", path.display())),
-    };
-    let values = parse_enabled_cores(&bytes, path)?;
-    // Match configkit's non-zero TOML merge: false is never assigned.
-    for (name, value) in values {
-        if value {
-            enabled.insert(name, true);
-        }
-    }
-    Ok(())
-}
-
-fn parse_enabled_cores(
-    bytes: &[u8],
-    path: &std::path::Path,
-) -> Result<BTreeMap<String, bool>, String> {
-    let text = std::str::from_utf8(bytes)
-        .map_err(|error| format!("config: parse {}: {error}", path.display()))?;
-    let document: toml_edit::DocumentMut = text
-        .parse()
-        .map_err(|error| format!("config: parse {}: {error}", path.display()))?;
-    let mut enabled = BTreeMap::new();
-    if let Some(value) = document.get("modules").and_then(|item| item.get("browse")) {
-        let browse = value.as_bool().ok_or_else(|| {
-            format!(
-                "config: modules.browse must be boolean in {}",
-                path.display()
-            )
-        })?;
-        enabled.insert("symbrowse".to_string(), browse);
-    }
-    Ok(enabled)
-}
-
-pub(crate) fn parse_go_bool(value: &str) -> Result<bool, ()> {
-    match value {
-        "1" | "t" | "T" | "TRUE" | "True" | "true" => Ok(true),
-        "0" | "f" | "F" | "FALSE" | "False" | "false" => Ok(false),
-        _ => Err(()),
-    }
-}
-
-fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<SetupArgs, u8> {
-    let normalized = crate::normalize_flags(args);
-    let mut parsed = SetupArgs::default();
-    for argument in normalized {
-        let argument = argument.to_string_lossy();
-        if argument == "--" || argument == "-" || !argument.starts_with('-') {
-            break;
-        }
-        let flag = argument.trim_start_matches('-');
-        if flag == "h" || flag == "help" {
-            let _ = write!(stderr, "{USAGE}");
-            return Err(exit::USAGE);
-        }
-        let (name, value) = flag
-            .split_once('=')
-            .map_or((flag, None), |(name, value)| (name, Some(value)));
-        let target = match name {
-            "json" => &mut parsed.json,
-            "fix" => &mut parsed.fix,
-            "allow-unsigned" => &mut parsed.allow_unsigned,
-            _ => {
-                let _ = writeln!(stderr, "flag provided but not defined: -{name}");
-                let _ = write!(stderr, "{USAGE}");
-                return Err(exit::USAGE);
-            }
-        };
-        match value {
-            None | Some("true") => *target = true,
-            Some("false") => *target = false,
-            Some(value) => {
-                let _ = writeln!(
-                    stderr,
-                    "invalid value {value:?} for flag -{name}: parse error"
-                );
-                let _ = write!(stderr, "{USAGE}");
-                return Err(exit::USAGE);
-            }
-        }
-    }
-    Ok(parsed)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn parse_flags_and_stop_at_first_positional_match_go_flagset() {
-        let mut stderr = Vec::new();
-        let parsed = parse_args(
-            &[
-                "--fix".into(),
-                "--allow-unsigned=false".into(),
-                "positional".into(),
-                "--json".into(),
-            ],
-            &mut stderr,
-        )
-        .unwrap();
-        assert!(parsed.fix);
-        assert!(!parsed.allow_unsigned);
-        assert!(!parsed.json);
-        assert!(stderr.is_empty());
-    }
-
-    #[test]
-    fn optional_browse_selection_matches_go_default_and_explicit_values() {
-        let path = std::path::Path::new("config.toml");
-        let empty = parse_enabled_cores(b"", path).unwrap();
-        assert!(!empty.get("symbrowse").copied().unwrap_or(false));
-        assert!(
-            parse_enabled_cores(b"[modules]\nbrowse = false\n", path)
-                .unwrap()
-                .get("symbrowse")
-                .is_some_and(|value| !value)
-        );
-        assert!(
-            parse_enabled_cores(b"[modules]\nbrowse = true\n", path)
-                .unwrap()
-                .get("symbrowse")
-                .is_some_and(|value| *value)
-        );
-        assert!(parse_enabled_cores(b"[modules]\nbrowse = 1\n", path).is_err());
-    }
-
-    #[test]
-    fn go_parse_bool_spellings_and_empty_env_contract() {
-        for value in ["1", "t", "T", "TRUE", "True", "true"] {
-            assert_eq!(parse_go_bool(value), Ok(true), "{value}");
-        }
-        for value in ["0", "f", "F", "FALSE", "False", "false"] {
-            assert_eq!(parse_go_bool(value), Ok(false), "{value}");
-        }
-        for value in ["", "yes", "on", "2"] {
-            assert_eq!(parse_go_bool(value), Err(()), "{value}");
-        }
-    }
-
-    #[test]
-    fn toml_false_does_not_clear_prior_true_like_configkit() {
-        let root = tempfile::tempdir().unwrap();
-        let global = root.path().join("global.toml");
-        let project = root.path().join("project.toml");
-        std::fs::write(&global, b"[modules]\nbrowse = true\n").unwrap();
-        std::fs::write(&project, b"[modules]\nbrowse = false\n").unwrap();
-        let mut enabled = BTreeMap::new();
-        merge_enabled_cores_file(&mut enabled, &global).unwrap();
-        merge_enabled_cores_file(&mut enabled, &project).unwrap();
-        assert_eq!(enabled.get("symbrowse"), Some(&true));
-    }
-
-    #[test]
-    fn unknown_flag_has_go_usage_shape() {
-        let mut stderr = Vec::new();
-        let result = parse_args(&["--unknown".into()], &mut stderr);
-        assert_eq!(result.unwrap_err(), exit::USAGE);
-        let text = String::from_utf8(stderr).unwrap();
-        assert!(text.starts_with("flag provided but not defined: -unknown\nUsage of setup:\n"));
-    }
-
-    #[test]
-    fn help_lists_the_go_owned_module_lifecycle_flags() {
-        let mut stderr = Vec::new();
-        let result = parse_args(&["--help".into()], &mut stderr);
-
-        assert_eq!(result.unwrap_err(), exit::USAGE);
-        assert_eq!(stderr, USAGE.as_bytes());
     }
 }

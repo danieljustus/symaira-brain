@@ -3,6 +3,19 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use toml_edit::{DocumentMut, Item};
 
+pub(crate) fn valid_configuration() -> bool {
+    let Some(global) = read_document(&symbrain_core::xdg::config_path()) else {
+        return false;
+    };
+    let Ok(directory) = std::env::current_dir() else {
+        return false;
+    };
+    let Some(project) = read_document(&directory.join(".symbrain.toml")) else {
+        return false;
+    };
+    valid_file_types(&global) && valid_file_types(&project) && valid_environment_types()
+}
+
 pub(super) fn configured_override(path: &Path, variable: &str) -> Option<PathBuf> {
     let global = read_document(path)?;
     let project = match std::env::current_dir() {

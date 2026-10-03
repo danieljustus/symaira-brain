@@ -1,98 +1,15 @@
 use std::collections::BTreeMap;
-use std::io::{BufRead, BufReader, Write};
-use std::net::TcpListener;
+use std::io::Write;
 use std::path::Path;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex};
-
-use std::thread;
-use std::time::Duration;
 
 use flate2::Compression;
 use flate2::write::GzEncoder;
 use sha2::{Digest, Sha256};
 use symbrain_managed::{Core, Installer, Platform, installed_version, versions_match};
 
-struct TestServer {
-    url: String,
-    requests: Arc<Mutex<Vec<String>>>,
-    stop: Arc<AtomicBool>,
-    thread: Option<thread::JoinHandle<()>>,
-}
-
-impl TestServer {
-    fn start(routes: BTreeMap<String, Vec<u8>>) -> Self {
-        let listener = TcpListener::bind("127.0.0.1:0").unwrap();
-        listener.set_nonblocking(true).unwrap();
-        let url = format!("http://{}", listener.local_addr().unwrap());
-        let stop = Arc::new(AtomicBool::new(false));
-        let stop_thread = Arc::clone(&stop);
-        let requests = Arc::new(Mutex::new(Vec::new()));
-        let requests_thread = Arc::clone(&requests);
-        let thread = thread::spawn(move || {
-            while !stop_thread.load(Ordering::Relaxed) {
-                match listener.accept() {
-                    Ok((mut stream, _)) => {
-                        stream.set_nonblocking(false).unwrap();
-                        let mut request_line = String::new();
-                        let mut reader = BufReader::new(&mut stream);
-                        let _ = reader.read_line(&mut request_line);
-                        loop {
-                            let mut header = String::new();
-                            if reader.read_line(&mut header).unwrap_or(0) == 0
-                                || header == "\r\n"
-                                || header == "\n"
-                            {
-                                break;
-                            }
-                        }
-                        drop(reader);
-                        let path = request_line
-                            .lines()
-                            .next()
-                            .and_then(|line| line.split_whitespace().nth(1))
-                            .unwrap_or("/");
-                        requests_thread.lock().unwrap().push(path.to_string());
-                        if let Some(body) = routes.get(path) {
-                            write!(
-                                stream,
-                                "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
-                                body.len()
-                            )
-                            .unwrap();
-                            stream.write_all(body).unwrap();
-                        } else {
-                            stream
-                                .write_all(
-                                    b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n",
-                                )
-                                .unwrap();
-                        }
-                    }
-                    Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
-                        thread::sleep(Duration::from_millis(2));
-                    }
-                    Err(_) => break,
-                }
-            }
-        });
-        Self {
-            url,
-            requests,
-            stop,
-            thread: Some(thread),
-        }
-    }
-}
-
-impl Drop for TestServer {
-    fn drop(&mut self) {
-        self.stop.store(true, Ordering::Relaxed);
-        if let Some(thread) = self.thread.take() {
-            thread.join().unwrap();
-        }
-    }
-}
+#[path = "support/server.rs"]
+mod server;
+use server::TestServer;
 
 fn archive(platform: Platform, binary_name: &str, bytes: &[u8]) -> Vec<u8> {
     if platform.os == "windows" {
@@ -219,6 +136,35 @@ fn installer_downloads_fallback_asset_verifies_and_installs() {
 }
 
 #[test]
+fn installer_retries_alternate_after_http10_closes_missing_asset_response() {
+    let core = fixture_core();
+    let platform = Platform::current().unwrap();
+    let binary = fixture_binary(platform, b"native HTTP/1.0 fallback");
+    let archive = archive(platform, &core.binary_name, binary);
+    let server = TestServer::start_http10(fixture_routes(&core, platform, &archive));
+    let temp = tempfile::tempdir().unwrap();
+    let installer = Installer::with_base_url(temp.path(), false, &server.url).unwrap();
+    for _ in 0..3 {
+        let mut warnings = Vec::new();
+        installer.install(&core, platform, &mut warnings).unwrap();
+        assert!(warnings.is_empty());
+        assert_eq!(std::fs::read(temp.path().join("tool")).unwrap(), binary);
+    }
+    let prefix = format!("/{}/releases/download/{}/", core.repo, core.tag());
+    let primary = format!("{prefix}{}", core.asset_name(platform.os, platform.arch));
+    let alternate = format!(
+        "{prefix}{}",
+        core.asset_name_alt(platform.os, platform.arch)
+    );
+    let requests = server.requests.lock().unwrap();
+    assert_eq!(requests.iter().filter(|path| **path == primary).count(), 3);
+    assert_eq!(
+        requests.iter().filter(|path| **path == alternate).count(),
+        3
+    );
+}
+
+#[test]
 fn installer_prefers_versioned_asset_with_manifest_pin() {
     let mut core = fixture_core();
     let platform = Platform::current().unwrap();
@@ -340,7 +286,8 @@ fn installed_version_probes_native_windows_executable() {
 
     let bin_dir = tempfile::tempdir().unwrap();
     let installed = bin_dir.path().join("tool");
-    std::fs::copy(binary, installed).expect("install native probe fixture");
+    std::fs::copy(&binary, installed).expect("install original native probe fixture");
+    std::fs::copy(binary, bin_dir.path().join("tool.exe")).expect("install executable candidate");
     let version = installed_version(bin_dir.path(), "tool").unwrap();
     assert_eq!(version, "1.2.3");
     assert!(versions_match(&version, "v1.2.3"));
@@ -363,7 +310,9 @@ fn installed_version_timeout_kills_native_windows_executable() {
     );
     let bin_dir = tempfile::tempdir().unwrap();
     let installed = bin_dir.path().join("tool");
-    std::fs::copy(binary, installed).expect("install slow native probe fixture");
+    std::fs::copy(&binary, installed).expect("install original slow probe fixture");
+    std::fs::copy(binary, bin_dir.path().join("tool.exe"))
+        .expect("install slow executable candidate");
 
     let started = std::time::Instant::now();
     let error = installed_version(bin_dir.path(), "tool").unwrap_err();
