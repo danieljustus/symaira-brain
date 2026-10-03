@@ -218,7 +218,9 @@ jobs:
           python3 scripts/mcp-differential.py "$RUNNER_TEMP/symbrain-go-mcp" target/debug/symbrain
 
       - name: Go/Rust vault administration process parity
-        run: python3 scripts/vault-admin-oracle/replay.py --go-ref dcddcef0df5789123c7c9a7ebe6e01f10e941f2c --rust target/debug/symbrain --out "$RUNNER_TEMP/vault-admin-parity.json"
+        run: |
+          python3 -m unittest discover -s scripts/vault-admin-oracle -p test_replay.py -v
+          python3 scripts/vault-admin-oracle/replay.py --go-ref dcddcef0df5789123c7c9a7ebe6e01f10e941f2c --rust target/debug/symbrain --out "$RUNNER_TEMP/vault-admin-parity.json"
 
       - name: Preserve vault process parity evidence
         if: always()
@@ -318,7 +320,9 @@ jobs:
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
 
       - name: Go/Rust vault administration process parity
-        run: python3 scripts/vault-admin-oracle/replay.py --go-ref dcddcef0df5789123c7c9a7ebe6e01f10e941f2c --rust target/debug/symbrain --out "$RUNNER_TEMP/vault-admin-parity.json"
+        run: |
+          python3 -m unittest discover -s scripts/vault-admin-oracle -p test_replay.py -v
+          python3 scripts/vault-admin-oracle/replay.py --go-ref dcddcef0df5789123c7c9a7ebe6e01f10e941f2c --rust target/debug/symbrain --out "$RUNNER_TEMP/vault-admin-parity.json"
 
       - name: Preserve vault process parity evidence
         if: always()
@@ -430,7 +434,9 @@ jobs:
 
       - name: Go/Rust vault administration process parity
         shell: bash
-        run: python3 scripts/vault-admin-oracle/replay.py --go-ref dcddcef0df5789123c7c9a7ebe6e01f10e941f2c --rust target/debug/symbrain.exe --out "$RUNNER_TEMP/vault-admin-parity.json"
+        run: |
+          python3 -m unittest discover -s scripts/vault-admin-oracle -p test_replay.py -v
+          python3 scripts/vault-admin-oracle/replay.py --go-ref dcddcef0df5789123c7c9a7ebe6e01f10e941f2c --rust target/debug/symbrain.exe --out "$RUNNER_TEMP/vault-admin-parity.json"
 
       - name: Preserve vault process parity evidence
         if: always()

@@ -1,6 +1,6 @@
 {
   "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
-  "platform": "posix",
+  "platform": "nt",
   "total": 179,
   "source_sha256": {
     "cmd/symbrain/main.go": "46a3245236f0104f34c7e0d0787fcb35c27a0eba6c6bba8d5a5098e1664c6e5b",
@@ -1312,16 +1312,16 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: configured binary_path \"<ROOT>/missing-symvault\" for \"symvault\": stat <ROOT>/missing-symvault: no such file or directory\n",
+        "stderr": "symbrain vault create: broker: configured binary_path \"C:\\\\Users\\\\RUNNER~1\\\\AppData\\\\Local\\\\Temp\\\\vault-oracle-8xa94l7z\\\\go-53\\\\missing-symvault\" for \"symvault\": GetFileAttributesEx <ROOT>\\missing-symvault: The system cannot find the file specified.\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: configured binary_path \"<ROOT>/missing-symvault\" for \"symvault\": stat <ROOT>/missing-symvault: no such file or directory\n",
+        "stderr": "symbrain vault create: broker: configured binary_path \"C:\\\\Users\\\\RUNNER~1\\\\AppData\\\\Local\\\\Temp\\\\vault-oracle-8xa94l7z\\\\rust-53\\\\missing-symvault\" for \"symvault\": GetFileAttributesEx <ROOT>\\missing-symvault: The system cannot find the file specified.\n",
         "calls": ""
       },
-      "matched": true
+      "matched": false
     },
     {
       "case": {
@@ -1338,13 +1338,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -1364,16 +1364,16 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: configured binary_path \"<ROOT>/unusable-symvault\" for \"symvault\" is not an executable regular file\n",
+        "stderr": "symbrain vault create: broker: configured binary_path \"C:\\\\Users\\\\RUNNER~1\\\\AppData\\\\Local\\\\Temp\\\\vault-oracle-8xa94l7z\\\\go-55\\\\unusable-symvault\" for \"symvault\" is not an executable regular file\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: configured binary_path \"<ROOT>/unusable-symvault\" for \"symvault\" is not an executable regular file\n",
+        "stderr": "symbrain vault create: broker: configured binary_path \"C:\\\\Users\\\\RUNNER~1\\\\AppData\\\\Local\\\\Temp\\\\vault-oracle-8xa94l7z\\\\rust-55\\\\unusable-symvault\" for \"symvault\" is not an executable regular file\n",
         "calls": ""
       },
-      "matched": true
+      "matched": false
     },
     {
       "case": {
@@ -1390,13 +1390,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: configured binary_path \"<ROOT>/unusable-symvault\" for \"symvault\" is not an executable regular file\n",
+        "stderr": "symbrain vault create: create failed\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: configured binary_path \"<ROOT>/unusable-symvault\" for \"symvault\" is not an executable regular file\n",
+        "stderr": "symbrain vault create: create failed\n",
         "calls": ""
       },
       "matched": true
@@ -1416,13 +1416,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -1442,13 +1442,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -2268,16 +2268,16 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault set: broker: configured binary_path \"<ROOT>/missing-symvault\" for \"symvault\": stat <ROOT>/missing-symvault: no such file or directory\n",
+        "stderr": "symbrain vault set: broker: configured binary_path \"C:\\\\Users\\\\RUNNER~1\\\\AppData\\\\Local\\\\Temp\\\\vault-oracle-8xa94l7z\\\\go-92\\\\missing-symvault\" for \"symvault\": GetFileAttributesEx <ROOT>\\missing-symvault: The system cannot find the file specified.\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault set: broker: configured binary_path \"<ROOT>/missing-symvault\" for \"symvault\": stat <ROOT>/missing-symvault: no such file or directory\n",
+        "stderr": "symbrain vault set: broker: configured binary_path \"C:\\\\Users\\\\RUNNER~1\\\\AppData\\\\Local\\\\Temp\\\\vault-oracle-8xa94l7z\\\\rust-92\\\\missing-symvault\" for \"symvault\": GetFileAttributesEx <ROOT>\\missing-symvault: The system cannot find the file specified.\n",
         "calls": ""
       },
-      "matched": true
+      "matched": false
     },
     {
       "case": {
@@ -2294,13 +2294,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault set: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault set: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault set: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault set: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -2320,16 +2320,16 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault set: broker: configured binary_path \"<ROOT>/unusable-symvault\" for \"symvault\" is not an executable regular file\n",
+        "stderr": "symbrain vault set: broker: configured binary_path \"C:\\\\Users\\\\RUNNER~1\\\\AppData\\\\Local\\\\Temp\\\\vault-oracle-8xa94l7z\\\\go-94\\\\unusable-symvault\" for \"symvault\" is not an executable regular file\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault set: broker: configured binary_path \"<ROOT>/unusable-symvault\" for \"symvault\" is not an executable regular file\n",
+        "stderr": "symbrain vault set: broker: configured binary_path \"C:\\\\Users\\\\RUNNER~1\\\\AppData\\\\Local\\\\Temp\\\\vault-oracle-8xa94l7z\\\\rust-94\\\\unusable-symvault\" for \"symvault\" is not an executable regular file\n",
         "calls": ""
       },
-      "matched": true
+      "matched": false
     },
     {
       "case": {
@@ -2346,13 +2346,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault set: broker: configured binary_path \"<ROOT>/unusable-symvault\" for \"symvault\" is not an executable regular file\n",
+        "stderr": "symbrain vault set: set failed\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault set: broker: configured binary_path \"<ROOT>/unusable-symvault\" for \"symvault\" is not an executable regular file\n",
+        "stderr": "symbrain vault set: set failed\n",
         "calls": ""
       },
       "matched": true
@@ -2372,13 +2372,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault set: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault set: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault set: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault set: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -2398,13 +2398,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault set: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault set: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault set: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault set: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -2937,13 +2937,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -2965,13 +2965,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -2993,13 +2993,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -3021,13 +3021,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -3049,13 +3049,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -3077,13 +3077,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -3105,13 +3105,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -3133,13 +3133,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -3525,13 +3525,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -3553,13 +3553,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -3581,13 +3581,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -3609,13 +3609,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -3833,13 +3833,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -3861,13 +3861,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -3889,13 +3889,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -3917,13 +3917,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -3945,13 +3945,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -3973,13 +3973,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -4001,13 +4001,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -4105,13 +4105,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -4209,13 +4209,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -4235,13 +4235,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -4313,13 +4313,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -4417,13 +4417,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -4524,13 +4524,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -4551,13 +4551,13 @@
       "go": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "rust": {
         "exit_code": 1,
         "stdout": "",
-        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in $PATH\n",
+        "stderr": "symbrain vault create: broker: \"symvault\" not found on PATH or in managed directory: exec: \"symvault\": executable file not found in %PATH%\n",
         "calls": ""
       },
       "matched": true
@@ -4589,14 +4589,5 @@
       },
       "matched": true
     }
-  ],
-  "runtime": "Linux x86_64; Rust 1.98.0; Go 1.26.7; isolated HOME/XDG, no credentials",
-  "candidate_source_sha256": {
-    "rust/symbrain-cli/src/vault_admin.rs": "7d92a35d8694b6147b19cddfb0d7931b9e9fcf6c9e3254703730d0b2ce232b97",
-    "rust/symbrain-cli/src/vault_config.rs": "e44e6d4ba64b852a626dcb1f50b75b79238724488ef395b7c9473ae33b9ba8ea",
-    "rust/symbrain-cli/src/passthrough.rs": "58eb151e105af40366dd6b24fb7105401f258c9dd24b67f9106fa046eeddf3e1",
-    "rust/symbrain-cli/src/doctor_process.rs": "35ddb638017ec617fd897bdd298c20e0688407365f886e9c62c70c55995c2ade",
-    "rust/symbrain-audit/src/redact.rs": "0f071038acd66c1995b025fddefab83b0cd100330d6d9b69cd5d71b01e4ec553",
-    "scripts/vault-admin-oracle/replay.py": "b84ad8147d1a043836aa22eaebb9b404c9ba8147c02c56501a8c05961d0f107d"
-  }
+  ]
 }

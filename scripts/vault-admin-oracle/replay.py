@@ -108,6 +108,14 @@ def cases():
     return result
 
 
+def normalize_output(data, root):
+    # Windows diagnostics print the same root both raw and Go-quoted. Replace
+    # just those two representations; other diagnostic bytes stay untouched.
+    raw_root = str(root)
+    quoted_root = json.dumps(raw_root, ensure_ascii=False)[1:-1]
+    return data.decode(errors="backslashreplace").replace(quoted_root, "<ROOT>").replace(raw_root, "<ROOT>")
+
+
 def run(binary, child, case, root):
     root.mkdir()
     home = root / "home"
@@ -160,9 +168,8 @@ def run(binary, child, case, root):
         (root / ".symbrain.toml").write_text(case["project_text"].replace("<CHILD>", str(child).replace("\\", "\\\\")))
     process = subprocess.run([str(binary), "vault", *case["args"]], input=bytes.fromhex(case["input_hex"]),
                              env=env, cwd=root, capture_output=True, timeout=5)
-    normalize = lambda data: data.decode(errors="backslashreplace").replace(str(root), "<ROOT>")
-    return dict(exit_code=process.returncode, stdout=normalize(process.stdout),
-                stderr=normalize(process.stderr), calls=(root / "calls").read_text() if (root / "calls").exists() else "")
+    return dict(exit_code=process.returncode, stdout=normalize_output(process.stdout, root),
+                stderr=normalize_output(process.stderr, root), calls=(root / "calls").read_text() if (root / "calls").exists() else "")
 
 
 def main():

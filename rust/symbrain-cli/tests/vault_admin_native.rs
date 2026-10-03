@@ -116,7 +116,14 @@ fn case_command(child: &Path, case: &Case, root: &Path) -> Command {
             "FAKE_VAULT_GET_EXIT",
             case.case.get_exit.unwrap_or(0).to_string(),
         );
-    for key in ["SystemRoot", "WINDIR", "COMSPEC", "PATHEXT"] {
+    // Instrumented children must keep profiles outside the disposable fixture.
+    for key in [
+        "SystemRoot",
+        "WINDIR",
+        "COMSPEC",
+        "PATHEXT",
+        "LLVM_PROFILE_FILE",
+    ] {
         if let Some(value) = std::env::var_os(key) {
             command.env(key, value);
         }
