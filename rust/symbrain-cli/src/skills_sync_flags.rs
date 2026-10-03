@@ -97,7 +97,8 @@ fn validate(
     raw_scope: &OsStr,
     stderr: &mut dyn Write,
 ) -> Result<Flags, u8> {
-    let target = raw_target.to_str().map(str::trim);
+    let raw_target = trim_target(raw_target);
+    let target = raw_target.to_str();
     let known = symbrain_skills::default_targets();
     if !target.is_some_and(|value| value.is_empty() || known.iter().any(|name| name == value)) {
         let quote = target.map_or_else(
@@ -128,6 +129,35 @@ fn validate(
         target: target.filter(|value| !value.is_empty()).map(str::to_owned),
         scope: scope.to_owned(),
     })
+}
+
+fn trim_target(value: &OsStr) -> &OsStr {
+    #[cfg(unix)]
+    {
+        use std::os::unix::ffi::OsStrExt;
+        // Go TrimSpace stops at invalid UTF-8. Decode only boundary runes so
+        // invalid interior bytes survive unchanged in the diagnostic.
+        let whitespace = |bytes: &[u8]| {
+            std::str::from_utf8(bytes).is_ok_and(|text| {
+                let mut chars = text.chars();
+                chars.next().is_some_and(char::is_whitespace) && chars.next().is_none()
+            })
+        };
+        let mut bytes = value.as_bytes();
+        while let Some(width) = (1..=bytes.len().min(4)).find(|&n| whitespace(&bytes[..n])) {
+            bytes = &bytes[width..];
+        }
+        while let Some(width) =
+            (1..=bytes.len().min(4)).find(|&n| whitespace(&bytes[bytes.len() - n..]))
+        {
+            bytes = &bytes[..bytes.len() - width];
+        }
+        OsStr::from_bytes(bytes)
+    }
+    #[cfg(not(unix))]
+    {
+        value.to_str().map_or(value, |text| OsStr::new(text.trim()))
+    }
 }
 
 fn suffix(arg: &OsStr, offset: usize) -> OsString {

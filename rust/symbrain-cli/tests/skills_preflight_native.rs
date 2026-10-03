@@ -81,6 +81,8 @@ fn native_skills_preflight_contracts() {
     check_special_markers();
     #[cfg(unix)]
     check_raw_argument_values();
+    #[cfg(unix)]
+    check_raw_target_whitespace();
 }
 
 fn check_sync_flag_errors() {
@@ -270,6 +272,31 @@ fn check_raw_argument_values() {
             None,
             "invalid boolean value \"bad\\xff\"",
         ),
+        (
+            b"--scope= bad\xff ".as_slice(),
+            None,
+            "unknown scope \" bad\\xff \"",
+        ),
+        (
+            b"--scope".as_slice(),
+            Some(b" bad\xff ".as_slice()),
+            "unknown scope \" bad\\xff \"",
+        ),
+        (
+            b"--target= \xe2\x80\x8bbad\xff\xe2\x80\x8b ".as_slice(),
+            None,
+            "unknown target \"\\u200bbad\\xff\\u200b\"",
+        ),
+        (
+            b"--target".as_slice(),
+            Some(b" \xe2\x80\x8bbad\xff\xe2\x80\x8b ".as_slice()),
+            "unknown target \"\\u200bbad\\xff\\u200b\"",
+        ),
+        (
+            b"--target= \xa0bad\xff\xc2 ".as_slice(),
+            None,
+            "unknown target \"\\xa0bad\\xff\\xc2\"",
+        ),
     ] {
         let root = TempDir::new().unwrap();
         let mut args = vec![
@@ -288,6 +315,50 @@ fn check_raw_argument_values() {
             "{:?}",
             output.stderr
         );
+    }
+}
+
+#[cfg(unix)]
+fn check_raw_target_whitespace() {
+    use std::os::unix::ffi::OsStringExt;
+    // All Go Unicode White_Space runes, with invalid bytes kept at the edge
+    // after trimming. Also cover non-whitespace Unicode boundary characters.
+    for padding in [
+        " ",
+        "\t\n\u{000b}\u{000c}\r",
+        "\u{0085}",
+        "\u{00a0}",
+        "\u{1680}",
+        "\u{2000}\u{2001}\u{2002}\u{2003}\u{2004}\u{2005}\u{2006}\u{2007}\u{2008}\u{2009}\u{200a}",
+        "\u{2028}\u{2029}",
+        "\u{202f}",
+        "\u{205f}",
+        "\u{3000}",
+    ] {
+        let value = [padding.as_bytes(), b"bad\xff", padding.as_bytes()].concat();
+        for inline in [false, true] {
+            let root = TempDir::new().unwrap();
+            let mut args = vec![OsString::from("skills"), OsString::from("sync")];
+            if inline {
+                args.push(OsString::from_vec(
+                    [b"--target=".as_slice(), &value].concat(),
+                ));
+            } else {
+                args.extend([
+                    OsString::from("--target"),
+                    OsString::from_vec(value.clone()),
+                ]);
+            }
+            let output = run_os(&root, &args, false);
+            assert_eq!(output.status.code(), Some(2));
+            assert!(output.stdout.is_empty());
+            assert_eq!(
+                output.stderr,
+                b"symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n",
+                "{args:?}"
+            );
+            assert!(!root.path().join("data/symbrain/skills").exists());
+        }
     }
 }
 
