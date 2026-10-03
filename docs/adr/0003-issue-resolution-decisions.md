@@ -195,3 +195,44 @@ proxy absolute-form port mismatches and declared CI-runner failure are defects
 requiring correction, not covered by this exception. All historical failures,
 frozen Go and existing assertions remain intact. Full #773 and native six-target
 acceptance remain open.
+
+## Implementation choices confirmed by independent review (2026-10-03)
+
+These choices repair concrete contracts; they add no new parity exception.
+The original observations, failed candidates and actual executables remain
+recoverable. A local pass is not native-platform or release acceptance.
+
+- Clean managed and credential path joins lexically, as pinned Go does, before
+  selecting files. With link/../home, resolving the symlink or leaving parent
+  components can choose another account. Do not use filesystem canonicalization.
+  Doctor/Setup and newly admitted Copilot/Kimi file routes need consistent
+  probe/read ownership, raw Unix path bytes and native Windows volume rules.
+- Preserve raw Unix diagnostic path bytes through human output. Convert to
+  JSON with Go's one-invalid-byte replacement rule. Sharing a small Core text
+  primitive avoids a Guard dependency on the installer and repeated lossy
+  conversions; capability checks, audit denial and error precedence remain.
+- Preserve quiet Unix SIGPIPE when an actual process stdout reader closes
+  during admitted Memory Set output. The already committed write remains
+  committed. Apply the existing signal handler at that actual stdio boundary;
+  embedded/custom writers keep ordinary checked errors. Do not reset signals
+  globally or treat every output failure as SIGPIPE.
+- Derive proxy Basic authentication from retained, percent-decoded username
+  and password bytes, including empty-field presence. UTF-8 normalization
+  can truncate credentials and cause real407 responses. Reuse already locked
+  dependencies and preserve caller/proxy header ordering. This does not approve
+  inherited origin-userinfo, HTTP2 or trailer differences.
+- Resolve Browse state keys once before IPC and share one keyed store. Provider
+  denial, malformed values and timeouts fail closed before operations. For
+  destructive cleanup with a configured key, authenticate every v3 body/header
+  before acting on its timestamps, including an untrusted key_source=none.
+  Preserve the pinned sorted stop order and complete partial-state observation.
+  Non-destructive legacy/plaintext metadata reads have their separate contract.
+  No cipher reimplementation or blanket redaction bypass is justified.
+
+PR808's owned atomic profile publication was independently approved and then
+normally squash-merged as e3dbda6c only after all protected and affected native
+Linux/macOS/Windows checks succeeded and no review thread remained open. It
+fixes that bounded race; migration epics remain open. Other branches integrate
+this main normally and retain fresh checks. PR809's Windows-only readonly test
+lint and PR801's Windows named-pipe fixture corrections preserve production
+contracts and test assertions, with complete native failure logs retained.
