@@ -173,3 +173,21 @@ Delete now records access feedback and its audit while preserving Go's actual
 relationship retention. New-file modes and unproven hydration/error shapes remain
 gated. See [the decision](memory-native-governed-writes-758.md) for scope and the
 strict state/identity/time proof contract. This does not mark full #758 complete.
+
+## Default-path fixture handle ownership
+
+The subsequent exact-head9c Windows run37155195743, job111297047149,
+passed the corrected configuration fixtures, then exposed the same retained
+SQLite handle in the separate default/legacy-path seed helper. Close that fourth
+owned connection after its transaction exits. Preserve all seven path cases,
+selected IDs and before/after database comparisons; do not ignore cleanup errors
+or retry deletion. The complete original Windows failure is retained as
+windows-cleanup-9c-job-111297047149.log. Fresh full Linux replay and the two
+actual process controls are repeated; corrected native Windows remains required.
+
+Fresh clean d7affb25 full replay passes all590 comparisons and both actual
+process controls (32 rejected pairs each). The retained original Windows log
+is explicitly binary-attributed; its complete CRLF bytes match the downloaded
+job log. The first Git add normalized the log to LF; that historical commit
+remains, and this evidence commit restores the exact original without rewriting
+source history. Production Rust and all fixture assertions remain unchanged.
