@@ -467,7 +467,8 @@
       "platforms": [
         "all"
       ],
-      "status": "parity"
+      "status": "parity",
+      "supplemental_runtime_gate": "port/harness/daemon_state_key.py: original17 startup pairs retained;31 Linux/Windows or38 Darwin pairs, six immutable v1/v2/v3 persisted fixtures with repeated read-only metadata access and exact file hashes, actual keyed cleanup/forged-selector/corrupt-later/authenticated-nonJSON observations, real Go/Core same-name overwrite warning API proof, three real executable input-mutator rejection controls. Original missing-key bridge, initial keyed cleanup and YAML failures retained. Six exact-head native receipts and independent review remain required; historical Core parity does not approve a runtime cutover."
     },
     {
       "id": "STATE-004",
@@ -479,7 +480,8 @@
       "platforms": [
         "all"
       ],
-      "status": "parity"
+      "status": "parity",
+      "supplemental_runtime_gate": "port/harness/daemon_state_key.py: original17 startup pairs retained;31 Linux/Windows or38 Darwin pairs, six immutable v1/v2/v3 persisted fixtures with repeated read-only metadata access and exact file hashes, actual keyed cleanup/forged-selector/corrupt-later/authenticated-nonJSON observations, real Go/Core same-name overwrite warning API proof, three real executable input-mutator rejection controls. Original missing-key bridge, initial keyed cleanup and YAML failures retained. Six exact-head native receipts and independent review remain required; historical Core parity does not approve a runtime cutover."
     },
     {
       "id": "STATE-005",

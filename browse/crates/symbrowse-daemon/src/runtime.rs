@@ -1,4 +1,5 @@
 mod state;
+mod state_key;
 
 use std::{
     future::Future,
@@ -38,6 +39,7 @@ use crate::{
 /// engine, fetch, and core crates; it never shells back into the CLI binary.
 pub struct DispatchRuntime {
     spec: SessionSpec,
+    state_store: Store,
     fetch: FetchClient,
     allowlist: Option<Allowlist>,
     output_cache: OutputCache,
@@ -188,6 +190,20 @@ impl DispatchRuntime {
             message,
             ..Default::default()
         })?;
+        let state_store = state_key::initialize(&spec)?;
+        Self::new_with_store(spec, wayback_cdx_url, state_store)
+    }
+
+    fn new_with_store(
+        spec: SessionSpec,
+        wayback_cdx_url: impl Into<String>,
+        state_store: Store,
+    ) -> Result<Arc<Self>, DaemonError> {
+        spec.validate_selection().map_err(|message| DaemonError {
+            code: "invalid_transport_selection".into(),
+            message,
+            ..Default::default()
+        })?;
         let allowlist = Allowlist::parse(&spec.allowed_domains).map_err(|error| DaemonError {
             code: codes::OPERATION_FAILED.into(),
             message: format!("invalid domain allowlist: {error}"),
@@ -202,6 +218,7 @@ impl DispatchRuntime {
         );
         Ok(Arc::new(Self {
             spec,
+            state_store,
             fetch,
             allowlist,
             output_cache,
@@ -1577,12 +1594,7 @@ impl DispatchRuntime {
     ) -> HandlerResult {
         let args = object_args(frame)?;
         let name = required_string(args, "name")?;
-        let store = Store::new(
-            self.spec.state_store_dir(),
-            time::Duration::days(self.spec.state_expire_days),
-            None,
-        )
-        .map_err(runtime_error)?;
+        let store = &self.state_store;
         match frame.cmd.as_str() {
             "state.save" => {
                 let mut captured = if self.spec.engine == "static" {
@@ -2020,6 +2032,18 @@ mod tests {
         assert_eq!(expired.message, "daemon operation exceeded its timeout");
     }
 
+    fn test_runtime(spec: SessionSpec) -> Result<Arc<DispatchRuntime>, DaemonError> {
+        test_runtime_with_wayback(spec, "https://web.archive.org/cdx/search/cdx")
+    }
+
+    fn test_runtime_with_wayback(
+        spec: SessionSpec,
+        url: impl Into<String>,
+    ) -> Result<Arc<DispatchRuntime>, DaemonError> {
+        let store = state_key::initialize_with_sources(&spec, state_key::tests::AbsentSources)?;
+        DispatchRuntime::new_with_store(spec, url, store)
+    }
+
     fn temp_spec(name: &str) -> SessionSpec {
         let root =
             std::env::temp_dir().join(format!("symbrowse-runtime-{name}-{}", std::process::id()));
@@ -2037,7 +2061,7 @@ mod tests {
     fn safari_bidi_capabilities_are_planned_without_starting_safari() {
         let mut spec = temp_spec("safari-capabilities");
         spec.engine = "safari-bidi".into();
-        let runtime = DispatchRuntime::new(spec).expect("runtime");
+        let runtime = test_runtime(spec).expect("runtime");
         let (data, _) = runtime
             .runtime
             .block_on(runtime.dispatch(
@@ -2072,7 +2096,7 @@ mod tests {
     fn safari_bidi_interactions_are_rejected_before_initialization() {
         let mut spec = temp_spec("safari-interactions");
         spec.engine = "safari-bidi".into();
-        let runtime = DispatchRuntime::new(spec).expect("runtime");
+        let runtime = test_runtime(spec).expect("runtime");
         for command in ["click", "fill", "type", "press"] {
             let error = runtime
                 .runtime
@@ -2114,7 +2138,7 @@ mod tests {
 
     #[test]
     fn dispatch_cache_get_returns_full_and_ranged_content() {
-        let runtime = DispatchRuntime::new(temp_spec("cache")).expect("runtime");
+        let runtime = test_runtime(temp_spec("cache")).expect("runtime");
         let id = runtime
             .output_cache
             .store(b"line one\nline two\nline three")
@@ -2139,9 +2163,8 @@ mod tests {
             br#"[["timestamp","original","mimetype","statuscode","digest","length"],["20260101120000","https://example.test/a","text/html","200","abc","42"]]"#,
             "application/json",
         );
-        let runtime =
-            DispatchRuntime::new_with_wayback_url(temp_spec("wayback"), format!("{endpoint}/cdx"))
-                .expect("runtime");
+        let runtime = test_runtime_with_wayback(temp_spec("wayback"), format!("{endpoint}/cdx"))
+            .expect("runtime");
         let frame = Frame {
             cmd: "wayback.snapshots".into(),
             args: Some(json!({"url":"https://example.test/a"})),
@@ -2163,7 +2186,7 @@ mod tests {
             b"<html><title>Fixture</title><main>Hello browser</main></html>",
             "text/html",
         );
-        let runtime = DispatchRuntime::new(temp_spec("browser")).expect("runtime");
+        let runtime = test_runtime(temp_spec("browser")).expect("runtime");
         let frame = Frame {
             cmd: "open".into(),
             args: Some(json!({"url":endpoint})),
@@ -2182,7 +2205,7 @@ mod tests {
             b"<html><body><h1>Long fixture</h1><p>one two three four five six seven eight nine ten eleven twelve</p></body></html>",
             "text/html",
         );
-        let runtime = DispatchRuntime::new(temp_spec("cache-roundtrip")).expect("runtime");
+        let runtime = test_runtime(temp_spec("cache-roundtrip")).expect("runtime");
         let (data, _) = runtime
             .runtime
             .block_on(runtime.dispatch(
@@ -2288,7 +2311,11 @@ mod tests {
             }
         });
 
-        let (production, shutdown) = handlers(spec.clone()).expect("production handlers");
+        let runtime = test_runtime(spec.clone()).expect("production runtime");
+        let dispatch = runtime.clone();
+        let production: crate::DaemonHandler =
+            Arc::new(move |frame, operation| dispatch.handle(frame, operation));
+        let shutdown: crate::ShutdownHandler = Arc::new(move || runtime.shutdown_browser());
         let followups = Arc::new(AtomicUsize::new(0));
         let observed = followups.clone();
         let wrapped = Arc::new(move |frame: Frame, operation: OperationContext| {
@@ -2407,7 +2434,7 @@ mod tests {
 
     #[test]
     fn unknown_commands_are_typed_errors() {
-        let runtime = DispatchRuntime::new(temp_spec("unknown")).expect("runtime");
+        let runtime = test_runtime(temp_spec("unknown")).expect("runtime");
         let error = runtime
             .runtime
             .block_on(runtime.dispatch(

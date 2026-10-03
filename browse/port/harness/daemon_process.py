@@ -46,6 +46,18 @@ def private_temporary_parent() -> str | None:
     return parent
 
 
+def absent_keychain_path(root: Path) -> str:
+    """Go treats a missing security executable as failure, not key absence."""
+    if sys.platform != "darwin":
+        return ""
+    owned_bin = root / "provider-bin"
+    owned_bin.mkdir(mode=0o700, exist_ok=True)
+    security = owned_bin / "security"
+    security.write_text("#!/bin/sh\nexit 44\n")
+    security.chmod(0o700)
+    return str(owned_bin)
+
+
 def observe(binary: Path, settings: dict[str, str], session: str,
             raw_origin: bytes | None = None, git_origin: bool = False) -> dict:
     with tempfile.TemporaryDirectory(prefix="bd-", dir=private_temporary_parent()) as temporary:
@@ -62,7 +74,7 @@ def observe(binary: Path, settings: dict[str, str], session: str,
         env.update(HOME=str(home), USERPROFILE=str(home), LOCALAPPDATA=str(root / "Local"),
                    XDG_CONFIG_HOME=str(root / "config"), XDG_CACHE_HOME=str(root / "cache"),
                    XDG_DATA_HOME=str(root / "data"), XDG_STATE_HOME=str(root / "state"),
-                   XDG_RUNTIME_DIR=str(runtime), PATH="", SYMBROWSE_NO_AUTOSTART="1",
+                   XDG_RUNTIME_DIR=str(runtime), PATH=absent_keychain_path(root), SYMBROWSE_NO_AUTOSTART="1",
                    TMPDIR=str(temporary), TMP=str(temporary), TEMP=str(temporary))
         env.update(settings)
         cwd = root
@@ -79,7 +91,7 @@ def observe(binary: Path, settings: dict[str, str], session: str,
             escaped = "".join(f"\\{byte:03o}" for byte in payload)
             script.write_text(f"#!/bin/sh\nprintf '{escaped}'\n")
             script.chmod(0o700)
-            env["PATH"] = str(git_bin)
+            env["PATH"] = str(git_bin) + os.pathsep + absent_keychain_path(root)
         begin = time.time()
         process = subprocess.Popen([str(binary), "daemon", "--session", session], cwd=cwd,
                                    env=env, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,

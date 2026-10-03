@@ -1,0 +1,61 @@
+{
+  "input": {
+    "name": "invalid-environment-yaml",
+    "key": "not-a-key",
+    "vault": null,
+    "output": [
+      "--output",
+      "yaml"
+    ]
+  },
+  "go": {
+    "root": "/tmp/bk-0duknesx",
+    "arguments": [
+      "/tmp/symaira-pr801-go-1.26.7",
+      "daemon",
+      "--session",
+      "key2115038",
+      "--output",
+      "yaml"
+    ],
+    "startup_ready": false,
+    "startup_elapsed_seconds": 0.020571038003254216,
+    "exit": 1,
+    "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'resolve state encryption key: SYMBROWSE_ENCRYPTION_KEY: key must be a 64-character hex string (32 bytes)'\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+    "stderr": "",
+    "records": [],
+    "queries": [],
+    "retained_before": {},
+    "retained_after_inspection": {},
+    "retained_after_clean": {},
+    "stop": null
+  },
+  "rust": {
+    "root": "/tmp/bk-yrb593lf",
+    "arguments": [
+      "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+      "daemon",
+      "--session",
+      "key2115038",
+      "--output",
+      "yaml"
+    ],
+    "startup_ready": false,
+    "startup_elapsed_seconds": 0.020458377002796624,
+    "exit": 1,
+    "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: \"resolve state encryption key: SYMBROWSE_ENCRYPTION_KEY: key must be a 64-character hex string (32 bytes)\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+    "stderr": "",
+    "records": [],
+    "queries": [],
+    "retained_before": {},
+    "retained_after_inspection": {},
+    "retained_after_clean": {},
+    "stop": null
+  },
+  "source_head": "95efd508f1a942da82bcda10de5fd2cd4d370436",
+  "source_dirty": true,
+  "candidate_cli_sha256": "104167deedf2684e2dc5d567abd72a46788ada763b8453248db4f5847e34bac2",
+  "roundtrip_archive": "/workspace/oracles/symaira-state-key-initial-yaml-cli.gz",
+  "archive_sha256": "ac33028182e42606767110d4d4a424d59ff3182bb3fd6750b1116c05a8ecdfbf",
+  "note": "Original actual public-key startup YAML quoting mismatch before correction. All operator providers isolated. Not approval."
+}

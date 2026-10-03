@@ -142,7 +142,12 @@ impl KeySources for SystemKeySources {
             self.timeout,
         ) {
             Ok(output) => output,
-            Err(ProbeError::Missing(MissingReason::Unavailable)) => return Ok(None),
+            Err(ProbeError::Missing(MissingReason::Unavailable)) => {
+                return Err(ProbeError::Failed(format!(
+                    "keychain lookup: exec: {:?}: executable file not found in $PATH",
+                    self.security
+                )));
+            }
             Err(error) => return Err(error),
         };
         match output.status.code() {

@@ -1,0 +1,50 @@
+// Actual child-process controls alter only explicitly public fixture inputs.
+package main
+
+import (
+	"errors"
+	"os"
+	"os/exec"
+	"strings"
+)
+
+func main() {
+	if len(os.Args) < 4 {
+		os.Exit(99)
+	}
+	mode, target := os.Args[1], os.Args[2]
+	env := os.Environ()
+	replace := func(name, value string) {
+		retained := []string{}
+		for _, entry := range env {
+			if !strings.HasPrefix(entry, name+"=") {
+				retained = append(retained, entry)
+			}
+		}
+		env = append(retained, name+"="+value)
+	}
+	switch mode {
+	case "wrong-environment":
+		replace("SYMBROWSE_ENCRYPTION_KEY", strings.Repeat("cd", 32))
+	case "wrong-vault":
+		replace("SYMBROWSE_KEY_PROBE_MODE", "cd")
+	case "denied-to-absence":
+		replace("SYMBROWSE_KEY_PROBE_MODE", "2")
+	default:
+		os.Exit(99)
+	}
+	child := exec.Command(target, os.Args[3:]...)
+	child.Env = env
+	child.Stdin = os.Stdin
+	child.Stdout = os.Stdout
+	child.Stderr = os.Stderr
+	err := child.Run()
+	if err == nil {
+		return
+	}
+	var exit *exec.ExitError
+	if errors.As(err, &exit) {
+		os.Exit(exit.ExitCode())
+	}
+	os.Exit(99)
+}

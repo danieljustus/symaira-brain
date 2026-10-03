@@ -12,6 +12,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import key_test_environment
 
 HERE = Path(__file__).resolve().parent
 SPEC = importlib.util.spec_from_file_location("daemon_process", HERE / "daemon_process.py")
@@ -123,7 +124,7 @@ def main() -> int:
         env.update(HOME=str(home), USERPROFILE=str(home), LOCALAPPDATA=str(root / "Local"),
                    XDG_CONFIG_HOME=str(root / "config"), XDG_CACHE_HOME=str(root / "cache"),
                    XDG_DATA_HOME=str(root / "data"), XDG_STATE_HOME=str(root / "state"),
-                   XDG_RUNTIME_DIR=str(runtime), PATH="", SYMBROWSE_NO_AUTOSTART="1")
+                   XDG_RUNTIME_DIR=str(runtime), PATH=process_harness.absent_keychain_path(root), SYMBROWSE_NO_AUTOSTART="1")
         session = f"mcp-parity-{os.getpid()}"
         fixture = root / "fixture"; fixture.mkdir(mode=0o700)
         daemon, endpoint = start(args.go.resolve(), session, env, root)
@@ -159,6 +160,9 @@ def main() -> int:
             tests["CARGO_HOME"] = os.environ.get("CARGO_HOME", str(Path.home() / ".cargo"))
             tests["RUSTUP_HOME"] = os.environ.get("RUSTUP_HOME", str(Path.home() / ".rustup"))
             tests.update({k: v for k, v in env.items() if k != "PATH"})
+            owned_bin = key_test_environment.absent_providers(root / "test-providers")
+            tests.update(PATH=str(owned_bin) + os.pathsep + tests.get("PATH", ""),
+                         SYMBROWSE_KEY_PROBE_MODE="3", SYMBROWSE_KEYCHAIN_PROBE_MODE="44")
             tests.update(SYMBROWSE_MCP_DAEMON_ENDPOINT=str(endpoint),
                          SYMBROWSE_MCP_ORACLE_FIXTURE_DIR=str(fixture), SYMBROWSE_MCP_ORACLE_SESSION=session)
             cargo = shutil.which("cargo")

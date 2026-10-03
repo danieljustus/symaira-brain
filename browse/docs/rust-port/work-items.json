@@ -155,13 +155,16 @@
         "DMN-005",
         "DMN-007",
         "DMN-008",
-        "MCP-006"
+        "MCP-006",
+        "STATE-003",
+        "STATE-004"
       ],
       "status": "in_progress",
       "acceptance_commands": [
         "cargo test -p symbrowse-daemon --locked",
         "python3 port/harness/run.py --suite daemon",
-        "python3 port/harness/run.py --suite daemon-races --repeat 50"
+        "python3 port/harness/run.py --suite daemon-races --repeat 50",
+        "python3 port/harness/daemon_state_key.py --go PINNED_GO --rust NATIVE_RUST --rust-store-probe NATIVE_CORE_PROBE --go-source FROZEN_GO_SOURCE --out OWNED_RECEIPT"
       ],
       "stop_rule": "Do not proceed while a concurrent starter can unlink a live socket or peer validation is weaker than Go.",
       "acceptance": [
@@ -170,8 +173,8 @@
         "cargo test --workspace --locked",
         "cargo clippy --workspace --all-targets --all-features --target x86_64-pc-windows-msvc --locked -- -D warnings"
       ],
-      "native_evidence_gate": ".github/workflows/browse-daemon-native.yml: all six declared runners must execute nonzero daemon tests, lifecycle, 50x50 competing starts and supplemental real Go/Rust requests; retain raw logs and hashed process receipts. Historical 652453d oracle is unchanged; dcddcef0 adds process observations only. The same six jobs also run all workspace tests through source-verified, newly Go-generated historical-input MCP fixtures and a production Rust daemon; thirteen actual CLI outputs and three actual failure controls must pass. Registry/autostart additionally require daemon_registry.py Go API, 108 CLI observations (including 48 invalid-session CLI failures) and 20 raw frames per binary, eight actual concurrent clients, retained Go migration-file bytes and six rejecting controls on all six native runners.",
-      "remaining_scope": "Issue #772 remains open/in_progress: runtime Store currently receives no key. A separate focused successor must connect the existing core key resolver to Go-equivalent state key resolution and verify existing encrypted data without loss. No registry/native receipt substitutes for this missing state-key bridge or for six exact-head native receipts."
+      "native_evidence_gate": ".github/workflows/browse-daemon-native.yml: all six declared runners must execute nonzero daemon tests, lifecycle, 50x50 competing starts and supplemental real Go/Rust requests; retain raw logs and hashed process receipts. Historical 652453d oracle is unchanged; dcddcef0 adds process observations only. The same six jobs also run all workspace tests through source-verified, newly Go-generated historical-input MCP fixtures and a production Rust daemon; thirteen actual CLI outputs and three actual failure controls must pass. Registry/autostart additionally require daemon_registry.py Go API, 108 CLI observations (including 48 invalid-session CLI failures) and 20 raw frames per binary, eight actual concurrent clients, retained Go migration-file bytes and six rejecting controls on all six native runners. State-key successor additionally requires daemon_state_key.py 31 Linux/Windows or38 Darwin startup pairs, all six persisted historical files unchanged during inspection, destructive authenticated cleanup/stop-order proofs, real Store warning observations, three rejecting executable controls, and owned security-exit44 absence fixtures for every Darwin process/workspace test.",
+      "remaining_scope": "Issue #772 remains open/in_progress: this candidate connects existing Core providers once before IPC and shares a keyed Store between browser and metadata handlers. Independent full review and six fresh native OS/architecture receipts are pending. Runtime/default-release cutover remains gated; registry/Core historical parity alone does not close this issue. Fresh snapshot same-name encrypted overwrite retains observed Go behavior with warning; a future explicit fail-closed overwrite contract requires separate evidence and decision, never an undocumented E012 exception."
     },
     {
       "id": "RUST-007",

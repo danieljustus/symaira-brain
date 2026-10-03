@@ -71,6 +71,7 @@ enum Action {
         format: Format,
     },
     DaemonRun {
+        format: Format,
         session: String,
         mode: String,
         engine: String,
@@ -196,12 +197,13 @@ fn main() -> ExitCode {
         }) => run_batch(format, commands, bail, dry_run),
         Ok(Action::StateKeyInit { format }) => run_state_key_init(format),
         Ok(Action::DaemonRun {
+            format,
             session,
             mode,
             engine,
             ssrf,
             allow_private,
-        }) => run_daemon(session, mode, engine, ssrf, allow_private),
+        }) => run_daemon(session, mode, engine, ssrf, allow_private, format),
         Ok(Action::DaemonLifecycle {
             session,
             command,
@@ -618,6 +620,7 @@ fn run_daemon(
     engine: String,
     ssrf: Option<bool>,
     allow_private: Option<bool>,
+    format: Format,
 ) -> ExitCode {
     let context = match LoadContext::from_process(FlagOverrides::default()) {
         Ok(context) => context,
@@ -699,10 +702,7 @@ fn run_daemon(
     };
     match Server::new(options).and_then(|server| server.listen_and_serve()) {
         Ok(()) | Err(symbrowse_daemon::ServerError::AlreadyRunning) => ExitCode::SUCCESS,
-        Err(error) => {
-            let _ = writeln!(io::stderr(), "daemon: {error}");
-            ExitCode::from(1)
-        }
+        Err(error) => write_batch_error(format, ErrorCode::Internal, &error.to_string(), 1),
     }
 }
 
@@ -1925,10 +1925,12 @@ fn parse_daemon(
             },
         });
     }
-    // Keep validation of daemon-run output flags even though its current
-    // process adapter does not render the lifecycle envelope.
-    parse_format(&output)?;
     Ok(Action::DaemonRun {
+        format: if json {
+            Format::Json
+        } else {
+            parse_format(&output)?
+        },
         session: session.to_string_lossy().into_owned(),
         mode,
         engine,
@@ -2611,6 +2613,7 @@ mod tests {
                 engine: "static".to_owned(),
                 ssrf: Some(true),
                 allow_private: None,
+                format: Format::Text,
             })
         );
     }

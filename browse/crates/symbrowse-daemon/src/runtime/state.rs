@@ -3,12 +3,7 @@ use super::*;
 
 impl DispatchRuntime {
     pub(super) fn state_command(&self, frame: &Frame) -> HandlerResult {
-        let store = Store::new(
-            self.spec.state_store_dir(),
-            time::Duration::days(self.spec.state_expire_days),
-            None,
-        )
-        .map_err(runtime_error)?;
+        let store = &self.state_store;
         let args = frame.args.as_ref().and_then(Value::as_object);
         match frame.cmd.as_str() {
             "state.list" => Ok((

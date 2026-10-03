@@ -29,6 +29,7 @@ pub enum StateError {
     InvalidKeySource,
     Truncated,
     Decrypt,
+    HeaderAuthentication(Box<StateError>),
     MetadataMismatch,
     PlaintextTooLarge,
 }
@@ -47,6 +48,9 @@ impl fmt::Display for StateError {
             Self::InvalidKeySource => formatter.write_str("encrypted state key source is required"),
             Self::Truncated => formatter.write_str("encrypted state file is truncated"),
             Self::Decrypt => formatter.write_str("decrypt state file: aead::Error"),
+            Self::HeaderAuthentication(error) => {
+                write!(formatter, "authenticate state header: {error}")
+            }
             Self::MetadataMismatch => formatter
                 .write_str("decrypt state file: plaintext state metadata does not match header"),
             Self::PlaintextTooLarge => write!(
@@ -125,11 +129,15 @@ pub(crate) fn read_header(raw: &[u8], key: Option<&[u8]>) -> Result<StateHeader,
         && let Ok(header) = serde_json::from_slice::<Header>(&data[..newline])
         && header.schema_version >= 2
     {
-        if header.schema_version >= 3
-            && !header.key_source.is_empty()
-            && header.key_source != "none"
-        {
-            let _ = decode_versioned(&header, &data[..newline], &data[newline + 1..], key)?;
+        if header.schema_version >= 3 {
+            if let Some(key) = key {
+                // Destructive timestamp decisions cannot trust key_source:
+                // it is itself unauthenticated until the AAD is verified.
+                let _ = decrypt(&data[newline + 1..], &data[..newline], key)
+                    .map_err(|error| StateError::HeaderAuthentication(Box::new(error)))?;
+            } else if !header.key_source.is_empty() && header.key_source != "none" {
+                return Err(StateError::KeyRequired);
+            }
         }
         return Ok(StateHeader {
             saved_at: header.saved_at,

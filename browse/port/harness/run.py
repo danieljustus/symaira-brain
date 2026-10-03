@@ -397,6 +397,11 @@ def daemon_suite(root: Path, env: dict[str, str], *, rounds: int, starters: int)
             SYMBROWSE_USER_DATA_DIR=str(data),
             SYMBROWSE_NO_AUTOSTART="1",
         )
+        import key_test_environment
+        owned_bin = key_test_environment.absent_providers(base / "providers")
+        scoped.pop("SYMBROWSE_ENCRYPTION_KEY", None)
+        scoped.update(PATH=str(owned_bin) + os.pathsep + scoped.get("PATH", ""),
+                      SYMBROWSE_KEY_PROBE_MODE="3", SYMBROWSE_KEYCHAIN_PROBE_MODE="44")
         lifecycle_once(binary, scoped, runtime, suffix="one")
         stale_socket_once(binary, scoped, runtime, suffix="one")
         for index in range(rounds):

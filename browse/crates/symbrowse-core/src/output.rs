@@ -285,7 +285,7 @@ fn yaml_string(value: &str) -> String {
         return format!("'{}'", value.replace('\'', "''"));
     }
     if needs_yaml_quotes(value) {
-        if value.contains('"') && !value.contains(['\n', '\r', '\t']) {
+        if (value.contains('"') || value.contains(": ")) && !value.contains(['\n', '\r', '\t']) {
             return format!("'{}'", value.replace('\'', "''"));
         }
         return serde_json::to_string(value).expect("string serialization cannot fail");

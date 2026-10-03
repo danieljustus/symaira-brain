@@ -1,0 +1,21 @@
+{
+  "original_source": "b363762cb85b879630fecd3fd141cba1ae85f71c",
+  "files_sha256": {
+    "symaira-key-bridge-baseline.py": "6b169d50d4e1f83dddd6cce19bc7c134d56003d42418aac2bb86bcf202201854",
+    "symaira-key-bridge-provider.go": "743e0dea17126b89565c35878609e3c0f52abc9da9a881b7ab83ffe2e924117b",
+    "symaira-key-bridge-b363-baseline.json": "a8622363fae75a93abc4041af010df55a5b6e7523ec88c95ec2d295086b767d7",
+    "symaira-key-bridge-b363-baseline.log": "afdb9dcb58b94a2359d3b11c4a34866ebe9e4d4fb14473e6ff3490e76633b495",
+    "symaira-key-bridge-b363-baseline.md": "eeb29bd98f7cdabfebc5511bca21f3cbc46e870d2455632493973f267d423f18",
+    "symaira-key-bridge-core-downgrade.rs": "fe820935c5209d8609d613432e515065baaf97bbafd0cfb4b6e86cf71cd4dbdb",
+    "symaira-key-bridge-b363-core-downgrade.json": "f60cd5d06885fb663f5693663033644856b4f7a42d92f36c7c34166dc9358ec7",
+    "symaira-key-bridge-go-downgrade.go": "42600054a72f72c1bdd29bfa1e12a57af1d21a3c64fb0c9d865d89d5c0ab49bd",
+    "symaira-key-bridge-go-downgrade.json": "f03da99cb0880b430bf461f764b025aad2314d25aa6acda758ea874686d9f713"
+  },
+  "cf959_archive_receipt_sha256": "cd108472c07bb5c166ca46112603dbb257c6b5639fecd09db8d3f6e67bef80f1",
+  "archives": "/workspace/oracles/symaira-registry-cf959-binaries",
+  "original_core_probe_binary": {
+    "path": "/tmp/symaira-key-bridge-core-downgrade",
+    "sha256": "6288ba8ce0135b6ec6055ebf0ed998a3b3153bc34d91bc9fdc4549c0c0f2590b"
+  },
+  "note": "Immutable actual original failures/API behavior; not approval or native proof."
+}

@@ -39,7 +39,7 @@ def environment(root: Path) -> dict:
     env.update(HOME=str(home), USERPROFILE=str(home), LOCALAPPDATA=str(root / "Local"),
                XDG_CONFIG_HOME=str(root / "config"), XDG_CACHE_HOME=str(root / "cache"),
                XDG_STATE_HOME=str(root / "state"), XDG_DATA_HOME=str(root / "data"),
-               XDG_RUNTIME_DIR=str(runtime), TMPDIR=str(temp), TMP=str(temp), TEMP=str(temp), PATH="")
+               XDG_RUNTIME_DIR=str(runtime), TMPDIR=str(temp), TMP=str(temp), TEMP=str(temp), PATH=process.absent_keychain_path(root))
     return env
 
 
