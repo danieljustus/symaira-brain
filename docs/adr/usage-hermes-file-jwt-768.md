@@ -62,3 +62,21 @@ Twelve fresh report/request/no-write cases cover repeated shrink/regrowth,
 hidden-tail exclusion, clearing fields, null/empty resets, preferred invoke
 credentials and growth beyond previously visited slots. Frozen fixtures remain
 unchanged; the original eighty supplemental cases are retained verbatim.
+
+## Integration decision
+
+Publish the independently reviewed Hermes correction in the existing #804 Usage
+PR together with the independently reviewed credential-reference seam. Both
+changes resolve Usage credentials and share the same bounded read-only routing
+contract. Normal integration retains the published parent and both original
+reviews; the fresh Hermes gate also executes the complete parent-reference gate.
+One final combined native three-OS CI avoids treating two overlapping credential
+PRs as separately validated integration states. No force push, review bypass or
+full #768 closure follows from this grouping. Provider-file work remains a
+separate unaccepted successor.
+
+The original rejected `273a93c0` and corrected scoped approval `9b37c53f` are
+retained under `migration/evidence/usage-hermes-768/`, including thirteen
+independent regrowth inputs and full actual-process receipts. The current
+publication only integrates the parent's review evidence and this documentation;
+reviewed production and comparator bytes are verified unchanged.
