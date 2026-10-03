@@ -1,0 +1,36 @@
+{
+  "published_head": "5414cf5c193874e513fb34b25b4d7fe33703a59b",
+  "workflow_run": 37138789461,
+  "job_id": 111248722700,
+  "artifact_id": 11280415114,
+  "artifact_sha256": "bbe733d203035c30c64a99efb38fd1f05c8a7e4bb986a648b2101c2233d60284",
+  "artifact_path": "/workspace/attachments/72b4798e-cd8b-4f0c-bd7a-56ecc9515c59/daemon-go-windows-arm-shutdown-failure.zip",
+  "go_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "diagnostic": "immutable Go daemon shutdown ERROR_OPERATION_ABORTED in listener.Accept; Rust/native comparison was not reached for the failing settings",
+  "native_checks_before_failure": "strict workspace lint, nonzero daemon unit tests, lifecycle and50x50 competing starts passed",
+  "failed_phase": "observe(args.go.resolve(), settings, session) with SYMBROWSE_ALLOW_PRIVATE=true; immutable Go exits1 after stop",
+  "retained_log_context": [
+    "2026-10-03T17:19:47.1569512Z failed daemon: settings={'SYMBROWSE_ALLOW_PRIVATE': 'true'}; exit=1; stdout=b''; stderr=b'time=2026-10-03T10:19:47.130-07:00 level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\\naccept daemon connection: The I/O operation has been aborted because of either a thread exit or an application request.\\n'\r",
+    "2026-10-03T17:19:47.1647028Z Traceback (most recent call last):\r",
+    "2026-10-03T17:19:47.1784952Z   File \"C:\\a\\symaira-brain\\symaira-brain\\browse\\port\\harness\\daemon_process.py\", line 182, in <module>\r",
+    "2026-10-03T17:19:47.1785433Z     raise SystemExit(main())\r",
+    "2026-10-03T17:19:47.1785695Z                      ~~~~^^\r",
+    "2026-10-03T17:19:47.1786112Z   File \"C:\\a\\symaira-brain\\symaira-brain\\browse\\port\\harness\\daemon_process.py\", line 157, in main\r",
+    "2026-10-03T17:19:47.1786657Z     \"go\": observe(args.go.resolve(), settings, session),\r",
+    "2026-10-03T17:19:47.1787020Z           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\r",
+    "2026-10-03T17:19:47.1787492Z   File \"C:\\a\\symaira-brain\\symaira-brain\\browse\\port\\harness\\daemon_process.py\", line 66, in observe\r",
+    "2026-10-03T17:19:47.1788293Z     raise AssertionError(f\"daemon exit/stdout: {process.returncode}, {stdout!r}, {stderr!r}\")\r",
+    "2026-10-03T17:19:47.1789656Z AssertionError: daemon exit/stdout: 1, b'', b'time=2026-10-03T10:19:47.130-07:00 level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\\naccept daemon connection: The I/O operation has been aborted because of either a thread exit or an application request.\\n'\r",
+    "2026-10-03T17:19:47.2002200Z ##[error]Process completed with exit code 1.\r",
+    "2026-10-03T17:19:47.4764977Z ##[group]Run {\r",
+    "2026-10-03T17:19:47.4765339Z \u001b[36;1m{\u001b[0m\r",
+    "2026-10-03T17:19:47.4765576Z \u001b[36;1m  echo \"source_revision=$GITHUB_SHA\"\u001b[0m\r",
+    "2026-10-03T17:19:47.4765844Z \u001b[36;1m  echo \"runner=windows-11-arm\"\u001b[0m\r",
+    "2026-10-03T17:19:47.4766088Z \u001b[36;1m  rustc -Vv\u001b[0m\r"
+  ],
+  "retry_request": {
+    "accepted": false,
+    "github_error": "403: The workflow run containing this job is already running"
+  },
+  "acceptance": "not accepted; do not change frozen Go or relax lifecycle exit assertions; fresh integrated native run required"
+}
