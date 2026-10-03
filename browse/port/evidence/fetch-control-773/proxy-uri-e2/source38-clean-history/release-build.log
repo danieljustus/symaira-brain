@@ -1,0 +1,11 @@
+   Compiling symbrowse-engine v0.0.0 (/workspace/symaira-fetch773-proxy-uri/browse/crates/symbrowse-engine)
+   Compiling symbrowse-core v0.0.0 (/workspace/symaira-fetch773-proxy-uri/browse/crates/symbrowse-core)
+   Compiling symbrowse-compat v0.0.0 (/workspace/symaira-fetch773-proxy-uri/browse/crates/symbrowse-compat)
+   Compiling symbrowse-protocol v0.0.0 (/workspace/symaira-fetch773-proxy-uri/browse/crates/symbrowse-protocol)
+   Compiling symbrowse-engine-chrome v0.0.0 (/workspace/symaira-fetch773-proxy-uri/browse/crates/symbrowse-engine-chrome)
+   Compiling symbrowse-engine-firefox v0.0.0 (/workspace/symaira-fetch773-proxy-uri/browse/crates/symbrowse-engine-firefox)
+   Compiling symbrowse-fetch v0.0.0 (/workspace/symaira-fetch773-proxy-uri/browse/crates/symbrowse-fetch)
+   Compiling symbrowse-daemon v0.0.0 (/workspace/symaira-fetch773-proxy-uri/browse/crates/symbrowse-daemon)
+   Compiling symbrowse-mcp v0.0.0 (/workspace/symaira-fetch773-proxy-uri/browse/crates/symbrowse-mcp)
+   Compiling symbrowse-cli v0.0.0 (/workspace/symaira-fetch773-proxy-uri/browse/crates/symbrowse-cli)
+    Finished `release` profile [optimized] target(s) in 53.61s

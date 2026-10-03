@@ -1,0 +1,5 @@
+    Finished `dev` profile [unoptimized] target(s) in 0.13s
+honest fetch process comparisons: 251/251; failures: []
+Five native-output executable mutants rejected
+raw proxy: 32 exact pairs; Referer7 exact+1 authorized; TLS4 exact; native jar4
+Three actual native URI/automatic/explicit Referer mutants rejected

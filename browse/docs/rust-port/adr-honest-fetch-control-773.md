@@ -175,7 +175,7 @@ dropping that body aborts the driver and closes the socket. A small Body adapter
 forwards the original length hints and trailers; reducing it to an opaque byte
 stream would lose the early compressed-size check. The existing shared operation
 deadline, retry policy, redirect processing and bounded response decoder apply.
-No global pooling/performance claim follows from this exceptional path. Measure
+No global pooling/performance claim follows from this selected path. Measure
 current executables and retain its connection/HTTPS-root costs as explicit scope;
 full773/native six-target/value acceptance still remain pending.
 
@@ -213,3 +213,18 @@ Go-source paths back only at the native-process boundary. Preserve source38's
 clean Linux proof unchanged. This focused runner correction requires a fresh
 clean source replay and remains subject to actual Windows CI; a Linux replay
 and static comparison with the accepted Guard runner are no Windows runtime proof.
+
+Clean source e2's coordinated full30×4 release measurement passes the unchanged
+value gates (Fetch p95 -59.04%, binary-size reduction41.59%). A separate owned
+local HTTP/HTTPS proxy probe preserves all120 exact Go/native response pairs
+and every observed response interval. For30 sequential calls, ordinary proxy
+routes use one connection in both clients; the normalization-sensitive explicit
+port route uses30 native connections versus one Go connection. This includes
+ordinary explicitly written `:80`; there is no observed frequency basis for
+calling the route rare. Raw HTTP later-interval medians were0.633ms native versus
+0.174ms Go, and raw HTTPS2.241ms versus0.241ms. These debug-seam, local-fixture
+intervals include startup in the first observation and are not isolated Fetch
+timings or a new acceptance threshold. Connection reuse/TLS cost remains an open
+#773 optimization, alongside full pipeline/native-six-target cutover gates.
+Keep the complete current measurement, the prior loaded failure and the new
+pre-sample SDK-PATH bootstrap failure in `proxy-uri-e2`; no sample was discarded.

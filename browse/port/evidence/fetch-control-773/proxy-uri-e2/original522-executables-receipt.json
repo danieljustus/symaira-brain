@@ -1,0 +1,238 @@
+{
+  "head": "52236234a197f00de89edbb185fc762a4f121161",
+  "source": "1f82e9cf8812c5b383a19349241787215a857493",
+  "source_clean": true,
+  "target": "/workspace/symaira-fetch773/target",
+  "target_ignored": true,
+  "target_process_users": 0,
+  "archive": "/workspace/oracles/symaira-fetch773-522-binaries/actual-native-executables.tar.gz",
+  "archive_sha256": "28a3ef3988e264f4d3282e30789b023f0a64b5c1006b90df07fec9f2624225d1",
+  "archive_bytes": 123894479,
+  "executables": [
+    {
+      "path": "debug/deps/archive_http-670448e58dcfc8cb",
+      "sha256": "9759e12cba9ad5de7fd1f06567cf37395ca9cc4659469295896b6cdd1cb0d949",
+      "bytes": 15654312
+    },
+    {
+      "path": "debug/deps/archive_http-8f8a8a08c0e8f435",
+      "sha256": "269f39d1df66cd0610e1373846904dc92b5d1a9957525d1ae0ff7b3f62295242",
+      "bytes": 15669752
+    },
+    {
+      "path": "debug/deps/cache_identity-39ca3ec923c78a5f",
+      "sha256": "a1b469f4815e1ab9b3c96ce8cce92673b2a424f78947183b4ea99b74c724f176",
+      "bytes": 15132944
+    },
+    {
+      "path": "debug/deps/cache_identity-c5eff75a1a668c6d",
+      "sha256": "30f744eb7ae66fffe50cc5299a1ec984f610d95a10c0f61c3d5c668d522e69a5",
+      "bytes": 15156504
+    },
+    {
+      "path": "debug/deps/cancellation-839883b9b5ea5819",
+      "sha256": "aa237b800bd4a533f93a1f6ec299dcf49b3275c6cc31bf72348c0faa7f518def",
+      "bytes": 50562456
+    },
+    {
+      "path": "debug/deps/chrome_native-34ca40c1c3540e63",
+      "sha256": "923ac1193bed1e0f2925de1866769641ce5a7f005ab5e73f5c93ab263e9ad28f",
+      "bytes": 1079936
+    },
+    {
+      "path": "debug/deps/control_contract-0aa5367d5673e54a",
+      "sha256": "a612d33be1b43a4a1076b8bfd2cae342042d33ef5fb8cbbbc75c1aa23490e326",
+      "bytes": 2904464
+    },
+    {
+      "path": "debug/deps/control_contract-7f82b68873b09517",
+      "sha256": "ece65e967e38d3683754649d14802c95fb2558eafc64caaa7f8c03a373a62f07",
+      "bytes": 2933744
+    },
+    {
+      "path": "debug/deps/firefox_native-f718645d19729f0f",
+      "sha256": "258b58981ba17d7c79b0fee413d8717ca49c2cc58ea0c069c5488251403bc288",
+      "bytes": 1079944
+    },
+    {
+      "path": "debug/deps/flow_list-d6e96093c5be1461",
+      "sha256": "08dd068099563457fd8c7adb11e53a4fefeb97355c97e2229f51c979209292da",
+      "bytes": 1730248
+    },
+    {
+      "path": "debug/deps/help_oracle-de9b37a06e40131b",
+      "sha256": "7955ec21e473895049526d82d85b944f70ca9b43f5bf843847ea99f04a430e31",
+      "bytes": 1705232
+    },
+    {
+      "path": "debug/deps/http-8bde67fa7b5cec73",
+      "sha256": "ad18180ff945a3d98fdf9c6457e446e43b4a31949c829be948f91cbe7da44edd",
+      "bytes": 16158656
+    },
+    {
+      "path": "debug/deps/http-9c58a3e71222c610",
+      "sha256": "98b2ec0b8ea3819dd2cfbfc77ec625e72a95bdf2b9cd3ee52fbe44cfb531c434",
+      "bytes": 16151344
+    },
+    {
+      "path": "debug/deps/lifecycle-da975e8e1033ed55",
+      "sha256": "048ed7ca0ce244c326d3c32c9cb397f9c88b10393495fcdb7384112ef55c6dc7",
+      "bytes": 50592136
+    },
+    {
+      "path": "debug/deps/pipeline_controls-702bc7d01e71b2a7",
+      "sha256": "4cdb24b996c0224faa0e7074439c54c3c4eab2cfdd3fa309f54ee02feabbb478",
+      "bytes": 18472096
+    },
+    {
+      "path": "debug/deps/pipeline_controls-bda1de7220dd6306",
+      "sha256": "0b796001090de803d31ecb83c3e361325fd2626acf613ccfa2ea5dc6d58e2ffe",
+      "bytes": 18346408
+    },
+    {
+      "path": "debug/deps/platform-1ac36df6fac8f513",
+      "sha256": "9f0d10870e3fcab82ec8f2e49efd414b53ef1d8517b1bbe2cc75beb4afeeab13",
+      "bytes": 1079880
+    },
+    {
+      "path": "debug/deps/profiles-9a8f2d220d327cb8",
+      "sha256": "6ffe5d095b04f9520bbd3e210d428210ac106a8ed2ceb8ac50916b68bb503547",
+      "bytes": 1841672
+    },
+    {
+      "path": "debug/deps/protocol_fixture-4bfe1c4dcdad6eaf",
+      "sha256": "6a2700a3c89ef521d257bcf42d8ebc8582a71580452acdbced38e9854319f4dc",
+      "bytes": 4378680
+    },
+    {
+      "path": "debug/deps/render_corpus-76a55da5d07dc889",
+      "sha256": "72c9763ffb470a90f8db03aa7ca0212fe101af3e7b25f0ff7f23be3c4e74fade",
+      "bytes": 5534848
+    },
+    {
+      "path": "debug/deps/render_corpus-f9d06efb580c3f73",
+      "sha256": "62886f03830477540ad5a6d082da082994935fdb9bc26b671b16874e6289fee9",
+      "bytes": 5403136
+    },
+    {
+      "path": "debug/deps/retry-0139b5ad96e18e70",
+      "sha256": "78e98b424ab15d80c71ade6dec461d31994419757caf5d1133c94990f8fdf5ae",
+      "bytes": 3388480
+    },
+    {
+      "path": "debug/deps/retry-708c962e4807df82",
+      "sha256": "77ba0db6ff7a6478a4cb5222fb544d80e5d51a9a46a8d5186483153d85173c52",
+      "bytes": 3396768
+    },
+    {
+      "path": "debug/deps/robots-1b405d6bebd06f96",
+      "sha256": "ccb3efd7ec51d37a7c8d6effef1356ee44367af1988a553c0ab33f97f4b5148e",
+      "bytes": 11563952
+    },
+    {
+      "path": "debug/deps/robots-7d9694385454afb6",
+      "sha256": "e9d1295cfeaaa8c004e28927e6392aa59b3da7b5137e43d3da943212b68cb974",
+      "bytes": 11603728
+    },
+    {
+      "path": "debug/deps/safari_native-527045a01121fc0d",
+      "sha256": "142ee974b374f4c78d4cab67330a68c50ab5f21148f2315e00b69ade69b65c2e",
+      "bytes": 1079936
+    },
+    {
+      "path": "debug/deps/static_controls-2234f27fd46a846c",
+      "sha256": "610f278f29a3b6840c3f6d297c307ac7120670b22631255de60ccef96255be47",
+      "bytes": 5206776
+    },
+    {
+      "path": "debug/deps/static_controls-c64a93e9948e4a01",
+      "sha256": "d9da215eea2f0fea07590baf178c56b4bbbcd9ff583aec03b2b2a27e1d7d282b",
+      "bytes": 5396040
+    },
+    {
+      "path": "debug/deps/symbrowse-7f408b72c1a0568d",
+      "sha256": "6e44f0df403d7a8aafedf73667608b47864a5d540f5d15d6284b58b99966afe1",
+      "bytes": 53072096
+    },
+    {
+      "path": "debug/deps/symbrowse-dc337014870bffd2",
+      "sha256": "64208cec9daaf80df369beb9a8597aee9d90652f70ccea378c57d1fc5606683b",
+      "bytes": 16821800
+    },
+    {
+      "path": "debug/deps/symbrowse_daemon-8ba546e94571dad3",
+      "sha256": "97249e1b2f75a5db9698567652c60c9a42a2cf6e7b22984d68a6193e9f99c17d",
+      "bytes": 50499936
+    },
+    {
+      "path": "debug/deps/symbrowse_fetch-38e1451ef4b7e50a",
+      "sha256": "d666ce5ebb747fe02ae08d3d52d1ef0c3fb64b4b80423809bc4e2c22d86a9d77",
+      "bytes": 5354168
+    },
+    {
+      "path": "debug/deps/symbrowse_fetch-e7886b96cd6a3908",
+      "sha256": "d5bc5222065cd240ca8ca45bd1da256142241169ce8aaba956676e1e2b71423d",
+      "bytes": 5296696
+    },
+    {
+      "path": "debug/deps/upgrade_check_native-e393d1733d686da7",
+      "sha256": "9549c6b9d36daa943d637ae9b330dd554474edd51a9910161a9d0e9d6aa8b758",
+      "bytes": 1910536
+    },
+    {
+      "path": "debug/deps/version-bdf73ea90c390b72",
+      "sha256": "8b4bc2d92d1861a9e007dff81d9f4542a30c5e5cbd000d3aa0ae14152bcfa2f1",
+      "bytes": 1155936
+    },
+    {
+      "path": "debug/examples/control_probe",
+      "sha256": "5469c1e7b2ea7f1d3680aa40829bce7a5b109e371c58504e8ad0b03c53697cf6",
+      "bytes": 14823488
+    },
+    {
+      "path": "debug/examples/control_probe-8cc2ad6440dd3cf9",
+      "sha256": "b4fec112812c3e4cb7bbf353c842b760d563570e1bf2a0ef0523dbdd8c59c648",
+      "bytes": 1079936
+    },
+    {
+      "path": "debug/examples/control_probe-d854f8a1336277bc",
+      "sha256": "f800700550bcf10aa30252c4b1e7971580455b9cb63acea9ea8658755c0d38a2",
+      "bytes": 1079936
+    },
+    {
+      "path": "debug/examples/control_probe-fcbbc77c2005dcfd",
+      "sha256": "5469c1e7b2ea7f1d3680aa40829bce7a5b109e371c58504e8ad0b03c53697cf6",
+      "bytes": 14823488
+    },
+    {
+      "path": "debug/symbrowse",
+      "sha256": "6e44f0df403d7a8aafedf73667608b47864a5d540f5d15d6284b58b99966afe1",
+      "bytes": 53072096
+    },
+    {
+      "path": "release/deps/symbrowse-0c27a2d32f6a6112",
+      "sha256": "6384a60885922ed76902432712fd4ff2a82f63b0430cd8b06f0defeaa1834853",
+      "bytes": 10598888
+    },
+    {
+      "path": "release/symbrowse",
+      "sha256": "6384a60885922ed76902432712fd4ff2a82f63b0430cd8b06f0defeaa1834853",
+      "bytes": 10598888
+    }
+  ],
+  "go_binaries": [
+    {
+      "path": "/workspace/oracles/symaira-fetch773-522-binaries/fresh-go-probe",
+      "sha256": "8e92be70d9b908c11f47720b1bf34c5717b327c246686dbb71e03b336f820786",
+      "bytes": 19682949
+    },
+    {
+      "path": "/workspace/oracles/symaira-fetch773-522-binaries/go-release",
+      "sha256": "221b047aa18e2c4eb421dd970de18e6e82372059c492f6bd52ac337c95c5a5f6",
+      "bytes": 26611127
+    }
+  ],
+  "verification": "Every archived executable decompressed and SHA256 verified before target reuse; original source/evidence unchanged",
+  "reused_target_location": "/workspace/symaira-fetch773-proxy-uri/target",
+  "target_reuse_operation": "rename after archive roundtrip verification; no target duplication"
+}
