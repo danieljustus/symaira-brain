@@ -284,7 +284,12 @@ fn shutdown_kills_descendant_process_group() {
         marker.to_str().expect("utf8 path"),
     )]));
     let _ = server.list_tools().expect("list tools");
-    wait_until(|| marker.exists());
+    // Creating the marker precedes writing its PID. Wait for the complete
+    // newline-terminated record so scheduling cannot expose an empty file.
+    wait_until(|| {
+        std::fs::read_to_string(&marker)
+            .is_ok_and(|record| record.ends_with('\n') && record.trim().parse::<u32>().is_ok())
+    });
     let pid = std::fs::read_to_string(&marker)
         .expect("read marker")
         .trim()

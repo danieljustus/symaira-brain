@@ -9,8 +9,14 @@ The Rust binary already owns top-level help, `version`, all `config` actions,
 and `profile help|list|show|add` plus `audit tail`; the native core also owns
 profile policy, the deterministic merged tool catalog, and the redacting
 hash-chained audit store. Pattern promotion and bounded activity-read contracts
-are native as well; DB-backed activity commands still delegate until the memory
-SQLite phase. `profile remove` is now native as well: it uses the harness registry
+are native as well; activity search/get/status, including flag and window
+validation, run natively. The ACT-CLI acceptance runner checks the original five
+report cases plus 237 portable validation cases and twenty-eight raw Unix argv cases
+against real immutable Go processes. Three actual fixture mutation controls
+reject missing files, changed exits and incomplete case sets; exact-head native
+Linux/macOS/Windows CI is required before merge. Importer and activity-store extensions remain in #761.
+Dynamic memory configuration and unported memory commands retain their
+existing Go fallback. `profile remove` is now native as well: it uses the harness registry
 for binding checks, fails closed on unsafe/unreadable/malformed configs unless
 `--force` is explicitly supplied, and retains capability-rooted profile parents
 through no-follow removal. The Go implementation remains the source-bound oracle
