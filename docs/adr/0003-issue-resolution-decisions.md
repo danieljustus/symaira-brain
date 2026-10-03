@@ -140,3 +140,33 @@ Gates. Kandidatenspezifische Messungen und ursprüngliche Fehlversuche bleiben
 unter `migration/evidence/`; sie werden nicht nachträglich zu Erfolgen erklärt.
 Historische Handoffs bleiben erhalten. Dieses Dokument ist ein veröffentlichtes
 ADR, nicht ein Abschlussnachweis für den gesamten Backlog.
+
+### E009 — Integrate native Memory adapters with the reviewed store
+
+Extend PR803 with the independently reviewed Memory CLI on main31de722.
+The store/evidence and adapter implement one database contract and share
+acceptance dependencies. Preserve all original concurrency/path/JSON failures,
+and require both native Memory workflows on the final integrated head.
+Fresh independent590 Memory/265 Activity observations and119 tests, plus
+separate59 Memory/Gateway tests and83 Go evidence observations, bind this
+combination. Historical333 is not a current-run claim. Full758 and649 remain
+open; Doctor must inspect actual schema, not only quick_check/bookkeeping.
+
+### E010 — Keep the reachable Memory web interface; retire the unreachable TUI target
+
+Actual frozen Go1.26.7 dependency inspection finds the embedded web package
+reachable through memory serve/Brain HTTPHandler, and no TUI dependency in the
+shipped Brain command tree. Twelve actual Go/native CLI pairs also reject
+memory tui/web/dashboard/console commands identically. Evidence and exact
+source/binary hashes live in migration/evidence/memory-ui-763.
+
+Port the existing reachable browser interface and its auth/API interactions
+with the native Memory HTTP server (#759/#762). It provides a cross-platform
+interface, including systems without the macOS app, so keeping it preserves
+useful access without inventing a separate frontend or database contract.
+Retire the unused standalone TUI migration target rather than adding a new
+CLI product that the shipped command tree never exposed. The maintained
+native app and scriptable Memory CLI remain complementary access paths.
+This delegated maintainer decision changes the implementation plan, not the
+running frozen Go oracle. #763 stays open until the reachable HTTP UI is
+implemented, independently reviewed and tested. No zero-case parity claim.
