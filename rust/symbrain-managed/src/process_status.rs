@@ -139,7 +139,7 @@ mod tests {
             (42, "exit status 42"),
             (65535, "exit status 65535"),
             (65536, "exit status 0x10000"),
-            (0xc0000005, "exit status 0xc0000005"),
+            (0xc000_0005, "exit status 0xc0000005"),
         ] {
             assert_eq!(format(std::process::ExitStatus::from_raw(code)), expected);
         }

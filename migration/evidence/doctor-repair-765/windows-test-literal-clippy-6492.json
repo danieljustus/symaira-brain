@@ -1,0 +1,18 @@
+{
+  "pr": 806,
+  "failed_head": "6492db7c19ce5ce9200dbe40f04584e52aee5633",
+  "run_id": 37146902471,
+  "job_id": 111272634808,
+  "platform": "windows-2025",
+  "failure": "strict Clippy unreadable_literal in Windows-only test, process_status.rs:142",
+  "original_literal": "0xc0000005",
+  "corrected_literal": "0xc000_0005",
+  "numeric_value_unchanged": true,
+  "production_code_changed_by_fix": false,
+  "actual_main": "31de72294521701fc4b1a0bce39f03cc34d72e7e",
+  "local_checks": [
+    "workspace cargo fmt --check",
+    "git diff --check"
+  ],
+  "fresh_native_three_os_ci": "required"
+}
