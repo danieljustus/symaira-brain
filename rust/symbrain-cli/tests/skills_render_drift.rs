@@ -104,6 +104,10 @@ struct Fixture {
 }
 
 fn fixture(target: &str) -> Fixture {
+    fixture_with_mode(target, if cfg!(unix) { "symlink" } else { "copy" })
+}
+
+fn fixture_with_mode(target: &str, mode: &'static str) -> Fixture {
     let temp = tempfile::tempdir().unwrap();
     let home = temp.path().join("home");
     let data = temp.path().join("data");
@@ -120,7 +124,6 @@ fn fixture(target: &str) -> Fixture {
     let cache = data.join("symskills/rendered");
     // Windows copy reports do not require developer-mode link privileges.
     // Native link behavior is covered in the skills crate's OS tests.
-    let mode = if cfg!(unix) { "symlink" } else { "copy" };
     install_rendered(
         &bundle,
         &rendered,
@@ -220,4 +223,116 @@ fn write_observations(observations: &[serde_json::Value]) {
         )
         .unwrap();
     }
+}
+
+#[cfg(any(unix, windows))]
+#[test]
+fn unreadable_real_render_links_keep_json_and_table_reports_read_only() {
+    for kind in ["nested-link", "depth", "fifo"] {
+        if kind == "fifo" && !cfg!(unix) {
+            continue;
+        }
+        let Fixture {
+            temp,
+            cache,
+            mut command,
+            ..
+        } = fixture_with_mode("hermes", "symlink");
+        let cached = cache.join("hermes/example");
+        match kind {
+            "nested-link" => {
+                let outside = temp.path().join("outside");
+                fs::create_dir(&outside).unwrap();
+                fs::write(outside.join("secret.md"), "OUTSIDE_SECRET_SENTINEL").unwrap();
+                #[cfg(unix)]
+                std::os::unix::fs::symlink(&outside, cached.join("outside-link")).unwrap();
+                #[cfg(windows)]
+                std::os::windows::fs::symlink_dir(&outside, cached.join("outside-link")).unwrap();
+            }
+            "depth" => {
+                let mut path = cached.clone();
+                for _ in 0..=symbrain_skills::MAX_RESOURCE_DEPTH {
+                    path = path.join("d");
+                    fs::create_dir(&path).unwrap();
+                }
+            }
+            "fifo" => assert!(
+                Command::new("mkfifo")
+                    .arg(cached.join("blocked"))
+                    .status()
+                    .unwrap()
+                    .success()
+            ),
+            _ => unreachable!(),
+        }
+        let before = snapshot(temp.path());
+        let diagnostic = match kind {
+            "nested-link" => "contains symlink",
+            "depth" => "maximum directory depth",
+            "fifo" => "contains special file",
+            _ => unreachable!(),
+        };
+        command.args(["skills", "status", "--target", "hermes"]);
+        let table = command.output().unwrap();
+        assert!(table.status.success(), "{kind}");
+        assert!(table.stderr.is_empty(), "{kind}");
+        let table = String::from_utf8(table.stdout).unwrap();
+        assert!(
+            table.starts_with("TARGET\tSKILL\tSTATUS\tMODE\tPATH\tRENDER\n"),
+            "{kind}"
+        );
+        assert!(table.ends_with("\tunreadable\n"), "{kind}: {table}");
+        command.arg("--json");
+        let json = command.output().unwrap();
+        assert!(json.status.success(), "{kind}");
+        assert!(json.stderr.is_empty(), "{kind}");
+        let report: serde_json::Value = serde_json::from_slice(&json.stdout).unwrap();
+        let row = &report["installs"][0];
+        assert_eq!(row["status"], "stale", "{kind}");
+        assert_eq!(row["render_status"], "unreadable", "{kind}");
+        assert_eq!(row["error"], row["render_error"], "{kind}");
+        assert!(
+            row["error"].as_str().unwrap().contains(diagnostic),
+            "{kind}"
+        );
+        assert_eq!(row["mode"], "symlink", "{kind}");
+        assert!(row.get("render_drift").is_none(), "{kind}");
+        assert_eq!(report["summary"]["stale"], 1, "{kind}");
+        assert!(!String::from_utf8_lossy(&json.stdout).contains("OUTSIDE_SECRET_SENTINEL"));
+        assert_eq!(snapshot(temp.path()), before, "{kind}: status wrote state");
+    }
+}
+
+fn snapshot(root: &std::path::Path) -> std::collections::BTreeMap<std::path::PathBuf, Vec<u8>> {
+    fn visit(
+        root: &std::path::Path,
+        relative: &std::path::Path,
+        output: &mut std::collections::BTreeMap<std::path::PathBuf, Vec<u8>>,
+    ) {
+        for entry in fs::read_dir(root.join(relative)).unwrap() {
+            let entry = entry.unwrap();
+            let path = relative.join(entry.file_name());
+            let kind = entry.file_type().unwrap();
+            if kind.is_dir() {
+                output.insert(path.clone(), b"directory".to_vec());
+                visit(root, &path, output);
+            } else if kind.is_symlink() {
+                output.insert(
+                    path,
+                    fs::read_link(entry.path())
+                        .unwrap()
+                        .as_os_str()
+                        .as_encoded_bytes()
+                        .to_vec(),
+                );
+            } else if kind.is_file() {
+                output.insert(path, fs::read(entry.path()).unwrap());
+            } else {
+                output.insert(path, Vec::new());
+            }
+        }
+    }
+    let mut output = std::collections::BTreeMap::new();
+    visit(root, std::path::Path::new(""), &mut output);
+    output
 }

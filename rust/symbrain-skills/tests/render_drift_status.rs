@@ -79,6 +79,7 @@ fn snapshot(root: &Path) -> BTreeMap<PathBuf, Vec<u8>> {
             let path = relative.join(entry.file_name());
             let kind = entry.file_type().unwrap();
             if kind.is_dir() {
+                result.insert(path.clone(), b"directory".to_vec());
                 visit(root, &path, result);
             } else if kind.is_symlink() {
                 result.insert(
@@ -89,8 +90,10 @@ fn snapshot(root: &Path) -> BTreeMap<PathBuf, Vec<u8>> {
                         .as_encoded_bytes()
                         .to_vec(),
                 );
-            } else {
+            } else if kind.is_file() {
                 result.insert(path, fs::read(entry.path()).unwrap());
+            } else {
+                result.insert(path, Vec::new());
             }
         }
     }
@@ -255,4 +258,56 @@ fn render_special_files_are_rejected_without_opening_them() {
     assert!(start.elapsed() < std::time::Duration::from_secs(2));
     assert_eq!(row.render_status, Some(RenderStatus::Unreadable));
     assert!(row.render_error.unwrap().contains("special file"));
+}
+
+#[cfg(any(unix, windows))]
+#[test]
+fn unreadable_linked_render_keeps_both_comparison_diagnostics() {
+    for kind in ["nested-link", "depth", "fifo"] {
+        if kind == "fifo" && !cfg!(unix) {
+            continue;
+        }
+        let fixture = Fixture::new("hermes", "symlink");
+        match kind {
+            "nested-link" => {
+                let outside = fixture.root.path().join("outside");
+                fs::create_dir(&outside).unwrap();
+                fs::write(outside.join("secret.md"), "OUTSIDE_SECRET_SENTINEL").unwrap();
+                link_directory(&outside, &fixture.cached.join("outside-link"));
+            }
+            "depth" => {
+                let mut path = fixture.cached.clone();
+                for _ in 0..=symbrain_skills::MAX_RESOURCE_DEPTH {
+                    path = path.join("d");
+                    fs::create_dir(&path).unwrap();
+                }
+            }
+            "fifo" => assert!(
+                std::process::Command::new("mkfifo")
+                    .arg(fixture.cached.join("blocked"))
+                    .status()
+                    .unwrap()
+                    .success()
+            ),
+            _ => unreachable!(),
+        }
+        let before = snapshot(fixture.root.path());
+        let row = fixture.row();
+        assert_eq!(row.status, StatusKind::Stale, "{kind}");
+        assert_eq!(row.render_status, Some(RenderStatus::Unreadable), "{kind}");
+        assert_eq!(row.error, row.render_error, "{kind}");
+        assert!(row.error.is_some(), "{kind}");
+        assert_eq!(row.mode.as_deref(), Some("symlink"), "{kind}");
+        assert!(row.render_drift.is_empty(), "{kind}");
+        assert!(
+            !serde_json::to_string(&row)
+                .unwrap()
+                .contains("OUTSIDE_SECRET_SENTINEL")
+        );
+        assert_eq!(
+            snapshot(fixture.root.path()),
+            before,
+            "{kind}: status wrote state"
+        );
+    }
 }

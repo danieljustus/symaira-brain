@@ -78,56 +78,67 @@ where
         super::render_status::inspect(&mut row, options, installed, &fresh.root);
         row
     };
-    if let Some(manifest) = read_manifest_for(
-        &options.home_dir,
-        options.base_dir.as_deref(),
-        target,
-        if options.scope.is_empty() {
-            "user"
-        } else {
-            options.scope.as_str()
-        },
-        name,
-        options.project_dir.as_deref(),
-    )? {
-        let base_hashes = manifest_hashes(&manifest);
+    // A retained cache is a separate observation: even an unreadable installed
+    // tree must retain its render diagnostic once a fresh render is available.
+    let comparison = (|| -> Result<InstallStatus, SkillError> {
+        if let Some(manifest) = read_manifest_for(
+            &options.home_dir,
+            options.base_dir.as_deref(),
+            target,
+            if options.scope.is_empty() {
+                "user"
+            } else {
+                options.scope.as_str()
+            },
+            name,
+            options.project_dir.as_deref(),
+        )? {
+            let base_hashes = manifest_hashes(&manifest);
+            let left = file_hashes(&fresh.root, false)?;
+            let right = file_hashes(installed, false)?;
+            let drifts = classify_drift(&base_hashes, &left, &right);
+            let summary = summarize(&drifts);
+            let (status, include_drift, error) = match summary {
+                DriftSummary::InSync => (StatusKind::InSync, false, None),
+                DriftSummary::Stale => (StatusKind::Stale, false, None),
+                DriftSummary::HarnessChanged => (StatusKind::HarnessChanged, true, None),
+                DriftSummary::Conflict => {
+                    (StatusKind::Conflict, true, Some(conflict_error(&drifts)))
+                }
+                DriftSummary::Converged => (StatusKind::InSync, false, None),
+            };
+            return Ok(common(
+                status,
+                if include_drift { drifts } else { Vec::new() },
+                error,
+            ));
+        }
+        let fresh_hash = fresh.source_hash;
+        if !marker.source_hash.is_empty() {
+            return Ok(common(
+                if marker.source_hash == fresh_hash {
+                    StatusKind::InSync
+                } else {
+                    StatusKind::Stale
+                },
+                Vec::new(),
+                None,
+            ));
+        }
         let left = file_hashes(&fresh.root, false)?;
         let right = file_hashes(installed, false)?;
-        let drifts = classify_drift(&base_hashes, &left, &right);
-        let summary = summarize(&drifts);
-        let (status, include_drift, error) = match summary {
-            DriftSummary::InSync => (StatusKind::InSync, false, None),
-            DriftSummary::Stale => (StatusKind::Stale, false, None),
-            DriftSummary::HarnessChanged => (StatusKind::HarnessChanged, true, None),
-            DriftSummary::Conflict => (StatusKind::Conflict, true, Some(conflict_error(&drifts))),
-            DriftSummary::Converged => (StatusKind::InSync, false, None),
+        let status = if left == right {
+            StatusKind::InSync
+        } else {
+            StatusKind::Stale
         };
-        return Ok(common(
-            status,
-            if include_drift { drifts } else { Vec::new() },
-            error,
-        ));
+        Ok(common(status, Vec::new(), None))
+    })();
+    match comparison {
+        Ok(row) => Ok(row),
+        // Preserve the existing Go stale/error classification and summary.
+        Err(error) => Ok(common(StatusKind::Stale, Vec::new(), Some(error.0))),
     }
-    let fresh_hash = fresh.source_hash;
-    if !marker.source_hash.is_empty() {
-        return Ok(common(
-            if marker.source_hash == fresh_hash {
-                StatusKind::InSync
-            } else {
-                StatusKind::Stale
-            },
-            Vec::new(),
-            None,
-        ));
-    }
-    let left = file_hashes(&fresh.root, false)?;
-    let right = file_hashes(installed, false)?;
-    let status = if left == right {
-        StatusKind::InSync
-    } else {
-        StatusKind::Stale
-    };
-    Ok(common(status, Vec::new(), None))
 }
 
 pub(super) fn conflict_error(drifts: &[super::drift::FileDrift]) -> String {
