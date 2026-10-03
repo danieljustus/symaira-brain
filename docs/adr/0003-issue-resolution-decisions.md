@@ -170,3 +170,28 @@ native app and scriptable Memory CLI remain complementary access paths.
 This delegated maintainer decision changes the implementation plan, not the
 running frozen Go oracle. #763 stays open until the reachable HTTP UI is
 implemented, independently reviewed and tested. No zero-case parity claim.
+
+### E011 — Strip fragments from automatic redirect Referer headers
+
+Retain the native removal of URI fragments when deriving the Referer for a
+redirect from the previous URL. RFC9110 section10.1.3 requires Referer values
+to exclude URI fragments and userinfo. Fragments are client-side navigation
+state and can contain sensitive values; redirecting them to an HTTP server is
+not a useful compatibility requirement. This delegated decision deliberately
+preserves the safer native behavior rather than reproducing the observed
+Go1.26.7 fragment disclosure.
+
+The independent immutable Fetch522/1f82 replay has eight actual HTTP pairs:
+seven exact matches and one fragment-derived Referer difference. Preserve its
+unmodified Go/native bytes under migration/evidence/fetch-referer-policy-773.
+This policy applies to the automatically derived redirect header. An explicit
+caller-supplied Referer remains caller-owned and byte-compatible with Go; the
+same replay proves that case. Do not generalize this exception to other
+headers, request targets, routing or authentication.
+
+The Fetch successor must document the boundary in its ADR and contract matrix
+and exercise it as a separate intentional-difference case. Its four additional
+proxy absolute-form port mismatches and declared CI-runner failure are defects
+requiring correction, not covered by this exception. All historical failures,
+frozen Go and existing assertions remain intact. Full #773 and native six-target
+acceptance remain open.
