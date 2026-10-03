@@ -5,6 +5,10 @@ umask 022
 oracle_ref=dcddcef0df5789123c7c9a7ebe6e01f10e941f2c
 report="${1:?usage: scripts/guard-standalone-oracle/run.sh REPORT_JSON}"
 owned="$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/guard-standalone-770.XXXXXX")"
+# Git Bash receives RUNNER_TEMP as a native Windows path; tar needs its MSYS form.
+if command -v cygpath >/dev/null 2>&1; then
+  owned="$(cygpath -u "$owned")"
+fi
 trap 'rm -rf "$owned"' EXIT
 mkdir -p "$owned/go-source/oracle770"
 git archive "$oracle_ref" | tar -xf - -C "$owned/go-source"

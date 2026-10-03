@@ -1,0 +1,27 @@
+{
+  "integrated_source": "efc25a1fa9ffe738ccddb5e1f917eb034771be46",
+  "main": "31de72294521701fc4b1a0bce39f03cc34d72e7e",
+  "reviewed_head": "e867c2bb88b9931f83f93ad7e880b84c9a0260f8",
+  "workflow_conflict_resolution": "Preserved all three complete Guard acceptance/artifact blocks and added all three complete Activity acceptance/artifact blocks; no weakened or omitted paths. Fresh actionlint passed.",
+  "component": {
+    "passed": 62,
+    "failed": 0,
+    "ignored": 0,
+    "log_sha256": "69e53fc925df01466d1d4822ea75558feeaeb8f412043ebc89fe953410e7fa97"
+  },
+  "brain_adapter": {
+    "passed": 4,
+    "failed": 0,
+    "ignored": 0,
+    "log_sha256": "12d8a6fd5b15524b510293353443fad31b5a10e94dfbdf506f65ffb3ef52e664"
+  },
+  "process": {
+    "cases": 80,
+    "complete_matches": 76,
+    "explicit_remaining_doctor": 3,
+    "inherited_audit_diagnostic": 1
+  },
+  "native_three_os": "fresh CI required",
+  "strict_clippy": "fresh pass",
+  "fmt": "fresh pass"
+}
