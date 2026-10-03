@@ -1,5 +1,8 @@
 //! Independent subprocess evidence for the native MCP CLI migration.
 
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
 use std::io::Write;
 use std::process::{Command, Output, Stdio};
 use std::thread;
@@ -125,7 +128,7 @@ fn command(root: &TempDir, args: &[&str]) -> Command {
         }
     }
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
-    command.env_clear();
+    command.env_clear().envs(coverage::profile_environment());
     #[cfg(windows)]
     {
         for key in [

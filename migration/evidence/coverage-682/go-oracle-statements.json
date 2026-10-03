@@ -1,0 +1,47 @@
+{
+  "oracles": [
+    "policy",
+    "catalog",
+    "audit",
+    "patterns-activity"
+  ],
+  "toolchain": "go1.26.7",
+  "denominator_blocks": 19867,
+  "unit": {
+    "covered": 19357,
+    "count": 29386,
+    "percent": 65.87150343701082
+  },
+  "combined": {
+    "covered": 19586,
+    "count": 29386,
+    "percent": 66.65078608861363
+  },
+  "product_code_diagnostic": {
+    "covered": 19186,
+    "count": 24415,
+    "percent": 78.58283841900472
+  },
+  "baseline_sha256": "02d2bf1ae5ce5ecc31f31e89c738312030ab1c26bafa8c242bcd4b42424329c8",
+  "oracle_profile_sha256": "6beaf63ed63f46de82faab02a30bf55a11eeb275adf35c3e9bf6fb8b14a6f370",
+  "combined_sha256": "ba666e062f66b1db0009cb764a321d289574ba1314e0cdb8ab6b75e9014abf1e",
+  "source_sha256": {
+    "scripts/policy-oracle/cases.go": "424e579ee3bc3fe593d6f43d5bad7c4e813c86d63739b13d4ef70efa589e5a98",
+    "scripts/policy-oracle/decode_cases.go": "16200ca87f4c60c5fc93031c3ccc3ec17ace872ffea7bbe299bceef0aceca375",
+    "scripts/policy-oracle/main.go": "1b6ef2aa7ade2b9d69591a3938e1e7b81b3c00649abb765a88132bae4d552c60",
+    "scripts/policy-oracle/policy_cases.go": "b3db24151f72db61036815e3a43de07ca557b57e8764462748178f16529d4026",
+    "scripts/policy-oracle/types.go": "c421c1ce233b70fee2240d37989c29377e688c990f092c93dfb223057601180f",
+    "scripts/catalog-oracle/main.go": "8db498c849427636e3a1ff0b9afd6e1398c001b093d77951f5cf9648577a7fa0",
+    "scripts/audit-oracle/main.go": "a6fa78353f577cdf8c8415a378fa2cf2614f92ba054469c93462aa9952f19885",
+    "scripts/patterns-activity-oracle/main.go": "db507627dbec00c6b03f8cf411272344262b11b38b2f2da0c98f1e5b50f931eb"
+  },
+  "unit_profile_provenance": {
+    "workflow_run": 37112549823,
+    "artifact_id": 11271124780,
+    "artifact_sha256": "f0c889ac0c0f7c4996375a5b66351f02859db8eef62bbe5a3f031cf9fc4bd121",
+    "code_head": "51b12565fd2e1fae955bddc2e5eb82119e9eaa1e",
+    "merge_head": "e4c1a6381474d6d9ef7f010c14bf0a6fc6170045",
+    "go_source_base": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+    "note": "Go sources, go.mod and go.sum are unchanged across these revisions. Isolated HOME/XDG in the instrumented four-oracle replay; no Go source or existing fixture modifications."
+  }
+}

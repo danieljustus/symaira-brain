@@ -1,5 +1,8 @@
 #![cfg(unix)]
 
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
 use std::process::{Command, Output};
@@ -54,6 +57,7 @@ impl DoctorFixture {
     fn doctor(&self) -> Output {
         Command::new(env!("CARGO_BIN_EXE_symbrain"))
             .env_clear()
+            .envs(coverage::profile_environment())
             .env("HOME", &self.home)
             .env("USERPROFILE", &self.home)
             .env("XDG_CONFIG_HOME", self.root.path().join("config"))
