@@ -11,3 +11,5 @@ migration/evidence/usage-files-windows-runner/*.log binary
 
 # Preserve the actual historical failed-suite log bytes.
 migration/evidence/usage-copilot-kimi-768/original-unit-failure/original-tests.log -text
+migration/evidence/usage-copilot-kimi-768/linux-f75993e/**/*.log -text
+migration/evidence/usage-copilot-kimi-768/linux-f75993e/*.log -text

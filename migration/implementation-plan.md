@@ -2063,18 +2063,30 @@ independent review remain required; USE-001/#768 stays open.
 
 ## Usage #768 — bounded Copilot/Kimi file successor, 2026-10-03
 
-Normal integration retains independently approved parentfdfea204 and original97
-Go-only baseline. All112 native ELF paths/74 unique binaries are archived by hash
-before reusing the released Files target in the successor worktree. Copilot uses
-ordered root replacement/typed-entry semantics, apps-before-hosts and the exact
-`github.com:` pass; distinct eligible tokens remain Go-gated. Kimi follows typed
-access-token/null/error semantics with unchanged home/strategy precedence. File
-references remain literal. Both use the shared bounded reader/depth guard;
-unreadable/unsafe sources, unproven devices and existing platform/config/host
-gates remain. New86-input process coverage preserves66 original baseline file
-inputs and adds20 cases. Require81 full comparisons/five gates on Linux/macOS,
-80/six on Windows, all read-only checks, private CLI bytes and five actual failing
-controls plus the three full parent process gates on clean final source. The
-initial WIP constructor/CLI gate passes81/111/five on Linux; final clean source
-validation and native target evidence remain required. No full USE-001/#768
-closure follows. See `docs/adr/usage-copilot-kimi-files-768.md` for rationale.
+Normal integration retains independently approved parent fdfea204 and the original
+97-case Go-only baseline. All112 native ELF paths/74 unique binaries were archived
+by hash before the released Files target was reused in this isolated lane.
+Copilot uses ordered root replacement/typed-entry semantics, apps-before-hosts
+and the literal `github.com:` pass; distinct eligible tokens remain Go-gated.
+Kimi follows typed access-token/null/error behavior and unchanged home/strategy
+precedence. File references stay literal. Both use the shared bounded reader and
+depth guard; unsafe/unreadable sources, unproven device/header values and existing
+platform/config/host gates remain.
+
+Clean source f75993e passes89 actual Go cases:81 full native reports/requests and
+eight explicit eligibility gates,111 CLI byte/exit comparisons and five rejected
+replay controls. Native Windows requires80 full comparisons/nine gates. Every
+original97 input is mapped:66 exactly retained,31 freshly replayed through the
+unchanged original Go helper and native routing/read-only checks. Those31 are
+not claimed as native full-report parity. Original baseline sources/receipt and
+frozen fixtures are verified unchanged. Original bare-GitHub unit failure is
+retained, and internal token/device newlines keep Go pending real HTTP evidence.
+
+The same clean source passes the complete parent Files86/151, Hermes96/104 and
+Reference44/110 gates with five real controls each. All59/55/53/49 source manifests
+and46 shared entries agree. The ordinary suite passes355 tests/zero failures/four
+ignored oracle seams, followed by strict all-target/all-feature Clippy, fmt and
+CI syntax checks. A prior run without the required subreaper produced a real
+unrelated descendant-cleanup failure; both raw logs remain in the evidence.
+Native macOS/Windows exact-candidate CI and independent full review are required.
+No full USE-001/#768 closure follows. See the ADR and tracked Linux f75993e evidence.

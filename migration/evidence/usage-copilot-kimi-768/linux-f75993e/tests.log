@@ -1,0 +1,140 @@
+    Blocking waiting for file lock on package cache
+   Compiling symbrain-usage v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-usage)
+   Compiling symbrain-cli v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-cli)
+    Finished `test` profile [unoptimized] target(s) in 5.97s
+     Running unittests src/lib.rs (target/debug/deps/symbrain_cli-9a0c1d60fb8b1821)
+
+running 117 tests
+test audit_cli::tests::parses_tail_flags_and_ignores_positionals_after_first ... ok
+test audit_cli::tests::formats_human_entry_like_go ... ok
+test config_cli::tests::no_subcommand_matches_go_usage ... ok
+test activity_cli::tests::invalid_get_and_status_budgets_match_usage_before_opening_database ... ok
+test config_cli::tests::unknown_subcommand_matches_go_error ... ok
+test doctor_cli::doctor_process::executable_name_tests::windows_lookup_follows_pathext_order_and_ignores_extensionless_files ... ok
+test doctor_cli::doctor_process::tests::rejects_malformed_pid_before_kill_check ... ok
+test activity_cli::tests::db_override_is_used_by_each_activity_read_command ... ok
+test doctor_cli::doctor_process::tests::pid_checker_detects_live_child_before_dead ... ok
+test doctor_cli::tests::arbitrary_vault_stderr_is_not_exposed ... ok
+test doctor_cli::tests::doctor_argument_parser_accepts_go_flag_forms ... ok
+test doctor_cli::tests::help_lists_the_go_owned_force_release_flag ... ok
+test doctor_cli::tests::json_harness_entries_match_go_basename_and_profile_rules ... ok
+test doctor_cli::tests::nonzero_version_probe_cannot_be_accepted ... ok
+test doctor_cli::tests::only_enabled_lifecycle_flags_require_go ... ok
+test doctor_cli::tests::secret_reference_classification_is_compatible_with_go ... ok
+test doctor_cli::tests::toml_harness_entries_preserve_sorted_server_names ... ok
+test guard_cli::guard_doctor::tests::allowlist_is_deny_by_default_and_prefix_matched ... ok
+test guard_cli::guard_doctor::tests::audit_status_reports_all_three_states ... ok
+test guard_cli::guard_doctor::tests::config_parses_the_healthy_fixture_and_gates_on_invalid_toml ... ok
+test guard_cli::guard_doctor::tests::multiple_secret_keys_on_one_server_are_sorted ... ok
+test guard_cli::guard_doctor::tests::secret_heuristic_matches_go ... ok
+test guard_cli::guard_doctor::tests::unsupported_missing_equals_offenders_stay_gated ... ok
+test guard_cli::guard_scan::tests::empty_format_value_resolves_to_default ... ok
+test guard_cli::guard_scan::tests::json_typed_fields_fail_instead_of_being_dropped ... ok
+test guard_cli::guard_scan::tests::jsonc_preserves_urls_and_removes_comments ... ok
+test guard_cli::guard_scan::tests::missing_source_error_classification_matches_go_platform_behavior ... ok
+test guard_cli::guard_scan::tests::opencode_environment_is_merged_and_redacted ... ok
+test guard_cli::guard_scan::tests::source_paths_clean_parent_components ... ok
+test guard_cli::guard_scan::tests::yaml_environment_is_not_merged ... ok
+test guard_cli::tests::audit_path_prefers_xdg_then_home_then_temp ... ok
+test guard_cli::tests::decide_preserves_go_trailing_json_diagnostic ... ok
+test guard_cli::tests::top_level_guard_routes_match_go ... ok
+test guard_cli::tests::unknown_verb_matches_go_dispatch ... ok
+test doctor_cli::doctor_process::tests::terminates_timed_out_probe ... ok
+test health_probe::tests::latency_keeps_sub_millisecond_measurement_as_a_fraction ... ok
+test health_probe::tests::sse_reply_parser_accepts_jsonrpc_data_and_ignores_other_events ... ok
+test health_probe::tests::stdio_argument_credential_guards_are_conservative ... ok
+test doctor_cli::doctor_process::tests::drains_large_stdout_and_stderr_without_deadlock ... ok
+test health_probe::tests::streamable_http_accepts_bounded_sse_rpc_replies ... ok
+test health_probe::tests::streamable_http_negotiates_protocol_and_pings_with_session ... ok
+test health_probe::tests::unsupported_transports_and_credentials_never_get_probe_metadata ... ok
+test init_cli::tests::help_flag_outputs_usage ... ok
+test init_cli::tests::malformed_flag_preserves_go_diagnostic ... ok
+test init_cli::tests::mkdir_collision_reports_first_failing_ancestor ... ok
+test init_cli::tests::symlink_loop_preserves_stat_context ... ok
+test init_cli::tests::unknown_flag_fails_with_usage ... ok
+test health_probe::tests::streamable_http_rejects_malformed_and_error_replies_without_leaking_body ... ok
+test install_cli::tests::foreign_symbrain_entry_is_not_removed ... ok
+test install_cli::tests::parser_accepts_all_install_flags ... ok
+test install_cli::tests::superseded_names_are_exact_basenames ... ok
+test mcp_cli::tests::inline_flags_accept_both_dash_forms ... ok
+test mcp_cli::tests::configured_module_path_reads_server_override ... ok
+test memory_cli::tests::hand_written_usage_shapes_stay_native ... ok
+test memory_cli::tests::json_output_escapes_what_the_shipped_encoder_escapes ... ok
+test mcp_cli::tests::url_only_foreign_server_matches_go_warning_and_is_skipped ... ok
+test memory_cli::tests::memory_sync_with_arguments_stays_on_go ... ok
+test memory_cli::tests::query_log_json_matches_go_fixture ... ok
+test memory_cli::tests::query_log_rejects_positionals_and_unknown_flags ... ok
+test memory_cli::tests::query_log_normalizes_schema_default_timestamp ... ok
+test memory_cli::tests::query_log_table_and_actor_filter_match_go_shape ... ok
+test memory_cli::tests::search_flags_consume_their_values ... ok
+test memory_cli::tests::search_keeps_go_for_shapes_the_native_path_does_not_own ... ok
+test memory_cli::tests::search_prints_the_shipped_usage_for_help ... ok
+test memory_cli::tests::search_refuses_a_missing_query_with_the_shipped_message ... ok
+test passthrough::tests::config_binary_path_is_read_from_nested_table ... ok
+test passthrough::tests::configured_path_diagnostic_preserves_non_utf8_bytes ... ok
+test passthrough::tests::empty_config_binary_path_is_not_an_override ... ok
+test passthrough::tests::managed_binary_requires_regular_executable_file ... ok
+test passthrough::tests::path_lookup_finds_binary_in_ordered_path_entry ... ok
+test passthrough::tests::windows_path_extensions_match_go_defaults ... ok
+test setup_cli::config::tests::go_parse_bool_spellings_and_empty_env_contract ... ok
+test setup_cli::config::tests::optional_browse_selection_matches_go_default_and_explicit_values ... ok
+test setup_cli::config::tests::toml_false_does_not_clear_prior_true_like_configkit ... ok
+test setup_cli::flags::tests::help_lists_the_go_owned_module_lifecycle_flags ... ok
+test setup_cli::flags::tests::parse_flags_and_stop_at_first_positional_match_go_flagset ... ok
+test setup_cli::flags::tests::unknown_flag_has_go_usage_shape ... ok
+test skills_cli::tests::explicit_target_status_is_native_only_for_absent_user_roots ... ok
+test skills_cli::tests::list_fallback_uses_cached_typed_inventory_issues ... ok
+test skills_cli::tests::sync_project_dir_matches_absolute_working_directory ... ok
+test sync_cli::tests::help_flag_prints_bare_usage_not_unknown_flag_rejection ... ok
+test sync_cli::tests::unknown_flag_matches_go_flag_package_rejection ... ok
+test tests::config_get_executes_in_process ... ok
+test tests::config_get_extra_arg_rejected ... ok
+test tests::config_get_normalizes_extra_flag ... ok
+test tests::config_path_normalizes_unexpected_flags ... ok
+test tests::config_path_prints_path ... ok
+test tests::config_path_rejects_extra_argument ... ok
+test tests::config_set_executes_in_process ... ok
+test tests::config_terminator_before_get ... ok
+test tests::config_terminator_before_set ... ok
+test tests::fallback_executor_receives_unmigrated_commands_only ... ok
+test tests::help_matches_frozen_usage ... ok
+test tests::json_help_exits_usage_with_unknown_command ... ok
+test tests::missing_command_prints_help_and_exits_usage ... ok
+test tests::module_lifecycle_flags_are_forwarded_to_the_go_fallback ... ok
+test tests::run_in_process_returns_none_for_unmigrated_commands ... ok
+test tests::unknown_command_quotes_properly ... ok
+test tests::unrelated_native_doctor_and_setup_invocations_do_not_fallback ... ok
+test tests::version_bare_hyphen_treated_as_positional ... ok
+test tests::version_help_flags_print_usage_only ... ok
+test tests::version_json_keeps_schema ... ok
+test tests::version_json_order_variants ... ok
+test tests::version_rejects_unknown_flag ... ok
+test tests::version_rejects_unknown_flag_with_value ... ok
+test tests::version_terminator_alone_succeeds ... ok
+test tests::version_terminator_with_extra_arg_rejected ... ok
+test tests::version_terminator_with_flag_arg_rejected_as_positional ... ok
+test tests::version_terminator_with_json_succeeds ... ok
+test tests::version_unexpected_argument ... ok
+test tests::version_version_exits_usage_with_unexpected_argument ... ok
+test memory_cli::tests::query_log_table_sanitizes_multiline_query_text ... ok
+test usage_cli::tests::help_is_native_without_resolving_credentials ... ok
+test usage_cli::tests::table_matches_go_shape ... ok
+test usage_cli::fetch_output_tests::usage_fetch_620_cli_json_and_table_match_go_bytes ... ok
+test health_probe::tests::http_deadline_and_redirect_refusal_are_measured_and_redacted ... ok
+test doctor_cli::doctor_process::tests::retained_descendant_pipes_cannot_extend_timeout ... FAILED
+
+failures:
+
+---- doctor_cli::doctor_process::tests::retained_descendant_pipes_cannot_extend_timeout stdout ----
+
+thread 'doctor_cli::doctor_process::tests::retained_descendant_pipes_cannot_extend_timeout' (1934876) panicked at rust/symbrain-cli/src/doctor_process.rs:323:13:
+descendant retained after timeout cleanup
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    doctor_cli::doctor_process::tests::retained_descendant_pipes_cannot_extend_timeout
+
+test result: FAILED. 116 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.04s
+
+error: test failed, to rerun pass `-p symbrain-cli --lib`

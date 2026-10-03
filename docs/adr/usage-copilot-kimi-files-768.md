@@ -95,3 +95,23 @@ retained byte-for-byte under
 `migration/evidence/usage-copilot-kimi-768/original-unit-failure/`, including its
 real64-pass/one-failure/two-ignored result. Correcting the deterministic fixture
 to the literal colon prefix does not rewrite frozen or original Go evidence.
+
+
+## Observed Linux checkpoint
+
+Clean source `f75993eb5155502a69a249c345c258b4277dece2` passes the89-case
+Copilot/Kimi gate (81 full reports/requests, eight retained gates,111 actual CLI
+comparisons and five real failing controls). Its same-source parent regressions
+pass Files86/151, Hermes96/104 and Reference44/110, each with five controls.
+Manifest counts59/55/53/49 and46 shared hashes verify against source. The exact
+original97 accounting, fresh complete Go replay,31 native route observations and
+all raw inputs/reports/headers are retained in `migration/evidence/usage-copilot-kimi-768/linux-f75993e/`.
+
+Ordinary all-features CLI/Usage tests pass355/zero failures/four ignored oracle
+seams, with strict Clippy/fmt/actionlint passing. The first ordinary run omitted
+the required container subreaper and failed the unrelated descendant-cleanup
+assertion; it is preserved in `tests.log`. The unchanged source's full rerun using
+the required subreaper passes in `tests-subreaper.log`. This correction changes
+only process ownership during verification, with no skipped or relaxed test.
+This is author validation on Linux; independent review and native exact-head
+macOS/Windows CI still determine acceptance. #768 remains open.
