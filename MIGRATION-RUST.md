@@ -67,6 +67,11 @@ preserving Go's committed failure state; a supplemental real-process gate adds
 six callback pairs and two Unix sink pairs where available. Original findings
 and reviewed executable hashes remain retained. Corrected independent review
 and native three-OS acceptance remain pending.
+Clean corrected source `647477f` passes fresh Linux 60 Set/16 Delete/13 actual
+Go boundary pairs, six governance callback pairs, two real Unix output sinks,
+all three write controls, 590 baseline pairs and both baseline controls. All
+163 affected Rust tests and strict lint gates pass. The old independent failure
+bytes/executable archives and new full state proof remain tracked separately.
 
 Independent review found two configured-read differences in the initial CLI
 candidate: memory-specific XDG/legacy resolution and populated rules JSON HTML/

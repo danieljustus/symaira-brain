@@ -1,8 +1,8 @@
 # Governed native CLI writes for Memory (#758)
 
-Status: the original Linux candidate passed its authored gate, but independent
-review requested two corrections. Corrected acceptance and native three-OS CI
-remain pending. Full #758 remains open.
+Status: independent review requested two corrections to the original candidate.
+The corrected candidate passes fresh authored Linux gates; corrected independent
+review and native three-OS CI remain pending. Full #758 remains open.
 
 ## Decision
 
@@ -147,3 +147,13 @@ archived and SHA-verified before reusing the released target. The correction
 normally integrates parent `7ca3bed0`'s default-path fixture handle ownership fix.
 No frozen Go production source, schema-repair ownership or routing admission was
 changed to disguise either finding.
+
+Clean corrected source `647477f63688b09f313f93e27cc8222d2f5b1450` passes all
+60 Set, 16 Delete, 13 delegated-Go boundary and eight failure-state pairs, with
+three actual write controls. All 590 baseline pairs and both baseline controls
+pass. Fresh 163 affected Rust tests pass (118 CLI, 33 Memory unit, four Go
+fixture, seven store and one complete Activity fixture), with strict Clippy,
+format and workflow lint. The source-bound raw receipts, test/binary hashes and
+retention checks are under
+`migration/evidence/memory-cli-758/governed-write-fix-647477f/verification.json`.
+This is author validation and does not replace the required independent review.
