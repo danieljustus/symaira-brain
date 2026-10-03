@@ -1,4 +1,4 @@
-"""SKL-007 / #621: validate the added drift fields before projecting Go bytes."""
+"""SKL-008 / #621: validate the added drift fields before projecting Go bytes."""
 import hashlib
 import json
 from pathlib import Path

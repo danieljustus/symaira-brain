@@ -3276,9 +3276,9 @@ def main() -> int:
                     try:
                         rust_stdout = legacy_render_view(case.name, go_stdout, rust_stdout, rust_root)
                     except (AssertionError, ValueError, TypeError, KeyError, OSError) as err:
-                        failures.append(f"{case.name}: SKL-007 render contract failed: {err}")
+                        failures.append(f"{case.name}: SKL-008 render contract failed: {err}")
                         continue
-                    print(f"ACCEPTED SKL-007 {case.name} (validated render drift contract)")
+                    print(f"ACCEPTED SKL-008 {case.name} (validated render drift contract)")
                 observed = (rust_result.returncode, rust_stdout, rust_stderr)
                 expected = (go_result.returncode, go_stdout, go_stderr)
                 if observed != expected:
