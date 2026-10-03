@@ -23,3 +23,10 @@ The supplemental Go process entrypoint imports unchanged public command packages
 The current scoped runner executes 80 cases: 76 exact matches after owned-path and truthful toolchain handling, three explicitly unported doctor states checked fail closed, and one retained audit failure diagnostic deviation. These are scoped process contracts, not zero-unported acceptance. Native Linux/macOS/Windows CI must run the new named gate and retain the receipt. The standalone binary is buildable from source; release/signing/distribution and issue closure are not claimed by this ADR.
 
 The product decision restores independent Guard usability while preserving the Brain/Guard and Room/Guard boundaries. It supersedes the Go-only standalone-retirement assumption for this Rust entrypoint, without inventing currently unshipped CLI commands or retiring future Guard library capabilities.
+
+After Activity PR800, normal-integrate main31de722 and retain both complete
+Guard and Activity acceptance/artifact blocks on all three OS jobs. Repeat
+the actual80-case Guard process gate, component tests and Brain adapter
+contracts; preserve the3 unported Doctor states and1 inherited diagnostic
+deviation. This verifies the current CLI combination without converting
+partial #770 evidence into completion. Fresh native CI still gates merge.
