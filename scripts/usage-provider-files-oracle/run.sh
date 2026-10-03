@@ -7,7 +7,11 @@ source "$repo_root/scripts/run-external-env.sh"
 external_env
 output=${1:?usage: run.sh OUTPUT_JSON}
 output=$(python3 -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "$output")
-scratch=$(mktemp -d "${TMPDIR:-/tmp}/symbrain-provider-files-768.XXXXXX")
+temporary_root=${TMPDIR:-/tmp}
+if command -v cygpath >/dev/null 2>&1; then
+  temporary_root=$(cygpath -u "$temporary_root")
+fi
+scratch=$(mktemp -d "$temporary_root/symbrain-provider-files-768.XXXXXX")
 source_root="$scratch/source"
 evidence_dir="${output%.json}.evidence"
 mkdir -p "$evidence_dir"

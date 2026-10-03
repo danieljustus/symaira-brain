@@ -5,3 +5,6 @@
 # Treat them as binary so Git preserves those exact bytes and diff checks do not
 # mistake the carriage returns for accidental trailing whitespace.
 fuzz/corpus/** binary
+
+# Preserve original native CI log bytes, including CRLF.
+migration/evidence/usage-files-windows-runner/*.log binary

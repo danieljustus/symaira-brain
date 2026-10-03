@@ -44,3 +44,17 @@ and fresh native evidence before the routing functions themselves can be removed
 No real provider accounts or system Keychain entries are needed for the current
 reference-adapter gate, and their absence is not represented as a passing host
 integration receipt.
+
+## Own executable and temporary-path selection on Windows
+
+Actual native Windows CI on published f241 (run37155540582, job111298062507)
+failed before credential/provider/Hermes comparisons: rustc emits both
+symvault.exe and its symvault.pdb, and the fixture copy glob selected both
+for a single security.exe destination. Copy only the explicitly selected
+platform executable. Keep its fixture behavior and all corpus/control assertions.
+Normalize each of the three owned temporary roots with cygpath -u before Bash
+path operations; convert fixture paths back to native form at process boundaries.
+The complete original CI log is retained byte-identically under
+migration/evidence/usage-files-windows-runner/. Repeat all three real Linux
+gates on the clean corrected source; native Windows/macOS must still pass.
+This fixes test ownership/path handling and does not widen production routing.
