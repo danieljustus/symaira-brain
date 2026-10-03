@@ -18,7 +18,7 @@
     "rust/symbrain-memory/src/lib.rs": "c539c1dad9dfe5f712bcaa4714162d4bb5109a96c271217e6317e4ef0ec41390",
     "rust/symbrain-memory/src/list_rows.rs": "4c7b0328e69db23d2f1f2ed13886e8cca3d6572fc696dd1bf15985d9ae5b5771",
     "rust/symbrain-memory/src/lsh.rs": "fe482f424364baefc4bb50caae158db185a82c87bdb4538788712dcd572556a9",
-    "rust/symbrain-memory/src/migration.rs": "1bd4f25567e91c528e56c289ea49cf1ce869f0d0eccd3ac76d4fbe32ad677b70",
+    "rust/symbrain-memory/src/migration.rs": "837e1bfb55d02d569bc708beea2b9d460e6d2e751a73236425d5624e5911f74c",
     "rust/symbrain-memory/src/model.rs": "dfd905688801ad6b1faca9bcc6ea74b6892b3dfab775c7663b0d501d26b25659",
     "rust/symbrain-memory/src/retrieval.rs": "3f14cd8e48042735bb3399aa9edd53621cfcaee57a029fbf984fc0d9d8905eee",
     "rust/symbrain-memory/src/rows.rs": "df335ae17fce3f7221cc41ef9f8f511dd88ffd0c9235e5c6ec1ad84c6ba28dc3",
@@ -34,7 +34,7 @@
     "rust/symbrain-memory/tests/fixtures/memory_evidence_go_v017.json": "ff78755268228615685cbd4ddbb72247b3dbc201765f27e784237bd013dc30a2",
     "rust/symbrain-memory/tests/store_contract_tests.rs": "7e08cb5bf0872468efc8d2b238ca86e5bbdac0df00e93129d08f6327fd3073d3",
     "scripts/memory-evidence-oracle/README.md": "b0fac6d352d002fcd58fbbf4ed5e8483c266627b6d73a5e4fd54741180966eb7",
-    "scripts/memory-evidence-oracle/controls.py": "d7e63fe34693cf0448885b3424b4a3a99321841d57eb6fa4ca8f92f02a18ba43",
+    "scripts/memory-evidence-oracle/controls.py": "36d5705484c856d071147745a7929e3d73bbdcb167f8cda195bbeaf0999f7691",
     "scripts/memory-evidence-oracle/main.go.txt": "5764e9093d81294536815be185d39c5a41eafd7a834535870c281a64bd877d80",
     "scripts/memory-evidence-oracle/replay.py": "ab7102ab5136f2d63854e11a8d8c24df514fd7e73d58991b8745be6f598e1413",
     "scripts/memory-evidence-oracle/run.sh": "8b83598b9646b95b3b77560c437419556718398247b72ca3fa2e4d4d1ba1acc5"
@@ -111,7 +111,7 @@
   "corekit_evidence_source_sha256": "8316336a261e6ab9ff8c525bdf8cae09c052a71c938d93204870b1b4d1808e54",
   "generator_sha256": "5764e9093d81294536815be185d39c5a41eafd7a834535870c281a64bd877d80",
   "fixture_sha256": "ff78755268228615685cbd4ddbb72247b3dbc201765f27e784237bd013dc30a2",
-  "candidate_revision": "86986facaa1db36d7fe0efbe8d80715071949e5b",
+  "candidate_revision": "8d2eefc5c02a77de7eccddb486f5b227e91b079d",
   "candidate_dirty": false,
   "go_version": "go version go1.26.7 linux/amd64",
   "alignment_cases": 32,
@@ -126,13 +126,19 @@
   ],
   "operator_home_used": false,
   "local_rust_validation": {
-    "source_revision": "f54389209cc0cb76b38e3f7653567313d3a2c346",
-    "source_equivalence_to_candidate": "only scripts/memory-evidence-oracle/controls.py changed; all Rust production/test files byte-identical",
+    "source_revision": "8d2eefc5c02a77de7eccddb486f5b227e91b079d",
+    "candidate_dirty": false,
     "test_command": "cargo test -p symbrain-memory -p symbrain-cli -p symbrain-gateway --all-targets --all-features --locked",
-    "passed": 332,
+    "passed": 333,
     "failed": 0,
     "ignored": 0,
     "parent_summaries": 33,
+    "affected_memory_tests": 42,
+    "cli_gateway_consumer_tests": 291,
+    "concurrent_public_opener_rounds": 10,
+    "threads_per_round": 8,
+    "concurrent_committed_writes": 80,
+    "preserved_initial_rows": 1,
     "clippy": "all three affected packages; all-targets all-features locked -D warnings passed",
     "fmt": "cargo fmt --all -- --check passed",
     "actionlint": "1.7.12 memory-evidence-native.yml passed"
@@ -146,9 +152,24 @@
     "issue_649_shipped": false
   },
   "logs_sha256": {
-    "symaira-memory758-final-tests.log": "deb331d59a99c6c88b360cc7555fd3c460ebf433f02de8fa9c29216267b31b3f",
-    "symaira-memory758-final-clippy.log": "7b94c48e7c0a0fca7451a96b2a454a105445adb0df9b2e546d3c90a9cc27ebee",
-    "symaira-memory758-final-oracle.log": "9e23193a2a7d601f786ecf686232cc720ae3de56a81cdec93a0641fd260e7e58",
+    "symaira-memory758-final-tests.log": "836595411e4161af8662bdfbfd9b38d70c413051e45ad14055369fb352f89365",
+    "symaira-memory758-final-clippy.log": "7a1083c6369f6ef018411652de00adb35fd0699d6c6da3864e17f33a56f2f073",
+    "symaira-memory758-final-oracle.log": "3065ea79ebdad3a563e3dfc77e784ee718966bdbde1095c83e93bfdab8782509",
     "symaira-memory758-final-controls.log": "7bfa35c2627b82a0c21bdab6fa0eddf4bc6c0c00951714f1bf161e3197424cf3"
+  },
+  "compiled_memory_rlib_sha256": "373f2f945aa2cfeeaf0ff5368bce3cf9011bfc06187de626ab44ef8ed1226ba3",
+  "independent_correction_verification": {
+    "source_revision": "8d2eefc5c02a77de7eccddb486f5b227e91b079d",
+    "rlib_sha256": "373f2f945aa2cfeeaf0ff5368bce3cf9011bfc06187de626ab44ef8ed1226ba3",
+    "separate_linked_public_api_probe_trials": 5,
+    "threads_per_trial": 8,
+    "all_trials_exit_code": 0,
+    "original_legacy_data_preserved": true,
+    "all_five_columns_repaired": true,
+    "committed_rows_each_trial": 11,
+    "affected_memory_tests": 42,
+    "immutable_go_evidence_replay": "passed",
+    "real_failure_controls": 3,
+    "receipt": "independent-fixed-concurrency.json"
   }
 }

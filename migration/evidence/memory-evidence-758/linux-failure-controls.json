@@ -1,5 +1,5 @@
 {
-  "candidate_revision": "86986facaa1db36d7fe0efbe8d80715071949e5b",
+  "candidate_revision": "8d2eefc5c02a77de7eccddb486f5b227e91b079d",
   "controls": [
     {
       "case": "missing-fixture",
@@ -20,5 +20,6 @@
       "observed_reason": true
     }
   ],
-  "unchanged_fixture_reencode_byte_identical": true
+  "unchanged_fixture_reencode_byte_identical": true,
+  "mutation_fixture_encoding": "UTF-8 raw bytes; no Windows newline translation"
 }
