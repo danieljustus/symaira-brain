@@ -96,3 +96,21 @@ writable/readonly directory at default.db is0777/0555 rather than0666/0444.
 Preserve this distinction before SQLite rejects the directory. A Windows-only
 actual CLI regression checks both attribute states and the absence of a private
 ACL claim. It is not executed by local Linux tests; native Windows must run it.
+
+## Independent acceptance and separate issue fix
+
+The complete independent review of immutable e4e06371 approves the source,
+closes the original view false-green and Windows mode findings, and retains all
+original failures. Fresh44 Memory/16 Doctor tests, three actual Go/native
+observations, eight additional read-only process cases and the actual unchanged
+Go false-green control are archived with exact hashes. Windows-specific file
+attributes and the extra fourth oracle observation still require native CI.
+
+Publish this bounded #649 diagnostic fix separately from the larger Memory
+#758 and Doctor #765 ports. It normally integrates their reviewed parents
+(PR803 head9c0ed065 and PR806 head1288b7a4); those dependency PRs must merge
+first, then this PR must integrate current main and pass its protected checks
+and all three schema-native jobs. This avoids mixing the separate schema
+acceptance with broader fallback-removal claims or creating mutual parent
+dependencies. Later parent Windows fixes must be normally integrated and the
+combined source checked. No issue is closed on local evidence alone.
