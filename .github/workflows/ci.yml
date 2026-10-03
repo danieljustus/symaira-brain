@@ -217,6 +217,19 @@ jobs:
           cargo build -p symbrain-cli --bin symbrain --locked
           python3 scripts/mcp-differential.py "$RUNNER_TEMP/symbrain-go-mcp" target/debug/symbrain
 
+      - name: Go/Rust native setup repair process parity
+        shell: bash
+        run: scripts/setup-repair-oracle/run.sh "$RUNNER_TEMP/setup-repair-parity.json"
+
+      - name: Preserve setup repair process parity evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: setup-repair-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/setup-repair-parity.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Go/Rust vault administration process parity
         run: |
           python3 -m unittest discover -s scripts/vault-admin-oracle -p test_replay.py -v
@@ -318,6 +331,19 @@ jobs:
 
       - name: Rust MCP stdio and lifecycle gate on macOS
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
+
+      - name: Go/Rust native setup repair process parity
+        shell: bash
+        run: scripts/setup-repair-oracle/run.sh "$RUNNER_TEMP/setup-repair-parity.json"
+
+      - name: Preserve setup repair process parity evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: setup-repair-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/setup-repair-parity.json
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Go/Rust vault administration process parity
         run: |
@@ -431,6 +457,19 @@ jobs:
           SYMBRAIN_VERSION=dev cargo build --workspace --locked
           ./guard/scripts/guard-scan-oracle/run.sh parity target/debug/symbrain.exe
           python3 scripts/rust-differential.py "$RUNNER_TEMP/symbrain-go.exe" target/debug/symbrain.exe
+
+      - name: Go/Rust native setup repair process parity
+        shell: bash
+        run: scripts/setup-repair-oracle/run.sh "$RUNNER_TEMP/setup-repair-parity.json"
+
+      - name: Preserve setup repair process parity evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: setup-repair-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/setup-repair-parity.json
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Go/Rust vault administration process parity
         shell: bash

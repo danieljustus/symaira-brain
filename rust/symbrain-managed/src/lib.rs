@@ -14,3 +14,4 @@ pub use install::{InstallOutcome, Installer, installed_version, versions_match};
 pub use manifest::{
     COSIGN_OIDC_ISSUER, Core, ManagedError, Manifest, Platform, download_url, normalize_version,
 };
+pub use provenance::is_brain_source_install;
