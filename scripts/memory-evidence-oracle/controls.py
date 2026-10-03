@@ -14,16 +14,26 @@ def main():
     args = parser.parse_args()
     repo = Path(__file__).resolve().parents[2]
     fixture = repo / "rust/symbrain-memory/tests/fixtures/memory_evidence_go_v017.json"
-    original = json.loads(fixture.read_bytes())
+    original_bytes = fixture.read_bytes()
+    original = json.loads(original_bytes)
+    def encode(value):
+        rendered = json.dumps(value, indent=2, ensure_ascii=False) + "\n"
+        for raw, escaped in [("&", "\\u0026"), ("<", "\\u003c"), (">", "\\u003e"),
+                             ("\u2028", "\\u2028"), ("\u2029", "\\u2029")]:
+            rendered = rendered.replace(raw, escaped)
+        return rendered
+    # Preserve the Go encoder's formatting so these controls fail because of
+    # the actual semantic mutation, rather than incidental reformatting.
+    assert encode(original).encode() == original_bytes
     results = []
     with tempfile.TemporaryDirectory(prefix="memory-evidence-controls-") as temporary:
         root = Path(temporary)
         changed = json.loads(json.dumps(original))
         changed["alignments"][3]["status"] = "unmatched"
-        (root / "changed-status.json").write_text(json.dumps(changed))
+        (root / "changed-status.json").write_text(encode(changed))
         missing_case = json.loads(json.dumps(original))
         missing_case["alignments"].pop()
-        (root / "missing-case.json").write_text(json.dumps(missing_case))
+        (root / "missing-case.json").write_text(encode(missing_case))
         for name, reason in [("missing-fixture", "FileNotFoundError"),
                              ("changed-status", "actual Go output differs"),
                              ("missing-case", "actual Go output differs")]:
