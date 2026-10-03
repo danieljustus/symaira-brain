@@ -153,6 +153,13 @@ live releases.
 Primary assets now fall back to legacy names only on HTTP 404; checksum,
 publisher-verification, and other failures stay fail-closed. Version probes
 have a three-second bound and reap descendant process groups on Unix.
+Windows probes retain Go's original-file existence check and PATHEXT candidate
+selection instead of executing an extensionless PE directly. Release downloads
+avoid reusing HTTP/1.0 connections closed after a missing-primary response.
+The setup repair acceptance runner compares 151 real Go/Rust processes and full
+fixture filesystems with no Go fallback. Source builds, module flags and doctor
+repair remain open in #765; all three native CI receipts are required before
+merging this repair increment.
 
 Rust skill input hardening (#476) checks control-file and normalized frontmatter
 bounds before allocating the full document or parsing YAML. Resource traversal

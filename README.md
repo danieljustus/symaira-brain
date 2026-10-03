@@ -414,6 +414,12 @@ never silently overwritten with a download. Replacing it requires an
 explicit `symbrain setup --from-source` re-run or `doctor --fix
 --force-release`.
 
+In the Rust migration entrypoint, release `setup --fix` and
+`--force-release` run natively when the typed configuration loads successfully.
+Repairs preserve intentional source builds unless replacement is requested.
+Source builds (`--from-source`/`--modules`), configuration-load failure
+diagnostics and `doctor --fix` still use the Go implementation under #765.
+
 Repeatable local replacement packages (archive + SHA-256 + provenance
 manifest per module) come from:
 

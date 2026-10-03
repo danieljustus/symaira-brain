@@ -6,10 +6,7 @@ use std::fs::{self, File};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use std::thread;
-use std::time::{Duration, Instant};
 
-use serde::Deserialize;
 use ureq::Agent;
 
 use crate::{
@@ -18,7 +15,6 @@ use crate::{
 };
 
 const DEFAULT_BASE_URL: &str = "https://github.com";
-const VERSION_PROBE_TIMEOUT: Duration = Duration::from_secs(3);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum InstallOutcome {
@@ -64,7 +60,12 @@ impl Installer {
             temp_dir: None,
             base_url: base_url.into(),
             allow_unsigned,
-            client: ureq::agent(),
+            // Release servers may close HTTP/1.0 connections after an error.
+            // Do not reuse a closed connection for the alternate asset URL.
+            client: Agent::config_builder()
+                .max_idle_connections(0)
+                .build()
+                .into(),
         })
     }
 
@@ -348,125 +349,6 @@ fn executable_names(binary: &str) -> Vec<OsString> {
     {
         vec![OsString::from(binary)]
     }
-}
-
-#[derive(Deserialize)]
-struct VersionPayload {
-    version: String,
-}
-
-/// Probes `<binary> version --json`, returning an empty string when absent.
-///
-/// # Errors
-/// Returns an error when the process cannot start, times out, exits non-zero,
-/// or emits malformed JSON.
-pub fn installed_version(bin_dir: &Path, binary_name: &str) -> Result<String, ManagedError> {
-    let path = bin_dir.join(binary_name);
-    if !path.exists() {
-        return Ok(String::new());
-    }
-
-    let output = tempfile::NamedTempFile::new()
-        .map_err(|error| ManagedError::IoContext("create version output".to_string(), error))?;
-    let output_writer = output
-        .reopen()
-        .map_err(|error| ManagedError::IoContext("open version output".to_string(), error))?;
-    let mut command = Command::new(&path);
-    command
-        .arg("version")
-        .arg("--json")
-        .stdin(Stdio::null())
-        .stdout(Stdio::from(output_writer))
-        .stderr(Stdio::null());
-    configure_probe_process(&mut command);
-    let mut child = command
-        .spawn()
-        .map_err(|error| ManagedError::Process(format!("probe {binary_name}: {error}")))?;
-    let process_group = child.id();
-    let started = Instant::now();
-    loop {
-        match child.try_wait() {
-            Ok(Some(status)) => {
-                terminate_probe_descendants(process_group);
-                let bytes = fs::read(output.path()).map_err(ManagedError::Io)?;
-                if !status.success() {
-                    return Err(ManagedError::Process(format!(
-                        "probe {binary_name}: process exited with {status}"
-                    )));
-                }
-                let payload: VersionPayload = serde_json::from_slice(&bytes).map_err(|error| {
-                    ManagedError::Process(format!("parse {binary_name} version: {error}"))
-                })?;
-                return Ok(payload.version);
-            }
-            Ok(None) if started.elapsed() < VERSION_PROBE_TIMEOUT => {
-                thread::sleep(Duration::from_millis(10));
-            }
-            Ok(None) => {
-                terminate_probe(&mut child, process_group);
-                return Err(ManagedError::Process(format!(
-                    "probe {binary_name}: timed out"
-                )));
-            }
-            Err(error) => {
-                terminate_probe(&mut child, process_group);
-                return Err(ManagedError::Process(format!(
-                    "probe {binary_name}: {error}"
-                )));
-            }
-        }
-    }
-}
-
-#[cfg(unix)]
-fn configure_probe_process(command: &mut Command) {
-    use std::os::unix::process::CommandExt;
-    command.process_group(0);
-}
-
-#[cfg(not(unix))]
-fn configure_probe_process(_command: &mut Command) {}
-
-fn terminate_probe(child: &mut std::process::Child, process_group: u32) {
-    #[cfg(unix)]
-    {
-        signal_probe_group(process_group, "-TERM");
-        let deadline = Instant::now() + Duration::from_millis(250);
-        while Instant::now() < deadline {
-            if child.try_wait().ok().flatten().is_some() {
-                terminate_probe_descendants(process_group);
-                return;
-            }
-            thread::sleep(Duration::from_millis(10));
-        }
-        terminate_probe_descendants(process_group);
-        let _ = child.wait();
-    }
-    #[cfg(not(unix))]
-    {
-        let _ = process_group;
-        let _ = child.kill();
-        let _ = child.wait();
-    }
-}
-
-#[cfg(unix)]
-fn terminate_probe_descendants(process_group: u32) {
-    signal_probe_group(process_group, "-KILL");
-}
-
-#[cfg(not(unix))]
-fn terminate_probe_descendants(_process_group: u32) {}
-
-#[cfg(unix)]
-fn signal_probe_group(process_group: u32, signal: &str) {
-    let _ = Command::new("/bin/kill")
-        .arg(signal)
-        .arg("--")
-        .arg(format!("-{process_group}"))
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status();
 }
 
 #[must_use]

@@ -1,0 +1,168 @@
+{
+  "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "candidate_head": "c67e62e4a5ec1eea4edda178de5117c0963a7212",
+  "candidate_dirty": true,
+  "runtime": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "total": 151,
+  "exit": 1,
+  "matches": false,
+  "go_binary_sha256": "eee40219406ad08dcd88f7cde56de71ed4d277d196c90016155e1fe386a44cd4",
+  "rust_binary_sha256": "69465d6cc9253f6c9d2648ef335da416d64066fe679afd1d2d5196cca8331b23",
+  "comparison": "stdout/stderr/exit and full fixture filesystem/modes; only fixture roots, release scratch names and newly written release timestamps (validated within this run) normalized; pre-existing source sidecars remain exact",
+  "candidate_source_sha256": {
+    "rust/symbrain-cli/src/setup_cli.rs": "e068a23610485db4caa515f11048e960b5026d6237a0c266eb0a84e6b9c0557e",
+    "rust/symbrain-cli/src/setup_args.rs": "ef62c564e91b277958420101562632027980415374fc59dcc0c76bf94d526878",
+    "rust/symbrain-cli/src/setup_config.rs": "a8338db6477d65e1bbfa9ed24556cd8b4f8f59f67d4036da1b66f04ca2d3caa0",
+    "rust/symbrain-cli/src/vault_config.rs": "1b1538509663c718b27bfbe7fde07bf89fa12e15ee933ac321e65ff0c50a175d",
+    "rust/symbrain-managed/src/provenance.rs": "3beee7a3a45f82c02a24ce69134921d9ede6f76dd7f7e5f4857f9dc0300e9d66",
+    "rust/symbrain-managed/src/provenance_json.rs": "6667fc1d287dbfef9b5eaa4f2945118493fd2b0729a49615747997a581f1bfff",
+    "scripts/setup-repair-oracle/replay.py": "9083ff0b43f6bfb171c54ac9634a0ce9b0d808d38f1a0b81a0b521cc7b4a4a25",
+    "scripts/rust-differential.py": "5fe1ac2a3e4fde3295a3c39122f1adec0c9e151eb3aaaf25f4ccf3ab3ae76864"
+  },
+  "case": "setup_lone_hyphen",
+  "observations": [
+    {
+      "binary": "/tmp/setup-repair-765.XFyTM1/symbrain-go",
+      "args": [
+        "setup",
+        "-"
+      ],
+      "exit": 1,
+      "stdout_base64": "ICAtICBzeW1jb2NrcGl0IDAuNi4yICh1bnN1cHBvcnRlZCBwbGF0Zm9ybSkKCkluc3RhbGxlZCB0byAvdG1wL3N5bWJyYWluLXBhcml0eS02NHE4NjB5eS9nby9ob21lLy5zeW1haXJhL2Jpbgo=",
+      "stderr_base64": "ICDinJcgIHN5bWRlc2s6IG1hbmFnZWQ6IGRvd25sb2FkIHN5bWRlc2s6IGNvc2lnbjogY2Fubm90IHZlcmlmeSBwdWJsaXNoZXIgc2lnbmF0dXJlIGZvciBzeW1kZXNrX2xpbnV4X2FtZDY0LnRhci5nejogY29zaWduIGlzIG5vdCBpbnN0YWxsZWQgb24gUEFUSCAoZXhlYzogImNvc2lnbiI6IGV4ZWN1dGFibGUgZmlsZSBub3QgZm91bmQgaW4gJFBBVEgpIChwYXNzIC0tYWxsb3ctdW5zaWduZWQgdG8gaW5zdGFsbCBhbnl3YXkgYXQgeW91ciBvd24gcmlzaykKICDinJcgIHN5bXZhdWx0OiBtYW5hZ2VkOiBkb3dubG9hZCBzeW12YXVsdDogY29zaWduOiBjYW5ub3QgdmVyaWZ5IHB1Ymxpc2hlciBzaWduYXR1cmUgZm9yIHN5bXZhdWx0X2xpbnV4X2FtZDY0LnRhci5nejogY29zaWduIGlzIG5vdCBpbnN0YWxsZWQgb24gUEFUSCAoZXhlYzogImNvc2lnbiI6IGV4ZWN1dGFibGUgZmlsZSBub3QgZm91bmQgaW4gJFBBVEgpIChwYXNzIC0tYWxsb3ctdW5zaWduZWQgdG8gaW5zdGFsbCBhbnl3YXkgYXQgeW91ciBvd24gcmlzaykK",
+      "fixture_root": "/tmp/symbrain-parity-64q860yy/go",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/symaira-setup765/target/debug/symbrain",
+      "args": [
+        "setup",
+        "-"
+      ],
+      "exit": 1,
+      "stdout_base64": "ICAtICBzeW1jb2NrcGl0IDAuNi4yICh1bnN1cHBvcnRlZCBwbGF0Zm9ybSkKCkluc3RhbGxlZCB0byAvdG1wL3N5bWJyYWluLXBhcml0eS02NHE4NjB5eS9ydXN0L2hvbWUvLnN5bWFpcmEvYmluCg==",
+      "stderr_base64": "ICDinJcgIHN5bWRlc2s6IG1hbmFnZWQ6IGRvd25sb2FkIHN5bWRlc2s6IGNvc2lnbjogY2Fubm90IHZlcmlmeSBwdWJsaXNoZXIgc2lnbmF0dXJlIGZvciBzeW1kZXNrX2xpbnV4X2FtZDY0LnRhci5nejogY29zaWduIGlzIG5vdCBpbnN0YWxsZWQgb24gUEFUSCAoZXhlYzogImNvc2lnbiI6IGV4ZWN1dGFibGUgZmlsZSBub3QgZm91bmQgaW4gJFBBVEgpIChwYXNzIC0tYWxsb3ctdW5zaWduZWQgdG8gaW5zdGFsbCBhbnl3YXkgYXQgeW91ciBvd24gcmlzaykKICDinJcgIHN5bXZhdWx0OiBtYW5hZ2VkOiBkb3dubG9hZCBzeW12YXVsdDogY29zaWduOiBjYW5ub3QgdmVyaWZ5IHB1Ymxpc2hlciBzaWduYXR1cmUgZm9yIHN5bXZhdWx0X2xpbnV4X2FtZDY0LnRhci5nejogY29zaWduIGlzIG5vdCBpbnN0YWxsZWQgb24gUEFUSCAoZXhlYzogImNvc2lnbiI6IGV4ZWN1dGFibGUgZmlsZSBub3QgZm91bmQgaW4gJFBBVEgpIChwYXNzIC0tYWxsb3ctdW5zaWduZWQgdG8gaW5zdGFsbCBhbnl3YXkgYXQgeW91ciBvd24gcmlzaykK",
+      "fixture_root": "/tmp/symbrain-parity-64q860yy/rust",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    }
+  ],
+  "diagnosis": "An HTTP/1.0 release fixture closes the missing-primary response connection; the pooled native client could reuse it for the alternate asset and return Peer disconnected. Keep release download connections unpooled and preserve the unchanged fallback and verification policy."
+}
