@@ -48,6 +48,9 @@ def cases():
     add("root-missing",root="missing")
     add("root-file",root="file")
     add("root-relative",relative=True)
+    for lexical in ("dot","parent","slash"):
+        add("managed-home-"+lexical,home_lexical=lexical)
+    if os.name!="nt":add("managed-home-symlink-parent",home_lexical="symlink-parent")
     for args in (["setup","--modules=browse"],["setup","--from-source"],["setup","--modules"],["setup","--from-source","<source>","--fix"],["setup","--from-source","<source>","--allow-unsigned"],["setup","--help"],["setup","--help=true"],["setup","--unknown"],["setup","--from-source","<source>","--modules=browse","--force-release"],["setup","--from-source=<source>","--modules=browse","--json"],["setup","--from-source","<source>","--modules=browse","positional","--json"]):
         add("args-"+str(len(result)),args)
     for args in (["setup","----from-source","<source>","--modules","browse","--json"],
@@ -193,6 +196,17 @@ def configure(case,root,go,tool):
         cfg=Path(env["XDG_CONFIG_HOME"])/"symbrain/config.toml";cfg.parent.mkdir();cfg.write_text(case["config"])
     if case.get("project"):(Path(env["PROJECT"])/".symbrain.toml").write_text(case["project"])
     env.update(case.get("env",{}))
+    if case.get("home_lexical"):
+        lexical=case["home_lexical"];home=env["HOME"]
+        if lexical=="dot":home+="/./"
+        elif lexical=="parent":home+="/../"+Path(home).name
+        elif lexical=="slash":home+="//"
+        elif lexical=="symlink-parent":
+            (root/"owner/nested").mkdir(parents=True)
+            (root/"link").symlink_to("owner/nested",target_is_directory=True)
+            home=str(root/"link")+"/../home"
+        env["HOME"]=home
+        if os.name=="nt":env["USERPROFILE"]=home
     if case.get("remove_browse"):shutil.rmtree(source/"browse")
     if case.get("root")=="missing":source=source/"missing"
     if case.get("root")=="file":source=source/"file";source.write_text("owned root file")

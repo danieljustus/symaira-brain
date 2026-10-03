@@ -20,6 +20,8 @@ class Case:
     raw_home: bool = False
     home_mode: str | None = None
     home_fallback: bool = False
+    home_lexical: str | None = None
+    bin_fault: str | None = None
 
 
 def cases():
@@ -49,6 +51,18 @@ def cases():
             Case("raw-home-force-source",raw_home=True,args=("doctor","--fix","--force-release"),version=b'{"version":"0.0.0"}',provenance=b'{"source":"brain-source"}',verifier=True),
             Case("raw-home-force-directory",raw_home=True,args=("doctor","--fix","--force-release"),version=b'{"version":"0.0.0"}',provenance="directory",verifier=True),
             Case("raw-home-force-corrupt",raw_home=True,args=("doctor","--fix","--force-release"),version=b'{"version":"0.0.0"}',provenance=b'{bad',verifier=True)))
+    for lexical in ("dot", "parent", "slash"):
+        result.append(Case("managed-home-"+lexical,home_lexical=lexical,
+                           args=("doctor","--fix","--force-release"),verifier=True))
+    for fault in ("bin", "parent"):
+        result.append(Case("managed-file-"+fault,bin_fault=fault,
+                           args=("doctor","--fix","--force-release"),verifier=True))
+        if __import__('os').name!='nt':
+            result.append(Case("raw-managed-file-"+fault,bin_fault=fault,raw_home=True,
+                               args=("doctor","--fix","--force-release"),verifier=True))
+    if __import__('os').name!='nt':
+        result.append(Case("managed-home-symlink-parent",home_lexical="symlink-parent",
+                           args=("doctor","--fix","--force-release"),verifier=True))
     payloads = [b'', b'{bad', b'null', b'{}', b'[]', b'1', b'true', b'"str"',
                 b'{"source":"brain-source"}', b'{"SOURCE":"brain-source","receiver_commit":"fixture commit=123"}',
                 '{"ſOURCE":"brain-source","RECEIVER_COMMIT":"unicode"}'.encode(),

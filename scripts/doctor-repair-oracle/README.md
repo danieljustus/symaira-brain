@@ -1,7 +1,7 @@
 `run.sh OUTPUT_JSON` builds the complete frozen production Go CLI from
 `dcddcef0df5789123c7c9a7ebe6e01f10e941f2c`, builds the candidate Rust CLI,
 and compares real `doctor --fix` subprocesses with an absent Go fallback.
-It replays 274 cases on Linux/macOS and 264 on Windows (Unix signals/permissions
+It replays 282 cases on Linux/macOS and 269 on Windows (Unix signals/permissions
 and Windows large exitcodes have separate native fixtures). A supplemental native
 Go fixture supplies version responses; it never changes the oracle, production Go or frozen cases.
 
@@ -10,7 +10,7 @@ three-second timeout, typed/duplicate/case-folded/null fields, malformed JSON,
 invalid UTF-8 and unpaired escapes, literal Go time.Time parsing, source and
 corrupt-origin protection, explicit forced replacement, optional-core config
 and nonzero config merging, boolean flags, Go flag stop rules and successful
-verified installation. New cases preserve raw Unix managed paths through stdout and provenance logs,
+verified installation. New cases clean managed owner paths lexically before touching symlinks, retain actual leaf/ancestor mkdir obstruction errors, preserve raw Unix managed paths through stdout and provenance logs,
 fail before probes/writes when HOME or USERPROFILE is empty/missing, reject Windows
 HOMEDRIVE/HOMEPATH fallback owners, and reject malformed excess-dash flags before
 any protected fixture can be probed or replaced, preserve the valid triple-dash

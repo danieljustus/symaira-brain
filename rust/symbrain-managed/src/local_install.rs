@@ -52,19 +52,7 @@ pub fn install_source(
             "managed: install local: invalid binary name".into(),
         ));
     }
-    std::fs::create_dir_all(bin_dir).map_err(|error| {
-        #[cfg(unix)]
-        let detail = if bin_dir.is_file() {
-            "not a directory".into()
-        } else {
-            crate::format_io_error(&error)
-        };
-        #[cfg(not(unix))]
-        let detail = crate::format_io_error(&error);
-        let mut message = crate::GoText::path("managed: mkdir ", bin_dir, ": mkdir ");
-        message.push(&symbrain_core::config::os_bytes(bin_dir.as_os_str()));
-        ManagedError::RawContext(message.with_suffix(format!(": {detail}").as_bytes()))
-    })?;
+    crate::mkdir::create_bin_dir(bin_dir)?;
     atomic_install(bin_dir, binary_name, binary)?;
     let record = Provenance {
         binary: binary_name,

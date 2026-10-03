@@ -8,7 +8,7 @@ scripts/setup-source-oracle/run.sh /tmp/setup-source-parity.json
 
 The launcher builds the full frozen production Go CLI at `dcddcef0` using the
 existing immutable oracle launcher and the candidate Rust CLI with `--locked`.
-It runs 103 real Go/Rust CLI cases on Linux/macOS (92 on Windows) and two separate deliberately failing native
+It runs 107 real Go/Rust CLI cases on Linux/macOS (95 on Windows) and two separate deliberately failing native
 process controls (`wrong-exit`, `wrong-source`). These controls execute the actual
 Rust CLI and must produce exactly their intended observable disagreement.
 The report binds runtime, native SDK, binary and source hashes, clean/dirty HEAD,

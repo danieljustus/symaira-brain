@@ -9,15 +9,8 @@ use symbrain_managed::{
 #[path = "doctor_fix_log.rs"]
 mod log;
 
-#[cfg(windows)]
-const HOME_VARIABLE: &str = "USERPROFILE";
-#[cfg(not(windows))]
-const HOME_VARIABLE: &str = "HOME";
-
 pub(super) fn managed_bin_dir() -> Option<std::path::PathBuf> {
-    std::env::var_os(HOME_VARIABLE)
-        .filter(|home| !home.is_empty())
-        .map(|home| std::path::PathBuf::from(home).join(".symaira").join("bin"))
+    crate::managed_home::bin_dir()
 }
 
 pub(super) fn run_fix(force_release: bool, stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {

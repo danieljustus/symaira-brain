@@ -18,6 +18,7 @@ mod harness_cli;
 mod health_probe;
 mod init_cli;
 mod install_cli;
+mod managed_home;
 mod mcp_cli;
 mod memory_cli;
 mod passthrough;

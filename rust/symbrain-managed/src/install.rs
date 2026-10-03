@@ -147,9 +147,7 @@ impl Installer {
                         .with_prefix(&format!("managed: extract {}: ", core.binary_name)),
                 )
             })?;
-        fs::create_dir_all(&self.bin_dir).map_err(|error| {
-            ManagedError::IoContext(format!("mkdir {}", self.bin_dir.display()), error)
-        })?;
+        crate::mkdir::create_bin_dir(&self.bin_dir)?;
         atomic_install(&self.bin_dir, &core.binary_name, &binary)?;
         record_release_provenance(&self.bin_dir, core, &binary).map_err(|error| {
             ManagedError::RawContext(error.into_go_text().with_prefix(&format!(

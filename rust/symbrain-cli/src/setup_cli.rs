@@ -5,7 +5,7 @@ use std::io::Write;
 use serde::Serialize;
 use symbrain_core::exit;
 use symbrain_managed::{
-    InstallOutcome, Installer, Manifest, Platform, installed_version, versions_match,
+    GoText, InstallOutcome, Installer, Manifest, Platform, installed_version, versions_match,
 };
 
 #[path = "setup_config.rs"]
@@ -19,21 +19,10 @@ use flags::{SetupArgs, parse_args};
 #[path = "setup_source.rs"]
 mod source;
 
-#[cfg(windows)]
-const HOME_VARIABLE: &str = "USERPROFILE";
-#[cfg(not(windows))]
-const HOME_VARIABLE: &str = "HOME";
-
-fn setup_home() -> Option<std::path::PathBuf> {
-    std::env::var_os(HOME_VARIABLE)
-        .filter(|home| !home.is_empty())
-        .map(std::path::PathBuf::from)
-}
-
 /// Preserve full typed configuration diagnostics until their native cutover.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     parse_args(args, &mut Vec::new()).is_ok_and(|parsed| {
-        if setup_home().is_none() {
+        if crate::managed_home::bin_dir().is_none() {
             return false;
         }
         let source = !parsed.from_source.is_empty();
@@ -54,10 +43,22 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
 
 #[derive(Serialize)]
 struct SetupReport {
-    bin_dir: String,
+    bin_dir: GoText,
     results: Vec<CoreResult>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    errors: Vec<String>,
+    errors: Vec<GoText>,
+}
+
+impl SetupReport {
+    fn new(bin_dir: &std::path::Path) -> Self {
+        Self {
+            bin_dir: symbrain_core::config::os_bytes(bin_dir.as_os_str())
+                .into_owned()
+                .into(),
+            results: Vec::new(),
+            errors: Vec::new(),
+        }
+    }
 }
 
 #[derive(Serialize)]
@@ -66,7 +67,7 @@ struct CoreResult {
     version: String,
     status: &'static str,
     #[serde(skip_serializing_if = "Option::is_none")]
-    error: Option<String>,
+    error: Option<GoText>,
 }
 
 impl CoreResult {
@@ -89,7 +90,7 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
     let home_label = "%userprofile%";
     #[cfg(not(windows))]
     let home_label = "$HOME";
-    let Some(bin_dir) = setup_home().map(|home| home.join(".symaira").join("bin")) else {
+    let Some(bin_dir) = crate::managed_home::bin_dir() else {
         let _ = writeln!(
             stderr,
             "symbrain setup: managed: cannot determine home directory: {home_label} is not defined"
@@ -179,11 +180,7 @@ fn run_install(
             return exit::GENERIC;
         }
     };
-    let mut report = SetupReport {
-        bin_dir: bin_dir.display().to_string(),
-        results: Vec::new(),
-        errors: Vec::new(),
-    };
+    let mut report = SetupReport::new(bin_dir);
 
     for (name, core) in manifest.active_cores(enabled) {
         if !core.supports_platform(platform.os) {
@@ -213,8 +210,10 @@ fn run_install(
             }
             Ok(InstallOutcome::SkippedPlatform) => unreachable!("checked above"),
             Err(error) => {
-                let detail = error.to_string();
-                report.errors.push(format!("{name}: {detail}"));
+                let detail = error.into_go_text();
+                report
+                    .errors
+                    .push(detail.clone().with_prefix(&format!("{name}: ")));
                 report.results.push(CoreResult {
                     name: name.clone(),
                     version: core.version.clone(),
@@ -222,14 +221,16 @@ fn run_install(
                     error: Some(detail.clone()),
                 });
                 if !json {
-                    let _ = writeln!(stderr, "  ✗  {name}: {detail}");
+                    print_core_error(stderr, &name, &detail);
                 }
             }
         }
     }
 
     if !json {
-        let _ = writeln!(stdout, "\nInstalled to {}", bin_dir.display());
+        let _ = stdout.write_all(b"\nInstalled to ");
+        let _ = stdout.write_all(report.bin_dir.as_ref());
+        let _ = writeln!(stdout);
     }
     finish(&report, json, "symbrain setup", stdout, stderr)
 }
@@ -258,11 +259,7 @@ fn run_fix(
             return exit::GENERIC;
         }
     };
-    let mut report = SetupReport {
-        bin_dir: bin_dir.display().to_string(),
-        results: Vec::new(),
-        errors: Vec::new(),
-    };
+    let mut report = SetupReport::new(bin_dir);
     let mut fixed = 0;
     let mut skipped = 0;
 
@@ -323,8 +320,10 @@ fn run_fix(
             }
             Ok(InstallOutcome::SkippedPlatform) => unreachable!("checked above"),
             Err(error) => {
-                let detail = error.to_string();
-                report.errors.push(format!("{name}: {detail}"));
+                let detail = error.into_go_text();
+                report
+                    .errors
+                    .push(detail.clone().with_prefix(&format!("{name}: ")));
                 report.results.push(CoreResult {
                     name: name.clone(),
                     version: core.version.clone(),
@@ -332,7 +331,7 @@ fn run_fix(
                     error: Some(detail.clone()),
                 });
                 if !json {
-                    let _ = writeln!(stderr, "  ✗  {name}: {detail}");
+                    print_core_error(stderr, &name, &detail);
                 }
             }
         }
@@ -342,6 +341,12 @@ fn run_fix(
         let _ = writeln!(stdout, "\n{fixed} fixed, {skipped} already correct");
     }
     finish(&report, json, "symbrain setup --fix", stdout, stderr)
+}
+
+fn print_core_error(stderr: &mut dyn Write, name: &str, error: &GoText) {
+    let _ = write!(stderr, "  ✗  {name}: ");
+    let _ = stderr.write_all(error.as_ref());
+    let _ = writeln!(stderr);
 }
 
 fn finish(

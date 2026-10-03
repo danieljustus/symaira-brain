@@ -43,6 +43,17 @@ def build_probe(root):
 def configure(case, root, env, probe):
     if case.raw_home:
         env["HOME"] = str(root / os.fsdecode(b"home\xff\xe2\x82"))
+    if case.home_lexical:
+        home = env["HOME"]
+        if case.home_lexical=="dot":home+="/./"
+        elif case.home_lexical=="parent":home+="/../"+Path(home).name
+        elif case.home_lexical=="slash":home+="//"
+        elif case.home_lexical=="symlink-parent":
+            (root/"owner/nested").mkdir(parents=True)
+            (root/"link").symlink_to("owner/nested",target_is_directory=True)
+            home=str(root/"link")+"/../home"
+        env["HOME"]=home
+        if os.name=="nt":env["USERPROFILE"]=home
     legacy.setup_release_fixture(root, env)
     if case.verifier:
         verifier = Path(env["PATH"]) / ("cosign.exe" if os.name == "nt" else "cosign")
@@ -89,6 +100,10 @@ def configure(case, root, env, probe):
                 sidecar.mkdir()
             else:
                 sidecar.write_bytes(case.provenance)
+    if case.bin_fault:
+        blocked = bin_dir if case.bin_fault=="bin" else bin_dir.parent
+        shutil.rmtree(blocked)
+        blocked.write_bytes(b"owned obstruction")
 
 
 def filesystem(root, originals, started, ended):

@@ -9,6 +9,7 @@ mod json_record;
 mod json_string;
 mod local_install;
 mod manifest;
+mod mkdir;
 mod process_status;
 mod provenance;
 mod version_probe;
