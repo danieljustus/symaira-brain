@@ -46,12 +46,15 @@ fn cfg() -> Config {
 
 fn cfg_with_env(values: &[(&str, &str)]) -> Config {
     let mut config = cfg();
-    config.env = Some(
-        values
-            .iter()
-            .map(|(key, value)| ((*key).to_string(), (*value).to_string()))
-            .collect(),
-    );
+    let mut environment: Vec<_> = values
+        .iter()
+        .map(|(key, value)| ((*key).to_string(), (*value).to_string()))
+        .collect();
+    // This is the test child's explicit environment, not broker inheritance.
+    if let Ok(profile) = std::env::var("LLVM_PROFILE_FILE") {
+        environment.push(("LLVM_PROFILE_FILE".to_owned(), profile));
+    }
+    config.env = Some(environment);
     config
 }
 

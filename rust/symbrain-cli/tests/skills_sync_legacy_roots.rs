@@ -16,6 +16,9 @@
 //! per-target rendered/base `SKILL.md` hashes after Go repaired the edited
 //! library.
 
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
 use std::path::Path;
 #[cfg(unix)]
 use std::path::PathBuf;
@@ -114,6 +117,7 @@ fn command(scenario: &Path, xdg_data_home: Option<&Path>, args: &[&str]) -> Comm
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
     command
         .env_clear()
+        .envs(coverage::profile_environment())
         .env("HOME", &home)
         .env("USERPROFILE", &home)
         .env("XDG_CONFIG_HOME", &config)

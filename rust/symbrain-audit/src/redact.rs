@@ -76,6 +76,15 @@ pub fn redact_args(server: &str, tool: &str, args: &[u8], verbose: bool) -> (Str
     (key_list, rendered)
 }
 
+/// Decodes a JSON value with the existing Go float64, duplicate-key and nesting
+/// contracts. Overflowing overwritten values are rejected before insertion.
+/// Returns `None` for invalid JSON, non-finite numbers or excessive nesting.
+#[must_use]
+pub fn decode_go_json_value(bytes: &[u8]) -> Option<Value> {
+    let raw = serde_json::from_slice::<Box<RawValue>>(bytes).ok()?;
+    parse_go_value(&raw, 0).ok()
+}
+
 /// Parses numbers as Go's `encoding/json` does without interpreting real
 /// object keys as `serde_json`'s `arbitrary_precision` internal number marker.
 fn parse_go_value(raw: &RawValue, depth: usize) -> Result<Value, ()> {

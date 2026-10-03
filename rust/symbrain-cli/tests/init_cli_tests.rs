@@ -1,5 +1,8 @@
 //! Independent subprocess coverage for `symbrain init`.
 
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
 use std::fs;
 use std::process::{Command, Output, Stdio};
 use tempfile::TempDir;
@@ -17,7 +20,7 @@ fn init_command(root: &TempDir, args: &[&str]) -> Command {
     fs::create_dir_all(&home).unwrap();
 
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
-    command.env_clear();
+    command.env_clear().envs(coverage::profile_environment());
     #[cfg(windows)]
     {
         for key in [
@@ -217,7 +220,7 @@ fn missing_home_fails_with_expected_error() {
     fs::create_dir_all(&cwd).unwrap();
 
     let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
-    command.env_clear();
+    command.env_clear().envs(coverage::profile_environment());
     #[cfg(windows)]
     {
         for key in [
