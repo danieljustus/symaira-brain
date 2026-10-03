@@ -48,6 +48,12 @@ class Handler(BaseHTTPRequestHandler):
             headers["Set-Cookie"] = "private_probe=synthetic; Path=/"
         elif parsed.path == "/cookie":
             content = self.headers.get("Cookie", "").encode()
+        elif parsed.path in ("/gzip-multi", "/gzip-corrupt-tail", "/gzip-garbage-tail"):
+            content = gzip.compress(b"first", mtime=0) + gzip.compress(b"second", mtime=0)
+            if parsed.path == "/gzip-corrupt-tail":
+                content = content[:-8] + bytes([content[-8] ^ 1]) + content[-7:]
+            if parsed.path == "/gzip-garbage-tail": content += b"invalid"
+            headers["Content-Encoding"] = "gzip"
         elif parsed.path == "/gzip":
             content = gzip.compress(content, mtime=0)
             headers["Content-Encoding"] = "gzip"
@@ -113,6 +119,11 @@ def cases(base):
         add("status-" + str(code), "/status?code=" + str(code))
     add("ephemeral-cookie-set", "/set-cookie")
     add("ephemeral-cookie-not-carried", "/cookie")
+    add("gzip-multi-success", "/gzip-multi")
+    for limit in [7, 10, 11, 12]:
+        add("gzip-multi-size-" + str(limit), "/gzip-multi", max_body=limit)
+    add("gzip-multi-corrupt-tail", "/gzip-corrupt-tail")
+    add("gzip-multi-garbage-tail", "/gzip-garbage-tail")
     add("http-proxy-explicit-private", proxy=base)
     result[-1]["url"] = "http://93.184.216.34/echo"
     add("http-proxy-private-blocked", proxy=base, allow_private=False)
@@ -171,7 +182,7 @@ def main():
     thread.start()
     try:
         selected = cases(f"http://127.0.0.1:{server.server_port}")
-        assert len(selected) == 50 and len({case["id"] for case in selected}) == 50
+        assert len(selected) == 57 and len({case["id"] for case in selected}) == 57
         with tempfile.TemporaryDirectory(prefix="fetch773-process-") as raw:
             go = execute(args.go, selected, Path(raw) / "go")
             rust = execute(args.rust, selected, Path(raw) / "rust")
@@ -193,6 +204,9 @@ def main():
         route_groups += [("no-proxy-" + str(index), {"HTTP_PROXY": proxy_base, "NO_PROXY": entry}, urls) for index, entry in enumerate(bypasses)]
         route_groups += [("no-proxy-lower", {"HTTP_PROXY": proxy_base, "no_proxy": "example.com"}, ["http://example.com", "http://sub.example.com"])]
         route_groups += [("unicode-domain", {"HTTP_PROXY": proxy_base, "NO_PROXY": "bücher.test"}, ["http://bücher.test", "http://sub.bücher.test", "http://xn--bcher-kva.test"])]
+        review_entries = ["example.com:080", "example.com:00080", "example.com:", "example.com:80", "[2001:4860::1]", "[2001:4860::1]:080", "2001:4860::/32", "::ffff:93.184.216.0/120", ".com", "*.example.com", "127.1", "example.com.", ".example.com.", "93.184.216.34:080"]
+        review_urls = ["http://example.com", "http://example.com.", "http://sub.example.com", "http://93.184.216.34", "http://[2001:4860::1]"]
+        route_groups += [("review-no-proxy-" + str(index), {"HTTP_PROXY": proxy_base, "NO_PROXY": entry}, review_urls) for index, entry in enumerate(review_entries)]
         if os.name != "nt":
             route_groups += [("upper-precedence", {"HTTP_PROXY": proxy_base, "http_proxy": "http://127.0.0.1:1", "NO_PROXY": "example.com", "no_proxy": "*"}, ["http://other.test", "http://example.com"])]
         with tempfile.TemporaryDirectory(prefix="fetch773-proxy-") as raw:

@@ -111,6 +111,7 @@ fn loopback(ip: IpAddr) -> bool {
 }
 
 fn bypass(raw: &str, host: &str, ip: Option<IpAddr>, port: Option<u16>) -> bool {
+    let canonical_port = port.map(|value| value.to_string());
     raw.split(',').any(|entry| {
         let entry = entry.trim().to_ascii_lowercase();
         if entry == "*" {
@@ -120,6 +121,13 @@ fn bypass(raw: &str, host: &str, ip: Option<IpAddr>, port: Option<u16>) -> bool 
             return match (network.parse::<IpAddr>(), prefix.parse::<u32>(), ip) {
                 (Ok(IpAddr::V4(a)), Ok(n @ 0..=32), Some(IpAddr::V4(b))) => {
                     n == 0 || (u32::from(a) >> (32 - n)) == (u32::from(b) >> (32 - n))
+                }
+                (Ok(IpAddr::V6(a)), Ok(n @ 96..=128), Some(IpAddr::V4(b))) => {
+                    // net.IPNet.Contains treats a mapped IPv6 network with a
+                    // 96-bit all-ones prefix as its equivalent IPv4 network.
+                    a.to_ipv4_mapped().is_some_and(|a| {
+                        n == 96 || (u32::from(a) >> (128 - n)) == (u32::from(b) >> (128 - n))
+                    })
                 }
                 (Ok(IpAddr::V6(a)), Ok(n @ 0..=128), Some(IpAddr::V6(b))) => {
                     n == 0 || (u128::from(a) >> (128 - n)) == (u128::from(b) >> (128 - n))
@@ -132,14 +140,15 @@ fn bypass(raw: &str, host: &str, ip: Option<IpAddr>, port: Option<u16>) -> bool 
                 return false;
             };
             let suffix = &entry[end + 1..];
-            (
-                &entry[1..end],
-                if suffix.is_empty() {
-                    None
-                } else {
-                    suffix.strip_prefix(':')
-                },
-            )
+            // Go SplitHostPort requires the port separator after the bracket.
+            // A bracketed bare IP is not an IP matcher in NO_PROXY.
+            let Some(port) = suffix
+                .strip_prefix(':')
+                .filter(|value| !value.contains(':'))
+            else {
+                return false;
+            };
+            (&entry[1..end], Some(port))
         } else if entry.matches(':').count() == 1 {
             let (h, p) = entry.split_once(':').expect("one colon");
             (h, Some(p))
@@ -148,7 +157,7 @@ fn bypass(raw: &str, host: &str, ip: Option<IpAddr>, port: Option<u16>) -> bool 
         };
         if entry_port
             .filter(|p| !p.is_empty())
-            .is_some_and(|p| p.parse::<u16>().ok() != port)
+            .is_some_and(|p| Some(p) != canonical_port.as_deref())
         {
             return false;
         }

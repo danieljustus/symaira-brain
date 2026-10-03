@@ -83,3 +83,26 @@ reviewed at the published immutable head before closing #773.
 Receipts: `browse/port/evidence/fetch-control-773/`. Original failed observations
 are retained. Final source-bound proof is added in an evidence-only successor
 commit after the code, harness and documentation commit passes validation.
+
+## Independent review corrections
+
+The immutable cc8 source passed its declared 154-case corpus and the Linux paired
+value gate, but independent review requested changes for two production defects.
+Its complete review, 70 additional actual-Go routing observations, three actual
+HTTP gzip observations, binaries/digests and original 30-pair receipt are retained.
+A passing bounded corpus is evidence for its cases, not permission to dismiss
+newly demonstrated behavior as an unspecified parser corner case.
+
+NO_PROXY ports compare literally with Go's canonical port string: `080` must not
+be treated as `80`. A bracketed IPv6 entry without a port separator is ignored as
+an IP matcher, while `[IPv6]:` matches every port. IPv4-mapped IPv6 CIDRs normalize
+their network and mask together, so `::ffff:93.184.216.0/120` has the IPv4 /24
+meaning used by `net.IPNet.Contains`. The permanent actual-SDK corpus includes all
+70 review observations, rather than rewriting the original failures.
+
+Use MultiGzDecoder for bounded gzip decoding. All concatenated members contribute
+to the same decoded-body limit, and corrupt later members are errors. Stopping at
+the first member silently truncates valid content and incorrectly accepts both
+oversized responses and invalid later checksums. The private real-Go/native
+corpus now covers concatenated success, four size boundaries, corrupt second CRC
+and invalid trailing bytes. Explicit gzip and Range behavior remains unchanged.

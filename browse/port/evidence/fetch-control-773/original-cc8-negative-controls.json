@@ -1,0 +1,51 @@
+{
+  "controls": [
+    {
+      "name": "missing-case",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/workspace/symaira-fetch773/browse/port/harness/fetch_control_process.py\", line 248, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/workspace/symaira-fetch773/browse/port/harness/fetch_control_process.py\", line 177, in main\n    rust = execute(args.rust, selected, Path(raw) / \"rust\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/symaira-fetch773/browse/port/harness/fetch_control_process.py\", line 145, in execute\n    assert [record[\"id\"] for record in records] == expected, \"missing/duplicate/reordered process case\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: missing/duplicate/reordered process case\n",
+      "mutant_sha256": "2d765b573cea096d7153b9a20c207eb691c62dd5e21ec4ec850308683f269cc0"
+    },
+    {
+      "name": "wrong-body",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "honest fetch process comparisons: 149/154; failures: ['default-headers', 'env-http-implicit-private-allowed', 'env-http-loopback-bypass', 'env-http-all-proxy-ignored', 'env-http-explicit-overrides-env']\n",
+      "stderr": "",
+      "mutant_sha256": "4b560a72d8af22df91bcf91743afec69e898a450760963789201fa6d34749dad"
+    },
+    {
+      "name": "wrong-header",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "honest fetch process comparisons: 149/154; failures: ['default-headers', 'env-http-implicit-private-allowed', 'env-http-loopback-bypass', 'env-http-all-proxy-ignored', 'env-http-explicit-overrides-env']\n",
+      "stderr": "",
+      "mutant_sha256": "e38b26ac3f45ee01d1de88f939e0e7a2139ff02b55f6eade282e1eb0a2897cf3"
+    },
+    {
+      "name": "wrong-error",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "honest fetch process comparisons: 153/154; failures: ['body-size-7']\n",
+      "stderr": "",
+      "mutant_sha256": "234f7e4df796133c7b12df111828047a75f8ca99e66f48df444b81e360c17afa"
+    },
+    {
+      "name": "wrong-proxy-route",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "honest fetch process comparisons: 134/154; failures: ['env-route-http-upper-0', 'env-route-http-lower-0', 'env-route-https-upper-0', 'env-route-https-lower-0', 'env-route-bare-proxy-0', 'env-route-no-proxy-1-2', 'env-route-no-proxy-2-0', 'env-route-no-proxy-3-0', 'env-route-no-proxy-4-2', 'env-route-no-proxy-5-0', 'env-route-no-proxy-6-2', 'env-route-no-proxy-7-2', 'env-route-no-proxy-8-0', 'env-route-no-proxy-9-0', 'env-route-no-proxy-10-0', 'env-route-no-proxy-11-0', 'env-route-no-proxy-12-0', 'env-route-no-proxy-13-0', 'env-route-no-proxy-14-0', 'env-route-upper-precedence-0']\n",
+      "stderr": "",
+      "mutant_sha256": "bc6bf9cf5f6b87e7ce81fe0ca2ad52679612ad2b99b76cf81d3e9d7b7c54d916"
+    }
+  ],
+  "rejected": 5,
+  "candidate_head": "cc8a1673bead86b1d34b6f84ea9bcbf5ced86017",
+  "candidate_dirty": false,
+  "controls_script_sha256": "0a7b20628da27fc3c7278805233c1aec818efc1da7b9f4c6dbc770ee73578417",
+  "native_binary_sha256": "bd4a50f0e5bc1ee884bcf4095b247ab32e74f84574d1c14a6679f6afa28dc151",
+  "go_binary_sha256": "d52a94fccfa0d07c571f7109c0f43a9771ab6f5b3ea207569f539945bf8c4401",
+  "runner_sha256": "f018e50fc2977f820e23774a59f61afd8de197c58609dc5e5a9bdbcf6e9e9eaf"
+}

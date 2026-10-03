@@ -1,0 +1,92 @@
+{
+  "candidate_revision": "cc8a1673bead86b1d34b6f84ea9bcbf5ced86017",
+  "candidate_dirty": false,
+  "go_binary_sha256": "d52a94fccfa0d07c571f7109c0f43a9771ab6f5b3ea207569f539945bf8c4401",
+  "rust_binary_sha256": "bd4a50f0e5bc1ee884bcf4095b247ab32e74f84574d1c14a6679f6afa28dc151",
+  "records": [
+    {
+      "request": {
+        "id": "concatenated-gzip",
+        "url": "http://127.0.0.1:43175/ok"
+      },
+      "go": {
+        "body_hex": "66697273747365636f6e64",
+        "error": "",
+        "headers": {
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "concatenated-gzip",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://127.0.0.1:43175/ok"
+      },
+      "rust": {
+        "body_hex": "6669727374",
+        "error": "",
+        "headers": {
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "concatenated-gzip",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://127.0.0.1:43175/ok"
+      },
+      "match": false
+    },
+    {
+      "request": {
+        "id": "concatenated-size-limit",
+        "url": "http://127.0.0.1:43175/ok",
+        "max_body": 7
+      },
+      "go": {
+        "detail": "too_large: response from http://127.0.0.1:43175/ok exceeds 7 bytes",
+        "error": "too_large",
+        "id": "concatenated-size-limit"
+      },
+      "rust": {
+        "body_hex": "6669727374",
+        "error": "",
+        "headers": {
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "concatenated-size-limit",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://127.0.0.1:43175/ok"
+      },
+      "match": false
+    },
+    {
+      "request": {
+        "id": "concatenated-corrupt-tail",
+        "url": "http://127.0.0.1:43175/corrupt"
+      },
+      "go": {
+        "detail": "read body: gzip: invalid checksum",
+        "error": "transport",
+        "id": "concatenated-corrupt-tail"
+      },
+      "rust": {
+        "body_hex": "6669727374",
+        "error": "",
+        "headers": {
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "concatenated-corrupt-tail",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://127.0.0.1:43175/corrupt"
+      },
+      "match": false
+    }
+  ]
+}

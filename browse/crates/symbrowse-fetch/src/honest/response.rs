@@ -2,7 +2,7 @@
 use crate::{BodyTooLarge, FetchError};
 use brotli::Decompressor;
 use encoding_rs::Encoding;
-use flate2::read::GzDecoder;
+use flate2::read::MultiGzDecoder;
 use futures_util::StreamExt;
 use reqwest::Response as HttpResponse;
 use std::io::{Cursor, Read};
@@ -113,7 +113,7 @@ fn decode_content(
     for encoding in encodings.iter().rev() {
         let mut reader: Box<dyn Read> = match encoding.to_ascii_lowercase().as_str() {
             "identity" => Box::new(Cursor::new(decoded)),
-            "gzip" | "x-gzip" => Box::new(GzDecoder::new(Cursor::new(decoded))),
+            "gzip" | "x-gzip" => Box::new(MultiGzDecoder::new(Cursor::new(decoded))),
             "br" => Box::new(Decompressor::new(Cursor::new(decoded), 4096)),
             "zstd" => Box::new(
                 ruzstd::decoding::StreamingDecoder::new_with_max_window_size(
