@@ -7,7 +7,7 @@
   "artifact_path": "/workspace/attachments/72b4798e-cd8b-4f0c-bd7a-56ecc9515c59/daemon-go-windows-arm-shutdown-failure.zip",
   "go_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
   "diagnostic": "immutable Go daemon shutdown ERROR_OPERATION_ABORTED in listener.Accept; Rust/native comparison was not reached for the failing settings",
-  "native_checks_before_failure": "strict workspace lint, nonzero daemon unit tests, lifecycle and50x50 competing starts passed",
+  "native_checks_before_failure": "strict workspace lint, nonzero daemon unit tests, lifecycle and 50x50 competing starts passed",
   "failed_phase": "observe(args.go.resolve(), settings, session) with SYMBROWSE_ALLOW_PRIVATE=true; immutable Go exits1 after stop",
   "retained_log_context": [
     "2026-10-03T17:19:47.1569512Z failed daemon: settings={'SYMBROWSE_ALLOW_PRIVATE': 'true'}; exit=1; stdout=b''; stderr=b'time=2026-10-03T10:19:47.130-07:00 level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\\naccept daemon connection: The I/O operation has been aborted because of either a thread exit or an application request.\\n'\r",
