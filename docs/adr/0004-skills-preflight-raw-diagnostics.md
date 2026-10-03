@@ -25,3 +25,9 @@ The original independent review and failed observations are retained under
 literal Unicode, invalid sequences, inline values, bad syntax, normalization,
 and valid flags before the unknown operand. Fresh native CI and independent
 review of the corrected revision remain required before merge.
+
+Native Windows CI on published head `6fff6058` rejected an unconditionally
+imported Unix-only test helper under strict Clippy. Its import now has the same
+`cfg(unix)` boundary as its callers; production behavior is unchanged. The
+failure remains recorded with both job IDs in the adjacent evidence receipt.
+The corrected published head must pass fresh native checks before acceptance.

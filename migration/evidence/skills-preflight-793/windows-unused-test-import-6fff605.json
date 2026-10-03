@@ -1,0 +1,11 @@
+{
+  "reviewed_head": "6fff6058b3898d99e3325c145223c1f0d7df2966",
+  "run_id": 37143475059,
+  "jobs": [
+    111262557718,
+    111262557958
+  ],
+  "failure": "Strict native Windows Clippy rejects an unconditional run_os test import; all callers are cfg(unix).",
+  "correction": "Guard run_os import with cfg(unix); no production source changes.",
+  "fresh_native_ci_required": true
+}
