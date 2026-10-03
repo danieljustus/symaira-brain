@@ -166,6 +166,10 @@ fn same_column_view_cannot_replace_a_required_writable_table() {
 
 #[cfg(windows)]
 #[test]
+#[allow(
+    clippy::permissions_set_readonly_false,
+    reason = "Windows readonly attributes must be restored; this test cannot run on Unix"
+)]
 fn windows_directory_attributes_are_reported_without_a_private_acl_claim() {
     let root = tempfile::tempdir().unwrap();
     let path = root.path().join("data/symbrain/memory/default.db");

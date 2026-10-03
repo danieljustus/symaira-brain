@@ -114,3 +114,20 @@ and all three schema-native jobs. This avoids mixing the separate schema
 acceptance with broader fallback-removal claims or creating mutual parent
 dependencies. Later parent Windows fixes must be normally integrated and the
 combined source checked. No issue is closed on local evidence alone.
+
+## Native Windows test lint and normal parent integration
+
+Actual Windows job111304520349 on b2fdd6c fails strict Clippy before
+running the schema tests: its Windows-only directory-attribute cleanup
+uses set_readonly(false). This clears the Windows attribute; the warning
+concerns Unix permission expansion, which this cfg(windows) test cannot
+perform. Allow that one lint on this test with the platform reason; keep
+all production lints, the exact writable/readonly assertions and cleanup.
+Retain the complete original CRLF log. No native pass is inferred from
+Linux or from this static correction.
+
+Normally integrate main e3dbda6c (independently approved PR808, all protected
+and native init checks green) and Memory parent7ca3bed0 (its Windows CLI
+fixture now passes) before fresh combined-source verification. Resolve the
+.gitattributes conflict by retaining both exact-log rules. Doctor parent
+corrections and the three current-head schema jobs remain merge gates.
