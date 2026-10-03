@@ -37,3 +37,10 @@ the required sequence. They are not native Apple certificate, Keychain,
 Gatekeeper, notarization-service or published-asset proofs. Those checks require
 macOS, configured release secrets and an actual release. Native CI labels and
 existing merge protection remain unchanged.
+
+Current-main integration: normal-merge main31de722 after Activity PR800,
+then repeat five portable orchestration tests, workflow lint and shell syntax.
+The release scripts and their reviewed source hashes are unchanged. The three
+new Activity acceptance/artifact blocks integrate in CI; the release contract
+job is byte-identical. This binds evidence to the current combination while
+retaining the native release and actual Apple acceptance requirements.
