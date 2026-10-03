@@ -11,7 +11,7 @@ script = pathlib.Path(__file__).with_name("cli.py")
 fake = scratch / "bin" / ("symvault.exe" if os.name == "nt" else "symvault")
 controls = []
 for control, diagnostic in [("exit", "CLI byte/exit mismatch"), ("missing-case", "missing CLI case")]:
-    command = [sys.executable, str(script), str(scratch / "go-usage"), str(rust), str(fake), str(scratch / ("cli-control-" + control + ".json")), "--control", control]
+    command = [sys.executable, str(script), str(scratch / ("go-usage.exe" if os.name == "nt" else "go-usage")), str(rust), str(fake), str(scratch / ("cli-control-" + control + ".json")), "--control", control]
     result = subprocess.run(command, capture_output=True, timeout=120, check=False)
     assert result.returncode != 0 and diagnostic.encode() in result.stderr, (control, result.stderr.decode())
     controls.append({"id": "cli-" + control, "exit": result.returncode, "intended_diagnostic": diagnostic, "stderr": result.stderr.decode()})

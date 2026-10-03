@@ -48,13 +48,14 @@ if command -v cygpath >/dev/null 2>&1; then
   export USAGE_768_ORACLE=$(cygpath -w "$USAGE_768_ORACLE") USAGE_768_NATIVE=$(cygpath -w "$USAGE_768_NATIVE") USAGE_768_ROOT=$(cygpath -w "$USAGE_768_ROOT") USAGE_768_BIN=$(cygpath -w "$USAGE_768_BIN")
 fi
 export GOTOOLCHAIN=go1.26.7 CGO_ENABLED=0
-run_stage go-build go -C "$source_root" build -trimpath -o "$scratch/go-usage" ./cmd/symbrain
+executable_suffix=$( [[ ${OS:-} == Windows_NT ]] && echo .exe || true )
+run_stage go-build go -C "$source_root" build -trimpath -o "$scratch/go-usage$executable_suffix" ./cmd/symbrain
 run_stage go-constructors go -C "$source_root" test ./internal/usage -run '^TestUsageCredentialOracle768$' -count=1
 git -C "$source_root" diff --exit-code --quiet
 cd "$repo_root"
 run_stage native-constructors cargo test --locked -p symbrain-usage --test credential_reference_tests -- --ignored --nocapture
 mkdir -p "$(dirname "$output")"
 run_stage native-build cargo build --locked -p symbrain-cli
-run_stage cli python3 "$repo_root/scripts/usage-credential-oracle/cli.py" "$scratch/go-usage" "${CARGO_TARGET_DIR:-target}/debug/symbrain$( [[ ${OS:-} == Windows_NT ]] && echo .exe || true )" "$scratch/bin/symvault$( [[ ${OS:-} == Windows_NT ]] && echo .exe || true )" "$scratch/cli.json"
+run_stage cli python3 "$repo_root/scripts/usage-credential-oracle/cli.py" "$scratch/go-usage$executable_suffix" "${CARGO_TARGET_DIR:-target}/debug/symbrain$( [[ ${OS:-} == Windows_NT ]] && echo .exe || true )" "$scratch/bin/symvault$( [[ ${OS:-} == Windows_NT ]] && echo .exe || true )" "$scratch/cli.json"
 run_stage controls python3 "$repo_root/scripts/usage-credential-oracle/controls.py" "$scratch" "${CARGO_TARGET_DIR:-target}/debug/symbrain$( [[ ${OS:-} == Windows_NT ]] && echo .exe || true )"
 python3 "$repo_root/scripts/usage-credential-oracle/receipt.py" "$scratch/go.json" "$scratch/native.json" "$output" "$oracle_commit"
