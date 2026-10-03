@@ -4,6 +4,7 @@
 
 mod archive;
 mod install;
+mod json_record;
 mod manifest;
 mod provenance;
 mod version_probe;
@@ -15,6 +16,6 @@ pub use install::{InstallOutcome, Installer, versions_match};
 pub use manifest::{
     COSIGN_OIDC_ISSUER, Core, ManagedError, Manifest, Platform, download_url, normalize_version,
 };
-pub use provenance::is_brain_source_install;
+pub use provenance::{SourceRecord, is_brain_source_install, read_provenance};
 
 pub use version_probe::installed_version;

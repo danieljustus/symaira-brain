@@ -316,7 +316,7 @@ fn installed_version_timeout_kills_native_windows_executable() {
 
     let started = std::time::Instant::now();
     let error = installed_version(bin_dir.path(), "tool").unwrap_err();
-    assert!(error.to_string().contains("timed out"));
+    assert_eq!(error.to_string(), "probe tool: exit status 1");
     assert!(started.elapsed() < Duration::from_secs(5));
 }
 
@@ -342,7 +342,7 @@ fn installed_version_timeout_is_bounded_and_reaps_descendants() {
 
     let started = Instant::now();
     let error = installed_version(temp.path(), "tool").unwrap_err();
-    assert!(error.to_string().contains("timed out"));
+    assert_eq!(error.to_string(), "probe tool: signal: killed");
     assert!(started.elapsed() < Duration::from_secs(5));
 
     let pid = std::fs::read_to_string(marker).unwrap();

@@ -246,6 +246,19 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Go/Rust native doctor repair and negative process controls
+        shell: bash
+        run: scripts/doctor-repair-oracle/run.sh "$RUNNER_TEMP/doctor-repair-parity.json"
+
+      - name: Preserve doctor repair process parity evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: doctor-repair-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/doctor-repair-parity*.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Credentialed usage requests, report JSON and table parity
         shell: bash
         run: scripts/usage-fetch-oracle/run.sh "$RUNNER_TEMP/usage-fetch-620.json"
@@ -387,6 +400,19 @@ jobs:
         with:
           name: setup-repair-parity-${{ runner.os }}
           path: ${{ runner.temp }}/setup-repair-parity.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Go/Rust native doctor repair and negative process controls
+        shell: bash
+        run: scripts/doctor-repair-oracle/run.sh "$RUNNER_TEMP/doctor-repair-parity.json"
+
+      - name: Preserve doctor repair process parity evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: doctor-repair-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/doctor-repair-parity*.json
           if-no-files-found: error
           retention-days: 14
 
@@ -542,6 +568,19 @@ jobs:
         with:
           name: setup-repair-parity-${{ runner.os }}
           path: ${{ runner.temp }}/setup-repair-parity.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Go/Rust native doctor repair and negative process controls
+        shell: bash
+        run: scripts/doctor-repair-oracle/run.sh "$RUNNER_TEMP/doctor-repair-parity.json"
+
+      - name: Preserve doctor repair process parity evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: doctor-repair-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/doctor-repair-parity*.json
           if-no-files-found: error
           retention-days: 14
 
