@@ -163,3 +163,24 @@ fn same_column_view_cannot_replace_a_required_writable_table() {
     assert!(line.contains('✗') && line.contains("sessions.id"), "{line}");
     assert_eq!(fs::read(&path).unwrap(), before);
 }
+
+#[cfg(windows)]
+#[test]
+fn windows_directory_attributes_are_reported_without_a_private_acl_claim() {
+    let root = tempfile::tempdir().unwrap();
+    let path = root.path().join("data/symbrain/memory/default.db");
+    fs::create_dir_all(&path).unwrap();
+    for (readonly, expected) in [(false, "0777"), (true, "0555")] {
+        let mut permissions = fs::metadata(&path).unwrap().permissions();
+        permissions.set_readonly(readonly);
+        fs::set_permissions(&path, permissions).unwrap();
+        let output = doctor(root.path(), true);
+        let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+        assert_eq!(report["memory_db"]["mode"], expected);
+        assert_eq!(report["memory_db"]["mode_ok"], false);
+        assert!(report["memory_db"].get("error").is_some());
+    }
+    let mut permissions = fs::metadata(&path).unwrap().permissions();
+    permissions.set_readonly(false);
+    fs::set_permissions(&path, permissions).unwrap();
+}

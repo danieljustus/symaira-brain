@@ -90,3 +90,9 @@ The supplemental native Windows gate additionally compares a real readonly
 attribute fixture and restores it before modifying the owned database. Linux
 continues to exercise its three observations; Windows requires four. These
 are static Windows changes until the actual native job executes successfully.
+
+Go's Windows Stat mapping also adds0111 for directory metadata, so an owned
+writable/readonly directory at default.db is0777/0555 rather than0666/0444.
+Preserve this distinction before SQLite rejects the directory. A Windows-only
+actual CLI regression checks both attribute states and the absence of a private
+ACL claim. It is not executed by local Linux tests; native Windows must run it.
