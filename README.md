@@ -652,7 +652,10 @@ go build -o symbrain ./cmd/symbrain
 Requirements: Go 1.26+, `CGO_ENABLED=0` (the release build is CGO-free; see
 `make build`).
 
-### Development
+#Activity validation acceptance: `scripts/activity-validation-oracle/run.sh /tmp/activity-validation.json`
+compares the native CLI with the immutable Go baseline in disposable roots.
+
+## Development
 
 ```bash
 make build       # CGO_ENABLED=0 go build -o symbrain ./cmd/symbrain
