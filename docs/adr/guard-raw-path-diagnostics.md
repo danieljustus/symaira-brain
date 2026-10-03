@@ -44,3 +44,15 @@ remains an explicit fail-closed deviation, pending native proof. Linux evidence
 never substitutes for macOS or Windows acceptance. Three conservative TOML
 states, broken-output and wider malformed discovery boundaries remain open;
 this correction does not complete #770 or assert full CLI cutover.
+
+Full independent Root review approves208aec9/source806ddcf for this bounded
+slice. Fresh168 tests/13 summaries, strict Clippy/fmt/actionlint and all124
+current cases,80/94 original inputs,63 raw/Unicode cases, five actual mutants,
+31 ordered probes, original4 raw/4 Unicode and6 filesystem invariants pass
+within their original explicit gates. An additional35 actual mixed raw-byte,
+HTML/JS/control pairs all match. Verify96 current and1217 frozenGo inputs,
+25 author/34 original proof files,14 current and53 original archived actual
+executables. Full report/raw observations/logs are in `independent-806/`.
+The shared Core representation is ready for a separately reviewed mechanical
+Managed re-export; neither native three-OS acceptance nor full770/769 is
+claimed by this Linux review.
