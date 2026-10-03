@@ -13,6 +13,16 @@ governed writes and JSONL decoding remain open; no memory Go fallback is removed
 #649 requires the shipped repaired store and its Doctor diagnostic. See
 `docs/adr/758-native-memory-evidence.md` for the long-term ownership decision.
 
+## Read-only Doctor schema inspection — 2026-10-03
+
+The #649 successor compares actual required columns against the schema embedded
+in the native binary, separately from atomic Store repair. Applied migration
+records and `quick_check=ok` no longer hide missing DDL in Doctor. The new
+`memory-schema-native.yml` requires native Linux/macOS/Windows process evidence,
+including a real unchanged-Go false-green rejection control. Acceptance remains
+pending; #649 is open. Decision and explicit scope are recorded in
+`docs/adr/649-doctor-schema-inspection.md`.
+
 ## Additional native init, Swift and fuzz evidence — 2026-09-29
 
 Candidate `f1263bea237e99ff9a297fe3146170ce5f2ad4a4` passes the exact

@@ -16,6 +16,7 @@ mod model;
 mod retrieval;
 mod rows;
 mod schema;
+mod schema_inspection;
 mod search_rows;
 mod store;
 mod write;
@@ -28,6 +29,7 @@ pub use activity::{ActivityItem, ActivityPage, ActivitySearch, ActivityStatus, P
 pub use embedding::{EmbeddingGenerator, GeneratedEmbedding};
 pub use list_rows::{MemoryListRow, RuleRow};
 pub use model::{Memory, SetOptions, Store, StoreError};
+pub use schema_inspection::missing_required_columns;
 pub use search_rows::{SearchHit, SearchRow};
 
 pub use evidence_store::{EvidenceSpan, reparent_memory_evidence_tx, save_memory_evidence_tx};
