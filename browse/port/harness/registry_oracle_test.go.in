@@ -2,13 +2,16 @@
 package daemon
 
 import (
+	"crypto/sha256"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	browserstate "github.com/danieljustus/symaira-browse/internal/state"
 )
@@ -158,7 +161,7 @@ func TestPortRegistryAPISupplemental(t *testing.T) {
 		}
 		fixtures[name] = fmt.Sprintf("%x", raw)
 	}
-	value := map[string]any{"default_roots": observeDefaultRoots(t, root), "state_fixtures_hex": fixtures, "registry": listed, "missing_error": missing.Error(),
+	value := map[string]any{"scalar_quote_sha256": observeScalarQuotes(), "default_roots": observeDefaultRoots(t, root), "state_fixtures_hex": fixtures, "registry": listed, "missing_error": missing.Error(),
 		"negative_tabs_error": negative.Error(), "read_timeout": client.options.ReadTimeout.Seconds(),
 		"environment_timeout": overridden.options.ReadTimeout.Seconds(), "explicit_timeout_ms": explicit.options.ReadTimeout.Milliseconds(),
 		"daemon_log": client.options.DaemonLogPath, "clear_retains_profile": true, "copied_refs": true}
@@ -167,6 +170,18 @@ func TestPortRegistryAPISupplemental(t *testing.T) {
 		t.Fatal(err)
 	}
 	fmt.Println("REGISTRY_API_OBSERVATIONS=" + string(encoded))
+}
+
+func observeScalarQuotes() string {
+	digest := sha256.New()
+	for scalar := rune(0); scalar <= utf8.MaxRune; scalar++ {
+		if !utf8.ValidRune(scalar) {
+			continue
+		}
+		digest.Write(strconv.AppendQuote(nil, string(scalar)))
+		digest.Write([]byte{'\n'})
+	}
+	return fmt.Sprintf("%x", digest.Sum(nil))
 }
 
 func observeDefaultRoots(t *testing.T, root string) []map[string]string {

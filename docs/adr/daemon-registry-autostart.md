@@ -56,3 +56,15 @@ migration data, and fail visibly when keys are absent or wrong. Do not invent
 a second cryptographic system, silently convert protected state to plaintext,
 or transfer vault-owned secrets through a gateway. Fresh independent review
 and all six exact-head native receipts remain required for each candidate.
+
+An additional actual process probe on candidate `dab8bdac` found that Rust Debug
+quoting changes invalid-session messages: NUL/ESC use different escapes and a
+combining mark is escaped even though Go prints it. The original paired failure
+is retained. Session error quoting therefore uses the pinned Go 1.26.7 Unicode
+15 printability observations and Go escapes, with no additional runtime library.
+The generated range table is independently checked by the actual Go digest of
+quoting every valid Unicode scalar. The runtime process gate also exercises all
+four original failing strings. Future toolchain Unicode changes require a fresh
+Go observation; changing to Rust's Debug tables would reintroduce the contract
+mismatch. This quoting change affects diagnostics, not session validity or
+authorization, and does not permit otherwise invalid IDs.

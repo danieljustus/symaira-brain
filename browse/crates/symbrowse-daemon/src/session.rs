@@ -18,8 +18,16 @@ pub enum SessionError {
 impl std::fmt::Display for SessionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::InvalidName(name) => write!(f, "invalid session name: {name:?}"),
-            Self::NotFound(name) => write!(f, "session not found: {name:?}"),
+            Self::InvalidName(name) => write!(
+                f,
+                "invalid session name: {}",
+                crate::session_quote::quote(name)
+            ),
+            Self::NotFound(name) => write!(
+                f,
+                "session not found: {}",
+                crate::session_quote::quote(name)
+            ),
             Self::Io(message) | Self::InvalidValue(message) => f.write_str(message),
         }
     }

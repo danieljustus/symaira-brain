@@ -67,7 +67,10 @@ pub(super) fn serve_connection_parts<S>(
                 reader.get_mut(),
                 error_response(
                     codes::INVALID_SESSION,
-                    format!("invalid session {:?}", crate::redact_str(&frame.session)),
+                    format!(
+                        "invalid session {}",
+                        crate::session_quote::quote(&crate::redact_str(&frame.session))
+                    ),
                 ),
             )
             .is_err()

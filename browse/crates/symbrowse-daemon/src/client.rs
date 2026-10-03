@@ -121,7 +121,10 @@ impl Client {
         if !crate::validate_session(&frame.session) {
             return Err(ClientError::Transport(DaemonError {
                 code: codes::INVALID_SESSION.into(),
-                message: format!("invalid session {:?}", redact_str(&frame.session)),
+                message: format!(
+                    "invalid session {}",
+                    crate::session_quote::quote(&redact_str(&frame.session))
+                ),
                 ..Default::default()
             }));
         }

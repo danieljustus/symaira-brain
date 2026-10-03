@@ -20,8 +20,17 @@ built by Go 1.26.7. These observations precede the corrections.
   describe the original run; reruns must pass their owned binary/source paths.
 
 The new source-bound `browse/port/harness/daemon_registry.py` separately performs
-60 actual CLI observations and 16 recorded raw frames per binary, eight actual
+60 actual CLI observations and 20 recorded raw frames per binary, eight actual
 concurrent autostart clients, three actual Go-produced state files, unchanged
 retained file bytes and four rejecting controls. Native exact-head receipts on
 all six workflow runners remain mandatory. No observed/schema correction
 completes the absent runtime state-key bridge or waives earlier Go failures.
+
+`original-dab8-invalid-session-quotes.json` preserves the later confirmed raw
+process mismatches on clean `dab8bdac`: NUL, ESC, combining U+0301 and soft hyphen.
+`go-print-ranges-probe.go.in` and `go-scalar-quote-probe.go.in` observe only the
+pinned standard library in disposable executions, not modified oracle source.
+`go-quote-provenance.json` retains their hashes, Unicode version, 712 non-printable
+ranges and digest covering every 1,112,064 valid Unicode scalar. The Rust quote
+regression executes that full scalar set; the actual process gate separately
+verifies all four strings through the production decoder and error path.

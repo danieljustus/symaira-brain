@@ -1,0 +1,3 @@
+package main
+import("fmt";"strconv";"unicode")
+func main(){fmt.Println(unicode.Version);start:=-1;for r:=0;r<=0x10ffff;r++{p:=strconv.IsPrint(rune(r));if !p&&start<0{start=r};if p&&start>=0{fmt.Printf("%x %x\n",start,r-1);start=-1}};if start>=0{fmt.Printf("%x 10ffff\n",start)}}

@@ -88,7 +88,8 @@ def observe(binary: Path, session: str, fixtures: dict[str, str]) -> dict:
         child, endpoint = start(binary, root, env, session)
         frames = [{"cmd": "session.info"}, {"cmd": "session.info", "session": "unknown"}]
         frames += [{"cmd": "daemon.ping", "session": name} for name in
-                   ("zulu", "alpha", "a" * 64, "bad session!", "_invalid", "../escape", "é", "a" * 65)]
+                   ("zulu", "alpha", "a" * 64, "bad session!", "_invalid", "../escape", "é", "a" * 65,
+                    "bad\0session", "bad\x1bsession", "bad\u0301session", "bad\u00adsession")]
         frames += [{"cmd": "session.list", "session": "zulu"},
                    {"cmd": "session.list", "session": "alpha"},
                    {"cmd": "session.info", "session": "alpha"}]
@@ -312,6 +313,7 @@ def main() -> int:
     assert subprocess.check_output(["git", "-C", str(source), "rev-parse", "HEAD"], text=True).strip() == process.GO_REF
     assert not subprocess.check_output(["git", "-C", str(source), "status", "--porcelain"], text=True)
     api = oracle_api(source)
+    assert api["observations"]["scalar_quote_sha256"] == "4c752b4c6e90df8c641d6ac02a6da80113943bc8fc476c825f27aef51db2a055", "pinned Go scalar quoting changed"
     assert not subprocess.check_output(["git", "-C", str(source), "status", "--porcelain"], text=True), "oracle API modified frozen Go"
     session = f"r{os.getpid()}"
     fixtures = api["observations"]["state_fixtures_hex"]
@@ -327,7 +329,7 @@ def main() -> int:
               "go_binary_sha256": process.digest(args.go), "rust_binary_sha256": process.digest(args.rust),
               "candidate_source_sha256": {f: process.digest(root / f) for f in files},
               "go_source_sha256": {f: process.digest(source / f) for f in go_files},
-              "counts_per_binary": {"cli_observations": 60, "recorded_raw_frames": 16,
+              "counts_per_binary": {"cli_observations": 60, "recorded_raw_frames": 20,
                                     "concurrent_clients": 8, "persisted_go_fixtures": 3},
               "case": case, "oracle_api": api, "matches": case["matches"], "negative_controls": controls(case)}
     args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -337,7 +339,7 @@ def main() -> int:
         for key in left:
             if left[key] != right[key]:
                 print(f"difference in {key}: Go={left[key]!r}; Rust={right[key]!r}")
-    print(f"60 CLI observations + 16 raw frames + 8 concurrent clients per binary: matches={case['matches']}; 4 controls rejected")
+    print(f"60 CLI observations + 20 raw frames + 8 concurrent clients per binary: matches={case['matches']}; 4 controls rejected")
     return 0 if case["matches"] else 1
 
 

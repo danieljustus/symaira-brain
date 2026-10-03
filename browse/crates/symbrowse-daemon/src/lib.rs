@@ -4,6 +4,7 @@
 //! Local daemon IPC, lifecycle and redaction contracts for `symbrowse`.
 
 mod client;
+mod go_print;
 mod protocol;
 mod redaction;
 mod runtime;
@@ -11,6 +12,7 @@ mod runtime;
 mod safari_runtime;
 mod server;
 mod session;
+mod session_quote;
 mod spec;
 
 #[cfg(unix)]
