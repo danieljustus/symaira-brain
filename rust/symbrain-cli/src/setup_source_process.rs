@@ -62,10 +62,8 @@ pub(super) fn lookup(tool: &str) -> Result<PathBuf, String> {
         None
     };
     #[cfg(windows)]
-    if allow_relative {
-        if let Some(implicit) = &implicit {
-            return Ok(implicit.clone());
-        }
+    if allow_relative && let Some(implicit) = &implicit {
+        return Ok(implicit.clone());
     }
     for directory in std::env::split_paths(&path) {
         #[cfg(windows)]
@@ -86,10 +84,10 @@ pub(super) fn lookup(tool: &str) -> Result<PathBuf, String> {
                 }
             }
             #[cfg(windows)]
-            if let Some(implicit) = &implicit {
-                if !same_lookup_file(implicit, &candidate) {
-                    return Err(dot_error());
-                }
+            if let Some(implicit) = &implicit
+                && !same_lookup_file(implicit, &candidate)
+            {
+                return Err(dot_error());
             }
             if !candidate.is_absolute() && !allow_relative {
                 return Err(dot_error());
@@ -133,10 +131,10 @@ pub(super) fn run(
         .try_clone()
         .map_err(|error| format!("open build capture: {error}"))?;
     #[cfg(windows)]
-    let resolved = if !executable.is_absolute() {
-        cwd.map(|directory| directory.join(executable))
-    } else {
+    let resolved = if executable.is_absolute() {
         None
+    } else {
+        cwd.map(|directory| directory.join(executable))
     };
     #[cfg(windows)]
     if let Some(resolved) = &resolved {
@@ -238,6 +236,9 @@ pub(super) struct Context {
     ids: Vec<signal_hook::SigId>,
 }
 impl Context {
+    // One fallible interface: Unix signal registration can fail; Windows keeps
+    // the same caller contract even though it currently has no registration.
+    #[cfg_attr(not(unix), allow(clippy::unnecessary_wraps))]
     pub(super) fn new() -> Result<Self, String> {
         let cancelled = Arc::new(AtomicBool::new(false));
         #[cfg(unix)]

@@ -138,3 +138,23 @@ Compiler-argv und Fehlern; ihr Cleanup-Besitzer hält separat den absoluten Pfad
 Das verhindert, dass `tempfile` den historischen relativen Source-Build unbemerkt
 in einen erfolgreichen, zusätzlichen Installationsvorgang umwandelt. Eine echte
 missing/file/valid-Relative-Temp-Fallgruppe bleibt im gemeinsamen Prozess-Gate.
+
+Ein zusätzlicher Windows-Ziel-Clippy-Durchlauf mit ausdrücklich typisierten
+Signatur-Stubs fand vor Veröffentlichung zwei verschachtelte `if`-Formen im
+Lookup. Sie werden semantisch gleichwertig als Let-Chains geschrieben. Ein
+weiterer Windows-Pedantic-Durchlauf erhielt außerdem die gleichwertige positive
+Absolute-Pfad-Abfrage und eine gezielte Windows-only-Lint-Ausnahme für die
+plattformübergreifend fallible Context-API: Unix-Signalregistrierung kann
+scheitern, weshalb der gemeinsame Aufrufer weiterhin `Result` benötigt. Der
+unveränderte vorherige Source `26c16944`, seine vollständige tatsächliche grüne
+Linux-Prozessprüfung und der genaue statische Lint-Fehler bleiben unter
+`migration/evidence/setup-source-765/corrected-26c169/` erhalten. Diese engere
+Ziel-Lint-Prüfung ist weder vollständige CLI-Kompilierung noch Windows-Ausführung;
+die echten nativen Drei-OS-Gates bleiben verbindlich.
+Der entsprechende Darwin-Ziel-Lint-Durchlauf ordnet die konstante externe
+Volume-Angabe vor den Funktionsstatements ein; auch dies ändert kein Verhalten.
+Die engen Lint-Durchläufe unterdrücken ausschließlich Lints der ausdrücklich
+markierten Stub-Definitionen und toten Fixture-Einstiegspunkte; die eingebundenen
+Produkt-Source-Dateien erhalten All-/Pedantic-Lints. Vollständige native CLI-
+Kompilierung und Plattformausführung werden weiterhin ausschließlich durch die
+verpflichtenden nativen CI-Gates belegt.

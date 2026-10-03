@@ -23,10 +23,10 @@ pub(super) fn prepare(context: &super::process::Context) -> Result<Layout, Strin
     use std::path::Path;
     use std::time::Duration;
     use symbrain_managed::format_io_error;
+    const VOLUME: &str = "/Volumes/1TB_NVMe_SN850X";
     if std::env::var_os("CI").is_some_and(|value| !value.is_empty()) {
         return Ok(Layout::default());
     }
-    const VOLUME: &str = "/Volumes/1TB_NVMe_SN850X";
     let volume = std::fs::canonicalize(VOLUME).map_err(|error| {
         format!(
             "required external build volume {VOLUME} is unavailable: lstat {VOLUME}: {}",
