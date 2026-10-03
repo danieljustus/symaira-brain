@@ -191,7 +191,7 @@ pub struct Issue {
 
 #[path = "model_parse.rs"]
 mod model_parse;
-pub(crate) use model_parse::parse_manifest;
+pub(crate) use model_parse::{frontmatter_scan, parse_manifest};
 pub use model_parse::parse_skill_md;
 
 /// Normalizes category whitespace while preserving spelling.

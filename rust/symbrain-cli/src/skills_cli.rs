@@ -16,7 +16,6 @@ use symbrain_skills::install::{
 };
 use symbrain_skills::library::list_library;
 use symbrain_skills::metadata::{self, Options as MetadataOptions, Record, read_events_log};
-use symbrain_skills::parse_skill_md;
 use symbrain_skills::targets_status::{
     StatusOptions as TargetStatusOptions, TargetStatus, list_status,
 };
@@ -352,20 +351,15 @@ fn has_dynamic_config() -> bool {
 /// load cleanly — including an absent or empty one — stays native.
 fn library_needs_go() -> bool {
     let (library_dir, _, _) = resolve_skills_dirs();
-    let entries = match fs::read_dir(&library_dir) {
-        Ok(entries) => entries,
-        Err(error) => return error.kind() != std::io::ErrorKind::NotFound,
-    };
-    entries.flatten().any(|entry| {
-        let path = entry.path();
-        if !path.is_dir() {
-            return false;
-        }
-        match fs::read(path.join("SKILL.md")) {
-            Ok(bytes) => parse_skill_md(&bytes).is_err(),
-            Err(_) => true,
-        }
-    })
+    let (_, issues) = list_library(&library_dir);
+    // A bounded/special-file rejection must not re-enter the legacy Go loader,
+    // even if another entry also has a Go-only malformed-input diagnostic.
+    if issues.iter().any(|issue| {
+        matches!(issue.code.as_str(), "skill_input_rejected" | "library_input_bound")
+    }) {
+        return false;
+    }
+    !issues.is_empty()
 }
 
 /// Accepts the flags `skills list` tolerates. Go parses `--target` and

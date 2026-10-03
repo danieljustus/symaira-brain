@@ -330,24 +330,39 @@ fn newest_file_mtime(root: &Path) -> Option<i64> {
     best
 }
 
-fn walk_mtimes(directory: &Path, best: &mut Option<i64>) {
-    let Ok(entries) = fs::read_dir(directory) else {
-        return;
-    };
-    for entry in entries.flatten() {
-        let path = entry.path();
-        let Ok(file_type) = entry.file_type() else {
+fn walk_mtimes(root: &Path, best: &mut Option<i64>) {
+    let mut pending = vec![(root.to_path_buf(), 0_usize)];
+    let mut entries_seen = 0_usize;
+    while let Some((directory, depth)) = pending.pop() {
+        if depth > crate::model::MAX_RESOURCE_DEPTH
+            || entries_seen >= crate::model::MAX_RESOURCE_ENTRIES
+        {
+            return;
+        }
+        let Ok(entries) = fs::read_dir(&directory) else {
             continue;
         };
-        if file_type.is_dir() {
-            if entry.file_name() == ".git" {
+        for entry in entries {
+            if entries_seen >= crate::model::MAX_RESOURCE_ENTRIES {
+                return;
+            }
+            let Ok(entry) = entry else {
+                continue;
+            };
+            entries_seen += 1;
+            let path = entry.path();
+            let Ok(file_type) = entry.file_type() else {
+                continue;
+            };
+            if file_type.is_dir() {
+                if entry.file_name() != ".git" {
+                    pending.push((path, depth + 1));
+                }
                 continue;
             }
-            walk_mtimes(&path, best);
-            continue;
-        }
-        if let Some(seconds) = file_mtime(&path) {
-            *best = Some(best.map_or(seconds, |current: i64| current.max(seconds)));
+            if let Some(seconds) = file_mtime(&path) {
+                *best = Some(best.map_or(seconds, |current: i64| current.max(seconds)));
+            }
         }
     }
 }

@@ -10,9 +10,15 @@
 use std::collections::BTreeMap;
 use std::fs;
 use std::io;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
-use crate::model::{Issue, parse_skill_md};
+use ambient_authority::ambient_authority;
+use cap_std::fs::Dir;
+
+use crate::load::{ReadBudget, read_skill_document};
+use crate::model::{
+    Issue, MAX_RESOURCE_ENTRIES, MAX_TOTAL_RESOURCE_BYTES, SkillError, parse_skill_md,
+};
 
 /// One library skill, as `skills list` reports it.
 #[derive(Debug, Clone)]
@@ -27,6 +33,29 @@ pub struct LibraryEntry {
     pub path: String,
 }
 
+/// Reads directory entries without collecting beyond the shared resource-entry
+/// bound. The returned entries are sorted for stable diagnostics and results.
+pub(crate) fn read_library_entries(library_dir: &Path) -> io::Result<Vec<fs::DirEntry>> {
+    let entries = fs::read_dir(library_dir)?;
+    let mut bounded = Vec::new();
+    for entry in entries {
+        if bounded.len() >= MAX_RESOURCE_ENTRIES {
+            return Err(io::Error::other(format!(
+                "library exceeds maximum entry count of {MAX_RESOURCE_ENTRIES}"
+            )));
+        }
+        bounded.push(entry?);
+    }
+    bounded.sort_by_key(fs::DirEntry::file_name);
+    Ok(bounded)
+}
+
+/// Returns true for a classified rejection that must remain on the bounded
+/// Rust path rather than falling back to the unbounded Go loader.
+pub(crate) fn is_safe_input_rejection(issue: &Issue) -> bool {
+    matches!(issue.code.as_str(), "skill_input_rejected" | "library_input_bound")
+}
+
 /// Reads every loadable skill directory in the library.
 ///
 /// Non-directory entries are ignored, exactly like the Go loader. Entries are
@@ -34,9 +63,25 @@ pub struct LibraryEntry {
 /// across the whole library.
 #[must_use]
 pub fn list_library(library_dir: &Path) -> (Vec<LibraryEntry>, Vec<Issue>) {
-    let entries = match fs::read_dir(library_dir) {
+    let entries = match read_library_entries(library_dir) {
         Ok(entries) => entries,
         Err(error) if error.kind() == io::ErrorKind::NotFound => return (Vec::new(), Vec::new()),
+        Err(error) => {
+            let bounded = error.to_string().contains("maximum entry count");
+            return (
+                Vec::new(),
+                vec![Issue {
+                    code: if bounded { "library_input_bound" } else { "library_read" }
+                        .to_owned(),
+                    severity: "error".to_owned(),
+                    message: error.to_string(),
+                    path: library_dir.display().to_string(),
+                }],
+            );
+        }
+    };
+    let library_cap = match Dir::open_ambient_dir(library_dir, ambient_authority()) {
+        Ok(directory) => directory,
         Err(error) => {
             return (
                 Vec::new(),
@@ -50,30 +95,37 @@ pub fn list_library(library_dir: &Path) -> (Vec<LibraryEntry>, Vec<Issue>) {
         }
     };
 
-    let mut names = entries
-        .flatten()
-        .map(|entry| entry.file_name())
-        .collect::<Vec<_>>();
-    names.sort();
+    let mut budget = ReadBudget::new(MAX_TOTAL_RESOURCE_BYTES, "library skill inputs");
     let mut loaded = Vec::new();
     let mut issues = Vec::new();
-    for name in names {
-        let root = library_dir.join(&name);
+    for entry in entries {
+        let root = entry.path();
         if !root.is_dir() {
             continue;
         }
+        let name = entry.file_name();
         let issue_path = name.to_string_lossy().into_owned();
-        let bytes = match fs::read(root.join("SKILL.md")) {
+        let relative = PathBuf::from(&name).join("SKILL.md");
+        let bytes = match read_skill_document(
+            &library_cap,
+            &relative,
+            &format!("{issue_path}/SKILL.md"),
+            Some(&mut budget),
+        ) {
             Ok(bytes) => bytes,
             Err(error) => {
-                issues.push(load_issue(&error.to_string(), &issue_path));
+                let stop = error.0.contains("library skill inputs exceeds maximum total size");
+                issues.push(load_issue(&error, &issue_path));
+                if stop {
+                    break;
+                }
                 continue;
             }
         };
         let parsed = match parse_skill_md(&bytes) {
             Ok(parsed) => parsed,
             Err(error) => {
-                issues.push(load_issue(&error.0, &issue_path));
+                issues.push(load_issue(&error, &issue_path));
                 continue;
             }
         };
@@ -89,11 +141,19 @@ pub fn list_library(library_dir: &Path) -> (Vec<LibraryEntry>, Vec<Issue>) {
     (loaded, issues)
 }
 
-fn load_issue(message: &str, path: &str) -> Issue {
+fn load_issue(error: &SkillError, path: &str) -> Issue {
+    let bounded_or_special = error.0.contains("exceeds maximum")
+        || error.0.contains("must be a regular file")
+        || error.0.contains("escapes skill root");
     Issue {
-        code: "skill_load".to_owned(),
+        code: if bounded_or_special {
+            "skill_input_rejected"
+        } else {
+            "skill_load"
+        }
+        .to_owned(),
         severity: "error".to_owned(),
-        message: message.to_owned(),
+        message: error.to_string(),
         path: path.to_owned(),
     }
 }
