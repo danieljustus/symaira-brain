@@ -48,6 +48,19 @@ Native Linux/macOS CI runs all 197 live cases and Windows runs its 182 cases; ac
 jobs to succeed at the candidate head. No operator credentials are used, no Go
 source is edited, and no broad Rust cutover or release is claimed.
 
+For #620, the native usage request layer preserves all five Kimi CLI identity
+headers and explicit Copilot enterprise authorities. Kimi's `1.26.7` value is
+the frozen Go SDK identity, not an OS-version claim. Windows queries the same
+physical DNS hostname API as Go instead of trusting `COMPUTERNAME`.
+The supplemental harness in `scripts/usage-fetch-oracle` leaves existing Go
+source and fixtures unchanged. Linux passes 133 complete reports, their request
+walks, and 266 byte comparisons through the real JSON/table renderers across
+all ten providers. Four actual negative controls fail as expected; 358 affected
+Rust tests, formatting and strict Clippy pass. Native Linux/macOS/Windows CI
+must still succeed at the published head before acceptance. The conservative
+credential-source fallback restrictions documented in `usage_cli.rs` remain;
+this does not complete the broader #768 cutover.
+
 The native MCP foundation now models JSON-RPC null/omission semantics and
 accepts both newline-delimited and `Content-Length` framing with the Go
 implementation's 1 MiB bounds. Gateway dispatch is implemented natively;

@@ -696,6 +696,11 @@ fuzzing, are recorded in the
 [contract matrix](migration/contract-matrix.csv). Go remains the production
 implementation and rollback path.
 
+Credentialed usage regression checks run with
+`scripts/usage-fetch-oracle/run.sh /tmp/usage-fetch-620.json`. The isolated
+fixture transport covers all ten providers, full request walks, JSON/table
+output and negative controls; see [the acceptance contract](scripts/usage-fetch-oracle/README.md).
+
 The root Rust workspace enforces an 80% line-coverage floor on every PR and
 main push. Run `make rust-coverage` with the pinned `cargo-llvm-cov 0.6.21` and
 LLVM tools; see [the coverage policy and measured scope](scripts/rust-coverage/README.md).
