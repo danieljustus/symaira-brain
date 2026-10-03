@@ -60,3 +60,28 @@ empty. Reports and verification logs are retained separately as
 is preserved. The final evidence/documentation commit leaves every validated
 production/comparator manifest hash unchanged. Independent corrected review and
 native macOS/Windows exact-candidate gates remain required.
+
+## Corrected independent review and publication
+
+Independent root review of clean9bc8ef0 passes the complete three process gates
+again: files86 (85 full reports plus one retained ambiguity gate)/151 CLI/five
+controls, Hermes96/104/five, references44/110/five. Both original overflowing
+input hashes match the new rejected cases exactly; configured/missing reports
+and auth captures now agree with Go. The exact10000 boundaries remain accepted.
+All50 original retention files and all53/51/47 current source hashes were
+verified. Affected ordinary tests pass355 with zero failures and three explicitly
+executed fresh-oracle ignores, across33 unfiltered summaries. Strict Clippy,
+formatting including included fragments, CI actionlint and diff checks pass.
+The initial final actionlint invocation named a nonexistent standalone workflow;
+the actual ci.yml was then checked successfully and the invocation correction is
+recorded. No production source changed during review.
+
+Publish the approved Claude/Codex files and focused Hermes correction together
+in existing PR804 because they share one reader, route and provider report
+contract. Normal integration already includes main31de722. Every affected
+provider-family gate remains in all three native CI blocks; original c7/5111
+proof remains historical. Fresh native Linux/macOS/Windows jobs on this expanded
+head are required. Full #768 and unported Copilot/Kimi/host contracts stay open.
+Independent report, complete fresh receipts and verification logs are retained
+under corrected-independent-root; raw owned stage evidence remains at the paths
+bound by the receipt.
