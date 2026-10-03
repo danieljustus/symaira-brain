@@ -760,6 +760,41 @@
       "sha256": "b1c3900dcd70d222f1f131726fb3d72f49e3d987b1454997a264182f33c115a7",
       "decision": "excluded",
       "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "cloud-fresh-checkout-tests.log",
+      "bytes": 65555,
+      "sha256": "737bb49e9ff539664128158614b89affbf5c2edde015804beb8c58db21430fd5",
+      "decision": "reproducible-closeout-receipt",
+      "reason": "Generated publication/verification receipt or raw log, not required source/input. Relevant actual outcomes and reproduction commands are versioned in verification.json and the public handoff."
+    },
+    {
+      "name": "cloud-fresh-verification.json",
+      "bytes": 1289,
+      "sha256": "9bfa24b041b7682c6a3a7a4c9008580fb7150c396626d48070e485c695bd651b",
+      "decision": "reproducible-closeout-receipt",
+      "reason": "Generated publication/verification receipt or raw log, not required source/input. Relevant actual outcomes and reproduction commands are versioned in verification.json and the public handoff."
+    },
+    {
+      "name": "cloud-go-oracle-build.log",
+      "bytes": 922,
+      "sha256": "3e2675231f187f9c74a9448286bba012431f5a57ab7748592613505c14e0bb4f",
+      "decision": "reproducible-closeout-receipt",
+      "reason": "Generated publication/verification receipt or raw log, not required source/input. Relevant actual outcomes and reproduction commands are versioned in verification.json and the public handoff."
+    },
+    {
+      "name": "cloud-publication-checkpoint.json",
+      "bytes": 646,
+      "sha256": "dd76aaf25fcbdc5028ee83e31ce6a63356618973198bbf728369ef22ca73eee4",
+      "decision": "reproducible-closeout-receipt",
+      "reason": "Generated publication/verification receipt or raw log, not required source/input. Relevant actual outcomes and reproduction commands are versioned in verification.json and the public handoff."
+    },
+    {
+      "name": "cloud-test-enumeration.log",
+      "bytes": 32446,
+      "sha256": "3baa6a2944542cb347df303ec3b6faf126e6f4aae3082a761c2f3f7cd7a98795",
+      "decision": "reproducible-closeout-receipt",
+      "reason": "Generated publication/verification receipt or raw log, not required source/input. Relevant actual outcomes and reproduction commands are versioned in verification.json and the public handoff."
     }
   ],
   "go_flag_oracle_directory": {
@@ -807,5 +842,10 @@
   },
   "secrets_personal_files_vaults": "Excluded; not used by scoped mock/unit checks; no values or raw harness config exported",
   "processes": "All session-owned review/watcher processes exited; latest result consumed. No active process to transfer.",
-  "cloud_runtime": "not checked; no cloud compute or model job launched"
+  "cloud_runtime": "not checked; no cloud compute or model job launched",
+  "fresh_checkouts_generated_during_closeout": {
+    "decision": "excluded-rebuildable-checkout-and-caches",
+    "recipe": "Direct public GitHub clone plus setup in docs/handoffs/end-work-cloud.md; no source copied from local worktrees."
+  },
+  "verification_count_correction": "422 top-level passed plus2ignored; previous435 included child harness runs. Literal historical reviews are preserved separately."
 }
