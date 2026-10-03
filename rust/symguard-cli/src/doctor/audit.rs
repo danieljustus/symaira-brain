@@ -1,15 +1,16 @@
 //! Guard doctor audit-anchor inspection.
 use std::path::{Path, PathBuf};
 use std::{fs, io};
+use symbrain_core::GoText;
 
 #[path = "anchor_decode.rs"]
 mod decoder;
 
-pub(super) fn audit_status(log_path: &Path) -> Option<(String, bool)> {
+pub(super) fn audit_status(log_path: &Path) -> Option<(GoText, bool)> {
     match fs::metadata(log_path) {
         Err(error) if error.kind() == io::ErrorKind::NotFound => {
             return Some((
-                "not initialized (created on first 'symguard decide')".to_owned(),
+                "not initialized (created on first 'symguard decide')".into(),
                 false,
             ));
         }
@@ -28,7 +29,7 @@ pub(super) fn audit_status(log_path: &Path) -> Option<(String, bool)> {
     };
     match anchor {
         None => Some((
-            "ok (JSONL, chain anchor pending Phase 3 sink)".to_owned(),
+            "ok (JSONL, chain anchor pending Phase 3 sink)".into(),
             false,
         )),
         Some(data) => {
@@ -37,23 +38,19 @@ pub(super) fn audit_status(log_path: &Path) -> Option<(String, bool)> {
                 symbrain_guard_core::external_decision::validate_go_json_syntax(&data)
             {
                 return Some((
-                    format!(
-                        "error: anchor {}: auditkit: parse anchor: {error}",
-                        anchor_path.display()
-                    ),
+                    GoText::path("error: anchor ", &anchor_path, ": auditkit: parse anchor: ")
+                        .with_suffix(error.as_bytes()),
                     true,
                 ));
             }
             if let Err(error) = decoder::validate(&data)? {
                 return Some((
-                    format!(
-                        "error: anchor {}: auditkit: parse anchor: {error}",
-                        anchor_path.display()
-                    ),
+                    GoText::path("error: anchor ", &anchor_path, ": auditkit: parse anchor: ")
+                        .with_suffix(error.as_bytes()),
                     true,
                 ));
             }
-            Some(("ok (hash-chained, anchor present)".to_owned(), false))
+            Some(("ok (hash-chained, anchor present)".into(), false))
         }
     }
 }

@@ -229,6 +229,7 @@ jobs:
           path: |
             ${{ runner.temp }}/guard-standalone.json
             ${{ runner.temp }}/guard-standalone-controls.json
+            ${{ runner.temp }}/guard-standalone-raw-paths.json
           if-no-files-found: error
           retention-days: 14
 
@@ -388,6 +389,7 @@ jobs:
           path: |
             ${{ runner.temp }}/guard-standalone.json
             ${{ runner.temp }}/guard-standalone-controls.json
+            ${{ runner.temp }}/guard-standalone-raw-paths.json
           if-no-files-found: error
           retention-days: 14
 
@@ -558,6 +560,7 @@ jobs:
           path: |
             ${{ runner.temp }}/guard-standalone.json
             ${{ runner.temp }}/guard-standalone-controls.json
+            ${{ runner.temp }}/guard-standalone-raw-paths.json
           if-no-files-found: error
           retention-days: 14
 

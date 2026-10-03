@@ -32,9 +32,8 @@
 //! in Go map-range order, which is not stable between two Go runs. Rust
 //! prints them sorted by key and handles multi-secret servers natively.
 
-use std::fmt::Write as _;
 use std::io::Write;
-use symbrain_core::{exit, version};
+use symbrain_core::{GoText, exit, version};
 
 #[path = "doctor/audit.rs"]
 mod audit;
@@ -53,37 +52,20 @@ use discovery::{
 /// back to the Go binary.
 pub(crate) fn run(stdout: &mut dyn Write) -> Option<u8> {
     let (report, code) = build_report()?;
-    let _ = stdout.write_all(report.as_bytes());
+    let _ = stdout.write_all(&report);
     Some(code)
 }
 
 /// Builds the whole report in memory. `None` means "fall back to Go" — no
 /// byte is written in that case, by construction.
-fn build_report() -> Option<(String, u8)> {
+fn build_report() -> Option<(Vec<u8>, u8)> {
     let config = load_config(&config_path())?;
     let audit = audit_status(&super::audit_path())?;
-    let (config_status, loaded) = match config {
-        ConfigState::Missing => (
-            "not configured (no config file found)".to_owned(),
-            Some(LoadedConfig::default()),
-        ),
-        ConfigState::Loaded(loaded) => ("ok".to_owned(), Some(loaded)),
-        ConfigState::ValidationError(error) => (
-            format!(
-                "error: config: validate {}: {error}",
-                config_path().display()
-            ),
-            None,
-        ),
-        ConfigState::ParseError(error) => (
-            format!("error: config: parse {}: {error}", config_path().display()),
-            None,
-        ),
-    };
+    let (config_status, loaded) = describe_config(config);
 
-    let mut out = String::new();
+    let mut out = Vec::new();
     let build_version = option_env!("SYMBRAIN_VERSION").unwrap_or("dev");
-    out.push_str("symguard doctor\n\n");
+    out.extend_from_slice(b"symguard doctor\n\n");
     let _ = writeln!(out, "  Version:   {build_version}");
     // Go's own line here is `runtime.Version()`. A Rust binary has no Go
     // toolchain and must never print a fabricated one (a prior wave did
@@ -97,22 +79,30 @@ fn build_report() -> Option<(String, u8)> {
         version::current_arch()
     );
 
-    let mut row = |name: &str, status: &str| {
-        let _ = writeln!(out, "  {name:<16} {status}");
+    let mut row = |name: &str, status: &[u8]| {
+        let _ = write!(out, "  {name:<16} ");
+        out.extend_from_slice(status);
+        out.push(b'\n');
     };
-    row("binary", "ok");
-    row("go runtime", "ok");
-    row("config", &config_status);
+    row("binary", b"ok");
+    row("go runtime", b"ok");
+    row("config", config_status.as_ref());
     if let Some(loaded) = &loaded {
         if loaded.rules > 0 {
-            row("policy", &format!("ok ({} rule(s))", loaded.rules));
+            row(
+                "policy",
+                format!("ok ({} rule(s))", loaded.rules).as_bytes(),
+            );
         } else {
-            row("policy", "defaults only (no rules — deny by default)");
+            row(
+                "policy",
+                "defaults only (no rules — deny by default)".as_bytes(),
+            );
         }
     } else {
-        row("policy", "not loaded (config error)");
+        row("policy", b"not loaded (config error)");
     }
-    row("audit log", audit.0.as_str());
+    row("audit log", audit.0.as_ref());
 
     if loaded.is_none() {
         let issues = 2 + usize::from(audit.1);
@@ -131,22 +121,25 @@ fn build_report() -> Option<(String, u8)> {
     if allowlist.is_empty() {
         row(
             "spawn allowlist",
-            "not configured (empty — deny by default)",
+            "not configured (empty — deny by default)".as_bytes(),
         );
     } else {
         row(
             "spawn allowlist",
-            &format!("ok ({} entries)", allowlist.len()),
+            format!("ok ({} entries)", allowlist.len()).as_bytes(),
         );
     }
 
     let mut checks = Vec::new();
     if let Some(error) = &discovery_error {
-        row("mcp servers", &format!("error: {error}"));
+        row("mcp servers", format!("error: {error}").as_bytes());
     } else if servers.is_empty() {
-        row("mcp servers", "none discovered");
+        row("mcp servers", b"none discovered");
     } else {
-        row("mcp servers", &format!("{} discovered", servers.len()));
+        row(
+            "mcp servers",
+            format!("{} discovered", servers.len()).as_bytes(),
+        );
         checks = check_servers(servers, &allowlist);
     }
 
@@ -158,18 +151,40 @@ fn build_report() -> Option<(String, u8)> {
             .filter(|c| !c.allowed || !c.secrets.is_empty())
             .count();
 
-    print_server_checks(&mut out, &checks);
-    print_secret_risks(&mut out, &checks);
+    let mut details = String::new();
+    print_server_checks(&mut details, &checks);
+    print_secret_risks(&mut details, &checks);
+    out.extend_from_slice(details.as_bytes());
 
-    out.push('\n');
+    out.push(b'\n');
     if problems == 0 {
-        out.push_str(
-            "All basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
+        out.extend_from_slice(
+            b"All basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
         );
         return Some((out, exit::OK));
     }
     let _ = writeln!(out, "{problems} issue(s) found. See details above.");
     Some((out, exit::GENERIC))
+}
+
+fn describe_config(config: ConfigState) -> (GoText, Option<LoadedConfig>) {
+    match config {
+        ConfigState::Missing => (
+            GoText::from("not configured (no config file found)"),
+            Some(LoadedConfig::default()),
+        ),
+        ConfigState::Loaded(loaded) => (GoText::from("ok"), Some(loaded)),
+        ConfigState::ValidationError(error) => (
+            GoText::path("error: config: validate ", &config_path(), ": ")
+                .with_suffix(error.as_bytes()),
+            None,
+        ),
+        ConfigState::ParseError(error) => (
+            GoText::path("error: config: parse ", &config_path(), ": ")
+                .with_suffix(error.as_bytes()),
+            None,
+        ),
+    }
 }
 
 #[cfg(test)]

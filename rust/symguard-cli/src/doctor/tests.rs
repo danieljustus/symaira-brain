@@ -152,13 +152,13 @@ fn audit_status_reports_all_three_states() {
     let dir = tempfile::tempdir().expect("tempdir");
     let log = dir.path().join("audit.log");
     assert_eq!(
-        audit_status(&log).as_ref().map(|status| status.0.as_str()),
-        Some("not initialized (created on first 'symguard decide')")
+        audit_status(&log).as_ref().map(|status| status.0.as_ref()),
+        Some("not initialized (created on first 'symguard decide')".as_bytes())
     );
     fs::write(&log, b"{\"entry_id\":\"1\"}\n").expect("write log");
     assert_eq!(
-        audit_status(&log).as_ref().map(|status| status.0.as_str()),
-        Some("ok (JSONL, chain anchor pending Phase 3 sink)")
+        audit_status(&log).as_ref().map(|status| status.0.as_ref()),
+        Some("ok (JSONL, chain anchor pending Phase 3 sink)".as_bytes())
     );
     fs::write(
         dir.path().join("audit.log.anchor"),
@@ -166,14 +166,14 @@ fn audit_status_reports_all_three_states() {
     )
     .expect("write anchor");
     assert_eq!(
-        audit_status(&log).as_ref().map(|status| status.0.as_str()),
-        Some("ok (hash-chained, anchor present)")
+        audit_status(&log).as_ref().map(|status| status.0.as_ref()),
+        Some("ok (hash-chained, anchor present)".as_bytes())
     );
     // Syntax errors use the shared Go-compatible JSON scanner.
     fs::write(dir.path().join("audit.log.anchor"), b"not json").expect("write anchor");
     let status = audit_status(&log).expect("syntax error is native");
-    assert!(status.0.ends_with(
-        "auditkit: parse anchor: invalid character 'o' in literal null (expecting 'u')"
+    assert!(status.0.as_ref().ends_with(
+        b"auditkit: parse anchor: invalid character 'o' in literal null (expecting 'u')"
     ));
     assert!(status.1);
     // The actual Go oracle's first typed field diagnostic is native.
@@ -183,7 +183,7 @@ fn audit_status_reports_all_three_states() {
     )
     .expect("write anchor");
     let status = audit_status(&log).expect("type error is native");
-    assert!(status.0.ends_with("auditkit: parse anchor: json: cannot unmarshal string into Go struct field ChainAnchor.entry_count of type int64"));
+    assert!(status.0.as_ref().ends_with(b"auditkit: parse anchor: json: cannot unmarshal string into Go struct field ChainAnchor.entry_count of type int64"));
     assert!(status.1);
 }
 

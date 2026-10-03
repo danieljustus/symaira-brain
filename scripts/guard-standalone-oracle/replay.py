@@ -281,7 +281,8 @@ def main():
                   candidate_dirty=bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT)),
                   go_version=subprocess.check_output([str(go), "version"], text=True).splitlines()[1].strip(),
                   candidate_source_sha256={str(path.relative_to(ROOT)): digest(path.read_bytes())
-                      for path in sorted((ROOT / "rust/symguard-cli").rglob("*")) if path.is_file() and path.suffix in [".rs", ".toml"]},
+                      for crate in ["symguard-cli", "symbrain-core", "symbrain-audit", "symbrain-guard-core"]
+                      for path in sorted((ROOT / "rust" / crate).rglob("*")) if path.is_file() and path.suffix in [".rs", ".toml"]},
                   candidate_manifest_sha256={name: digest((ROOT / name).read_bytes()) for name in ["Cargo.toml", "Cargo.lock", "rust/symbrain-cli/Cargo.toml"]},
                   go_source_sha256=source_hashes, supplemental_go_entry_sha256=digest((archive / "oracle770/main.go").read_bytes()),
                   binaries_sha256=dict(go=digest(go.read_bytes()), rust=digest(rust.read_bytes())),

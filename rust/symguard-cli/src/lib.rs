@@ -7,9 +7,9 @@ use std::path::{Path, PathBuf};
 
 use chrono::{DateTime, FixedOffset};
 use symbrain_audit::RawJsonlAppender;
-use symbrain_core::exit;
+use symbrain_core::{GoText, exit};
 use symbrain_guard_core::external_decision::{
-    MAX_REQUEST_BYTES, evaluate_at, evaluate_read_error_at,
+    ExternalDecision, MAX_REQUEST_BYTES, evaluate_at, evaluate_read_error_at,
 };
 use symbrain_guard_core::go_json::to_go_json_vec;
 
@@ -97,19 +97,38 @@ pub fn run_at_path<R: Read, W: Write>(
 
     let diagnostic_path = path.clone();
     let appender = RawJsonlAppender::new(path);
-    let mut sink = |record: &symbrain_guard_core::external_decision::ExternalDecisionAudit| {
-        let serialized = to_go_json_vec(record)
-            .map_err(|error| format!("decide: marshal audit record: {error}"))?;
-        appender
-            .append(&serialized)
-            .map_err(|error| audit_error::render(&error, &diagnostic_path))
+    // The kernel owns policy and fail-closed transitions. Keep its String API
+    // intact; only the CLI presentation retains the OS diagnostic's raw bytes.
+    let mut audit_reason = None;
+    let response = {
+        let mut sink = |record: &symbrain_guard_core::external_decision::ExternalDecisionAudit| {
+            let serialized = to_go_json_vec(record)
+                .map_err(|error| format!("decide: marshal audit record: {error}"))?;
+            appender.append(&serialized).map_err(|error| {
+                let rendered = audit_error::render(&error, &diagnostic_path);
+                if matches!(
+                    record.decision,
+                    ExternalDecision::Allow | ExternalDecision::Confirm
+                ) {
+                    audit_reason = Some(
+                        rendered
+                            .clone()
+                            .with_prefix("audit: write decision record: "),
+                    );
+                }
+                rendered.to_string()
+            })
+        };
+        match read_result {
+            Ok(_) => evaluate_at(&bytes, now, &mut sink),
+            Err(error) => evaluate_read_error_at(error, now, &mut sink),
+        }
     };
-
-    let response = match read_result {
-        Ok(_) => evaluate_at(&bytes, now, &mut sink),
-        Err(error) => evaluate_read_error_at(error, now, &mut sink),
+    let wire = WireResponse {
+        decision: response.decision,
+        reason: audit_reason.unwrap_or_else(|| response.reason.into()),
     };
-    let Ok(mut encoded) = to_go_json_vec(&response) else {
+    let Ok(mut encoded) = to_go_json_vec(&wire) else {
         return exit::GENERIC;
     };
     encoded.push(b'\n');
@@ -235,6 +254,12 @@ mod tests {
             assert!(stderr.is_empty());
         }
     }
+}
+
+#[derive(serde::Serialize)]
+struct WireResponse {
+    decision: ExternalDecision,
+    reason: GoText,
 }
 
 mod standalone;
