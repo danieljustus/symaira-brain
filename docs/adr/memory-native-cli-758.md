@@ -114,8 +114,21 @@ table cannot pass this assertion. The archived original binary fails four of
 seven new path cases and three populated rules JSON cases; the fixed binary
 passes all of them. No Go production or frozen fixture is modified.
 
-Final scoped acceptance is 590 Unix/553 Windows real process comparisons, twelve
-affected native CLI component tests and strict Clippy/format/actionlint. The
-prior 333-test record remains evidence for the earlier source; it is not claimed
-as a fresh full-suite execution of these two corrections. Native three-OS and
-the documented full #758/#649 release gates remain pending.
+The focused fixes were normally merged with actual main
+`31de72294521701fc4b1a0bce39f03cc34d72e7e`; clean combined source is
+`2572f1bf28ac57c3af348245f1444aa6172ce997`. The new CLI SHA-256 is
+`71091ff9a963d5effdcb0f741085ff7c6f4723e83a0cd0a8b5a7d7f78c2d170e`.
+This preserves the accepted Activity cutover in the shared CLI dispatcher and
+keeps the rejected original source and binary receipts separate.
+
+Combined Linux acceptance passes all 590 memory comparisons, both actual process
+failure controls, all 265 actual Go Activity validation comparisons, 117 CLI lib
+tests and both Activity process fixture tests (119 Rust tests total), plus strict
+Clippy/format/actionlint. Exact source/binary hashes and literal process outputs
+are tracked under `migration/evidence/memory-cli-758/review-fixes-2572`.
+The first broader lib invocation omitted this environment's subreaper and failed
+the Doctor retained-descendant cleanup check. Its literal failed log is retained;
+the unchanged source passes all 117 lib tests with the lifecycle wrapper.
+The prior 333-test record remains evidence for the earlier source; it is not
+claimed as a fresh full-suite execution of these corrections. Native three-OS
+and the documented full #758/#649 release gates remain pending.
