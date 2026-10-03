@@ -18,3 +18,14 @@ Rust bearbeitet Cores deterministisch. Go iteriert eine Map mit wechselnder Reih
 Fehlerdiagnosen des vollständigen typisierten Konfigurationsladers bleiben zunächst Go-verwaltet. Ein bestehender Eligibility-Gate verhindert die native Reparatur, wenn Go die Konfiguration ablehnen würde; dieser Gate führt keine Versionsprobe aus. Ebenso bleiben `setup --from-source` und dessen Modul-Lifecycle außerhalb dieses Schrittes. Eine Teilmigration als komplette Erledigung von #765 zu kennzeichnen würde den späteren sicheren Fallback-Abbau erschweren.
 
 Die reproduzierbare Validierung liegt in `scripts/doctor-repair-oracle/` und `migration/evidence/doctor-repair-765/`. Drei absichtlich beschädigte tatsächliche CLI-Prozesse müssen am falschen Exitcode, fehlenden Header beziehungsweise fehlenden Core-Ereignis scheitern. Die CI behält positive und negative Belege auf allen drei Betriebssystemen auch bei Fehlern für 14 Tage. Merge und Issue-Abschluss setzen weiterhin die echten Annahmekriterien voraus.
+
+## Native Windows lint and current main integration
+
+The original Windows CI at published `6492db7c` stopped at strict Clippy because
+the Windows-only test used the unreadable literal `0xc0000005`. Keep the check
+strict and add the conventional separator `0xc000_0005`; the numeric status and
+expected diagnostic remain identical. The original failing job/run and exact
+correction are retained in `windows-test-literal-clippy-6492.json`. This local
+format/diff check is not a native Windows pass. Normal integration of actual
+main `31de7229` also retains the accepted Activity port; current combined native
+CI must pass again before merging this Doctor increment.
