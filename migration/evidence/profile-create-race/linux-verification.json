@@ -1,0 +1,653 @@
+{
+  "schema_version": 1,
+  "candidate_source_head": "0e71ef1450dc3b9fde52ce9b2dac8d77aa96eb98",
+  "candidate_dirty": false,
+  "main_base": "31de72294521701fc4b1a0bce39f03cc34d72e7e",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "rust_sdk": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+  "original_windows_failure": {
+    "run_id": 37153314306,
+    "job_id": 111291463063,
+    "actual_checkout_merge": "202de89a53f653c43a062f594f4ac8c6fe130be6",
+    "docs_head": "06ff95b4c48a8aeef82820bc913d734c2a6f5f11",
+    "test": "profile::create::tests::concurrent_creators_never_clobber_each_other",
+    "observed_loser_kind": "PermissionDenied",
+    "required_loser_kind": "AlreadyExists",
+    "original_log_path": "migration/evidence/profile-create-race/original-windows-ci.log",
+    "original_log_sha256": "121c25df6b7f88ba5749ba2731734d367a5672eca342e02f161b1f41c7af9fa0",
+    "main_and_docs_original_create_sha256": "13c3de6a10eaabe50585ac1f12f177a3962aec353bf4caabd76f85647b7c7386",
+    "precise_windows_failing_syscall": "not instrumented; delete-pending temporary reuse is a hypothesis"
+  },
+  "tests": {
+    "policy-tests": {
+      "passed": 104,
+      "failed": 0,
+      "ignored": 0,
+      "summaries": 12
+    },
+    "cli-contracts": {
+      "passed": 23,
+      "failed": 0,
+      "ignored": 0,
+      "summaries": 2
+    },
+    "init-unit": {
+      "passed": 5,
+      "failed": 0,
+      "ignored": 0,
+      "summaries": 1
+    }
+  },
+  "thread_races": [
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:restricted",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 0,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "winner:personal",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 1,
+      "winner_bytes": "# Example profile: full access for trusted personal use.\n[profile]\nname        = \"race\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode    = \"full\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "personal"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:personal",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 2,
+      "winner_bytes": "# Example profile: full access for trusted personal use.\n[profile]\nname        = \"race\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode    = \"full\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "personal"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "winner:restricted",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 3,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "winner:restricted",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 4,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:personal",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 5,
+      "winner_bytes": "# Example profile: full access for trusted personal use.\n[profile]\nname        = \"race\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode    = \"full\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "personal"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:personal",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 6,
+      "winner_bytes": "# Example profile: full access for trusted personal use.\n[profile]\nname        = \"race\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode    = \"full\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "personal"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:restricted",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 7,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "winner:restricted",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 8,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:restricted",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 9,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:restricted",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 10,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:personal",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 11,
+      "winner_bytes": "# Example profile: full access for trusted personal use.\n[profile]\nname        = \"race\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode    = \"full\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "personal"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:personal",
+        "error:AlreadyExists"
+      ],
+      "round": 12,
+      "winner_bytes": "# Example profile: full access for trusted personal use.\n[profile]\nname        = \"race\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode    = \"full\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "personal"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:restricted",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 13,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:restricted",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 14,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "winner:personal",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 15,
+      "winner_bytes": "# Example profile: full access for trusted personal use.\n[profile]\nname        = \"race\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode    = \"full\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "personal"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:personal",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 16,
+      "winner_bytes": "# Example profile: full access for trusted personal use.\n[profile]\nname        = \"race\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode    = \"full\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "personal"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:restricted",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 17,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:personal",
+        "error:AlreadyExists"
+      ],
+      "round": 18,
+      "winner_bytes": "# Example profile: full access for trusted personal use.\n[profile]\nname        = \"race\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode    = \"full\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "personal"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:restricted"
+      ],
+      "round": 19,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:personal",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 20,
+      "winner_bytes": "# Example profile: full access for trusted personal use.\n[profile]\nname        = \"race\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode    = \"full\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "personal"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:restricted",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 21,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:restricted"
+      ],
+      "round": 22,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:personal",
+        "error:AlreadyExists"
+      ],
+      "round": 23,
+      "winner_bytes": "# Example profile: full access for trusted personal use.\n[profile]\nname        = \"race\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode    = \"full\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "personal"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:restricted",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 24,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "winner:restricted",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 25,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:personal",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 26,
+      "winner_bytes": "# Example profile: full access for trusted personal use.\n[profile]\nname        = \"race\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode    = \"full\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "personal"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "winner:restricted",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 27,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:personal",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 28,
+      "winner_bytes": "# Example profile: full access for trusted personal use.\n[profile]\nname        = \"race\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode    = \"full\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "personal"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:restricted"
+      ],
+      "round": 29,
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:personal",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 30,
+      "winner_bytes": "# Example profile: full access for trusted personal use.\n[profile]\nname        = \"race\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode    = \"full\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "personal"
+    },
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:personal",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "round": 31,
+      "winner_bytes": "# Example profile: full access for trusted personal use.\n[profile]\nname        = \"race\"\ndescription = \"Full access for trusted personal use\"\n\n[servers.vault]\nenabled = true\nmode    = \"full\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_write\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "personal"
+    }
+  ],
+  "process_races": [
+    {
+      "creators": 8,
+      "remaining_profile_files": 1,
+      "results": [
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "error:AlreadyExists",
+        "winner:restricted",
+        "error:AlreadyExists",
+        "error:AlreadyExists"
+      ],
+      "winner_bytes": "# Example profile: least-privilege for untrusted or shared harnesses.\n[profile]\nname        = \"race\"\ndescription = \"Least-privilege profile for untrusted or shared harnesses\"\n\n[servers.vault]\nenabled = true\nmode    = \"request_only\"\n\n[servers.memory]\nenabled = true\nmode    = \"read_only\"\n\n[servers.skills]\nenabled = true\n\n[servers.usage]\nenabled = true\n\n[audit]\nenabled = true\n",
+      "winner_template": "restricted"
+    }
+  ],
+  "total_creators_observed": 264,
+  "source_sha256": {
+    "Cargo.toml": "982fdf67af364bb689371f888d79e4662bcbd2d7088dec0d7a2aa85f308a0155",
+    "Cargo.lock": "95657aeeba4f12cde301afa9aaf6b01b021b0d7892ed4cad6907a1db390785c0",
+    ".github/workflows/ci.yml": "7781a2f5fc55a94605eef5a071f44d24b16d7fb3b8d9b5f6e37f608ff3d214dd",
+    "rust/symbrain-policy/Cargo.toml": "8f5ec941b85722894f19d595313b2d4107d2fd6de384faf54ee3282952af3de1",
+    "rust/symbrain-policy/src/profile/create.rs": "4a761f474339671ec6888c3b6fcbbc689d864a11ee193813d5b8a8aa441df8e2",
+    "rust/symbrain-policy/tests/profile_create_races.rs": "3f1d568d6723ff8e2e7bc09e6f6634f948eea87c55e30c646d334b04876c1309",
+    "rust/symbrain-cli/src/profile_actions.rs": "347c0ba2fac9b24e6f308c91edcb042fcc39bb34e305a17522c0d533c620d3c9",
+    "rust/symbrain-cli/tests/init_cli_tests.rs": "5cf56e33be68522d26aae3ff854cf59e9e38a92467e1577d042bdda49994ee18",
+    "rust/symbrain-cli/tests/profile_cli_tests.rs": "e9fe05f8ef3cb1f691c06b07c7cb840d3e7627e474763eafe118e7a8cf6b3255"
+  },
+  "checks": {
+    "strict_alltargets_allfeatures_policy_cli_clippy": "pass",
+    "workspace_fmt": "pass",
+    "ci_actionlint": "pass",
+    "git_diff_check": "pass",
+    "Go_and_frozen_fixtures_diff": "empty",
+    "Cargo_lock_diff": "empty"
+  },
+  "logs": {
+    "policy-tests": {
+      "path": "migration/evidence/profile-create-race/linux-policy-tests.log",
+      "sha256": "6af69812e18ee28147df87fb6f39c1403baee48eec65959bca31dc314746553a"
+    },
+    "cli-contracts": {
+      "path": "migration/evidence/profile-create-race/linux-cli-contracts.log",
+      "sha256": "b84a83da5332041cd4bcae228f487449083a4633911c12f6c37efaf5324e9294"
+    },
+    "init-unit": {
+      "path": "migration/evidence/profile-create-race/linux-init-unit.log",
+      "sha256": "64b4d0f63a11a2d52412ddaa30de0cb1a54327e9957a48c95cde3fbaf7e64a6a"
+    },
+    "clippy": {
+      "path": "migration/evidence/profile-create-race/linux-clippy.log",
+      "sha256": "9ae36bb22d8f0f810a77044760863f70b81405396a32cce477ec08eecd4e6d59"
+    },
+    "fmt": {
+      "path": "migration/evidence/profile-create-race/linux-fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "actionlint": {
+      "path": "migration/evidence/profile-create-race/linux-actionlint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "native_windows_macos_corrected_candidate": "required; no native proof supplied here",
+  "independent_review": "required; author validation is not approval"
+}

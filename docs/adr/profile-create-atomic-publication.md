@@ -65,3 +65,21 @@ Affected policy and CLI init/profile contracts, strict Clippy, formatting and
 CI validation must pass. Native Windows/macOS exact-candidate CI and independent
 review remain required before acceptance. This change does not itself approve
 or merge its author's implementation.
+
+## Linux candidate verification
+
+Clean source0e71ef1450dc3b9fde52ce9b2dac8d77aa96eb98 passes104 policy tests,
+23 CLI init/profile integration tests and five CLI init unit tests, with no
+failures or skips. Structured observations retain all264 creator results from
+32 eight-thread races and one eight-process race. Every race has one winner,
+seven AlreadyExists losers, matching complete winner bytes and one profile file;
+the thread probe also checks Unix0600. Publication-failure cleanup and100 legacy
+slot ownership probes pass. Strict all-targets/all-features policy+CLI Clippy,
+workspace fmt, CI actionlint and diff checks pass. Cargo.lock, Go production and
+frozen fixtures remain unchanged.
+
+The separate Linux verification receipt and raw logs are retained under
+`migration/evidence/profile-create-race/`. The original Windows failure is
+retained byte-for-byte. Final evidence/documentation leaves the validated source
+hashes unchanged. An independent reviewer and exact-candidate native Windows/
+macOS CI must assess this implementation before it is accepted.
