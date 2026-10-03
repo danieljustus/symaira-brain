@@ -16,6 +16,9 @@
 #[path = "common/doctor_header.rs"]
 mod doctor_header;
 
+#[path = "../../test-support/coverage.rs"]
+mod coverage;
+
 use std::fs;
 use std::path::Path;
 use std::process::{Command, Output, Stdio};
@@ -119,7 +122,7 @@ fn run(case_root: &Path) -> Output {
     let home = case_root.join("home");
     let config_home = home.join(".config");
     let mut cmd = Command::new(env!("CARGO_BIN_EXE_symbrain"));
-    cmd.env_clear();
+    cmd.env_clear().envs(coverage::profile_environment());
     #[cfg(windows)]
     for key in ["SystemRoot", "windir", "PATHEXT", "ComSpec", "SystemDrive"] {
         if let Some(val) = std::env::var_os(key) {

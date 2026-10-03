@@ -696,6 +696,14 @@ fuzzing, are recorded in the
 [contract matrix](migration/contract-matrix.csv). Go remains the production
 implementation and rollback path.
 
+The root Rust workspace enforces an 80% line-coverage floor on every PR and
+main push. Run `make rust-coverage` with the pinned `cargo-llvm-cov 0.6.21` and
+LLVM tools; see [the coverage policy and measured scope](scripts/rust-coverage/README.md).
+CI retains the complete denominator and per-crate reports. The Go coverage badge
+also includes instrumented execution of four existing oracle generators,
+retaining all unit-suite statements and reporting product-code diagnostics
+separately. This coverage policy does not replace native-platform parity gates.
+
 See [AGENTS.md](AGENTS.md) for coding conventions, package layout, and the
 full architectural boundary rules referenced above. See
 [CONTRIBUTING.md](.github/CONTRIBUTING.md) for the PR process, and
