@@ -1,0 +1,811 @@
+{
+  "scope": "2026-10-02/03 scoped Brain changes and continuation inputs; not a global machine/repository backup",
+  "external_session_artifacts": [
+    {
+      "name": "bodies.json",
+      "bytes": 131290,
+      "sha256": "8dc3f57b3515d53bec79ace203671b677a785ce0ceed881972367e69a88ae082",
+      "decision": "excluded-private-context",
+      "reason": "Internal coordination, local paths, raw review transcripts or private harness details; continuation decisions and literal current review published separately without exporting chat, memory or configuration."
+    },
+    {
+      "name": "check-ci-559.py",
+      "bytes": 1630,
+      "sha256": "a0fae0c66d58efeb86822b64e389bca3ad0514fdcdb8f70f4a12110efe0dd1c6",
+      "decision": "reproducible",
+      "reason": "Temporary one-off verification/watcher, not product input. Existing tracked workflows/scripts and versioned inline parity replay replace it; no local script required."
+    },
+    {
+      "name": "check-health-598.py",
+      "bytes": 4918,
+      "sha256": "5bda68452466e0330e339f51684742a90ad1f14d3c03a67d3192dd8eb95feaa4",
+      "decision": "reproducible",
+      "reason": "Temporary one-off verification/watcher, not product input. Existing tracked workflows/scripts and versioned inline parity replay replace it; no local script required."
+    },
+    {
+      "name": "check-scope-597.py",
+      "bytes": 1742,
+      "sha256": "88610ce7a7c6947438a8fc74e73525112d982c0c8dd7b86ff327639fb41ece9f",
+      "decision": "reproducible",
+      "reason": "Temporary one-off verification/watcher, not product input. Existing tracked workflows/scripts and versioned inline parity replay replace it; no local script required."
+    },
+    {
+      "name": "ci-784-a1a93192.json",
+      "bytes": 14409,
+      "sha256": "0fafb815d6cb16d68a322adda333be06184a88abbc110a953395a58789784108",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-785-53069de1.json",
+      "bytes": 14419,
+      "sha256": "4705b3cef5273f992b1e47739776f7846c9c444c1d669500c68f716e8443f1de",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-786-8f493764.json",
+      "bytes": 14424,
+      "sha256": "262ffd809f2c2cff8cc4cb057c46ece76767d1fd493adf06e25501bb06ad03ac",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-786-ef9814ba.json",
+      "bytes": 14419,
+      "sha256": "2747da34d0ab17823567160f885b02468ecd279fa27dfddad1ed7baf384e84c9",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-787-149bef48.json",
+      "bytes": 14434,
+      "sha256": "afd5661712a9efb5a69c0873c48a78f7c0f8e3b33d1f35482367ad6fa5df6143",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-788-26337581.json",
+      "bytes": 14419,
+      "sha256": "ee883a446dc02123c76c841e2e6bb82dbe4a8a149a834f93dc13c202611a0693",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-788-after-timeout.json",
+      "bytes": 14524,
+      "sha256": "310e7729adc241a03eef82b85560e405cd1d0bed7f6be6db2a89752c9c329517",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-788-job-110862845479-timeout.json",
+      "bytes": 4294,
+      "sha256": "6ab2f316d2b43a2b2f43c8da389d0358bb1156153da769432672f3c3187734e7",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-788-job-110862845567-timeout.json",
+      "bytes": 967,
+      "sha256": "aaefd183d72cae0637ae0045bb373e2a38cb1a795d5abbaaf9c5147b0b98e426",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-789-23680db8.json",
+      "bytes": 14434,
+      "sha256": "8e9c9e35ebb63290baceaac5503f0af5a7525dcc2802501d563b67c1396ca1fc",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-789-b58e33fa.json",
+      "bytes": 14439,
+      "sha256": "c6c404cf06345225d6d34bc08ec7f4603e92b305793fc6db10102dcd2cfed792",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-789-windows-after-timeout.json",
+      "bytes": 4393,
+      "sha256": "6d158d334137dcd0f96df15b4bb327b8c5e6f9c86adfe1ff69320af1c8b607dd",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-791-66194a37.json",
+      "bytes": 14439,
+      "sha256": "450416f3309f8f72bc3a4383bb4d1f8507fd1630278161c5b1994e5b179f3d84",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-791-9274dc71.json",
+      "bytes": 14394,
+      "sha256": "0eb753663c7ee061d4721667d53a85f3c2b161fb9822194e0021622137db437d",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-791-e9d486dd-37052366472.json",
+      "bytes": 3609,
+      "sha256": "92b27f3d82c7011688f96ed4f2fc62f259bdbb559b3b0f5af617bd3c877650dc",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-792-2831c2ab-native-init-windows-failure.txt",
+      "bytes": 14332,
+      "sha256": "e55e2dd0f96b4439ce177b4a91e0093d7514ff1b6bfaa1e1dcfc958fd6698a65",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-792-682177d9-windows-native-proof.txt",
+      "bytes": 2270,
+      "sha256": "9f28e8ad1ec5157fda12677f445b3c111e252156f979d588e990a88990eb6235",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-792-682177d9.json",
+      "bytes": 14444,
+      "sha256": "d1728c7820f04bbbc08bc33fda5946fbe5a8f2f55b6c148e104d3a147c0d3510",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-792-ebcc5252-37056745090-failure-excerpt.txt",
+      "bytes": 289541,
+      "sha256": "3a04bc1d75229e604077000725efd06cd189d864b6f28de048f8522b4cc276a6",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-792-ebcc5252-37056745090.json",
+      "bytes": 2483,
+      "sha256": "86b8253d788e53c50d64cc59007c8c893eb12c3643ee0b35b3d0defd37b3c3fb",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ci-before.json",
+      "bytes": 3616,
+      "sha256": "dbde6aeb97694b92d8af076e476a8382bef6a0a0ac009764406f2adfc6a75a6f",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "cloud-preserved-checkpoints.json",
+      "bytes": 3772,
+      "sha256": "2eef35917693664921d118180614e542e17d0a386e52a023faf1a6e44838edf1",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "doctor-594-clippy.log",
+      "bytes": 72,
+      "sha256": "5604fc8f0c276397a55db4bd7008236712075c0ad37d3b3a0f1fe362b1b85a36",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "doctor-594-ios-build.log",
+      "bytes": 263704,
+      "sha256": "358f6c3c677e4649280071f54911f46c833d344469cd110332ee7d90d2146be7",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "doctor-594-macos-build.log",
+      "bytes": 86900,
+      "sha256": "02007e97d4529a65a0ea61dd6d6febe72f51d0be161960c675acd86789f92d26",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "doctor-594-macos-tests.log",
+      "bytes": 122174,
+      "sha256": "443a2a1403930fceaf976461dbfb97834d3a5dab387ff6f40077bfddbfa1b344",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "doctor-594-rust-tests.log",
+      "bytes": 25788,
+      "sha256": "c974efcba524f872ccc95fdd75bcd36cd26ab961246cd9b50e8a2a8d5362bbc7",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "go-external-fd-issue.md",
+      "bytes": 1796,
+      "sha256": "a7d79bd44f5a3e437e9eb815b5a297314cc7b1a6e2799009f2dc2a270798ea0b",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "health-598-backend-broker-tests.log",
+      "bytes": 2886,
+      "sha256": "0b1c8ef641fe38de105d5e2b0b77061073d6293484f70167f3c7c6972f9f0bcb",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "health-598-backend-cli-tests.log",
+      "bytes": 34936,
+      "sha256": "a410d1a20dd52cf2daaef1a4104b662e5d7636a8a6c4f73ff074f10fe7c993a9",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "health-598-backend-clippy.log",
+      "bytes": 8290,
+      "sha256": "cf905edd3aa11bc81379ffe8617683b6f9ebf0e788abdce056bf87de1905865b",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "health-598-parity-final.log",
+      "bytes": 22472,
+      "sha256": "1c3f47979861857fdcbcb31681b8e42597d6f0fc26ff2841275cb0f0af2ef66b",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "health-598-parity.log",
+      "bytes": 24000,
+      "sha256": "0dc034ab2cd01deddd01e08826a2c86c062bc20423b134df883638e3c42346d3",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "health-598-scope-tests.log",
+      "bytes": 24436,
+      "sha256": "87fe5ba6e4531d8ad69b01129864f44b8605df5864bad9b5b1f018042486b70c",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "health-contract-598-check.json",
+      "bytes": 69,
+      "sha256": "c0aeca57fa9d96f400ee303c896c4aa845ad08aeb1a0f19811bdcf7a0edb5f70",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "intake.json",
+      "bytes": 70480,
+      "sha256": "03b4cce71a014b4d6a46d158e743f29cd145a43e2c3608dc6b21148a6fce9b15",
+      "decision": "excluded-private-context",
+      "reason": "Internal coordination, local paths, raw review transcripts or private harness details; continuation decisions and literal current review published separately without exporting chat, memory or configuration."
+    },
+    {
+      "name": "ios-406-ios-build.log",
+      "bytes": 206379,
+      "sha256": "d4e46647157bb4e1c9dd6b34d2b3f24c820d84f803c3e02adf17a67ec8b56af2",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ios-406-macos-build.log",
+      "bytes": 317128,
+      "sha256": "a74d1bef4467642e5a4a7b94b2e9c6098691f7964a4d79568b3058a0636abe17",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "ios-406-macos-test.log",
+      "bytes": 327425,
+      "sha256": "0b50c18a4717946683044655f43ef35e1e8f99b1a501ba80480af21980d88644",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "merge-gate-791-9274dc71.json",
+      "bytes": 1755,
+      "sha256": "c935f1c8225a587ebc92c30b5d79b1b51145fc4093d7c1eb848271e8a524e857",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "merge-gate-792-682177d9.json",
+      "bytes": 2146,
+      "sha256": "bde211d8f98ea99dd60b0d998a00eccadf5a816c27c9e4c1b1ccdfe6e196dae8",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "native-skills-preflight-bug.md",
+      "bytes": 2102,
+      "sha256": "bf0db62c98595a218fc4f93a1baceba5cdeb5ce338a61ab1c929e4da32810cdd",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-457.md",
+      "bytes": 1764,
+      "sha256": "52d5a24cac0ef45dbb89b7d04ddc4d9ad7d9050ec201cf2a7803401b526457c0",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-476.md",
+      "bytes": 4532,
+      "sha256": "06c0546cc5614d0c503a1481f2c76c1c22ad2449ddcc6dbd86696094200e54ed",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-490.md",
+      "bytes": 4456,
+      "sha256": "5acb1f52df7ca72608d6ef39cd82c75112498b3821178277e27b2a86de0fffeb",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-559.md",
+      "bytes": 1720,
+      "sha256": "e54213011d2139b8e29894867d97d5baebd16cc36088505ba52d9618f60755ae",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-594.md",
+      "bytes": 1875,
+      "sha256": "d64c18c2081d33dc34f8d23bfd63576bcd77c14bdca942f43d4da231e268e792",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-598.md",
+      "bytes": 1701,
+      "sha256": "09c1b50b903bc8814437e00b094d433e564f16e6803bece5fdf48cfd0ef3279c",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-784-gate.json",
+      "bytes": 2448,
+      "sha256": "beafebe071b6f09835c43789dd67bde47da5c4c37e29d69958e091ad0d02f824",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-785-gate.json",
+      "bytes": 2257,
+      "sha256": "f87bd4a8f0f5b7a83a2679ee3e1a80c7fae6aa4104cdee7adbc4be17080970dc",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-786-8f493764-gate.json",
+      "bytes": 1604,
+      "sha256": "a0d39ed0cf64dc40277aa1146db2bc0173f00f1603bcae6db153ad36f6dc91e9",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-786-gate.json",
+      "bytes": 3028,
+      "sha256": "7b8b1657287b1a1ab8e43c84c83f21e25356e6ffdfface10c6bfd64cd1b7470e",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-787-149bef48-gate.json",
+      "bytes": 3444,
+      "sha256": "88a3659b0cb4889148d0ae6e340bc75bd9599dc4c6fa1c5446e362dc87b6ae63",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-789-review-b58e33fa.json",
+      "bytes": 3873,
+      "sha256": "87f968a9595e766c591f9e4e9d2263dd9ec944608d61d457983d22ac106c6401",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-789-ruleset-snapshot.json",
+      "bytes": 2146,
+      "sha256": "1edc486488c8737f0fb994f13739a62e1a6b82aa7c997fc74573b5e0d4ce8f6d",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-793.md",
+      "bytes": 3253,
+      "sha256": "204f67b8461076f1e8c20eea1a19285d94630de8b5c8ac9062ed2dcdafd05755",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-ios.md",
+      "bytes": 910,
+      "sha256": "61074b2bbf73c3c6f3a5f6fc4730bdcdec0456956ec929ba3dc56f211d073479",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "pr-scope.md",
+      "bytes": 1391,
+      "sha256": "ffd31e7b5b98c2fb46c7eb3c41167de3841fbaa4a6062224873ea80f42bd73e3",
+      "decision": "reproducible",
+      "reason": "Relevant purpose, changes, tests and blockers preserved in live GitHub PR/issue and versioned handoff; no dependency on local draft paths."
+    },
+    {
+      "name": "proposed-native-gates-codex-review-lessons.md",
+      "bytes": 3006,
+      "sha256": "c1fc5bda5ae468d08b62289532989922858d6d95787e2fa24689025e46d6e5f5",
+      "decision": "excluded-private-context",
+      "reason": "Internal coordination, local paths, raw review transcripts or private harness details; continuation decisions and literal current review published separately without exporting chat, memory or configuration."
+    },
+    {
+      "name": "report.json",
+      "bytes": 98135,
+      "sha256": "63b12529c0d5deca1f4679f3fba6009450ec23d943caf8cf56a62e159824cc8e",
+      "decision": "excluded-private-context",
+      "reason": "Internal coordination, local paths, raw review transcripts or private harness details; continuation decisions and literal current review published separately without exporting chat, memory or configuration."
+    },
+    {
+      "name": "review-793-prompt.txt",
+      "bytes": 3045,
+      "sha256": "48b17cf52879cbd087591f63e467b53c435f48ae9783480ddb245a1dcf2f5394",
+      "decision": "excluded-private-context",
+      "reason": "Internal coordination, local paths, raw review transcripts or private harness details; continuation decisions and literal current review published separately without exporting chat, memory or configuration."
+    },
+    {
+      "name": "review-793-result.json",
+      "bytes": 4168,
+      "sha256": "b735e3d4e09c64d7c31d7e258dd164c4ebb3ae0982eeb1cef8693280b2287dfc",
+      "decision": "excluded-superseded-review",
+      "reason": "Initial changes-requested findings repaired at current code head; current full-layer review supersedes it and preserves remaining finding."
+    },
+    {
+      "name": "review-793-schema.json",
+      "bytes": 1570,
+      "sha256": "bfd0d847f94a4cb1b70a11759753a840fa621120fc67d1ac755a78e513dae90b",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "review-793-v2.log",
+      "bytes": 431178,
+      "sha256": "797c87cae932267617be13eb3926bc8acf334dfcbfa96d262c658db1f496b995",
+      "decision": "excluded-private-context",
+      "reason": "Internal coordination, local paths, raw review transcripts or private harness details; continuation decisions and literal current review published separately without exporting chat, memory or configuration."
+    },
+    {
+      "name": "review-793-v3-prompt.txt",
+      "bytes": 3820,
+      "sha256": "fecbe400a7d017dfdf1b6a372c0d37465960b76a2484716ec1f7e41ba9f78a93",
+      "decision": "excluded-private-context",
+      "reason": "Internal coordination, local paths, raw review transcripts or private harness details; continuation decisions and literal current review published separately without exporting chat, memory or configuration."
+    },
+    {
+      "name": "review-793-v3-result.json",
+      "bytes": 2393,
+      "sha256": "5ac204120cb31dc9e814ff5e499ddf374c93ef0bbaef965011b17fdd6254da2d",
+      "decision": "published",
+      "reason": "Literal latest changes-requested verdict and source finding retained.",
+      "cloud_target": "migration/evidence/skills-preflight-793/review-code-head.json"
+    },
+    {
+      "name": "review-793-v3.log",
+      "bytes": 506864,
+      "sha256": "35a7bf6979610fb9fabbe08687342a2e596d33a51a5bf837fc4be31fdd43e657",
+      "decision": "excluded-private-context",
+      "reason": "Internal coordination, local paths, raw review transcripts or private harness details; continuation decisions and literal current review published separately without exporting chat, memory or configuration."
+    },
+    {
+      "name": "review-793.log",
+      "bytes": 4084,
+      "sha256": "55594bc26b4fc6c32eef5affb17335dcc4ec22e7f48c7a2ca9ec8fd535ac191b",
+      "decision": "excluded-private-context",
+      "reason": "Internal coordination, local paths, raw review transcripts or private harness details; continuation decisions and literal current review published separately without exporting chat, memory or configuration."
+    },
+    {
+      "name": "scope-597-base-update-test.log",
+      "bytes": 20703,
+      "sha256": "34018fdac671713b6dccff5cc96b538b9f540360cc8fbb3e4ce0efb19eef2fa9",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-457-coordinator-clippy.log",
+      "bytes": 1941,
+      "sha256": "402268faefe19976865058a32b2cdb0dfce8b7e0d5513a63003c2a7b763f0601",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-457-coordinator-parity.log",
+      "bytes": 30551,
+      "sha256": "ad8179189d961ccaa833ed31c1838505ab0a46a62877d7655fba1eff5975b84a",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-457-coordinator-tests.log",
+      "bytes": 17024,
+      "sha256": "38f902c9ac4d18f1147c6d2e770ad199cc55e9713e7ef9839ddeac8f535f123e",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-457-final-clippy.log",
+      "bytes": 245,
+      "sha256": "2c279afac12d7bd1a66ff8857bdedd05789b8c23af1b70c189a2e7df3fd51109",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-457-final-parity.log",
+      "bytes": 23013,
+      "sha256": "bed12bc1ab2f2c7c16ea79a4dcb0dc8f8c1835cd6082224e67374f1ccb7e4485",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-457-final-tests.log",
+      "bytes": 15193,
+      "sha256": "20a4e03d89640140890751373b94bcdeddab41f4b2869349c1ac46036d74c769",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-457-original-partial.zip",
+      "bytes": 27061,
+      "sha256": "bee11c44ac265ebe966d39a66a345f6402b3c4da14caeb01789153fa44d92859",
+      "decision": "published-source-checkpoint",
+      "reason": "All eight source files preserved byte-for-byte on a separately verified GitHub branch; archive container itself is not needed.",
+      "cloud_target": "handoff/20261003-skills-457-partial"
+    },
+    {
+      "name": "skills-457-partial-manifest.json",
+      "bytes": 921,
+      "sha256": "75cc6b8a506fedb64145c1193307cc6cc596e6fd8bfe3dbe8a15ffc897650a92",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-476-final-parity-go1267.log",
+      "bytes": 17748,
+      "sha256": "7b1b6717258c74ffd7649140dc0d7a4bcd82573f90cd509250c9e576b479e8a2",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-476-final-parity.log",
+      "bytes": 18236,
+      "sha256": "0c2fbd1c751dea1c13a67c54e489285e0fbf442164ed233704f017e6888f0b8b",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-476-final-tests.log",
+      "bytes": 42642,
+      "sha256": "b292dbe28e32c1e9119e6b0de4834927f9c9fa897c9b6027b6cb539e5fdd8a4d",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-476-interrupted-source.zip",
+      "bytes": 33676,
+      "sha256": "7cd57f31bfacc67a1addf0d3091aff29635fb7b476fec12fd9e6c915ed40ec35",
+      "decision": "published-source-checkpoint",
+      "reason": "All eight source files preserved byte-for-byte on a separately verified GitHub branch; archive container itself is not needed.",
+      "cloud_target": "handoff/20261003-skills-476-interrupted"
+    },
+    {
+      "name": "skills-476-recovery-tests.log",
+      "bytes": 7651,
+      "sha256": "5d1efc584853f4e4f28629a86b2dda4fd281e4c91e7a7d61c760cb5f57cc0c8f",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-476-review-repair-evidence.json",
+      "bytes": 9155,
+      "sha256": "5e3c6647c40b3042d03d85368160edf1175cc533e4bcc773597b6809bf5cc189",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-476-review-repair-final-tests.log",
+      "bytes": 45245,
+      "sha256": "2f64483d3eb06c954726ca3d6544f4be3f902512852f8c07a05d17460be6708d",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-476-review-repair-tests.log",
+      "bytes": 45245,
+      "sha256": "8b6277de6b24d13ee06090727fe10ac45bd75aa8373f0646835f3ac13ba6133a",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-476-single-scan-tests.log",
+      "bytes": 44995,
+      "sha256": "c919e21a1f59f0eb87936310d967ea5d077130bc5869a8992478c83587f8e65e",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-476-verified-test-summary.json",
+      "bytes": 12531,
+      "sha256": "991de68b7ff118992838a34fbccbbe8877281d8a092e6574b68413e0f3956234",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-476-verified-tests.log",
+      "bytes": 42722,
+      "sha256": "8912197cc6a4f1346869da3541359b8a21b7f98a4da2a89e8a60e4afc34f49a7",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-490-bootstrap-path-forms-tests.log",
+      "bytes": 46422,
+      "sha256": "2c6cb79246ac4d07ec561184b1898bf58f02bde00b2bd5c37a941bc6be971eb7",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-490-final-tests.log",
+      "bytes": 53744,
+      "sha256": "009b6c75b0b87fa5a0cfdb9b55bd761bd0acbbbac01e7295bb4a1bb8c4f6df67",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-490-main-reconcile-tests.log",
+      "bytes": 46346,
+      "sha256": "a595ecca6c6f51547a44d5908470d70e8646aa8fff3380178eff128c5241fe81",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-490-recovery-evidence.json",
+      "bytes": 988,
+      "sha256": "430005e02ccb595c385901ba92ebbfaefaa86ab6c672a47e5c37f992e36450ae",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-490-tests.log",
+      "bytes": 17351,
+      "sha256": "b7213cba0a94d6bff2a12b5b9420089731e1b38c1f76ed362b686669f73104ed",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-490-trusted-root-spellings-tests.log",
+      "bytes": 46422,
+      "sha256": "7879ef6d435fa926f51714abf4bbaa2349e2a3c01f97ed0d2c0da23735dc9a49",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-490-windows-fix-tests.log",
+      "bytes": 46346,
+      "sha256": "96cd4d8aa304df74741ef68efc38f617a3bc4b44019fbdb3568db044f89d490a",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-764-preflight-bug-probes.json",
+      "bytes": 1796,
+      "sha256": "13d245c26c572f47b46c94e36fe50024e8a05599a99bf9c8db26291a9f93b717",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-793-all-tests.log",
+      "bytes": 46724,
+      "sha256": "ff3bb8ca9f86047ca977f75070fce852986c884b7d4dc46ae98eb39e6ef6aa58",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-793-final-tests.log",
+      "bytes": 46416,
+      "sha256": "8e6ee955493a59a388b51ab93f241a6212d996c35de51779aff92588f6558fe8",
+      "decision": "reproducible",
+      "reason": "Actual totals retained in handoff; run documented three-package test command. Original raw log contains local paths and is not an input."
+    },
+    {
+      "name": "skills-793-go-flag-parity-extended.json",
+      "bytes": 16934,
+      "sha256": "6d8febc9cd8c9eaf826f52eac98ad96217e184b98bca6e440568c3e3cf3ba0ce",
+      "decision": "published",
+      "reason": "All thirty real comparison records contain no local paths or credentials.",
+      "cloud_target": "migration/evidence/skills-preflight-793/parity-30-cases.json"
+    },
+    {
+      "name": "skills-793-go-flag-parity.json",
+      "bytes": 12320,
+      "sha256": "bb7ee927e4f1d29ece7daa80b677bf00ce4bb7913b8f3770fe3614de03e9be80",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    },
+    {
+      "name": "skills-793-review-repair-final-tests.log",
+      "bytes": 46724,
+      "sha256": "4c581f5e822bf6eb9a3c54a2d6228d3acdcabe46283b4800ddf4fb4cf9160387",
+      "decision": "reproducible",
+      "reason": "Actual totals retained in handoff; run documented three-package test command. Original raw log contains local paths and is not an input."
+    },
+    {
+      "name": "triage.json",
+      "bytes": 26383,
+      "sha256": "b6e9b3b61fca87d3b16cd4a7247288f71fc45eee7ad421cca4114a5f71b312cb",
+      "decision": "excluded-private-context",
+      "reason": "Internal coordination, local paths, raw review transcripts or private harness details; continuation decisions and literal current review published separately without exporting chat, memory or configuration."
+    },
+    {
+      "name": "wait-ci.py",
+      "bytes": 1877,
+      "sha256": "c984f64e9b085fd48698c68d02172fcae378a3a4e09b479fd62e381d36a947fe",
+      "decision": "reproducible",
+      "reason": "Temporary one-off verification/watcher, not product input. Existing tracked workflows/scripts and versioned inline parity replay replace it; no local script required."
+    },
+    {
+      "name": "watch-792-2831c2ab.log",
+      "bytes": 452800,
+      "sha256": "b1c3900dcd70d222f1f131726fb3d72f49e3d987b1454997a264182f33c115a7",
+      "decision": "excluded",
+      "reason": "Superseded diagnostic output or intermediate test/build log; current code, tracked regressions and GitHub CI reproduce the relevant checks."
+    }
+  ],
+  "go_flag_oracle_directory": {
+    "decision": "deterministically-reproduce",
+    "ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+    "recipe": "git archive ref; compile ./cmd/symbrain using go.mod toolchain without source or fixture changes",
+    "excluded": "source copies, source tar and binary are rebuildable; provenance transferred to this record"
+  },
+  "retained_worktrees": {
+    "skills-preflight-793": "active source plus handoff on agent/skills-preflight-793",
+    "skills-concurrency-457-20261002": "own incomplete eight-file snapshot published on handoff/20261003-skills-457-partial; original unchanged",
+    "subagent-sa-0-c8cece65": "own original worker commit published on handoff/20261003-skills-457-worker",
+    "subagent-sa-0-51e9cf07": "clean at merged main ancestor; interrupted archive published on handoff/20261003-skills-476-interrupted",
+    "blocker-lane-20260930": "older unrelated work excluded and untouched",
+    "cloud-20260930-cloud": "older unrelated work excluded and untouched; historical handoff preserved",
+    "unix-socket-fixtures-752": "older unrelated work excluded and untouched"
+  },
+  "local_branches_outside_these_units": "Older unrelated codex/migration/release refs excluded, not deleted or incorporated. Completed variants represented by verified merged PRs and main history.",
+  "stashes": {
+    "count": 0,
+    "decision": "none to publish"
+  },
+  "ignored_repo_artifacts": {
+    "decision": "reproduce-generated-or-exclude-unrelated",
+    "generated": [
+      "target",
+      "symbrain",
+      ".build",
+      ".app-test-build",
+      "dist",
+      "coverage.out",
+      "fuzz/target",
+      "module build caches",
+      "__pycache__"
+    ],
+    "private_or_older": [
+      "local docs except explicitly public handoff",
+      "internal .github audit/review/admin files",
+      ".omo",
+      ".codegraph",
+      "unrelated local history",
+      "Finder metadata"
+    ],
+    "recipe": "Tracked Cargo.lock, go.mod/go.sum and Package.resolved plus documented builds; no force-add of ignored paths"
+  },
+  "secrets_personal_files_vaults": "Excluded; not used by scoped mock/unit checks; no values or raw harness config exported",
+  "processes": "All session-owned review/watcher processes exited; latest result consumed. No active process to transfer.",
+  "cloud_runtime": "not checked; no cloud compute or model job launched"
+}

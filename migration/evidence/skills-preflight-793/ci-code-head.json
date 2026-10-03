@@ -1,0 +1,118 @@
+{
+  "head": "3a85990fa3e91c403c5058d386af068b443cfe41",
+  "run_id": 37078394459,
+  "url": "https://github.com/danieljustus/symaira-brain/actions/runs/37078394459",
+  "state": "all11_acceptance_checks_success_at_code_head_not_review_approval",
+  "checks": [
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-02T23:45:30Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/danieljustus/symaira-brain/actions/runs/37078394459/job/111075327901",
+      "name": "build-test",
+      "startedAt": "2026-10-02T23:45:24Z",
+      "status": "COMPLETED",
+      "workflowName": "CI"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-02T23:38:16Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/danieljustus/symaira-brain/actions/runs/37078394459/job/111073301116",
+      "name": "stdio-hygiene",
+      "startedAt": "2026-10-02T23:36:43Z",
+      "status": "COMPLETED",
+      "workflowName": "CI"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-02T23:39:18Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/danieljustus/symaira-brain/actions/runs/37078394459/job/111073301071",
+      "name": "govulncheck",
+      "startedAt": "2026-10-02T23:38:36Z",
+      "status": "COMPLETED",
+      "workflowName": "CI"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-02T23:43:33Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/danieljustus/symaira-brain/actions/runs/37078394459/job/111073301220",
+      "name": "gui",
+      "startedAt": "2026-10-02T23:43:24Z",
+      "status": "COMPLETED",
+      "workflowName": "CI"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-02T23:38:12Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/danieljustus/symaira-brain/actions/runs/37078394459/job/111073301014",
+      "name": "pin-check",
+      "startedAt": "2026-10-02T23:38:08Z",
+      "status": "COMPLETED",
+      "workflowName": "CI"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-02T23:46:08Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/danieljustus/symaira-brain/actions/runs/37078394459/job/111073301092",
+      "name": "rust-migration",
+      "startedAt": "2026-10-02T23:39:19Z",
+      "status": "COMPLETED",
+      "workflowName": "CI"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-02T23:45:11Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/danieljustus/symaira-brain/actions/runs/37078394459/job/111073301047",
+      "name": "rust-migration-macos",
+      "startedAt": "2026-10-02T23:37:05Z",
+      "status": "COMPLETED",
+      "workflowName": "CI"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-02T23:52:47Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/danieljustus/symaira-brain/actions/runs/37078394459/job/111073301082",
+      "name": "rust-migration-windows",
+      "startedAt": "2026-10-02T23:38:32Z",
+      "status": "COMPLETED",
+      "workflowName": "CI"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-02T23:43:39Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/danieljustus/symaira-brain/actions/runs/37078394459/job/111073301180",
+      "name": "rust-init-native (ubuntu-latest)",
+      "startedAt": "2026-10-02T23:39:36Z",
+      "status": "COMPLETED",
+      "workflowName": "CI"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-02T23:44:04Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/danieljustus/symaira-brain/actions/runs/37078394459/job/111073301160",
+      "name": "rust-init-native (macos-15)",
+      "startedAt": "2026-10-02T23:39:22Z",
+      "status": "COMPLETED",
+      "workflowName": "CI"
+    },
+    {
+      "__typename": "CheckRun",
+      "completedAt": "2026-10-02T23:54:48Z",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/danieljustus/symaira-brain/actions/runs/37078394459/job/111073301170",
+      "name": "rust-init-native (windows-2025)",
+      "startedAt": "2026-10-02T23:39:38Z",
+      "status": "COMPLETED",
+      "workflowName": "CI"
+    }
+  ]
+}
