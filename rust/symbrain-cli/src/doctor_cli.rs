@@ -28,6 +28,7 @@ mod doctor_types;
 /// Config-load diagnostics remain Go-owned until the typed loader is ported.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     parse_args(args, &mut Vec::new()).is_ok_and(|parsed| parsed.fix)
+        && doctor_fix::managed_bin_dir().is_some()
         && (!crate::vault_config::valid_configuration()
             || crate::setup_cli::enabled_cores().is_err())
 }

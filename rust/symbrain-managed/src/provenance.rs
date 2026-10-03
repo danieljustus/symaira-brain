@@ -42,22 +42,35 @@ pub struct SourceRecord {
 /// # Errors
 /// Returns the Go-compatible read or typed JSON error. Repair callers must
 /// leave the binary untouched on error unless force-release was explicit.
+/// Byte-valued paths require [`read_provenance_bytes`]; this conventional text
+/// interface projects diagnostics through `Display` for existing callers.
 pub fn read_provenance(bin_dir: &Path, binary_name: &str) -> Result<Option<SourceRecord>, String> {
+    read_provenance_bytes(bin_dir, binary_name).map_err(|error| error.to_string())
+}
+
+/// Reads a provenance record retaining byte-valued path errors until output.
+///
+/// # Errors
+/// Returns the actual read failure or Go-compatible typed JSON diagnostic.
+pub fn read_provenance_bytes(
+    bin_dir: &Path,
+    binary_name: &str,
+) -> Result<Option<SourceRecord>, crate::GoText> {
     let path = bin_dir.join(format!("{binary_name}.provenance.json"));
     let bytes = match reader::read(&path) {
         Ok(bytes) => bytes,
         Err((_, error)) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
         Err((operation, error)) => {
-            return Err(format!(
-                "managed: read provenance: {operation} {}: {}",
-                path.display(),
-                go_io_error(&error)
+            return Err(crate::GoText::path(
+                &format!("managed: read provenance: {operation} "),
+                &path,
+                &format!(": {}", go_io_error(&error)),
             ));
         }
     };
     decode_source_record(&bytes)
         .map(Some)
-        .map_err(|error| format!("managed: parse provenance for {binary_name}: {error}"))
+        .map_err(|error| format!("managed: parse provenance for {binary_name}: {error}").into())
 }
 
 fn decode_source_record(bytes: &[u8]) -> Result<SourceRecord, String> {

@@ -132,22 +132,30 @@ impl Installer {
             Err(error) => Err(error),
         };
         let archive = archive_result.map_err(|error| {
-            ManagedError::Context(format!("managed: download {}: {error}", core.binary_name))
+            ManagedError::RawContext(
+                error
+                    .into_go_text()
+                    .with_prefix(&format!("managed: download {}: ", core.binary_name)),
+            )
         })?;
 
         let binary =
             extract_binary(&archive, core, platform.os, platform.arch).map_err(|error| {
-                ManagedError::Context(format!("managed: extract {}: {error}", core.binary_name))
+                ManagedError::RawContext(
+                    error
+                        .into_go_text()
+                        .with_prefix(&format!("managed: extract {}: ", core.binary_name)),
+                )
             })?;
         fs::create_dir_all(&self.bin_dir).map_err(|error| {
             ManagedError::IoContext(format!("mkdir {}", self.bin_dir.display()), error)
         })?;
         atomic_install(&self.bin_dir, &core.binary_name, &binary)?;
         record_release_provenance(&self.bin_dir, core, &binary).map_err(|error| {
-            ManagedError::Context(format!(
-                "managed: record provenance for {}: {error}",
+            ManagedError::RawContext(error.into_go_text().with_prefix(&format!(
+                "managed: record provenance for {}: ",
                 core.binary_name
-            ))
+            )))
         })?;
         Ok(InstallOutcome::Installed)
     }

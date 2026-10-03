@@ -17,6 +17,9 @@ class Case:
     nonexecutable: bool = False
     verifier: bool = False
     signal: str | None = None
+    raw_home: bool = False
+    home_mode: str | None = None
+    home_fallback: bool = False
 
 
 def cases():
@@ -33,6 +36,19 @@ def cases():
     else:
         for code in (65536,0xc0000005):
             result.append(Case(f"large-probe-exit-{code}",probe_exit=code,provenance=b'{"source":"brain-source"}'))
+    for mode in ("empty","unset"):
+        result.append(Case("home-"+mode,all_missing=True,home_mode=mode))
+        result.append(Case("home-before-config-"+mode,all_missing=True,home_mode=mode,config="[bad config"))
+        if __import__('os').name=='nt':
+            result.append(Case("userprofile-fallback-refused-"+mode,all_missing=True,home_mode=mode,home_fallback=True))
+    if __import__('os').name!='nt':
+        result.extend((
+            Case("raw-home-correct",raw_home=True),
+            Case("raw-home-source",raw_home=True,version=b'{"version":"0.0.0"}',provenance=b'{"source":"brain-source"}'),
+            Case("raw-home-directory",raw_home=True,version=b'{"version":"0.0.0"}',provenance="directory"),
+            Case("raw-home-force-source",raw_home=True,args=("doctor","--fix","--force-release"),version=b'{"version":"0.0.0"}',provenance=b'{"source":"brain-source"}',verifier=True),
+            Case("raw-home-force-directory",raw_home=True,args=("doctor","--fix","--force-release"),version=b'{"version":"0.0.0"}',provenance="directory",verifier=True),
+            Case("raw-home-force-corrupt",raw_home=True,args=("doctor","--fix","--force-release"),version=b'{"version":"0.0.0"}',provenance=b'{bad',verifier=True)))
     payloads = [b'', b'{bad', b'null', b'{}', b'[]', b'1', b'true', b'"str"',
                 b'{"source":"brain-source"}', b'{"SOURCE":"brain-source","receiver_commit":"fixture commit=123"}',
                 '{"ſOURCE":"brain-source","RECEIVER_COMMIT":"unicode"}'.encode(),

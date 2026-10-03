@@ -41,6 +41,8 @@ def build_probe(root):
 
 
 def configure(case, root, env, probe):
+    if case.raw_home:
+        env["HOME"] = str(root / os.fsdecode(b"home\xff\xe2\x82"))
     legacy.setup_release_fixture(root, env)
     if case.verifier:
         verifier = Path(env["PATH"]) / ("cosign.exe" if os.name == "nt" else "cosign")
@@ -55,6 +57,15 @@ def configure(case, root, env, probe):
         path.write_text(case.config)
     if case.project_config is not None:
         (Path(env["PROJECT"]) / ".symbrain.toml").write_text(case.project_config)
+    if case.home_mode:
+        home_key = "USERPROFILE" if os.name == "nt" else "HOME"
+        if case.home_mode == "unset":env.pop(home_key, None)
+        else:env[home_key] = ""
+        if case.home_fallback:
+            fallback = root / "fallback-owner";fallback.mkdir()
+            drive, tail = os.path.splitdrive(str(fallback))
+            assert drive and tail, "Windows fallback fixture must have a real owned drive/path"
+            env.update(HOMEDRIVE=drive, HOMEPATH=tail)
     if case.all_missing:
         return
     bin_dir = Path(env["HOME"]) / ".symaira/bin"
@@ -105,7 +116,7 @@ def filesystem(root, originals, started, ended):
     return result
 
 
-def log_contract(stderr, root, started, ended):
+def log_contract(stderr, root, started, ended, case):
     data = legacy.normalize_fixture_root(stderr, root)
     groups = {}
     final = []
@@ -126,6 +137,17 @@ def log_contract(stderr, root, started, ended):
         if core:
             assert not finished, "core event follows completion"
             assert core[1].decode() in legacy._managed_cores(), "unknown logged core"
+            # The two retained actual Go runs choose distinct CreateTemp names.
+            # Require this owned raw-HOME fixture, exact bin dir/core/destination,
+            # syscall and error; only the generated source basename can differ.
+            if case.raw_home:
+                bin_dir = rb"<root>/home\xff\xe2\x82/.symaira/bin/"
+                prefix = (b'ERROR repair failed binary=' + core[1] +
+                          b' error="managed: record provenance for ' + core[1] +
+                          b': managed: rename provenance: rename ' + bin_dir + b'.provenance-')
+                suffix = b' ' + bin_dir + core[1] + b'.provenance.json: file exists"\n'
+                if re.fullmatch(re.escape(prefix) + rb"[A-Za-z0-9]+" + re.escape(suffix), body):
+                    body = prefix + b"<unique>" + suffix
             groups.setdefault(core[1].decode(),[]).append(base64.b64encode(body).decode("ascii"))
         else:
             assert body.startswith(b"INFO doctor --fix complete "), "unattributed event"
@@ -151,7 +173,7 @@ def observe(binary, case, root, probe, go, control=None):
     ended = time.time()
     contract = {"exit":completed.returncode,
                 "stdout_base64":base64.b64encode(legacy.normalize_fixture_root(completed.stdout,root)).decode(),
-                "logs":log_contract(completed.stderr,root,started,ended),
+                "logs":log_contract(completed.stderr,root,started,ended,case),
                 "filesystem":filesystem(root, originals, started, ended)}
     return {"binary":str(binary),"fixture_root":str(root),"started":started,"ended":ended,
             "exit":completed.returncode,"stdout_base64":base64.b64encode(completed.stdout).decode(),
@@ -201,7 +223,7 @@ def main():
             "control":control,
             "complete_observations":len(observations),"exit":int(bool(failures)),"failures":failures,
             "observations":observations,
-            "comparison":"exact stdout, exit, full fixture files/modes and all per-core log sequences/attributes plus completion tail. Actual Go-equivalent clock timestamp in run window (Unix fixture TZ=UTC; Windows native OS timezone); only known root paths and new verified-UTC release-sidecar timestamps normalized. Frozen Go ActiveCores map order permits only between-core reorder; no per-core log or failure is discarded.",
+            "comparison":"exact stdout, exit, full fixture files/modes and all per-core log sequences/attributes plus completion tail. Actual Go-equivalent clock timestamp in run window (Unix fixture TZ=UTC; Windows native OS timezone); only known root paths, proven-random provenance rename source basenames and new verified-UTC release-sidecar timestamps normalized. Frozen Go ActiveCores map order permits only between-core reorder; no per-core log or failure is discarded.",
             "fallback":"every actual process has an absent SYMBRAIN_GO_BINARY; fixture PATH contains no Go CLI",
             "remaining_scope":"typed config failure diagnostics and setup source-build/module lifecycle remain Go-owned in #765"}
     names = subprocess.check_output(["git","ls-tree","-r","--name-only",ORACLE,"--","cmd/symbrain","internal/managed","internal/config","internal/xdg","go.mod","go.sum"],cwd=ROOT,text=True).splitlines()

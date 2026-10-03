@@ -25,6 +25,8 @@ pub use manifest::{
 };
 pub use process_status::format as format_process_exit_status;
 pub use provenance::go_io_error as format_io_error;
-pub use provenance::{SourceRecord, is_brain_source_install, read_provenance};
+pub use provenance::{
+    SourceRecord, is_brain_source_install, read_provenance, read_provenance_bytes,
+};
 
 pub use version_probe::installed_version;

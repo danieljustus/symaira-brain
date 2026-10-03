@@ -230,8 +230,5 @@ fn output(
 }
 
 fn trim_identity(bytes: &[u8]) -> Vec<u8> {
-    std::str::from_utf8(bytes).map_or_else(
-        |_| bytes.trim_ascii().to_vec(),
-        |text| text.trim().as_bytes().to_vec(),
-    )
+    super::text::trim_space(bytes).to_vec()
 }

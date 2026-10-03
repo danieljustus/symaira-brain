@@ -89,7 +89,7 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
     let home_label = "%userprofile%";
     #[cfg(not(windows))]
     let home_label = "$HOME";
-    let Some(bin_dir) = setup_home().map(|home| home.join(".symaira/bin")) else {
+    let Some(bin_dir) = setup_home().map(|home| home.join(".symaira").join("bin")) else {
         let _ = writeln!(
             stderr,
             "symbrain setup: managed: cannot determine home directory: {home_label} is not defined"

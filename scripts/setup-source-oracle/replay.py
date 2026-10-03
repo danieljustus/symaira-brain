@@ -106,7 +106,7 @@ def cases():
         add("probe-json-"+str(index),env={"SOURCE_PROBE_BYTES":base64.b64encode(payload).decode()})
     for fault in ("managed-file", "binary-directory", "sidecar-directory"):
         add("publication-"+fault,publication=fault)
-    for index, identity in enumerate((b"tool <identity> & UTF8 \xe2\x80\xa8\n", b"invalid \xff\xe2\x82\n", b"", b"tool\nsecond line\n")):
+    for index, identity in enumerate((b"tool <identity> & UTF8 \xe2\x80\xa8\n", b"invalid \xff\xe2\x82\n", b"", b"tool\nsecond line\n", b"\xc2\xa0valid tool\xc2\xa0\n", b"\xc2\xa0invalid\xff\xe2\x82\xc2\xa0\n", b" invalid\xff\xe2\x82 \n")):
         add("tool-identity-"+str(index),env={"SOURCE_TOOL_VERSION_BYTES":base64.b64encode(identity).decode() or "="})
     add("real-go-build",real_go=True)
     add("preserve-other-owner",foreign=True)
