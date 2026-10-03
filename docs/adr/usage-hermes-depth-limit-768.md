@@ -2,9 +2,11 @@
 
 The full independent review of immutable provider-files `5111d8b6` found one
 inherited P2 defect: Hermes credentials and decoded JWT claims omitted the shared
-Go JSON nesting limit. At 10001 total containers, frozen Go rejects the input
-and reports missing without a request; Rust previously accepted the credential
-and sent the synthetic token. Both entry points accepted the exact 10000
+Go JSON nesting limit. At 10001 total containers, frozen Go reports configured=false and missing
+credentials without a request. The original Rust report instead has
+configured=true, file credentials available and a fallback error. The full report
+comparison failed before the subsequent header comparison, so the original
+replay does not separately establish Rust Authorization bytes or a request. Both entry points accepted the exact 10000
 boundary. The newly introduced Claude/Codex readers had already used this guard.
 
 Apply `go_json_credential_limits(text, false)` to normalized text before either
