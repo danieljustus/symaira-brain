@@ -1,0 +1,24 @@
+{
+  "candidate_revision": "86986facaa1db36d7fe0efbe8d80715071949e5b",
+  "controls": [
+    {
+      "case": "missing-fixture",
+      "exit_code": 1,
+      "required_reason": "FileNotFoundError",
+      "observed_reason": true
+    },
+    {
+      "case": "changed-status",
+      "exit_code": 1,
+      "required_reason": "actual Go output differs",
+      "observed_reason": true
+    },
+    {
+      "case": "missing-case",
+      "exit_code": 1,
+      "required_reason": "actual Go output differs",
+      "observed_reason": true
+    }
+  ],
+  "unchanged_fixture_reencode_byte_identical": true
+}
