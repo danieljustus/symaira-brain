@@ -30,6 +30,7 @@ impl ProxyConfig {
     pub(crate) fn selected(
         &self,
         target: &Url,
+        raw_target: &str,
         explicit: Option<&str>,
     ) -> Result<Option<Url>, FetchError> {
         if let Some(explicit) = explicit.filter(|v| !v.is_empty()) {
@@ -57,7 +58,16 @@ impl ProxyConfig {
         let ip = host.parse::<IpAddr>().ok().map(normalize_ip);
         if host == "localhost"
             || ip.is_some_and(loopback)
-            || bypass(&self.no_proxy, &host, ip, target.port_or_known_default())
+            || bypass(
+                &self.no_proxy,
+                &host,
+                ip,
+                literal_port(raw_target).or_else(|| match target.scheme() {
+                    "http" => Some("80"),
+                    "https" => Some("443"),
+                    _ => None,
+                }),
+            )
         {
             return Ok(None);
         }
@@ -110,14 +120,34 @@ fn loopback(ip: IpAddr) -> bool {
     }
 }
 
-fn bypass(raw: &str, host: &str, ip: Option<IpAddr>, port: Option<u16>) -> bool {
-    let canonical_port = port.map(|value| value.to_string());
+/// Go canonicalAddr retains the authority's written port, including zeroes.
+pub(crate) fn literal_port(raw: &str) -> Option<&str> {
+    let authority = raw
+        .split_once("://")
+        .map(|(_, rest)| rest)
+        .or_else(|| raw.strip_prefix("//"))?
+        .split(['/', '?', '#'])
+        .next()?
+        .rsplit('@')
+        .next()?;
+    let port = if authority.starts_with('[') {
+        authority.split_once(']')?.1.strip_prefix(':')?
+    } else {
+        authority.rsplit_once(':')?.1
+    };
+    (!port.is_empty()).then_some(port)
+}
+
+fn bypass(raw: &str, host: &str, ip: Option<IpAddr>, port: Option<&str>) -> bool {
     raw.split(',').any(|entry| {
         let entry = entry.trim().to_ascii_lowercase();
         if entry == "*" {
             return true;
         }
         if let Some((network, prefix)) = entry.split_once('/') {
+            if prefix.is_empty() || !prefix.bytes().all(|byte| byte.is_ascii_digit()) {
+                return false;
+            }
             return match (network.parse::<IpAddr>(), prefix.parse::<u32>(), ip) {
                 (Ok(IpAddr::V4(a)), Ok(n @ 0..=32), Some(IpAddr::V4(b))) => {
                     n == 0 || (u32::from(a) >> (32 - n)) == (u32::from(b) >> (32 - n))
@@ -157,7 +187,7 @@ fn bypass(raw: &str, host: &str, ip: Option<IpAddr>, port: Option<u16>) -> bool 
         };
         if entry_port
             .filter(|p| !p.is_empty())
-            .is_some_and(|p| Some(p) != canonical_port.as_deref())
+            .is_some_and(|p| Some(p) != port)
         {
             return false;
         }

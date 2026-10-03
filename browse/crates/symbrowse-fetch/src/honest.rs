@@ -10,9 +10,9 @@ use reqwest::{
     Client as HttpClient, Method,
     cookie::Jar,
     dns::{Addrs, Name, Resolve, Resolving},
-    redirect::{Attempt, Policy},
+    redirect::Policy,
 };
-use symbrowse_core::policy::{Allowlist, SsrfGuard, is_private_ip};
+use symbrowse_core::policy::{SsrfGuard, is_private_ip};
 use tokio::time::timeout;
 
 use crate::{
@@ -21,14 +21,13 @@ use crate::{
 };
 
 const DEFAULT_USER_AGENT: &str = "symfetch/0.1 (+https://github.com/danieljustus/symaira-fetch)";
-const MAX_REDIRECTS: usize = 10;
 
 #[path = "honest/headers.rs"]
 mod headers;
-use headers::request_headers;
 #[path = "honest/proxy.rs"]
 pub(crate) mod proxy;
-use proxy::ProxyConfig;
+#[path = "honest/redirect.rs"]
+mod redirect;
 #[path = "honest/response.rs"]
 mod response;
 use response::read_response;
@@ -131,89 +130,25 @@ impl Resolve for PinnedResolver {
     }
 }
 
-fn policy_error(
-    attempt: Attempt<'_>,
-    guard: &SsrfGuard,
-    allowlist: &Option<Allowlist>,
-    proxies: &ProxyConfig,
-    explicit: Option<&str>,
-) -> reqwest::redirect::Action {
-    if attempt.previous().len() >= MAX_REDIRECTS {
-        return attempt.error("too many redirects");
-    }
-    let url = attempt.url().as_str();
-    if allowlist.as_ref().is_some_and(|list| !list.allows_url(url)) {
-        return attempt.error("blocked_domain: redirect target is not allowlisted");
-    }
-    if let Err(error) = guard.allows_url(url) {
-        return attempt.error(error.to_string());
-    }
-    if let Err(error) = validate_proxy(proxies, attempt.url(), explicit, guard) {
-        return attempt.error(error.to_string());
-    }
-    attempt.follow()
-}
-
-fn validate_proxy(
-    config: &ProxyConfig,
-    target: &url::Url,
-    explicit: Option<&str>,
-    guard: &SsrfGuard,
-) -> Result<(), FetchError> {
-    if let Some(proxy) = config.selected(target, explicit)? {
-        if !matches!(proxy.scheme(), "http" | "https" | "socks5" | "socks5h") {
-            return Err(FetchError::InvalidProxy(
-                "unsupported proxy scheme".to_owned(),
-            ));
-        }
-        let host = proxy
-            .host_str()
-            .ok_or_else(|| FetchError::InvalidProxy("proxy has no host".to_owned()))?;
-        guard
-            .allows_host(host, "proxy peer")
-            .map_err(|error| FetchError::BlockedPrivate(error.to_string()))?;
-    }
-    Ok(())
-}
-
 pub(crate) fn build_http_client(
     jar: Option<Arc<Jar>>,
-    proxy: Option<String>,
-    proxies: ProxyConfig,
+    proxy: Option<url::Url>,
     guard: SsrfGuard,
-    allowlist: Option<Allowlist>,
     allow_private: bool,
     resolver: Option<PinnedResolver>,
 ) -> Result<HttpClient, FetchError> {
-    let redirect_guard = guard.clone();
-    let redirect_allowlist = allowlist.clone();
     let guard_enabled = guard.enabled();
-    let redirect_proxies = proxies.clone();
-    let redirect_proxy = proxy.clone();
     let mut builder = HttpClient::builder()
         .no_proxy()
-        .proxy(reqwest::Proxy::custom(move |url| {
-            let mut selected = proxies.selected(url, proxy.as_deref()).ok().flatten();
-            // Remote SOCKS DNS would bypass our pinned target-address set.
-            if !allow_private
-                && guard_enabled
-                && let Some(url) = &mut selected
-                && url.scheme() == "socks5h"
-            {
-                url.set_scheme("socks5").expect("valid SOCKS scheme");
-            }
-            selected
-        }))
-        .redirect(Policy::custom(move |attempt| {
-            policy_error(
-                attempt,
-                &redirect_guard,
-                &redirect_allowlist,
-                &redirect_proxies,
-                redirect_proxy.as_deref(),
-            )
-        }))
+        .redirect(Policy::none())
         .danger_accept_invalid_certs(false);
+    if let Some(mut proxy) = proxy {
+        // Remote SOCKS DNS would bypass our pinned target-address set.
+        if !allow_private && guard_enabled && proxy.scheme() == "socks5h" {
+            proxy.set_scheme("socks5").expect("valid SOCKS scheme");
+        }
+        builder = builder.proxy(reqwest::Proxy::all(proxy.as_str()).map_err(FetchError::Request)?);
+    }
 
     // Cached connections must not turn an unnamed request into a cookie session.
     if let Some(jar) = jar {
@@ -227,8 +162,6 @@ pub(crate) fn build_http_client(
 }
 
 pub(crate) async fn fetch(client: &FetchClient, request: Request) -> Result<Response, FetchError> {
-    let parsed = url::Url::parse(&request.url)
-        .map_err(|error| FetchError::InvalidRequest(format!("URL: {error}")))?;
     client.validate_request_policy(&request)?;
     let guard = if request.allow_private {
         SsrfGuard::new(true)
@@ -236,7 +169,7 @@ pub(crate) async fn fetch(client: &FetchClient, request: Request) -> Result<Resp
         client.ssrf.clone()
     };
 
-    validate_proxy(&client.proxies, &parsed, request.proxy.as_deref(), &guard)?;
+    redirect::validate_proxy(client, &request.url, request.proxy.as_deref(), &guard)?;
 
     let _permit = client.limiter.acquire(&request.url).await;
     let host = request.url.clone();
@@ -258,7 +191,6 @@ pub(crate) async fn fetch(client: &FetchClient, request: Request) -> Result<Resp
     let max_compressed = request
         .max_compressed_body
         .unwrap_or(client.options.max_compressed_body);
-    let http_client = client.http_client(&request, guard)?;
 
     let attempts = if client.options.retry {
         client.options.backoff.max_retries
@@ -276,27 +208,14 @@ pub(crate) async fn fetch(client: &FetchClient, request: Request) -> Result<Resp
             return Err(FetchError::Timeout);
         }
         let started = Instant::now();
-        let mut builder = http_client
-            .request(method.clone(), parsed.clone())
-            .headers(request_headers(&request, &method)?);
-        if !request.body.is_empty() {
-            builder = builder.body(request.body.clone());
-        }
-
-        let result = timeout(remaining, builder.send()).await;
-        let response = match result {
+        let result = timeout(remaining, redirect::send(client, &request, &method, &guard)).await;
+        let (response, final_url, final_method) = match result {
             Ok(Ok(response)) => response,
             Ok(Err(error)) => {
-                let retryable = retryable_request_error(&error);
-                last_error = Some(FetchError::Request(error));
+                last_error = Some(error);
                 // The Go oracle retries every transport error when retry is
-                // enabled.  Keep the classification for circuit accounting,
-                // but do not silently turn an otherwise retryable operation
-                // into a one-shot request merely because reqwest classified a
-                // platform-specific error differently.
-                if retryable {
-                    client.limiter.record_failure(&host);
-                }
+                // enabled, including a failed redirect policy check.
+                client.limiter.record_failure(&host);
                 if attempt >= attempts {
                     break;
                 }
@@ -351,8 +270,8 @@ pub(crate) async fn fetch(client: &FetchClient, request: Request) -> Result<Resp
                 &request.url,
                 max_compressed,
                 max_body,
-                headers::implicit_gzip(&request, &method),
-                method != Method::HEAD,
+                headers::implicit_gzip(&request, &final_method),
+                final_method != Method::HEAD,
             ),
         )
         .await
@@ -362,7 +281,7 @@ pub(crate) async fn fetch(client: &FetchClient, request: Request) -> Result<Resp
         };
         client.limiter.record_success(&host);
         return Ok(Response {
-            final_url: body.final_url,
+            final_url,
             status_code: status,
             headers: body.headers,
             body: body.body,
@@ -376,8 +295,4 @@ pub(crate) async fn fetch(client: &FetchClient, request: Request) -> Result<Resp
         Some(error) => Err(error),
         None => Err(FetchError::InvalidRequest("request failed".to_owned())),
     }
-}
-
-fn retryable_request_error(_error: &reqwest::Error) -> bool {
-    true
 }

@@ -9,6 +9,14 @@ use crate::{honest, rate_limit::HostRateLimiter};
 
 pub use crate::types::*;
 
+#[derive(Clone, Eq, Hash, PartialEq)]
+struct TransportKey {
+    session: String,
+    proxy: Option<String>,
+    allow_private: bool,
+    allowlist: Option<Vec<String>>,
+}
+
 /// Honest HTTP client with named cookie jars and fetch controls.
 #[derive(Clone)]
 pub struct FetchClient {
@@ -18,7 +26,7 @@ pub struct FetchClient {
     pub(crate) ssrf: symbrowse_core::policy::SsrfGuard,
     pub(crate) resolver: Option<honest::PinnedResolver>,
     pub(crate) proxies: honest::proxy::ProxyConfig,
-    http_clients: Arc<Mutex<std::collections::HashMap<String, reqwest::Client>>>,
+    http_clients: Arc<Mutex<std::collections::HashMap<TransportKey, reqwest::Client>>>,
 }
 
 impl fmt::Debug for FetchClient {
@@ -103,14 +111,17 @@ impl FetchClient {
         &self,
         request: &Request,
         guard: symbrowse_core::policy::SsrfGuard,
+        proxy: Option<url::Url>,
     ) -> Result<reqwest::Client, FetchError> {
-        let key = format!(
-            "session={};proxy={};private={};allowlist={:?}",
-            request.session.as_deref().unwrap_or_default(),
-            request.proxy.as_deref().unwrap_or_default(),
-            request.allow_private,
-            request.allowlist
-        );
+        let key = TransportKey {
+            session: request.session.clone().unwrap_or_default(),
+            proxy: proxy.as_ref().map(ToString::to_string),
+            allow_private: request.allow_private,
+            allowlist: request
+                .allowlist
+                .as_ref()
+                .map(|list| list.patterns().to_vec()),
+        };
         if let Some(cached) = self
             .http_clients
             .lock()
@@ -126,10 +137,8 @@ impl FetchClient {
                 .as_deref()
                 .filter(|name| !name.is_empty())
                 .map(|name| self.jar(Some(name))),
-            request.proxy.clone(),
-            self.proxies.clone(),
+            proxy,
             guard,
-            request.allowlist.clone(),
             request.allow_private,
             self.resolver.clone(),
         )?;

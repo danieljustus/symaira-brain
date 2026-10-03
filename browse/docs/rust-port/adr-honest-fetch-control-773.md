@@ -106,3 +106,42 @@ the first member silently truncates valid content and incorrectly accepts both
 oversized responses and invalid later checksums. The private real-Go/native
 corpus now covers concatenated success, four size boundaries, corrupt second CRC
 and invalid trailing bytes. Explicit gzip and Range behavior remains unchanged.
+
+The subsequent immutable a073 review found three additional differences despite
+231 passing declared cases. Its original review, ten additional actual SDK
+routing cases, two real owned proxy exchanges and unchanged binary digests are
+preserved under `independent-review-a073`. CIDR prefix syntax must contain only
+ASCII decimal digits before numeric conversion: Go rejects `/+24`, `/+32` and
+mapped `/+120`, while accepting unsigned leading zeroes such as `/024`.
+
+Go's `canonicalAddr` also retains the *target* authority port spelling. Preserve
+that spelling before WHATWG URL normalization, so a written `:080` compares only
+with NO_PROXY `:080`, not `:80`. Reqwest's automatic proxy/redirect callbacks see
+already normalized URLs and cannot recover raw Location authorities. A focused
+bounded hop module therefore resolves raw Location headers, selects and validates
+the actual proxy for each hop, and obtains a cached fixed-route transport. Direct
+targets and proxy peers retain the existing shared DNS pinning and private-peer
+policy. Redirects retain the same ten-request bound and common operation deadline,
+method/body transformations, credential stripping, Referer handling and bounded
+body draining. Host and final URL retain literal ports. Real HTTP observations
+cover initial, relative, absolute and network-relative authority ports, with a
+separate class for redirect policy errors. This does not certify every remaining
+Go/WHATWG URL representation difference or full transport cutover.
+
+Transport identity is a hashable struct of session, resolved proxy, private-peer
+permission and allowlist patterns. Formatting those fields with delimiters can
+map distinct valid strings to the same cache entry: a session or proxy containing
+`;proxy=` previously selected the wrong peer and attached another session's jar.
+The structural key preserves reuse for identical configurations and avoids this
+ambiguity. Two permanent real-Go/native proxy exchanges demonstrate both routes;
+a native three-request regression additionally proves that the two named jars
+stay isolated and the original jar persists when that session returns.
+
+The expanded process gate has 251 cases on Unix and 249 on Windows: 74 real HTTP
+exchanges and 177/175 routing observations that open no socket. It retains every
+original case and all five executable mutation controls. The ten review routes
+are accompanied by actual initial/redirect port and method/body/header cases;
+counts distinguish network exchanges from SDK-only routing. Fresh exact-source
+parent tests, strict lint and optimized 30-pair measurements remain required
+after this correction. Native six-target acceptance, complete pipeline parity,
+Windows paired measurements and #772 remain open.

@@ -240,7 +240,7 @@ async fn redirect_loop_is_bounded() {
     let mut request = Request::get(server.url("/loop"));
     request.allow_private = true;
     let result = client.fetch(request).await;
-    assert!(matches!(result, Err(FetchError::Request(_))));
+    assert!(matches!(result, Err(FetchError::Redirect(_))));
     assert!(server.requests.load(Ordering::SeqCst) <= 11);
 }
 
@@ -253,7 +253,7 @@ async fn cross_host_redirect_is_rejected_by_allowlist() {
     request.allowlist = Some(Allowlist::parse(&[server.address.ip().to_string()]).unwrap());
     let result = client.fetch(request).await;
     match result {
-        Err(FetchError::Request(error)) => assert!(
+        Err(FetchError::Redirect(error)) => assert!(
             !error.to_string().is_empty(),
             "redirect rejection error was empty"
         ),

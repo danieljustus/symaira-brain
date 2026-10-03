@@ -47,9 +47,11 @@ async fn main() {
     .unwrap();
     for case in cases {
         if case.route_only {
-            let observation = match proxy::ProxyConfig::from_env()
-                .selected(&url::Url::parse(&case.url).unwrap(), case.proxy.as_deref())
-            {
+            let observation = match proxy::ProxyConfig::from_env().selected(
+                &url::Url::parse(&case.url).unwrap(),
+                &case.url,
+                case.proxy.as_deref(),
+            ) {
                 Ok(route) => {
                     json!({"id":case.id,"error":"","route":route.map(|u| u.to_string()).unwrap_or_default()})
                 }
@@ -82,6 +84,7 @@ async fn main() {
                     FetchError::Timeout => "timeout",
                     FetchError::BodyTooLarge(_) => "too_large",
                     FetchError::Request(e) if e.is_redirect() => "redirect",
+                    FetchError::Redirect(e) if e.contains("too many redirects") => "redirect",
                     FetchError::InvalidRequest(_) => "invalid_request",
                     _ => "transport",
                 };

@@ -8,7 +8,6 @@ use reqwest::Response as HttpResponse;
 use std::io::{Cursor, Read};
 
 pub(super) struct ReadResponse {
-    pub(super) final_url: String,
     pub(super) headers: std::collections::BTreeMap<String, Vec<String>>,
     pub(super) body: Vec<u8>,
     pub(super) protocol: String,
@@ -23,7 +22,6 @@ pub(super) async fn read_response(
     implicit_gzip: bool,
     body_permitted: bool,
 ) -> Result<ReadResponse, FetchError> {
-    let final_url = response.url().to_string();
     let protocol = match response.version() {
         reqwest::Version::HTTP_2 => "HTTP/2.0",
         reqwest::Version::HTTP_3 => "HTTP/3.0",
@@ -90,7 +88,6 @@ pub(super) async fn read_response(
     }
     let body = normalize_charset(decoded, content_type.as_deref());
     Ok(ReadResponse {
-        final_url,
         headers,
         body,
         protocol,

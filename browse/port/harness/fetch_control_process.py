@@ -14,6 +14,7 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlsplit
+import fetch_control_followups as followups
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -34,6 +35,14 @@ class Handler(BaseHTTPRequestHandler):
                 headers={name.lower(): self.headers.get_all(name) for name in
                     ["User-Agent", "Accept", "Accept-Language", "Accept-Encoding", "X-Probe"]
                     if self.headers.get_all(name)}), sort_keys=True, separators=(",", ":")).encode()
+        elif parsed.path == "/echo-authority":
+            content = json.dumps(dict(method=self.command, body=body.decode(),
+                headers={name.lower(): self.headers.get_all(name) for name in
+                         ["Host", "Referer", "Authorization", "Content-Type", "Cookie"]
+                         if self.headers.get_all(name)}), sort_keys=True, separators=(",", ":")).encode()
+        elif parsed.path == "/redirect-authority":
+            status = int(params.get("status", ["302"])[0])
+            headers["Location"] = params["target"][0]
         elif parsed.path == "/redirect":
             status = int(params["status"][0])
             headers["Location"] = "/echo"
@@ -203,6 +212,7 @@ def main():
         urls = ["http://example.com", "http://sub.example.com", "http://notexample.com", "http://93.184.216.34", "http://[2001:4860::1]"]
         route_groups += [("no-proxy-" + str(index), {"HTTP_PROXY": proxy_base, "NO_PROXY": entry}, urls) for index, entry in enumerate(bypasses)]
         route_groups += [("no-proxy-lower", {"HTTP_PROXY": proxy_base, "no_proxy": "example.com"}, ["http://example.com", "http://sub.example.com"])]
+        route_groups += followups.route_groups(proxy_base)
         route_groups += [("unicode-domain", {"HTTP_PROXY": proxy_base, "NO_PROXY": "bücher.test"}, ["http://bücher.test", "http://sub.bücher.test", "http://xn--bcher-kva.test"])]
         review_entries = ["example.com:080", "example.com:00080", "example.com:", "example.com:80", "[2001:4860::1]", "[2001:4860::1]:080", "2001:4860::/32", "::ffff:93.184.216.0/120", ".com", "*.example.com", "127.1", "example.com.", ".example.com.", "93.184.216.34:080"]
         review_urls = ["http://example.com", "http://example.com.", "http://sub.example.com", "http://93.184.216.34", "http://[2001:4860::1]"]
@@ -229,6 +239,23 @@ def main():
                 left = execute(args.go, [case], Path(raw) / f"go-http-{index}", env)[0]
                 right = execute(args.rust, [case], Path(raw) / f"rust-http-{index}", env)[0]
                 results.append(dict(id=case["id"], kind="actual-http-peer", request=case, environment=env, go=left, rust=right, matched=comparable(left) == comparable(right)))
+            authority_cases = [
+                dict(id="literal-port-http", url="http://93.184.216.34:080/echo-authority"),
+                dict(id="literal-port-relative-redirect", url="http://93.184.216.34:080/redirect-authority?target=/echo-authority"),
+                dict(id="literal-port-absolute-redirect", url="http://93.184.216.34/redirect-authority?target=http://93.184.216.34:080/echo-authority"),
+                dict(id="literal-port-network-relative-redirect", url="http://93.184.216.34/redirect-authority?target=//93.184.216.34:080/echo-authority"),
+                dict(id="redirect-drop-body-headers", url=proxy_base + "/redirect-authority?target=/echo-authority", method="POST", body="payload", headers={"Content-Type": "text/plain", "Authorization": "synthetic", "Cookie": "synthetic=yes"}),
+                dict(id="redirect-retain-body-headers", url=proxy_base + "/redirect-authority?status=307&target=/echo-authority", method="POST", body="payload", headers={"Content-Type": "text/plain", "Authorization": "synthetic"}),
+                dict(id="redirect-strip-cross-host-credentials", url=proxy_base + f"/redirect-authority?target=http://localhost:{server.server_port}/echo-authority", headers={"Authorization": "synthetic", "Cookie": "synthetic=yes"}),
+                dict(id="redirect-custom-referer", url=proxy_base + "/redirect-authority?target=/echo-authority", headers={"Referer": "http://synthetic.invalid/custom"}),
+            ]
+            for index, case in enumerate(authority_cases):
+                env = {"HTTP_PROXY": proxy_base, "NO_PROXY": "93.184.216.34:80"}
+                left = execute(args.go, [case], Path(raw) / f"go-authority-{index}", env)[0]
+                right = execute(args.rust, [case], Path(raw) / f"rust-authority-{index}", env)[0]
+                results.append(dict(id=case["id"], kind="actual-http-peer", request=case, environment=env, go=left, rust=right, matched=comparable(left) == comparable(right)))
+        results += followups.cache_collision(args.go, args.rust, execute, comparable)
+        assert len(results) == (249 if os.name == "nt" else 251), "declared process corpus missing cases"
         report = dict(candidate_head=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip(),
             candidate_dirty=bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=repo)),
             oracle_ref="dcddcef0df5789123c7c9a7ebe6e01f10e941f2c", total=len(results),

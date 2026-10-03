@@ -1,6 +1,6 @@
 # #773 honest fetch evidence
 
-Final Linux source: `8973726d531a946a6e4a041f0e590b9a16407bbe`, clean, with
+First corrected Linux source: `8973726d531a946a6e4a041f0e590b9a16407bbe`, clean, with
 actual main `31de72294521701fc4b1a0bce39f03cc34d72e7e` integrated normally.
 The publication successor adds only this evidence directory. Candidate source
 hashes in the receipts must remain byte-identical to the tested source commit.
@@ -51,3 +51,11 @@ scope and long-term decisions. Native six-target CI uses
 `.github/workflows/browse-fetch-native.yml`; its separately visible Linux value
 job uploads raw paired evidence including failures and is allowed to fail while
 the remaining cutover gates stay open.
+
+The subsequent `independent-review-a073/` directory preserves the literal second
+independent review and its signed-CIDR, target-port and transport-cache collision
+failures, with identities and retained copies of the actual prior executables.
+The next focused correction expands the permanent corpus to 251 Unix/249 Windows
+cases (74 HTTP exchanges and 177/175 routing-only observations). New clean-source
+logs, controls and optimized paired30 receipts are recorded separately; the 231
+observations and measurements above remain historical proof for source8973726.
