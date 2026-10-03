@@ -59,3 +59,20 @@ only clean-source proof and fresh native jobs establish acceptance. #649 stays
 open until the repaired native store and diagnostic are delivered and their
 acceptance is verified. Full Memory CLI writes, HTTP/sync and #758/#759/#762
 remain separately tracked.
+
+## Independent view-substitution correction
+
+The initial clean689b1a8 review reproduced a false-green database: replacing
+required `sessions` with a view exposing all three column names passed
+`PRAGMA table_info`, even though writes failed because it was not a table.
+Retain that original process evidence. Inspect the actual `sqlite_schema.type`
+as well as required names; a view now reports every required column of the
+missing table. This closes the claimed table-presence contract without
+broadening the diagnostic into complete DDL equivalence. A same-column view
+regression supplements the existing missing-table test.
+
+The supplemental runner also converts its owned native Windows temporary root
+into MSYS form before tar extraction. The original Guard Windows failure
+establishes why the same Bash/Tar boundary matters; this is a static portability
+correction, not a claim that Doctor's Windows runner has been executed locally.
+Fresh exact-source proofs, corrected independent review and native CI are required.

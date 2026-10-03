@@ -133,3 +133,33 @@ fn applied_migrations_with_missing_columns_are_reported_without_modification() {
         count
     );
 }
+
+#[test]
+fn same_column_view_cannot_replace_a_required_writable_table() {
+    let root = tempfile::tempdir().unwrap();
+    let path = root.path().join("data/symbrain/memory/default.db");
+    drop(symbrain_memory::Store::open(&path).unwrap());
+    {
+        let conn = rusqlite::Connection::open(&path).unwrap();
+        conn.execute_batch(
+            "DROP TABLE sessions; CREATE VIEW sessions AS SELECT '' AS id, '' AS summary, '' AS updated_at;",
+        )
+        .unwrap();
+    }
+    let before = fs::read(&path).unwrap();
+    let output = doctor(root.path(), true);
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["memory_db"]["quick_check"], "ok");
+    assert_eq!(
+        report["memory_db"]["error"],
+        "missing required columns: sessions.id, sessions.summary, sessions.updated_at"
+    );
+    let output = doctor(root.path(), false);
+    let text = String::from_utf8(output.stdout).unwrap();
+    let line = text
+        .lines()
+        .find(|line| line.contains("memory db"))
+        .unwrap();
+    assert!(line.contains('✗') && line.contains("sessions.id"), "{line}");
+    assert_eq!(fs::read(&path).unwrap(), before);
+}

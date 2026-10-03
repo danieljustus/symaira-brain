@@ -12,16 +12,18 @@ use rusqlite::Connection;
 pub fn missing_required_columns(actual: &Connection) -> Result<Vec<String>, rusqlite::Error> {
     let expected = Connection::open_in_memory()?;
     expected.execute_batch(crate::schema::SCHEMA)?;
-    let mut tables = expected.prepare(
-        "SELECT name FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name",
-    )?;
-    let tables = tables
-        .query_map([], |row| row.get::<_, String>(0))?
-        .collect::<Result<Vec<_>, _>>()?;
+    let tables = table_names(&expected)?;
+    let actual_tables = table_names(actual)?;
     let mut missing = Vec::new();
     for table in tables {
         let required = columns(&expected, &table)?;
-        let present = columns(actual, &table)?;
+        // PRAGMA table_info also accepts views. A view cannot satisfy the
+        // required writable table contract, even with all expected columns.
+        let present = if actual_tables.contains(&table) {
+            columns(actual, &table)?
+        } else {
+            Vec::new()
+        };
         for column in required {
             if !present.contains(&column) {
                 missing.push(format!("{table}.{column}"));
@@ -30,6 +32,13 @@ pub fn missing_required_columns(actual: &Connection) -> Result<Vec<String>, rusq
     }
     missing.sort();
     Ok(missing)
+}
+
+fn table_names(connection: &Connection) -> Result<Vec<String>, rusqlite::Error> {
+    connection
+        .prepare("SELECT name FROM sqlite_schema WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name")?
+        .query_map([], |row| row.get::<_, String>(0))?
+        .collect()
 }
 
 fn columns(connection: &Connection, table: &str) -> Result<Vec<String>, rusqlite::Error> {
@@ -91,6 +100,14 @@ mod tests {
         conn.execute_batch(crate::schema::SCHEMA).unwrap();
         assert!(missing_required_columns(&conn).unwrap().is_empty());
         conn.execute_batch("DROP TABLE schema_migrations").unwrap();
+        assert_eq!(
+            missing_required_columns(&conn).unwrap(),
+            ["schema_migrations.applied_at", "schema_migrations.version"]
+        );
+        conn.execute_batch(
+            "CREATE VIEW schema_migrations AS SELECT '' AS applied_at, '' AS version",
+        )
+        .unwrap();
         assert_eq!(
             missing_required_columns(&conn).unwrap(),
             ["schema_migrations.applied_at", "schema_migrations.version"]

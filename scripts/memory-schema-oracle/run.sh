@@ -4,6 +4,10 @@ set -euo pipefail
 umask 022
 report="${1:?usage: scripts/memory-schema-oracle/run.sh REPORT}"
 owned="$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/memory-schema-649.XXXXXX")"
+# Git Bash passes RUNNER_TEMP as a native Windows path; tar requires MSYS form.
+if command -v cygpath >/dev/null 2>&1; then
+  owned="$(cygpath -u "$owned")"
+fi
 trap 'rm -rf "$owned"' EXIT
 git archive dcddcef0df5789123c7c9a7ebe6e01f10e941f2c | tar -xf - -C "$owned"
 go_binary="$owned/symbrain-go"
