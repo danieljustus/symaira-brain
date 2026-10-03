@@ -178,7 +178,7 @@ remains assigned to RUST-006.
 
 ## RUST-006: Daemon IPC, lifecycle and MCP handoff
 
-The supplemental `port/harness/daemon_process.py` gate compares 21 actual daemon requests with immutable integrated Go `dcddcef0`, including policy reporting, session cache/scope metadata and unknown-command errors. It retains source/binary hashes and three rejection controls. The historical `652453d` fixtures remain unchanged. Native receipts on all six declared runners and the remaining registry/autostart cases are still required before RUST-006 completes.
+The supplemental `port/harness/daemon_process.py` gate compares 21 actual daemon requests with immutable integrated Go `dcddcef0`, including policy reporting, session cache/scope metadata and unknown-command errors. It retains source/binary hashes and three rejection controls. The historical `652453d` fixtures remain unchanged. The MCP companion `port/harness/daemon_mcp.py` verifies that all four Go MCP source files exactly match the historical manifest, regenerates the thirteen existing inputs in disposable roots, compares actual CLI frames and supplies those outputs to the existing production-proxy tests. The full local workspace now passes; its initial missing-output failure remains retained. Three actual native fixture controls require failure for missing output, changed bytes and an absent production daemon. Native receipts on all six declared runners and the remaining registry/autostart cases are still required before RUST-006 completes.
 
 **Objective:** Reproduce protected local IPC, concurrency, process ownership,
 lifecycle control and MCP daemon handoff.

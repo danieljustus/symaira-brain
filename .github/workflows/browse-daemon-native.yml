@@ -83,6 +83,14 @@ jobs:
           go -C "$oracle/browse" build -o "$go_binary" ./cmd/symbrowse
           python3 port/harness/daemon_process.py --go "$go_binary" --rust "$rust_binary" \
             --go-source "$oracle" --out "$RUNNER_TEMP/browse-daemon-process.json"
+          fixture_binary="$RUNNER_TEMP/symbrowse-mcp-go-v0.8.0"
+          if [ "${OS:-}" = Windows_NT ]; then
+            fixture_binary="$(cygpath -m "$fixture_binary.exe")"
+          fi
+          go -C "$oracle/browse" build -ldflags '-X main.version=v0.8.0' -o "$fixture_binary" ./cmd/symbrowse
+          python3 port/harness/daemon_mcp.py --go "$go_binary" --go-fixture "$fixture_binary" \
+            --rust "$rust_binary" --go-source "$oracle" --workspace \
+            --out "$RUNNER_TEMP/browse-daemon-mcp.json"
 
       - name: Retain exact-head daemon receipt
         if: always()
@@ -108,5 +116,7 @@ jobs:
             ${{ runner.temp }}/browse-daemon-lifecycle.log
             ${{ runner.temp }}/browse-daemon-races.log
             ${{ runner.temp }}/browse-daemon-process.json
+            ${{ runner.temp }}/browse-daemon-mcp.json
+            ${{ runner.temp }}/browse-daemon-mcp.json.tests.log
           if-no-files-found: error
           retention-days: 14

@@ -162,7 +162,7 @@ pub(super) fn serve_connection_parts<S>(
         });
         let result = loop {
             match rx.recv_timeout(operation.remaining().min(Duration::from_millis(10))) {
-                Ok(result) => break operation_result_response(result, &operation),
+                Ok(result) => break operation_result_for_frame(result, &frame, &operation),
                 Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
                     break error_response(codes::OPERATION_FAILED, "daemon handler disconnected");
                 }

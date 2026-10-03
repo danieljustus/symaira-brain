@@ -1,4 +1,34 @@
 use super::*;
+pub(super) fn operation_result_for_frame(
+    mut result: HandlerResult,
+    frame: &Frame,
+    operation: &OperationContext,
+) -> Response {
+    // Preserve the network refusal while adapting its public Go error shape.
+    // Only literal private targets can be reclassified without another DNS
+    // lookup; redirect/rebinding errors retain their original target details.
+    if frame.cmd == "fetch.url"
+        && let Err(error) = &mut result
+        && error.code == codes::PEER_DENIED
+        && error.message.starts_with("blocked_private:")
+        && let Some(url) = frame
+            .args
+            .as_ref()
+            .and_then(|args| args.get("url"))
+            .and_then(Value::as_str)
+        && let Ok(ip) = symbrowse_core::policy::policy_host(url).parse::<std::net::IpAddr>()
+        && symbrowse_core::policy::is_private_ip(ip)
+    {
+        error.message = crate::redact_str(&format!(
+            "blocked_private: {url} targets a private or loopback address"
+        ));
+        error.retryable = Some(false);
+        error.requires_user_confirmation = Some(false);
+        error.resume_hint = "the target is a private or loopback address; start the daemon with --allow-private to permit it".into();
+    }
+    operation_result_response(result, operation)
+}
+
 pub(super) fn operation_result_response(
     result: HandlerResult,
     operation: &OperationContext,

@@ -216,7 +216,8 @@
       "platforms": [
         "all"
       ],
-      "status": "parity"
+      "status": "parity",
+      "supplemental_process_gate": "port/harness/daemon_mcp.py: thirteen real Go/Rust MCP processes, Go MCP source hashes exactly equal the historical manifest, byte-exact existing input frames through the actual daemon, actual missing/changed-output and missing-daemon rejection controls; six native candidate receipts pending"
     },
     {
       "id": "MCP-007",

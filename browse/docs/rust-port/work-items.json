@@ -170,7 +170,7 @@
         "cargo test --workspace --locked",
         "cargo clippy --workspace --all-targets --all-features --target x86_64-pc-windows-msvc --locked -- -D warnings"
       ],
-      "native_evidence_gate": ".github/workflows/browse-daemon-native.yml: all six declared runners must execute nonzero daemon tests, lifecycle, 50x50 competing starts and supplemental real Go/Rust requests; retain raw logs and hashed process receipts. Historical 652453d oracle is unchanged; dcddcef0 adds process observations only."
+      "native_evidence_gate": ".github/workflows/browse-daemon-native.yml: all six declared runners must execute nonzero daemon tests, lifecycle, 50x50 competing starts and supplemental real Go/Rust requests; retain raw logs and hashed process receipts. Historical 652453d oracle is unchanged; dcddcef0 adds process observations only. The same six jobs also run all workspace tests through source-verified, newly Go-generated historical-input MCP fixtures and a production Rust daemon; thirteen actual CLI outputs and three actual failure controls must pass."
     },
     {
       "id": "RUST-007",
