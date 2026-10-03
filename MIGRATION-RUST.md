@@ -28,6 +28,25 @@ under the shared JSON feature graph: negative zero, numeric overflow rejection
 including overwritten duplicate keys, and ordinary object keys that resemble
 serde_json's internal number marker. The existing JSON nesting bound remains.
 
+`vault create`, `vault set`, and `vault delete` now execute natively, with
+secrets sent only over child stdin. The remaining vault verbs retain opaque
+argv, inherited stdio, and child exit/signal semantics. Discovery includes the
+merged global/project configuration, typed environment overrides, managed
+binaries, and PATH. Invalid configuration discards the override exactly as
+Go does. Confirmation returns metadata only; `set` compares the requested
+value without printing it, and `delete` requires symvault's not-found exit 2.
+The shared Go-compatible field-value decoder retains the existing native JSON
+nesting bound and fails closed when it is exceeded.
+
+For #766, `scripts/vault-admin-oracle/replay.py` builds the complete immutable
+Go archive at `dcddcef0df5789123c7c9a7ebe6e01f10e941f2c` and compares actual
+process stdout, stderr, exit codes, child argv and stdin in disposable roots.
+The Linux candidate passes 179 comparisons, with 126 portable Go-derived
+contracts frozen for native process tests. Native Linux/macOS/Windows CI runs
+the same live differential; acceptance and issue closure require all three
+jobs to succeed at the candidate head. No operator credentials are used, no Go
+source is edited, and no broad Rust cutover or release is claimed.
+
 The native MCP foundation now models JSON-RPC null/omission semantics and
 accepts both newline-delimited and `Content-Length` framing with the Go
 implementation's 1 MiB bounds. Gateway dispatch is implemented natively;

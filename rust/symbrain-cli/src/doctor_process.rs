@@ -1,6 +1,6 @@
 use std::env;
 use std::ffi::{OsStr, OsString};
-use std::io::Read;
+use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, Stdio};
 use std::thread;
@@ -61,10 +61,24 @@ pub(super) fn run_process(
     args: &[&str],
     timeout: Duration,
 ) -> Result<(std::process::ExitStatus, Vec<u8>, Vec<u8>), String> {
+    let args: Vec<_> = args.iter().map(OsString::from).collect();
+    run_process_with_input(path, &args, None, timeout)
+}
+
+pub(crate) fn run_process_with_input(
+    path: &Path,
+    args: &[OsString],
+    input: Option<Vec<u8>>,
+    timeout: Duration,
+) -> Result<(std::process::ExitStatus, Vec<u8>, Vec<u8>), String> {
     let mut command = Command::new(path);
     command
         .args(args)
-        .stdin(Stdio::null())
+        .stdin(if input.is_some() {
+            Stdio::piped()
+        } else {
+            Stdio::null()
+        })
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
     #[cfg(unix)]
@@ -73,6 +87,13 @@ pub(super) fn run_process(
         command.process_group(0);
     }
     let mut child = command.spawn().map_err(|error| error.to_string())?;
+    let input_writer = input.map(|input| {
+        let stdin = child.stdin.take().expect("piped stdin");
+        thread::spawn(move || {
+            let mut stdin = stdin;
+            stdin.write_all(&input)
+        })
+    });
     let stdout = child
         .stdout
         .take()
@@ -98,7 +119,12 @@ pub(super) fn run_process(
             }
         }
     };
-    while !stdout_reader.is_finished() || !stderr_reader.is_finished() {
+    while !stdout_reader.is_finished()
+        || !stderr_reader.is_finished()
+        || input_writer
+            .as_ref()
+            .is_some_and(|writer| !writer.is_finished())
+    {
         if started.elapsed() >= timeout {
             terminate(&mut child);
             return Err("probe timed out".to_string());
@@ -107,6 +133,18 @@ pub(super) fn run_process(
     }
     let out = join_reader(stdout_reader, "stdout")?;
     let err = join_reader(stderr_reader, "stderr")?;
+    // A child that deliberately ignores input can still exit successfully,
+    // matching Go's exec.Cmd stdin-copy semantics for broken pipes.
+    if let Some(writer) = input_writer {
+        let written = writer
+            .join()
+            .map_err(|_| "child stdin writer panicked".to_string())?;
+        if let Err(error) = written
+            && error.kind() != std::io::ErrorKind::BrokenPipe
+        {
+            return Err(format!("copy child stdin: {error}"));
+        }
+    }
     Ok((status, out, err))
 }
 
