@@ -115,15 +115,19 @@ impl Store {
     /// Returns a SQLite error; audit errors do not fail a completed deletion.
     pub fn delete_cli(&self, id: &str) -> Result<bool, StoreError> {
         let conn = self.lock()?;
-        crate::cli_delete_admission::checked(&conn, id)?;
+        if !crate::cli_delete_admission::checked(&conn, id)? {
+            return Ok(false);
+        }
+        conn.execute("UPDATE memories SET access_count=access_count+1,prev_access=last_access,last_access=? WHERE id=?",
+            params![timestamp(), id])?;
+        // Go reads the audit identity in DeleteMemory after GetMemory's access
+        // update. If another process already deleted it, DeleteMemory succeeds.
         let identity: Option<(String, String, String)> = conn.query_row(
             "SELECT COALESCE(scope,''),COALESCE(created_by,''),COALESCE(created_session,'') FROM memories WHERE id=?", [id],
             |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?))).optional()?;
         let Some((scope, author, session)) = identity else {
-            return Ok(false);
+            return Ok(true);
         };
-        conn.execute("UPDATE memories SET access_count=access_count+1,prev_access=last_access,last_access=? WHERE id=?",
-            params![timestamp(), id])?;
         conn.execute("DELETE FROM memories WHERE id=?", [id])?;
         audit(&conn, "delete", id, &scope, &session, &author, "");
         Ok(true)
