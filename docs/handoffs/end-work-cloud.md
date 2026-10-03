@@ -1,4 +1,34 @@
-# Current continuation: raw-target correction (2026-10-03)
+# Current continuation: reviewed raw flag correction (2026-10-03)
+
+PR #794 also preserves unknown raw flag names and malformed flag spellings.
+The independent full-layer review of D7 found eight additional stderr-byte
+mismatches after all 198 retained cases passed. The correction matches known
+flags as ASCII byte spans and emits original unquoted Unix operands, while
+keeping valid U+FFFD and Windows UTF-16 replacement behavior distinct.
+
+The immutable corrected source is
+`9ae16e787ea05544db54c773a0599db6daa3712c`, integrated with main
+`e8c7f7990ab61967db0a3cbadaf6e485b4a33d99`. Actual Linux validation:
+
+- 315/315 real immutable-Go/native comparisons match complete stdout/stderr
+  bytes and exits without a Go fallback, including all 198 retained cases,
+  the nine independent review cases and 108 further flag spelling controls.
+- CLI, skills and audit all-feature suites pass: 446 primary tests, zero
+  failures, two ignored child-harness entrypoints, 57 complete parent summaries.
+  Strict all-target/all-feature Clippy, formatting and actionlint pass.
+- Independent corrected full-layer review passes for this source; the reviewer
+  separately reran 315 comparisons and three native parent tests. The source-
+  bound report and both original and corrected reviews are retained under
+  `migration/evidence/skills-preflight-793/`.
+
+Decision and rationale: `docs/adr/0004-skills-preflight-raw-diagnostics.md`.
+These are scoped local acceptance and review results. Keep the PR draft until
+fresh native CI on its published final head succeeds. Marking ready and normal
+merge are authorized by the user's GitHub goal; branch protection still applies.
+#793 closes only after a verified merge; #764/#476 and release/hardware gates
+remain separate. The following checkpoints retain their original observations.
+
+# Previous continuation: raw-target correction (2026-10-03)
 
 The active candidate remains PR #794 on `agent/skills-preflight-793`. The
 previously open padded non-UTF-8 target defect is repaired: target trimming
