@@ -715,6 +715,10 @@ full architectural boundary rules referenced above. See
 [CODE_OF_CONDUCT.md](.github/CODE_OF_CONDUCT.md) for community
 expectations.
 
+The Hermes usage credential gate (`scripts/usage-hermes-oracle/run.sh`) retains
+92 actual Go/native constructor and request cases, 100 CLI comparisons, and five
+real failure controls, including duplicate-array shrink/regrowth regressions.
+
 ## Native Apps
 
 Native SwiftUI apps for macOS and iOS are included in the repo. They use

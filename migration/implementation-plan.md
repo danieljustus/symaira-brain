@@ -1992,3 +1992,19 @@ jobs preserve partial failure evidence. The rationale and capability-rooted
 reader dependency are in `docs/adr/usage-hermes-file-jwt-768.md`.
 USE-001 and #768 remain open for numeric overflow and other credential families;
 this slice does not close broader host integration or Go-removal work.
+
+
+### #768: Hermes slice backing repair after independent review
+
+Immutable `273a93c0` failed an actual Go/native replay of nonempty duplicate
+`providers` array shrinkage followed by null-slot regrowth. Keep that original
+failure receipt and reviewed candidate intact. The focused correction retains
+visited backing slots separately from visible length, resets on null/empty
+arrays, and selects only visible entries. Twelve appended regressions expand the
+required fresh gate from 80 to 92 complete constructor/report/request/no-write
+cases and from 90 to 100 actual CLI table/JSON byte/exit comparisons. Five actual
+negative controls and the parent 44-constructor/110-CLI/five-control reference
+gate remain required. Native macOS/Windows execution and all other #768 gates
+remain open; Linux evidence alone does not establish those target contracts.
+The decision and pinned Go slice semantics are recorded in
+`docs/adr/usage-hermes-file-jwt-768.md`.
