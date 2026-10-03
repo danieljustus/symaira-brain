@@ -233,6 +233,19 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Credentialed usage requests, report JSON and table parity
+        shell: bash
+        run: scripts/usage-fetch-oracle/run.sh "$RUNNER_TEMP/usage-fetch-620.json"
+
+      - name: Preserve credentialed usage process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-fetch-620-${{ runner.os }}
+          path: ${{ runner.temp }}/usage-fetch-620.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Go/Rust vault administration process parity
         run: |
           python3 -m unittest discover -s scripts/vault-admin-oracle -p test_replay.py -v
@@ -348,6 +361,19 @@ jobs:
             ${{ runner.temp }}/activity-validation-767.json
             ${{ runner.temp }}/activity-validation-767.json.fixture.json
             ${{ runner.temp }}/activity-validation-767.json.controls.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Credentialed usage requests, report JSON and table parity
+        shell: bash
+        run: scripts/usage-fetch-oracle/run.sh "$RUNNER_TEMP/usage-fetch-620.json"
+
+      - name: Preserve credentialed usage process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-fetch-620-${{ runner.os }}
+          path: ${{ runner.temp }}/usage-fetch-620.json
           if-no-files-found: error
           retention-days: 14
 
@@ -477,6 +503,19 @@ jobs:
             ${{ runner.temp }}/activity-validation-767.json
             ${{ runner.temp }}/activity-validation-767.json.fixture.json
             ${{ runner.temp }}/activity-validation-767.json.controls.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Credentialed usage requests, report JSON and table parity
+        shell: bash
+        run: scripts/usage-fetch-oracle/run.sh "$RUNNER_TEMP/usage-fetch-620.json"
+
+      - name: Preserve credentialed usage process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-fetch-620-${{ runner.os }}
+          path: ${{ runner.temp }}/usage-fetch-620.json
           if-no-files-found: error
           retention-days: 14
 

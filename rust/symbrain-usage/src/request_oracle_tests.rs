@@ -70,8 +70,8 @@ const CREDENTIALS: [&str; 11] = [
     OPENROUTER_KEY,
 ];
 
-/// Headers the shipped implementation fills with values that carry no
-/// reproducible fact (see the note in `provider_requests_tests.rs`).
+/// The historical fixture masks runtime metadata and random request ids.
+/// Fresh #620 oracle tests pin both Kimi runtime metadata fields exactly.
 const UNPINNED_HEADERS: [&str; 3] = [
     "X-Msh-Os-Version",
     "X-Msh-Device-Model",
@@ -959,7 +959,11 @@ fn requests_match_the_shipped_oracle_recording() {
                     case.provider
                 );
             } else {
-                assert_eq!(ported, None, "{}: {name} is not pinned", case.provider);
+                if case.provider == "kimi" && case.source == "cli" {
+                    assert!(ported.is_some(), "{}: {name} is required", case.provider);
+                } else {
+                    assert_eq!(ported, None, "{}: {name} is not sent", case.provider);
+                }
                 if case.provider == "kimi" && case.source == "cli" {
                     assert!(
                         shipped_value.is_some(),
