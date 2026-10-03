@@ -1,0 +1,20 @@
+# Native Doctor-Reparatur mit geschützter Herkunft
+
+Datum: 2026-10-03 (Europe/Berlin). Bezug: [#765](https://github.com/danieljustus/symaira-brain/issues/765), [#731](https://github.com/danieljustus/symaira-brain/issues/731).
+Status: umgesetzt; Annahme nach frischen nativen Linux-, macOS- und Windows-CI-Belegen. #765 bleibt offen.
+
+Der Nutzer hat technische Entscheidungen einschließlich ihrer langfristigen Begründung delegiert. Dieser Schritt übernimmt die normale `doctor --fix`-Reparatur in Rust. Der Go-Produktionscode und eingefrorene Fixtures bleiben unverändert als Referenz erhalten.
+
+Die Reparatur wählt dieselben verpflichtenden und konfigurierten optionalen Cores wie die Release-Installation. Ein Fehler bei einem Core beendet die übrigen Reparaturen nicht. Die Abschlusszählung enthält nur Cores, die auf der Plattform tatsächlich bearbeitet wurden. Dadurch kann eine beschädigte Installation mehrere Probleme in einem Durchlauf melden, ohne einen Erfolg zu behaupten.
+
+Ein `brain-source`-Build ist absichtlich installierter Zustand. Ein Versionsunterschied berechtigt nicht zum Überschreiben. Auch eine unlesbare oder fehlerhaft typisierte Herkunftsdatei schützt das bestehende Binary. Erst ein ausdrücklich aktiviertes `--force-release` hebt diesen Schutz auf; Prüfsummen und Publisher-Prüfung bleiben aktiv. Eine bereits richtige Version wird entsprechend der bestehenden Go-Reihenfolge vor der Herkunftsprüfung übersprungen.
+
+Die JSON-Kompatibilität liegt in `symbrain-managed`, nicht in Guard und nicht in zwei getrennten Doctor-/Setup-Decodern. Ein iterativer Syntaxscanner erhält Go-Diagnosen und die Grenze von 10.000 verschachtelten Containern. Der Decoder übernimmt Feldreihenfolge, Unicode-Faltung der bekannten ASCII-Feldnamen, Null-Werte, doppelte Felder, String-Typprüfung und die Go-spezifische `time.Time`-Behandlung. Ungültige UTF-8-Bytes werden einzeln ersetzt. Die Rohbytes eines Zeitwertes bleiben für dessen Diagnose erhalten. Eine rein formatierende Byte-Quote-Funktion des gemeinsamen Core wird öffentlich wiederverwendet; die Produktgrenze zwischen Brain und Guard ändert sich dadurch nicht.
+
+Versionsprobes laufen genau einmal pro bearbeitetem Core und höchstens drei Sekunden. Ein fehlender Originalpfad bleibt fehlend. Windows löst erst nach dieser Prüfung Go-kompatible PATHEXT-Kandidaten auf. Bei einem Unix-Timeout wird die eigene Prozessgruppe beendet und das Kind eingesammelt, damit Nachkommen weder weiterlaufen noch Ausgabedeskriptoren offen halten.
+
+Rust bearbeitet Cores deterministisch. Go iteriert eine Map mit wechselnder Reihenfolge. Der Prozessvergleich prüft daher jede Core-Sequenz einschließlich sämtlicher Attribute exakt sowie die vollständige Abschlussfolge. Er verwirft keine Probe- oder Installationsfehler. Logzeitpunkte müssen im tatsächlichen Ausführungsfenster liegen. Dateiinhalte und Modi werden vollständig verglichen; nur isolierte Testpfade und neu erzeugte, zeitlich geprüfte UTC-Release-Zeitstempel werden vereinheitlicht. Der Test-Publisher erzeugt genau einen exklusiven Beleg je Core und prüft die echten Identity-/Issuer-Argumente. Er behauptet keine Authentifizierung eines Produktionszertifikats.
+
+Fehlerdiagnosen des vollständigen typisierten Konfigurationsladers bleiben zunächst Go-verwaltet. Ein bestehender Eligibility-Gate verhindert die native Reparatur, wenn Go die Konfiguration ablehnen würde; dieser Gate führt keine Versionsprobe aus. Ebenso bleiben `setup --from-source` und dessen Modul-Lifecycle außerhalb dieses Schrittes. Eine Teilmigration als komplette Erledigung von #765 zu kennzeichnen würde den späteren sicheren Fallback-Abbau erschweren.
+
+Die reproduzierbare Validierung liegt in `scripts/doctor-repair-oracle/` und `migration/evidence/doctor-repair-765/`. Drei absichtlich beschädigte tatsächliche CLI-Prozesse müssen am falschen Exitcode, fehlenden Header beziehungsweise fehlenden Core-Ereignis scheitern. Die CI behält positive und negative Belege auf allen drei Betriebssystemen auch bei Fehlern für 14 Tage. Merge und Issue-Abschluss setzen weiterhin die echten Annahmekriterien voraus.
