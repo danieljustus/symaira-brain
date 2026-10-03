@@ -1,11 +1,11 @@
 {
   "supplemental_go_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
   "historical_oracle_unchanged": "652453d",
-  "candidate_head": "4bbac5d0adb1870bfceaa31dca2fa5174819d1f5",
+  "candidate_head": "0cde5a4c522b77d4f511dd665a641c39875015a2",
   "candidate_dirty": false,
   "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
   "go_binary_sha256": "10df8816128c4a9408ee7c00f2182eca928e079f55fd9d6f6a1d4f299267beb8",
-  "rust_binary_sha256": "c9647c267d2d191f3b39fe22379193ac6427ff3575e73e85ad8ffe08308a6324",
+  "rust_binary_sha256": "37c3ffe032a38d3ef36e43a0e51535919032f4bfa05e47f5f94566b787cbd1f7",
   "go_source_sha256": {
     "browse/.gitignore": "fdcce6ead7dd804578c84b412fbf72f9008355d7ab1fc64f7767cf6111af5d57",
     "browse/CONTRIBUTING.md": "df071defbfed953359f669066fe72921eaff4a3393b2c95c11765c871a408e1a",
@@ -748,12 +748,12 @@
     "browse/crates/symbrowse-daemon/src/safari_runtime.rs": "9806bf97e2c1173f0ce29342d20960c9acbd01ed24f656e0d58fcd57e9e93553",
     "browse/crates/symbrowse-daemon/src/server.rs": "71ff5c234a810064b5e565c1fd092ae3be16d3329fc3d98d68854383f60aac70",
     "browse/crates/symbrowse-daemon/src/server/connection.rs": "fb65f3e77fa5cdb3b9485fc93360abaa3baaa81c21fb77930158b8791efa7a5d",
-    "browse/crates/symbrowse-daemon/src/server/helpers.rs": "a989a7a14279cd69b8c2de0929654b9313ce9e849e863a4dd151ed3bd6c11067",
+    "browse/crates/symbrowse-daemon/src/server/helpers.rs": "95865c7efd3f916a78c8d67d404fca31599bb3b5e61e2630340a1947b4347b83",
     "browse/crates/symbrowse-daemon/src/server/tests.rs": "657b94e60d7998f061d8a69c9d7a188732c9a234100325d97b498a0f99ea7b71",
     "browse/crates/symbrowse-daemon/src/server/unix.rs": "3d542e6d4921a913b9ffb5716cdb8751c639d7db8af10ff712392739c1da9a7b",
     "browse/crates/symbrowse-daemon/src/server/windows.rs": "70284004c47aee25bef42920b057b333eead1aa4d9af1c1a08c4797dcf9f1ee2",
     "browse/crates/symbrowse-daemon/src/session.rs": "6556f14ab6c1f2d0c905ffa9aefdd57f1770d3cfa2fc14e3c6d4db11b6c57c7f",
-    "browse/crates/symbrowse-daemon/src/spec.rs": "aaa1cc711340c439db456dc6fa2e3d0e0f219e091ccea250056a93d8315097bb",
+    "browse/crates/symbrowse-daemon/src/spec.rs": "db7755f2a6a0b53a5c0de686019c32eea723931cb0e214f280953984b5634823",
     "browse/crates/symbrowse-daemon/tests/cancellation.rs": "0d3a3c591260ce6388ac0aef49532cf46b0e2dc734f17eda15b27eb7d277e356",
     "browse/crates/symbrowse-daemon/tests/chrome_native.rs": "4f9e43b5f67d8163cd11a41a22281988fd3c4a529884a4eba5611c76624b169b",
     "browse/crates/symbrowse-daemon/tests/firefox_native.rs": "4781ec7a34979fd865cd5686fa41bcc6720096cca826d2b80198df4e6976171c",
@@ -838,22 +838,22 @@
   "matches": true,
   "cases": [
     {
-      "session": "parity463726-0",
+      "session": "parity486727-0",
       "settings": {},
       "go": {
-        "root": "/tmp/bd-r5_0ta1c",
-        "endpoint": "/tmp/bd-r5_0ta1c/run/symbrowse/parity463726-0.sock",
-        "pid": 463733,
-        "begin": 1791044702.4303463,
-        "end": 1791044702.4529042,
+        "root": "/tmp/bd-fpc6l9o4",
+        "endpoint": "/tmp/bd-fpc6l9o4/run/symbrowse/parity486727-0.sock",
+        "pid": 486734,
+        "begin": 1791045963.5717847,
+        "end": 1791045963.6150692,
         "exit": 0,
         "stdout_hex": "",
-        "stderr_hex": "74696d653d323032362d31302d30335431363a32353a30322e3433395a206c6576656c3d5741524e206d73673d226e6f2065787465726e616c207269736b206465636964657220617661696c61626c65202873796d627261696e206e6f7420666f756e64206f722064697361626c6564293b207269736b206465636973696f6e732066616c6c206261636b20746f20746865206275696c742d696e20706f6c696379220a",
+        "stderr_hex": "74696d653d323032362d31302d30335431363a34363a30332e3539345a206c6576656c3d5741524e206d73673d226e6f2065787465726e616c207269736b206465636964657220617661696c61626c65202873796d627261696e206e6f7420666f756e64206f722064697361626c6564293b207269736b206465636973696f6e732066616c6c206261636b20746f20746865206275696c742d696e20706f6c696379220a",
         "observations": [
           {
             "request": {
               "cmd": "daemon.ping",
-              "session": "parity463726-0"
+              "session": "parity486727-0"
             },
             "response": {
               "success": true,
@@ -865,29 +865,29 @@
           {
             "request": {
               "cmd": "daemon.status",
-              "session": "parity463726-0"
+              "session": "parity486727-0"
             },
             "response": {
               "success": true,
               "data": {
                 "engine": "chrome",
-                "last_activity": "2026-10-03T16:25:02.45162029Z",
-                "pid": 463733,
+                "last_activity": "2026-10-03T16:46:03.613439568Z",
+                "pid": 486734,
                 "policy": {
                   "ssrf_enabled": false,
                   "fetch_ssrf_enabled": true,
                   "allow_private": false
                 },
                 "running": true,
-                "socket": "/tmp/bd-r5_0ta1c/run/symbrowse/parity463726-0.sock",
-                "started_at": "2026-10-03T16:25:02.440030384Z"
+                "socket": "/tmp/bd-fpc6l9o4/run/symbrowse/parity486727-0.sock",
+                "started_at": "2026-10-03T16:46:03.594752273Z"
               }
             }
           },
           {
             "request": {
               "cmd": "session.list",
-              "session": "parity463726-0"
+              "session": "parity486727-0"
             },
             "response": {
               "success": true,
@@ -895,16 +895,16 @@
                 "schema_version": 1,
                 "sessions": [
                   {
-                    "name": "parity463726-0",
-                    "pid": 463733,
-                    "started_at": "2026-10-03T16:25:02.440032578Z",
+                    "name": "parity486727-0",
+                    "pid": 486734,
+                    "started_at": "2026-10-03T16:46:03.594754156Z",
                     "active_tabs": 0,
-                    "last_activity": "2026-10-03T16:25:02.451763556Z",
-                    "user_data_dir": "/tmp/bd-r5_0ta1c/cache/symbrowse/sessions/parity463726-0",
-                    "browser_context_id": "context-parity463726-0",
+                    "last_activity": "2026-10-03T16:46:03.613703057Z",
+                    "user_data_dir": "/tmp/bd-fpc6l9o4/cache/symbrowse/sessions/parity486727-0",
+                    "browser_context_id": "context-parity486727-0",
                     "ref_count": 0,
                     "scope": "worktree",
-                    "origin_path": "/tmp/bd-r5_0ta1c"
+                    "origin_path": "/tmp/bd-fpc6l9o4"
                   }
                 ]
               }
@@ -913,28 +913,28 @@
           {
             "request": {
               "cmd": "session.info",
-              "session": "parity463726-0"
+              "session": "parity486727-0"
             },
             "response": {
               "success": true,
               "data": {
-                "name": "parity463726-0",
-                "pid": 463733,
-                "started_at": "2026-10-03T16:25:02.440032578Z",
+                "name": "parity486727-0",
+                "pid": 486734,
+                "started_at": "2026-10-03T16:46:03.594754156Z",
                 "active_tabs": 0,
-                "last_activity": "2026-10-03T16:25:02.452004616Z",
-                "user_data_dir": "/tmp/bd-r5_0ta1c/cache/symbrowse/sessions/parity463726-0",
-                "browser_context_id": "context-parity463726-0",
+                "last_activity": "2026-10-03T16:46:03.61390368Z",
+                "user_data_dir": "/tmp/bd-fpc6l9o4/cache/symbrowse/sessions/parity486727-0",
+                "browser_context_id": "context-parity486727-0",
                 "ref_count": 0,
                 "scope": "worktree",
-                "origin_path": "/tmp/bd-r5_0ta1c"
+                "origin_path": "/tmp/bd-fpc6l9o4"
               }
             }
           },
           {
             "request": {
               "cmd": "session.ensure",
-              "session": "parity463726-0"
+              "session": "parity486727-0"
             },
             "response": {
               "success": false,
@@ -947,7 +947,7 @@
           {
             "request": {
               "cmd": "unknown",
-              "session": "parity463726-0"
+              "session": "parity486727-0"
             },
             "response": {
               "success": false,
@@ -960,7 +960,7 @@
           {
             "request": {
               "cmd": "daemon.stop",
-              "session": "parity463726-0"
+              "session": "parity486727-0"
             },
             "response": {
               "success": true,
@@ -972,11 +972,11 @@
         ]
       },
       "rust": {
-        "root": "/tmp/bd-labbzv5p",
-        "endpoint": "/tmp/bd-labbzv5p/run/symbrowse/parity463726-0.sock",
-        "pid": 463742,
-        "begin": 1791044702.4536602,
-        "end": 1791044702.5040085,
+        "root": "/tmp/bd-z5_ncqrb",
+        "endpoint": "/tmp/bd-z5_ncqrb/run/symbrowse/parity486727-0.sock",
+        "pid": 486743,
+        "begin": 1791045963.6154842,
+        "end": 1791045963.664628,
         "exit": 0,
         "stdout_hex": "",
         "stderr_hex": "73796d62726f7773652073687574646f776e3a20626567696e0a73796d62726f7773652073687574646f776e3a206e6f2062726f777365722073657373696f6e0a",
@@ -984,7 +984,7 @@
           {
             "request": {
               "cmd": "daemon.ping",
-              "session": "parity463726-0"
+              "session": "parity486727-0"
             },
             "response": {
               "success": true,
@@ -996,31 +996,31 @@
           {
             "request": {
               "cmd": "daemon.status",
-              "session": "parity463726-0"
+              "session": "parity486727-0"
             },
             "response": {
               "success": true,
               "data": {
                 "engine": "chrome",
-                "last_activity": "2026-10-03T16:25:02.475506289Z",
+                "last_activity": "2026-10-03T16:46:03.637037377Z",
                 "mode": "browser",
-                "pid": 463742,
+                "pid": 486743,
                 "policy": {
                   "allow_private": false,
                   "fetch_ssrf_enabled": true,
                   "ssrf_enabled": false
                 },
                 "running": true,
-                "session": "parity463726-0",
-                "socket": "/tmp/bd-labbzv5p/run/symbrowse/parity463726-0.sock",
-                "started_at": "2026-10-03T16:25:02.459389465Z"
+                "session": "parity486727-0",
+                "socket": "/tmp/bd-z5_ncqrb/run/symbrowse/parity486727-0.sock",
+                "started_at": "2026-10-03T16:46:03.625991889Z"
               }
             }
           },
           {
             "request": {
               "cmd": "session.list",
-              "session": "parity463726-0"
+              "session": "parity486727-0"
             },
             "response": {
               "success": true,
@@ -1029,15 +1029,15 @@
                 "sessions": [
                   {
                     "active_tabs": 0,
-                    "browser_context_id": "context-parity463726-0",
-                    "last_activity": "2026-10-03T16:25:02.475520491Z",
-                    "name": "parity463726-0",
-                    "origin_path": "/tmp/bd-labbzv5p",
-                    "pid": 463742,
+                    "browser_context_id": "context-parity486727-0",
+                    "last_activity": "2026-10-03T16:46:03.637055104Z",
+                    "name": "parity486727-0",
+                    "origin_path": "/tmp/bd-z5_ncqrb",
+                    "pid": 486743,
                     "ref_count": 0,
                     "scope": "worktree",
-                    "started_at": "2026-10-03T16:25:02.460188984Z",
-                    "user_data_dir": "/tmp/bd-labbzv5p/cache/symbrowse/sessions/parity463726-0"
+                    "started_at": "2026-10-03T16:46:03.627369902Z",
+                    "user_data_dir": "/tmp/bd-z5_ncqrb/cache/symbrowse/sessions/parity486727-0"
                   }
                 ]
               }
@@ -1046,28 +1046,28 @@
           {
             "request": {
               "cmd": "session.info",
-              "session": "parity463726-0"
+              "session": "parity486727-0"
             },
             "response": {
               "success": true,
               "data": {
                 "active_tabs": 0,
-                "browser_context_id": "context-parity463726-0",
-                "last_activity": "2026-10-03T16:25:02.475931372Z",
-                "name": "parity463726-0",
-                "origin_path": "/tmp/bd-labbzv5p",
-                "pid": 463742,
+                "browser_context_id": "context-parity486727-0",
+                "last_activity": "2026-10-03T16:46:03.637636143Z",
+                "name": "parity486727-0",
+                "origin_path": "/tmp/bd-z5_ncqrb",
+                "pid": 486743,
                 "ref_count": 0,
                 "scope": "worktree",
-                "started_at": "2026-10-03T16:25:02.460188984Z",
-                "user_data_dir": "/tmp/bd-labbzv5p/cache/symbrowse/sessions/parity463726-0"
+                "started_at": "2026-10-03T16:46:03.627369902Z",
+                "user_data_dir": "/tmp/bd-z5_ncqrb/cache/symbrowse/sessions/parity486727-0"
               }
             }
           },
           {
             "request": {
               "cmd": "session.ensure",
-              "session": "parity463726-0"
+              "session": "parity486727-0"
             },
             "response": {
               "success": false,
@@ -1080,7 +1080,7 @@
           {
             "request": {
               "cmd": "unknown",
-              "session": "parity463726-0"
+              "session": "parity486727-0"
             },
             "response": {
               "success": false,
@@ -1093,7 +1093,7 @@
           {
             "request": {
               "cmd": "daemon.stop",
-              "session": "parity463726-0"
+              "session": "parity486727-0"
             },
             "response": {
               "success": true,
@@ -1107,24 +1107,24 @@
       "matches": true
     },
     {
-      "session": "parity463726-1",
+      "session": "parity486727-1",
       "settings": {
         "SYMBROWSE_ALLOW_PRIVATE": "true"
       },
       "go": {
-        "root": "/tmp/bd-xijf8cwk",
-        "endpoint": "/tmp/bd-xijf8cwk/run/symbrowse/parity463726-1.sock",
-        "pid": 463782,
-        "begin": 1791044702.5046055,
-        "end": 1791044702.5269177,
+        "root": "/tmp/bd-oiir1fxq",
+        "endpoint": "/tmp/bd-oiir1fxq/run/symbrowse/parity486727-1.sock",
+        "pid": 486783,
+        "begin": 1791045963.6651387,
+        "end": 1791045963.6870632,
         "exit": 0,
         "stdout_hex": "",
-        "stderr_hex": "74696d653d323032362d31302d30335431363a32353a30322e3531315a206c6576656c3d5741524e206d73673d226e6f2065787465726e616c207269736b206465636964657220617661696c61626c65202873796d627261696e206e6f7420666f756e64206f722064697361626c6564293b207269736b206465636973696f6e732066616c6c206261636b20746f20746865206275696c742d696e20706f6c696379220a",
+        "stderr_hex": "74696d653d323032362d31302d30335431363a34363a30332e3637375a206c6576656c3d5741524e206d73673d226e6f2065787465726e616c207269736b206465636964657220617661696c61626c65202873796d627261696e206e6f7420666f756e64206f722064697361626c6564293b207269736b206465636973696f6e732066616c6c206261636b20746f20746865206275696c742d696e20706f6c696379220a",
         "observations": [
           {
             "request": {
               "cmd": "daemon.ping",
-              "session": "parity463726-1"
+              "session": "parity486727-1"
             },
             "response": {
               "success": true,
@@ -1136,29 +1136,29 @@
           {
             "request": {
               "cmd": "daemon.status",
-              "session": "parity463726-1"
+              "session": "parity486727-1"
             },
             "response": {
               "success": true,
               "data": {
                 "engine": "chrome",
-                "last_activity": "2026-10-03T16:25:02.525866631Z",
-                "pid": 463782,
+                "last_activity": "2026-10-03T16:46:03.686089352Z",
+                "pid": 486783,
                 "policy": {
                   "ssrf_enabled": false,
                   "fetch_ssrf_enabled": false,
                   "allow_private": true
                 },
                 "running": true,
-                "socket": "/tmp/bd-xijf8cwk/run/symbrowse/parity463726-1.sock",
-                "started_at": "2026-10-03T16:25:02.511578546Z"
+                "socket": "/tmp/bd-oiir1fxq/run/symbrowse/parity486727-1.sock",
+                "started_at": "2026-10-03T16:46:03.67810369Z"
               }
             }
           },
           {
             "request": {
               "cmd": "session.list",
-              "session": "parity463726-1"
+              "session": "parity486727-1"
             },
             "response": {
               "success": true,
@@ -1166,16 +1166,16 @@
                 "schema_version": 1,
                 "sessions": [
                   {
-                    "name": "parity463726-1",
-                    "pid": 463782,
-                    "started_at": "2026-10-03T16:25:02.511580158Z",
+                    "name": "parity486727-1",
+                    "pid": 486783,
+                    "started_at": "2026-10-03T16:46:03.678106003Z",
                     "active_tabs": 0,
-                    "last_activity": "2026-10-03T16:25:02.526076984Z",
-                    "user_data_dir": "/tmp/bd-xijf8cwk/cache/symbrowse/sessions/parity463726-1",
-                    "browser_context_id": "context-parity463726-1",
+                    "last_activity": "2026-10-03T16:46:03.686286765Z",
+                    "user_data_dir": "/tmp/bd-oiir1fxq/cache/symbrowse/sessions/parity486727-1",
+                    "browser_context_id": "context-parity486727-1",
                     "ref_count": 0,
                     "scope": "worktree",
-                    "origin_path": "/tmp/bd-xijf8cwk"
+                    "origin_path": "/tmp/bd-oiir1fxq"
                   }
                 ]
               }
@@ -1184,28 +1184,28 @@
           {
             "request": {
               "cmd": "session.info",
-              "session": "parity463726-1"
+              "session": "parity486727-1"
             },
             "response": {
               "success": true,
               "data": {
-                "name": "parity463726-1",
-                "pid": 463782,
-                "started_at": "2026-10-03T16:25:02.511580158Z",
+                "name": "parity486727-1",
+                "pid": 486783,
+                "started_at": "2026-10-03T16:46:03.678106003Z",
                 "active_tabs": 0,
-                "last_activity": "2026-10-03T16:25:02.526309706Z",
-                "user_data_dir": "/tmp/bd-xijf8cwk/cache/symbrowse/sessions/parity463726-1",
-                "browser_context_id": "context-parity463726-1",
+                "last_activity": "2026-10-03T16:46:03.68647159Z",
+                "user_data_dir": "/tmp/bd-oiir1fxq/cache/symbrowse/sessions/parity486727-1",
+                "browser_context_id": "context-parity486727-1",
                 "ref_count": 0,
                 "scope": "worktree",
-                "origin_path": "/tmp/bd-xijf8cwk"
+                "origin_path": "/tmp/bd-oiir1fxq"
               }
             }
           },
           {
             "request": {
               "cmd": "session.ensure",
-              "session": "parity463726-1"
+              "session": "parity486727-1"
             },
             "response": {
               "success": false,
@@ -1218,7 +1218,7 @@
           {
             "request": {
               "cmd": "unknown",
-              "session": "parity463726-1"
+              "session": "parity486727-1"
             },
             "response": {
               "success": false,
@@ -1231,7 +1231,7 @@
           {
             "request": {
               "cmd": "daemon.stop",
-              "session": "parity463726-1"
+              "session": "parity486727-1"
             },
             "response": {
               "success": true,
@@ -1243,11 +1243,11 @@
         ]
       },
       "rust": {
-        "root": "/tmp/bd-xiu2uiyc",
-        "endpoint": "/tmp/bd-xiu2uiyc/run/symbrowse/parity463726-1.sock",
-        "pid": 463790,
-        "begin": 1791044702.5272374,
-        "end": 1791044702.5779045,
+        "root": "/tmp/bd-orxaho1a",
+        "endpoint": "/tmp/bd-orxaho1a/run/symbrowse/parity486727-1.sock",
+        "pid": 486791,
+        "begin": 1791045963.6873794,
+        "end": 1791045963.737321,
         "exit": 0,
         "stdout_hex": "",
         "stderr_hex": "73796d62726f7773652073687574646f776e3a20626567696e0a73796d62726f7773652073687574646f776e3a206e6f2062726f777365722073657373696f6e0a",
@@ -1255,7 +1255,7 @@
           {
             "request": {
               "cmd": "daemon.ping",
-              "session": "parity463726-1"
+              "session": "parity486727-1"
             },
             "response": {
               "success": true,
@@ -1267,31 +1267,31 @@
           {
             "request": {
               "cmd": "daemon.status",
-              "session": "parity463726-1"
+              "session": "parity486727-1"
             },
             "response": {
               "success": true,
               "data": {
                 "engine": "chrome",
-                "last_activity": "2026-10-03T16:25:02.54850232Z",
+                "last_activity": "2026-10-03T16:46:03.708431423Z",
                 "mode": "browser",
-                "pid": 463790,
+                "pid": 486791,
                 "policy": {
                   "allow_private": true,
                   "fetch_ssrf_enabled": false,
                   "ssrf_enabled": false
                 },
                 "running": true,
-                "session": "parity463726-1",
-                "socket": "/tmp/bd-xiu2uiyc/run/symbrowse/parity463726-1.sock",
-                "started_at": "2026-10-03T16:25:02.53187576Z"
+                "session": "parity486727-1",
+                "socket": "/tmp/bd-orxaho1a/run/symbrowse/parity486727-1.sock",
+                "started_at": "2026-10-03T16:46:03.692733582Z"
               }
             }
           },
           {
             "request": {
               "cmd": "session.list",
-              "session": "parity463726-1"
+              "session": "parity486727-1"
             },
             "response": {
               "success": true,
@@ -1300,15 +1300,15 @@
                 "sessions": [
                   {
                     "active_tabs": 0,
-                    "browser_context_id": "context-parity463726-1",
-                    "last_activity": "2026-10-03T16:25:02.548554008Z",
-                    "name": "parity463726-1",
-                    "origin_path": "/tmp/bd-xiu2uiyc",
-                    "pid": 463790,
+                    "browser_context_id": "context-parity486727-1",
+                    "last_activity": "2026-10-03T16:46:03.708449711Z",
+                    "name": "parity486727-1",
+                    "origin_path": "/tmp/bd-orxaho1a",
+                    "pid": 486791,
                     "ref_count": 0,
                     "scope": "worktree",
-                    "started_at": "2026-10-03T16:25:02.532554646Z",
-                    "user_data_dir": "/tmp/bd-xiu2uiyc/cache/symbrowse/sessions/parity463726-1"
+                    "started_at": "2026-10-03T16:46:03.693475143Z",
+                    "user_data_dir": "/tmp/bd-orxaho1a/cache/symbrowse/sessions/parity486727-1"
                   }
                 ]
               }
@@ -1317,28 +1317,28 @@
           {
             "request": {
               "cmd": "session.info",
-              "session": "parity463726-1"
+              "session": "parity486727-1"
             },
             "response": {
               "success": true,
               "data": {
                 "active_tabs": 0,
-                "browser_context_id": "context-parity463726-1",
-                "last_activity": "2026-10-03T16:25:02.549072332Z",
-                "name": "parity463726-1",
-                "origin_path": "/tmp/bd-xiu2uiyc",
-                "pid": 463790,
+                "browser_context_id": "context-parity486727-1",
+                "last_activity": "2026-10-03T16:46:03.709025321Z",
+                "name": "parity486727-1",
+                "origin_path": "/tmp/bd-orxaho1a",
+                "pid": 486791,
                 "ref_count": 0,
                 "scope": "worktree",
-                "started_at": "2026-10-03T16:25:02.532554646Z",
-                "user_data_dir": "/tmp/bd-xiu2uiyc/cache/symbrowse/sessions/parity463726-1"
+                "started_at": "2026-10-03T16:46:03.693475143Z",
+                "user_data_dir": "/tmp/bd-orxaho1a/cache/symbrowse/sessions/parity486727-1"
               }
             }
           },
           {
             "request": {
               "cmd": "session.ensure",
-              "session": "parity463726-1"
+              "session": "parity486727-1"
             },
             "response": {
               "success": false,
@@ -1351,7 +1351,7 @@
           {
             "request": {
               "cmd": "unknown",
-              "session": "parity463726-1"
+              "session": "parity486727-1"
             },
             "response": {
               "success": false,
@@ -1364,7 +1364,7 @@
           {
             "request": {
               "cmd": "daemon.stop",
-              "session": "parity463726-1"
+              "session": "parity486727-1"
             },
             "response": {
               "success": true,
@@ -1378,24 +1378,24 @@
       "matches": true
     },
     {
-      "session": "parity463726-2",
+      "session": "parity486727-2",
       "settings": {
         "SYMBROWSE_SSRF": "true"
       },
       "go": {
-        "root": "/tmp/bd-qedvh2ap",
-        "endpoint": "/tmp/bd-qedvh2ap/run/symbrowse/parity463726-2.sock",
-        "pid": 463830,
-        "begin": 1791044702.5785592,
-        "end": 1791044702.6009653,
+        "root": "/tmp/bd-c7n9mlxu",
+        "endpoint": "/tmp/bd-c7n9mlxu/run/symbrowse/parity486727-2.sock",
+        "pid": 486831,
+        "begin": 1791045963.7378094,
+        "end": 1791045963.7601352,
         "exit": 0,
         "stdout_hex": "",
-        "stderr_hex": "74696d653d323032362d31302d30335431363a32353a30322e3538375a206c6576656c3d5741524e206d73673d226e6f2065787465726e616c207269736b206465636964657220617661696c61626c65202873796d627261696e206e6f7420666f756e64206f722064697361626c6564293b207269736b206465636973696f6e732066616c6c206261636b20746f20746865206275696c742d696e20706f6c696379220a",
+        "stderr_hex": "74696d653d323032362d31302d30335431363a34363a30332e3734335a206c6576656c3d5741524e206d73673d226e6f2065787465726e616c207269736b206465636964657220617661696c61626c65202873796d627261696e206e6f7420666f756e64206f722064697361626c6564293b207269736b206465636973696f6e732066616c6c206261636b20746f20746865206275696c742d696e20706f6c696379220a",
         "observations": [
           {
             "request": {
               "cmd": "daemon.ping",
-              "session": "parity463726-2"
+              "session": "parity486727-2"
             },
             "response": {
               "success": true,
@@ -1407,29 +1407,29 @@
           {
             "request": {
               "cmd": "daemon.status",
-              "session": "parity463726-2"
+              "session": "parity486727-2"
             },
             "response": {
               "success": true,
               "data": {
                 "engine": "chrome",
-                "last_activity": "2026-10-03T16:25:02.599851776Z",
-                "pid": 463830,
+                "last_activity": "2026-10-03T16:46:03.758826754Z",
+                "pid": 486831,
                 "policy": {
                   "ssrf_enabled": true,
                   "fetch_ssrf_enabled": true,
                   "allow_private": false
                 },
                 "running": true,
-                "socket": "/tmp/bd-qedvh2ap/run/symbrowse/parity463726-2.sock",
-                "started_at": "2026-10-03T16:25:02.587359682Z"
+                "socket": "/tmp/bd-c7n9mlxu/run/symbrowse/parity486727-2.sock",
+                "started_at": "2026-10-03T16:46:03.743820673Z"
               }
             }
           },
           {
             "request": {
               "cmd": "session.list",
-              "session": "parity463726-2"
+              "session": "parity486727-2"
             },
             "response": {
               "success": true,
@@ -1437,16 +1437,16 @@
                 "schema_version": 1,
                 "sessions": [
                   {
-                    "name": "parity463726-2",
-                    "pid": 463830,
-                    "started_at": "2026-10-03T16:25:02.587366172Z",
+                    "name": "parity486727-2",
+                    "pid": 486831,
+                    "started_at": "2026-10-03T16:46:03.743822115Z",
                     "active_tabs": 0,
-                    "last_activity": "2026-10-03T16:25:02.60000942Z",
-                    "user_data_dir": "/tmp/bd-qedvh2ap/cache/symbrowse/sessions/parity463726-2",
-                    "browser_context_id": "context-parity463726-2",
+                    "last_activity": "2026-10-03T16:46:03.759044883Z",
+                    "user_data_dir": "/tmp/bd-c7n9mlxu/cache/symbrowse/sessions/parity486727-2",
+                    "browser_context_id": "context-parity486727-2",
                     "ref_count": 0,
                     "scope": "worktree",
-                    "origin_path": "/tmp/bd-qedvh2ap"
+                    "origin_path": "/tmp/bd-c7n9mlxu"
                   }
                 ]
               }
@@ -1455,28 +1455,28 @@
           {
             "request": {
               "cmd": "session.info",
-              "session": "parity463726-2"
+              "session": "parity486727-2"
             },
             "response": {
               "success": true,
               "data": {
-                "name": "parity463726-2",
-                "pid": 463830,
-                "started_at": "2026-10-03T16:25:02.587366172Z",
+                "name": "parity486727-2",
+                "pid": 486831,
+                "started_at": "2026-10-03T16:46:03.743822115Z",
                 "active_tabs": 0,
-                "last_activity": "2026-10-03T16:25:02.600210949Z",
-                "user_data_dir": "/tmp/bd-qedvh2ap/cache/symbrowse/sessions/parity463726-2",
-                "browser_context_id": "context-parity463726-2",
+                "last_activity": "2026-10-03T16:46:03.759382484Z",
+                "user_data_dir": "/tmp/bd-c7n9mlxu/cache/symbrowse/sessions/parity486727-2",
+                "browser_context_id": "context-parity486727-2",
                 "ref_count": 0,
                 "scope": "worktree",
-                "origin_path": "/tmp/bd-qedvh2ap"
+                "origin_path": "/tmp/bd-c7n9mlxu"
               }
             }
           },
           {
             "request": {
               "cmd": "session.ensure",
-              "session": "parity463726-2"
+              "session": "parity486727-2"
             },
             "response": {
               "success": false,
@@ -1489,7 +1489,7 @@
           {
             "request": {
               "cmd": "unknown",
-              "session": "parity463726-2"
+              "session": "parity486727-2"
             },
             "response": {
               "success": false,
@@ -1502,7 +1502,7 @@
           {
             "request": {
               "cmd": "daemon.stop",
-              "session": "parity463726-2"
+              "session": "parity486727-2"
             },
             "response": {
               "success": true,
@@ -1514,11 +1514,11 @@
         ]
       },
       "rust": {
-        "root": "/tmp/bd-h8reefyb",
-        "endpoint": "/tmp/bd-h8reefyb/run/symbrowse/parity463726-2.sock",
-        "pid": 463839,
-        "begin": 1791044702.6012902,
-        "end": 1791044702.6507785,
+        "root": "/tmp/bd-8dru4e0o",
+        "endpoint": "/tmp/bd-8dru4e0o/run/symbrowse/parity486727-2.sock",
+        "pid": 486840,
+        "begin": 1791045963.760474,
+        "end": 1791045963.8103461,
         "exit": 0,
         "stdout_hex": "",
         "stderr_hex": "73796d62726f7773652073687574646f776e3a20626567696e0a73796d62726f7773652073687574646f776e3a206e6f2062726f777365722073657373696f6e0a",
@@ -1526,7 +1526,7 @@
           {
             "request": {
               "cmd": "daemon.ping",
-              "session": "parity463726-2"
+              "session": "parity486727-2"
             },
             "response": {
               "success": true,
@@ -1538,31 +1538,31 @@
           {
             "request": {
               "cmd": "daemon.status",
-              "session": "parity463726-2"
+              "session": "parity486727-2"
             },
             "response": {
               "success": true,
               "data": {
                 "engine": "chrome",
-                "last_activity": "2026-10-03T16:25:02.622575679Z",
+                "last_activity": "2026-10-03T16:46:03.781757219Z",
                 "mode": "browser",
-                "pid": 463839,
+                "pid": 486840,
                 "policy": {
                   "allow_private": false,
                   "fetch_ssrf_enabled": true,
                   "ssrf_enabled": true
                 },
                 "running": true,
-                "session": "parity463726-2",
-                "socket": "/tmp/bd-h8reefyb/run/symbrowse/parity463726-2.sock",
-                "started_at": "2026-10-03T16:25:02.605960301Z"
+                "session": "parity486727-2",
+                "socket": "/tmp/bd-8dru4e0o/run/symbrowse/parity486727-2.sock",
+                "started_at": "2026-10-03T16:46:03.764899489Z"
               }
             }
           },
           {
             "request": {
               "cmd": "session.list",
-              "session": "parity463726-2"
+              "session": "parity486727-2"
             },
             "response": {
               "success": true,
@@ -1571,15 +1571,15 @@
                 "sessions": [
                   {
                     "active_tabs": 0,
-                    "browser_context_id": "context-parity463726-2",
-                    "last_activity": "2026-10-03T16:25:02.622652265Z",
-                    "name": "parity463726-2",
-                    "origin_path": "/tmp/bd-h8reefyb",
-                    "pid": 463839,
+                    "browser_context_id": "context-parity486727-2",
+                    "last_activity": "2026-10-03T16:46:03.781779532Z",
+                    "name": "parity486727-2",
+                    "origin_path": "/tmp/bd-8dru4e0o",
+                    "pid": 486840,
                     "ref_count": 0,
                     "scope": "worktree",
-                    "started_at": "2026-10-03T16:25:02.606670444Z",
-                    "user_data_dir": "/tmp/bd-h8reefyb/cache/symbrowse/sessions/parity463726-2"
+                    "started_at": "2026-10-03T16:46:03.765650104Z",
+                    "user_data_dir": "/tmp/bd-8dru4e0o/cache/symbrowse/sessions/parity486727-2"
                   }
                 ]
               }
@@ -1588,28 +1588,28 @@
           {
             "request": {
               "cmd": "session.info",
-              "session": "parity463726-2"
+              "session": "parity486727-2"
             },
             "response": {
               "success": true,
               "data": {
                 "active_tabs": 0,
-                "browser_context_id": "context-parity463726-2",
-                "last_activity": "2026-10-03T16:25:02.623154289Z",
-                "name": "parity463726-2",
-                "origin_path": "/tmp/bd-h8reefyb",
-                "pid": 463839,
+                "browser_context_id": "context-parity486727-2",
+                "last_activity": "2026-10-03T16:46:03.783283116Z",
+                "name": "parity486727-2",
+                "origin_path": "/tmp/bd-8dru4e0o",
+                "pid": 486840,
                 "ref_count": 0,
                 "scope": "worktree",
-                "started_at": "2026-10-03T16:25:02.606670444Z",
-                "user_data_dir": "/tmp/bd-h8reefyb/cache/symbrowse/sessions/parity463726-2"
+                "started_at": "2026-10-03T16:46:03.765650104Z",
+                "user_data_dir": "/tmp/bd-8dru4e0o/cache/symbrowse/sessions/parity486727-2"
               }
             }
           },
           {
             "request": {
               "cmd": "session.ensure",
-              "session": "parity463726-2"
+              "session": "parity486727-2"
             },
             "response": {
               "success": false,
@@ -1622,7 +1622,7 @@
           {
             "request": {
               "cmd": "unknown",
-              "session": "parity463726-2"
+              "session": "parity486727-2"
             },
             "response": {
               "success": false,
@@ -1635,7 +1635,7 @@
           {
             "request": {
               "cmd": "daemon.stop",
-              "session": "parity463726-2"
+              "session": "parity486727-2"
             },
             "response": {
               "success": true,
@@ -1679,7 +1679,8 @@
     "concurrent_starts": {
       "rounds": 50,
       "starters": 50,
-      "passed": true
+      "passed": true,
+      "candidate_head": "0cde5a4c522b77d4f511dd665a641c39875015a2"
     },
     "mcp_cases": 13,
     "mcp_actual_failure_controls": [
@@ -1703,6 +1704,7 @@
       }
     ],
     "native_other_platforms": "pending",
-    "initial_workspace_failure_retained": "workspace-failure.json"
+    "initial_workspace_failure_retained": "workspace-failure.json",
+    "windows_path_failure_retained": "windows-session-path-mismatches.json"
   }
 }
