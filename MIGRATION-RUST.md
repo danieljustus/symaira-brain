@@ -169,8 +169,11 @@ while scoping #764. Native `skills sync` validates missing values, unknown flags
 Go boolean spellings, target/scope, help and positional termination before any
 filesystem work, reusing the existing Go-compatible quoter and whole-vector
 normalizer. Raw argument values survive until validation, including Unix non-UTF-8
-bytes and separated flag-like values. All 30 isolated flag
-probes match stdout, stderr and exit code against the actual frozen Go binary
+bytes and separated flag-like values. Target validation trims Go Unicode
+whitespace at valid UTF-8 boundaries while preserving invalid interior bytes;
+invalid scope diagnostics retain their original padding. All 198 isolated flag
+probes (including both previously failing padded targets and Unicode/control
+boundaries) match stdout, stderr and exit code against the actual frozen Go binary
 built from a complete archive of `dcddcef0df5789123c7c9a7ebe6e01f10e941f2c`.
 OpenCode fallback eligibility reuses the common no-follow marker reader, which
 now uses the existing regular-file, same-handle, size/growth-bounded reader and
@@ -182,10 +185,13 @@ concurrently renamed directories remain absent without status creating paths.
 Marker reads retain the existing per-file `MAX_INPUT_SIZE`; this slice does not
 claim a new aggregate marker budget or complete native config/all-target status
 coverage. Parent #476/#764 stay open and #621 no-follow/product policy is unchanged.
-Bounded child-process regressions, the affected three-package suite and host
-Clippy pass locally. Skills-only Windows cross-Clippy passes. Full CLI cross-build
-on this Mac is blocked by missing Windows C headers for existing SQLite/TLS
-dependencies; fresh native three-OS CI remains required, not inferred from Unix.
+Bounded child-process regressions and the complete affected three-package suite
+pass on Linux x86_64: 421 top-level tests, zero failures, two ignored child
+entrypoints. Formatting and strict all-target Clippy pass. The cloud checkout
+uses standard 0644/0755 tracked-file permissions and umask 022; a subreaper
+reaps adopted test children because the container PID 1 is not a reaping init.
+Fresh native three-OS CI and independent full-layer review remain required.
+Earlier macOS and Windows cross-build records describe their original code heads.
 
 The Go oracle and source fixtures remain frozen. These are documented Rust-only
 security deviations, not a claim that the vulnerable Go paths have changed.

@@ -1,4 +1,40 @@
-# Current continuation checkpoint: skills preflight (2026-10-03)
+# Current continuation: raw-target correction (2026-10-03)
+
+The active candidate remains PR #794 on `agent/skills-preflight-793`. The
+previously open padded non-UTF-8 target defect is repaired: target trimming
+recognizes Go Unicode whitespace without converting invalid bytes, and scope
+diagnostics retain their untrimmed input. The original failed evidence and
+review verdict below are preserved as historical records.
+
+Actual Linux x86_64 verification uses Rust 1.98.0, the complete frozen Go source
+archive at `dcddcef0df5789123c7c9a7ebe6e01f10e941f2c`, and Go 1.26.7:
+
+- 198/198 actual isolated comparisons match stdout/stderr/exit. The new
+  `migration/evidence/skills-preflight-793/raw-target-repair-linux.json` binds
+  the tested source hashes and includes all original 30 cases, both known
+  failures, every Unicode whitespace rune, non-whitespace Unicode boundaries,
+  scope controls, and malformed multibyte boundaries.
+- All three affected packages pass: 421 top-level tests, zero failures, two
+  ignored child-harness entrypoints; 54 complete parent summaries. The platform
+  count differs from the historical macOS count by one platform-specific test.
+- Workspace formatting, strict affected-package all-target Clippy, and diff
+  whitespace checks pass.
+
+The cloud container initially had umask 077, tracked fixture modes 0600/0700,
+and PID 1 `tail`. Standard tracked checkout modes (0644/0755) and umask 022
+restore the fixture filesystem contract without changing contents; an owned
+subreaper reaps adopted test descendants without modifying or skipping tests.
+The actual Go toolchain is selected explicitly before `/usr/bin/go` (an
+unrelated executable on this image). These are runtime setup corrections.
+
+Keep the PR draft until fresh exact-head native acceptance CI and independent
+full-layer review succeed; the old `changes_requested` receipt is not an approval
+of this correction. #793 closes only with verified merge. #764/#476 and the
+broader Rust cutover remain separate. The full goal has 37 open issues at intake,
+including release/signing, real iPhone, macOS external-volume and seven-day
+observation gates; none is represented as complete by these scoped results.
+
+# Historical publication checkpoint: skills preflight (2026-10-03)
 
 This is the active entry point. The earlier 2026-09-30 record is preserved below as historical context, not a current branch or merge instruction.
 
