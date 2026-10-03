@@ -30,10 +30,10 @@ def main():
         root = Path(temporary)
         changed = json.loads(json.dumps(original))
         changed["alignments"][3]["status"] = "unmatched"
-        (root / "changed-status.json").write_text(encode(changed))
+        (root / "changed-status.json").write_bytes(encode(changed).encode("utf-8"))
         missing_case = json.loads(json.dumps(original))
         missing_case["alignments"].pop()
-        (root / "missing-case.json").write_text(encode(missing_case))
+        (root / "missing-case.json").write_bytes(encode(missing_case).encode("utf-8"))
         for name, reason in [("missing-fixture", "FileNotFoundError"),
                              ("changed-status", "actual Go output differs"),
                              ("missing-case", "actual Go output differs")]:
