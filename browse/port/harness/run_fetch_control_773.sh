@@ -3,7 +3,12 @@
 set -euo pipefail
 umask 022
 report="${1:?usage: run_fetch_control_773.sh REPORT_JSON}"
-owned="$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/fetch773-source.XXXXXX")"
+owned_root="${RUNNER_TEMP:-${TMPDIR:-/tmp}}"
+# Git Bash receives native Windows paths; mktemp and tar need the MSYS form.
+if command -v cygpath >/dev/null 2>&1; then
+  owned_root="$(cygpath -u "$owned_root")"
+fi
+owned="$(mktemp -d "$owned_root/fetch773-source.XXXXXX")"
 trap 'rm -rf "$owned"' EXIT
 git -C "$(git rev-parse --show-toplevel)" archive dcddcef0df5789123c7c9a7ebe6e01f10e941f2c browse | tar -xf - -C "$owned"
 mkdir -p "$owned/browse/port773"

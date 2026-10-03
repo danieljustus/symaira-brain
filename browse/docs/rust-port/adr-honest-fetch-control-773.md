@@ -204,3 +204,12 @@ Linux through per-process SSL_CERT_FILE. No operator trust-store write occurs.
 The macOS/Windows root backends require their own owned trusted-CA proof and are
 explicitly pending; cross-compilation or two matching TLS failures do not certify
 a successful native trusted TLS connection there.
+
+The root's partial static review of source38 also identified the inherited
+Windows runner-path boundary: Git Bash receives RUNNER_TEMP with native
+backslashes, while Bash mktemp and tar need an MSYS path. Normalize the selected
+owned temporary root with cygpath before either command; convert executable and
+Go-source paths back only at the native-process boundary. Preserve source38's
+clean Linux proof unchanged. This focused runner correction requires a fresh
+clean source replay and remains subject to actual Windows CI; a Linux replay
+and static comparison with the accepted Guard runner are no Windows runtime proof.
