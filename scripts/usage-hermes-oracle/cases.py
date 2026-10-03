@@ -59,6 +59,20 @@ payload = base64.urlsafe_b64encode(b'{"exp":4102444800,"z":0}').decode().rstrip(
 for name, encoded in {"crlf": payload[:4] + '\r\n' + payload[4:], "space-invalid": payload[:4] + ' ' + payload[4:], "padded-invalid": payload + '=', "one-tail-invalid": 'A', "noncanonical-tail": payload[:-1] + "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".index(payload[-1]) ^ 1]}.items():
     add("base64-" + name, json.dumps({"providers": [{"id": "nous", "invoke_jwt": "header." + encoded + ".signature"}]}))
 add("file-deep-ignored-metadata", '{"providers":[{"id":"nous","access_token":"retained","unknown":' + '[' * 200 + '0' + ']' * 200 + '}]}')
+# Retain Go backing slots across nonempty shrinkage and later growth.
+for name, value in {'shrink-regrow-null-slot': '{"providers":[{"id":"other"},{"id":"nous","access_token":"retained"}],"providers":[{"id":"other"}],"providers":[{},null]}',
+ 'shrink-regrow-object-slot': '{"providers":[{"id":"other"},{"id":"nous","access_token":"retained"}],"providers":[{"id":"other"}],"providers":[{},{}]}',
+ 'shrink-regrow-scalar-null': '{"providers":[{"id":"other"},{"id":"nous","access_token":"retained"}],"providers":[{}],"providers":[{},{"access_token":null}]}',
+ 'shrink-hides-old-nous': '{"providers":[{"id":"other"},{"id":"nous","access_token":"retained"}],"providers":[{}]}',
+ 'shrink-regrow-null-reset': '{"providers":[{"id":"other"},{"id":"nous","access_token":"discarded"}],"providers":[{}],"providers":null,"providers":[{},null]}',
+ 'shrink-regrow-empty-reset': '{"providers":[{"id":"other"},{"id":"nous","access_token":"discarded"}],"providers":[{}],"providers":[],"providers":[{},null]}',
+ 'shrink-regrow-clear-token': '{"providers":[{"id":"other"},{"id":"nous","access_token":"discarded"}],"providers":[{}],"providers":[{},{"access_token":""}]}',
+ 'shrink-regrow-replace-id': '{"providers":[{"id":"other"},{"id":"nous","access_token":"hidden"}],"providers":[{}],"providers":[{},{"id":"other"}]}',
+ 'shrink-regrow-prefer-invoke': '{"providers":[{"id":"other"},{"id":"nous","invoke_jwt":"invoke-token","access_token":"access-token"}],"providers":[{}],"providers":[{},null]}',
+ 'shrink-regrow-multiple-cycles': '{"providers":[{"id":"other"},{"id":"other"},{"id":"nous","access_token":"retained"}],"providers":[{}],"providers":[{},null],"providers":[null],"providers":[null,{},null]}',
+ 'shrink-regrow-grow-past-history': '{"providers":[{"id":"other"},{"id":"nous","access_token":"retained"}],"providers":[{}],"providers":[{},null,null,null,null]}',
+ 'shrink-regrow-fresh-tail': '{"providers":[{"id":"other"},{"id":"other","access_token":"unselected"}],"providers":[{}],"providers":[{},null,{"id":"nous","access_token":"new-token"}]}'}.items():
+    add("slice-" + name, value)
 assert len({case['id'] for case in cases}) == len(cases)
 pathlib.Path(sys.argv[1]).write_text(json.dumps(cases, indent=2) + '\n')
 print(f"Hermes source-bound cases: {len(cases)}")

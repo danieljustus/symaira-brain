@@ -37,10 +37,28 @@ receipt distinguishes this safety behavior from byte-equivalent regular-file,
 symlink and directory observations. Native Windows root-confinement proof still
 requires its own CI execution; Unix probes are not counted as Windows evidence.
 
-The fresh gate requires 80 constructor/report/request/no-write cases, 90 actual
+The fresh gate requires 92 constructor/report/request/no-write cases, 100 actual
 CLI table/JSON byte comparisons for credential-free cases, and five actual
 rejection controls. Positive provider requests receive canned 401 responses;
 no real account or live endpoint is used. Native Linux, macOS and Windows CI
 retain full and partial receipts/logs. Other credential-file families, Claude
 host-Keychain discovery, numeric overflow and remaining routing gates keep #768
 open until their own accepted ports and native evidence exist.
+
+The independent review of immutable `273a93c0` found one token-selection
+regression: a nonempty duplicate `providers` array could shrink and subsequently
+regrow. Go keeps the hidden backing slots, whereas Rust's `truncate` destroyed
+them. The original actual failing replay is retained in
+`migration/evidence/usage-hermes-768/linux-slice-regrowth-failure.json`.
+
+The correction models visible length independently of retained visited slots.
+Selection sees only the visible prefix. Nonempty shrinkage preserves hidden
+values for regrowth, including null/object entries and scalar-null no-ops; both
+null and an empty array reset retained slots. This follows the pinned Go SDK's
+`encoding/json` slice decoder and `reflect_growslice`, which preserves the old
+capacity even on reallocation. Rust allocator capacity need not match Go:
+previously unvisited slots are always default values in either implementation.
+Twelve fresh report/request/no-write cases cover repeated shrink/regrowth,
+hidden-tail exclusion, clearing fields, null/empty resets, preferred invoke
+credentials and growth beyond previously visited slots. Frozen fixtures remain
+unchanged; the original eighty supplemental cases are retained verbatim.

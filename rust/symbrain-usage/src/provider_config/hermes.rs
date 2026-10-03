@@ -59,13 +59,18 @@ struct HermesProvider {
 fn decode_hermes_token(contents: &[u8]) -> Option<String> {
     let text = go_json_compatible_text(contents);
     let root: HermesFields = serde_json::from_str(&text).ok()?;
+    // Go's decoder reuses the slice backing array across duplicate fields.
+    // Keep visited slots separate from visible length: shrinking a nonempty
+    // array hides its tail without destroying values reused by later growth.
     let mut providers: Vec<HermesProvider> = Vec::new();
+    let mut visible_length = 0;
     for (name, value) in root.0 {
         if !go_json_field_matches(&name, "providers") {
             continue;
         }
         if value.get() == "null" {
             providers.clear();
+            visible_length = 0;
             continue;
         }
         let entries: Vec<Box<serde_json::value::RawValue>> =
@@ -92,10 +97,15 @@ fn decode_hermes_token(contents: &[u8]) -> Option<String> {
                 }
             }
         }
-        providers.truncate(length);
+        visible_length = length;
+        // Go replaces [] with a new empty slice, unlike nonempty shrinkage.
+        if length == 0 {
+            providers.clear();
+        }
     }
     let provider = providers
         .into_iter()
+        .take(visible_length)
         .find(|provider| provider.id == "nous")?;
     let token = if provider.invoke_jwt.is_empty() {
         provider.access_token
