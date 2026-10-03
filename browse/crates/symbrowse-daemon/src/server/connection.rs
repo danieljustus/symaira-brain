@@ -67,7 +67,7 @@ pub(super) fn serve_connection_parts<S>(
                 reader.get_mut(),
                 error_response(
                     codes::INVALID_SESSION,
-                    format!("invalid session {}", crate::redact_str(&frame.session)),
+                    format!("invalid session {:?}", crate::redact_str(&frame.session)),
                 ),
             )
             .is_err()
@@ -77,6 +77,7 @@ pub(super) fn serve_connection_parts<S>(
             continue;
         }
         if frame.cmd == "session.list" {
+            let _ = registry.touch(&frame.session);
             if write_response(
                 reader.get_mut(),
                 success_response(
@@ -107,7 +108,12 @@ pub(super) fn serve_connection_parts<S>(
             continue;
         }
         if let Err(error) = registry.ensure(&frame.session) {
-            if write_response(reader.get_mut(), session_error_response(error)).is_err() {
+            if write_response(
+                reader.get_mut(),
+                error_response(codes::INVALID_SESSION, error.to_string()),
+            )
+            .is_err()
+            {
                 return;
             }
             continue;

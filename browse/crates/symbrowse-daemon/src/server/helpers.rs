@@ -61,14 +61,14 @@ pub(super) fn operation_result_response(
 }
 
 pub(super) fn session_error_response(error: crate::SessionError) -> Response {
-    let (code, message) = match error {
-        crate::SessionError::InvalidName(message) => (codes::INVALID_SESSION, message),
-        crate::SessionError::NotFound(message) => (codes::SESSION_NOT_FOUND, message),
-        crate::SessionError::Io(message) | crate::SessionError::InvalidValue(message) => {
-            (codes::OPERATION_FAILED, message)
+    let code = match &error {
+        crate::SessionError::InvalidName(_) => codes::INVALID_SESSION,
+        crate::SessionError::NotFound(_) => codes::SESSION_NOT_FOUND,
+        crate::SessionError::Io(_) | crate::SessionError::InvalidValue(_) => {
+            codes::OPERATION_FAILED
         }
     };
-    error_response(code, message)
+    error_response(code, error.to_string())
 }
 
 pub(super) fn unix_nanos() -> i64 {

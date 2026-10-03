@@ -119,4 +119,14 @@ fn cache_environment_uses_go_platform_fallbacks_in_isolated_children() {
 fn cache_environment_child() {
     let expected = PathBuf::from(std::env::var_os("SYMBROWSE_CACHE_PATH_TEST_EXPECTED").unwrap());
     assert_eq!(default_session_cache_root(), expected);
+    for root in [
+        crate::SessionRegistryOptions::default().user_data_root,
+        PathBuf::new(),
+    ] {
+        let registry = crate::SessionRegistry::new(crate::SessionRegistryOptions {
+            user_data_root: root,
+            ..Default::default()
+        });
+        assert_eq!(registry.user_data_root(), expected);
+    }
 }

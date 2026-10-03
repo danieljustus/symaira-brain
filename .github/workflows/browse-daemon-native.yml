@@ -83,6 +83,8 @@ jobs:
           go -C "$oracle/browse" build -o "$go_binary" ./cmd/symbrowse
           python3 port/harness/daemon_process.py --go "$go_binary" --rust "$rust_binary" \
             --go-source "$oracle" --out "$RUNNER_TEMP/browse-daemon-process.json"
+          python3 port/harness/daemon_registry.py --go "$go_binary" --rust "$rust_binary" \
+            --go-source "$oracle" --out "$RUNNER_TEMP/browse-daemon-registry.json"
           fixture_binary="$RUNNER_TEMP/symbrowse-mcp-go-v0.8.0"
           if [ "${OS:-}" = Windows_NT ]; then
             fixture_binary="$(cygpath -m "$fixture_binary.exe")"
@@ -116,6 +118,8 @@ jobs:
             ${{ runner.temp }}/browse-daemon-lifecycle.log
             ${{ runner.temp }}/browse-daemon-races.log
             ${{ runner.temp }}/browse-daemon-process.json
+            ${{ runner.temp }}/browse-daemon-registry.json
+            ${{ runner.temp }}/browse-daemon-registry.raw.json
             ${{ runner.temp }}/browse-daemon-mcp.json
             ${{ runner.temp }}/browse-daemon-mcp.json.tests.log
           if-no-files-found: error

@@ -1975,3 +1975,20 @@ Hosted Darwin's original AF_UNIX length failure uses a short private HOME in
 new harness runs; original production endpoint rules and external-volume gates
 are preserved. ADR 0007 records these decisions. Six fresh native platform/arch
 gates remain required. Registry/autostart and complete #772 acceptance stay open.
+
+### 2026-10-03: registry/autostart ownership increment (#772)
+
+Restore DMN-007/008 registry and ordinary CLI contracts using actual immutable
+Go API overlays and native process observations. Add read-only session list/info,
+resolved client timeout/log defaults, stable failure metadata, bounded cleanup,
+pre-dispatch explicit engine/policy verification, restart/profile preservation,
+schema-v3/null state inspection and compatibility decoding for existing Go
+null-cookie files. Keep historical Go fixtures and original failing observations.
+See `docs/adr/daemon-registry-autostart.md` and
+`migration/evidence/browse-registry-772/README.md` for rationale and evidence.
+
+DMN-007/008 are fixture-ready, not native parity. RUST-006 stays in_progress.
+Both runtime Store call paths still omit the state key; a focused successor must
+reuse the existing core resolver and verify actual Go key precedence and encrypted
+migration files without silent loss. All six exact-head native gates and fresh
+independent review remain required; do not close #772 on this increment.

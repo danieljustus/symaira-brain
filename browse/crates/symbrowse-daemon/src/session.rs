@@ -36,7 +36,7 @@ pub struct SessionRegistryOptions {
 impl Default for SessionRegistryOptions {
     fn default() -> Self {
         Self {
-            user_data_root: default_user_data_root(),
+            user_data_root: crate::spec::default_session_cache_root(),
             pid: std::process::id(),
             scope: String::new(),
             origin_path: String::new(),
@@ -49,7 +49,7 @@ pub struct SessionInfo {
     pub name: String,
     pub pid: u32,
     pub started_at: String,
-    pub active_tabs: u32,
+    pub active_tabs: i64,
     pub last_activity: String,
     pub user_data_dir: String,
     pub browser_context_id: String,
@@ -83,8 +83,13 @@ pub struct SessionRegistry {
 
 impl SessionRegistry {
     pub fn new(options: SessionRegistryOptions) -> Self {
+        let root = if options.user_data_root.as_os_str().is_empty() {
+            crate::spec::default_session_cache_root()
+        } else {
+            options.user_data_root
+        };
         Self {
-            user_data_root: options.user_data_root,
+            user_data_root: clean_root(&root),
             pid: if options.pid == 0 {
                 std::process::id()
             } else {
@@ -117,10 +122,16 @@ impl SessionRegistry {
             return Ok(session.info.clone());
         }
         let user_data_dir = self.user_data_root.join(name);
-        fs::create_dir_all(&user_data_dir)
-            .map_err(|error| SessionError::Io(format!("create user data directory: {error}")))?;
-        secure_directory(&user_data_dir)
-            .map_err(|error| SessionError::Io(format!("secure user data directory: {error}")))?;
+        create_directory(&user_data_dir).map_err(|error| {
+            SessionError::Io(format!(
+                "create user data directory for session {name:?}: {error}"
+            ))
+        })?;
+        secure_directory(&user_data_dir).map_err(|error| {
+            SessionError::Io(format!(
+                "secure user data directory for session {name:?}: {error}"
+            ))
+        })?;
         let now = timestamp_now();
         let info = SessionInfo {
             name: name.to_owned(),
@@ -128,7 +139,7 @@ impl SessionRegistry {
             started_at: now.clone(),
             active_tabs: 0,
             last_activity: now,
-            user_data_dir: user_data_dir.display().to_string(),
+            user_data_dir: crate::spec::json_path(&user_data_dir),
             browser_context_id: format!("context-{name}"),
             ref_count: 0,
             scope: self.scope.clone(),
@@ -178,7 +189,12 @@ impl SessionRegistry {
         Ok(())
     }
 
-    pub fn set_active_tabs(&self, name: &str, count: u32) -> Result<(), SessionError> {
+    pub fn set_active_tabs(&self, name: &str, count: i64) -> Result<(), SessionError> {
+        if count < 0 {
+            return Err(SessionError::InvalidValue(
+                "active tab count cannot be negative".into(),
+            ));
+        }
         let mut sessions = self.sessions.write().expect("session registry poisoned");
         let session = sessions
             .get_mut(name)
@@ -222,29 +238,49 @@ impl SessionRegistry {
             .expect("session registry poisoned")
             .clear();
     }
+
+    /// Return a copy so callers cannot mutate another session's references.
+    pub fn ref_table(&self, name: &str) -> Result<BTreeMap<String, String>, SessionError> {
+        self.sessions
+            .read()
+            .expect("session registry poisoned")
+            .get(name)
+            .map(|session| session.refs.clone())
+            .ok_or_else(|| SessionError::NotFound(name.to_owned()))
+    }
 }
 
-fn default_user_data_root() -> PathBuf {
-    if let Ok(path) = std::env::var("SYMBROWSE_USER_DATA_DIR") {
-        return PathBuf::from(path);
+fn clean_root(path: &Path) -> PathBuf {
+    use std::path::Component;
+    let mut result = PathBuf::new();
+    for part in path.components() {
+        match part {
+            Component::CurDir => {}
+            Component::ParentDir => {
+                if matches!(result.components().next_back(), Some(Component::Normal(_))) {
+                    result.pop();
+                } else if !result.has_root() {
+                    result.push(part.as_os_str());
+                }
+            }
+            other => result.push(other.as_os_str()),
+        }
     }
-    if cfg!(target_os = "macos")
-        && let Ok(home) = std::env::var("HOME")
+    if result.as_os_str().is_empty() {
+        result.push(".");
+    }
+    result
+}
+
+fn create_directory(path: &Path) -> io::Result<()> {
+    let mut builder = fs::DirBuilder::new();
+    builder.recursive(true);
+    #[cfg(unix)]
     {
-        return PathBuf::from(home).join("Library/Caches/symbrowse/sessions");
+        use std::os::unix::fs::DirBuilderExt;
+        builder.mode(0o700);
     }
-    if cfg!(windows)
-        && let Ok(local_app_data) = std::env::var("LOCALAPPDATA")
-    {
-        return PathBuf::from(local_app_data).join("symbrowse/sessions");
-    }
-    if let Ok(path) = std::env::var("XDG_CACHE_HOME") {
-        return PathBuf::from(path).join("symbrowse/sessions");
-    }
-    if let Ok(home) = std::env::var("HOME") {
-        return PathBuf::from(home).join(".cache/symbrowse/sessions");
-    }
-    std::env::temp_dir().join("symbrowse/sessions")
+    builder.create(path)
 }
 
 #[cfg(unix)]

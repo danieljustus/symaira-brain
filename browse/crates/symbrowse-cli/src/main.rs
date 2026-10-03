@@ -2,6 +2,8 @@
 
 mod browser_profiles;
 mod completion;
+mod daemon_state;
+use daemon_state::{run_daemon_lifecycle, run_state_operation};
 mod help_catalog;
 mod upgrade;
 
@@ -704,145 +706,6 @@ fn run_daemon(
     }
 }
 
-fn run_daemon_lifecycle(session: String, command: String, format: Format) -> ExitCode {
-    let client = Client::new(ClientOptions {
-        socket_path: default_socket_path(&session),
-        session: session.clone(),
-        autostart: false,
-        ..ClientOptions::default()
-    });
-    let response = match client.request_without_autostart(Frame {
-        cmd: command,
-        session,
-        ..Frame::default()
-    }) {
-        Ok(response) => response,
-        Err(error) => {
-            if format == Format::Text {
-                let _ = writeln!(io::stderr(), "{error}");
-            } else if let Ok(output) = serde_json::to_string(&symbrowse_daemon::error_response(
-                daemon_codes::DAEMON_UNAVAILABLE,
-                error.to_string(),
-            )) {
-                let _ = writeln!(io::stdout(), "{output}");
-            }
-            return ExitCode::from(1);
-        }
-    };
-    if format == Format::Text {
-        if response.success {
-            let _ = writeln!(
-                io::stdout(),
-                "{}",
-                response.data.as_ref().map_or_else(
-                    || "ok".to_owned(),
-                    |data| serde_json::to_string_pretty(data).unwrap_or_else(|_| "ok".to_owned())
-                )
-            );
-            ExitCode::SUCCESS
-        } else {
-            let _ = writeln!(
-                io::stderr(),
-                "{}",
-                response
-                    .error
-                    .map_or_else(|| "daemon request failed".to_owned(), |error| error.message)
-            );
-            ExitCode::from(1)
-        }
-    } else {
-        serde_json::to_string(&response)
-            .map(|output| write_stdout(&(output + "\n")))
-            .unwrap_or_else(|_| ExitCode::from(1))
-    }
-}
-
-fn run_state_operation(
-    session: String,
-    command: String,
-    name: Option<String>,
-    older_than: Option<i64>,
-    format: Format,
-) -> ExitCode {
-    let args = match (name, older_than) {
-        (Some(name), _) => Some(serde_json::json!({"name": name})),
-        (None, Some(days)) => Some(serde_json::json!({"older_than_days": days})),
-        (None, None) => None,
-    };
-    let client = Client::new(ClientOptions {
-        socket_path: default_socket_path(&session),
-        session: session.clone(),
-        ..ClientOptions::default()
-    });
-    let response = match client.request(Frame {
-        cmd: command.clone(),
-        args,
-        session,
-        ..Frame::default()
-    }) {
-        Ok(response) => response,
-        Err(error) => {
-            let _ = writeln!(io::stderr(), "{error}");
-            return ExitCode::from(1);
-        }
-    };
-    if !response.success {
-        let _ = writeln!(
-            io::stderr(),
-            "{}",
-            response
-                .error
-                .map_or_else(|| "state request failed".to_owned(), |error| error.message)
-        );
-        return ExitCode::from(1);
-    }
-    if format != Format::Text {
-        return serde_json::to_string(&response)
-            .map(|output| write_stdout(&(output + "\n")))
-            .unwrap_or_else(|_| ExitCode::from(1));
-    }
-    let data = response.data.unwrap_or(serde_json::Value::Null);
-    let output = match command.as_str() {
-        "state.save" => format!(
-            "saved state {:?}\n",
-            data.get("name")
-                .and_then(serde_json::Value::as_str)
-                .unwrap_or("")
-        ),
-        "state.load" => format!(
-            "loaded state {:?}\n",
-            data.get("name")
-                .and_then(serde_json::Value::as_str)
-                .unwrap_or("")
-        ),
-        "state.clear" => format!(
-            "cleared state {:?}\n",
-            data.get("name")
-                .and_then(serde_json::Value::as_str)
-                .unwrap_or("")
-        ),
-        "state.list" => data
-            .get("states")
-            .and_then(serde_json::Value::as_array)
-            .map(|values| {
-                values
-                    .iter()
-                    .filter_map(serde_json::Value::as_str)
-                    .map(|s| format!("{s}\n"))
-                    .collect()
-            })
-            .unwrap_or_default(),
-        "state.clean" => format!(
-            "removed {} expired state(s)\n",
-            data.get("removed")
-                .and_then(serde_json::Value::as_array)
-                .map_or(0, Vec::len)
-        ),
-        _ => serde_json::to_string_pretty(&data).unwrap_or_default() + "\n",
-    };
-    write_stdout(&output)
-}
-
 fn run_batch(format: Format, mut commands: Vec<String>, bail: bool, dry_run: bool) -> ExitCode {
     if commands.is_empty() {
         let mut input = String::new();
@@ -1099,6 +962,7 @@ fn implemented_help_command(command: &str) -> bool {
             | "click"
             | "config"
             | "daemon"
+            | "session"
             | "fill"
             | "find"
             | "flow"
@@ -1141,6 +1005,7 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         format!("{description}\n\nUsage:\n  {usage}\n\nFlags:\n{flags}\n{globals}")
     };
     match (target, first) {
+        ("session", subcommand) => Some(daemon_state::help(subcommand)),
         ("a11y", None) => Some(plain(
             "Run an axe-core accessibility audit on the current page",
             "symbrowse a11y [url] [flags]",
@@ -1487,6 +1352,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "batch" => parse_batch(&values, command_index),
         "state" => parse_state_lifecycle(&values, command_index),
         "daemon" => parse_daemon(&values, command_index),
+        "session" => daemon_state::parse_session(&values, command_index),
         "mcp" => parse_mcp(&values, command_index),
         "flow" | "workflow" => parse_flow(&values, command_index),
         "profiles" => {
