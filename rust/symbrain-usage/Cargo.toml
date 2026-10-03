@@ -17,6 +17,11 @@ tempfile.workspace = true
 ureq.workspace = true
 regex.workspace = true
 
+# Go uses GetComputerNameExW, not the overridable COMPUTERNAME environment value.
+# This safe wrapper keeps platform FFI outside the usage crate.
+[target.'cfg(windows)'.dependencies]
+hostname = "=0.4.2"
+
 [dev-dependencies]
 sha2.workspace = true
 

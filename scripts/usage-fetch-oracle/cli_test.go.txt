@@ -1,0 +1,49 @@
+// Supplemental harness for the unchanged Go CLI's real table/JSON renderer.
+package main
+
+import (
+	"bytes"
+	"encoding/json"
+	"github.com/danieljustus/symaira-brain/internal/output"
+	"github.com/danieljustus/symaira-brain/internal/usage"
+	"os"
+	"testing"
+)
+
+func TestUsageFetchCLIOracle620(t *testing.T) {
+	path := os.Getenv("USAGE_FETCH_ORACLE_620")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cases []map[string]json.RawMessage
+	if err := json.Unmarshal(data, &cases); err != nil {
+		t.Fatal(err)
+	}
+	for _, entry := range cases {
+		var report usage.Report
+		if err := json.Unmarshal(entry["report"], &report); err != nil {
+			t.Fatal(err)
+		}
+		var table, machine bytes.Buffer
+		printUsageReport(&table, report)
+		if err := output.Render(&machine, output.FormatJSON, report); err != nil {
+			t.Fatal(err)
+		}
+		entry["table"], err = json.Marshal(table.String())
+		if err != nil {
+			t.Fatal(err)
+		}
+		entry["json"], err = json.Marshal(machine.String())
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	data, err = json.MarshalIndent(cases, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, append(data, '\n'), 0600); err != nil {
+		t.Fatal(err)
+	}
+}
