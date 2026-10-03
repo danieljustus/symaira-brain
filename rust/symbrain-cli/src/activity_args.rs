@@ -13,49 +13,63 @@ pub(super) struct Args {
 }
 const DEFAULTS: &str = "  -db string\n    \tdatabase path override\n  -from string\n    \trequired RFC3339 window start\n  -limit int\n    \trequired result limit (1-50)\n  -max-tokens int\n    \trequired response token budget (1-4000)\n  -profile string\n    \tprofile that explicitly exposes activity read tools\n  -to string\n    \trequired RFC3339 window end (at most 7 days)\n";
 
-fn parse_integer(raw: &str) -> Result<i64, &'static str> {
-    let (negative, text) = raw.strip_prefix('-').map_or_else(
-        || (false, raw.strip_prefix('+').unwrap_or(raw)),
-        |s| (true, s),
-    );
-    let (radix, digits, prefix) =
-        if let Some(d) = text.strip_prefix("0x").or_else(|| text.strip_prefix("0X")) {
-            (16, d, true)
-        } else if let Some(d) = text.strip_prefix("0b").or_else(|| text.strip_prefix("0B")) {
-            (2, d, true)
-        } else if let Some(d) = text.strip_prefix("0o").or_else(|| text.strip_prefix("0O")) {
-            (8, d, true)
-        } else if text.starts_with('0') && text.len() > 1 {
-            (8, &text[1..], true)
-        } else {
-            (10, text, false)
-        };
+// Go checks unsigned overflow while scanning bytes, then underscore syntax,
+// then signed range. Whole-value UTF-8 or early separator validation would
+// change which diagnostic wins when an argument has several invalid parts.
+fn parse_integer(raw: &[u8]) -> Result<i64, &'static str> {
+    let (negative, text) = match raw.first() {
+        Some(b'-') => (true, &raw[1..]),
+        Some(b'+') => (false, &raw[1..]),
+        _ => (false, raw),
+    };
+    let (radix, digits, prefix) = if let Some(d) = text
+        .strip_prefix(b"0x")
+        .or_else(|| text.strip_prefix(b"0X"))
+    {
+        (16, d, true)
+    } else if let Some(d) = text
+        .strip_prefix(b"0b")
+        .or_else(|| text.strip_prefix(b"0B"))
+    {
+        (2, d, true)
+    } else if let Some(d) = text
+        .strip_prefix(b"0o")
+        .or_else(|| text.strip_prefix(b"0O"))
+    {
+        (8, d, true)
+    } else if text.starts_with(b"0") && text.len() > 1 {
+        (8, &text[1..], true)
+    } else {
+        (10, text, false)
+    };
     if digits.is_empty() {
         return Err("parse error");
     }
-    let mut last_digit = prefix;
     let mut value = 0_u64;
-    for c in digits.chars() {
-        if c == '_' {
-            if !last_digit {
-                return Err("parse error");
-            }
-            last_digit = false;
+    for &byte in digits {
+        if byte == b'_' {
             continue;
         }
-        let n = c
-            .to_digit(radix)
-            .filter(|_| c.is_ascii())
-            .ok_or("parse error")?;
-        if let Some(next) = value
-            .checked_mul(u64::from(radix))
-            .and_then(|v| v.checked_add(u64::from(n)))
-        {
-            value = next;
-        } else {
-            return Err("value out of range");
+        let digit = match byte {
+            b'0'..=b'9' => byte - b'0',
+            b'a'..=b'z' => byte - b'a' + 10,
+            b'A'..=b'Z' => byte - b'A' + 10,
+            _ => return Err("parse error"),
+        };
+        if u64::from(digit) >= radix {
+            return Err("parse error");
         }
-        last_digit = true;
+        value = value
+            .checked_mul(radix)
+            .and_then(|n| n.checked_add(u64::from(digit)))
+            .ok_or("value out of range")?;
+    }
+    let mut last_digit = prefix;
+    for &byte in digits {
+        if byte == b'_' && !last_digit {
+            return Err("parse error");
+        }
+        last_digit = byte != b'_';
     }
     if !last_digit {
         return Err("parse error");
@@ -174,9 +188,7 @@ pub(super) fn parse(args: &[OsString], verb: &str, stderr: &mut dyn Write) -> Re
             b"from" => parsed.from = value,
             b"to" => parsed.to = value,
             b"limit" | b"max-tokens" => {
-                let number = std::str::from_utf8(&value)
-                    .map_err(|_| "parse error")
-                    .and_then(parse_integer);
+                let number = parse_integer(&value);
                 match number {
                     Ok(n) => {
                         if name == b"limit" {

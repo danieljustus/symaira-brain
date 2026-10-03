@@ -11,7 +11,7 @@ profile policy, the deterministic merged tool catalog, and the redacting
 hash-chained audit store. Pattern promotion and bounded activity-read contracts
 are native as well; activity search/get/status, including flag and window
 validation, run natively. The ACT-CLI acceptance runner checks the original five
-report cases plus 173 portable validation cases and twelve raw Unix argv cases
+report cases plus 237 portable validation cases and twenty-eight raw Unix argv cases
 against real immutable Go processes. Three actual fixture mutation controls
 reject missing files, changed exits and incomplete case sets; exact-head native
 Linux/macOS/Windows CI is required before merge. Importer and activity-store extensions remain in #761.

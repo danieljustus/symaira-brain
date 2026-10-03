@@ -41,12 +41,38 @@ def cases():
         add(f'bounds-{len(result)}', search(**change))
     for name, args in [('duplicate-profile', ['activity','status','--profile=absent','--profile=activity-oracle','--max-tokens=100']), ('duplicate-profile-denied', ['activity','status','--profile=activity-oracle','--profile=absent','--max-tokens=100']), ('single-profile', ['activity','status','-profile=activity-oracle','--max-tokens=100']), ('unknown-verb', ['activity','help','--profile=activity-oracle']), ('get-ignored-search-flags', ['activity','get','--profile=activity-oracle','--max-tokens=100','--from=invalid','--limit=-1','missing-id'])]:
         add(name,args)
+    # Keep source-bound error precedence when multiple parts are invalid:
+    # unsigned overflow wins while scanning; underscore syntax is checked
+    # before signed range, and raw invalid bytes are examined in input order.
+    integers = ('+', '-', '0', '0x', '0b', '0o', '0_1', '0__1', '0b_1', '0b__1',
+                '0o_1', '0o__1', '0x_1', '0x__1', '_1', '1__2', '1_',
+                '9223372036854775807', '9223372036854775808',
+                '-9223372036854775808', '-9223372036854775809',
+                '9223372036854775808_', '18446744073709551615_',
+                '18446744073709551616_', '1__9999999999999999999999999999',
+                '0x__ffffffffffffffffffff', '0xffffffffffffffff_',
+                '0x10000000000000000_', '0o__77777777777777777777777',
+                '0b__' + '1'*65, '-18446744073709551616_',
+                '+18446744073709551616_')
+    for flag in ('limit', 'max-tokens'):
+        for index, value in enumerate(integers):
+            add(f'integer-precedence-{flag}-{index}', ['activity', 'status',
+                '--profile=activity-oracle', '--max-tokens=100', f'--{flag}={value}'])
     if os.name!='nt':
         for raw in (b'\xff', b'\xe2\x82', b'\xef\xbf\xbd'):
             add(f'raw-time-{len(result)}', ['activity','search','--profile=activity-oracle','--limit=1','--max-tokens=100',b'--from='+raw,f'--to={END}','editor'])
             add(f'raw-int-{len(result)}', ['activity','status','--profile=activity-oracle',b'--max-tokens='+raw])
             add(f'raw-flag-{len(result)}', ['activity','status','--profile=activity-oracle',b'--'+raw])
             add(f'raw-query-{len(result)}', ['activity','search','--profile=activity-oracle','--limit=1','--max-tokens=100',f'--from={START}',f'--to={END}',raw*257])
+        for flag in ('limit', 'max-tokens'):
+            for index, value in enumerate((b'9999999999999999999999999999\xff',
+                    b'\xff9999999999999999999999999999', b'9223372036854775808\xff',
+                    b'-9223372036854775809\xff', b'0x10000000000000000\xe2\x82',
+                    b'0x\xff10000000000000000', b'0x10000000000000000\xef\xbf\xbd',
+                    b'18446744073709551615\xff')):
+                add(f'raw-integer-precedence-{flag}-{index}', ['activity', 'status',
+                    '--profile=activity-oracle', '--max-tokens=100',
+                    b'--'+flag.encode()+b'='+value])
     assert len(result)>150 and len({name for name,_ in result})==len(result)
     return result
 

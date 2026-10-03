@@ -116,7 +116,7 @@ fn activity_validation_matches_complete_go_process_fixture_without_fallback() {
     }
     assert_eq!(
         count,
-        if cfg!(windows) { 173 } else { 185 },
+        if cfg!(windows) { 237 } else { 265 },
         "complete activity process case count"
     );
 }
