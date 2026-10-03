@@ -14,3 +14,4 @@ migration/evidence/usage-copilot-kimi-768/original-unit-failure/original-tests.l
 migration/evidence/usage-copilot-kimi-768/linux-f75993e/**/*.log -text
 migration/evidence/usage-copilot-kimi-768/linux-f75993e/*.log -text
 migration/evidence/usage-copilot-kimi-768/original-root-review-7e0b/** -text
+migration/evidence/usage-copilot-kimi-768/linux-owner-00bcc6f/** -text

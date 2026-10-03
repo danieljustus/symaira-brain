@@ -66,3 +66,29 @@ complete parent gates,355 ordinary tests and strict checks must pass on one clea
 source. Existing unsafe access, map ambiguity, control/device headers, numeric
 architecture, unsupported base/workspace, Windows HOME mismatch and automatic
 host-Keychain gates remain. Full #768 remains open.
+
+
+## Observed corrected Linux checkpoint
+
+Clean source `00bcc6f51a2fbc00581ca7f6b7af0e868d168971`, after normal main
+integration, passes the unchanged89-input gate (81 full reports/eight retained
+gates/111 CLI pairs/five rejection controls), all original97 Go inputs and exact
+66+31 accounting. The16 new owner reports/requests/read-only cases,16 owner CLI
+pairs,22 actual Unix filepath comparisons and separate wrong-owner exit101
+control pass. Complete parent regressions pass Files86/151, Hermes96/104 and
+Reference44/110, each with five real controls. All62/57/55/51 source manifest
+entries and48 shared hashes match one source. The ordinary suite passes355/zero
+failures/four ignored oracle seams with the required container subreaper; strict
+Clippy, workspace/included-file fmt, actionlint and diff checks pass.
+
+The original public constructor probe was also rebuilt against this exact
+production rlib. All twelve original reviewer owner cases were replayed with
+exact original input bytes and actual frozen-Go constructors: every current
+report/auth/header observation matches Go's lexical owner, every eligibility
+probe stays native and all source/link state remains unchanged. The seven
+ordinary and five literal results remain separate from the stronger sixteen
+full-report/request/device cases. The original failing receipts are unchanged.
+Tracked full receipts, raw inputs/reports/headers/controls/logs and source/hash
+verification are under `migration/evidence/usage-copilot-kimi-768/linux-owner-00bcc6f/`.
+Author validation does not approve this candidate or supply native Windows/macOS
+proof; independent review and exact-candidate native CI remain outstanding.

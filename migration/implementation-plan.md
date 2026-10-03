@@ -2090,3 +2090,26 @@ CI syntax checks. A prior run without the required subreaper produced a real
 unrelated descendant-cleanup failure; both raw logs remain in the evidence.
 Native macOS/Windows exact-candidate CI and independent full review are required.
 No full USE-001/#768 closure follows. See the ADR and tracked Linux f75993e evidence.
+
+
+## Usage #768 — credential owner path correction, 2026-10-03
+
+Independent immutable7e0b/f759 review requested changes for one P2: native
+Copilot/Kimi symlink-plus-parent paths selected the physical owner while frozen
+Go selected the lexical owner. Ordinary-token behavior was inherited; literal
+file-token routing was newly admitted. Preserve all73 original review artifacts
+and eleven archived executed binary/library entries, then normally integrate
+main e3dbda6c. A221-line Usage-local pure native-path helper now applies lexical
+Go joins to both probes and reads, retaining raw Unix bytes and native Windows
+volume/UTF16 rules without canonicalization or a CLI dependency.
+
+Clean source00bcc6f passes all four full process gates and original97 accounting,
+plus16 complete two-account token/device owner cases,16 owner CLI pairs,22 actual
+Go Unix path comparisons and one genuine wrong-owner request rejection. All12
+original reviewer owner inputs replay exactly against actual Go/public native
+constructors with correct lexical owners and no writes. Manifests62/57/55/51
+and48 shared hashes match;355 ordinary tests and strict checks pass. Original
+failures, source and fixtures stay unchanged. Native Windows requires its21
+actual path pairs and owned symlink proof; macOS/Windows and full independent
+review remain required. #768 stays open. See the owner-path ADR and full tracked
+Linux owner evidence; source00bcc6f replaces the rejected acceptance candidate.

@@ -115,3 +115,12 @@ the required subreaper passes in `tests-subreaper.log`. This correction changes
 only process ownership during verification, with no skipped or relaxed test.
 This is author validation on Linux; independent review and native exact-head
 macOS/Windows CI still determine acceptance. #768 remains open.
+
+
+The subsequent full independent review of7e0b/f75993e requested changes for one
+credential-owner path group, despite the passing checkpoint above. Ordinary
+file tokens inherited the defect; newly admitted literal file tokens made it
+reachable in the new scope. The original failure is preserved, and the corrected
+lexical path design, complete owner probes and later clean-source validation are
+recorded in `docs/adr/usage-credential-path-owner-768.md`. The earlier passing
+test checkpoint is historical and is not an independent approval.
