@@ -2,9 +2,9 @@ use super::{
     MAX_CREDENTIAL_FILE_BYTES, UsageFallbackSignals, claude_file_token_in, codex_file_token,
     codex_from_resolved, copilot_file_token_candidate_in, copilot_file_token_in, decode_base64url,
     json_string, kimi_device_id_is_native, kimi_file_token_candidate, kimi_store,
-    names_from_keychain_dump, needs_go_fallback_for, nous_file_token, nous_file_token_candidate,
-    nous_jwt_is_live, parse_claude_keychain_blob, path_may_exist, read_limited,
-    supported_custom_base, supported_opencode_workspace,
+    names_from_keychain_dump, needs_go_fallback_for, nous_file_token, nous_jwt_is_live,
+    parse_claude_keychain_blob, path_may_exist, read_limited, supported_custom_base,
+    supported_opencode_workspace,
 };
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -297,7 +297,6 @@ fn literal_file_references_and_unproven_sources_keep_go_fallback() {
     assert!(!needs_go_fallback_for(&UsageFallbackSignals {
         copilot_file: Some("synthetic-copilot-file"),
         kimi_cli: Some("synthetic-kimi-file"),
-        nous_file: Some("synthetic-nous-file"),
         codex_file: Some("synthetic-codex-file"),
         claude_file: Some("synthetic-claude-file"),
         ..UsageFallbackSignals::default()
@@ -315,10 +314,6 @@ fn literal_file_references_and_unproven_sources_keep_go_fallback() {
             },
             UsageFallbackSignals {
                 kimi_cli: Some(reference),
-                ..UsageFallbackSignals::default()
-            },
-            UsageFallbackSignals {
-                nous_file: Some(reference),
                 ..UsageFallbackSignals::default()
             },
             UsageFallbackSignals {
@@ -416,7 +411,7 @@ fn kimi_file_candidate_matches_only_the_source_bound_native_shapes() {
 }
 
 #[test]
-fn nous_file_candidate_matches_source_bound_plain_and_live_jwt_tokens() {
+fn nous_file_parser_matches_all_frozen_go_shapes() {
     let fixture: serde_json::Value =
         serde_json::from_str(NOUS_FILE_TOKEN_ORACLE).expect("Go Nous file parser oracle");
     for case in fixture["cases"].as_array().expect("oracle cases") {
@@ -429,13 +424,12 @@ fn nous_file_candidate_matches_source_bound_plain_and_live_jwt_tokens() {
         if !case["file_present"].as_bool().expect("file presence") {
             fs::remove_file(&path).expect("remove absent-file fixture");
         }
-        let candidate = nous_file_token_candidate(&path);
-        if case["native_route"].as_bool().expect("native route") {
-            assert_eq!(candidate.as_deref(), Some(case["token"].as_str().unwrap()));
-            assert_eq!(nous_file_token(&path), candidate, "Go and Rust selection");
-        } else {
-            assert!(candidate.is_none(), "{} must remain on Go", case["id"]);
-        }
+        assert_eq!(
+            nous_file_token(&path).unwrap_or_default(),
+            case["token"].as_str().expect("Go token"),
+            "{}",
+            case["id"]
+        );
     }
 }
 
@@ -535,15 +529,14 @@ fn nous_token_accepts_a_live_jwt() {
     assert!(nous_jwt_is_live(&format!(
         "header.{fractional_payload}.signature"
     )));
-    for ambiguous_payload in [
-        r#"{"exp":4102444800,"EXP":0}"#,
-        r#"{"EXP":0,"exp":4102444800}"#,
-    ] {
-        assert!(!nous_jwt_is_live(&format!(
-            "header.{}.signature",
-            encode_base64url(ambiguous_payload)
-        )));
-    }
+    assert!(!nous_jwt_is_live(&format!(
+        "header.{}.signature",
+        encode_base64url(r#"{"exp":4102444800,"EXP":0}"#)
+    )));
+    assert!(nous_jwt_is_live(&format!(
+        "header.{}.signature",
+        encode_base64url(r#"{"EXP":0,"exp":4102444800}"#)
+    )));
     assert!(!nous_jwt_is_live("not-a-jwt"));
     assert!(!nous_jwt_is_live("only.two"));
     assert!(!nous_jwt_is_live("no.exp-claim.signature"));

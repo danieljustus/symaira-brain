@@ -783,7 +783,7 @@ fn codex_default_file_env_and_home_override_routes_are_native() {
 }
 
 #[test]
-fn kimi_and_nous_supported_home_overrides_route_natively_only_for_proven_files() {
+fn kimi_and_nous_supported_home_overrides_select_native_usage_parser() {
     let default_kimi_root = TempDir::new().unwrap();
     install_synthetic_claude_file(&default_kimi_root);
     let default_kimi_file = default_kimi_root
@@ -855,10 +855,9 @@ fn kimi_and_nous_supported_home_overrides_route_natively_only_for_proven_files()
         .env("HERMES_HOME", &nous_home)
         .output()
         .unwrap();
-    let stderr = String::from_utf8(malformed.stderr).unwrap();
-    assert!(
-        stderr.contains("not ported yet and no Go fallback was found"),
-        "malformed existing Hermes JWT must remain on Go: {stderr}"
+    assert_native_usage_parser(
+        malformed,
+        "malformed Hermes JWT is native missing credentials",
     );
 }
 
@@ -916,7 +915,7 @@ fn copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go() {
 }
 
 #[test]
-fn nous_auth_file_presence_keeps_unproven_shapes_on_go() {
+fn nous_auth_file_shapes_select_native_parser_and_overflow_retains_go() {
     let fixture: serde_json::Value = serde_json::from_str(include_str!(
         "../../symbrain-usage/tests/fixtures/nous_file_token_oracle.json"
     ))
@@ -955,15 +954,7 @@ fn nous_auth_file_presence_keeps_unproven_shapes_on_go() {
         let output = command(&root, &["usage", "--not-a-usage-flag"])
             .output()
             .unwrap();
-        if case["file_present"] != true || case["native_route"] == true {
-            assert_native_usage_parser(output, id);
-        } else {
-            let stderr = String::from_utf8(output.stderr).unwrap();
-            assert!(
-                stderr.contains("not ported yet and no Go fallback was found"),
-                "unproven Nous auth.json case {id} must remain on Go: {stderr}"
-            );
-        }
+        assert_native_usage_parser(output, id);
     }
 
     #[cfg(unix)]
@@ -976,13 +967,30 @@ fn nous_auth_file_presence_keeps_unproven_shapes_on_go() {
         let output = command(&root, &["usage", "--not-a-usage-flag"])
             .output()
             .unwrap();
-        assert!(
-            String::from_utf8(output.stderr)
-                .unwrap()
-                .contains("not ported yet and no Go fallback was found"),
-            "dangling Nous auth.json symlink must remain on Go"
+        assert_native_usage_parser(
+            output,
+            "dangling Hermes symlink is native missing credentials",
         );
     }
+    // Numeric overflow has architecture-dependent Go conversion semantics.
+    // This real CLI process must still choose the oracle routing boundary.
+    let root = TempDir::new().unwrap();
+    let auth = root.path().join("home/.hermes/auth.json");
+    std::fs::create_dir_all(auth.parent().unwrap()).unwrap();
+    std::fs::write(
+        &auth,
+        br#"{"providers":[{"id":"nous","invoke_jwt":"header.eyJleHAiOjFlMTl9.signature"}]}"#,
+    )
+    .unwrap();
+    let overflow = command(&root, &["usage", "--not-a-usage-flag"])
+        .output()
+        .unwrap();
+    assert!(
+        String::from_utf8(overflow.stderr)
+            .unwrap()
+            .contains("not ported yet and no Go fallback was found"),
+        "numeric-overflow JWT must retain Go routing"
+    );
 }
 
 #[cfg(windows)]

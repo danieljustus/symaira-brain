@@ -43,6 +43,8 @@ include!("provider_config/commands.rs");
 include!("provider_config/references.rs");
 include!("provider_config/files.rs");
 include!("provider_config/kimi_nous.rs");
+include!("provider_config/hermes.rs");
+include!("provider_config/jwt.rs");
 include!("provider_config/keychain.rs");
 include!("provider_config/registry.rs");
 include!("provider_config/routing.rs");

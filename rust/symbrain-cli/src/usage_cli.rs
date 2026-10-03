@@ -12,13 +12,14 @@ const HELP: &str = "symbrain usage — AI subscription/token usage per provider\
 /// The native port reproduces each proven provider's credential state machine,
 /// request, snapshot, and error behavior. Several supported providers can run
 /// together. Native sources include direct credentials; the canonical default
-/// Copilot, Kimi CLI, Nous, Codex, and Claude files; Moonshot's supported `ai`
+/// Copilot, Kimi CLI, Codex, and Claude files; typed Hermes/Nous files; Moonshot's supported `ai`
 /// and `cn` regions; constrained public HTTPS base overrides; and a canonical
 /// `OpenCode` workspace id. File sources with case aliases, duplicate or
 /// malformed fields, ambiguous provider selection, unsupported metadata,
-/// secret references, non-ASCII Kimi device ids, or other unproven shapes stay
+/// literal non-Hermes file references, non-ASCII Kimi device ids, or other unproven shapes stay
 /// on Go. `CODEX_HOME`, `HERMES_HOME`, and `KIMI_CODE_HOME` use the same per-file
-/// eligibility checks as their default paths; differing Windows home roots,
+/// eligibility checks as their default paths. Hermes malformed/expired files are
+/// native; numeric JWT expiry overflow retains Go. Differing Windows home roots,
 /// unsupported URL/workspace forms and Claude Keychain-only credentials also
 /// keep the report on Go. Environment secret references use the native shared
 /// resolver. Antigravity's local probe runs natively. Source-bound Go

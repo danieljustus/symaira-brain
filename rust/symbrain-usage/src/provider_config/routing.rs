@@ -47,10 +47,9 @@ pub fn needs_go_fallback() -> bool {
     }
     let codex_file = codex_file_token(&codex_home());
     let nous_path = nous_auth_path();
-    let nous_file = nous_file_token_candidate(&nous_path);
-    if path_may_exist(&nous_path) && nous_file.is_none() {
-        // Existing files that fall outside the deterministic plain-token
-        // subset remain interpreted by Go, including expired JWTs.
+    if nous_file_requires_go(&nous_path) {
+        // Go float-to-int overflow is architecture-dependent. Preserve that
+        // remaining gate until native target receipts define the contract.
         return true;
     }
     let kimi_path = kimi_cli_home().join("credentials/kimi-code.json");
@@ -74,7 +73,6 @@ pub fn needs_go_fallback() -> bool {
         claude_oauth_env: claude_oauth_env.as_deref(),
         copilot_file: copilot_file.as_deref(),
         kimi_cli: kimi_cli.as_deref(),
-        nous_file: nous_file.as_deref(),
         codex_file: codex_file.as_deref(),
         claude_file: claude_file_token.as_deref(),
         other_provider_env: false,
@@ -96,7 +94,6 @@ struct UsageFallbackSignals<'a> {
     claude_oauth_env: Option<&'a str>,
     copilot_file: Option<&'a str>,
     kimi_cli: Option<&'a str>,
-    nous_file: Option<&'a str>,
     codex_file: Option<&'a str>,
     claude_file: Option<&'a str>,
     other_provider_env: bool,
@@ -111,7 +108,6 @@ fn needs_go_fallback_for(signals: &UsageFallbackSignals<'_>) -> bool {
     let credentials = [
         signals.copilot_file,
         signals.kimi_cli,
-        signals.nous_file,
         signals.codex_file,
         signals.claude_file,
     ];

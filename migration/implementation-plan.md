@@ -1974,3 +1974,21 @@ failure controls using private synthetic credential executables. Native Linux,
 macOS and Windows CI retain receipts and partial failure logs for 14 days.
 USE-001 and #768 remain open for unproven file/JWT/host-Keychain and other routing
 gates; no frozen fixture or production Go source changed.
+
+## #768: native read-only Hermes files and JWT expiry
+
+The follow-on Hermes slice replaces permissive untyped JSON with ordered typed
+Go-compatible credential decoding and removes the broad malformed/expired-file
+fallback. Case/Unicode aliases, duplicates/nulls, reused provider arrays, ignored
+metadata, raw UTF-8 and JWT expiry/base64 behavior have fresh immutable-Go
+constructor/report/request evidence. Numeric expiry overflow retains a narrow
+architecture-sensitive routing gate.
+
+`scripts/usage-hermes-oracle/run.sh` requires 80 report/request/no-write cases,
+90 actual CLI table/JSON byte comparisons and five actual rejection controls.
+Unix filesystem probes separately record source-bound symlink/directory parity
+and the native nonblocking FIFO safety contract. All native operating-system
+jobs preserve partial failure evidence. The rationale and capability-rooted
+reader dependency are in `docs/adr/usage-hermes-file-jwt-768.md`.
+USE-001 and #768 remain open for numeric overflow and other credential families;
+this slice does not close broader host integration or Go-removal work.
