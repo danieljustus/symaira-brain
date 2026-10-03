@@ -10,7 +10,9 @@ use tempfile::TempDir;
 
 #[path = "support/skills_preflight_process.rs"]
 mod process;
-use process::{run, run_os};
+use process::run;
+#[cfg(unix)]
+use process::run_os;
 
 #[test]
 fn native_skills_preflight_contracts() {
