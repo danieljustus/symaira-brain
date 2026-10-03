@@ -1,0 +1,9 @@
+
+running 4 tests
+test jsonl_writer_failure_propagates_without_faking_success ... ok
+test jsonl_bytes_hash_and_go_roundtrip_match ... ok
+test every_validation_boundary_and_error_priority_matches_go ... ok
+test all_alignment_strategies_offsets_and_ties_match_executed_go ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

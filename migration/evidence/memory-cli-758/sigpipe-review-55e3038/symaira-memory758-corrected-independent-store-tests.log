@@ -1,0 +1,12 @@
+
+running 7 tests
+test shipped_timestamp_rendering_is_readable ... ok
+test a_native_row_reaches_the_shipped_fts_index ... ok
+test written_row_uses_shipped_embedding ... ok
+test written_row_uses_shipped_identifiers ... ok
+test written_row_uses_shipped_timestamps ... ok
+test written_row_uses_shipped_columns ... ok
+test missing_shipped_columns_are_added_to_an_existing_database ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
