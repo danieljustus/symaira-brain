@@ -1,7 +1,7 @@
 //! Go-compatible optional-core selection for release setup.
 use std::collections::BTreeMap;
 
-pub(super) fn enabled_cores() -> Result<BTreeMap<String, bool>, String> {
+pub(crate) fn enabled_cores() -> Result<BTreeMap<String, bool>, String> {
     let mut enabled = BTreeMap::new();
     let global = symbrain_core::xdg::config_path();
     merge_enabled_cores_file(&mut enabled, &global)?;

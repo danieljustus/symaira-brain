@@ -1,0 +1,156 @@
+// Supplemental native executable for isolated Doctor process fixtures.
+package main
+
+import (
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"time"
+)
+
+type response struct {
+	Output string `json:"output"`
+	Exit   int    `json:"exit"`
+	WaitMS int    `json:"wait_ms"`
+}
+
+func main() {
+	if target := os.Getenv("DOCTOR_CONTROL_TARGET"); target != "" {
+		control(target)
+		return
+	}
+	if strings.TrimSuffix(filepath.Base(os.Args[0]), ".exe") == "cosign" {
+		verifyFixture()
+		return
+	}
+	path, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	path = strings.TrimSuffix(path, ".exe")
+	data, err := os.ReadFile(path + ".probe.json")
+	if err != nil {
+		panic(err)
+	}
+	var r response
+	if err := json.Unmarshal(data, &r); err != nil {
+		panic(err)
+	}
+	if len(os.Args) != 3 || os.Args[1] != "version" || os.Args[2] != "--json" {
+		fmt.Fprintln(os.Stderr, "unsupported fixture invocation", filepath.Base(path))
+		os.Exit(99)
+	}
+	calls, err := os.OpenFile(path+".probe.calls", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+	if err != nil {
+		panic(err)
+	}
+	if _, err := calls.WriteString("version --json\n"); err != nil {
+		panic(err)
+	}
+	if err := calls.Close(); err != nil {
+		panic(err)
+	}
+	time.Sleep(time.Duration(r.WaitMS) * time.Millisecond)
+	output, err := base64.StdEncoding.DecodeString(r.Output)
+	if err != nil {
+		panic(err)
+	}
+	if _, err := os.Stdout.Write(output); err != nil {
+		panic(err)
+	}
+	os.Exit(r.Exit)
+}
+
+// A fixture verifier checks the real pinned invocation; it makes no claim
+// about production certificate authenticity. Checksums remain independently
+// verified against the local archive's checksum file in both real CLIs.
+func verifyFixture() {
+	args := os.Args[1:]
+	if len(args) != 10 || args[0] != "verify-blob" || args[2] != "--signature" || args[4] != "--certificate" || args[6] != "--certificate-identity" || args[8] != "--certificate-oidc-issuer" {
+		panic("invalid verifier arguments")
+	}
+	name := strings.Split(filepath.Base(args[1]), "_")[0]
+	identity := map[string]string{
+		"symvault":  "https://github.com/danieljustus/symaira-vault/.github/workflows/release.yml@refs/tags/v0.22.1",
+		"symdesk":   "https://github.com/danieljustus/symaira-desktop/.github/workflows/release.yml@refs/tags/v0.12.2",
+		"symbrowse": "https://github.com/danieljustus/symaira-browse/.github/workflows/release.yml@refs/tags/v0.8.0",
+	}[name]
+	if identity == "" || args[7] != identity || args[9] != "https://token.actions.githubusercontent.com" {
+		panic("unpinned verifier identity")
+	}
+	signature, err := os.ReadFile(args[3])
+	if err != nil {
+		panic(err)
+	}
+	certificate, err := os.ReadFile(args[5])
+	if err != nil {
+		panic(err)
+	}
+	if string(signature) != "fixture-signature" || string(certificate) != "fixture-certificate" {
+		panic("missing verifier inputs")
+	}
+	if args[3] != args[1]+".sig" || args[5] != args[1]+".pem" {
+		panic("unrelated verifier inputs")
+	}
+	receipt := os.Getenv("DOCTOR_SIGNATURE_RECEIPT")
+	// One exclusive receipt per core verifies exactly one publisher invocation
+	// while avoiding a meaningless append order across Go's core map.
+	file, err := os.OpenFile(receipt+"."+name, os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0600)
+	if err != nil {
+		panic(err)
+	}
+	if _, err := file.WriteString(name + " " + identity + "\n"); err != nil {
+		panic(err)
+	}
+	if err := file.Close(); err != nil {
+		panic(err)
+	}
+}
+
+// Run the actual Rust CLI, then intentionally corrupt exactly one observable.
+// The positive replay must reject each resulting process without changing Go.
+func control(target string) {
+	cmd := exec.Command(target, os.Args[1:]...)
+	for _, env := range os.Environ() {
+		if !strings.HasPrefix(env, "DOCTOR_CONTROL_") {
+			cmd.Env = append(cmd.Env, env)
+		}
+	}
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout, cmd.Stderr = &stdout, &stderr
+	code := 0
+	if err := cmd.Run(); err != nil {
+		if exit, ok := err.(*exec.ExitError); ok {
+			code = exit.ExitCode()
+		} else {
+			panic(err)
+		}
+	}
+	out, diagnostic := stdout.Bytes(), stderr.Bytes()
+	switch os.Getenv("DOCTOR_CONTROL_MUTATION") {
+	case "wrong-exit":
+		code = 42
+	case "missing-header":
+		if index := bytes.IndexByte(out, '\n'); index >= 0 {
+			out = out[index+1:]
+		}
+	case "missing-core-event":
+		lines := bytes.SplitAfter(diagnostic, []byte("\n"))
+		for index, line := range lines {
+			if bytes.Contains(line, []byte(" binary=")) {
+				diagnostic = bytes.Join(append(lines[:index], lines[index+1:]...), nil)
+				break
+			}
+		}
+	default:
+		panic("unknown control")
+	}
+	os.Stdout.Write(out)
+	os.Stderr.Write(diagnostic)
+	os.Exit(code)
+}

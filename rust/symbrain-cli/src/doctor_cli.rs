@@ -21,13 +21,11 @@ pub(crate) mod doctor_process;
 #[path = "doctor_types.rs"]
 mod doctor_types;
 
-/// Whether this invocation requires Go lifecycle handling.
-///
-/// The Rust doctor implementation intentionally does not manage source-build
-/// provenance. Keep enabled `--fix` and `--force-release` in Go, where the
-/// managed installer owns that behavior.
+/// Config-load diagnostics remain Go-owned until the typed loader is ported.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     parse_args(args, &mut Vec::new()).is_ok_and(|parsed| parsed.fix)
+        && (!crate::vault_config::valid_configuration()
+            || crate::setup_cli::enabled_cores().is_err())
 }
 
 pub fn run(
@@ -41,7 +39,7 @@ pub fn run(
         Err(code) => return code,
     };
     if parsed.fix {
-        return doctor_fix::run_fix(stdout, stderr);
+        return doctor_fix::run_fix(parsed.force_release, stdout, stderr);
     }
     let report = doctor_checks::run_checks(&parsed.vault_agent);
     let format = if parsed.json {
@@ -64,6 +62,7 @@ pub fn run(
 #[derive(Default)]
 struct DoctorArgs {
     fix: bool,
+    force_release: bool,
     json: bool,
     vault_agent: String,
 }
@@ -90,7 +89,7 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<DoctorArgs, u
         match name {
             "json" => parsed.json = parse_bool_flag(name, inline, stderr)?,
             "force-release" => {
-                parse_bool_flag(name, inline, stderr)?;
+                parsed.force_release = parse_bool_flag(name, inline, stderr)?;
             }
             "fix" => parsed.fix = parse_bool_flag(name, inline, stderr)?,
             "vault-agent" => {
@@ -240,17 +239,17 @@ args = ["mcp", "--profile", "default"]
     }
 
     #[test]
-    fn only_enabled_lifecycle_flags_require_go() {
+    fn valid_configuration_allows_native_repair_flag_forms() {
         let args = |rest: &[&str]| -> Vec<OsString> { rest.iter().map(OsString::from).collect() };
         assert!(!requires_go_fallback(&args(&["--vault-agent", "agent"])));
         assert!(!requires_go_fallback(&args(&["--vault-agent=agent"])));
         assert!(!requires_go_fallback(&args(&["--json"])));
         assert!(!requires_go_fallback(&args(&["--force-release"])));
         assert!(!requires_go_fallback(&args(&["--force-release=true"])));
-        assert!(requires_go_fallback(&args(&["--fix"])));
-        assert!(requires_go_fallback(&args(&["--fix=TRUE"])));
+        assert!(!requires_go_fallback(&args(&["--fix"])));
+        assert!(!requires_go_fallback(&args(&["--fix=TRUE"])));
         assert!(!requires_go_fallback(&args(&["--fix=0"])));
-        assert!(requires_go_fallback(&args(&["--force-release", "--fix"])));
+        assert!(!requires_go_fallback(&args(&["--force-release", "--fix"])));
         assert!(!requires_go_fallback(&args(&[
             "--fix=false",
             "--force-release=false"
@@ -259,7 +258,7 @@ args = ["mcp", "--profile", "default"]
     }
 
     #[test]
-    fn help_lists_the_go_owned_force_release_flag() {
+    fn help_lists_the_force_release_flag() {
         let mut stdout = Vec::new();
         let mut stderr = Vec::new();
         let code = run(
