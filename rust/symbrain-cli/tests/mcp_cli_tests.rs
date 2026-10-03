@@ -876,7 +876,12 @@ fn copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go() {
         let stderr = String::from_utf8(output.stderr).unwrap();
         // Historical routing flags are preserved; deterministic token results
         // now have the expanded source-bound native contract.
-        if !case["token"].is_null() {
+        if case["token"].is_null() {
+            assert!(
+                stderr.contains("not ported yet and no Go fallback was found"),
+                "unproven Copilot file case {id} must remain on Go: {stderr}"
+            );
+        } else {
             assert_eq!(output.status.code(), Some(2), "{id}: {stderr}");
             assert!(
                 stderr.starts_with("flag provided but not defined: -not-a-usage-flag\n"),
@@ -885,11 +890,6 @@ fn copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go() {
             assert!(
                 !stderr.contains("no Go fallback") && !stderr.contains("Go fallback"),
                 "Copilot file case {id} unexpectedly selected Go fallback: {stderr}"
-            );
-        } else {
-            assert!(
-                stderr.contains("not ported yet and no Go fallback was found"),
-                "unproven Copilot file case {id} must remain on Go: {stderr}"
             );
         }
     }
