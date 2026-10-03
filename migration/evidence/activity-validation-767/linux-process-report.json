@@ -1,6 +1,6 @@
 {
   "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
-  "candidate_head": "25954fc86b7e8dd7549d9446aa18e042abbfd641",
+  "candidate_head": "bdc6d30e4d31da0fb3dda90e6bad5d16850e6285",
   "candidate_dirty": false,
   "runtime": "Linux-6.18.44-x86_64-with-glibc2.41",
   "total": 185,
@@ -4103,8 +4103,8 @@
       "matches": true
     }
   ],
-  "go_binary_sha256": "02402822c7a162befbcc521f2da6f1df7dd4ec3bc0a6a06b25c64fd121e5f0cf",
-  "rust_binary_sha256": "e413a7c9ca83a30855f8f0db597e1e50fed280a80e55fafa419d54f68662a595",
+  "go_binary_sha256": "b65178befcaf75360d0afed179697540993c351066b7778808bbbf1c5003ea23",
+  "rust_binary_sha256": "ee93c828b22931459d84467502c1ec58faeeedb443e60b4b63c67403ef020dae",
   "candidate_source_sha256": {
     "rust/symbrain-cli/src/activity_cli.rs": "3e332795d6aad6ef530b93edb73918d9438f50d56c41c5b4051977fcba452af6",
     "rust/symbrain-cli/src/activity_args.rs": "70f2961fbdebde4ce77994007da777c8740c992813ddbe7261376bad75a443a9",
@@ -4117,20 +4117,22 @@
     "rust/symbrain-cli/tests/activity_validation_tests.rs": "598e0e3f4b4037ae7e73c5bc9fa37ccf6d27864b5f36d0e764b37089b244757a"
   },
   "local_validation": {
-    "main_revision": "d5f1e2e3f0c1226905388da9456077a5353a445f",
+    "main_revision": "e8c7f7990ab61967db0a3cbadaf6e485b4a33d99",
     "rust_packages": [
       "symbrain-cli",
       "symbrain-activity",
       "symbrain-broker"
     ],
     "all_features": true,
-    "passed": 298,
+    "passed": 299,
     "failed": 0,
     "ignored": 0,
-    "summaries": 35,
+    "summaries": 36,
     "strict_all_target_clippy": "passed",
     "formatting": "passed",
     "actionlint": "passed",
-    "broker_shutdown_repeat": 50
+    "broker_shutdown_repeat": 50,
+    "broker_shutdown_repeat_source_head": "25954fc86b7e8dd7549d9446aa18e042abbfd641",
+    "broker_shutdown_test_source_sha256": "b2e81f34cda0f58940a119f26f019958363e728e1f9a8b2ab3d00f1c79bb2764"
   }
 }
