@@ -47,3 +47,8 @@ The source-bound Linux checkpoint and actual missing-oracle / mutated-status
 failure controls are in `migration/evidence/skills-render-drift-621/`. Both
 controls fail for their intended reason; CI acceptance remains pending until
 the native jobs succeed at the published candidate head.
+
+This feature depends on the bounded marker/preflight repair in PR #794. Its
+final branch includes that exact repaired head; do not merge the dependent PR
+until #794 receives its required independent review and lands in main, then
+verify the integrated candidate with fresh native CI.

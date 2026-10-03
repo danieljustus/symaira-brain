@@ -5,10 +5,10 @@
       "go": {
         "installs": [
           {
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "symlink",
             "name": "example",
-            "path": "/tmp/.tmpyDKekQ/home/.claude/skills/example",
+            "path": "/tmp/.tmpbZmpVH/home/.claude/skills/example",
             "source_hash": "cd187a46f623931eadddd049cb939b7a770669346734b39ae5e84a4f9a3507d9",
             "status": "in-sync",
             "target": "claude"
@@ -26,10 +26,10 @@
       "rust": {
         "installs": [
           {
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "linked",
             "name": "example",
-            "path": "/tmp/.tmpyDKekQ/home/.claude/skills/example",
+            "path": "/tmp/.tmpbZmpVH/home/.claude/skills/example",
             "render_status": "in-sync",
             "source_hash": "cd187a46f623931eadddd049cb939b7a770669346734b39ae5e84a4f9a3507d9",
             "status": "in-sync",
@@ -69,10 +69,10 @@
                 "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
               }
             ],
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "symlink",
             "name": "example",
-            "path": "/tmp/.tmpyDKekQ/home/.claude/skills/example",
+            "path": "/tmp/.tmpbZmpVH/home/.claude/skills/example",
             "source_hash": "cd187a46f623931eadddd049cb939b7a770669346734b39ae5e84a4f9a3507d9",
             "status": "harness-changed",
             "target": "claude"
@@ -106,10 +106,10 @@
                 "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
               }
             ],
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "linked",
             "name": "example",
-            "path": "/tmp/.tmpyDKekQ/home/.claude/skills/example",
+            "path": "/tmp/.tmpbZmpVH/home/.claude/skills/example",
             "render_drift": [
               {
                 "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
@@ -140,10 +140,10 @@
       "go": {
         "installs": [
           {
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "symlink",
             "name": "example",
-            "path": "/tmp/.tmpdtItgR/home/.config/opencode/skills/example",
+            "path": "/tmp/.tmpHFex7y/home/.config/opencode/skills/example",
             "source_hash": "c193716902709995279a5866dcd2e2f8dc48b1275b51e73606d0a239b1caa5e0",
             "status": "in-sync",
             "target": "opencode"
@@ -161,10 +161,10 @@
       "rust": {
         "installs": [
           {
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "linked",
             "name": "example",
-            "path": "/tmp/.tmpdtItgR/home/.config/opencode/skills/example",
+            "path": "/tmp/.tmpHFex7y/home/.config/opencode/skills/example",
             "render_status": "in-sync",
             "source_hash": "c193716902709995279a5866dcd2e2f8dc48b1275b51e73606d0a239b1caa5e0",
             "status": "in-sync",
@@ -204,10 +204,10 @@
                 "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
               }
             ],
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "symlink",
             "name": "example",
-            "path": "/tmp/.tmpdtItgR/home/.config/opencode/skills/example",
+            "path": "/tmp/.tmpHFex7y/home/.config/opencode/skills/example",
             "source_hash": "c193716902709995279a5866dcd2e2f8dc48b1275b51e73606d0a239b1caa5e0",
             "status": "harness-changed",
             "target": "opencode"
@@ -241,10 +241,10 @@
                 "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
               }
             ],
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "linked",
             "name": "example",
-            "path": "/tmp/.tmpdtItgR/home/.config/opencode/skills/example",
+            "path": "/tmp/.tmpHFex7y/home/.config/opencode/skills/example",
             "render_drift": [
               {
                 "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
@@ -275,10 +275,10 @@
       "go": {
         "installs": [
           {
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "symlink",
             "name": "example",
-            "path": "/tmp/.tmp1eThls/home/.agents/skills/example",
+            "path": "/tmp/.tmp9Cn3i7/home/.agents/skills/example",
             "source_hash": "e1464042ba6c2c3e09c4ce6e0ed4fc77a3f25021608c65f13feef41916f66957",
             "status": "in-sync",
             "target": "codex"
@@ -296,10 +296,10 @@
       "rust": {
         "installs": [
           {
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "linked",
             "name": "example",
-            "path": "/tmp/.tmp1eThls/home/.agents/skills/example",
+            "path": "/tmp/.tmp9Cn3i7/home/.agents/skills/example",
             "render_status": "in-sync",
             "source_hash": "e1464042ba6c2c3e09c4ce6e0ed4fc77a3f25021608c65f13feef41916f66957",
             "status": "in-sync",
@@ -346,10 +346,10 @@
                 "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
               }
             ],
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "symlink",
             "name": "example",
-            "path": "/tmp/.tmp1eThls/home/.agents/skills/example",
+            "path": "/tmp/.tmp9Cn3i7/home/.agents/skills/example",
             "source_hash": "e1464042ba6c2c3e09c4ce6e0ed4fc77a3f25021608c65f13feef41916f66957",
             "status": "harness-changed",
             "target": "codex"
@@ -390,10 +390,10 @@
                 "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
               }
             ],
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "linked",
             "name": "example",
-            "path": "/tmp/.tmp1eThls/home/.agents/skills/example",
+            "path": "/tmp/.tmp9Cn3i7/home/.agents/skills/example",
             "render_drift": [
               {
                 "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
@@ -424,10 +424,10 @@
       "go": {
         "installs": [
           {
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "symlink",
             "name": "example",
-            "path": "/tmp/.tmpbXhEqu/home/.gemini/config/skills/example",
+            "path": "/tmp/.tmpLKqLbf/home/.gemini/config/skills/example",
             "source_hash": "d9cbe3e4ae51cdc953baa4131eb8ffa5151d26cd60de33a2d5139614f006f841",
             "status": "in-sync",
             "target": "antigravity"
@@ -445,10 +445,10 @@
       "rust": {
         "installs": [
           {
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "linked",
             "name": "example",
-            "path": "/tmp/.tmpbXhEqu/home/.gemini/config/skills/example",
+            "path": "/tmp/.tmpLKqLbf/home/.gemini/config/skills/example",
             "render_status": "in-sync",
             "source_hash": "d9cbe3e4ae51cdc953baa4131eb8ffa5151d26cd60de33a2d5139614f006f841",
             "status": "in-sync",
@@ -488,10 +488,10 @@
                 "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
               }
             ],
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "symlink",
             "name": "example",
-            "path": "/tmp/.tmpbXhEqu/home/.gemini/config/skills/example",
+            "path": "/tmp/.tmpLKqLbf/home/.gemini/config/skills/example",
             "source_hash": "d9cbe3e4ae51cdc953baa4131eb8ffa5151d26cd60de33a2d5139614f006f841",
             "status": "harness-changed",
             "target": "antigravity"
@@ -525,10 +525,10 @@
                 "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
               }
             ],
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "linked",
             "name": "example",
-            "path": "/tmp/.tmpbXhEqu/home/.gemini/config/skills/example",
+            "path": "/tmp/.tmpLKqLbf/home/.gemini/config/skills/example",
             "render_drift": [
               {
                 "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
@@ -559,10 +559,10 @@
       "go": {
         "installs": [
           {
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "symlink",
             "name": "example",
-            "path": "/tmp/.tmpebMVK4/home/.hermes/skills/symaira/example",
+            "path": "/tmp/.tmpj889iA/home/.hermes/skills/symaira/example",
             "source_hash": "48e78b86b68603c86a980edfaf0623f2db04136ec68cd719dae7003cbf1316e7",
             "status": "in-sync",
             "target": "hermes"
@@ -580,10 +580,10 @@
       "rust": {
         "installs": [
           {
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "linked",
             "name": "example",
-            "path": "/tmp/.tmpebMVK4/home/.hermes/skills/symaira/example",
+            "path": "/tmp/.tmpj889iA/home/.hermes/skills/symaira/example",
             "render_status": "in-sync",
             "source_hash": "48e78b86b68603c86a980edfaf0623f2db04136ec68cd719dae7003cbf1316e7",
             "status": "in-sync",
@@ -623,10 +623,10 @@
                 "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
               }
             ],
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "symlink",
             "name": "example",
-            "path": "/tmp/.tmpebMVK4/home/.hermes/skills/symaira/example",
+            "path": "/tmp/.tmpj889iA/home/.hermes/skills/symaira/example",
             "source_hash": "48e78b86b68603c86a980edfaf0623f2db04136ec68cd719dae7003cbf1316e7",
             "status": "harness-changed",
             "target": "hermes"
@@ -660,10 +660,10 @@
                 "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
               }
             ],
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "linked",
             "name": "example",
-            "path": "/tmp/.tmpebMVK4/home/.hermes/skills/symaira/example",
+            "path": "/tmp/.tmpj889iA/home/.hermes/skills/symaira/example",
             "render_drift": [
               {
                 "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
@@ -694,10 +694,10 @@
       "go": {
         "installs": [
           {
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "symlink",
             "name": "example",
-            "path": "/tmp/.tmpY9UbkF/home/.openclaw/skills/example",
+            "path": "/tmp/.tmpMfIoBb/home/.openclaw/skills/example",
             "source_hash": "adc2fed452340980476b33b39656a19172471945a40b2904098e45e5d763ccc2",
             "status": "in-sync",
             "target": "openclaw"
@@ -715,10 +715,10 @@
       "rust": {
         "installs": [
           {
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "linked",
             "name": "example",
-            "path": "/tmp/.tmpY9UbkF/home/.openclaw/skills/example",
+            "path": "/tmp/.tmpMfIoBb/home/.openclaw/skills/example",
             "render_status": "in-sync",
             "source_hash": "adc2fed452340980476b33b39656a19172471945a40b2904098e45e5d763ccc2",
             "status": "in-sync",
@@ -758,10 +758,10 @@
                 "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
               }
             ],
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "symlink",
             "name": "example",
-            "path": "/tmp/.tmpY9UbkF/home/.openclaw/skills/example",
+            "path": "/tmp/.tmpMfIoBb/home/.openclaw/skills/example",
             "source_hash": "adc2fed452340980476b33b39656a19172471945a40b2904098e45e5d763ccc2",
             "status": "harness-changed",
             "target": "openclaw"
@@ -795,10 +795,10 @@
                 "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
               }
             ],
-            "installed_at": "2026-10-03T11:55:14Z",
+            "installed_at": "2026-10-03T12:08:41Z",
             "mode": "linked",
             "name": "example",
-            "path": "/tmp/.tmpY9UbkF/home/.openclaw/skills/example",
+            "path": "/tmp/.tmpMfIoBb/home/.openclaw/skills/example",
             "render_drift": [
               {
                 "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
@@ -828,9 +828,9 @@
   "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
   "total": 12,
   "runtime": "Linux-6.18.44-x86_64-with-glibc2.41",
-  "candidate_head": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
-  "candidate_dirty": true,
-  "go_binary_sha256": "ecc2b7aee9ee079703511e883228652bc01a499d4c278466db4c5bc39c236540",
+  "candidate_head": "e14768462583e61368ae0ec5f83288eac8a2089a",
+  "candidate_dirty": false,
+  "go_binary_sha256": "f0c324f8f8b7cd22a72c76e62e4845dd0b13f66d9c2819e4ca15bfff25442f47",
   "go_source_sha256": {
     "cmd/symbrain/browse_integration_test.go": "c4e2ab70bee25096db7b37369c3511019658a2f3221408288d3c6afc170c6140",
     "cmd/symbrain/cmd_activity.go": "0b23d53e303641e09e39129d18991a1800750ec824d7eeb4ce507896c6789658",
@@ -1057,9 +1057,9 @@
     "internal/skills/vcs/vcs_test.go": "edfa9757a69a98ce88bc590f904db0e9cee8d8c4adada52de450cc4b9cb49c3a"
   },
   "candidate_source_sha256": {
-    "rust/symbrain-cli/src/skills_cli.rs": "76f0357f4a94a2dad177084af0921b3059fec9d34c636834e0eb5d296037a4e5",
+    "rust/symbrain-cli/src/skills_cli.rs": "2862c0faaa47cd928816772523cecb634570fa110872966543fefadd6692d207",
     "rust/symbrain-skills/src/install/status.rs": "88f14bf8c76b193fdbd75f841c75221438dbf85794a345d05327f1a6adda010c",
-    "rust/symbrain-skills/src/install/status_compare.rs": "7c61239cb25bcdd71735271c111a7139066eb09254eea0e3e5983970bf4a894b",
+    "rust/symbrain-skills/src/install/status_compare.rs": "c21f1a1a164a288e69d4f5cf47b94f0135ef3a9a996142c5bedee3e36810d7ad",
     "rust/symbrain-skills/src/install/render_status.rs": "65e9a8db1f7d6d9eb71781d7d441b08af3a201be8c2771fc18f772cbd8d61319",
     "rust/symbrain-skills/src/install/drift.rs": "4d89fed7b088a72e2a1e72b22e2d57d44f5b716e38abbaff808f81e21bba0b6d",
     "rust/symbrain-cli/tests/skills_render_drift.rs": "c571a4b772b829e3ff6a4f2c0fe5cf33d9cc3e4ae58a4ea5e0c77ece75711dff",
@@ -1072,5 +1072,12 @@
     "render_error",
     "verified symlink presentation mode: linked"
   ],
-  "comparison": "actual process success, empty stderr, full existing report equality after removing only the explicit #621 extensions"
+  "comparison": "actual process success, empty stderr, full existing report equality after removing only the explicit #621 extensions",
+  "affected_test_results": {
+    "passed": 425,
+    "failed": 0,
+    "ignored": 2,
+    "summaries": 65
+  },
+  "integrated_preflight_head": "51b12565fd2e1fae955bddc2e5eb82119e9eaa1e"
 }
