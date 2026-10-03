@@ -39,3 +39,10 @@ limit. Hosted Darwin process/MCP runners therefore use short, private owned
 HOME directories under `/tmp`, with unchanged production endpoint rules.
 Direct macOS runs retain the required external-volume policy. This correction
 does not claim the external APFS/NVMe acceptance required by #790.
+
+The independent correction review also reproduced a relative profile path when
+Unix `TMPDIR` was empty. Go `os.TempDir` uses `/tmp` for both missing and empty
+`TMPDIR`, including macOS; Rust's standard helper does not preserve that contract.
+The profile-cache fallback therefore resolves Go's Unix temp semantics explicitly.
+Isolated child tests cover both states without creating profile directories. The
+original failing constructor receipt remains alongside the corrected evidence.

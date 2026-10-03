@@ -9,7 +9,7 @@ pub(crate) fn default_session_cache_root() -> PathBuf {
         return std::env::var_os("LOCALAPPDATA")
             .filter(|p| !p.is_empty())
             .map_or_else(
-                || std::env::temp_dir().join("symbrowse").join("sessions"),
+                || go_temp_dir().join("symbrowse").join("sessions"),
                 |path| PathBuf::from(path).join("symbrowse").join("sessions"),
             );
     }
@@ -17,7 +17,7 @@ pub(crate) fn default_session_cache_root() -> PathBuf {
         return std::env::var_os("HOME")
             .filter(|p| !p.is_empty())
             .map_or_else(
-                || std::env::temp_dir().join("symbrowse").join("sessions"),
+                || go_temp_dir().join("symbrowse").join("sessions"),
                 |home| PathBuf::from(home).join("Library/Caches/symbrowse/sessions"),
             );
     }
@@ -28,16 +28,30 @@ pub(crate) fn default_session_cache_root() -> PathBuf {
         return if path.is_absolute() {
             path.join("symbrowse").join("sessions")
         } else {
-            std::env::temp_dir().join("symbrowse").join("sessions")
+            go_temp_dir().join("symbrowse").join("sessions")
         };
     }
     std::env::var_os("HOME")
         .filter(|p| !p.is_empty())
         .map_or_else(
-            || std::env::temp_dir().join("symbrowse").join("sessions"),
+            || go_temp_dir().join("symbrowse").join("sessions"),
             |home| PathBuf::from(home).join(".cache/symbrowse/sessions"),
         )
 }
+// Go os.TempDir uses /tmp for a missing or empty Unix TMPDIR, including macOS.
+fn go_temp_dir() -> PathBuf {
+    #[cfg(unix)]
+    {
+        std::env::var_os("TMPDIR")
+            .filter(|path| !path.is_empty())
+            .map_or_else(|| PathBuf::from("/tmp"), PathBuf::from)
+    }
+    #[cfg(not(unix))]
+    {
+        std::env::temp_dir()
+    }
+}
+
 pub(crate) fn worktree_origin() -> String {
     let Ok(cwd) = std::env::current_dir() else {
         return String::new();

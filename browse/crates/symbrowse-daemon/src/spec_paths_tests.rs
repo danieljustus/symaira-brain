@@ -30,6 +30,8 @@ fn cache_environment_uses_go_platform_fallbacks_in_isolated_children() {
         "home",
         "absolute-cache",
         "relative-cache",
+        "missing-temp",
+        "empty-temp",
     ] {
         let mut command = std::process::Command::new(std::env::current_exe().unwrap());
         command
@@ -49,6 +51,18 @@ fn cache_environment_uses_go_platform_fallbacks_in_isolated_children() {
                     .env("LOCALAPPDATA", "")
                     .env("XDG_CACHE_HOME", "");
                 fallback.clone()
+            }
+            "missing-temp" | "empty-temp" => {
+                if kind == "missing-temp" {
+                    command.env_remove("TMPDIR");
+                } else {
+                    command.env("TMPDIR", "");
+                }
+                if cfg!(unix) {
+                    PathBuf::from("/tmp/symbrowse/sessions")
+                } else {
+                    fallback.clone()
+                }
             }
             "home" => {
                 command.env("HOME", &home).env("LOCALAPPDATA", &home);
