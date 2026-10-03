@@ -5,7 +5,11 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use crate::go_json;
-use chrono::{DateTime, Utc};
+#[path = "activity_args.rs"]
+mod activity_args;
+#[path = "activity_time.rs"]
+mod activity_time;
+use activity_args::Args;
 use symbrain_activity::{
     SearchOptions, fence_summary, profile_allows_activity, validate_search_options,
 };
@@ -22,30 +26,7 @@ Usage:
 
 Every command requires --profile, an explicit bounded response budget, and (for search) an explicit RFC3339 window and result limit.
 ";
-const MAX_ACTIVITY_BUDGET: usize = 4000;
-const GET_FLAGS: &[&str] = &[
-    "--profile",
-    "-profile",
-    "--max-tokens",
-    "-max-tokens",
-    "--db",
-    "-db",
-];
-const SEARCH_FLAGS: &[&str] = &[
-    "--profile",
-    "-profile",
-    "--from",
-    "-from",
-    "--to",
-    "-to",
-    "--limit",
-    "-limit",
-    "--max-tokens",
-    "-max-tokens",
-    "--db",
-    "-db",
-];
-
+const MAX_ACTIVITY_BUDGET: i64 = 4000;
 fn resolve_db_path(override_path: Option<&str>) -> PathBuf {
     if let Some(path) = override_path.filter(|path| !path.is_empty()) {
         return PathBuf::from(path);
@@ -65,165 +46,6 @@ fn resolve_db_path(override_path: Option<&str>) -> PathBuf {
     )
 }
 
-/// Reports whether `symbrain activity` has to stay on the Go implementation.
-///
-/// Supported commands stay native for absent or unusable profiles and for a
-/// granting profile with a valid bounded `search`, `get`, or `status` request.
-/// Invalid requests and unsupported flag shapes retain Go's diagnostics.
-pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
-    let Some(verb) = args.first().map(|arg| arg.to_string_lossy().into_owned()) else {
-        return false;
-    };
-    if matches!(verb.as_str(), "-h" | "--help" | "help") {
-        return false;
-    }
-    // An unusable profile is answered natively with the policy diagnostic.
-    let profile_name = extract_flag(args, "--profile").or_else(|| extract_flag(args, "-profile"));
-    let Some(name) = profile_name else {
-        return false;
-    };
-    let allowed = match load_profile(&name) {
-        Ok(profile) => profile_allows_activity(&profile),
-        Err(_) => return false,
-    };
-    if !allowed {
-        return false;
-    }
-    // A granting profile: `status` and `get` run natively; `search` is native
-    // only when its bounded window, page size, and response budget are valid.
-    match verb.as_str() {
-        "status" => !status_args_are_supported(&args[1..]),
-        // The shipped flag set stops at the first bare argument, so a flag
-        // after the identifier is a usage error there; only the documented
-        // `get <flags> <id>` order is reproducible natively.
-        "get" => !flags_before_positional(&args[1..], GET_FLAGS),
-        // `search` runs natively only for a fully valid request: every
-        // validation failure carries the shipped (or the Go time parser's)
-        // error text and stays on Go.
-        "search" => {
-            !flags_before_positional(&args[1..], SEARCH_FLAGS)
-                || !search_request_is_valid(&args[1..])
-        }
-        _ => true,
-    }
-}
-
-/// Reports whether a `search` invocation is a valid request whose result the
-/// native path reproduces.
-fn search_request_is_valid(args: &[OsString]) -> bool {
-    let flags = [
-        "--profile",
-        "-profile",
-        "--from",
-        "-from",
-        "--to",
-        "-to",
-        "--limit",
-        "-limit",
-        "--max-tokens",
-        "-max-tokens",
-        "--db",
-        "-db",
-    ];
-    let Some(query) = positional_argument(args, &flags) else {
-        return false;
-    };
-    let (Some(from), Some(to)) = (
-        flag_value(args, &["--from", "-from"])
-            .and_then(|value| value.parse::<DateTime<Utc>>().ok()),
-        flag_value(args, &["--to", "-to"]).and_then(|value| value.parse::<DateTime<Utc>>().ok()),
-    ) else {
-        return false;
-    };
-    let Some(limit) =
-        flag_value(args, &["--limit", "-limit"]).and_then(|value| value.parse::<usize>().ok())
-    else {
-        return false;
-    };
-    let Some(max_tokens) = flag_value(args, &["--max-tokens", "-max-tokens"])
-        .and_then(|value| value.parse::<usize>().ok())
-    else {
-        return false;
-    };
-    let options = SearchOptions {
-        query,
-        source: String::new(),
-        from,
-        to,
-        limit,
-        max_tokens,
-        include_episodes: false,
-    };
-    validate_search_options(&options).is_ok()
-}
-
-/// Reports whether every flag precedes the single bare argument.
-///
-/// The shipped flag set stops parsing at the first bare argument, so a flag
-/// after it is a usage error there and the native path must not accept it.
-fn flags_before_positional(args: &[OsString], value_flags: &[&str]) -> bool {
-    let mut positionals = 0;
-    let mut seen_positional = false;
-    let mut index = 0;
-    while index < args.len() {
-        let arg = args[index].to_string_lossy();
-        let (name, inline) = arg
-            .split_once('=')
-            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
-        if value_flags.contains(&name) {
-            if seen_positional {
-                return false;
-            }
-            if inline.is_none() {
-                if index + 1 >= args.len() {
-                    return false;
-                }
-                index += 1;
-            }
-        } else if arg.starts_with('-') {
-            return false;
-        } else {
-            positionals += 1;
-            seen_positional = true;
-        }
-        index += 1;
-    }
-    positionals == 1
-}
-
-/// Keep unsupported status syntax on Go, where flag parser errors are exact.
-fn status_args_are_supported(args: &[OsString]) -> bool {
-    let flags = [
-        "--profile",
-        "-profile",
-        "--max-tokens",
-        "-max-tokens",
-        "--db",
-        "-db",
-    ];
-    let mut index = 0;
-    while index < args.len() {
-        let arg = args[index].to_string_lossy();
-        let (name, inline) = arg
-            .split_once('=')
-            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
-        if !flags.contains(&name) || (inline.is_none() && index + 1 >= args.len()) {
-            return false;
-        }
-        if inline.is_none() {
-            index += 1;
-        }
-        index += 1;
-    }
-    true
-}
-
-fn budget_is_valid(args: &[OsString]) -> bool {
-    flag_value(args, &["--max-tokens", "-max-tokens"])
-        .and_then(|value| value.parse::<usize>().ok())
-        .is_some_and(|value| (1..=MAX_ACTIVITY_BUDGET).contains(&value))
-}
-
 /// Runs `symbrain activity`.
 pub fn run(
     args: &[OsString],
@@ -237,13 +59,13 @@ pub fn run(
     }
 
     let verb = args[0].to_string_lossy();
-    if matches!(verb.as_ref(), "-h" | "--help" | "help") {
+    if matches!(verb.as_ref(), "-h" | "--help") {
         let _ = write!(stdout, "{ACTIVITY_USAGE}");
         return exit::OK;
     }
 
     // Check profile
-    let profile_name = extract_flag(args, "--profile").or_else(|| extract_flag(args, "-profile"));
+    let profile_name = extract_flag(args);
     let Some(pname) = profile_name else {
         let _ = writeln!(
             stderr,
@@ -276,27 +98,53 @@ pub fn run(
         "get" => run_get(rest, stdout, stderr, format),
         "status" => run_status(rest, stdout, stderr, format),
         _ => {
-            let _ = writeln!(stderr, "symbrain activity: unknown subcommand {verb:?}\n");
+            let _ = writeln!(
+                stderr,
+                "symbrain activity: unknown subcommand {}",
+                symbrain_core::config::format_go_quoted(&args[0])
+            );
             let _ = write!(stderr, "{ACTIVITY_USAGE}");
             exit::USAGE
         }
     }
 }
 
-fn extract_flag(args: &[OsString], flag: &str) -> Option<String> {
-    let mut i = 0;
-    while i < args.len() {
-        let arg = args[i].to_string_lossy();
-        if arg == flag {
-            if i + 1 < args.len() {
-                return Some(args[i + 1].to_string_lossy().into_owned());
-            }
-        } else if let Some(v) = arg.strip_prefix(&format!("{flag}=")) {
-            return Some(v.to_string());
+fn extract_flag(args: &[OsString]) -> Option<String> {
+    let mut name = None;
+    let mut index = 0;
+    while index < args.len() {
+        let arg = args[index].to_string_lossy();
+        if arg == "--profile" && index + 1 < args.len() {
+            index += 1;
+            name = Some(args[index].to_string_lossy().into_owned());
+        } else if let Some(value) = arg.strip_prefix("--profile=") {
+            name = Some(value.to_owned());
         }
-        i += 1;
+        index += 1;
     }
-    None
+    name.filter(|value| !value.is_empty())
+}
+
+fn parsed_args(args: &[OsString], verb: &str, stderr: &mut dyn Write) -> Result<Args, u8> {
+    let parsed = activity_args::parse(args, verb, stderr);
+    let valid = parsed.as_ref().is_ok_and(|p| {
+        p.positional.len() == usize::from(verb != "status")
+            && (verb == "search" || (1..=MAX_ACTIVITY_BUDGET).contains(&p.budget))
+    });
+    if valid {
+        return parsed.map_err(|()| exit::USAGE);
+    }
+    let usage = match verb {
+        "search" => {
+            "usage: symbrain activity search <query> --profile <name> --from <RFC3339> --to <RFC3339> --limit <N> --max-tokens <N> [--db <path>]"
+        }
+        "get" => {
+            "usage: symbrain activity get <id> --profile <name> --max-tokens <N> [--db <path>]"
+        }
+        _ => "usage: symbrain activity status --profile <name> --max-tokens <N> [--db <path>]",
+    };
+    let _ = writeln!(stderr, "{usage}");
+    Err(exit::USAGE)
 }
 
 #[allow(clippy::too_many_lines)]
@@ -325,52 +173,62 @@ fn run_search(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    let query = positional_argument(
-        args,
-        &[
-            "--profile",
-            "-profile",
-            "--from",
-            "-from",
-            "--to",
-            "-to",
-            "--limit",
-            "-limit",
-            "--max-tokens",
-            "-max-tokens",
-            "--db",
-            "-db",
-        ],
-    )
-    .unwrap_or_default();
-    let from: Option<DateTime<Utc>> =
-        flag_value(args, &["--from", "-from"]).and_then(|value| value.parse().ok());
-    let to: Option<DateTime<Utc>> =
-        flag_value(args, &["--to", "-to"]).and_then(|value| value.parse().ok());
-    let limit = flag_value(args, &["--limit", "-limit"])
-        .and_then(|value| value.parse::<usize>().ok())
-        .unwrap_or(10);
-    let max_tokens = flag_value(args, &["--max-tokens", "-max-tokens"])
-        .and_then(|value| value.parse::<usize>().ok())
-        .unwrap_or(1000);
-
-    let db_override = flag_value(args, &["--db", "-db"]);
-    let store = match open_store(stderr, "search", db_override.as_deref()) {
-        Ok(store) => store,
+    let parsed = match parsed_args(args, "search", stderr) {
+        Ok(parsed) => parsed,
         Err(code) => return code,
     };
-
-    // The fallback gate admits only complete, validated windows and budgets.
-    let from_dt = from.unwrap_or_else(Utc::now);
-    let to_dt = to.unwrap_or_else(Utc::now);
-    let mem_search = ActivitySearch {
-        query,
+    if !(1..=50).contains(&parsed.limit) || !(1..=4000).contains(&parsed.budget) {
+        let _ = writeln!(
+            stderr,
+            "symbrain activity search: invalid bounds (limit 1-50; budget 1-4000)"
+        );
+        return exit::USAGE;
+    }
+    let window = activity_time::parse(&parsed.from)
+        .map_err(|e| format!("from must be RFC3339: {e}"))
+        .and_then(|from| {
+            activity_time::parse(&parsed.to)
+                .map(|to| (from, to))
+                .map_err(|e| format!("to must be RFC3339: {e}"))
+        });
+    let (from, to) = match window {
+        Ok(window) => window,
+        Err(error) => {
+            let _ = writeln!(stderr, "symbrain activity search: {error}");
+            return exit::USAGE;
+        }
+    };
+    let limit = usize::try_from(parsed.limit).expect("validated limit");
+    let max_tokens = usize::try_from(parsed.budget).expect("validated budget");
+    let options = SearchOptions {
+        query: parsed.positional[0].clone(),
         source: String::new(),
-        from: from_dt,
-        to: to_dt,
+        from,
+        to,
         limit,
         max_tokens,
         include_episodes: false,
+    };
+    if let Err(error) = validate_search_options(&options) {
+        let _ = writeln!(stderr, "symbrain activity search: {error}");
+        return exit::USAGE;
+    }
+    let mem_search = ActivitySearch {
+        query: options.query,
+        source: String::new(),
+        from,
+        to,
+        limit,
+        max_tokens,
+        include_episodes: false,
+    };
+    let store = match open_store(
+        stderr,
+        "search",
+        Some(parsed.db.as_str()).filter(|p| !p.is_empty()),
+    ) {
+        Ok(store) => store,
+        Err(code) => return code,
     };
 
     let page = match store.activity_search(&mem_search) {
@@ -424,27 +282,15 @@ fn run_status(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    if !budget_is_valid(args)
-        || positional_count(
-            args,
-            &[
-                "--profile",
-                "-profile",
-                "--max-tokens",
-                "-max-tokens",
-                "--db",
-                "-db",
-            ],
-        ) != 0
-    {
-        let _ = writeln!(
-            stderr,
-            "usage: symbrain activity status --profile <name> --max-tokens <N> [--db <path>]"
-        );
-        return exit::USAGE;
-    }
-    let db_override = flag_value(args, &["--db", "-db"]);
-    let store = match open_store(stderr, "status", db_override.as_deref()) {
+    let parsed = match parsed_args(args, "status", stderr) {
+        Ok(parsed) => parsed,
+        Err(code) => return code,
+    };
+    let store = match open_store(
+        stderr,
+        "status",
+        Some(parsed.db.as_str()).filter(|p| !p.is_empty()),
+    ) {
         Ok(store) => store,
         Err(code) => return code,
     };
@@ -478,32 +324,17 @@ fn run_get(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    let flags = [
-        "--profile",
-        "-profile",
-        "--max-tokens",
-        "-max-tokens",
-        "--db",
-        "-db",
-    ];
-    let Some(id) = positional_argument(args, &flags) else {
-        let _ = writeln!(
-            stderr,
-            "usage: symbrain activity get <id> --profile <name> --max-tokens <N> [--db <path>]"
-        );
-        return exit::USAGE;
+    let parsed = match parsed_args(args, "get", stderr) {
+        Ok(parsed) => parsed,
+        Err(code) => return code,
     };
-    if !budget_is_valid(args) || positional_count(args, &flags) != 1 {
-        let _ = writeln!(
-            stderr,
-            "usage: symbrain activity get <id> --profile <name> --max-tokens <N> [--db <path>]"
-        );
-        return exit::USAGE;
-    }
-    let max_tokens = flag_value(args, &["--max-tokens", "-max-tokens"])
-        .and_then(|value| value.parse::<usize>().ok());
-    let db_override = flag_value(args, &["--db", "-db"]);
-    let store = match open_store(stderr, "get", db_override.as_deref()) {
+    let id = parsed.positional[0].clone();
+    let max_tokens = usize::try_from(parsed.budget).expect("validated budget");
+    let store = match open_store(
+        stderr,
+        "get",
+        Some(parsed.db.as_str()).filter(|p| !p.is_empty()),
+    ) {
         Ok(store) => store,
         Err(code) => return code,
     };
@@ -520,7 +351,7 @@ fn run_get(
     };
 
     // The shipped command fences the summary and reports its token count.
-    let summary = fence_summary(&item.summary, max_tokens.unwrap_or(0));
+    let summary = fence_summary(&item.summary, max_tokens);
     item.tokens = if summary.is_empty() {
         0
     } else {
@@ -546,228 +377,6 @@ fn run_get(
     exit::OK
 }
 
-/// Reads a flag's value in `--flag value` or `--flag=value` form.
-fn flag_value(args: &[OsString], names: &[&str]) -> Option<String> {
-    let mut index = 0;
-    while index < args.len() {
-        let arg = args[index].to_string_lossy();
-        let (name, inline) = arg
-            .split_once('=')
-            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
-        if names.contains(&name) {
-            if let Some(value) = inline {
-                return Some(value.to_owned());
-            }
-            return args
-                .get(index + 1)
-                .map(|value| value.to_string_lossy().into_owned());
-        }
-        index += 1;
-    }
-    None
-}
-
-/// Reads the single bare argument, skipping the values of the listed flags.
-fn positional_argument(args: &[OsString], flags: &[&str]) -> Option<String> {
-    let mut index = 0;
-    while index < args.len() {
-        let arg = args[index].to_string_lossy();
-        let (name, inline) = arg
-            .split_once('=')
-            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
-        if flags.contains(&name) {
-            if inline.is_none() {
-                index += 1;
-            }
-        } else if !arg.starts_with('-') {
-            return Some(arg.into_owned());
-        }
-        index += 1;
-    }
-    None
-}
-
-fn positional_count(args: &[OsString], flags: &[&str]) -> usize {
-    let mut count = 0;
-    let mut index = 0;
-    while index < args.len() {
-        let arg = args[index].to_string_lossy();
-        let (name, inline) = arg
-            .split_once('=')
-            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
-        if flags.contains(&name) {
-            if inline.is_none() {
-                index += 1;
-            }
-        } else if !arg.starts_with('-') {
-            count += 1;
-        }
-        index += 1;
-    }
-    count
-}
-
 #[cfg(test)]
-mod tests {
-    use super::{
-        GET_FLAGS, SEARCH_FLAGS, flags_before_positional, run_get, run_search, run_status,
-        search_request_is_valid, status_args_are_supported,
-    };
-    use std::ffi::OsString;
-    use symbrain_core::exit;
-    use symbrain_core::output::OutputFormat;
-    use tempfile::tempdir;
-
-    fn args(values: &[&str]) -> Vec<OsString> {
-        values.iter().map(OsString::from).collect()
-    }
-
-    #[test]
-    fn invalid_get_and_status_budgets_match_usage_before_opening_database() {
-        let usage = [
-            (
-                "get",
-                "usage: symbrain activity get <id> --profile <name> --max-tokens <N> [--db <path>]\n",
-            ),
-            (
-                "status",
-                "usage: symbrain activity status --profile <name> --max-tokens <N> [--db <path>]\n",
-            ),
-        ];
-        for budget in [None, Some("--max-tokens=0"), Some("--max-tokens=4001")] {
-            for (command, expected) in usage {
-                let mut argv = vec!["--profile=default", "--db=/no/such/database"];
-                if let Some(value) = budget {
-                    argv.push(value);
-                }
-                if command == "get" {
-                    argv.push("item-id");
-                }
-                let argv = args(&argv);
-                let mut stdout = Vec::new();
-                let mut stderr = Vec::new();
-                let code = if command == "get" {
-                    run_get(&argv, &mut stdout, &mut stderr, OutputFormat::Table)
-                } else {
-                    run_status(&argv, &mut stdout, &mut stderr, OutputFormat::Table)
-                };
-                assert_eq!(code, exit::USAGE);
-                assert!(stdout.is_empty());
-                assert_eq!(stderr, expected.as_bytes());
-            }
-        }
-    }
-
-    #[test]
-    fn status_falls_back_for_unhandled_argument_shapes() {
-        assert!(status_args_are_supported(&args(&[
-            "--profile=default",
-            "--max-tokens=10"
-        ])));
-        assert!(!status_args_are_supported(&args(&["--unknown"])));
-        assert!(!status_args_are_supported(&args(&["stray"])));
-    }
-
-    #[test]
-    fn bounded_search_flags_are_recognized_before_the_query() {
-        let inline = args(&[
-            "--profile=activity",
-            "--from=2026-08-28T11:59:00Z",
-            "--to=2026-08-28T15:00:00Z",
-            "--limit=10",
-            "--max-tokens=100",
-            "--db=/tmp/activity.db",
-            "editor",
-        ]);
-        assert!(flags_before_positional(&inline, SEARCH_FLAGS));
-        assert!(search_request_is_valid(&inline));
-
-        let separate_values = args(&[
-            "--profile",
-            "activity",
-            "--from",
-            "2026-08-28T11:59:00Z",
-            "--to",
-            "2026-08-28T15:00:00Z",
-            "--limit",
-            "10",
-            "--max-tokens",
-            "100",
-            "--db",
-            "/tmp/activity.db",
-            "editor",
-        ]);
-        assert!(flags_before_positional(&separate_values, SEARCH_FLAGS));
-        assert!(search_request_is_valid(&separate_values));
-
-        let misplaced = args(&[
-            "--profile=activity",
-            "editor",
-            "--from=2026-08-28T11:59:00Z",
-            "--to=2026-08-28T15:00:00Z",
-            "--limit=10",
-            "--max-tokens=100",
-        ]);
-        assert!(!flags_before_positional(&misplaced, SEARCH_FLAGS));
-        let invalid_window = args(&[
-            "--profile=activity",
-            "--from=invalid",
-            "--to=2026-08-28T15:00:00Z",
-            "--limit=10",
-            "--max-tokens=100",
-            "editor",
-        ]);
-        assert!(flags_before_positional(&invalid_window, SEARCH_FLAGS));
-        assert!(!search_request_is_valid(&invalid_window));
-        assert!(flags_before_positional(
-            &args(&["--profile=activity", "id"]),
-            GET_FLAGS
-        ));
-    }
-
-    #[test]
-    fn db_override_is_used_by_each_activity_read_command() {
-        let directory = tempdir().expect("temporary directory");
-        let db_path = directory.path().join("invalid.db");
-        std::fs::write(&db_path, b"not a sqlite database").expect("invalid database fixture");
-        let db_path = db_path.to_string_lossy().into_owned();
-
-        for command in ["search", "get", "status"] {
-            let mut argv = vec![OsString::from("--profile=default")];
-            if command == "get" {
-                argv.push(OsString::from(format!("--db={db_path}")));
-            } else {
-                argv.extend([OsString::from("--db"), OsString::from(&db_path)]);
-            }
-            argv.push(OsString::from("--max-tokens=100"));
-            match command {
-                "search" => argv.extend([
-                    OsString::from("--from=2026-09-01T00:00:00Z"),
-                    OsString::from("--to=2026-09-02T00:00:00Z"),
-                    OsString::from("--limit=1"),
-                    OsString::from("query"),
-                ]),
-                "get" => argv.push(OsString::from("item-id")),
-                "status" => {}
-                _ => unreachable!(),
-            }
-
-            let mut stdout = Vec::new();
-            let mut stderr = Vec::new();
-            let code = match command {
-                "search" => run_search(&argv, &mut stdout, &mut stderr, OutputFormat::Table),
-                "get" => run_get(&argv, &mut stdout, &mut stderr, OutputFormat::Table),
-                "status" => run_status(&argv, &mut stdout, &mut stderr, OutputFormat::Table),
-                _ => unreachable!(),
-            };
-            assert_eq!(code, exit::GENERIC, "{command}");
-            assert!(stdout.is_empty(), "{command}");
-            assert!(
-                String::from_utf8(stderr)
-                    .expect("UTF-8 error")
-                    .starts_with(&format!("symbrain activity {command}: open database:")),
-                "{command}"
-            );
-        }
-    }
-}
+#[path = "activity_tests.rs"]
+mod tests;
