@@ -23,7 +23,7 @@ impl Args {
     pub fn raw(&self, name: &str) -> OsString {
         self.values
             .get(name)
-            .map_or_else(OsString::new, |value| os(value.clone()))
+            .map_or_else(OsString::new, |value| os(value))
     }
 }
 
@@ -118,7 +118,7 @@ pub(super) fn parse(args: &[OsString], verb: &str, stderr: &mut dyn Write) -> Re
                 } else {
                     ""
                 },
-                format_go_quoted(&os(value)),
+                format_go_quoted(&os(&value)),
                 if kind == Kind::Boolean { "" } else { "flag " }
             );
             let _ = stderr.write_all(name);
@@ -197,13 +197,13 @@ pub(super) fn bytes(arg: &OsStr) -> Vec<u8> {
     arg.to_string_lossy().as_bytes().to_vec()
 }
 #[cfg(unix)]
-fn os(value: Vec<u8>) -> OsString {
+fn os(value: &[u8]) -> OsString {
     use std::os::unix::ffi::OsStringExt;
-    OsString::from_vec(value)
+    OsString::from_vec(value.to_vec())
 }
 #[cfg(not(unix))]
-fn os(value: Vec<u8>) -> OsString {
-    String::from_utf8_lossy(&value).into_owned().into()
+fn os(value: &[u8]) -> OsString {
+    String::from_utf8_lossy(value).into_owned().into()
 }
 pub(super) fn go_string(mut value: &[u8]) -> String {
     let mut text = String::new();

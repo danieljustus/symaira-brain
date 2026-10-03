@@ -2,6 +2,7 @@
 """Execute scoped native memory CLI contracts against an immutable Go process."""
 import argparse
 import base64
+from contextlib import closing
 import hashlib
 import http.server
 import io
@@ -66,7 +67,7 @@ def seed(go, root, env):
                         ("project", root / "project.db"), ("env", root / "env.db")):
         result = output(go, ["list", "--db", str(path)], root, env)
         assert result["exit"] == 0, result
-        with sqlite3.connect(path) as database:
+        with closing(sqlite3.connect(path)) as database, database:
             database.execute(
                 "INSERT INTO memories(id,content,scope,kind,created_at,updated_at,metadata,embedding) "
                 "VALUES(?,?,'global','reference','2000-01-01 00:00:00 +0000 UTC',"
@@ -79,7 +80,7 @@ def snapshot(root):
     state = {}
     for path in sorted(root.rglob("*.db")):
         tables = {}
-        with sqlite3.connect(path) as database:
+        with closing(sqlite3.connect(path)) as database, database:
             names = database.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")
             for (name,) in names.fetchall():
                 sql_name = '"' + name.replace('"', '""') + '"'
@@ -126,7 +127,7 @@ def seeded_reads(go, rust, records):
         env = isolated_env(root)
         path = root / "memory.db"
         assert output(go, ["list", "--db", str(path)], root, env)["exit"] == 0
-        with sqlite3.connect(path) as database:
+        with closing(sqlite3.connect(path)) as database, database:
             database.executemany(
                 "INSERT INTO memories(id,content,scope,kind,created_at,updated_at,metadata,embedding) "
                 "VALUES(?,?,?,?, '2000-01-01 00:00:00 +0000 UTC',"

@@ -142,3 +142,21 @@ passed59 Memory/Gateway tests,83 actual Go evidence observations,4 Go DB
 tests and3 rejecting controls. Historical333 is not relabeled as a new run.
 This keeps one reviewable domain change and avoids merging a store with an
 unverified CLI adapter. Full #758 and release-level #649 remain open.
+
+Native Windows CI found needless_pass_by_value in the non-Unix byte helper
+at160f24b. Borrow its input and preserve both platform decoding rules; no
+lint waiver. Retain both original complete job logs and require fresh native
+acceptance. Targeted Linux Memory CLI tests and strict Clippy pass, then
+replay all590 actual process contracts on the new immutable source.
+
+## Close oracle SQLite handles before removing private fixtures
+
+Fresh native Windows head e8d2970 passed strict Clippy and component tests, then
+failed the actual process oracle while removing an owned configuration fixture:
+Python's SQLite connection context commits or rolls back but does not close the
+connection. Windows rejects removing env.db while that handle remains open.
+Use explicit closing around the existing transaction context in all three
+fixture seed/snapshot paths. Keep every comparison and all input counts; do not
+ignore cleanup errors or weaken assertions. The original complete failing job
+111293527292 is retained. This changes only fixture resource ownership; fresh
+Linux process proof and native Windows acceptance remain required.
