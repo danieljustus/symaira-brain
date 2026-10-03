@@ -182,21 +182,21 @@ pub fn default_socket_path(session: &str) -> PathBuf {
 pub(crate) fn default_session_cache_root() -> PathBuf {
     if cfg!(windows) {
         return std::env::var_os("LOCALAPPDATA").map_or_else(
-            || std::env::temp_dir().join("symbrowse/sessions"),
-            |path| PathBuf::from(path).join("symbrowse/sessions"),
+            || std::env::temp_dir().join("symbrowse").join("sessions"),
+            |path| PathBuf::from(path).join("symbrowse").join("sessions"),
         );
     }
     if cfg!(target_os = "macos") {
         return std::env::var_os("HOME").map_or_else(
-            || std::env::temp_dir().join("symbrowse/sessions"),
+            || std::env::temp_dir().join("symbrowse").join("sessions"),
             |home| PathBuf::from(home).join("Library/Caches/symbrowse/sessions"),
         );
     }
     if let Some(path) = std::env::var_os("XDG_CACHE_HOME").filter(|p| !p.is_empty()) {
-        return PathBuf::from(path).join("symbrowse/sessions");
+        return PathBuf::from(path).join("symbrowse").join("sessions");
     }
     std::env::var_os("HOME").map_or_else(
-        || std::env::temp_dir().join("symbrowse/sessions"),
+        || std::env::temp_dir().join("symbrowse").join("sessions"),
         |home| PathBuf::from(home).join(".cache/symbrowse/sessions"),
     )
 }

@@ -100,15 +100,17 @@ pub(super) fn default_user_data_root() -> PathBuf {
     if cfg!(windows)
         && let Ok(local_app_data) = std::env::var("LOCALAPPDATA")
     {
-        return PathBuf::from(local_app_data).join("symbrowse/sessions");
+        return PathBuf::from(local_app_data)
+            .join("symbrowse")
+            .join("sessions");
     }
     if let Ok(path) = std::env::var("XDG_CACHE_HOME") {
-        return PathBuf::from(path).join("symbrowse/sessions");
+        return PathBuf::from(path).join("symbrowse").join("sessions");
     }
     if let Ok(home) = std::env::var("HOME") {
         return PathBuf::from(home).join(".cache/symbrowse/sessions");
     }
-    std::env::temp_dir().join("symbrowse/sessions")
+    std::env::temp_dir().join("symbrowse").join("sessions")
 }
 
 pub fn validate_session(session: &str) -> bool {
