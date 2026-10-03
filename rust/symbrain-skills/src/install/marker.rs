@@ -6,11 +6,9 @@
     clippy::cast_possible_truncation
 )]
 
-use std::io::Read;
 use std::path::Path;
 
-use cap_fs_ext::{FollowSymlinks, OpenOptionsFollowExt};
-use cap_std::fs::{Dir, OpenOptions};
+use cap_std::fs::Dir;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
@@ -72,6 +70,8 @@ pub enum MarkerState {
     Valid(Marker),
     /// A marker exists but is malformed or not an object.
     Malformed(String),
+    /// The marker could not be read safely; never retry it through a weaker reader.
+    Rejected(String),
     /// A valid marker uses a schema newer than this binary understands.
     UnsupportedSchema(u32),
 }
@@ -105,43 +105,43 @@ pub fn new_marker(
 /// marker open also uses `FollowSymlinks::No`, including on Windows where a
 /// reparse point must never become an install-control file.
 pub(crate) fn read_marker_at(root: &Dir) -> Result<MarkerState, SkillError> {
-    let mut options = OpenOptions::new();
-    options.read(true).follow(FollowSymlinks::No);
-    let file = match root.open_with(Path::new(MARKER_FILE), &options) {
-        Ok(file) => file,
+    match root.symlink_metadata(MARKER_FILE) {
+        Ok(metadata) if metadata.file_type().is_symlink() => {
+            return Ok(MarkerState::Rejected("marker is a symlink".to_owned()));
+        }
+        Ok(_) => {}
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
             return Ok(MarkerState::Missing);
         }
-        Err(error) => return Ok(MarkerState::Malformed(error.to_string())),
+        Err(error) => return Ok(MarkerState::Rejected(error.to_string())),
+    }
+    // Reuse the same-handle, regular-file reader; its Unix final open is
+    // nonblocking even if an attacker replaces a regular marker with a FIFO.
+    let bytes = match crate::load::read_limited_nofollow(
+        root,
+        Path::new(MARKER_FILE),
+        "marker",
+        MAX_INPUT_SIZE,
+    ) {
+        Ok(bytes) => bytes,
+        Err(error) => return Ok(MarkerState::Rejected(error.to_string())),
     };
-    let metadata = file
-        .metadata()
-        .map_err(|error| SkillError(format!("read marker metadata: {error}")))?;
-    if !metadata.is_file() {
-        return Ok(MarkerState::Malformed(
-            "marker is not a regular file".to_owned(),
-        ));
-    }
-    if metadata.len() > MAX_INPUT_SIZE {
-        return Ok(MarkerState::Malformed(format!(
-            "marker exceeds maximum input size of {MAX_INPUT_SIZE} bytes"
-        )));
-    }
-    let mut bytes = Vec::new();
-    file.take(MAX_INPUT_SIZE.saturating_add(1))
-        .read_to_end(&mut bytes)
-        .map_err(|error| SkillError(format!("read marker: {error}")))?;
-    if bytes.len() as u64 > MAX_INPUT_SIZE {
-        return Ok(MarkerState::Malformed(format!(
-            "marker exceeds maximum input size of {MAX_INPUT_SIZE} bytes"
-        )));
-    }
     parse_marker(&bytes)
 }
 
 /// Reads and classifies a marker with a trusted, no-follow directory walk.
 pub fn read_marker(path: &Path) -> Result<MarkerState, SkillError> {
-    let root = super::replace::open_trusted_dir(path)?;
+    let root = match super::replace::open_existing_dir(path) {
+        Ok(root) => root,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+            return Ok(MarkerState::Missing);
+        }
+        Err(error) => {
+            return Err(SkillError(format!(
+                "open existing marker directory: {error}"
+            )));
+        }
+    };
     read_marker_at(&root)
 }
 
@@ -179,6 +179,10 @@ pub fn ensure_writable(state: &MarkerState, path: &Path) -> Result<(), SkillErro
         ))),
         MarkerState::Malformed(error) => Err(SkillError(format!(
             "refusing to overwrite malformed marker {}: {error}",
+            path.display()
+        ))),
+        MarkerState::Rejected(error) => Err(SkillError(format!(
+            "refusing to overwrite rejected marker {}: {error}",
             path.display()
         ))),
         MarkerState::Missing | MarkerState::Valid(_) => Ok(()),

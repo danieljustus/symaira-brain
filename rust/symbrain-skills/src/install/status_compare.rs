@@ -196,6 +196,7 @@ pub(super) fn marker_row(
             path.display(),
             go_json_error(error),
         )),
+        MarkerState::Rejected(error) => Some(format!("reading marker {}: {error}", path.display())),
         MarkerState::UnsupportedSchema(version) => {
             Some(format!("unsupported marker schema_version {version}"))
         }

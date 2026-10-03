@@ -12,13 +12,16 @@ use symbrain_core::exit;
 use symbrain_core::output::OutputFormat;
 use symbrain_skills::install::{
     self, InstallStatus, MarkerState, StatusKind, StatusOptions, SyncOptions, SyncResult,
-    parse_marker,
+    read_marker,
 };
 use symbrain_skills::library::list_library;
 use symbrain_skills::metadata::{self, Options as MetadataOptions, Record, read_events_log};
 use symbrain_skills::targets_status::{
     StatusOptions as TargetStatusOptions, TargetStatus, list_status,
 };
+
+#[path = "skills_sync_flags.rs"]
+mod sync_flags;
 
 /// The shipped `symbrain skills` help, verbatim from the shipped source.
 const SKILLS_USAGE: &str = r"symbrain skills — embedded skill library operations
@@ -143,11 +146,23 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
             let Ok((target, scope)) = parse_status_flags(&args[1..]) else {
                 return true;
             };
+            let opencode_needs_go = if target.as_deref() == Some("opencode")
+                && matches!(scope.as_str(), "user" | "project")
+            {
+                match opencode_status_needs_go(&scope) {
+                    Ok(needs_go) => Some(needs_go),
+                    // Classified unsafe marker input must not reach Go, even
+                    // when a different marker or config would require fallback.
+                    Err(_) => return false,
+                }
+            } else {
+                None
+            };
             if has_dynamic_config() || !matches!(scope.as_str(), "user" | "project") {
                 return true;
             }
             match target.as_deref() {
-                Some("opencode") => opencode_status_needs_go(&scope),
+                Some("opencode") => opencode_needs_go.unwrap_or(false),
                 Some(target)
                     if symbrain_skills::default_targets()
                         .iter()
@@ -414,21 +429,34 @@ fn has_dynamic_target_state() -> bool {
 /// command on Go instead of emitting different bytes. Roots made of real
 /// directories, single-hop links and well-formed schema-version-1 markers stay
 /// native.
-fn opencode_status_needs_go(scope: &str) -> bool {
+fn opencode_status_needs_go(scope: &str) -> Result<bool, symbrain_skills::SkillError> {
     let root = opencode_status_root(scope);
+    if fs::symlink_metadata(&root).is_ok_and(|metadata| metadata.is_symlink()) {
+        return Err(symbrain_skills::SkillError(
+            "OpenCode skill root is a symlink".to_owned(),
+        ));
+    }
     let entries = match fs::read_dir(&root) {
         Ok(entries) => entries,
         // A missing root is a normal native case; anything else (for example a
         // permission failure) reports a Go error message we do not mirror.
-        Err(error) => return error.kind() != std::io::ErrorKind::NotFound,
+        Err(error) => return Ok(error.kind() != std::io::ErrorKind::NotFound),
     };
-    for entry in entries {
+    let mut needs_go = false;
+    for (index, entry) in entries.enumerate() {
+        if index >= symbrain_skills::MAX_RESOURCE_ENTRIES {
+            return Err(symbrain_skills::SkillError(
+                "OpenCode skill root exceeds entry limit".to_owned(),
+            ));
+        }
         let Ok(entry) = entry else {
-            return true;
+            needs_go = true;
+            continue;
         };
         let path = entry.path();
         let Ok(file_type) = entry.file_type() else {
-            return true;
+            needs_go = true;
+            continue;
         };
         let marker_dir = if file_type.is_symlink() {
             let resolved = match fs::read_link(&path) {
@@ -436,11 +464,17 @@ fn opencode_status_needs_go(scope: &str) -> bool {
                 Ok(link) => path
                     .parent()
                     .map_or_else(|| link.clone(), |parent| parent.join(&link)),
-                Err(_) => return true,
+                Err(_) => {
+                    needs_go = true;
+                    continue;
+                }
             };
             match fs::symlink_metadata(&resolved) {
                 // A second link level is not reproducible natively; Go follows it.
-                Ok(metadata) if metadata.file_type().is_symlink() => return true,
+                Ok(metadata) if metadata.file_type().is_symlink() => {
+                    needs_go = true;
+                    continue;
+                }
                 // Missing or non-directory targets stay native: both sides
                 // report an unmanaged row for them.
                 Ok(metadata) if metadata.is_dir() => resolved,
@@ -451,18 +485,13 @@ fn opencode_status_needs_go(scope: &str) -> bool {
         } else {
             continue;
         };
-        let marker = marker_dir.join(".symskills.json");
-        match fs::read(&marker) {
-            Ok(bytes) => {
-                if !matches!(parse_marker(&bytes), Ok(MarkerState::Valid(_))) {
-                    return true;
-                }
-            }
-            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
-            Err(_) => return true,
+        match read_marker(&marker_dir)? {
+            MarkerState::Missing | MarkerState::Valid(_) => {}
+            MarkerState::Rejected(error) => return Err(symbrain_skills::SkillError(error)),
+            MarkerState::Malformed(_) | MarkerState::UnsupportedSchema(_) => needs_go = true,
         }
     }
-    false
+    Ok(needs_go)
 }
 
 fn parse_status_flags(args: &[OsString]) -> Result<(Option<String>, String), &'static str> {
@@ -1005,42 +1034,14 @@ fn run_sync(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    let mut dry_run = false;
-    let mut target = None;
-    let mut scope = "user".to_string();
-
-    let mut i = 0;
-    while i < args.len() {
-        let arg = args[i].to_string_lossy();
-        if arg == "-dry-run" || arg == "--dry-run" {
-            dry_run = true;
-            i += 1;
-        } else if arg == "-target" || arg == "--target" {
-            if i + 1 < args.len() {
-                target = Some(args[i + 1].to_string_lossy().into_owned());
-                i += 2;
-            }
-        } else if let Some(v) = arg
-            .strip_prefix("-target=")
-            .or_else(|| arg.strip_prefix("--target="))
-        {
-            target = Some(v.to_string());
-            i += 1;
-        } else if arg == "-scope" || arg == "--scope" {
-            if i + 1 < args.len() {
-                scope = args[i + 1].to_string_lossy().into_owned();
-                i += 2;
-            }
-        } else if let Some(v) = arg
-            .strip_prefix("-scope=")
-            .or_else(|| arg.strip_prefix("--scope="))
-        {
-            scope = v.to_string();
-            i += 1;
-        } else {
-            i += 1;
-        }
-    }
+    let sync_flags::Flags {
+        dry_run,
+        target,
+        scope,
+    } = match sync_flags::parse(args, stderr) {
+        Ok(flags) => flags,
+        Err(code) => return code,
+    };
 
     let (library_dir, base_dir, home_dir) = resolve_skills_dirs();
     let targets = target.into_iter().collect();
