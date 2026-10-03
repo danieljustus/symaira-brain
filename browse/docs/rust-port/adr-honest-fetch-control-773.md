@@ -145,3 +145,62 @@ counts distinguish network exchanges from SDK-only routing. Fresh exact-source
 parent tests, strict lint and optimized 30-pair measurements remain required
 after this correction. Native six-target acceptance, complete pipeline parity,
 Windows paired measurements and #772 remain open.
+
+## Proxy absolute-form boundary and E011
+
+The independent immutable522/1f82 review found that correct NO_PROXY selection,
+Host and final URL did not preserve the absolute-form URI actually sent to an
+HTTP proxy. Reqwest constructs that URI from a normalized URL; default ports and
+leading zeroes disappear. Retain the complete original review, declared Browse-CWD
+runner failure, five real proxy pairs (four failures), eight real Referer pairs
+and executable snapshots under `independent-review-522`. Anchor the archive to
+the Git repository root so the actual Browse-CWD CI invocation can run its gates.
+
+Use a limited Hyper HTTP/1 send path only for an HTTP target over an HTTP(S)
+proxy when its explicit port would otherwise change. This preserves the raw
+absolute-form URI without a dependency fork/private override or a global client
+replacement. The selected route is still policy-checked at every hop; protected
+proxy dials use the existing pinned resolver and selected peer port, and HTTPS
+proxies use the same native TLS backend, default certificate trust and hostname
+verification. URL userinfo is excluded from the request target and uses the
+existing request builder's authentication encoding. Go writes transport proxy
+credentials after any caller Proxy-Authorization values; one shared hop helper
+preserves those values/order for both raw and ordinary HTTP-proxy sends.
+
+The existing typed client cache and named jar map remain authoritative. The raw
+path uses the same named jar, including transitions to ordinary/direct requests;
+unnamed requests acquire no persistent jar. Its connection is deliberately owned
+by one response rather than pooled: cancelling, timing out, exceeding limits or
+dropping that body aborts the driver and closes the socket. A small Body adapter
+forwards the original length hints and trailers; reducing it to an opaque byte
+stream would lose the early compressed-size check. The existing shared operation
+deadline, retry policy, redirect processing and bounded response decoder apply.
+No global pooling/performance claim follows from this exceptional path. Measure
+current executables and retain its connection/HTTPS-root costs as explicit scope;
+full773/native six-target/value acceptance still remain pending.
+
+Five explicit direct dependencies (`http`, `hyper`, `hyper-util`, `native-tls`,
+`tokio-native-tls`) expose versions already in the immutable lockfile and used by
+reqwest. They justify this supported URI/IO/body boundary rather than inventing
+HTTP parsing or copying a TLS stack. No frozen Go source or original fixture,
+equality assertion, benchmark threshold or sample selection changes.
+
+The delegated [E011 decision](https://github.com/danieljustus/symaira-brain/blob/6eca544a8db11c4aeba6d2a80b3a5680c34bc9ab/docs/adr/0003-issue-resolution-decisions.md#e011--strip-fragments-from-automatic-redirect-referer-headers)
+specifically preserves removal of fragments from automatically derived redirect
+Referer (RFC9110 section10.1.3). Frozen Go1.26.7 discloses the fragment; native
+does not. An explicit caller-supplied Referer remains unchanged and byte-compatible.
+The separate real process gate asserts the exact Go/native automatic difference,
+seven ordinary equality cases and rejects mutants that disclose the automatic
+fragment or strip an explicit fragment. This exception covers no other header,
+request URI, proxy selection or authentication difference and never turns a
+failed ordinary equality case into an accepted one.
+
+The additional owned proxy gate covers raw request targets, methods, raw/ordinary
+redirects, origin/proxy authentication, private-peer rejection, body/gzip limits
+and deadlines. Native named-jar behavior is separately asserted, since the Go
+honest client has no named jar. Actual HTTPS-proxy tests reject untrusted chains
+and hostname mismatches; a disposable CA additionally proves trusted success on
+Linux through per-process SSL_CERT_FILE. No operator trust-store write occurs.
+The macOS/Windows root backends require their own owned trusted-CA proof and are
+explicitly pending; cross-compilation or two matching TLS failures do not certify
+a successful native trusted TLS connection there.

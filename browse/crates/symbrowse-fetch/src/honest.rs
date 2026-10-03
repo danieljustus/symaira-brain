@@ -26,6 +26,12 @@ const DEFAULT_USER_AGENT: &str = "symfetch/0.1 (+https://github.com/danieljustus
 mod headers;
 #[path = "honest/proxy.rs"]
 pub(crate) mod proxy;
+#[path = "honest/proxy_body.rs"]
+mod proxy_body;
+#[path = "honest/proxy_io.rs"]
+mod proxy_io;
+#[path = "honest/proxy_uri.rs"]
+mod proxy_uri;
 #[path = "honest/redirect.rs"]
 mod redirect;
 #[path = "honest/response.rs"]

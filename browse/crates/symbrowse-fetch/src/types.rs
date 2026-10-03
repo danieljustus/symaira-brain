@@ -154,6 +154,7 @@ pub enum FetchError {
     BlockedPrivate(String),
     InvalidRequest(String),
     Request(reqwest::Error),
+    ProxyTransport(String),
     Redirect(String),
     Archive(String),
     BodyTooLarge(BodyTooLarge),
@@ -175,6 +176,9 @@ impl fmt::Display for FetchError {
             Self::BlockedPrivate(url) => write!(formatter, "blocked_private: {url}"),
             Self::InvalidRequest(message) => write!(formatter, "invalid request: {message}"),
             Self::Request(error) => write!(formatter, "request failed: {error}"),
+            Self::ProxyTransport(error) => {
+                write!(formatter, "HTTP proxy transport failed: {error}")
+            }
             Self::Redirect(error) => write!(formatter, "redirect: {error}"),
             Self::Archive(message) => write!(formatter, "archive request failed: {message}"),
             Self::BodyTooLarge(error) => error.fmt(formatter),

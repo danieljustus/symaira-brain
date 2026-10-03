@@ -22,7 +22,3 @@ python3 port/harness/fetch_control_process.py --go "$go_binary" --rust "$rust_bi
   --go-source "$go_source" --output "$report"
 python3 port/harness/fetch_control_negative.py --go "$go_binary" --rust "$rust_binary" \
   --go-source "$go_source" --output "${report%.json}-controls.json"
-python3 port/harness/fetch_control_raw_proxy.py --go "$go_binary" --rust "$rust_binary" \
-  --output "${report%.json}-raw-proxy.json"
-python3 port/harness/fetch_control_raw_proxy_negative.py --go "$go_binary" --rust "$rust_binary" \
-  --output "${report%.json}-raw-proxy-controls.json"

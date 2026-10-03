@@ -2000,8 +2000,12 @@ dependencies = [
  "flate2",
  "futures-util",
  "html5ever",
+ "http",
  "httpdate",
+ "hyper",
+ "hyper-util",
  "markup5ever_rcdom",
+ "native-tls",
  "rand",
  "reqwest",
  "ruzstd",
@@ -2011,6 +2015,7 @@ dependencies = [
  "symbrowse-core",
  "time",
  "tokio",
+ "tokio-native-tls",
  "url",
 ]
 

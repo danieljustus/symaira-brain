@@ -643,7 +643,7 @@
     {
       "id": "FETCH-010",
       "seam": "static transport honesty",
-      "fixture": "hermetic HTTP/DNS/proxy corpus with static-mode metadata; #773 real frozen-Go/native process corpus and original controls; partial slice only, native six-target CI and complete pipeline parity pending (adr-honest-fetch-control-773.md)",
+      "fixture": "hermetic HTTP/DNS/proxy corpus with static-mode metadata; #773 real frozen-Go/native process corpus and original controls; partial slice only, native six-target CI and complete pipeline parity pending (adr-honest-fetch-control-773.md); raw HTTP-proxy absolute-form URI/TLS/auth/body ownership supplementary gate fetch_control_raw_proxy.py; E011 separately asserts automatic Referer fragment removal and unchanged explicit caller Referer",
       "go_oracle": "new target contract; FETCH-003 through FETCH-008 remain the semantic oracle",
       "expected": "static mode makes no browser-identity or TLS/HTTP2 impersonation claim; it preserves declared HTTP semantics, redirect policy, cookie-session behavior and typed errors without fabricating browser-only state",
       "comparison": "json-semantic",
@@ -672,7 +672,7 @@
     {
       "id": "FETCH-003",
       "seam": "HTTP semantics",
-      "fixture": "methods, headers, body, gzip/br/zstd, charset, limits and content types; Rust slice: crates/symbrowse-fetch/tests/{http,retry,robots}.rs; #773 real frozen-Go/native process corpus and original controls; partial slice only, native six-target CI and complete pipeline parity pending (adr-honest-fetch-control-773.md)",
+      "fixture": "methods, headers, body, gzip/br/zstd, charset, limits and content types; Rust slice: crates/symbrowse-fetch/tests/{http,retry,robots}.rs; #773 real frozen-Go/native process corpus and original controls; partial slice only, native six-target CI and complete pipeline parity pending (adr-honest-fetch-control-773.md); raw HTTP-proxy absolute-form URI/TLS/auth/body ownership supplementary gate fetch_control_raw_proxy.py; E011 separately asserts automatic Referer fragment removal and unchanged explicit caller Referer",
       "go_oracle": "go test ./internal/fetch/fetch -run 'Fetch|Decode|Charset|Body'",
       "expected": "status, headers, decoded UTF-8 body, protocol and size errors match",
       "comparison": "network",
@@ -684,9 +684,9 @@
     {
       "id": "FETCH-004",
       "seam": "redirect/proxy/cookies",
-      "fixture": "redirect chain/loop, cross-host policy, HTTP/SOCKS proxy and named cookie jar; Rust slice: crates/symbrowse-fetch/tests/{http,retry,robots}.rs; #773 real frozen-Go/native process corpus and original controls; partial slice only, native six-target CI and complete pipeline parity pending (adr-honest-fetch-control-773.md)",
+      "fixture": "redirect chain/loop, cross-host policy, HTTP/SOCKS proxy and named cookie jar; Rust slice: crates/symbrowse-fetch/tests/{http,retry,robots}.rs; #773 real frozen-Go/native process corpus and original controls; partial slice only, native six-target CI and complete pipeline parity pending (adr-honest-fetch-control-773.md); raw HTTP-proxy absolute-form URI/TLS/auth/body ownership supplementary gate fetch_control_raw_proxy.py; E011 separately asserts automatic Referer fragment removal and unchanged explicit caller Referer",
       "go_oracle": "go test ./internal/fetch/fetch -run 'Redirect|Proxy|Cookie|Session'",
-      "expected": "hop policy, final URL, cookie persistence and proxy behavior match",
+      "expected": "hop policy, final URL, cookie persistence and proxy behavior match; intentional E011 automatic Referer fragment sanitization is separately asserted against actual Go bytes, never accepted as ordinary equality",
       "comparison": "network",
       "platforms": [
         "all"
