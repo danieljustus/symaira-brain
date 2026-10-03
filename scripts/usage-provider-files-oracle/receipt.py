@@ -11,7 +11,7 @@ records=json.loads(go.read_text())
 assert len(records)==86 and json.loads(native.read_text())==dict(cases=86,passed=86,failed=0,full_reports=85,gated=1)
 cli=json.loads(go.with_name('cli.json').read_text())
 controls=json.loads(go.with_name('controls.json').read_text())
-assert cli['cases']==cli['expected_cases']==cli['passed']==151and cli['failed']==0 and cli['route_cases']==85
+assert cli['cases']==cli['expected_cases']==cli['passed']==151 and cli['failed']==0 and cli['route_cases']==85
 assert len(controls)==5 and [item['exit']for item in controls]==[1,1,101,101,101]
 repo=pathlib.Path(subprocess.check_output(['git','rev-parse','--show-toplevel'],text=True).strip())
 files=sorted((repo/'rust/symbrain-usage/src').rglob('*.rs'))+[repo/path for path in ['rust/symbrain-usage/Cargo.toml','Cargo.lock','rust/symbrain-cli/tests/mcp_cli_tests.rs','rust/symbrain-cli/src/usage_cli.rs','rust/symbrain-cli/src/lib.rs']]+sorted((repo/'scripts/usage-provider-files-oracle').glob('*'))
