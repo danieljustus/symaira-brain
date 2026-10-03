@@ -40,7 +40,7 @@ fn copilot_config_dir() -> PathBuf {
 }
 
 fn copilot_config_dir_for(home: &Path) -> PathBuf {
-    home.join(".config/github-copilot")
+    credential_join(home, ".config/github-copilot")
 }
 
 fn copilot_file_token() -> Option<String> {

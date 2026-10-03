@@ -11,15 +11,22 @@ import sys
 parser=argparse.ArgumentParser()
 for name in ['fixture','go_binary','rust_binary','output']:parser.add_argument(name,type=pathlib.Path)
 parser.add_argument('--control',choices=['exit','missing-case'])
+parser.add_argument('--owner',action='store_true')
 args=parser.parse_args()
 rows=json.loads(args.fixture.read_text())
-assert len(rows)==89 and len({row['id']for row in rows})==89,'exact Copilot/Kimi corpus'
+owner=args.owner
+expected=16 if owner else 89
+assert len(rows)==expected and len({row['id']for row in rows})==expected,'exact Copilot/Kimi corpus'
 rows=[row for row in rows if not row['gated']]
-assert len(rows)==(80 if os.name=='nt'else 81),'complete conservative file subset'
+assert len(rows)==(16 if owner else 80 if os.name=='nt'else 81),'complete conservative file subset'
 missing=[row for row in rows if not row['report']['providers'][0]['configured']]
 expected=len(rows)+2*len(missing)
 records=[]
 for row in rows:
+    before={path:pathlib.Path(path).read_bytes()for path in row['file_sha256']}
+    for path,digest in row['file_sha256'].items():assert hashlib.sha256(before[path]).hexdigest()==digest,'source file hash'
+    link=pathlib.Path(row['link'])if owner else None
+    target=os.readlink(link)if owner else None
     home=pathlib.Path(row['home'])
     env={key:value for key,value in os.environ.items()if key in ['SYSTEMROOT','WINDIR','TEMP','TMP','TMPDIR','PATHEXT']}
     env.update({'HOME':row['home'],'USERPROFILE':row['userprofile'],'XDG_CONFIG_HOME':str(home/'config'),'XDG_DATA_HOME':str(home/'data'),'XDG_CACHE_HOME':str(home/'cache'),'PATH':'','ANTHROPIC_OAUTH_TOKEN':'env://USAGE_LOCAL_FILES_ABSENT','SYMBRAIN_GO_BINARY':str(home/'absent-go')})
@@ -34,7 +41,9 @@ for row in rows:
         if args.control=='exit'and not records:observations[0]['exit']=42
         records.append({'id':row['id']+'-'+mode,'go':observations[0],'rust':observations[1],'matches':observations[0]==observations[1]})
 if args.control=='missing-case':records.pop()
-report={'schema_version':1,'cases':len(records),'expected_cases':expected,'route_cases':len(rows),'missing_file_report_cases':len(missing)*2,'passed':sum(row['matches']for row in records),'failed':sum(not row['matches']for row in records),'binary_sha256':{name:hashlib.sha256(path.read_bytes()).hexdigest()for name,path in [('go',args.go_binary),('rust',args.rust_binary)]},'records':records,'operator_keychain_isolation':'both CLIs seed unresolved OAuth; selected Copilot/Kimi Go constructors never invoke Claude Keychain'}
+    assert all(pathlib.Path(path).read_bytes()==value for path,value in before.items()),'actual CLI sources read-only'
+    if owner:assert os.readlink(link)==target,'actual CLI owner symlink read-only'
+report={'schema_version':1,'cases':len(records),'expected_cases':expected,'route_cases':len(rows),'missing_file_report_cases':len(missing)*2,'passed':sum(row['matches']for row in records),'failed':sum(not row['matches']for row in records),'binary_sha256':{name:hashlib.sha256(path.read_bytes()).hexdigest()for name,path in [('go',args.go_binary),('rust',args.rust_binary)]},'records':records,'read_only_source_cases':len(rows),'operator_keychain_isolation':'both CLIs seed unresolved OAuth; selected Copilot/Kimi Go constructors never invoke Claude Keychain'}
 args.output.write_text(json.dumps(report,indent=2)+'\n')
 if len(records)!=expected:sys.exit('Copilot/Kimi CLI oracle: missing CLI case')
 if report['failed']:sys.exit('Copilot/Kimi CLI oracle: byte/exit mismatch: '+', '.join(row['id']for row in records if not row['matches']))

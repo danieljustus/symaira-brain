@@ -2,7 +2,10 @@
 use crate::{Request, Response, Service, Transport};
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, BTreeSet};
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
+
+include!("copilot_kimi_owner_tests.rs");
 
 fn hex(bytes: &[u8]) -> String {
     const DIGITS: &[u8; 16] = b"0123456789abcdef";
@@ -172,6 +175,7 @@ fn copilot_kimi_oracle_matches_fresh_go() {
     }
     assert_eq!(gated, if cfg!(windows) { 9 } else { 8 });
     baseline_routes(&input);
+    owner_matches_fresh_go();
     if let Ok(path) = std::env::var("USAGE_COPILOT_KIMI_NATIVE") {
         std::fs::write(path,serde_json::to_vec_pretty(&serde_json::json!({"cases":89,"passed":89,"failed":0,"full_reports":full,"gated":gated})).unwrap()).unwrap();
     }

@@ -60,3 +60,14 @@ retained byte-for-byte under
 `migration/evidence/usage-copilot-kimi-768/original-unit-failure/`, including its
 real64-pass/one-failure/two-ignored result. Correcting the deterministic fixture
 to the literal colon prefix does not rewrite frozen or original Go evidence.
+
+The owner correction adds16 complete actual Go/native constructor/report/request
+pairs and16 actual CLI routes, separately from the unchanged89 inputs. Owned
+symlinks and two distinct account/device files exercise lexical HOME and explicit
+KIMI_CODE_HOME joins. Every owner file and link remains unchanged. Actual Go
+native-platform path outputs cover22 Unix or21 Windows Clean/Join pairs, including
+raw non-UTF8 Unix bytes and Windows drive/UNC/device cases. Windows/macOS require
+actual native CI. A separate wrong-owner request mutation must produce a real
+exit101 at the full native request assertion; the original five controls remain.
+Original failed review and executed binaries are preserved before target reuse.
+See `docs/adr/usage-credential-path-owner-768.md` for the decision and limits.

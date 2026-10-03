@@ -45,6 +45,7 @@ include!("provider_config/environment.rs");
 include!("provider_config/commands.rs");
 include!("provider_config/references.rs");
 include!("provider_config/credential_json.rs");
+include!("provider_config/credential_path.rs");
 include!("provider_config/files.rs");
 include!("provider_config/claude_file.rs");
 include!("provider_config/codex_file.rs");

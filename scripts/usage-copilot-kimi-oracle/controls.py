@@ -31,3 +31,17 @@ for control,diagnostic in [('missing-oracle','Go Copilot/Kimi evidence'),('mutat
     finally:fixture.write_bytes(original)
 assert len(controls)==5
 (scratch/'controls.json').write_text(json.dumps(controls,indent=2)+'\n')
+
+# Wrong-owner requests must fail the real production-constructor byte assertion.
+owner=scratch/'owner.json'
+original=owner.read_bytes()
+try:
+    rows=json.loads(original)
+    rows[0]['requests'][0]['headers']['Authorization']=['Bearer wrong-owner-control']
+    rows[0]['requests'][0]['header_value_hex']['Authorization']=['Bearer wrong-owner-control'.encode().hex()]
+    owner.write_text(json.dumps(rows))
+    result=subprocess.run(['cargo','test','--locked','-p','symbrain-usage','--lib','copilot_kimi_oracle_matches_fresh_go','--','--ignored','--nocapture'],capture_output=True,check=False,timeout=120)
+    output=result.stdout+result.stderr
+    assert result.returncode==101 and b'complete owner request bytes'in output and b'1 failed'in output,output.decode()
+    (scratch/'owner-controls.json').write_text(json.dumps([dict(id='wrong-owner-request',exit=result.returncode,intended_diagnostic='complete owner request bytes',output=output.decode())],indent=2)+'\n')
+finally:owner.write_bytes(original)

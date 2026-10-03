@@ -55,7 +55,7 @@ pub fn needs_go_fallback() -> bool {
         // remaining gate until native target receipts define the contract.
         return true;
     }
-    let kimi_path = kimi_cli_home().join("credentials/kimi-code.json");
+    let kimi_path = credential_join(&kimi_cli_home(), "credentials/kimi-code.json");
     let kimi_cli = kimi_file_token_candidate(&kimi_path);
     if kimi_file_requires_go(&kimi_path)
         || kimi_cli
@@ -64,7 +64,7 @@ pub fn needs_go_fallback() -> bool {
     {
         return true;
     }
-    if !kimi_device_id_is_native(&kimi_cli_home().join("device_id")) {
+    if !kimi_device_id_is_native(&credential_join(&kimi_cli_home(), "device_id")) {
         return true;
     }
     // Without a cookie Go has no request strategy, so the workspace is only

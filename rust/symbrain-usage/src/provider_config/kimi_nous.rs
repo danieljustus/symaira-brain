@@ -5,12 +5,12 @@ fn kimi_cli_home() -> PathBuf {
     if let Some(name) = env::var_os("KIMI_CODE_HOME").filter(|value| !value.is_empty()) {
         return PathBuf::from(name);
     }
-    let current = home().join(".kimi-code");
-    if current.join("credentials/kimi-code.json").exists() {
+    let current = credential_join(&home(), ".kimi-code");
+    if credential_join(&current, "credentials/kimi-code.json").exists() {
         return current;
     }
-    let legacy = home().join(".kimi");
-    if legacy.join("credentials/kimi-code.json").exists() {
+    let legacy = credential_join(&home(), ".kimi");
+    if credential_join(&legacy, "credentials/kimi-code.json").exists() {
         return legacy;
     }
     current
@@ -18,8 +18,8 @@ fn kimi_cli_home() -> PathBuf {
 
 /// The CLI's stored access token and device id.
 fn kimi_store(cli_home: &Path) -> (Option<String>, Option<String>) {
-    let token = kimi_file_token_candidate(&cli_home.join("credentials/kimi-code.json"));
-    let device_id = read_limited(&cli_home.join("device_id"))
+    let token = kimi_file_token_candidate(&credential_join(cli_home, "credentials/kimi-code.json"));
+    let device_id = read_limited(&credential_join(cli_home, "device_id"))
         .and_then(|data| String::from_utf8(data).ok())
         .map(|value| value.trim().to_owned())
         .filter(|value| !value.is_empty());
