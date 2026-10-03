@@ -133,13 +133,9 @@ fn oversized_probe_output_terminates_the_child_while_it_is_running() {
 /// therefore records what the shipped strategies send, and this test pins the
 /// port against that recording.
 ///
-/// Two headers are deliberately *not* pinned, because the shipped values carry
-/// no reproducible fact:
-///
-/// - `X-Msh-Os-Version` / `X-Msh-Device-Model`: the shipped code fills them with
-///   the Go runtime version (`internal/usage/kimi.go`), so they cannot be
-///   reproduced from Rust; the port sends neither.
-/// - `X-Server-Instance`: the shipped code generates a random id per request; the
-///   port sends a fixed one. Only the `server-fn:` shape is compared.
+/// The historical fixture masks Go runtime metadata and random request ids.
+/// The separate #620 oracle pins all five Kimi headers against a fresh process
+/// at the Go 1.26.7 compatibility checkpoint. OpenCode's random id is compared
+/// by shape in this historical fixture.
 #[path = "request_oracle_tests.rs"]
 mod request_oracle;
