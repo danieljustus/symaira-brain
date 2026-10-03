@@ -1,0 +1,955 @@
+﻿2026-10-03T22:16:54.7270434Z Current runner version: '2.337.0'
+2026-10-03T22:16:54.7470953Z ##[group]Runner Image Provisioner
+2026-10-03T22:16:54.7472679Z Hosted Compute Agent
+2026-10-03T22:16:54.7473662Z Version: 20260901.588
+2026-10-03T22:16:54.7474776Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-03T22:16:54.7476382Z Build Date: 2026-09-01T19:56:44Z
+2026-10-03T22:16:54.7477599Z Worker ID: {85d1af42-918e-42f0-a9c8-18e3dd2b60c6}
+2026-10-03T22:16:54.7479382Z Azure Region: centralus
+2026-10-03T22:16:54.7480359Z ##[endgroup]
+2026-10-03T22:16:54.7482155Z ##[group]Operating System
+2026-10-03T22:16:54.7483241Z Microsoft Windows Server 2025
+2026-10-03T22:16:54.7484231Z 10.0.26100
+2026-10-03T22:16:54.7484990Z Datacenter
+2026-10-03T22:16:54.7486060Z ##[endgroup]
+2026-10-03T22:16:54.7487023Z ##[group]Runner Image
+2026-10-03T22:16:54.7488007Z Image: windows-2025-vs2026
+2026-10-03T22:16:54.7489000Z Version: 20260925.250.1
+2026-10-03T22:16:54.7492453Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20260925.250/images/windows/Windows2025-VS2026-Readme.md
+2026-10-03T22:16:54.7497564Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20260925.250
+2026-10-03T22:16:54.7499632Z ##[endgroup]
+2026-10-03T22:16:54.7501472Z ##[group]GITHUB_TOKEN Permissions
+2026-10-03T22:16:54.7504091Z Contents: read
+2026-10-03T22:16:54.7505033Z Metadata: read
+2026-10-03T22:16:54.7505889Z ##[endgroup]
+2026-10-03T22:16:54.7508683Z Secret source: Actions
+2026-10-03T22:16:54.7510108Z Cache mode: write
+2026-10-03T22:16:54.7511504Z Prepare workflow directory
+2026-10-03T22:16:54.8611071Z Prepare all required actions
+2026-10-03T22:16:54.8659764Z Getting action download info
+2026-10-03T22:16:55.1045019Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+2026-10-03T22:16:55.2989143Z Download action repository 'actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e' (SHA:b7ad1dad31e06c5925ef5d2fc7ad053ef454303e)
+2026-10-03T22:16:55.9416625Z Download action repository 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+2026-10-03T22:16:56.5076320Z Complete job name: memory schema (windows-2025)
+2026-10-03T22:16:57.1857112Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+2026-10-03T22:16:57.1859166Z with:
+2026-10-03T22:16:57.1860170Z   fetch-depth: 0
+2026-10-03T22:16:57.1860939Z   repository: danieljustus/symaira-brain
+2026-10-03T22:16:57.1864450Z   token: ***
+2026-10-03T22:16:57.1865163Z   ssh-strict: true
+2026-10-03T22:16:57.1865878Z   ssh-user: git
+2026-10-03T22:16:57.1866599Z   persist-credentials: true
+2026-10-03T22:16:57.1867346Z   clean: true
+2026-10-03T22:16:57.1868066Z   sparse-checkout-cone-mode: true
+2026-10-03T22:16:57.1868836Z   fetch-tags: false
+2026-10-03T22:16:57.1869552Z   show-progress: true
+2026-10-03T22:16:57.1870279Z   lfs: false
+2026-10-03T22:16:57.1870965Z   submodules: false
+2026-10-03T22:16:57.1871713Z   set-safe-directory: true
+2026-10-03T22:16:57.1872492Z   allow-unsafe-pr-checkout: false
+2026-10-03T22:16:57.1873535Z env:
+2026-10-03T22:16:57.1874233Z   CARGO_INCREMENTAL: 0
+2026-10-03T22:16:57.1874972Z   CARGO_PROFILE_DEV_DEBUG: 0
+2026-10-03T22:16:57.1875798Z   CARGO_PROFILE_TEST_DEBUG: 0
+2026-10-03T22:16:57.1876540Z ##[endgroup]
+2026-10-03T22:16:57.4968928Z Syncing repository: danieljustus/symaira-brain
+2026-10-03T22:16:57.4974249Z ##[group]Getting Git version info
+2026-10-03T22:16:57.4975940Z Working directory is 'D:\a\symaira-brain\symaira-brain'
+2026-10-03T22:16:57.6221958Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-03T22:16:58.0976123Z git version 2.55.0.windows.5
+2026-10-03T22:16:58.1062935Z ##[endgroup]
+2026-10-03T22:16:58.1078610Z Temporarily overriding HOME='D:\a\_temp\67bf4eb5-76e8-478c-b876-131334391df7' before making global git config changes
+2026-10-03T22:16:58.1081995Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-03T22:16:58.1094183Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\symaira-brain\symaira-brain
+2026-10-03T22:16:58.2634558Z Deleting the contents of 'D:\a\symaira-brain\symaira-brain'
+2026-10-03T22:16:58.2640819Z ##[group]Determining repository object format
+2026-10-03T22:16:58.2642730Z ##[endgroup]
+2026-10-03T22:16:58.2644653Z ##[group]Initializing the repository
+2026-10-03T22:16:58.2654413Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\symaira-brain\symaira-brain
+2026-10-03T22:16:58.4767046Z Initialized empty Git repository in D:/a/symaira-brain/symaira-brain/.git/
+2026-10-03T22:16:58.4849420Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/danieljustus/symaira-brain
+2026-10-03T22:16:58.6014151Z ##[endgroup]
+2026-10-03T22:16:58.6046663Z ##[group]Disabling automatic garbage collection
+2026-10-03T22:16:58.6106072Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-10-03T22:16:58.6565415Z ##[endgroup]
+2026-10-03T22:16:58.6567582Z ##[group]Setting up auth
+2026-10-03T22:16:58.6570785Z Removing SSH command configuration
+2026-10-03T22:16:58.6578479Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-03T22:16:58.7254370Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-03T22:17:00.7381505Z Removing HTTP extra header
+2026-10-03T22:17:00.7394969Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-03T22:17:00.8480711Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-03T22:17:02.3569039Z Removing includeIf entries pointing to credentials config files
+2026-10-03T22:17:02.3584834Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-03T22:17:02.5501479Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-03T22:17:04.2865370Z [command]"C:\Program Files\Git\bin\git.exe" config --file D:\a\_temp\git-credentials-3946b90b-2615-4084-a371-0c1e7c485ee2.config http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-10-03T22:17:04.4322635Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/symaira-brain/symaira-brain/.git.path D:\a\_temp\git-credentials-3946b90b-2615-4084-a371-0c1e7c485ee2.config
+2026-10-03T22:17:04.6317738Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/symaira-brain/symaira-brain/.git/worktrees/*.path D:\a\_temp\git-credentials-3946b90b-2615-4084-a371-0c1e7c485ee2.config
+2026-10-03T22:17:04.8263995Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-3946b90b-2615-4084-a371-0c1e7c485ee2.config
+2026-10-03T22:17:04.9854095Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-3946b90b-2615-4084-a371-0c1e7c485ee2.config
+2026-10-03T22:17:05.1087628Z ##[endgroup]
+2026-10-03T22:17:05.1089013Z ##[group]Fetching the repository
+2026-10-03T22:17:05.1112622Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +69284c6086fe3a181174cab1f93b8b0fc12c471d:refs/remotes/pull/809/merge
+2026-10-03T22:17:08.7261779Z From https://github.com/danieljustus/symaira-brain
+2026-10-03T22:17:08.7262985Z  * [new branch]      agent/skills-preflight-793               -> origin/agent/skills-preflight-793
+2026-10-03T22:17:08.7265703Z  * [new branch]      codex/browse-batch-mcp-profiles-20260926 -> origin/codex/browse-batch-mcp-profiles-20260926
+2026-10-03T22:17:08.7267371Z  * [new branch]      codex/browse-cli-parity-proof-20260927   -> origin/codex/browse-cli-parity-proof-20260927
+2026-10-03T22:17:08.7268903Z  * [new branch]      codex/browse-cli-runtime-20260926        -> origin/codex/browse-cli-runtime-20260926
+2026-10-03T22:17:08.7270371Z  * [new branch]      codex/browse-native-daemon-gate-20260924 -> origin/codex/browse-native-daemon-gate-20260924
+2026-10-03T22:17:08.7271935Z  * [new branch]      codex/browse-perf003-win-timeout-20260926 -> origin/codex/browse-perf003-win-timeout-20260926
+2026-10-03T22:17:08.7273342Z  * [new branch]      codex/browse-upgrade-check-native-20260927 -> origin/codex/browse-upgrade-check-native-20260927
+2026-10-03T22:17:08.7274860Z  * [new branch]      coverage-data                            -> origin/coverage-data
+2026-10-03T22:17:08.7276154Z  * [new branch]      docs/issue-resolution-decisions          -> origin/docs/issue-resolution-decisions
+2026-10-03T22:17:08.7276947Z  * [new branch]      fix/policy-create-windows-race           -> origin/fix/policy-create-windows-race
+2026-10-03T22:17:08.7278079Z  * [new branch]      handoff/20261003-skills-457-partial      -> origin/handoff/20261003-skills-457-partial
+2026-10-03T22:17:08.7278841Z  * [new branch]      handoff/20261003-skills-457-worker       -> origin/handoff/20261003-skills-457-worker
+2026-10-03T22:17:08.7279728Z  * [new branch]      handoff/20261003-skills-476-interrupted  -> origin/handoff/20261003-skills-476-interrupted
+2026-10-03T22:17:08.7281279Z  * [new branch]      issue/621-skills-render-drift            -> origin/issue/621-skills-render-drift
+2026-10-03T22:17:08.7282148Z  * [new branch]      issue/649-native-doctor-schema           -> origin/issue/649-native-doctor-schema
+2026-10-03T22:17:08.7283009Z  * [new branch]      issue/730-release-verification           -> origin/issue/730-release-verification
+2026-10-03T22:17:08.7283733Z  * [new branch]      issue/758-native-memory-store            -> origin/issue/758-native-memory-store
+2026-10-03T22:17:08.7285147Z  * [new branch]      issue/765-native-doctor-fix              -> origin/issue/765-native-doctor-fix
+2026-10-03T22:17:08.7286003Z  * [new branch]      issue/768-native-credential-usage        -> origin/issue/768-native-credential-usage
+2026-10-03T22:17:08.7286797Z  * [new branch]      issue/770-standalone-rust-guard          -> origin/issue/770-standalone-rust-guard
+2026-10-03T22:17:08.7369507Z  * [new branch]      issue/772-daemon-native-acceptance       -> origin/issue/772-daemon-native-acceptance
+2026-10-03T22:17:08.7370764Z  * [new branch]      main                                     -> origin/main
+2026-10-03T22:17:08.7371464Z  * [new tag]         v0.1.0                                   -> v0.1.0
+2026-10-03T22:17:08.7372874Z  * [new tag]         v0.10.0                                  -> v0.10.0
+2026-10-03T22:17:08.7373582Z  * [new tag]         v0.11.0                                  -> v0.11.0
+2026-10-03T22:17:08.7374239Z  * [new tag]         v0.12.0                                  -> v0.12.0
+2026-10-03T22:17:08.7374646Z  * [new tag]         v0.2.0                                   -> v0.2.0
+2026-10-03T22:17:08.7375009Z  * [new tag]         v0.2.1                                   -> v0.2.1
+2026-10-03T22:17:08.7375364Z  * [new tag]         v0.2.2                                   -> v0.2.2
+2026-10-03T22:17:08.7375710Z  * [new tag]         v0.2.3                                   -> v0.2.3
+2026-10-03T22:17:08.7376078Z  * [new tag]         v0.2.4                                   -> v0.2.4
+2026-10-03T22:17:08.7376601Z  * [new tag]         v0.3.0                                   -> v0.3.0
+2026-10-03T22:17:08.7377267Z  * [new tag]         v0.3.1                                   -> v0.3.1
+2026-10-03T22:17:08.7377892Z  * [new tag]         v0.4.0                                   -> v0.4.0
+2026-10-03T22:17:08.7378816Z  * [new tag]         v0.4.1                                   -> v0.4.1
+2026-10-03T22:17:08.7379440Z  * [new tag]         v0.4.2                                   -> v0.4.2
+2026-10-03T22:17:08.7380077Z  * [new tag]         v0.4.3                                   -> v0.4.3
+2026-10-03T22:17:08.7380698Z  * [new tag]         v0.5.0                                   -> v0.5.0
+2026-10-03T22:17:08.7381308Z  * [new tag]         v0.5.1                                   -> v0.5.1
+2026-10-03T22:17:08.7381952Z  * [new tag]         v0.6.0                                   -> v0.6.0
+2026-10-03T22:17:08.7382662Z  * [new tag]         v0.7.0                                   -> v0.7.0
+2026-10-03T22:17:08.7383270Z  * [new tag]         v0.7.1                                   -> v0.7.1
+2026-10-03T22:17:08.7383891Z  * [new tag]         v0.7.2                                   -> v0.7.2
+2026-10-03T22:17:08.7384511Z  * [new tag]         v0.7.3                                   -> v0.7.3
+2026-10-03T22:17:08.7385185Z  * [new tag]         v0.8.0                                   -> v0.8.0
+2026-10-03T22:17:08.7385938Z  * [new tag]         v0.8.1                                   -> v0.8.1
+2026-10-03T22:17:08.7386684Z  * [new tag]         v0.9.0                                   -> v0.9.0
+2026-10-03T22:17:08.7387394Z  * [new tag]         v0.9.1                                   -> v0.9.1
+2026-10-03T22:17:08.7388193Z  * [new ref]         69284c6086fe3a181174cab1f93b8b0fc12c471d -> pull/809/merge
+2026-10-03T22:17:08.7389873Z ##[endgroup]
+2026-10-03T22:17:08.7390506Z ##[group]Determining the checkout info
+2026-10-03T22:17:08.7391243Z ##[endgroup]
+2026-10-03T22:17:08.7391753Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-10-03T22:17:08.7797863Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-10-03T22:17:08.8167394Z ##[group]Checking out the ref
+2026-10-03T22:17:08.8179007Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force refs/remotes/pull/809/merge
+2026-10-03T22:17:09.9623769Z Updating files:  89% (2388/2674)
+2026-10-03T22:17:09.9692258Z Updating files:  90% (2407/2674)
+2026-10-03T22:17:09.9774703Z Updating files:  91% (2434/2674)
+2026-10-03T22:17:09.9848294Z Updating files:  92% (2461/2674)
+2026-10-03T22:17:09.9916903Z Updating files:  93% (2487/2674)
+2026-10-03T22:17:10.0010572Z Updating files:  94% (2514/2674)
+2026-10-03T22:17:10.0096839Z Updating files:  95% (2541/2674)
+2026-10-03T22:17:10.0211803Z Updating files:  96% (2568/2674)
+2026-10-03T22:17:10.0300109Z Updating files:  97% (2594/2674)
+2026-10-03T22:17:10.0383729Z Updating files:  98% (2621/2674)
+2026-10-03T22:17:10.0462267Z Updating files:  99% (2648/2674)
+2026-10-03T22:17:10.0463011Z Updating files: 100% (2674/2674)
+2026-10-03T22:17:10.0463294Z Updating files: 100% (2674/2674), done.
+2026-10-03T22:17:10.0598814Z Note: switching to 'refs/remotes/pull/809/merge'.
+2026-10-03T22:17:10.0599387Z 
+2026-10-03T22:17:10.0599644Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-03T22:17:10.0600191Z changes and commit them, and you can discard any commits you make in this
+2026-10-03T22:17:10.0600668Z state without impacting any branches by switching back to a branch.
+2026-10-03T22:17:10.0601045Z 
+2026-10-03T22:17:10.0601358Z If you want to create a new branch to retain commits you create, you may
+2026-10-03T22:17:10.0602063Z do so (now or later) by using -c with the switch command. Example:
+2026-10-03T22:17:10.0602320Z 
+2026-10-03T22:17:10.0602443Z   git switch -c <new-branch-name>
+2026-10-03T22:17:10.0602617Z 
+2026-10-03T22:17:10.0602715Z Or undo this operation with:
+2026-10-03T22:17:10.0602864Z 
+2026-10-03T22:17:10.0602946Z   git switch -
+2026-10-03T22:17:10.0603060Z 
+2026-10-03T22:17:10.0603266Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-03T22:17:10.0603850Z 
+2026-10-03T22:17:10.0604220Z HEAD is now at 69284c6 Merge b2fdd6c54b23112de4f35ac302da7abd88ab945a into 31de72294521701fc4b1a0bce39f03cc34d72e7e
+2026-10-03T22:17:10.0792405Z ##[endgroup]
+2026-10-03T22:17:10.1222374Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-03T22:17:10.1504902Z 69284c6086fe3a181174cab1f93b8b0fc12c471d
+2026-10-03T22:17:10.1971007Z ##[group]Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+2026-10-03T22:17:10.1971462Z with:
+2026-10-03T22:17:10.1971646Z   go-version: 1.26.7
+2026-10-03T22:17:10.1971864Z   check-latest: false
+2026-10-03T22:17:10.1974725Z   token: ***
+2026-10-03T22:17:10.1974947Z   cache: true
+2026-10-03T22:17:10.1975123Z env:
+2026-10-03T22:17:10.1975297Z   CARGO_INCREMENTAL: 0
+2026-10-03T22:17:10.1975511Z   CARGO_PROFILE_DEV_DEBUG: 0
+2026-10-03T22:17:10.1975741Z   CARGO_PROFILE_TEST_DEBUG: 0
+2026-10-03T22:17:10.1975956Z ##[endgroup]
+2026-10-03T22:17:10.3546648Z Setup go version spec 1.26.7
+2026-10-03T22:17:10.3562879Z Attempting to download 1.26.7...
+2026-10-03T22:17:10.9741816Z matching 1.26.7...
+2026-10-03T22:17:10.9759278Z Acquiring 1.26.7 from https://github.com/actions/go-versions/releases/download/1.26.7-32325178046/go-1.26.7-win32-x64.zip
+2026-10-03T22:17:11.7371750Z Extracting Go...
+2026-10-03T22:17:11.8372246Z [command]"C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Unrestricted -Command "$ErrorActionPreference = 'Stop' ; try { Add-Type -AssemblyName System.IO.Compression.ZipFile } catch { } ; try { [System.IO.Compression.ZipFile]::ExtractToDirectory('D:\a\_temp\go-1.26.7-win32-x64.zip', 'D:\a\_temp\293fee5d-cdd6-465f-998f-e161e1c09636', $true) } catch { if (($_.Exception.GetType().FullName -eq 'System.Management.Automation.MethodException') -or ($_.Exception.GetType().FullName -eq 'System.Management.Automation.RuntimeException') ){ Expand-Archive -LiteralPath 'D:\a\_temp\go-1.26.7-win32-x64.zip' -DestinationPath 'D:\a\_temp\293fee5d-cdd6-465f-998f-e161e1c09636' -Force } else { throw $_ } } ;"
+2026-10-03T22:17:16.8050020Z Successfully extracted go to D:\a\_temp\293fee5d-cdd6-465f-998f-e161e1c09636
+2026-10-03T22:17:16.8050575Z Adding to the cache ...
+2026-10-03T22:17:27.9221663Z Created link C:\hostedtoolcache\windows\go\1.26.7\x64 => D:\hostedtoolcache\windows\go\1.26.7\x64
+2026-10-03T22:17:27.9226112Z Created link C:\hostedtoolcache\windows\go\1.26.7\x64.complete => D:\hostedtoolcache\windows\go\1.26.7\x64.complete
+2026-10-03T22:17:27.9227007Z Successfully cached go to C:\hostedtoolcache\windows\go\1.26.7\x64
+2026-10-03T22:17:27.9232889Z Added go to the path
+2026-10-03T22:17:27.9235038Z Successfully set up Go version 1.26.7
+2026-10-03T22:17:28.2749442Z [command]C:\hostedtoolcache\windows\go\1.26.7\x64\bin\go.exe env GOMODCACHE
+2026-10-03T22:17:28.2802601Z [command]C:\hostedtoolcache\windows\go\1.26.7\x64\bin\go.exe env GOCACHE
+2026-10-03T22:17:28.3078603Z C:\Users\runneradmin\go\pkg\mod
+2026-10-03T22:17:28.3101708Z C:\Users\runneradmin\AppData\Local\go-build
+2026-10-03T22:17:28.5565248Z Cache hit for: setup-go-Windows-x64-go-1.26.7-da193973ccd725fdd1a6125e59e1398e6714d9dc4da6b8fd1ec8954a4a0bd404
+2026-10-03T22:17:29.7046839Z Received 125829120 of 219869179 (57.2%), 118.1 MBs/sec
+2026-10-03T22:17:30.7088346Z Received 184549376 of 219869179 (83.9%), 87.1 MBs/sec
+2026-10-03T22:17:31.1657624Z Received 219869179 of 219869179 (100.0%), 84.7 MBs/sec
+2026-10-03T22:17:31.1660965Z Cache Size: ~210 MB (219869179 B)
+2026-10-03T22:17:31.1745577Z [command]"C:\Program Files\Git\usr\bin\tar.exe" -xf D:/a/_temp/3577ac17-d81a-44d2-97a4-b8292bb8525b/cache.tzst -P -C D:/a/symaira-brain/symaira-brain --force-local --use-compress-program "zstd -d"
+2026-10-03T22:17:54.8432381Z Cache restored successfully
+2026-10-03T22:17:54.8564651Z Cache restored from key: setup-go-Windows-x64-go-1.26.7-da193973ccd725fdd1a6125e59e1398e6714d9dc4da6b8fd1ec8954a4a0bd404
+2026-10-03T22:17:54.8584564Z go version go1.26.7 windows/amd64
+2026-10-03T22:17:54.8584769Z 
+2026-10-03T22:17:54.8585064Z ##[group]go env
+2026-10-03T22:17:55.5253885Z set AR=ar
+2026-10-03T22:17:55.5255742Z set CC=gcc
+2026-10-03T22:17:55.5256304Z set CGO_CFLAGS=-O2 -g
+2026-10-03T22:17:55.5256714Z set CGO_CPPFLAGS=
+2026-10-03T22:17:55.5257089Z set CGO_CXXFLAGS=-O2 -g
+2026-10-03T22:17:55.5257471Z set CGO_ENABLED=1
+2026-10-03T22:17:55.5257826Z set CGO_FFLAGS=-O2 -g
+2026-10-03T22:17:55.5260874Z set CGO_LDFLAGS=-O2 -g
+2026-10-03T22:17:55.5261326Z set CXX=g++
+2026-10-03T22:17:55.5261648Z set GCCGO=gccgo
+2026-10-03T22:17:55.5262095Z set GO111MODULE=
+2026-10-03T22:17:55.5262429Z set GOAMD64=v1
+2026-10-03T22:17:55.5262752Z set GOARCH=amd64
+2026-10-03T22:17:55.5263082Z set GOAUTH=netrc
+2026-10-03T22:17:55.5263403Z set GOBIN=
+2026-10-03T22:17:55.5263845Z set GOCACHE=C:\Users\runneradmin\AppData\Local\go-build
+2026-10-03T22:17:55.5264412Z set GOCACHEPROG=
+2026-10-03T22:17:55.5264740Z set GODEBUG=
+2026-10-03T22:17:55.5265160Z set GOENV=C:\Users\runneradmin\AppData\Roaming\go\env
+2026-10-03T22:17:55.5265695Z set GOEXE=.exe
+2026-10-03T22:17:55.5266019Z set GOEXPERIMENT=
+2026-10-03T22:17:55.5266379Z set GOFIPS140=off
+2026-10-03T22:17:55.5266710Z set GOFLAGS=
+2026-10-03T22:17:55.5268210Z set GOGCCFLAGS=-m64 -mthreads -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=C:\Users\RUNNER~1\AppData\Local\Temp\go-build331480958=/tmp/go-build -gno-record-gcc-switches
+2026-10-03T22:17:55.5269627Z set GOHOSTARCH=amd64
+2026-10-03T22:17:55.5269981Z set GOHOSTOS=windows
+2026-10-03T22:17:55.5270321Z set GOINSECURE=
+2026-10-03T22:17:55.5271225Z set GOMOD=D:\a\symaira-brain\symaira-brain\go.mod
+2026-10-03T22:17:55.5271843Z set GOMODCACHE=C:\Users\runneradmin\go\pkg\mod
+2026-10-03T22:17:55.5272335Z set GONOPROXY=
+2026-10-03T22:17:55.5272647Z set GONOSUMDB=
+2026-10-03T22:17:55.5272957Z set GOOS=windows
+2026-10-03T22:17:55.5273323Z set GOPATH=C:\Users\runneradmin\go
+2026-10-03T22:17:55.5273750Z set GOPRIVATE=
+2026-10-03T22:17:55.5274164Z set GOPROXY=https://proxy.golang.org,direct
+2026-10-03T22:17:55.5274764Z set GOROOT=C:\hostedtoolcache\windows\go\1.26.7\x64
+2026-10-03T22:17:55.5275310Z set GOSUMDB=sum.golang.org
+2026-10-03T22:17:55.5275721Z set GOTELEMETRY=local
+2026-10-03T22:17:55.5276317Z set GOTELEMETRYDIR=C:\Users\runneradmin\AppData\Roaming\go\telemetry
+2026-10-03T22:17:55.5276954Z set GOTMPDIR=
+2026-10-03T22:17:55.5277282Z set GOTOOLCHAIN=local
+2026-10-03T22:17:55.5277909Z set GOTOOLDIR=C:\hostedtoolcache\windows\go\1.26.7\x64\pkg\tool\windows_amd64
+2026-10-03T22:17:55.5278587Z set GOVCS=
+2026-10-03T22:17:55.5278899Z set GOVERSION=go1.26.7
+2026-10-03T22:17:55.5279242Z set GOWORK=
+2026-10-03T22:17:55.5279569Z set PKG_CONFIG=pkg-config
+2026-10-03T22:17:55.5279821Z 
+2026-10-03T22:17:55.5280321Z ##[endgroup]
+2026-10-03T22:17:55.5652515Z ##[group]Run set -euo pipefail
+2026-10-03T22:17:55.5652931Z [36;1mset -euo pipefail[0m
+2026-10-03T22:17:55.5653176Z [36;1mumask 022[0m
+2026-10-03T22:17:55.5653402Z [36;1mcargo fmt --all -- --check[0m
+2026-10-03T22:17:55.5653702Z [36;1mcargo build -p symbrain-cli --locked[0m
+2026-10-03T22:17:55.5654284Z [36;1mcargo clippy -p symbrain-cli --all-targets --all-features --locked -- -D warnings 2>&1 | tee "$CLIPPY_LOG"[0m
+2026-10-03T22:17:55.5676539Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-03T22:17:55.5676965Z env:
+2026-10-03T22:17:55.5677150Z   CARGO_INCREMENTAL: 0
+2026-10-03T22:17:55.5677379Z   CARGO_PROFILE_DEV_DEBUG: 0
+2026-10-03T22:17:55.5677624Z   CARGO_PROFILE_TEST_DEBUG: 0
+2026-10-03T22:17:55.5677858Z   GOTOOLCHAIN: local
+2026-10-03T22:17:55.5678119Z   CLIPPY_LOG: D:\a\_temp/memory-schema-clippy.log
+2026-10-03T22:17:55.5678421Z ##[endgroup]
+2026-10-03T22:17:56.2529989Z info: syncing channel updates for 1.98.0-x86_64-pc-windows-msvc
+2026-10-03T22:17:56.8408485Z info: latest update on 2026-08-20 for version 1.98.0 (88d9e12ae 2026-08-18)
+2026-10-03T22:17:56.8493691Z info: downloading 5 components
+2026-10-03T22:18:04.7959516Z warn: the missing active toolchain `1.98.0-x86_64-pc-windows-msvc` has been auto-installed
+2026-10-03T22:18:04.7960402Z warn: this might cause rustup commands to take longer time to finish than expected
+2026-10-03T22:18:04.7961529Z info: you may opt out with `RUSTUP_AUTO_INSTALL=0` or `rustup set auto-install disable`
+2026-10-03T22:18:07.3450986Z     Updating crates.io index
+2026-10-03T22:18:07.3469580Z     Updating git repository `https://github.com/danieljustus/symaira-corekit`
+2026-10-03T22:18:10.3316658Z  Downloading crates ...
+2026-10-03T22:18:10.5238258Z   Downloaded adler2 v2.0.1
+2026-10-03T22:18:10.5376935Z   Downloaded atomic-waker v1.1.2
+2026-10-03T22:18:10.5482644Z   Downloaded ambient-authority v0.0.2
+2026-10-03T22:18:10.5636121Z   Downloaded cpufeatures v0.3.1
+2026-10-03T22:18:10.5780113Z   Downloaded rand_pcg v0.10.2
+2026-10-03T22:18:10.5990621Z   Downloaded stable_deref_trait v1.2.1
+2026-10-03T22:18:10.6148851Z   Downloaded cfg_aliases v0.2.2
+2026-10-03T22:18:10.6262886Z   Downloaded block-buffer v0.10.4
+2026-10-03T22:18:10.6365975Z   Downloaded ryu v1.0.23
+2026-10-03T22:18:10.6665513Z   Downloaded crypto-common v0.1.7
+2026-10-03T22:18:10.6760708Z   Downloaded cfg-if v1.0.4
+2026-10-03T22:18:10.6873366Z   Downloaded cpufeatures v0.2.17
+2026-10-03T22:18:10.6989825Z   Downloaded autocfg v1.5.1
+2026-10-03T22:18:10.7173197Z   Downloaded rustc-hash v2.1.3
+2026-10-03T22:18:10.7278651Z   Downloaded sync_wrapper v1.0.2
+2026-10-03T22:18:10.7345291Z   Downloaded subtle v2.6.1
+2026-10-03T22:18:10.7437169Z   Downloaded tower-service v0.3.3
+2026-10-03T22:18:10.7516129Z   Downloaded windows-strings v0.5.1
+2026-10-03T22:18:10.7665731Z   Downloaded cap-fs-ext v4.0.3
+2026-10-03T22:18:10.7821323Z   Downloaded idna_adapter v1.2.2
+2026-10-03T22:18:10.7897889Z   Downloaded futures-sink v0.3.34
+2026-10-03T22:18:10.7968398Z   Downloaded http-body v1.1.0
+2026-10-03T22:18:10.8055114Z   Downloaded itoa v1.0.18
+2026-10-03T22:18:10.8175311Z   Downloaded untrusted v0.9.0
+2026-10-03T22:18:10.8313328Z   Downloaded dunce v1.0.5
+2026-10-03T22:18:10.8389515Z   Downloaded equivalent v1.0.2
+2026-10-03T22:18:10.8476162Z   Downloaded futures-core v0.3.34
+2026-10-03T22:18:10.8622038Z   Downloaded form_urlencoded v1.2.2
+2026-10-03T22:18:10.8690164Z   Downloaded windows-targets v0.52.6
+2026-10-03T22:18:10.8770956Z   Downloaded percent-encoding v2.3.2
+2026-10-03T22:18:10.8843318Z   Downloaded potential_utf v0.1.6
+2026-10-03T22:18:10.9105065Z   Downloaded try-lock v0.2.5
+2026-10-03T22:18:11.1021105Z   Downloaded want v0.3.1
+2026-10-03T22:18:11.1097124Z   Downloaded zerofrom-derive v0.1.8
+2026-10-03T22:18:11.1176880Z   Downloaded hostname v0.4.2
+2026-10-03T22:18:11.1318675Z   Downloaded lru-slab v0.1.3
+2026-10-03T22:18:11.1394357Z   Downloaded signal-hook-registry v1.4.8
+2026-10-03T22:18:11.1492964Z   Downloaded slab v0.4.12
+2026-10-03T22:18:11.1595707Z   Downloaded version_check v0.9.5
+2026-10-03T22:18:11.1724726Z   Downloaded windows-link v0.2.1
+2026-10-03T22:18:11.1806134Z   Downloaded fallible-streaming-iterator v0.1.9
+2026-10-03T22:18:11.1881836Z   Downloaded fs2 v0.4.3
+2026-10-03T22:18:11.1971929Z   Downloaded futures-task v0.3.34
+2026-10-03T22:18:11.2115872Z   Downloaded maybe-owned v0.3.4
+2026-10-03T22:18:11.2243226Z   Downloaded rand_core v0.10.1
+2026-10-03T22:18:11.2427058Z   Downloaded tokio-macros v2.7.2
+2026-10-03T22:18:11.2524284Z   Downloaded utf8_iter v1.0.4
+2026-10-03T22:18:11.2668916Z   Downloaded windows-registry v0.6.1
+2026-10-03T22:18:11.2820193Z   Downloaded windows-result v0.4.1
+2026-10-03T22:18:11.3013317Z   Downloaded futures-macro v0.3.34
+2026-10-03T22:18:11.3156424Z   Downloaded tower-layer v0.3.3
+2026-10-03T22:18:11.3256927Z   Downloaded winx v0.36.4
+2026-10-03T22:18:11.3388823Z   Downloaded yoke-derive v0.8.4
+2026-10-03T22:18:11.3479231Z   Downloaded zerofrom v0.1.8
+2026-10-03T22:18:11.3567529Z   Downloaded digest v0.10.7
+2026-10-03T22:18:11.3741139Z   Downloaded displaydoc v0.2.7
+2026-10-03T22:18:11.3944475Z   Downloaded fs-set-times v0.20.3
+2026-10-03T22:18:11.4087647Z   Downloaded sha2 v0.10.9
+2026-10-03T22:18:11.4342931Z   Downloaded simd-adler32 v0.3.10
+2026-10-03T22:18:11.4578527Z   Downloaded toml_datetime v1.1.1+spec-1.1.0
+2026-10-03T22:18:11.4712111Z   Downloaded zerovec-derive v0.11.6
+2026-10-03T22:18:11.4900974Z   Downloaded zmij v1.0.23
+2026-10-03T22:18:11.5036713Z   Downloaded cap-std v4.0.3
+2026-10-03T22:18:11.6235602Z   Downloaded cmake v0.1.58
+2026-10-03T22:18:11.6584158Z   Downloaded errno v0.3.14
+2026-10-03T22:18:11.6715705Z   Downloaded foldhash v0.2.0
+2026-10-03T22:18:11.6942880Z   Downloaded fs_extra v1.3.0
+2026-10-03T22:18:11.7071816Z   Downloaded http-body-util v0.1.5
+2026-10-03T22:18:11.7288930Z   Downloaded io-lifetimes v2.0.4
+2026-10-03T22:18:11.7430904Z   Downloaded utf8-zero v0.8.1
+2026-10-03T22:18:11.7568109Z   Downloaded filetime v0.2.29
+2026-10-03T22:18:11.7734550Z   Downloaded io-lifetimes v3.0.1
+2026-10-03T22:18:11.7876800Z   Downloaded ipnet v2.12.2
+2026-10-03T22:18:11.8010294Z   Downloaded shlex v2.0.1
+2026-10-03T22:18:11.8115012Z   Downloaded smallvec v1.16.0
+2026-10-03T22:18:11.8202375Z   Downloaded thiserror v2.0.20
+2026-10-03T22:18:11.8959949Z   Downloaded thiserror-impl v2.0.20
+2026-10-03T22:18:11.9119645Z   Downloaded tinystr v0.8.4
+2026-10-03T22:18:11.9283704Z   Downloaded toml_writer v1.1.2+spec-1.1.0
+2026-10-03T22:18:11.9433731Z   Downloaded hyper-rustls v0.27.10
+2026-10-03T22:18:11.9551652Z   Downloaded synstructure v0.14.0
+2026-10-03T22:18:11.9625006Z   Downloaded tokio-rustls v0.26.6
+2026-10-03T22:18:11.9747534Z   Downloaded writeable v0.6.4
+2026-10-03T22:18:11.9946601Z   Downloaded yoke v0.8.3
+2026-10-03T22:18:12.0204580Z   Downloaded zeroize v1.9.0
+2026-10-03T22:18:12.0332734Z   Downloaded fallible-iterator v0.3.0
+2026-10-03T22:18:12.0486993Z   Downloaded fastrand v2.5.0
+2026-10-03T22:18:12.0606184Z   Downloaded find-msvc-tools v0.1.12
+2026-10-03T22:18:12.0740928Z   Downloaded generic-array v0.14.7
+2026-10-03T22:18:12.0866085Z   Downloaded jobserver v0.1.35
+2026-10-03T22:18:12.1025327Z   Downloaded litemap v0.8.3
+2026-10-03T22:18:12.1214731Z   Downloaded once_cell v1.21.4
+2026-10-03T22:18:12.1437828Z   Downloaded pin-project-lite v0.2.17
+2026-10-03T22:18:12.2068671Z   Downloaded pkg-config v0.3.34
+2026-10-03T22:18:12.2187992Z   Downloaded quote v1.0.47
+2026-10-03T22:18:12.2431524Z   Downloaded rustls-pki-types v1.15.1
+2026-10-03T22:18:12.5616519Z   Downloaded serde_derive v1.0.229
+2026-10-03T22:18:12.5959671Z   Downloaded toml_parser v1.1.3+spec-1.1.0
+2026-10-03T22:18:12.6143907Z   Downloaded unicode-ident v1.0.24
+2026-10-03T22:18:12.6367055Z   Downloaded bitflags v2.13.1
+2026-10-03T22:18:12.6811797Z   Downloaded chacha20 v0.10.2
+2026-10-03T22:18:12.7003263Z   Downloaded crc32fast v1.5.1
+2026-10-03T22:18:12.7171953Z   Downloaded futures-channel v0.3.34
+2026-10-03T22:18:12.7324287Z   Downloaded getrandom v0.2.17
+2026-10-03T22:18:12.7578114Z   Downloaded hashlink v0.12.1
+2026-10-03T22:18:12.7747788Z   Downloaded hmac v0.12.1
+2026-10-03T22:18:12.7923093Z   Downloaded httparse v1.10.1
+2026-10-03T22:18:12.8099398Z   Downloaded icu_provider v2.3.1
+2026-10-03T22:18:12.8353256Z   Downloaded io-extras v0.19.0
+2026-10-03T22:18:12.8543064Z   Downloaded log v0.4.34
+2026-10-03T22:18:12.8712751Z   Downloaded proc-macro2 v1.0.107
+2026-10-03T22:18:12.8964783Z   Downloaded quinn-udp v0.5.16
+2026-10-03T22:18:12.9106076Z   Downloaded rustls-platform-verifier v0.7.1
+2026-10-03T22:18:12.9477410Z   Downloaded serde_core v1.0.229
+2026-10-03T22:18:12.9697197Z   Downloaded serde_yaml_ng v0.10.0
+2026-10-03T22:18:13.0006131Z   Downloaded socket2 v0.6.5
+2026-10-03T22:18:13.0113538Z   Downloaded tar v0.4.46
+2026-10-03T22:18:13.0323165Z   Downloaded tempfile v3.27.0
+2026-10-03T22:18:13.0536159Z   Downloaded tinyvec v1.13.3
+2026-10-03T22:18:13.0825663Z   Downloaded toml_edit v0.25.13+spec-1.1.0
+2026-10-03T22:18:13.1177851Z   Downloaded tracing-core v0.1.36
+2026-10-03T22:18:13.1422719Z   Downloaded unsafe-libyaml v0.2.11
+2026-10-03T22:18:13.1735187Z   Downloaded ureq-proto v0.6.2
+2026-10-03T22:18:13.2125481Z   Downloaded bytes v1.12.1
+2026-10-03T22:18:13.2415173Z   Downloaded getrandom v0.4.3
+2026-10-03T22:18:13.2736868Z   Downloaded icu_normalizer_data v2.3.0
+2026-10-03T22:18:13.2876035Z   Downloaded miniz_oxide v0.9.1
+2026-10-03T22:18:13.3064505Z   Downloaded rustls-webpki v0.103.15
+2026-10-03T22:18:13.3285260Z   Downloaded signal-hook v0.3.18
+2026-10-03T22:18:13.3541630Z   Downloaded zerotrie v0.2.5
+2026-10-03T22:18:13.3877423Z   Downloaded base64 v0.22.1
+2026-10-03T22:18:13.4160323Z   Downloaded base64 v0.23.1
+2026-10-03T22:18:13.4452947Z   Downloaded cap-primitives v4.0.3
+2026-10-03T22:18:13.5643141Z   Downloaded flate2 v1.1.10
+2026-10-03T22:18:13.6110961Z   Downloaded getrandom v0.3.3
+2026-10-03T22:18:13.6432299Z   Downloaded icu_collections v2.3.0
+2026-10-03T22:18:14.2281679Z   Downloaded icu_locale_core v2.3.0
+2026-10-03T22:18:14.2944540Z   Downloaded indexmap v2.14.2
+2026-10-03T22:18:14.3277946Z   Downloaded num-traits v0.2.19
+2026-10-03T22:18:14.3493213Z   Downloaded quinn v0.11.12
+2026-10-03T22:18:14.3739078Z   Downloaded serde v1.0.229
+2026-10-03T22:18:14.4003985Z   Downloaded tower v0.5.3
+2026-10-03T22:18:14.4904273Z   Downloaded typed-path v0.12.3
+2026-10-03T22:18:14.5469580Z   Downloaded typenum v1.20.1
+2026-10-03T22:18:14.5688879Z   Downloaded url v2.5.8
+2026-10-03T22:18:14.5889627Z   Downloaded icu_properties v2.3.0
+2026-10-03T22:18:14.6107617Z   Downloaded mio v1.2.3
+2026-10-03T22:18:14.6672809Z   Downloaded rand v0.10.3
+2026-10-03T22:18:14.6994209Z   Downloaded zerovec v0.11.8
+2026-10-03T22:18:14.7586379Z   Downloaded cc v1.4.5
+2026-10-03T22:18:14.7861204Z   Downloaded http v1.5.0
+2026-10-03T22:18:14.8165279Z   Downloaded memchr v2.8.3
+2026-10-03T22:18:14.8650638Z   Downloaded hyper-util v0.1.21
+2026-10-03T22:18:14.9185307Z   Downloaded idna v1.1.0
+2026-10-03T22:18:14.9412167Z   Downloaded regex v1.13.1
+2026-10-03T22:18:14.9893656Z   Downloaded serde_json v1.0.151
+2026-10-03T22:18:15.3623279Z   Downloaded tower-http v0.6.11
+2026-10-03T22:18:15.4619903Z   Downloaded ureq v3.4.1
+2026-10-03T22:18:15.5110659Z   Downloaded zip v8.6.0
+2026-10-03T22:18:15.5510526Z   Downloaded icu_properties_data v2.3.0
+2026-10-03T22:18:15.6629372Z   Downloaded reqwest v0.13.4
+2026-10-03T22:18:15.7023674Z   Downloaded tokio-util v0.7.19
+2026-10-03T22:18:15.7692561Z   Downloaded aho-corasick v1.1.5
+2026-10-03T22:18:15.8072886Z   Downloaded futures-util v0.3.34
+2026-10-03T22:18:15.9357876Z   Downloaded hashbrown v0.17.1
+2026-10-03T22:18:15.9737806Z   Downloaded hkdf v0.12.4
+2026-10-03T22:18:15.9882858Z   Downloaded hyper v1.11.1
+2026-10-03T22:18:16.0410570Z   Downloaded rusqlite v0.40.2
+2026-10-03T22:18:16.0927461Z   Downloaded webpki-roots v1.0.9
+2026-10-03T22:18:16.1051280Z   Downloaded winnow v1.0.4
+2026-10-03T22:18:16.1902042Z   Downloaded zlib-rs v0.6.7
+2026-10-03T22:18:16.2364436Z   Downloaded vcpkg v0.2.15
+2026-10-03T22:18:17.1418306Z   Downloaded chrono v0.4.45
+2026-10-03T22:18:17.1836397Z   Downloaded aws-lc-rs v1.18.1
+2026-10-03T22:18:17.2828017Z   Downloaded quinn-proto v0.11.19
+2026-10-03T22:18:17.3387984Z   Downloaded syn v3.0.5
+2026-10-03T22:18:17.4133479Z   Downloaded regex-syntax v0.8.11
+2026-10-03T22:18:17.4481743Z   Downloaded rustls v0.23.45
+2026-10-03T22:18:17.5437304Z   Downloaded tracing v0.1.44
+2026-10-03T22:18:17.6192159Z   Downloaded icu_normalizer v2.3.0
+2026-10-03T22:18:17.6595892Z   Downloaded regex-automata v0.4.18
+2026-10-03T22:18:17.7417428Z   Downloaded windows_x86_64_msvc v0.52.6
+2026-10-03T22:18:17.7828637Z   Downloaded rustix v1.1.4
+2026-10-03T22:18:18.3119355Z   Downloaded tokio v1.53.1
+2026-10-03T22:18:19.1131252Z   Downloaded libc v0.2.189
+2026-10-03T22:18:19.6093343Z   Downloaded windows-sys v0.52.0
+2026-10-03T22:18:19.9064471Z   Downloaded winapi v0.3.9
+2026-10-03T22:18:20.1759613Z   Downloaded ring v0.17.14
+2026-10-03T22:18:20.4845895Z   Downloaded windows-sys v0.61.2
+2026-10-03T22:18:21.5095911Z   Downloaded libsqlite3-sys v0.38.2
+2026-10-03T22:18:21.5933321Z   Downloaded aws-lc-sys v0.45.0
+2026-10-03T22:18:24.3376314Z    Compiling proc-macro2 v1.0.107
+2026-10-03T22:18:24.3377021Z    Compiling quote v1.0.47
+2026-10-03T22:18:24.3377995Z    Compiling unicode-ident v1.0.24
+2026-10-03T22:18:24.3379717Z    Compiling cfg-if v1.0.4
+2026-10-03T22:18:24.4033019Z    Compiling windows-link v0.2.1
+2026-10-03T22:18:24.4572787Z    Compiling windows-sys v0.61.2
+2026-10-03T22:18:24.4610130Z    Compiling getrandom v0.4.3
+2026-10-03T22:18:26.3769537Z    Compiling itoa v1.0.18
+2026-10-03T22:18:26.6174230Z    Compiling jobserver v0.1.35
+2026-10-03T22:18:26.6404486Z    Compiling shlex v2.0.1
+2026-10-03T22:18:26.9112781Z    Compiling find-msvc-tools v0.1.12
+2026-10-03T22:18:27.1516033Z    Compiling once_cell v1.21.4
+2026-10-03T22:18:27.7548348Z    Compiling syn v3.0.5
+2026-10-03T22:18:27.8850534Z    Compiling cc v1.4.5
+2026-10-03T22:18:28.3784694Z    Compiling serde_core v1.0.229
+2026-10-03T22:18:29.7620924Z    Compiling serde v1.0.229
+2026-10-03T22:18:30.1617609Z    Compiling memchr v2.8.3
+2026-10-03T22:18:30.7676570Z    Compiling subtle v2.6.1
+2026-10-03T22:18:30.9243633Z    Compiling windows_x86_64_msvc v0.52.6
+2026-10-03T22:18:31.1956483Z    Compiling zmij v1.0.23
+2026-10-03T22:18:31.2727193Z    Compiling bytes v1.12.1
+2026-10-03T22:18:31.5886275Z    Compiling serde_json v1.0.151
+2026-10-03T22:18:31.8737368Z    Compiling foldhash v0.2.0
+2026-10-03T22:18:32.0580953Z    Compiling hashbrown v0.17.1
+2026-10-03T22:18:32.6085716Z    Compiling cmake v0.1.58
+2026-10-03T22:18:32.7568162Z    Compiling fs_extra v1.3.0
+2026-10-03T22:18:32.9679831Z    Compiling synstructure v0.14.0
+2026-10-03T22:18:33.1160303Z    Compiling bitflags v2.13.1
+2026-10-03T22:18:33.2222485Z    Compiling stable_deref_trait v1.2.1
+2026-10-03T22:18:33.2845465Z    Compiling dunce v1.0.5
+2026-10-03T22:18:33.4979638Z    Compiling aws-lc-sys v0.45.0
+2026-10-03T22:18:33.9626047Z    Compiling windows-targets v0.52.6
+2026-10-03T22:18:34.0644988Z    Compiling version_check v0.9.5
+2026-10-03T22:18:34.4928349Z    Compiling autocfg v1.5.1
+2026-10-03T22:18:35.1047733Z    Compiling num-traits v0.2.19
+2026-10-03T22:18:35.3390463Z    Compiling generic-array v0.14.7
+2026-10-03T22:18:35.5585169Z    Compiling windows-sys v0.52.0
+2026-10-03T22:18:35.6796369Z    Compiling equivalent v1.0.2
+2026-10-03T22:18:36.0136119Z    Compiling indexmap v2.14.2
+2026-10-03T22:18:36.4831221Z    Compiling serde_derive v1.0.229
+2026-10-03T22:18:36.8446540Z    Compiling zerofrom-derive v0.1.8
+2026-10-03T22:18:38.8087218Z    Compiling zerofrom v0.1.8
+2026-10-03T22:18:38.9357839Z    Compiling yoke-derive v0.8.4
+2026-10-03T22:18:40.7389172Z    Compiling yoke v0.8.3
+2026-10-03T22:18:40.8391978Z    Compiling zerovec-derive v0.11.6
+2026-10-03T22:18:40.9886874Z    Compiling displaydoc v0.2.7
+2026-10-03T22:18:42.0208380Z    Compiling ring v0.17.14
+2026-10-03T22:18:42.0923711Z    Compiling pin-project-lite v0.2.17
+2026-10-03T22:18:42.1755199Z    Compiling aws-lc-rs v1.18.1
+2026-10-03T22:18:42.5007207Z    Compiling zeroize v1.9.0
+2026-10-03T22:18:42.5579325Z    Compiling zerovec v0.11.8
+2026-10-03T22:18:42.7146145Z    Compiling libc v0.2.189
+2026-10-03T22:18:42.7202115Z    Compiling typenum v1.20.1
+2026-10-03T22:18:44.5878424Z    Compiling http v1.5.0
+2026-10-03T22:18:44.6584792Z    Compiling futures-core v0.3.34
+2026-10-03T22:18:44.7742377Z    Compiling winnow v1.0.4
+2026-10-03T22:18:46.0222838Z    Compiling fastrand v2.5.0
+2026-10-03T22:18:46.2798255Z    Compiling ipnet v2.12.2
+2026-10-03T22:18:46.4096394Z    Compiling tempfile v3.27.0
+2026-10-03T22:18:46.8124823Z    Compiling toml_parser v1.1.3+spec-1.1.0
+2026-10-03T22:18:46.9580241Z    Compiling chrono v0.4.45
+2026-10-03T22:18:47.1231425Z    Compiling rustls-pki-types v1.15.1
+2026-10-03T22:18:47.8253160Z    Compiling getrandom v0.2.17
+2026-10-03T22:18:47.8543195Z    Compiling httparse v1.10.1
+2026-10-03T22:18:47.9554763Z    Compiling untrusted v0.9.0
+2026-10-03T22:18:48.0445599Z    Compiling toml_writer v1.1.2+spec-1.1.0
+2026-10-03T22:18:48.2859217Z    Compiling toml_datetime v1.1.1+spec-1.1.0
+2026-10-03T22:18:48.3302148Z    Compiling smallvec v1.16.0
+2026-10-03T22:18:48.5825096Z    Compiling toml_edit v0.25.13+spec-1.1.0
+2026-10-03T22:18:48.8966571Z    Compiling crypto-common v0.1.7
+2026-10-03T22:18:48.9861515Z    Compiling block-buffer v0.10.4
+2026-10-03T22:18:49.1242975Z    Compiling tinystr v0.8.4
+2026-10-03T22:18:49.3730476Z    Compiling tokio-macros v2.7.2
+2026-10-03T22:18:50.3769598Z    Compiling mio v1.2.3
+2026-10-03T22:18:50.6312106Z    Compiling socket2 v0.6.5
+2026-10-03T22:18:51.2733864Z    Compiling writeable v0.6.4
+2026-10-03T22:18:51.4882293Z    Compiling log v0.4.34
+2026-10-03T22:18:51.6000609Z    Compiling io-lifetimes v2.0.4
+2026-10-03T22:18:51.6894686Z    Compiling litemap v0.8.3
+2026-10-03T22:18:51.8581122Z    Compiling percent-encoding v2.3.2
+2026-10-03T22:18:51.9406891Z    Compiling io-lifetimes v3.0.1
+2026-10-03T22:18:51.9501199Z    Compiling rustls v0.23.45
+2026-10-03T22:18:52.1217372Z    Compiling icu_locale_core v2.3.0
+2026-10-03T22:18:52.1347409Z    Compiling tokio v1.53.1
+2026-10-03T22:18:52.3080301Z    Compiling digest v0.10.7
+2026-10-03T22:18:52.9649784Z    Compiling potential_utf v0.1.6
+2026-10-03T22:18:53.1300486Z    Compiling zerotrie v0.2.5
+2026-10-03T22:18:53.5436847Z    Compiling icu_properties_data v2.3.0
+2026-10-03T22:18:53.7746660Z    Compiling icu_normalizer_data v2.3.0
+2026-10-03T22:18:53.9571667Z    Compiling io-extras v0.19.0
+2026-10-03T22:18:54.0078488Z    Compiling utf8_iter v1.0.4
+2026-10-03T22:18:54.1577198Z    Compiling icu_collections v2.3.0
+2026-10-03T22:18:54.4497731Z    Compiling icu_provider v2.3.1
+2026-10-03T22:18:55.0170894Z    Compiling futures-macro v0.3.34
+2026-10-03T22:18:55.0234460Z    Compiling futures-task v0.3.34
+2026-10-03T22:18:55.2090201Z    Compiling cap-primitives v4.0.3
+2026-10-03T22:18:55.5861399Z    Compiling slab v0.4.12
+2026-10-03T22:18:55.7889131Z    Compiling base64 v0.23.1
+2026-10-03T22:18:56.1309962Z    Compiling futures-util v0.3.34
+2026-10-03T22:18:56.7023336Z    Compiling fs-set-times v0.20.3
+2026-10-03T22:18:57.5041426Z    Compiling http-body v1.1.0
+2026-10-03T22:18:57.6419609Z    Compiling winx v0.36.4
+2026-10-03T22:18:58.4352220Z    Compiling maybe-owned v0.3.4
+2026-10-03T22:18:58.6598019Z    Compiling cap-std v4.0.3
+2026-10-03T22:18:58.7996330Z    Compiling ambient-authority v0.0.2
+2026-10-03T22:18:58.8508604Z    Compiling cpufeatures v0.2.17
+2026-10-03T22:18:58.8984660Z    Compiling sha2 v0.10.9
+2026-10-03T22:18:59.1321291Z    Compiling icu_normalizer v2.3.0
+2026-10-03T22:18:59.4674438Z    Compiling icu_properties v2.3.0
+2026-10-03T22:18:59.8957641Z    Compiling symbrain-core v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-core)
+2026-10-03T22:19:00.0066232Z    Compiling errno v0.3.14
+2026-10-03T22:19:00.2039167Z    Compiling tower-service v0.3.3
+2026-10-03T22:19:00.2866809Z    Compiling cap-fs-ext v4.0.3
+2026-10-03T22:19:00.6406324Z    Compiling try-lock v0.2.5
+2026-10-03T22:19:00.7359273Z    Compiling want v0.3.1
+2026-10-03T22:19:01.0045448Z    Compiling futures-channel v0.3.34
+2026-10-03T22:19:01.2740311Z    Compiling idna_adapter v1.2.2
+2026-10-03T22:19:01.3297883Z    Compiling tracing-core v0.1.36
+2026-10-03T22:19:01.3850410Z    Compiling windows-strings v0.5.1
+2026-10-03T22:19:01.6349128Z    Compiling windows-result v0.4.1
+2026-10-03T22:19:01.7836962Z    Compiling atomic-waker v1.1.2
+2026-10-03T22:19:01.8949412Z    Compiling rustix v1.1.4
+2026-10-03T22:19:01.9280365Z    Compiling hyper v1.11.1
+2026-10-03T22:19:02.1860104Z    Compiling tracing v0.1.44
+2026-10-03T22:19:02.4899466Z    Compiling windows-registry v0.6.1
+2026-10-03T22:19:02.5189693Z    Compiling idna v1.1.0
+2026-10-03T22:19:02.9872613Z    Compiling ureq-proto v0.6.2
+2026-10-03T22:19:03.5825477Z    Compiling form_urlencoded v1.2.2
+2026-10-03T22:19:03.7262488Z    Compiling webpki-roots v1.0.9
+2026-10-03T22:19:03.7443845Z    Compiling sync_wrapper v1.0.2
+2026-10-03T22:19:03.8349349Z    Compiling vcpkg v0.2.15
+2026-10-03T22:19:03.8479202Z    Compiling thiserror v2.0.20
+2026-10-03T22:19:04.0972530Z    Compiling tower-layer v0.3.3
+2026-10-03T22:19:04.2608049Z    Compiling utf8-zero v0.8.1
+2026-10-03T22:19:04.2945708Z    Compiling pkg-config v0.3.34
+2026-10-03T22:19:04.4356573Z    Compiling tower v0.5.3
+2026-10-03T22:19:05.0285651Z    Compiling url v2.5.8
+2026-10-03T22:19:05.0946906Z    Compiling libsqlite3-sys v0.38.2
+2026-10-03T22:19:05.1582353Z    Compiling hyper-util v0.1.21
+2026-10-03T22:19:05.8629168Z    Compiling thiserror-impl v2.0.20
+2026-10-03T22:19:06.2575030Z    Compiling aho-corasick v1.1.5
+2026-10-03T22:19:07.3386664Z    Compiling crc32fast v1.5.1
+2026-10-03T22:19:07.6572436Z    Compiling winapi v0.3.9
+2026-10-03T22:19:07.8097290Z    Compiling regex-syntax v0.8.11
+2026-10-03T22:19:08.2180271Z    Compiling getrandom v0.3.3
+2026-10-03T22:19:08.5772047Z    Compiling base64 v0.22.1
+2026-10-03T22:19:09.3084361Z    Compiling tower-http v0.6.11
+2026-10-03T22:19:09.8796142Z    Compiling symbrain-policy v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-policy)
+2026-10-03T22:19:11.4359174Z    Compiling regex-automata v0.4.18
+2026-10-03T22:19:12.1603128Z    Compiling http-body-util v0.1.5
+2026-10-03T22:19:12.2391079Z    Compiling adler2 v2.0.1
+2026-10-03T22:19:12.3652606Z    Compiling simd-adler32 v0.3.10
+2026-10-03T22:19:12.5028375Z    Compiling futures-sink v0.3.34
+2026-10-03T22:19:12.5740264Z    Compiling miniz_oxide v0.9.1
+2026-10-03T22:19:12.6502673Z    Compiling tokio-util v0.7.19
+2026-10-03T22:19:13.8415284Z    Compiling symaira-core-secretref v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+2026-10-03T22:19:14.6675065Z    Compiling symbrain-harness v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-harness)
+2026-10-03T22:19:15.9215428Z    Compiling regex v1.13.1
+2026-10-03T22:19:16.3627783Z    Compiling hashlink v0.12.1
+2026-10-03T22:19:16.5492304Z    Compiling symaira-core-exit v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+2026-10-03T22:19:16.7348879Z    Compiling fallible-streaming-iterator v0.1.9
+2026-10-03T22:19:16.7841632Z    Compiling unsafe-libyaml v0.2.11
+2026-10-03T22:19:16.8938827Z    Compiling ryu v1.0.23
+2026-10-03T22:19:17.0818556Z    Compiling fallible-iterator v0.3.0
+2026-10-03T22:19:17.2342098Z    Compiling fs2 v0.4.3
+2026-10-03T22:19:17.4786791Z    Compiling flate2 v1.1.10
+2026-10-03T22:19:17.5421576Z    Compiling rusqlite v0.40.2
+2026-10-03T22:19:18.0339533Z    Compiling serde_yaml_ng v0.10.0
+2026-10-03T22:19:18.0638939Z    Compiling symbrain-activity v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-activity)
+2026-10-03T22:19:18.7053096Z    Compiling hmac v0.12.1
+2026-10-03T22:19:18.8283190Z    Compiling symbrain-mcp v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-mcp)
+2026-10-03T22:19:19.4214889Z    Compiling hostname v0.4.2
+2026-10-03T22:19:19.5145796Z    Compiling filetime v0.2.29
+2026-10-03T22:19:19.5340907Z    Compiling signal-hook v0.3.18
+2026-10-03T22:19:19.6764011Z    Compiling typed-path v0.12.3
+2026-10-03T22:19:19.7697107Z    Compiling tar v0.4.46
+2026-10-03T22:19:20.4241799Z    Compiling symbrain-skills v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-skills)
+2026-10-03T22:19:21.1577120Z    Compiling zip v8.6.0
+2026-10-03T22:19:21.7066153Z    Compiling symbrain-broker v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-broker)
+2026-10-03T22:19:22.8391595Z    Compiling hkdf v0.12.4
+2026-10-03T22:19:23.0245748Z    Compiling symbrain-catalog v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-catalog)
+2026-10-03T22:19:23.2959528Z    Compiling symbrain-audit v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-audit)
+2026-10-03T22:19:23.5665090Z    Compiling symbrain-instructions v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-instructions)
+2026-10-03T22:19:23.8895381Z    Compiling signal-hook-registry v1.4.8
+2026-10-03T22:19:24.2445604Z    Compiling symbrain-patterns v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-patterns)
+2026-10-03T22:19:25.0978363Z    Compiling symbrain-cli v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-cli)
+2026-10-03T22:19:25.3857542Z    Compiling symbrain-adapter v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-adapter)
+2026-10-03T22:19:25.7323413Z    Compiling symbrain-guard-core v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-guard-core)
+2026-10-03T22:20:01.9651354Z    Compiling rustls-webpki v0.103.15
+2026-10-03T22:20:06.0269215Z    Compiling ureq v3.4.1
+2026-10-03T22:20:06.0269833Z    Compiling tokio-rustls v0.26.6
+2026-10-03T22:20:06.0270544Z    Compiling rustls-platform-verifier v0.7.1
+2026-10-03T22:20:06.3810297Z    Compiling hyper-rustls v0.27.10
+2026-10-03T22:20:06.7004353Z    Compiling reqwest v0.13.4
+2026-10-03T22:20:08.5222918Z    Compiling symbrain-usage v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-usage)
+2026-10-03T22:20:08.7619959Z    Compiling symaira-core-llm v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+2026-10-03T22:20:08.7737903Z    Compiling symbrain-managed v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-managed)
+2026-10-03T22:20:10.8603406Z    Compiling symbrain-memory v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-memory)
+2026-10-03T22:20:12.3565032Z    Compiling symbrain-gateway v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-gateway)
+2026-10-03T22:20:18.2029580Z     Finished `dev` profile [unoptimized] target(s) in 2m 10s
+2026-10-03T22:20:19.3381428Z     Checking windows-link v0.2.1
+2026-10-03T22:20:19.3382059Z     Checking cfg-if v1.0.4
+2026-10-03T22:20:19.3382610Z     Checking itoa v1.0.18
+2026-10-03T22:20:19.3383179Z     Checking once_cell v1.21.4
+2026-10-03T22:20:19.3918579Z     Checking serde_core v1.0.229
+2026-10-03T22:20:19.3988204Z     Checking windows-sys v0.61.2
+2026-10-03T22:20:19.4981300Z     Checking memchr v2.8.3
+2026-10-03T22:20:19.5464822Z     Checking subtle v2.6.1
+2026-10-03T22:20:19.6918756Z     Checking foldhash v0.2.0
+2026-10-03T22:20:19.8337161Z     Checking bytes v1.12.1
+2026-10-03T22:20:20.0891146Z     Checking hashbrown v0.17.1
+2026-10-03T22:20:20.5308374Z     Checking zerofrom v0.1.8
+2026-10-03T22:20:20.6506716Z     Checking windows_x86_64_msvc v0.52.6
+2026-10-03T22:20:20.7007241Z     Checking zmij v1.0.23
+2026-10-03T22:20:20.8660896Z     Checking stable_deref_trait v1.2.1
+2026-10-03T22:20:20.9164181Z     Checking bitflags v2.13.1
+2026-10-03T22:20:21.0371196Z     Checking yoke v0.8.3
+2026-10-03T22:20:21.1381038Z     Checking windows-targets v0.52.6
+2026-10-03T22:20:21.1790777Z     Checking windows-sys v0.52.0
+2026-10-03T22:20:21.2591350Z     Checking equivalent v1.0.2
+2026-10-03T22:20:21.3168911Z     Checking indexmap v2.14.2
+2026-10-03T22:20:22.2431535Z     Checking zerovec v0.11.8
+2026-10-03T22:20:22.4404039Z     Checking serde v1.0.229
+2026-10-03T22:20:22.9838240Z     Checking serde_json v1.0.151
+2026-10-03T22:20:23.1785226Z     Checking zeroize v1.9.0
+2026-10-03T22:20:23.3536013Z     Checking pin-project-lite v0.2.17
+2026-10-03T22:20:23.4450735Z     Checking typenum v1.20.1
+2026-10-03T22:20:24.2869153Z     Checking num-traits v0.2.19
+2026-10-03T22:20:24.3824855Z     Checking getrandom v0.4.3
+2026-10-03T22:20:24.5253372Z     Checking http v1.5.0
+2026-10-03T22:20:24.5888812Z     Checking generic-array v0.14.7
+2026-10-03T22:20:25.2555537Z     Checking futures-core v0.3.34
+2026-10-03T22:20:25.3857418Z     Checking winnow v1.0.4
+2026-10-03T22:20:25.4133046Z     Checking fastrand v2.5.0
+2026-10-03T22:20:25.4989655Z     Checking ipnet v2.12.2
+2026-10-03T22:20:25.6803858Z     Checking tempfile v3.27.0
+2026-10-03T22:20:25.7786230Z     Checking chrono v0.4.45
+2026-10-03T22:20:25.9246074Z     Checking libc v0.2.189
+2026-10-03T22:20:26.0808482Z     Checking rustls-pki-types v1.15.1
+2026-10-03T22:20:26.4850238Z     Checking aws-lc-sys v0.45.0
+2026-10-03T22:20:26.5336470Z     Checking getrandom v0.2.17
+2026-10-03T22:20:26.6898696Z     Checking toml_datetime v1.1.1+spec-1.1.0
+2026-10-03T22:20:26.8564870Z     Checking untrusted v0.9.0
+2026-10-03T22:20:26.8961005Z     Checking toml_parser v1.1.3+spec-1.1.0
+2026-10-03T22:20:26.9501492Z     Checking toml_writer v1.1.2+spec-1.1.0
+2026-10-03T22:20:27.0519296Z     Checking smallvec v1.16.0
+2026-10-03T22:20:27.1595217Z     Checking ring v0.17.14
+2026-10-03T22:20:27.3144883Z     Checking block-buffer v0.10.4
+2026-10-03T22:20:27.3145490Z     Checking aws-lc-rs v1.18.1
+2026-10-03T22:20:27.3882860Z     Checking toml_edit v0.25.13+spec-1.1.0
+2026-10-03T22:20:27.4435240Z     Checking crypto-common v0.1.7
+2026-10-03T22:20:27.5382942Z     Checking mio v1.2.3
+2026-10-03T22:20:28.0500401Z     Checking socket2 v0.6.5
+2026-10-03T22:20:28.1925546Z     Checking tinystr v0.8.4
+2026-10-03T22:20:28.4104261Z     Checking writeable v0.6.4
+2026-10-03T22:20:28.4105323Z     Checking percent-encoding v2.3.2
+2026-10-03T22:20:28.5466972Z     Checking litemap v0.8.3
+2026-10-03T22:20:28.6343390Z     Checking log v0.4.34
+2026-10-03T22:20:28.7765952Z     Checking tokio v1.53.1
+2026-10-03T22:20:28.7766528Z     Checking icu_locale_core v2.3.0
+2026-10-03T22:20:28.8066838Z     Checking rustls-webpki v0.103.15
+2026-10-03T22:20:28.8067965Z     Checking digest v0.10.7
+2026-10-03T22:20:29.0392156Z     Checking httparse v1.10.1
+2026-10-03T22:20:29.3308345Z     Checking zerotrie v0.2.5
+2026-10-03T22:20:29.4348263Z     Checking potential_utf v0.1.6
+2026-10-03T22:20:29.5564349Z     Checking utf8_iter v1.0.4
+2026-10-03T22:20:29.6342405Z     Checking rustls v0.23.45
+2026-10-03T22:20:29.6643125Z     Checking icu_collections v2.3.0
+2026-10-03T22:20:29.8080025Z     Checking icu_provider v2.3.1
+2026-10-03T22:20:30.1001306Z     Checking io-lifetimes v3.0.1
+2026-10-03T22:20:30.1477883Z     Checking io-lifetimes v2.0.4
+2026-10-03T22:20:30.2200621Z     Checking futures-task v0.3.34
+2026-10-03T22:20:30.2555881Z     Checking slab v0.4.12
+2026-10-03T22:20:30.3788096Z     Checking base64 v0.23.1
+2026-10-03T22:20:30.4441395Z     Checking futures-util v0.3.34
+2026-10-03T22:20:30.7909970Z     Checking fs-set-times v0.20.3
+2026-10-03T22:20:30.9355116Z     Checking io-extras v0.19.0
+2026-10-03T22:20:31.2491397Z     Checking icu_normalizer_data v2.3.0
+2026-10-03T22:20:31.3115290Z     Checking icu_properties_data v2.3.0
+2026-10-03T22:20:31.5056738Z     Checking winx v0.36.4
+2026-10-03T22:20:32.0295862Z     Checking http-body v1.1.0
+2026-10-03T22:20:32.1886911Z     Checking cpufeatures v0.2.17
+2026-10-03T22:20:32.2533579Z     Checking maybe-owned v0.3.4
+2026-10-03T22:20:32.4547934Z     Checking ambient-authority v0.0.2
+2026-10-03T22:20:32.5177852Z     Checking cap-primitives v4.0.3
+2026-10-03T22:20:32.9831051Z     Checking sha2 v0.10.9
+2026-10-03T22:20:33.0435879Z     Checking icu_properties v2.3.0
+2026-10-03T22:20:33.0436814Z     Checking icu_normalizer v2.3.0
+2026-10-03T22:20:33.3520709Z     Checking symbrain-core v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-core)
+2026-10-03T22:20:33.4706189Z     Checking errno v0.3.14
+2026-10-03T22:20:33.6113314Z     Checking try-lock v0.2.5
+2026-10-03T22:20:33.7062858Z     Checking tower-service v0.3.3
+2026-10-03T22:20:33.7867748Z     Checking want v0.3.1
+2026-10-03T22:20:33.8680299Z     Checking cap-std v4.0.3
+2026-10-03T22:20:33.9053422Z     Checking futures-channel v0.3.34
+2026-10-03T22:20:33.9299540Z     Checking tracing-core v0.1.36
+2026-10-03T22:20:34.1202854Z     Checking windows-result v0.4.1
+2026-10-03T22:20:34.1368524Z     Checking windows-strings v0.5.1
+2026-10-03T22:20:34.2935501Z     Checking atomic-waker v1.1.2
+2026-10-03T22:20:34.3837421Z     Checking windows-registry v0.6.1
+2026-10-03T22:20:34.3852327Z     Checking hyper v1.11.1
+2026-10-03T22:20:34.4176732Z     Checking tracing v0.1.44
+2026-10-03T22:20:34.5815893Z     Checking cap-fs-ext v4.0.3
+2026-10-03T22:20:34.6135611Z     Checking ureq-proto v0.6.2
+2026-10-03T22:20:34.6753094Z     Checking idna_adapter v1.2.2
+2026-10-03T22:20:34.6947480Z     Checking form_urlencoded v1.2.2
+2026-10-03T22:20:34.8159191Z     Checking idna v1.1.0
+2026-10-03T22:20:34.8484310Z     Checking webpki-roots v1.0.9
+2026-10-03T22:20:34.9627303Z     Checking sync_wrapper v1.0.2
+2026-10-03T22:20:35.0315928Z     Checking utf8-zero v0.8.1
+2026-10-03T22:20:35.0747329Z     Checking tower-layer v0.3.3
+2026-10-03T22:20:35.1071794Z     Checking url v2.5.8
+2026-10-03T22:20:35.1545732Z     Checking ureq v3.4.1
+2026-10-03T22:20:35.2504039Z     Checking tower v0.5.3
+2026-10-03T22:20:35.2861800Z     Checking hyper-util v0.1.21
+2026-10-03T22:20:35.6767042Z     Checking rustix v1.1.4
+2026-10-03T22:20:35.8361581Z     Checking tokio-rustls v0.26.6
+2026-10-03T22:20:35.9114626Z     Checking aho-corasick v1.1.5
+2026-10-03T22:20:36.1593842Z     Checking base64 v0.22.1
+2026-10-03T22:20:36.1838081Z     Checking regex-syntax v0.8.11
+2026-10-03T22:20:36.5022956Z     Checking thiserror v2.0.20
+2026-10-03T22:20:36.5925594Z     Checking tower-http v0.6.11
+2026-10-03T22:20:36.6704614Z     Checking hyper-rustls v0.27.10
+2026-10-03T22:20:36.8962853Z     Checking rustls-platform-verifier v0.7.1
+2026-10-03T22:20:37.0147199Z     Checking symbrain-policy v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-policy)
+2026-10-03T22:20:37.0697382Z     Checking http-body-util v0.1.5
+2026-10-03T22:20:37.0933018Z     Checking futures-sink v0.3.34
+2026-10-03T22:20:37.1833685Z     Checking adler2 v2.0.1
+2026-10-03T22:20:37.2776538Z     Checking simd-adler32 v0.3.10
+2026-10-03T22:20:37.3599687Z     Checking reqwest v0.13.4
+2026-10-03T22:20:37.4451060Z     Checking miniz_oxide v0.9.1
+2026-10-03T22:20:37.7821407Z     Checking tokio-util v0.7.19
+2026-10-03T22:20:37.9887391Z     Checking libsqlite3-sys v0.38.2
+2026-10-03T22:20:38.2470654Z     Checking symaira-core-secretref v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+2026-10-03T22:20:38.2897613Z     Checking getrandom v0.3.3
+2026-10-03T22:20:38.3980137Z     Checking winapi v0.3.9
+2026-10-03T22:20:38.4046416Z     Checking crc32fast v1.5.1
+2026-10-03T22:20:38.4775970Z     Checking symbrain-harness v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-harness)
+2026-10-03T22:20:38.5349912Z     Checking regex-automata v0.4.18
+2026-10-03T22:20:38.5604486Z     Checking hashlink v0.12.1
+2026-10-03T22:20:38.9326126Z     Checking ryu v1.0.23
+2026-10-03T22:20:39.0635612Z     Checking symaira-core-exit v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+2026-10-03T22:20:39.2116857Z     Checking fallible-streaming-iterator v0.1.9
+2026-10-03T22:20:39.3259460Z     Checking fallible-iterator v0.3.0
+2026-10-03T22:20:39.3770100Z     Checking unsafe-libyaml v0.2.11
+2026-10-03T22:20:39.7670742Z     Checking rusqlite v0.40.2
+2026-10-03T22:20:40.1851995Z     Checking serde_yaml_ng v0.10.0
+2026-10-03T22:20:40.3789642Z     Checking fs2 v0.4.3
+2026-10-03T22:20:40.5058629Z     Checking symaira-core-llm v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+2026-10-03T22:20:40.8778519Z     Checking flate2 v1.1.10
+2026-10-03T22:20:40.9841546Z     Checking regex v1.13.1
+2026-10-03T22:20:41.3102337Z     Checking symbrain-activity v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-activity)
+2026-10-03T22:20:41.4147176Z     Checking hmac v0.12.1
+2026-10-03T22:20:41.5269519Z     Checking symbrain-mcp v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-mcp)
+2026-10-03T22:20:41.5399970Z     Checking hostname v0.4.2
+2026-10-03T22:20:41.6189804Z     Checking filetime v0.2.29
+2026-10-03T22:20:41.6807638Z     Checking typed-path v0.12.3
+2026-10-03T22:20:41.7326515Z     Checking tar v0.4.46
+2026-10-03T22:20:41.8215158Z     Checking symbrain-memory v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-memory)
+2026-10-03T22:20:41.9276824Z     Checking symbrain-broker v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-broker)
+2026-10-03T22:20:42.2972688Z     Checking symbrain-usage v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-usage)
+2026-10-03T22:20:42.4976816Z     Checking hkdf v0.12.4
+2026-10-03T22:20:42.6331285Z     Checking symbrain-skills v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-skills)
+2026-10-03T22:20:42.9162184Z     Checking zip v8.6.0
+2026-10-03T22:20:43.3027719Z     Checking symbrain-catalog v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-catalog)
+2026-10-03T22:20:43.5894788Z     Checking symbrain-instructions v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-instructions)
+2026-10-03T22:20:43.6646629Z     Checking symbrain-audit v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-audit)
+2026-10-03T22:20:43.7886516Z     Checking signal-hook-registry v1.4.8
+2026-10-03T22:20:43.9247285Z     Checking symbrain-patterns v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-patterns)
+2026-10-03T22:20:43.9643898Z    Compiling symbrain-cli v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-cli)
+2026-10-03T22:20:44.2846315Z     Checking signal-hook v0.3.18
+2026-10-03T22:20:44.3474435Z     Checking symbrain-managed v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-managed)
+2026-10-03T22:20:44.3910445Z     Checking symbrain-adapter v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-adapter)
+2026-10-03T22:20:44.4149501Z     Checking symbrain-guard-core v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-guard-core)
+2026-10-03T22:20:45.1701450Z     Checking symbrain-gateway v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-gateway)
+2026-10-03T22:20:49.3442967Z error: call to `set_readonly` with argument `false`
+2026-10-03T22:20:49.3463547Z    --> rust\symbrain-cli\tests\doctor_memory_schema.rs:184:5
+2026-10-03T22:20:49.3503003Z     |
+2026-10-03T22:20:49.3557569Z 184 |     permissions.set_readonly(false);
+2026-10-03T22:20:49.3588475Z     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-03T22:20:49.3637501Z     |
+2026-10-03T22:20:49.3641727Z     = note: on Unix platforms this results in the file being world writable
+2026-10-03T22:20:49.3647418Z     = help: you can set the desired permissions using `PermissionsExt`. For more information, see
+2026-10-03T22:20:49.3650310Z             https://doc.rust-lang.org/std/os/unix/fs/trait.PermissionsExt.html
+2026-10-03T22:20:49.3651977Z     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#permissions_set_readonly_false
+2026-10-03T22:20:49.3653742Z     = note: `-D clippy::permissions-set-readonly-false` implied by `-D clippy::all`
+2026-10-03T22:20:49.3655080Z     = help: to override `-D clippy::all` add `#[allow(clippy::permissions_set_readonly_false)]`
+2026-10-03T22:20:49.3655826Z 
+2026-10-03T22:20:49.3730088Z error: could not compile `symbrain-cli` (test "doctor_memory_schema") due to 1 previous error
+2026-10-03T22:20:49.3731111Z warning: build failed, waiting for other jobs to finish...
+2026-10-03T22:20:49.7281342Z ##[error]Process completed with exit code 101.
+2026-10-03T22:20:49.7493658Z ##[group]Run set -euo pipefail
+2026-10-03T22:20:49.7494059Z [36;1mset -euo pipefail[0m
+2026-10-03T22:20:49.7494307Z [36;1mumask 022[0m
+2026-10-03T22:20:49.7494503Z [36;1m{[0m
+2026-10-03T22:20:49.7494720Z [36;1m  echo "source_revision=$GITHUB_SHA"[0m
+2026-10-03T22:20:49.7495030Z [36;1m  echo "runner=windows-2025"[0m
+2026-10-03T22:20:49.7495304Z [36;1m  rustc -Vv[0m
+2026-10-03T22:20:49.7495509Z [36;1m  cargo -V[0m
+2026-10-03T22:20:49.7495716Z [36;1m  go version[0m
+2026-10-03T22:20:49.7495984Z [36;1m} > "$RECEIPT"[0m
+2026-10-03T22:20:49.7513027Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-03T22:20:49.7513446Z env:
+2026-10-03T22:20:49.7513656Z   CARGO_INCREMENTAL: 0
+2026-10-03T22:20:49.7513887Z   CARGO_PROFILE_DEV_DEBUG: 0
+2026-10-03T22:20:49.7514140Z   CARGO_PROFILE_TEST_DEBUG: 0
+2026-10-03T22:20:49.7514372Z   GOTOOLCHAIN: local
+2026-10-03T22:20:49.7514627Z   RECEIPT: D:\a\_temp/memory-schema-native.txt
+2026-10-03T22:20:49.7514975Z ##[endgroup]
+2026-10-03T22:20:50.0373316Z ##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+2026-10-03T22:20:50.0373803Z with:
+2026-10-03T22:20:50.0374147Z   name: memory-schema-windows-2025-69284c6086fe3a181174cab1f93b8b0fc12c471d
+2026-10-03T22:20:50.0374573Z   path: D:\a\_temp/memory-schema-*
+2026-10-03T22:20:50.0375079Z   if-no-files-found: error
+2026-10-03T22:20:50.0375318Z   retention-days: 14
+2026-10-03T22:20:50.0375758Z   compression-level: 6
+2026-10-03T22:20:50.0375990Z   overwrite: false
+2026-10-03T22:20:50.0376214Z   include-hidden-files: false
+2026-10-03T22:20:50.0376449Z   archive: true
+2026-10-03T22:20:50.0376633Z env:
+2026-10-03T22:20:50.0376810Z   CARGO_INCREMENTAL: 0
+2026-10-03T22:20:50.0377029Z   CARGO_PROFILE_DEV_DEBUG: 0
+2026-10-03T22:20:50.0377267Z   CARGO_PROFILE_TEST_DEBUG: 0
+2026-10-03T22:20:50.0377491Z   GOTOOLCHAIN: local
+2026-10-03T22:20:50.0377686Z ##[endgroup]
+2026-10-03T22:20:50.2391253Z With the provided path, there will be 2 files uploaded
+2026-10-03T22:20:50.2396690Z Artifact name is valid!
+2026-10-03T22:20:50.2399240Z Root directory input is valid!
+2026-10-03T22:20:50.5102717Z Uploading artifact: memory-schema-windows-2025-69284c6086fe3a181174cab1f93b8b0fc12c471d.zip
+2026-10-03T22:20:50.5156155Z Beginning upload of artifact content to blob storage
+2026-10-03T22:20:50.7066194Z Uploaded bytes 2781
+2026-10-03T22:20:50.7487655Z Finished uploading artifact content to blob storage!
+2026-10-03T22:20:50.7489310Z SHA256 digest of uploaded artifact is e60152f8841f09ff5efd6148441526cda3f2ae0e54bcdc9149eb148888007810
+2026-10-03T22:20:50.7490303Z Finalizing artifact upload
+2026-10-03T22:20:51.0065588Z Artifact memory-schema-windows-2025-69284c6086fe3a181174cab1f93b8b0fc12c471d successfully finalized. Artifact ID 11286650591
+2026-10-03T22:20:51.0067402Z Artifact memory-schema-windows-2025-69284c6086fe3a181174cab1f93b8b0fc12c471d has been successfully uploaded! Final size is 2781 bytes. Artifact ID is 11286650591
+2026-10-03T22:20:51.0074076Z Artifact download URL: https://github.com/danieljustus/symaira-brain/actions/runs/37157719410/artifacts/11286650591
+2026-10-03T22:20:51.0417666Z Post job cleanup.
+2026-10-03T22:20:51.2506503Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-03T22:20:51.2808770Z git version 2.55.0.windows.5
+2026-10-03T22:20:51.2877901Z Temporarily overriding HOME='D:\a\_temp\afcf90e4-38a0-42eb-8d5a-1fe6ea53f2e7' before making global git config changes
+2026-10-03T22:20:51.2879252Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-03T22:20:51.2890660Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\symaira-brain\symaira-brain
+2026-10-03T22:20:51.3195871Z Removing SSH command configuration
+2026-10-03T22:20:51.3207598Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-03T22:20:51.3533816Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-03T22:20:51.8960986Z Removing HTTP extra header
+2026-10-03T22:20:51.8971552Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-03T22:20:51.9290550Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-03T22:20:52.4526860Z Removing includeIf entries pointing to credentials config files
+2026-10-03T22:20:52.4545012Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-03T22:20:52.4806044Z includeif.gitdir:D:/a/symaira-brain/symaira-brain/.git.path
+2026-10-03T22:20:52.4806756Z includeif.gitdir:D:/a/symaira-brain/symaira-brain/.git/worktrees/*.path
+2026-10-03T22:20:52.4807228Z includeif.gitdir:/github/workspace/.git.path
+2026-10-03T22:20:52.4807831Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-03T22:20:52.4845735Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/symaira-brain/symaira-brain/.git.path
+2026-10-03T22:20:52.5101662Z D:\a\_temp\git-credentials-3946b90b-2615-4084-a371-0c1e7c485ee2.config
+2026-10-03T22:20:52.5142230Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/symaira-brain/symaira-brain/.git.path D\:\\a\\_temp\\git\-credentials\-3946b90b\-2615\-4084\-a371\-0c1e7c485ee2\.config
+2026-10-03T22:20:52.5488392Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/symaira-brain/symaira-brain/.git/worktrees/*.path
+2026-10-03T22:20:52.5742684Z D:\a\_temp\git-credentials-3946b90b-2615-4084-a371-0c1e7c485ee2.config
+2026-10-03T22:20:52.5781130Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/symaira-brain/symaira-brain/.git/worktrees/*.path D\:\\a\\_temp\\git\-credentials\-3946b90b\-2615\-4084\-a371\-0c1e7c485ee2\.config
+2026-10-03T22:20:52.6070305Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-10-03T22:20:52.6318888Z /github/runner_temp/git-credentials-3946b90b-2615-4084-a371-0c1e7c485ee2.config
+2026-10-03T22:20:52.6354897Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-3946b90b\-2615\-4084\-a371\-0c1e7c485ee2\.config
+2026-10-03T22:20:52.6647566Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-03T22:20:52.6907266Z /github/runner_temp/git-credentials-3946b90b-2615-4084-a371-0c1e7c485ee2.config
+2026-10-03T22:20:52.6950872Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-3946b90b\-2615\-4084\-a371\-0c1e7c485ee2\.config
+2026-10-03T22:20:52.7256443Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-03T22:20:53.2455962Z Removing credentials config 'D:\a\_temp\git-credentials-3946b90b-2615-4084-a371-0c1e7c485ee2.config'
+2026-10-03T22:20:53.2658275Z Cleaning up orphan processes
+2026-10-03T22:20:53.3292625Z Terminate orphan process: pid (4172) (vctip)

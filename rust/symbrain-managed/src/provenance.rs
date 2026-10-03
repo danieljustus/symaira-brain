@@ -13,82 +13,96 @@ use sha2::{Digest, Sha256};
 use crate::{Core, ManagedError};
 
 #[path = "provenance_json.rs"]
-mod json;
+pub(super) mod json;
+#[path = "provenance_time.rs"]
+mod time;
 
 /// Reports an intentional source install. Setup, like Go, treats unreadable or
 /// malformed records as unknown; doctor repair has a separate fail-closed rule.
 #[must_use]
 pub fn is_brain_source_install(bin_dir: &Path, binary_name: &str) -> bool {
-    std::fs::read(bin_dir.join(format!("{binary_name}.provenance.json")))
+    read_provenance(bin_dir, binary_name)
         .ok()
-        .and_then(|bytes| {
-            serde_json::from_slice::<SourceRecord>(&json::replace_invalid_strings(&bytes)).ok()
-        })
+        .flatten()
         .is_some_and(|record| record.source == "brain-source")
 }
 
-#[derive(Default)]
-struct SourceRecord {
-    source: String,
+#[derive(Debug, Default)]
+pub struct SourceRecord {
+    pub source: String,
+    pub receiver_commit: String,
 }
 
-impl<'de> serde::Deserialize<'de> for SourceRecord {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        struct RecordVisitor;
-        impl<'de> serde::de::Visitor<'de> for RecordVisitor {
-            type Value = SourceRecord;
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                formatter.write_str("provenance object or null")
-            }
-            fn visit_unit<E: serde::de::Error>(self) -> Result<SourceRecord, E> {
-                Ok(SourceRecord::default())
-            }
-            fn visit_map<M: serde::de::MapAccess<'de>>(
-                self,
-                mut map: M,
-            ) -> Result<SourceRecord, M::Error> {
-                let mut record = SourceRecord::default();
-                while let Some(key) = map.next_key::<String>()? {
-                    let folded = key
-                        .replace('\u{017f}', "s")
-                        .replace('\u{212a}', "k")
-                        .to_ascii_lowercase();
-                    match folded.as_str() {
-                        "binary" | "source" | "version" | "repo" | "receiver_commit"
-                        | "module_dir" | "builder" | "binary_sha256" => {
-                            // encoding/json ignores null for plain string fields,
-                            // retains duplicate order, and rejects other scalar types.
-                            let value = map.next_value::<Option<String>>()?;
-                            if folded == "source"
-                                && let Some(value) = value
-                            {
-                                record.source = value;
-                            }
-                        }
-                        "built_at" => {
-                            // time.Time's JSON decoder parses the literal token,
-                            // rather than JSON-unescaping its timestamp contents.
-                            let raw = map.next_value::<Box<serde_json::value::RawValue>>()?;
-                            let token = raw.get();
-                            if token != "null"
-                                && (!token.starts_with('"')
-                                    || !token.ends_with('"')
-                                    || !json::valid_time(&token[1..token.len() - 1]))
-                            {
-                                return Err(serde::de::Error::custom(
-                                    "invalid provenance built_at",
-                                ));
-                            }
-                        }
-                        _ => {
-                            map.next_value::<serde::de::IgnoredAny>()?;
-                        }
+/// Reads origin information, distinguishing an absent record from corruption.
+///
+/// # Errors
+/// Returns the Go-compatible read or typed JSON error. Repair callers must
+/// leave the binary untouched on error unless force-release was explicit.
+pub fn read_provenance(bin_dir: &Path, binary_name: &str) -> Result<Option<SourceRecord>, String> {
+    let path = bin_dir.join(format!("{binary_name}.provenance.json"));
+    let bytes = match std::fs::read(&path) {
+        Ok(bytes) => bytes,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err(error) => {
+            let operation = if error.kind() == std::io::ErrorKind::IsADirectory {
+                "read"
+            } else {
+                "open"
+            };
+            return Err(format!(
+                "managed: read provenance: {operation} {}: {}",
+                path.display(),
+                go_io_error(&error)
+            ));
+        }
+    };
+    decode_source_record(&bytes)
+        .map(Some)
+        .map_err(|error| format!("managed: parse provenance for {binary_name}: {error}"))
+}
+
+fn decode_source_record(bytes: &[u8]) -> Result<SourceRecord, String> {
+    let mut record = SourceRecord::default();
+    let mut first_error = None;
+    for (key, raw) in crate::json_record::fields(bytes, "managed.Provenance")? {
+        let folded = crate::json_record::fold(&key);
+        match folded.as_str() {
+            "binary" | "source" | "version" | "repo" | "receiver_commit" | "module_dir"
+            | "builder" | "binary_sha256" => {
+                let kind = if folded == "source" {
+                    "managed.ProvenanceSource"
+                } else {
+                    "string"
+                };
+                match crate::json_record::string(raw, &format!("Provenance.{folded}"), kind) {
+                    Ok(Some(value)) => match folded.as_str() {
+                        "source" => record.source = value,
+                        "receiver_commit" => record.receiver_commit = value,
+                        _ => {}
+                    },
+                    Ok(None) => {}
+                    Err(error) => {
+                        first_error.get_or_insert(error);
                     }
                 }
-                Ok(record)
             }
+            "built_at" => time::validate(raw)?,
+            _ => {}
         }
-        deserializer.deserialize_any(RecordVisitor)
+    }
+    first_error.map_or(Ok(record), Err)
+}
+
+pub(super) fn go_io_error(error: &std::io::Error) -> String {
+    let text = error.to_string();
+    let text = text.split(" (os error ").next().unwrap_or(&text);
+    #[cfg(unix)]
+    {
+        text.to_lowercase()
+    }
+    #[cfg(not(unix))]
+    {
+        text.into()
     }
 }
 

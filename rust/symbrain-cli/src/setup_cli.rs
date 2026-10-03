@@ -10,7 +10,7 @@ use symbrain_managed::{
 
 #[path = "setup_config.rs"]
 mod config;
-use config::enabled_cores;
+pub(crate) use config::enabled_cores;
 pub(crate) use config::parse_go_bool;
 #[path = "setup_args.rs"]
 mod flags;

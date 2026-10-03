@@ -1,0 +1,11 @@
+{
+  "source_revision": "99c76668bbcf45f9236540b61220367cd51df258",
+  "cases": 590,
+  "passed": 590,
+  "actual_controls": 2,
+  "rejected_pairs_per_control": 32,
+  "controls_uncompressed_sha256": "104dc63ab780f6cb55ce53db080a67ffd85d1d25917c0b920922bc33c1ec73e8",
+  "original_windows_job": 111293527292,
+  "native_windows_pending": true,
+  "production_change": false
+}

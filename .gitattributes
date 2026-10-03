@@ -5,3 +5,12 @@
 # Treat them as binary so Git preserves those exact bytes and diff checks do not
 # mistake the carriage returns for accidental trailing whitespace.
 fuzz/corpus/** binary
+
+# Exact source-bound review and process logs.
+migration/evidence/memory-schema-649/final-independent-e4e/*.log binary
+# Preserve exact original native failure log bytes.
+migration/evidence/memory-cli-758/windows-cleanup-9c-job-111297047149.log binary
+
+# Preserve exact Windows schema-native failure bytes.
+migration/evidence/memory-schema-649/windows-lint-b2fdd/*.log binary
+migration/evidence/memory-schema-649/windows-lint-b2fdd/corrected-88a/*.log binary

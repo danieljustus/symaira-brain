@@ -22,6 +22,34 @@ for binding checks, fails closed on unsafe/unreadable/malformed configs unless
 through no-follow removal. The Go implementation remains the source-bound oracle
 for this seam until all release gates pass.
 
+The #758 memory increment adds Brain-owned grounded evidence to
+`symbrain-memory`: source refs, UTF-8 byte spans, exact/normalized/fuzzy
+alignment, strict validation, Go-compatible JSONL encoding, evidence persistence
+and transaction-aware reparenting. The additive oracle executes frozen Go
+CoreKit v0.17.0 for 32 alignment pairs, 48 validation boundaries, three JSONL
+records and four existing production database tests. Actual schema inspection
+continues to repair #649's five missing columns despite applied migration names;
+DDL, repairs, indexes and bookkeeping now commit atomically. The native
+three-OS workflow is required before accepting this increment. Full memory CLI,
+dynamic configuration, governed writes and JSONL decoding remain open; no Go
+fallback route is removed, and #649 remains pending the shipped Rust release.
+The rationale is recorded in `docs/adr/758-native-memory-evidence.md`.
+
+The follow-up #758 CLI increment splits the oversized memory module into focused
+behavior modules, ports raw Go flags/error grammar and all 86 typed memory
+configuration fields, uses configured Ollama query embeddings and corrects the
+list default to 100. The supplemental immutable-Go replay compares 590 Unix/553
+Windows cases, including full seeded database state for configuration/read
+commands and two executable failure controls. Native three-OS acceptance is
+pending. Governed writes, configured Hamming prefilter, every database open/error
+shape, new-file permission parity and JSONL decoding remain open. The decision
+and scope are recorded in `docs/adr/memory-native-cli-758.md`.
+Independent review found two configured-read differences in the initial CLI
+candidate: memory-specific XDG/legacy resolution and populated rules JSON HTML/
+JavaScript-separator escaping. Corrections remain memory-local, preserve the
+original failed process reports and add meaningful directory/file and populated
+rules cases to the replay. Other domains' data-path convention stays unchanged.
+
 The native memory embedding adapter uses CoreKit's Rust `symaira-core-llm`
 transport at the exact Git revision pinned in `Cargo.toml`. Brain retains its
 Ollama URL normalization, two-second timeout, 768-dimension gate, and local hash
