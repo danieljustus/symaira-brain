@@ -1,0 +1,649 @@
+    Checking libc v0.2.189
+    Checking cfg-if v1.0.4
+    Checking once_cell v1.21.4
+    Checking itoa v1.0.18
+    Checking bitflags v2.13.1
+    Checking linux-raw-sys v0.12.1
+    Checking rustix v1.1.4
+    Checking serde_core v1.0.229
+    Checking memchr v2.8.3
+    Checking serde v1.0.229
+    Checking subtle v2.6.1
+    Checking foldhash v0.2.0
+    Checking bytes v1.12.1
+    Checking hashbrown v0.17.1
+    Checking zerofrom v0.1.8
+    Checking zmij v1.0.23
+    Checking stable_deref_trait v1.2.1
+    Checking yoke v0.8.3
+    Checking serde_json v1.0.151
+    Checking zeroize v1.9.0
+    Checking equivalent v1.0.2
+    Checking indexmap v2.14.2
+    Checking zerovec v0.11.8
+    Checking typenum v1.20.1
+    Checking pin-project-lite v0.2.17
+    Checking num-traits v0.2.19
+    Checking generic-array v0.14.7
+    Checking getrandom v0.4.3
+    Checking rustls-pki-types v1.15.1
+    Checking http v1.5.0
+    Checking iana-time-zone v0.1.65
+    Checking ipnet v2.12.2
+    Checking fastrand v2.5.0
+    Checking futures-core v0.3.34
+    Checking chrono v0.4.45
+    Checking tempfile v3.27.0
+    Checking aws-lc-sys v0.45.0
+    Checking getrandom v0.2.17
+    Checking winnow v1.0.4
+    Checking untrusted v0.9.0
+    Checking smallvec v1.16.0
+    Checking ring v0.17.14
+    Checking toml_parser v1.1.3+spec-1.1.0
+    Checking aws-lc-rs v1.18.1
+    Checking block-buffer v0.10.4
+    Checking crypto-common v0.1.7
+    Checking tinystr v0.8.4
+    Checking mio v1.2.3
+    Checking socket2 v0.6.5
+    Checking toml_writer v1.1.2+spec-1.1.0
+    Checking toml_datetime v1.1.1+spec-1.1.0
+    Checking log v0.4.34
+    Checking litemap v0.8.3
+    Checking percent-encoding v2.3.2
+    Checking writeable v0.6.4
+    Checking toml_edit v0.25.13+spec-1.1.0
+    Checking icu_locale_core v2.3.0
+    Checking tokio v1.53.1
+    Checking rustls-webpki v0.103.15
+    Checking digest v0.10.7
+    Checking httparse v1.10.1
+    Checking potential_utf v0.1.6
+    Checking zerotrie v0.2.5
+    Checking utf8_iter v1.0.4
+    Checking icu_collections v2.3.0
+    Checking icu_provider v2.3.1
+    Checking rustls v0.23.45
+    Checking futures-task v0.3.34
+    Checking slab v0.4.12
+    Checking base64 v0.23.1
+    Checking futures-util v0.3.34
+    Checking icu_normalizer_data v2.3.0
+    Checking icu_properties_data v2.3.0
+    Checking http-body v1.1.0
+    Checking cpufeatures v0.2.17
+    Checking sha2 v0.10.9
+    Checking icu_properties v2.3.0
+    Checking icu_normalizer v2.3.0
+    Checking try-lock v0.2.5
+    Checking tower-service v0.3.3
+    Checking want v0.3.1
+    Checking io-lifetimes v3.0.1
+    Checking io-lifetimes v2.0.4
+    Checking symbrain-core v0.12.1 (/workspace/symaira-memory758-writes/rust/symbrain-core)
+    Checking futures-channel v0.3.34
+    Checking idna_adapter v1.2.2
+    Checking tracing-core v0.1.36
+    Checking atomic-waker v1.1.2
+    Checking hyper v1.11.1
+    Checking tracing v0.1.44
+    Checking idna v1.1.0
+    Checking fs-set-times v0.20.3
+    Checking io-extras v0.19.0
+    Checking ureq-proto v0.6.2
+    Checking form_urlencoded v1.2.2
+    Checking sync_wrapper v1.0.2
+    Checking webpki-roots v1.0.9
+    Checking rustix-linux-procfs v0.1.1
+    Checking maybe-owned v0.3.4
+    Checking utf8-zero v0.8.1
+    Checking tower-layer v0.3.3
+    Checking openssl-probe v0.2.1
+    Checking ambient-authority v0.0.2
+    Checking cap-primitives v4.0.3
+    Checking tower v0.5.3
+    Checking rustls-native-certs v0.8.4
+    Checking ureq v3.4.1
+    Checking url v2.5.8
+    Checking hyper-util v0.1.21
+    Checking tokio-rustls v0.26.6
+    Checking aho-corasick v1.1.5
+    Checking base64 v0.22.1
+    Checking regex-syntax v0.8.11
+    Checking thiserror v2.0.20
+    Checking hyper-rustls v0.27.10
+    Checking tower-http v0.6.11
+    Checking cap-std v4.0.3
+    Checking rustls-platform-verifier v0.7.1
+    Checking symbrain-policy v0.12.1 (/workspace/symaira-memory758-writes/rust/symbrain-policy)
+    Checking http-body-util v0.1.5
+    Checking futures-sink v0.3.34
+    Checking tokio-util v0.7.19
+    Checking regex-automata v0.4.18
+    Checking reqwest v0.13.4
+    Checking libsqlite3-sys v0.38.2
+    Checking cap-fs-ext v4.0.3
+    Checking symaira-core-secretref v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+    Checking getrandom v0.3.3
+    Checking hashlink v0.12.1
+    Checking regex v1.13.1
+    Checking fallible-streaming-iterator v0.1.9
+    Checking fallible-iterator v0.3.0
+    Checking symaira-core-exit v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+    Checking symaira-core-llm v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+    Checking rusqlite v0.40.2
+    Checking symbrain-activity v0.12.1 (/workspace/symaira-memory758-writes/rust/symbrain-activity)
+    Checking simd-adler32 v0.3.10
+    Checking adler2 v2.0.1
+    Checking miniz_oxide v0.9.1
+    Checking symbrain-memory v0.12.1 (/workspace/symaira-memory758-writes/rust/symbrain-memory)
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:13:9
+   |
+13 |         r#"(?i)(?:https?|ftp|sftp|amqps?|mongodb(?:\\+srv)?|postgres(?:ql)?|mysql|redis)://[^\s:@]+:[^\s@]+@[^\s]+"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+   = note: `-D clippy::needless-raw-string-hashes` implied by `-D clippy::pedantic`
+   = help: to override `-D clippy::pedantic` add `#[allow(clippy::needless_raw_string_hashes)]`
+help: remove all the hashes around the string literal
+   |
+13 -         r#"(?i)(?:https?|ftp|sftp|amqps?|mongodb(?:\\+srv)?|postgres(?:ql)?|mysql|redis)://[^\s:@]+:[^\s@]+@[^\s]+"#,
+13 +         r"(?i)(?:https?|ftp|sftp|amqps?|mongodb(?:\\+srv)?|postgres(?:ql)?|mysql|redis)://[^\s:@]+:[^\s@]+@[^\s]+",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:14:9
+   |
+14 |         r#"(?i)(?:sk-proj-[a-zA-Z0-9]{32,})"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+14 -         r#"(?i)(?:sk-proj-[a-zA-Z0-9]{32,})"#,
+14 +         r"(?i)(?:sk-proj-[a-zA-Z0-9]{32,})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:15:9
+   |
+15 |         r#"(?i)(?:ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|ghs_[a-zA-Z0-9]{36}|ghr_[a-zA-Z0-9]{36})"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+15 -         r#"(?i)(?:ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|ghs_[a-zA-Z0-9]{36}|ghr_[a-zA-Z0-9]{36})"#,
+15 +         r"(?i)(?:ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|ghs_[a-zA-Z0-9]{36}|ghr_[a-zA-Z0-9]{36})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:16:9
+   |
+16 |         r#"(?i)(?:AIzaSy[a-zA-Z0-9-_]{33})"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+16 -         r#"(?i)(?:AIzaSy[a-zA-Z0-9-_]{33})"#,
+16 +         r"(?i)(?:AIzaSy[a-zA-Z0-9-_]{33})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:17:9
+   |
+17 |         r#"(?i)(?:bearer\s+[a-zA-Z0-9-_\.]{20,})"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+17 -         r#"(?i)(?:bearer\s+[a-zA-Z0-9-_\.]{20,})"#,
+17 +         r"(?i)(?:bearer\s+[a-zA-Z0-9-_\.]{20,})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:18:9
+   |
+18 |         r#"(?i)(?:AKIA[A-Z0-9]{16}:[A-Za-z0-9/+=]{40})"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+18 -         r#"(?i)(?:AKIA[A-Z0-9]{16}:[A-Za-z0-9/+=]{40})"#,
+18 +         r"(?i)(?:AKIA[A-Z0-9]{16}:[A-Za-z0-9/+=]{40})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:19:9
+   |
+19 |         r#"(?i)(?:AKIA[A-Z0-9]{16})"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+19 -         r#"(?i)(?:AKIA[A-Z0-9]{16})"#,
+19 +         r"(?i)(?:AKIA[A-Z0-9]{16})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:20:9
+   |
+20 |         r#"(?i)(?:xox[abposr]-[a-zA-Z0-9-]{10,60})"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+20 -         r#"(?i)(?:xox[abposr]-[a-zA-Z0-9-]{10,60})"#,
+20 +         r"(?i)(?:xox[abposr]-[a-zA-Z0-9-]{10,60})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:21:9
+   |
+21 |         r#"(?i)(?:sk_live_[a-zA-Z0-9]{24,})"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+21 -         r#"(?i)(?:sk_live_[a-zA-Z0-9]{24,})"#,
+21 +         r"(?i)(?:sk_live_[a-zA-Z0-9]{24,})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:22:9
+   |
+22 |         r#"(?i)(?:glpat-[A-Za-z0-9_-]{20,})"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+22 -         r#"(?i)(?:glpat-[A-Za-z0-9_-]{20,})"#,
+22 +         r"(?i)(?:glpat-[A-Za-z0-9_-]{20,})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:23:9
+   |
+23 |         r#"(?i)(?:npm_[A-Za-z0-9]{36})"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+23 -         r#"(?i)(?:npm_[A-Za-z0-9]{36})"#,
+23 +         r"(?i)(?:npm_[A-Za-z0-9]{36})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:24:9
+   |
+24 |         r#"(?i)(?:AAAA[A-Za-z0-9_-]{120,})"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+24 -         r#"(?i)(?:AAAA[A-Za-z0-9_-]{120,})"#,
+24 +         r"(?i)(?:AAAA[A-Za-z0-9_-]{120,})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:25:9
+   |
+25 |         r#"(?i)(?:basic\s+[A-Za-z0-9+/=]{20,})"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+25 -         r#"(?i)(?:basic\s+[A-Za-z0-9+/=]{20,})"#,
+25 +         r"(?i)(?:basic\s+[A-Za-z0-9+/=]{20,})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:27:9
+   |
+27 | ...   r#"(?i)(?:-----BEGIN\s(?:RSA\s|EC\s|DSA\s|OPENSSH\s)?PRIVATE\sKEY-----[A-Za-z0-9+/=\n\s]+-----END\s(?:RSA\s|EC\s|DSA\s|OPENSSH\s)?PRIVATE\sKEY-----)"#,
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+27 -         r#"(?i)(?:-----BEGIN\s(?:RSA\s|EC\s|DSA\s|OPENSSH\s)?PRIVATE\sKEY-----[A-Za-z0-9+/=\n\s]+-----END\s(?:RSA\s|EC\s|DSA\s|OPENSSH\s)?PRIVATE\sKEY-----)"#,
+27 +         r"(?i)(?:-----BEGIN\s(?:RSA\s|EC\s|DSA\s|OPENSSH\s)?PRIVATE\sKEY-----[A-Za-z0-9+/=\n\s]+-----END\s(?:RSA\s|EC\s|DSA\s|OPENSSH\s)?PRIVATE\sKEY-----)",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:28:9
+   |
+28 |         r#"(?i)(?:sk-[a-zA-Z0-9]{20,})"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+28 -         r#"(?i)(?:sk-[a-zA-Z0-9]{20,})"#,
+28 +         r"(?i)(?:sk-[a-zA-Z0-9]{20,})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:29:9
+   |
+29 |         r#"(?i)(?:eyJ[a-zA-Z0-9_-]{10,}\.eyJ[a-zA-Z0-9_-]{10,})"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+29 -         r#"(?i)(?:eyJ[a-zA-Z0-9_-]{10,}\.eyJ[a-zA-Z0-9_-]{10,})"#,
+29 +         r"(?i)(?:eyJ[a-zA-Z0-9_-]{10,}\.eyJ[a-zA-Z0-9_-]{10,})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:30:9
+   |
+30 |         r#"(?i)(?:ssh-(?:rsa|ed25519|dss)\s+[A-Za-z0-9+/=]{40,})"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+30 -         r#"(?i)(?:ssh-(?:rsa|ed25519|dss)\s+[A-Za-z0-9+/=]{40,})"#,
+30 +         r"(?i)(?:ssh-(?:rsa|ed25519|dss)\s+[A-Za-z0-9+/=]{40,})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:31:9
+   |
+31 |         r#"(?i)(?:AccountKey=[A-Za-z0-9+/]{86}[AEIMQUYcgkosw048]=)"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+31 -         r#"(?i)(?:AccountKey=[A-Za-z0-9+/]{86}[AEIMQUYcgkosw048]=)"#,
+31 +         r"(?i)(?:AccountKey=[A-Za-z0-9+/]{86}[AEIMQUYcgkosw048]=)",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:33:9
+   |
+33 |         r#"(?i)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+33 -         r#"(?i)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"#,
+33 +         r"(?i)[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:34:9
+   |
+34 |         r#"\+\d{1,3}[\s.-]?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+34 -         r#"\+\d{1,3}[\s.-]?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}"#,
+34 +         r"\+\d{1,3}[\s.-]?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:35:9
+   |
+35 |         r#"\b(?:4\d{3}|5[1-5]\d{2}|2[2-7]\d{2}|3[47]\d{2}|62\d{2}|65\d{2}|6011)(?:[ -]?\d){9,12}\b"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+35 -         r#"\b(?:4\d{3}|5[1-5]\d{2}|2[2-7]\d{2}|3[47]\d{2}|62\d{2}|65\d{2}|6011)(?:[ -]?\d){9,12}\b"#,
+35 +         r"\b(?:4\d{3}|5[1-5]\d{2}|2[2-7]\d{2}|3[47]\d{2}|62\d{2}|65\d{2}|6011)(?:[ -]?\d){9,12}\b",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:36:9
+   |
+36 | ...   r#"(?i)(?:\b(?:api[_-]?key|auth[_-]?token|access[_-]?token|client[_-]?secret|private[_-]?key|secret|token|password|passwd)\b\s*[:=]\s*)([A-Za-z0-9_\-\.]{20,})"#,
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+36 -         r#"(?i)(?:\b(?:api[_-]?key|auth[_-]?token|access[_-]?token|client[_-]?secret|private[_-]?key|secret|token|password|passwd)\b\s*[:=]\s*)([A-Za-z0-9_\-\.]{20,})"#,
+36 +         r"(?i)(?:\b(?:api[_-]?key|auth[_-]?token|access[_-]?token|client[_-]?secret|private[_-]?key|secret|token|password|passwd)\b\s*[:=]\s*)([A-Za-z0-9_\-\.]{20,})",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:73:9
+   |
+73 |         r#"(?i)(?:i\s+like|i\s+prefer|i\s+love)\s+([^.,;!]+)"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+73 -         r#"(?i)(?:i\s+like|i\s+prefer|i\s+love)\s+([^.,;!]+)"#,
+73 +         r"(?i)(?:i\s+like|i\s+prefer|i\s+love)\s+([^.,;!]+)",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:74:9
+   |
+74 |         r#"(?i)(?:my\s+favorite)\s+([^.,;!]+)"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+74 -         r#"(?i)(?:my\s+favorite)\s+([^.,;!]+)"#,
+74 +         r"(?i)(?:my\s+favorite)\s+([^.,;!]+)",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:75:9
+   |
+75 |         r#"(?i)(?:ich\s+mag|ich\s+bevorzuge|ich\s+liebe)\s+([^.,;!]+)"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+75 -         r#"(?i)(?:ich\s+mag|ich\s+bevorzuge|ich\s+liebe)\s+([^.,;!]+)"#,
+75 +         r"(?i)(?:ich\s+mag|ich\s+bevorzuge|ich\s+liebe)\s+([^.,;!]+)",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:76:9
+   |
+76 |         r#"(?i)(?:mein\s+favorit\s+ist|mein\s+lieblings[^ ]+\s+ist)\s+([^.,;!]+)"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+76 -         r#"(?i)(?:mein\s+favorit\s+ist|mein\s+lieblings[^ ]+\s+ist)\s+([^.,;!]+)"#,
+76 +         r"(?i)(?:mein\s+favorit\s+ist|mein\s+lieblings[^ ]+\s+ist)\s+([^.,;!]+)",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:77:9
+   |
+77 |         r#"(?i)(?:i\s+work\s+on|i'm\s+working\s+on|i\s+am\s+building)\s+([^.,;!]+)"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+77 -         r#"(?i)(?:i\s+work\s+on|i'm\s+working\s+on|i\s+am\s+building)\s+([^.,;!]+)"#,
+77 +         r"(?i)(?:i\s+work\s+on|i'm\s+working\s+on|i\s+am\s+building)\s+([^.,;!]+)",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:78:9
+   |
+78 |         r#"(?i)(?:my\s+project\s+is|our\s+project\s+is)\s+([^.,;!]+)"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+78 -         r#"(?i)(?:my\s+project\s+is|our\s+project\s+is)\s+([^.,;!]+)"#,
+78 +         r"(?i)(?:my\s+project\s+is|our\s+project\s+is)\s+([^.,;!]+)",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:79:9
+   |
+79 |         r#"(?i)(?:ich\s+arbeite\s+an|ich\s+baue\s+gerade|ich\s+bin\s+dabei)\s+([^.,;!]+)"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+79 -         r#"(?i)(?:ich\s+arbeite\s+an|ich\s+baue\s+gerade|ich\s+bin\s+dabei)\s+([^.,;!]+)"#,
+79 +         r"(?i)(?:ich\s+arbeite\s+an|ich\s+baue\s+gerade|ich\s+bin\s+dabei)\s+([^.,;!]+)",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:80:9
+   |
+80 |         r#"(?i)(?:mein\s+projekt\s+ist|unsre\s+projekt\s+ist)\s+([^.,;!]+)"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+80 -         r#"(?i)(?:mein\s+projekt\s+ist|unsre\s+projekt\s+ist)\s+([^.,;!]+)"#,
+80 +         r"(?i)(?:mein\s+projekt\s+ist|unsre\s+projekt\s+ist)\s+([^.,;!]+)",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:81:9
+   |
+81 |         r#"(?i)(?:i\s+am\s+a|i\s+work\s+as\s+a|i'm\s+a)\s+([^.,;!]+)"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+81 -         r#"(?i)(?:i\s+am\s+a|i\s+work\s+as\s+a|i'm\s+a)\s+([^.,;!]+)"#,
+81 +         r"(?i)(?:i\s+am\s+a|i\s+work\s+as\s+a|i'm\s+a)\s+([^.,;!]+)",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:82:9
+   |
+82 |         r#"(?i)(?:i\s+use|i'm\s+using)\s+([^.,;!]+)"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+82 -         r#"(?i)(?:i\s+use|i'm\s+using)\s+([^.,;!]+)"#,
+82 +         r"(?i)(?:i\s+use|i'm\s+using)\s+([^.,;!]+)",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:83:9
+   |
+83 |         r#"(?i)(?:ich\s+bin\s+ein|ich\s+arbeite\s+als|ich\s+bin\s+eine)\s+([^.,;!]+)"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+83 -         r#"(?i)(?:ich\s+bin\s+ein|ich\s+arbeite\s+als|ich\s+bin\s+eine)\s+([^.,;!]+)"#,
+83 +         r"(?i)(?:ich\s+bin\s+ein|ich\s+arbeite\s+als|ich\s+bin\s+eine)\s+([^.,;!]+)",
+   |
+
+error: unnecessary hashes around raw string literal
+  --> rust/symbrain-memory/src/direct_admission.rs:84:9
+   |
+84 |         r#"(?i)(?:ich\s+nutze|ich\s+verwende)\s+([^.,;!]+)"#,
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_raw_string_hashes
+help: remove all the hashes around the string literal
+   |
+84 -         r#"(?i)(?:ich\s+nutze|ich\s+verwende)\s+([^.,;!]+)"#,
+84 +         r"(?i)(?:ich\s+nutze|ich\s+verwende)\s+([^.,;!]+)",
+   |
+
+    Checking crc32fast v1.5.1
+    Checking symbrain-harness v0.12.1 (/workspace/symaira-memory758-writes/rust/symbrain-harness)
+error: you seem to be trying to use `match` for destructuring a single pattern. Consider using `if let`
+  --> rust/symbrain-memory/src/cli_entity.rs:14:18
+   |
+14 |           let id = match found {
+   |  __________________^
+15 | |             Some(id) => id,
+16 | |             None => {
+17 | |                 let id = crate::write::new_uuid();
+...  |
+30 | |         };
+   | |_________^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#single_match_else
+   = note: `-D clippy::single-match-else` implied by `-D clippy::pedantic`
+   = help: to override `-D clippy::pedantic` add `#[allow(clippy::single_match_else)]`
+help: try
+   |
+14 ~         let id = if let Some(id) = found { id } else {
+15 +             let id = crate::write::new_uuid();
+16 +             let created_at = crate::gotime::format(chrono::Utc::now());
+17 +             let updated_at = crate::gotime::format(chrono::Utc::now());
+18 +             if conn.execute("INSERT INTO entities(id,name,type,aliases,description,created_by,created_at,updated_at) VALUES(?,?,'other','[]','',?,?,?)",
+19 +                 params![id, name, author, created_at, updated_at]).is_err() { continue; }
+20 +             let detail =
+21 +                 crate::cli_write::go_json(&serde_json::json!({"name": name, "type": "other"}))
+22 +                     .unwrap_or_default();
+23 +             let actor = (!author.is_empty()).then_some(author);
+24 +             let _ = conn.execute("INSERT INTO audit_log(id,action,target_type,target_id,actor,detail,created_at) VALUES(?,'entity_create','entity',?,?,?,?)",
+25 +                 params![crate::write::new_uuid(), id, actor, detail, crate::gotime::format(chrono::Utc::now())]);
+26 +             id
+27 ~         };
+   |
+
+error: docs for function which may panic missing `# Panics` section
+  --> rust/symbrain-memory/src/direct_admission.rs:10:1
+   |
+10 | pub fn direct_text_supported(text: &str) -> bool {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+note: first possible panic found here
+  --> rust/symbrain-memory/src/direct_admission.rs:37:28
+   |
+37 |     ].iter().map(|pattern| Regex::new(pattern).expect("frozen Go PII regex")).collect()).iter().any(|pattern| pattern.is_match(text))
+   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#missing_panics_doc
+   = note: `-D clippy::missing-panics-doc` implied by `-D clippy::pedantic`
+   = help: to override `-D clippy::pedantic` add `#[allow(clippy::missing_panics_doc)]`
+
+error: docs for function which may panic missing `# Panics` section
+  --> rust/symbrain-memory/src/direct_admission.rs:42:1
+   |
+42 | pub fn direct_content_supported(text: &str) -> bool {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+note: first possible panic found here
+  --> rust/symbrain-memory/src/direct_admission.rs:85:28
+   |
+85 |     ].iter().map(|pattern| Regex::new(pattern).expect("frozen Go extraction regex")).collect()
+   |                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#missing_panics_doc
+
+error: could not compile `symbrain-memory` (lib) due to 37 previous errors
+warning: build failed, waiting for other jobs to finish...

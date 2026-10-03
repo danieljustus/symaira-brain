@@ -56,6 +56,11 @@ integrity, with executable identity/audit/exit mutants and actual delegation
 observations. Full #758 and native three-OS acceptance remain pending; the
 rationale and exact boundaries are in
 `docs/adr/memory-native-governed-writes-758.md`.
+Clean source `14d2414` passes Linux 60 native set / 16 native delete pairs,
+13 literal delegated-Go boundaries, three write controls, all 590 baseline pairs
+and two baseline controls, plus 161 affected Rust tests and strict lint gates.
+Tracked receipts retain the actual delete-audit sequencing regression and
+earlier rejected harness assumptions. Independent review is still pending.
 
 Independent review found two configured-read differences in the initial CLI
 candidate: memory-specific XDG/legacy resolution and populated rules JSON HTML/

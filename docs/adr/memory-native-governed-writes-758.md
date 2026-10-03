@@ -1,6 +1,7 @@
 # Governed native CLI writes for Memory (#758)
 
-Status: bounded implementation under verification; full #758 remains open.
+Status: bounded implementation passes author validation on Linux; independent
+review and native three-OS CI remain pending. Full #758 remains open.
 
 ## Decision
 
@@ -86,3 +87,24 @@ fallback probes record the actual delegated Go process and require the native
 reply to match those literal bytes and exit; they do not count as native writes.
 Source/SDK/binary hashes and clean revision bind final receipts. Native three-OS
 CI and independent review remain required; no issue is closed by this document.
+
+## Retained Linux evidence
+
+Clean source `14d24144df9fdf7e55db25b0ba64b1dcfa587468` includes the normally
+integrated PR803 Windows borrow/SQLite cleanup corrections through `9c0ed065`.
+Fresh gates pass 60 native set pairs, 16 native delete pairs, 13 actual delegated-Go
+boundaries, three executable write controls, the full 590 baseline process pairs
+and both baseline process controls. All 161 affected Rust tests pass: 117 CLI
+unit tests, 32 Memory unit tests, four immutable-Go fixture tests, seven store
+tests and one complete Activity CLI fixture test. Strict Clippy, format and
+workflow lint pass. Eleven changed production Rust files are each below 400 lines.
+
+Full raw state/transcripts, explicit identity/time bindings, source and binary
+hashes, immutable Go source provenance, test logs and rejected prior controls are
+tracked under
+`migration/evidence/memory-cli-758/governed-writes-14d2414/verification.json`.
+The evidence commit changes documentation and receipts only; these gates bind the
+stated clean source and executable, not an untested later source change. Preserve
+the first invalid FTS callback fixture separately from the corrected callback's
+actual Go/native audit mismatch. No cleanup exception or broad state normalization
+was used to turn either failure into a pass.

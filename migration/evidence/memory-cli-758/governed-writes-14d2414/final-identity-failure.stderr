@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/writes.py", line 304, in <module>
+    execute(args.go.resolve(),args.rust.resolve(),args.report)
+  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/writes.py", line 276, in execute
+    stable, binding = canonical(state, before, (start,end), expected, identity)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/writes.py", line 108, in canonical
+    assert len(rows) == 1, "one returned primary row"
+           ^^^^^^^^^^^^^^
+AssertionError: one returned primary row

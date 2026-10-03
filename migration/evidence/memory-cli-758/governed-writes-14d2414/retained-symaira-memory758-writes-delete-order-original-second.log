@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/deletes.py", line 85, in <module>
+    args=parser.parse_args(); execute(args.go.resolve(),args.rust.resolve(),args.report)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/deletes.py", line 62, in execute
+    assert len(audits)==1 and audits[0]['scope']==actual_scope and audits[0]['actor']==actual_author and audits[0]['session']==actual_session
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
