@@ -37,7 +37,7 @@ receipt distinguishes this safety behavior from byte-equivalent regular-file,
 symlink and directory observations. Native Windows root-confinement proof still
 requires its own CI execution; Unix probes are not counted as Windows evidence.
 
-The fresh gate requires 92 constructor/report/request/no-write cases, 100 actual
+The fresh gate requires 96 constructor/report/request/no-write cases, 104 actual
 CLI table/JSON byte comparisons for credential-free cases, and five actual
 rejection controls. Positive provider requests receive canned 401 responses;
 no real account or live endpoint is used. Native Linux, macOS and Windows CI

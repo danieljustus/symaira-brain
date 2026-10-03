@@ -1,0 +1,20 @@
+    Finished `test` profile [unoptimized] target(s) in 0.08s
+     Running tests/hermes_credential_tests.rs (target/debug/deps/hermes_credential_tests-c837eb94e066b9af)
+
+running 1 test
+
+thread 'usage_hermes_768_matches_fresh_go_file_and_jwt_contracts' (1344007) panicked at rust/symbrain-usage/tests/hermes_credential_tests.rs:111:9:
+assertion `left == right` failed: "jwt-unknown-overflow-number": complete Hermes report
+  left: Object {"providers": Array [Object {"auth_status": Object {"detail": String("Signed in via Hermes CLI auth store (NOUS_PORTAL_ACCESS_TOKEN or file)"), "source": String("file"), "status": String("available")}, "configured": Bool(true), "display_name": String("Nous Portal"), "error": String("all AI usage fallbacks failed: AI usage provider \"nous\" is not configured"), "id": String("nous")}], "schema_version": Number(1)}
+ right: Object {"providers": Array [Object {"auth_status": Object {"detail": String("No Nous Portal credentials found — sign in with the Hermes CLI"), "status": String("missing")}, "configured": Bool(false), "display_name": String("Nous Portal"), "id": String("nous")}], "schema_version": Number(1)}
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test usage_hermes_768_matches_fresh_go_file_and_jwt_contracts ... FAILED
+
+failures:
+
+failures:
+    usage_hermes_768_matches_fresh_go_file_and_jwt_contracts
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+error: test failed, to rerun pass `-p symbrain-usage --test hermes_credential_tests`

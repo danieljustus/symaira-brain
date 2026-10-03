@@ -2033,3 +2033,19 @@ All three native CI jobs retain full/partial receipts for 14 days. Re-run the
 92/100/five-control Hermes gate and 44/110/five-control reference gate on the same
 clean source revision because the read-only helper is shared. Decisions and
 limits are recorded in `docs/adr/usage-provider-files-768.md`.
+
+## Usage #768 — inherited Hermes depth correction, 2026-10-03
+
+Independent full provider-files review of immutable `5111d8b6` reproduced one
+inherited P2 across outer Hermes JSON and decoded JWT claims: total depth10001
+was accepted natively while Go reported missing/no request. Both exact10000
+boundaries passed. Preserve that full review and all four original process
+replays under `migration/evidence/usage-hermes-depth-768/original-review-5111/`.
+The focused source correction calls the shared typed JSON limit for both entry
+points and appends four exact boundary inputs; original92 inputs are unchanged.
+The expanded Hermes gate requires96 reports,104 CLI comparisons and five real
+rejection controls. Run it with the entire86-input provider-files and44-report
+reference gates on the same clean source, plus355 ordinary tests/strict checks.
+See `docs/adr/usage-hermes-depth-limit-768.md`. These are required gates at this
+checkpoint, not claimed completed results. Native macOS/Windows, host Keychain,
+Copilot/Kimi and other residual USE-001/#768 requirements remain open.
