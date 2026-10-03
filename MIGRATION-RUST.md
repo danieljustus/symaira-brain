@@ -72,6 +72,12 @@ Go boundary pairs, six governance callback pairs, two real Unix output sinks,
 all three write controls, 590 baseline pairs and both baseline controls. All
 163 affected Rust tests and strict lint gates pass. The old independent failure
 bytes/executable archives and new full state proof remain tracked separately.
+The subsequent independent review closed both original findings and requested
+actual Unix Set stdout SIGPIPE parity. The focused successor keeps library
+writers as checked errors, adds both real closed-reader process formats and an
+actual CLI child test, and normally integrates main `e3dbda6c`. Its decision is
+in `docs/adr/memory-set-stdout-sigpipe-758.md`; exact-source independent review,
+native three-OS acceptance and full #758 remain pending.
 
 Independent review found two configured-read differences in the initial CLI
 candidate: memory-specific XDG/legacy resolution and populated rules JSON HTML/

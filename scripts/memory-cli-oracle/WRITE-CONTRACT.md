@@ -20,6 +20,12 @@ pairs with literal OS error diagnostics and preserved committed staged writes.
 Other native hosts still execute the portable Rust failing-writer test; the
 receipt states whether a real Unix sink was exercised.
 
+Unix hosts also run two actual closed-reader stdout pairs. Both CLIs must die
+quietly through SIGPIPE after the complete committed metadata/staging write;
+all application state, ID/time bindings and FTS checks remain strict. This
+process contract is distinct from portable injected-writer tests, which require
+ordinary checked errors and preserve the library caller.
+
 Each set/delete pair starts from the same actual Go-created database backup at
 the same path. Full raw SQLite rows/blobs are retained. Generated UUIDs/timestamps
 have explicit validation/binding receipts; all other application values stay

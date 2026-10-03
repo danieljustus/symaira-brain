@@ -6,6 +6,7 @@ from contextlib import closing
 import http.server
 import json
 import os
+import signal
 from pathlib import Path
 import sqlite3
 import subprocess
@@ -52,6 +53,10 @@ def execute(go, rust, report):
     if unix_sink:
         cases += [('metadata-output-full-' + fmt, None, 'reference', False, fmt, True)
                   for fmt in ('json', 'table')]
+    unix_pipe = os.name == 'posix'
+    if unix_pipe:
+        cases += [('metadata-output-closed-pipe-' + fmt, None, 'reference', False, fmt, 'pipe')
+                  for fmt in ('json', 'table')]
     records = []
     server = http.server.HTTPServer(('127.0.0.1', 0), writes.Embeddings)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -74,7 +79,7 @@ def execute(go, rust, report):
                 before = writes.snapshot(path)
                 args = ['set', 'hello world', '--kind', 'fact', '--staged', '--db', str(path),
                         '--metadata', '{"fixture":"value"}', '--output', fmt]
-                expected = dict(author='cli:symbrain', kind=kind, staged=sink, metadata={'fixture': 'value'})
+                expected = dict(author='cli:symbrain', kind=kind, staged=bool(sink), metadata={'fixture': 'value'})
                 pair = []
                 for binary in (go, rust):
                     with closing(sqlite3.connect(saved)) as backup, closing(sqlite3.connect(path)) as db:
@@ -82,7 +87,15 @@ def execute(go, rust, report):
                     writes.Embeddings.requests = []
                     writes.Embeddings.mode = 'success'
                     start = time.time_ns()
-                    if sink:
+                    if sink == 'pipe':
+                        read_fd, write_fd = os.pipe()
+                        os.close(read_fd)
+                        with os.fdopen(write_fd, 'wb', buffering=0) as output:
+                            result = subprocess.run([str(binary), 'memory', *args], cwd=root, env=env,
+                                                    stdout=output, stderr=subprocess.PIPE, timeout=12)
+                        transcript = dict(exit=result.returncode, stdout=None,
+                                          stderr=base64.b64encode(result.stderr).decode())
+                    elif sink:
                         with open('/dev/full', 'wb', buffering=0) as output:
                             result = subprocess.run([str(binary), 'memory', *args], cwd=root, env=env,
                                                     stdout=output, stderr=subprocess.PIPE, timeout=12)
@@ -95,14 +108,18 @@ def execute(go, rust, report):
                     try:
                         identity, stable, bindings = committed_state(state, before, (start, end), expected, removed)
                         stderr = base64.b64decode(transcript['stderr'])
-                        if sink:
+                        if sink == 'pipe':
+                            assert stderr == b'', 'actual stdout SIGPIPE must stay quiet'
+                            comparable_stderr = stderr
+                        elif sink:
                             assert stderr == b'symbrain memory set: format output: write /dev/stdout: no space left on device\n'
                             comparable_stderr = stderr
                         else:
                             assert base64.b64decode(transcript['stdout']) == b'', 'failed governance emits no success reply'
                             assert stderr == f'symbrain memory set: store memory: memory not found: {identity}\n'.encode()
                             comparable_stderr = stderr.replace(identity.encode(), b'$memory')
-                        assert transcript['exit'] == 1, 'failure must propagate to CLI exit'
+                        expected_exit = -signal.SIGPIPE if sink == 'pipe' else 1
+                        assert transcript['exit'] == expected_exit, 'failure must propagate to CLI exit'
                         requests = list(writes.Embeddings.requests)
                         assert requests == [dict(path='/v1/embeddings', body=dict(model='owned-model', input=['hello world']))]
                         fts = writes.audit_fts(path)
@@ -122,7 +139,8 @@ def execute(go, rust, report):
         thread.join()
     document = dict(go_binary_sha256=replay.digest(go.read_bytes()), rust_binary_sha256=replay.digest(rust.read_bytes()),
                     cases=records, passed=sum(row['match'] for row in records), total=len(records),
-                    unix_sink_executed=unix_sink, portable_failing_writer_test='memory_cli::write_output::tests::output_failure_reports_error_after_committed_set')
+                    unix_sink_executed=unix_sink, unix_closed_pipe_executed=unix_pipe,
+                    portable_failing_writer_test='memory_cli::write_output::tests::output_failure_reports_error_after_committed_set')
     writes.save_json(report, document)
     assert document['passed'] == document['total'], 'actual Go/native failure state differs'
     print(json.dumps(dict(passed=document['passed'], total=document['total'], unix_sink_executed=unix_sink)))

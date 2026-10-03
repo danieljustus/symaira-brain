@@ -49,6 +49,16 @@ pub fn run(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
+    run_with_stdout(args, stdout, stderr, format, false)
+}
+
+pub(super) fn run_with_stdout(
+    args: &[OsString],
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write,
+    format: OutputFormat,
+    process_stdout: bool,
+) -> u8 {
     if args.is_empty() {
         let _ = write!(stderr, "{MEMORY_USAGE}");
         return exit::USAGE;
@@ -64,7 +74,7 @@ pub fn run(
         }
         "list" => run_list(rest, stdout, stderr, format),
         "search" => run_search(rest, stdout, stderr, format),
-        "set" => run_set(rest, stdout, stderr, format),
+        "set" => run_set(rest, stdout, stderr, format, process_stdout),
         "delete" => run_delete(rest, stdout, stderr, format),
         "rules" => run_rules(rest, stdout, stderr, format),
         "query-log" => run_query_log(rest, stdout, stderr, format),

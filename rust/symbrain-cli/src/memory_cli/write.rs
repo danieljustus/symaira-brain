@@ -10,6 +10,7 @@ pub(super) fn run_set(
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
+    process_stdout: bool,
 ) -> u8 {
     if flags::has_help(args) {
         let _ = write!(stdout, "{MEMORY_SET_USAGE}");
@@ -76,9 +77,18 @@ pub(super) fn run_set(
     let generator =
         symbrain_memory::EmbeddingGenerator::new(&config.ollama_url, &config.ollama_model);
     match store.set_direct_cli(&request, &generator) {
-        Ok(id) => {
-            super::write_output::finish_set(&id, &scope, kind, staged, stdout, stderr, format)
-        }
+        Ok(id) => super::write_output::finish_set(
+            super::write_output::SetReply {
+                id: &id,
+                scope: &scope,
+                kind,
+                staged,
+            },
+            stdout,
+            stderr,
+            format,
+            process_stdout,
+        ),
         Err(err) => {
             let _ = writeln!(stderr, "symbrain memory set: store memory: {err}");
             exit::GENERIC

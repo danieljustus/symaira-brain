@@ -62,6 +62,7 @@ jobs:
           set -euo pipefail
           umask 022
           cargo test -p symbrain-cli --lib --all-features --locked memory_cli:: 2>&1 | tee "$TEST_LOG"
+          cargo test -p symbrain-cli --test memory_set_sigpipe --all-features --locked 2>&1 | tee -a "$TEST_LOG"
           cargo test -p symbrain-memory --all-targets --all-features --locked 2>&1 | tee -a "$TEST_LOG"
       - name: Execute immutable Go subprocess parity
         env:

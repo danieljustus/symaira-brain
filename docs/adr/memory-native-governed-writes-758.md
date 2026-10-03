@@ -1,8 +1,8 @@
 # Governed native CLI writes for Memory (#758)
 
-Status: independent review requested two corrections to the original candidate.
-The corrected candidate passes fresh authored Linux gates; corrected independent
-review and native three-OS CI remain pending. Full #758 remains open.
+Status: independent review closed the original governance/output findings and
+requested a focused actual stdout SIGPIPE correction. Its independent review
+and native three-OS CI remain pending. Full #758 remains open.
 
 ## Decision
 
@@ -157,3 +157,10 @@ format and workflow lint. The source-bound raw receipts, test/binary hashes and
 retention checks are under
 `migration/evidence/memory-cli-758/governed-write-fix-647477f/verification.json`.
 This is author validation and does not replace the required independent review.
+
+The subsequent full independent review closed both original groups and found
+actual closed-reader stdout behavior still differed in both Set formats. Its
+complete unchanged results and executable archive receipts are retained under
+`migration/evidence/memory-cli-758/sigpipe-review-55e3038/`. The scoped process
+boundary decision, writer guarantees and remaining limits are documented in
+`docs/adr/memory-set-stdout-sigpipe-758.md`.
