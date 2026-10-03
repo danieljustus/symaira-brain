@@ -1,0 +1,68 @@
+{
+  "candidate_source": "1f82e9cf8812c5b383a19349241787215a857493",
+  "reason": "unchanged comparator blocked MCP and daemon p95; original literal measurement retained",
+  "captured_utc": "2026-10-03T21:08:44.287633+00:00",
+  "loadavg": "0.86 1.52 1.53 1/374 1465005\n",
+  "process_comm_cpu": [
+    "COMMAND         %CPU",
+    "python3         66.6",
+    "containerd       0.0",
+    "codex            0.0",
+    "dockerd          0.0",
+    "tail             0.0",
+    "rustc            0.0",
+    "cargo            0.0",
+    "python3          0.0",
+    "python3          0.0",
+    "python3          0.0",
+    "symbrowse        0.0"
+  ],
+  "binaries": {
+    "go": {
+      "sha256": "221b047aa18e2c4eb421dd970de18e6e82372059c492f6bd52ac337c95c5a5f6",
+      "source_revision": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
+    },
+    "rust": {
+      "sha256": "6384a60885922ed76902432712fd4ff2a82f63b0430cd8b06f0defeaa1834853",
+      "source_revision": "1f82e9cf8812c5b383a19349241787215a857493"
+    }
+  },
+  "timing_ms": {
+    "go": {
+      "cli": {
+        "median": 6.645086,
+        "p95": 8.570738
+      },
+      "daemon": {
+        "median": 20.474664,
+        "p95": 21.092758
+      },
+      "fetch": {
+        "median": 1.172727,
+        "p95": 2.36156
+      },
+      "mcp": {
+        "median": 6.346762,
+        "p95": 8.325978
+      }
+    },
+    "rust": {
+      "cli": {
+        "median": 2.660127,
+        "p95": 3.500192
+      },
+      "daemon": {
+        "median": 24.44121,
+        "p95": 51.793842
+      },
+      "fetch": {
+        "median": 0.667273,
+        "p95": 0.874152
+      },
+      "mcp": {
+        "median": 3.275647,
+        "p95": 12.639809
+      }
+    }
+  }
+}
