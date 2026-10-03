@@ -176,13 +176,15 @@ fn audit_status_reports_all_three_states() {
         "auditkit: parse anchor: invalid character 'o' in literal null (expecting 'u')"
     ));
     assert!(status.1);
-    // Valid JSON with an incompatible type remains gated.
+    // The actual Go oracle's first typed field diagnostic is native.
     fs::write(
         dir.path().join("audit.log.anchor"),
         br#"{"entry_count":"one"}"#,
     )
     .expect("write anchor");
-    assert!(audit_status(&log).is_none());
+    let status = audit_status(&log).expect("type error is native");
+    assert!(status.0.ends_with("auditkit: parse anchor: json: cannot unmarshal string into Go struct field ChainAnchor.entry_count of type int64"));
+    assert!(status.1);
 }
 
 #[test]

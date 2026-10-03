@@ -2,6 +2,9 @@
 use std::path::{Path, PathBuf};
 use std::{fs, io};
 
+#[path = "anchor_decode.rs"]
+mod decoder;
+
 pub(super) fn audit_status(log_path: &Path) -> Option<(String, bool)> {
     match fs::metadata(log_path) {
         Err(error) if error.kind() == io::ErrorKind::NotFound => {
@@ -29,9 +32,7 @@ pub(super) fn audit_status(log_path: &Path) -> Option<(String, bool)> {
             false,
         )),
         Some(data) => {
-            // Syntax errors come from the shared Go-compatible scanner. Keep
-            // valid-JSON type/shape failures gated because serde diagnostics
-            // do not match encoding/json.
+            // Syntax errors come from the shared Go-compatible scanner.
             if let Err(error) =
                 symbrain_guard_core::external_decision::validate_go_json_syntax(&data)
             {
@@ -43,25 +44,16 @@ pub(super) fn audit_status(log_path: &Path) -> Option<(String, bool)> {
                     true,
                 ));
             }
-            serde_json::from_slice::<ChainAnchor>(&data).ok()?;
+            if let Err(error) = decoder::validate(&data)? {
+                return Some((
+                    format!(
+                        "error: anchor {}: auditkit: parse anchor: {error}",
+                        anchor_path.display()
+                    ),
+                    true,
+                ));
+            }
             Some(("ok (hash-chained, anchor present)".to_owned(), false))
         }
     }
-}
-
-/// Mirrors `auditkit.ChainAnchor`'s JSON shape closely enough that a
-/// document Go would reject is rejected here too (and therefore gated).
-#[derive(serde::Deserialize)]
-#[allow(dead_code)]
-struct ChainAnchor {
-    #[serde(default)]
-    last_entry_hash: String,
-    #[serde(default)]
-    entry_count: i64,
-    #[serde(default)]
-    schema_version: i32,
-    #[serde(default)]
-    log_size: i64,
-    #[serde(default)]
-    content_hash: String,
 }

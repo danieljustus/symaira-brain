@@ -263,7 +263,10 @@ shared by the Brain compatibility route and an independently buildable native
 memory dependencies and cannot invoke Go. The real reachable command inventory
 and remaining doctor/audit diagnostics are recorded in
 `migration/guard-standalone-tree-770.md`; nonexistent planned CLI verbs are not
-invented or treated as retired. The scoped process runner executes 80 actual
-Go/Rust cases, with 76 full matches and four explicitly retained fail-closed
-states/deviations. Native three-OS acceptance, remaining diagnostics and release
+invented or treated as retired. The scoped process runner executes124 actual
+Go/Rust cases: the current Linux replay has121 full matches and three selected
+TOML diagnostic states explicitly fail closed. Typed anchor errors and the proven
+Unix directory audit-open spelling are native; Windows audit wording remains
+separately unported. Three actual output mutants test the new boundaries. These
+selected states do not inventory all unsupported TOML/discovery/I/O shapes. Native three-OS acceptance, remaining diagnostics and release
 are still pending; #770 stays open. Production Go and frozen fixtures are unchanged.

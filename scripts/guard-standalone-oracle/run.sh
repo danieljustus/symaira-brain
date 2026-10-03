@@ -22,3 +22,4 @@ fi
 (cd "$owned/go-source" && GOTOOLCHAIN=go1.26.7 CGO_ENABLED=0 go build -mod=readonly -o "$go_binary" ./oracle770)
 cargo build --locked -p symguard-cli
 python3 scripts/guard-standalone-oracle/replay.py "$go_binary" "$rust_binary" "$report" "$owned/go-source"
+python3 scripts/guard-standalone-oracle/controls.py "$go_binary" "$rust_binary" "${report%.json}-controls.json"

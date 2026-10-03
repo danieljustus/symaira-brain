@@ -14,6 +14,27 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 REF = "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
+ANCHORS = {
+    "null": b"null", "array": b"[]", "number": b"1", "string": b'"text"', "bool": b"true",
+    "string-null": b'{"last_entry_hash":null}', "string-number": b'{"last_entry_hash":1}',
+    "string-bool": b'{"content_hash":false}', "string-object": b'{"content_hash":{}}',
+    "count-null": b'{"entry_count":null}', "count-bool": b'{"entry_count":false}',
+    "count-array": b'{"entry_count":[]}', "count-object": b'{"entry_count":{}}',
+    "count-max": b'{"entry_count":9223372036854775807}',
+    "count-min": b'{"entry_count":-9223372036854775808}',
+    "count-overflow": b'{"entry_count":9223372036854775808}',
+    "count-decimal": b'{"entry_count":1.0}', "count-exponent": b'{"entry_count":1e0}',
+    "count-negative-zero": b'{"entry_count":-0}',
+    "schema-wide": b'{"schema_version":2147483648}', "schema-null": b'{"schema_version":null}',
+    "schema-string": b'{"schema_version":"wrong"}', "log-string": b'{"log_size":"wrong"}',
+    "case-fold": b'{"ENTRY_COUNT":"wrong"}',
+    "unicode-fold": '{"laſt_entry_haſh":false}'.encode(),
+    "duplicate-first-error": b'{"entry_count":"wrong","entry_count":1}',
+    "duplicate-later-error": b'{"entry_count":1,"entry_count":"wrong"}',
+    "multiple-first-error": b'{"content_hash":false,"entry_count":"wrong"}',
+    "unknown-overflow": b'{"unknown":1e309}',
+    "unknown-depth": b'{"unknown":' + b'[' * 150 + b'0' + b']' * 150 + b'}',
+}
 
 
 def digest(data):
@@ -57,7 +78,10 @@ def cases():
                   "rule-command-match"]:
         add("doctor-" + state, ["doctor"], state)
     for state in ["invalid-anchor-shape", "decode-before-validation", "multiple-invalid-defaults", "unknown-key"]:
-        add("doctor-unported-" + state, ["doctor"], state, "native-fail-closed")
+        add("doctor-unported-" + state, ["doctor"], state,
+            "parity" if state == "invalid-anchor-shape" else "native-fail-closed")
+    for state in ANCHORS:
+        add("doctor-anchor-" + state, ["doctor"], "anchor:" + state)
     add("decide-help", ["decide", "--help"])
     fixture = json.loads((ROOT / "guard/scripts/guard-decide-oracle/cases.json").read_text())
     for item in fixture["cases"]:
@@ -72,7 +96,7 @@ def cases():
         if item["id"] == "deadline-equality-at-launch":
             payload = b"LAUNCH_DEADLINE"
         state = "audit-failure" if item["id"] == "audit-failure" else "empty"
-        contract = "audit-fail-closed" if state == "audit-failure" else "parity"
+        contract = "audit-fail-closed" if state == "audit-failure" and os.name == "nt" else "parity"
         add("decide-" + item["id"], ["decide"], state, contract, payload)
     return result
 
@@ -121,6 +145,9 @@ def setup(root, state):
             write(root / "data/symguard/audit.log.anchor", value)
     if state == "audit-failure":
         (root / "data/symguard/audit.log").mkdir(parents=True)
+    if state.startswith("anchor:"):
+        write(root / "data/symguard/audit.log", '{}\n')
+        (root / "data/symguard/audit.log.anchor").write_bytes(ANCHORS[state.removeprefix("anchor:")])
     if state == "grants":
         record = dict(id="g1", scope="session", subject="fixture", origin=dict(epoch=1, via="human"),
                       granted_at="2026-01-01T00:00:00Z", expires_at="2999-01-01T00:00:00Z")
@@ -188,7 +215,10 @@ def observe(binary, case, root, native):
         stamp = datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00", "Z")
         payload = json.dumps(dict(command="open", risk_class="low", deadline=stamp)).encode()
     start = time.time()
-    p = subprocess.run([str(binary), *case["args"]], cwd=root / "project", env=env,
+    command = [str(binary), *case["args"]]
+    if binary.suffix == ".py":
+        command.insert(0, sys.executable)
+    p = subprocess.run(command, cwd=root / "project", env=env,
                        input=payload, capture_output=True, timeout=5)
     end = time.time()
     return dict(exit_code=p.returncode, stdout_hex=p.stdout.hex(), stderr_hex=p.stderr.hex(),
@@ -235,7 +265,7 @@ def main():
         source_hashes[name] = digest(expected)
     results = []
     selected = cases()
-    assert len(selected) == 94 and len({c["id"] for c in selected}) == 94
+    assert len(selected) == 94 + len(ANCHORS) and len({c["id"] for c in selected}) == len(selected)
     with tempfile.TemporaryDirectory(prefix="guard770-process-") as owned:
         for index, case in enumerate(selected):
             base = Path(owned) / str(index)
@@ -256,6 +286,7 @@ def main():
                   go_source_sha256=source_hashes, supplemental_go_entry_sha256=digest((archive / "oracle770/main.go").read_bytes()),
                   binaries_sha256=dict(go=digest(go.read_bytes()), rust=digest(rust.read_bytes())),
                   total=len(results), matched=sum(r["disposition"] == "matched" for r in results),
+                  supplemental_anchor_inputs_hex={k: v.hex() for k, v in ANCHORS.items()},
                   remaining_native_diagnostic_states=[r["id"] for r in results if r["contract"] == "native-fail-closed"],
                   audit_diagnostic_deviations=[r["id"] for r in results if r["contract"] == "audit-fail-closed"], results=results,
                   explicit_limits=["unported doctor diagnostic states", "inherited decision audit failure diagnostic",
@@ -265,7 +296,7 @@ def main():
     report.write_text(json.dumps(output, indent=2) + "\n")
     failures = [r["id"] + ": " + r["disposition"] for r in results if r["disposition"].startswith("failed")]
     assert not failures, "\n".join(failures)
-    print(f"{len(results)} actual standalone process cases; {output['matched']} full matches; {len(output['remaining_native_diagnostic_states'])} remaining doctor diagnostic states and 1 audit diagnostic deviation explicitly retained")
+    print(f"{len(results)} actual standalone process cases; {output['matched']} full matches; {len(output['remaining_native_diagnostic_states'])} remaining doctor diagnostic states and {len(output['audit_diagnostic_deviations'])} audit diagnostic deviations explicitly retained")
 
 
 if __name__ == "__main__":

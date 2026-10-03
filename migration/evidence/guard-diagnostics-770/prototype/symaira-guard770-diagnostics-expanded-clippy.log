@@ -1,0 +1,18 @@
+    Checking symguard-cli v0.12.1 (/workspace/symaira-guard770-diagnostics/rust/symguard-cli)
+error: this argument is passed by value, but not consumed in the function body
+  --> rust/symguard-cli/src/lib.rs:89:11
+   |
+89 |     path: PathBuf,
+   |           ^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_pass_by_value
+   = note: `-D clippy::needless-pass-by-value` implied by `-D clippy::pedantic`
+   = help: to override `-D clippy::pedantic` add `#[allow(clippy::needless_pass_by_value)]`
+help: consider taking a reference instead
+   |
+89 |     path: &PathBuf,
+   |           +
+
+error: could not compile `symguard-cli` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `symguard-cli` (lib test) due to 1 previous error

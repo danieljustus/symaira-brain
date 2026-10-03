@@ -28,6 +28,7 @@ Commands:
 
 Run 'symbrain guard <command> --help' for details on a specific command.";
 
+mod audit_error;
 #[path = "guard_doctor.rs"]
 mod guard_doctor;
 #[path = "guard_grants.rs"]
@@ -94,13 +95,14 @@ pub fn run_at_path<R: Read, W: Write>(
         .take((MAX_REQUEST_BYTES + 1) as u64)
         .read_to_end(&mut bytes);
 
+    let diagnostic_path = path.clone();
     let appender = RawJsonlAppender::new(path);
     let mut sink = |record: &symbrain_guard_core::external_decision::ExternalDecisionAudit| {
         let serialized = to_go_json_vec(record)
             .map_err(|error| format!("decide: marshal audit record: {error}"))?;
         appender
             .append(&serialized)
-            .map_err(|error| format!("decide: write audit log: {error}"))
+            .map_err(|error| audit_error::render(&error, &diagnostic_path))
     };
 
     let response = match read_result {

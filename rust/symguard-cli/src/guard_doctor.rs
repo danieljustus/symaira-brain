@@ -21,8 +21,8 @@
 //! * TOML syntax/type errors except the simple missing-`=` diagnostic,
 //!   unknown-key warnings and multiple invalid defaults with Go map ordering;
 //!   known semantic validation errors are rendered natively;
-//! * an audit anchor with valid JSON but the wrong `ChainAnchor` shape still
-//!   gates, because serde's type errors differ from `encoding/json`;
+//! * unsupported audit-anchor Unicode decoding still gates; known typed JSON
+//!   failures preserve Go's first field error and original numeric spelling;
 //! * any discovery source that exists but fails to read or parse, or an
 //!   entry with neither `command` nor `url` — Go turns those into an
 //!   `mcp servers  error: discovery: …` line carrying the upstream parser's
