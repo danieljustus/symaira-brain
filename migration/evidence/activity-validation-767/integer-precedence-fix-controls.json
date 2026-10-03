@@ -1,0 +1,36 @@
+{
+  "controls": [
+    {
+      "name": "missing-fixture",
+      "exit": 101,
+      "expected_diagnostic": "required activity validation fixture",
+      "rejected": true
+    },
+    {
+      "name": "changed-Go-exit",
+      "exit": 101,
+      "expected_diagnostic": "exit",
+      "rejected": true
+    },
+    {
+      "name": "missing-case",
+      "exit": 101,
+      "expected_diagnostic": "complete activity process case count",
+      "rejected": true
+    }
+  ],
+  "candidate_head": "89083ea31f3ab0fd849ac94712fb0ee6e24ada50",
+  "candidate_dirty": false,
+  "candidate_source_sha256": {
+    "rust/symbrain-cli/src/activity_cli.rs": "3e332795d6aad6ef530b93edb73918d9438f50d56c41c5b4051977fcba452af6",
+    "rust/symbrain-cli/src/activity_args.rs": "5bea6864075f6c2f26114e7c43b759d764da23e4bbbcdaa625a7835a7e02b6a7",
+    "rust/symbrain-cli/src/activity_time.rs": "ffe48f0f95f668a863b93af2f9085c230971a29dd91f3fc8ba872b66e2664404",
+    "rust/symbrain-cli/src/lib.rs": "decf6229c8fd9295893c456ca15dc8ab20ab79390988de051591bc80f21aa9ca",
+    "scripts/activity-validation-oracle/replay.py": "7d099dd6612a5878281d3fe07d5c46f583ebeafe9ee4174112da29f93945ae56",
+    "scripts/activity-validation-oracle/controls.py": "ac3843c82ddd40cf2cb8b62e3e01b2288cf65f5be213d9c175cdcdb622167e27",
+    "scripts/activity-validation-oracle/run.sh": "ea6c5ebe81338492eabdebd7f385ee23d465a72c487146825c6a1c8821216bfd",
+    "rust/symbrain-activity/src/lib.rs": "709f266eaf00b917eeea2d4da4e67d4fdbe0fdbacc4ddbe51ba6b76d731b1d82",
+    "rust/symbrain-cli/tests/activity_validation_tests.rs": "b9a85ed7d37461379295b39a4554a9c8fd4fd29a3d644634e2987f435e89454a"
+  },
+  "actual_process_cases": 265
+}
