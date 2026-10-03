@@ -105,6 +105,19 @@ def cases():
         add(f"create-project-config-{len(result)}", ["create", "work/item"],
             discovery="config", metadata='{"fields":{"password":"fixture-secret"}}',
             project_text=project, portable=False)
+    for action in ("create", "set", "delete"):
+        path = "work/\ufffd" + (".password" if action == "set" else "")
+        add(f"{action}-valid-replacement-character", [action, path] + (["--yes"] if action == "delete" else []),
+            get_exit=2 if action == "delete" else 0,
+            metadata='{"fields":{"password":"fixture-secret"}}', unicode_path=True)
+    for raw in (b"work/\xe2\x82", b"work/\xf0\x9f", b"work/\xf0\x9f\x92", b"work/\xe2\x82z", b"work/\xff"):
+        for action in ("create", "set", "delete"):
+            query = raw + (b".password" if action == "set" else b"")
+            argv = [action.encode(), query] + ([b"--yes"] if action == "delete" else [])
+            add(f"{action}-raw-path-{len(result)}", [action, "raw-path"],
+                args_raw_hex=[arg.hex() for arg in argv], unix_only=True, portable=False,
+                get_exit=2 if action == "delete" else 0,
+                metadata='{"fields":{"password":"fixture-secret"}}')
     return result
 
 
@@ -166,7 +179,10 @@ def run(binary, child, case, root):
         config.write_text(case["config_text"])
     if "project_text" in case:
         (root / ".symbrain.toml").write_text(case["project_text"].replace("<CHILD>", str(child).replace("\\", "\\\\")))
-    process = subprocess.run([str(binary), "vault", *case["args"]], input=bytes.fromhex(case["input_hex"]),
+    argv = [str(binary), "vault", *case["args"]]
+    if "args_raw_hex" in case:
+        argv = [os.fsencode(binary), b"vault", *[bytes.fromhex(arg) for arg in case["args_raw_hex"]]]
+    process = subprocess.run(argv, input=bytes.fromhex(case["input_hex"]),
                              env=env, cwd=root, capture_output=True, timeout=5)
     return dict(exit_code=process.returncode, stdout=normalize_output(process.stdout, root),
                 stderr=normalize_output(process.stderr, root), calls=(root / "calls").read_text() if (root / "calls").exists() else "")
@@ -195,7 +211,8 @@ def main():
         child = temporary / ("fake-vault.exe" if os.name == "nt" else "fake-vault")
         subprocess.run(["rustc", "--edition=2024", str(support), "-o", str(child)], check=True)
         results = []
-        for index, case in enumerate(cases()):
+        selected = [case for case in cases() if not case.get("unix_only") or os.name != "nt"]
+        for index, case in enumerate(selected):
             expected = run(go, child, case, temporary / f"go-{index}")
             actual = run(args.rust.resolve(), child, case, temporary / f"rust-{index}") if args.rust else None
             if actual is not None and actual != expected:

@@ -1,7 +1,7 @@
 {
   "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
   "platform": "posix",
-  "total": 179,
+  "total": 197,
   "source_sha256": {
     "cmd/symbrain/main.go": "46a3245236f0104f34c7e0d0787fcb35c27a0eba6c6bba8d5a5098e1664c6e5b",
     "cmd/symbrain/cmd_passthrough.go": "e550ea185a413f43d212d945e7a532d396110033aa8abfbe10ab9da668f3f0f4",
@@ -4588,15 +4588,565 @@
         "calls": "argshex=616464 776f726b2f6974656d 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2f6974656d 2d2d6f7574707574 6a736f6e;stdinhex=\n"
       },
       "matched": true
+    },
+    {
+      "case": {
+        "name": "create-valid-replacement-character",
+        "args": [
+          "create",
+          "work/\ufffd"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "get_exit": 0,
+        "unicode_path": true
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field_count\":1,\"has_value\":true,\"path\":\"work/\ufffd\"},\"submitted\":{\"path\":\"work/\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=616464 776f726b2fefbfbd 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fefbfbd 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field_count\":1,\"has_value\":true,\"path\":\"work/\ufffd\"},\"submitted\":{\"path\":\"work/\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=616464 776f726b2fefbfbd 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fefbfbd 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "set-valid-replacement-character",
+        "args": [
+          "set",
+          "work/\ufffd.password"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "get_exit": 0,
+        "unicode_path": true
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field\":\"password\",\"field_count\":1,\"has_value\":true,\"path\":\"work/\ufffd\",\"value_matches\":true},\"submitted\":{\"field\":\"password\",\"path\":\"work/\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=736574 776f726b2fefbfbd2e70617373776f7264 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fefbfbd 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field\":\"password\",\"field_count\":1,\"has_value\":true,\"path\":\"work/\ufffd\",\"value_matches\":true},\"submitted\":{\"field\":\"password\",\"path\":\"work/\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=736574 776f726b2fefbfbd2e70617373776f7264 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fefbfbd 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "delete-valid-replacement-character",
+        "args": [
+          "delete",
+          "work/\ufffd",
+          "--yes"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "get_exit": 2,
+        "unicode_path": true
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"absent\":true,\"path\":\"work/\ufffd\"},\"submitted\":{\"path\":\"work/\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=64656c657465 776f726b2fefbfbd 2d2d796573;stdinhex=\nargshex=676574 776f726b2fefbfbd 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"absent\":true,\"path\":\"work/\ufffd\"},\"submitted\":{\"path\":\"work/\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=64656c657465 776f726b2fefbfbd 2d2d796573;stdinhex=\nargshex=676574 776f726b2fefbfbd 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "create-raw-path-182",
+        "args": [
+          "create",
+          "raw-path"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "args_raw_hex": [
+          "637265617465",
+          "776f726b2fe282"
+        ],
+        "unix_only": true,
+        "portable": false,
+        "get_exit": 0
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=616464 776f726b2fe282 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fe282 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=616464 776f726b2fe282 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fe282 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "set-raw-path-183",
+        "args": [
+          "set",
+          "raw-path"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "args_raw_hex": [
+          "736574",
+          "776f726b2fe2822e70617373776f7264"
+        ],
+        "unix_only": true,
+        "portable": false,
+        "get_exit": 0
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field\":\"password\",\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffd\",\"value_matches\":true},\"submitted\":{\"field\":\"password\",\"path\":\"work/\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=736574 776f726b2fe2822e70617373776f7264 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fe282 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field\":\"password\",\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffd\",\"value_matches\":true},\"submitted\":{\"field\":\"password\",\"path\":\"work/\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=736574 776f726b2fe2822e70617373776f7264 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fe282 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "delete-raw-path-184",
+        "args": [
+          "delete",
+          "raw-path"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "args_raw_hex": [
+          "64656c657465",
+          "776f726b2fe282",
+          "2d2d796573"
+        ],
+        "unix_only": true,
+        "portable": false,
+        "get_exit": 2
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"absent\":true,\"path\":\"work/\\ufffd\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=64656c657465 776f726b2fe282 2d2d796573;stdinhex=\nargshex=676574 776f726b2fe282 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"absent\":true,\"path\":\"work/\\ufffd\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=64656c657465 776f726b2fe282 2d2d796573;stdinhex=\nargshex=676574 776f726b2fe282 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "create-raw-path-185",
+        "args": [
+          "create",
+          "raw-path"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "args_raw_hex": [
+          "637265617465",
+          "776f726b2ff09f"
+        ],
+        "unix_only": true,
+        "portable": false,
+        "get_exit": 0
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=616464 776f726b2ff09f 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2ff09f 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=616464 776f726b2ff09f 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2ff09f 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "set-raw-path-186",
+        "args": [
+          "set",
+          "raw-path"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "args_raw_hex": [
+          "736574",
+          "776f726b2ff09f2e70617373776f7264"
+        ],
+        "unix_only": true,
+        "portable": false,
+        "get_exit": 0
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field\":\"password\",\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffd\",\"value_matches\":true},\"submitted\":{\"field\":\"password\",\"path\":\"work/\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=736574 776f726b2ff09f2e70617373776f7264 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2ff09f 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field\":\"password\",\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffd\",\"value_matches\":true},\"submitted\":{\"field\":\"password\",\"path\":\"work/\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=736574 776f726b2ff09f2e70617373776f7264 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2ff09f 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "delete-raw-path-187",
+        "args": [
+          "delete",
+          "raw-path"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "args_raw_hex": [
+          "64656c657465",
+          "776f726b2ff09f",
+          "2d2d796573"
+        ],
+        "unix_only": true,
+        "portable": false,
+        "get_exit": 2
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"absent\":true,\"path\":\"work/\\ufffd\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=64656c657465 776f726b2ff09f 2d2d796573;stdinhex=\nargshex=676574 776f726b2ff09f 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"absent\":true,\"path\":\"work/\\ufffd\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=64656c657465 776f726b2ff09f 2d2d796573;stdinhex=\nargshex=676574 776f726b2ff09f 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "create-raw-path-188",
+        "args": [
+          "create",
+          "raw-path"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "args_raw_hex": [
+          "637265617465",
+          "776f726b2ff09f92"
+        ],
+        "unix_only": true,
+        "portable": false,
+        "get_exit": 0
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffd\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=616464 776f726b2ff09f92 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2ff09f92 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffd\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=616464 776f726b2ff09f92 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2ff09f92 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "set-raw-path-189",
+        "args": [
+          "set",
+          "raw-path"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "args_raw_hex": [
+          "736574",
+          "776f726b2ff09f922e70617373776f7264"
+        ],
+        "unix_only": true,
+        "portable": false,
+        "get_exit": 0
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field\":\"password\",\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffd\\ufffd\",\"value_matches\":true},\"submitted\":{\"field\":\"password\",\"path\":\"work/\\ufffd\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=736574 776f726b2ff09f922e70617373776f7264 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2ff09f92 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field\":\"password\",\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffd\\ufffd\",\"value_matches\":true},\"submitted\":{\"field\":\"password\",\"path\":\"work/\\ufffd\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=736574 776f726b2ff09f922e70617373776f7264 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2ff09f92 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "delete-raw-path-190",
+        "args": [
+          "delete",
+          "raw-path"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "args_raw_hex": [
+          "64656c657465",
+          "776f726b2ff09f92",
+          "2d2d796573"
+        ],
+        "unix_only": true,
+        "portable": false,
+        "get_exit": 2
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"absent\":true,\"path\":\"work/\\ufffd\\ufffd\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=64656c657465 776f726b2ff09f92 2d2d796573;stdinhex=\nargshex=676574 776f726b2ff09f92 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"absent\":true,\"path\":\"work/\\ufffd\\ufffd\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=64656c657465 776f726b2ff09f92 2d2d796573;stdinhex=\nargshex=676574 776f726b2ff09f92 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "create-raw-path-191",
+        "args": [
+          "create",
+          "raw-path"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "args_raw_hex": [
+          "637265617465",
+          "776f726b2fe2827a"
+        ],
+        "unix_only": true,
+        "portable": false,
+        "get_exit": 0
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffdz\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffdz\"}}\n",
+        "stderr": "",
+        "calls": "argshex=616464 776f726b2fe2827a 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fe2827a 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffdz\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffdz\"}}\n",
+        "stderr": "",
+        "calls": "argshex=616464 776f726b2fe2827a 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fe2827a 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "set-raw-path-192",
+        "args": [
+          "set",
+          "raw-path"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "args_raw_hex": [
+          "736574",
+          "776f726b2fe2827a2e70617373776f7264"
+        ],
+        "unix_only": true,
+        "portable": false,
+        "get_exit": 0
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field\":\"password\",\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffdz\",\"value_matches\":true},\"submitted\":{\"field\":\"password\",\"path\":\"work/\\ufffd\\ufffdz\"}}\n",
+        "stderr": "",
+        "calls": "argshex=736574 776f726b2fe2827a2e70617373776f7264 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fe2827a 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field\":\"password\",\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffdz\",\"value_matches\":true},\"submitted\":{\"field\":\"password\",\"path\":\"work/\\ufffd\\ufffdz\"}}\n",
+        "stderr": "",
+        "calls": "argshex=736574 776f726b2fe2827a2e70617373776f7264 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fe2827a 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "delete-raw-path-193",
+        "args": [
+          "delete",
+          "raw-path"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "args_raw_hex": [
+          "64656c657465",
+          "776f726b2fe2827a",
+          "2d2d796573"
+        ],
+        "unix_only": true,
+        "portable": false,
+        "get_exit": 2
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"absent\":true,\"path\":\"work/\\ufffd\\ufffdz\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffdz\"}}\n",
+        "stderr": "",
+        "calls": "argshex=64656c657465 776f726b2fe2827a 2d2d796573;stdinhex=\nargshex=676574 776f726b2fe2827a 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"absent\":true,\"path\":\"work/\\ufffd\\ufffdz\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffdz\"}}\n",
+        "stderr": "",
+        "calls": "argshex=64656c657465 776f726b2fe2827a 2d2d796573;stdinhex=\nargshex=676574 776f726b2fe2827a 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "create-raw-path-194",
+        "args": [
+          "create",
+          "raw-path"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "args_raw_hex": [
+          "637265617465",
+          "776f726b2fff"
+        ],
+        "unix_only": true,
+        "portable": false,
+        "get_exit": 0
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=616464 776f726b2fff 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fff 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=616464 776f726b2fff 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fff 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "set-raw-path-195",
+        "args": [
+          "set",
+          "raw-path"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "args_raw_hex": [
+          "736574",
+          "776f726b2fff2e70617373776f7264"
+        ],
+        "unix_only": true,
+        "portable": false,
+        "get_exit": 0
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field\":\"password\",\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\",\"value_matches\":true},\"submitted\":{\"field\":\"password\",\"path\":\"work/\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=736574 776f726b2fff2e70617373776f7264 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fff 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field\":\"password\",\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\",\"value_matches\":true},\"submitted\":{\"field\":\"password\",\"path\":\"work/\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=736574 776f726b2fff2e70617373776f7264 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fff 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "name": "delete-raw-path-196",
+        "args": [
+          "delete",
+          "raw-path"
+        ],
+        "input_hex": "666978747572652d7365637265740a",
+        "metadata": "{\"fields\":{\"password\":\"fixture-secret\"}}",
+        "args_raw_hex": [
+          "64656c657465",
+          "776f726b2fff",
+          "2d2d796573"
+        ],
+        "unix_only": true,
+        "portable": false,
+        "get_exit": 2
+      },
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"absent\":true,\"path\":\"work/\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=64656c657465 776f726b2fff 2d2d796573;stdinhex=\nargshex=676574 776f726b2fff 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"absent\":true,\"path\":\"work/\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=64656c657465 776f726b2fff 2d2d796573;stdinhex=\nargshex=676574 776f726b2fff 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": true
     }
   ],
   "runtime": "Linux x86_64; Rust 1.98.0; Go 1.26.7; isolated HOME/XDG, no credentials",
   "candidate_source_sha256": {
-    "rust/symbrain-cli/src/vault_admin.rs": "7d92a35d8694b6147b19cddfb0d7931b9e9fcf6c9e3254703730d0b2ce232b97",
+    "rust/symbrain-cli/src/vault_admin.rs": "85e8466e9e5d781368051f3f1c0a3066ff2c86eb16a9a5de3323ce9604c231da",
+    "rust/symbrain-cli/src/vault_response.rs": "ad8a66f0a55f5d601c5b4da333a9253c93cf7d008aaf41fd6bd3a31430b6b65c",
     "rust/symbrain-cli/src/vault_config.rs": "e44e6d4ba64b852a626dcb1f50b75b79238724488ef395b7c9473ae33b9ba8ea",
     "rust/symbrain-cli/src/passthrough.rs": "58eb151e105af40366dd6b24fb7105401f258c9dd24b67f9106fa046eeddf3e1",
     "rust/symbrain-cli/src/doctor_process.rs": "35ddb638017ec617fd897bdd298c20e0688407365f886e9c62c70c55995c2ade",
     "rust/symbrain-audit/src/redact.rs": "0f071038acd66c1995b025fddefab83b0cd100330d6d9b69cd5d71b01e4ec553",
-    "scripts/vault-admin-oracle/replay.py": "b84ad8147d1a043836aa22eaebb9b404c9ba8147c02c56501a8c05961d0f107d"
+    "scripts/vault-admin-oracle/replay.py": "c95ca6eeaf737d9322d98aad619dcfb2c50d3e79adbf7c970709998e04219174"
   }
 }

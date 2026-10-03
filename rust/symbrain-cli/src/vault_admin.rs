@@ -8,11 +8,14 @@ use std::time::Duration;
 
 use serde::de::{IgnoredAny, MapAccess, Visitor};
 use serde::{Deserialize, Deserializer};
-use serde_json::{Value, json};
+use serde_json::Value;
 use symbrain_core::exit;
 
 use crate::doctor_cli::doctor_process::run_process_with_input;
 use crate::passthrough;
+
+#[path = "vault_response.rs"]
+mod response;
 
 pub(super) fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {
     let action = args.get(1).and_then(|arg| arg.to_str());
@@ -176,7 +179,7 @@ fn create_or_set(
         return usage(action, stderr);
     };
     let display = query.to_string_lossy();
-    let (path, field) = if action == "set" {
+    let (_, field) = if action == "set" {
         let Some((path, field)) = field_target(&display) else {
             return usage(action, stderr);
         };
@@ -227,11 +230,8 @@ fn create_or_set(
         );
     };
     let fields = detail.fields.unwrap_or_default();
-    let confirmed_path = detail
-        .path
-        .filter(|path| !path.is_empty())
-        .unwrap_or_else(|| path.to_owned());
-    let result = if let Some(field) = field {
+    let confirmed_path = detail.path.as_deref().filter(|path| !path.is_empty());
+    if let Some(field) = field {
         let raw_field_valid = std::str::from_utf8(
             query
                 .as_encoded_bytes()
@@ -252,11 +252,15 @@ fn create_or_set(
                 stderr,
             );
         }
-        json!({"submitted":{"path":path,"field":field},"confirmed":{"path":confirmed_path,"field":field,"field_count":fields.len(),"has_value":!fields.is_empty(),"value_matches":true}})
-    } else {
-        json!({"submitted":{"path":path},"confirmed":{"path":confirmed_path,"field_count":fields.len(),"has_value":!fields.is_empty()}})
-    };
-    write_result(stdout, &result)
+    }
+    response::write(
+        stdout,
+        &raw_path,
+        confirmed_path,
+        field,
+        Some(fields.len()),
+        false,
+    )
 }
 
 fn field_path(query: &OsStr) -> OsString {
@@ -311,10 +315,7 @@ fn delete(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> 
         .and_then(|(status, _)| status.code())
         .unwrap_or(-1);
     match code {
-        2 => write_result(
-            stdout,
-            &json!({"submitted":{"path":path.to_string_lossy()},"confirmed":{"path":path.to_string_lossy(),"absent":true}}),
-        ),
+        2 => response::write(stdout, path, None, None, None, true),
         0 => error(
             "delete",
             "confirmation read found entry still present",
@@ -327,16 +328,5 @@ fn delete(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> 
             ),
             stderr,
         ),
-    }
-}
-
-fn write_result(stdout: &mut dyn Write, result: &Value) -> u8 {
-    let encoded = crate::go_json(result)
-        .replace('\u{2028}', "\\u2028")
-        .replace('\u{2029}', "\\u2029");
-    if writeln!(stdout, "{encoded}").is_ok() {
-        exit::OK
-    } else {
-        exit::GENERIC
     }
 }

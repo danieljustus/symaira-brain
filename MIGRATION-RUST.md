@@ -41,9 +41,10 @@ nesting bound and fails closed when it is exceeded.
 For #766, `scripts/vault-admin-oracle/replay.py` builds the complete immutable
 Go archive at `dcddcef0df5789123c7c9a7ebe6e01f10e941f2c` and compares actual
 process stdout, stderr, exit codes, child argv and stdin in disposable roots.
-The Linux candidate passes 179 comparisons, with 126 portable Go-derived
-contracts frozen for native process tests. Native Linux/macOS/Windows CI runs
-the same live differential; acceptance and issue closure require all three
+The Linux candidate passes 197 comparisons, including raw invalid UTF-8
+path bytes and valid U+FFFD controls. Native process tests preserve the original
+126 portable Go contracts and add 18 Go-only Unicode records (15 Unix-only).
+Native Linux/macOS CI runs all 197 live cases and Windows runs its 182 cases; acceptance and issue closure require all three
 jobs to succeed at the candidate head. No operator credentials are used, no Go
 source is edited, and no broad Rust cutover or release is claimed.
 

@@ -25,6 +25,10 @@ struct Case {
 struct Scenario {
     name: String,
     args: Vec<String>,
+    #[serde(default)]
+    args_raw_hex: Option<Vec<String>>,
+    #[serde(default)]
+    unix_only: bool,
     input_hex: String,
     metadata: Option<String>,
     discovery: Option<String>,
@@ -54,7 +58,7 @@ fn unhex(hex: &str) -> Vec<u8> {
 
 #[test]
 fn vault_administration_matches_real_go_process_contracts() {
-    let fixture: Fixture =
+    let mut fixture: Fixture =
         serde_json::from_str(include_str!("fixtures/vault_admin_go.json")).unwrap();
     assert_eq!(
         fixture.go_oracle_ref,
@@ -68,6 +72,21 @@ fn vault_administration_matches_real_go_process_contracts() {
         fixture.child_sha256,
         "child fixture changed without actual Go regeneration"
     );
+    let unicode: Fixture =
+        serde_json::from_str(include_str!("fixtures/vault_unicode_go.json")).unwrap();
+    assert_eq!(unicode.go_oracle_ref, fixture.go_oracle_ref);
+    assert_eq!(unicode.child_sha256, fixture.child_sha256);
+    assert_eq!(unicode.total, 18);
+    assert_eq!(unicode.results.len(), unicode.total);
+    assert_eq!(
+        unicode
+            .results
+            .iter()
+            .filter(|case| case.case.unix_only)
+            .count(),
+        15
+    );
+    fixture.results.extend(unicode.results);
     let temp = tempfile::tempdir().unwrap();
     let child = temp
         .path()
@@ -87,6 +106,9 @@ fn vault_administration_matches_real_go_process_contracts() {
         String::from_utf8_lossy(&output.stderr)
     );
     for (index, case) in fixture.results.iter().enumerate() {
+        if case.case.unix_only && !cfg!(unix) {
+            continue;
+        }
         run_case(&child, case, &temp.path().join(format!("case-{index}")));
     }
 }
@@ -175,7 +197,7 @@ fn run_case(child: &Path, case: &Case, root: &Path) {
     let mut stderr = tempfile::tempfile_in(root).unwrap();
     command
         .arg("vault")
-        .args(&case.case.args)
+        .args(case_args(&case.case))
         .stdin(Stdio::piped())
         .stdout(stdout.try_clone().unwrap())
         .stderr(stderr.try_clone().unwrap());
@@ -222,6 +244,22 @@ fn run_case(child: &Path, case: &Case, root: &Path) {
     assert_eq!(err, case.go.stderr.as_bytes(), "{} stderr", case.case.name);
     let calls = fs::read_to_string(root.join("calls")).unwrap_or_default();
     assert_eq!(calls, case.go.calls, "{} argv/stdin", case.case.name);
+}
+
+fn case_args(case: &Scenario) -> Vec<OsString> {
+    if let Some(raw) = &case.args_raw_hex {
+        #[cfg(unix)]
+        {
+            use std::os::unix::ffi::OsStringExt;
+            return raw
+                .iter()
+                .map(|arg| OsString::from_vec(unhex(arg)))
+                .collect();
+        }
+        #[cfg(not(unix))]
+        panic!("Unix raw argv case reached another platform: {raw:?}");
+    }
+    case.args.iter().map(OsString::from).collect()
 }
 
 #[test]
