@@ -77,28 +77,7 @@ pub(super) fn run_set(
         symbrain_memory::EmbeddingGenerator::new(&config.ollama_url, &config.ollama_model);
     match store.set_direct_cli(&request, &generator) {
         Ok(id) => {
-            match format {
-                OutputFormat::Json => {
-                    // Shipped shape: compact, `id`, `scope`, `kind`, `staged`.
-                    let _ = writeln!(
-                        stdout,
-                        "{{\"id\":{},\"scope\":{},\"kind\":{},\"staged\":{}}}",
-                        go_json_string(&id),
-                        go_json_string(&scope),
-                        go_json_string(kind),
-                        staged
-                    );
-                }
-                OutputFormat::Table => {
-                    let state = if staged {
-                        "staged for review"
-                    } else {
-                        "stored"
-                    };
-                    let _ = writeln!(stdout, "Memory {id} ({scope}, {kind}, {state}).");
-                }
-            }
-            exit::OK
+            super::write_output::finish_set(&id, &scope, kind, staged, stdout, stderr, format)
         }
         Err(err) => {
             let _ = writeln!(stderr, "symbrain memory set: store memory: {err}");

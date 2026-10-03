@@ -96,15 +96,21 @@ impl Store {
         ).map_err(|error| StoreError::Invalid(format!("failed to save memory: {error}")))?;
         audit(&conn, "set", &id, scope, "", &request.author, "");
         crate::cli_entity::link(&conn, &id, &request.entities, &request.author);
-        conn.execute(
+        let affected = conn.execute(
             "UPDATE memories SET kind=?,updated_at=? WHERE id=?",
             params![request.kind, timestamp(), id],
         )?;
+        if affected == 0 {
+            return Err(StoreError::Invalid(format!("memory not found: {id}")));
+        }
         if request.staged {
-            conn.execute(
+            let affected = conn.execute(
                 "UPDATE memories SET review_status='staged',updated_at=? WHERE id=?",
                 params![timestamp(), id],
             )?;
+            if affected == 0 {
+                return Err(StoreError::Invalid(format!("memory not found: {id}")));
+            }
         }
         Ok(id)
     }
@@ -217,5 +223,81 @@ fn timestamp() -> String {
     } else {
         let fraction = format!("{nanos:09}");
         format!("{base}.{} +0000 UTC", fraction.trim_end_matches('0'))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn governance_callbacks_stop_without_reverting_committed_steps() {
+        for (trigger, remaining_kind, remaining_rows) in [
+            (
+                "CREATE TRIGGER fixture_kind BEFORE UPDATE OF kind ON memories BEGIN SELECT RAISE(IGNORE); END",
+                "",
+                1,
+            ),
+            (
+                "CREATE TRIGGER fixture_stage BEFORE UPDATE OF review_status ON memories BEGIN SELECT RAISE(IGNORE); END",
+                "reference",
+                1,
+            ),
+            (
+                "CREATE TRIGGER fixture_audit AFTER INSERT ON audit_log WHEN new.action='set' BEGIN DELETE FROM memories WHERE id=new.memory_id; END",
+                "",
+                0,
+            ),
+        ] {
+            let store = Store::open_in_memory().expect("owned database");
+            store
+                .lock()
+                .expect("lock")
+                .execute_batch(trigger)
+                .expect("callback");
+            let request = DirectWrite {
+                content: "hello world".into(),
+                scope: "global".into(),
+                kind: "reference".into(),
+                metadata: BTreeMap::new(),
+                author: "cli:symbrain".into(),
+                entities: vec![],
+                staged: true,
+                quantize_binary: false,
+                conflict_enabled: false,
+            };
+            let generator = EmbeddingGenerator::new("owned-invalid-endpoint", "owned-model");
+            let error = store
+                .set_direct_cli(&request, &generator)
+                .expect_err("governance failed");
+            let conn = store.lock().expect("lock");
+            let id: String = conn
+                .query_row(
+                    "SELECT memory_id FROM audit_log WHERE action='set'",
+                    [],
+                    |row| row.get(0),
+                )
+                .expect("set audit remains");
+            assert_eq!(error.to_string(), format!("memory not found: {id}"));
+            let count: i64 = conn
+                .query_row("SELECT COUNT(*) FROM memories", [], |row| row.get(0))
+                .expect("count");
+            assert_eq!(count, remaining_rows);
+            if remaining_rows == 1 {
+                let state: (String, String) = conn
+                    .query_row(
+                        "SELECT kind,review_status FROM memories WHERE id=?",
+                        [&id],
+                        |row| Ok((row.get(0)?, row.get(1)?)),
+                    )
+                    .expect("committed row");
+                assert_eq!(state, (remaining_kind.into(), "approved".into()));
+            }
+            conn.execute(
+                "INSERT INTO memories_fts(memories_fts,rank) VALUES('integrity-check',1)",
+                [],
+            )
+            .expect("healthy FTS callbacks");
+        }
     }
 }

@@ -35,6 +35,7 @@ use read::{run_list, table_content};
 mod search;
 use search::run_search;
 mod write;
+mod write_output;
 use write::{run_delete, run_set};
 mod rules;
 use rules::run_rules;

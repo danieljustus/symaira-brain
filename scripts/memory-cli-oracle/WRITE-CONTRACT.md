@@ -11,6 +11,15 @@ HOME/USERPROFILE/XDG/cwd are disposable, PATH is empty, credentials/proxy variab
 are not inherited and every embedding endpoint is owned. Existing Go production
 and frozen fixtures remain unchanged; the `.go.txt` helpers are additive wrappers.
 
+The failure-state supplement also runs six healthy governance callbacks in both
+output formats: ignored kind, ignored staging and removal during the set audit.
+It requires exit one, no success reply and the exact Go error bound to the actual
+committed audit ID. Complete application state, generated-time relations and FTS
+integrity must match. Hosts exposing `/dev/full` add two nonempty-metadata Set
+pairs with literal OS error diagnostics and preserved committed staged writes.
+Other native hosts still execute the portable Rust failing-writer test; the
+receipt states whether a real Unix sink was exercised.
+
 Each set/delete pair starts from the same actual Go-created database backup at
 the same path. Full raw SQLite rows/blobs are retained. Generated UUIDs/timestamps
 have explicit validation/binding receipts; all other application values stay

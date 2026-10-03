@@ -1,7 +1,8 @@
 # Governed native CLI writes for Memory (#758)
 
-Status: bounded implementation passes author validation on Linux; independent
-review and native three-OS CI remain pending. Full #758 remains open.
+Status: the original Linux candidate passed its authored gate, but independent
+review requested two corrections. Corrected acceptance and native three-OS CI
+remain pending. Full #758 remains open.
 
 ## Decision
 
@@ -108,3 +109,41 @@ stated clean source and executable, not an untested later source change. Preserv
 the first invalid FTS callback fixture separately from the corrected callback's
 actual Go/native audit mismatch. No cleanup exception or broad state normalization
 was used to turn either failure into a pass.
+
+## Governance and output failure correction
+
+Independent review of clean `14d24144` (publication `28e8e7ae`) found three
+healthy SQLite callbacks that made native Set claim success after Go failed:
+`RAISE(IGNORE)` on kind or review status, and deletion of the primary row by the
+set-audit callback. SQLite successfully executing an UPDATE is insufficient;
+both governance updates must affect a row. Return the frozen Go `memory not
+found: <id>` error immediately when either update affects zero rows. Preserve
+the insert, audit, entity links and any earlier governance update already
+committed. A transaction around this pipeline would change Go's observable
+failure state and is therefore rejected.
+
+Set rendering must also propagate its writer error. Independent real `/dev/full`
+probes for newly native, nonempty-metadata JSON/table Set completed the write but
+returned native exit zero instead of Go exit one. Use a focused checked Set
+renderer after persistence, reporting `symbrain memory set: format output: ...`.
+Keep committed state when rendering fails. OS-backed stdout errors include Go's
+`write /dev/stdout` context; injected writer errors retain the writer's message.
+This correction does not claim to resolve inherited Delete/general output error
+handling, arbitrary SQLite errors or the broader delegated pipeline.
+
+The permanent gate adds six actual Go/native governance callback pairs (both
+formats), validates the exact diagnostic against the ID of the surviving set
+audit, compares all committed application state and checks FTS integrity. On a
+host exposing `/dev/full`, two more pairs require literal errno diagnostics and
+complete committed metadata/staging. A portable failing-writer Rust test runs
+on every native platform and verifies exit one plus preservation of a committed
+primary row. Unix sink coverage is recorded explicitly; it is not counted as a
+Windows runtime result. Native macOS/Windows execution remains required.
+
+Original independent findings, inputs and raw differing outputs are preserved
+unchanged under `migration/evidence/memory-cli-758/governed-write-review-28e8/`.
+The original reviewed CLI and all five executed test binaries were losslessly
+archived and SHA-verified before reusing the released target. The correction
+normally integrates parent `7ca3bed0`'s default-path fixture handle ownership fix.
+No frozen Go production source, schema-repair ownership or routing admission was
+changed to disguise either finding.

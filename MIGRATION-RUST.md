@@ -60,7 +60,13 @@ Clean source `14d2414` passes Linux 60 native set / 16 native delete pairs,
 13 literal delegated-Go boundaries, three write controls, all 590 baseline pairs
 and two baseline controls, plus 161 affected Rust tests and strict lint gates.
 Tracked receipts retain the actual delete-audit sequencing regression and
-earlier rejected harness assumptions. Independent review is still pending.
+earlier rejected harness assumptions. Independent review requested changes for
+zero-row governance updates and failed output on newly native metadata Set.
+The correction checks both governance row counts and Set writer errors while
+preserving Go's committed failure state; a supplemental real-process gate adds
+six callback pairs and two Unix sink pairs where available. Original findings
+and reviewed executable hashes remain retained. Corrected independent review
+and native three-OS acceptance remain pending.
 
 Independent review found two configured-read differences in the initial CLI
 candidate: memory-specific XDG/legacy resolution and populated rules JSON HTML/

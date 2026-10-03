@@ -13,6 +13,7 @@ import deletes
 import replay
 import writes
 import write_boundaries
+import write_failures
 
 
 def main():
@@ -41,6 +42,7 @@ def main():
         writes.execute(go,rust,reports/'writes.json')
         deletes.execute(go,rust,reports/'deletes.json')
         write_boundaries.execute(go,rust,fallback,reports/'fallback-boundaries.json')
+        write_failures.execute(go,rust,reports/'write-failures.json')
         controls=[]
         expected={'identity':'one returned primary row','audit':'actual Go/native write state differs','exit':'native set exit must be zero'}
         for mode in ('identity','audit','exit'):
