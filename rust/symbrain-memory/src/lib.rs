@@ -4,17 +4,21 @@
 mod activity;
 mod embedding;
 mod entity;
+pub mod evidence;
+mod evidence_store;
 mod gojson;
 mod gorand;
 mod gotime;
 mod list_rows;
 mod lsh;
+mod migration;
 mod model;
 mod retrieval;
 mod rows;
 mod schema;
 mod search_rows;
 mod store;
+mod write;
 
 #[cfg(test)]
 #[path = "db_oracle_tests.rs"]
@@ -25,3 +29,5 @@ pub use embedding::{EmbeddingGenerator, GeneratedEmbedding};
 pub use list_rows::{MemoryListRow, RuleRow};
 pub use model::{Memory, SetOptions, Store, StoreError};
 pub use search_rows::{SearchHit, SearchRow};
+
+pub use evidence_store::{EvidenceSpan, reparent_memory_evidence_tx, save_memory_evidence_tx};

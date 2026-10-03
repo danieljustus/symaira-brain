@@ -1,0 +1,1378 @@
+{
+  "alignments": [
+    {
+      "source": "",
+      "evidence": "",
+      "span": {
+        "char_start": 0,
+        "char_end": 0
+      },
+      "status": "unmatched",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": null
+    },
+    {
+      "source": "abc",
+      "evidence": "",
+      "span": {
+        "char_start": 0,
+        "char_end": 0
+      },
+      "status": "unmatched",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": null
+    },
+    {
+      "source": "",
+      "evidence": "abc",
+      "span": {
+        "char_start": 0,
+        "char_end": 0
+      },
+      "status": "unmatched",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": null
+    },
+    {
+      "source": "abc abc",
+      "evidence": "abc",
+      "span": {
+        "char_start": 0,
+        "char_end": 3
+      },
+      "status": "exact",
+      "exact": {
+        "char_start": 0,
+        "char_end": 3
+      },
+      "normalized": {
+        "char_start": 0,
+        "char_end": 3
+      },
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 3
+      }
+    },
+    {
+      "source": "prefix hello world suffix",
+      "evidence": "hello world",
+      "span": {
+        "char_start": 7,
+        "char_end": 18
+      },
+      "status": "exact",
+      "exact": {
+        "char_start": 7,
+        "char_end": 18
+      },
+      "normalized": {
+        "char_start": 7,
+        "char_end": 18
+      },
+      "fuzzy": {
+        "char_start": 7,
+        "char_end": 18
+      }
+    },
+    {
+      "source": "hello\t\nworld",
+      "evidence": "hello world",
+      "span": {
+        "char_start": 0,
+        "char_end": 12
+      },
+      "status": "normalized",
+      "exact": null,
+      "normalized": {
+        "char_start": 0,
+        "char_end": 12
+      },
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 12
+      }
+    },
+    {
+      "source": " \t hello\n\nworld end",
+      "evidence": " hello world ",
+      "span": {
+        "char_start": 3,
+        "char_end": 15
+      },
+      "status": "normalized",
+      "exact": null,
+      "normalized": {
+        "char_start": 3,
+        "char_end": 15
+      },
+      "fuzzy": {
+        "char_start": 3,
+        "char_end": 15
+      }
+    },
+    {
+      "source": "é  🐱\n世界",
+      "evidence": "🐱 世界",
+      "span": {
+        "char_start": 4,
+        "char_end": 15
+      },
+      "status": "normalized",
+      "exact": null,
+      "normalized": {
+        "char_start": 4,
+        "char_end": 15
+      },
+      "fuzzy": {
+        "char_start": 4,
+        "char_end": 15
+      }
+    },
+    {
+      "source": "ab c d\u2028e\u2029f g h　i",
+      "evidence": "a b c d e f g h i",
+      "span": {
+        "char_start": 0,
+        "char_end": 32
+      },
+      "status": "normalized",
+      "exact": null,
+      "normalized": {
+        "char_start": 0,
+        "char_end": 32
+      },
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 32
+      }
+    },
+    {
+      "source": "a​b",
+      "evidence": "a b",
+      "span": {
+        "char_start": 0,
+        "char_end": 0
+      },
+      "status": "unmatched",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": null
+    },
+    {
+      "source": "test",
+      "evidence": "test!",
+      "span": {
+        "char_start": 0,
+        "char_end": 4
+      },
+      "status": "fuzzy",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 4
+      }
+    },
+    {
+      "source": "colour mode",
+      "evidence": "color mode",
+      "span": {
+        "char_start": 0,
+        "char_end": 11
+      },
+      "status": "fuzzy",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 11
+      }
+    },
+    {
+      "source": "User prefers dark mode",
+      "evidence": "User prefers dark theme",
+      "span": {
+        "char_start": 0,
+        "char_end": 17
+      },
+      "status": "fuzzy",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 17
+      }
+    },
+    {
+      "source": "αβγ δεζ",
+      "evidence": "αβγ δεζζ",
+      "span": {
+        "char_start": 0,
+        "char_end": 13
+      },
+      "status": "fuzzy",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 13
+      }
+    },
+    {
+      "source": "cat dog cat dog",
+      "evidence": "cat dug",
+      "span": {
+        "char_start": 0,
+        "char_end": 7
+      },
+      "status": "fuzzy",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 7
+      }
+    },
+    {
+      "source": "foo foo",
+      "evidence": "foe",
+      "span": {
+        "char_start": 0,
+        "char_end": 3
+      },
+      "status": "fuzzy",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 3
+      }
+    },
+    {
+      "source": "a b c d",
+      "evidence": "a b c",
+      "span": {
+        "char_start": 0,
+        "char_end": 5
+      },
+      "status": "exact",
+      "exact": {
+        "char_start": 0,
+        "char_end": 5
+      },
+      "normalized": {
+        "char_start": 0,
+        "char_end": 5
+      },
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 5
+      }
+    },
+    {
+      "source": "hello there world",
+      "evidence": "hello world",
+      "span": {
+        "char_start": 0,
+        "char_end": 17
+      },
+      "status": "fuzzy",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 17
+      }
+    },
+    {
+      "source": "one two three",
+      "evidence": "unrelated",
+      "span": {
+        "char_start": 0,
+        "char_end": 0
+      },
+      "status": "unmatched",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": null
+    },
+    {
+      "source": " a  b ",
+      "evidence": "a b",
+      "span": {
+        "char_start": 1,
+        "char_end": 5
+      },
+      "status": "normalized",
+      "exact": null,
+      "normalized": {
+        "char_start": 1,
+        "char_end": 5
+      },
+      "fuzzy": {
+        "char_start": 1,
+        "char_end": 5
+      }
+    },
+    {
+      "source": "🐱 🐶 🐱 🐶",
+      "evidence": "🐱 🐷",
+      "span": {
+        "char_start": 0,
+        "char_end": 4
+      },
+      "status": "fuzzy",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 4
+      }
+    },
+    {
+      "source": "你好世界",
+      "evidence": "你好世间",
+      "span": {
+        "char_start": 0,
+        "char_end": 12
+      },
+      "status": "fuzzy",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 12
+      }
+    },
+    {
+      "source": "match\n\n match",
+      "evidence": "match ",
+      "span": {
+        "char_start": 0,
+        "char_end": 5
+      },
+      "status": "normalized",
+      "exact": null,
+      "normalized": {
+        "char_start": 0,
+        "char_end": 5
+      },
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 5
+      }
+    },
+    {
+      "source": "abc\r\ndef",
+      "evidence": "abc def",
+      "span": {
+        "char_start": 0,
+        "char_end": 8
+      },
+      "status": "normalized",
+      "exact": null,
+      "normalized": {
+        "char_start": 0,
+        "char_end": 8
+      },
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 8
+      }
+    },
+    {
+      "source": "x\u000by\fz",
+      "evidence": "x y z",
+      "span": {
+        "char_start": 0,
+        "char_end": 5
+      },
+      "status": "normalized",
+      "exact": null,
+      "normalized": {
+        "char_start": 0,
+        "char_end": 5
+      },
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 5
+      }
+    },
+    {
+      "source": "x﻿y",
+      "evidence": "x y",
+      "span": {
+        "char_start": 0,
+        "char_end": 0
+      },
+      "status": "unmatched",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": null
+    },
+    {
+      "source": "red green blue",
+      "evidence": "red blue",
+      "span": {
+        "char_start": 0,
+        "char_end": 14
+      },
+      "status": "fuzzy",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 14
+      }
+    },
+    {
+      "source": "x y",
+      "evidence": "x y z",
+      "span": {
+        "char_start": 0,
+        "char_end": 3
+      },
+      "status": "fuzzy",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 3
+      }
+    },
+    {
+      "source": "UPPER lower",
+      "evidence": "upper lower",
+      "span": {
+        "char_start": 6,
+        "char_end": 11
+      },
+      "status": "fuzzy",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": {
+        "char_start": 6,
+        "char_end": 11
+      }
+    },
+    {
+      "source": "replacement � rune",
+      "evidence": "replacement � run",
+      "span": {
+        "char_start": 0,
+        "char_end": 19
+      },
+      "status": "exact",
+      "exact": {
+        "char_start": 0,
+        "char_end": 19
+      },
+      "normalized": {
+        "char_start": 0,
+        "char_end": 19
+      },
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 20
+      }
+    },
+    {
+      "source": "token token token",
+      "evidence": "taken",
+      "span": {
+        "char_start": 0,
+        "char_end": 5
+      },
+      "status": "fuzzy",
+      "exact": null,
+      "normalized": null,
+      "fuzzy": {
+        "char_start": 0,
+        "char_end": 5
+      }
+    },
+    {
+      "source": "end whitespace   ",
+      "evidence": "whitespace ",
+      "span": {
+        "char_start": 4,
+        "char_end": 15
+      },
+      "status": "exact",
+      "exact": {
+        "char_start": 4,
+        "char_end": 15
+      },
+      "normalized": {
+        "char_start": 4,
+        "char_end": 14
+      },
+      "fuzzy": {
+        "char_start": 4,
+        "char_end": 14
+      }
+    }
+  ],
+  "decoded": [
+    {
+      "source": {
+        "id": ""
+      },
+      "text": "",
+      "evidence_text": "",
+      "span": {
+        "char_start": 0,
+        "char_end": 0
+      },
+      "alignment_status": ""
+    },
+    {
+      "source": {
+        "id": "é\u003c\u0026\u003e",
+        "kind": "activity_segment"
+      },
+      "text": "hello\u2028world\u2029",
+      "evidence_text": "line\n\"quoted\"",
+      "span": {
+        "char_start": 2,
+        "char_end": 13
+      },
+      "alignment_status": "exact",
+      "attributes": {
+        "a": "\u003c\u0026\u003e",
+        "z": "last"
+      }
+    },
+    {
+      "source": {
+        "id": "session"
+      },
+      "text": "🐱",
+      "evidence_text": "🐱",
+      "span": {
+        "char_start": 0,
+        "char_end": 4
+      },
+      "alignment_status": "normalized"
+    }
+  ],
+  "extractions": [
+    {
+      "source": {
+        "id": ""
+      },
+      "text": "",
+      "evidence_text": "",
+      "span": {
+        "char_start": 0,
+        "char_end": 0
+      },
+      "alignment_status": ""
+    },
+    {
+      "source": {
+        "id": "é\u003c\u0026\u003e",
+        "kind": "activity_segment"
+      },
+      "text": "hello\u2028world\u2029",
+      "evidence_text": "line\n\"quoted\"",
+      "span": {
+        "char_start": 2,
+        "char_end": 13
+      },
+      "alignment_status": "exact",
+      "attributes": {
+        "a": "\u003c\u0026\u003e",
+        "z": "last"
+      }
+    },
+    {
+      "source": {
+        "id": "session"
+      },
+      "text": "🐱",
+      "evidence_text": "🐱",
+      "span": {
+        "char_start": 0,
+        "char_end": 4
+      },
+      "alignment_status": "normalized"
+    }
+  ],
+  "jsonl": "{\"source\":{\"id\":\"\"},\"text\":\"\",\"evidence_text\":\"\",\"span\":{\"char_start\":0,\"char_end\":0},\"alignment_status\":\"\"}\n{\"source\":{\"id\":\"é\\u003c\\u0026\\u003e\",\"kind\":\"activity_segment\"},\"text\":\"hello\\u2028world\\u2029\",\"evidence_text\":\"line\\n\\\"quoted\\\"\",\"span\":{\"char_start\":2,\"char_end\":13},\"alignment_status\":\"exact\",\"attributes\":{\"a\":\"\\u003c\\u0026\\u003e\",\"z\":\"last\"}}\n{\"source\":{\"id\":\"session\"},\"text\":\"🐱\",\"evidence_text\":\"🐱\",\"span\":{\"char_start\":0,\"char_end\":4},\"alignment_status\":\"normalized\"}\n",
+  "jsonl_sha256": "7200b5ed67848a797f2eb7127b426268daca468d67be034c7f4d282d55de1bfb",
+  "validations": [
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 1,
+          "char_end": 4
+        },
+        "alignment_status": "exact"
+      },
+      "strict": "",
+      "fuzzy": ""
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 1,
+          "char_end": 4
+        },
+        "alignment_status": "exact"
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 0,
+          "char_end": 0
+        },
+        "alignment_status": "exact"
+      },
+      "strict": "",
+      "fuzzy": ""
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 0,
+          "char_end": 0
+        },
+        "alignment_status": "exact"
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": -1,
+          "char_end": 2
+        },
+        "alignment_status": "exact"
+      },
+      "strict": "evidencekit: invalid span [-1,2)",
+      "fuzzy": "evidencekit: invalid span [-1,2)"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": -1,
+          "char_end": 2
+        },
+        "alignment_status": "exact"
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 4,
+          "char_end": 1
+        },
+        "alignment_status": "exact"
+      },
+      "strict": "evidencekit: invalid span [4,1)",
+      "fuzzy": "evidencekit: invalid span [4,1)"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 4,
+          "char_end": 1
+        },
+        "alignment_status": "exact"
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 1,
+          "char_end": 4
+        },
+        "alignment_status": "normalized"
+      },
+      "strict": "",
+      "fuzzy": ""
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 1,
+          "char_end": 4
+        },
+        "alignment_status": "normalized"
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 0,
+          "char_end": 0
+        },
+        "alignment_status": "normalized"
+      },
+      "strict": "",
+      "fuzzy": ""
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 0,
+          "char_end": 0
+        },
+        "alignment_status": "normalized"
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": -1,
+          "char_end": 2
+        },
+        "alignment_status": "normalized"
+      },
+      "strict": "evidencekit: invalid span [-1,2)",
+      "fuzzy": "evidencekit: invalid span [-1,2)"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": -1,
+          "char_end": 2
+        },
+        "alignment_status": "normalized"
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 4,
+          "char_end": 1
+        },
+        "alignment_status": "normalized"
+      },
+      "strict": "evidencekit: invalid span [4,1)",
+      "fuzzy": "evidencekit: invalid span [4,1)"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 4,
+          "char_end": 1
+        },
+        "alignment_status": "normalized"
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 1,
+          "char_end": 4
+        },
+        "alignment_status": "fuzzy"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": ""
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 1,
+          "char_end": 4
+        },
+        "alignment_status": "fuzzy"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 0,
+          "char_end": 0
+        },
+        "alignment_status": "fuzzy"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": ""
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 0,
+          "char_end": 0
+        },
+        "alignment_status": "fuzzy"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": -1,
+          "char_end": 2
+        },
+        "alignment_status": "fuzzy"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": "evidencekit: invalid span [-1,2)"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": -1,
+          "char_end": 2
+        },
+        "alignment_status": "fuzzy"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 4,
+          "char_end": 1
+        },
+        "alignment_status": "fuzzy"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": "evidencekit: invalid span [4,1)"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 4,
+          "char_end": 1
+        },
+        "alignment_status": "fuzzy"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 1,
+          "char_end": 4
+        },
+        "alignment_status": "unmatched"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": "evidencekit: extraction is unmatched, not grounded"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 1,
+          "char_end": 4
+        },
+        "alignment_status": "unmatched"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": "evidencekit: extraction is unmatched, not grounded"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 0,
+          "char_end": 0
+        },
+        "alignment_status": "unmatched"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": "evidencekit: extraction is unmatched, not grounded"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 0,
+          "char_end": 0
+        },
+        "alignment_status": "unmatched"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": "evidencekit: extraction is unmatched, not grounded"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": -1,
+          "char_end": 2
+        },
+        "alignment_status": "unmatched"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": "evidencekit: extraction is unmatched, not grounded"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": -1,
+          "char_end": 2
+        },
+        "alignment_status": "unmatched"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": "evidencekit: extraction is unmatched, not grounded"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 4,
+          "char_end": 1
+        },
+        "alignment_status": "unmatched"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": "evidencekit: extraction is unmatched, not grounded"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 4,
+          "char_end": 1
+        },
+        "alignment_status": "unmatched"
+      },
+      "strict": "evidencekit: extraction is unmatched, not grounded",
+      "fuzzy": "evidencekit: extraction is unmatched, not grounded"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 1,
+          "char_end": 4
+        },
+        "alignment_status": ""
+      },
+      "strict": "",
+      "fuzzy": ""
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 1,
+          "char_end": 4
+        },
+        "alignment_status": ""
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 0,
+          "char_end": 0
+        },
+        "alignment_status": ""
+      },
+      "strict": "",
+      "fuzzy": ""
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 0,
+          "char_end": 0
+        },
+        "alignment_status": ""
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": -1,
+          "char_end": 2
+        },
+        "alignment_status": ""
+      },
+      "strict": "evidencekit: invalid span [-1,2)",
+      "fuzzy": "evidencekit: invalid span [-1,2)"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": -1,
+          "char_end": 2
+        },
+        "alignment_status": ""
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 4,
+          "char_end": 1
+        },
+        "alignment_status": ""
+      },
+      "strict": "evidencekit: invalid span [4,1)",
+      "fuzzy": "evidencekit: invalid span [4,1)"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 4,
+          "char_end": 1
+        },
+        "alignment_status": ""
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 1,
+          "char_end": 4
+        },
+        "alignment_status": "future"
+      },
+      "strict": "",
+      "fuzzy": ""
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 1,
+          "char_end": 4
+        },
+        "alignment_status": "future"
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 0,
+          "char_end": 0
+        },
+        "alignment_status": "future"
+      },
+      "strict": "",
+      "fuzzy": ""
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 0,
+          "char_end": 0
+        },
+        "alignment_status": "future"
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": -1,
+          "char_end": 2
+        },
+        "alignment_status": "future"
+      },
+      "strict": "evidencekit: invalid span [-1,2)",
+      "fuzzy": "evidencekit: invalid span [-1,2)"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": -1,
+          "char_end": 2
+        },
+        "alignment_status": "future"
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "proof",
+        "span": {
+          "char_start": 4,
+          "char_end": 1
+        },
+        "alignment_status": "future"
+      },
+      "strict": "evidencekit: invalid span [4,1)",
+      "fuzzy": "evidencekit: invalid span [4,1)"
+    },
+    {
+      "extraction": {
+        "source": {
+          "id": ""
+        },
+        "text": "",
+        "evidence_text": "",
+        "span": {
+          "char_start": 4,
+          "char_end": 1
+        },
+        "alignment_status": "future"
+      },
+      "strict": "evidencekit: empty evidence text",
+      "fuzzy": "evidencekit: empty evidence text"
+    }
+  ]
+}

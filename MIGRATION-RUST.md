@@ -16,6 +16,19 @@ for binding checks, fails closed on unsafe/unreadable/malformed configs unless
 through no-follow removal. The Go implementation remains the source-bound oracle
 for this seam until all release gates pass.
 
+The #758 memory increment adds Brain-owned grounded evidence to
+`symbrain-memory`: source refs, UTF-8 byte spans, exact/normalized/fuzzy
+alignment, strict validation, Go-compatible JSONL encoding, evidence persistence
+and transaction-aware reparenting. The additive oracle executes frozen Go
+CoreKit v0.17.0 for 32 alignment pairs, 48 validation boundaries, three JSONL
+records and four existing production database tests. Actual schema inspection
+continues to repair #649's five missing columns despite applied migration names;
+DDL, repairs, indexes and bookkeeping now commit atomically. The native
+three-OS workflow is required before accepting this increment. Full memory CLI,
+dynamic configuration, governed writes and JSONL decoding remain open; no Go
+fallback route is removed, and #649 remains pending the shipped Rust release.
+The rationale is recorded in `docs/adr/758-native-memory-evidence.md`.
+
 The native memory embedding adapter uses CoreKit's Rust `symaira-core-llm`
 transport at the exact Git revision pinned in `Cargo.toml`. Brain retains its
 Ollama URL normalization, two-second timeout, 768-dimension gate, and local hash
