@@ -50,12 +50,35 @@ def cases():
     add("root-relative",relative=True)
     for args in (["setup","--modules=browse"],["setup","--from-source"],["setup","--modules"],["setup","--from-source","<source>","--fix"],["setup","--from-source","<source>","--allow-unsigned"],["setup","--help"],["setup","--help=true"],["setup","--unknown"],["setup","--from-source","<source>","--modules=browse","--force-release"],["setup","--from-source=<source>","--modules=browse","--json"],["setup","--from-source","<source>","--modules=browse","positional","--json"]):
         add("args-"+str(len(result)),args)
+    for args in (["setup","----from-source","<source>","--modules","browse","--json"],
+                 ["setup","--from-source","<source>","----modules","browse","--json"],
+                 ["setup","--from-source","<source>","--modules","browse","----json"],
+                 ["setup","--from-source","<source>","--=bad"],
+                 ["setup","--from-source","<source>","--modules","browse","---json"]):
+        add("flag-grammar-"+str(len(result)),args)
+    for fault in ("missing","file"):add("tmp-root-"+fault,tmp_fault=fault)
+    if os.name!="nt":
+        raw=os.fsdecode(b"bad\xff\xe2\x82")
+        add("raw-module-separate",modules=raw)
+        add("raw-module-inline",["setup","--from-source","<source>","--modules="+raw,"--json"])
+        add("raw-module-unicode-space",modules="\u2003 "+raw+" \u00a0")
+        add("raw-missing-root",["setup","--from-source","<source>/"+raw,"--modules","browse","--json"])
+        add("raw-unknown-flag",["setup","--from-source","<source>","--"+raw])
+        add("raw-boolean",["setup","--from-source","<source>","--json="+raw])
+        for json_out in (True,False):
+            args=["setup","--from-source","<source>","--modules","browse"]+(["--json"] if json_out else [])
+            add("raw-existing-root-"+str(json_out),args,raw_root=os.fsdecode(b"owned\xff\xe2\x82"))
+            add("raw-home-"+str(json_out),args,raw_home=os.fsdecode(b"owned\xff\xe2\x82"))
+        add("literal-replacement-root",raw_root="owned\ufffd")
     for failure in ("git","go-version","go-build","missing-payload","directory-payload","swift-version","swift-build","swift-show"):
         add("failure-"+failure,modules="browse,operate,scope",env={"SOURCE_TOOL_FAILURE":failure})
     add("relative-tools-refused",relative_tools=True)
     add("relative-tools-explicit-optin",relative_tools=True,env={"GODEBUG":"execerrdot=0"})
     if os.name!="nt":add("go-nonexecutable-refused",nonexecutable=True)
     if os.name=="nt":
+        add("implicit-cwd-tool-optin-distinct-path",cwd_tool=True,env={"GODEBUG":"execerrdot=0","SOURCE_DISTINCT_CWD":"yes"},expected_commit="c650123456789abcdef0123456789abcdef0123456")
+        add("implicit-cwd-tool-optin-only",cwd_tool=True,omit="git",env={"GODEBUG":"execerrdot=0","SOURCE_DISTINCT_CWD":"yes"},expected_commit="c650123456789abcdef0123456789abcdef0123456")
+        add("implicit-cwd-tool-optin-disabled",cwd_tool=True,env={"GODEBUG":"execerrdot=0","SOURCE_DISTINCT_CWD":"yes","NoDefaultCurrentDirectoryInExePath":""})
         add("implicit-cwd-tool-refused",cwd_tool=True)
         add("implicit-cwd-tool-disabled",cwd_tool=True,env={"NoDefaultCurrentDirectoryInExePath":""})
         add("implicit-cwd-same-file",cwd_hardlink=True)
@@ -84,7 +107,7 @@ def normalize(data,root):
     return re.sub(rb"(?<=[/\\])(\.install-|\.provenance-)[A-Za-z0-9]+",rb"\1<unique>",data)
 
 
-def filesystem(root,originals,started,ended):
+def filesystem(root,originals,started,ended,expected_commit="7650123456789abcdef0123456789abcdef0123456"):
     result={}
     for path in sorted(root.rglob("*")):
         rel=path.relative_to(root).as_posix(); mode=stat.S_IMODE(path.lstat().st_mode)
@@ -93,7 +116,7 @@ def filesystem(root,originals,started,ended):
         content=normalize(path.read_bytes(),root)
         if rel.endswith(".provenance.json") and content!=originals.get(rel):
             record=json.loads(content);assert record["source"]=="brain-source" and record["version"]==""
-            assert record["receiver_commit"]=="7650123456789abcdef0123456789abcdef0123456"
+            assert record["receiver_commit"]==expected_commit
             timestamp=record["built_at"];when=datetime.datetime.fromisoformat(timestamp.replace("Z","+00:00")).timestamp()
             assert timestamp.endswith("Z") and started-1<=when<=ended+1
             payload=path.with_name(path.name.removesuffix(".provenance.json"))
@@ -109,6 +132,11 @@ def configure(case,root,go,tool):
     env=legacy.prepare_root(root,go);env.update({"CI":"true","SYMBRAIN_GO_BINARY":str(root/"absent-fallback"),"SOURCE_TOOL_LOG":str(root/"invocations.jsonl")})
     tools=root/"tools";tools.mkdir(); source=root/"receiving sources";source.mkdir();(source/"browse").mkdir()
     for module in ("operate","scope"):(source/module).mkdir()
+    if case.get("raw_root"):
+        source=source/case["raw_root"];source.mkdir()
+        for module in ("browse","operate","scope"):(source/module).mkdir()
+    if case.get("raw_home"):
+        home=root/case["raw_home"];home.mkdir();env["HOME"]=str(home)
     for name in ("git","go","swift"):
         if case.get("omit")==name:continue
         dest=tools/(name);shutil.copyfile(tool,dest);dest.chmod(0o755)
@@ -120,6 +148,10 @@ def configure(case,root,go,tool):
     if os.name=="nt":env["PATHEXT"]=";;"
     tmp=root/"tmp";tmp.mkdir()
     for key in ("TMPDIR","TMP","TEMP"):env[key]=str(tmp)
+    if case.get("tmp_fault"):
+        bad=root/"tmp-obstruction"
+        if case["tmp_fault"]=="file":bad.write_text("owned tempfile obstruction")
+        for key in ("TMPDIR","TMP","TEMP"):env[key]=str(bad)
     if case.get("config"):
         cfg=Path(env["XDG_CONFIG_HOME"])/"symbrain/config.toml";cfg.parent.mkdir();cfg.write_text(case["config"])
     if case.get("project"):(Path(env["PROJECT"])/".symbrain.toml").write_text(case["project"])
@@ -160,9 +192,10 @@ def observe(binary,case,root,go,tool,control=None):
     env,args=configure(case,root,go,tool)
     if control:env.update(SOURCE_CONTROL_TARGET=str(control[0]),SOURCE_CONTROL_MUTATION=control[1])
     originals={p.relative_to(root).as_posix():normalize(p.read_bytes(),root) for p in root.rglob("*.provenance.json") if p.is_file()}
-    started=time.time();before=filesystem(root,originals,started,started)
+    commit=case.get("expected_commit","7650123456789abcdef0123456789abcdef0123456")
+    started=time.time();before=filesystem(root,originals,started,started,commit)
     proc=subprocess.run([str(binary),*args],cwd=env["PROJECT"],env=env,capture_output=True,timeout=25);ended=time.time()
-    contract={"exit":proc.returncode,"stdout_base64":base64.b64encode(normalize(proc.stdout,root)).decode(),"stderr_base64":base64.b64encode(normalize(proc.stderr,root)).decode(),"filesystem":filesystem(root,originals,started,ended)}
+    contract={"exit":proc.returncode,"stdout_base64":base64.b64encode(normalize(proc.stdout,root)).decode(),"stderr_base64":base64.b64encode(normalize(proc.stderr,root)).decode(),"filesystem":filesystem(root,originals,started,ended,commit)}
     return {"started":started,"ended":ended,"actual_exit":proc.returncode,"raw_stdout_base64":base64.b64encode(proc.stdout).decode(),"raw_stderr_base64":base64.b64encode(proc.stderr).decode(),"before":before,"contract":contract}
 
 

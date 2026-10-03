@@ -65,6 +65,13 @@ func main() {
 		if failure == "git" {
 			os.Exit(9)
 		}
+		if os.Getenv("SOURCE_DISTINCT_CWD") != "" {
+			executable, _ := os.Executable()
+			if filepath.Dir(executable) == os.Getenv("PROJECT") {
+				fmt.Println("c650123456789abcdef0123456789abcdef0123456")
+				return
+			}
+		}
 		fmt.Println("7650123456789abcdef0123456789abcdef0123456")
 		return
 	}

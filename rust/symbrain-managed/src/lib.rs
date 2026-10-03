@@ -5,6 +5,7 @@
 mod archive;
 mod install;
 mod json_record;
+mod json_string;
 mod local_install;
 mod manifest;
 mod process_status;
@@ -15,6 +16,7 @@ pub use archive::{
     atomic_install, extract_binary, find_checksum, safe_archive_path, sha256_file, verify_checksum,
 };
 pub use install::{InstallOutcome, Installer, versions_match};
+pub use json_string::go_json_string_bytes;
 pub use local_install::{SourceOrigin, install_source};
 pub use manifest::{
     COSIGN_OIDC_ISSUER, Core, ManagedError, Manifest, Platform, download_url, normalize_version,

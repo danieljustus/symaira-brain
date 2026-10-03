@@ -1,0 +1,1703 @@
+{
+  "candidate_head": "5a57f36e55d4237da50163243667b4850c6a347f",
+  "go_binary_sha256": "0654376cf8fc33c3be0b03bd394b665842d04e6659b3dfd67c0d6786d2f136e2",
+  "rust_binary_sha256": "3a2a0bc07633848c901e9710befb857147703aff50aa9a30fb8ef28bd0e76f2a",
+  "tool_binary_sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a",
+  "observations": [
+    {
+      "case": "flag-syntax-extra-0",
+      "argv": [
+        "setup",
+        "----from-source",
+        "<source>",
+        "--modules",
+        "browse",
+        "--json"
+      ],
+      "go": {
+        "started": 1791058641.070804,
+        "ended": 1791058641.1790442,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "YmFkIGZsYWcgc3ludGF4OiAtLS1mcm9tLXNvdXJjZQpVc2FnZSBvZiBzZXR1cDoKICAtYWxsb3ctdW5zaWduZWQKICAgIAlpbnN0YWxsIGV2ZW4gaWYgY29zaWduIG9yIGEgY29yZSdzIHNpZ25hdHVyZSBpcyB1bmF2YWlsYWJsZSAocHJpbnRzIGEgd2FybmluZzsgc2tpcHMgcHVibGlzaGVyIHZlcmlmaWNhdGlvbiBmb3IgdGhhdCBjb3JlKQogIC1maXgKICAgIAlyZXBhaXIgbWlzc2luZyBvciB2ZXJzaW9uLW1pc21hdGNoZWQgYmluYXJpZXMgKGFsaWFzIGZvciBkb2N0b3IgLS1maXgpCiAgLWZvcmNlLXJlbGVhc2UKICAgIAl3aXRoIC0tZml4OiBhbGxvdyByZXBsYWNpbmcgYSBicmFpbi1zb3VyY2UgYnVpbGQgd2l0aCB0aGUgcGlubmVkIHJlbGVhc2UgZG93bmxvYWQKICAtZnJvbS1zb3VyY2Ugc3RyaW5nCiAgICAJYnVpbGQgb3B0aW9uYWwgbW9kdWxlIGJpbmFyaWVzIGZyb20gdGhlIGluLXJlcG8gc291cmNlcyBhdCB0aGlzIHJlcG9zaXRvcnkgcm9vdCBhbmQgaW5zdGFsbCB0aGVtIGludG8gdGhlIG1hbmFnZWQgZGlyZWN0b3J5IChpbnN0ZWFkIG9mIGRvd25sb2FkaW5nIHJlbGVhc2VzKQogIC1qc29uCiAgICAJZW1pdCBtYWNoaW5lLXJlYWRhYmxlIEpTT04KICAtbW9kdWxlcyBzdHJpbmcKICAgIAl3aXRoIC0tZnJvbS1zb3VyY2U6IGNvbW1hLXNlcGFyYXRlZCBtb2R1bGUgc2VsZWN0aW9uIChicm93c2Usb3BlcmF0ZSxzY29wZSk7IGRlZmF1bHQ6IG1vZHVsZXMgZW5hYmxlZCBpbiBjb25maWcK",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "YmFkIGZsYWcgc3ludGF4OiAtLS1mcm9tLXNvdXJjZQpVc2FnZSBvZiBzZXR1cDoKICAtYWxsb3ctdW5zaWduZWQKICAgIAlpbnN0YWxsIGV2ZW4gaWYgY29zaWduIG9yIGEgY29yZSdzIHNpZ25hdHVyZSBpcyB1bmF2YWlsYWJsZSAocHJpbnRzIGEgd2FybmluZzsgc2tpcHMgcHVibGlzaGVyIHZlcmlmaWNhdGlvbiBmb3IgdGhhdCBjb3JlKQogIC1maXgKICAgIAlyZXBhaXIgbWlzc2luZyBvciB2ZXJzaW9uLW1pc21hdGNoZWQgYmluYXJpZXMgKGFsaWFzIGZvciBkb2N0b3IgLS1maXgpCiAgLWZvcmNlLXJlbGVhc2UKICAgIAl3aXRoIC0tZml4OiBhbGxvdyByZXBsYWNpbmcgYSBicmFpbi1zb3VyY2UgYnVpbGQgd2l0aCB0aGUgcGlubmVkIHJlbGVhc2UgZG93bmxvYWQKICAtZnJvbS1zb3VyY2Ugc3RyaW5nCiAgICAJYnVpbGQgb3B0aW9uYWwgbW9kdWxlIGJpbmFyaWVzIGZyb20gdGhlIGluLXJlcG8gc291cmNlcyBhdCB0aGlzIHJlcG9zaXRvcnkgcm9vdCBhbmQgaW5zdGFsbCB0aGVtIGludG8gdGhlIG1hbmFnZWQgZGlyZWN0b3J5IChpbnN0ZWFkIG9mIGRvd25sb2FkaW5nIHJlbGVhc2VzKQogIC1qc29uCiAgICAJZW1pdCBtYWNoaW5lLXJlYWRhYmxlIEpTT04KICAtbW9kdWxlcyBzdHJpbmcKICAgIAl3aXRoIC0tZnJvbS1zb3VyY2U6IGNvbW1hLXNlcGFyYXRlZCBtb2R1bGUgc2VsZWN0aW9uIChicm93c2Usb3BlcmF0ZSxzY29wZSk7IGRlZmF1bHQ6IG1vZHVsZXMgZW5hYmxlZCBpbiBjb25maWcK",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791058641.2871623,
+        "ended": 1791058641.58818,
+        "actual_exit": 0,
+        "raw_stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zb3VyY2U3NjUtY29uZmlnLWNhc2UtbWxxd3JfYzYvaG9tZS8uc3ltYWlyYS9iaW4iLCJyb290IjoiL3RtcC9zb3VyY2U3NjUtY29uZmlnLWNhc2UtbWxxd3JfYzYvcmVjZWl2aW5nIHNvdXJjZXMiLCJyZXN1bHRzIjpbeyJtb2R1bGUiOiJicm93c2UiLCJiaW5hcnkiOiJzeW1icm93c2UiLCJ2ZXJzaW9uIjoiMC43NjUuMC1sb2NhbCIsInN0YXR1cyI6Imluc3RhbGxlZCIsInNvdXJjZSI6ImJyYWluLXNvdXJjZSIsInJlY2VpdmVyX2NvbW1pdCI6Ijc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsImJpbmFyeV9zaGEyNTYiOiI4NDJiYWRlMTY5MTYyMDQ0YmM4ZWRlN2FmMWJkMjc1MjMxYjY0OTM4NmQ3OGZmZmZlM2Q4ZTk1YmFmYmFhYjJhIn1dfQo=",
+        "raw_stderr_base64": "",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 0,
+          "stdout_base64": "eyJiaW5fZGlyIjoiPHJvb3Q+L2hvbWUvLnN5bWFpcmEvYmluIiwicm9vdCI6Ijxyb290Pi9yZWNlaXZpbmcgc291cmNlcyIsInJlc3VsdHMiOlt7Im1vZHVsZSI6ImJyb3dzZSIsImJpbmFyeSI6InN5bWJyb3dzZSIsInZlcnNpb24iOiIwLjc2NS4wLWxvY2FsIiwic3RhdHVzIjoiaW5zdGFsbGVkIiwic291cmNlIjoiYnJhaW4tc291cmNlIiwicmVjZWl2ZXJfY29tbWl0IjoiNzY1MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2IiwiYmluYXJ5X3NoYTI1NiI6Ijg0MmJhZGUxNjkxNjIwNDRiYzhlZGU3YWYxYmQyNzUyMzFiNjQ5Mzg2ZDc4ZmZmZmUzZDhlOTViYWZiYWFiMmEifV19Cg==",
+          "stderr_base64": "",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin/symbrowse": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "home/.symaira/bin/symbrowse.provenance.json": {
+              "type": "file",
+              "mode": 420,
+              "size": 352,
+              "sha256": "352cfe7ea35e241d9e20aebfeb9ac58569845d282a1a93bd86844e10097dbd2d",
+              "content_base64": "ewogICJiaW5hcnkiOiAic3ltYnJvd3NlIiwKICAic291cmNlIjogImJyYWluLXNvdXJjZSIsCiAgInZlcnNpb24iOiAiIiwKICAicmVjZWl2ZXJfY29tbWl0IjogIjc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsCiAgIm1vZHVsZV9kaXIiOiAiYnJvd3NlIiwKICAiYnVpbGRlciI6ICJnbyB2ZXJzaW9uIGdvMS4yNi43IGZpeHR1cmUvZml4dHVyZSIsCiAgImJ1aWx0X2F0IjogIjx2YWxpZGF0ZWQtaW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICI4NDJiYWRlMTY5MTYyMDQ0YmM4ZWRlN2FmMWJkMjc1MjMxYjY0OTM4NmQ3OGZmZmZlM2Q4ZTk1YmFmYmFhYjJhIgp9Cg=="
+            },
+            "invocations.jsonl": {
+              "type": "file",
+              "mode": 420,
+              "size": 342,
+              "sha256": "7f6d3420b228e7404c7d5f6c76d4f8854a585969453b1e07786508a831fb0d16",
+              "content_base64": "eyJhcmdzIjpbIi1DIiwiPHJvb3Q+L3JlY2VpdmluZyBzb3VyY2VzIiwicmV2LXBhcnNlIiwiSEVBRCJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnaXQifQp7ImFyZ3MiOlsidmVyc2lvbiJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnbyJ9CnsiYXJncyI6WyJidWlsZCIsIi10cmltcGF0aCIsIi1vIiwiPHJvb3Q+L3RtcC9zeW1icmFpbi1zb3VyY2UtYnVpbGQtPHVuaXF1ZT4vc3ltYnJvd3NlIiwiLi9jbWQvc3ltYnJvd3NlIl0sImNnbyI6IjAiLCJjd2QiOiI8cm9vdD4vcmVjZWl2aW5nIHNvdXJjZXMvYnJvd3NlIiwidG9vbCI6ImdvIn0K"
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "mismatched_fields": [
+        "exit",
+        "stdout_base64",
+        "stderr_base64",
+        "filesystem"
+      ]
+    },
+    {
+      "case": "flag-syntax-extra-1",
+      "argv": [
+        "setup",
+        "--from-source",
+        "<source>",
+        "----modules",
+        "browse",
+        "--json"
+      ],
+      "go": {
+        "started": 1791058641.7591205,
+        "ended": 1791058641.8638368,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "YmFkIGZsYWcgc3ludGF4OiAtLS1tb2R1bGVzClVzYWdlIG9mIHNldHVwOgogIC1hbGxvdy11bnNpZ25lZAogICAgCWluc3RhbGwgZXZlbiBpZiBjb3NpZ24gb3IgYSBjb3JlJ3Mgc2lnbmF0dXJlIGlzIHVuYXZhaWxhYmxlIChwcmludHMgYSB3YXJuaW5nOyBza2lwcyBwdWJsaXNoZXIgdmVyaWZpY2F0aW9uIGZvciB0aGF0IGNvcmUpCiAgLWZpeAogICAgCXJlcGFpciBtaXNzaW5nIG9yIHZlcnNpb24tbWlzbWF0Y2hlZCBiaW5hcmllcyAoYWxpYXMgZm9yIGRvY3RvciAtLWZpeCkKICAtZm9yY2UtcmVsZWFzZQogICAgCXdpdGggLS1maXg6IGFsbG93IHJlcGxhY2luZyBhIGJyYWluLXNvdXJjZSBidWlsZCB3aXRoIHRoZSBwaW5uZWQgcmVsZWFzZSBkb3dubG9hZAogIC1mcm9tLXNvdXJjZSBzdHJpbmcKICAgIAlidWlsZCBvcHRpb25hbCBtb2R1bGUgYmluYXJpZXMgZnJvbSB0aGUgaW4tcmVwbyBzb3VyY2VzIGF0IHRoaXMgcmVwb3NpdG9yeSByb290IGFuZCBpbnN0YWxsIHRoZW0gaW50byB0aGUgbWFuYWdlZCBkaXJlY3RvcnkgKGluc3RlYWQgb2YgZG93bmxvYWRpbmcgcmVsZWFzZXMpCiAgLWpzb24KICAgIAllbWl0IG1hY2hpbmUtcmVhZGFibGUgSlNPTgogIC1tb2R1bGVzIHN0cmluZwogICAgCXdpdGggLS1mcm9tLXNvdXJjZTogY29tbWEtc2VwYXJhdGVkIG1vZHVsZSBzZWxlY3Rpb24gKGJyb3dzZSxvcGVyYXRlLHNjb3BlKTsgZGVmYXVsdDogbW9kdWxlcyBlbmFibGVkIGluIGNvbmZpZwo=",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "YmFkIGZsYWcgc3ludGF4OiAtLS1tb2R1bGVzClVzYWdlIG9mIHNldHVwOgogIC1hbGxvdy11bnNpZ25lZAogICAgCWluc3RhbGwgZXZlbiBpZiBjb3NpZ24gb3IgYSBjb3JlJ3Mgc2lnbmF0dXJlIGlzIHVuYXZhaWxhYmxlIChwcmludHMgYSB3YXJuaW5nOyBza2lwcyBwdWJsaXNoZXIgdmVyaWZpY2F0aW9uIGZvciB0aGF0IGNvcmUpCiAgLWZpeAogICAgCXJlcGFpciBtaXNzaW5nIG9yIHZlcnNpb24tbWlzbWF0Y2hlZCBiaW5hcmllcyAoYWxpYXMgZm9yIGRvY3RvciAtLWZpeCkKICAtZm9yY2UtcmVsZWFzZQogICAgCXdpdGggLS1maXg6IGFsbG93IHJlcGxhY2luZyBhIGJyYWluLXNvdXJjZSBidWlsZCB3aXRoIHRoZSBwaW5uZWQgcmVsZWFzZSBkb3dubG9hZAogIC1mcm9tLXNvdXJjZSBzdHJpbmcKICAgIAlidWlsZCBvcHRpb25hbCBtb2R1bGUgYmluYXJpZXMgZnJvbSB0aGUgaW4tcmVwbyBzb3VyY2VzIGF0IHRoaXMgcmVwb3NpdG9yeSByb290IGFuZCBpbnN0YWxsIHRoZW0gaW50byB0aGUgbWFuYWdlZCBkaXJlY3RvcnkgKGluc3RlYWQgb2YgZG93bmxvYWRpbmcgcmVsZWFzZXMpCiAgLWpzb24KICAgIAllbWl0IG1hY2hpbmUtcmVhZGFibGUgSlNPTgogIC1tb2R1bGVzIHN0cmluZwogICAgCXdpdGggLS1mcm9tLXNvdXJjZTogY29tbWEtc2VwYXJhdGVkIG1vZHVsZSBzZWxlY3Rpb24gKGJyb3dzZSxvcGVyYXRlLHNjb3BlKTsgZGVmYXVsdDogbW9kdWxlcyBlbmFibGVkIGluIGNvbmZpZwo=",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791058641.9695022,
+        "ended": 1791058642.2290025,
+        "actual_exit": 0,
+        "raw_stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zb3VyY2U3NjUtY29uZmlnLWNhc2Uteng3MzN3ODkvaG9tZS8uc3ltYWlyYS9iaW4iLCJyb290IjoiL3RtcC9zb3VyY2U3NjUtY29uZmlnLWNhc2Uteng3MzN3ODkvcmVjZWl2aW5nIHNvdXJjZXMiLCJyZXN1bHRzIjpbeyJtb2R1bGUiOiJicm93c2UiLCJiaW5hcnkiOiJzeW1icm93c2UiLCJ2ZXJzaW9uIjoiMC43NjUuMC1sb2NhbCIsInN0YXR1cyI6Imluc3RhbGxlZCIsInNvdXJjZSI6ImJyYWluLXNvdXJjZSIsInJlY2VpdmVyX2NvbW1pdCI6Ijc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsImJpbmFyeV9zaGEyNTYiOiI4NDJiYWRlMTY5MTYyMDQ0YmM4ZWRlN2FmMWJkMjc1MjMxYjY0OTM4NmQ3OGZmZmZlM2Q4ZTk1YmFmYmFhYjJhIn1dfQo=",
+        "raw_stderr_base64": "",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 0,
+          "stdout_base64": "eyJiaW5fZGlyIjoiPHJvb3Q+L2hvbWUvLnN5bWFpcmEvYmluIiwicm9vdCI6Ijxyb290Pi9yZWNlaXZpbmcgc291cmNlcyIsInJlc3VsdHMiOlt7Im1vZHVsZSI6ImJyb3dzZSIsImJpbmFyeSI6InN5bWJyb3dzZSIsInZlcnNpb24iOiIwLjc2NS4wLWxvY2FsIiwic3RhdHVzIjoiaW5zdGFsbGVkIiwic291cmNlIjoiYnJhaW4tc291cmNlIiwicmVjZWl2ZXJfY29tbWl0IjoiNzY1MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2IiwiYmluYXJ5X3NoYTI1NiI6Ijg0MmJhZGUxNjkxNjIwNDRiYzhlZGU3YWYxYmQyNzUyMzFiNjQ5Mzg2ZDc4ZmZmZmUzZDhlOTViYWZiYWFiMmEifV19Cg==",
+          "stderr_base64": "",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin/symbrowse": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "home/.symaira/bin/symbrowse.provenance.json": {
+              "type": "file",
+              "mode": 420,
+              "size": 352,
+              "sha256": "352cfe7ea35e241d9e20aebfeb9ac58569845d282a1a93bd86844e10097dbd2d",
+              "content_base64": "ewogICJiaW5hcnkiOiAic3ltYnJvd3NlIiwKICAic291cmNlIjogImJyYWluLXNvdXJjZSIsCiAgInZlcnNpb24iOiAiIiwKICAicmVjZWl2ZXJfY29tbWl0IjogIjc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsCiAgIm1vZHVsZV9kaXIiOiAiYnJvd3NlIiwKICAiYnVpbGRlciI6ICJnbyB2ZXJzaW9uIGdvMS4yNi43IGZpeHR1cmUvZml4dHVyZSIsCiAgImJ1aWx0X2F0IjogIjx2YWxpZGF0ZWQtaW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICI4NDJiYWRlMTY5MTYyMDQ0YmM4ZWRlN2FmMWJkMjc1MjMxYjY0OTM4NmQ3OGZmZmZlM2Q4ZTk1YmFmYmFhYjJhIgp9Cg=="
+            },
+            "invocations.jsonl": {
+              "type": "file",
+              "mode": 420,
+              "size": 342,
+              "sha256": "7f6d3420b228e7404c7d5f6c76d4f8854a585969453b1e07786508a831fb0d16",
+              "content_base64": "eyJhcmdzIjpbIi1DIiwiPHJvb3Q+L3JlY2VpdmluZyBzb3VyY2VzIiwicmV2LXBhcnNlIiwiSEVBRCJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnaXQifQp7ImFyZ3MiOlsidmVyc2lvbiJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnbyJ9CnsiYXJncyI6WyJidWlsZCIsIi10cmltcGF0aCIsIi1vIiwiPHJvb3Q+L3RtcC9zeW1icmFpbi1zb3VyY2UtYnVpbGQtPHVuaXF1ZT4vc3ltYnJvd3NlIiwiLi9jbWQvc3ltYnJvd3NlIl0sImNnbyI6IjAiLCJjd2QiOiI8cm9vdD4vcmVjZWl2aW5nIHNvdXJjZXMvYnJvd3NlIiwidG9vbCI6ImdvIn0K"
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "mismatched_fields": [
+        "exit",
+        "stdout_base64",
+        "stderr_base64",
+        "filesystem"
+      ]
+    },
+    {
+      "case": "flag-syntax-extra-2",
+      "argv": [
+        "setup",
+        "--from-source",
+        "<source>",
+        "--modules",
+        "browse",
+        "----json"
+      ],
+      "go": {
+        "started": 1791058642.3739219,
+        "ended": 1791058642.481836,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "YmFkIGZsYWcgc3ludGF4OiAtLS1qc29uClVzYWdlIG9mIHNldHVwOgogIC1hbGxvdy11bnNpZ25lZAogICAgCWluc3RhbGwgZXZlbiBpZiBjb3NpZ24gb3IgYSBjb3JlJ3Mgc2lnbmF0dXJlIGlzIHVuYXZhaWxhYmxlIChwcmludHMgYSB3YXJuaW5nOyBza2lwcyBwdWJsaXNoZXIgdmVyaWZpY2F0aW9uIGZvciB0aGF0IGNvcmUpCiAgLWZpeAogICAgCXJlcGFpciBtaXNzaW5nIG9yIHZlcnNpb24tbWlzbWF0Y2hlZCBiaW5hcmllcyAoYWxpYXMgZm9yIGRvY3RvciAtLWZpeCkKICAtZm9yY2UtcmVsZWFzZQogICAgCXdpdGggLS1maXg6IGFsbG93IHJlcGxhY2luZyBhIGJyYWluLXNvdXJjZSBidWlsZCB3aXRoIHRoZSBwaW5uZWQgcmVsZWFzZSBkb3dubG9hZAogIC1mcm9tLXNvdXJjZSBzdHJpbmcKICAgIAlidWlsZCBvcHRpb25hbCBtb2R1bGUgYmluYXJpZXMgZnJvbSB0aGUgaW4tcmVwbyBzb3VyY2VzIGF0IHRoaXMgcmVwb3NpdG9yeSByb290IGFuZCBpbnN0YWxsIHRoZW0gaW50byB0aGUgbWFuYWdlZCBkaXJlY3RvcnkgKGluc3RlYWQgb2YgZG93bmxvYWRpbmcgcmVsZWFzZXMpCiAgLWpzb24KICAgIAllbWl0IG1hY2hpbmUtcmVhZGFibGUgSlNPTgogIC1tb2R1bGVzIHN0cmluZwogICAgCXdpdGggLS1mcm9tLXNvdXJjZTogY29tbWEtc2VwYXJhdGVkIG1vZHVsZSBzZWxlY3Rpb24gKGJyb3dzZSxvcGVyYXRlLHNjb3BlKTsgZGVmYXVsdDogbW9kdWxlcyBlbmFibGVkIGluIGNvbmZpZwo=",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "YmFkIGZsYWcgc3ludGF4OiAtLS1qc29uClVzYWdlIG9mIHNldHVwOgogIC1hbGxvdy11bnNpZ25lZAogICAgCWluc3RhbGwgZXZlbiBpZiBjb3NpZ24gb3IgYSBjb3JlJ3Mgc2lnbmF0dXJlIGlzIHVuYXZhaWxhYmxlIChwcmludHMgYSB3YXJuaW5nOyBza2lwcyBwdWJsaXNoZXIgdmVyaWZpY2F0aW9uIGZvciB0aGF0IGNvcmUpCiAgLWZpeAogICAgCXJlcGFpciBtaXNzaW5nIG9yIHZlcnNpb24tbWlzbWF0Y2hlZCBiaW5hcmllcyAoYWxpYXMgZm9yIGRvY3RvciAtLWZpeCkKICAtZm9yY2UtcmVsZWFzZQogICAgCXdpdGggLS1maXg6IGFsbG93IHJlcGxhY2luZyBhIGJyYWluLXNvdXJjZSBidWlsZCB3aXRoIHRoZSBwaW5uZWQgcmVsZWFzZSBkb3dubG9hZAogIC1mcm9tLXNvdXJjZSBzdHJpbmcKICAgIAlidWlsZCBvcHRpb25hbCBtb2R1bGUgYmluYXJpZXMgZnJvbSB0aGUgaW4tcmVwbyBzb3VyY2VzIGF0IHRoaXMgcmVwb3NpdG9yeSByb290IGFuZCBpbnN0YWxsIHRoZW0gaW50byB0aGUgbWFuYWdlZCBkaXJlY3RvcnkgKGluc3RlYWQgb2YgZG93bmxvYWRpbmcgcmVsZWFzZXMpCiAgLWpzb24KICAgIAllbWl0IG1hY2hpbmUtcmVhZGFibGUgSlNPTgogIC1tb2R1bGVzIHN0cmluZwogICAgCXdpdGggLS1mcm9tLXNvdXJjZTogY29tbWEtc2VwYXJhdGVkIG1vZHVsZSBzZWxlY3Rpb24gKGJyb3dzZSxvcGVyYXRlLHNjb3BlKTsgZGVmYXVsdDogbW9kdWxlcyBlbmFibGVkIGluIGNvbmZpZwo=",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791058642.5929408,
+        "ended": 1791058642.8545263,
+        "actual_exit": 0,
+        "raw_stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zb3VyY2U3NjUtY29uZmlnLWNhc2UtZHZqXzV5Zm4vaG9tZS8uc3ltYWlyYS9iaW4iLCJyb290IjoiL3RtcC9zb3VyY2U3NjUtY29uZmlnLWNhc2UtZHZqXzV5Zm4vcmVjZWl2aW5nIHNvdXJjZXMiLCJyZXN1bHRzIjpbeyJtb2R1bGUiOiJicm93c2UiLCJiaW5hcnkiOiJzeW1icm93c2UiLCJ2ZXJzaW9uIjoiMC43NjUuMC1sb2NhbCIsInN0YXR1cyI6Imluc3RhbGxlZCIsInNvdXJjZSI6ImJyYWluLXNvdXJjZSIsInJlY2VpdmVyX2NvbW1pdCI6Ijc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsImJpbmFyeV9zaGEyNTYiOiI4NDJiYWRlMTY5MTYyMDQ0YmM4ZWRlN2FmMWJkMjc1MjMxYjY0OTM4NmQ3OGZmZmZlM2Q4ZTk1YmFmYmFhYjJhIn1dfQo=",
+        "raw_stderr_base64": "",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 0,
+          "stdout_base64": "eyJiaW5fZGlyIjoiPHJvb3Q+L2hvbWUvLnN5bWFpcmEvYmluIiwicm9vdCI6Ijxyb290Pi9yZWNlaXZpbmcgc291cmNlcyIsInJlc3VsdHMiOlt7Im1vZHVsZSI6ImJyb3dzZSIsImJpbmFyeSI6InN5bWJyb3dzZSIsInZlcnNpb24iOiIwLjc2NS4wLWxvY2FsIiwic3RhdHVzIjoiaW5zdGFsbGVkIiwic291cmNlIjoiYnJhaW4tc291cmNlIiwicmVjZWl2ZXJfY29tbWl0IjoiNzY1MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2IiwiYmluYXJ5X3NoYTI1NiI6Ijg0MmJhZGUxNjkxNjIwNDRiYzhlZGU3YWYxYmQyNzUyMzFiNjQ5Mzg2ZDc4ZmZmZmUzZDhlOTViYWZiYWFiMmEifV19Cg==",
+          "stderr_base64": "",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin/symbrowse": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "home/.symaira/bin/symbrowse.provenance.json": {
+              "type": "file",
+              "mode": 420,
+              "size": 352,
+              "sha256": "352cfe7ea35e241d9e20aebfeb9ac58569845d282a1a93bd86844e10097dbd2d",
+              "content_base64": "ewogICJiaW5hcnkiOiAic3ltYnJvd3NlIiwKICAic291cmNlIjogImJyYWluLXNvdXJjZSIsCiAgInZlcnNpb24iOiAiIiwKICAicmVjZWl2ZXJfY29tbWl0IjogIjc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsCiAgIm1vZHVsZV9kaXIiOiAiYnJvd3NlIiwKICAiYnVpbGRlciI6ICJnbyB2ZXJzaW9uIGdvMS4yNi43IGZpeHR1cmUvZml4dHVyZSIsCiAgImJ1aWx0X2F0IjogIjx2YWxpZGF0ZWQtaW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICI4NDJiYWRlMTY5MTYyMDQ0YmM4ZWRlN2FmMWJkMjc1MjMxYjY0OTM4NmQ3OGZmZmZlM2Q4ZTk1YmFmYmFhYjJhIgp9Cg=="
+            },
+            "invocations.jsonl": {
+              "type": "file",
+              "mode": 420,
+              "size": 342,
+              "sha256": "7f6d3420b228e7404c7d5f6c76d4f8854a585969453b1e07786508a831fb0d16",
+              "content_base64": "eyJhcmdzIjpbIi1DIiwiPHJvb3Q+L3JlY2VpdmluZyBzb3VyY2VzIiwicmV2LXBhcnNlIiwiSEVBRCJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnaXQifQp7ImFyZ3MiOlsidmVyc2lvbiJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnbyJ9CnsiYXJncyI6WyJidWlsZCIsIi10cmltcGF0aCIsIi1vIiwiPHJvb3Q+L3RtcC9zeW1icmFpbi1zb3VyY2UtYnVpbGQtPHVuaXF1ZT4vc3ltYnJvd3NlIiwiLi9jbWQvc3ltYnJvd3NlIl0sImNnbyI6IjAiLCJjd2QiOiI8cm9vdD4vcmVjZWl2aW5nIHNvdXJjZXMvYnJvd3NlIiwidG9vbCI6ImdvIn0K"
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "mismatched_fields": [
+        "exit",
+        "stdout_base64",
+        "stderr_base64",
+        "filesystem"
+      ]
+    },
+    {
+      "case": "flag-syntax-extra-3",
+      "argv": [
+        "setup",
+        "--from-source",
+        "<source>",
+        "--=bad"
+      ],
+      "go": {
+        "started": 1791058642.997467,
+        "ended": 1791058643.102027,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "YmFkIGZsYWcgc3ludGF4OiAtPWJhZApVc2FnZSBvZiBzZXR1cDoKICAtYWxsb3ctdW5zaWduZWQKICAgIAlpbnN0YWxsIGV2ZW4gaWYgY29zaWduIG9yIGEgY29yZSdzIHNpZ25hdHVyZSBpcyB1bmF2YWlsYWJsZSAocHJpbnRzIGEgd2FybmluZzsgc2tpcHMgcHVibGlzaGVyIHZlcmlmaWNhdGlvbiBmb3IgdGhhdCBjb3JlKQogIC1maXgKICAgIAlyZXBhaXIgbWlzc2luZyBvciB2ZXJzaW9uLW1pc21hdGNoZWQgYmluYXJpZXMgKGFsaWFzIGZvciBkb2N0b3IgLS1maXgpCiAgLWZvcmNlLXJlbGVhc2UKICAgIAl3aXRoIC0tZml4OiBhbGxvdyByZXBsYWNpbmcgYSBicmFpbi1zb3VyY2UgYnVpbGQgd2l0aCB0aGUgcGlubmVkIHJlbGVhc2UgZG93bmxvYWQKICAtZnJvbS1zb3VyY2Ugc3RyaW5nCiAgICAJYnVpbGQgb3B0aW9uYWwgbW9kdWxlIGJpbmFyaWVzIGZyb20gdGhlIGluLXJlcG8gc291cmNlcyBhdCB0aGlzIHJlcG9zaXRvcnkgcm9vdCBhbmQgaW5zdGFsbCB0aGVtIGludG8gdGhlIG1hbmFnZWQgZGlyZWN0b3J5IChpbnN0ZWFkIG9mIGRvd25sb2FkaW5nIHJlbGVhc2VzKQogIC1qc29uCiAgICAJZW1pdCBtYWNoaW5lLXJlYWRhYmxlIEpTT04KICAtbW9kdWxlcyBzdHJpbmcKICAgIAl3aXRoIC0tZnJvbS1zb3VyY2U6IGNvbW1hLXNlcGFyYXRlZCBtb2R1bGUgc2VsZWN0aW9uIChicm93c2Usb3BlcmF0ZSxzY29wZSk7IGRlZmF1bHQ6IG1vZHVsZXMgZW5hYmxlZCBpbiBjb25maWcK",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "YmFkIGZsYWcgc3ludGF4OiAtPWJhZApVc2FnZSBvZiBzZXR1cDoKICAtYWxsb3ctdW5zaWduZWQKICAgIAlpbnN0YWxsIGV2ZW4gaWYgY29zaWduIG9yIGEgY29yZSdzIHNpZ25hdHVyZSBpcyB1bmF2YWlsYWJsZSAocHJpbnRzIGEgd2FybmluZzsgc2tpcHMgcHVibGlzaGVyIHZlcmlmaWNhdGlvbiBmb3IgdGhhdCBjb3JlKQogIC1maXgKICAgIAlyZXBhaXIgbWlzc2luZyBvciB2ZXJzaW9uLW1pc21hdGNoZWQgYmluYXJpZXMgKGFsaWFzIGZvciBkb2N0b3IgLS1maXgpCiAgLWZvcmNlLXJlbGVhc2UKICAgIAl3aXRoIC0tZml4OiBhbGxvdyByZXBsYWNpbmcgYSBicmFpbi1zb3VyY2UgYnVpbGQgd2l0aCB0aGUgcGlubmVkIHJlbGVhc2UgZG93bmxvYWQKICAtZnJvbS1zb3VyY2Ugc3RyaW5nCiAgICAJYnVpbGQgb3B0aW9uYWwgbW9kdWxlIGJpbmFyaWVzIGZyb20gdGhlIGluLXJlcG8gc291cmNlcyBhdCB0aGlzIHJlcG9zaXRvcnkgcm9vdCBhbmQgaW5zdGFsbCB0aGVtIGludG8gdGhlIG1hbmFnZWQgZGlyZWN0b3J5IChpbnN0ZWFkIG9mIGRvd25sb2FkaW5nIHJlbGVhc2VzKQogIC1qc29uCiAgICAJZW1pdCBtYWNoaW5lLXJlYWRhYmxlIEpTT04KICAtbW9kdWxlcyBzdHJpbmcKICAgIAl3aXRoIC0tZnJvbS1zb3VyY2U6IGNvbW1hLXNlcGFyYXRlZCBtb2R1bGUgc2VsZWN0aW9uIChicm93c2Usb3BlcmF0ZSxzY29wZSk7IGRlZmF1bHQ6IG1vZHVsZXMgZW5hYmxlZCBpbiBjb25maWcK",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791058643.2092676,
+        "ended": 1791058643.3162715,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC0KVXNhZ2Ugb2Ygc2V0dXA6CiAgLWFsbG93LXVuc2lnbmVkCiAgICAJaW5zdGFsbCBldmVuIGlmIGNvc2lnbiBvciBhIGNvcmUncyBzaWduYXR1cmUgaXMgdW5hdmFpbGFibGUgKHByaW50cyBhIHdhcm5pbmc7IHNraXBzIHB1Ymxpc2hlciB2ZXJpZmljYXRpb24gZm9yIHRoYXQgY29yZSkKICAtZml4CiAgICAJcmVwYWlyIG1pc3Npbmcgb3IgdmVyc2lvbi1taXNtYXRjaGVkIGJpbmFyaWVzIChhbGlhcyBmb3IgZG9jdG9yIC0tZml4KQogIC1mb3JjZS1yZWxlYXNlCiAgICAJd2l0aCAtLWZpeDogYWxsb3cgcmVwbGFjaW5nIGEgYnJhaW4tc291cmNlIGJ1aWxkIHdpdGggdGhlIHBpbm5lZCByZWxlYXNlIGRvd25sb2FkCiAgLWZyb20tc291cmNlIHN0cmluZwogICAgCWJ1aWxkIG9wdGlvbmFsIG1vZHVsZSBiaW5hcmllcyBmcm9tIHRoZSBpbi1yZXBvIHNvdXJjZXMgYXQgdGhpcyByZXBvc2l0b3J5IHJvb3QgYW5kIGluc3RhbGwgdGhlbSBpbnRvIHRoZSBtYW5hZ2VkIGRpcmVjdG9yeSAoaW5zdGVhZCBvZiBkb3dubG9hZGluZyByZWxlYXNlcykKICAtanNvbgogICAgCWVtaXQgbWFjaGluZS1yZWFkYWJsZSBKU09OCiAgLW1vZHVsZXMgc3RyaW5nCiAgICAJd2l0aCAtLWZyb20tc291cmNlOiBjb21tYS1zZXBhcmF0ZWQgbW9kdWxlIHNlbGVjdGlvbiAoYnJvd3NlLG9wZXJhdGUsc2NvcGUpOyBkZWZhdWx0OiBtb2R1bGVzIGVuYWJsZWQgaW4gY29uZmlnCg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC0KVXNhZ2Ugb2Ygc2V0dXA6CiAgLWFsbG93LXVuc2lnbmVkCiAgICAJaW5zdGFsbCBldmVuIGlmIGNvc2lnbiBvciBhIGNvcmUncyBzaWduYXR1cmUgaXMgdW5hdmFpbGFibGUgKHByaW50cyBhIHdhcm5pbmc7IHNraXBzIHB1Ymxpc2hlciB2ZXJpZmljYXRpb24gZm9yIHRoYXQgY29yZSkKICAtZml4CiAgICAJcmVwYWlyIG1pc3Npbmcgb3IgdmVyc2lvbi1taXNtYXRjaGVkIGJpbmFyaWVzIChhbGlhcyBmb3IgZG9jdG9yIC0tZml4KQogIC1mb3JjZS1yZWxlYXNlCiAgICAJd2l0aCAtLWZpeDogYWxsb3cgcmVwbGFjaW5nIGEgYnJhaW4tc291cmNlIGJ1aWxkIHdpdGggdGhlIHBpbm5lZCByZWxlYXNlIGRvd25sb2FkCiAgLWZyb20tc291cmNlIHN0cmluZwogICAgCWJ1aWxkIG9wdGlvbmFsIG1vZHVsZSBiaW5hcmllcyBmcm9tIHRoZSBpbi1yZXBvIHNvdXJjZXMgYXQgdGhpcyByZXBvc2l0b3J5IHJvb3QgYW5kIGluc3RhbGwgdGhlbSBpbnRvIHRoZSBtYW5hZ2VkIGRpcmVjdG9yeSAoaW5zdGVhZCBvZiBkb3dubG9hZGluZyByZWxlYXNlcykKICAtanNvbgogICAgCWVtaXQgbWFjaGluZS1yZWFkYWJsZSBKU09OCiAgLW1vZHVsZXMgc3RyaW5nCiAgICAJd2l0aCAtLWZyb20tc291cmNlOiBjb21tYS1zZXBhcmF0ZWQgbW9kdWxlIHNlbGVjdGlvbiAoYnJvd3NlLG9wZXJhdGUsc2NvcGUpOyBkZWZhdWx0OiBtb2R1bGVzIGVuYWJsZWQgaW4gY29uZmlnCg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "mismatched_fields": [
+        "stderr_base64"
+      ]
+    },
+    {
+      "case": "flag-syntax-extra-4",
+      "argv": [
+        "setup",
+        "--from-source",
+        "<source>",
+        "--modules",
+        "browse",
+        "---json"
+      ],
+      "go": {
+        "started": 1791058643.4218328,
+        "ended": 1791058643.5400937,
+        "actual_exit": 0,
+        "raw_stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zb3VyY2U3NjUtY29uZmlnLWNhc2UtbDFyNHBvMm8vaG9tZS8uc3ltYWlyYS9iaW4iLCJyb290IjoiL3RtcC9zb3VyY2U3NjUtY29uZmlnLWNhc2UtbDFyNHBvMm8vcmVjZWl2aW5nIHNvdXJjZXMiLCJyZXN1bHRzIjpbeyJtb2R1bGUiOiJicm93c2UiLCJiaW5hcnkiOiJzeW1icm93c2UiLCJ2ZXJzaW9uIjoiMC43NjUuMC1sb2NhbCIsInN0YXR1cyI6Imluc3RhbGxlZCIsInNvdXJjZSI6ImJyYWluLXNvdXJjZSIsInJlY2VpdmVyX2NvbW1pdCI6Ijc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsImJpbmFyeV9zaGEyNTYiOiI4NDJiYWRlMTY5MTYyMDQ0YmM4ZWRlN2FmMWJkMjc1MjMxYjY0OTM4NmQ3OGZmZmZlM2Q4ZTk1YmFmYmFhYjJhIn1dfQo=",
+        "raw_stderr_base64": "",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 0,
+          "stdout_base64": "eyJiaW5fZGlyIjoiPHJvb3Q+L2hvbWUvLnN5bWFpcmEvYmluIiwicm9vdCI6Ijxyb290Pi9yZWNlaXZpbmcgc291cmNlcyIsInJlc3VsdHMiOlt7Im1vZHVsZSI6ImJyb3dzZSIsImJpbmFyeSI6InN5bWJyb3dzZSIsInZlcnNpb24iOiIwLjc2NS4wLWxvY2FsIiwic3RhdHVzIjoiaW5zdGFsbGVkIiwic291cmNlIjoiYnJhaW4tc291cmNlIiwicmVjZWl2ZXJfY29tbWl0IjoiNzY1MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2IiwiYmluYXJ5X3NoYTI1NiI6Ijg0MmJhZGUxNjkxNjIwNDRiYzhlZGU3YWYxYmQyNzUyMzFiNjQ5Mzg2ZDc4ZmZmZmUzZDhlOTViYWZiYWFiMmEifV19Cg==",
+          "stderr_base64": "",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin/symbrowse": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "home/.symaira/bin/symbrowse.provenance.json": {
+              "type": "file",
+              "mode": 420,
+              "size": 352,
+              "sha256": "352cfe7ea35e241d9e20aebfeb9ac58569845d282a1a93bd86844e10097dbd2d",
+              "content_base64": "ewogICJiaW5hcnkiOiAic3ltYnJvd3NlIiwKICAic291cmNlIjogImJyYWluLXNvdXJjZSIsCiAgInZlcnNpb24iOiAiIiwKICAicmVjZWl2ZXJfY29tbWl0IjogIjc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsCiAgIm1vZHVsZV9kaXIiOiAiYnJvd3NlIiwKICAiYnVpbGRlciI6ICJnbyB2ZXJzaW9uIGdvMS4yNi43IGZpeHR1cmUvZml4dHVyZSIsCiAgImJ1aWx0X2F0IjogIjx2YWxpZGF0ZWQtaW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICI4NDJiYWRlMTY5MTYyMDQ0YmM4ZWRlN2FmMWJkMjc1MjMxYjY0OTM4NmQ3OGZmZmZlM2Q4ZTk1YmFmYmFhYjJhIgp9Cg=="
+            },
+            "invocations.jsonl": {
+              "type": "file",
+              "mode": 420,
+              "size": 342,
+              "sha256": "7f6d3420b228e7404c7d5f6c76d4f8854a585969453b1e07786508a831fb0d16",
+              "content_base64": "eyJhcmdzIjpbIi1DIiwiPHJvb3Q+L3JlY2VpdmluZyBzb3VyY2VzIiwicmV2LXBhcnNlIiwiSEVBRCJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnaXQifQp7ImFyZ3MiOlsidmVyc2lvbiJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnbyJ9CnsiYXJncyI6WyJidWlsZCIsIi10cmltcGF0aCIsIi1vIiwiPHJvb3Q+L3RtcC9zeW1icmFpbi1zb3VyY2UtYnVpbGQtPHVuaXF1ZT4vc3ltYnJvd3NlIiwiLi9jbWQvc3ltYnJvd3NlIl0sImNnbyI6IjAiLCJjd2QiOiI8cm9vdD4vcmVjZWl2aW5nIHNvdXJjZXMvYnJvd3NlIiwidG9vbCI6ImdvIn0K"
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791058643.6829834,
+        "ended": 1791058643.9474847,
+        "actual_exit": 0,
+        "raw_stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zb3VyY2U3NjUtY29uZmlnLWNhc2UtNGxtOHY1Y3QvaG9tZS8uc3ltYWlyYS9iaW4iLCJyb290IjoiL3RtcC9zb3VyY2U3NjUtY29uZmlnLWNhc2UtNGxtOHY1Y3QvcmVjZWl2aW5nIHNvdXJjZXMiLCJyZXN1bHRzIjpbeyJtb2R1bGUiOiJicm93c2UiLCJiaW5hcnkiOiJzeW1icm93c2UiLCJ2ZXJzaW9uIjoiMC43NjUuMC1sb2NhbCIsInN0YXR1cyI6Imluc3RhbGxlZCIsInNvdXJjZSI6ImJyYWluLXNvdXJjZSIsInJlY2VpdmVyX2NvbW1pdCI6Ijc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsImJpbmFyeV9zaGEyNTYiOiI4NDJiYWRlMTY5MTYyMDQ0YmM4ZWRlN2FmMWJkMjc1MjMxYjY0OTM4NmQ3OGZmZmZlM2Q4ZTk1YmFmYmFhYjJhIn1dfQo=",
+        "raw_stderr_base64": "",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 0,
+          "stdout_base64": "eyJiaW5fZGlyIjoiPHJvb3Q+L2hvbWUvLnN5bWFpcmEvYmluIiwicm9vdCI6Ijxyb290Pi9yZWNlaXZpbmcgc291cmNlcyIsInJlc3VsdHMiOlt7Im1vZHVsZSI6ImJyb3dzZSIsImJpbmFyeSI6InN5bWJyb3dzZSIsInZlcnNpb24iOiIwLjc2NS4wLWxvY2FsIiwic3RhdHVzIjoiaW5zdGFsbGVkIiwic291cmNlIjoiYnJhaW4tc291cmNlIiwicmVjZWl2ZXJfY29tbWl0IjoiNzY1MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2IiwiYmluYXJ5X3NoYTI1NiI6Ijg0MmJhZGUxNjkxNjIwNDRiYzhlZGU3YWYxYmQyNzUyMzFiNjQ5Mzg2ZDc4ZmZmZmUzZDhlOTViYWZiYWFiMmEifV19Cg==",
+          "stderr_base64": "",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin/symbrowse": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "home/.symaira/bin/symbrowse.provenance.json": {
+              "type": "file",
+              "mode": 420,
+              "size": 352,
+              "sha256": "352cfe7ea35e241d9e20aebfeb9ac58569845d282a1a93bd86844e10097dbd2d",
+              "content_base64": "ewogICJiaW5hcnkiOiAic3ltYnJvd3NlIiwKICAic291cmNlIjogImJyYWluLXNvdXJjZSIsCiAgInZlcnNpb24iOiAiIiwKICAicmVjZWl2ZXJfY29tbWl0IjogIjc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsCiAgIm1vZHVsZV9kaXIiOiAiYnJvd3NlIiwKICAiYnVpbGRlciI6ICJnbyB2ZXJzaW9uIGdvMS4yNi43IGZpeHR1cmUvZml4dHVyZSIsCiAgImJ1aWx0X2F0IjogIjx2YWxpZGF0ZWQtaW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICI4NDJiYWRlMTY5MTYyMDQ0YmM4ZWRlN2FmMWJkMjc1MjMxYjY0OTM4NmQ3OGZmZmZlM2Q4ZTk1YmFmYmFhYjJhIgp9Cg=="
+            },
+            "invocations.jsonl": {
+              "type": "file",
+              "mode": 420,
+              "size": 342,
+              "sha256": "7f6d3420b228e7404c7d5f6c76d4f8854a585969453b1e07786508a831fb0d16",
+              "content_base64": "eyJhcmdzIjpbIi1DIiwiPHJvb3Q+L3JlY2VpdmluZyBzb3VyY2VzIiwicmV2LXBhcnNlIiwiSEVBRCJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnaXQifQp7ImFyZ3MiOlsidmVyc2lvbiJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnbyJ9CnsiYXJncyI6WyJidWlsZCIsIi10cmltcGF0aCIsIi1vIiwiPHJvb3Q+L3RtcC9zeW1icmFpbi1zb3VyY2UtYnVpbGQtPHVuaXF1ZT4vc3ltYnJvd3NlIiwiLi9jbWQvc3ltYnJvd3NlIl0sImNnbyI6IjAiLCJjd2QiOiI8cm9vdD4vcmVjZWl2aW5nIHNvdXJjZXMvYnJvd3NlIiwidG9vbCI6ImdvIn0K"
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "mismatched_fields": []
+    }
+  ]
+}

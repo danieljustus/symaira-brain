@@ -84,3 +84,45 @@ gezielt roten Kontrollberichte hoch. Linux-Belege bestätigen keine native macOS
 oder Windows-Ausführung, keine echten Swift-Worker, Hardwareberechtigungen oder
 Signierung. Die Fixture-Worker sind Instrumentierung, kein Ersatz für den späteren
 vollständigen Browse-/Operate-/Scope-Produkt-Cutover.
+
+## Korrektur nach unabhängiger Prüfung von 2454c461
+
+Der ursprüngliche Source-Commit `2454c461` und sein Evidence-Head `5a57f36e`
+bleiben unverändert erhalten. Der vollständige unabhängige Bericht, seine
+Hash-Bindung und alle tatsächlichen Fehler-/Kontrollbeobachtungen stehen unter
+`migration/evidence/setup-source-765/independent-review-2454/`. Die Prüfung
+beanstandete drei P2-Verträge und einen P3-Fehlerpfad; grüne Baseline-Vergleiche
+ersetzen diese Befunde nicht. Der korrigierte Stand integriert `main` und die
+veröffentlichte Doctor-Windows-Testkorrektur durch normale Merge-Commits.
+
+- Setup übernimmt die präzise Go-FlagSet-Grammatik nach einmaliger vorhandener
+  Normalisierung. Zusätzliche Bindestriche oder ein leerer Name führen vor Tool-
+  und Installationswirkungen zum Syntaxfehler. Der gültige Dreifach-Präfix vor
+  der Normalisierung bleibt als tatsächliche positive Kontrolle erhalten.
+- Moduloptionen bleiben Byte-Werte; Go-konforme Unicode-Randzeichen werden ohne
+  Verlust ungültiger Unix-Bytes entfernt. Diagnostik verwendet die vorhandene
+  bytegenaue Go-Quoting-Funktion. Fehlende Source-Pfade und menschliche Managed-
+  Zielausgaben behalten rohe OS-Bytes. Erfolgreiche JSON-Pfadidentitäten und
+  Toolchain-Provenienz teilen einen kleinen Encoder, der jedes ungültige Byte
+  einzeln als `\ufffd` schreibt und gültiges U+FFFD unterscheidet. Dies schützt
+  reale Unix-Verzeichnisidentitäten; es ist keine Änderung des Installationsorts.
+- Windows berücksichtigt den impliziten aktuellen Ordner weiterhin, sofern
+  `NoDefaultCurrentDirectoryInExePath` fehlt. `GODEBUG=execerrdot=0` wählt diesen
+  ausdrücklich vor PATH. Ohne Opt-in bleiben ErrDot und die bestehende Lstat-
+  Identitätsprüfung erhalten. Drei echte Windows-CLI-Fixtures prüfen unterschiedliche
+  CWD-/PATH-Besitzer, ausschließlich CWD und ausdrücklich deaktiviertes CWD;
+  Linux und Signatur-Stubs bestätigen diese Windows-Ausführung nicht.
+- Eine fehlende oder als Datei belegte Worker-Temp-Wurzel darf den Git-Metadaten-
+  Prozess nicht durch einen neuen Capture-Fehler vorzeitig abbrechen. Ausschließlich
+  der kurzlebige Kontroll-Capture nutzt den nächsten existierenden Verzeichnis-
+  Vorfahren derselben angeforderten Temp-Wurzel. Das erzeugt keine Verzeichnisse
+  und ändert weder Worker-Umgebung, Cache, Volume-Auswahl noch Stage-Wurzel.
+  Worker-Staging versucht weiterhin den tatsächlich zufällig erzeugten Pfad
+  atomisch mit privaten Rechten und Go-konformer Stat-/Mkdir-Fehlerreihenfolge;
+  Fehler bleiben pro Modul im JSON-Bericht. Der eigene RAII-Stage-Besitzer räumt
+  vollständig auf. Dieses Verfahren erhält dateibasierte kombinierte Ausgabe
+  und vermeidet neue Pipe-Nachkommen-Hänger oder eine stille Build-Ausweichwurzel.
+
+Der erweiterte tatsächliche Prozess-Gate umfasst 87 Fälle auf Linux/macOS und
+81 auf Windows sowie dieselben zwei echten negativen Prozesskontrollen.
+Native Drei-OS-CI und erneute vollständige unabhängige Prüfung bleiben erforderlich.

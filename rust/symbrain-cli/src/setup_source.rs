@@ -7,7 +7,8 @@ use std::path::{Component, Path, PathBuf};
 use serde::Serialize;
 use symbrain_core::exit;
 use symbrain_managed::{
-    SourceOrigin, format_io_error, install_source, installed_version, read_provenance,
+    SourceOrigin, format_io_error, go_json_string_bytes, install_source, installed_version,
+    read_provenance,
 };
 
 #[path = "setup_source_build.rs"]
@@ -16,6 +17,10 @@ mod build;
 mod layout;
 #[path = "setup_source_process.rs"]
 mod process;
+#[path = "setup_source_temp.rs"]
+mod temp;
+#[path = "setup_source_text.rs"]
+mod text;
 
 #[derive(Clone, Copy)]
 struct Spec {
@@ -43,11 +48,22 @@ const SPECS: [Spec; 3] = [
 
 #[derive(Serialize)]
 struct Report {
-    bin_dir: String,
-    root: String,
+    bin_dir: Box<serde_json::value::RawValue>,
+    root: Box<serde_json::value::RawValue>,
     results: Vec<ResultRow>,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     errors: Vec<String>,
+}
+
+impl Report {
+    fn new(bin_dir: &Path, root: &Path) -> Result<Self, serde_json::Error> {
+        Ok(Self {
+            bin_dir: go_json_string_bytes(&symbrain_core::config::os_bytes(bin_dir.as_os_str()))?,
+            root: go_json_string_bytes(&symbrain_core::config::os_bytes(root.as_os_str()))?,
+            results: Vec::new(),
+            errors: Vec::new(),
+        })
+    }
 }
 
 #[derive(Serialize, Default)]
@@ -93,20 +109,20 @@ fn absolute(root: &OsStr) -> Result<PathBuf, String> {
     Ok(clean)
 }
 
-fn select(modules: &str) -> Result<Vec<Spec>, String> {
-    let mut wanted: BTreeSet<String> = if modules.is_empty() {
+fn select(modules: &[u8]) -> Result<Vec<Spec>, String> {
+    let mut wanted: BTreeSet<Vec<u8>> = if modules.is_empty() {
         let enabled = super::enabled_cores()?;
         SPECS
             .iter()
             .filter(|spec| enabled.get(spec.binary).copied().unwrap_or(false))
-            .map(|spec| spec.module.into())
+            .map(|spec| spec.module.as_bytes().to_vec())
             .collect()
     } else {
         modules
-            .split(',')
-            .map(str::trim)
+            .split(|byte| *byte == b',')
+            .map(text::trim_space)
             .filter(|name| !name.is_empty())
-            .map(str::to_owned)
+            .map(<[u8]>::to_vec)
             .collect()
     };
     if wanted.is_empty() {
@@ -114,14 +130,14 @@ fn select(modules: &str) -> Result<Vec<Spec>, String> {
     }
     let mut specs = Vec::new();
     for spec in SPECS {
-        if wanted.remove(spec.module) {
+        if wanted.remove(spec.module.as_bytes()) {
             specs.push(spec);
         }
     }
     if let Some(unknown) = wanted.first() {
         return Err(format!(
             "unknown module {} (known: browse, operate, scope)",
-            symbrain_core::config::format_go_quoted(OsStr::new(unknown))
+            symbrain_core::config::format_go_quoted_bytes(unknown)
         ));
     }
     Ok(specs)
@@ -130,7 +146,7 @@ fn select(modules: &str) -> Result<Vec<Spec>, String> {
 pub(super) fn run(
     bin_dir: &Path,
     root: &OsStr,
-    modules: &str,
+    modules: &[u8],
     json: bool,
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
@@ -138,11 +154,9 @@ pub(super) fn run(
     let root = match absolute(root) {
         Ok(root) if root.is_dir() => root,
         Ok(root) => {
-            let _ = writeln!(
-                stderr,
-                "symbrain setup --from-source: {} is not a directory",
-                root.display()
-            );
+            let _ = stderr.write_all(b"symbrain setup --from-source: ");
+            let _ = stderr.write_all(&symbrain_core::config::os_bytes(root.as_os_str()));
+            let _ = stderr.write_all(b" is not a directory\n");
             return exit::USAGE;
         }
         Err(error) => return failed(stderr, &error, exit::USAGE),
@@ -163,11 +177,9 @@ pub(super) fn run(
         Ok(commit) => commit,
         Err(error) => return failed(stderr, &error, exit::GENERIC),
     };
-    let mut report = Report {
-        bin_dir: bin_dir.display().to_string(),
-        root: root.display().to_string(),
-        results: Vec::new(),
-        errors: Vec::new(),
+    let mut report = match Report::new(bin_dir, &root) {
+        Ok(report) => report,
+        Err(error) => return failed(stderr, &format!("encode JSON: {error}"), exit::GENERIC),
     };
     for spec in specs {
         let mut result = ResultRow {
@@ -224,7 +236,9 @@ pub(super) fn run(
             return failed(stderr, &format!("encode JSON: {error}"), exit::GENERIC);
         }
     } else {
-        let _ = writeln!(stdout, "\nInstalled to {}", bin_dir.display());
+        let _ = stdout.write_all(b"\nInstalled to ");
+        let _ = stdout.write_all(&symbrain_core::config::os_bytes(bin_dir.as_os_str()));
+        let _ = stdout.write_all(b"\n");
     }
     if report.errors.is_empty() {
         exit::OK
@@ -241,13 +255,8 @@ fn install(
     layout: &layout::Layout,
     context: &process::Context,
 ) -> Result<(String, String), (String, bool)> {
-    let mut builder = tempfile::Builder::new();
-    builder.prefix("symbrain-source-build-");
-    let temp = layout
-        .temp
-        .as_ref()
-        .map_or_else(|| builder.tempdir(), |parent| builder.tempdir_in(parent))
-        .map_err(|error| (format_io_error(&error), false))?;
+    let parent = layout.temp.clone().unwrap_or_else(std::env::temp_dir);
+    let temp = temp::stage(&parent).map_err(|error| (error, false))?;
     let (binary, builder) =
         build::build(root, spec, temp.path(), context).map_err(|error| (error, true))?;
     let data = std::fs::read(&binary).map_err(|error| {

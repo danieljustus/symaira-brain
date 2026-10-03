@@ -53,15 +53,20 @@ pub(super) fn lookup(tool: &str) -> Result<PathBuf, String> {
     let dot_error =
         || format!("exec: {tool:?}: cannot run executable found relative to current directory");
     #[cfg(windows)]
-    let implicit =
-        if std::env::var_os("NoDefaultCurrentDirectoryInExePath").is_none() && !allow_relative {
-            names
-                .iter()
-                .map(PathBuf::from)
-                .find(|candidate| candidate.is_file())
-        } else {
-            None
-        };
+    let implicit = if std::env::var_os("NoDefaultCurrentDirectoryInExePath").is_none() {
+        names
+            .iter()
+            .map(PathBuf::from)
+            .find(|candidate| candidate.is_file())
+    } else {
+        None
+    };
+    #[cfg(windows)]
+    if allow_relative {
+        if let Some(implicit) = &implicit {
+            return Ok(implicit.clone());
+        }
+    }
     for directory in std::env::split_paths(&path) {
         #[cfg(windows)]
         if directory.as_os_str().is_empty() {
@@ -122,8 +127,7 @@ pub(super) fn run(
         fs::metadata(cwd)
             .map_err(|error| format!("chdir {}: {}", cwd.display(), format_io_error(&error)))?;
     }
-    let capture =
-        tempfile::NamedTempFile::new().map_err(|error| format!("create build capture: {error}"))?;
+    let capture = super::temp::capture()?;
     let writer = capture
         .as_file()
         .try_clone()

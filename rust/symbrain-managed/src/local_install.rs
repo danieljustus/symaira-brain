@@ -78,7 +78,7 @@ pub fn install_source(
             None
         } else {
             Some(
-                serde_json::value::RawValue::from_string(quote_builder(origin.builder)?)
+                crate::go_json_string_bytes(origin.builder)
                     .map_err(|error| ManagedError::Context(error.to_string()))?,
             )
         },
@@ -90,28 +90,4 @@ pub fn install_source(
             "managed: record provenance for {binary_name}: {error}"
         ))
     })
-}
-
-// Go strings retain malformed tool stdout bytes. encoding/json encodes each
-// malformed byte as \ufffd, while valid U+FFFD remains literal UTF-8.
-fn quote_builder(mut bytes: &[u8]) -> Result<String, ManagedError> {
-    let mut json = String::from("\"");
-    while !bytes.is_empty() {
-        let valid = std::str::from_utf8(bytes);
-        let count = valid
-            .as_ref()
-            .map_or_else(std::str::Utf8Error::valid_up_to, |text| text.len());
-        let text = std::str::from_utf8(&bytes[..count])
-            .map_err(|error| ManagedError::Context(error.to_string()))?;
-        let quoted = serde_json::to_string(text)
-            .map_err(|error| ManagedError::Context(error.to_string()))?;
-        json.push_str(&quoted[1..quoted.len() - 1]);
-        bytes = &bytes[count..];
-        if valid.is_err() {
-            json.push_str("\\ufffd");
-            bytes = &bytes[1..];
-        }
-    }
-    json.push('"');
-    Ok(json)
 }
