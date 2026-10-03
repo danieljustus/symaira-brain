@@ -100,6 +100,38 @@ einen verarbeiteten TestFlight-Build und einen realen iPhone-Test; #790 benötig
 eine tatsächliche Darwin-Prüfung auf einem externen Volume. Bis zum realen
 Nachweis bleiben diese Kriterien offen. Codearbeiten laufen unabhängig weiter.
 
+## E-007: Gemeinsam geprüfte Credential-Inkremente zusammen integrieren
+
+Die native Secret-Reference-Auflösung und der korrigierte Hermes-/JWT-Dateipfad
+werden gemeinsam im bestehenden PR #804 veröffentlicht. Beide liegen in Usage,
+benutzen dieselben begrenzten Read-only-Verträge und haben vollständige getrennte
+Reviews sowie einen frisch ausgeführten Eltern-Regressionsgate. Der normale
+Merge des veröffentlichten Elternstands erhält alle bisherigen Reviewbelege.
+
+Begründung: Zwei überlappende Credential-PRs würden zusätzliche Zwischenstände
+mit eigener Plattformabnahme erzeugen. Ein gemeinsamer unveränderlicher Kandidat
+mit beiden Verträgen und frischer nativer Drei-OS-CI macht die tatsächliche
+Integration prüfbar. Der ursprüngliche Shrink/Regrowth-Fehler bleibt erhalten;
+andere Dateifamilien und das Gesamtissue #768 bleiben getrennte Restarbeit.
+
+## E-008: Activity nach erfüllten eigenen Annahmekriterien integrieren
+
+PR #800 wurde regulär mit erwartetem Head `635d98af` per Squash integriert;
+tatsächlicher main-Commit ist `31de72294521701fc4b1a0bce39f03cc34d72e7e`.
+Die vollständige Haupt-CI `37143614255`, einschließlich der erforderlichen
+Checks und tatsächlicher Linux/macOS/Windows-Migrationsprüfungen, war erfolgreich.
+Reviews und Review-Threads enthielten keine offenen Auflagen. Die gelöschte
+Activity-Fallback-Route und ACT-CLI-001 bis -003 erfüllen #767; GitHub hat das
+Issue mit Grund `completed` geschlossen, anschließend unabhängig abgefragt.
+
+Begründung: Der betroffene Vertrag hat eigene erfüllte Annahmegates. Der
+separate Browser-Profil-Job auf macOS war noch queued; Browse-Quellen und sein
+Manifest änderten sich in diesem PR nicht. Dieser unabhängige Job ist kein
+Activity-Annahmekriterium. Es gab keinen Admin-Bypass, keine umbenannten Checks
+und keine gelockerten Assertions. #761 bleibt für seine Store-/Import-Verträge
+offen. Die übrigen Kandidaten werden normal auf den tatsächlichen neuen main
+integriert und benötigen aktuelle Prüfungen ihrer jeweiligen Kombination.
+
 ## Pflege
 
 Neue materielle Entscheidungen erhalten eine eigene Kennung mit betroffenen
