@@ -10,6 +10,7 @@ if [ "${OS:-}" = Windows_NT ]; then
   go_binary="$(cygpath -m "$go_binary")"
 fi
 report="${1:?usage: scripts/skills-render-drift/run.sh OUTPUT_JSON}"
+python3 -m unittest discover -s scripts -p test_skills_render_contract.py -v
 ./scripts/run-go-oracle.sh "$oracle_ref" build -o "$go_binary" ./cmd/symbrain
 SYMBRAIN_SKILLS_STATUS_GO_ORACLE="$go_binary" \
 SYMBRAIN_SKILLS_STATUS_REQUIRE_ORACLE=1 \
@@ -36,7 +37,8 @@ data['candidate_source_sha256'] = {name: hashlib.sha256(Path(name).read_bytes())
     'rust/symbrain-skills/src/install/status_compare.rs', 'rust/symbrain-skills/src/install/render_status.rs',
     'rust/symbrain-skills/src/install/drift.rs',
     'rust/symbrain-cli/tests/skills_render_drift.rs', 'rust/symbrain-skills/tests/render_drift_status.rs',
-    'scripts/skills-render-drift/run.sh')}
+    'scripts/skills-render-drift/run.sh', 'scripts/skills_render_contract.py',
+    'scripts/rust-differential.py', 'scripts/test_skills_render_contract.py')}
 data['intentional_extensions'] = ['render_status', 'render_drift', 'render_error', 'verified symlink presentation mode: linked']
 data['comparison'] = 'actual process success, empty stderr, full existing report equality after removing only the explicit #621 extensions'
 path.write_text(json.dumps(data, indent=2) + '\n')

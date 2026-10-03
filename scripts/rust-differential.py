@@ -26,6 +26,7 @@ from typing import Callable
 
 from external_env import ensure_external_environment
 from harness_health_contract import HEALTH_DEVIATIONS, legacy_health_view
+from skills_render_contract import RENDER_DEVIATIONS, legacy_render_view
 if os.name == "posix":
     import pty
 RELEASE_BASE_URL = ""
@@ -3271,6 +3272,13 @@ def main() -> int:
                         failures.append(f"{case.name}: HAR-007 health contract failed: {err}")
                         continue
                     print(f"ACCEPTED HAR-007 {case.name} (validated versioned health contract)")
+                if case.name in RENDER_DEVIATIONS:
+                    try:
+                        rust_stdout = legacy_render_view(case.name, go_stdout, rust_stdout, rust_root)
+                    except (AssertionError, ValueError, TypeError, KeyError, OSError) as err:
+                        failures.append(f"{case.name}: SKL-007 render contract failed: {err}")
+                        continue
+                    print(f"ACCEPTED SKL-007 {case.name} (validated render drift contract)")
                 observed = (rust_result.returncode, rust_stdout, rust_stderr)
                 expected = (go_result.returncode, go_stdout, go_stderr)
                 if observed != expected:
