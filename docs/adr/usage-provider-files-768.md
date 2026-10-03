@@ -67,3 +67,10 @@ reference gate on the same source revision. Native macOS and Windows receipts
 remain required; Linux alone does not establish their contracts. Other #768
 file families, host Keychain, numeric JWT overflow and configuration gates remain
 open.
+
+The first full CLI replay found a pre-existing help-byte mismatch on all 85
+invalid-flag routes. The native help text described a narrowly proven migration
+subset while frozen Go used the generic CLI-file wording. Restore Go's exact
+help bytes and keep migration status in the contract ledger/ADRs. The original
+151-case observation (66 passes, 85 help mismatches) is retained in
+`migration/evidence/usage-provider-files-768/initial-help-byte-mismatch.json`.

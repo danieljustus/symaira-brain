@@ -5,7 +5,7 @@ use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
 use symbrain_usage::{Report, Service, UsageMeter};
 
-const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credential resolution: an explicit env\nvar per provider, whose value may be a symvault://<path> URI resolved\nthrough the secret store; Claude, Codex, and Copilot accept narrowly proven\ndefault credential-file shapes read-only when the env var is unset. See each provider's\ndoc comment in internal/usage for the macOS-Keychain / local-database\nstrategies not ported from the Swift original.\n";
+const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credential resolution: an explicit env\nvar per provider, whose value may be a symvault://<path> URI resolved\nthrough the secret store; providers with a native CLI credential file\nfall back to it read-only when the env var is unset. See each provider's\ndoc comment in internal/usage for the macOS-Keychain / local-database\nstrategies not ported from the Swift original.\n";
 
 /// Reports whether `symbrain usage` has to stay on the Go implementation.
 ///
@@ -14,10 +14,9 @@ const HELP: &str = "symbrain usage — AI subscription/token usage per provider\
 /// together. Native sources include direct credentials; the canonical default
 /// Copilot, Kimi CLI, Codex, and Claude files; typed Hermes/Nous files; Moonshot's supported `ai`
 /// and `cn` regions; constrained public HTTPS base overrides; and a canonical
-/// `OpenCode` workspace id. File sources with case aliases, duplicate or
-/// malformed fields, ambiguous provider selection, unsupported metadata,
-/// literal non-Hermes file references, non-ASCII Kimi device ids, or other unproven shapes stay
-/// on Go. `CODEX_HOME`, `HERMES_HOME`, and `KIMI_CODE_HOME` use the same per-file
+/// `OpenCode` workspace id. Claude/Codex typed or generic file decoding and literal file tokens are native;
+/// distinct nondefault Claude tokens, unproven Copilot/Kimi shapes and
+/// non-ASCII Kimi device ids stay on Go. `CODEX_HOME`, `HERMES_HOME`, and `KIMI_CODE_HOME` use the same per-file
 /// eligibility checks as their default paths. Hermes malformed/expired files are
 /// native; numeric JWT expiry overflow retains Go. Differing Windows home roots,
 /// unsupported URL/workspace forms and Claude Keychain-only credentials also
