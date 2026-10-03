@@ -84,7 +84,7 @@ Clippy, workspace/included-file fmt, actionlint and diff checks pass.
 The original public constructor probe was also rebuilt against this exact
 production rlib. All twelve original reviewer owner cases were replayed with
 exact original input bytes and actual frozen-Go constructors: every current
-report/auth/header observation matches Go's lexical owner, every eligibility
+constructor configuration/auth/header observation matches Go's lexical owner, every eligibility
 probe stays native and all source/link state remains unchanged. The seven
 ordinary and five literal results remain separate from the stronger sixteen
 full-report/request/device cases. The original failing receipts are unchanged.
