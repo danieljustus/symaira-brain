@@ -1,0 +1,64 @@
+{
+  "code_head": "388e05d68f8052c6a1f76d19324e69d8c135076f",
+  "go_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "results": [
+    {
+      "args_hex": [
+        "637265617465",
+        "776f726b2fe282"
+      ],
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=616464 776f726b2fe282 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fe282 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field_count\":1,\"has_value\":true,\"path\":\"work/\ufffd\"},\"submitted\":{\"path\":\"work/\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=616464 776f726b2fe282 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fe282 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": false
+    },
+    {
+      "args_hex": [
+        "736574",
+        "776f726b2fe2822e70617373776f7264"
+      ],
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field\":\"password\",\"field_count\":1,\"has_value\":true,\"path\":\"work/\\ufffd\\ufffd\",\"value_matches\":true},\"submitted\":{\"field\":\"password\",\"path\":\"work/\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=736574 776f726b2fe2822e70617373776f7264 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fe282 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"field\":\"password\",\"field_count\":1,\"has_value\":true,\"path\":\"work/\ufffd\",\"value_matches\":true},\"submitted\":{\"field\":\"password\",\"path\":\"work/\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=736574 776f726b2fe2822e70617373776f7264 2d2d737464696e2d76616c7565;stdinhex=666978747572652d7365637265740a\nargshex=676574 776f726b2fe282 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": false
+    },
+    {
+      "args_hex": [
+        "64656c657465",
+        "776f726b2fe282",
+        "2d2d796573"
+      ],
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"absent\":true,\"path\":\"work/\\ufffd\\ufffd\"},\"submitted\":{\"path\":\"work/\\ufffd\\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=64656c657465 776f726b2fe282 2d2d796573;stdinhex=\nargshex=676574 776f726b2fe282 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"confirmed\":{\"absent\":true,\"path\":\"work/\ufffd\"},\"submitted\":{\"path\":\"work/\ufffd\"}}\n",
+        "stderr": "",
+        "calls": "argshex=64656c657465 776f726b2fe282 2d2d796573;stdinhex=\nargshex=676574 776f726b2fe282 2d2d6f7574707574 6a736f6e;stdinhex=\n"
+      },
+      "matched": false
+    }
+  ]
+}

@@ -17,7 +17,7 @@ mod doctor_fix;
 #[path = "doctor_links.rs"]
 mod doctor_links;
 #[path = "doctor_process.rs"]
-mod doctor_process;
+pub(crate) mod doctor_process;
 #[path = "doctor_types.rs"]
 mod doctor_types;
 
