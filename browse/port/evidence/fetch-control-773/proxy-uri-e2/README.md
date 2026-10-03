@@ -39,7 +39,10 @@ native CI failure; this lane has not executed native Windows proof locally.
 - Current release builds bind Go SHA `221b047aa18e2c4eb421dd970de18e6e82372059c492f6bd52ac337c95c5a5f6`
   and Rust SHA `1900720a4c0b518f80747f7cfc8202b96b1778124072a6eafc138d6c67c4042f`.
   The complete coordinated quiet30×4 comparison passes unchanged gates:
-  Fetch p95 -59.04%; binary-size reduction41.59%. All240 raw samples remain.
+  Fetch p95 -59.04%; comparator size reduction41.59% against its existing recorded
+  Darwin-arm64 release baseline. Current Linux binary sizes are10,707,264 native
+  and26,611,127 Go bytes; that fresh build is a different size reference.
+  All240 raw samples remain.
   The prior loaded failure is retained in the inherited1f82 evidence. A new
   metadata bootstrap failure before any sample (missing pinned SDK PATH in the
   outer wrapper) is also preserved, not presented as a successful measurement.

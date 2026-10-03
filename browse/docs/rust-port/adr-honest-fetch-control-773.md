@@ -215,7 +215,10 @@ clean source replay and remains subject to actual Windows CI; a Linux replay
 and static comparison with the accepted Guard runner are no Windows runtime proof.
 
 Clean source e2's coordinated full30×4 release measurement passes the unchanged
-value gates (Fetch p95 -59.04%, binary-size reduction41.59%). A separate owned
+value gates (Fetch p95 -59.04%, comparator size reduction41.59% against its
+existing recorded Darwin-arm64 release baseline). The current Linux executables
+are10,707,264 bytes native and26,611,127 bytes Go; the unchanged comparator's
+size reference is explicitly different from that fresh Go build. A separate owned
 local HTTP/HTTPS proxy probe preserves all120 exact Go/native response pairs
 and every observed response interval. For30 sequential calls, ordinary proxy
 routes use one connection in both clients; the normalization-sensitive explicit
