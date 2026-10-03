@@ -136,6 +136,9 @@ fn normalize_flags(args: &[OsString]) -> Vec<OsString> {
 // Keep table rendering testable without making the public usage report depend
 // on CLI concerns.
 #[cfg(test)]
+#[path = "usage_fetch_output_tests.rs"]
+mod fetch_output_tests;
+#[cfg(test)]
 mod tests {
     use super::*;
 
