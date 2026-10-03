@@ -1,5 +1,6 @@
 """Actual-process default/legacy path choices under disposable XDG/HOME roots."""
 import base64
+from contextlib import closing
 import json
 from pathlib import Path
 import sqlite3
@@ -31,7 +32,7 @@ def run(go, rust, output, snapshot, isolated_env):
             for label in choices:
                 path = directories[label] / "default.db"
                 assert output(go, ["list", "--db", str(path)], root, env)["exit"] == 0
-                with sqlite3.connect(path) as database:
+                with closing(sqlite3.connect(path)) as database, database:
                     database.execute(
                         "INSERT INTO memories(id,content,scope,kind,created_at,updated_at,metadata,embedding) "
                         "VALUES(?,?,'global','reference','2000-01-01 00:00:00 +0000 UTC',"
