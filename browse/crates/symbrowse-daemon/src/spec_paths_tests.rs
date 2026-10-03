@@ -18,7 +18,7 @@ fn cache_environment_uses_go_platform_fallbacks_in_isolated_children() {
     let temp = std::env::temp_dir();
     let home = temp.join("cache-path-home");
     let cache = temp.join("cache-path-xdg");
-    let fallback = temp.join("symbrowse").join("sessions");
+    let fallback = go_temp_dir().join("symbrowse").join("sessions");
     let home_cache = if cfg!(target_os = "macos") {
         home.join("Library/Caches/symbrowse/sessions")
     } else {
