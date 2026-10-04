@@ -190,9 +190,7 @@ fn missing_shipped_columns_are_added_to_an_existing_database() {
     {
         let connection = rusqlite::Connection::open(&path).expect("open");
         connection
-            .execute_batch(
-                include_str!("../src/migration/sql/001_init.sql"),
-            )
+            .execute_batch(include_str!("../src/migration/sql/001_init.sql"))
             .expect("legacy schema");
     }
     let _store = Store::open(&path).expect("store opens a legacy database");
