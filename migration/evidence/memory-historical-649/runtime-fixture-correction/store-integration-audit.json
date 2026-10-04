@@ -1,0 +1,10 @@
+{
+  "original_source": "ab561d57e0fb110e44b28535a99e237cac4a88f1",
+  "original_failure": "migration/evidence/memory-historical-649/runtime-ab561d5-original-failure",
+  "test": "missing_shipped_columns_are_added_to_an_existing_database",
+  "fixture": "literal frozen-Go-owned 001_init.sql",
+  "fixture_sha256": "45d33bff4a5292a1a803655a07de8a79bec7512c51e7adc5c1ee088dffa0400f",
+  "test_assertions": "All five Memory and three Rule column assertions retained unchanged.",
+  "production_changes": false,
+  "other_test_DDL_callers": []
+}

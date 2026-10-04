@@ -97,3 +97,9 @@ No other numeric caller requires a semantic correction. Preserve that audit
 with the fixture source checkpoint, then rerun the complete allocated runtime
 driver. Passing author execution still requires different-author review and
 native three-OS acceptance before publication.
+
+## Historical integration fixture uses the shipped base schema
+
+The source-bound `ab561d5` follow-up executed 391 passing tests and one failing test in 38 summaries. All 65 Memory unit tests, including the 28 historical migration cases and seven unchanged WAL cases, passed. The older `missing_shipped_columns_are_added_to_an_existing_database` integration fixture constructed its own two-table schema: it added empty-string/JSON defaults where frozen Go migration 001 has no defaults and allowed a nullable `rules.created_at`. The new exact-default preflight correctly rejected `memories.scope` before any migration changes. A fresh reconstruction of that exact SQL, executed by the archived original native CLI, exited 1 with the same diagnostic and preserved the complete database snapshot. Original Rust-test temporary database bytes are not claimed as recovered.
+
+The fixture now includes the literal owned `001_init.sql`, whose bytes are checked against frozen Go. It still requires all five historical Memory columns and all three Rule columns to be added by public `Store::open`; none of those assertions is weakened. The production default policy, complete migration catalog, WAL initialization and frozen Go remain unchanged. The only handwritten Store integration DDL caller was inspected. Full runtime validation and independent/native platform approval remain required.
