@@ -48,7 +48,28 @@ pub(super) fn run_owned_command(
     timeout: Duration,
     ownership: Ownership,
 ) -> Result<OwnedOutput, ProbeError> {
-    let mut command = Command::new(program);
+    // Discovery belongs only to the explicit startup provider owner. The
+    // supervisor executable and standalone/public runner keep their contract.
+    let resolved = if matches!(ownership, Ownership::Provider(_)) {
+        Some(
+            super::startup_discovery::executable(program)
+                .ok_or(ProbeError::Missing(MissingReason::Unavailable))?,
+        )
+    } else {
+        None
+    };
+    #[cfg(windows)]
+    if let Some(path) = &resolved
+        && let Some(error) = super::startup_discovery::batch_error(program, path)
+    {
+        return Err(ProbeError::Failed(error));
+    }
+    let mut command = Command::new(resolved.as_deref().unwrap_or(program));
+    #[cfg(unix)]
+    {
+        use std::os::unix::process::CommandExt;
+        command.arg0(program);
+    }
     command
         .args(args)
         .stdin(

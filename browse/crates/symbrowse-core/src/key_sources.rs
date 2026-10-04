@@ -18,6 +18,7 @@ use crate::key_resolver::{
 
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(15);
 mod command;
+mod startup_discovery;
 mod startup_owner;
 #[cfg(test)]
 use command::INJECT_ETXTBSY;

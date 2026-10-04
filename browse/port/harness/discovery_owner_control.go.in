@@ -1,0 +1,32 @@
+// Real owner-control child: perform one forbidden local lookup, then delegate.
+package main
+
+import (
+	"io"
+	"os"
+	"os/exec"
+	"path/filepath"
+)
+
+func main() {
+	local := filepath.Join(os.Getenv("DISCOVERY_OWNED_ROOT"), "symvault")
+	if os.PathSeparator == '\\' {
+		local += ".exe"
+	}
+	extra := exec.Command(local, "get", "symbrowse/encryption-key")
+	extra.Stdout = io.Discard
+	extra.Stderr = os.Stderr
+	if err := extra.Run(); err != nil {
+		panic(err)
+	}
+	child := exec.Command(os.Getenv("DISCOVERY_ACTUAL_RUST"), os.Args[1:]...)
+	child.Stdin = os.Stdin
+	child.Stdout = os.Stdout
+	child.Stderr = os.Stderr
+	if err := child.Run(); err != nil {
+		if exit, ok := err.(*exec.ExitError); ok {
+			os.Exit(exit.ExitCode())
+		}
+		panic(err)
+	}
+}
