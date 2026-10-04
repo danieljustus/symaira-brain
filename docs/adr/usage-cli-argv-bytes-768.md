@@ -106,3 +106,9 @@ losslessly archived and decompressed/hash/length checked before target release.
 The earlier failed shared-target parent/candidate were both byte-identical to
 the abf CLI in the original36-file archive. No failure or attempt was discarded.
 Full independent review and native exact-head three-OS CI remain pending.
+
+## Independent full review of source8803847
+
+The complete credential/provider/HTTP/harness/CLI change has independent bounded approval on publicationeea73b7, normally integrated with maine3dbda6c. All four actual frozen-Go gates,355 ordinary tests, strict checks,96 additional invalid argument pairs and64 unsupported-admission triples were replayed. The original owner inputs,32 constructor surfaces and22 accepted-parent argv inputs pass their stated bounds. Full report, raw receipts, original mistaken reviewer probes and reproducible archive verification are retained in `migration/evidence/usage-argv-768/independent-880`.
+
+The64 unsupported-admission triples explicitly retain the inherited pre-parser fallback behavior: with the Go executor absent,28 of32 cases emit its startup diagnostic instead of Go FlagSet output. This is documented remaining work, not parity acceptance. Next, classify arguments once before credential admission so invalid/help inputs cannot require an unrelated provider credential. Distinct account selection and transport errors retain their bounds. Native Linux/macOS/Windows and all protected checks on the published head remain mandatory; full issue768 is open.
