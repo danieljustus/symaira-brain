@@ -212,6 +212,19 @@ jobs:
       # executable. `rust-check` already covers this test, but a named gate
       # prevents stdout/lifecycle regressions from disappearing inside a
       # workspace-wide test log.
+      - name: Native skills render drift and frozen Go baseline
+        shell: bash
+        run: scripts/skills-render-drift/run.sh "$RUNNER_TEMP/skills-render-drift.json"
+
+      - name: Upload native skills render drift evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: skills-render-drift-${{ runner.os }}
+          path: ${{ runner.temp }}/skills-render-drift.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Rust MCP stdio and lifecycle gate
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
 
@@ -461,6 +474,19 @@ jobs:
 
       - name: Rust quality and Go parity gates on macOS
         run: make rust-check parity-smoke
+
+      - name: Native skills render drift and frozen Go baseline
+        shell: bash
+        run: scripts/skills-render-drift/run.sh "$RUNNER_TEMP/skills-render-drift.json"
+
+      - name: Upload native skills render drift evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: skills-render-drift-${{ runner.os }}
+          path: ${{ runner.temp }}/skills-render-drift.json
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Rust MCP stdio and lifecycle gate on macOS
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
@@ -716,6 +742,19 @@ jobs:
           SYMBRAIN_VERSION=dev cargo build --workspace --locked
           ./guard/scripts/guard-scan-oracle/run.sh parity target/debug/symbrain.exe
           python3 scripts/rust-differential.py "$RUNNER_TEMP/symbrain-go.exe" target/debug/symbrain.exe
+
+      - name: Native skills render drift and frozen Go baseline
+        shell: bash
+        run: scripts/skills-render-drift/run.sh "$RUNNER_TEMP/skills-render-drift.json"
+
+      - name: Upload native skills render drift evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: skills-render-drift-${{ runner.os }}
+          path: ${{ runner.temp }}/skills-render-drift.json
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Fetch the immutable native Skills comparison parent
         shell: bash
