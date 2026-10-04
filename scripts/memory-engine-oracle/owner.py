@@ -31,6 +31,10 @@ def physical(checkout, tracked, role):
             for name in dirs + files:
                 path = Path(parent) / name
                 relative = path.relative_to(checkout).as_posix()
+                if relative == ".git":
+                    # Linked worktree metadata selects the independently
+                    # checked Git identity; it is never staged as source.
+                    continue
                 if path.is_symlink():
                     raise ValueError("unbound compilation symlink: " + relative)
                 if path.is_file() and relative not in expected:

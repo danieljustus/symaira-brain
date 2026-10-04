@@ -17,25 +17,26 @@
   ],
   "python_ast_files": 8,
   "python_lines": {
+    "owner.py": 94,
     "binding.py": 174,
-    "build.py": 84,
-    "dependencies.py": 150,
-    "owner.py": 90,
     "reader.py": 41,
     "replay.py": 147,
     "test_binding.py": 63,
-    "test_ownership.py": 189
+    "dependencies.py": 150,
+    "build.py": 84,
+    "test_ownership.py": 197
   },
   "actual_dependency_git_blobs": 456,
   "actual_index_database_files": 251,
   "sdk_compiler_product_http_port_executions": 0,
   "target_use": false,
   "worktree_maximum_bytes": 15728640,
-  "portable_tests": 19,
+  "portable_tests": 20,
   "pure_test_attempts": [
     18,
     19,
-    19
+    19,
+    20
   ],
   "actual_sdk_compiler_product_executions": 0
 }

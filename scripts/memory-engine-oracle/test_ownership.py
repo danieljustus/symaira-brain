@@ -37,6 +37,14 @@ class Ownership(unittest.TestCase):
             path.unlink()
         owner.physical(self.root, selected, "rust")
 
+    def test_linked_git_metadata_is_not_a_compilation_source(self):
+        self.file(".git", b"gitdir: owned-git-metadata\n")
+        self.file("owned.go", b"package owned\n")
+        owner.physical(self.root, {"owned.go": "owned"}, "go")
+        self.file("unexpected.go", b"package foreign\n")
+        with self.assertRaisesRegex(ValueError, "unexpected physical"):
+            owner.physical(self.root, {"owned.go": "owned"}, "go")
+
     def test_current_and_ancestor_cargo_config_are_rejected(self):
         checkout = self.root / "checkout"
         checkout.mkdir()
