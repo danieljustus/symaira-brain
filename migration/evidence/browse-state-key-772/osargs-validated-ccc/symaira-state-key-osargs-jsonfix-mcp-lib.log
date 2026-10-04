@@ -1,0 +1,23 @@
+    Finished `test` profile [unoptimized] target(s) in 0.12s
+     Running unittests src/lib.rs (/workspace/symaira-daemon772-state-key-osargs/target/debug/deps/symbrowse_mcp-9b1edc6fc4342d44)
+
+running 16 tests
+test proxy::tests::aliases_and_budget_commands_map_to_daemon_frames ... ok
+test proxy::tests::daemon_frame_limit_applies_while_reading ... ok
+test proxy::tests::session_validation_matches_daemon_contract ... ok
+test proxy::tests::transport_metadata_redacts_endpoint_and_error_text ... ok
+test proxy::tests::runtime_proxy_sends_daemon_frame_and_preserves_warnings ... ok
+test proxy::tests::wait_milliseconds_use_go_duration_nanoseconds ... ok
+test registry::tests::fetch_batch_rejects_non_string_urls_like_go ... ok
+test registry::tests::aliases_resolve_without_changing_profile_membership ... ok
+test registry::tests::generated_registry_has_the_pinned_surface ... ok
+test transport::tests::eof_and_notifications_are_silent ... ok
+test transport::tests::oversized_header_line_is_rejected ... ok
+test transport::tests::cumulative_header_size_is_bounded ... ok
+test transport::tests::ping_and_go_parse_errors_are_compatible ... ok
+test transport::tests::oversized_request_line_is_rejected_without_allocating_the_full_input ... ok
+test proxy::tests::terminate_child_reaps_within_bounded_cleanup_window ... ok
+test proxy::tests::failed_status_preserves_error_without_stop_or_autostart ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.25s
+
