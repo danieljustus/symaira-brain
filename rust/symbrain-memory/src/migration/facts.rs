@@ -1,6 +1,6 @@
 //! Cached facts from executing the exact owned migration SQL in an empty store.
 
-use super::{catalog, sql};
+use super::{catalog, defaults, sql};
 use crate::StoreError;
 use rusqlite::Connection;
 use std::{
@@ -178,16 +178,6 @@ fn unique_keys(conn: &Connection, table: &str) -> Result<BTreeSet<UniqueKey>, St
     Ok(result)
 }
 
-fn compatible_default(actual: &Option<String>, expected: &Option<String>) -> bool {
-    if actual == expected {
-        return true;
-    }
-    matches!(
-        (actual.as_deref(), expected.as_deref()),
-        (Some("CURRENT_TIMESTAMP"), Some("datetime('now')"))
-    )
-}
-
 fn without_rowid(conn: &Connection, table: &str) -> Result<bool, StoreError> {
     Ok(conn.query_row(
         "SELECT wr FROM pragma_table_list WHERE schema='main' AND name=?",
@@ -197,6 +187,22 @@ fn without_rowid(conn: &Connection, table: &str) -> Result<bool, StoreError> {
 }
 
 impl Facts {
+    /// Reject incompatible declared defaults before executing row repairs or
+    /// inserting any ledger entries. Missing columns remain additive repairs.
+    pub fn verify_existing_defaults(&self, conn: &Connection) -> Result<(), StoreError> {
+        for (table, expected) in &self.columns {
+            if sql::object(conn, table)?.is_none() {
+                continue;
+            }
+            for actual in columns(conn, table)? {
+                if let Some(expected) = expected.iter().find(|entry| entry.name == actual.name) {
+                    defaults::verify(table, &actual, expected)?;
+                }
+            }
+        }
+        Ok(())
+    }
+
     pub fn verify_column(
         &self,
         conn: &Connection,
@@ -213,11 +219,10 @@ impl Facts {
             .find(|entry| entry.name == column)
             .ok_or_else(|| StoreError::Invalid(format!("missing owned column {table}.{column}")))?;
         let additive = self.added.contains(&(table.to_owned(), column.to_owned()));
+        defaults::verify(table, &actual, expected)?;
         if !actual.kind.eq_ignore_ascii_case(&expected.kind)
             || actual.pk != expected.pk
-            || (additive
-                && (actual.not_null != expected.not_null
-                    || !compatible_default(&actual.default, &expected.default)))
+            || (additive && actual.not_null != expected.not_null)
         {
             return Err(StoreError::Invalid(format!(
                 "incompatible owned column {table}.{column}"

@@ -21,6 +21,7 @@ pub(super) fn apply(conn: &Connection) -> Result<(), StoreError> {
     // Validate preexisting FTS/trigger identities before even creating missing
     // current schema objects; unknown objects are never selected for dropping.
     fts::recognize(conn)?;
+    facts::owned()?.verify_existing_defaults(conn)?;
     conn.execute_batch(SCHEMA)?;
     for (table, column, definition) in COLUMN_PARITY {
         if !sql::column_present(conn, table, column)? {

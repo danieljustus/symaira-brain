@@ -82,6 +82,14 @@ jobs:
           set -euo pipefail
           umask 022
           bash scripts/memory-historical-oracle/run.sh --output "$REPORT_DIR" 2>&1 | tee "$HISTORICAL_LOG"
+      - name: Bind owned original and additive default contracts
+        env:
+          REPORT_DIR: ${{ runner.temp }}/memory-cli-owned-defaults
+          DEFAULT_LOG: ${{ runner.temp }}/memory-cli-owned-defaults.log
+        run: |
+          set -euo pipefail
+          umask 022
+          python3 scripts/memory-historical-oracle/defaults_inventory.py --output "$REPORT_DIR" 2>&1 | tee "$DEFAULT_LOG"
       - name: Verify governed direct writes and delete state
         env:
           REPORT_DIR: ${{ runner.temp }}/memory-cli-writes

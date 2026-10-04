@@ -40,6 +40,15 @@ The private Rust tests additionally cover false-marker eligibility, nullable
 data preservation, ignored/aborted callbacks, atomic late-index rollback,
 unknown FTS/trigger owners, missing constraints and file permissions.
 
+The default correction verifies every owned original/additive declaration before
+row repairs or new markers, and again at final verification. Public-opener tests
+reject missing/wrong omission defaults with full rollback and preserve the exact
+known old query-log default through reopen and real writes. Run the additional
+source-bound SQL census with `defaults_inventory.py --output NEW_DIRECTORY`.
+It compares all 184 owned columns/62 defaults against the 37 frozen resources
+and known native base, and repeats the original three owned oplog SQL invariants.
+These Python SQLite controls are not compiled Go/Rust runtime acceptance.
+
 The required allocation-stage commands are:
 
 ```sh

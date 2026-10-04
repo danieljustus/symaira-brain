@@ -2,6 +2,7 @@
 
 mod backfill;
 mod catalog;
+mod defaults;
 mod facts;
 mod fts;
 mod initial;
@@ -14,6 +15,8 @@ mod sql;
 pub(crate) use permissions::secure_files;
 #[cfg(test)]
 mod backfill_tests;
+#[cfg(test)]
+mod defaults_tests;
 #[cfg(test)]
 mod fts_tests;
 #[cfg(test)]
