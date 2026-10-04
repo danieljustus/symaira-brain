@@ -1,0 +1,20 @@
+{
+  "kind": "exact-inherited-raw-log-whitespace-diagnostic-streams",
+  "originals_not_trimmed": true,
+  "files": [
+    {
+      "raw_name": "inherited-raw-log-whitespace.stdout",
+      "retained": "inherited-raw-log-whitespace.stdout.gz",
+      "bytes": 1503,
+      "sha256": "eb7490dacd0c8afd7f80e0457239e23cd8e7c6262022fe3f758a514ec696e1de",
+      "gzip_sha256": "62b31ac78b7ea2f8c33e873d6ba1531fd56bbc0a6cc55b6f57f3b17aaab1299c"
+    },
+    {
+      "raw_name": "inherited-raw-log-whitespace.stderr",
+      "retained": "inherited-raw-log-whitespace.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    }
+  ]
+}
