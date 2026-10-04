@@ -59,3 +59,10 @@ increase, native Windows claim or weakened source assertion is authorized here.
 Preparation uses only static Bash/Python/workflow checks; fresh actual output
 corpora and controls require a separately allocated target, followed by
 independent review and current-head native CI before merge.
+
+
+Root independently approves the bounded executable-path harness correction at c672 (2026-10-04). All9 nonfix stdout,4 repair stdout and27 public Writer cases pass with explicit relative executable inputs, after every child changes to its owned PROJECT. Three actual mutant groups reject6 intended changes while preserving21 equal observations. Four actual shell-prefix cases validate the target owner for unset, empty, relative paths containing spaces and absolute target inputs. All200 candidate and108 frozen-Go hashes per family are checked. Production bytes are identical to independently reviewed58fe50; its exact two executed Rust binaries are restored from verified archives and the frozen Go CLI is freshly built with1.26.7. This is actual process evidence, not a fresh Rust compilation or Windows/macOS claim. All original assertions/controls remain unchanged. Complete proofs: migration/evidence/doctor-owned-paths-806/independent-c672.
+
+The original relative target/debug/symbrain failure and complete Linux/Windows CI logs remain byte-exact. Root's initial evidence-prefix allowlist assumption rejected before any runtime work; the corrected complete source check and successful run are retained separately. The Windows source replay25s timeout remains a separate unresolved gate; its exact failed case/phase has not been established and no timeout was raised.
+
+The full workspace instrumented coverage at original publishedf944 succeeds with37645/46353 lines (81.21%) at the unchanged80% minimum. Exact216403-byte decoded provider log and current-source receipt are retained in migration/evidence/doctor-coverage-environment-765/success-f944. That historical success does not replace required new-head checks.
