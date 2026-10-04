@@ -68,6 +68,7 @@ jobs:
           set -euo pipefail
           python3 port/harness/test_run.py DaemonExitTests 2>&1 | tee "$RUNNER_TEMP/browse-daemon-harness.log"
           python3 port/harness/test_windows_pipe.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-pipe-controls.log"
+          python3 port/harness/test_registry_progress.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-registry-progress-tests.log"
           python3 port/harness/run.py --suite daemon 2>&1 | tee "$RUNNER_TEMP/browse-daemon-lifecycle.log"
           python3 port/harness/run.py --suite daemon-races --repeat 50 2>&1 | tee "$RUNNER_TEMP/browse-daemon-races.log"
 
@@ -136,11 +137,13 @@ jobs:
             ${{ runner.temp }}/browse-daemon-unit.log
             ${{ runner.temp }}/browse-daemon-harness.log
             ${{ runner.temp }}/browse-daemon-pipe-controls.log
+            ${{ runner.temp }}/browse-daemon-registry-progress-tests.log
             ${{ runner.temp }}/browse-daemon-lifecycle.log
             ${{ runner.temp }}/browse-daemon-races.log
             ${{ runner.temp }}/browse-daemon-process.json
             ${{ runner.temp }}/browse-daemon-registry.json
             ${{ runner.temp }}/browse-daemon-registry.raw.json
+            ${{ runner.temp }}/browse-daemon-registry.progress.jsonl
             ${{ runner.temp }}/browse-daemon-state-key.json
             ${{ runner.temp }}/browse-daemon-state-key.raw.json
             ${{ runner.temp }}/browse-daemon-state-key.log

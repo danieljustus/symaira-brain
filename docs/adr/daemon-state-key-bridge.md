@@ -261,3 +261,31 @@ gate rejects its incorrect fallback and missing provider query. This controls
 path identity rather than merely mirroring the new argument type. Fresh builds,
 full gates, independent review and all six native lanes remain required; source
 preparation during the shared compiler hold does not constitute runtime proof.
+
+### Record bounded Registry progress independently of parity
+
+The actual published c31 Windows amd64 and arm64 runs passed their process
+observations and were then cancelled during the Registry stage without a final
+Registry receipt. Their cause remains unproved. Original full logs and the
+actual seven-file ARM artifact ZIP remain under `windows-c31-cancelled`, with
+SHA receipts. Increasing the workflow timeout or skipping assertions would not
+identify the failing boundary and is not part of this change.
+
+A separate harness-only diagnostic journal records source/head and actual
+binary SHA bindings, exact public argv in base64, process begin/end, readiness,
+IPC frame begin/end, restart and autostart stages. Each bounded line reaches a
+separate progress JSONL before the next operation. Concurrent clients use a
+local lock and link completion records to distinct starting case identities.
+Stdout/stderr are preserved in the existing full parity report; diagnostic
+progress records lengths, SHA values and exit status without projecting fields
+or decoding raw streams. The original final assertions and all negative-control
+function bodies are mechanically moved unchanged into `registry_compare.py`;
+byte identity is recorded in the static receipt. The runner stays below400lines.
+
+The journal is limited to8192events and8192bytes per event, uses only owned output
+files and is uploaded by the existing always-running receipt step. An incomplete
+progress journal is not a passing Registry receipt. Existing subprocess/IPC
+and workflow time limits stay unchanged. Prepared portable tests exercise a
+real still-running child, raw output/error status, concurrent case links, raw
+argv and bounds. Full fresh Registry gates and native six-platform evidence
+remain required; this diagnostics change makes no Windows runtime-fix claim.

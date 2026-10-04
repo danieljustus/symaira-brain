@@ -9,16 +9,20 @@ COMMANDS = [("session", "list"), ("session", "info"), ("daemon", "status"), ("st
 FORMATS = [[], ["--json"], ["--output", "yaml"]]
 
 
-def execute(binary, root, env, arguments):
+def execute(binary, root, env, arguments, progress=None):
+    case = progress.begin_cli(binary, arguments) if progress is not None else None
     argv = arguments if os.name == "posix" else [value.decode() for value in arguments]
     result = subprocess.run([str(binary), *argv], cwd=root, env=env,
                             capture_output=True, timeout=15)
+    if progress is not None: progress.end_cli(case, result)
     return {"arguments_base64": [base64.b64encode(value).decode() for value in arguments],
             "exit": result.returncode, "stdout_base64": base64.b64encode(result.stdout).decode(),
             "stderr_base64": base64.b64encode(result.stderr).decode()}
 
 
-def observe(binary, root, env):
+def observe(binary, root, env, progress=None):
+    def run(arguments):
+        return execute(binary, root, env, arguments, progress)
     before = sorted(p.relative_to(root).as_posix() for p in root.rglob("*"))
     invalid = [b"bad\xffsession", b"bad\xe2\x82session", b"bad\xc0\xafsession"] if os.name == "posix" else []
     replacement = "bad\ufffdsession".encode()
@@ -29,7 +33,7 @@ def observe(binary, root, env):
         group, verb = [value.encode() for value in command]
         for name in names:
             for output in FORMATS:
-                records.append(execute(binary, root, env,
+                records.append(run(
                     [group, verb, b"--session", name, *[value.encode() for value in output]]))
         for name in [*invalid, replacement]:
             for output in FORMATS:
@@ -41,7 +45,7 @@ def observe(binary, root, env):
                     [*flags, group, verb, b"--session", name],
                     [group, b"--session", name, verb, *flags],
                 ):
-                    records.append(execute(binary, root, env, arguments))
+                    records.append(run(arguments))
     # Append the exact12 independently observed JSON/invalid-output cases;
     # keep the existing360/144-case prefix unchanged.
     for command in COMMANDS:
@@ -52,7 +56,7 @@ def observe(binary, root, env):
             [*selected, b"--json", b"--output", b"invalid"],
             [*selected, b"--output", b"invalid", b"--json"],
         ):
-            records.append(execute(binary, root, env, arguments))
+            records.append(run(arguments))
     # Meaningful root-flag controls: inline forms, false overrides and later
     # output overrides must select the final format before its validation.
     for command in COMMANDS:
@@ -65,15 +69,15 @@ def observe(binary, root, env):
             [b"--output=invalid", *selected, b"--output=text"],
             [b"--json", *selected, b"--json=false", b"--output=yaml"],
         ):
-            records.append(execute(binary, root, env, arguments))
-    format_errors = [execute(binary, root, env,
+            records.append(run(arguments))
+    format_errors = [run(
         [*[value.encode() for value in command], b"--session", b"bad session",
          b"--output", b"invalid", b"--json=false"]) for command in COMMANDS]
     help_records = []
     for arguments in ([b"session", b"--help"], [b"session"], [b"session", b"list", b"--help"],
                       [b"session", b"info", b"--help"], [b"help", b"session", b"list"],
                       [b"help", b"session", b"info"]):
-        help_records.append(execute(binary, root, env, arguments))
+        help_records.append(run(arguments))
     assert sorted(p.relative_to(root).as_posix() for p in root.rglob("*")) == before, "CLI edges created daemon/profile/state files"
     return {"invalid": records, "format_errors": format_errors, "help": help_records, "no_files_created": True,
             "raw_unix_bytes": os.name == "posix"}

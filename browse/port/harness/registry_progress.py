@@ -1,0 +1,53 @@
+"""Bounded diagnostic journal; never substitutes for final parity assertions."""
+from __future__ import annotations
+import base64
+import hashlib
+import json
+import os
+from pathlib import Path
+import threading
+import time
+
+MAX_EVENTS = 8192
+MAX_EVENT_BYTES = 8192
+
+
+class Progress:
+    def __init__(self, path: Path, binding: dict):
+        self.path, self.sequence, self.lock = path, 0, threading.Lock()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"")
+        self.event("binding", **binding)
+
+    def event(self, stage: str, **fields) -> int:
+        with self.lock:
+            if self.sequence >= MAX_EVENTS:
+                raise RuntimeError("registry progress event bound exceeded")
+            sequence = self.sequence + 1
+            encoded = (json.dumps({"sequence": sequence, "monotonic": time.monotonic(),
+                                   "stage": stage, **fields}, sort_keys=True) + "\n").encode()
+            if len(encoded) > MAX_EVENT_BYTES:
+                raise RuntimeError("registry progress record bound exceeded")
+            # Each complete bounded line reaches its file before any next
+            # subprocess/readiness/frame operation; cancellation leaves it.
+            with self.path.open("ab") as output:
+                output.write(encoded)
+            self.sequence = sequence
+            return sequence
+
+    def begin_cli(self, binary, arguments) -> int:
+        return self.event("cli.begin", binary=str(binary), arguments_filesystem_base64=[
+            base64.b64encode(value if isinstance(value, bytes) else os.fsencode(value)).decode()
+            for value in arguments])
+
+    def end_cli(self, case: int, result) -> None:
+        self.event("cli.end", case=case, exit=result.returncode,
+                   stdout_bytes=len(result.stdout), stderr_bytes=len(result.stderr),
+                   stdout_sha256=hashlib.sha256(result.stdout).hexdigest(),
+                   stderr_sha256=hashlib.sha256(result.stderr).hexdigest())
+
+
+def event(progress, stage: str, **fields):
+    if progress is not None:
+        return progress.event(stage, **fields)
+    return None
