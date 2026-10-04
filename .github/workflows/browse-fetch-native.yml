@@ -47,6 +47,13 @@ jobs:
           go run -tags rustport ./scripts/rust-port/cmd/fetchcontrolgen --check
           python3 scripts/rust-port/test_benchmark_harness.py
           python3 port/bench/test_identity.py
+      - name: Prove actual deadline and owner-lifetime negative controls
+        run: |
+          set -euo pipefail
+          umask 022
+          cargo test -p symbrowse-fetch --all-targets --locked --no-run --message-format=json > "$RUNNER_TEMP/browse-fetch-deadline-artifacts.jsonl" 2> "$RUNNER_TEMP/browse-fetch-deadline-build.log"
+          python3 port/harness/fetch_deadline_controls.py --artifacts "$RUNNER_TEMP/browse-fetch-deadline-artifacts.jsonl" --output "$RUNNER_TEMP/browse-fetch-deadline-controls.json" 2>&1 | tee "$RUNNER_TEMP/browse-fetch-deadline-controls.log"
+
       - name: Compare actual frozen-Go and native honest requests
         run: port/harness/run_fetch_control_773.sh "$RUNNER_TEMP/browse-fetch-process.json"
       - name: Verify native honest fetch lint
@@ -60,6 +67,10 @@ jobs:
           name: browse-fetch-${{ matrix.runner }}-${{ github.sha }}
           path: |
             ${{ runner.temp }}/browse-fetch-tests.log
+            ${{ runner.temp }}/browse-fetch-deadline-artifacts.jsonl
+            ${{ runner.temp }}/browse-fetch-deadline-build.log
+            ${{ runner.temp }}/browse-fetch-deadline-controls.json
+            ${{ runner.temp }}/browse-fetch-deadline-controls.log
             ${{ runner.temp }}/browse-fetch-process.json
             ${{ runner.temp }}/browse-fetch-process-controls.json
             ${{ runner.temp }}/browse-fetch-process-raw-proxy.json

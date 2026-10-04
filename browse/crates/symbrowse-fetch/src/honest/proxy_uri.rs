@@ -90,3 +90,7 @@ pub(super) async fn send(
         reqwest::Body::wrap(OwnedBody::new(body, task)),
     )))
 }
+
+#[cfg(test)]
+#[path = "proxy_uri_tests.rs"]
+mod tests;

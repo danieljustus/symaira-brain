@@ -32,3 +32,6 @@ time.workspace = true
 tokio.workspace = true
 url.workspace = true
 ruzstd.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
