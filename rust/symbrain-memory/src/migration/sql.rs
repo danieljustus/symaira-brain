@@ -138,7 +138,7 @@ pub(super) fn ensure_index(conn: &Connection, statement: &str) -> Result<(), Sto
 }
 
 /// Extract real CHECK clauses, excluding literals/comments that merely mention
-/// them. Definitions come from sqlite_schema after SQLite has parsed the DDL.
+/// them. Definitions come from `sqlite_schema` after SQLite has parsed the DDL.
 pub(super) fn checks(definition: &str) -> BTreeSet<String> {
     let text = definition.chars().collect::<Vec<_>>();
     let mut result = BTreeSet::new();

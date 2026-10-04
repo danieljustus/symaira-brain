@@ -176,14 +176,12 @@ fn verify_step(conn: &Connection, statements: &[String]) -> Result<(), StoreErro
             facts::owned()?.verify_column(conn, table, column)?;
         }
         for kind in ["TABLE", "INDEX", "TRIGGER"] {
-            if statement.trim_start().starts_with("CREATE") {
-                if let Some(name) = sql::object_name(statement, kind) {
-                    if !sql::object(conn, name)?
-                        .is_some_and(|(actual, _)| actual.eq_ignore_ascii_case(kind))
-                    {
-                        return Err(StoreError::Invalid(format!("missing owned {kind} {name}")));
-                    }
-                }
+            if statement.trim_start().starts_with("CREATE")
+                && let Some(name) = sql::object_name(statement, kind)
+                && !sql::object(conn, name)?
+                    .is_some_and(|(actual, _)| actual.eq_ignore_ascii_case(kind))
+            {
+                return Err(StoreError::Invalid(format!("missing owned {kind} {name}")));
             }
         }
     }

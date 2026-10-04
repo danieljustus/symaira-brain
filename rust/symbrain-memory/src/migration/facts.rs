@@ -233,7 +233,7 @@ impl Facts {
 
     pub fn verify_final(&self, conn: &Connection) -> Result<(), StoreError> {
         for (table, expected) in &self.columns {
-            if !sql::object(conn, table)?.is_some_and(|(kind, _)| kind == "table") {
+            if sql::object(conn, table)?.is_none_or(|(kind, _)| kind != "table") {
                 return Err(StoreError::Invalid(format!("missing owned table {table}")));
             }
             for column in expected {

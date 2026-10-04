@@ -5,29 +5,27 @@ use crate::StoreError;
 use rusqlite::{Connection, ErrorCode};
 
 pub(super) fn recognize(conn: &Connection) -> Result<(), StoreError> {
-    if let Some((kind, definition)) = sql::object(conn, "memories_fts")? {
-        if kind != "table"
+    if let Some((kind, definition)) = sql::object(conn, "memories_fts")?
+        && (kind != "table"
             || !facts::owned()?
                 .fts_variants
-                .contains(&sql::canonical(&definition))
-        {
-            return Err(StoreError::Invalid(
-                "incompatible owned memories_fts definition".into(),
-            ));
-        }
+                .contains(&sql::canonical(&definition)))
+    {
+        return Err(StoreError::Invalid(
+            "incompatible owned memories_fts definition".into(),
+        ));
     }
     for name in ["memories_ai", "memories_ad", "memories_au"] {
-        if let Some((kind, definition)) = sql::object(conn, name)? {
-            if kind != "trigger"
+        if let Some((kind, definition)) = sql::object(conn, name)?
+            && (kind != "trigger"
                 || !facts::owned()?
                     .trigger_variants
                     .get(name)
-                    .is_some_and(|variants| variants.contains(&sql::canonical(&definition)))
-            {
-                return Err(StoreError::Invalid(format!(
-                    "incompatible owned trigger {name}"
-                )));
-            }
+                    .is_some_and(|variants| variants.contains(&sql::canonical(&definition))))
+        {
+            return Err(StoreError::Invalid(format!(
+                "incompatible owned trigger {name}"
+            )));
         }
     }
     Ok(())
