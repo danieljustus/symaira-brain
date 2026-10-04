@@ -1,0 +1,60 @@
+{
+  "head": "ac81b94f6d47250baf2ee1ed619802a4affa4817",
+  "run": 37173613032,
+  "job": 111351527033,
+  "zip_sha256": "d140101a5bb1d3f062e8d63cd9f0b5d3df7d1bfdcbcedf93cdc837d4d46a776d",
+  "finding": "Hermetic Doctor missing-home test omits LLVM_PROFILE_FILE; real instrumented child creates default_16407567936918546430_0_21257.profraw, failing complete snapshot at line50",
+  "full_job_bytes": 10848071,
+  "access_limits": "MCP decoded job log exceeds8MiB; direct job signed redirect forbidden. gh run ZIP succeeds; its formatted views omit huge10.7MiB assertion line, so original ZIP and full raw members preserved separately.",
+  "proofs": [
+    {
+      "original": "/tmp/gh-cli-cache/run-log-37173613032-1791083807.zip",
+      "retained": "migration/evidence/doctor-coverage-environment-765/original-ac81/run-log-37173613032-1791083807.zip.gz",
+      "bytes": 3940640,
+      "sha256": "d140101a5bb1d3f062e8d63cd9f0b5d3df7d1bfdcbcedf93cdc837d4d46a776d"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-ac81-coverage-original-0_rust-coverage.txt",
+      "retained": "migration/evidence/doctor-coverage-environment-765/original-ac81/symaira-doctor806-ac81-coverage-original-0_rust-coverage.txt.gz",
+      "bytes": 10848071,
+      "sha256": "928f79b7d68fc5aadd2f90818681fcdb2a393528c705f9cc9ed9431286e21ce2"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-ac81-coverage-original-8_Enforce the complete Rust workspace floor.txt",
+      "retained": "migration/evidence/doctor-coverage-environment-765/original-ac81/symaira-doctor806-ac81-coverage-original-8_Enforce the complete Rust workspace floor.txt.gz",
+      "bytes": 10809573,
+      "sha256": "6f3f4f92e2c3fcd25ba718cdf42753d46d4f251164c3cc80ad136db28a86b386"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-ac81-coverage-gh-log-attempt.txt",
+      "retained": "migration/evidence/doctor-coverage-environment-765/original-ac81/symaira-doctor806-ac81-coverage-gh-log-attempt.txt.gz",
+      "bytes": 95580,
+      "sha256": "26e29f018e62c6a095ddf368bdbd7735ad96ce2c72e848d96a48a68655f0904b"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-ac81-coverage-full-run.log",
+      "retained": "migration/evidence/doctor-coverage-environment-765/original-ac81/symaira-doctor806-ac81-coverage-full-run.log.gz",
+      "bytes": 159768,
+      "sha256": "4ee927204748344fb836c17b738568d128f23d80113f39ec8121fa3aadfa94fc"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-ac81-coverage-job-metadata.json",
+      "retained": "migration/evidence/doctor-coverage-environment-765/original-ac81/symaira-doctor806-ac81-coverage-job-metadata.json.gz",
+      "bytes": 2670,
+      "sha256": "b79d9d3d2e7c7c609aea36e4a5ff33659039c5935910d381a3bf32059800a7cf"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-ac81-coverage-check-run.json",
+      "retained": "migration/evidence/doctor-coverage-environment-765/original-ac81/symaira-doctor806-ac81-coverage-check-run.json.gz",
+      "bytes": 3580,
+      "sha256": "5c34c37bf0023e236370e2042a32f8036e1b2d47ec39802fed55026eddd24a7c"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-ac81-coverage-annotations.json",
+      "retained": "migration/evidence/doctor-coverage-environment-765/original-ac81/symaira-doctor806-ac81-coverage-annotations.json.gz",
+      "bytes": 1411,
+      "sha256": "725ed2b31b41d23ad10dd8332519e261069c3f26b1dcb4efd7eade9fc45fa01b"
+    }
+  ],
+  "no_assertions_or_floor_weakened": true
+}
