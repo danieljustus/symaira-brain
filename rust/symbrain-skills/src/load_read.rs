@@ -18,17 +18,12 @@ fn open_read_with(
     if nofollow {
         options.follow(FollowSymlinks::No);
     }
-    root.open_with(relative, &options)
-        .map_err(|error| SkillError(format!("read {name}: {}", go_io_error(&error))))
-}
-
-fn go_io_error(error: &std::io::Error) -> String {
-    let message = error.to_string();
-    #[cfg(windows)]
-    if let Some(context) = message.strip_suffix(": no such file or directory") {
-        return format!("{context}: The system cannot find the file specified.");
-    }
-    message
+    root.open_with(relative, &options).map_err(|error| {
+        SkillError(format!(
+            "read {name}: {}",
+            crate::io_contract::path_error("openat", relative, &error)
+        ))
+    })
 }
 
 #[derive(Debug)]

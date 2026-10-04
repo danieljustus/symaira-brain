@@ -82,3 +82,18 @@ fn current_project_dir() -> PathBuf {
 fn or_dash(value: &str) -> &str {
     if value.trim().is_empty() { "-" } else { value }
 }
+
+// Reporting follows completed reads/sync: a sink failure never rolls back work.
+fn report_result(verb: &str, result: std::io::Result<()>, stderr: &mut dyn Write) -> u8 {
+    match result {
+        Ok(()) => exit::OK,
+        Err(error) => {
+            let _ = writeln!(stderr, "symbrain skills {verb}: format output: {error}");
+            exit::GENERIC
+        }
+    }
+}
+
+#[cfg(test)]
+#[path = "skills_report_tests.rs"]
+mod report_tests;

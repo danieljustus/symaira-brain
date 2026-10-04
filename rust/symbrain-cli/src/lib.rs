@@ -7,7 +7,6 @@ use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
-use symbrain_core::version::{self, VersionInfo};
 
 mod activity_cli;
 mod audit_cli;
@@ -27,10 +26,12 @@ mod profile_cli;
 mod profile_render;
 mod setup_cli;
 mod skills_cli;
+mod skills_stdout;
 mod sync_cli;
 mod usage_cli;
 mod vault_admin;
 mod vault_config;
+mod version_cli;
 
 const USAGE: &str = "symbrain — portable agent-context layer for AI harnesses\n\nUsage:\n  symbrain <command> [flags]\n\nGlobal output flags (version, sync, memory, skills, activity, profile, harness, audit, usage, and doctor):\n  --output table|json  Output format (default: table)\n  --json               Shorthand for --output json\n\nCommands:\n  init        Create XDG directories, default config, and example profiles\n  doctor      Check environment, config, profiles, and child binaries\n  setup       Download and install pinned core binaries to ~/.symaira/bin\n  profile     Manage profiles (list, show, add, remove)\n  config      Inspect and edit the global config (path, get, set)\n  harness     Inspect registered AI harnesses and their MCP servers\n  usage       AI subscription/token usage per provider\n  mcp         Run the MCP gateway over stdio for a profile (serve is a deprecated alias)\n  install     Register symbrain with a harness\n  uninstall   Remove symbrain from a harness\n  sync        Sync instructions and skills to harnesses\n  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync, serve)\n  skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)\n  activity    Read bounded activity summaries with explicit profile access\n  audit       Inspect the audit log\n  vault       Human credential management (create <path> and set <path.field> read single-line secrets from stdin; delete requires --yes)\n  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)\n\n  version     Print version information\n  help        Show this help message\n\nVault approval passthrough:\n  symbrain vault approval list [--output json]\n  symbrain vault approval decide <request-id> --approve|--deny\n\nRun 'symbrain <command> --help' for details on a specific command.\n";
 
@@ -140,6 +141,20 @@ fn has_go_owned_flag(
     false
 }
 
+/// Runs the actual executable's standard streams, with scoped Skills fd1 ownership.
+pub fn run_stdio(args: &[OsString]) -> u8 {
+    let mut stderr = io::stderr();
+    if peek_command(args) == "skills" {
+        run(
+            args,
+            &mut skills_stdout::SkillsStdout::new(io::stdout()),
+            &mut stderr,
+        )
+    } else {
+        run(args, &mut io::stdout(), &mut stderr)
+    }
+}
+
 /// Runs `symbrain` with the production inherited-process fallback executor.
 pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {
     run_with_executor(args, stdout, stderr, &InheritedProcessExecutor)
@@ -194,7 +209,7 @@ pub fn run_in_process(
 
     match cmd.as_ref() {
         "help" | "--help" | "-h" => Some(write_usage(stdout)),
-        "version" => Some(run_version(rest, stdout, stderr, format)),
+        "version" => Some(version_cli::run(rest, stdout, stderr, format)),
         "config" => config_cli::run(rest, stdout, stderr),
         "profile" => profile_cli::run(rest, stdout, stderr, format),
         "audit" => Some(audit_cli::run(rest, stdout, stderr, format)),
@@ -282,71 +297,6 @@ fn write_usage(stdout: &mut dyn Write) -> u8 {
     } else {
         exit::GENERIC
     }
-}
-
-fn run_version(
-    args: &[OsString],
-    stdout: &mut dyn Write,
-    stderr: &mut dyn Write,
-    format: OutputFormat,
-) -> u8 {
-    let normalized = normalize_flags(args);
-    if let Some(first) = normalized.first() {
-        let first_str = first.to_string_lossy();
-        if first_str == "--" {
-            if normalized.len() > 1 {
-                let unexpected = args
-                    .get(1)
-                    .map_or_else(|| "".into(), |a| a.to_string_lossy());
-                let _ = writeln!(
-                    stderr,
-                    "symbrain version: unexpected argument {unexpected:?}"
-                );
-                return exit::USAGE;
-            }
-        } else if first_str == "-" {
-            let _ = writeln!(stderr, "symbrain version: unexpected argument \"-\"");
-            return exit::USAGE;
-        } else if first_str.starts_with('-') {
-            let trimmed = first_str.trim_start_matches('-');
-            let name = match trimmed.split_once('=') {
-                Some((k, _)) => k,
-                None => trimmed,
-            };
-            if name == "h" || name == "help" {
-                let _ = writeln!(stderr, "Usage of version:");
-                return exit::USAGE;
-            }
-            let _ = writeln!(stderr, "flag provided but not defined: -{name}");
-            let _ = writeln!(stderr, "Usage of version:");
-            return exit::USAGE;
-        } else {
-            let _ = writeln!(
-                stderr,
-                "symbrain version: unexpected argument {first_str:?}"
-            );
-            return exit::USAGE;
-        }
-    }
-
-    let version = option_env!("SYMBRAIN_VERSION").unwrap_or("dev");
-    let info = VersionInfo::new("symbrain", version);
-    if output::render(&mut *stdout, format, &info, |w| -> io::Result<()> {
-        writeln!(w, "symbrain {version}")?;
-        writeln!(w, "  rust    {}", rustc_version())?;
-        writeln!(
-            w,
-            "  os/arch {}/{}",
-            version::current_os(),
-            version::current_arch()
-        )
-    })
-    .is_err()
-    {
-        let _ = writeln!(stderr, "symbrain version: format output");
-        return exit::GENERIC;
-    }
-    exit::OK
 }
 
 #[cfg(unix)]

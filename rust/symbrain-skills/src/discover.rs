@@ -130,14 +130,43 @@ pub fn scanned(
     let loader = BundleLoader::default();
     let mut found = BTreeMap::new();
     for (path, source, target) in roots {
+        let metadata = match std::fs::symlink_metadata(&path) {
+            Ok(metadata) => metadata,
+            Err(error) => {
+                if source == "explicit-path" {
+                    let mut row = candidate(&path, &source, &target, &loader);
+                    row.status = "unreadable";
+                    row.valid = false;
+                    row.managed = false;
+                    #[cfg(windows)]
+                    let operation = if error.kind() == std::io::ErrorKind::NotFound {
+                        "GetFileAttributesEx"
+                    } else {
+                        "CreateFile"
+                    };
+                    #[cfg(not(windows))]
+                    let operation = "lstat";
+                    row.diagnostics = vec![format!(
+                        "path not accessible: {}",
+                        crate::io_contract::path_error(operation, &path, &error)
+                    )];
+                    found.insert(row.source_id.clone(), row);
+                }
+                continue;
+            }
+        };
         if path.join("SKILL.md").exists() {
             let row = candidate(&path, &source, &target, &loader);
             found.insert(row.source_id.clone(), row);
             continue;
         }
-        match crate::library::library_paths(&path) {
+        if !metadata.is_dir() && !metadata.file_type().is_symlink() {
+            continue;
+        }
+        match crate::library::read_library_entries(&path) {
             Ok(entries) => {
                 for entry in entries {
+                    let entry = entry.path();
                     if !entry.join("SKILL.md").exists() {
                         continue;
                     }
@@ -154,20 +183,17 @@ pub fn scanned(
                 let mut row = candidate(&path, &source, &target, &loader);
                 row.status = "unreadable";
                 row.valid = false;
-                row.diagnostics = vec![format!("read directory: {error}")];
+                row.managed = false;
+                let diagnostic = match error {
+                    crate::library::LibraryReadError::Io(error) => {
+                        crate::io_contract::path_error("open", &path, &error)
+                    }
+                    crate::library::LibraryReadError::InputBound => error.to_string(),
+                };
+                row.diagnostics = vec![format!("read directory: {diagnostic}")];
                 found.insert(row.source_id.clone(), row);
             }
             Err(_) => {}
-        }
-        if !path.exists() && source == "explicit-path" {
-            let mut row = candidate(&path, &source, &target, &loader);
-            row.status = "unreadable";
-            row.valid = false;
-            row.diagnostics = vec![format!(
-                "path not accessible: {}",
-                std::fs::symlink_metadata(&path).unwrap_err()
-            )];
-            found.insert(row.source_id.clone(), row);
         }
     }
     let mut rows: Vec<_> = found.into_values().collect();

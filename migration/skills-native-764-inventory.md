@@ -37,3 +37,16 @@ all 567 unique case IDs and the three planned actual input controls. Existing
 required gates. Conditional GODEBUG stack/report compatibility, raw Windows
 process arguments and exact typed TOML diagnostics remain explicit pending
 boundaries in docs/adr/skills-native-surface-764.md.
+
+## Isolated source correction after full independent review
+
+Original db9760 and all317 independent review files/24 consumer references are
+retained unchanged. Seven reported P2 owners have source corrections for order,
+report writes, reachable raw transport, Lstat classification, library errors,
+separate archive stderr and lossless pair journaling. See
+`docs/adr/native-skills-source-corrections-764.md` and corrections/source-checks.
+The original567 cases and their five generator bodies remain intact; prepared
+additions bring Linux/macOS to638 and Windows to614 pairs plus the original
+three child-input controls. Eleven additional Rust test declarations are
+prepared, including isolated failing writers and full CLI transport checks.
+No compiler/type/test/product/native success or issue closure is claimed.

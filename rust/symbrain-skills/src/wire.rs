@@ -77,3 +77,10 @@ pub fn rendered(value: &Rendered, path: &std::path::Path) -> Value {
 pub fn decode_string(raw: &[u8]) -> Result<String, serde_json::Error> {
     serde_json::from_str(&crate::install::marker_string::repair_json_strings(raw))
 }
+
+/// Repairs Go argument string values and keys without decoding numeric fields.
+/// Duplicate fields, valid escapes and raw non-string tokens are retained.
+#[must_use]
+pub fn repair_argument_strings(raw: &[u8]) -> String {
+    crate::install::marker_string::repair_json_strings(raw)
+}

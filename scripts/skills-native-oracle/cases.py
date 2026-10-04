@@ -112,3 +112,32 @@ def mcp_config_cases(root):
             for variant in ("global", "project", "environment", "invalid-global",
                             "invalid-project", "zero-global", "ignored-targets")
             for name in ("skills_list", "skills_targets_status", "skills_profile_list")]
+
+
+def raw_argument_cases():
+    return [
+        ("surrogate-value", "skills_history", r'{"name":"\ud800"}'),
+        ("surrogate-key", "skills_history", r'{"\ud800":1e9999,"name":"demo"}'),
+        ("ignored-number", "skills_history", r'{"ignored":1e9999,"name":"demo"}'),
+        ("list-ignored-number", "skills_list", r'{"ignored":1e9999}'),
+        ("list-ignored-key", "skills_list", r'{"\ud800":1e9999}'),
+        ("known-number-type", "skills_history", r'{"limit":1e9999}'),
+        ("known-name-type", "skills_history", r'{"name":false}'),
+    ]
+
+
+def correction_cases(root):
+    pairs = []
+    for name, tool, args in raw_argument_cases():
+        pairs.append(("mcp-raw-" + name, tool, args, None))
+    for name in ["empty-entry", "malformed-entry"]:
+        pairs.append(("mcp-library-" + name, "skills_list", {}, name))
+    for name in ["regular", "missing", "empty", "dangling"]:
+        pairs.append(("mcp-discover-" + name, "skills_discover_sources",
+                      {"paths": [str(root / "sources" / name)]}, "discovery-edges"))
+    pairs.append(("mcp-catalog-disabled", "skills_list", {}, "skills-disabled"))
+    for mode in ["normal", "warning", "failure"]:
+        for dry in [True, False]:
+            pairs.append((f"mcp-archive-{mode}-{dry}", "skills_restore",
+                          {"name": "demo", "rev": "HEAD~1", "dry_run": dry}, "git-" + mode))
+    return pairs

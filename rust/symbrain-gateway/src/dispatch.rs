@@ -14,6 +14,23 @@ impl Gateway {
         context: DispatchContext<'_>,
     ) -> Result<GatewayResponse, GatewayError> {
         let started = Instant::now();
+        if let Some((name, raw_arguments)) = symbrain_mcp::raw_skills_params(params) {
+            if self.skills_tool_names.iter().any(|tool| tool == &name) {
+                // The transport already checked envelope syntax and limits.
+                // Retain argument bytes through the actual Skills owner and
+                // audit; an intermediate Value would change Go admission.
+                let fields = serde_json::Map::new();
+                return self.handle_embedded_call(
+                    id,
+                    &name,
+                    &fields,
+                    raw_arguments.as_deref(),
+                    context,
+                    started,
+                );
+            }
+            return self.handle_routed_call(id, &name, raw_arguments.as_deref(), context, started);
+        }
         let raw_arguments = params.and_then(|raw| {
             serde_json::from_str::<std::collections::BTreeMap<String, Box<RawValue>>>(raw.get())
                 .ok()
@@ -166,9 +183,18 @@ impl Gateway {
             category: "tool".to_string(),
             retryable: false,
         };
-        let audit_args = params
-            .get("arguments")
-            .map_or_else(Vec::new, |value| value.to_string().into_bytes());
+        let audit_args = if symbrain_mcp::SKILLS_TOOL_NAMES.contains(&name) {
+            // Go's audit map decoder repairs strings independently of the
+            // handler. Repair only string tokens; its shared numeric/overflow
+            // and recursive redaction policy still owns audit admission.
+            raw_arguments.map_or_else(Vec::new, |raw| {
+                symbrain_skills::wire::repair_argument_strings(raw.get().as_bytes()).into_bytes()
+            })
+        } else {
+            params
+                .get("arguments")
+                .map_or_else(Vec::new, |value| value.to_string().into_bytes())
+        };
         self.audit_write(
             &server,
             &tool,

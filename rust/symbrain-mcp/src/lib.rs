@@ -4,6 +4,7 @@
 
 mod frame;
 mod model;
+mod raw_skills;
 mod server;
 
 pub use frame::{
@@ -15,3 +16,5 @@ pub use model::{
     Request, RequestMessage, Response,
 };
 pub use server::{DispatchContext, DispatchError, Dispatcher, Server, ServerError, serve_io};
+
+pub use raw_skills::{SKILLS_TOOL_NAMES, raw_skills_params};

@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import shutil
 
 TARGET_ROOTS = {"opencode": ".config/opencode/skills", "claude": ".claude/skills",
                 "codex": ".agents/skills", "hermes": ".hermes/skills/symaira",
@@ -44,7 +45,25 @@ def environment(root, git):
     return env
 
 
-def setup(root, git):
+
+def fixture_command(argv, cwd, env, ledger):
+    row = {"argv": argv, "cwd": str(cwd), "exit": None}
+    ledger.append(row)
+    try:
+        out = subprocess.run(argv, cwd=cwd, env=env, capture_output=True, timeout=20, check=False)
+    except subprocess.TimeoutExpired as error:
+        row.update(timed_out=True, stdout_hex=(error.stdout or b"").hex(),
+                   stderr_hex=(error.stderr or b"").hex())
+        raise
+    except OSError as error:
+        row["launch_error"] = {"type": type(error).__name__, "message": str(error)}
+        raise
+    row.update(exit=out.returncode, stdout_hex=out.stdout.hex(), stderr_hex=out.stderr.hex())
+    return out
+
+
+def setup(root, git, ledger=None):
+    ledger = [] if ledger is None else ledger
     for name in ("home", "config", "data", "cache", "state", "project", "tmp", "sources"):
         (root / name).mkdir(parents=True)
     write(root / "profile.toml", PROFILE)
@@ -56,19 +75,14 @@ def setup(root, git):
     commands = [[git, "init"], [git, "add", "-A"],
                 [git, "-c", "user.name=fixture", "-c", "user.email=fixture@localhost",
                  "-c", "commit.gpgsign=false", "commit", "-m", "import: fixture one"]]
-    ledger = []
     for argv in commands:
-        out = subprocess.run(argv, cwd=demo, env=env, capture_output=True, timeout=20, check=False)
-        ledger.append({"argv": argv, "exit": out.returncode,
-                       "stdout_hex": out.stdout.hex(), "stderr_hex": out.stderr.hex()})
+        out = fixture_command(argv, demo, env, ledger)
         if out.returncode:
             raise RuntimeError("owned Git fixture initialization failed")
     write(demo / "SKILL.md", "---\nname: demo\ndescription: bounded skill\nversion: 2\ncategory: work\n---\nsecond body\n")
     for argv in ([git, "add", "-A"], [git, "-c", "user.name=fixture", "-c", "user.email=fixture@localhost",
                                     "-c", "commit.gpgsign=false", "commit", "-m", "update: fixture two"]):
-        out = subprocess.run(argv, cwd=demo, env=env, capture_output=True, timeout=20, check=False)
-        ledger.append({"argv": argv, "exit": out.returncode,
-                       "stdout_hex": out.stdout.hex(), "stderr_hex": out.stderr.hex()})
+        out = fixture_command(argv, demo, env, ledger)
         if out.returncode:
             raise RuntimeError("owned second Git commit failed")
     write(library / "warning/SKILL.md", "---\nname: warning\n---\nbody\n")
@@ -103,8 +117,33 @@ def setup(root, git):
     return env, ledger
 
 
-def variant(root, env, name):
+def variant(root, env, name, git_fixture=None):
     env = dict(env)
+    if name == "skills-disabled":
+        write(root / "profile.toml", PROFILE.replace('[servers.skills]\nenabled = true', '[servers.skills]\nenabled = false'))
+        return env
+    if name == "discovery-edges":
+        write(root / "sources/regular", b"ordinary file")
+        (root / "sources/empty").mkdir()
+        os.symlink("absent", root / "sources/dangling", target_is_directory=True)
+        return env
+    if name in ["empty-entry", "malformed-entry"]:
+        bundle = root / "data/symbrain/skills/library/edge"
+        bundle.mkdir()
+        if name != "empty-entry":
+            write(bundle / "SKILL.md", b"missing frontmatter" if name == "malformed-entry" else b"---\nname: edge\n---\nbody\n")
+        return env
+    if name.startswith("git-"):
+        if git_fixture is None: raise ValueError("bound owned Git fixture required")
+        directory = root / "owned-git"
+        directory.mkdir()
+        target = directory / ("git.exe" if os.name == "nt" else "git")
+        shutil.copy2(git_fixture, target)
+        env["PATH"] = str(directory)
+        env["SKILLS_FIXTURE_REAL_GIT"] = env.pop("SKILLS_ACTUAL_GIT")
+        env["SKILLS_FIXTURE_GIT_LEDGER"] = str(root / "tmp/git-provider.jsonl")
+        env["SKILLS_FIXTURE_GIT_MODE"] = name.removeprefix("git-")
+        return env
     alternate = root / "alternate-library"
     alternate.mkdir()
     quoted = json.dumps(str(alternate))

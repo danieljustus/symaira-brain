@@ -1,5 +1,4 @@
 //! Bounded revision extraction and staged restore while retaining .git.
-use super::run;
 use crate::{MAX_INPUT_SIZE, MAX_RESOURCE_ENTRIES, MAX_TOTAL_RESOURCE_BYTES, SkillError};
 use cap_std::fs::Dir;
 use std::io::Read;
@@ -18,7 +17,7 @@ pub fn extract(dir: &Path, rev: &str, dst: &Path) -> Result<(), SkillError> {
     std::fs::create_dir_all(dst).map_err(|error| SkillError(error.to_string()))?;
     let root = Dir::open_ambient_dir(dst, ambient_authority::ambient_authority())
         .map_err(|error| SkillError(error.to_string()))?;
-    let data = run(dir, &["archive", "--format=tar", rev])?;
+    let data = super::process::archive(dir, rev)?;
     let mut archive = tar::Archive::new(data.as_slice());
     let entries = archive
         .entries()

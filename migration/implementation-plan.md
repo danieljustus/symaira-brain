@@ -1961,3 +1961,17 @@ Go remains the production enforcement path until the full Guard-specific matrix 
 ### Completion definition
 
 The migration is complete only when every row in `migration/contract-matrix.csv` is green, no command invokes Go, the supported release matrix passes, Swift clients work unchanged at their public boundary, and the Rust release has a verified rollback to the last Go release.
+
+
+### Skills764 isolated source correction after REQUEST_CHANGES
+
+The immutable db9760 review remains authoritative historical failure evidence.
+The successor retains all317 independent originals/24 SDK and consumer references
+losslessly before addressing all seven P2 source owners: catalog order, checked
+report writes and actual fd1 ownership, raw MCP ingress, observed Lstat types,
+confined library diagnostics, separate bounded Git archive streams, and durable
+pair/error journaling. Original567 cases remain, with638 Unix/614 Windows total
+prepared pairs and three unchanged real-input controls. Eleven new Rust test
+declarations and native3 workflow coverage are prepared. All actual runtime,
+strict compile, original preflight/render gates, native3 and different-author
+acceptance remain mandatory. See `docs/adr/native-skills-source-corrections-764.md`.

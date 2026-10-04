@@ -1,11 +1,8 @@
 //! Library inventory behind `symbrain skills list`.
 //!
-//! The native slice deliberately covers libraries whose entries all load
-//! cleanly: Go reports a per-entry issue with cap-std error text when a
-//! `SKILL.md` is missing, unreadable or malformed, and that text is not
-//! reproducible here. [`super::install`] callers therefore keep such libraries
-//! on Go (see the CLI fallback gate) — the issue shape below exists so the
-//! report type is complete, not as a byte-compatible error path.
+//! Each bundle has a confined root and the shared bounded read budget. Ordinary
+//! read errors retain Go's operation/relative document label; resource-bound
+//! and special-file refusals keep the pinned corrective contracts.
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -132,16 +129,26 @@ pub fn list_library(library_dir: &Path) -> (Vec<LibraryEntry>, Vec<Issue>) {
     let mut issues = Vec::new();
     for entry in entries {
         let root = entry.path();
-        if !root.is_dir() {
+        if !entry.file_type().is_ok_and(|kind| kind.is_dir()) {
             continue;
         }
         let name = entry.file_name();
         let issue_path = name.to_string_lossy().into_owned();
-        let relative = PathBuf::from(&name).join("SKILL.md");
+        let bundle_cap = match library_cap.open_dir(&name) {
+            Ok(directory) => directory,
+            Err(error) => {
+                let message = format!(
+                    "open skill root: {}",
+                    crate::io_contract::path_error("open", &root, &error)
+                );
+                issues.push(load_issue(&message, &issue_path, false));
+                continue;
+            }
+        };
         let bytes = match read_skill_document(
-            &library_cap,
-            &relative,
-            &format!("{issue_path}/SKILL.md"),
+            &bundle_cap,
+            Path::new("SKILL.md"),
+            "SKILL.md",
             Some(&mut budget),
         ) {
             Ok(bytes) => bytes,

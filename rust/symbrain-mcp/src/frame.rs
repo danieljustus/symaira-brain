@@ -188,6 +188,16 @@ fn parse_content_length_header(line: &str) -> Result<Option<i64>, FrameError> {
 }
 
 fn parse_request(bytes: &[u8], mode: Mode) -> Result<(Request, Mode), FrameError> {
+    // RawMessage arguments must reach the Skills decoder before Value rejects
+    // ignored large numbers or lone surrogates. Every other route keeps the
+    // original recursive Value validation below, including its error mapping.
+    if let Ok(request) = serde_json::from_slice::<Request>(bytes)
+        && request.jsonrpc == crate::JSONRPC_VERSION
+        && request.method == "tools/call"
+        && crate::raw_skills_params(request.params.as_deref()).is_some()
+    {
+        return Ok((request, mode));
+    }
     let value: serde_json::Value =
         serde_json::from_slice(bytes).map_err(|error| FrameError::Parse {
             mode,
@@ -258,6 +268,42 @@ mod tests {
             body.len()
         )));
         assert_eq!(framed.read_request().unwrap().unwrap().1, Mode::Framed);
+    }
+
+    #[test]
+    fn raw_skills_are_admitted_in_both_transports_without_widening_other_routes() {
+        for arguments in [
+            r#"{"name":"\ud800"}"#,
+            r#"{"ignored":1e9999}"#,
+            r#"{"\ud800":1e9999}"#,
+        ] {
+            let body = format!(
+                r#"{{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{{"name":"skills_history","arguments":{arguments}}}}}"#
+            );
+            for mode in [Mode::Line, Mode::Framed] {
+                let incoming = if mode == Mode::Line {
+                    format!("{body}\n")
+                } else {
+                    format!("Content-Length: {}\r\n\r\n{body}", body.len())
+                };
+                let request = Decoder::new(Cursor::new(incoming))
+                    .read_request()
+                    .unwrap()
+                    .unwrap();
+                assert_eq!(request.1, mode);
+                assert!(request.0.params.unwrap().get().contains(arguments));
+            }
+            let ordinary = body.replace("skills_history", "memory_get");
+            assert!(matches!(
+                parse_request(ordinary.as_bytes(), Mode::Line),
+                Err(FrameError::Parse { .. })
+            ));
+        }
+        let malformed = br#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"skills_list","arguments":{}}"#;
+        assert!(matches!(
+            parse_request(malformed, Mode::Line),
+            Err(FrameError::Parse { .. })
+        ));
     }
 
     #[test]

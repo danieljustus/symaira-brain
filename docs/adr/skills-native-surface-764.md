@@ -26,11 +26,15 @@ without CLI config.Load, event logging, ProjectDir or marker metadata fallback.
 No caller registers custom targets or capabilities from configuration; accepting
 the untagged Targets field would invent behavior rather than port this route.
 
-The gateway preserves the raw Skills argument object before Value conversion.
-Its private decoder retains duplicate-field error order, null pointer defaults,
-Go string repair and profile-selector-before-bundle argument checks. Memory and
-other embedded adapters continue using their existing Value paths. Outer gateway
-framing and JSON admission still apply; this seam does not bypass them.
+The initial db9760 source checkpoint captured RawValue only after outer
+Value admission, so its Go string/ignored-number decoder was unreachable for
+some real input forms. The independent review retained that defect. The isolated
+successor described in [source corrections](native-skills-source-corrections-764.md)
+keeps known Skills arguments raw through the actual transport and dispatcher,
+repairs string keys as well as values, and retains original framing limits.
+Memory and other adapters retain their existing Value paths. The ordered Skills
+handler decoder still owns duplicate/type error order, null pointer defaults
+and profile-selector-before-bundle checks; actual native proof remains pending.
 
 ## Read observations and write authority
 

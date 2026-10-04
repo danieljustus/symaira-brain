@@ -19,19 +19,7 @@ pub(crate) const MEMORY_TOOLS: &[&str] = &[
     "query_log",
 ];
 pub(crate) const ACTIVITY_TOOLS: &[&str] = &["activity_get", "activity_search", "activity_status"];
-pub(crate) const SKILLS_TOOLS: &[&str] = &[
-    "skills_list",
-    "skills_inspect",
-    "skills_validate",
-    "skills_render_plan",
-    "skills_install",
-    "skills_targets_status",
-    "skills_profile_list",
-    "skills_profile_resolve",
-    "skills_discover_sources",
-    "skills_history",
-    "skills_restore",
-];
+pub(crate) use symbrain_mcp::SKILLS_TOOL_NAMES as SKILLS_TOOLS;
 
 fn schema(name: &str) -> Box<serde_json::value::RawValue> {
     let text = match name {

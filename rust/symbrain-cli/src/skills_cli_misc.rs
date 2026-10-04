@@ -71,27 +71,30 @@ pub(super) fn targets(
         targets: list_status(&options),
     };
 
-    match format {
-        OutputFormat::Json => {
-            let _ = writeln!(stdout, "{}", go_json(&report));
-        }
-        OutputFormat::Table => {
-            let _ = writeln!(stdout, "TARGET\tINSTALLED\tMANAGED\tUNMANAGED\tSKILL ROOT");
-            for target in &report.targets {
-                let _ = writeln!(
-                    stdout,
-                    "{}\t{}\t{}\t{}\t{}",
-                    target.target,
-                    target.installed,
-                    target.managed_skills_count,
-                    target.unmanaged_skills_count,
-                    target.effective_skill_root
-                );
+    let rendered = (|| -> std::io::Result<()> {
+        match format {
+            OutputFormat::Json => {
+                writeln!(stdout, "{}", go_json(&report))?;
+            }
+            OutputFormat::Table => {
+                writeln!(stdout, "TARGET\tINSTALLED\tMANAGED\tUNMANAGED\tSKILL ROOT")?;
+                for target in &report.targets {
+                    writeln!(
+                        stdout,
+                        "{}\t{}\t{}\t{}\t{}",
+                        target.target,
+                        target.installed,
+                        target.managed_skills_count,
+                        target.unmanaged_skills_count,
+                        target.effective_skill_root
+                    )?;
+                }
             }
         }
-    }
 
-    exit::OK
+        Ok(())
+    })();
+    super::report_result("targets", rendered, stderr)
 }
 
 pub(super) fn log(
@@ -131,36 +134,39 @@ pub(super) fn log(
     if parsed.limit > 0 {
         records.truncate(usize::try_from(parsed.limit).unwrap_or(usize::MAX));
     }
-    match format {
-        OutputFormat::Json => {
-            let _ = writeln!(stdout, "{}", go_json(&records));
-        }
-        OutputFormat::Table => {
-            if records.is_empty() {
-                let _ = writeln!(stdout, "No recorded skill operations.");
-            } else {
-                let _ = writeln!(stdout, "WHEN\tEVENT\tSKILL\tTARGET\tOUTCOME");
-                for event in &records {
-                    let skill = if event.skill.is_empty() {
-                        "-"
-                    } else {
-                        &event.skill
-                    };
-                    let target = if event.target.is_empty() {
-                        "-"
-                    } else {
-                        &event.target
-                    };
-                    let _ = writeln!(
-                        stdout,
-                        "{}\t{}\t{}\t{}\t{}",
-                        event.ts, event.event, skill, target, event.outcome
-                    );
+    let rendered = (|| -> std::io::Result<()> {
+        match format {
+            OutputFormat::Json => {
+                writeln!(stdout, "{}", go_json(&records))?;
+            }
+            OutputFormat::Table => {
+                if records.is_empty() {
+                    writeln!(stdout, "No recorded skill operations.")?;
+                } else {
+                    writeln!(stdout, "WHEN\tEVENT\tSKILL\tTARGET\tOUTCOME")?;
+                    for event in &records {
+                        let skill = if event.skill.is_empty() {
+                            "-"
+                        } else {
+                            &event.skill
+                        };
+                        let target = if event.target.is_empty() {
+                            "-"
+                        } else {
+                            &event.target
+                        };
+                        writeln!(
+                            stdout,
+                            "{}\t{}\t{}\t{}\t{}",
+                            event.ts, event.event, skill, target, event.outcome
+                        )?;
+                    }
                 }
             }
         }
-    }
-    exit::OK
+        Ok(())
+    })();
+    super::report_result("log", rendered, stderr)
 }
 pub(super) fn doctor(
     args: &[OsString],
@@ -173,18 +179,21 @@ pub(super) fn doctor(
     }
     let (report, pairs) = skills_doctor_report();
 
-    match format {
-        OutputFormat::Json => {
-            let _ = writeln!(stdout, "{}", go_json(&report));
-        }
-        OutputFormat::Table => {
-            for (name, value) in pairs {
-                let _ = writeln!(stdout, "{name:<11} {value}");
+    let rendered = (|| -> std::io::Result<()> {
+        match format {
+            OutputFormat::Json => {
+                writeln!(stdout, "{}", go_json(&report))?;
+            }
+            OutputFormat::Table => {
+                for (name, value) in pairs {
+                    writeln!(stdout, "{name:<11} {value}")?;
+                }
             }
         }
-    }
 
-    exit::OK
+        Ok(())
+    })();
+    super::report_result("doctor", rendered, stderr)
 }
 
 fn skills_doctor_report() -> (SkillsDoctorReport, [(&'static str, String); 9]) {

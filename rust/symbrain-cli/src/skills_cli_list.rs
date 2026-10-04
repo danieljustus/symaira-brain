@@ -5,7 +5,7 @@ use serde::Serialize;
 use std::collections::BTreeMap;
 use std::ffi::OsString;
 use std::io::Write;
-use symbrain_core::{exit, output::OutputFormat};
+use symbrain_core::output::OutputFormat;
 use symbrain_skills::library::list_library;
 use symbrain_skills::metadata::{self, Options as MetadataOptions, Record, read_events_log};
 #[derive(Debug, Serialize)]
@@ -78,43 +78,46 @@ pub(super) fn run(
         issues,
     };
 
-    match format {
-        OutputFormat::Json => {
-            let _ = writeln!(stdout, "{}", go_json(&report));
-        }
-        OutputFormat::Table => {
-            if report.skills.is_empty() {
-                let _ = writeln!(stdout, "No skills in the library.");
-            } else {
-                let _ = writeln!(stdout, "NAME\tCATEGORY\tINSTALLS\tDESCRIPTION");
-                for skill in &report.skills {
-                    let category = or_dash(&skill.category);
-                    let mut targets = skill
-                        .record
-                        .installs
-                        .iter()
-                        .map(|install| install.target.as_str())
-                        .collect::<Vec<_>>();
-                    targets.sort_unstable();
-                    let installed = if targets.is_empty() {
-                        "-".to_owned()
-                    } else {
-                        targets.join(",")
-                    };
-                    let _ = writeln!(
-                        stdout,
-                        "{}\t{}\t{}\t{}",
-                        skill.name,
-                        category,
-                        installed,
-                        table_content(&skill.description)
-                    );
+    let rendered = (|| -> std::io::Result<()> {
+        match format {
+            OutputFormat::Json => {
+                writeln!(stdout, "{}", go_json(&report))?;
+            }
+            OutputFormat::Table => {
+                if report.skills.is_empty() {
+                    writeln!(stdout, "No skills in the library.")?;
+                } else {
+                    writeln!(stdout, "NAME\tCATEGORY\tINSTALLS\tDESCRIPTION")?;
+                    for skill in &report.skills {
+                        let category = or_dash(&skill.category);
+                        let mut targets = skill
+                            .record
+                            .installs
+                            .iter()
+                            .map(|install| install.target.as_str())
+                            .collect::<Vec<_>>();
+                        targets.sort_unstable();
+                        let installed = if targets.is_empty() {
+                            "-".to_owned()
+                        } else {
+                            targets.join(",")
+                        };
+                        writeln!(
+                            stdout,
+                            "{}\t{}\t{}\t{}",
+                            skill.name,
+                            category,
+                            installed,
+                            table_content(&skill.description)
+                        )?;
+                    }
                 }
             }
         }
-    }
 
-    exit::OK
+        Ok(())
+    })();
+    super::report_result("list", rendered, stderr)
 }
 
 fn table_content(value: &str) -> String {

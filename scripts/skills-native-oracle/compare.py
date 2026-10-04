@@ -15,9 +15,9 @@ def current_timestamp(value, start, end):
     return "<verified-current-process-time>"
 
 
-def filesystem(root, start, end):
+def filesystem(root, start, end, retained_reads=None):
     rows, lock_rows, raw = {}, {}, {}
-    for area in ("home", "config", "data", "cache", "state", "project"):
+    for area in ("home", "config", "data", "cache", "state", "project", "sources", "owned-git", "alternate-library"):
         for path in sorted((root / area).rglob("*")):
             relative = path.relative_to(root).as_posix()
             if path.is_symlink():
@@ -26,7 +26,16 @@ def filesystem(root, start, end):
             if path.is_dir():
                 rows[relative] = {"type": "directory", "mode": path.stat().st_mode & 0o777}
                 continue
-            data = path.read_bytes()
+            if retained_reads and path in retained_reads:
+                import os
+                observer = retained_reads[path]
+                retained = os.fstat(observer.fileno())
+                observed = path.stat()
+                assert (retained.st_dev, retained.st_ino) == (observed.st_dev, observed.st_ino), "denied document owner replaced"
+                observer.seek(0)
+                data = observer.read()
+            else:
+                data = path.read_bytes()
             raw[relative] = {"sha256": digest(data), "bytes": len(data)}
             mode = path.stat().st_mode & 0o777
             if re.fullmatch(r"\.symskills-lock-[0-9a-f]{64}", path.name):
@@ -73,14 +82,33 @@ def cli_view(record, root, rust=False):
 
 def mcp_view(record):
     out = bytes.fromhex(record["stdout_hex"])
-    responses = [json.loads(line) for line in out.splitlines()]
+    responses = []
+    if out.startswith(b"Content-Length:"):
+        remaining = out
+        while remaining:
+            header, remaining = remaining.split(b"\r\n\r\n", 1)
+            assert header.startswith(b"Content-Length: ")
+            length = int(header.removeprefix(b"Content-Length: "))
+            assert 0 < length <= len(remaining)
+            responses.append(json.loads(remaining[:length]))
+            remaining = remaining[length:]
+    else:
+        responses = [json.loads(line) for line in out.splitlines()]
     ids = [row.get("id") for row in responses]
     assert ids == [1, 2, 3], f"missing or duplicate actual responses: {ids}"
     catalog = responses[1]["result"]["tools"]
     skills = [row for row in catalog if row["name"].startswith("skills_")]
-    assert len(skills) == 11 and len({row["name"] for row in skills}) == 11
+    expected = record.get("expected_skills", 11)
+    assert expected in (0, 11)
+    assert len(skills) == expected and len({row["name"] for row in skills}) == expected
     responses[1]["result"]["tools"] = skills
-    result = responses[2]["result"]
+    reply = responses[2]
+    assert ("result" in reply) != ("error" in reply), "exactly one RPC response branch required"
+    if "error" in reply:
+        error = reply["error"]
+        assert isinstance(error, dict) and isinstance(error.get("code"), int) and isinstance(error.get("message"), str)
+        return record["exit"], responses, bytes.fromhex(record["stderr_hex"])
+    result = reply["result"]
     assert len(result["content"]) == 1 and result["content"][0]["type"] == "text"
     text = result["content"][0]["text"]
     if not result.get("isError", False):

@@ -102,48 +102,51 @@ pub(super) fn run(
         summary,
     };
 
-    match format {
-        OutputFormat::Json => {
-            // Go encodes every skills report with `json.Encoder`, so the
-            // native output needs the same compact shape and HTML escaping.
-            let _ = writeln!(stdout, "{}", go_json(&report));
-        }
-        OutputFormat::Table => {
-            if report.installs.is_empty() {
-                let _ = writeln!(stdout, "No installed skills found.");
-                return exit::OK;
+    let rendered = (|| -> std::io::Result<()> {
+        match format {
+            OutputFormat::Json => {
+                // Go encodes every skills report with `json.Encoder`, so the
+                // native output needs the same compact shape and HTML escaping.
+                writeln!(stdout, "{}", go_json(&report))?;
             }
-            let has_render = report
-                .installs
-                .iter()
-                .any(|row| row.render_status.is_some());
-            let suffix = if has_render { "\tRENDER" } else { "" };
-            let _ = writeln!(stdout, "TARGET\tSKILL\tSTATUS\tMODE\tPATH{suffix}");
-            for st in &report.installs {
-                let mode = st.mode.as_deref().unwrap_or("-");
-                let _ = writeln!(
-                    stdout,
-                    "{}\t{}\t{}\t{}\t{}{}",
-                    st.target,
-                    st.name,
-                    status_name(st.status),
-                    mode,
-                    st.path.display(),
-                    if has_render {
-                        format!(
-                            "\t{}",
-                            st.render_status
-                                .map_or("-", symbrain_skills::install::RenderStatus::label)
-                        )
-                    } else {
-                        String::new()
-                    }
-                );
+            OutputFormat::Table => {
+                if report.installs.is_empty() {
+                    writeln!(stdout, "No installed skills found.")?;
+                    return Ok(());
+                }
+                let has_render = report
+                    .installs
+                    .iter()
+                    .any(|row| row.render_status.is_some());
+                let suffix = if has_render { "\tRENDER" } else { "" };
+                writeln!(stdout, "TARGET\tSKILL\tSTATUS\tMODE\tPATH{suffix}")?;
+                for st in &report.installs {
+                    let mode = st.mode.as_deref().unwrap_or("-");
+                    writeln!(
+                        stdout,
+                        "{}\t{}\t{}\t{}\t{}{}",
+                        st.target,
+                        st.name,
+                        status_name(st.status),
+                        mode,
+                        st.path.display(),
+                        if has_render {
+                            format!(
+                                "\t{}",
+                                st.render_status
+                                    .map_or("-", symbrain_skills::install::RenderStatus::label)
+                            )
+                        } else {
+                            String::new()
+                        }
+                    )?;
+                }
             }
         }
-    }
 
-    exit::OK
+        Ok(())
+    })();
+    super::report_result("status", rendered, stderr)
 }
 pub(super) fn sync(
     args: &[OsString],
@@ -198,22 +201,25 @@ pub(super) fn sync(
 
     let report = SkillSyncReport { results, dry_run };
 
-    match format {
-        OutputFormat::Json => {
-            let _ = writeln!(stdout, "{}", go_json(&report));
-        }
-        OutputFormat::Table => {
-            if report.results.is_empty() {
-                let _ = writeln!(stdout, "Every installed skill is in sync.");
-            } else {
-                let _ = writeln!(stdout, "TARGET\tSKILL\tACTION\tDETAIL");
-                for r in &report.results {
-                    let detail = if r.error.is_empty() { "-" } else { &r.error };
-                    let _ = writeln!(stdout, "{}\t{}\t{}\t{}", r.target, r.name, r.action, detail);
+    let rendered = (|| -> std::io::Result<()> {
+        match format {
+            OutputFormat::Json => {
+                writeln!(stdout, "{}", go_json(&report))?;
+            }
+            OutputFormat::Table => {
+                if report.results.is_empty() {
+                    writeln!(stdout, "Every installed skill is in sync.")?;
+                } else {
+                    writeln!(stdout, "TARGET\tSKILL\tACTION\tDETAIL")?;
+                    for r in &report.results {
+                        let detail = if r.error.is_empty() { "-" } else { &r.error };
+                        writeln!(stdout, "{}\t{}\t{}\t{}", r.target, r.name, r.action, detail)?;
+                    }
                 }
             }
         }
-    }
 
-    exit::OK
+        Ok(())
+    })();
+    super::report_result("sync", rendered, stderr)
 }

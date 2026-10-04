@@ -85,7 +85,8 @@ fn descriptor(fields: &[(&str, &str)]) -> String {
     format!("struct {{ {} }}", members.join("; "))
 }
 fn parse(raw: &str, specs: &[(&str, &str)]) -> Result<Value, Error> {
-    let fields = serde_json::from_str::<Fields>(raw).map_err(|_| {
+    let repaired = symbrain_skills::wire::repair_argument_strings(raw.as_bytes());
+    let fields = serde_json::from_str::<Fields>(&repaired).map_err(|_| {
         Error::validation(
             "parse arguments",
             format!(
@@ -202,5 +203,41 @@ mod tests {
         assert!(decode("skills_render_plan", Some(&raw)).is_ok());
         let raw = RawValue::from_string(r#"{"profile":"","path":4}"#.into()).unwrap();
         assert!(decode("skills_render_plan", Some(&raw)).is_err());
+    }
+}
+
+#[cfg(test)]
+mod raw_key_tests {
+    use super::*;
+    #[test]
+    fn ignored_lone_surrogate_key_and_huge_number_reach_original_struct_decoder() {
+        let raw = RawValue::from_string(r#"{"\ud800":1e9999,"name":"demo"}"#.into()).unwrap();
+        assert_eq!(
+            decode("skills_history", Some(&raw)).unwrap()["name"],
+            "demo"
+        );
+        let raw = RawValue::from_string(r#"{"name":"\ud800"}"#.into()).unwrap();
+        assert_eq!(
+            decode("skills_history", Some(&raw)).unwrap()["name"],
+            "\u{fffd}"
+        );
+        let raw = RawValue::from_string(r#"{"limit":1e9999}"#.into()).unwrap();
+        assert!(decode("skills_history", Some(&raw)).is_err());
+    }
+    #[test]
+    fn newly_admitted_strings_keep_shared_audit_redaction() {
+        let raw = symbrain_skills::wire::repair_argument_strings(
+            br#"{"name":"\ud800","password":"owned-placeholder"}"#,
+        );
+        let (keys, values) =
+            symbrain_audit::redact_args("skills", "skills_history", raw.as_bytes(), true);
+        assert_eq!(keys, "name,password");
+        assert_eq!(values, "name=\u{fffd},password=[redacted]");
+        let raw =
+            symbrain_skills::wire::repair_argument_strings(br#"{"ignored":1e9999,"name":"demo"}"#);
+        assert_eq!(
+            symbrain_audit::redact_args("skills", "skills_history", raw.as_bytes(), true),
+            (String::new(), String::new())
+        );
     }
 }

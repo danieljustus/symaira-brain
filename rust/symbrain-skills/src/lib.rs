@@ -10,6 +10,7 @@ pub mod context_profile;
 pub mod discover;
 mod encode;
 pub mod install;
+mod io_contract;
 pub mod library;
 mod load;
 pub mod materialize;
