@@ -218,6 +218,67 @@ fn many_skipped_handler_attempts_share_one_budget_under_retained_writer() {
 }
 
 #[test]
+fn early_writer_then_waiting_reader_share_the_actual_sqlite_timeout() {
+    let database = OwnedDatabase::new();
+    let writer = retained_writer(&database);
+    let reader = Connection::open(&database.0).unwrap();
+    reader.execute_batch("BEGIN;").unwrap();
+    assert_eq!(
+        reader
+            .query_row("SELECT value FROM retained", [], |row| row
+                .get::<_, String>(0))
+            .unwrap(),
+        "unchanged"
+    );
+    let follower = Connection::open(&database.0).unwrap();
+    let started = Instant::now();
+    let mut early_attempts = 0_u32;
+    let mut released_at = None;
+    // Keep the reader's actual SHARED lock throughout. Only after repeated
+    // real skipped-handler failures release RESERVED, so the next pragma
+    // acquires RESERVED and genuinely waits for that reader's EXCLUSIVE lock.
+    let error = attempts(&follower, || {
+        early_attempts += 1;
+        if released_at.is_none() && started.elapsed() >= Duration::from_secs(1) {
+            writer.execute_batch("ROLLBACK;").unwrap();
+            released_at = Some(started.elapsed());
+        }
+    })
+    .unwrap_err();
+    let elapsed = started.elapsed();
+    let released_at = released_at.expect("real writer phase must precede reader wait");
+    let last_timeout = follower
+        .query_row("PRAGMA busy_timeout", [], |row| row.get::<_, u32>(0))
+        .unwrap();
+    assert!(plain_busy(&error), "{error}");
+    assert!(early_attempts > 1);
+    // Inspect the actual SQLite handler budget before the wrapper restores it.
+    // A fresh-five-second-per-attempt mutant deterministically leaves 5000;
+    // no scheduler-sensitive upper elapsed-time assertion is needed.
+    assert!(last_timeout > 0 && last_timeout < 4000, "{last_timeout}");
+    assert!(elapsed - released_at >= Duration::from_millis(u64::from(last_timeout)));
+    assert!(elapsed >= BUDGET);
+    assert!(follower.is_autocommit());
+    assert_eq!(
+        follower
+            .query_row("PRAGMA journal_mode", [], |row| row.get::<_, String>(0))
+            .unwrap(),
+        "delete"
+    );
+    assert_eq!(
+        reader
+            .query_row("SELECT value FROM retained", [], |row| row
+                .get::<_, String>(0))
+            .unwrap(),
+        "unchanged"
+    );
+    eprintln!(
+        "mixed real WAL contention: {early_attempts} early BUSY attempts; writer released at {released_at:?}; final actual SQLite timeout={last_timeout}ms; total={elapsed:?}; error={error:?}"
+    );
+    reader.execute_batch("COMMIT;").unwrap();
+}
+
+#[test]
 fn caller_transaction_is_not_retried_or_rolled_back() {
     let conn = Connection::open_in_memory().unwrap();
     conn.execute_batch(
