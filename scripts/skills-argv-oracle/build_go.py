@@ -123,6 +123,24 @@ def source_map(git, source, env, report):
     return rows
 
 
+def prepare_module_cache(go, git, source, env, report):
+    """Fetch checksum-verified frozen dependencies before the offline proof."""
+    preparation_env = dict(env, GOPROXY="https://proxy.golang.org",
+                           GOSUMDB="sum.golang.org")
+    report["module_cache_preparation"] = {
+        "GOPROXY": preparation_env["GOPROXY"],
+        "GOSUMDB": preparation_env["GOSUMDB"],
+        "status": "started", "build_network": False}
+    run([go, "mod", "download"], preparation_env, report, source, timeout=300)
+    rows = source_map(git, source, env, report)
+    report["source_after_cache_preparation"] = rows
+    if rows != report["source_before"]:
+        raise ValueError("module cache preparation changed frozen source bytes or modes")
+    if run([git, "status", "--porcelain"], env, report, source):
+        raise ValueError("frozen fixture must remain clean after cache preparation")
+    report["module_cache_preparation"]["status"] = "passed"
+
+
 def build(args, out, report):
     git = shutil.which("git")
     go = shutil.which("go")
@@ -173,6 +191,8 @@ def build(args, out, report):
         report["source_before"] = source_map(git, source, env, report)
         if run([git, "status", "--porcelain"], env, report, source):
             raise ValueError("frozen fixture must be clean before build")
+        if args.prepare_module_cache:
+            prepare_module_cache(go, git, source, env, report)
         run([go, "mod", "verify"], env, report, source, timeout=300)
         floor((owned, out.parent, args.go_cache))
         run([go, "build", "-p=2", "-mod=readonly", "-buildvcs=true", "-o", out,
@@ -198,6 +218,8 @@ def main():
     parser.add_argument("--receipt", type=Path, required=True)
     parser.add_argument("--go-cache", type=Path, required=True)
     parser.add_argument("--module-cache", type=Path, required=True)
+    parser.add_argument("--prepare-module-cache", action="store_true",
+                        help="explicitly fetch verified frozen dependencies before offline verification/build")
     args = parser.parse_args()
     os.umask(0o022)
     # These handlers are scoped to this SDK fixture program. Product CLI signal

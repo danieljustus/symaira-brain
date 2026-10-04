@@ -61,7 +61,8 @@ class NovelPreparation(unittest.TestCase):
             os.utime(owned, ns=(10**18, 10**18))
             self.assertNotEqual(initial, snapshot(root))
             owned.write_bytes(b"unchanged\0raw\xff")
-            os.utime(owned, ns=(10**18 + 1, 10**18 + 1))
+            # A one-second delta is representable by native Windows FILETIME.
+            os.utime(owned, ns=(10**18 + 10**9, 10**18 + 10**9))
             self.assertNotEqual(initial, snapshot(root))
             if os.name != "nt":
                 owned.chmod(0o600)
