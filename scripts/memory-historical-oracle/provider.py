@@ -55,18 +55,24 @@ def activate():
                    library_sha256=manifest["library_sha256"], library_mapped=True,
                    zip_sha256=ZIP_SHA256, c_sha3_256=C_SHA3_256,
                    loader_environment_changed=False, provider_environment_consumed=True)
+    # Admission belongs to this interpreter, including the controls process.
+    # A verified handle alone cannot establish the extension's symbol binding.
+    identity()
 
 
 def identity():
     import _sqlite3
     import sqlite3
-    with closing(sqlite3.connect(":memory:")) as database:
-        source_id = database.execute("SELECT sqlite_source_id()").fetchone()[0]
     if _active is not None:
         extension = ctypes.CDLL(_sqlite3.__file__)
         actual_address = ctypes.cast(extension.sqlite3_sourceid, ctypes.c_void_p).value
         expected_address = ctypes.cast(_library.sqlite3_sourceid, ctypes.c_void_p).value
         assert actual_address == expected_address, "extension bound another SQLite library"
+        assert sqlite3.sqlite_version == VERSION, (
+            "CPython did not bind the required checker provider", sqlite3.sqlite_version)
+    with closing(sqlite3.connect(":memory:")) as database:
+        source_id = database.execute("SELECT sqlite_source_id()").fetchone()[0]
+    if _active is not None:
         assert sqlite3.sqlite_version == VERSION and source_id == SOURCE_ID, (
             "CPython did not bind the required checker provider", sqlite3.sqlite_version, source_id)
         _active["extension_sourceid_address_verified"] = True

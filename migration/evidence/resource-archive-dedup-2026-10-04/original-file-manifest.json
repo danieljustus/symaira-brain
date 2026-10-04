@@ -1,0 +1,314 @@
+{
+  "dedup/restore-portable-test.json": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/restore-portable-test.json",
+    "bytes": 493,
+    "native_mode": 384,
+    "sha256": "652e4e441691adfc36dd01666ed99caff82ad752bbe2d941dcfb56815d7dd041"
+  },
+  "dedup/slow-audit-stop.json": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/slow-audit-stop.json",
+    "bytes": 248,
+    "native_mode": 384,
+    "sha256": "f46183f305621f83579a9f0b8bbf6923a61d54656e16b9ee35f146053fd94d96"
+  },
+  "dedup/report.md": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/report.md",
+    "bytes": 3327,
+    "native_mode": 384,
+    "sha256": "78853b3c7e93d95637e9a9446efcead53d216f0c16f968df16e38fcf41a1013d"
+  },
+  "dedup/dedup-resume-liveness.stderr": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup-resume-liveness.stderr",
+    "bytes": 768,
+    "native_mode": 384,
+    "sha256": "ddd1e34cc8308ce334e5c2374e5bff944b13d1f933ecc366ceeceaeede0c7c37"
+  },
+  "dedup/dedup.stdout": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup.stdout",
+    "bytes": 0,
+    "native_mode": 420,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "dedup/dedup-resume-bounded-liveness.py": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup-resume-bounded-liveness.py",
+    "bytes": 6583,
+    "native_mode": 384,
+    "sha256": "03bfc26b758d34d2d518975ec3fa4b22df0be94cdce4971f3700d56f8598293a"
+  },
+  "dedup/dedup-resume-bounded-liveness.stderr": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup-resume-bounded-liveness.stderr",
+    "bytes": 602,
+    "native_mode": 384,
+    "sha256": "75845dfb9dcebff51c5ce265301227bc178ab09f7de2c2b0152a44cf395c44f9"
+  },
+  "dedup/dedup-resume-liveness.stdout": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup-resume-liveness.stdout",
+    "bytes": 0,
+    "native_mode": 384,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "dedup/adr-ready.md": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/adr-ready.md",
+    "bytes": 1571,
+    "native_mode": 384,
+    "sha256": "4df5817ce76a18e92fb30c71946ba08d9a57cbb54d9b9c66703f26fa52d69f62"
+  },
+  "dedup/gzip-dedup-manifest.json": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/gzip-dedup-manifest.json",
+    "bytes": 1169387,
+    "native_mode": 420,
+    "sha256": "fa8e177288f1c847610e87e5e7599d0dcc966be97be0e7e7b5109fa2b9dab646"
+  },
+  "dedup/dedup-first-run.py": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup-first-run.py",
+    "bytes": 7937,
+    "native_mode": 384,
+    "sha256": "e46b49701f1986d8edb438e014e22e5386429d92c5f79f1d01b2c00e162c1733"
+  },
+  "dedup/dedup-resume-liveness.py": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup-resume-liveness.py",
+    "bytes": 6376,
+    "native_mode": 384,
+    "sha256": "d93a3ca5d871d33fb6ceb92790c3e628ac5c196d57aeb74258076242980c1f74"
+  },
+  "dedup/final-result.json": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/final-result.json",
+    "bytes": 1236,
+    "native_mode": 384,
+    "sha256": "e9ca519e15d9a7e954913eb88827940ec97787299fc6c3e75c7018dd27169155"
+  },
+  "dedup/dedup-resume-known-service.stdout": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup-resume-known-service.stdout",
+    "bytes": 552,
+    "native_mode": 384,
+    "sha256": "cd11c2e293796d3346ff8e337a84e088a9f4e9bfbbcdb64eba33098d422e1524"
+  },
+  "dedup/dedup-resume.stdout": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup-resume.stdout",
+    "bytes": 0,
+    "native_mode": 384,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "dedup/final-proof-manifest.json": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/final-proof-manifest.json",
+    "bytes": 3656,
+    "native_mode": 384,
+    "sha256": "ece240c3ce6617b60b9173f71c943705728bf7edeed2545b4a4ca3aaefeaed14"
+  },
+  "dedup/restore_archive.py": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/restore_archive.py",
+    "bytes": 3329,
+    "native_mode": 384,
+    "sha256": "9207e835400169431d55b075affef9b9d30dffe16c594a5efe91e2ed546bc8a4"
+  },
+  "dedup/first-stop-verification.json": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/first-stop-verification.json",
+    "bytes": 683,
+    "native_mode": 384,
+    "sha256": "5febf68bfbfc46a752a1391ce1e4b766d1a8757c7ea80358f02edb0e76d7b500"
+  },
+  "dedup/dedup-resume.py": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup-resume.py",
+    "bytes": 6024,
+    "native_mode": 384,
+    "sha256": "04ebd4a919b7e0f0d5a0f9907b5ea4c0a3cc223a6ed2644bb00f54abf1374a74"
+  },
+  "dedup/dedup.stderr": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup.stderr",
+    "bytes": 724,
+    "native_mode": 420,
+    "sha256": "0308d7963735a3f43b58d5b526254387b5bdf7bf43d1bcd76b877b5dab7efb0f"
+  },
+  "dedup/dedup.py": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup.py",
+    "bytes": 7937,
+    "native_mode": 420,
+    "sha256": "e46b49701f1986d8edb438e014e22e5386429d92c5f79f1d01b2c00e162c1733"
+  },
+  "dedup/dedup-resume-bounded-liveness.stdout": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup-resume-bounded-liveness.stdout",
+    "bytes": 0,
+    "native_mode": 384,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "dedup/full-original-restore-manifest.json": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/full-original-restore-manifest.json",
+    "bytes": 4424687,
+    "native_mode": 420,
+    "sha256": "8d5f6113a9ebf7951ce1c74167b59ad56e8a56c6e2b38cd2d544df5505eb4c1e"
+  },
+  "dedup/consolidated-report.md": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/consolidated-report.md",
+    "bytes": 3039,
+    "native_mode": 384,
+    "sha256": "1144c74d3df1a161dbc0372413963ca0f734624348bcb9079c4704a1085122f4"
+  },
+  "dedup/dedup-journal.jsonl": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup-journal.jsonl",
+    "bytes": 3734607,
+    "native_mode": 420,
+    "sha256": "89532efe99a6c7c4d07da417e8b8f4b609bf0ab7a007411d1fb51ed8f8c4a1b6"
+  },
+  "dedup/dedup-resume-result.json": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup-resume-result.json",
+    "bytes": 338053,
+    "native_mode": 384,
+    "sha256": "42f45910afc957889714d91b438f2f8bd9929239f781edb04744393f834cc8e4"
+  },
+  "dedup/dedup-resume-known-service.py": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup-resume-known-service.py",
+    "bytes": 6930,
+    "native_mode": 384,
+    "sha256": "c31c1bff2f87b38e32511ce67a8a2356a5fe27f03ce5349769b721f3a142da2a"
+  },
+  "dedup/dedup-resume.stderr": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup-resume.stderr",
+    "bytes": 881,
+    "native_mode": 384,
+    "sha256": "ada00853c4b84fbf1cac3003cd884dd758cd257f2007bb56b0b34bd70dc7bbcc"
+  },
+  "dedup/dedup-resume-known-service.stderr": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/dedup-resume-known-service.stderr",
+    "bytes": 0,
+    "native_mode": 384,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "dedup/released-source-archive/stdout.log": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/released-source-archive/stdout.log",
+    "bytes": 637,
+    "native_mode": 384,
+    "sha256": "d382ccbe804e89d843f18d6deb1aee1cf83f5fb354ab0aadb27f3331f920a910"
+  },
+  "dedup/released-source-archive/first-owned-script.py": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/released-source-archive/first-owned-script.py",
+    "bytes": 6154,
+    "native_mode": 384,
+    "sha256": "bdfb4591a2cbe3aa591eb2aa7a2bc48a7d51f09866eb6473e3d3e0fded55561c"
+  },
+  "dedup/released-source-archive/result.json": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/released-source-archive/result.json",
+    "bytes": 687,
+    "native_mode": 384,
+    "sha256": "d51eb41b43fade7bcff4ac85022373a1102e0d90e91a05219101734795ac11d4"
+  },
+  "dedup/released-source-archive/dedup.py": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/released-source-archive/dedup.py",
+    "bytes": 6227,
+    "native_mode": 384,
+    "sha256": "0f00e5a355f3868b3ac5933c10f97743805dcddc34210e0d762662470f2e1697"
+  },
+  "dedup/released-source-archive/full-original-restore-manifest.json": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/released-source-archive/full-original-restore-manifest.json",
+    "bytes": 28537,
+    "native_mode": 384,
+    "sha256": "bf306102672e3120016d8a5d7f6b13f745da68a21b065b38349edafb9dcec158"
+  },
+  "dedup/released-source-archive/dedup-journal.jsonl": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/released-source-archive/dedup-journal.jsonl",
+    "bytes": 1385,
+    "native_mode": 384,
+    "sha256": "5f82da6781a77020adfdf2f8ad3e01d466856527e7a7a3164c8eefb1f0884848"
+  },
+  "dedup/released-source-archive/stderr.log": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/released-source-archive/stderr.log",
+    "bytes": 0,
+    "native_mode": 384,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "dedup/released-source-archive/first-owned-stderr.log": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/released-source-archive/first-owned-stderr.log",
+    "bytes": 904,
+    "native_mode": 384,
+    "sha256": "912b22e40d9deb1c3e11235d59803ae5925d2a0ba6cd9daedfddba12a1ec44e4"
+  },
+  "dedup/released-source-archive/first-owned-stdout.log": {
+    "original_path": "/workspace/review-proof/review-pr800-resource-derivatives/released-source-archive/first-owned-stdout.log",
+    "bytes": 0,
+    "native_mode": 384,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "sixteenth-retirement/receipt.json": {
+    "original_path": "/workspace/review-proof/review-pr800-source765-old-tree-audit/receipt.json",
+    "bytes": 1067057,
+    "native_mode": 384,
+    "sha256": "3f1a8e7c2fa9a06d7b9c94404f02777c19c95517dfc982a0c4c3a28f0564f4d5"
+  },
+  "sixteenth-retirement/retirement.stderr.log": {
+    "original_path": "/workspace/review-proof/review-pr800-source765-old-tree-audit/retirement.stderr.log",
+    "bytes": 0,
+    "native_mode": 384,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "sixteenth-retirement/stdout.log": {
+    "original_path": "/workspace/review-proof/review-pr800-source765-old-tree-audit/stdout.log",
+    "bytes": 1134,
+    "native_mode": 384,
+    "sha256": "1122728ec9eba5be7a3c16b4798efbf296c27f0acf23c998a0c18951ab579af5"
+  },
+  "sixteenth-retirement/retire.py": {
+    "original_path": "/workspace/review-proof/review-pr800-source765-old-tree-audit/retire.py",
+    "bytes": 6644,
+    "native_mode": 384,
+    "sha256": "e91a0545caf73f09252be601d44034fcb47818344f4ce7b4a75cf78d5237e921"
+  },
+  "sixteenth-retirement/retirement-result.json": {
+    "original_path": "/workspace/review-proof/review-pr800-source765-old-tree-audit/retirement-result.json",
+    "bytes": 1288,
+    "native_mode": 384,
+    "sha256": "4e172264cb5a5b8ed1de810f309ee6a50422be4d70c37aebb9c6700cbadd213d"
+  },
+  "sixteenth-retirement/retirement-journal.jsonl": {
+    "original_path": "/workspace/review-proof/review-pr800-source765-old-tree-audit/retirement-journal.jsonl",
+    "bytes": 10649,
+    "native_mode": 384,
+    "sha256": "b84cc68ef9408edd8ea8b1930b24d13d465fb789b6bc429b20e79f008f05d3d5"
+  },
+  "sixteenth-retirement/full-tracked-manifest.json": {
+    "original_path": "/workspace/review-proof/review-pr800-source765-old-tree-audit/full-tracked-manifest.json",
+    "bytes": 2068809,
+    "native_mode": 384,
+    "sha256": "024145eeed2fe7a6cec46b613cc824d698d2c418df53e65c08532625a144be05"
+  },
+  "sixteenth-retirement/retirement.stdout.log": {
+    "original_path": "/workspace/review-proof/review-pr800-source765-old-tree-audit/retirement.stdout.log",
+    "bytes": 1086,
+    "native_mode": 384,
+    "sha256": "d257eb22160afd5971be92d34aecdedb03bdb75b98b6d84a3a8bdc37808da26a"
+  },
+  "sixteenth-retirement/f05cc9338d5746e8af85155d9c315c9c61b43c0097205d8abc8ac23771ad70b6.pyc.gz": {
+    "original_path": "/workspace/review-proof/review-pr800-source765-old-tree-audit/f05cc9338d5746e8af85155d9c315c9c61b43c0097205d8abc8ac23771ad70b6.pyc.gz",
+    "bytes": 4315,
+    "native_mode": 384,
+    "sha256": "0b5b970b299a9edb9e23beb92221c9735d0e79d4b927a0733dc527ab8cfa3d20"
+  },
+  "sixteenth-retirement/f77ddf72b5f2d150719fd4c0e4e8dfc1fa779d721d218fc0dbd2392716d55d30.pyc.gz": {
+    "original_path": "/workspace/review-proof/review-pr800-source765-old-tree-audit/f77ddf72b5f2d150719fd4c0e4e8dfc1fa779d721d218fc0dbd2392716d55d30.pyc.gz",
+    "bytes": 2971,
+    "native_mode": 384,
+    "sha256": "7760658137fc2ec9fdb41f63871a68a4c3b189931d3ac3b140491f5c5cfe9f25"
+  },
+  "sixteenth-retirement/audit.py": {
+    "original_path": "/workspace/review-proof/review-pr800-source765-old-tree-audit/audit.py",
+    "bytes": 5087,
+    "native_mode": 384,
+    "sha256": "a2e228998d03f4c5c61b86391a46c6394b7d56f5fdf61dd7f6df526dc9f924df"
+  },
+  "sixteenth-retirement/e4cc96329142c26a8de05c4387a3fad2e37942ffaad9a8c11ac996ca89882153.pyc.gz": {
+    "original_path": "/workspace/review-proof/review-pr800-source765-old-tree-audit/e4cc96329142c26a8de05c4387a3fad2e37942ffaad9a8c11ac996ca89882153.pyc.gz",
+    "bytes": 4372,
+    "native_mode": 384,
+    "sha256": "3642513bac144e3efb206cb186ede972f1bc84dd62bb6f9a5adea65ea67009f0"
+  },
+  "sixteenth-retirement/stderr.log": {
+    "original_path": "/workspace/review-proof/review-pr800-source765-old-tree-audit/stderr.log",
+    "bytes": 0,
+    "native_mode": 384,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "root-independent-verification.json": {
+    "original_path": "/workspace/review-proof/root-source765-old-tree-retirement/verification.json",
+    "bytes": 643,
+    "native_mode": 384,
+    "sha256": "46bfa9e6f168641953bef86e67e66dc2444133ea0a3bab03b545c0671a959c42"
+  }
+}

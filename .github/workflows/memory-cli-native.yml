@@ -55,7 +55,7 @@ jobs:
         run: |
           set -euo pipefail
           umask 022
-          python3 -m unittest discover -s scripts/memory-historical-oracle -p test_provider.py -v
+          python3 -m unittest discover -s scripts/memory-historical-oracle -p 'test_provider*.py' -v
       - name: Prepare the verified Linux SQLite checker library
         if: runner.os == 'Linux'
         env:
