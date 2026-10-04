@@ -78,6 +78,7 @@ jobs:
           python3 port/harness/test_windows_pipe.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-pipe-controls.log"
           python3 port/harness/test_registry_progress.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-registry-progress-tests.log"
           python3 port/harness/test_registry_cli_process.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-cli-capture-tests.log"
+          python3 port/harness/test_registry_daemon_lifetime.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-owner-tests.log"
           python3 port/harness/test_raw_path_admission.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-raw-path-tests.log"
           python3 port/harness/run.py --suite daemon 2>&1 | tee "$RUNNER_TEMP/browse-daemon-lifecycle.log"
           python3 port/harness/run.py --suite daemon-races --repeat 50 2>&1 | tee "$RUNNER_TEMP/browse-daemon-races.log"
@@ -153,6 +154,7 @@ jobs:
             ${{ runner.temp }}/browse-daemon-pipe-controls.log
             ${{ runner.temp }}/browse-daemon-registry-progress-tests.log
             ${{ runner.temp }}/browse-daemon-cli-capture-tests.log
+            ${{ runner.temp }}/browse-daemon-owner-tests.log
             ${{ runner.temp }}/browse-daemon-raw-path-tests.log
             ${{ runner.temp }}/browse-daemon-client-deadlines.log
             ${{ runner.temp }}/browse-daemon-client-deadlines/**

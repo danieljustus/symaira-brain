@@ -17,6 +17,7 @@ import time
 from registry_progress import Progress, event
 from registry_compare import compare, controls, normalize
 from registry_cli_process import capture
+from registry_daemon_lifetime import WindowsOwner
 
 HERE = Path(__file__).resolve().parent
 SPEC = importlib.util.spec_from_file_location("process", HERE / "daemon_process.py")
@@ -163,6 +164,7 @@ def observe(binary: Path, session: str, fixtures: dict[str, str], progress=None)
         env.pop("SYMBROWSE_NO_AUTOSTART")
         auto_session = session + "a"
         auto_endpoint = harness.daemon_socket_path(Path(env["XDG_RUNTIME_DIR"]), auto_session)
+        auto_owner = None
         try:
             event(progress, "autostart.begin", session=auto_session)
             with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
@@ -170,9 +172,13 @@ def observe(binary: Path, session: str, fixtures: dict[str, str], progress=None)
                     ["state", "list", "--session", auto_session, "--json"]), range(8)))
             event(progress, "autostart.owner.begin", session=auto_session)
             owner = request(auto_endpoint, {"cmd": "daemon.status", "session": auto_session}, progress)
+            if os.name == "nt":
+                auto_owner = WindowsOwner(owner["data"]["pid"], binary, progress)
             info = request(auto_endpoint, {"cmd": "session.info", "session": auto_session}, progress)
             event(progress, "autostart.owner.end", session=auto_session)
             assert owner["data"]["pid"] == info["data"]["pid"]
+            if auto_owner is not None:
+                auto_owner.confirm(owner["data"]["pid"], info["data"]["pid"])
             log = state / "daemon.log"
             assert log.is_file(), "autostart ignored the resolved configured state directory"
             if os.name == "posix":
@@ -194,12 +200,16 @@ def observe(binary: Path, session: str, fixtures: dict[str, str], progress=None)
             assert (state_files / "alpha.json").read_bytes().hex() == fixtures["alpha"], "metadata/clean rewrote retained migration data"
             assert sorted(p.name for p in state_files.iterdir()) == ["alpha.json"], "clear/clean removed the wrong state files"
         finally:
+            stop_error = None
             try:
                 event(progress, "autostart.stop.begin", session=auto_session)
                 request(auto_endpoint, {"cmd": "daemon.stop", "session": auto_session}, progress)
                 event(progress, "autostart.stop.end", session=auto_session)
-            except OSError:
-                pass
+            except OSError as error:
+                stop_error = error
+            finally:
+                if auto_owner is not None:
+                    auto_owner.finish(stop_error)
         event(progress, "observe.end", binary=str(binary), session=session)
         return {"root": str(root), "session": session, "begin": began, "end": time.time(),
                 "pid": first_pid, "restart_pid": restart_pid, "missing": missing, "invalid_cli": invalid_cli,
