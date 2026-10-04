@@ -1,6 +1,7 @@
 # Prepare the Skills wide-argv runtime successor
 
-Status: source integration only; no new compiler, target or process validation.
+Status: Linux author runtime gates complete; independent review and native
+three-OS/protected CI remain pending. The original preparation is retained.
 Refs #793/#794. The isolated author-runtime branch starts at immutable
 97d8ca6a0679ebdf9cf8175a284da335dc6a07de and normally merges current main
 5e232700bb9031fc34d4995465a4037837540abb. Merge2a76fc7 has no conflicts.
@@ -51,3 +52,41 @@ reported child-harness passes; its70 raw summaries sum to461. Core has104 tests
 over2 parents. The historical459 count retains its original source/aggregation;
 it is not silently relabeled as this run. Repeat the entire final-source driver
 and all actual315 raw pairs/three controls after the documentation correction.
+
+The clean final production source is51e42aa. Its fresh complete run passes447
+primary Audit/CLI/Skills tests and104 Core tests over58 Cargo parents, with
+2 intentional child-entry ignores and14 separately counted nested child tests.
+Strict all-target/all-feature Clippy, workspace formatting and actionlint pass.
+The existing actionlint binary needs /workspace/toolchains/bin in PATH; preserve
+the preceding missing-PATH attempt rather than replacing its failure log.
+
+The frozen Go build from the original linked-worktree helper was correctly
+rejected by the unchanged comparison harness because it lacks VCS metadata.
+Go1.26.7's actual vcsGit.RootNames recognizes only a .git directory; the linked
+worktree has a .git file. Even the explicit buildvcs dry run confirms the absent
+stamp. Use a separate owned local shared clone with a real .git directory,
+checkout immutable dcddcef0, require buildvcs=true and clean checks, and verify
+all2438 tracked file/blob/mode mappings after building. This repairs oracle
+preparation without changing frozen sources, the SDK or the VCS assertion.
+The original unstamped executable and failed metadata check remain retained.
+
+All315 actual Unix Go/native pairs match exactly and retain their filesystem
+state. Each of the3 real changed-input controls fails and passes the existing
+control verifier. The preserved novel plan adds40 raw Unix and11 portable
+required pairs plus2 separately attributed global-output parent controls;
+all53 owned Go/native/archived-parent cases preserve full filesystem snapshots.
+Their observed output also matches Go, but this preflight proof does not
+establish broader positive Skills or global-output cutover.
+
+Preserve67 original/new proof files losslessly in author-linux-51e42, including
+all initial attempts, permission changes, metadata diagnosis and cache-transfer
+lineage. The final immutable executable receipt preserves590 ELF paths and547
+unique payloads with checked gzip round trips. It distinguishes58 actually
+executed Cargo parent roles and3 CLI roles from inherited, unexecuted cache
+artifacts. The actual native CLI and stamped Go CLI hashes are in
+author-linux-result.json. All465 Rust/Cargo source maps and36 original proof
+files retain the original97d bytes apart from the precise API doc addition.
+The312 baseline and99 novel Windows cases remain native-runtime requirements;
+Linux wide-source preparation is not Windows evidence. Release this one target
+only after the immutable evidence checkpoint and a zero-user check, for the
+different-author full review. No GitHub publication or self-approval occurs here.
