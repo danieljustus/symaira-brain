@@ -256,7 +256,9 @@ fn early_writer_then_waiting_reader_share_the_actual_sqlite_timeout() {
     // A fresh-five-second-per-attempt mutant deterministically leaves 5000;
     // no scheduler-sensitive upper elapsed-time assertion is needed.
     assert!(last_timeout > 0 && last_timeout < 4000, "{last_timeout}");
-    assert!(elapsed - released_at >= Duration::from_millis(u64::from(last_timeout)));
+    assert!(
+        elapsed.checked_sub(released_at).unwrap() >= Duration::from_millis(u64::from(last_timeout))
+    );
     assert!(elapsed >= BUDGET);
     assert!(follower.is_autocommit());
     assert_eq!(
