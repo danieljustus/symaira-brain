@@ -99,12 +99,18 @@ mod tests {
 
     #[test]
     fn absolute_host_wins_without_broadening_loopback_spellings() {
+        // The existing HTTP URI parser rejects encoded ASCII host bytes before
+        // this helper; it must not be replaced by a normalizer accepting them.
+        assert!(
+            "http://%31%32%37.0.0.1:80/api/list"
+                .parse::<hyper::Uri>()
+                .is_err()
+        );
         for (authority, expected, admitted) in [
             ("untrusted.invalid", "untrusted.invalid", false),
             ("LOCALHOST:80", "LOCALHOST:80", true),
             ("127.1:80", "127.1:80", false),
             ("0x7f000001:80", "0x7f000001:80", false),
-            ("%31%32%37.0.0.1:80", "%31%32%37.0.0.1:80", false),
             ("owned@127.0.0.1:80", "127.0.0.1:80", true),
         ] {
             let request = Request::builder()
