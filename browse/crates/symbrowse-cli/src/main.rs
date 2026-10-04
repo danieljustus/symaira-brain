@@ -2,6 +2,8 @@
 
 mod browser_profiles;
 mod completion;
+mod daemon_state;
+use daemon_state::{run_daemon_lifecycle, run_state_operation};
 mod help_catalog;
 mod upgrade;
 
@@ -76,12 +78,12 @@ enum Action {
         allow_private: Option<bool>,
     },
     DaemonLifecycle {
-        session: String,
+        session: OsString,
         command: String,
         format: Format,
     },
     StateOperation {
-        session: String,
+        session: OsString,
         command: String,
         name: Option<String>,
         older_than: Option<i64>,
@@ -704,145 +706,6 @@ fn run_daemon(
     }
 }
 
-fn run_daemon_lifecycle(session: String, command: String, format: Format) -> ExitCode {
-    let client = Client::new(ClientOptions {
-        socket_path: default_socket_path(&session),
-        session: session.clone(),
-        autostart: false,
-        ..ClientOptions::default()
-    });
-    let response = match client.request_without_autostart(Frame {
-        cmd: command,
-        session,
-        ..Frame::default()
-    }) {
-        Ok(response) => response,
-        Err(error) => {
-            if format == Format::Text {
-                let _ = writeln!(io::stderr(), "{error}");
-            } else if let Ok(output) = serde_json::to_string(&symbrowse_daemon::error_response(
-                daemon_codes::DAEMON_UNAVAILABLE,
-                error.to_string(),
-            )) {
-                let _ = writeln!(io::stdout(), "{output}");
-            }
-            return ExitCode::from(1);
-        }
-    };
-    if format == Format::Text {
-        if response.success {
-            let _ = writeln!(
-                io::stdout(),
-                "{}",
-                response.data.as_ref().map_or_else(
-                    || "ok".to_owned(),
-                    |data| serde_json::to_string_pretty(data).unwrap_or_else(|_| "ok".to_owned())
-                )
-            );
-            ExitCode::SUCCESS
-        } else {
-            let _ = writeln!(
-                io::stderr(),
-                "{}",
-                response
-                    .error
-                    .map_or_else(|| "daemon request failed".to_owned(), |error| error.message)
-            );
-            ExitCode::from(1)
-        }
-    } else {
-        serde_json::to_string(&response)
-            .map(|output| write_stdout(&(output + "\n")))
-            .unwrap_or_else(|_| ExitCode::from(1))
-    }
-}
-
-fn run_state_operation(
-    session: String,
-    command: String,
-    name: Option<String>,
-    older_than: Option<i64>,
-    format: Format,
-) -> ExitCode {
-    let args = match (name, older_than) {
-        (Some(name), _) => Some(serde_json::json!({"name": name})),
-        (None, Some(days)) => Some(serde_json::json!({"older_than_days": days})),
-        (None, None) => None,
-    };
-    let client = Client::new(ClientOptions {
-        socket_path: default_socket_path(&session),
-        session: session.clone(),
-        ..ClientOptions::default()
-    });
-    let response = match client.request(Frame {
-        cmd: command.clone(),
-        args,
-        session,
-        ..Frame::default()
-    }) {
-        Ok(response) => response,
-        Err(error) => {
-            let _ = writeln!(io::stderr(), "{error}");
-            return ExitCode::from(1);
-        }
-    };
-    if !response.success {
-        let _ = writeln!(
-            io::stderr(),
-            "{}",
-            response
-                .error
-                .map_or_else(|| "state request failed".to_owned(), |error| error.message)
-        );
-        return ExitCode::from(1);
-    }
-    if format != Format::Text {
-        return serde_json::to_string(&response)
-            .map(|output| write_stdout(&(output + "\n")))
-            .unwrap_or_else(|_| ExitCode::from(1));
-    }
-    let data = response.data.unwrap_or(serde_json::Value::Null);
-    let output = match command.as_str() {
-        "state.save" => format!(
-            "saved state {:?}\n",
-            data.get("name")
-                .and_then(serde_json::Value::as_str)
-                .unwrap_or("")
-        ),
-        "state.load" => format!(
-            "loaded state {:?}\n",
-            data.get("name")
-                .and_then(serde_json::Value::as_str)
-                .unwrap_or("")
-        ),
-        "state.clear" => format!(
-            "cleared state {:?}\n",
-            data.get("name")
-                .and_then(serde_json::Value::as_str)
-                .unwrap_or("")
-        ),
-        "state.list" => data
-            .get("states")
-            .and_then(serde_json::Value::as_array)
-            .map(|values| {
-                values
-                    .iter()
-                    .filter_map(serde_json::Value::as_str)
-                    .map(|s| format!("{s}\n"))
-                    .collect()
-            })
-            .unwrap_or_default(),
-        "state.clean" => format!(
-            "removed {} expired state(s)\n",
-            data.get("removed")
-                .and_then(serde_json::Value::as_array)
-                .map_or(0, Vec::len)
-        ),
-        _ => serde_json::to_string_pretty(&data).unwrap_or_default() + "\n",
-    };
-    write_stdout(&output)
-}
-
 fn run_batch(format: Format, mut commands: Vec<String>, bail: bool, dry_run: bool) -> ExitCode {
     if commands.is_empty() {
         let mut input = String::new();
@@ -1099,6 +962,7 @@ fn implemented_help_command(command: &str) -> bool {
             | "click"
             | "config"
             | "daemon"
+            | "session"
             | "fill"
             | "find"
             | "flow"
@@ -1141,6 +1005,7 @@ fn command_help(command: &str, suffix: &[&str]) -> Option<String> {
         format!("{description}\n\nUsage:\n  {usage}\n\nFlags:\n{flags}\n{globals}")
     };
     match (target, first) {
+        ("session", subcommand) => Some(daemon_state::help(subcommand)),
         ("a11y", None) => Some(plain(
             "Run an axe-core accessibility audit on the current page",
             "symbrowse a11y [url] [flags]",
@@ -1485,8 +1350,9 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
         "upgrade" => parse_upgrade(&values, command_index),
         "config" => parse_config(&values, command_index),
         "batch" => parse_batch(&values, command_index),
-        "state" => parse_state_lifecycle(&values, command_index),
-        "daemon" => parse_daemon(&values, command_index),
+        "state" => parse_state_lifecycle(&values, args, command_index),
+        "daemon" => parse_daemon(&values, args, command_index),
+        "session" => daemon_state::parse_session(&values, args, command_index),
         "mcp" => parse_mcp(&values, command_index),
         "flow" | "workflow" => parse_flow(&values, command_index),
         "profiles" => {
@@ -1971,24 +1837,30 @@ fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
         }),
     }
 }
-fn parse_daemon(values: &[String], daemon_index: usize) -> Result<Action, ParseError> {
-    let mut session = "default".to_owned();
+fn parse_daemon(
+    values: &[String],
+    raw: &[OsString],
+    daemon_index: usize,
+) -> Result<Action, ParseError> {
+    let mut session = OsString::from("default");
     let mut engine = String::new();
     let mut mode = String::new();
     let mut ssrf = None;
     let mut allow_private = None;
-    let mut format = Format::Text;
-    let subcommand = values
-        .get(daemon_index + 1)
-        .map(String::as_str)
-        .unwrap_or("");
+    let (mut output, mut json) = daemon_state::global_output(values, daemon_index)?;
+    let mut subcommand = None;
     let mut index = daemon_index + 1;
     while index < values.len() {
         match values[index].as_str() {
-            "status" | "stop" => {}
+            value @ ("status" | "stop") => {
+                if subcommand.is_none() {
+                    subcommand = Some(value);
+                }
+            }
             "--session" => {
                 index += 1;
-                session = required_value(values, index, "--session")?.to_owned();
+                required_value(values, index, "--session")?;
+                session = daemon_state::session_value(&raw[index], false);
             }
             "--engine" => {
                 index += 1;
@@ -2009,12 +1881,14 @@ fn parse_daemon(values: &[String], daemon_index: usize) -> Result<Action, ParseE
             }
             "--mcp-mode" => {}
             "--allow-private" => allow_private = Some(true),
-            "--json" => format = Format::Json,
+            "--json" => json = true,
             "--output" => {
                 index += 1;
-                format = parse_format(required_value(values, index, "--output")?)?;
+                output = required_value(values, index, "--output")?.to_owned();
             }
-            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with("--session=") => {
+                session = daemon_state::session_value(&raw[index], true);
+            }
             value if value.starts_with("--engine=") => engine = value[9..].to_owned(),
             value if value.starts_with("--mode=") => mode = value[7..].to_owned(),
             value if value.starts_with("--ssrf=") => {
@@ -2022,8 +1896,8 @@ fn parse_daemon(values: &[String], daemon_index: usize) -> Result<Action, ParseE
             }
             "--allow-private=true" => allow_private = Some(true),
             "--allow-private=false" => allow_private = Some(false),
-            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
-            "--json=true" => format = Format::Json,
+            value if value.starts_with("--output=") => output = value[9..].to_owned(),
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             value if value.starts_with('-') => {
                 return Err(ParseError {
                     message: format!("unknown flag: {value}"),
@@ -2040,15 +1914,22 @@ fn parse_daemon(values: &[String], daemon_index: usize) -> Result<Action, ParseE
         }
         index += 1;
     }
-    if subcommand == "status" || subcommand == "stop" {
+    if let Some(subcommand) = subcommand {
         return Ok(Action::DaemonLifecycle {
             session,
             command: format!("daemon.{subcommand}"),
-            format,
+            format: if json {
+                Format::Json
+            } else {
+                parse_format(&output)?
+            },
         });
     }
+    // Keep validation of daemon-run output flags even though its current
+    // process adapter does not render the lifecycle envelope.
+    parse_format(&output)?;
     Ok(Action::DaemonRun {
-        session,
+        session: session.to_string_lossy().into_owned(),
         mode,
         engine,
         ssrf,
@@ -2125,23 +2006,17 @@ fn parse_mcp(values: &[String], mcp_index: usize) -> Result<Action, ParseError> 
     }
 }
 
-fn parse_state_lifecycle(values: &[String], state_index: usize) -> Result<Action, ParseError> {
-    let subcommand = values
-        .get(state_index + 1)
-        .map(String::as_str)
-        .ok_or_else(|| ParseError {
-            message: "state requires a subcommand".into(),
-            exit_code: 2,
-        })?;
-    if subcommand == "key" {
-        return parse_state(values, state_index);
-    }
-    let mut session = "default".to_owned();
-    let mut output = "text".to_owned();
-    let mut json = false;
+fn parse_state_lifecycle(
+    values: &[String],
+    raw: &[OsString],
+    state_index: usize,
+) -> Result<Action, ParseError> {
+    let mut subcommand = None;
+    let mut session = OsString::from("default");
+    let (mut output, mut json) = daemon_state::global_output(values, state_index)?;
     let mut name = None;
     let mut older_than = None;
-    let mut index = state_index + 2;
+    let mut index = state_index + 1;
     while index < values.len() {
         match values[index].as_str() {
             "--json" => json = true,
@@ -2151,7 +2026,8 @@ fn parse_state_lifecycle(values: &[String], state_index: usize) -> Result<Action
             }
             "--session" => {
                 index += 1;
-                session = required_value(values, index, "--session")?.to_owned();
+                required_value(values, index, "--session")?;
+                session = daemon_state::session_value(&raw[index], false);
             }
             "--older-than" => {
                 index += 1;
@@ -2166,13 +2042,16 @@ fn parse_state_lifecycle(values: &[String], state_index: usize) -> Result<Action
             }
             value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             value if value.starts_with("--output=") => output = value[9..].to_owned(),
-            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with("--session=") => {
+                session = daemon_state::session_value(&raw[index], true);
+            }
             value if value.starts_with('-') => {
                 return Err(ParseError {
                     message: format!("unknown flag: {value}"),
                     exit_code: 2,
                 });
             }
+            value if subcommand.is_none() => subcommand = Some(value),
             value if name.is_none() => name = Some(value.to_owned()),
             value => {
                 return Err(ParseError {
@@ -2182,6 +2061,13 @@ fn parse_state_lifecycle(values: &[String], state_index: usize) -> Result<Action
             }
         }
         index += 1;
+    }
+    let subcommand = subcommand.ok_or_else(|| ParseError {
+        message: "state requires a subcommand".into(),
+        exit_code: 2,
+    })?;
+    if subcommand == "key" {
+        return parse_state(values, state_index);
     }
     let format = if json {
         Format::Json

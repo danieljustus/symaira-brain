@@ -1,0 +1,3 @@
+package main
+import("crypto/sha256";"fmt";"strconv";"unicode/utf8")
+func main(){h:=sha256.New();for r:=rune(0);r<=utf8.MaxRune;r++ {if !utf8.ValidRune(r){continue};h.Write(strconv.AppendQuote(nil,string(r)));h.Write([]byte{'\n'})};fmt.Printf("%x\n",h.Sum(nil))}

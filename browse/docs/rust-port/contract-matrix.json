@@ -216,7 +216,8 @@
       "platforms": [
         "all"
       ],
-      "status": "parity"
+      "status": "parity",
+      "supplemental_process_gate": "port/harness/daemon_mcp.py: thirteen real Go/Rust MCP processes, Go MCP source hashes exactly equal the historical manifest, byte-exact existing input frames through the actual daemon, actual missing/changed-output and missing-daemon rejection controls; six native candidate receipts pending"
     },
     {
       "id": "MCP-007",
@@ -252,7 +253,8 @@
       "platforms": [
         "all"
       ],
-      "status": "parity"
+      "status": "parity",
+      "supplemental_process_gate": "port/harness/daemon_process.py: 21 actual requests against immutable integrated Go dcddcef0; PID/timestamps validated; only owned roots and documented Rust mode/session extensions projected; six native candidate receipts pending"
     },
     {
       "id": "DMN-002",
@@ -310,7 +312,8 @@
         "linux-amd64",
         "linux-arm64"
       ],
-      "status": "fixture-ready"
+      "status": "fixture-ready",
+      "supplemental_process_gate": "port/harness/daemon_process.py: 21 actual requests against immutable integrated Go dcddcef0; PID/timestamps validated; only owned roots and documented Rust mode/session extensions projected; six native candidate receipts pending"
     },
     {
       "id": "DMN-006",
@@ -330,19 +333,20 @@
     {
       "id": "DMN-007",
       "seam": "session registry",
-      "fixture": "valid/invalid IDs, ensure/list/info/touch/clear",
+      "fixture": "valid/invalid IDs, lexical/default roots without construction writes, ensure/list/info/touch/clear, copied refs, session isolation and restart preserving profiles",
       "go_oracle": "go test ./internal/daemon ./internal/sessionid -run 'Session|Registry'",
       "expected": "defaulting, order, timestamps and stable errors match",
       "comparison": "json-semantic",
       "platforms": [
         "all"
       ],
-      "status": "todo"
+      "status": "fixture-ready",
+      "supplemental_process_gate": "port/harness/daemon_registry.py: immutable dcddcef0 Go API overlay, 510 Unix or 294 Windows CLI observations (original108 including48 invalid plus392 Unix/176 Windows literal edge cases including exact12 JSON-output review regressions and20 root-flag controls,4 selected invalid-output controls and6 supported help pairs), 20 recorded raw frames, 8 concurrent autostart clients and3 actual Go-produced persisted v3 files per binary;8 rejecting controls; raw argv/output pairs literal; only verified unsupported Go session-id root-help advertisement omitted; only validated owned paths/PIDs/timestamps projected; all six native exact-head receipts required before parity"
     },
     {
       "id": "DMN-008",
       "seam": "client autostart",
-      "fixture": "missing daemon, concurrent clients, SYMBROWSE_NO_AUTOSTART and wrong engine/policy",
+      "fixture": "missing daemon, concurrent clients, SYMBROWSE_NO_AUTOSTART, resolved config timeout/logs, bounded owned-child cleanup and pre-dispatch wrong engine/policy rejection",
       "go_oracle": "go test ./internal/daemon ./cmd/symbrowse -run 'Autostart|Client|Engine'",
       "expected": "spawn argv, retry window, warnings and failure classification match",
       "comparison": "process",
@@ -350,9 +354,12 @@
         "darwin-amd64",
         "darwin-arm64",
         "linux-amd64",
-        "linux-arm64"
+        "linux-arm64",
+        "windows-amd64",
+        "windows-arm64"
       ],
-      "status": "todo"
+      "status": "fixture-ready",
+      "supplemental_process_gate": "port/harness/daemon_registry.py: immutable dcddcef0 Go API overlay, 510 Unix or 294 Windows CLI observations (original108 including48 invalid plus392 Unix/176 Windows literal edge cases including exact12 JSON-output review regressions and20 root-flag controls,4 selected invalid-output controls and6 supported help pairs), 20 recorded raw frames, 8 concurrent autostart clients and3 actual Go-produced persisted v3 files per binary;8 rejecting controls; raw argv/output pairs literal; only verified unsupported Go session-id root-help advertisement omitted; only validated owned paths/PIDs/timestamps projected; all six native exact-head receipts required before parity"
     },
     {
       "id": "CFG-001",

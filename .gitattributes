@@ -5,3 +5,11 @@
 # Treat them as binary so Git preserves those exact bytes and diff checks do not
 # mistake the carriage returns for accidental trailing whitespace.
 fuzz/corpus/** binary
+
+# Keep source-bound independent process/test logs exact.
+migration/evidence/browse-registry-772/corrected-independent-cf959/*.log binary
+
+# Retain exact native Windows endpoint failure bytes.
+migration/evidence/browse-registry-772/windows-endpoint-b427/*.log binary
+
+migration/evidence/browse-registry-772/windows-pipe-7f/*.log binary

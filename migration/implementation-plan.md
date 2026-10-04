@@ -1959,3 +1959,36 @@ Go remains the production enforcement path until the full Guard-specific matrix 
 ### Completion definition
 
 The migration is complete only when every row in `migration/contract-matrix.csv` is green, no command invokes Go, the supported release matrix passes, Swift clients work unchanged at their public boundary, and the Rust release has a verified rollback to the last Go release.
+
+
+### 2026-10-03: independently corrected daemon acceptance (#772 / #801)
+
+Clean corrected source `a3c2bdbc3686bf1b67b6970b155f8fb53a6db4a9` preserves
+Go's OS cache selection, Unix missing/empty TMPDIR fallback and per-invalid-byte
+worktree JSON identity. Reviewed successor `6c3bf1f93d2760b17f4f936076d26f0f4c00fe1d`
+changes only the isolated parent-test expectation to that Go-compatible fallback.
+Fresh independent Linux proof executed 63 daemon requests, 13 actual MCP CLI byte
+pairs, 291 workspace tests and six rejecting controls. One isolated child-entry
+test is ordinarily ignored and actually executed by its seven-scenario parent.
+The original process receipts, findings and failing probes remain tracked.
+Hosted Darwin's original AF_UNIX length failure uses a short private HOME in
+new harness runs; original production endpoint rules and external-volume gates
+are preserved. ADR 0007 records these decisions. Six fresh native platform/arch
+gates remain required. Registry/autostart and complete #772 acceptance stay open.
+
+### 2026-10-03: registry/autostart ownership increment (#772)
+
+Restore DMN-007/008 registry and ordinary CLI contracts using actual immutable
+Go API overlays and native process observations. Add read-only session list/info,
+resolved client timeout/log defaults, stable failure metadata, bounded cleanup,
+pre-dispatch explicit engine/policy verification, restart/profile preservation,
+schema-v3/null state inspection and compatibility decoding for existing Go
+null-cookie files. Keep historical Go fixtures and original failing observations.
+See `docs/adr/daemon-registry-autostart.md` and
+`migration/evidence/browse-registry-772/README.md` for rationale and evidence.
+
+DMN-007/008 are fixture-ready, not native parity. RUST-006 stays in_progress.
+Both runtime Store call paths still omit the state key; a focused successor must
+reuse the existing core resolver and verify actual Go key precedence and encrypted
+migration files without silent loss. All six exact-head native gates and fresh
+independent review remain required; do not close #772 on this increment.

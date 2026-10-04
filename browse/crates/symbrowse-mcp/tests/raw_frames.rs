@@ -5,9 +5,13 @@ use std::io::Cursor;
 use symbrowse_mcp::{ServeOptions, serve_stdio};
 
 fn run_fixture(name: &str, args: &[&str]) {
-    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
-    let input_path = format!("../../testdata/port/mcp/{name}.in");
-    let output_path = format!("../../testdata/port/mcp/{name}.out");
+    let root = std::env::var_os("SYMBROWSE_MCP_ORACLE_FIXTURE_DIR")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|| {
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../testdata/port/mcp")
+        });
+    let input_path = format!("{name}.in");
+    let output_path = format!("{name}.out");
     let input = std::fs::read(root.join(input_path)).expect("read MCP input fixture");
     let expected = std::fs::read(root.join(output_path)).expect("read MCP output fixture");
     let mut profiles = "core";
@@ -18,7 +22,8 @@ fn run_fixture(name: &str, args: &[&str]) {
     }
     let options = ServeOptions {
         version: "v0.8.0".to_owned(),
-        session: "default".to_owned(),
+        session: std::env::var("SYMBROWSE_MCP_ORACLE_SESSION")
+            .unwrap_or_else(|_| "default".to_owned()),
         profiles: profiles.to_owned(),
         executable: String::new(),
         allow_private: false,
