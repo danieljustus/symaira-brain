@@ -16,7 +16,14 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from progress import Journal, diagnostic_tree, raw
+
+# This harness is also loaded by the Linux output probes with importlib. Bind
+# its sibling directly, independent of the caller's working directory/sys.path.
+progress_spec = importlib.util.spec_from_file_location(
+    "setup_source_progress", Path(__file__).resolve().with_name("progress.py"))
+progress = importlib.util.module_from_spec(progress_spec)
+progress_spec.loader.exec_module(progress)
+Journal, diagnostic_tree, raw = progress.Journal, progress.diagnostic_tree, progress.raw
 
 ROOT = Path(__file__).resolve().parents[2]
 ORACLE = "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
