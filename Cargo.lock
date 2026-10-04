@@ -1681,7 +1681,6 @@ dependencies = [
  "rusqlite",
  "serde",
  "serde_json",
- "serde_yaml_ng",
  "sha2",
  "signal-hook",
  "symbrain-activity",
@@ -1700,6 +1699,7 @@ dependencies = [
  "symbrain-policy",
  "symbrain-skills",
  "symbrain-usage",
+ "symguard-cli",
  "tempfile",
  "toml_edit",
  "ureq",
@@ -1876,6 +1876,21 @@ dependencies = [
  "sha2",
  "tempfile",
  "ureq",
+]
+
+[[package]]
+name = "symguard-cli"
+version = "0.12.1"
+dependencies = [
+ "chrono",
+ "serde",
+ "serde_json",
+ "serde_yaml_ng",
+ "symbrain-audit",
+ "symbrain-core",
+ "symbrain-guard-core",
+ "tempfile",
+ "toml_edit",
 ]
 
 [[package]]

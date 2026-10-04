@@ -10,4 +10,4 @@ mod set;
 pub use atomic::{atomic_write, create_dir_all};
 pub use format::format_go_quoted;
 pub use get::{run_config_get, run_config_get_with_path};
-pub use set::{run_config_set, run_config_set_with_path};
+pub use set::{os_bytes, run_config_set, run_config_set_with_path};

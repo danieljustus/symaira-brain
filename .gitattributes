@@ -5,3 +5,7 @@
 # Treat them as binary so Git preserves those exact bytes and diff checks do not
 # mistake the carriage returns for accidental trailing whitespace.
 fuzz/corpus/** binary
+
+migration/evidence/guard-raw-paths-770/independent-806/*.log binary
+
+migration/evidence/guard-doctor-boundaries-770/final-9603/*.log binary

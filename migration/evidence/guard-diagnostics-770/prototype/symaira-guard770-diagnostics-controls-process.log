@@ -1,0 +1,3 @@
+    Finished `dev` profile [unoptimized] target(s) in 0.09s
+124 actual standalone process cases; 121 full matches; 3 remaining doctor diagnostic states and 0 audit diagnostic deviations explicitly retained
+actual diagnostic output mutants rejected: 3

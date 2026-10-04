@@ -1,0 +1,29 @@
+   Compiling symbrain-core v0.12.1 (/workspace/symaira-guard770-raw-paths/rust/symbrain-core)
+   Compiling symguard-cli v0.12.1 (/workspace/symaira-guard770-raw-paths/rust/symguard-cli)
+error: incorrect unicode escape sequence
+  --> rust/symbrain-core/src/json_string.rs:23:23
+   |
+23 |             .replace('\u2028', "\\u2028")
+   |                       ^^^
+   |
+help: format of unicode escape sequences uses braces
+   |
+23 -             .replace('\u2028', "\\u2028")
+23 +             .replace('\u{2028}', "\\u2028")
+   |
+
+error: incorrect unicode escape sequence
+  --> rust/symbrain-core/src/json_string.rs:24:23
+   |
+24 |             .replace('\u2029', "\\u2029");
+   |                       ^^^
+   |
+help: format of unicode escape sequences uses braces
+   |
+24 -             .replace('\u2029', "\\u2029");
+24 +             .replace('\u{2029}', "\\u2029");
+   |
+
+error: could not compile `symbrain-core` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `symbrain-core` (lib test) due to 2 previous errors

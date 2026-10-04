@@ -1,0 +1,12 @@
+b'defaults={read="allow",}\n' 0 0 True
+b'defaults={\nread="allow"\n}\n' 0 0 True
+b'defaults={read="allow",\nnetwork="ask"}\n' 0 0 True
+b'defaults={read="allow",# hi\nnetwork="ask"}\n' 0 0 True
+b'proxy={upstream="\\e"}\n' 0 0 True
+b'proxy={upstream="\\x41"}\n' 0 0 True
+b'proxy={upstream="\\u0041"}\n' 0 0 True
+b'rules=[{decision="allow",match={command_contains=[\n"owned",\n]}}]\n' 0 0 True
+b'remote=[{labels=[\n"owned",\n]}]\n' 0 0 True
+b'defaults={read="allow"} #comment\n' 0 0 True
+b'rules=[{decision="allow",match={server="owned"}},]\n' 0 0 True
+b'proxy.upstream="\\e"\n' 0 0 True

@@ -1,0 +1,12 @@
+{
+  "head": "e8766e354b4f6b21617d4201de23a96d65ac47c7",
+  "total": 31,
+  "matched": 27,
+  "gated": 4,
+  "failed": 0,
+  "binaries": {
+    "/tmp/symaira-guard770-diagnostics-independent-go": "d3aac7bb745a62cd3d55a6c47c0c3d322adc8de242ee71b456375a61f73e8e39",
+    "/workspace/symaira-guard770-diagnostics/target/debug/symguard": "cb05bf56ad55ce8e36449b3852ebb7b1669d7f7db1e2e51387b0c803d09ac563"
+  }
+}
+failures []

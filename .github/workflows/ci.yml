@@ -217,6 +217,23 @@ jobs:
           cargo build -p symbrain-cli --bin symbrain --locked
           python3 scripts/mcp-differential.py "$RUNNER_TEMP/symbrain-go-mcp" target/debug/symbrain
 
+      - name: Native standalone Guard process contracts
+        shell: bash
+        run: scripts/guard-standalone-oracle/run.sh "$RUNNER_TEMP/guard-standalone.json"
+
+      - name: Upload native standalone Guard evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: guard-standalone-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/guard-standalone.json
+            ${{ runner.temp }}/guard-standalone-controls.json
+            ${{ runner.temp }}/guard-standalone-raw-paths.json
+            ${{ runner.temp }}/guard-standalone-doctor-boundaries.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Native Go/Rust activity validation acceptance
         shell: bash
         run: scripts/activity-validation-oracle/run.sh "$RUNNER_TEMP/activity-validation-767.json"
@@ -360,6 +377,23 @@ jobs:
 
       - name: Rust MCP stdio and lifecycle gate on macOS
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
+
+      - name: Native standalone Guard process contracts
+        shell: bash
+        run: scripts/guard-standalone-oracle/run.sh "$RUNNER_TEMP/guard-standalone.json"
+
+      - name: Upload native standalone Guard evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: guard-standalone-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/guard-standalone.json
+            ${{ runner.temp }}/guard-standalone-controls.json
+            ${{ runner.temp }}/guard-standalone-raw-paths.json
+            ${{ runner.temp }}/guard-standalone-doctor-boundaries.json
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Native Go/Rust activity validation acceptance
         shell: bash
@@ -515,6 +549,23 @@ jobs:
           SYMBRAIN_VERSION=dev cargo build --workspace --locked
           ./guard/scripts/guard-scan-oracle/run.sh parity target/debug/symbrain.exe
           python3 scripts/rust-differential.py "$RUNNER_TEMP/symbrain-go.exe" target/debug/symbrain.exe
+
+      - name: Native standalone Guard process contracts
+        shell: bash
+        run: scripts/guard-standalone-oracle/run.sh "$RUNNER_TEMP/guard-standalone.json"
+
+      - name: Upload native standalone Guard evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: guard-standalone-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/guard-standalone.json
+            ${{ runner.temp }}/guard-standalone-controls.json
+            ${{ runner.temp }}/guard-standalone-raw-paths.json
+            ${{ runner.temp }}/guard-standalone-doctor-boundaries.json
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Native Go/Rust activity validation acceptance
         shell: bash
