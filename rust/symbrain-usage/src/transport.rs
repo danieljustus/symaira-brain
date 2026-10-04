@@ -181,10 +181,7 @@ pub struct UreqTransport {
 
 impl Default for UreqTransport {
     fn default() -> Self {
-        let config = ureq::Agent::config_builder()
-            .timeout_global(Some(Duration::from_secs(8)))
-            .max_redirects(0)
-            .build();
+        let config = Self::agent_config(Duration::from_secs(8)).build();
         Self {
             agent: ureq::Agent::new_with_config(config),
         }
@@ -192,6 +189,22 @@ impl Default for UreqTransport {
 }
 
 impl UreqTransport {
+    // One policy owns both default/deadline agents and the private wire proof.
+    // HTTP statuses belong to provider parsers, rather than transport errors.
+    pub(crate) fn agent_config(
+        timeout: Duration,
+    ) -> ureq::config::ConfigBuilder<ureq::typestate::AgentScope> {
+        ureq::Agent::config_builder()
+            .timeout_global(Some(timeout))
+            .max_redirects(0)
+            .http_status_as_error(false)
+    }
+
+    #[cfg(test)]
+    pub(crate) fn with_owned_test_agent(agent: ureq::Agent) -> Self {
+        Self { agent }
+    }
+
     fn execute(request: Request, agent: &ureq::Agent) -> Result<Response, String> {
         if request
             .body
@@ -262,10 +275,7 @@ impl Transport for UreqTransport {
         if timeout.is_zero() {
             return Err("request cancelled".to_string());
         }
-        let config = ureq::Agent::config_builder()
-            .timeout_global(Some(timeout))
-            .max_redirects(0)
-            .build();
+        let config = Self::agent_config(timeout).build();
         let agent = ureq::Agent::new_with_config(config);
         Self::execute(request, &agent)
     }

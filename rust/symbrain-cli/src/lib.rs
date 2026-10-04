@@ -52,50 +52,8 @@ impl FallbackExecutor for InheritedProcessExecutor {
     }
 }
 
-/// Normalizes CLI arguments matching Go's `normalizeFlags`:
-/// - Converts `--flag` to `-flag` when length > 2
-/// - Preserves positional arguments and bare `-`
-/// - Preserves `--` and all arguments following `--`
-#[must_use]
-pub fn normalize_flags(args: &[OsString]) -> Vec<OsString> {
-    let mut out = Vec::with_capacity(args.len());
-    let mut terminated = false;
-    for arg in args {
-        if terminated {
-            out.push(arg.clone());
-            continue;
-        }
-        #[cfg(unix)]
-        {
-            use std::os::unix::ffi::{OsStrExt, OsStringExt};
-            let bytes = arg.as_os_str().as_bytes();
-            if bytes == b"--" {
-                terminated = true;
-                out.push(arg.clone());
-            } else if bytes.starts_with(b"--") && bytes.len() > 2 {
-                let mut normalized = Vec::with_capacity(bytes.len() - 1);
-                normalized.push(b'-');
-                normalized.extend_from_slice(&bytes[2..]);
-                out.push(OsString::from_vec(normalized));
-            } else {
-                out.push(arg.clone());
-            }
-        }
-        #[cfg(not(unix))]
-        {
-            let s = arg.to_string_lossy();
-            if s == "--" {
-                terminated = true;
-                out.push(arg.clone());
-            } else if s.starts_with("--") && s.len() > 2 {
-                out.push(OsString::from(format!("-{}", &s[2..])));
-            } else {
-                out.push(arg.clone());
-            }
-        }
-    }
-    out
-}
+mod flag_normalization;
+pub use flag_normalization::normalize_flags;
 
 /// Returns whether an invocation reaches a Go-owned flag before its native
 /// parser would stop. This follows the relevant `flag.FlagSet` boundaries so
@@ -206,8 +164,14 @@ pub fn run_in_process(
         "uninstall" => Some(install_cli::run_uninstall(rest, stdout, stderr)),
         "mcp" => Some(mcp_cli::run(rest, stderr)),
         "serve" => Some(mcp_cli::run_serve(rest, stderr)),
-        "usage" if usage_cli::requires_go_fallback(rest) => None,
-        "usage" => Some(usage_cli::run(rest, stdout, stderr, format)),
+        "usage" => {
+            let invocation = usage_cli::classify(rest);
+            if invocation.requires_go_fallback() {
+                None
+            } else {
+                Some(invocation.run(stdout, stderr, format))
+            }
+        }
         "init" => Some(init_cli::run(rest, stdout, stderr)),
         "harness" => harness_cli::run(rest, stdout, stderr, format),
         "sync" if sync_cli::requires_go_fallback(rest) => None,

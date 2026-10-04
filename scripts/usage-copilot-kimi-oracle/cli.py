@@ -18,7 +18,7 @@ owner=args.owner
 expected=16 if owner else 89
 assert len(rows)==expected and len({row['id']for row in rows})==expected,'exact Copilot/Kimi corpus'
 rows=[row for row in rows if not row['gated']]
-assert len(rows)==(16 if owner else 80 if os.name=='nt'else 81),'complete conservative file subset'
+assert len(rows)==(16 if owner else 81 if os.name=='nt'else 82),'complete conservative file subset'
 missing=[row for row in rows if not row['report']['providers'][0]['configured']]
 expected=len(rows)+2*len(missing)
 records=[]

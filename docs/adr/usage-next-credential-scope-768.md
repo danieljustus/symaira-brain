@@ -103,3 +103,69 @@ pass. Preserve those compatibility gates until a separately designed explicit
 account-selection policy is authorized and evidenced. URL/workspace families,
 actual platform credential ownership, numeric conversion and host Keychain have
 separate acceptance criteria. Neither next increment closes full #768.
+
+## Implemented successor decision and exact limits
+
+The independently reviewed publication `b8621bc26e8d9c5985e8517968d679c127fa152a`
+was normally merged into this isolated successor. Its880 production, original
+103/36 and121/83 binary archives, old failed observations and review artifacts
+remain unchanged. The accepted target was SHA/gzip-roundtrip verified with zero
+`/proc` users before exclusive rename; no duplicate Cargo target exists.
+
+Usage now carries one `Invocation` classification through dispatch. Help,
+undefined/bad flags and unexpected positionals use the existing literal-byte
+normalizer and Go quoting before calling credential admission. Valid reports
+alone evaluate `needs_go_fallback`; every original argument byte still reaches
+Go on fallback. The normalization function moved mechanically to its own file
+with the same public API and unchanged grammar, keeping touched production
+components below400 lines. Existing fixture tests now require native diagnostics
+and separately exercise valid report forms for ambiguous and numeric gates;
+they no longer infer credential admission from an invalid command.
+
+Regular bounded validUTF8 Kimi device IDs preserve their exact Unicode bytes
+following Go-compatible TrimSpace, including CJK/emoji/combining/RTL/BOM/zero-width
+and Unicode-whitespace controls. InvalidUTF8, internal ASCII controls/DEL and
+unsafe/unreadable source shapes remain Go-owned. Token ownership, lexical joins,
+API/CLI/web chain and URL trust are unchanged. The original89-input successor
+corpus promotes exactly `kimi-device-unicode-value`: original ID/input bytes and
+historical gate string remain, with a separate promotion marker. Its equality
+is strengthened to full report/request/raw-header/read-only comparison. Source
+totals are now82 full/7 gated on Unix (81/8 Windows conservatively),112 local CLI
+observations; historical81/8/111 proof remains byte-identical. The original97
+mapping and66 retained inputs are preserved.
+
+Real owned TLS uncovered an inherited shared status-delivery bug: Ureq's default
+HTTP-status exception bypassed the existing provider-specific parser. Both
+production default/deadline agents now share one internal timeout/redirect/status
+builder with status-as-error disabled. All raw response statuses and bodies reach
+the existing provider owners; TLS, redirect refusal, body bounds and deadlines
+are retained. The private proof uses this exact production builder, adds only an
+owned trust root and restricted DNS resolver, and exercises unchanged production
+request construction/execution. Actual TLS also exposed Cursor's empty200 body
+diagnostic; only that precise empty-body text now follows frozen Go. Original
+actual401, empty200, clock and harness failures remain retained, without removing
+existing comparisons or changing body limits.
+
+The new complete gate retains the original39 device inputs:32 full native
+reports and seven retained raw/control gates, including selected bytes, exact
+logical request/raw-header bytes and read-only sources.32 owned TLS device cases
+plus84 remote cases across twelve strategy constructors cover401/403/429/500,
+success/malformed/empty responses. Four actual TLS200/401 exact/over1MiB bodies
+prove the unchanged native bound; Antigravity's shared transport is included,
+without a claim about its independent process-observation/report contract.
+Three genuine native failures reject missing-case, raw-device-header and remote
+status-diagnostic mutations. Early argv preserves all64 original unsupported
+admission vectors and expands to160 Unix/128 Windows-launchable diagnostics,
+fifteen valid gated report forms and two real late-admission/double-normalization
+mutants. Every original four gate, owner and argv regression remains required.
+
+All full actual reports/timestamps and wire bytes remain available. Runtime
+fetched_at is invocation-bounded; OpenCode resets compare exact3600/86400-second
+offsets from each actual fetched_at. Other report values compare exactly. The
+inherited OpenCode generated/fixed X-Server-Instance and transport-default headers,
+header case/order remain explicit differences, rather than an exact HTTP-stack
+parity claim. No frequency/performance claim follows from these tests. Fast-peer
+proof is not a new cancellation/deadline or operator proxy claim. All credentials
+are synthetic; pinned Go1.26.7 production/frozen fixtures remain unchanged. Fresh
+native3 exact-head CI and different-author full review are required; full #768,
+other URL/workspace/Keychain/account/numeric/platform families remain open.

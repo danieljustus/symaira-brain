@@ -173,7 +173,7 @@ fn copilot_kimi_oracle_matches_fresh_go() {
             );
         }
     }
-    assert_eq!(gated, if cfg!(windows) { 9 } else { 8 });
+    assert_eq!(gated, if cfg!(windows) { 8 } else { 7 });
     baseline_routes(&input);
     owner_matches_fresh_go();
     if let Ok(path) = std::env::var("USAGE_COPILOT_KIMI_NATIVE") {

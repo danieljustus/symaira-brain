@@ -70,3 +70,7 @@ mod provider_file_oracle_tests;
 #[cfg(test)]
 #[path = "copilot_kimi_oracle_tests.rs"]
 mod copilot_kimi_oracle_tests;
+
+#[cfg(test)]
+#[path = "device_oracle_tests.rs"]
+mod device_oracle_tests;

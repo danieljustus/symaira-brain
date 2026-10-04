@@ -39,9 +39,9 @@ fn kimi_file_requires_go(path: &Path) -> bool {
     read_optional_credential_file(path).is_err()
 }
 
-/// The Go Kimi provider converts the device-id file's raw bytes to a string,
-/// while Rust reads UTF-8. Keep existing non-ASCII or unreadable forms on Go
-/// until their header encoding has source-bound parity evidence.
+/// Preserve Go's trimmed device bytes for the proven regular UTF-8 family.
+/// Invalid UTF-8, internal ASCII controls and unsafe file access retain Go;
+/// Unicode bytes require full request/report and actual wire evidence.
 fn kimi_device_id_is_native(path: &Path) -> bool {
     match read_optional_credential_file(path) {
         Ok(None) => true,
@@ -49,7 +49,7 @@ fn kimi_device_id_is_native(path: &Path) -> bool {
             value
                 .trim()
                 .bytes()
-                .all(|byte| byte == b' ' || byte.is_ascii_graphic())
+                .all(|byte| byte == b' ' || byte.is_ascii_graphic() || byte >= 0x80)
         }),
         Err(()) => false,
     }

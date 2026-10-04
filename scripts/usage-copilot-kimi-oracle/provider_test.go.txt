@@ -17,12 +17,13 @@ import (
 )
 
 type copilotKimiCase768 struct {
-	ID       string            `json:"id"`
-	Provider string            `json:"provider"`
-	Files    map[string]string `json:"files"`
-	Env      map[string]string `json:"env"`
-	HomeMode string            `json:"home_mode"`
-	Gate     string            `json:"gate"`
+	ID             string            `json:"id"`
+	Provider       string            `json:"provider"`
+	Files          map[string]string `json:"files"`
+	Env            map[string]string `json:"env"`
+	HomeMode       string            `json:"home_mode"`
+	Gate           string            `json:"gate"`
+	NativePromoted bool              `json:"native_promoted"`
 }
 type copilotKimiTransport768 struct{ Requests []any }
 
@@ -56,6 +57,9 @@ func TestUsageCopilotKimi768(t *testing.T) {
 	}
 	records := []any{}
 	for _, entry := range cases {
+		if entry.NativePromoted && entry.ID != "kimi-device-unicode-value" {
+			t.Fatal("unknown promotion", entry.ID)
+		}
 		root := filepath.Join(os.Getenv("USAGE_COPILOT_KIMI_ROOT"), entry.ID)
 		home := filepath.Join(root, "home")
 		profile := home
@@ -137,7 +141,7 @@ func TestUsageCopilotKimi768(t *testing.T) {
 			p := provider.(*CopilotProvider)
 			selected = map[string]any{"token_hex": hex.EncodeToString([]byte(p.accessToken)), "source": p.credSource}
 		}
-		records = append(records, map[string]any{"id": entry.ID, "provider": entry.Provider, "home": home, "userprofile": profile, "env": entry.Env, "file_sha256": hashes, "selected": selected, "report": report, "requests": transport.Requests, "gate": entry.Gate, "gated": entry.Gate != "" || (runtime.GOOS == "windows" && entry.HomeMode == "different")})
+		records = append(records, map[string]any{"id": entry.ID, "provider": entry.Provider, "home": home, "userprofile": profile, "env": entry.Env, "file_sha256": hashes, "selected": selected, "report": report, "requests": transport.Requests, "gate": entry.Gate, "native_promoted": entry.NativePromoted, "gated": (entry.Gate != "" && !entry.NativePromoted) || (runtime.GOOS == "windows" && entry.HomeMode == "different")})
 	}
 	output := records
 	data, err = json.MarshalIndent(output, "", "  ")

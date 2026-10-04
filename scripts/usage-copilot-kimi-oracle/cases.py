@@ -12,6 +12,7 @@ with tempfile.TemporaryDirectory() as scratch:
 assert len(cases) == 66
 for row in cases:
     row['gate'] = ''
+    row['native_promoted'] = row['id'] == 'kimi-device-unicode-value'
     if row['id'] in ('copilot-frozen-multiple-github-tokens-have-map-order-dependent-choice', 'copilot-frozen-multiple-fallback-tokens-have-map-order-dependent-choice', 'copilot-different-prefix-tokens'):
         row['gate'] = 'distinct eligible Go map tokens'
     if row['id'] in ('kimi-device-unicode-value', 'kimi-device-invalid-utf8'):

@@ -635,14 +635,20 @@ fn deterministic_claude_files_are_native_and_ambiguous_accounts_remain_on_go() {
             .env("ANTHROPIC_OAUTH_TOKEN", "env://USAGE_TEST_ABSENT")
             .output()
             .unwrap();
+        assert_native_usage_parser(output, id);
         if case["possible_tokens"].is_array() {
-            let stderr = String::from_utf8(output.stderr).unwrap();
+            // Only a valid report consults credential admission. Diagnostics
+            // above remain native even for an ambiguous, Go-owned account.
+            let report = command(&root, &["usage"])
+                .env("ANTHROPIC_OAUTH_TOKEN", "env://USAGE_TEST_ABSENT")
+                .output()
+                .unwrap();
+            assert_eq!(report.status.code(), Some(1));
+            let stderr = String::from_utf8(report.stderr).unwrap();
             assert!(
                 stderr.contains("not ported yet and no Go fallback was found"),
                 "ambiguous case {id}: {stderr}"
             );
-        } else {
-            assert_native_usage_parser(output, id);
         }
     }
 }
@@ -873,23 +879,20 @@ fn copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go() {
         let output = command(&root, &["usage", "--not-a-usage-flag"])
             .output()
             .unwrap();
-        let stderr = String::from_utf8(output.stderr).unwrap();
+        assert_native_usage_parser(output, id);
+        let report = if case["token"].is_null() {
+            Some(command(&root, &["usage"]).output().unwrap())
+        } else {
+            None
+        };
         // Historical routing flags are preserved; deterministic token results
         // now have the expanded source-bound native contract.
-        if case["token"].is_null() {
+        if let Some(report) = report {
+            assert_eq!(report.status.code(), Some(1));
+            let stderr = String::from_utf8(report.stderr).unwrap();
             assert!(
                 stderr.contains("not ported yet and no Go fallback was found"),
                 "unproven Copilot file case {id} must remain on Go: {stderr}"
-            );
-        } else {
-            assert_eq!(output.status.code(), Some(2), "{id}: {stderr}");
-            assert!(
-                stderr.starts_with("flag provided but not defined: -not-a-usage-flag\n"),
-                "Go-equivalent Copilot file case {id} should select native parser: {stderr}"
-            );
-            assert!(
-                !stderr.contains("no Go fallback") && !stderr.contains("Go fallback"),
-                "Copilot file case {id} unexpectedly selected Go fallback: {stderr}"
             );
         }
     }
@@ -977,9 +980,13 @@ fn nous_auth_file_shapes_select_native_parser_and_overflow_retains_go() {
         br#"{"providers":[{"id":"nous","invoke_jwt":"header.eyJleHAiOjFlMTl9.signature"}]}"#,
     )
     .unwrap();
-    let overflow = command(&root, &["usage", "--not-a-usage-flag"])
-        .output()
-        .unwrap();
+    assert_native_usage_parser(
+        command(&root, &["usage", "--not-a-usage-flag"])
+            .output()
+            .unwrap(),
+        "overflow diagnostics remain native",
+    );
+    let overflow = command(&root, &["usage"]).output().unwrap();
     assert!(
         String::from_utf8(overflow.stderr)
             .unwrap()
@@ -1005,7 +1012,15 @@ fn differing_home_and_userprofile_keep_the_whole_usage_report_on_go() {
     // Go resolves its default home through USERPROFILE on Windows; Rust's
     // current home helper uses HOME. A second direct credential confirms the
     // mismatch keeps the entire report on Go, not only the Nous row.
-    let output = command(&root, &["usage", "--not-a-usage-flag"])
+    assert_native_usage_parser(
+        command(&root, &["usage", "--not-a-usage-flag"])
+            .env("HOME", &rust_home)
+            .env("USERPROFILE", &go_home)
+            .output()
+            .unwrap(),
+        "Windows home mismatch diagnostics remain native",
+    );
+    let output = command(&root, &["usage"])
         .env("HOME", rust_home)
         .env("USERPROFILE", go_home)
         .env("OPENROUTER_API_KEY", "synthetic-direct-env-fixture")

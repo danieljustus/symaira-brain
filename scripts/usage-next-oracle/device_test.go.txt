@@ -1,0 +1,192 @@
+// Go-only source/value baseline: frozen production constructors, owned files.
+package usage
+
+import (
+	"context"
+	"crypto/sha256"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net"
+	"net/http"
+	"os"
+	"path/filepath"
+	"reflect"
+	"strings"
+	"testing"
+	"time"
+)
+
+type remainingCase768 struct {
+	ID            string `json:"id"`
+	DeviceHex     string `json:"device_hex"`
+	DevicePresent bool   `json:"device_present"`
+	Token         string `json:"token"`
+	API           string `json:"api"`
+	Web           string `json:"web"`
+	Responses     []int  `json:"responses"`
+	Kind          string `json:"kind"`
+}
+type remainingTransport768 struct {
+	caseValue remainingCase768
+	requests  []any
+	api, web  []byte
+	wire      *http.Transport
+}
+
+func (r *remainingTransport768) RoundTrip(req *http.Request) (*http.Response, error) {
+	body := []byte{}
+	if req.Body != nil {
+		body, _ = io.ReadAll(req.Body)
+	}
+	headers := map[string][]string{}
+	raw := map[string][]string{}
+	for name, values := range req.Header {
+		headers[name] = values
+		for _, value := range values {
+			raw[name] = append(raw[name], hex.EncodeToString([]byte(value)))
+		}
+	}
+	index := len(r.requests)
+	r.requests = append(r.requests, map[string]any{"method": req.Method, "url": req.URL.String(), "headers": headers, "header_value_hex": raw, "body_hex": hex.EncodeToString(body)})
+	if r.wire != nil {
+		copy := req.Clone(req.Context())
+		copy.Header = req.Header.Clone()
+		copy.Header.Set("X-Owned-Case", r.caseValue.ID)
+		copy.Header.Set("X-Owned-Index", fmt.Sprint(index))
+		return r.wire.RoundTrip(copy)
+	}
+	status := r.caseValue.Responses[index]
+	data := []byte(`{}`)
+	if status == 200 {
+		data = r.api
+		if req.Method == "POST" {
+			data = r.web
+		}
+		if r.caseValue.Kind == "cli-invalid-json" {
+			data = []byte(`broken`)
+		}
+	}
+	responseHeaders := http.Header{}
+	if status == 429 {
+		responseHeaders.Set("Retry-After", "3")
+	}
+	return &http.Response{StatusCode: status, Body: io.NopCloser(strings.NewReader(string(data))), Header: responseHeaders}, nil
+}
+func TestRemainingDeviceBaseline768(t *testing.T) {
+	input, err := os.ReadFile(os.Getenv("USAGE_REMAINING_INPUT"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cases []remainingCase768
+	if err = json.Unmarshal(input, &cases); err != nil {
+		t.Fatal(err)
+	}
+	if len(cases) != 39 {
+		t.Fatal("complete39-case proposed family baseline required")
+	}
+	api, err := os.ReadFile("testdata/kimi-api-usages.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	web, err := os.ReadFile("testdata/kimi-web-usages.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	records := []any{}
+	for _, entry := range cases {
+		if os.Getenv("USAGE_DEVICE_PEER") != "" && entry.Kind == "retain-go-control" {
+			continue
+		}
+		home := filepath.Join(os.Getenv("USAGE_REMAINING_ROOT"), entry.ID)
+		cli := filepath.Join(home, ".kimi-code")
+		credential := filepath.Join(cli, "credentials", "kimi-code.json")
+		device := filepath.Join(cli, "device_id")
+		if err = os.MkdirAll(filepath.Dir(credential), 0700); err != nil {
+			t.Fatal(err)
+		}
+		credentialBytes, _ := json.Marshal(map[string]string{"access_token": entry.Token})
+		if err = os.WriteFile(credential, credentialBytes, 0600); err != nil {
+			t.Fatal(err)
+		}
+		deviceBytes, err := hex.DecodeString(entry.DeviceHex)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if entry.DevicePresent {
+			if err = os.WriteFile(device, deviceBytes, 0600); err != nil {
+				t.Fatal(err)
+			}
+		}
+		for _, name := range []string{"KIMI_CODE_API_KEY", "KIMI_AUTH_TOKEN", "KIMI_CODE_BASE_URL", "KIMI_CODE_HOME"} {
+			t.Setenv(name, "")
+		}
+		t.Setenv("HOME", home)
+		t.Setenv("USERPROFILE", home)
+		t.Setenv("PATH", "")
+		t.Setenv("KIMI_CODE_API_KEY", entry.API)
+		t.Setenv("KIMI_AUTH_TOKEN", entry.Web)
+		transport := &remainingTransport768{caseValue: entry, requests: []any{}, api: api, web: web}
+		if peer := os.Getenv("USAGE_DEVICE_PEER"); peer != "" {
+			ca, err := os.ReadFile(os.Getenv("USAGE_DEVICE_CA"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			roots := x509.NewCertPool()
+			if !roots.AppendCertsFromPEM(ca) {
+				t.Fatal("owned CA")
+			}
+			transport.wire = &http.Transport{TLSClientConfig: &tls.Config{RootCAs: roots, MinVersion: tls.VersionTLS12}, DisableKeepAlives: true, DialContext: func(ctx context.Context, network, address string) (net.Conn, error) {
+				if address != "api.kimi.com:443" && address != "www.kimi.com:443" {
+					return nil, fmt.Errorf("unowned endpoint: %s", address)
+				}
+				return (&net.Dialer{Timeout: 8 * time.Second}).DialContext(ctx, network, peer)
+			}}
+		}
+		provider := NewKimiProvider(&http.Client{Transport: transport})
+		beforeState := ownedState768(home)
+		started := time.Now()
+		report := BuildReport(context.Background(), []Provider{provider})
+		finished := time.Now()
+		afterState := ownedState768(home)
+		if !reflect.DeepEqual(beforeState, afterState) {
+			t.Fatal(entry.ID, "owned state mutation")
+		}
+		if transport.wire != nil {
+			transport.wire.CloseIdleConnections()
+		}
+		if snapshot := report.Providers[0].Snapshot; snapshot != nil {
+			if snapshot.FetchedAt.Before(started) || snapshot.FetchedAt.After(finished) {
+				t.Fatal("runtime clock outside invocation")
+			}
+		}
+		if len(transport.requests) != len(entry.Responses) {
+			t.Fatal(entry.ID, "unexpected chain length", len(transport.requests))
+		}
+		after, err := os.ReadFile(credential)
+		if err != nil || string(after) != string(credentialBytes) {
+			t.Fatal(entry.ID, "credential changed")
+		}
+		if entry.DevicePresent {
+			after, err = os.ReadFile(device)
+			if err != nil || string(after) != string(deviceBytes) {
+				t.Fatal(entry.ID, "device changed")
+			}
+		} else if _, err = os.Stat(device); !os.IsNotExist(err) {
+			t.Fatal(entry.ID, "missing device created")
+		}
+		credentialHash := sha256.Sum256(credentialBytes)
+		deviceHash := sha256.Sum256(deviceBytes)
+		records = append(records, map[string]any{"id": entry.ID, "input": entry, "home": home, "cli_home": kimiCLIHome(), "selected_token_hex": hex.EncodeToString([]byte(provider.cliAccessToken)), "selected_device_hex": hex.EncodeToString([]byte(provider.cliDeviceID)), "base_url": provider.baseURL, "report": report, "filesystem": beforeState, "read_only": true, "started": started, "finished": finished, "requests": transport.requests, "credential_sha256": hex.EncodeToString(credentialHash[:]), "device_sha256": hex.EncodeToString(deviceHash[:])})
+	}
+	output, err := json.MarshalIndent(records, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(os.Getenv("USAGE_REMAINING_OUTPUT"), append(output, '\n'), 0600); err != nil {
+		t.Fatal(err)
+	}
+}

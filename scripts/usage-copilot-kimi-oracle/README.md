@@ -83,3 +83,12 @@ CLI-package artifacts before package-only cleaning between parent/candidate
 variants and requires byte-identical restoration of the initial candidate CLI.
 The original failed shared-target restoration attempt remains preserved. See
 `docs/adr/usage-cli-argv-bytes-768.md` for helper reuse and acceptance boundaries.
+
+Successor promotion: `kimi-device-unicode-value` retains its original ID, input
+bytes and historical `unproven device header bytes` gate metadata. Its explicit
+`native_promoted` marker now requires full actual native report/request/raw
+header/read-only equality. The current89 inputs therefore have82 full/7 gated
+comparisons on Unix (81/8 on Windows), and112 local CLI comparisons. Windows
+home conservatism remains until native runtime evidence. The separate
+`usage-next-oracle` adds complete Unicode/trim/strategy/status/TLS proof and early
+argument classification. Historical81/8/111 receipts remain unchanged.
