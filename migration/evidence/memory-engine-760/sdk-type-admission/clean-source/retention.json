@@ -1,0 +1,90 @@
+{
+  "source_head": "7f8269f74c8711a6a846e2a97ec7bb78b14d573e",
+  "scope": "Source and owned filesystem Python predicates; SDK/compiler/product/target/cache/port/network runs zero",
+  "files": [
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/clean-head-42.log",
+      "retained": "clean-head-42.log.gz",
+      "bytes": 6075,
+      "sha256": "31ef1e38ddbcbd6c7d5936c0ed701c8b5a457558e65c4fa5f132d3e42a88c3f5",
+      "gzip_sha256": "90dd1f4b14b7e7aa1e916100af9bb560c32f2b9d6148f7bf024f436360c2e305",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791118036066337124,
+        "atime_ns": 1791118140454373566
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/clean-head-static.log",
+      "retained": "clean-head-static.log.gz",
+      "bytes": 980,
+      "sha256": "cfb76a1d3806ed8e9d6b38ca6a04b4245db250856bee73dbb68409860b560e6c",
+      "gzip_sha256": "8906802d73318ff0603afe70cca5ef56d44519e20d252f27aae0c04b0548d303",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791118038257547509,
+        "atime_ns": 1791118140461981982
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/clean-head-journal.jsonl",
+      "retained": "clean-head-journal.jsonl.gz",
+      "bytes": 22807,
+      "sha256": "f607b38fd5e07306b6f2b829de12fd9cfe434288be5b515174a96be078d58ab4",
+      "gzip_sha256": "dced82ac75c42f2bbd32a46596c6fbb52944b5336e3f7ee463414419d2828178",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791118036061519036,
+        "atime_ns": 1791118140462221274
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/full-clean-source-binding.json",
+      "retained": "full-clean-source-binding.json.gz",
+      "bytes": 1472244,
+      "sha256": "2be96c19eebfaed0470fd742b29caea87e5f1ae766582994b211128c23c3b2ec",
+      "gzip_sha256": "1cdbde24f69fa1d9659401b2ca84b65cfa8d20ae575bc984718cf08ad51d4a79",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791118039188635186,
+        "atime_ns": 1791118140462536440
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/execution-context.json",
+      "retained": "execution-context.json.gz",
+      "bytes": 792,
+      "sha256": "5bb89eff74b1059d55023f2322ff5988b0cca588f3e90b200cd83c483b76c258",
+      "gzip_sha256": "69245a0fb8c195281eba01f9bcd4e0950e10192c4474ecb5cb04bb97ddc03ac7",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117950041985530,
+        "atime_ns": 1791118140512329339
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/precommit-context-path-error.json",
+      "retained": "precommit-context-path-error.json.gz",
+      "bytes": 536,
+      "sha256": "c2a01c901617917d471031b80d2443010fa46b491a298fe53f4f83ca5b89243a",
+      "gzip_sha256": "49fdcd07278b77de22c466bb87f229472b9ae43bdcf44a8e6f9daf22a44f2f00",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117950042061145,
+        "atime_ns": 1791118140513662344
+      }
+    }
+  ]
+}
