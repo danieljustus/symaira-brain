@@ -138,7 +138,11 @@ jobs:
             echo "runner=${{ matrix.runner }}"
             rustc -Vv
             cargo -V
-            go version
+            if command -v go >/dev/null 2>&1; then
+              go version
+            else
+              echo "go_version=unavailable (pinned Go setup did not complete)"
+            fi
             python3 --version
             python3 -c 'import sqlite3; print("sqlite_native_stdlib=" + sqlite3.sqlite_version)'
             echo "historical_checker_provider=${MEMORY_SQLITE_CHECKER_PROVIDER:-native-stdlib}"

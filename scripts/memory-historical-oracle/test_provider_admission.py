@@ -33,6 +33,8 @@ class Symbol:
 class AdmissionFixture:
     def __init__(self, root, *, address=101, version=provider.VERSION,
                  source_id=provider.SOURCE_ID):
+        # The verified provider uses canonical paths, including owned temp aliases.
+        root = root.resolve(strict=True)
         self.root = root
         self.trace = []
         self.loader_calls = []
