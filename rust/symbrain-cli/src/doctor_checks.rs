@@ -5,7 +5,6 @@ use std::path::Path;
 use symbrain_audit::Degradation;
 use symbrain_core::xdg;
 use symbrain_managed::{Manifest, Platform, installed_version};
-use toml_edit::DocumentMut;
 
 use super::doctor_core::{check_harnesses, check_memory_db, check_skills_library, probe_version};
 use super::doctor_links::{check_foreign_access_risks, check_handshakes, check_links};
@@ -61,22 +60,16 @@ fn check_dir(path: &Path) -> DirCheck {
 }
 
 fn check_config(path: &Path) -> ConfigCheck {
-    let exists = path.is_file();
+    let exists = std::fs::metadata(path).is_ok();
     let mut result = ConfigCheck {
-        path: path.display().to_string(),
+        path: symbrain_core::go_path::os_bytes(path.as_os_str()).into(),
         exists,
         parsed: false,
-        error: String::new(),
+        error: symbrain_core::GoText::default(),
     };
-    match fs::read_to_string(path) {
-        Ok(contents) => match contents.parse::<DocumentMut>() {
-            Ok(_) => result.parsed = true,
-            Err(error) => {
-                result.error = format!("config: failed to load {}: {error}", path.display());
-            }
-        },
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => result.parsed = true,
-        Err(error) => result.error = format!("config: failed to load {}: {error}", path.display()),
+    match symbrain_core::config::resolved::load() {
+        Ok(_) => result.parsed = true,
+        Err(error) => result.error = error.text().clone(),
     }
     result
 }

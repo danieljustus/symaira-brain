@@ -75,6 +75,7 @@ impl Default for Config {
 
 struct SharedState {
     cfg: Config,
+    binary_path: std::path::PathBuf,
     state: AtomicI32,
     spawn_lock: Mutex<()>,
     client: Mutex<Option<Arc<Client>>>,
@@ -91,9 +92,17 @@ pub struct ManagedServer {
 impl ManagedServer {
     #[must_use]
     pub fn new(cfg: Config) -> Self {
+        let path = std::path::PathBuf::from(&cfg.binary_path);
+        Self::new_path(cfg, path)
+    }
+
+    /// Retains a native selector through lazy spawn and all restarts.
+    #[must_use]
+    pub fn new_path(cfg: Config, binary_path: std::path::PathBuf) -> Self {
         Self {
             shared: Arc::new(SharedState {
                 cfg,
+                binary_path,
                 state: AtomicI32::new(State::Idle as i32),
                 spawn_lock: Mutex::new(()),
                 client: Mutex::new(None),
@@ -190,15 +199,16 @@ impl ManagedServer {
             env: self.shared.cfg.env.clone(),
             capture_stderr: self.shared.cfg.capture_stderr,
         };
-        let client = Client::spawn(&self.shared.cfg.binary_path, opts).map_err(|err| {
-            self.shared
-                .state
-                .store(State::Idle as i32, Ordering::SeqCst);
-            BrokerError::Closed {
-                op: "spawn".to_string(),
-                detail: err.to_string(),
-            }
-        })?;
+        let client =
+            Client::spawn_path(self.shared.binary_path.as_os_str(), opts).map_err(|err| {
+                self.shared
+                    .state
+                    .store(State::Idle as i32, Ordering::SeqCst);
+                BrokerError::Closed {
+                    op: "spawn".to_string(),
+                    detail: err.to_string(),
+                }
+            })?;
 
         if let Err(err) = client.initialize(self.shared.cfg.init_timeout) {
             let _ = client.kill();

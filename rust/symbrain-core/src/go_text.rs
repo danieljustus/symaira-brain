@@ -36,6 +36,31 @@ impl GoText {
         self
     }
 
+    /// Repairs invalid bytes one byte at a time, as Go range/encoding does.
+    /// Use only at Unicode metadata boundaries, never for filesystem selectors.
+    #[must_use]
+    pub fn unicode_lossy(&self) -> String {
+        let mut result = String::new();
+        let mut remaining = self.0.as_slice();
+        while !remaining.is_empty() {
+            match std::str::from_utf8(remaining) {
+                Ok(valid) => {
+                    result.push_str(valid);
+                    break;
+                }
+                Err(error) => {
+                    let prefix = error.valid_up_to();
+                    if let Ok(valid) = std::str::from_utf8(&remaining[..prefix]) {
+                        result.push_str(valid);
+                    }
+                    result.push('\u{fffd}');
+                    remaining = &remaining[prefix + 1..];
+                }
+            }
+        }
+        result
+    }
+
     #[must_use]
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()

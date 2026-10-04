@@ -75,44 +75,12 @@ impl From<io::Error> for BrokerError {
 /// # Errors
 /// Returns an error when the binary is not found or not executable.
 pub fn discover(binary_name: &str, override_path: &str) -> Result<String, BrokerError> {
-    if !override_path.is_empty() {
-        let path = std::path::Path::new(override_path);
-        if is_usable_executable(path) {
-            return Ok(override_path.to_string());
-        }
-        let kind = if path.exists() {
-            io::ErrorKind::PermissionDenied
-        } else {
-            io::ErrorKind::NotFound
-        };
-        return Err(BrokerError::Io(io::Error::new(
-            kind,
-            format!(
-                "broker: configured binary_path {override_path:?} for {binary_name:?} is not an executable regular file"
-            ),
-        )));
-    }
-
-    if let Ok(home) = std::env::var("HOME") {
-        let managed_dir = std::path::PathBuf::from(home).join(".symaira").join("bin");
-        if let Some(managed) = find_in_dir(&managed_dir, binary_name) {
-            return Ok(managed.to_string_lossy().to_string());
-        }
-    }
-
-    which(binary_name).ok_or_else(|| {
-        #[cfg(windows)]
-        let path_var = "%PATH%";
-        #[cfg(not(windows))]
-        let path_var = "$PATH";
-        BrokerError::Io(io::Error::new(
-            io::ErrorKind::NotFound,
-            format!("{binary_name:?} not found on PATH or in managed directory: exec: {binary_name:?}: executable file not found in {path_var}"),
-        ))
-    })
+    super::discovery::discover_path(binary_name, std::ffi::OsStr::new(override_path))
+        .map(|path| path.to_string_lossy().into_owned())
+        .map_err(|error| BrokerError::Io(io::Error::new(error.kind, error.to_string())))
 }
 
-fn is_usable_executable(path: &std::path::Path) -> bool {
+pub(super) fn is_usable_executable(path: &std::path::Path) -> bool {
     let Ok(metadata) = path.metadata() else {
         return false;
     };
@@ -130,7 +98,7 @@ fn is_usable_executable(path: &std::path::Path) -> bool {
     }
 }
 
-fn find_in_dir(directory: &std::path::Path, binary: &str) -> Option<std::path::PathBuf> {
+pub(super) fn find_in_dir(directory: &std::path::Path, binary: &str) -> Option<std::path::PathBuf> {
     executable_names(binary)
         .into_iter()
         .map(|name| directory.join(name))
@@ -156,14 +124,6 @@ fn executable_names(binary: &str) -> Vec<OsString> {
     {
         vec![OsString::from(binary)]
     }
-}
-
-fn which(binary: &str) -> Option<String> {
-    std::env::var_os("PATH").and_then(|paths| {
-        std::env::split_paths(&paths)
-            .find_map(|dir| find_in_dir(&dir, binary))
-            .map(|path| path.to_string_lossy().to_string())
-    })
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -263,6 +223,15 @@ impl Client {
     /// # Panics
     /// Panics when the piped stdin/stdout handles are absent (impossible after successful spawn).
     pub fn spawn(path: &str, opts: Options) -> Result<Self, BrokerError> {
+        Self::spawn_path(std::ffi::OsStr::new(path), opts)
+    }
+
+    /// Starts a child using its filesystem-native selector; lifecycle is shared.
+    /// # Errors
+    /// Returns the same process/pipe admission errors as `spawn`.
+    /// # Panics
+    /// Panics only if the OS omits a successfully requested piped handle.
+    pub fn spawn_path(path: &std::ffi::OsStr, opts: Options) -> Result<Self, BrokerError> {
         let mut cmd = Command::new(path);
         cmd.args(&opts.args);
         if let Some(env) = opts.env {

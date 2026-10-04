@@ -17,18 +17,36 @@ pub(crate) fn valid_configuration() -> bool {
 }
 
 pub(super) fn configured_override(path: &Path, variable: &str) -> Option<PathBuf> {
-    let global = read_document(path)?;
-    let project = match std::env::current_dir() {
-        Ok(directory) => read_document(&directory.join(".symbrain.toml"))?,
-        Err(_) => DocumentMut::new(),
-    };
-    if !valid_file_types(&global) || !valid_file_types(&project) || !valid_environment_types() {
-        return None;
+    let source = OverrideSources(variable);
+    let config = symbrain_core::config::resolved::load_with_global_path(path, &source).ok()?;
+    (!config.servers.vault.is_empty()).then(|| {
+        PathBuf::from(symbrain_core::go_path::from_bytes(
+            config.servers.vault.as_ref(),
+        ))
+    })
+}
+
+struct OverrideSources<'a>(&'a str);
+impl symbrain_core::config::resolved::Sources for OverrideSources<'_> {
+    fn environment(&self, name: &str) -> Option<std::ffi::OsString> {
+        std::env::var_os(if name == "SYMBRAIN_SERVERS_VAULT_BINARY_PATH" {
+            self.0
+        } else {
+            name
+        })
     }
-    std::env::var_os(variable)
-        .filter(|value| !value.is_empty())
-        .map(PathBuf::from)
-        .or_else(|| binary_path(&project).or_else(|| binary_path(&global)))
+    fn current_directory(&self) -> std::io::Result<PathBuf> {
+        std::env::current_dir()
+    }
+    fn metadata(&self, path: &Path) -> std::io::Result<()> {
+        std::fs::metadata(path).map(|_| ())
+    }
+    fn read(&self, path: &Path) -> Result<Vec<u8>, (&'static str, std::io::Error)> {
+        symbrain_core::config::resolved::Sources::read(
+            &symbrain_core::config::resolved::ProcessSources,
+            path,
+        )
+    }
 }
 
 fn read_document(path: &Path) -> Option<DocumentMut> {
@@ -37,11 +55,6 @@ fn read_document(path: &Path) -> Option<DocumentMut> {
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => Some(DocumentMut::new()),
         Err(_) => None,
     }
-}
-
-fn binary_path(document: &DocumentMut) -> Option<PathBuf> {
-    let value = lookup(document, "servers.vault.binary_path")?.as_str()?;
-    (!value.is_empty()).then(|| PathBuf::from(value))
 }
 
 fn lookup<'a>(document: &'a DocumentMut, path: &str) -> Option<&'a Item> {

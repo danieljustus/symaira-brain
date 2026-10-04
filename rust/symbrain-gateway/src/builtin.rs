@@ -111,10 +111,10 @@ impl Gateway {
         let episodes = symbrain_patterns::Store::new_private(path)
             .load()
             .map_err(|error| GatewayError::Policy(format!("patterns: {error}")))?;
-        let patterns = symbrain_patterns::promote(&episodes, 3);
+        let patterns = symbrain_patterns::promote(&episodes, self.pattern_threshold);
         serde_json::to_string(&PatternsResponse {
             profile: self.profile.name.clone(),
-            threshold: 3,
+            threshold: self.pattern_threshold,
             patterns: (!patterns.is_empty()).then_some(patterns),
         })
         .map_err(|error| GatewayError::Serialization(error.to_string()))

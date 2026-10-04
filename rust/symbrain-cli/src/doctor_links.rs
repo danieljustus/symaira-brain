@@ -17,6 +17,7 @@ const PROBE_TIMEOUT: Duration = Duration::from_secs(3);
 const HANDSHAKE_TIMEOUT: Duration = Duration::from_secs(5);
 
 pub(super) fn check_handshakes(vault_agent: &str) -> Vec<ProfileHandshake> {
+    let config = symbrain_core::config::resolved::load().unwrap_or_default();
     let names = symbrain_policy::list_names().unwrap_or_default();
     let mut result = Vec::new();
     for name in names {
@@ -27,7 +28,7 @@ pub(super) fn check_handshakes(vault_agent: &str) -> Vec<ProfileHandshake> {
         if !server.enabled {
             continue;
         }
-        let path = match discover_vault() {
+        let path = match discover_vault(&config) {
             Ok(path) => path,
             Err(error) => {
                 result.push(ProfileHandshake {
@@ -48,31 +49,15 @@ pub(super) fn check_handshakes(vault_agent: &str) -> Vec<ProfileHandshake> {
     result
 }
 
-fn discover_vault() -> Result<String, String> {
-    let override_path = config_binary_override();
-    symbrain_broker::discover("symvault", &override_path).map_err(|error| error.to_string())
-}
-
-fn config_binary_override() -> String {
-    let path = xdg::config_path();
-    let Ok(bytes) = fs::read_to_string(path) else {
-        return String::new();
-    };
-    let Ok(doc) = bytes.parse::<DocumentMut>() else {
-        return String::new();
-    };
-    doc.get("servers")
-        .and_then(|v| v.as_table())
-        .and_then(|v| v.get("vault"))
-        .and_then(|v| v.as_table())
-        .and_then(|v| v.get("binary_path"))
-        .and_then(|v| v.as_str())
-        .unwrap_or_default()
-        .to_string()
+fn discover_vault(
+    config: &symbrain_core::config::resolved::BrainConfig,
+) -> Result<std::path::PathBuf, symbrain_core::GoText> {
+    let path = symbrain_core::go_path::from_bytes(config.servers.vault.as_ref());
+    symbrain_broker::discover_path("symvault", &path).map_err(|error| error.text)
 }
 
 fn probe_handshake(
-    path: &str,
+    path: &Path,
     profile_name: &str,
     vault_agent: &str,
     server: &ServerConfig,
@@ -85,7 +70,7 @@ fn probe_handshake(
         exposed: 0,
         hidden: 0,
         unknown: 0,
-        error: String::new(),
+        error: symbrain_core::GoText::default(),
     };
     let args = if vault_agent.is_empty() {
         vec!["serve".to_string()]
@@ -99,8 +84,8 @@ fn probe_handshake(
         ]
     };
     let deadline = Instant::now() + HANDSHAKE_TIMEOUT;
-    let client = match Client::spawn(
-        path,
+    let client = match Client::spawn_path(
+        path.as_os_str(),
         Options {
             args,
             env: None,
@@ -109,7 +94,7 @@ fn probe_handshake(
     ) {
         Ok(client) => client,
         Err(error) => {
-            result.error = format!("spawn: {error}");
+            result.error = format!("spawn: {error}").into();
             return result;
         }
     };
@@ -121,7 +106,7 @@ fn probe_handshake(
     let init = match client.initialize(remaining()) {
         Ok(init) => init,
         Err(error) => {
-            result.error = format!("initialize: {error}");
+            result.error = format!("initialize: {error}").into();
             return result;
         }
     };
@@ -129,7 +114,7 @@ fn probe_handshake(
     let tools = match client.list_tools(remaining()) {
         Ok(tools) => tools,
         Err(error) => {
-            result.error = format!("tools/list: {error}");
+            result.error = format!("tools/list: {error}").into();
             return result;
         }
     };

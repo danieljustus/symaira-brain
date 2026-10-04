@@ -164,17 +164,15 @@ fn env_path(var_name: &str) -> Option<PathBuf> {
 /// Resolves the global config file path using current process environment variables.
 #[must_use]
 pub fn config_path() -> PathBuf {
-    let xdg = env_path("XDG_CONFIG_HOME");
-    let home = home_dir();
-    resolve_config_path(xdg.as_deref(), home.as_deref())
+    crate::config::resolved::default_path()
 }
 
 /// Resolves the global config directory using current process environment variables.
 #[must_use]
 pub fn config_dir() -> PathBuf {
-    let xdg = env_path("XDG_CONFIG_HOME");
-    let home = home_dir();
-    resolve_config_dir(xdg.as_deref(), home.as_deref())
+    config_path()
+        .parent()
+        .map_or_else(PathBuf::new, Path::to_path_buf)
 }
 
 /// Resolves the profiles directory using current process environment variables.

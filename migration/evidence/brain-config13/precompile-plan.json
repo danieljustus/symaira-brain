@@ -1,0 +1,135 @@
+{
+  "status": "precompile source preparation; all successor runtime gates unexecuted",
+  "parent_source": "58fe50b9d275f0cc8a7ab6a8252a6595a58e52ab",
+  "parent_publication": "fb6d68b337974b03efeb8e9bd547dfbb06bb8fae",
+  "main_ancestor": "2b6d49f250a81650eda1b93cec7d859a171873bb",
+  "initial_retention_sha256": "4a7f9eb9b77d31f86ef5df50775e8e98746de02cbeab67923309c835a157872b",
+  "compiler_allocation": null,
+  "new_target_created": false,
+  "github_writes": false,
+  "typed_field_count": 13,
+  "initial_actual_groups": 115,
+  "initial_actual_executions": 269,
+  "prepared_process_runner": "scripts/brain-config13/process.py",
+  "prepared_runner_groups": 102,
+  "prepared_actual_go_type_fixture": "rust/symbrain-core/tests/fixtures/brain13-types-go58.json",
+  "open_acceptance_gates": [
+    "BurntSushi1.6 supported syntax acceptance/duplicates/raw UTF8/error priority; only proved native inner malformed-syntax wording may differ",
+    "SDK exec.LookPath relative/ErrDot/Windows implicit CWD/PATHEXT/same-file behavior",
+    "All consumer value/ownership/admission full differential processes with missing-Go controls",
+    "Native Linux/macOS/Windows runtime, independent review and protected CI",
+    "Windows configured Stat/error operation parity and raw native selectors"
+  ],
+  "separate_whole_acceptance_gaps": [
+    "759 eager MCP Memory/JWT construction",
+    "649/758 legacy schema apply/backfill",
+    "native Browse locked source build ownership"
+  ],
+  "parent_actual_test_totals": {
+    "passed": 501,
+    "failed": 0,
+    "ignored": 0,
+    "summaries": 54,
+    "previous_actual500_retained": true
+  },
+  "parent_required_regressions": {
+    "Source": 111,
+    "Doctor": 285,
+    "Setup": 201,
+    "actual_source_doctor_controls": [
+      {
+        "family": "source",
+        "mode": "wrong-exit",
+        "field": "exit"
+      },
+      {
+        "family": "source",
+        "mode": "wrong-source",
+        "field": "stdout_base64"
+      },
+      {
+        "family": "doctor",
+        "mode": "wrong-exit",
+        "field": "exit"
+      },
+      {
+        "family": "doctor",
+        "mode": "missing-header",
+        "field": "stdout_base64"
+      },
+      {
+        "family": "doctor",
+        "mode": "missing-core-event",
+        "field": "logs"
+      }
+    ],
+    "original35_and_cancel2": true,
+    "original23_raw_consumers": true,
+    "Guard": {
+      "main": 124,
+      "raw": 63,
+      "controls": 5
+    },
+    "Memory": {
+      "reads": 590,
+      "sets": 60,
+      "deletes": 16,
+      "delegated_boundaries": 13,
+      "failure_pairs": 10,
+      "controls": 5
+    },
+    "stdio": {
+      "setup_source_process_pairs": 18,
+      "setup_source_embedded": 24,
+      "setup_source_controls": 4,
+      "doctor_process_cases": 13,
+      "doctor_embedded": 27,
+      "doctor_controls": 3,
+      "novel_setup_cumulative_writers": 18,
+      "original_bounded_nonfix": 18,
+      "original_fix": 8
+    }
+  },
+  "fresh_required_work": [
+    "Locked complete workspace/all-feature unit/integration/docs tests; compare actual totals to parent501/54 without reusing them as fresh evidence",
+    "Strict Cargo fmt and Clippy all targets/features; fixed dependency lock; focused helper modules below400 lines",
+    "All115 original census groups and expanded typed/global/project/env syntax/type/positive cases; preserve all full failed observations",
+    "All13 typed fields at every consumer with correct declaration/error/path/admission ordering and unrelated-field rejection before HTTP/child/store writes",
+    "Raw Unix HOME/XDG/DEFAULT_PROFILE/configured binary owner cases; symlink lexical owners; obstruction/error context; profile serialization vs selectors",
+    "Actual Windows WTF8 lone-surrogate paths plus copied pinned-SDK Clean/Join/LookPath proof, followed by actual Windows runtime",
+    "MCP audit enabled/profile OR config, verbose redaction, routed identity caller-wins/on-off/unmapped, threshold/promoted episodes/names-only/error/cancel flush",
+    "Configured raw Broker path spawn/restart/cancel/descendant cleanup; managed discovery precedence; Vault ignored-load-error policy and existing passthrough argv/status",
+    "Missing-Go native controls, actual negative controls for wrong error/owner/admission/module/option/lifecycle effects; no fallback deletion until accepted",
+    "Stored config global get/set/raw bytes/atomic owner/failure corpus plus every xdg::config_path consumer: init/profiles/Doctor/harness/Vault",
+    "Complete parent Source/Doctor/Setup/Guard/Memory/stdio/original failure and cancellation proof after normal dependency integration",
+    "Immutable source/Go/environment/harness/executable SHA receipts, actual binary archive before reuse, different-author review and native3 CI"
+  ],
+  "planned_counts_are_test_results": false,
+  "prepared_loader_value_runner": "scripts/brain-config13/values.py",
+  "prepared_loader_value_groups_Unix": 152,
+  "prepared_CLI_probe_groups": 102,
+  "prepared_probes": {
+    "Rust": "rust/symbrain-core/examples/brain_config13_probe.rs",
+    "Go": "scripts/brain-config13/go_probe.go",
+    "Go_build_scope": "Future owned module copy; frozen internal/config/config.go and go.mod/go.sum byte-identical; no original Go writes",
+    "built": false
+  },
+  "prepared_loader_value_groups_Windows": 174,
+  "parser_inner_diagnostic_decision": "parser-wording-decision.json; narrowly accepted design, current runtime still unexecuted",
+  "prepared_negative_controls": {
+    "Rust": "rust/symbrain-core/examples/brain_config13_fault.rs",
+    "CLI": [
+      "premature-http",
+      "premature-fs",
+      "wrong-exit",
+      "wrong-field-error"
+    ],
+    "loader": [
+      "premature-fs",
+      "wrong-exit",
+      "wrong-field-error",
+      "wrong-value"
+    ],
+    "built_or_run": false
+  }
+}

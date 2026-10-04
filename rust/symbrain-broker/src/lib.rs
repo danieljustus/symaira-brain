@@ -3,6 +3,7 @@
 #![deny(unsafe_code)]
 
 mod client;
+mod discovery;
 mod server;
 
 pub use client::{
@@ -10,3 +11,5 @@ pub use client::{
     SUPPORTED_PROTOCOL_VERSIONS, ServerInfo, Tool, discover,
 };
 pub use server::{Config, ManagedServer, State};
+
+pub use discovery::{PathDiscoveryError, discover_path};

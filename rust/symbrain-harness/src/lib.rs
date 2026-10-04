@@ -11,6 +11,7 @@ mod inventory_read;
 mod json;
 mod json_parser;
 mod registry;
+mod registry_environment;
 mod server_info;
 mod toml_backend;
 mod write;

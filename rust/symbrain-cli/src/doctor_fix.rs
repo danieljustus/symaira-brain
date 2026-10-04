@@ -30,7 +30,7 @@ pub(super) fn run_fix(force_release: bool, stdout: &mut dyn Write, stderr: &mut 
     let enabled = match crate::setup_cli::enabled_cores() {
         Ok(enabled) => enabled,
         Err(error) => {
-            let _ = writeln!(stderr, "  ✗  {error}");
+            let _ = error.write("  ✗  ", stderr);
             return exit::USAGE;
         }
     };

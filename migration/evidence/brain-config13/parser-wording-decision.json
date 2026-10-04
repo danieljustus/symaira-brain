@@ -1,0 +1,401 @@
+{
+  "decision": "Use locked native inner malformed-syntax location/reason; no private Go grammar maintained solely for legacy wording",
+  "user_delegated_technical_choice": true,
+  "parent_accepted_narrow_contract": true,
+  "successor_runtime_accepted": false,
+  "new_executions": 0,
+  "actual_legacy_source": "280914bc6bc9c3b3faac404dcd5d84856a424ed7",
+  "actual_legacy_publication": "3f92a768e2a19c1a5533262663d6f85b4ce0b591",
+  "actual_legacy_native_sha256": "44468313653a364c28aedde3aa9536cbe0e27980b5cebe1d61f6e91aae1e764b",
+  "actual_Go_sha256": "a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41",
+  "original_report_path": "/tmp/symaira-doctor765-inventory-process.json",
+  "original_report_sha256": "3d56cd51e6fd8903252f76eb6a1d6f634e1f4b5be9214bfc07ae91c89dac0aa6",
+  "input_hex": "5b62616420636f6e666967",
+  "native_old_exit1_accepted": false,
+  "unchanged_selected_actual_rows": [
+    {
+      "case": "global-toml-install",
+      "args": [
+        "setup",
+        "--json"
+      ],
+      "go": {
+        "exit": 2,
+        "stdout_base64": "",
+        "stderr_base64": "c3ltYnJhaW4gc2V0dXA6IGNvbmZpZzogZmFpbGVkIHRvIGxvYWQgL3RtcC9kb2N0b3I3NjUtaW52ZW50b3J5LW93bmVkLWRfMHh3dGlsL2dsb2JhbC10b21sLWluc3RhbGwvY29uZmlnL3N5bWJyYWluL2NvbmZpZy50b21sOiBnbG9iYWwgY29uZmlnIGVycm9yOiBmYWlsZWQgdG8gcGFyc2UgL3RtcC9kb2N0b3I3NjUtaW52ZW50b3J5LW93bmVkLWRfMHh3dGlsL2dsb2JhbC10b21sLWluc3RhbGwvY29uZmlnL3N5bWJyYWluL2NvbmZpZy50b21sOiB0b21sOiBsaW5lIDE6IGV4cGVjdGVkICcuJyBvciAnXScgdG8gZW5kIHRhYmxlIG5hbWUsIGJ1dCBnb3QgJ2MnIGluc3RlYWQK",
+        "before_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        },
+        "after_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        }
+      },
+      "native_with_actual_go_fallback": {
+        "exit": 1,
+        "stdout_base64": "",
+        "stderr_base64": "c3ltYnJhaW4gc2V0dXA6IGNvbmZpZzogcGFyc2UgL3RtcC9kb2N0b3I3NjUtaW52ZW50b3J5LW93bmVkLWRfMHh3dGlsL2dsb2JhbC10b21sLWluc3RhbGwvY29uZmlnL3N5bWJyYWluL2NvbmZpZy50b21sOiBUT01MIHBhcnNlIGVycm9yIGF0IGxpbmUgMSwgY29sdW1uIDUKICB8CjEgfCBbYmFkIGNvbmZpZwogIHwgICAgIF4KdW5jbG9zZWQgdGFibGUsIGV4cGVjdGVkIGBdYAoK",
+        "before_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        },
+        "after_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        }
+      },
+      "native_with_sentinel_fallback": {
+        "exit": 1,
+        "stdout_base64": "",
+        "stderr_base64": "c3ltYnJhaW4gc2V0dXA6IGNvbmZpZzogcGFyc2UgL3RtcC9kb2N0b3I3NjUtaW52ZW50b3J5LW93bmVkLWRfMHh3dGlsL2dsb2JhbC10b21sLWluc3RhbGwvY29uZmlnL3N5bWJyYWluL2NvbmZpZy50b21sOiBUT01MIHBhcnNlIGVycm9yIGF0IGxpbmUgMSwgY29sdW1uIDUKICB8CjEgfCBbYmFkIGNvbmZpZwogIHwgICAgIF4KdW5jbG9zZWQgdGFibGUsIGV4cGVjdGVkIGBdYAoK",
+        "before_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        },
+        "after_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        }
+      },
+      "fallback_invoked": false,
+      "fallback_argv_hex": null,
+      "actual_mismatched_fields": [
+        "exit",
+        "stderr_base64"
+      ]
+    },
+    {
+      "case": "global-toml-repair",
+      "args": [
+        "setup",
+        "--fix",
+        "--json"
+      ],
+      "go": {
+        "exit": 2,
+        "stdout_base64": "",
+        "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1maXg6IGNvbmZpZzogZmFpbGVkIHRvIGxvYWQgL3RtcC9kb2N0b3I3NjUtaW52ZW50b3J5LW93bmVkLWRfMHh3dGlsL2dsb2JhbC10b21sLXJlcGFpci9jb25maWcvc3ltYnJhaW4vY29uZmlnLnRvbWw6IGdsb2JhbCBjb25maWcgZXJyb3I6IGZhaWxlZCB0byBwYXJzZSAvdG1wL2RvY3Rvcjc2NS1pbnZlbnRvcnktb3duZWQtZF8weHd0aWwvZ2xvYmFsLXRvbWwtcmVwYWlyL2NvbmZpZy9zeW1icmFpbi9jb25maWcudG9tbDogdG9tbDogbGluZSAxOiBleHBlY3RlZCAnLicgb3IgJ10nIHRvIGVuZCB0YWJsZSBuYW1lLCBidXQgZ290ICdjJyBpbnN0ZWFkCg==",
+        "before_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        },
+        "after_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        }
+      },
+      "native_with_actual_go_fallback": {
+        "exit": 2,
+        "stdout_base64": "",
+        "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1maXg6IGNvbmZpZzogZmFpbGVkIHRvIGxvYWQgL3RtcC9kb2N0b3I3NjUtaW52ZW50b3J5LW93bmVkLWRfMHh3dGlsL2dsb2JhbC10b21sLXJlcGFpci9jb25maWcvc3ltYnJhaW4vY29uZmlnLnRvbWw6IGdsb2JhbCBjb25maWcgZXJyb3I6IGZhaWxlZCB0byBwYXJzZSAvdG1wL2RvY3Rvcjc2NS1pbnZlbnRvcnktb3duZWQtZF8weHd0aWwvZ2xvYmFsLXRvbWwtcmVwYWlyL2NvbmZpZy9zeW1icmFpbi9jb25maWcudG9tbDogdG9tbDogbGluZSAxOiBleHBlY3RlZCAnLicgb3IgJ10nIHRvIGVuZCB0YWJsZSBuYW1lLCBidXQgZ290ICdjJyBpbnN0ZWFkCg==",
+        "before_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        },
+        "after_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        }
+      },
+      "native_with_sentinel_fallback": {
+        "exit": 73,
+        "stdout_base64": "",
+        "stderr_base64": "",
+        "before_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        },
+        "after_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        }
+      },
+      "fallback_invoked": true,
+      "fallback_argv_hex": [
+        "7365747570",
+        "2d2d666978",
+        "2d2d6a736f6e"
+      ],
+      "actual_mismatched_fields": []
+    },
+    {
+      "case": "global-toml-doctor",
+      "args": [
+        "doctor",
+        "--fix"
+      ],
+      "go": {
+        "exit": 2,
+        "stdout_base64": "c3ltYnJhaW4gZG9jdG9yIC0tZml4Cgo=",
+        "stderr_base64": "ICDinJcgIGNvbmZpZzogZmFpbGVkIHRvIGxvYWQgL3RtcC9kb2N0b3I3NjUtaW52ZW50b3J5LW93bmVkLWRfMHh3dGlsL2dsb2JhbC10b21sLWRvY3Rvci9jb25maWcvc3ltYnJhaW4vY29uZmlnLnRvbWw6IGdsb2JhbCBjb25maWcgZXJyb3I6IGZhaWxlZCB0byBwYXJzZSAvdG1wL2RvY3Rvcjc2NS1pbnZlbnRvcnktb3duZWQtZF8weHd0aWwvZ2xvYmFsLXRvbWwtZG9jdG9yL2NvbmZpZy9zeW1icmFpbi9jb25maWcudG9tbDogdG9tbDogbGluZSAxOiBleHBlY3RlZCAnLicgb3IgJ10nIHRvIGVuZCB0YWJsZSBuYW1lLCBidXQgZ290ICdjJyBpbnN0ZWFkCg==",
+        "before_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        },
+        "after_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        }
+      },
+      "native_with_actual_go_fallback": {
+        "exit": 2,
+        "stdout_base64": "c3ltYnJhaW4gZG9jdG9yIC0tZml4Cgo=",
+        "stderr_base64": "ICDinJcgIGNvbmZpZzogZmFpbGVkIHRvIGxvYWQgL3RtcC9kb2N0b3I3NjUtaW52ZW50b3J5LW93bmVkLWRfMHh3dGlsL2dsb2JhbC10b21sLWRvY3Rvci9jb25maWcvc3ltYnJhaW4vY29uZmlnLnRvbWw6IGdsb2JhbCBjb25maWcgZXJyb3I6IGZhaWxlZCB0byBwYXJzZSAvdG1wL2RvY3Rvcjc2NS1pbnZlbnRvcnktb3duZWQtZF8weHd0aWwvZ2xvYmFsLXRvbWwtZG9jdG9yL2NvbmZpZy9zeW1icmFpbi9jb25maWcudG9tbDogdG9tbDogbGluZSAxOiBleHBlY3RlZCAnLicgb3IgJ10nIHRvIGVuZCB0YWJsZSBuYW1lLCBidXQgZ290ICdjJyBpbnN0ZWFkCg==",
+        "before_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        },
+        "after_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        }
+      },
+      "native_with_sentinel_fallback": {
+        "exit": 73,
+        "stdout_base64": "",
+        "stderr_base64": "",
+        "before_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        },
+        "after_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        }
+      },
+      "fallback_invoked": true,
+      "fallback_argv_hex": [
+        "646f63746f72",
+        "2d2d666978"
+      ],
+      "actual_mismatched_fields": []
+    },
+    {
+      "case": "global-toml-source",
+      "args": [
+        "setup",
+        "--from-source",
+        "/tmp/doctor765-inventory-owned-d_0xwtil/global-toml-source/source",
+        "--json"
+      ],
+      "go": {
+        "exit": 2,
+        "stdout_base64": "",
+        "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbG9hZCBjb25maWc6IGNvbmZpZzogZmFpbGVkIHRvIGxvYWQgL3RtcC9kb2N0b3I3NjUtaW52ZW50b3J5LW93bmVkLWRfMHh3dGlsL2dsb2JhbC10b21sLXNvdXJjZS9jb25maWcvc3ltYnJhaW4vY29uZmlnLnRvbWw6IGdsb2JhbCBjb25maWcgZXJyb3I6IGZhaWxlZCB0byBwYXJzZSAvdG1wL2RvY3Rvcjc2NS1pbnZlbnRvcnktb3duZWQtZF8weHd0aWwvZ2xvYmFsLXRvbWwtc291cmNlL2NvbmZpZy9zeW1icmFpbi9jb25maWcudG9tbDogdG9tbDogbGluZSAxOiBleHBlY3RlZCAnLicgb3IgJ10nIHRvIGVuZCB0YWJsZSBuYW1lLCBidXQgZ290ICdjJyBpbnN0ZWFkCg==",
+        "before_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        },
+        "after_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        }
+      },
+      "native_with_actual_go_fallback": {
+        "exit": 2,
+        "stdout_base64": "",
+        "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbG9hZCBjb25maWc6IGNvbmZpZzogZmFpbGVkIHRvIGxvYWQgL3RtcC9kb2N0b3I3NjUtaW52ZW50b3J5LW93bmVkLWRfMHh3dGlsL2dsb2JhbC10b21sLXNvdXJjZS9jb25maWcvc3ltYnJhaW4vY29uZmlnLnRvbWw6IGdsb2JhbCBjb25maWcgZXJyb3I6IGZhaWxlZCB0byBwYXJzZSAvdG1wL2RvY3Rvcjc2NS1pbnZlbnRvcnktb3duZWQtZF8weHd0aWwvZ2xvYmFsLXRvbWwtc291cmNlL2NvbmZpZy9zeW1icmFpbi9jb25maWcudG9tbDogdG9tbDogbGluZSAxOiBleHBlY3RlZCAnLicgb3IgJ10nIHRvIGVuZCB0YWJsZSBuYW1lLCBidXQgZ290ICdjJyBpbnN0ZWFkCg==",
+        "before_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        },
+        "after_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        }
+      },
+      "native_with_sentinel_fallback": {
+        "exit": 73,
+        "stdout_base64": "",
+        "stderr_base64": "",
+        "before_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        },
+        "after_files": {
+          "config/symbrain/config.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        }
+      },
+      "fallback_invoked": true,
+      "fallback_argv_hex": [
+        "7365747570",
+        "2d2d66726f6d2d736f75726365",
+        "2f746d702f646f63746f723736352d696e76656e746f72792d6f776e65642d645f30787774696c2f676c6f62616c2d746f6d6c2d736f757263652f736f75726365",
+        "2d2d6a736f6e"
+      ],
+      "actual_mismatched_fields": []
+    },
+    {
+      "case": "project-toml-install",
+      "args": [
+        "setup",
+        "--json"
+      ],
+      "go": {
+        "exit": 2,
+        "stdout_base64": "",
+        "stderr_base64": "c3ltYnJhaW4gc2V0dXA6IGNvbmZpZzogZmFpbGVkIHRvIGxvYWQgL3RtcC9kb2N0b3I3NjUtaW52ZW50b3J5LW93bmVkLWRfMHh3dGlsL3Byb2plY3QtdG9tbC1pbnN0YWxsL2NvbmZpZy9zeW1icmFpbi9jb25maWcudG9tbDogcHJvamVjdCBjb25maWcgZXJyb3I6IGZhaWxlZCB0byBwYXJzZSAvdG1wL2RvY3Rvcjc2NS1pbnZlbnRvcnktb3duZWQtZF8weHd0aWwvcHJvamVjdC10b21sLWluc3RhbGwvcHJvamVjdC8uc3ltYnJhaW4udG9tbDogdG9tbDogbGluZSAxOiBleHBlY3RlZCAnLicgb3IgJ10nIHRvIGVuZCB0YWJsZSBuYW1lLCBidXQgZ290ICdjJyBpbnN0ZWFkCg==",
+        "before_files": {
+          "project/.symbrain.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        },
+        "after_files": {
+          "project/.symbrain.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        }
+      },
+      "native_with_actual_go_fallback": {
+        "exit": 1,
+        "stdout_base64": "",
+        "stderr_base64": "c3ltYnJhaW4gc2V0dXA6IGNvbmZpZzogcGFyc2UgL3RtcC9kb2N0b3I3NjUtaW52ZW50b3J5LW93bmVkLWRfMHh3dGlsL3Byb2plY3QtdG9tbC1pbnN0YWxsL3Byb2plY3QvLnN5bWJyYWluLnRvbWw6IFRPTUwgcGFyc2UgZXJyb3IgYXQgbGluZSAxLCBjb2x1bW4gNQogIHwKMSB8IFtiYWQgY29uZmlnCiAgfCAgICAgXgp1bmNsb3NlZCB0YWJsZSwgZXhwZWN0ZWQgYF1gCgo=",
+        "before_files": {
+          "project/.symbrain.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        },
+        "after_files": {
+          "project/.symbrain.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        }
+      },
+      "native_with_sentinel_fallback": {
+        "exit": 1,
+        "stdout_base64": "",
+        "stderr_base64": "c3ltYnJhaW4gc2V0dXA6IGNvbmZpZzogcGFyc2UgL3RtcC9kb2N0b3I3NjUtaW52ZW50b3J5LW93bmVkLWRfMHh3dGlsL3Byb2plY3QtdG9tbC1pbnN0YWxsL3Byb2plY3QvLnN5bWJyYWluLnRvbWw6IFRPTUwgcGFyc2UgZXJyb3IgYXQgbGluZSAxLCBjb2x1bW4gNQogIHwKMSB8IFtiYWQgY29uZmlnCiAgfCAgICAgXgp1bmNsb3NlZCB0YWJsZSwgZXhwZWN0ZWQgYF1gCgo=",
+        "before_files": {
+          "project/.symbrain.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        },
+        "after_files": {
+          "project/.symbrain.toml": {
+            "bytes": 11,
+            "sha256": "4f20c0c5748ab5b577c972f8268284bc651965420ecc2645d6c89e0fcb473670",
+            "mode": "0o600"
+          }
+        }
+      },
+      "fallback_invoked": false,
+      "fallback_argv_hex": null,
+      "actual_mismatched_fields": [
+        "exit",
+        "stderr_base64"
+      ]
+    }
+  ],
+  "source58_final115_groups_contain_malformed_TOML_grammar_proof": false,
+  "mandatory_unchanged_contract": [
+    "exact raw selected file/outer global-project-env stage context",
+    "fatal exit2",
+    "parser-before-type and global-before-project-before-env ordering",
+    "zero child/HTTP/filesystem mutation before admission",
+    "unchanged supported syntax acceptance",
+    "UTF8/error priority",
+    "all13 typed conversion/value/field-chain semantics"
+  ],
+  "narrow_inner_wording_only": true,
+  "unwaived_boundaries": [
+    "UTF8 priority",
+    "typed13 conversion chains",
+    "valid syntax acceptance",
+    "SDK LookPath ownership/errors",
+    "whole MCP eager Memory/JWT"
+  ],
+  "fresh_needed_input_cases": [
+    "original [bad config global/project",
+    "duplicate key/table",
+    "unterminated array/string",
+    "invalid UTF8",
+    "grammar-before-invalid-UTF8",
+    "file syntax before invalid known type",
+    "global parse before project/type/env",
+    "valid multiline/dotted/quoted/inline/numeric/date controls"
+  ]
+}

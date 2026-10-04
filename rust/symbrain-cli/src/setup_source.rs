@@ -109,9 +109,12 @@ fn absolute(root: &OsStr) -> Result<PathBuf, String> {
     Ok(clean)
 }
 
-fn select(modules: &[u8]) -> Result<Vec<Spec>, String> {
+fn select(
+    modules: &[u8],
+    config: &symbrain_core::config::resolved::BrainConfig,
+) -> Result<Vec<Spec>, String> {
     let mut wanted: BTreeSet<Vec<u8>> = if modules.is_empty() {
-        let enabled = super::enabled_cores()?;
+        let enabled = config.modules.enabled_modules();
         SPECS
             .iter()
             .filter(|spec| enabled.get(spec.binary).copied().unwrap_or(false))
@@ -161,7 +164,15 @@ pub(super) fn run(
         }
         Err(error) => return failed(stderr, &error, exit::USAGE),
     };
-    let specs = match select(modules) {
+    // Even explicit --modules does not bypass Go's full config admission.
+    let config = match symbrain_core::config::resolved::load() {
+        Ok(config) => config,
+        Err(error) => {
+            let _ = error.write("symbrain setup --from-source: load config: ", stderr);
+            return exit::NO_INPUT;
+        }
+    };
+    let specs = match select(modules, &config) {
         Ok(specs) => specs,
         Err(error) => return failed(stderr, &error, exit::USAGE),
     };

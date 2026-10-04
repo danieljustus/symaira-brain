@@ -2,6 +2,7 @@
 
 pub mod config;
 pub mod exit;
+pub mod go_path;
 mod go_text;
 mod json_string;
 pub mod output;

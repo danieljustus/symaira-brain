@@ -19,7 +19,7 @@ pub fn os_bytes(s: &OsStr) -> Cow<'_, [u8]> {
     }
     #[cfg(not(unix))]
     {
-        Cow::Owned(s.to_string_lossy().into_owned().into_bytes())
+        Cow::Owned(crate::go_path::os_bytes(s))
     }
 }
 

@@ -16,11 +16,11 @@ pub(crate) struct DirCheck {
 
 #[derive(Debug, Serialize)]
 pub(crate) struct ConfigCheck {
-    pub(crate) path: String,
+    pub(crate) path: symbrain_core::GoText,
     pub(crate) exists: bool,
     pub(crate) parsed: bool,
-    #[serde(skip_serializing_if = "String::is_empty")]
-    pub(crate) error: String,
+    #[serde(skip_serializing_if = "symbrain_core::GoText::is_empty")]
+    pub(crate) error: symbrain_core::GoText,
 }
 
 #[derive(Debug, Serialize)]
@@ -132,8 +132,8 @@ pub(crate) struct ProfileHandshake {
     pub(crate) exposed: usize,
     pub(crate) hidden: usize,
     pub(crate) unknown: usize,
-    #[serde(skip_serializing_if = "String::is_empty")]
-    pub(crate) error: String,
+    #[serde(skip_serializing_if = "symbrain_core::GoText::is_empty")]
+    pub(crate) error: symbrain_core::GoText,
 }
 
 #[derive(Debug, Clone, Serialize)]

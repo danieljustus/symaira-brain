@@ -1,0 +1,16 @@
+{
+  "sdk_source": "/workspace/toolchains/go1.26.7/src/os/getwd.go",
+  "sha256": "20bf5c0875341ff1d685ff8aa58f3a0de19250ec19708d32a921779ed515e26e",
+  "tracked_archive": "migration/fixtures/brain-config13/go1267-getwd.go.gz",
+  "roundtrip_verified": true,
+  "actual_process_proof": false,
+  "reason": "Unix same-file absolute PWD spelling is admitted before lexical project-file Join; Windows explicitly ignores PWD",
+  "prepared_new_cases": [
+    "pwd-lexical-symlink",
+    "pwd-raw-symlink",
+    "pwd-relative-ignored",
+    "pwd-mismatch-ignored",
+    "pwd-repeated-separators",
+    "windows-pwd-ignored"
+  ]
+}

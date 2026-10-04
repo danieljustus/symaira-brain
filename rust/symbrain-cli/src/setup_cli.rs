@@ -152,8 +152,8 @@ fn run_setup(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) 
             } else {
                 "symbrain setup"
             };
-            let _ = writeln!(stderr, "{prefix}: {error}");
-            return exit::GENERIC;
+            let _ = error.write(&format!("{prefix}: "), stderr);
+            return exit::NO_INPUT;
         }
     };
     if parsed.fix {

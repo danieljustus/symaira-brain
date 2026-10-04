@@ -1,14 +1,11 @@
 use chrono::Utc;
 use std::ffi::OsString;
 use std::fs;
-use std::io::{self, Read, Write};
+use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 
 use symbrain_core::exit;
-use symbrain_core::xdg;
-use symbrain_harness::{
-    AtomicFile, ConfigLocation, Entry, Harness, HarnessError, MAX_CONFIG_BYTES, SERVER_NAME,
-};
+use symbrain_harness::{AtomicFile, ConfigLocation, Entry, Harness, HarnessError, SERVER_NAME};
 
 const INSTALL_USAGE: &str = "Usage of install:\n  -dry-run\n    \tprint a unified diff of the change and write nothing\n  -harness string\n    \tharness to install into: claude, claude-desktop, cursor, opencode, codex, antigravity (required)\n  -keep-superseded\n    \tkeep superseded symmemory/symskills MCP entries instead of migrating them out\n  -profile string\n    \tprofile to bind this harness connection to (default: the global config's default_profile)\n  -project string\n    \tproject directory; only meaningful for harnesses with a project-local config (currently: claude's .mcp.json)\n";
 
@@ -47,12 +44,12 @@ pub(crate) fn run_install(args: &[OsString], stdout: &mut dyn Write, stderr: &mu
         match default_profile() {
             Ok(profile) => profile,
             Err(error) => {
-                let _ = writeln!(stderr, "symbrain install: {error}");
+                let _ = error.write("symbrain install: ", stderr);
                 return exit::USAGE;
             }
         }
     } else {
-        parsed.profile
+        parsed.profile.into()
     };
     if profile.is_empty() {
         let _ = writeln!(
@@ -295,63 +292,16 @@ fn resolve_harness(
     }
 }
 
-fn read_bounded(path: &Path) -> io::Result<Vec<u8>> {
-    let file = fs::File::open(path)?;
-    let mut bytes = Vec::with_capacity(MAX_CONFIG_BYTES.min(64 * 1024));
-    file.take((MAX_CONFIG_BYTES + 1) as u64)
-        .read_to_end(&mut bytes)?;
-    if bytes.len() > MAX_CONFIG_BYTES {
-        return Err(io::Error::new(
-            io::ErrorKind::InvalidData,
-            "configuration file exceeds maximum size",
-        ));
-    }
-    Ok(bytes)
-}
-
-fn default_profile() -> Result<String, HarnessError> {
-    match std::env::var("SYMBRAIN_DEFAULT_PROFILE") {
-        Ok(profile) if !profile.is_empty() => return Ok(profile),
-        _ => {}
-    }
-    let path = xdg::config_path();
-    let data = match read_bounded(&path) {
-        Ok(data) => data,
-        Err(error) if error.kind() == io::ErrorKind::NotFound => return Ok(String::new()),
-        Err(error) => return Err(HarnessError::Io(error)),
-    };
-    let text = std::str::from_utf8(&data).map_err(|_| {
-        HarnessError::Unsupported(format!(
-            "config: failed to load {}: global config error: failed to parse {}: input is not UTF-8",
-            path.display(),
-            path.display()
-        ))
-    })?;
-    let document = text.parse::<toml_edit::DocumentMut>().map_err(|error| {
-        let detail = if error.message() == "unclosed array, expected `]`" {
-            "toml: line 1 (last key \"invalid\"): expected value but found \"unterminated\" instead"
-                .to_owned()
-        } else {
-            error.message().to_owned()
-        };
-        HarnessError::Unsupported(format!(
-            "config: failed to load {}: global config error: failed to parse {}: {detail}",
-            path.display(),
-            path.display(),
-        ))
-    })?;
-    Ok(document
-        .get("default_profile")
-        .and_then(toml_edit::Item::as_str)
-        .unwrap_or_default()
-        .to_owned())
+fn default_profile() -> Result<symbrain_core::GoText, symbrain_core::config::resolved::ConfigError>
+{
+    symbrain_core::config::resolved::load().map(|config| config.default_profile)
 }
 
 #[allow(clippy::too_many_lines)]
 fn install_into(
     harness: &Harness,
     location: &ConfigLocation,
-    profile: &str,
+    profile: &symbrain_core::GoText,
     dry_run: bool,
     keep_superseded: bool,
     stdout: &mut dyn Write,
@@ -403,7 +353,7 @@ fn install_into(
             }
         }
     }
-    document.set_server(SERVER_NAME, Entry::new(profile));
+    document.set_server(SERVER_NAME, Entry::new(&profile.unicode_lossy()));
     let new_content = match document.marshal() {
         Ok(content) => content,
         Err(error) => {
@@ -498,13 +448,12 @@ fn install_into(
         );
         return exit::GENERIC;
     }
-    let _ = writeln!(
-        stdout,
-        "installed symbrain into {} (harness: {}, profile: {})",
-        location.path.display(),
-        harness.name,
-        profile
-    );
+    let mut line = b"installed symbrain into ".to_vec();
+    line.extend_from_slice(&symbrain_core::go_path::os_bytes(location.path.as_os_str()));
+    line.extend_from_slice(format!(" (harness: {}, profile: ", harness.name).as_bytes());
+    line.extend_from_slice(profile.as_ref());
+    line.extend_from_slice(b")\n");
+    let _ = stdout.write_all(&line);
     exit::OK
 }
 

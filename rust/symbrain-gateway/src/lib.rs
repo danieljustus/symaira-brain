@@ -22,6 +22,7 @@ mod embedded;
 mod error;
 mod response;
 mod routing;
+mod session_patterns;
 
 pub use catalog::{CatalogAssembly, build_catalog};
 pub use error::{BackendError, GatewayError, join_content};
@@ -97,6 +98,8 @@ pub struct Gateway {
     degradations: Vec<symbrain_audit::Degradation>,
     version: String,
     identity_injection: bool,
+    pattern_threshold: usize,
+    episode: std::sync::Mutex<Option<symbrain_patterns::Episode>>,
     audit: Option<Arc<symbrain_audit::Logger>>,
     usage: Option<Arc<Service>>,
     usage_allowed: bool,
@@ -175,6 +178,8 @@ impl Gateway {
             degradations: assembly.degradations,
             version: version.into(),
             identity_injection: true,
+            pattern_threshold: 3,
+            episode: std::sync::Mutex::new(None),
             audit: None,
             usage: None,
             usage_allowed,

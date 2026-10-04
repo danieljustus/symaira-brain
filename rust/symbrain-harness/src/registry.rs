@@ -178,8 +178,7 @@ impl Harness {
     /// # Errors
     /// Returns an error for unsupported harnesses or when the home directory is unavailable.
     pub fn config_path(&self) -> Result<PathBuf, HarnessError> {
-        let env = std::env::vars().collect::<Vec<_>>();
-        self.config_path_for(std::env::consts::OS, &env)
+        crate::registry_environment::location(self.path_kind).map(|location| location.path)
     }
 
     /// Resolves a path using an injected target OS and environment.
@@ -203,8 +202,7 @@ impl Harness {
     /// # Errors
     /// Returns an error for unsupported harnesses or when the required home directory is absent.
     pub fn config_location(&self) -> Result<ConfigLocation, HarnessError> {
-        let env = std::env::vars().collect::<Vec<_>>();
-        self.config_location_for(std::env::consts::OS, &env)
+        crate::registry_environment::location(self.path_kind)
     }
 
     /// Resolves a capability target using an injected target OS and environment.

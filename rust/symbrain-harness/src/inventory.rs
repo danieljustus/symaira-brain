@@ -84,8 +84,7 @@ pub struct BindingScan {
 /// Inspects harness configurations using the current process environment.
 #[must_use]
 pub fn list(project_dir: Option<&Path>) -> Inventory {
-    let env = std::env::vars().collect::<Vec<_>>();
-    list_for_env(project_dir, std::env::consts::OS, &env)
+    list_with(project_dir, |harness| harness.config_location().ok())
 }
 
 /// Lists configs with an injected target OS/environment for cross-platform tests.
@@ -95,14 +94,22 @@ pub fn list_for_env(
     target_os: &str,
     env: &[(String, String)],
 ) -> Inventory {
+    list_with(project_dir, |harness| {
+        harness.config_location_for(target_os, env).ok()
+    })
+}
+
+fn list_with(
+    project_dir: Option<&Path>,
+    location: impl Fn(&Harness) -> Option<crate::ConfigLocation>,
+) -> Inventory {
     let project_dir = project_dir.map(clean_path);
     let mut harnesses = Vec::new();
     for harness in all().iter().filter(|h| h.supports_mcp_install) {
-        let global_path = harness.config_path_for(target_os, env).ok();
-        let global_capability = harness
-            .config_location_for(target_os, env)
-            .ok()
-            .map(|location| (location.trusted_root, location.relative_path));
+        let location = location(harness);
+        let global_path = location.as_ref().map(|location| location.path.clone());
+        let global_capability =
+            location.map(|location| (location.trusted_root, location.relative_path));
         let project = project_dir.as_deref().and_then(|path| {
             harness.project_config_path(path).map(|path| {
                 let root = path

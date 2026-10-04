@@ -1682,6 +1682,7 @@ version = "0.12.1"
 dependencies = [
  "serde",
  "serde_json",
+ "symbrain-core",
  "symbrain-mcp",
  "tempfile",
 ]
@@ -1788,6 +1789,7 @@ dependencies = [
  "rustix",
  "serde",
  "serde_json",
+ "symbrain-core",
  "tempfile",
  "toml_edit",
 ]

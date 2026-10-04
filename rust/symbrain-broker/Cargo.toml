@@ -19,6 +19,7 @@ required-features = ["test-fakemcp"]
 serde.workspace = true
 serde_json.workspace = true
 symbrain-mcp.workspace = true
+symbrain-core.workspace = true
 
 [dev-dependencies]
 tempfile.workspace = true

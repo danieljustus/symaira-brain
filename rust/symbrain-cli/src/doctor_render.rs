@@ -98,21 +98,27 @@ fn dir(w: &mut dyn Write, label: &str, check: &DirCheck) -> io::Result<()> {
 }
 fn config(w: &mut dyn Write, check: &ConfigCheck) -> io::Result<()> {
     if !check.exists {
-        writeln!(
+        return writeln!(
             w,
             "  →  {:<12} not found (run `symbrain init`)",
             "config.toml"
-        )
-    } else if check.parsed {
-        writeln!(w, "  ✓  {:<12} {}", "config.toml", check.path)
-    } else {
-        writeln!(
-            w,
-            "  ✗  {:<12} {}: {}",
-            "config.toml", check.path, check.error
-        )
+        );
     }
+    let mut line = format!(
+        "  {}  {:<12} ",
+        if check.parsed { "✓" } else { "✗" },
+        "config.toml"
+    )
+    .into_bytes();
+    line.extend_from_slice(check.path.as_ref());
+    if !check.parsed {
+        line.extend_from_slice(b": ");
+        line.extend_from_slice(check.error.as_ref());
+    }
+    line.push(b'\n');
+    w.write_all(&line)
 }
+
 fn server_line(w: &mut dyn Write, server: &ServerCheck) -> io::Result<()> {
     let origin = if server.origin.is_empty() {
         String::new()
@@ -267,11 +273,14 @@ fn handshake_line(w: &mut dyn Write, check: &ProfileHandshake) -> io::Result<()>
             check.unknown
         )
     } else {
-        writeln!(
-            w,
-            "    ✗  {:<10} {:<8} handshake failed: {}",
-            check.profile, check.server, check.error
+        let mut line = format!(
+            "    ✗  {:<10} {:<8} handshake failed: ",
+            check.profile, check.server
         )
+        .into_bytes();
+        line.extend_from_slice(check.error.as_ref());
+        line.push(b'\n');
+        w.write_all(&line)
     }
 }
 fn link_line(w: &mut dyn Write, check: &LinkCheck) -> io::Result<()> {

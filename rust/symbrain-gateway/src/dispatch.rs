@@ -109,6 +109,7 @@ impl Gateway {
         };
         let result = symbrain_usage::report_json(&report)
             .map_err(|error| GatewayError::Serialization(error.to_string()));
+        self.record_step("usage", "get_ai_usage");
         let status = super::audit::usage_status(&report, result.is_ok());
         let classification = super::audit::usage_classification(&report, status);
         self.audit_usage(
@@ -144,6 +145,7 @@ impl Gateway {
                 .and_then(|value| value.get("isError").and_then(Value::as_bool))
                 .unwrap_or(false);
         let (server, tool, exposure) = self.audit_target(name);
+        self.record_step(&server, &tool);
         let classification = symbrain_audit::Classification {
             category: "tool".to_string(),
             retryable: false,
@@ -171,7 +173,7 @@ impl Gateway {
         context: DispatchContext<'_>,
         started: Instant,
     ) -> Result<GatewayResponse, GatewayError> {
-        match route_tool_with_context(
+        let response = match route_tool_with_context(
             &self.profile,
             &self.servers,
             &self.catalog,
@@ -216,7 +218,15 @@ impl Gateway {
                 self.audit_error(name, arguments, started, status, &error);
                 GatewayResponse::success(id, tool_result(error.to_string(), true))
             }
+        };
+        if let Some(entry) = self
+            .catalog
+            .lookup(name)
+            .filter(|entry| entry.verdict == symbrain_policy::Verdict::Exposed)
+        {
+            self.record_step(&entry.server, &entry.original_name);
         }
+        response
     }
 }
 
