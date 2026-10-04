@@ -22,6 +22,8 @@ def save(path, record):
 def source(root, out):
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root).decode().strip()
     assert not subprocess.check_output(["git", "status", "--porcelain"], cwd=root)
+    from integration_owners import effective_owners, owner_hash
+    integrated = effective_owners(root, head)
     final_path = root / "migration/evidence/brain-config13/startup-four-final-corrections/source-updates.json"
     final = json.loads(final_path.read_bytes()) if final_path.exists() else {}
     changes = final.get("changes", {})
@@ -30,14 +32,14 @@ def source(root, out):
         for name, record in changes.items():
             original = subprocess.check_output(["git", "show", final["parent"] + ":" + name], cwd=root)
             assert sha(original) == record["parent_sha256"], name
-            assert sha((root / name).read_bytes()) == record["current_sha256"], name
+            assert sha((root / name).read_bytes()) == owner_hash(integrated, name, record["current_sha256"]), name
         for name, expected in final.get("added_source_sha256", {}).items():
-            assert sha((root / name).read_bytes()) == expected, name
+            assert sha((root / name).read_bytes()) == owner_hash(integrated, name, expected), name
     def current_hash(name, expected):
         if name in changes:
             assert changes[name]["parent_sha256"] == expected, (name, "historical source phase differs")
-            return changes[name]["current_sha256"]
-        return expected
+            expected = changes[name]["current_sha256"]
+        return owner_hash(integrated, name, expected)
     review = root / "migration/evidence/brain-config13/startup-review-corrections"
     current = json.loads((review / "checkpoint.json").read_bytes())
     for name, expected in current["candidate_source_sha256"].items():
@@ -82,7 +84,7 @@ def source(root, out):
     save(out / "source.json", dict(head=head, source={name: sha((root/name).read_bytes()) for name in files},
          validated_checkpoint_entries=len(checkpoint["candidate_source_sha256"]),
          pinned_references=len(references), all_frozen_go_files=len(independent["frozen_source"]),
-         references=references, explicit_source_updates=updates, final_source_updates=final, clean=True))
+         references=references, explicit_source_updates=updates, final_source_updates=final, normal_main_owner_overlay=integrated, clean=True))
 
 
 def binaries(root, out, target):

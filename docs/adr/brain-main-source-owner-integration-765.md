@@ -1,0 +1,80 @@
+# Brain startup source owners after normal main integration
+
+Status: source-only integration, not compilation, runtime approval or a whole
+Brain/Memory cutover. Issues #765 and #759 remain open. The independently read
+Brain publication e30676fd and production f9b79327 remain unchanged, alongside
+all older 9804 sources, failed observations and executable archives.
+
+The normal two-parent merge combines e306's startup/configuration owners with
+published main 9353520a (Skills #794). It does not propagate the unreviewed
+Skills #764 byte-contract successor or infer approval of newer Memory/Source
+branches. The complete two-parent source bodies, Git modes/blob maps, original
+16-proof independent review and fresh original-retention verification were
+saved before conflict resolution. Existing historical ELF archives were fully
+round-trip verified and reused; no executable archive was duplicated.
+
+## Owner decisions
+
+* Brain's startup, typed configuration, marker admission, timezone precedence,
+  linear rotation JSON traversal, Darwin admission accounting and all process
+  corpora/tests retain complete e306 bodies. The Brain runtime preflight alone
+  receives an explicit integration overlay; its other functions remain exact.
+* Skills CLI flags, raw-byte quoter, codecs, marker/preflight tests and argv
+  helpers retain complete main 935 bodies and modes. Core's byte quoter is
+  exactly main, including its UTF8-valid-prefix assertion and documentation.
+  The config module remains exactly e306: its additive `resolved` and `os_bytes`
+  exports coexist with the main byte-quoter export. No formatting, accepting
+  grammar or unrelated output owner is normalized during integration.
+* CI keeps every complete step from both parents. Both Guard's standalone gate
+  and main's Windows wide Skills gate survive, with their separate artifact
+  settings. The contract matrix keeps every original row under its unchanged
+  unique ID; the migration ledger retains both parent additions.
+* The two already-reviewed CI parent-acquisition commits are copied as two
+  ordinary history commits, retaining the failed depth-one attempt. The final
+  workflow adds only the pinned no-tags, full-ancestry fetch to the merged
+  workflow. Their exact ADR and four original evidence artifact bodies remain
+  in Git; sparse exclusion does not rewrite or omit them from the commit.
+
+## Executable source preflight
+
+Checking old source hashes against a newly composed source would reject the
+intended main owners before any actual test. Silently rebinding historical
+expectations to mutable HEAD would instead weaken attribution. The integration
+manifest therefore pins complete expected bodies/modes for every current Rust,
+script and Cargo source. Changed main owners also pin their original e306 body
+(or verified prior absence), and their exact main body. The two fixed parents
+must be ancestors. Existing checkpoint expectations first traverse their
+unchanged historical overlays; only explicitly declared owner changes may then
+select the separately pinned effective SHA. Unchanged expectations are returned
+unchanged. Complete current Git and filesystem bodies/modes are checked against
+the fixed manifest, so missing, altered and foreign source owners reject.
+
+The new helper shares no product configuration/defaults and executes no SDK or
+provider. Additive Python controls reject changed bytes/modes, missing/foreign
+owner coverage and forged historical expectations. Actual execution of the
+source-only preflight is distinct from admission/runtime compatibility.
+
+## Validation and limits
+
+The prepared startup family remains exactly 94 Unix / 82 Windows plans, with
+all original 81/69 prefix plans and controls. The inherited runtime driver keeps
+full workspace/all-target/all-feature tests, strict lint/format, authenticated
+constructor/state probes, original process families and native acceptance.
+Their product execution count in this integration is zero. Future execution
+requires explicit target/port allocation, fresh executable/source attribution,
+complete failed-stage retention and all native gates.
+
+Pure checks verify the parent owner bodies/modes, unchanged Cargo identities,
+complete CI step dictionaries, matrix rows, Python AST, formatting, actionlint,
+prepared case projections and source-preflight negative controls. They do not
+prove native Windows or Darwin behavior, SQLite correctness, provider cleanup,
+model startup or timing. The full diff whitespace check retains failures in two
+unchanged published main raw test logs; source-only whitespace is checked
+separately. Their original whitespace is not edited to manufacture a clean log.
+
+Preparation failures remain visible: the first sparse add refused the new
+retention directory, so the initial merge was aborted without resolving source
+conflicts, the sparse rule was added and preservation was committed first. A
+first owner-check projection incorrectly demanded main's entire config module
+instead of the explicit e306 export union; its raw failure is retained. Neither
+is attributed to compiled product behavior.
