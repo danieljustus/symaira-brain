@@ -1,0 +1,1594 @@
+{
+  "production_source": "5a735a4632ee0e8c5a331a2872ad7db8fd1489bc",
+  "original": "64b2c6aceaa0d1f7d1550d1398a5a70ec81aa7a0",
+  "members": [
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/CI-parent-complete-step-differences.json",
+      "member": "CI-parent-complete-step-differences.json",
+      "bytes": 8387,
+      "sha256": "431b38fdb1260a86e554dab276c988e0185798093a2a0a30a2eafa46af45f132",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121599720819528
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/after-full-git-native-bindings.json.gz",
+      "member": "after-full-git-native-bindings.json.gz",
+      "bytes": 632422,
+      "sha256": "6dbf9a774e2d3ca3e6364b613f6eb167d774deb661db12668507577fca82013b",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121809752970475
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/all-actionlint.exit.json",
+      "member": "all-actionlint.exit.json",
+      "bytes": 90,
+      "sha256": "117ae34293ab1e0ea7c495410b00a1309c1ecf101ceebdfa168d18019534adf3",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917699512615
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/all-actionlint.stderr",
+      "member": "all-actionlint.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917694953249
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/all-actionlint.stdout",
+      "member": "all-actionlint.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917694953249
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/bash-syntax-0.exit.json",
+      "member": "bash-syntax-0.exit.json",
+      "bytes": 102,
+      "sha256": "a67d060e57eae48edef1d7cd501d6f09b97bebcdafc0562d24cde98a020abf84",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917701405877
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/bash-syntax-0.stderr",
+      "member": "bash-syntax-0.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917699512615
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/bash-syntax-0.stdout",
+      "member": "bash-syntax-0.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917699512615
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/bash-syntax-1.exit.json",
+      "member": "bash-syntax-1.exit.json",
+      "bytes": 101,
+      "sha256": "10d84ee58ed0757767991b2820c66540c020273fbd5739996cd6df7d8220f1fa",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917702898523
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/bash-syntax-1.stderr",
+      "member": "bash-syntax-1.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917701405877
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/bash-syntax-1.stdout",
+      "member": "bash-syntax-1.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917701405877
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/bash-syntax-2.exit.json",
+      "member": "bash-syntax-2.exit.json",
+      "bytes": 102,
+      "sha256": "ff34c108172159f06543008910c065533fafacfe0910e77dd597d21364f5419c",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917704435140
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/bash-syntax-2.stderr",
+      "member": "bash-syntax-2.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917702898523
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/bash-syntax-2.stdout",
+      "member": "bash-syntax-2.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917702898523
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/bash-syntax-3.exit.json",
+      "member": "bash-syntax-3.exit.json",
+      "bytes": 106,
+      "sha256": "7dd0a3adda21d30a01e136b05fdb190cd81b1512706bc11caa832725499f376f",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917705749858
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/bash-syntax-3.stderr",
+      "member": "bash-syntax-3.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917704435140
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/bash-syntax-3.stdout",
+      "member": "bash-syntax-3.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917704435140
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/before-full-git-native-bindings.json.gz",
+      "member": "before-full-git-native-bindings.json.gz",
+      "bytes": 1811984,
+      "sha256": "c3a62c504d1434fd8d6350690d00b1b337e511d3e7ffaad18b9dc10f34e87b3e",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121025658327281
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/before-preservation-receipt.json",
+      "member": "before-preservation-receipt.json",
+      "bytes": 5361,
+      "sha256": "ac34288da5bd59ef2f75c1aa14d21ebe538e8729cf9ef7f5e17c5b208f1d6d64",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121026184187172
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/before-preservation.stderr",
+      "member": "before-preservation.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121020484023380
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/before-preservation.stdout",
+      "member": "before-preservation.stdout",
+      "bytes": 822,
+      "sha256": "8658046232706185b86ecc7102cfc2b53a09d479441f287cfb67e6eb852fafe6",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121026184187172
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/check_whole_owner_classification.py",
+      "member": "check_whole_owner_classification.py",
+      "bytes": 2088,
+      "sha256": "39f67e782b4758b965ac3eabbeb82798aa11277ba1d7054e335496c8b767df97",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791122058047244677
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/.github/workflows/ci.yml",
+      "member": "conflicts-main/.github/workflows/ci.yml",
+      "bytes": 80275,
+      "sha256": "d353756c9e315372e218e17f6e60d03db26ad02898191dcef4e6091b29eae8d7",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150219832872
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/.github/workflows/ci.yml.stage1",
+      "member": "conflicts-main/.github/workflows/ci.yml.stage1",
+      "bytes": 71153,
+      "sha256": "7781a2f5fc55a94605eef5a071f44d24b16d7fb3b8d9b5f6e37f608ff3d214dd",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150223402217
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/.github/workflows/ci.yml.stage2",
+      "member": "conflicts-main/.github/workflows/ci.yml.stage2",
+      "bytes": 77547,
+      "sha256": "f96c00686b8c6ecc7aceb2d5b0f0af9af6182bcddc0101f8390c083435aa2bff",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150226380480
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/.github/workflows/ci.yml.stage3",
+      "member": "conflicts-main/.github/workflows/ci.yml.stage3",
+      "bytes": 73876,
+      "sha256": "ff81d2e9b856003f882d2c9c4fa7d9bf3243a676ad3e02a8090dc097cc38fb84",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150228945267
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/MIGRATION-RUST.md",
+      "member": "conflicts-main/MIGRATION-RUST.md",
+      "bytes": 26766,
+      "sha256": "52daf8dc4fe27f7ee07a6e05b5077bb38315b38397c6b7a7f80480ffd563f945",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150229105820
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/MIGRATION-RUST.md.stage1",
+      "member": "conflicts-main/MIGRATION-RUST.md.stage1",
+      "bytes": 16674,
+      "sha256": "31f7a6cb3de5322f60b65cca4df7e1eb0fa3044bd2810db8e540a2c16ab43336",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150231468783
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/MIGRATION-RUST.md.stage2",
+      "member": "conflicts-main/MIGRATION-RUST.md.stage2",
+      "bytes": 23363,
+      "sha256": "6696c4f85c785474ce51706daa1306365fe832837128210f0abfa17dbd798b9e",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150233651713
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/MIGRATION-RUST.md.stage3",
+      "member": "conflicts-main/MIGRATION-RUST.md.stage3",
+      "bytes": 20008,
+      "sha256": "30002e19b4debcc10451cd943a33cafc9a64a2ca17cae60e9d67b53ec080a1d2",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150236705128
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/manifest.json",
+      "member": "conflicts-main/manifest.json",
+      "bytes": 2835,
+      "sha256": "78ec2f41a88754085cb60ec50aa7c1625258ef41cecceeb03268974595aaa143",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150250445887
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/migration/contract-matrix.csv",
+      "member": "conflicts-main/migration/contract-matrix.csv",
+      "bytes": 34804,
+      "sha256": "b93ca8a64d8b78a623e798718e52bea46744dfc6e501a1b46b4a63e08b6e52f3",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150236816427
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/migration/contract-matrix.csv.stage1",
+      "member": "conflicts-main/migration/contract-matrix.csv.stage1",
+      "bytes": 27051,
+      "sha256": "49b38f4744cbbb261d9ea22bf0979dd255d4e00942e63348816711723c9bf3d7",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150239138427
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/migration/contract-matrix.csv.stage2",
+      "member": "conflicts-main/migration/contract-matrix.csv.stage2",
+      "bytes": 33109,
+      "sha256": "eae77df71874832340d9e72e62be4793fa20a07127d770641e88d9f18ee7b235",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150241448990
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/migration/contract-matrix.csv.stage3",
+      "member": "conflicts-main/migration/contract-matrix.csv.stage3",
+      "bytes": 28676,
+      "sha256": "3d128ba0bcfad3add7205c1ba258c6ed1912eb8970885d28526f6dea8ea17c1e",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150243649287
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/rust/symbrain-core/src/config/format.rs",
+      "member": "conflicts-main/rust/symbrain-core/src/config/format.rs",
+      "bytes": 8714,
+      "sha256": "96938bf5310e5917b1fdfe1887549eb67dcc6ce9f35fc18b34512eae58391842",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150243837431
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/rust/symbrain-core/src/config/format.rs.stage1",
+      "member": "conflicts-main/rust/symbrain-core/src/config/format.rs.stage1",
+      "bytes": 8441,
+      "sha256": "9e6f68b61896e6f5c559c948a533b633e099bf91dde65b6c5bd03796cc3e8a7c",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150245988548
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/rust/symbrain-core/src/config/format.rs.stage2",
+      "member": "conflicts-main/rust/symbrain-core/src/config/format.rs.stage2",
+      "bytes": 8428,
+      "sha256": "1a31fc16a95b1fa213fcfef22bae64aa6e7bacb6e427ccf52efb5c6ef67dba49",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150248085949
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-main/rust/symbrain-core/src/config/format.rs.stage3",
+      "member": "conflicts-main/rust/symbrain-core/src/config/format.rs.stage3",
+      "bytes": 8662,
+      "sha256": "f2360ccf0a4ade10ba622b5da09d40139139e0427d27aa1b7ee3846723b639ac",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150250178332
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-memory/.gitattributes",
+      "member": "conflicts-memory/.gitattributes",
+      "bytes": 2578,
+      "sha256": "9c6db2136edd4369c44a51e3a367e9c221515b51c83d82b906ba135ddf35d43e",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240638638924
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-memory/.gitattributes.stage1",
+      "member": "conflicts-memory/.gitattributes.stage1",
+      "bytes": 529,
+      "sha256": "d5b78f92fe2dde9b0abe682bf201ee53ebefe0885fa8582d6a8d6e05331fbe0e",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240641662585
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-memory/.gitattributes.stage2",
+      "member": "conflicts-memory/.gitattributes.stage2",
+      "bytes": 1443,
+      "sha256": "fe97a2b5bbd660c8200050188b3183356dc18656af78359c615189eb6d2762c2",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240644648950
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-memory/.gitattributes.stage3",
+      "member": "conflicts-memory/.gitattributes.stage3",
+      "bytes": 1595,
+      "sha256": "24be57ffcb13e012d0b3895b0ed3715945ea9d480f9ff28108b074ce6806203b",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240647273117
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-memory/.github/workflows/ci.yml",
+      "member": "conflicts-memory/.github/workflows/ci.yml",
+      "bytes": 83633,
+      "sha256": "d00b76b7d4b2be8947ef9a698633c1193f1d22bf4a85034a324b75e12a0b12be",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240647488112
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-memory/.github/workflows/ci.yml.stage1",
+      "member": "conflicts-memory/.github/workflows/ci.yml.stage1",
+      "bytes": 73876,
+      "sha256": "ff81d2e9b856003f882d2c9c4fa7d9bf3243a676ad3e02a8090dc097cc38fb84",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240650103225
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-memory/.github/workflows/ci.yml.stage2",
+      "member": "conflicts-memory/.github/workflows/ci.yml.stage2",
+      "bytes": 80270,
+      "sha256": "666baf228a402b515fefa84f1c23b7ece63e1a6b52dec4c057241df158d55908",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240653935989
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-memory/.github/workflows/ci.yml.stage3",
+      "member": "conflicts-memory/.github/workflows/ci.yml.stage3",
+      "bytes": 77170,
+      "sha256": "31e768848473c4462ebeec44409b8ec6862d4571f9bb2605dfdc2245abbd887a",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240656996196
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-memory/manifest.json",
+      "member": "conflicts-memory/manifest.json",
+      "bytes": 2144,
+      "sha256": "1c5a61c2459ddae3e753107ddd353d0bae3e5d1c0f90898c0db3587f252303b3",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240664595344
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-memory/rust/symbrain-managed/tests/install_tests.rs",
+      "member": "conflicts-memory/rust/symbrain-managed/tests/install_tests.rs",
+      "bytes": 14123,
+      "sha256": "7ed7ed9962897376afd844ddb1dac223840572fd5f11b8533f47f344da3a31a1",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240657194836
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-memory/rust/symbrain-managed/tests/install_tests.rs.stage1",
+      "member": "conflicts-memory/rust/symbrain-managed/tests/install_tests.rs.stage1",
+      "bytes": 13213,
+      "sha256": "2a017b66116aae75404c2c46eca620a71bc78079093d01add029156cfb258372",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240659882159
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-memory/rust/symbrain-managed/tests/install_tests.rs.stage2",
+      "member": "conflicts-memory/rust/symbrain-managed/tests/install_tests.rs.stage2",
+      "bytes": 13234,
+      "sha256": "ca4ea17dd861f1730e056bac0013b1ff168f6821e09fc567fcc9282845f97260",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240662209197
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-memory/rust/symbrain-managed/tests/install_tests.rs.stage3",
+      "member": "conflicts-memory/rust/symbrain-managed/tests/install_tests.rs.stage3",
+      "bytes": 13921,
+      "sha256": "d12443a3bb85023e7d3b75ffca8517fa00112690fa174d943955fc105f6522fc",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240664439549
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/.gitattributes",
+      "member": "conflicts-source/.gitattributes",
+      "bytes": 2720,
+      "sha256": "26f0da0bfadcd5106636ea6bf6f32747c08397df8215d2a242117d102f1c91b5",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289465751735
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/.gitattributes.stage1",
+      "member": "conflicts-source/.gitattributes.stage1",
+      "bytes": 985,
+      "sha256": "0db9baf384e30d55a0ea42d495800233fb574feb831a1eaed51304a6e4183ef0",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289468833154
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/.gitattributes.stage2",
+      "member": "conflicts-source/.gitattributes.stage2",
+      "bytes": 2508,
+      "sha256": "361961775eba051436ffd1de334ea35d08eb1e0787bc76d2a8f262d33fcaea16",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289471561649
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/.gitattributes.stage3",
+      "member": "conflicts-source/.gitattributes.stage3",
+      "bytes": 1127,
+      "sha256": "984c61745723e73fdc12ce4fc2ff909cc28da719c29f3f4fe9e7561ed19c7a3a",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289474084202
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/.github/workflows/ci.yml",
+      "member": "conflicts-source/.github/workflows/ci.yml",
+      "bytes": 84621,
+      "sha256": "e7ba07f6b4f43e40adbe7554fd305b14e2dbc9871d959936ab36b01fda750cc8",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289474315662
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/.github/workflows/ci.yml.stage1",
+      "member": "conflicts-source/.github/workflows/ci.yml.stage1",
+      "bytes": 80285,
+      "sha256": "f5bb0069f84aa5cb56716db1f59e351e534de992a3edcfa04f1aa8f0af1f578f",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289476922433
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/.github/workflows/ci.yml.stage2",
+      "member": "conflicts-source/.github/workflows/ci.yml.stage2",
+      "bytes": 83564,
+      "sha256": "b4de89e2e6bb2e366fb1f0e7c5bede0690f989df632fec442110add67064375b",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289479665079
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/.github/workflows/ci.yml.stage3",
+      "member": "conflicts-source/.github/workflows/ci.yml.stage3",
+      "bytes": 81425,
+      "sha256": "3d4f7796a9b41a290f572e4366f21603dcf3d9793df3839740aaf0b30a21cb4d",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289482377880
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/MIGRATION-RUST.md",
+      "member": "conflicts-source/MIGRATION-RUST.md",
+      "bytes": 29856,
+      "sha256": "ad9378758d51fbd22692dc5749f0508fa969052c8fbd9d4430e198d0c1cfa859",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289482514807
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/MIGRATION-RUST.md.stage1",
+      "member": "conflicts-source/MIGRATION-RUST.md.stage1",
+      "bytes": 26776,
+      "sha256": "eda1e2881aecb459f4e8b22059d83de9f1abe2e5c2ee8f5afac4d20ec2b5bccd",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289485099354
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/MIGRATION-RUST.md.stage2",
+      "member": "conflicts-source/MIGRATION-RUST.md.stage2",
+      "bytes": 29786,
+      "sha256": "0cac0f6643891fb58306d26c723879190c1e5a43473e6ecc067e401c7cbe1a2f",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289487762090
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/MIGRATION-RUST.md.stage3",
+      "member": "conflicts-source/MIGRATION-RUST.md.stage3",
+      "bytes": 26696,
+      "sha256": "640065b12566ce1f0582a6eb30b9fdde729ed4657ed605cdebd12d157cbc2678",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289490212184
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/manifest.json",
+      "member": "conflicts-source/manifest.json",
+      "bytes": 2783,
+      "sha256": "195cbc614f1a14b56992008bb0be157231e58cc86dd28b241d29198c875f9f47",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289498253280
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/migration/contract-matrix.csv",
+      "member": "conflicts-source/migration/contract-matrix.csv",
+      "bytes": 35627,
+      "sha256": "54d9843b9837e8dd162b86f73b3356da6e5114416255464579724f5d00f9a46b",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289490352516
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/migration/contract-matrix.csv.stage1",
+      "member": "conflicts-source/migration/contract-matrix.csv.stage1",
+      "bytes": 34220,
+      "sha256": "abb0ed11f2f544436ce7c9b2019381dfbafe02fedd44f3fccb1ae573fd8b6476",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289492722208
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/migration/contract-matrix.csv.stage2",
+      "member": "conflicts-source/migration/contract-matrix.csv.stage2",
+      "bytes": 35557,
+      "sha256": "1d0c4c787182ea046d752e555aad02e0b0625beb0e9d7ec97904ce0aa9882c9d",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289495329059
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/conflicts-source/migration/contract-matrix.csv.stage3",
+      "member": "conflicts-source/migration/contract-matrix.csv.stage3",
+      "bytes": 34140,
+      "sha256": "8ef1a53f76cfb1f6ea36f6c7ab50e4c1c9b72d8091a2824ff171885eb8157716",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289498056362
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/full-criterion-map.json",
+      "member": "full-criterion-map.json",
+      "bytes": 10142,
+      "sha256": "dbafddd4e74d964c5dd8e13cb6374751346b2f6175c9019dbe29c636d86b357c",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121918072610010
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/main-merge-commit.stderr",
+      "member": "main-merge-commit.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150319340190
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/main-merge-commit.stdout",
+      "member": "main-merge-commit.stdout",
+      "bytes": 106,
+      "sha256": "515bb1d7637664773ac1e20f7a3d2a26bd1debc284c748154d6b2c836dc4a163",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121150333955611
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/main-normal-merge.stderr",
+      "member": "main-normal-merge.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121092142248825
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/main-normal-merge.stdout",
+      "member": "main-normal-merge.stdout",
+      "bytes": 546,
+      "sha256": "5efd38e91f3bdce229c50611e19cce06434bde7718a504e096831b08023db953",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121092274392971
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/matrix-before-owner-selection.csv",
+      "member": "matrix-before-owner-selection.csv",
+      "bytes": 35557,
+      "sha256": "1d0c4c787182ea046d752e555aad02e0b0625beb0e9d7ec97904ce0aa9882c9d",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121703779462323
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/matrix-owner-selection.json",
+      "member": "matrix-owner-selection.json",
+      "bytes": 1541,
+      "sha256": "39796db366a2b14ba272fff44c478121e363da839edb4bc775a2952a89f9d11f",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121703779596646
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/memory-merge-commit.stderr",
+      "member": "memory-merge-commit.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240688015395
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/memory-merge-commit.stdout",
+      "member": "memory-merge-commit.stdout",
+      "bytes": 101,
+      "sha256": "68905f6384307f0b7f39074432d7fd94a1e289a28966c22bd59397ed2a9c5203",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240699367587
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/memory-normal-merge.stderr",
+      "member": "memory-normal-merge.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121172528027927
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/memory-normal-merge.stdout",
+      "member": "memory-normal-merge.stdout",
+      "bytes": 508,
+      "sha256": "e369694b005e5a94db330343a4ba359183bcff4f8460216881440731c127a764",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121172583356136
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/memory803-handoff.json.gz",
+      "member": "memory803-handoff.json.gz",
+      "bytes": 826,
+      "sha256": "b7120848ca13f6878e61a136ebea5bd1d7c2427b3f09766055f97b666698dd89",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121081029602142
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/memory803-independent-review.md.gz",
+      "member": "memory803-independent-review.md.gz",
+      "bytes": 3200,
+      "sha256": "521082be44cef80b0e81d95e1985b8ffb55c4cabfe5181c1eb58d476146ab81f",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121081029056377
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/original-scoped-source.tar.gz",
+      "member": "original-scoped-source.tar.gz",
+      "bytes": 1414567,
+      "sha256": "bde0a05d1c1091bf833bb65266346e4460e03a393da7be3ab85a59fe90699142",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121026127492328
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/ownership-doc-commit.stderr",
+      "member": "ownership-doc-commit.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121807435698551
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/ownership-doc-commit.stdout",
+      "member": "ownership-doc-commit.stdout",
+      "bytes": 228,
+      "sha256": "32fb596d1a08c5fcd10d7a01c7716da2815da0e21565695b701af19a448c192e",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121807447862753
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/parent-full-reviews-retention.json",
+      "member": "parent-full-reviews-retention.json",
+      "bytes": 1991,
+      "sha256": "f7b8bb5cd8184c9aa22d21eb7753ca1bc39d6d2e59351bc81c783675aabcd780",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121081229977475
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/preserve_before.py",
+      "member": "preserve_before.py",
+      "bytes": 4307,
+      "sha256": "c156744b2e37514fd5de9ea72386f2c063c0b5620f910457fb941c21977f3b51",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121020484023380
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/pure-checks.json",
+      "member": "pure-checks.json",
+      "bytes": 5757,
+      "sha256": "b084ea7e3171cd1dbdb5968049796b81484c71ffcb2e60df8aec65b9f991d0f9",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121918074091750
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/pure-checks.stderr",
+      "member": "pure-checks.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917483889152
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/pure-checks.stdout",
+      "member": "pure-checks.stdout",
+      "bytes": 274,
+      "sha256": "b69054fda8ffd5787a2c67dcce60c3fadae52989b2e639dd8c620495a9eb52a0",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121918074091750
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/run_pure_checks.py",
+      "member": "run_pure_checks.py",
+      "bytes": 3704,
+      "sha256": "298bf53757ebfc58becd68899a730981f915f8e6e58e8a47e67db006ed25a05e",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917483889152
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/rustfmt.exit.json",
+      "member": "rustfmt.exit.json",
+      "bytes": 2234,
+      "sha256": "4629e305f66efcfe00c09bfc9675311f3a9fa2334ece539320dfaa8e2efc7257",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917684651624
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/rustfmt.stderr",
+      "member": "rustfmt.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917678952759
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/rustfmt.stdout",
+      "member": "rustfmt.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917678952759
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-diff-check.exit.json",
+      "member": "source-diff-check.exit.json",
+      "bytes": 382,
+      "sha256": "b777b4da552673a3461c236ee9cd43c6f3e0b91359a3fccccfe8b0338e823b88",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917948272813
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-diff-check.stderr",
+      "member": "source-diff-check.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917942960840
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-diff-check.stdout",
+      "member": "source-diff-check.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917942960840
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-merge-commit.stderr",
+      "member": "source-merge-commit.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289515410738
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-merge-commit.stdout",
+      "member": "source-merge-commit.stdout",
+      "bytes": 104,
+      "sha256": "7cff75da685ff5d05d7fc4136cd8849f0d0db504bf9b59a0a5e741eb83e1db85",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121289526922120
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-normal-merge.stderr",
+      "member": "source-normal-merge.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240702138837
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-normal-merge.stdout",
+      "member": "source-normal-merge.stdout",
+      "bytes": 446,
+      "sha256": "4c980dcb0e6c3ad6306738f61fa6a7beb1319971e53ed2027fe0726d70f2ddc9",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121240753864623
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-owner-union.json",
+      "member": "source-owner-union.json",
+      "bytes": 12967,
+      "sha256": "b182e1c013386897750bd9c44da72001a67a01aa4a553bef10a328f4dcc28e27",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121809753575189
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-union.stderr",
+      "member": "source-union.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121807468282348
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-union.stderr.first-attempt",
+      "member": "source-union.stderr.first-attempt",
+      "bytes": 294,
+      "sha256": "7d6bbd4be8bcd24cd1f4270802eff3f61f94ab1cd4791ba0c2c19ab2090c16b7",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121563648132597
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-union.stderr.second-attempt",
+      "member": "source-union.stderr.second-attempt",
+      "bytes": 424,
+      "sha256": "78846a28722746dece3411ed97c6052d9824369be46843494b6dede1723271ef",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121649703811658
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-union.stderr.third-attempt",
+      "member": "source-union.stderr.third-attempt",
+      "bytes": 283,
+      "sha256": "b263f6d86f8b4cfaf070b8d741456265f16e49407f9637a04256b45ddd31a576",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121807468282348
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-union.stdout",
+      "member": "source-union.stdout",
+      "bytes": 448,
+      "sha256": "c90728a29bc1908db6b5bdedce5e258f09b06e63a92e7d40dac7ec1cd0c1ca4e",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121809753575189
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-union.stdout.first-attempt",
+      "member": "source-union.stdout.first-attempt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121563647942620
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-union.stdout.second-attempt",
+      "member": "source-union.stdout.second-attempt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121649703693189
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source-union.stdout.third-attempt",
+      "member": "source-union.stdout.third-attempt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121807468182597
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source806-handoff.json.gz",
+      "member": "source806-handoff.json.gz",
+      "bytes": 1339,
+      "sha256": "8facde7f825eaf4b7e74ecbb0f11f436cec3331a99b3b3652261dcf9b939ea60",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121081030195048
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source806-receipt.json.gz",
+      "member": "source806-receipt.json.gz",
+      "bytes": 1370447,
+      "sha256": "a8866904a7c37c96e24088b06c3d843acc61841e567eeb5e3d4f17f5e999a8bf",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121081201110745
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/source806-review.md.gz",
+      "member": "source806-review.md.gz",
+      "bytes": 4518,
+      "sha256": "ef4e6f9fc404a2a32cb3ea4f441045426c69460f52a2b781f66a23d4263104c9",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121081029944540
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/symaira-doctor806-llvm-env-independent-review-receipt.json.gz",
+      "member": "symaira-doctor806-llvm-env-independent-review-receipt.json.gz",
+      "bytes": 1701,
+      "sha256": "864c6a22e0151ee377e8fcf0fb8598f186f6b98b83ac6320617f0e4a2324fe54",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121026181235780
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/symaira-doctor806-llvm-env-independent-review.md.gz",
+      "member": "symaira-doctor806-llvm-env-independent-review.md.gz",
+      "bytes": 1267,
+      "sha256": "bad66c95f4583d1bd13ffdfd2c567b89aed711a0e9399b452dc826650281feb4",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121026181458136
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/symaira-memory649-doctor-corrected-independent-review.json.gz",
+      "member": "symaira-memory649-doctor-corrected-independent-review.json.gz",
+      "bytes": 1964,
+      "sha256": "4084779cded27cdb6c8bb227da5ec63745c0687706d35cd7eacbbb3e0a34dc0c",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121026177884894
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/symaira-memory649-doctor-corrected-independent-review.md.gz",
+      "member": "symaira-memory649-doctor-corrected-independent-review.md.gz",
+      "bytes": 2953,
+      "sha256": "a1f5bebe6de1d4a8f3bb83b24434b051dd4d64822f1be9ef5e4c4e113891439d",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121026173671254
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/symaira-memory649-doctor-final-independent-review.json.gz",
+      "member": "symaira-memory649-doctor-final-independent-review.json.gz",
+      "bytes": 2909,
+      "sha256": "2751ec47bf572add9f0d89e14efaf314c78e59baa49f4968f3a3eedf3b4d1848",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121026178090395
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/symaira-memory649-doctor-final-independent-review.md.gz",
+      "member": "symaira-memory649-doctor-final-independent-review.md.gz",
+      "bytes": 3371,
+      "sha256": "b64aafefb4111a9db988f89da2f8fec73d8a8d4795a08eed38bc89fae631e0ad",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121026173985179
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/symaira-memory649-doctor-independent-review.json.gz",
+      "member": "symaira-memory649-doctor-independent-review.json.gz",
+      "bytes": 1585,
+      "sha256": "090b9e13f37e7cd483f2fe911185e8eee6a187c3d27fef6332813bfd16307ab2",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121026178354424
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/symaira-memory649-doctor-independent-review.md.gz",
+      "member": "symaira-memory649-doctor-independent-review.md.gz",
+      "bytes": 3173,
+      "sha256": "3284be44f77596bf4e8ecb38826e4c04a8f47dcd6c308b14df96476d21501f36",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121026174368468
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/verify_union.py",
+      "member": "verify_union.py",
+      "bytes": 9877,
+      "sha256": "1dcec631f4015973c647228ce8c75e9dc127deaf33fde79784fe2e25c879279d",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121649703922826
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/verify_union.py.first-attempt",
+      "member": "verify_union.py.first-attempt",
+      "bytes": 8841,
+      "sha256": "c3ffcd7ec3d190c02059b25370ed7a4d8676ea59f634d9fdaa6a3969360f97d1",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121563647942620
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/verify_union.py.second-attempt",
+      "member": "verify_union.py.second-attempt",
+      "bytes": 8981,
+      "sha256": "240e9687772026b56d1040de9b00af987058fc07cc4de652a29d9e1342342bde",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121649703693189
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/verify_union.py.third-attempt",
+      "member": "verify_union.py.third-attempt",
+      "bytes": 9877,
+      "sha256": "1dcec631f4015973c647228ce8c75e9dc127deaf33fde79784fe2e25c879279d",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121807468182597
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/whole-historical-diff-check.exit.json",
+      "member": "whole-historical-diff-check.exit.json",
+      "bytes": 139,
+      "sha256": "e867f40a4300b854ee306ac1c56f84e67bc3aec94ecc0bae5a2528d0e0fdebb1",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917933961362
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/whole-historical-diff-check.stderr",
+      "member": "whole-historical-diff-check.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917933830695
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/whole-historical-diff-check.stdout",
+      "member": "whole-historical-diff-check.stdout",
+      "bytes": 1503,
+      "sha256": "eb7490dacd0c8afd7f80e0457239e23cd8e7c6262022fe3f758a514ec696e1de",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121917933830695
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/whole-owner-classification-verified.json",
+      "member": "whole-owner-classification-verified.json",
+      "bytes": 3970,
+      "sha256": "43e4860bf80b08525d73adfa11bbc2c4c2b67ed78d876911a6a1194e13da5eb5",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791122058152068705
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/whole-owner.stderr",
+      "member": "whole-owner.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791122058047244677
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/whole-owner.stdout",
+      "member": "whole-owner.stdout",
+      "bytes": 536,
+      "sha256": "486093310342ac88219429ed4de96c52416dcf09b3f470e4b3ff8e50e190b530",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791122058152068705
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory649-main935-parent-integration/whole-tree-parent-owner-classification.json",
+      "member": "whole-tree-parent-owner-classification.json",
+      "bytes": 2097162,
+      "sha256": "ace7a543f71926e6be51c3112a89b46755b45ca27f7eb8bc62c71655098a3910",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791121999247461509
+      }
+    }
+  ],
+  "archive_sha256": "cfae6cbe4f7fe53c22a21ee6ff6bb1f5b8e81cea4408a447266012548e8b9820",
+  "archive_bytes": 5929278,
+  "no_runtime": true,
+  "initial_pure_verifier_failures_retained": true
+}
