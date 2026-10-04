@@ -1,0 +1,1931 @@
+{
+  "validated_source": "bde819e23689a846271f6cc489d46a310ec0fbe9",
+  "original_published_HEAD": "76132675ee81cae30bd610cd955ae3d28f7b5df8",
+  "complete_records": [
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actionlint.stderr",
+      "member": "actionlint.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125962179690806
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actionlint.stdout",
+      "member": "actionlint.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125962179690806
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/2/result.json",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/2/result.json",
+      "bytes": 1441,
+      "sha256": "d313acb4a4eb4fc097abfa8b18393845d12a598bb1100059be9f1afbb4f50790",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672515270989
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/2/stderr.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/2/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672490116703
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/2/stdout.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/2/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672502747019
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/3/result.json",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/3/result.json",
+      "bytes": 1440,
+      "sha256": "980948a827cf81475319fb82229956b6e5ddd4dc7dc42345933cf6a86655311b",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672514881085
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/3/stderr.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/3/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672490116703
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/3/stdout.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/3/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672502417058
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/4/result.json",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/4/result.json",
+      "bytes": 1441,
+      "sha256": "eefc3f10136cab5cd2d0340ab57ac2b8b3f7e0899c1a711caca477ec989a0725",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672502417058
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/4/stderr.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/4/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672490419130
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/4/stdout.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/4/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672498726453
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/5/result.json",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/5/result.json",
+      "bytes": 1439,
+      "sha256": "2f158d5ec51cb0a63d90174c5ad540b1b907472506d435169b085fe10ec9e7f7",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672524870666
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/5/stderr.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/5/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672490419130
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/5/stdout.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/5/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672502747019
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/6/result.json",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/6/result.json",
+      "bytes": 1441,
+      "sha256": "a56f5650d440fccc943b17857a8c55f4acb39286e9ec8c94e9047639cb0c033c",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672531243676
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/6/stderr.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/6/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672491315715
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/6/stdout.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/6/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672506747142
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/7/result.json",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/7/result.json",
+      "bytes": 1441,
+      "sha256": "e32f4fb73585c0f1dfb989841aff497e227690bb7fe6708cf4b1a8bbc77a6352",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672514266691
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/7/stderr.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/7/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672491111517
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/7/stdout.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/7/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672502747019
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/8/result.json",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/8/result.json",
+      "bytes": 1440,
+      "sha256": "6d2451731d1b9a35563c4dc8f7d7415e9e99946d5682445dec1479dfd5357534",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672514881085
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/8/stderr.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/8/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672491315715
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/8/stdout.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/8/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672502747019
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/9/result.json",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/9/result.json",
+      "bytes": 1441,
+      "sha256": "8e0be2513ac255ac2b26d137cc24183d9804fc6d51652f69e3499d9a4d70ad59",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672502017173
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/9/stderr.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/9/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672491315715
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/9/stdout.bin",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.cli/9/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672498726453
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.jsonl",
+      "member": "actual-controls/missing-launch/actual-fixture-ve6vhbu0/progress.jsonl",
+      "bytes": 11563,
+      "sha256": "b33d40d4cf45dcb0515da73bd478f2112c8d5189d1e7ae74224159e6daf1ba76",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672531243676
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/missing-launch/unittest.txt",
+      "member": "actual-controls/missing-launch/unittest.txt",
+      "bytes": 1207,
+      "sha256": "5d4dd8ebec235511290000e199f3063ef74de0604a4992aa3e77690e85c1c0f8",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672531243676
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/11/result.json",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/11/result.json",
+      "bytes": 1417,
+      "sha256": "1c11147e89437afa039995993330d337cf7a3f22b9be9e350040b7e416a05dda",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672472669917
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/11/stderr.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/11/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672449676372
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/11/stdout.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/11/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672462745782
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/16/result.json",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/16/result.json",
+      "bytes": 1417,
+      "sha256": "d4b1c12bbf77d35fa9e7ace102d271eb6015f8f687f1c04093eae6b8d93b281e",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672485330888
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/16/stderr.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/16/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672450201271
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/16/stdout.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/16/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672458745658
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/2/result.json",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/2/result.json",
+      "bytes": 1415,
+      "sha256": "debf930765c3046e5d3df5c1538dad8d2e8b83602cdc4baff2ee2e6308a7c074",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672471075332
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/2/stderr.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/2/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672446788732
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/2/stdout.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/2/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672456780667
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/3/result.json",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/3/result.json",
+      "bytes": 1415,
+      "sha256": "d37bd6e169304fcc0149a9f85dcad6ba948898d12a35f31ed4cb331aa45acefa",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672484971524
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/3/stderr.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/3/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672446788732
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/3/stdout.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/3/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672470400566
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/4/result.json",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/4/result.json",
+      "bytes": 1414,
+      "sha256": "60759225eefaea62bf91bb04d6e5be654a12fa6a40a2a5872107cb0e622d2fd8",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672470400566
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/4/stderr.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/4/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672447988866
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/4/stdout.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/4/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672458745658
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/5/result.json",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/5/result.json",
+      "bytes": 1414,
+      "sha256": "97db8783860cc162e12ebf9ae3846623f24f0cdc00357a96ff9ca6206eb62bdc",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672485614026
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/5/stderr.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/5/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672448350182
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/5/stdout.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/5/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672462745782
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/7/result.json",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/7/result.json",
+      "bytes": 1415,
+      "sha256": "b779692a3901e24cfb99b721e7d966eed30a5fe5fc08b83f6b9ddfc7ad4e1b6f",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672472324925
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/7/stderr.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/7/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672449350555
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/7/stdout.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/7/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672462745782
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/9/result.json",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/9/result.json",
+      "bytes": 1415,
+      "sha256": "82b6e917eb67cd08c4ac1fea122ce8aa575b2766c179ee093a292d2731b410e6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672471075332
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/9/stderr.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/9/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672449476064
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/9/stdout.bin",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.cli/9/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672456780667
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/actual-fixture-t_ksu524/progress.jsonl",
+      "member": "actual-controls/ordinary/actual-fixture-t_ksu524/progress.jsonl",
+      "bytes": 15838,
+      "sha256": "783526ef4c4a23e3e870dba77e6370fd4d4cce1a866a3a2da7a64885f974d76e",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672485614026
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/ordinary/unittest.txt",
+      "member": "actual-controls/ordinary/unittest.txt",
+      "bytes": 98,
+      "sha256": "0276289a917b36926f4a82fd7b7e1660cb3eb443b96c998d41c5d3cf04007a39",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672485614026
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/results.json",
+      "member": "actual-controls/results.json",
+      "bytes": 1118,
+      "sha256": "836af49bb664b0eea39c1603c9186a7cc413943d8b57ab1b86872b6596d00bee",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672575200828
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/12/result.json",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/12/result.json",
+      "bytes": 1424,
+      "sha256": "bf2ff20309ec600b4f43ca215d28f97a04c668d7c650f5a393dbb2123b74d05d",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672562577074
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/12/stderr.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/12/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672536332970
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/12/stdout.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/12/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672558552475
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/14/result.json",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/14/result.json",
+      "bytes": 1424,
+      "sha256": "4c238821b327b5cd75501fcf877f10dda78dc5a0b9c098f44b75c25447f5a3e7",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672573120273
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/14/stderr.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/14/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672537962914
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/14/stdout.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/14/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672550748503
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/2/result.json",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/2/result.json",
+      "bytes": 1420,
+      "sha256": "25b2d4ccd9ce8d66bd0121f1cf06841a69da76d49306a2d8f5a90699713817a1",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672570582466
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/2/stderr.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/2/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672534137356
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/2/stdout.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/2/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672558552475
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/3/result.json",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/3/result.json",
+      "bytes": 1421,
+      "sha256": "5ed786b49757597d1d362907ae1bcf7d0e55d148b95676384596dcf158ee33b1",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672547603463
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/3/stderr.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/3/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672534888757
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/3/stdout.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/3/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672542505556
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/4/result.json",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/4/result.json",
+      "bytes": 1420,
+      "sha256": "86a202049b1a21d52284a57203001fb26c3494ede4dffeeb38fea6a8208712f7",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672573483542
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/4/stderr.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/4/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672535424341
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/4/stdout.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/4/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672549149605
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/5/result.json",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/5/result.json",
+      "bytes": 1421,
+      "sha256": "3ab6e30b5f0c9dafeee4482b237955d7e60cb9656b7600c1c90503d666df0ecf",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672549149605
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/5/stderr.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/5/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672535841988
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/5/stdout.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/5/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672542505556
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/6/result.json",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/6/result.json",
+      "bytes": 1421,
+      "sha256": "203db5df690015f2ba668ee7684626f9a909982deab2b21a822e8041a9f90c7d",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672570892275
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/6/stderr.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/6/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672535620423
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/6/stdout.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/6/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672549149605
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/7/result.json",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/7/result.json",
+      "bytes": 1419,
+      "sha256": "eace6fbfd89f9969cb540259086c6fadd98433a2a74f98234646642994056deb",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672558552475
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/7/stderr.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/7/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672535620423
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/7/stdout.bin",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.cli/7/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672549149605
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.jsonl",
+      "member": "actual-controls/wrong-case/actual-fixture-7jst4qeo/progress.jsonl",
+      "bytes": 15973,
+      "sha256": "5c2e46bc62c01586c60fb134639285b8d7e24ef16d165a277227fa403ccada9c",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672573483542
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls/wrong-case/unittest.txt",
+      "member": "actual-controls/wrong-case/unittest.txt",
+      "bytes": 2522,
+      "sha256": "a816a96355cb4c68a811ff07173794d7aa38ca5b9ca1ab946e6cf013f363eb43",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672573483542
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls.stderr",
+      "member": "actual-controls.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672357417066
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/actual-controls.stdout",
+      "member": "actual-controls.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672357417066
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/all-unchanged-original-bodies-modes.json",
+      "member": "all-unchanged-original-bodies-modes.json",
+      "bytes": 2023360,
+      "sha256": "3faef67a5607feba4719e134f0c86fdfc9f479d941cc93d7627bc51d447458cb",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125844900279702
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/complete-originals.tar.gz",
+      "member": "complete-originals.tar.gz",
+      "bytes": 130750,
+      "sha256": "1650bc0df690835eca2b9043a58a7e427f9b6d0044a74380dd1f549a56b2e456",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125503349510809
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/completion.md",
+      "member": "completion.md",
+      "bytes": 1479,
+      "sha256": "666aeec2c92d082d6bd344319537b07816156a506dfa817c654209d55e48f4b8",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791126037764529425
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/corrected-five.stderr",
+      "member": "corrected-five.stderr",
+      "bytes": 103,
+      "sha256": "78ddd6d072cd8bf0a842ba109438bc9719544186e32e3d619cc895c7fdf1019f",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672322693132
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/corrected-five.stdout",
+      "member": "corrected-five.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125671892090449
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/diff.stderr",
+      "member": "diff.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125962187691053
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/diff.stdout",
+      "member": "diff.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125962187691053
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/10/result.json",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/10/result.json",
+      "bytes": 1502,
+      "sha256": "00d6f606b182a2b49ca534e74d7e733f7fa809ea2e308496f230a504e1f1c82d",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843963097195
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/10/stderr.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/10/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843928074190
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/10/stdout.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/10/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843948196734
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/13/result.json",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/13/result.json",
+      "bytes": 1501,
+      "sha256": "90ff2c453ed3756d6398288acc6d108ccd4083520b4460db00e39cf283d9e4f9",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843962528340
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/13/stderr.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/13/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843928785050
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/13/stdout.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/13/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843944042208
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/2/result.json",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/2/result.json",
+      "bytes": 1499,
+      "sha256": "5d777d7cae37d37e907f05bde28438d7a0dc8f4875b5ae6a5072f78ceabf27b4",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843943576135
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/2/stderr.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/2/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843925209885
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/2/stdout.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/2/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843932041838
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/3/result.json",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/3/result.json",
+      "bytes": 1498,
+      "sha256": "52ae09515c816598e06e5a651a75b9e7e5a7427651a745af79bdcefcbaeb57e2",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843959581405
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/3/stderr.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/3/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843924445324
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/3/stdout.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/3/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843940042084
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/4/result.json",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/4/result.json",
+      "bytes": 1499,
+      "sha256": "75b9830dda6e785b0b8095e7f3ebea60e4c84a33a566f4c6b911b46717ef6199",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843963544661
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/4/stderr.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/4/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843925209885
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/4/stdout.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/4/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843944042208
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/5/result.json",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/5/result.json",
+      "bytes": 1499,
+      "sha256": "806d22f13cc70c5888a7da05888a47714d0338d494e4375bfc1adb8280c794d8",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843944042208
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/5/stderr.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/5/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843925209885
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/5/stdout.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/5/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843940042084
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/6/result.json",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/6/result.json",
+      "bytes": 1499,
+      "sha256": "9a11a3707cf2f4bf1eedd1aff4113837b90cc2982e5f790f84b55348f9adf84f",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843946569244
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/6/stderr.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/6/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843925878371
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/6/stdout.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/6/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843932041838
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/7/result.json",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/7/result.json",
+      "bytes": 1498,
+      "sha256": "4be04df87bd0dc2835be60550fb0dd458b74b9f688544b19fb87c0643d0a8966",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843947197704
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/7/stderr.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/7/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843927658292
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/7/stdout.bin",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.cli/7/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843936041962
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.jsonl",
+      "member": "final-bde819e/actual-controls/missing-launch/actual-fixture-b1jibp58/progress.jsonl",
+      "bytes": 12019,
+      "sha256": "6d6b7f2334c008116e18ec8e00e4a16f0168fa538e164b2efceae741b2ff2be0",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843963544661
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/missing-launch/unittest.txt",
+      "member": "final-bde819e/actual-controls/missing-launch/unittest.txt",
+      "bytes": 1207,
+      "sha256": "9cd47e7df6a8574fb28a9b942fbeb0b428b5e3c44720cce57942b071cc69f353",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843963544661
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/11/result.json",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/11/result.json",
+      "bytes": 1476,
+      "sha256": "f4978b34c8f2c0ff734c612e9b307d52bc27a86b4f9c7e761e0c600757b0a14f",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843912961594
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/11/stderr.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/11/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843878274647
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/11/stdout.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/11/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843899132824
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/2/result.json",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/2/result.json",
+      "bytes": 1472,
+      "sha256": "242ac55322e65b27db6db4874eea66bb254ce9e3377bbcfb0584f50a4f12ae85",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843898505630
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/2/stderr.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/2/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843876203145
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/2/stdout.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/2/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843892040601
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/3/result.json",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/3/result.json",
+      "bytes": 1473,
+      "sha256": "6c0eca969722b1501914c69c3550b00e9a08056ed132fe01eea4092b90bfbf28",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843899132824
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/3/stderr.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/3/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843875440748
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/3/stdout.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/3/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843888040478
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/4/result.json",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/4/result.json",
+      "bytes": 1473,
+      "sha256": "62d8941be5d8a3775b3dc2f6a0cb04961d3a4101e0d900947774d052f17f2279",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843916483939
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/4/stderr.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/4/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843876203145
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/4/stdout.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/4/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843900368026
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/5/result.json",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/5/result.json",
+      "bytes": 1473,
+      "sha256": "4c3ca05904479966fc87050edac5ce3556344fafa2a59e520fe3333b46e802fb",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843913569873
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/5/stderr.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/5/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843877273238
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/5/stdout.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/5/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843896450589
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/6/result.json",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/6/result.json",
+      "bytes": 1473,
+      "sha256": "01a4bb792ae0a9f7167f2dca7ab858574d03e15c2c1a5d36e1dc1ea21b8a7352",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843896450589
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/6/stderr.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/6/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843877273238
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/6/stdout.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/6/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843886971163
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/7/result.json",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/7/result.json",
+      "bytes": 1472,
+      "sha256": "50866419ae97cbf6ee8fb39e63ad1987d90f293eee004ef1e053349caf475c64",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843918748953
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/7/stderr.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/7/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843877701971
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/7/stdout.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/7/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843900368026
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/8/result.json",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/8/result.json",
+      "bytes": 1473,
+      "sha256": "1a7d4a94b447667d279ad62b0ed242e6a18eec256cf79f7bda839f678ff601e0",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843900368026
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/8/stderr.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/8/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843877896490
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/8/stdout.bin",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.cli/8/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843896450589
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.jsonl",
+      "member": "final-bde819e/actual-controls/ordinary/actual-fixture-vmvx7nxp/progress.jsonl",
+      "bytes": 16613,
+      "sha256": "a6742d7f97ed1679c1c0ad51d91be95207ad400ae7aa91ea060343d64fc57ae3",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843918748953
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/ordinary/unittest.txt",
+      "member": "final-bde819e/actual-controls/ordinary/unittest.txt",
+      "bytes": 98,
+      "sha256": "c61a7d071bcbbd18c2b81c3641e7cd2e933d0cc2c5112a561ad4fc5bd497790d",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843918748953
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/results.json",
+      "member": "final-bde819e/actual-controls/results.json",
+      "bytes": 1160,
+      "sha256": "fbb8ee429387437f1fe2f92be89ea97529979049aae190dc82ad7bf68b9e500e",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125844007848076
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/10/result.json",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/10/result.json",
+      "bytes": 1486,
+      "sha256": "5ed3f3715edd0501c1a7b56d0e4465df35513348aa0b481a1e99e1119fbda1f9",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843997875876
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/10/stderr.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/10/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843969139679
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/10/stdout.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/10/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843994494479
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/2/result.json",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/2/result.json",
+      "bytes": 1482,
+      "sha256": "a7bb90a90b9a82a0031d592ff83d85909a41710c630382241512e8ce56bdb338",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843986000078
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/2/stderr.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/2/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843967514342
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/2/stdout.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/2/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843974465190
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/3/result.json",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/3/result.json",
+      "bytes": 1483,
+      "sha256": "75809edd1d7b956873299d45e3ddfb831ec53a7d2b8a7106f6e222964db9b889",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843986402296
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/3/stderr.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/3/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843967514342
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/3/stdout.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/3/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843978511297
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/4/result.json",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/4/result.json",
+      "bytes": 1483,
+      "sha256": "2679572997903cd57ea7cd4c1b1b11a3f2639c012181742871b8c7b7b9f212ec",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843994061374
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/4/stderr.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/4/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843967514342
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/4/stdout.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/4/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843982356980
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/5/result.json",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/5/result.json",
+      "bytes": 1482,
+      "sha256": "b75d9dc6a25cec98058905c7cf1a6a5e3ff001b76c8b874d56045ec93b16a25e",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843981717884
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/5/stderr.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/5/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843968368904
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/5/stdout.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/5/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843974465190
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/6/result.json",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/6/result.json",
+      "bytes": 1483,
+      "sha256": "b6389f8f554da3ea11569e1fcf3631ab7b9f89c0f786a9a9f564dcc778936c80",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125844005708081
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/6/stderr.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/6/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843968581917
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/6/stdout.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/6/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843986402296
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/7/result.json",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/7/result.json",
+      "bytes": 1483,
+      "sha256": "f655a86f3a6ef98484c8a9dbee2183d9b4ca33c74937fc78a3dc52d6204a1c04",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843998079704
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/7/stderr.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/7/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843968713605
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/7/stdout.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/7/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843988043568
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/8/result.json",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/8/result.json",
+      "bytes": 1483,
+      "sha256": "8c0fdb4c0d0577e9c51d1203a1e228cfa33f3e49bdb929b2a5fbf8ff34b7b2dc",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843994494479
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/8/stderr.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/8/stderr.bin",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843968713605
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/8/stdout.bin",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.cli/8/stdout.bin",
+      "bytes": 6,
+      "sha256": "33bff9108736f23280e9cd50cb1472e3a5b4403ed3f2da1fe67b8487a4fb75c6",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843986402296
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.jsonl",
+      "member": "final-bde819e/actual-controls/wrong-case/actual-fixture-o09npitg/progress.jsonl",
+      "bytes": 16752,
+      "sha256": "faffe34dcd2ce7f91dd2bcc56df126d6185516096a381ccdb5facf11e4329a89",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125844005708081
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls/wrong-case/unittest.txt",
+      "member": "final-bde819e/actual-controls/wrong-case/unittest.txt",
+      "bytes": 2519,
+      "sha256": "3f909711610ead44f7336c81cbd8c7102acb3781853c3171a655f538aeee4ba1",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125844005708081
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls.stderr",
+      "member": "final-bde819e/actual-controls.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843764752713
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/actual-controls.stdout",
+      "member": "final-bde819e/actual-controls.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843764752713
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/corrected-five.stderr",
+      "member": "final-bde819e/corrected-five.stderr",
+      "bytes": 103,
+      "sha256": "48feae5eb0603da7ae1add44883bfab9863f592af48c31cd6b6198eadf05125c",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843742463307
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/corrected-five.stdout",
+      "member": "final-bde819e/corrected-five.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843299420173
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/driver.stderr",
+      "member": "final-bde819e/driver.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125842811232911
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/driver.stdout",
+      "member": "final-bde819e/driver.stdout",
+      "bytes": 2445,
+      "sha256": "318c0011260d478e4fccb3e43f7de2d65ef2af4ab0636477f7356106125537db",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125844034989647
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/machinery-progress.json",
+      "member": "final-bde819e/machinery-progress.json",
+      "bytes": 2885,
+      "sha256": "fbbf5448325e266e0f001d4296923ee1190ff476a4e8470041ea938833295188",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125844034805118
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/machinery.json",
+      "member": "final-bde819e/machinery.json",
+      "bytes": 3170,
+      "sha256": "0d629e07eba6ebc8007913f51d06c27ce69a27e4a1a06410b9d61b715e93f5c0",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125844034989647
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/original-five.stderr",
+      "member": "final-bde819e/original-five.stderr",
+      "bytes": 1209,
+      "sha256": "3dd4d776e6c44c0285bb809d70a9f6f927b30bff49114a30088e3b2746ab5f89",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125843260854687
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/original-five.stdout",
+      "member": "final-bde819e/original-five.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125842828007725
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-bde819e/run_machinery.py",
+      "member": "final-bde819e/run_machinery.py",
+      "bytes": 2487,
+      "sha256": "ed6646eabacb47bb3ee77f2441026344222b58b8362ac706e64fe7b60d6889f0",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125842811232911
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/final-pure-checks.json",
+      "member": "final-pure-checks.json",
+      "bytes": 2972,
+      "sha256": "57b702d807fa7b273521d97613527c323b6e915ef98b595f3cad0aee7a157acd",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125962228927587
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/four-CI-first-failures.json",
+      "member": "four-CI-first-failures.json",
+      "bytes": 13246,
+      "sha256": "8bca9e8d6714c6e534d146fc36525cea7964f0ca982f947ae28afcefde81c882",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125844903565459
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/machinery-progress.json",
+      "member": "machinery-progress.json",
+      "bytes": 2786,
+      "sha256": "7b96ae982a23413cf256c6f760a52df2c62130946313f8215c8da5a74094e069",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672622538515
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/machinery.json",
+      "member": "machinery.json",
+      "bytes": 3071,
+      "sha256": "b9d294369025d55d810250c474b79bbaef794ab1c21fe2c049698c1c052be18a",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672623185674
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/machinery.stderr",
+      "member": "machinery.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125671402649967
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/machinery.stdout",
+      "member": "machinery.stdout",
+      "bytes": 2346,
+      "sha256": "19848360861d22c2bdabefd0df20beb5dc2441fad7e8ab8732783f1b3b8a3fee",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125672623185674
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/original-five.stderr",
+      "member": "original-five.stderr",
+      "bytes": 1209,
+      "sha256": "a89c5624d7eb3fa3b8d160c28a481dab7adbd54e72f3a3b1b4bbaef0f89c1e9c",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125671875573896
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/original-five.stdout",
+      "member": "original-five.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125671422713624
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/original-preservation.json",
+      "member": "original-preservation.json",
+      "bytes": 467,
+      "sha256": "59aafecdb4375b9232e9da21c42e4cb54de37109efadf8008df50a75d7d06e76",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125503358068391
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/original-retention.json",
+      "member": "original-retention.json",
+      "bytes": 734325,
+      "sha256": "3a5541152b75bac2d9ae238acc8f0e3146f5e4491a8cab38d1d661c2a7c082b4",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125503324491279
+    },
+    {
+      "path": "/workspace/review-proof/review-pr800-daemon801-progress-correction/run_machinery.py",
+      "member": "run_machinery.py",
+      "bytes": 2487,
+      "sha256": "ed6646eabacb47bb3ee77f2441026344222b58b8362ac706e64fe7b60d6889f0",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125671402649967
+    }
+  ],
+  "archive": "migration/evidence/daemon-registry-progress-observer-801/actual-python-machinery.tar.gz",
+  "archive_bytes": 841194,
+  "archive_sha256": "1bc8fd8bcf1cb44319cc8da676af1295b13172c0ee5b1342aa718f31d3efb4d8",
+  "all_roundtrips": true,
+  "tests": {
+    "original_five_actual_exit": 1,
+    "current_five_actual_exit": 0,
+    "ordinary_concurrent_children8_records33": "pass",
+    "actual_missing_launch_control_children8_records25": "rejected_intended_sequence",
+    "actual_wrong_case_control_children8_records33": "rejected_intended_links"
+  },
+  "native_execution_scope": "Linux Python-only machinery; no product/SDK/native parity claim",
+  "original_tests_and_native_criteria_not_weakened": true,
+  "SDK_product_compiler_Target_cache_provider_endpoint_ports_GitHub": 0,
+  "independent_review_required": true
+}
