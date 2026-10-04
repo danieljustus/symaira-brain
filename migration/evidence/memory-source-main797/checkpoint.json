@@ -1,0 +1,74 @@
+{
+  "status": "source-only normal main integration checkpoint; two independently reviewed fixture successors still required",
+  "parents": [
+    "23fa5854df3ca408eb8786c9b6042fe1add61877",
+    "c74110425d04dd62c7f2c0f09bb86561bd1ac20e"
+  ],
+  "original_author_proofs": 83,
+  "original_independent_review_proofs": 37,
+  "original_method_proofs": 106,
+  "old_conflict_index_bodies_actual": 26,
+  "new_main_conflict_index_bodies": 6,
+  "workspace_members": 19,
+  "lock_packages": 281,
+  "preserved_old_package_records": 274,
+  "Source_added_package_records": 7,
+  "current_named_CI_steps": 181,
+  "prior175_CI_steps_complete_preserved": true,
+  "pure_source_tests": 22,
+  "render_contract_tests": 4,
+  "whole_owner_reject_controls": 18,
+  "SDK_compiler_SQL_product_Target_ports": 0,
+  "external_complete_preserved_inputs": [
+    {
+      "path": "/workspace/review-proof/memory803-source806-main797-preparation/complete-pre-edit-originals-native.tar.gz",
+      "bytes": 10371119,
+      "sha256": "e140d0994327106f8039f85fb756c18abc46a44f1c164ae78ab7f527250252b7"
+    },
+    {
+      "path": "/workspace/review-proof/memory803-source806-main797-preparation/pre-edit-originals-retention.json",
+      "bytes": 680971,
+      "sha256": "8ebd81414b11476eefad6531d8e4439e5462b0d1a5e53f1a7c58d6fde15e0f4f"
+    },
+    {
+      "path": "/workspace/review-proof/memory803-source806-main797-preparation/current-full-owner-union.json",
+      "bytes": 5068,
+      "sha256": "974779e163e389b6f96c06676fd06211d5c131780129d67478fe039d71f460c9"
+    },
+    {
+      "path": "/workspace/review-proof/memory803-source806-main797-preparation/current-complete-CI-and-harness-union.json",
+      "bytes": 24462,
+      "sha256": "1a5fff9da0e54a24abdc302d2a546845dea1a4f192df5d2a871bbcc1fd3e8d43"
+    },
+    {
+      "path": "/workspace/review-proof/memory803-source806-main797-preparation/current-whole-owner-controls.json",
+      "bytes": 5036,
+      "sha256": "05b22027afa52e6048cc40f0f89163e4a28897b55f92ffb5460cce6229b5d291"
+    },
+    {
+      "path": "/workspace/review-proof/memory803-source806-main797-preparation/pure-test-execution.json",
+      "bytes": 14745,
+      "sha256": "5de76cefc991e61ae215a82d0997a363222a5bf233bc96dd5c0f8c9e4fe92059"
+    },
+    {
+      "path": "/workspace/review-proof/memory803-source806-main797-preparation/historical-main-diff-whitespace-attribution.json",
+      "bytes": 9470,
+      "sha256": "7e818f2280be9b37c473bb73f80dc4cc17b19e42bcbe92fd222124610ab660b7"
+    },
+    {
+      "path": "/workspace/review-proof/memory803-source806-main797-preparation/original-c741-conflict-stage-map.json",
+      "bytes": 1338,
+      "sha256": "1ab7ae2c6be213248d7dba233b1cee4e1fbc4fb454846281a895129f11182544"
+    }
+  ],
+  "source_only_tools": [
+    "git",
+    "Python-source/pure owned filesystem fixtures",
+    "rustfmt check",
+    "actionlint",
+    "bash syntax"
+  ],
+  "runtime_method_rebound": false,
+  "independent_current_source_review": false,
+  "fixture_successors_integrated": false
+}

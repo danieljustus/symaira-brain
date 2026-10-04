@@ -188,6 +188,9 @@ pub fn sync(options: &SyncOptions) -> Result<Vec<SyncResult>, SkillError> {
             library_dir: options.library_dir.clone(),
             base_dir: options.base_dir.clone(),
             skills: options.skills.clone(),
+            // Render drift is an observational report. Sync's three-way policy
+            // and stored installation modes must retain their existing meaning.
+            render_dir: None,
         },
         &loader,
     )?;
@@ -366,6 +369,9 @@ mod tests {
             allow_executable: None,
             error: None,
             drift: Vec::new(),
+            render_status: None,
+            render_drift: Vec::new(),
+            render_error: None,
         };
         let options = SyncOptions {
             library_dir: library.path().to_path_buf(),
