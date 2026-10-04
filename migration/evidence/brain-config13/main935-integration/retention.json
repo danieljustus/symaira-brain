@@ -1,0 +1,16 @@
+{
+  "parents": [
+    "e30676fdaced483a3cd1588a78253a3f15096d04",
+    "9353520a34c5819c7d0a6cd58d3bfaa2b22b045b"
+  ],
+  "source_and_proof_members": 1441,
+  "all_parent_blob_counts": {
+    "e30676fdaced483a3cd1588a78253a3f15096d04": 5173,
+    "9353520a34c5819c7d0a6cd58d3bfaa2b22b045b": 2902
+  },
+  "archive_sha256": "792b5dbdaf00a582ab31c5cf07531d7144603d77647fc5d9879e93c4c8a874d6",
+  "manifest_sha256": "5fcfe455878f9e68d33dfa75cbc7a09a04ec8e1f890117c49fe7b1ac5476e39e",
+  "all_members_roundtrip": true,
+  "historical_ELF_archives_reused_verified": "before/full-original-verification.log; no copied ELF payloads",
+  "runtime": 0
+}
