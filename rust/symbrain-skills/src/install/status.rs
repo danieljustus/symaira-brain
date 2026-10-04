@@ -74,6 +74,15 @@ pub struct InstallStatus {
     /// Per-file drift for harness changes/conflicts.
     #[serde(skip_serializing_if = "Vec::is_empty", default)]
     pub drift: Vec<super::drift::FileDrift>,
+    /// Comparison of the current library render with the retained render cache.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub render_status: Option<super::render_status::RenderStatus>,
+    /// Changed paths and hashes; skill content is never returned here.
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub render_drift: Vec<super::render_status::RenderDrift>,
+    /// Why an existing render cache could not be compared safely.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub render_error: Option<String>,
 }
 
 /// Inputs for a read-only status scan.
@@ -91,6 +100,8 @@ pub struct StatusOptions {
     pub library_dir: PathBuf,
     /// Optional custom base snapshot root.
     pub base_dir: Option<PathBuf>,
+    /// Optional trusted render cache root for an additional read-only comparison.
+    pub render_dir: Option<PathBuf>,
     /// Optional exact names to scan.
     pub skills: Vec<String>,
 }
@@ -166,6 +177,9 @@ fn status_target(
     .ok_or_else(|| SkillError(format!("{target} base root has no parent")))?
     .to_path_buf();
     let mut lock_roots = vec![root.clone(), base_root];
+    if let Some(render_root) = &options.render_dir {
+        lock_roots.push(render_root.join(target));
+    }
     if scope == "project" && options.project_dir.is_some() {
         let legacy_root = super::base::legacy_project_base_path(
             &options.home_dir,
@@ -246,6 +260,9 @@ fn status_target(
             allow_executable: marker_for_row.allow_executable.then_some(true),
             error,
             drift,
+            render_status: None,
+            render_drift: Vec::new(),
+            render_error: None,
         };
         if marker.managed_by != "symskills"
             || marker.target != target
@@ -263,6 +280,9 @@ fn status_target(
                 allow_executable: marker.allow_executable.then_some(true),
                 error: None,
                 drift: Vec::new(),
+                render_status: None,
+                render_drift: Vec::new(),
+                render_error: None,
             });
             continue;
         }

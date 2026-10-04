@@ -168,7 +168,14 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
                         .iter()
                         .any(|known| known == target) =>
                 {
-                    target_status_missing_root_needs_go(target, &scope)
+                    // #621 adds an observational native report for explicit
+                    // targets with a retained render cache. The bounded native
+                    // scanner owns its diagnostics, including unsafe trees.
+                    if skills_data_root().join("rendered").join(target).is_dir() {
+                        false
+                    } else {
+                        target_status_missing_root_needs_go(target, &scope)
+                    }
                 }
                 None => has_dynamic_target_state(),
                 Some(_) => true,
@@ -710,6 +717,7 @@ fn run_status(
         library_dir,
         base_dir: Some(base_dir),
         skills: Vec::new(),
+        render_dir: Some(skills_data_root().join("rendered")),
     };
 
     let statuses = match install::status(&opts) {
@@ -748,17 +756,31 @@ fn run_status(
                 let _ = writeln!(stdout, "No installed skills found.");
                 return exit::OK;
             }
-            let _ = writeln!(stdout, "TARGET\tSKILL\tSTATUS\tMODE\tPATH");
+            let has_render = report
+                .installs
+                .iter()
+                .any(|row| row.render_status.is_some());
+            let suffix = if has_render { "\tRENDER" } else { "" };
+            let _ = writeln!(stdout, "TARGET\tSKILL\tSTATUS\tMODE\tPATH{suffix}");
             for st in &report.installs {
                 let mode = st.mode.as_deref().unwrap_or("-");
                 let _ = writeln!(
                     stdout,
-                    "{}\t{}\t{}\t{}\t{}",
+                    "{}\t{}\t{}\t{}\t{}{}",
                     st.target,
                     st.name,
                     status_name(st.status),
                     mode,
-                    st.path.display()
+                    st.path.display(),
+                    if has_render {
+                        format!(
+                            "\t{}",
+                            st.render_status
+                                .map_or("-", symbrain_skills::install::RenderStatus::label)
+                        )
+                    } else {
+                        String::new()
+                    }
                 );
             }
         }

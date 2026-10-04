@@ -302,3 +302,12 @@ remain historical acceptance of their exact source. New native Windows wide
 CreateProcessW comparisons, unchanged Unix315 regression, affected tests/strict
 checks and independent review are pending; copied SDK source is no Windows
 runtime evidence. This does not complete broader Skills/Rust cutover.
+For #621, the native explicit-target status report adds a bounded, read-only
+library-versus-render comparison, including reference files. It compares a fresh
+target render, reports paths/hashes and unreadable caches, and labels verified
+managed cache links `linked` without changing persisted markers or sync policy.
+The original Go report is compared live for 12 clean/edited states across six
+targets, removing only these documented product extensions; no Go source or
+existing fixture is changed. See `scripts/skills-render-drift/README.md`. Native
+three-OS CI at the final candidate head remains required. Dynamic config and
+unqualified multi-target CLI fallback remain part of #764.
