@@ -1,7 +1,7 @@
 # Own the Skills frozen Go checkout explicitly
 
 Status: source-only successor to immutable522ce5d/source51e42aa; light actual
-SDK validation follows a clean source checkpoint. Refs #793/#794.
+SDK validation complete, full native CLI review pending. Refs #793/#794.
 
 The original complete Linux author evidence remains unchanged:551 primary Rust
 tests,14 separate nested passes,315 exact process pairs,3 genuine controls and
@@ -47,3 +47,16 @@ will be retained separately. No Cargo target, operator service or11434
 endpoint is allocated to this source-only successor. Root owns the existing
 Skills target and performs different-author full current-leaf review and
 native315/312 acceptance before publication.
+
+Clean source4a541e1 passes4 actual Git admission tests and actionlint. Its
+actual Linux helper invocation uses Go1.26.7, verifies cached modules offline,
+and records2438 identical before/after blob/mode mappings. The resulting
+executable has the exact pinned revision and modified=false stamp. An actual
+central-helper linked-worktree control builds successfully with explicit
+buildvcs=true but still lacks that stamp; the unmodified comparator rejects it
+with exit1 before invoking a candidate case. Both complete command histories,
+raw outputs and executable bytes are retained in owned-go-builder evidence
+and its checked gzip archive. This is light SDK evidence, not a rerun or
+reinterpretation of the551 primary/14 nested author Rust proofs or Root's
+separate551 primary/13 nested observations. Existing522 worktree and target
+remain immutable and exclusively owned by Root.
