@@ -1493,7 +1493,7 @@
     },
     "rust/symbrain-memory/src/lib.rs": {
       "mode": "100644",
-      "sha256": "0cd343125406d626aa4075a5759b8e90181853d855dfde187be6f44ac87de49b"
+      "sha256": "363cd76db19594fc334b580b8a36b86dcdd9098b702b0f3fc199079bde2b6490"
     },
     "rust/symbrain-memory/src/list_rows.rs": {
       "mode": "100644",
@@ -1505,7 +1505,7 @@
     },
     "rust/symbrain-memory/src/migration.rs": {
       "mode": "100644",
-      "sha256": "e28c8ee8adc0cb2c8786107278b036743293fb7e8f58aae4789091df83c843f0"
+      "sha256": "8475395db4e7fb6ae47739ece11c7f95384349a9f02a86455eb3624e0b809891"
     },
     "rust/symbrain-memory/src/model.rs": {
       "mode": "100644",
@@ -1537,7 +1537,7 @@
     },
     "rust/symbrain-memory/src/startup_db_error.rs": {
       "mode": "100644",
-      "sha256": "10c0fd9c82a9d6d847c18da04f93a6d321490c361feefe80ca5543811a357670"
+      "sha256": "08527f67b3494ade5d3e2d7f1a6bf9a2a3c4f56efc11090fdcc1820661516701"
     },
     "rust/symbrain-memory/src/startup_fallback.rs": {
       "mode": "100644",
@@ -1545,15 +1545,15 @@
     },
     "rust/symbrain-memory/src/startup_fs.rs": {
       "mode": "100644",
-      "sha256": "50a790bc168e76ed6023985eea8ccc438b7852f1a3f00d84a47b5608a3eeff8c"
+      "sha256": "20abb5e5aed614608840f1fd5c9d494bfb6f4e846b2ff4bf21543c252fa3c7c6"
     },
     "rust/symbrain-memory/src/startup_json_scan.rs": {
       "mode": "100644",
-      "sha256": "7e2873de908b7db284f84d63b0008f9da20193875e03f1a34f0ae296394a256d"
+      "sha256": "01fc0869d859b7062ad01c51dc50065dfabd45baaeceeb0554c6206f1d779cda"
     },
     "rust/symbrain-memory/src/startup_mkdir.rs": {
       "mode": "100644",
-      "sha256": "3d318d868c32e2bfa669d592ea2aca82c22cd0e228c5bafdf92dc77a5f20ed08"
+      "sha256": "717e131b8d9d28c142cb5ad172a31b12867d4a2a1daca734110acf982966d501"
     },
     "rust/symbrain-memory/src/startup_review_tests.rs": {
       "mode": "100644",
@@ -2017,7 +2017,7 @@
     },
     "rust/symbrain-usage/src/command_capture.rs": {
       "mode": "100644",
-      "sha256": "765ea7b823b40631f6523ef443872da107b2d62f45df94cd16454ced63ebe5d9"
+      "sha256": "92b9f8c06390c7c9f630df5d5ca6f6957d7d90ad121fb7bf5f5ad3ad90d69081"
     },
     "rust/symbrain-usage/src/lib.rs": {
       "mode": "100644",
@@ -2105,7 +2105,7 @@
     },
     "rust/symbrain-usage/src/secret_exit_status.rs": {
       "mode": "100644",
-      "sha256": "01cb4e3ca8a5594f8193d4ca852609eea07a60fbaafd52a6b3f07d128e136c58"
+      "sha256": "f3fd22dfe9061587ac3ec8e6644436b29d86742136df6f162cae677ba6f67add"
     },
     "rust/symbrain-usage/src/secret_reference_bytes.rs": {
       "mode": "100644",
@@ -3049,7 +3049,7 @@
     },
     "scripts/brain-config13/integration_owners.py": {
       "mode": "100644",
-      "sha256": "3fb2e3739f67913ae85998f5bbac2735e99bcc7ff618af31ababf8e274bda30a"
+      "sha256": "96300c41ac73ac064fd6ffa866c488e6a5a486babec664ca6212da42055e4a1b"
     },
     "scripts/brain-config13/integration_owners_tests.py": {
       "mode": "100644",
@@ -3166,6 +3166,62 @@
     "scripts/brain-config13/integration_owners_tests.py": {
       "owner": "additive-source-preflight",
       "historical": null
+    },
+    "rust/symbrain-memory/src/lib.rs": {
+      "owner": "formatting-only-reviewed-Brain",
+      "historical": {
+        "mode": "100644",
+        "sha256": "0cd343125406d626aa4075a5759b8e90181853d855dfde187be6f44ac87de49b"
+      }
+    },
+    "rust/symbrain-memory/src/migration.rs": {
+      "owner": "formatting-only-reviewed-Brain",
+      "historical": {
+        "mode": "100644",
+        "sha256": "e28c8ee8adc0cb2c8786107278b036743293fb7e8f58aae4789091df83c843f0"
+      }
+    },
+    "rust/symbrain-memory/src/startup_db_error.rs": {
+      "owner": "formatting-only-reviewed-Brain",
+      "historical": {
+        "mode": "100644",
+        "sha256": "10c0fd9c82a9d6d847c18da04f93a6d321490c361feefe80ca5543811a357670"
+      }
+    },
+    "rust/symbrain-memory/src/startup_fs.rs": {
+      "owner": "formatting-only-reviewed-Brain",
+      "historical": {
+        "mode": "100644",
+        "sha256": "50a790bc168e76ed6023985eea8ccc438b7852f1a3f00d84a47b5608a3eeff8c"
+      }
+    },
+    "rust/symbrain-memory/src/startup_json_scan.rs": {
+      "owner": "formatting-only-reviewed-Brain",
+      "historical": {
+        "mode": "100644",
+        "sha256": "7e2873de908b7db284f84d63b0008f9da20193875e03f1a34f0ae296394a256d"
+      }
+    },
+    "rust/symbrain-memory/src/startup_mkdir.rs": {
+      "owner": "formatting-only-reviewed-Brain",
+      "historical": {
+        "mode": "100644",
+        "sha256": "3d318d868c32e2bfa669d592ea2aca82c22cd0e228c5bafdf92dc77a5f20ed08"
+      }
+    },
+    "rust/symbrain-usage/src/command_capture.rs": {
+      "owner": "formatting-only-reviewed-Brain",
+      "historical": {
+        "mode": "100644",
+        "sha256": "765ea7b823b40631f6523ef443872da107b2d62f45df94cd16454ced63ebe5d9"
+      }
+    },
+    "rust/symbrain-usage/src/secret_exit_status.rs": {
+      "owner": "formatting-only-reviewed-Brain",
+      "historical": {
+        "mode": "100644",
+        "sha256": "01cb4e3ca8a5594f8193d4ca852609eea07a60fbaafd52a6b3f07d128e136c58"
+      }
     }
   },
   "Core_mod_union": {

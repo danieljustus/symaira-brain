@@ -17,7 +17,9 @@ round-trip verified and reused; no executable archive was duplicated.
 
 * Brain's startup, typed configuration, marker admission, timezone precedence,
   linear rotation JSON traversal, Darwin admission accounting and all process
-  corpora/tests retain complete e306 bodies. The Brain runtime preflight alone
+  corpora/tests retain complete e306 functional owners. Eight files with inherited
+  formatting failures receive only deterministic Rustfmt output, preserving every
+  literal token. The Brain runtime preflight alone
   receives an explicit integration overlay; its other functions remain exact.
 * Skills CLI flags, raw-byte quoter, codecs, marker/preflight tests and argv
   helpers retain complete main 935 bodies and modes. Core's byte quoter is
@@ -27,8 +29,12 @@ round-trip verified and reused; no executable archive was duplicated.
   grammar or unrelated output owner is normalized during integration.
 * CI keeps every complete step from both parents. Both Guard's standalone gate
   and main's Windows wide Skills gate survive, with their separate artifact
-  settings. The contract matrix keeps every original row under its unchanged
-  unique ID; the migration ledger retains both parent additions.
+  settings. The contract matrix keeps every acceptance column under its unchanged unique
+  ID. Only SKL-006 status follows published main (its actual historical evidence),
+  and SET-002 status follows the reviewed Brain parent; both old rows remain
+  archived. Cargo manifests/lock remain exactly e306, retaining its previously
+  reviewed graph rather than reverting to main's older graph. No dependency was
+  added by this integration. The migration ledger retains both parent additions.
 * The two already-reviewed CI parent-acquisition commits are copied as two
   ordinary history commits, retaining the failed depth-one attempt. The final
   workflow adds only the pinned no-tags, full-ancestry fetch to the merged
@@ -65,7 +71,7 @@ requires explicit target/port allocation, fresh executable/source attribution,
 complete failed-stage retention and all native gates.
 
 Pure checks verify the parent owner bodies/modes, unchanged Cargo identities,
-complete CI step dictionaries, matrix rows, Python AST, formatting, actionlint,
+complete CI step dictionaries, explicit matrix status owners, Python AST, formatting, actionlint,
 prepared case projections and source-preflight negative controls. They do not
 prove native Windows or Darwin behavior, SQLite correctness, provider cleanup,
 model startup or timing. The full diff whitespace check retains failures in two
@@ -78,3 +84,18 @@ conflicts, the sparse rule was added and preservation was committed first. A
 first owner-check projection incorrectly demanded main's entire config module
 instead of the explicit e306 export union; its raw failure is retained. Neither
 is attributed to compiled product behavior.
+
+Eight pre-existing Brain-owned Rust formatting failures were preserved before
+correction with full original source bytes, native metadata, Git bindings and
+formatter output. Each formatted file equals standalone Rustfmt output from its
+archived input; every literal token remains byte-identical and ordered. Module
+/import declaration ordering retains attached cfg attributes (no macro_use).
+These eight paths have precise formatting-only effective-owner records pinned
+to original e306 and current bodies/modes. Main Skills owner bytes remain exact.
+Fresh full formatter checks, never compilation, verify this correction.
+
+All pure preparation attempts remain raw: an initial assumption that both parent
+Cargo graphs were identical, status expectations for SKL-006/SET-002, and a
+reused preparation output path were rejected. The corrections to source checks
+name the real owners; the original case generators and their no-overwrite guard
+are unchanged. These observations are not native product failures.

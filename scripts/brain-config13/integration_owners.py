@@ -1,11 +1,16 @@
 """Exact normal-main source overlay; no runtime acceptance or owner selection."""
 import hashlib
 import json
-from pathlib import Path
 import subprocess
 
 BRAIN = 'e30676fdaced483a3cd1588a78253a3f15096d04'
 MAIN = '9353520a34c5819c7d0a6cd58d3bfaa2b22b045b'
+FORMATTED = {
+    'rust/symbrain-memory/src/' + name for name in
+    ('lib.rs', 'migration.rs', 'startup_db_error.rs', 'startup_fs.rs',
+     'startup_json_scan.rs', 'startup_mkdir.rs')
+} | {'rust/symbrain-usage/src/command_capture.rs',
+     'rust/symbrain-usage/src/secret_exit_status.rs'}
 MANIFEST = 'migration/evidence/brain-config13/main935-integration/effective-owners.json'
 
 
@@ -57,6 +62,8 @@ def effective_owners(root, head):
         if owner['owner'] == 'published-main':
             mode, oid = intended[name]
             check_identity(name, git('cat-file', 'blob', oid), mode, manifest['effective_source'][name])
+        elif owner['owner'] == 'formatting-only-reviewed-Brain':
+            assert name in FORMATTED and old is not None
         else:
             assert owner['owner'] == 'additive-source-preflight'
             assert name in ('scripts/brain-config13/runtime_tools.py', 'scripts/brain-config13/integration_owners.py', 'scripts/brain-config13/integration_owners_tests.py')
