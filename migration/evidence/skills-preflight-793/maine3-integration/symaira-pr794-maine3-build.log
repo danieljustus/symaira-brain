@@ -1,0 +1,10 @@
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling symbrain-policy v0.12.1 (/workspace/symaira-pr794/rust/symbrain-policy)
+   Compiling symbrain-activity v0.12.1 (/workspace/symaira-pr794/rust/symbrain-activity)
+   Compiling symbrain-memory v0.12.1 (/workspace/symaira-pr794/rust/symbrain-memory)
+   Compiling symbrain-catalog v0.12.1 (/workspace/symaira-pr794/rust/symbrain-catalog)
+   Compiling symbrain-gateway v0.12.1 (/workspace/symaira-pr794/rust/symbrain-gateway)
+   Compiling symbrain-cli v0.12.1 (/workspace/symaira-pr794/rust/symbrain-cli)
+    Finished `dev` profile [unoptimized] target(s) in 4.96s

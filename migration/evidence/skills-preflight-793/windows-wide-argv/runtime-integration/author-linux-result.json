@@ -1,0 +1,92 @@
+{
+  "scope": "complete Linux author gates; independent review and native3/protected CI pending",
+  "production_source": "51e42aa959fbec416f20221db6fa41e8c91b5862",
+  "original_immutable_runtime": "53711fb08ddd51b149554e02bf97531f54d18d10",
+  "original_immutable_skills": "97d8ca6a0679ebdf9cf8175a284da335dc6a07de",
+  "normal_main_integration": "5e232700bb9031fc34d4995465a4037837540abb",
+  "target": "/workspace/symaira-skills794-wide-runtime/target",
+  "native_cli_sha256": {
+    "go": "d3e33230553fadc29906d94e033bab17fbf939f7b16276482574191792d5ae2d",
+    "rust": "f2ae2d7bdd22e051a88434b87ce312268bdb0dfd494955b360726ccb70c25170"
+  },
+  "frozen_go": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "Go_toolchain": "go1.26.7",
+  "Rust_Cargo_environment": {
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_BUILD_JOBS": "2",
+    "umask": "022",
+    "subreaper": "/tmp/symaira-subreaper.py"
+  },
+  "actual_Rust": {
+    "affected_primary_passed": 447,
+    "affected_parents": 56,
+    "Core_passed": 104,
+    "Core_parents": 2,
+    "primary_total": 551,
+    "intentional_child_entry_ignored": 2,
+    "nested_child_passed_separately": 14,
+    "raw_summary_total_passed": 565,
+    "strict_clippy": "PASS4crates all-target/all-feature -Dwarnings",
+    "workspace_fmt": "PASS",
+    "actionlint": "PASS existing /workspace/toolchains/bin/actionlint"
+  },
+  "actual_process": {
+    "original315_exact": 315,
+    "original315_readonly": true,
+    "three_controls": "eachactualexit1; actual changed-input mismatch retained and verified, no bootstrap substitute",
+    "supplement": {
+      "actual_pairs": 53,
+      "Go_native_required": 51,
+      "native_parent_inherited": 2,
+      "all_readonly": true,
+      "raw_Unix_cases": 40,
+      "portable_required": 11,
+      "portable_inherited": 2,
+      "native_Windows_executed": 0
+    },
+    "supplement_all_observed_Go_native_exact": true
+  },
+  "actual_executable_archive": {
+    "path": "/workspace/oracles/symaira-skills794-51e42-final-binaries/receipt.json",
+    "sha256": "25f200b869ad8a0270c73bd811ec010314070754e4681fff2d7b9b19345e73e2",
+    "ELF_paths": 590,
+    "unique_payloads": 547,
+    "actual_fresh_parent_roles": 58,
+    "actual_cli_roles": 3,
+    "gzip_roundtrip_verified": true,
+    "target_users": []
+  },
+  "original_attempts_preserved": [
+    "53711 first loader fixture failure due0600/0700 checkout modes",
+    "same53711 corrected modes: tests/Core pass; strict public #Panics documentation failure",
+    "51e42 full test/strict/fmt pass: actionlint PATH absent",
+    "51e42 properPATH fullRust/nativeCLI/Go build pass: linked-worktree missingVCS metadata rejected beforepairs"
+  ],
+  "source_provenance": {
+    "original36proof_files_unchanged": true,
+    "all465RustCargo_maps_exceptprecise5doclines_unchanged": true,
+    "formatter_body_unchanged": true,
+    "actual2438_frozenGo_blobbyte_mode_maps_clean": true
+  },
+  "open": [
+    "fulldifferentauthorindependentreview",
+    "realnativeWindows312baseline plus99novelWindows vectors/preparedportable controls",
+    "exactsourceLinux/macOS/Windows protectedCI",
+    "broaderSkillsglobaloutput/positivecutover remainseparate"
+  ],
+  "no_GitHub_writes": true,
+  "not_self_approved": true,
+  "retention_manifest": "author-linux-51e42/retention.json",
+  "actual_host": {
+    "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+    "machine": "x86_64",
+    "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+    "cargo": "cargo 1.98.0 (797e8a9bc 2026-08-05)"
+  },
+  "proof_roundtrip_validation": {
+    "all67_original_files_checked": true,
+    "all_original_gzip_contents_checked": true
+  }
+}

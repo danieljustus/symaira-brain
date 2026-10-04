@@ -1,0 +1,40 @@
+{
+  "head": "3a85990fa3e91c403c5058d386af068b443cfe41",
+  "oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "status": "actual_reproduction_of_open_review_finding_not_a_passing_test",
+  "cases": [
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d20626164ff20"
+      ],
+      "matched": false,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \" bad\\xff \" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "20626164ff20"
+      ],
+      "matched": false,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \" bad\\xff \" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    }
+  ]
+}

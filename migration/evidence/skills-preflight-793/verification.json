@@ -1,0 +1,40 @@
+{
+  "initial_handoff_head": "f8a6bb8a91630bf03b7c6c10c0fdbedec9d2ba79",
+  "code_base": "3a85990fa3e91c403c5058d386af068b443cfe41",
+  "fresh_clone": "directGitHub; originallyemptyCargoHome; clean source; no copies/overrides",
+  "commands": "fetch/fmt/test/clippy/build/version all exit0",
+  "parent_suite_total": {
+    "log": "cloud-fresh-checkout-tests.log",
+    "parent_suite_pass": 422,
+    "fail": 0,
+    "ignored": 2,
+    "parent_suites": 54
+  },
+  "prior_test_count_correction": "Historical435 aggregated child test harness runs and is not the distinct top-level suite total; use parent suites with0filteredonly.",
+  "oracle_go_toolchain": "1.26.7 fromgo.mod",
+  "parity_replay": "30 recorded cases match; 2 known padded-target mismatches reproduced",
+  "preservation": [
+    {
+      "branch": "handoff/20261003-skills-457-partial",
+      "head": "cc12e8aeb9fbfcf73d7db9984c4d0dc92f494298",
+      "byte_verified_files": 8
+    },
+    {
+      "branch": "handoff/20261003-skills-476-interrupted",
+      "head": "2703b37c757234f0172b641a2d8b0bd4590c8313",
+      "byte_verified_files": 8
+    },
+    {
+      "branch": "handoff/20261003-skills-457-worker",
+      "head": "4e368f94b66ace1c0d677436e9129b09a5fe203d",
+      "byte_verified_files": 0
+    }
+  ],
+  "cloud_runtime": "not checked",
+  "top_level_enumeration": {
+    "listed": 424,
+    "passed": 422,
+    "ignored": 2,
+    "method": "Top-level --list counts independently corroborate parent summaries; filtered child harnesses excluded."
+  }
+}
