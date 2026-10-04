@@ -14,7 +14,7 @@ class Journal:
     def write(self):
         staged = None
         try:
-            with tempfile.NamedTempFile(dir=self.path.parent, prefix=self.path.name + '.',
+            with tempfile.NamedTemporaryFile(dir=self.path.parent, prefix=self.path.name + '.',
                                        delete=False) as stream:
                 staged = Path(stream.name)
                 stream.write((json.dumps(self.data, indent=2) + '\n').encode('utf-8'))

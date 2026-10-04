@@ -1,0 +1,99 @@
+test_actual_wrapper_still_rejects_incidental_child_failure (test_config_path_progress.ProgressTests.test_actual_wrapper_still_rejects_incidental_child_failure) ... ok
+test_complete_retains_the_supplied_exact_result (test_config_path_progress.ProgressTests.test_complete_retains_the_supplied_exact_result) ... ERROR
+test_completed_pairs_survive_later_failure (test_config_path_progress.ProgressTests.test_completed_pairs_survive_later_failure) ... ERROR
+test_failed_control_keeps_raw_outputs_and_environment (test_config_path_progress.ProgressTests.test_failed_control_keeps_raw_outputs_and_environment) ... ERROR
+test_replace_failure_preserves_previous_document_and_cleans_stage (test_config_path_progress.ProgressTests.test_replace_failure_preserves_previous_document_and_cleans_stage) ... ERROR
+test_unix_wrapper_keeps_original_realpath_branch (test_config_path_progress.ProgressTests.test_unix_wrapper_keeps_original_realpath_branch) ... ok
+test_windows_current_resolves_link_prefix_first (test_config_path_progress.ProgressTests.test_windows_current_resolves_link_prefix_first) ... FAIL
+test_windows_original_folds_link_parent_before_resolution (test_config_path_progress.ProgressTests.test_windows_original_folds_link_parent_before_resolution) ... FAIL
+
+======================================================================
+ERROR: test_complete_retains_the_supplied_exact_result (test_config_path_progress.ProgressTests.test_complete_retains_the_supplied_exact_result)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/symaira-guard805-config-control/scripts/guard-standalone-oracle/test_config_path_progress.py", line 81, in test_complete_retains_the_supplied_exact_result
+    journal = Journal(self.root/'report.json', {})
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-guard805-config-control/scripts/guard-standalone-oracle/config_path_journal.py", line 12, in __init__
+    self.write()
+  File "/workspace/symaira-guard805-config-control/scripts/guard-standalone-oracle/config_path_journal.py", line 17, in write
+    with tempfile.NamedTempFile(dir=self.path.parent, prefix=self.path.name + '.',
+         ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'tempfile' has no attribute 'NamedTempFile'. Did you mean: 'NamedTemporaryFile'?
+
+======================================================================
+ERROR: test_completed_pairs_survive_later_failure (test_config_path_progress.ProgressTests.test_completed_pairs_survive_later_failure)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/symaira-guard805-config-control/scripts/guard-standalone-oracle/test_config_path_progress.py", line 63, in test_completed_pairs_survive_later_failure
+    journal = Journal(self.root/'report.json', {})
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-guard805-config-control/scripts/guard-standalone-oracle/config_path_journal.py", line 12, in __init__
+    self.write()
+  File "/workspace/symaira-guard805-config-control/scripts/guard-standalone-oracle/config_path_journal.py", line 17, in write
+    with tempfile.NamedTempFile(dir=self.path.parent, prefix=self.path.name + '.',
+         ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'tempfile' has no attribute 'NamedTempFile'. Did you mean: 'NamedTemporaryFile'?
+
+======================================================================
+ERROR: test_failed_control_keeps_raw_outputs_and_environment (test_config_path_progress.ProgressTests.test_failed_control_keeps_raw_outputs_and_environment)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/symaira-guard805-config-control/scripts/guard-standalone-oracle/test_config_path_progress.py", line 52, in test_failed_control_keeps_raw_outputs_and_environment
+    journal = Journal(self.root/'report.json', {'source': 'owned'})
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-guard805-config-control/scripts/guard-standalone-oracle/config_path_journal.py", line 12, in __init__
+    self.write()
+  File "/workspace/symaira-guard805-config-control/scripts/guard-standalone-oracle/config_path_journal.py", line 17, in write
+    with tempfile.NamedTempFile(dir=self.path.parent, prefix=self.path.name + '.',
+         ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'tempfile' has no attribute 'NamedTempFile'. Did you mean: 'NamedTemporaryFile'?
+
+======================================================================
+ERROR: test_replace_failure_preserves_previous_document_and_cleans_stage (test_config_path_progress.ProgressTests.test_replace_failure_preserves_previous_document_and_cleans_stage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/symaira-guard805-config-control/scripts/guard-standalone-oracle/test_config_path_progress.py", line 72, in test_replace_failure_preserves_previous_document_and_cleans_stage
+    journal = Journal(self.root/'report.json', {})
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-guard805-config-control/scripts/guard-standalone-oracle/config_path_journal.py", line 12, in __init__
+    self.write()
+  File "/workspace/symaira-guard805-config-control/scripts/guard-standalone-oracle/config_path_journal.py", line 17, in write
+    with tempfile.NamedTempFile(dir=self.path.parent, prefix=self.path.name + '.',
+         ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: module 'tempfile' has no attribute 'NamedTempFile'. Did you mean: 'NamedTemporaryFile'?
+
+======================================================================
+FAIL: test_windows_current_resolves_link_prefix_first (test_config_path_progress.ProgressTests.test_windows_current_resolves_link_prefix_first)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/symaira-guard805-config-control/scripts/guard-standalone-oracle/test_config_path_progress.py", line 128, in test_windows_current_resolves_link_prefix_first
+    self.assertEqual(requests, [r'D:\owned\link'])
+AssertionError: Lists differ: ['D:\\owned\\link', 'D:\\owned\\physical\\anchor'] != ['D:\\owned\\link']
+
+First list contains 1 additional elements.
+First extra element 1:
+'D:\\owned\\physical\\anchor'
+
+- ['D:\\owned\\link', 'D:\\owned\\physical\\anchor']
++ ['D:\\owned\\link']
+
+======================================================================
+FAIL: test_windows_original_folds_link_parent_before_resolution (test_config_path_progress.ProgressTests.test_windows_original_folds_link_parent_before_resolution)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/symaira-guard805-config-control/scripts/guard-standalone-oracle/test_config_path_progress.py", line 117, in test_windows_original_folds_link_parent_before_resolution
+    self.assertEqual(requests, [r'D:\owned\cfg'])
+AssertionError: Lists differ: ['D:\\owned\\cfg', 'D:\\owned\\cfg'] != ['D:\\owned\\cfg']
+
+First list contains 1 additional elements.
+First extra element 1:
+'D:\\owned\\cfg'
+
+- ['D:\\owned\\cfg', 'D:\\owned\\cfg']
++ ['D:\\owned\\cfg']
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.027s
+
+FAILED (failures=2, errors=4)

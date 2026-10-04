@@ -145,7 +145,7 @@ def compare(case, go, native):
 def control(go, native, root, journal=None):
     root.mkdir()
     wrapper = root/'canonicalize-mutant.py'
-    wrapper.write_text("""import os,subprocess,sys
+    wrapper.write_text("""import json,os,subprocess,sys
 from pathlib import Path
 old=os.environ['XDG_CONFIG_HOME'];assert '/link/../' in old
 if os.name=='nt':
@@ -159,6 +159,7 @@ else:
     os.environ['XDG_CONFIG_HOME']=os.path.realpath(old)
 assert os.environ['XDG_CONFIG_HOME']!=old
 p=subprocess.run([NATIVE,*sys.argv[1:]],capture_output=True)
+Path(__file__).with_suffix('.child.json').write_bytes(json.dumps(dict(argv=[NATIVE,*sys.argv[1:]],cwd=os.getcwd(),environment_bytes={key:os.fsencode(value).hex() for key,value in os.environ.items()},exit_code=p.returncode,stdout_hex=p.stdout.hex(),stderr_hex=p.stderr.hex())).encode('utf-8'))
 assert p.returncode==0 and b'physical_owner' in p.stderr
 sys.stdout.buffer.write(p.stdout);sys.stderr.buffer.write(p.stderr);sys.exit(p.returncode)
 """.replace('NATIVE',repr(str(native))))
@@ -166,7 +167,14 @@ sys.stdout.buffer.write(p.stdout);sys.stderr.buffer.write(p.stderr);sys.exit(p.r
     if journal:
         journal.event('control-prepared', case=case, wrapper_source_hex=wrapper.read_bytes().hex(),
                       wrapper_sha256=replay.digest(wrapper.read_bytes()))
-    left=observe(go,case,root/'go',False,journal);right=observe(wrapper,case,root/'native',True,journal)
+    left=observe(go,case,root/'go',False,journal)
+    try:
+        right=observe(wrapper,case,root/'native',True,journal)
+    finally:
+        child_report=wrapper.with_suffix('.child.json')
+        if journal and child_report.exists():
+            journal.event('control-native-child', report=json.loads(child_report.read_bytes()),
+                          raw_report_hex=child_report.read_bytes().hex())
     if journal: journal.event('control-observed', go=left, mutated_native=right)
     assert right['exit_code']==0 and b'physical_owner' in bytes.fromhex(right['stderr_hex']), 'incidental mutant failure'
     try: compare(case,left,right)

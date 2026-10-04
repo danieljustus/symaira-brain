@@ -13,6 +13,7 @@ import unittest
 from unittest.mock import patch
 
 from config_path_journal import Journal
+import config_paths
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -83,6 +84,36 @@ class ProgressTests(unittest.TestCase):
         journal.complete(result)
         self.assertEqual(json.loads(journal.path.read_bytes())['result'], result)
 
+    def test_actual_observer_retains_timeout_partial_streams_and_unchanged_budget(self):
+        journal = Journal(self.root/'report.json', {})
+        case = dict(id='owned-timeout', family='xdg', spelling='plain', contract='parity')
+        error = subprocess.TimeoutExpired(['owned-native'], 5, output=b'partial\xff', stderr=None)
+        with patch('config_paths.link_directory', side_effect=lambda link,target: link.mkdir()), \
+             patch('config_paths.subprocess.run', side_effect=error) as run:
+            with self.assertRaises(subprocess.TimeoutExpired):
+                config_paths.observe(Path('/owned-native'), case, self.root/'fixture', True, journal)
+        self.assertEqual(run.call_args.kwargs['timeout'], 5)
+        events=json.loads(journal.path.read_bytes())['events']
+        self.assertEqual(events[0]['phase'], 'child-start')
+        self.assertEqual(events[1]['phase'], 'child-exception')
+        self.assertEqual(bytes.fromhex(events[1]['stdout_hex']), b'partial\xff')
+        self.assertIsNone(events[1]['stderr_hex'])
+
+    def test_actual_observer_retains_child_before_readonly_assertion(self):
+        journal = Journal(self.root/'report.json', {})
+        case = dict(id='owned-readonly', family='xdg', spelling='plain', contract='parity')
+        def changed(command, **kwargs):
+            (self.root/'fixture/cfg/symguard/config.toml').write_bytes(b'owned changed state')
+            return SimpleNamespace(returncode=0, stdout=b'child output\r\n', stderr=b'child error\xff')
+        with patch('config_paths.link_directory', side_effect=lambda link,target: link.mkdir()), \
+             patch('config_paths.subprocess.run', side_effect=changed):
+            with self.assertRaisesRegex(AssertionError, 'doctor changed owned'):
+                config_paths.observe(Path('/owned-native'), case, self.root/'fixture', True, journal)
+        events=json.loads(journal.path.read_bytes())['events']
+        self.assertEqual(events[1]['phase'], 'child-returned')
+        self.assertEqual(bytes.fromhex(events[1]['stderr_hex']), b'child error\xff')
+        self.assertNotEqual(events[0]['before'], events[1]['after'])
+
     def execute_wrapper(self, source, platform='nt', status=0, stderr=b'config: warning: unknown key "physical_owner"\n'):
         requests = []
         path = SimpleNamespace(realpath=windows_realpath(requests), normpath=ntpath.normpath, join=ntpath.join)
@@ -92,10 +123,14 @@ class ProgressTests(unittest.TestCase):
         output, errors = io.BytesIO(), io.BytesIO()
         system = SimpleNamespace(argv=['wrapper.py', 'doctor'], stdout=SimpleNamespace(buffer=output),
                                  stderr=SimpleNamespace(buffer=errors), exit=lambda code: (_ for _ in ()).throw(SystemExit(code)))
-        fake_os = SimpleNamespace(name=platform, environ=environment, path=path)
+        fake_os = SimpleNamespace(name=platform, environ=environment, path=path,
+                                  getcwd=lambda: 'owned-cwd', fsencode=os.fsencode)
+        reports = []
         class OwnedPath:
             def __init__(self, value): self.value = value
             def __truediv__(self, value): return OwnedPath(self.value+'/'+value)
+            def with_suffix(self, value): return OwnedPath(self.value+value)
+            def write_bytes(self, value): reports.append(json.loads(value))
             def read_bytes(self):
                 self_test = self.value.replace('\\', '/')
                 if '/physical/cfg/symguard/config.toml' not in self_test:
@@ -106,7 +141,18 @@ class ProgressTests(unittest.TestCase):
         with patch.dict(sys.modules, {'os':fake_os, 'sys':system,
                                     'subprocess':SimpleNamespace(run=child),
                                     'pathlib':SimpleNamespace(Path=OwnedPath)}):
-            exec(compile(source, 'actual-generated-wrapper', 'exec'), {})
+            try:
+                exec(compile(source, 'actual-generated-wrapper', 'exec'), {'__file__':'owned-wrapper.py'})
+            finally:
+                if '.child.json' in source:
+                    self.assertEqual(len(reports), 1)
+                if reports:
+                    self.assertEqual(reports[0]['exit_code'], status)
+                    self.assertEqual(bytes.fromhex(reports[0]['stderr_hex']), stderr)
+                    self.assertEqual(bytes.fromhex(reports[0]['stdout_hex']), b'owned response\r\n')
+                    self.assertEqual(reports[0]['cwd'], 'owned-cwd')
+                    self.assertEqual(reports[0]['environment_bytes']['XDG_CONFIG_HOME'],
+                                     os.fsencode(environment['XDG_CONFIG_HOME']).hex())
         return requests
 
     def test_windows_original_folds_link_parent_before_resolution(self):
@@ -114,7 +160,8 @@ class ProgressTests(unittest.TestCase):
         requests=[]
         realpath=windows_realpath(requests)
         actual=realpath(r'D:\owned'+'/link/../cfg')
-        self.assertEqual(requests, [r'D:\owned\cfg'])
+        # CPython validates removal of the long-path prefix with a second call.
+        self.assertEqual(requests, [r'D:\owned\cfg', r'D:\owned\cfg'])
         self.assertEqual(actual, r'D:\owned\cfg')
         original=wrapper_source(gzip.decompress(ORIGINAL.read_bytes()))
         with self.assertRaises(AssertionError):
@@ -125,7 +172,7 @@ class ProgressTests(unittest.TestCase):
         requests=[];realpath=windows_realpath(requests)
         resolved=realpath(r'D:\owned'+'/link')
         actual=ntpath.normpath(ntpath.join(resolved, '..', 'cfg'))
-        self.assertEqual(requests, [r'D:\owned\link'])
+        self.assertEqual(requests, [r'D:\owned\link', r'D:\owned\physical\anchor'])
         self.assertEqual(actual, r'D:\owned\physical\cfg')
         with self.assertRaises(SystemExit) as ended: self.execute_wrapper(source)
         self.assertEqual(ended.exception.code, 0)

@@ -1,0 +1,27 @@
+{
+  "source": "d42be7c39e1cc44ed75e339f342a53c20ffc7055",
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "scripts/guard-standalone-oracle",
+    "-p",
+    "test_config_path_progress.py",
+    "-v"
+  ],
+  "exit": 1,
+  "total": 8,
+  "passed": 2,
+  "failed": 2,
+  "errors": 4,
+  "source_sha256": {
+    "scripts/guard-standalone-oracle/config_paths.py": "58f2045658dd2ece32d7490ab4c4c7c65650b65a6d055d4ba2f471ec62847cea",
+    "scripts/guard-standalone-oracle/config_path_journal.py": "a81cbcfdef780522c8302144501a858832df5ce06f5500b6eb75e4151a163c32",
+    "scripts/guard-standalone-oracle/test_config_path_progress.py": "6945dbcc27fff36b7f3c51c494574a1a4cd1bed518d085696e67ac195ff3c232",
+    ".github/workflows/ci.yml": "f84724045d3793c180c4ac5494602b7a1b7dab9fa460705087e351d91c583f05"
+  },
+  "candidate_product_or_compiler_executed": false,
+  "reason": "actual portable proof found invalid NamedTempFile API and test-only incomplete expected CPython prefix-validation request sequences"
+}

@@ -35,7 +35,10 @@ must still prove an actual successful wrong-owner process before rejecting it.
 
 Retain normal and control observations before assertions in the next actual
 run, with raw stdout/stderr, actual exits, argv/cwd, owned environment, original
-config bytes and read-only metadata. Add the config-path receipt and progress
+config bytes and read-only metadata. The generated wrapper also retains its
+inner native child output, actual exit and selected environment in an owned
+sidecar outside the read-only fixture, before its strict assertion. The outer
+journal records that sidecar even when the wrapper fails. Add the receipt and progress
 journal to the existing artifact upload. This supplies new current evidence;
 it cannot reconstruct omitted original observations. Keep normal case vectors,
 timeouts, warning bytes, gating rules, Go/native production, frozen sources and
@@ -46,6 +49,23 @@ equivalence checks do not run the Go/native product or Windows APIs. Actual
 native Windows full config-path pairs plus the genuine owner mutant, all
 existing Guard gates and three-OS CI remain required. No scope closure, new
 fallback, product waiver or self-approval is granted.
+
+The first authored portable source checkpointd42be7c3 had eight tests with two
+passes, two failures and four errors. Its complete original outputs and source
+hashes remain retained. They exposed a misspelled NamedTemporaryFile API and
+test-only expectations omitting CPython's second prefix-validation lookup.
+Correct those concrete issues, keep the original strict control criteria and
+record the complete two-request sequences. Ten final portable tests also
+exercise the actual observer's partial-timeout and read-only-failure journals
+with mocked children and an owned link stand-in, so they call no Windows API
+or product. Run those portable tests before the existing actual Oracle gate.
+
+The initial unpopulated sparse Git index also produced a bad unpublished
+retention commitb2ef6ecc with unintended deletions. Its exact state remains on
+the separate `issue/805-windows-owner-control-empty-index-proof` branch and in
+the original evidence map. Restore the full parent index before the corrected
+retention commitea35f2d5; that bad commit is not an ancestor of this candidate.
+Original worktrees and product sources were unchanged throughout preparation.
 
 The isolated worktree uses sparse checkout solely to respect the shared disk
 floor. Its Git index retains the full parent source. Disable sparse checkout

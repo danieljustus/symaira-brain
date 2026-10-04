@@ -2,6 +2,7 @@
 # Actual immutable Go handlers versus the standalone native Guard.
 set -euo pipefail
 umask 022
+python3 -m unittest discover -s scripts/guard-standalone-oracle -p test_config_path_progress.py -v
 oracle_ref=dcddcef0df5789123c7c9a7ebe6e01f10e941f2c
 report="${1:?usage: scripts/guard-standalone-oracle/run.sh REPORT_JSON}"
 owned="$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/guard-standalone-770.XXXXXX")"
