@@ -53,9 +53,11 @@ pub(super) fn bare_value_error(bytes: &[u8], limit: usize) -> Option<GoText> {
                     .get(cursor..cursor + 3)
                     .is_some_and(|v| v.iter().all(|b| *b == byte))
                 {
-                    break;
+                    return None;
                 }
                 quote = Some(byte);
+            } else if byte == b'{' {
+                return None;
             } else if byte.is_ascii_alphabetic() || byte == b'_' {
                 let start = cursor;
                 while cursor < line.len()
@@ -119,4 +121,27 @@ fn bare_key(bytes: &[u8]) -> bool {
         && bytes
             .iter()
             .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'_' | b'-' | b'.'))
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn rejected_bare_array_word_precedes_later_invalid_utf8() {
+        let error = super::super::document::parse(b"invalid=[unterminated\n#\xff\n").unwrap_err();
+        assert_eq!(error.as_ref(), b"toml: line 1 (last key \"invalid\"): expected value but found \"unterminated\" instead");
+        let error = super::super::document::parse(b"#\xff\n").unwrap_err();
+        assert_eq!(error.as_ref(), b"toml: line 1: invalid UTF-8 byte: 0xff");
+    }
+
+    #[test]
+    fn classifier_never_accepts_repaired_bytes_or_scans_string_values() {
+        assert!(
+            super::super::document::parse(b"key='unterminated'\nnumber=1e3\nflag=true\n").is_ok()
+        );
+        assert!(super::super::document::parse(b"key='unterminated\xff'\n").is_err());
+        assert!(
+            super::bare_value_error(b"key='''line\ninvalid = word\n'''\n", usize::MAX).is_none()
+        );
+        assert!(super::bare_value_error(b"key={bad=word}\n", usize::MAX).is_none());
+    }
 }
