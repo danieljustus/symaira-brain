@@ -64,48 +64,6 @@
       "gzip_sha256": "22139dc2b51409ca698fa7f681730b841e7caba571ad43069b2665bdfc60cc34"
     },
     {
-      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/asm@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
-      "retained": "09-asm@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count.gz",
-      "bytes": 16384,
-      "sha256": "abb2a1e8addb892ee5d2e94837b743e48baa64ead389226942d5a589e93879cd",
-      "gzip_sha256": "5eac8f1fb1a0a525c3d2b1f384c85db23935569dc24f064a00fb2bc0f5176fba"
-    },
-    {
-      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/compile@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
-      "retained": "10-compile@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count.gz",
-      "bytes": 16384,
-      "sha256": "8abc24bff7e560e98092e92cf7791f242f70b42373d27541660b693f764aa051",
-      "gzip_sha256": "189823108d85b5a65d10d4bad366793d86ca31468f1a80dcc90814b077a81b17"
-    },
-    {
-      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/go@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
-      "retained": "11-go@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count.gz",
-      "bytes": 16384,
-      "sha256": "9d705f4fab0ce2df023da18e955ef6fddf218583cf8bccb9900a584c0c6b2c63",
-      "gzip_sha256": "ea3c277830d2f9c67ab0847a701eaeab6050f231a6adca70e92f9d9af3b13ef0"
-    },
-    {
-      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/link@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
-      "retained": "12-link@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count.gz",
-      "bytes": 16384,
-      "sha256": "6c9efd77d22b428457923fd8c1c4c63bc867dc737d38690d2c921e8548d2a92f",
-      "gzip_sha256": "e536fc1d278fa4934dbe4836d3be90c49d5f03b90f812dbec5160dee852f54de"
-    },
-    {
-      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/upload.token",
-      "retained": "13-upload.token.gz",
-      "bytes": 0,
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
-    },
-    {
-      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/weekends",
-      "retained": "14-weekends.gz",
-      "bytes": 2,
-      "sha256": "7de1555df0c2700329e815b93b32c571c3ea54dc967b89e81ab73b9972b72d1d",
-      "gzip_sha256": "d3b2df6999bcb649ec121782b777a15aabbf3242213bdd390f50d9c878495556"
-    },
-    {
       "original": "/tmp/symaira-discovery-mask-sdk-only/input.json",
       "retained": "15-input.json.gz",
       "bytes": 52451,
@@ -197,5 +155,38 @@
       "gzip_sha256": "d99d354231a25024b1d3ea8aaec7e018debe85c291be483b81990810e711deea"
     }
   ],
-  "scope": "Actual SDK-only typed executables and source/raw proof; no candidate Rust/native provider runtime"
+  "scope": "Actual SDK-only typed executables and source/raw proof; no candidate Rust/native provider runtime",
+  "excluded_generated_sdk_home_metadata": [
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/asm@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
+      "bytes": 16384,
+      "sha256": "abb2a1e8addb892ee5d2e94837b743e48baa64ead389226942d5a589e93879cd"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/compile@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
+      "bytes": 16384,
+      "sha256": "8abc24bff7e560e98092e92cf7791f242f70b42373d27541660b693f764aa051"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/go@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
+      "bytes": 16384,
+      "sha256": "9d705f4fab0ce2df023da18e955ef6fddf218583cf8bccb9900a584c0c6b2c63"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/link@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
+      "bytes": 16384,
+      "sha256": "6c9efd77d22b428457923fd8c1c4c63bc867dc737d38690d2c921e8548d2a92f"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/upload.token",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/weekends",
+      "bytes": 2,
+      "sha256": "7de1555df0c2700329e815b93b32c571c3ea54dc967b89e81ab73b9972b72d1d"
+    }
+  ],
+  "exclusion_scope": "Generated private Go telemetry bookkeeping is not execution input/output/source/binary proof. All actual SDK proof bytes remain retained; original owned home files remain local."
 }

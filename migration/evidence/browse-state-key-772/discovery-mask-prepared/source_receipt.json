@@ -5,12 +5,12 @@
     "discovery-request-718": 16,
     "independent-ccc": 57,
     "discovery-request-48fc": 7,
-    "actual_sdk_only": 28
+    "actual_sdk_only": 22
   },
   "source_sha256": {
-    "browse/crates/symbrowse-core/src/key_sources/startup_discovery/godebug.rs": "0b4645a823188bfb2453e18568cc1e7ab09a8348250e63a804cefb8084362f71",
-    "browse/port/harness/discovery_owner_control.go.in": "932a07371d18f9debf8537399cfc5537eb051a1dcbd709bd5818f109a6a3d277",
     "browse/port/harness/daemon_provider_discovery.py": "3d0f78eb959e0a684aaccb22196f555625a9def1ad758e1ecac6815b77969ff4",
+    "browse/port/harness/discovery_owner_control.go.in": "932a07371d18f9debf8537399cfc5537eb051a1dcbd709bd5818f109a6a3d277",
+    "browse/crates/symbrowse-core/src/key_sources/startup_discovery/godebug.rs": "0b4645a823188bfb2453e18568cc1e7ab09a8348250e63a804cefb8084362f71",
     "docs/adr/daemon-provider-discovery-and-owner-772.md": "bd991bbfd4dcaa45c51e36821fab2799dee77f905ac6329b9c5acf2956118742",
     "migration/evidence/browse-state-key-772/discovery-mask-prepared/projection.py": "90031a8100c35e3ff714ab79a91dafba546692e9b5fb7739220ede3bcf02972f",
     "migration/evidence/browse-state-key-772/discovery-mask-prepared/sdk_bulk.go.in": "94246ac5a8200f842ce8fc2830d9b5550cee3c20f7f7e9c4afffa4042814a034",
