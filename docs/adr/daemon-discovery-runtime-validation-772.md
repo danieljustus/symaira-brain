@@ -51,3 +51,20 @@ publication, self-approval or full #772 closure follows from this preparation.
 
 Prepared driver and original review retention:
 `migration/evidence/browse-state-key-772/discovery-runtime-prepared/`.
+
+The first real all-target gate at b17 retained132passes/one failure after the
+original215passes/three explicitly executed child ignores. A diagnostic-only
+successor a147 revealed the exact inherited failure: the descendant Guard
+fixture exited without consuming its request, so stdin.write_all could fail
+with BrokenPipe before the output-pipe timeout. Its first isolated real child
+failed with that literal error. All606 target ELF paths/555 unique payloads and
+original b17 bytes/logs were archived before the test-only correction. Cached
+and transferred ELF inventory is explicitly not evidence of execution.
+
+The descendant fixture now drains the actual request before its existing
+background sleep, valid response and exit. This isolates the intended retained
+output-pipe timeout without changing production behavior,50ms/20ms limits or
+any assertions. Diagnostics retain the literal Guard error. Completed source
+checks are not reused as current-source full-gate passes; the corrected graph
+requires fresh verification. The failure and its mixed pass/fail diagnostic
+observations remain immutable.

@@ -1,5 +1,5 @@
 {
-  "status": "prepared_not_executed",
+  "status": "corrected_fixture_prepared_fresh_runtime_required",
   "upstream": "7e5c4561c82803403b579d011fb687bbe254d32a",
   "files_sha256": {
     "migration/evidence/browse-state-key-772/discovery-runtime-prepared/README.md": "487d2ba37e5711244f99710a21f7d169ee06b9055c25519b79573ab23a6921fc",
@@ -20,11 +20,10 @@
     "migration/evidence/browse-state-key-772/discovery-runtime-prepared/original-review/symaira-discovery-mask-independent-review.md": "23a151f51e702a07d19522d707f2f1dfbbece6109d1ff4963bcc65a0b89357fe",
     "migration/evidence/browse-state-key-772/discovery-runtime-prepared/original-review/symaira-discovery-mask-independent-static-first-precheck.log": "c109e62aa5d834eb2b8484606a8a98b4fb48d6a0af8fda61e3e60e4fae87f1be",
     "migration/evidence/browse-state-key-772/discovery-runtime-prepared/retention.json": "a0e6d1f48463933375bd9e87b629a764df832dd29c7b0aea43293e39150ab81a",
-    "migration/evidence/browse-state-key-772/discovery-runtime-prepared/run.py": "d42fee83c1717bfb51a35132a5a8bfcc0f85813642f5c828c116b7710ad7d611",
-    "docs/adr/daemon-discovery-runtime-validation-772.md": "c872da42937c563075918f6e1db34bbc058cebd157c236a7670e72f54ac8f060"
+    "migration/evidence/browse-state-key-772/discovery-runtime-prepared/run.py": "1dccc9fd9a814ffc571673f5de18ccb7bb7d3d05e6523b465e2275e451a8f68c",
+    "docs/adr/daemon-discovery-runtime-validation-772.md": "5d8077eac6e75067b1a29f5f81d7370d7b3b215fa32e2dd8636c204b22338748"
   },
-  "compiler": false,
-  "runtime": false,
-  "target_created_or_accessed": false,
-  "port_used": false
+  "original_b17_and_a147_retained": true,
+  "production_changed": false,
+  "fixture_assertions_or_timeouts_changed": false
 }

@@ -71,12 +71,10 @@ mod unix {
             error.to_string().contains("timed out"),
             "actual Guard error: {error}"
         );
-        // Consume the request before exiting: this fixture must isolate a
-        // descendant-held output pipe, not race the parent stdin writer.
         let descendant = Guard {
             executable: script(
                 &root,
-                "cat >/dev/null\nsleep 5 &\nprintf '%s\\n' '{\"decision\":\"allow\"}'\nexit 0\n",
+                "sleep 5 &\nprintf '%s\\n' '{\"decision\":\"allow\"}'\nexit 0\n",
             ),
             subcommand: Vec::new(),
             timeout: Duration::from_millis(50),

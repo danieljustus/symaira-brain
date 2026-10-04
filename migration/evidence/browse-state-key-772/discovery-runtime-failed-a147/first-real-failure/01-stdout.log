@@ -1,0 +1,11 @@
+
+running 1 test
+test unix::guard_errors_fail_closed_and_timeout_is_bounded ... FAILED
+
+failures:
+
+failures:
+    unix::guard_errors_fail_closed_and_timeout_is_bounded
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.03s
+

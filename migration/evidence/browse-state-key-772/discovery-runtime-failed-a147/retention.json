@@ -1,0 +1,25 @@
+{
+  "status": "PRESERVED_BEFORE_TEST_ONLY_STDIN_FIX",
+  "observed_source": "a147cedb6fd003f257cc491fcb94c45db4291400",
+  "files_sha256": {
+    "receipt.json": "737e7708cc5231a469b07fd1199e670acf44b7c7f35be24bb943ef17b0fd813f",
+    "preserve.py": "9a9f22c39ae3d61bc14033076ee60898b35a09ae5c0f2fc0c216f7eda3b031b6",
+    "cargo-diagnostic.log": "4b13eca9fccc730784c9607aa9559b7084e7e215da3534cafb50c3e60f32eae4",
+    "original-owned-fixture/receipt.json": "4940757822403cfe45015fee0e96df9124e2cf1eec08e2ec990a02840bc80ba0",
+    "original-owned-fixture/guard-3": "995da8cb66cddccaeb3063913ed2bc39cf0e851ea5fa1e6cd47f1d34df884d69",
+    "original-owned-fixture/guard-6": "baaf3b4bcf9658d45f4b6d9716c4c04ce97a096222a9ab9e100995bbe4d15fc1",
+    "original-owned-fixture/guard-5": "93d279447c752b00555112e51db69b99dc34cfe402f65f0ae893f217dac6777c",
+    "first-real-failure/observations.json": "be37b879e1e8f2cb5bb984843df55249f3b0de3f6baac01d6df6a4444bff9854",
+    "first-real-failure/01-stdout.log": "dc2175c25aa6795dee13cffc2382c680e64aa3a55c2ee8978ef517ff16064def",
+    "first-real-failure/01-stderr.log": "9dba57e52a3f4ec31fb249e6e708813d09dc4060d36fd2b8b9c50cd3e83d06bb",
+    "source/browse/crates/symbrowse-core/tests/policy_guard.rs": "c7f6dede7beb014cb4f270fd03010004ec4d2741d59ace296d955000d9b2ce97",
+    "source/browse/crates/symbrowse-core/src/policy_guard.rs": "631fea056197a3fa517732cf54241cf15aba90b180a826d7b8a4f4d10a12b55d"
+  },
+  "external_new_archive_payloads": "/tmp/symaira-discovery-runtime-a147-before-fixture-fix/archives",
+  "target_inventory_paths": 606,
+  "unique_payloads": 555,
+  "original_payloads_reused_roundtrip": 551,
+  "new_payloads_roundtrip": 4,
+  "actual_new_test_role": "policy_guard-12661e3eaa035ad6",
+  "error": "guard decide failed: Broken pipe (os error 32)"
+}

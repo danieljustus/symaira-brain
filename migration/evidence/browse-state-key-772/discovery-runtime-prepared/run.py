@@ -48,6 +48,10 @@ def main():
     args.out.mkdir(parents=True, exist_ok=False)
     state = {'phase': args.phase, 'source': source, 'upstream': UPSTREAM,
              'allocation_receipt_sha256': digest(args.allocation_receipt), 'stages': [], 'complete': False}
+    state['owned_execution_environment'] = {name: os.environ.get(name) for name in
+        ['HOME', 'USERPROFILE', 'GOCACHE', 'GOMODCACHE', 'GOENV', 'GOTOOLCHAIN', 'GOPROXY', 'CGO_ENABLED',
+         'CARGO_TARGET_DIR', 'CARGO_HOME', 'RUSTUP_HOME', 'CARGO_BUILD_JOBS', 'CARGO_INCREMENTAL',
+         'CARGO_PROFILE_DEV_DEBUG', 'CARGO_PROFILE_TEST_DEBUG', 'CARGO_NET_OFFLINE']}
     state['source_sha256'] = {p: digest(ROOT / p) for p in git('ls-files', 'browse/crates', 'browse/port/harness', 'browse/Cargo.lock', 'browse/Cargo.toml', '.github/workflows/browse-daemon-native.yml').splitlines()}
     def flush():
         (args.out / 'validation.json').write_text(json.dumps(state, indent=2) + '\n')
@@ -69,7 +73,8 @@ def main():
                 assert restored.hexdigest() == h
                 unique[h] = {'archive': str(archive), 'gzip_sha256': digest(archive)}
             rows.append({'path': str(path), 'sha256': h, 'bytes': path.stat().st_size})
-        state['failed_source_bound_ELF'] = {'source': source, 'paths': rows, 'unique': unique}
+        state['failed_target_ELF_inventory'] = {'observed_source': source, 'paths': rows, 'unique': unique,
+                                              'cached_or_transferred_roles_are_not_execution': True}
         flush()
     def run(name, command, cwd=BROWSE):
         available = shutil.disk_usage('/workspace').free
