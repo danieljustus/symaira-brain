@@ -44,3 +44,11 @@ Local Linux results need full different-author review and exact-head native
 six-platform CI. Existing pooling cost, origin-byte-auth gaps and other open
 Fetch/Daemon acceptance criteria remain visible. This correction does not close
 #773 or authorize an unproved production cutover.
+
+## Independent full review
+
+The bounded correction is approved after a different-author full review and fresh independent303 workspace tests,13 actual MCP pairs,251 Fetch comparisons,32 raw proxy pairs,114 credential pairs and all original negative controls.32 additional actual test-ELF repetitions exercise128 body/header/earlyEOF/close/task cases; the three precise actual mutation controls reject. Strict workspace checks and the88-contract matrix pass. All22 production-file comparisons,69 retained author artifacts, source maps and original152/121 archived identities verify. Complete independent proof is under migration/evidence/fetch-deadline-773/independent-6eb3cde.
+
+Main2b6d49 is integrated normally and adds only documentation/history; reviewed production, tests, harness, workflow and Cargo remain byte-identical. Current protected and genuine six-platform native checks still must pass. This addresses the flaky fixture without changing production timers, does not waive the original Linux jobs, and does not claim a fresh benchmark or full773 cutover. The prerequisite final801 integration remains required.
+
+Workspace builds can change a shared example's feature-graph binary without changing source. Preserve each actually executed binary SHA/archive before target reuse, and separately record the current variant; do not require the old execution identity to remain at a mutable cache path. All149 current cache ELF paths were verified against immutable archives before the exclusively owned1.7GB cache was retired. Original failed provenance assumptions and all receipts remain retained.
