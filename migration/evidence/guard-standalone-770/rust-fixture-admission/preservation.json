@@ -1,0 +1,194 @@
+{
+  "before_edits": true,
+  "head": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+  "records": [
+    {
+      "path": "rust/symguard-cli/tests/doctor_warnings.rs",
+      "source": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+      "bytes": 3909,
+      "sha256": "200fdd7440eb1564c15701f91cef6d7d89c720a71c9ae616fd154ed8f3df580e",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791115972773402244,
+        "dev": 27,
+        "inode": 703057,
+        "nlink": 1,
+        "blocks": 8
+      },
+      "archive": "/workspace/review-proof/guard805-rust-fixture-admission/originals/rust__symguard-cli__tests__doctor_warnings.rs",
+      "archive_sha256": "a140cd7ae8aca6d79dc40743244af9357c1187befa03c2543fa2549582d664dd"
+    },
+    {
+      "path": "rust/symguard-cli/tests/raw_diagnostics.rs",
+      "source": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+      "bytes": 2169,
+      "sha256": "ab6432dd9654c630dc39b78ce91dd7b5ba82c037dce4122ad5a05be307fb3ca5",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791115972773402244,
+        "dev": 27,
+        "inode": 703073,
+        "nlink": 1,
+        "blocks": 8
+      },
+      "archive": "/workspace/review-proof/guard805-rust-fixture-admission/originals/rust__symguard-cli__tests__raw_diagnostics.rs",
+      "archive_sha256": "f123c1eba2b53ff2894cc1d704fd16fbe0cb05b6e4c486115c1e98c3545c401d"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/kernel_admission.py",
+      "source": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+      "bytes": 6612,
+      "sha256": "9560996a08e3f7f0eb4f7d6a2247feb3c19d61a6c84b2909ed702496e0fd94ff",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791115972773973057,
+        "dev": 27,
+        "inode": 703265,
+        "nlink": 1,
+        "blocks": 16
+      },
+      "archive": "/workspace/review-proof/guard805-rust-fixture-admission/originals/scripts__guard-standalone-oracle__kernel_admission.py",
+      "archive_sha256": "3634b747696270cc0c4a69ca053c1a4c295be53b281b75641d75c3a2f744b5a7"
+    },
+    {
+      "path": "docs/adr/guard-kernel-fixture-main-integration-805.md",
+      "source": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+      "bytes": 2096,
+      "sha256": "cd7aea4bf0d32d3f5085087050aaf378faa6c6ab582c22033b2e8fdf6393c968",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791116725606746047,
+        "dev": 27,
+        "inode": 701269,
+        "nlink": 1,
+        "blocks": 8
+      },
+      "archive": "/workspace/review-proof/guard805-rust-fixture-admission/originals/docs__adr__guard-kernel-fixture-main-integration-805.md",
+      "archive_sha256": "f97b3ef4acb4c18e9d0a42ff4aa62a16f5e3a6a467fad9cdb85bf4968ad6cacf"
+    },
+    {
+      "path": "Cargo.toml",
+      "source": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+      "bytes": 2876,
+      "sha256": "dfa1fc858d8556f92d8175a5a298deec96776ac9f7bef90555954c7cfa4440a3",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791115972764901293,
+        "dev": 27,
+        "inode": 701713,
+        "nlink": 1,
+        "blocks": 8
+      },
+      "archive": "/workspace/review-proof/guard805-rust-fixture-admission/originals/Cargo.toml",
+      "archive_sha256": "c2c52443bfc4f9040b0c7114723656ae29de1a4fffcfdd62e828179ec05e75d9"
+    },
+    {
+      "path": "Cargo.lock",
+      "source": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+      "bytes": 65896,
+      "sha256": "273fedc324f5acf687ef66d46a6914e16fc2b6ad643541b03c3021532c4b2acc",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791115972764901293,
+        "dev": 27,
+        "inode": 701699,
+        "nlink": 1,
+        "blocks": 136
+      },
+      "archive": "/workspace/review-proof/guard805-rust-fixture-admission/originals/Cargo.lock",
+      "archive_sha256": "3da79ee27f1c5f65f3d3dfebf5f4a8b7cef274404219c353eccb380f6820c489"
+    },
+    {
+      "path": ".github/workflows/guard-review-repair.yml",
+      "source": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+      "bytes": 1427,
+      "sha256": "46879b8f3724cab7f2ca0fc4ac976f24736ff1c3484482910dd14d40536f5868",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791115972764901293,
+        "dev": 27,
+        "inode": 701345,
+        "nlink": 1,
+        "blocks": 8
+      },
+      "archive": "/workspace/review-proof/guard805-rust-fixture-admission/originals/.github__workflows__guard-review-repair.yml",
+      "archive_sha256": "48c06ea29e95b171a3492c886a81fd657deb6862f0fdf9ab83888cf7e973211a"
+    },
+    {
+      "path": "migration/contract-matrix.csv",
+      "source": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+      "bytes": 30477,
+      "sha256": "c1d4df85774e7b29d0257acfcd0f80791a483674e0fc19d3653c7aadf09d24b8",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791116610698231218,
+        "dev": 27,
+        "inode": 702002,
+        "nlink": 1,
+        "blocks": 64
+      },
+      "archive": "/workspace/review-proof/guard805-rust-fixture-admission/originals/migration__contract-matrix.csv",
+      "archive_sha256": "232ca2330fe3ad59658b74957d064cecd710556bfc066339dc4d1bda53c58987"
+    },
+    {
+      "path": "AGENTS.md",
+      "source": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+      "bytes": 15652,
+      "sha256": "96501fab340de5969b201a1060581420f9085f923fbcf4c32d1394e4082189b6",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791115972764901293,
+        "dev": 27,
+        "inode": 701682,
+        "nlink": 1,
+        "blocks": 32
+      },
+      "archive": "/workspace/review-proof/guard805-rust-fixture-admission/originals/AGENTS.md",
+      "archive_sha256": "b3be89ad2919cd3d85d0fcfdc635e94344541df6e4e62951e3a7366a8fdfa5fe"
+    },
+    {
+      "path": "/workspace/review-proof/root-ci-1643-job-111449257217.log",
+      "bytes": 215177,
+      "sha256": "eaaba2444148b38484f3d6b3cbdb847acbae10cbdb46540316c8ac2c765c6e9c",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791132171268065717
+      },
+      "archive": "/workspace/review-proof/guard805-rust-fixture-admission/originals/root-ci-1643-job-111449257217.log",
+      "archive_sha256": "62f5e2d7a5b2c2e311265f48fdcfb18689c3a200c27bcdd228e56df3efe5c82b"
+    },
+    {
+      "path": "/workspace/review-proof/root-ci-1643-job-111449257217.content.json",
+      "bytes": 218109,
+      "sha256": "4faac275af68cebef000257d051d5ba3bfa45b539de64cbfdab9176f6d686957",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791132168999523817
+      },
+      "archive": "/workspace/review-proof/guard805-rust-fixture-admission/originals/root-ci-1643-job-111449257217.content.json",
+      "archive_sha256": "466617fcce835b4c13db39cb43e96f61a141b2bfd6243db7105525886b365bac"
+    }
+  ]
+}
