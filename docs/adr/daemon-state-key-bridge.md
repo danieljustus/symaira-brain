@@ -289,3 +289,22 @@ and workflow time limits stay unchanged. Prepared portable tests exercise a
 real still-running child, raw output/error status, concurrent case links, raw
 argv and bounds. Full fresh Registry gates and native six-platform evidence
 remain required; this diagnostics change makes no Windows runtime-fix claim.
+
+### Use a genuine macOS FIFO fixture without skipping its contract
+
+The fresh all-target Darwin source check of immutable1a91 failed before runtime:
+`state_cleanup.rs` imported `rustix::fs::mkfifoat` under `cfg(unix)`, but pinned
+rustix1.1.4 explicitly excludes Apple for `mkfifoat` and `mknodat`. Earlier
+library-only Darwin checks did not cover this test. Original full failure,
+passed225 affected tests/strict Windows checks and all218currentELF paths
+(159unique,35fresh State build/test bindings) were preserved before correction.
+
+On macOS only, the owned fixture uses the absolute platform `/usr/bin/mkfifo`
+with mode600 and requires successful completion. Other existing Unix paths keep
+the original rustix operation. Both branches assert a genuine FIFO and exact
+mode0600 before the unchanged no-follow/no-block/external-file-preservation
+assertions. This avoids unsafe FFI, a new dependency, a socket substitute or a
+platform skip. No production code, timeout or acceptance assertion is weakened.
+Fresh complete source-bound gates must run for the successor; old1a91 runs are
+not presented as successor runs. Cross compilation validates source only;
+actual macOS FIFO behavior and all six native jobs remain required.

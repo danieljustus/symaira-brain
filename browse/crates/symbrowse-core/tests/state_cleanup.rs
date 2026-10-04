@@ -118,19 +118,32 @@ fn authenticated_header_cleanup_does_not_require_payload_json() {
 #[cfg(unix)]
 #[test]
 fn overwrite_warning_probe_rejects_links_and_never_blocks_on_fifo() {
-    use rustix::fs::{CWD, Mode, mkfifoat};
-    use std::os::unix::fs::symlink;
+    use std::os::unix::fs::{FileTypeExt, PermissionsExt, symlink};
     let outside = root("outside");
     let root = root("warning");
     let store = store(&root);
     fs::write(outside.join("external.json"), fixture("encrypted-v3")).unwrap();
     symlink(outside.join("external.json"), root.join("linked.json")).unwrap();
-    mkfifoat(
-        CWD,
-        root.join("pipe.json").as_path(),
-        Mode::from_bits_truncate(0o600),
+    let pipe = root.join("pipe.json");
+    #[cfg(target_os = "macos")]
+    assert!(
+        std::process::Command::new("/usr/bin/mkfifo")
+            .args(["-m", "600"])
+            .arg(&pipe)
+            .status()
+            .unwrap()
+            .success()
+    );
+    #[cfg(not(target_os = "macos"))]
+    rustix::fs::mkfifoat(
+        rustix::fs::CWD,
+        pipe.as_path(),
+        rustix::fs::Mode::from_bits_truncate(0o600),
     )
     .unwrap();
+    let metadata = fs::symlink_metadata(&pipe).unwrap();
+    assert!(metadata.file_type().is_fifo());
+    assert_eq!(metadata.permissions().mode() & 0o777, 0o600);
     assert_eq!(store.existing_encrypted_key_source("linked"), None);
     assert_eq!(store.existing_encrypted_key_source("pipe"), None);
     assert_eq!(
