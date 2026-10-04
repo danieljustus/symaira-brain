@@ -1,0 +1,26 @@
+{
+  "archive": "symaira-macbook-proofs-20261004.tar.gz",
+  "archive_sha256": "1257d9252f279b9877bb65b59af7a5354ee051c93608f30c313691f3d3c6c2e2",
+  "parts": [
+    {
+      "file": "symaira-macbook-proofs-20261004.tar.gz.part000",
+      "bytes": 26214400,
+      "sha256": "27a1a98ebb3b66cf4585703428bd84aae4b4743f8b19add5af3e26949aeaec59"
+    },
+    {
+      "file": "symaira-macbook-proofs-20261004.tar.gz.part001",
+      "bytes": 26214400,
+      "sha256": "e424199ef770a207a4536232d48be686f1d9417e60bfd475f942889ce9707c02"
+    },
+    {
+      "file": "symaira-macbook-proofs-20261004.tar.gz.part002",
+      "bytes": 26214400,
+      "sha256": "c2461cdb8b352652fa9c730a94af40f387b3d0eaecef2e50a0f5c813636e7014"
+    },
+    {
+      "file": "symaira-macbook-proofs-20261004.tar.gz.part003",
+      "bytes": 8282924,
+      "sha256": "542248b543d4e4c6be7bb5e7075e4d84b41bf87778c57d200ac2713c0d553e87"
+    }
+  ]
+}
