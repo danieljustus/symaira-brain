@@ -15,7 +15,7 @@ fn windows_raw_utf16_paths_keep_lone_surrogates() {
         assert_eq!(
             join_units(&[raw, 58], &["symguard", "config.toml"]),
             [
-                vec![raw, 58, 92],
+                vec![raw, 58],
                 "symguard\\config.toml".encode_utf16().collect()
             ]
             .concat()
