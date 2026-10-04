@@ -28,6 +28,10 @@ fn missing_managed_home_fails_before_config_probes_or_publication() {
         if empty {
             command.env(home_key, "");
         }
+        // Keep instrumentation outside the product-owned filesystem snapshot.
+        if let Some(profile) = std::env::var_os("LLVM_PROFILE_FILE") {
+            command.env("LLVM_PROFILE_FILE", profile);
+        }
         #[cfg(windows)]
         {
             let owner = fallback.to_str().unwrap();
