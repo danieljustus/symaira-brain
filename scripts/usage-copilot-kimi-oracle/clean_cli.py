@@ -30,7 +30,7 @@ def main():
     target = Path(sys.argv[1]).resolve()
     root = Path(sys.argv[2]).resolve()
     output = Path(sys.argv[3]).resolve()
-    assert target.name == 'target' and target != root and target.is_dir()
+    assert target != root and target not in root.parents and target.is_dir()
     users = target_users(target)
     command = ['cargo', 'clean', '--locked', '-p', 'symbrain-cli', '--target-dir', str(target)]
     dry = subprocess.run(command + ['--dry-run', '--verbose'], cwd=root, capture_output=True, check=True)
