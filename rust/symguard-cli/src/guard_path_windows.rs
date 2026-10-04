@@ -47,11 +47,11 @@ pub(super) fn clean_units(path: &[u16]) -> Vec<u16> {
     let original = &path[volume..];
     let rooted = separator(original[0]);
     let mut result = Vec::new();
-    let mut changed = false;
+    let mut buffer: Option<Vec<u16>> = None;
     let mut read = 0;
     let mut boundary = 0;
     if rooted {
-        append_unit(&mut result, 92, original, &mut changed);
+        append_unit(&mut result, 92, original, &mut buffer);
         read = 1;
         boundary = 1;
     }
@@ -77,43 +77,53 @@ pub(super) fn clean_units(path: &[u16]) -> Vec<u16> {
                 }
             } else if !rooted {
                 if !result.is_empty() {
-                    append_unit(&mut result, 92, original, &mut changed);
+                    append_unit(&mut result, 92, original, &mut buffer);
                 }
-                append_unit(&mut result, 46, original, &mut changed);
-                append_unit(&mut result, 46, original, &mut changed);
+                append_unit(&mut result, 46, original, &mut buffer);
+                append_unit(&mut result, 46, original, &mut buffer);
                 boundary = result.len();
             }
         } else {
             if (rooted && result.len() != 1) || (!rooted && !result.is_empty()) {
-                append_unit(&mut result, 92, original, &mut changed);
+                append_unit(&mut result, 92, original, &mut buffer);
             }
             while read < original.len() && !separator(original[read]) {
-                append_unit(&mut result, original[read], original, &mut changed);
+                append_unit(&mut result, original[read], original, &mut buffer);
                 read += 1;
             }
         }
     }
     if result.is_empty() {
-        append_unit(&mut result, 46, original, &mut changed);
+        append_unit(&mut result, 46, original, &mut buffer);
     }
     // Go postClean only acts after an actual buffer rewrite. Merely trimming
     // trailing separators or backtracking an unchanged prefix must not add .\.
-    if volume == 0 && changed {
-        if result
+    if volume == 0
+        && let Some(buffer) = &buffer
+    {
+        // Go scans the complete allocated buffer, including hidden backing slots.
+        if buffer
             .split(|unit| *unit == 92)
             .next()
             .is_some_and(|first| first.contains(&58))
         {
             result.splice(..0, [46, 92]);
-        } else if result.starts_with(&[92, 63, 63]) {
+        } else if buffer.starts_with(&[92, 63, 63]) {
             result.splice(..0, [92, 46]);
         }
     }
     [prefix, result.as_slice()].concat()
 }
 
-fn append_unit(output: &mut Vec<u16>, unit: u16, original: &[u16], changed: &mut bool) {
-    *changed |= original.get(output.len()) != Some(&unit);
+fn append_unit(output: &mut Vec<u16>, unit: u16, original: &[u16], buffer: &mut Option<Vec<u16>>) {
+    if buffer.is_none() && original.get(output.len()) != Some(&unit) {
+        let mut slots = vec![0; original.len()];
+        slots[..output.len()].copy_from_slice(output);
+        *buffer = Some(slots);
+    }
+    if let Some(slots) = buffer {
+        slots[output.len()] = unit;
+    }
     output.push(unit);
 }
 

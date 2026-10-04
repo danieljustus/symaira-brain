@@ -93,4 +93,9 @@ fn windows_volume_and_device_paths_follow_go_clean() {
         assert_eq!(clean(input), expected, "{input:?}");
         assert_eq!(clean(expected), expected, "idempotence {input:?}");
     }
+    assert_eq!(join("foo:bar/a/..", &["..", "b"]), r".\b");
+    assert_eq!(
+        join_units(&[0xdc00, 58, 47, 97, 47, 46, 46], &["..", "b"]),
+        ".\\b".encode_utf16().collect::<Vec<_>>()
+    );
 }
