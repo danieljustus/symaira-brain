@@ -359,3 +359,11 @@ Prozess-Lebenszyklusfehler verdecken. Auch die aktuelle Windows-Abweichung
 bei MCP-Initialize und der10-Sekunden-Timeout der unveränderten Go-Memory-
 Referenz bleiben offene Nachweisgates; erfolgreiche Memory-Einzeljobs
 ersetzen diese vollständigen Vergleiche nicht.
+
+## E-018: Geprüfte historische Memory-Effekte mit dem Store integrieren
+
+Die historische37-Generationen-Reparatur wird in PR803 integriert. Sie besitzt denselben Konstruktor, dieselben Default-/Dateninvarianten und dieselbe atomare Transaktionsgrenze wie der geprüfte WAL-Öffnungsfix. Zwei überlappende Store-PRs würden zusätzliche Zwischenzustände erzeugen. Der unabhängige63fbd320-Lauf besteht alle17 Stufen mit392 Tests und37 Reparaturen/Wiederöffnungen; original gescheiterte Go-Ergebnisse bleiben als absichtliche Korrekturen sichtbar. Im integrierten a30bba8b bleiben alle549 kompilierten Rust-/Cargo-Dateien identisch; eine separat geprüfte Windows-Diagnose kommt hinzu. Frische native Drei-OS- und geschützte CI bleibt vor Merge erforderlich. Die früheren Vorbereitungsstände oben bleiben historische Angaben.
+
+## E-019: Diagnoseprotokollierung dem bestehenden Zeitbudget zurechnen
+
+Ein langlebiges fsync-Journal darf die Timeoutgrenze nicht verlängern. Die neue Windows-Memory-Diagnose erhält nach erfolgreichem Spawn eine absolute5s-Deadline; unmittelbar nach jedem begin-Ereignis wird das verbleibende Budget neu berechnet. Bei null Restzeit erfolgt kein initialize/ping; die positive Assertion schlägt nach eigener Prozessbereinigung fehl. Der vollständige unabhängige Ursprungsbefund und seine deterministische Quellprojektion bleiben erhalten. Die korrigierte Diagnose ist unabhängig statisch freigegeben und veröffentlicht; tatsächliche Windows-Ausführung und ursprüngliche Fehlerursache bleiben offen.
