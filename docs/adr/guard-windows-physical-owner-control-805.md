@@ -71,3 +71,15 @@ The isolated worktree uses sparse checkout solely to respect the shared disk
 floor. Its Git index retains the full parent source. Disable sparse checkout
 under an allocated workspace budget before future full compilation; there is
 no target in this worktree and no compiler or port allocation in this phase.
+
+## Different-author review and CI publication
+
+Root reviewed the complete correction and original provenance, independently
+verified126 original roundtrips,1760 unchanged product files,1311 original
+execution bindings and all8 ZIP members including both actual PE files.
+All10 portable controls and four static gates passed independently.
+The source is approved for current native CI; Windows API/product runtime
+and the missing original child outputs remain unproved. Full review, raw
+checks and source maps are in
+`migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent`.
+No normal case, comparator, incidental-error criterion or product changed.
