@@ -39,3 +39,8 @@ child-entry ignores and54 unfiltered summaries, with strict Clippy and fmt
 passing. Historical446 belongs to its earlier source, not this run. This
 checks the current combination while preserving earlier review/CI evidence;
 fresh native three-OS acceptance still gates merge and #793 completion.
+# Current-main publication (2026-10-04)
+
+Main `2b6d49f250a81650eda1b93cec7d859a171873bb` is integrated by a normal merge after CI run `37162341373` at `faa8f12f` completed successfully, including all four protected contexts and native Linux, macOS and Windows migration jobs. The integration changes documentation and retained historical evidence only. Production, tests, workflows, dependency locks and the contract matrix remain byte-identical to the fully reviewed and tested predecessor.
+
+Keep the complete earlier process/test and native-runtime evidence instead of rebuilding unchanged code locally solely for a documentation merge. Require protected and applicable native checks at the new published head before regular squash merge. This preserves source attribution while avoiding redundant local build artifacts. The broader Skills and traversal issues retain their remaining acceptance scope.
