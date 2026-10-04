@@ -12,8 +12,14 @@ gate distinct from native runtime acceptance. Windows config text that cannot
 be emitted exactly remains delegated. Original92 proofs/180 raw-state paths and
 69/46 ELF byte mappings remain retained; all inherited gates remain required.
 [ADR](../docs/adr/guard-generated-config-path-ownership.md). New path process/
-mutation cases, complete fresh verification, independent review and native3
-remain pending at this unvalidated source checkpoint; full770/769 remain open.
+mutation cases pass on clean source5bb: 177 ordinary tests and an overlapping
+41-test kernel graph, strict/fmt/actionlint, 124/63/78/54/25 actual process cases,
+386 portable Windows SDK comparisons, all13 inherited controls plus the actual
+wrong-owner mutant. The original25 before-fix inputs, 20+10 owner-history pairs,
+80/94 original inputs, prior parent/raw/ordered gates and nine original Scan
+fixtures are explicitly accounted for. Failures and exact executable bytes
+remain retained. SDK source-reference is not Windows runtime proof; independent
+review and native3 protected checks remain pending. Full770/769 remain open.
 
 ## Guard Doctor ordered warning slice — 2026-10-04
 

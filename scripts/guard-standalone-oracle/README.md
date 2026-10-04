@@ -66,3 +66,13 @@ The copy/namespace adaptations are declared in the receipt; it is source-
 reference evidence and never substitutes for native Windows CLI/file tests.
 SDK BSD source licensing is retained in `windows-sdk-LICENSE.txt`.
 See [the ownership decision](../../docs/adr/guard-generated-config-path-ownership.md).
+
+The repaired Linux source5bb receipt retains 25 path cases (21 full reports and
+four explicit refusals) and the actual wrong-owner mutant. The 386 portable SDK
+comparisons include all34 original Windows Clean examples. The immutable
+before-fix25 mapping accounts for all15 original failures; the original20 owner
+pairs and later10 fresh pairs are replayed separately. All prior CLI/Scan/ordered
+corpora stay required. Final source maps, logs, copied probe bytes and exact
+executable roles are retained under
+`migration/evidence/guard-doctor-config-paths-770/final-5bb`; native three-platform
+CI and independent review remain pending.

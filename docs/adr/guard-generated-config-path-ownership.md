@@ -76,8 +76,44 @@ rewrite of the immutable independent review's owner proofs.
 The CI runner retains these reports plus the Windows source-reference report
 and actual probe executable bytes on all three native jobs.
 
-Validation is pending at this source checkpoint. The compiler hold is respected;
-Python syntax, Bash syntax and source formatting do not establish Rust/runtime
-acceptance. Fresh ordinary/strict tests, every inherited process gate, original
-corpus accounting, all controls, independent review and native Linux/macOS/Windows
-protected checks remain necessary. Full issues #770/#769 remain open.
+Clean source `5bbd42774b73760731801ca148663350b9770b47` passes 177 ordinary
+Core/Guard tests in 15 executed test binaries, the separate overlapping 41-test
+kernel graph in seven binaries, both strict Clippy graphs, workspace formatting
+and actionlint. The fresh actual SDK Go/native process gate passes 122/124 full
+reports, all 63 raw cases, 67/78 additive reports, 46/54 ordered-warning reports,
+and 21/25 generated-path reports. Each remaining case is an explicit refusal;
+all 13 inherited actual mutation controls and the new wrong-owner process
+mutation are rejected. The 386/386 portable Windows source comparisons include
+all 34 original SDK Clean examples. This is source-reference evidence only.
+
+All 25 corrected before-fix inputs are mapped case by case in the final receipt,
+including their original environment spellings, input bytes and readonly state.
+Of the 15 original failures, 13 now match completely and two typed-config cases
+correctly refuse before native output. The original 20 owner-history pairs and
+the later ten fresh owner pairs also match on the corrected executable. Fresh
+replays account for all original 80/94 CLI inputs, prior ordered/Unicode/raw and
+parent cases, the exact Brain-adapter children, and all nine original Scan
+fixtures including TTY/repeats. The prior signed-hex TOML parser refusal remains
+explicitly classified; audit filesystem controls assert native safety properties
+and retain observed inherited Go writes rather than claiming blanket parity.
+These adapter checks execute the unchanged Brain source inside Guard test
+binaries; they do not establish acceptance of a complete Brain executable.
+
+The first actual compilation exposed Windows helper backtracking errors; the
+copied SDK then exposed stale allocated-buffer and UTF8 byte-width behavior.
+Those failed reports, original executable probe bytes, correction commits and
+strict-lint failures are retained separately from the final passing source.
+The final archive distinguishes all 67 cached target ELF paths from the 22
+actually executed test roles, and separately retains the actual public Go/native
+pair and two portable SDK probe executables. Intermediate F02 ordinary test logs
+have no complete retained executable binding and are not the final acceptance
+proof. No original Go input, frozen fixture, independent finding or failure
+receipt was rewritten.
+
+Full source maps, original/raw-state retention, exact executable SHA/bytes,
+case accounting and gate logs are under
+`migration/evidence/guard-doctor-config-paths-770/final-5bb`.
+A different author must independently review this immutable candidate. Native
+Linux/macOS/Windows protected checks, remaining typed/discovery diagnostics,
+raw Windows text and complete standalone/Brain admission remain necessary.
+Full issues #770/#769 remain open.
