@@ -36,6 +36,9 @@ impl Client {
     pub(super) fn request_once(&self, frame: &Frame) -> Result<Response, ClientError> {
         use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
+        // Keep the existing shared client/server/wake endpoint spelling. A
+        // raw UTF-16 cutover must change all three owners together.
+        let path = self.options.socket_path.to_string_lossy();
         let mut payload = serde_json::to_vec(frame).map_err(io::Error::other)?;
         if payload.len() >= MAX_FRAME_BYTES {
             return Err(ClientError::Transport(DaemonError {
@@ -51,11 +54,10 @@ impl Client {
             .build()
             .map_err(ClientError::Io)?;
         runtime.block_on(async {
-            let mut stream =
-                tokio::time::timeout(timeout, connect_windows(&self.options.socket_path))
-                    .await
-                    .map_err(|_| unavailable(&self.options, timed_out("connect to daemon")))?
-                    .map_err(|error| unavailable(&self.options, error))?;
+            let mut stream = tokio::time::timeout(timeout, connect_windows(path.as_ref()))
+                .await
+                .map_err(|_| unavailable(&self.options, timed_out("connect to daemon")))?
+                .map_err(|error| unavailable(&self.options, error))?;
             tokio::time::timeout(timeout, async {
                 stream.write_all(&payload).await?;
                 stream.flush().await?;
@@ -104,18 +106,18 @@ impl Client {
 
 #[cfg(windows)]
 async fn connect_windows(
-    path: &std::path::Path,
+    path: &str,
 ) -> io::Result<tokio::net::windows::named_pipe::NamedPipeClient> {
     use tokio::net::windows::named_pipe::ClientOptions;
     use windows_sys::Win32::Foundation::ERROR_PIPE_BUSY;
 
     // CreateFile opens an available instance without WaitNamedPipe. Retry only
     // native contention, yielding to the caller's existing connect deadline.
-    // The native OsStr and Tokio-owned overlapped handle remain intact: there
-    // is no blocking connect task, FlushFileBuffers task or interprocess limbo
-    // owner which can outlive cancellation and stall Runtime::drop.
+    // Tokio owns the overlapped handle; there is no blocking connect task,
+    // FlushFileBuffers task or interprocess limbo owner which can outlive
+    // cancellation and stall Runtime::drop.
     loop {
-        match ClientOptions::new().open(path.as_os_str()) {
+        match ClientOptions::new().open(path) {
             Ok(stream) => return Ok(stream),
             Err(error) if error.raw_os_error() == Some(ERROR_PIPE_BUSY as i32) => {
                 tokio::time::sleep(Duration::from_millis(25)).await;

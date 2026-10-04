@@ -46,6 +46,28 @@ def main():
                        ("            tokio::time::timeout(timeout, async {", "    #[cfg(not(any(unix, windows)))]")]:
         assert old_transport.split(start, 1)[1].split(end, 1)[0] == new_transport.split(start, 1)[1].split(end, 1)[0]
     assert "spawn_blocking" not in new_transport and "interprocess" not in new_transport.split("async fn connect_windows", 1)[0]
+    assert "let path = self.options.socket_path.to_string_lossy();" in old_transport
+    assert "let path = self.options.socket_path.to_string_lossy();" in new_transport
+    assert "connect_windows(path.as_ref())" in new_transport
+    assert "ClientOptions::new().open(path)" in new_transport
+    windows_tests = (ROOT / "browse/crates/symbrowse-daemon/tests/windows_client_deadlines.rs").read_text()
+    old_tests = subprocess.check_output(["git", "show", "591248a89f56c7b810daf9fa1a036ec20061aaec:browse/crates/symbrowse-daemon/tests/windows_client_deadlines.rs"], cwd=ROOT, text=True)
+    assert old_tests.split("fn blocked_peer(", 1)[1] == windows_tests.split("fn blocked_peer(", 1)[1]
+    scenarios = ["unread-request", "full-request", "busy-instance", "eight-clients",
+                 "endpoint-ascii", "endpoint-unicode", "endpoint-lossy"]
+    assert all('"' + name + '"' in windows_tests for name in scenarios)
+    relation = json.loads((OUT.parent / "endpoint-relation-finding/receipt.json").read_text())
+    relation_archive = OUT.parent / "endpoint-relation-finding/pre-correction-source.tar.gz"
+    assert digest(relation_archive.read_bytes()) == relation["archive_sha256"]
+    with tarfile.open(relation_archive, "r:gz") as saved:
+        assert len(saved.getmembers()) == len(relation["members"]) == 11
+        for row in relation["members"]:
+            data = saved.extractfile(row["member"]).read()
+            assert len(data) == row["bytes"] and digest(data) == row["sha256"]
+            if "git_head" in row:
+                assert subprocess.check_output(["git", "show", row["git_head"] + ":" + row["path"]], cwd=ROOT) == data
+            else:
+                assert Path(row["local_reference"]).read_bytes() == data
     for file in ["client.rs", "client/errors.rs", "client/process.rs", "server/windows.rs", "server/connection.rs", "protocol.rs"]:
         name = "browse/crates/symbrowse-daemon/src/" + file
         assert original(name) == (ROOT / name).read_bytes()
@@ -87,7 +109,8 @@ def main():
               "Python_ASTs": len(parsed), "original_functions_AST_unchanged": unchanged,
               "registry_comparator_byte_identical": True, "Unix_transport_and_Windows_IO_body_byte_identical": True,
               "frame_errors_server_and_child_deadlines_byte_identical": True, "original_archive_roundtrips": 324,
-              "Rust_line_counts": counts, "source_maps": maps, "explicit_Browse_correction_scope": scope,
+              "Rust_line_counts": counts, "prepared_Windows_scenarios": scenarios,
+              "prior_shared_lossy_endpoint_relation_retained": True, "endpoint_finding_roundtrips": 11, "source_maps": maps, "explicit_Browse_correction_scope": scope,
               "candidate_runtime_executions": 0}
     (OUT / "checks.json").write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps({k: v for k, v in result.items() if k != "source_maps"}))

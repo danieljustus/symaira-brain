@@ -14,6 +14,9 @@ use tokio::net::windows::named_pipe::{ClientOptions as PipeClientOptions, Server
 
 const SCENARIO: &str = "SYMBROWSE_OWNED_CLIENT_SCENARIO";
 
+#[path = "support/windows_endpoint_relation.rs"]
+mod endpoint_relation;
+
 #[test]
 #[ignore = "mandatory native Windows CI; external owned-child watchdog"]
 fn native_windows_client_deadlines() {
@@ -27,6 +30,9 @@ fn native_windows_client_deadlines() {
         "full-request",
         "busy-instance",
         "eight-clients",
+        "endpoint-ascii",
+        "endpoint-unicode",
+        "endpoint-lossy",
     ] {
         let root = parent.join(scenario);
         fs::create_dir(&root).unwrap();
@@ -107,7 +113,9 @@ fn native_windows_client_owned_fixture() {
     let session = format!("client-{}-{}", std::process::id(), scenario);
     let endpoint = symbrowse_daemon::default_socket_path(&session);
     eprintln!("phase=begin scenario={scenario} endpoint={endpoint:?}");
-    if scenario == "eight-clients" {
+    if scenario.starts_with("endpoint-") {
+        endpoint_relation::run(&endpoint, &session, &scenario);
+    } else if scenario == "eight-clients" {
         eight_clients(&endpoint, &session);
     } else {
         blocked_peer(&endpoint, &session, &scenario);
