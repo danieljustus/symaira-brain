@@ -71,3 +71,10 @@ runs52 launchable cases; the two raw Unix path forms are explicit inapplicable
 cases rather than surrogate acceptance. Native exact-head Linux/macOS/Windows
 CI and independent review remain required. Full #770/#769 and Brain's other
 configuration consumers remain open.
+
+The complete different-author review of successor source5bb independently
+repeats the full warning and generated-path gates, all old warning inputs/orders
+and every real mutation control. It approves this bounded implementation;
+complete proof is retained in
+`migration/evidence/guard-doctor-config-paths-770/independent-5bb`.
+Current-head native-three-OS and protected CI remain merge requirements.

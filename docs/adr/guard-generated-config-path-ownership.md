@@ -117,3 +117,23 @@ A different author must independently review this immutable candidate. Native
 Linux/macOS/Windows protected checks, remaining typed/discovery diagnostics,
 raw Windows text and complete standalone/Brain admission remain necessary.
 Full issues #770/#769 remain open.
+
+## Complete different-author review and publication
+
+Full independent review now approves actual source5bb/publication7f6. Fresh177
+ordinary tests,41 overlapping kernel tests, strict checks and every listed
+process/control/old fixture gate pass. All original25 inputs and their full
+states, the30 owner-history comparisons, original warning inputs/orders and
+every prior review failure remain byte-bound. A further16 real path/precedence
+observations retain14 full matches and two existing unported refusals. Another
+144 portable SDK joins/reclean pass with the same source-reference limitation.
+
+The complete report,225 independent raw proofs and additional handoff/archive
+receipts are retained under
+`migration/evidence/guard-doctor-config-paths-770/independent-5bb`.
+The current archive has71 ELF path mappings/48 unique bytes, with actual test
+and public/SDK roles separated from cached objects. Root's publication adds only
+docs and retained evidence; all reviewed production/harness/dependency/workflow
+bytes remain unchanged. Fresh protected/native-three-OS checks, full Brain
+execution, raw Windows Scan/discovery text and full770/769 acceptance are still
+required; independent bounded approval does not waive those boundaries.
