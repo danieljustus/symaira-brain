@@ -2,7 +2,7 @@
 """Actual Linux output/state boundary; retained independent inputs, no assertion weakening."""
 from pathlib import Path
 import base64,hashlib,importlib.util,json,os,subprocess,tempfile,time
-ROOT=Path(__file__).resolve().parents[2];GO=Path(os.environ["SETUP_OUTPUT_GO"]);RUST=Path(os.environ["SETUP_OUTPUT_RUST"])
+ROOT=Path(__file__).resolve().parents[2];GO=Path(os.environ["SETUP_OUTPUT_GO"]);RUST=Path(os.environ["SETUP_OUTPUT_RUST"]).resolve()
 spec=importlib.util.spec_from_file_location('source_output',ROOT/'scripts/setup-source-oracle/replay.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);rows=[]
 with tempfile.TemporaryDirectory(prefix='source-fourth-output-tools-')as temporary:
  tmp=Path(temporary);src=tmp/'fixture.go';src.write_bytes((ROOT/'scripts/setup-source-oracle/tool_fixture.go.txt').read_bytes());tool=tmp/'tool';subprocess.run(['go','build','-trimpath','-o',str(tool),str(src)],check=True)

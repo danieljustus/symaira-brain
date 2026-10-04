@@ -3,7 +3,7 @@
 from pathlib import Path
 import base64,importlib.util,json,os,subprocess,sys,tempfile,time
 ROOT=Path(__file__).resolve().parents[2]
-GO=Path(os.environ['SETUP_OUTPUT_GO']);RUST=Path(os.environ['SETUP_OUTPUT_EMBEDDED_RUST'])
+GO=Path(os.environ['SETUP_OUTPUT_GO']);RUST=Path(os.environ['SETUP_OUTPUT_EMBEDDED_RUST']).resolve()
 def load(name,path):
  spec=importlib.util.spec_from_file_location(name,path);module=importlib.util.module_from_spec(spec);sys.modules[name]=module;spec.loader.exec_module(module);return module
 setup=load('embedded_setup_output',ROOT/'scripts/setup-repair-oracle/replay.py')

@@ -2,7 +2,7 @@
 """Actual Linux output/state boundary; retained independent inputs, no assertion weakening."""
 from pathlib import Path
 import base64,datetime,hashlib,importlib.util,json,os,stat,subprocess,sys,tempfile,time
-ROOT=Path(__file__).resolve().parents[2];GO=Path(os.environ["SETUP_OUTPUT_GO"]);RUST=Path(os.environ["SETUP_OUTPUT_RUST"])
+ROOT=Path(__file__).resolve().parents[2];GO=Path(os.environ["SETUP_OUTPUT_GO"]);RUST=Path(os.environ["SETUP_OUTPUT_RUST"]).resolve()
 spec=importlib.util.spec_from_file_location('output_setup',ROOT/'scripts/setup-repair-oracle/replay.py');m=importlib.util.module_from_spec(spec);sys.modules[spec.name]=m;spec.loader.exec_module(m)
 def digest(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 def state(root,earliest,latest):

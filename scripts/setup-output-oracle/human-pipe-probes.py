@@ -2,7 +2,7 @@
 """Actual Linux output/state boundary; retained independent inputs, no assertion weakening."""
 from pathlib import Path
 import base64,datetime,fcntl,hashlib,importlib.util,json,os,stat,subprocess,sys,tempfile,time
-ROOT=Path(__file__).resolve().parents[2];GO=Path(os.environ["SETUP_OUTPUT_GO"]);RUST=Path(os.environ["SETUP_OUTPUT_RUST"])
+ROOT=Path(__file__).resolve().parents[2];GO=Path(os.environ["SETUP_OUTPUT_GO"]);RUST=Path(os.environ["SETUP_OUTPUT_RUST"]).resolve()
 def load(name,path):
  spec=importlib.util.spec_from_file_location(name,path);m=importlib.util.module_from_spec(spec);sys.modules[name]=m;spec.loader.exec_module(m);return m
 setup=load('fourth_pipe_setup',ROOT/'scripts/setup-repair-oracle/replay.py');source=load('fourth_pipe_source',ROOT/'scripts/setup-source-oracle/replay.py')

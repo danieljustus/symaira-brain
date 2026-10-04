@@ -3,7 +3,7 @@
 from pathlib import Path
 import base64,hashlib,json,os,subprocess,sys,tempfile
 ROOT=Path(__file__).resolve().parents[2]
-native=Path(os.environ['SETUP_OUTPUT_RUST']);report=Path(os.environ['SETUP_OUTPUT_REPORT']);rows=[]
+native=Path(os.environ['SETUP_OUTPUT_RUST']).resolve();report=Path(os.environ['SETUP_OUTPUT_REPORT']);rows=[]
 with tempfile.TemporaryDirectory(prefix='setup-output-controls-')as temporary:
  wrapper=Path(temporary)/'control';template='#!'+sys.executable+'\n'+'''
 import os,signal,subprocess,sys
