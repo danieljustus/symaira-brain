@@ -61,15 +61,24 @@ complete historical repair or close #649/#758. See
 evidence.
 
 The isolated historical/default/WAL integration normally merges main 5e and the
-independently approved 2fe WAL prerequisite while retaining every 9b0 historical
-module, all 37 owned SQL resources and 28 prepared migration tests. Its complete
-23-file default static review and Root 327-test WAL prerequisite receipt are
-retained separately. A full source-bound runtime driver is prepared, including
-a fresh production CLI build, 37 constructor pairs/reopens/nine controls, the
-184-column inventory and inherited Memory gates. No combined constructor/test
-execution or target allocation has occurred; native three-OS and shipped/full
-649/758 acceptance remain pending. Decisions are in
-`docs/adr/memory-historical-wal-integration-649.md`.
+independently approved 2fe WAL prerequisite. At source `1fc5910`, the full
+allocated Linux driver passes 392 tests with no failures/ignores, all 28
+historical cases, seven unchanged WAL cases, strict Clippy/fmt/actionlint,
+37 actual frozen-Go/native constructor pairs, 37 whole-state native reopens,
+nine actual repair/rollback controls and the 184-column SQL default inventory.
+Inherited gates also pass: 590 reads/two 32-case mutation controls,
+60 Set/16 Delete/13 fallback/10 output cases/three process mutants, and the
+32/48/3 evidence corpus/four production Go DB tests/three negative controls.
+Original failed 252 fixtures, the later incompatible handwritten integration
+fixture and first strict lint run are preserved with actual executed binaries
+before precise fixture/style corrections. All 37 SQL resources and approved
+WAL behavior remain unchanged; no lint or callback/state assertion is weakened.
+The complete 23-file default static review and Root WAL prerequisite review
+remain separate lineage. Author Linux validation is not independent acceptance:
+full different-author runtime review, native three-OS CI and the shipped Rust
+release remain pending, and #649/#758 stay open. Decisions and exact proof
+bindings are in `docs/adr/memory-historical-wal-integration-649.md` and
+`migration/evidence/memory-historical-649/final-1fc5910`.
 
 The follow-up #758 CLI increment splits the oversized memory module into focused
 behavior modules, ports raw Go flags/error grammar and all 86 typed memory
