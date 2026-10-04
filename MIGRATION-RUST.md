@@ -336,3 +336,16 @@ three-OS differentials and independent review remain mandatory. Issue #764 and
 full Rust release/cutover are not completed by this source checkpoint. Decisions
 and full route inventory are in docs/adr/skills-native-surface-764.md and
 migration/skills-native-764-inventory.md.
+
+Skills764's second source-only correction retains raw path/Markdown bytes until
+presentation, applies Go JSON separator escaping, validates ordered outer MCP
+metadata before handler execution, and admits Go string forms at the actual
+known-Skills transport entry. Unix final control links stay rejected; confined
+ordinary metadata retains the original nofollow diagnostic, while discovery
+identity uses a bounded confined raw-content read. Original source, raw inputs,
+metadata and full reviews are preserved under
+migration/evidence/skills-native-764/byte-corrections. The native three-platform differential
+plans preserve 638/614 original Unix/Windows pairs and prepare 826/784 with all
+old controls plus two new actual-child input controls. These are source plans,
+not compiler/native success or completion of #764. See
+[the byte-owner decisions](docs/adr/skills-native-byte-contracts-764.md).

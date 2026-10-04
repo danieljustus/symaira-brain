@@ -122,24 +122,24 @@ pub(super) fn run(
                 writeln!(stdout, "TARGET\tSKILL\tSTATUS\tMODE\tPATH{suffix}")?;
                 for st in &report.installs {
                     let mode = st.mode.as_deref().unwrap_or("-");
-                    writeln!(
+                    write!(
                         stdout,
-                        "{}\t{}\t{}\t{}\t{}{}",
+                        "{}\t{}\t{}\t{}\t",
                         st.target,
                         st.name,
                         status_name(st.status),
-                        mode,
-                        st.path.display(),
-                        if has_render {
-                            format!(
-                                "\t{}",
-                                st.render_status
-                                    .map_or("-", symbrain_skills::install::RenderStatus::label)
-                            )
-                        } else {
-                            String::new()
-                        }
+                        mode
                     )?;
+                    stdout.write_all(st.path.as_os_str().as_encoded_bytes())?;
+                    if has_render {
+                        write!(
+                            stdout,
+                            "\t{}",
+                            st.render_status
+                                .map_or("-", symbrain_skills::install::RenderStatus::label)
+                        )?;
+                    }
+                    writeln!(stdout)?;
                 }
             }
         }

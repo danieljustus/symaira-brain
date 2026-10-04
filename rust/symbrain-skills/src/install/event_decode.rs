@@ -22,6 +22,14 @@ pub(super) fn decode(raw: &[u8]) -> Option<OperationEvent> {
                 _ => ch.to_ascii_lowercase(),
             })
             .collect();
+        if key == "path" {
+            if value.trim_ascii() != b"null" {
+                event.path = std::path::PathBuf::from(
+                    serde_json::from_str::<String>(&repair_json_strings(value)).ok()?,
+                );
+            }
+            continue;
+        }
         let field = match key.as_str() {
             "ts" => &mut event.ts,
             "event" => &mut event.event,
@@ -30,7 +38,6 @@ pub(super) fn decode(raw: &[u8]) -> Option<OperationEvent> {
             "target" => &mut event.target,
             "scope" => &mut event.scope,
             "mode" => &mut event.mode,
-            "path" => &mut event.path,
             "source_hash" => &mut event.source_hash,
             "outcome" => &mut event.outcome,
             "error" => &mut event.error,

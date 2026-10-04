@@ -17,4 +17,4 @@ pub use model::{
 };
 pub use server::{DispatchContext, DispatchError, Dispatcher, Server, ServerError, serve_io};
 
-pub use raw_skills::{SKILLS_TOOL_NAMES, raw_skills_params};
+pub use raw_skills::{RawSkillsCall, SKILLS_TOOL_NAMES, raw_skills_params};

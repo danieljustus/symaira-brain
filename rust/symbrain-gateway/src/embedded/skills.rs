@@ -101,22 +101,20 @@ fn boolean(value: &Value, key: &str, default: bool) -> Result<bool, Error> {
     }
 }
 fn bundle(value: &Value) -> Result<Bundle, Error> {
-    let mut path = text(value, "path")?;
+    let requested = text(value, "path")?;
     let name = text(value, "name")?;
-    if path.is_empty() && !name.is_empty() {
-        path = config::defaults()
-            .library_dir
-            .join(name)
-            .to_string_lossy()
-            .into_owned();
-    }
-    if path.is_empty() {
+    let path = if requested.is_empty() && !name.is_empty() {
+        config::defaults().library_dir.join(name)
+    } else {
+        std::path::PathBuf::from(requested)
+    };
+    if path.as_os_str().is_empty() {
         return Err(Error::validation(
             "inspect skill",
             "path or name is required",
         ));
     }
-    load_bundle(std::path::Path::new(&path)).map_err(Into::into)
+    load_bundle(&path).map_err(Into::into)
 }
 fn compact<T: serde::Serialize>(value: &T) -> Result<String, Error> {
     serde_json::to_string(value)

@@ -46,9 +46,10 @@ pub struct TargetStatus {
     /// Whether any harness evidence (binary or config directory) was found.
     pub installed: bool,
     /// First evidence source(s), e.g. `binary:/usr/local/bin/opencode`.
-    pub evidence: String,
+    pub evidence: crate::GoText,
     /// Skill root the target would read for the requested scope.
-    pub effective_skill_root: String,
+    #[serde(serialize_with = "crate::text::serialize_path")]
+    pub effective_skill_root: PathBuf,
     /// Whether the skill root exists on disk.
     pub skill_root_exists: bool,
     /// Whether the skill root could be enumerated.
@@ -64,7 +65,7 @@ pub struct TargetStatus {
     /// Declared runtime capability states.
     pub runtime_capabilities: BTreeMap<String, String>,
     /// Ready-to-run next step for this target.
-    pub setup_hint: String,
+    pub setup_hint: crate::GoText,
     /// `verified` when evidence was found, otherwise `not_verified`.
     pub verification_status: String,
 }
@@ -114,7 +115,7 @@ fn inspect(spec: TargetSpec, options: &StatusOptions) -> TargetStatus {
         display_name: spec.display_name.to_owned(),
         installed: evidence.installed,
         evidence: evidence.text,
-        effective_skill_root: skill_root.display().to_string(),
+        effective_skill_root: skill_root.clone(),
         skill_root_exists: counts.exists,
         skill_root_readable: counts.readable,
         managed_skills_count: counts.managed,
@@ -130,25 +131,30 @@ fn inspect(spec: TargetSpec, options: &StatusOptions) -> TargetStatus {
 /// Harness evidence: an installed binary and/or a present config directory.
 struct Evidence {
     installed: bool,
-    text: String,
+    text: crate::GoText,
     verification_status: String,
 }
 
 fn evidence_for(spec: TargetSpec, config_dir: Option<&Path>) -> Evidence {
-    let mut parts: Vec<String> = Vec::new();
+    let mut parts: Vec<crate::GoText> = Vec::new();
     if let Some(binary) = lookup_path(spec.binary_name) {
-        parts.push(format!("binary:{}", binary.display()));
+        parts.push(crate::GoText::from_path(&binary).prefixed("binary:"));
     }
     if let Some(config) = config_dir
         && config.is_dir()
     {
-        parts.push(format!("config_dir:{}", config.display()));
+        parts.push(crate::GoText::from_path(config).prefixed("config_dir:"));
     }
     let installed = !parts.is_empty();
     let text = match parts.len() {
-        0 => "none".to_owned(),
+        0 => "none".into(),
         1 => parts[0].clone(),
-        _ => format!("{},{}", parts[0], parts[1]),
+        _ => {
+            let mut bytes = parts[0].as_bytes().to_vec();
+            bytes.push(b',');
+            bytes.extend_from_slice(parts[1].as_bytes());
+            crate::GoText::from_bytes(&bytes)
+        }
     };
     Evidence {
         installed,
@@ -212,35 +218,35 @@ fn state_and_hint(
     spec: TargetSpec,
     skill_root: &Path,
     counts: &SkillRootCounts,
-) -> (String, String) {
+) -> (String, crate::GoText) {
     let managed = counts.managed;
     let unmanaged = counts.unmanaged;
     if !counts.exists {
-        return (
-            "missing".to_owned(),
-            format!(
-                "Create skill directory {} or run 'symskills install --target {} <skill>'",
-                skill_root.display(),
-                spec.name
-            ),
-        );
+        return ("missing".to_owned(), {
+            let mut bytes = b"Create skill directory ".to_vec();
+            bytes.extend_from_slice(skill_root.as_os_str().as_encoded_bytes());
+            bytes.extend_from_slice(
+                format!(" or run 'symskills install --target {} <skill>'", spec.name).as_bytes(),
+            );
+            crate::GoText::from_bytes(&bytes)
+        });
     }
     if !counts.readable {
         return (
             "unreadable".to_owned(),
-            format!("Check permissions for skill root {}", skill_root.display()),
+            crate::GoText::from_path(skill_root).prefixed("Check permissions for skill root "),
         );
     }
     if managed > 0 && unmanaged == 0 {
         return (
             "managed".to_owned(),
-            format!("Harness is active with {managed} managed skill(s)"),
+            format!("Harness is active with {managed} managed skill(s)").into(),
         );
     }
     if managed > 0 {
         return (
             "mixed".to_owned(),
-            format!("Harness contains {managed} managed and {unmanaged} unmanaged skill(s)"),
+            format!("Harness contains {managed} managed and {unmanaged} unmanaged skill(s)").into(),
         );
     }
     if unmanaged > 0 {
@@ -248,7 +254,8 @@ fn state_and_hint(
             "unmanaged".to_owned(),
             format!(
                 "Harness contains {unmanaged} unmanaged skill(s); consider importing into library"
-            ),
+            )
+            .into(),
         );
     }
     (
@@ -256,7 +263,7 @@ fn state_and_hint(
         format!(
             "Harness skill directory is ready; install skills with 'symskills install --target {} <skill>'",
             spec.name
-        ),
+        ).into(),
     )
 }
 

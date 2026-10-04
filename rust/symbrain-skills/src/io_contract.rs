@@ -2,8 +2,11 @@
 use std::io;
 use std::path::Path;
 
-pub(crate) fn path_error(operation: &str, path: &Path, error: &io::Error) -> String {
-    format!("{operation} {}: {}", path.display(), error_text(error))
+pub(crate) fn path_error(operation: &str, path: &Path, error: &io::Error) -> crate::GoText {
+    let mut bytes = format!("{operation} ").into_bytes();
+    bytes.extend_from_slice(path.as_os_str().as_encoded_bytes());
+    bytes.extend_from_slice(format!(": {}", error_text(error)).as_bytes());
+    crate::GoText::from_bytes(&bytes)
 }
 fn error_text(error: &io::Error) -> String {
     let text = error.to_string();

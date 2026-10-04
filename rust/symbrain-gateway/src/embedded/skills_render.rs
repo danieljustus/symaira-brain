@@ -151,7 +151,7 @@ fn install_one(
     let path = install::install_path_for(target, &home, project.as_deref(), scope, &item.name)?;
     if dry {
         return Ok(
-            json!({"action":"planned","target":target,"name":item.name,"path":path,"mode":""}),
+            json!({"action":"planned","target":target,"name":item.name,"path":symbrain_skills::GoText::from_path(&path),"mode":""}),
         );
     }
     // Go renders before installing even for project scope without a project.
@@ -173,9 +173,9 @@ fn install_one(
             events_path: None,
         },
     )?;
-    let mut wire = json!({"action":result.action,"target":result.target,"name":result.name,"path":result.path,"mode":result.mode});
+    let mut wire = json!({"action":result.action,"target":result.target,"name":result.name,"path":symbrain_skills::GoText::from_path(&result.path),"mode":result.mode});
     if let Some(path) = result.backup_path {
-        wire["backup_path"] = json!(path);
+        wire["backup_path"] = json!(symbrain_skills::GoText::from_path(&path));
     }
     if !result.mode_changes.is_empty() {
         wire["mode_changes"] = json!(result.mode_changes);

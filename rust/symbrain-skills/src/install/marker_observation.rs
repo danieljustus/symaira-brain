@@ -31,7 +31,7 @@ fn empty() -> Marker {
         managed_by: String::new(),
         target: String::new(),
         name: String::new(),
-        rendered_at: String::new(),
+        rendered_at: crate::GoText::default(),
         mode: String::new(),
         installed: String::new(),
         source_hash: String::new(),
@@ -79,11 +79,13 @@ fn decode(bytes: &[u8]) -> Observation {
         if raw == b"null" {
             continue;
         }
+        let mut rendered_at = String::new();
         let string = match key.as_str() {
+            "rendered_at" => Some(&mut rendered_at),
             "managed_by" => Some(&mut result.marker.managed_by),
             "target" => Some(&mut result.marker.target),
             "name" => Some(&mut result.marker.name),
-            "rendered_at" => Some(&mut result.marker.rendered_at),
+
             "mode" => Some(&mut result.marker.mode),
             "installed" => Some(&mut result.marker.installed),
             "source_hash" => Some(&mut result.marker.source_hash),
@@ -92,6 +94,9 @@ fn decode(bytes: &[u8]) -> Observation {
         let ty = if let Some(field) = string {
             if let Ok(value) = serde_json::from_str::<String>(&repair_json_strings(raw)) {
                 *field = value;
+                if key == "rendered_at" {
+                    result.marker.rendered_at = rendered_at.into();
+                }
                 continue;
             }
             match key.as_str() {

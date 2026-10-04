@@ -11,7 +11,7 @@ fn event(timestamp: &str, path: &std::path::Path) -> OperationEvent {
         event: "install".into(),
         skill: "demo".into(),
         target: "opencode".into(),
-        path: path.to_string_lossy().into_owned(),
+        path: path.to_owned(),
         outcome: "ok".into(),
         ..Default::default()
     }

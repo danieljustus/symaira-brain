@@ -16,8 +16,9 @@ pub struct Candidate {
     /// Always skill_bundle.
     pub kind: &'static str,
     /// Frontmatter name when loadable, otherwise path basename.
-    pub display_name: String,
+    pub display_name: crate::GoText,
     /// Observed source path.
+    #[serde(serialize_with = "crate::text::serialize_path")]
     pub location: PathBuf,
     /// Existing managed marker.
     pub managed: bool,
@@ -29,25 +30,17 @@ pub struct Candidate {
     pub status: &'static str,
     /// Optional source/validation diagnostics.
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub diagnostics: Vec<String>,
+    pub diagnostics: Vec<crate::GoText>,
 }
 fn candidate(path: &Path, source: &str, target: &str, loader: &BundleLoader) -> Candidate {
     let canonical = std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
     let loaded = loader.load(path);
     // Identity includes raw SKILL.md even when frontmatter fails to load.
-    // Retain the same bounded, no-follow reader rather than weakening the
-    // library loader merely to obtain an invalid candidate's identifier.
+    // The loader refuses final Unix control links; identity may follow a
+    // confined link through a retained bounded capability without loading it.
     let bytes = cap_std::fs::Dir::open_ambient_dir(path, ambient_authority::ambient_authority())
         .ok()
-        .and_then(|root| {
-            crate::load::read_limited_nofollow(
-                &root,
-                Path::new("SKILL.md"),
-                "discovered skill",
-                crate::MAX_INPUT_SIZE,
-            )
-            .ok()
-        })
+        .and_then(|root| crate::load::read_discovery_identity(&root).ok())
         .unwrap_or_default();
     let mut hash = Sha256::new();
     // Go hashes native Unix bytes / Windows UTF16ToString WTF-8 before
@@ -61,11 +54,7 @@ fn candidate(path: &Path, source: &str, target: &str, loader: &BundleLoader) -> 
         source_id: format!("sha256:{:x}", hash.finalize())[..23].into(),
         target: target.into(),
         kind: "skill_bundle",
-        display_name: path
-            .file_name()
-            .unwrap_or_default()
-            .to_string_lossy()
-            .into_owned(),
+        display_name: crate::GoText::from_path(Path::new(path.file_name().unwrap_or_default())),
         location: path.to_path_buf(),
         managed,
         valid: true,
@@ -77,17 +66,15 @@ fn candidate(path: &Path, source: &str, target: &str, loader: &BundleLoader) -> 
         Err(error) => {
             row.valid = false;
             row.status = "invalid";
-            row.diagnostics.push(error.to_string());
+            row.diagnostics.push(error.to_string().into());
         }
         Ok(bundle) => {
             if !bundle.frontmatter.name.is_empty() {
-                row.display_name = bundle.frontmatter.name.clone();
+                row.display_name = bundle.frontmatter.name.clone().into();
             }
             for issue in crate::validate(&bundle) {
-                row.diagnostics.push(format!(
-                    "[{}] {}: {}",
-                    issue.severity, issue.code, issue.message
-                ));
+                row.diagnostics
+                    .push(format!("[{}] {}: {}", issue.severity, issue.code, issue.message).into());
                 if issue.severity == "error" {
                     row.valid = false;
                     if row.status == "candidate" {
@@ -146,10 +133,10 @@ pub fn scanned(
                     };
                     #[cfg(not(windows))]
                     let operation = "lstat";
-                    row.diagnostics = vec![format!(
-                        "path not accessible: {}",
+                    row.diagnostics = vec![
                         crate::io_contract::path_error(operation, &path, &error)
-                    )];
+                            .prefixed("path not accessible: "),
+                    ];
                     found.insert(row.source_id.clone(), row);
                 }
                 continue;
@@ -188,9 +175,9 @@ pub fn scanned(
                     crate::library::LibraryReadError::Io(error) => {
                         crate::io_contract::path_error("open", &path, &error)
                     }
-                    crate::library::LibraryReadError::InputBound => error.to_string(),
+                    crate::library::LibraryReadError::InputBound => error.to_string().into(),
                 };
-                row.diagnostics = vec![format!("read directory: {diagnostic}")];
+                row.diagnostics = vec![diagnostic.prefixed("read directory: ")];
                 found.insert(row.source_id.clone(), row);
             }
             Err(_) => {}

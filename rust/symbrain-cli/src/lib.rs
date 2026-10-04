@@ -242,16 +242,18 @@ pub fn run_in_process(
 }
 
 /// Encodes JSON the way Go's `json.Encoder` does: compact output with `&`,
-/// `<` and `>` escaped, and no trailing newline.
+/// `<`, `>` and JavaScript line separators escaped, and no trailing newline.
 ///
 /// Go renders every CLI report through `encoding/json`, so a report that must
-/// match its bytes has to escape those three characters too.
+/// match its bytes escapes HTML characters and U+2028/U+2029 too.
 pub(crate) fn go_json<T: serde::Serialize>(value: &T) -> String {
     serde_json::to_string(value)
         .unwrap_or_default()
         .replace('&', "\\u0026")
         .replace('<', "\\u003c")
         .replace('>', "\\u003e")
+        .replace('\u{2028}', "\\u2028")
+        .replace('\u{2029}', "\\u2029")
 }
 
 fn is_output_command(cmd: &str) -> bool {
@@ -372,3 +374,7 @@ pub(crate) fn rustc_version() -> &'static str {
 #[cfg(test)]
 #[path = "cli_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "skills_json_tests.rs"]
+mod skills_json_tests;

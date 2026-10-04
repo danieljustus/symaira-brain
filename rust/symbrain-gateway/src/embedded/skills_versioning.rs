@@ -115,7 +115,7 @@ pub(super) fn restore(value: &Value) -> Result<String, Error> {
     let errors: Vec<_> = symbrain_skills::validate(&bundle)
         .into_iter()
         .filter(|issue| issue.severity == "error")
-        .map(|issue| issue.message)
+        .map(|issue| issue.message.to_string())
         .collect();
     if !errors.is_empty() {
         return Err(Error::validation(
@@ -197,7 +197,7 @@ pub(super) fn restore(value: &Value) -> Result<String, Error> {
                         out["error"] = json!(row.error);
                     }
                     if !row.path.as_os_str().is_empty() {
-                        out["path"] = json!(row.path);
+                        out["path"] = json!(symbrain_skills::GoText::from_path(&row.path));
                     }
                     out
                 })

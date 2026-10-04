@@ -21,11 +21,16 @@ struct SkillsDoctorVcs {
 
 #[derive(Debug, Serialize)]
 struct SkillsDoctorConfig {
-    library_dir: String,
-    render_dir: String,
-    cache_dir: String,
-    profiles_dir: String,
-    base_dir: String,
+    #[serde(serialize_with = "symbrain_skills::text::serialize_path")]
+    library_dir: PathBuf,
+    #[serde(serialize_with = "symbrain_skills::text::serialize_path")]
+    render_dir: PathBuf,
+    #[serde(serialize_with = "symbrain_skills::text::serialize_path")]
+    cache_dir: PathBuf,
+    #[serde(serialize_with = "symbrain_skills::text::serialize_path")]
+    profiles_dir: PathBuf,
+    #[serde(serialize_with = "symbrain_skills::text::serialize_path")]
+    base_dir: PathBuf,
     #[serde(rename = "Targets")]
     targets: Option<()>,
     vcs: SkillsDoctorVcs,
@@ -34,17 +39,23 @@ struct SkillsDoctorConfig {
 #[derive(Debug, Serialize)]
 struct SkillsDoctorTarget {
     target: String,
-    user: String,
-    project: String,
+    #[serde(serialize_with = "symbrain_skills::text::serialize_path")]
+    user: PathBuf,
+    #[serde(serialize_with = "symbrain_skills::text::serialize_path")]
+    project: PathBuf,
 }
 
 #[derive(Debug, Serialize)]
 struct SkillsDoctorReport {
     config: SkillsDoctorConfig,
-    config_path: String,
-    log_path: String,
-    profiles_dir: String,
-    project_dir: String,
+    #[serde(serialize_with = "symbrain_skills::text::serialize_path")]
+    config_path: PathBuf,
+    #[serde(serialize_with = "symbrain_skills::text::serialize_path")]
+    log_path: PathBuf,
+    #[serde(serialize_with = "symbrain_skills::text::serialize_path")]
+    profiles_dir: PathBuf,
+    #[serde(serialize_with = "symbrain_skills::text::serialize_path")]
+    project_dir: PathBuf,
     targets: Vec<SkillsDoctorTarget>,
 }
 pub(super) fn targets(
@@ -79,15 +90,17 @@ pub(super) fn targets(
             OutputFormat::Table => {
                 writeln!(stdout, "TARGET\tINSTALLED\tMANAGED\tUNMANAGED\tSKILL ROOT")?;
                 for target in &report.targets {
-                    writeln!(
+                    write!(
                         stdout,
-                        "{}\t{}\t{}\t{}\t{}",
+                        "{}\t{}\t{}\t{}\t",
                         target.target,
                         target.installed,
                         target.managed_skills_count,
                         target.unmanaged_skills_count,
-                        target.effective_skill_root
                     )?;
+                    // The path is a Go byte string, not Display's lossy text.
+                    stdout.write_all(target.effective_skill_root.as_os_str().as_encoded_bytes())?;
+                    writeln!(stdout)?;
                 }
             }
         }
@@ -186,7 +199,9 @@ pub(super) fn doctor(
             }
             OutputFormat::Table => {
                 for (name, value) in pairs {
-                    writeln!(stdout, "{name:<11} {value}")?;
+                    write!(stdout, "{name:<11} ")?;
+                    stdout.write_all(value.as_bytes())?;
+                    writeln!(stdout)?;
                 }
             }
         }
@@ -196,7 +211,10 @@ pub(super) fn doctor(
     super::report_result("doctor", rendered, stderr)
 }
 
-fn skills_doctor_report() -> (SkillsDoctorReport, [(&'static str, String); 9]) {
+fn skills_doctor_report() -> (
+    SkillsDoctorReport,
+    [(&'static str, symbrain_skills::GoText); 9],
+) {
     let home = symbrain_skills::config::home_dir();
     let project_dir = current_project_dir();
     let config_path = skills_config_path();
@@ -204,11 +222,11 @@ fn skills_doctor_report() -> (SkillsDoctorReport, [(&'static str, String); 9]) {
     let profiles_dir = cfg.profiles_dir.clone();
     let log_path = symbrain_skills::config::events_path();
     let config = SkillsDoctorConfig {
-        library_dir: cfg.library_dir.display().to_string(),
-        render_dir: cfg.render_dir.display().to_string(),
-        cache_dir: cfg.cache_dir.display().to_string(),
-        profiles_dir: cfg.profiles_dir.display().to_string(),
-        base_dir: cfg.base_dir.display().to_string(),
+        library_dir: cfg.library_dir.clone(),
+        render_dir: cfg.render_dir.clone(),
+        cache_dir: cfg.cache_dir.clone(),
+        profiles_dir: cfg.profiles_dir.clone(),
+        base_dir: cfg.base_dir.clone(),
         targets: None,
         vcs: SkillsDoctorVcs {
             enabled: cfg.vcs.enabled,
@@ -222,29 +240,50 @@ fn skills_doctor_report() -> (SkillsDoctorReport, [(&'static str, String); 9]) {
                 symbrain_skills::skill_root(&target, &home, Some(&project_dir), "project")?;
             Some(SkillsDoctorTarget {
                 target,
-                user: user.display().to_string(),
-                project: project.display().to_string(),
+                user: user.clone(),
+                project: project.clone(),
             })
         })
         .collect();
     let report = SkillsDoctorReport {
         config,
-        config_path: config_path.display().to_string(),
-        log_path: log_path.display().to_string(),
-        profiles_dir: profiles_dir.display().to_string(),
-        project_dir: project_dir.display().to_string(),
+        config_path: config_path.clone(),
+        log_path: log_path.clone(),
+        profiles_dir: profiles_dir.clone(),
+        project_dir: project_dir.clone(),
         targets,
     };
     let pairs = [
-        ("config", report.config_path.clone()),
-        ("library", report.config.library_dir.clone()),
-        ("rendered", report.config.render_dir.clone()),
-        ("cache", report.config.cache_dir.clone()),
-        ("base", report.config.base_dir.clone()),
-        ("profiles", report.profiles_dir.clone()),
-        ("log", report.log_path.clone()),
-        ("project", report.project_dir.clone()),
-        ("versioning", report.config.vcs.enabled.to_string()),
+        (
+            "config",
+            symbrain_skills::GoText::from_path(&report.config_path),
+        ),
+        (
+            "library",
+            symbrain_skills::GoText::from_path(&report.config.library_dir),
+        ),
+        (
+            "rendered",
+            symbrain_skills::GoText::from_path(&report.config.render_dir),
+        ),
+        (
+            "cache",
+            symbrain_skills::GoText::from_path(&report.config.cache_dir),
+        ),
+        (
+            "base",
+            symbrain_skills::GoText::from_path(&report.config.base_dir),
+        ),
+        (
+            "profiles",
+            symbrain_skills::GoText::from_path(&report.profiles_dir),
+        ),
+        ("log", symbrain_skills::GoText::from_path(&report.log_path)),
+        (
+            "project",
+            symbrain_skills::GoText::from_path(&report.project_dir),
+        ),
+        ("versioning", report.config.vcs.enabled.to_string().into()),
     ];
     (report, pairs)
 }

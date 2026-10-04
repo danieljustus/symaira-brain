@@ -50,3 +50,12 @@ additions bring Linux/macOS to638 and Windows to614 pairs plus the original
 three child-input controls. Eleven additional Rust test declarations are
 prepared, including isolated failing writers and full CLI transport checks.
 No compiler/type/test/product/native success or issue closure is claimed.
+
+The second full independent review (publication 128e/source 625e) found six byte,
+JSON, body, outer-MCP, transport and final-control-link owner differences.
+Its full source/raw/metadata retention and prepared successor are under
+`evidence/skills-native-764/byte-corrections`; decisions are in
+`docs/adr/skills-native-byte-contracts-764.md`. Original 638 Unix / 614 Windows
+pairs remain, with 188 / 170 additive plans and two additional real-child input
+controls (826 / 784 total prepared). No compiler or native execution occurred;
+all existing cutover, native three-platform and different-author review requirements remain.

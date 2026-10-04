@@ -36,8 +36,11 @@ pub struct OperationEvent {
     #[serde(skip_serializing_if = "String::is_empty")]
     pub mode: String,
     /// Affected destination.
-    #[serde(skip_serializing_if = "String::is_empty")]
-    pub path: String,
+    #[serde(
+        skip_serializing_if = "path_is_empty",
+        serialize_with = "crate::text::serialize_path"
+    )]
+    pub path: PathBuf,
     /// Content hash when known.
     #[serde(skip_serializing_if = "String::is_empty")]
     pub source_hash: String,
@@ -51,6 +54,10 @@ pub struct OperationEvent {
     pub tool_version: String,
     /// Caller identity.
     pub actor: String,
+}
+
+fn path_is_empty(path: &Path) -> bool {
+    path.as_os_str().is_empty()
 }
 
 /// Maximum size of the current operation-event segment.
@@ -286,7 +293,7 @@ pub(crate) fn event_for_at(
         source_hash: String::new(),
         scope: scope.to_owned(),
         mode: mode.to_owned(),
-        path: path.to_string_lossy().into_owned(),
+        path: path.to_owned(),
         outcome: outcome.to_owned(),
         error: error.to_owned(),
         actor: "cli".to_owned(),

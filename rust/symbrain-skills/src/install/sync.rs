@@ -151,6 +151,7 @@ pub struct SyncResult {
     /// Skill name.
     pub name: String,
     /// Installed path.
+    #[serde(serialize_with = "crate::text::serialize_path")]
     pub path: PathBuf,
     /// `planned`, `installed`, `skipped`, or `failed`.
     pub action: String,

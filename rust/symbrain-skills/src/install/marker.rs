@@ -36,7 +36,7 @@ pub struct Marker {
     pub name: String,
     /// Render source identity/path retained for diagnostics.
     #[serde(default)]
-    pub rendered_at: String,
+    pub rendered_at: crate::GoText,
     /// Installation mode; Phase 7.3A writes `copy` only.
     #[serde(default)]
     pub mode: String,
@@ -90,7 +90,7 @@ pub fn new_marker(
         managed_by: "symskills".to_owned(),
         target: target.to_owned(),
         name: name.to_owned(),
-        rendered_at: rendered_at.to_string_lossy().into_owned(),
+        rendered_at: crate::GoText::from_path(rendered_at),
         mode: "copy".to_owned(),
         installed: chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Secs, true),
         source_hash: source_hash.to_owned(),

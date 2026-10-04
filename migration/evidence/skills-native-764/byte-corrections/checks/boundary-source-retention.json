@@ -1,0 +1,331 @@
+{
+  "kind": "SOURCE_REFERENCES_NOT_SDK_OR_NATIVE_EXECUTION",
+  "archive": "inspected-sdk-dependency-owners.tar.gz",
+  "bytes": 447331,
+  "sha256": "1a50bf0ff808195f986a464d2ff238be4acf5a36b8e5c1c821d3757bb3585d8c",
+  "files": [
+    {
+      "path": "/workspace/toolchains/go1.26.7/src/strings/strings.go",
+      "member": "workspace/toolchains/go1.26.7/src/strings/strings.go",
+      "bytes": 33374,
+      "sha256": "ba9478be775d11b6956c828ebf870a8f8e7b7318ee382834f1e741f02d1336ef",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1787089461000000000
+    },
+    {
+      "path": "/workspace/toolchains/go1.26.7/src/unicode/graphic.go",
+      "member": "workspace/toolchains/go1.26.7/src/unicode/graphic.go",
+      "bytes": 4503,
+      "sha256": "46a43107a87c88cf17a05a557e00dbf6b0f4bb53ebcd7d3035e02f1e67c428be",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1787089461000000000
+    },
+    {
+      "path": "/workspace/toolchains/go1.26.7/src/unicode/tables.go",
+      "member": "workspace/toolchains/go1.26.7/src/unicode/tables.go",
+      "bytes": 243953,
+      "sha256": "6a88d48746c4b2c471cc04ae40559694b734770212e6f5ea5f1962adb0c0bdb1",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1787089461000000000
+    },
+    {
+      "path": "/workspace/toolchains/go1.26.7/src/syscall/syscall_windows.go",
+      "member": "workspace/toolchains/go1.26.7/src/syscall/syscall_windows.go",
+      "bytes": 57661,
+      "sha256": "f1b22dde6bb980cf036561cee7ece968daa260cb622f32c96cebd52477b7a346",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1787089461000000000
+    },
+    {
+      "path": "/workspace/toolchains/go1.26.7/src/syscall/wtf8_windows.go",
+      "member": "workspace/toolchains/go1.26.7/src/syscall/wtf8_windows.go",
+      "bytes": 2736,
+      "sha256": "df35fc932a3bf98375eb780c08091f6a0b4a927ba2918a977495fe0b15c77f99",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1787089461000000000
+    },
+    {
+      "path": "/workspace/toolchains/go1.26.7/src/encoding/json/encode.go",
+      "member": "workspace/toolchains/go1.26.7/src/encoding/json/encode.go",
+      "bytes": 40037,
+      "sha256": "4012d78aa8236f3067a6330ddf2f719c7e59b262fcf4fff5e51b4abd1ccba235",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1787089461000000000
+    },
+    {
+      "path": "/workspace/toolchains/go1.26.7/src/encoding/json/decode.go",
+      "member": "workspace/toolchains/go1.26.7/src/encoding/json/decode.go",
+      "bytes": 36010,
+      "sha256": "a91535f18f9a2c8380448b1c84c4c2017dbe3d530a10faf8babf03494042da48",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1787089461000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f/cap-std-4.0.3.crate",
+      "member": "home/agent/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f/cap-std-4.0.3.crate",
+      "bytes": 36964,
+      "sha256": "c1ec78e242cfa2cfe276807ac2ecc00315a6c97786977414bcd1c3963b6c91b8",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791018505072054738
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-std-4.0.3/Cargo.toml",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-std-4.0.3/Cargo.toml",
+      "bytes": 1674,
+      "sha256": "a8fb353713848658d13b84dfdae2f9c0e11ceff1d97f27908fbf63244e5da832",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-std-4.0.3/src/fs/dir.rs",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-std-4.0.3/src/fs/dir.rs",
+      "bytes": 30944,
+      "sha256": "27eed147c16f744140773a26b2645b65eeb16645e3c4fc5429c8217f9079c0f5",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3.crate",
+      "member": "home/agent/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3.crate",
+      "bytes": 93618,
+      "sha256": "8b5f74729fd2f44701d1a8eb47e906cdb3ccd9ec0f02baad85a744b791940b18",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791018505095467963
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/Cargo.toml",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/Cargo.toml",
+      "bytes": 2129,
+      "sha256": "c8ef594e213cd93ae9bdfde6381a663ba345f6c2da08f6a0e8f08398a18a4dea",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/fs/stat.rs",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/fs/stat.rs",
+      "bytes": 2535,
+      "sha256": "103d2e466941e72886fc455a5faccb3e531aec16cc178afa86ab052d19e8a518",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/fs/mod.rs",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/fs/mod.rs",
+      "bytes": 3561,
+      "sha256": "7c9c63bd182da570c4d9b4140d653aba49d036044b4c6dc9b2c67e9792150f27",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/fs/manually/open.rs",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/fs/manually/open.rs",
+      "bytes": 22232,
+      "sha256": "6758dd4360bf6f7bba955e4787b374bde4e4f5b5264342322961b05a20c863fc",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/fs/manually/mod.rs",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/fs/manually/mod.rs",
+      "bytes": 627,
+      "sha256": "0a4e8d486686fe0aaef9c168386e2e22d294273d8555ce79e40180651fe256b6",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/rustix/linux/fs/stat_impl.rs",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/rustix/linux/fs/stat_impl.rs",
+      "bytes": 2084,
+      "sha256": "6e9cb6d6e459472fb15cd3e2f61ee2b0ff6008959c5ca9ca6ea640d1569bc0c2",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/rustix/linux/fs/mod.rs",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/rustix/linux/fs/mod.rs",
+      "bytes": 1309,
+      "sha256": "09ab87de065a92b4717d2e6d0635a88839867c42bdad2f284e15004708deb0af",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/rustix/fs/stat_unchecked.rs",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/rustix/fs/stat_unchecked.rs",
+      "bytes": 3085,
+      "sha256": "797df9851f409c484687aff85fad08a366d31bc4decb462c908ff8c31610b00f",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/rustix/fs/mod.rs",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3/src/rustix/fs/mod.rs",
+      "bytes": 6835,
+      "sha256": "7862a00b18d4d18d66626484f4f3d72b63c5d5abc839793c48bdfdf80524fb49",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151.crate",
+      "member": "home/agent/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151.crate",
+      "bytes": 156556,
+      "sha256": "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791018505662757300
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/Cargo.toml",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/Cargo.toml",
+      "bytes": 3118,
+      "sha256": "00b920255c320a278bf25b962b491263a19d8c90e12e4a91c1d823db71eabb2f",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/src/de.rs",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/src/de.rs",
+      "bytes": 86840,
+      "sha256": "4998d7e252eb513be85b298e287048b4fb283882e9ba7df905f572f07200f3f3",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/src/read.rs",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/src/read.rs",
+      "bytes": 33041,
+      "sha256": "17a2efe49e5a6937c8d7d4a5c0b9eac84453de0f86bf8e7ee421387e82341bb3",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/src/ser.rs",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/src/ser.rs",
+      "bytes": 63877,
+      "sha256": "f2b8cc0b97e30c49dbc58698fa22c14a7d56ea616cdb57b067835a59af49a75f",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/src/raw.rs",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/src/raw.rs",
+      "bytes": 23498,
+      "sha256": "0e6ae2ade492a3c5c090dfaf31f03ff4e54123a5a47b59def5f1b3dcc035a2e3",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    },
+    {
+      "path": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/src/value/ser.rs",
+      "member": "home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/src/value/ser.rs",
+      "bytes": 28223,
+      "sha256": "11f2b7daa1eba826d4086d5497f73729478dd7647bff77deccde5e47b0f126f2",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1153704088000000000
+    }
+  ],
+  "locked_packages": {
+    "cap-std": {
+      "name": "cap-std",
+      "version": "4.0.3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "c1ec78e242cfa2cfe276807ac2ecc00315a6c97786977414bcd1c3963b6c91b8",
+      "dependencies": [
+        "cap-primitives",
+        "io-extras",
+        "io-lifetimes 3.0.1",
+        "rustix"
+      ],
+      "actual_crate": "/home/agent/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f/cap-std-4.0.3.crate",
+      "bytes": 36964
+    },
+    "cap-primitives": {
+      "name": "cap-primitives",
+      "version": "4.0.3",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "8b5f74729fd2f44701d1a8eb47e906cdb3ccd9ec0f02baad85a744b791940b18",
+      "dependencies": [
+        "ambient-authority",
+        "fs-set-times",
+        "io-extras",
+        "io-lifetimes 3.0.1",
+        "ipnet",
+        "maybe-owned",
+        "rustix",
+        "rustix-linux-procfs",
+        "windows-sys 0.61.2",
+        "winx"
+      ],
+      "actual_crate": "/home/agent/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f/cap-primitives-4.0.3.crate",
+      "bytes": 93618
+    },
+    "serde_json": {
+      "name": "serde_json",
+      "version": "1.0.151",
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "checksum": "c841b55ecdae098c80dcae9cf767f6f8a0c2cdb3416bbef72181df4d0fe73f14",
+      "dependencies": [
+        "itoa",
+        "memchr",
+        "serde",
+        "serde_core",
+        "zmij"
+      ],
+      "actual_crate": "/home/agent/.cargo/registry/cache/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151.crate",
+      "bytes": 156556
+    }
+  },
+  "full_roundtrips": 27,
+  "product_SDK_compiler_executions": 0
+}

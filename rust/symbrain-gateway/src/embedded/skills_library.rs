@@ -11,7 +11,8 @@ struct Item {
     description: String,
     #[serde(skip_serializing_if = "String::is_empty")]
     category: String,
-    root: String,
+    #[serde(serialize_with = "symbrain_skills::text::serialize_path")]
+    root: std::path::PathBuf,
     #[serde(flatten)]
     record: metadata::Record,
 }
@@ -29,11 +30,7 @@ pub(super) fn list() -> Result<String, Error> {
             if !entry.category.is_empty() {
                 *counts.entry(entry.category.clone()).or_insert(0_usize) += 1;
             }
-            let record = metadata::collect(
-                std::path::Path::new(&entry.path),
-                &entry.name,
-                &metadata_options(),
-            );
+            let record = metadata::collect(&entry.path, &entry.name, &metadata_options());
             Item {
                 name: entry.name,
                 description: entry.description,

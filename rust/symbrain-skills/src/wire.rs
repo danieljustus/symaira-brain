@@ -37,12 +37,12 @@ pub fn bundle(value: &Bundle) -> Value {
     if value.manifest.targets.is_empty() {
         fields.insert("targets".into(), Value::Null);
     }
-    json!({"root":value.root,"frontmatter":frontmatter(&value.frontmatter),"manifest":manifest,"body":value.body,"resources":value.resources})
+    json!({"root":crate::GoText::from_path(&value.root),"frontmatter":frontmatter(&value.frontmatter),"manifest":manifest,"body":value.body,"resources":value.resources})
 }
 /// Render summary exposes generated Markdown as text and omits private files.
 #[must_use]
 pub fn rendered(value: &Rendered, path: &std::path::Path) -> Value {
-    let mut result = json!({"target":value.target,"name":value.name,"path":path,"frontmatter":frontmatter(&value.frontmatter),"skill_md":String::from_utf8_lossy(&value.skill_md)});
+    let mut result = json!({"target":value.target,"name":value.name,"path":crate::GoText::from_path(path),"frontmatter":frontmatter(&value.frontmatter),"skill_md":crate::GoText::from_bytes(&value.skill_md)});
     let map = result.as_object_mut().expect("render object");
     if !value.source.is_empty() {
         map.insert("source".into(), json!(value.source));

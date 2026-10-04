@@ -66,6 +66,7 @@ pub struct InstallResult {
     /// Installed skill name.
     pub name: String,
     /// Absolute destination path.
+    #[serde(serialize_with = "crate::text::serialize_path")]
     pub path: PathBuf,
     /// `copy` or `symlink`.
     pub mode: String,
@@ -73,6 +74,7 @@ pub struct InstallResult {
     pub mode_changes: Vec<ModeChange>,
     /// Backup created when force adopts an unmanaged directory.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(serialize_with = "crate::text::serialize_optional_path")]
     pub backup_path: Option<PathBuf>,
 }
 

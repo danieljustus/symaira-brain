@@ -41,7 +41,8 @@ pub struct Install {
     /// Harness target name.
     pub target: String,
     /// Installed path for that target.
-    pub path: String,
+    #[serde(serialize_with = "crate::text::serialize_path")]
+    pub path: PathBuf,
     /// Marker installation timestamp, copied verbatim.
     pub installed_at: String,
 }
@@ -210,7 +211,7 @@ fn collect_markers(
             target.clone(),
             Install {
                 target: target.clone(),
-                path: destination.display().to_string(),
+                path: destination.clone(),
                 installed_at: marker.installed.clone(),
             },
         );
@@ -255,7 +256,7 @@ fn read_marker(destination: &Path) -> Option<Marker> {
 fn last_used(installs: &[Install]) -> Option<((i64, u32), String)> {
     let mut best: Option<(i64, u32)> = None;
     for install in installs {
-        if install.path.is_empty() {
+        if install.path.as_os_str().is_empty() {
             continue;
         }
         let installed_at = parse_timestamp(&install.installed_at);

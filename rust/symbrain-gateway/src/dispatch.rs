@@ -14,11 +14,16 @@ impl Gateway {
         context: DispatchContext<'_>,
     ) -> Result<GatewayResponse, GatewayError> {
         let started = Instant::now();
-        if let Some((name, raw_arguments)) = symbrain_mcp::raw_skills_params(params) {
+        if let Some(call) = symbrain_mcp::raw_skills_params(params) {
+            let (name, raw_arguments) = match call {
+                Ok(call) => call,
+                Err(message) => return Ok(self.invalid_call(id, started, message)),
+            };
             if self.skills_tool_names.iter().any(|tool| tool == &name) {
                 // The transport already checked envelope syntax and limits.
-                // Retain argument bytes through the actual Skills owner and
-                // audit; an intermediate Value would change Go admission.
+                // Retain RawMessage structure through the Skills owner/audit;
+                // transport repaired invalid string bytes per Go decoding,
+                // but an intermediate Value would change numeric admission.
                 let fields = serde_json::Map::new();
                 return self.handle_embedded_call(
                     id,

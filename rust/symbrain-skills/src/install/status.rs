@@ -53,6 +53,7 @@ pub struct InstallStatus {
     /// Installed directory name.
     pub name: String,
     /// Absolute installation path.
+    #[serde(serialize_with = "crate::text::serialize_path")]
     pub path: PathBuf,
     /// Classification.
     pub status: StatusKind,

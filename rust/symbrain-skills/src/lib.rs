@@ -21,6 +21,7 @@ mod render_variants;
 pub mod runner;
 mod target;
 pub mod targets_status;
+pub mod text;
 mod validation;
 pub mod variant;
 pub mod vcs;
@@ -39,3 +40,5 @@ pub use render::{
 };
 pub use target::{config_dir, lookup, skill_root, target_names};
 pub use validation::{DEFAULT_TARGETS, is_render_blocking, validate, validate_with_targets};
+
+pub use text::GoText;

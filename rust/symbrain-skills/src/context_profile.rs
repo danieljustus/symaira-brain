@@ -161,8 +161,8 @@ pub fn resolve(
     for row in &rows {
         if row.skill.is_empty() || !library.join(&row.skill).exists() {
             issues.push(Issue {
-                code: "profile_missing_skill".into(), severity: "error".into(), path: row.name.clone(),
-                message: if row.skill.is_empty() { "link has no skill".into() } else { format!("profile {name:?} links skill {:?} which is not in the library; import it with: symskills import <path>", row.skill) },
+                code: "profile_missing_skill".into(), severity: "error".into(), path: row.name.clone().into(),
+                message: if row.skill.is_empty() { "link has no skill".into() } else { format!("profile {name:?} links skill {:?} which is not in the library; import it with: symskills import <path>", row.skill).into() },
             });
         }
     }
