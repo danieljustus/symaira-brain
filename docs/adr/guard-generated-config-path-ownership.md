@@ -137,3 +137,6 @@ docs and retained evidence; all reviewed production/harness/dependency/workflow
 bytes remain unchanged. Fresh protected/native-three-OS checks, full Brain
 execution, raw Windows Scan/discovery text and full770/769 acceptance are still
 required; independent bounded approval does not waive those boundaries.
+
+
+Normally integrate currentmain5e232 after regular807 merge. All reviewed Rust/Cargo/Guard harness bytes remain byte-identical to independently approved24f source; this integration adds release-check scripts/workflows/docs only. Historical native results remain historical. Require fresh published-head protected/nativeLinux/macOS/Windows acceptance before regular805 merge. Source-bound receipt: migration/evidence/guard-doctor-config-paths-770/main5e-integration.json.
