@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -33,6 +34,19 @@ func main() {
 		if err = file.Close(); err != nil {
 			panic(err)
 		}
+	}
+	if mode == "descendant" || mode == "pipe-holder" {
+		child := exec.Command(os.Args[0], "owned-descendant")
+		child.Env = append(os.Environ(), "SYMBROWSE_KEY_PROBE_MODE=timeout", "SYMBROWSE_KEYCHAIN_PROBE_MODE=timeout")
+		child.Stdout, child.Stderr = os.Stdout, os.Stderr
+		if err := child.Start(); err != nil {
+			panic(err)
+		}
+		if mode == "pipe-holder" {
+			os.Exit(3)
+		}
+		time.Sleep(30 * time.Second)
+		return
 	}
 	switch mode {
 	case "ab", "cd":

@@ -157,6 +157,14 @@ struct StateSuccess<'a> {
 
 fn main() -> ExitCode {
     let args: Vec<OsString> = std::env::args_os().skip(1).collect();
+    if args
+        .first()
+        .is_some_and(|arg| arg == symbrowse_core::key_sources::STARTUP_PROVIDER_ARGUMENT)
+    {
+        return ExitCode::from(symbrowse_core::key_sources::run_startup_provider(
+            &args[1..],
+        ));
+    }
     match parse(&args) {
         Ok(Action::Help(text)) => write_stdout(&text),
         Ok(Action::Completion {
@@ -697,6 +705,12 @@ fn run_daemon(
         idle_timeout,
         operation_timeout: Duration::from_secs(config.operation_timeout as u64),
         read_timeout: Duration::from_secs(config.read_timeout as u64),
+        startup_provider_owner: match std::env::current_exe() {
+            Ok(executable) => Some(executable),
+            Err(error) => {
+                return write_batch_error(format, ErrorCode::Internal, &error.to_string(), 1);
+            }
+        },
         session_spec: Some(spec),
         ..ServerOptions::default()
     };

@@ -96,6 +96,9 @@ jobs:
             --rust-store-probe "$store_probe" --go-source "$oracle" \
             --out "$RUNNER_TEMP/browse-daemon-state-key.json" \
             2>&1 | tee "$RUNNER_TEMP/browse-daemon-state-key.log"
+          python3 port/harness/daemon_state_key_ownership.py --rust "$rust_binary" \
+            --out "$RUNNER_TEMP/browse-daemon-state-key-ownership.json" \
+            2>&1 | tee "$RUNNER_TEMP/browse-daemon-state-key-ownership.log"
           fixture_binary="$RUNNER_TEMP/symbrowse-mcp-go-v0.8.0"
           if [ "${OS:-}" = Windows_NT ]; then
             fixture_binary="$(cygpath -m "$fixture_binary.exe")"
@@ -134,6 +137,8 @@ jobs:
             ${{ runner.temp }}/browse-daemon-state-key.json
             ${{ runner.temp }}/browse-daemon-state-key.raw.json
             ${{ runner.temp }}/browse-daemon-state-key.log
+            ${{ runner.temp }}/browse-daemon-state-key-ownership.json
+            ${{ runner.temp }}/browse-daemon-state-key-ownership.log
             ${{ runner.temp }}/browse-daemon-mcp.json
             ${{ runner.temp }}/browse-daemon-mcp.json.tests.log
           if-no-files-found: error

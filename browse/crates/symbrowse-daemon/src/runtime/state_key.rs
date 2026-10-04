@@ -5,8 +5,16 @@ use symbrowse_core::{
     key_sources::SystemKeySources,
 };
 
-pub(super) fn initialize(spec: &SessionSpec) -> Result<Store, DaemonError> {
-    initialize_with_sources(spec, SystemKeySources::default())
+pub(super) fn initialize(
+    spec: &SessionSpec,
+    owner: Option<std::path::PathBuf>,
+) -> Result<Store, DaemonError> {
+    let sources = SystemKeySources::default();
+    let sources = match owner {
+        Some(owner) => sources.with_startup_owner(owner),
+        None => sources,
+    };
+    initialize_with_sources(spec, sources)
 }
 
 pub(super) fn initialize_with_sources(

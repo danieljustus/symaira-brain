@@ -185,12 +185,20 @@ impl DispatchRuntime {
         spec: SessionSpec,
         wayback_cdx_url: impl Into<String>,
     ) -> Result<Arc<Self>, DaemonError> {
+        Self::new_with_startup_owner(spec, wayback_cdx_url, None)
+    }
+
+    fn new_with_startup_owner(
+        spec: SessionSpec,
+        wayback_cdx_url: impl Into<String>,
+        owner: Option<std::path::PathBuf>,
+    ) -> Result<Arc<Self>, DaemonError> {
         spec.validate_selection().map_err(|message| DaemonError {
             code: "invalid_transport_selection".into(),
             message,
             ..Default::default()
         })?;
-        let state_store = state_key::initialize(&spec)?;
+        let state_store = state_key::initialize(&spec, owner)?;
         Self::new_with_store(spec, wayback_cdx_url, state_store)
     }
 
@@ -1737,7 +1745,18 @@ impl DispatchRuntime {
 pub fn handlers(
     spec: SessionSpec,
 ) -> Result<(crate::DaemonHandler, crate::ShutdownHandler), DaemonError> {
-    let runtime = DispatchRuntime::new(spec)?;
+    handlers_with_startup_owner(spec, None)
+}
+
+pub(crate) fn handlers_with_startup_owner(
+    spec: SessionSpec,
+    owner: Option<std::path::PathBuf>,
+) -> Result<(crate::DaemonHandler, crate::ShutdownHandler), DaemonError> {
+    let runtime = DispatchRuntime::new_with_startup_owner(
+        spec,
+        "https://web.archive.org/cdx/search/cdx",
+        owner,
+    )?;
     let dispatch_runtime = runtime.clone();
     let shutdown_runtime = runtime;
     let handler = Arc::new(move |frame, operation| dispatch_runtime.handle(frame, operation));

@@ -4,16 +4,12 @@
 
 use std::{
     fs,
-    io::{Read, Write},
     path::{Path, PathBuf},
-    process::{Child, Command, ExitStatus, Stdio},
-    sync::mpsc,
-    thread,
+    process::ExitStatus,
     time::Duration,
 };
 
 use fs2::FileExt;
-use wait_timeout::ChildExt;
 use zeroize::Zeroizing;
 
 use crate::key_resolver::{
@@ -21,7 +17,12 @@ use crate::key_resolver::{
 };
 
 const DEFAULT_TIMEOUT: Duration = Duration::from_secs(15);
-const MAX_OUTPUT_BYTES: usize = 1 << 20;
+mod command;
+mod startup_owner;
+#[cfg(test)]
+use command::INJECT_ETXTBSY;
+use command::run_command;
+pub use startup_owner::{STARTUP_PROVIDER_ARGUMENT, run_startup_provider};
 
 #[derive(Clone)]
 pub struct SystemKeySources {
@@ -30,6 +31,7 @@ pub struct SystemKeySources {
     security: PathBuf,
     timeout: Duration,
     lock_path: PathBuf,
+    startup_owner: Option<PathBuf>,
 }
 
 impl Default for SystemKeySources {
@@ -40,6 +42,7 @@ impl Default for SystemKeySources {
             security: PathBuf::from("security"),
             timeout: DEFAULT_TIMEOUT,
             lock_path: default_lock_path(),
+            startup_owner: None,
         }
     }
 }
@@ -63,6 +66,22 @@ impl SystemKeySources {
             security,
             timeout,
             lock_path,
+            startup_owner: None,
+        }
+    }
+
+    /// Attach an explicit CLI startup owner. Ordinary vault/provisioning users
+    /// retain the existing standalone subprocess contract.
+    #[must_use]
+    pub fn with_startup_owner(mut self, executable: PathBuf) -> Self {
+        self.startup_owner = Some(executable);
+        self
+    }
+
+    fn lookup(&self, program: &Path, args: &[&str]) -> Result<command::CommandOutput, ProbeError> {
+        match &self.startup_owner {
+            Some(owner) => startup_owner::lookup(owner, program, args, self.timeout),
+            None => run_command(program, args, None, self.timeout),
         }
     }
 
@@ -117,7 +136,7 @@ impl SystemKeySources {
 
 impl KeySources for SystemKeySources {
     fn vault(&self, entry: &str) -> Result<Option<Vec<u8>>, ProbeError> {
-        let output = match run_command(&self.symvault, &["get", entry], None, self.timeout) {
+        let output = match self.lookup(&self.symvault, &["get", entry]) {
             Ok(output) => output,
             Err(ProbeError::Missing(MissingReason::Unavailable)) => return Ok(None),
             Err(error) => return Err(error),
@@ -135,11 +154,9 @@ impl KeySources for SystemKeySources {
 
     #[cfg(target_os = "macos")]
     fn keychain(&self, service: &str, account: &str) -> Result<Option<Vec<u8>>, ProbeError> {
-        let output = match run_command(
+        let output = match self.lookup(
             &self.security,
             &["find-generic-password", "-s", service, "-a", account, "-w"],
-            None,
-            self.timeout,
         ) {
             Ok(output) => output,
             Err(ProbeError::Missing(MissingReason::Unavailable)) => {
@@ -202,221 +219,6 @@ impl KeyProvisioner for SystemKeySources {
         self.set_keychain(service, account, key)?;
         Ok(ProvisionOutcome::Created)
     }
-}
-
-#[derive(Debug)]
-struct CommandOutput {
-    status: ExitStatus,
-    stdout: Vec<u8>,
-}
-
-fn run_command(
-    program: &Path,
-    args: &[&str],
-    input: Option<&[u8]>,
-    timeout: Duration,
-) -> Result<CommandOutput, ProbeError> {
-    let mut command = Command::new(program);
-    command
-        .args(args)
-        .stdin(if input.is_some() {
-            Stdio::piped()
-        } else {
-            Stdio::null()
-        })
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null());
-    configure_process_tree(&mut command);
-    let deadline = std::time::Instant::now() + timeout;
-    let mut child = {
-        let mut last_error = None;
-        let mut spawned = None;
-        for _ in 0..3 {
-            if deadline <= std::time::Instant::now() {
-                return Err(ProbeError::Failed(
-                    "command timed out before spawn".to_owned(),
-                ));
-            }
-            match spawn_command(&mut command) {
-                Ok(child) => {
-                    spawned = Some(child);
-                    break;
-                }
-                Err(error) if error.raw_os_error() == Some(26) => {
-                    // ETXTBSY is a transient Unix race when a freshly-created
-                    // fixture executable is still being released by the filesystem.
-                    last_error = Some(error);
-                    let remaining = deadline.saturating_duration_since(std::time::Instant::now());
-                    if remaining.is_zero() {
-                        return Err(ProbeError::Failed(
-                            "command timed out before spawn retry".to_owned(),
-                        ));
-                    }
-                    thread::sleep(Duration::from_millis(2).min(remaining));
-                }
-                Err(error) => {
-                    last_error = Some(error);
-                    break;
-                }
-            }
-        }
-        match spawned {
-            Some(child) => child,
-            None => {
-                let error = last_error.expect("spawn error");
-                return Err(if error.kind() == std::io::ErrorKind::NotFound {
-                    ProbeError::Missing(MissingReason::Unavailable)
-                } else {
-                    ProbeError::Failed(error.to_string())
-                });
-            }
-        }
-    };
-
-    let stdout = child
-        .stdout
-        .take()
-        .ok_or_else(|| ProbeError::Failed("capture child stdout".to_owned()))?;
-    let (output_sender, output_receiver) = mpsc::sync_channel(1);
-    thread::spawn(move || {
-        let _ = output_sender.send(read_bounded(stdout));
-    });
-
-    let deadline = std::time::Instant::now() + timeout;
-    if let Some(input) = input
-        && let Some(mut stdin) = child.stdin.take()
-        && let Err(error) = stdin.write_all(input)
-    {
-        terminate_process_tree(&mut child);
-        return Err(ProbeError::Failed(error.to_string()));
-    }
-
-    let remaining = deadline.saturating_duration_since(std::time::Instant::now());
-    let status = match child.wait_timeout(remaining) {
-        Ok(Some(status)) => status,
-        Ok(None) => {
-            terminate_process_tree(&mut child);
-            return Err(ProbeError::Failed(format!(
-                "command timed out after {}ms",
-                timeout.as_millis()
-            )));
-        }
-        Err(error) => {
-            terminate_process_tree(&mut child);
-            return Err(ProbeError::Failed(error.to_string()));
-        }
-    };
-
-    let remaining = deadline.saturating_duration_since(std::time::Instant::now());
-    let stdout = if remaining.is_zero() {
-        terminate_process_tree(&mut child);
-        return Err(ProbeError::Failed("command timed out".to_owned()));
-    } else {
-        match output_receiver.recv_timeout(remaining) {
-            Ok(Ok(output)) => output,
-            Ok(Err(error)) => {
-                terminate_process_tree(&mut child);
-                return Err(error);
-            }
-            Err(_) => {
-                terminate_process_tree(&mut child);
-                return Err(ProbeError::Failed(
-                    "stdout pipe remained open after command exit".to_owned(),
-                ));
-            }
-        }
-    };
-    Ok(CommandOutput { status, stdout })
-}
-
-#[cfg(test)]
-thread_local! {
-    static INJECT_ETXTBSY: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
-}
-
-fn spawn_command(command: &mut Command) -> std::io::Result<Child> {
-    #[cfg(test)]
-    if INJECT_ETXTBSY.with(|remaining| {
-        let count = remaining.get();
-        remaining.set(count.saturating_sub(1));
-        count != 0
-    }) {
-        return Err(std::io::Error::from_raw_os_error(26));
-    }
-    command.spawn()
-}
-
-#[cfg(unix)]
-fn configure_process_tree(command: &mut Command) {
-    use std::os::unix::process::CommandExt;
-    command.process_group(0);
-}
-
-#[cfg(windows)]
-fn configure_process_tree(command: &mut Command) {
-    use std::os::windows::process::CommandExt;
-    const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
-    command.creation_flags(CREATE_NEW_PROCESS_GROUP);
-}
-
-#[cfg(not(any(unix, windows)))]
-fn configure_process_tree(_command: &mut Command) {}
-
-#[cfg(unix)]
-fn terminate_process_tree(child: &mut std::process::Child) {
-    use rustix::process::{Pid, Signal, kill_process_group};
-
-    if let Some(pid) = Pid::from_raw(child.id() as i32) {
-        let _ = kill_process_group(pid, Signal::KILL);
-    }
-    let _ = child.kill();
-    let _ = child.wait();
-}
-
-#[cfg(windows)]
-fn terminate_process_tree(child: &mut std::process::Child) {
-    let pid = child.id().to_string();
-    let _ = Command::new("taskkill.exe")
-        .args(["/PID", &pid, "/T", "/F"])
-        .stdin(Stdio::null())
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status();
-    let _ = child.kill();
-    let _ = child.wait();
-}
-
-#[cfg(not(any(unix, windows)))]
-fn terminate_process_tree(child: &mut std::process::Child) {
-    let _ = child.kill();
-    let _ = child.wait();
-}
-
-fn read_bounded(mut reader: impl Read) -> Result<Vec<u8>, ProbeError> {
-    let mut output = Vec::new();
-    let mut buffer = [0_u8; 8192];
-    let mut oversized = false;
-    loop {
-        let read = reader
-            .read(&mut buffer)
-            .map_err(|error| ProbeError::Failed(error.to_string()))?;
-        if read == 0 {
-            break;
-        }
-        if output.len() < MAX_OUTPUT_BYTES {
-            let keep = read.min(MAX_OUTPUT_BYTES - output.len());
-            output.extend_from_slice(&buffer[..keep]);
-            oversized |= keep != read;
-        } else {
-            oversized = true;
-        }
-    }
-    if oversized {
-        return Err(ProbeError::Failed(format!(
-            "command output exceeds {MAX_OUTPUT_BYTES} bytes"
-        )));
-    }
-    Ok(output)
 }
 
 fn require_success(status: ExitStatus, action: &str) -> Result<(), ProbeError> {

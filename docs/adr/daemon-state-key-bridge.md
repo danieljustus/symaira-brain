@@ -134,3 +134,80 @@ rejecting controls remain additive gates. Local Linux checks establish only
 Linux behavior. Full independent candidate review, protected checks and six
 fresh exact-head native receipts remain required before merging or claiming
 #772/release acceptance.
+
+### Scoped startup provider ownership (2026-10-04)
+
+The immutable 4cd candidate passed all 31 startup observations and the existing
+full gates, but an additional actual autostart probe exposed a provider orphan.
+The real client returned the same daemon_unavailable envelope after 5 seconds.
+At 16.5 seconds the actual Go provider was gone; the native provider was still
+alive, adopted by the probe's subreaper after its daemon had been killed. Both
+providers were private owned fixtures. Core's actual provider timeout is 15 s;
+the fixture's 30 s sleep is a separate observation bound. The original failing
+inputs, literal outputs, executable hashes, repeat with a retained executable
+provider and full 4cd proofs remain in candidate-4cd.137 ELF paths / 107 unique
+executables were gzip-retained and roundtrip-SHA verified before target reuse.
+
+Choose an explicit CLI-daemon-startup supervisor and a private stdin lifetime
+pipe. The existing resolver still resolves once and constructs the same shared
+keyed Store before IPC. Only CLI daemon startup supplies its own executable as
+a provider owner. Standalone Core sources, library defaults and key provisioning
+keep the previous runner; its entire run_command function body is byte-identical
+to 4cd, apart from signature visibility needed by the file move. The tracked
+standalone-and-lock receipt pins that exact body and dependency metadata.
+
+The daemon retains the pipe writer in its lookup stack frame. It passes only
+the reader as the supervisor's stdin, through Rust's explicit stdio handles;
+the parent writer is not passed to child processes. Daemon death closes it.
+The supervisor watches EOF/read failure and cancels only its own provider
+operation. Provider output remains bounded and captured privately. Fixed GET
+selectors are checked before spawn, and result/status uses a separate captured
+stderr channel, so a real provider exit code cannot become a fabricated absence.
+No key bytes enter argv. On Unix the internal helper also refuses an inherited
+process group. Public help, IPC authorization and provider authorization remain
+unchanged. This channel establishes lifetime ownership, not additional authority.
+
+On Unix the scoped runner retains the existing per-child process group and kills
+only that group, including a descendant holding stdout after its provider has
+exited. Cancellation polls every 20 ms in both process-wait and output-read phases.
+The parent 15 s deadline first closes its writer and permits at most 2 s for owned
+cleanup before terminating the supervisor. The helper has a 16 s fallback deadline;
+it cannot race the parent's authoritative 15 s diagnostic. Successful lookup also
+ends its scoped provider group. No global signals or process-tree search change.
+
+Windows needs a handle for the entire owned family: taskkill cannot reliably
+find descendants once their parent has exited. Use exactly pinned process-wrap
+10.0.1, Windows-only, defaults disabled, std/job-object/creation-flags features.
+Its safe JobObject wrapper suspends the provider, assigns the private job and
+then resumes it, preventing descendants from racing assignment. The scoped owner
+terminates that job on cancellation and completion, including exited-parent
+cases. Existing CREATE_NEW_PROCESS_GROUP flags remain explicit. Ordinary Core
+Windows subprocess cleanup is unchanged. The lock checksum and chosen features
+are recorded; adding this small OS wrapper avoids introducing unsafe Rust or
+reimplementing Windows process creation. Compilation/source inspection proves
+only API compatibility; actual Windows handle and descendant behavior still
+requires both native Windows lanes.
+
+Reject inheriting the daemon process group for providers: a provider timeout
+would then threaten its daemon owner. Reject a global signal handler, process
+name/PID scan or blanket Vault behavior change: they cannot establish scoped
+ownership. A client-only kill cannot cover a separately created provider group.
+The private lifetime pipe plus owned process group/job handles addresses that
+actual failure while leaving separate same-name providers alive.
+
+The additive actual ownership harness tests normal success and denial, a closed
+writer, an exited provider with a stdout-holding descendant, bounded helper
+fallback, daemon termination, the actual 5 s autostart cancellation and a genuinely
+held-writer control. A separately started same-name owned provider must survive.
+It rejects invalid provider commands/references/timeouts before any lookup.
+The same harness runs in all six native lanes, with portable Windows termination
+and Unix signal observations described separately; Linux success cannot waive
+Darwin or Windows execution. The original 31/38 key cases, original 17 baseline,
+state.show closure cases,207 affected assertions,63 process requests, registry
+cases and full MCP/workspace gates remain required on the final clean source.
+
+The separate inherited root-prefix spelling observation is also retained:
+--session S state list (and session/daemon variants) already fails in native b363
+while actual Go accepts it. This ownership correction does not disguise that
+pre-existing parser gap or claim full #772, native or release acceptance. It needs a
+separate explicit parser contract and actual compatibility correction.
