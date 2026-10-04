@@ -63,10 +63,6 @@ jobs:
           cargo fmt --all -- --check
           cargo build -p symbrain-cli --locked
           export ORACLE_SOURCE="$RUNNER_TEMP/memory-mcp-go-source"
-          # Bash/tar need the POSIX path; retain the native Go output path below.
-          if command -v cygpath >/dev/null 2>&1; then
-            ORACLE_SOURCE="$(cygpath -u "$ORACLE_SOURCE")"
-          fi
           mkdir -p "$ORACLE_SOURCE"
           git archive dcddcef0df5789123c7c9a7ebe6e01f10e941f2c | tar -x -C "$ORACLE_SOURCE"
           export CGO_ENABLED=0 GOWORK=off GOENV=off

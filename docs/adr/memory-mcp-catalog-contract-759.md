@@ -53,3 +53,24 @@ The full different-author review approves the bounded catalog correction:316 tes
 Main2b6d49f is normally integrated. Its change contains documentation and historical proof only; the tested catalog, harness, workflow, Cargo and other production bytes are unchanged. Documentation and preserved review evidence therefore require source/diff/actionlint verification, without repeating unchanged local execution. Current published-head protected and genuine native-three-OS checks remain required, and803 must merge first. No full759 closure follows from a catalog-only result.
 
 Build-cache retention is deliberate: exact independently executed binaries, all current ELF payloads, the original107 executable-path archive, and original failing preservation attempts have SHA and decompression checks before the exclusively owned853MB cache is retired. Original source snapshots, receipts and the pre-existing Brain target are preserved. This keeps the growing parallel migration reviewable within the shared workspace's capacity.
+
+
+## Windows archive shell path correction (#811)
+
+Actual Windows job `111341331634` checked out the PR merge containing
+`11f5777a91bd980f16a68fe187ef70f6b50fa9ff`. Its owner build completed, but GNU/MSYS
+Tar rejected the native `D:\a\_temp/memory-mcp-go-source` path passed to `-C`.
+The frozen Go build and subsequent MCP comparisons did not run. The original
+raw job log, decoded payload and immutable workflow are retained under
+`migration/evidence/memory-mcp-759/windows-archive-path-811/`. This failure is
+workflow bootstrap evidence, not a native catalog parity result.
+
+Normalize only `ORACLE_SOURCE` with `cygpath -u` before Bash `mkdir`, Tar and
+`cd`, using the existing portable Windows runner pattern. Keep `ORACLE_BIN`
+as the native runner-temp path for Go's output and Python/native process
+launch. The general `run-go-oracle.sh` uses a separate Git worktree lifecycle;
+replacing this archived oracle preparation would broaden the fix needlessly.
+The frozen Go revision, archive bytes, all MCP assertions, inputs, timeouts,
+matrices and upload policy remain unchanged. Local shell syntax and workflow
+lint can check this source-only correction; they do not prove Windows runtime.
+Fresh native Windows and all required exact-head checks remain mandatory.
