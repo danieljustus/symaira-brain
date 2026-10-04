@@ -1,0 +1,7 @@
+# Explicit immutable Skills parent acquisition
+
+Decision: the native Windows CI job fetches exactly 01f41906e2e021db3c693ec97617bb701e4dad8a, with no tags and depth one, before the existing shared-clone parent builder. A Squash merge preserves product bytes but does not preserve feature-branch ancestry in later checkouts. The original e605 Windows receipt proves clone succeeded and checkout of this exact parent failed with Git exit128 (`unable to read tree`), before any parent compilation.
+
+The authenticated Actions checkout owns this bounded network preparation. The hermetic parent builder keeps its scrubbed environment, offline locked Cargo build, original source-tree verification, original process criteria and fixed reference. Fetching all branches/history or selecting a newer available parent would add unnecessary scope or change the regression contract. No product change is needed. A missing/unavailable pinned object remains a hard CI failure.
+
+The entire original job log, all eight artifact members (including actual Go/current Windows binaries), original workflow/builder and native metadata are retained losslessly under migration/evidence/skills-render-drift-621/ci-parent-object-e605. The original ZIP also remains at its recorded owned path. Current render acceptance passed on Windows, but this whole job failed and its later product gates did not run. Fresh complete native and protected checks are mandatory after this workflow correction.
