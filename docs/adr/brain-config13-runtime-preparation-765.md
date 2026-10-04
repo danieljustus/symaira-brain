@@ -209,3 +209,9 @@ retained. Later NULL bytes stay accepting-parser owned. Prepared rotation-time
 cases also cover Go's intentionally disabled strict RFC3339 checks, including
 one-digit hours/comma fractions/long fractions/offset24/minute60; Chrono
 compatibility is unproven until actual SDK/live owner comparison, not waived.
+
+Prepared Gateway controls hold a real private owner under disabled exposure,
+assert absent Memory/Activity catalog entries, deny an attempted memory_set and
+compare unchanged committed WAL bytes. An explicit failed owner under an enabled
+profile must hide those tools and cannot fall back to reopening storage. These
+are additional uncompiled criteria, not existing output/assertion replacements.

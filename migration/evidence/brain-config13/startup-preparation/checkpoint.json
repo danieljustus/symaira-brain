@@ -583,7 +583,8 @@
     "scripts/brain-config13/startup_replay.py": "09620b84005b0808b7557bf89be8ada74784346589b1cfd08edd1478d5f3cad1",
     "scripts/brain-config13/startup_sdk.go.txt": "b1e5cd0aa9f775edb1dd68fff7be006e95818d0a80a4b0822c42f5d15d56b001",
     "scripts/brain-config13/startup_state.py": "d43e731d0f230a6763a2715a6d3011e26a5b44bfb5756923cf59de4f03a59ca4",
-    "scripts/brain-config13/values.py": "1ebc48e38c261ccdc1b2f1fa36431d4a9939d82256c714a651f49febfec2646c"
+    "scripts/brain-config13/values.py": "1ebc48e38c261ccdc1b2f1fa36431d4a9939d82256c714a651f49febfec2646c",
+    "rust/symbrain-gateway/tests/startup_owner.rs": "ed2ede9381aef7cede17de693ddedad604cbe036f4de6a63f302df18ed117f6a"
   },
   "selected_sdk_sources": {
     "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/libsqlite3-sys-0.38.2/sqlite3/sqlite3.c": {
@@ -706,5 +707,9 @@
     "mode",
     "missing-key"
   ],
-  "known_unproven": "lax RFC3339 edge cases and new startup owner/stdlib-Go live probe need allocated execution; original strict gates still required"
+  "known_unproven": "lax RFC3339 edge cases and new startup owner/stdlib-Go live probe need allocated execution; original strict gates still required",
+  "prepared_gateway_controls": [
+    "disabled Memory owner cannot expose tools or mutate committed WAL on a denied call",
+    "explicit failed owner cannot reopen fallback storage or expose enabled Memory tools"
+  ]
 }
