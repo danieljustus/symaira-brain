@@ -1,0 +1,1 @@
+Clean source fb2844b actual source-bound Linux checkpoint. All105 candidate/1217 frozen Go inputs, actual binaries and original raw failures are retained; see validation.json. Native3/protected/different-author independent review and full770/769 remain required.
