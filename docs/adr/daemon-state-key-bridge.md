@@ -308,3 +308,13 @@ platform skip. No production code, timeout or acceptance assertion is weakened.
 Fresh complete source-bound gates must run for the successor; old1a91 runs are
 not presented as successor runs. Cross compilation validates source only;
 actual macOS FIFO behavior and all six native jobs remain required.
+
+The fresh source330 Registry run then exposed an extraction mistake: the runner's
+activity-order assertion still uses `datetime`, whose import had been moved out
+with the comparator. The original NameError,993complete progress lines, passed
+strict/225affected/key/ownership/process/path-controls and currentELF receipts
+are retained in `failed-330-registry-import`. Restoring that runner import changes
+no assertion, normalization, control, timeout or production behavior. The progress
+journal correctly retained the last completed frame before the failure. All full
+gates must be freshly rerun for the corrected source; old330 executions are not
+presented as its runtime validation.
