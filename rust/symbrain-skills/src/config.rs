@@ -8,7 +8,7 @@ use toml_edit::DocumentMut;
 use crate::SkillError;
 
 /// Resolved skills paths. `Targets` is deliberately null: the shipped CLI's
-/// configkit loader ignores this untagged field and never calls LoadTargets.
+/// configkit loader ignores this untagged field and never calls `LoadTargets`.
 #[derive(Debug, Clone, Serialize)]
 pub struct Config {
     /// Portable library root.

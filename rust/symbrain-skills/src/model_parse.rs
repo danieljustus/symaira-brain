@@ -51,6 +51,8 @@ pub fn parse_skill_md(raw: &[u8]) -> Result<ParsedSkill, SkillError> {
     }
 
     let frontmatter = parse_frontmatter(header)?;
+    // Bounded byte scan keeps newline identity without a new dependency.
+    #[allow(clippy::naive_bytecount)]
     let body_line_offset = text[..body_start]
         .iter()
         .filter(|byte| **byte == b'\n')

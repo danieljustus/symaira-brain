@@ -281,7 +281,7 @@ fn status_target(
             rows.push(common(
                 StatusKind::Stale,
                 Vec::new(),
-                Some(format!("reading marker {}: {error}", path.display(),)),
+                Some(format!("reading marker {}: {error}", path.display())),
             ));
             continue;
         }

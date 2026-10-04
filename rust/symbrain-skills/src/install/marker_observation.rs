@@ -36,7 +36,7 @@ fn empty() -> Marker {
         installed: String::new(),
         source_hash: String::new(),
         allow_executable: false,
-        extra: Default::default(),
+        extra: std::collections::BTreeMap::default(),
     }
 }
 

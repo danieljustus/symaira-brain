@@ -24,26 +24,23 @@ pub(crate) fn resolve_variants(
             .unwrap_or_default(),
         terms: bundle.manifest.terms.clone(),
     };
-    let (body, body_result) = match std::str::from_utf8(composed) {
-        Ok(text) => {
-            let (result, problems) = variant::apply(text, &options);
-            reject_blocking(&problems, "SKILL.md")?;
-            (result.text.as_bytes().to_vec(), result)
+    let (body, body_result) = if let Ok(text) = std::str::from_utf8(composed) {
+        let (result, problems) = variant::apply(text, &options);
+        reject_blocking(&problems, "SKILL.md")?;
+        (result.text.as_bytes().to_vec(), result)
+    } else {
+        if composed.windows(7).any(|part| part == b"{{term:")
+            || composed.windows(10).any(|part| part == b"symskills:")
+        {
+            return Err(SkillError("invalid_utf8_variant_markdown: SKILL.md".into()));
         }
-        Err(_) => {
-            if composed.windows(7).any(|part| part == b"{{term:")
-                || composed.windows(10).any(|part| part == b"symskills:")
-            {
-                return Err(SkillError("invalid_utf8_variant_markdown: SKILL.md".into()));
-            }
-            (
-                composed.to_vec(),
-                variant::Result {
-                    source_bytes: composed.len(),
-                    ..Default::default()
-                },
-            )
-        }
+        (
+            composed.to_vec(),
+            variant::Result {
+                source_bytes: composed.len(),
+                ..Default::default()
+            },
+        )
     };
     let mut report = VariantReport {
         blocks: body_result.blocks.clone(),

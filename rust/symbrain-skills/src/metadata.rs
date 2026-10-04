@@ -14,7 +14,6 @@
 //!   evidence it stays `null` — a wrong "last used" is worse than none.
 
 use std::collections::BTreeMap;
-use std::fs;
 use std::path::{Path, PathBuf};
 
 use serde::Serialize;

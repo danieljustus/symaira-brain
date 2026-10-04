@@ -21,6 +21,8 @@ use crate::model::{Bundle, SkillError, validate_skill_name};
 use crate::render::Rendered;
 
 /// Options for installing a rendered skill at any registered target and scope.
+// These independent flags retain the public installer and Go adapter inputs.
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Clone, Default)]
 pub struct InstallOptions {
     /// User home used to resolve global harness skill roots.

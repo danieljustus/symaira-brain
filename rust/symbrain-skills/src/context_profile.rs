@@ -207,8 +207,8 @@ fn resolve_at(
                 ))
             })?;
             let mut found = None;
-            for next in index..contexts.len() {
-                let path = contexts[next].1.join(format!("{parent}.toml"));
+            for (next, (_, directory)) in contexts.iter().enumerate().skip(index) {
+                let path = directory.join(format!("{parent}.toml"));
                 if present(&path, "stat inherited profile", parent)? {
                     found = Some(next);
                     break;

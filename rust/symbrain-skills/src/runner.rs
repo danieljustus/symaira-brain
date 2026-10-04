@@ -382,5 +382,5 @@ fn install_skill(bundle: &Bundle, target_name: &str, opts: &Options) -> Result<(
     Ok(())
 }
 
-/// Builds the harness -> target map from the canonical harness registry.
+// Builds the harness -> target map from the canonical harness registry.
 include!("runner_support.rs");

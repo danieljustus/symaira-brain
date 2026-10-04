@@ -306,7 +306,7 @@ fn is_managed_skill(path: &Path) -> bool {
     fs::metadata(resolved.join(MARKER_FILE)).is_ok()
 }
 
-/// Discovery is shared with the skills git caller, including Go ErrDot.
+/// Discovery is shared with the skills git caller, including Go `ErrDot`.
 fn lookup_path(name: &str) -> Option<PathBuf> {
     crate::binary::executable(Path::new(name))
         .ok()

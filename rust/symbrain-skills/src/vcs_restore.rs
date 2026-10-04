@@ -13,6 +13,8 @@ fn local(path: &Path) -> bool {
 /// Extracts only confined regular files, directories and relative links.
 /// # Errors
 /// Rejects traversal, excessive counts/sizes and failed git reads.
+// Escaped, quoted path diagnostics are the existing byte presentation contract.
+#[allow(clippy::unnecessary_debug_formatting)]
 pub fn extract(dir: &Path, rev: &str, dst: &Path) -> Result<(), SkillError> {
     std::fs::create_dir_all(dst).map_err(|error| SkillError(error.to_string()))?;
     let root = Dir::open_ambient_dir(dst, ambient_authority::ambient_authority())
@@ -38,8 +40,7 @@ pub fn extract(dir: &Path, rev: &str, dst: &Path) -> Result<(), SkillError> {
                 .any(|component| component.as_os_str() == ".git")
         {
             return Err(SkillError(format!(
-                "archive entry {:?} escapes destination",
-                path
+                "archive entry {path:?} escapes destination"
             )));
         }
         let kind = entry.header().entry_type();
@@ -57,8 +58,7 @@ pub fn extract(dir: &Path, rev: &str, dst: &Path) -> Result<(), SkillError> {
                 .ok_or_else(|| SkillError("archive symlink target missing".into()))?;
             if target.is_absolute() || !confined_link(&path, &target) {
                 return Err(SkillError(format!(
-                    "archive symlink {:?} escapes destination",
-                    path
+                    "archive symlink {path:?} escapes destination"
                 )));
             }
             #[cfg(unix)]

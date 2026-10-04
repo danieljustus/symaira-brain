@@ -13,7 +13,7 @@ pub struct Candidate {
     /// Known harness target, absent for explicit paths.
     #[serde(skip_serializing_if = "String::is_empty")]
     pub target: String,
-    /// Always skill_bundle.
+    /// Always `skill_bundle`.
     pub kind: &'static str,
     /// Frontmatter name when loadable, otherwise path basename.
     pub display_name: crate::GoText,
@@ -34,7 +34,7 @@ pub struct Candidate {
 }
 fn candidate(path: &Path, source: &str, target: &str, loader: &BundleLoader) -> Candidate {
     let canonical = std::fs::canonicalize(path).unwrap_or_else(|_| path.to_path_buf());
-    let loaded = loader.load(path);
+    let outcome = loader.load(path);
     // Identity includes raw SKILL.md even when frontmatter fails to load.
     // The loader refuses final Unix control links; identity may follow a
     // confined link through a retained bounded capability without loading it.
@@ -62,7 +62,7 @@ fn candidate(path: &Path, source: &str, target: &str, loader: &BundleLoader) -> 
         status: if managed { "managed" } else { "candidate" },
         diagnostics: Vec::new(),
     };
-    match loaded {
+    match outcome {
         Err(error) => {
             row.valid = false;
             row.status = "invalid";

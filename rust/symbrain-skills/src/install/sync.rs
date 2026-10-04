@@ -251,7 +251,7 @@ pub fn sync_selected(
             });
             continue;
         }
-        results.push(reinstall(&status, options, &scope, mode, &loader));
+        results.push(reinstall(&status, options, scope, mode, &loader));
     }
     Ok(results)
 }

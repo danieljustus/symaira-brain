@@ -3,6 +3,8 @@ use crate::{Bundle, Frontmatter, Rendered};
 use serde_json::{Value, json};
 
 /// Frontmatter omits optional empty fields, matching the shipped Go tags.
+/// # Panics
+/// Panics if the typed frontmatter cannot serialize to its required JSON object.
 #[must_use]
 pub fn frontmatter(value: &Frontmatter) -> Value {
     let mut value = serde_json::to_value(value).expect("frontmatter is serializable");
@@ -19,6 +21,8 @@ pub fn frontmatter(value: &Frontmatter) -> Value {
     value
 }
 /// Full inspection shape without root capabilities and internal read buffers.
+/// # Panics
+/// Panics if the typed manifest cannot serialize to its required JSON object and skill field.
 #[must_use]
 pub fn bundle(value: &Bundle) -> Value {
     let mut manifest = serde_json::to_value(&value.manifest).expect("manifest serializable");
@@ -40,6 +44,8 @@ pub fn bundle(value: &Bundle) -> Value {
     json!({"root":crate::GoText::from_path(&value.root),"frontmatter":frontmatter(&value.frontmatter),"manifest":manifest,"body":value.body,"resources":value.resources})
 }
 /// Render summary exposes generated Markdown as text and omits private files.
+/// # Panics
+/// Panics if a typed render or variants value cannot serialize to its required JSON object.
 #[must_use]
 pub fn rendered(value: &Rendered, path: &std::path::Path) -> Value {
     let mut result = json!({"target":value.target,"name":value.name,"path":crate::GoText::from_path(path),"frontmatter":frontmatter(&value.frontmatter),"skill_md":crate::GoText::from_bytes(&value.skill_md)});

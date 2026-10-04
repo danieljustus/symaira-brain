@@ -92,7 +92,13 @@ fn units(path: &Path) -> Vec<u16> {
 #[cfg(unix)]
 fn native(input: Vec<u16>) -> PathBuf {
     use std::os::unix::ffi::OsStringExt;
-    std::ffi::OsString::from_vec(input.into_iter().map(|unit| unit as u8).collect()).into()
+    std::ffi::OsString::from_vec(
+        input
+            .into_iter()
+            .map(|unit| unit.to_le_bytes()[0])
+            .collect(),
+    )
+    .into()
 }
 #[cfg(windows)]
 fn native(input: Vec<u16>) -> PathBuf {

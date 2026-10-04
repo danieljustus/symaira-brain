@@ -141,7 +141,7 @@ fn parse(pattern: &[u8]) -> Option<Matcher> {
         enable,
         tree: Tree::Leaf(false),
     };
-    let (mut result, mut bits, mut start, mut width) = (true, 0u64, 0usize, 1usize);
+    let (mut result, mut bits, mut start, mut width) = (true, 0u64, 0usize, 1u8);
     for index in 0..=p.len() {
         let byte = p.get(index).copied().unwrap_or(b'-');
         if index == start && width == 1 && byte == b'x' {
@@ -151,7 +151,7 @@ fn parse(pattern: &[u8]) -> Option<Matcher> {
         }
         match byte {
             b'0'..=b'9' if width == 4 || byte <= b'1' => {
-                bits = bits.wrapping_shl(width as u32) | u64::from(byte - b'0');
+                bits = bits.wrapping_shl(u32::from(width)) | u64::from(byte - b'0');
             }
             b'a'..=b'f' | b'A'..=b'F' if width == 4 => {
                 bits = bits.wrapping_shl(4) | u64::from(byte.to_ascii_uppercase() - b'A' + 10);
@@ -167,7 +167,7 @@ fn parse(pattern: &[u8]) -> Option<Matcher> {
                     return None;
                 }
                 if index > 0 {
-                    let mut count = (index - start) * width;
+                    let mut count = (index - start) * usize::from(width);
                     if count == 0 || count > 64 {
                         return None;
                     }

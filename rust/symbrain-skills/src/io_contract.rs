@@ -1,4 +1,4 @@
-//! Scoped presentation of actual filesystem errors as Go PathError values.
+//! Scoped presentation of actual filesystem errors as Go `PathError` values.
 use std::io;
 use std::path::Path;
 
