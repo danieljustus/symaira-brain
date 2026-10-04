@@ -232,6 +232,7 @@ jobs:
             ${{ runner.temp }}/guard-standalone-raw-paths.json
             ${{ runner.temp }}/guard-standalone-doctor-boundaries.json
             ${{ runner.temp }}/guard-standalone-config-warnings.json
+            ${{ runner.temp }}/guard-standalone-binaries/
           if-no-files-found: error
           retention-days: 14
 
@@ -394,6 +395,7 @@ jobs:
             ${{ runner.temp }}/guard-standalone-raw-paths.json
             ${{ runner.temp }}/guard-standalone-doctor-boundaries.json
             ${{ runner.temp }}/guard-standalone-config-warnings.json
+            ${{ runner.temp }}/guard-standalone-binaries/
           if-no-files-found: error
           retention-days: 14
 
@@ -567,6 +569,7 @@ jobs:
             ${{ runner.temp }}/guard-standalone-raw-paths.json
             ${{ runner.temp }}/guard-standalone-doctor-boundaries.json
             ${{ runner.temp }}/guard-standalone-config-warnings.json
+            ${{ runner.temp }}/guard-standalone-binaries/
           if-no-files-found: error
           retention-days: 14
 

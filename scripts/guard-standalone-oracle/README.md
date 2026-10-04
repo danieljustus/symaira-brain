@@ -43,3 +43,7 @@ Unix path forms as inapplicable; none is a UTF16 runtime claim. A known config
 validation failure still emits its warnings; type failures emit none. Warnings
 stay buffered across later native delegation. See the
 [warning decision](../../docs/adr/guard-doctor-ordered-config-warnings.md).
+
+Before the temporary frozen-Go tree is removed, the runner copies both actual
+executables to `-binaries/` and verifies every byte/SHA/length. The clean-head
+receipt and all three native CI artifact uploads retain these exact gate binaries.
