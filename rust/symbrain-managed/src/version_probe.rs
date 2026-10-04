@@ -1,5 +1,6 @@
 //! Bounded managed-version probes with Go-compatible Windows path resolution.
 use crate::ManagedError;
+use crate::process_status;
 use std::fs;
 use std::path::Path;
 #[cfg(any(windows, test))]
@@ -7,8 +8,6 @@ use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
-#[path = "process_status.rs"]
-mod process_status;
 const VERSION_PROBE_TIMEOUT: Duration = Duration::from_secs(3);
 
 /// Probes `<binary> version --json`, returning an empty string when absent.
@@ -45,10 +44,10 @@ pub fn installed_version(bin_dir: &Path, binary_name: &str) -> Result<String, Ma
         .stderr(Stdio::null());
     configure_probe_process(&mut command);
     let mut child = command.spawn().map_err(|error| {
-        ManagedError::Context(format!(
-            "probe {binary_name}: fork/exec {}: {}",
-            path.display(),
-            crate::provenance::go_io_error(&error)
+        ManagedError::RawContext(crate::GoText::path(
+            &format!("probe {binary_name}: fork/exec "),
+            &path,
+            &format!(": {}", crate::provenance::go_io_error(&error)),
         ))
     })?;
     let process_group = child.id();

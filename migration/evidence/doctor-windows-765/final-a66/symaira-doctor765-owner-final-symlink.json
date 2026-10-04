@@ -1,0 +1,632 @@
+{
+  "head": "a66b4818f74943812315509a3ba2545b2b6b2ea1",
+  "dirty": false,
+  "go_sha": "a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41",
+  "rust_sha": "a2f9be69dbf324e12a20b5ed3e573f06bb9c66750fec2c3a2a16bd4716bdfc52",
+  "probe_sha": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+  "cases": [
+    {
+      "case": "home-symlink-parent",
+      "raw_home": false,
+      "bin_file": false,
+      "lexical": "symlink-parent",
+      "go": {
+        "binary": "/workspace/oracles/symbrain-go-dcddcef0",
+        "fixture_root": "/tmp/doctor-second-boundary-case-k2r2fzgd",
+        "started": 1791069810.6252182,
+        "ended": 1791069810.678845,
+        "exit": 0,
+        "stdout_base64": "c3ltYnJhaW4gZG9jdG9yIC0tZml4CgoKRG9uZS4gQmluYXJpZXMgaW5zdGFsbGVkIHRvIC90bXAvZG9jdG9yLXNlY29uZC1ib3VuZGFyeS1jYXNlLWsycjJmemdkL2hvbWUvLnN5bWFpcmEvYmluCg==",
+        "stderr_base64": "MjAyNi8xMC8wMyAyMzoyMzozMCBJTkZPIGJpbmFyeSBtaXNzaW5nLCBpbnN0YWxsaW5nIGJpbmFyeT1zeW1kZXNrIHZlcnNpb249djAuMTIuMgoyMDI2LzEwLzAzIDIzOjIzOjMwIElORk8gcmVwYWlyZWQgYmluYXJ5PXN5bWRlc2sgdmVyc2lvbj12MC4xMi4yCjIwMjYvMTAvMDMgMjM6MjM6MzAgSU5GTyBiaW5hcnkgbWlzc2luZywgaW5zdGFsbGluZyBiaW5hcnk9c3ltdmF1bHQgdmVyc2lvbj12MC4yMi4xCjIwMjYvMTAvMDMgMjM6MjM6MzAgSU5GTyByZXBhaXJlZCBiaW5hcnk9c3ltdmF1bHQgdmVyc2lvbj12MC4yMi4xCjIwMjYvMTAvMDMgMjM6MjM6MzAgSU5GTyBza2lwcGluZyAocGxhdGZvcm0pIGJpbmFyeT1zeW1jb2NrcGl0IGdvb3M9bGludXgKMjAyNi8xMC8wMyAyMzoyMzozMCBJTkZPIGRvY3RvciAtLWZpeCBjb21wbGV0ZSByZXBhaXJlZD0yIHNraXBwZWQ9MCBmYWlsZWQ9MAo=",
+        "filesystem_before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "empty-path": {
+            "type": "dir",
+            "mode": 493
+          },
+          "empty-path/cosign": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+            "size": 3455178
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "link": {
+            "type": "link",
+            "mode": 511,
+            "target": "owner/nested"
+          },
+          "owner": {
+            "type": "dir",
+            "mode": 493
+          },
+          "owner/home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "owner/home/.symaira": {
+            "type": "dir",
+            "mode": 493
+          },
+          "owner/home/.symaira/bin": {
+            "type": "dir",
+            "mode": 493
+          },
+          "owner/home/.symaira/bin/symbrowse": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+            "size": 3455178
+          },
+          "owner/home/.symaira/bin/symbrowse.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "e716541c67d34930166aad511712c2f20c99d2b0e1c6ad56e998077bf6a25cc6",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU9DNHdJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "owner/home/.symaira/bin/symcockpit": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+            "size": 3455178
+          },
+          "owner/home/.symaira/bin/symcockpit.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "221eb264dbee078cff680cb069b61b2253e0defd80bb854ded2f6492c2ce34e8",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU5pNHlJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "owner/home/.symaira/bin/symdesk": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+            "size": 3455178
+          },
+          "owner/home/.symaira/bin/symdesk.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "7716ba1120fda7e0b2121c705de1aec4b9ac3cd3bcea62ab74d7f672fc18b5aa",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1USXVNaUo5IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "owner/home/.symaira/bin/symvault": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+            "size": 3455178
+          },
+          "owner/home/.symaira/bin/symvault.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "d418cfa06c093f84235333657ecb9e4e212abc32b40e60cf8a22a37332ac79b6",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1qSXVNU0o5IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "owner/nested": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          }
+        },
+        "contract": {
+          "exit": 0,
+          "stdout_base64": "c3ltYnJhaW4gZG9jdG9yIC0tZml4CgoKRG9uZS4gQmluYXJpZXMgaW5zdGFsbGVkIHRvIDxyb290Pi9ob21lLy5zeW1haXJhL2Jpbgo=",
+          "logs": {
+            "encoding": "base64 exact line bytes",
+            "cores": {
+              "symdesk": [
+                "SU5GTyBiaW5hcnkgbWlzc2luZywgaW5zdGFsbGluZyBiaW5hcnk9c3ltZGVzayB2ZXJzaW9uPXYwLjEyLjIK",
+                "SU5GTyByZXBhaXJlZCBiaW5hcnk9c3ltZGVzayB2ZXJzaW9uPXYwLjEyLjIK"
+              ],
+              "symvault": [
+                "SU5GTyBiaW5hcnkgbWlzc2luZywgaW5zdGFsbGluZyBiaW5hcnk9c3ltdmF1bHQgdmVyc2lvbj12MC4yMi4xCg==",
+                "SU5GTyByZXBhaXJlZCBiaW5hcnk9c3ltdmF1bHQgdmVyc2lvbj12MC4yMi4xCg=="
+              ],
+              "symcockpit": [
+                "SU5GTyBza2lwcGluZyAocGxhdGZvcm0pIGJpbmFyeT1zeW1jb2NrcGl0IGdvb3M9bGludXgK"
+              ]
+            },
+            "tail": [
+              "SU5GTyBkb2N0b3IgLS1maXggY29tcGxldGUgcmVwYWlyZWQ9MiBza2lwcGVkPTAgZmFpbGVkPTAK"
+            ]
+          },
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "empty-path": {
+              "type": "dir",
+              "mode": 493
+            },
+            "empty-path/cosign": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+              "size": 3455178
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin/symdesk": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "d0657fefe27d35d6c82459f1feb85d9e1d66c684f97f01bd1e41973a7daaa05e",
+              "size": 42,
+              "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4xMi4yIn1cbicK"
+            },
+            "home/.symaira/bin/symdesk.provenance.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "c3ea9417fd2edc855144ce3595dac1adfd3687c749535961716b7c75ac1716ea",
+              "size": 239,
+              "content_base64": "ewogICJiaW5hcnkiOiAic3ltZGVzayIsCiAgInNvdXJjZSI6ICJyZWxlYXNlIiwKICAidmVyc2lvbiI6ICJ2MC4xMi4yIiwKICAicmVwbyI6ICJkYW5pZWxqdXN0dXMvc3ltYWlyYS1kZXNrdG9wIiwKICAiYnVpbHRfYXQiOiAiPGluc3RhbGwtdGltZXN0YW1wPiIsCiAgImJpbmFyeV9zaGEyNTYiOiAiZDA2NTdmZWZlMjdkMzVkNmM4MjQ1OWYxZmViODVkOWUxZDY2YzY4NGY5N2YwMWJkMWU0MTk3M2E3ZGFhYTA1ZSIKfQo="
+            },
+            "home/.symaira/bin/symvault": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "ee6a5b2899eb59dd6a9cc1c550ce145a92738261b8f0dd89a5690531f2413590",
+              "size": 42,
+              "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4yMi4xIn1cbicK"
+            },
+            "home/.symaira/bin/symvault.provenance.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "ba54872f3bd903e03c41d8739a577219da4a43b9619711fec15217100d7352e5",
+              "size": 238,
+              "content_base64": "ewogICJiaW5hcnkiOiAic3ltdmF1bHQiLAogICJzb3VyY2UiOiAicmVsZWFzZSIsCiAgInZlcnNpb24iOiAidjAuMjIuMSIsCiAgInJlcG8iOiAiZGFuaWVsanVzdHVzL3N5bWFpcmEtdmF1bHQiLAogICJidWlsdF9hdCI6ICI8aW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICJlZTZhNWIyODk5ZWI1OWRkNmE5Y2MxYzU1MGNlMTQ1YTkyNzM4MjYxYjhmMGRkODlhNTY5MDUzMWYyNDEzNTkwIgp9Cg=="
+            },
+            "link": {
+              "type": "link",
+              "mode": 511,
+              "target": "owner/nested"
+            },
+            "owner": {
+              "type": "dir",
+              "mode": 493
+            },
+            "owner/home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "owner/home/.symaira": {
+              "type": "dir",
+              "mode": 493
+            },
+            "owner/home/.symaira/bin": {
+              "type": "dir",
+              "mode": 493
+            },
+            "owner/home/.symaira/bin/symbrowse": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+              "size": 3455178
+            },
+            "owner/home/.symaira/bin/symbrowse.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "e716541c67d34930166aad511712c2f20c99d2b0e1c6ad56e998077bf6a25cc6",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU9DNHdJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "owner/home/.symaira/bin/symcockpit": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+              "size": 3455178
+            },
+            "owner/home/.symaira/bin/symcockpit.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "221eb264dbee078cff680cb069b61b2253e0defd80bb854ded2f6492c2ce34e8",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU5pNHlJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "owner/home/.symaira/bin/symdesk": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+              "size": 3455178
+            },
+            "owner/home/.symaira/bin/symdesk.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "7716ba1120fda7e0b2121c705de1aec4b9ac3cd3bcea62ab74d7f672fc18b5aa",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1USXVNaUo5IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "owner/home/.symaira/bin/symvault": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+              "size": 3455178
+            },
+            "owner/home/.symaira/bin/symvault.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "d418cfa06c093f84235333657ecb9e4e212abc32b40e60cf8a22a37332ac79b6",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1qSXVNU0o5IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "owner/nested": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "signature-invocations.symdesk": {
+              "type": "file",
+              "mode": 384,
+              "sha256": "cf12f5b11e47b4d37d235172f7017c8fd9acc73d57c710af2fb3c3ad031a1561",
+              "size": 104,
+              "content_base64": "c3ltZGVzayBodHRwczovL2dpdGh1Yi5jb20vZGFuaWVsanVzdHVzL3N5bWFpcmEtZGVza3RvcC8uZ2l0aHViL3dvcmtmbG93cy9yZWxlYXNlLnltbEByZWZzL3RhZ3MvdjAuMTIuMgo="
+            },
+            "signature-invocations.symvault": {
+              "type": "file",
+              "mode": 384,
+              "sha256": "421300c25c1040c46aedeaef1ad4eb39263a3272d4437a438f6725e78b84c421",
+              "size": 103,
+              "content_base64": "c3ltdmF1bHQgaHR0cHM6Ly9naXRodWIuY29tL2RhbmllbGp1c3R1cy9zeW1haXJhLXZhdWx0Ly5naXRodWIvd29ya2Zsb3dzL3JlbGVhc2UueW1sQHJlZnMvdGFncy92MC4yMi4xCg=="
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            }
+          }
+        }
+      },
+      "rust": {
+        "binary": "/workspace/symaira-setup765-source/target/debug/symbrain",
+        "fixture_root": "/tmp/doctor-second-boundary-case-oqbjbfi2",
+        "started": 1791069810.7097685,
+        "ended": 1791069810.773473,
+        "exit": 0,
+        "stdout_base64": "c3ltYnJhaW4gZG9jdG9yIC0tZml4CgoKRG9uZS4gQmluYXJpZXMgaW5zdGFsbGVkIHRvIC90bXAvZG9jdG9yLXNlY29uZC1ib3VuZGFyeS1jYXNlLW9xYmpiZmkyL2hvbWUvLnN5bWFpcmEvYmluCg==",
+        "stderr_base64": "MjAyNi8xMC8wMyAyMzoyMzozMCBJTkZPIHNraXBwaW5nIChwbGF0Zm9ybSkgYmluYXJ5PXN5bWNvY2twaXQgZ29vcz1saW51eAoyMDI2LzEwLzAzIDIzOjIzOjMwIElORk8gYmluYXJ5IG1pc3NpbmcsIGluc3RhbGxpbmcgYmluYXJ5PXN5bWRlc2sgdmVyc2lvbj12MC4xMi4yCjIwMjYvMTAvMDMgMjM6MjM6MzAgSU5GTyByZXBhaXJlZCBiaW5hcnk9c3ltZGVzayB2ZXJzaW9uPXYwLjEyLjIKMjAyNi8xMC8wMyAyMzoyMzozMCBJTkZPIGJpbmFyeSBtaXNzaW5nLCBpbnN0YWxsaW5nIGJpbmFyeT1zeW12YXVsdCB2ZXJzaW9uPXYwLjIyLjEKMjAyNi8xMC8wMyAyMzoyMzozMCBJTkZPIHJlcGFpcmVkIGJpbmFyeT1zeW12YXVsdCB2ZXJzaW9uPXYwLjIyLjEKMjAyNi8xMC8wMyAyMzoyMzozMCBJTkZPIGRvY3RvciAtLWZpeCBjb21wbGV0ZSByZXBhaXJlZD0yIHNraXBwZWQ9MCBmYWlsZWQ9MAo=",
+        "filesystem_before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "empty-path": {
+            "type": "dir",
+            "mode": 493
+          },
+          "empty-path/cosign": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+            "size": 3455178
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "link": {
+            "type": "link",
+            "mode": 511,
+            "target": "owner/nested"
+          },
+          "owner": {
+            "type": "dir",
+            "mode": 493
+          },
+          "owner/home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "owner/home/.symaira": {
+            "type": "dir",
+            "mode": 493
+          },
+          "owner/home/.symaira/bin": {
+            "type": "dir",
+            "mode": 493
+          },
+          "owner/home/.symaira/bin/symbrowse": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+            "size": 3455178
+          },
+          "owner/home/.symaira/bin/symbrowse.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "e716541c67d34930166aad511712c2f20c99d2b0e1c6ad56e998077bf6a25cc6",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU9DNHdJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "owner/home/.symaira/bin/symcockpit": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+            "size": 3455178
+          },
+          "owner/home/.symaira/bin/symcockpit.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "221eb264dbee078cff680cb069b61b2253e0defd80bb854ded2f6492c2ce34e8",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU5pNHlJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "owner/home/.symaira/bin/symdesk": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+            "size": 3455178
+          },
+          "owner/home/.symaira/bin/symdesk.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "7716ba1120fda7e0b2121c705de1aec4b9ac3cd3bcea62ab74d7f672fc18b5aa",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1USXVNaUo5IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "owner/home/.symaira/bin/symvault": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+            "size": 3455178
+          },
+          "owner/home/.symaira/bin/symvault.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "d418cfa06c093f84235333657ecb9e4e212abc32b40e60cf8a22a37332ac79b6",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1qSXVNU0o5IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "owner/nested": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          }
+        },
+        "contract": {
+          "exit": 0,
+          "stdout_base64": "c3ltYnJhaW4gZG9jdG9yIC0tZml4CgoKRG9uZS4gQmluYXJpZXMgaW5zdGFsbGVkIHRvIDxyb290Pi9ob21lLy5zeW1haXJhL2Jpbgo=",
+          "logs": {
+            "encoding": "base64 exact line bytes",
+            "cores": {
+              "symcockpit": [
+                "SU5GTyBza2lwcGluZyAocGxhdGZvcm0pIGJpbmFyeT1zeW1jb2NrcGl0IGdvb3M9bGludXgK"
+              ],
+              "symdesk": [
+                "SU5GTyBiaW5hcnkgbWlzc2luZywgaW5zdGFsbGluZyBiaW5hcnk9c3ltZGVzayB2ZXJzaW9uPXYwLjEyLjIK",
+                "SU5GTyByZXBhaXJlZCBiaW5hcnk9c3ltZGVzayB2ZXJzaW9uPXYwLjEyLjIK"
+              ],
+              "symvault": [
+                "SU5GTyBiaW5hcnkgbWlzc2luZywgaW5zdGFsbGluZyBiaW5hcnk9c3ltdmF1bHQgdmVyc2lvbj12MC4yMi4xCg==",
+                "SU5GTyByZXBhaXJlZCBiaW5hcnk9c3ltdmF1bHQgdmVyc2lvbj12MC4yMi4xCg=="
+              ]
+            },
+            "tail": [
+              "SU5GTyBkb2N0b3IgLS1maXggY29tcGxldGUgcmVwYWlyZWQ9MiBza2lwcGVkPTAgZmFpbGVkPTAK"
+            ]
+          },
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "empty-path": {
+              "type": "dir",
+              "mode": 493
+            },
+            "empty-path/cosign": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+              "size": 3455178
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin/symdesk": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "d0657fefe27d35d6c82459f1feb85d9e1d66c684f97f01bd1e41973a7daaa05e",
+              "size": 42,
+              "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4xMi4yIn1cbicK"
+            },
+            "home/.symaira/bin/symdesk.provenance.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "c3ea9417fd2edc855144ce3595dac1adfd3687c749535961716b7c75ac1716ea",
+              "size": 239,
+              "content_base64": "ewogICJiaW5hcnkiOiAic3ltZGVzayIsCiAgInNvdXJjZSI6ICJyZWxlYXNlIiwKICAidmVyc2lvbiI6ICJ2MC4xMi4yIiwKICAicmVwbyI6ICJkYW5pZWxqdXN0dXMvc3ltYWlyYS1kZXNrdG9wIiwKICAiYnVpbHRfYXQiOiAiPGluc3RhbGwtdGltZXN0YW1wPiIsCiAgImJpbmFyeV9zaGEyNTYiOiAiZDA2NTdmZWZlMjdkMzVkNmM4MjQ1OWYxZmViODVkOWUxZDY2YzY4NGY5N2YwMWJkMWU0MTk3M2E3ZGFhYTA1ZSIKfQo="
+            },
+            "home/.symaira/bin/symvault": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "ee6a5b2899eb59dd6a9cc1c550ce145a92738261b8f0dd89a5690531f2413590",
+              "size": 42,
+              "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4yMi4xIn1cbicK"
+            },
+            "home/.symaira/bin/symvault.provenance.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "ba54872f3bd903e03c41d8739a577219da4a43b9619711fec15217100d7352e5",
+              "size": 238,
+              "content_base64": "ewogICJiaW5hcnkiOiAic3ltdmF1bHQiLAogICJzb3VyY2UiOiAicmVsZWFzZSIsCiAgInZlcnNpb24iOiAidjAuMjIuMSIsCiAgInJlcG8iOiAiZGFuaWVsanVzdHVzL3N5bWFpcmEtdmF1bHQiLAogICJidWlsdF9hdCI6ICI8aW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICJlZTZhNWIyODk5ZWI1OWRkNmE5Y2MxYzU1MGNlMTQ1YTkyNzM4MjYxYjhmMGRkODlhNTY5MDUzMWYyNDEzNTkwIgp9Cg=="
+            },
+            "link": {
+              "type": "link",
+              "mode": 511,
+              "target": "owner/nested"
+            },
+            "owner": {
+              "type": "dir",
+              "mode": 493
+            },
+            "owner/home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "owner/home/.symaira": {
+              "type": "dir",
+              "mode": 493
+            },
+            "owner/home/.symaira/bin": {
+              "type": "dir",
+              "mode": 493
+            },
+            "owner/home/.symaira/bin/symbrowse": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+              "size": 3455178
+            },
+            "owner/home/.symaira/bin/symbrowse.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "e716541c67d34930166aad511712c2f20c99d2b0e1c6ad56e998077bf6a25cc6",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU9DNHdJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "owner/home/.symaira/bin/symcockpit": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+              "size": 3455178
+            },
+            "owner/home/.symaira/bin/symcockpit.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "221eb264dbee078cff680cb069b61b2253e0defd80bb854ded2f6492c2ce34e8",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU5pNHlJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "owner/home/.symaira/bin/symdesk": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+              "size": 3455178
+            },
+            "owner/home/.symaira/bin/symdesk.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "7716ba1120fda7e0b2121c705de1aec4b9ac3cd3bcea62ab74d7f672fc18b5aa",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1USXVNaUo5IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "owner/home/.symaira/bin/symvault": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "6e99d71427fe9468de0f38d114418426321d918e6501ef1693d1b8a2942c68a0",
+              "size": 3455178
+            },
+            "owner/home/.symaira/bin/symvault.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "d418cfa06c093f84235333657ecb9e4e212abc32b40e60cf8a22a37332ac79b6",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1qSXVNU0o5IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "owner/nested": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "signature-invocations.symdesk": {
+              "type": "file",
+              "mode": 384,
+              "sha256": "cf12f5b11e47b4d37d235172f7017c8fd9acc73d57c710af2fb3c3ad031a1561",
+              "size": 104,
+              "content_base64": "c3ltZGVzayBodHRwczovL2dpdGh1Yi5jb20vZGFuaWVsanVzdHVzL3N5bWFpcmEtZGVza3RvcC8uZ2l0aHViL3dvcmtmbG93cy9yZWxlYXNlLnltbEByZWZzL3RhZ3MvdjAuMTIuMgo="
+            },
+            "signature-invocations.symvault": {
+              "type": "file",
+              "mode": 384,
+              "sha256": "421300c25c1040c46aedeaef1ad4eb39263a3272d4437a438f6725e78b84c421",
+              "size": 103,
+              "content_base64": "c3ltdmF1bHQgaHR0cHM6Ly9naXRodWIuY29tL2RhbmllbGp1c3R1cy9zeW1haXJhLXZhdWx0Ly5naXRodWIvd29ya2Zsb3dzL3JlbGVhc2UueW1sQHJlZnMvdGFncy92MC4yMi4xCg=="
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            }
+          }
+        }
+      },
+      "differences": []
+    }
+  ]
+}

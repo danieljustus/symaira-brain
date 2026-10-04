@@ -1,0 +1,16 @@
+func sigpipe() // implemented in package runtime
+
+// epipecheck raises SIGPIPE if we get an EPIPE error on standard
+// output or standard error. See the SIGPIPE docs in os/signal, and
+// issue 11845.
+func epipecheck(file *File, e error) {
+	if e == syscall.EPIPE && file.stdoutOrErr {
+		sigpipe()
+	}
+}
+func sigpipe() {
+	if signal_ignored(_SIGPIPE) || sigsend(_SIGPIPE) {
+		return
+	}
+	dieFromSignal(_SIGPIPE)
+}

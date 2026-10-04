@@ -17,15 +17,21 @@ pub(crate) fn enabled_cores() -> Result<BTreeMap<String, bool>, String> {
     // Environment values are presence-based overrides. As in configkit, an
     // empty value is ignored, while Go's strconv.ParseBool accepts all of the
     // listed spellings below (not just true/false).
-    if let Some(value) = std::env::var_os("SYMBRAIN_MODULES_BROWSE") {
-        let value = value.to_string_lossy();
-        if !value.is_empty() {
-            enabled.insert(
-                "symbrowse".to_string(),
-                parse_go_bool(&value).map_err(|()| {
-                    format!("config: invalid boolean SYMBRAIN_MODULES_BROWSE={value:?}")
-                })?,
-            );
+    for (module, core) in [
+        ("BROWSE", "symbrowse"),
+        ("OPERATE", "symoperate"),
+        ("SCOPE", "symscope"),
+    ] {
+        let variable = format!("SYMBRAIN_MODULES_{module}");
+        if let Some(value) = std::env::var_os(&variable) {
+            let value = value.to_string_lossy();
+            if !value.is_empty() {
+                enabled.insert(
+                    core.into(),
+                    parse_go_bool(&value)
+                        .map_err(|()| format!("config: invalid boolean {variable}={value:?}"))?,
+                );
+            }
         }
     }
     Ok(enabled)
@@ -60,23 +66,29 @@ pub(super) fn parse_enabled_cores(
         .parse()
         .map_err(|error| format!("config: parse {}: {error}", path.display()))?;
     let mut enabled = BTreeMap::new();
-    if let Some(value) = document.get("modules").and_then(|item| item.get("browse")) {
-        let browse = value
-            .as_bool()
-            .or_else(|| value.as_str().and_then(|value| parse_go_bool(value).ok()))
-            .or_else(|| {
-                (value.as_str() == Some("")
-                    || value.as_integer() == Some(0)
-                    || value.as_float() == Some(0.0))
-                .then_some(false)
-            })
-            .ok_or_else(|| {
-                format!(
-                    "config: modules.browse must be boolean in {}",
-                    path.display()
-                )
-            })?;
-        enabled.insert("symbrowse".to_string(), browse);
+    for (module, core) in [
+        ("browse", "symbrowse"),
+        ("operate", "symoperate"),
+        ("scope", "symscope"),
+    ] {
+        if let Some(value) = document.get("modules").and_then(|item| item.get(module)) {
+            let browse = value
+                .as_bool()
+                .or_else(|| value.as_str().and_then(|value| parse_go_bool(value).ok()))
+                .or_else(|| {
+                    (value.as_str() == Some("")
+                        || value.as_integer() == Some(0)
+                        || value.as_float() == Some(0.0))
+                    .then_some(false)
+                })
+                .ok_or_else(|| {
+                    format!(
+                        "config: modules.{module} must be boolean in {}",
+                        path.display()
+                    )
+                })?;
+            enabled.insert(core.to_string(), browse);
+        }
     }
     Ok(enabled)
 }

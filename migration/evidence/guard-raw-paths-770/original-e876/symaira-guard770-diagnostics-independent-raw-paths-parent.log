@@ -1,0 +1,12 @@
+config-invalid-default False
+go 1 b'symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   linux/amd64\n\n  binary           ok\n  go runtime       ok\n  config           error: config: validate <root>/owned-\xe2\x82/config.toml: defaults."read": invalid decision "bad" (allowed: allow, ask, deny, redact, readonly, sandbox)\n  policy           not loaded (config error)\n  audit log        not initialized (created on first \'symguard decide\')\n\n2 issue(s) found. See details above.\n'
+rust 1 b''
+config-missing-equals False
+go 1 b"symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   linux/amd64\n\n  binary           ok\n  go runtime       ok\n  config           error: config: parse <root>/owned-\xe2\x82/config.toml: toml: line 1: expected '.' or '=', but got 'T' instead\n  policy           not loaded (config error)\n  audit log        not initialized (created on first 'symguard decide')\n\n2 issue(s) found. See details above.\n"
+rust 1 b"symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   linux/amd64\n\n  binary           ok\n  go runtime       ok\n  config           error: config: parse <root>/owned-\xef\xbf\xbd/config.toml: toml: line 1: expected '.' or '=', but got 'T' instead\n  policy           not loaded (config error)\n  audit log        not initialized (created on first 'symguard decide')\n\n2 issue(s) found. See details above.\n"
+anchor-overflow False
+go 1 b'symguard doctor\n\n  Version:   dev\n  Toolchain: <actual>\n  OS/Arch:   linux/amd64\n\n  binary           ok\n  go runtime       ok\n  config           not configured (no config file found)\n  policy           defaults only (no rules \xe2\x80\x94 deny by default)\n  audit log        error: anchor <root>/owned-\xe2\x82/symguard/audit.log.anchor: auditkit: parse anchor: json: cannot unmarshal number 9223372036854775808 into Go struct field ChainAnchor.entry_count of type int64\n  spawn allowlist  not configured (empty \xe2\x80\x94 deny by default)\n  mcp servers      none discovered\n\n1 issue(s) found. See details above.\n'
+rust 1 b''
+audit-directory False
+go 0 b'{"decision":"deny","reason":"audit: write decision record: decide: open audit log: open <root>/owned-\\ufffd\\ufffd/symguard/audit.log: is a directory"}\n'
+rust 0 b'{"decision":"deny","reason":"audit: write decision record: decide: write audit log: Is a directory (os error 21)"}\n'

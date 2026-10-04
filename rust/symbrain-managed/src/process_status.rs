@@ -1,7 +1,9 @@
 //! Actual process termination diagnostics used by the frozen Go CLI.
 use std::process::ExitStatus;
 
-pub(super) fn format(status: ExitStatus) -> String {
+/// Formats a native process exit using Go's platform status diagnostics.
+#[must_use]
+pub fn format(status: ExitStatus) -> String {
     if let Some(code) = status.code() {
         #[cfg(windows)]
         {

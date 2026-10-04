@@ -1922,8 +1922,10 @@ Go remains the production enforcement path until the full Guard-specific matrix 
 - Port list/search/set/delete/rules/query-log/sync/serve and all memory MCP schemas.
 - Preserve JWT/secret resolution (`symvault://`, deprecated `vault://`, env fallback), loopback binding, request limits, and encrypted relay compatibility.
 
-### Task 10.8: Port the TUI
-- Reproduce keyboard actions and semantic states with `ratatui`; visual pixel parity is not required unless documented, but all data mutations and exits are.
+### Task 10.8: Preserve reachable Memory interfaces
+- Port the embedded web interface with the native HTTP server and preserve its auth/API behavior (#759/#762/#763).
+- Retire the unreachable legacy TUI migration target under ADR0003/E010: frozen Go's Brain command dependencies do not include the TUI;12 actual Go/native command probes match. No new terminal UI command is introduced.
+- Keep #763 open until the reachable HTTP UI has full native acceptance; Go source remains frozen until its separately gated removal.
 
 ### Phase 10 acceptance
 - Rust opens and migrates every Go database fixture.

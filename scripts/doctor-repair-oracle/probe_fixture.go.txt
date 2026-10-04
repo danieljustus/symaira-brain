@@ -24,7 +24,7 @@ func main() {
 		control(target)
 		return
 	}
-	if strings.TrimSuffix(filepath.Base(os.Args[0]), ".exe") == "cosign" {
+	if strings.EqualFold(fixtureExecutableStem(filepath.Base(os.Args[0])), "cosign") {
 		verifyFixture()
 		return
 	}
@@ -32,7 +32,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	path = strings.TrimSuffix(path, ".exe")
+	path = fixtureExecutableStem(path)
 	data, err := os.ReadFile(path + ".probe.json")
 	if err != nil {
 		panic(err)
@@ -66,6 +66,15 @@ func main() {
 	os.Exit(r.Exit)
 }
 
+// Windows lookup may preserve PATHEXT spelling rather than the installed
+// executable's spelling. Strip only the executable extension, preserving paths.
+func fixtureExecutableStem(path string) string {
+	if strings.EqualFold(filepath.Ext(path), ".exe") {
+		return path[:len(path)-len(".exe")]
+	}
+	return path
+}
+
 // A fixture verifier checks the real pinned invocation; it makes no claim
 // about production certificate authenticity. Checksums remain independently
 // verified against the local archive's checksum file in both real CLIs.
@@ -75,6 +84,11 @@ func verifyFixture() {
 		panic("invalid verifier arguments")
 	}
 	name := strings.Split(filepath.Base(args[1]), "_")[0]
+	// The frozen vault manifest uses a repository-prefixed primary archive;
+	// some platforms use its binary-prefixed alternate. Both pin the same core.
+	if name == "symaira-vault" {
+		name = "symvault"
+	}
 	identity := map[string]string{
 		"symvault":  "https://github.com/danieljustus/symaira-vault/.github/workflows/release.yml@refs/tags/v0.22.1",
 		"symdesk":   "https://github.com/danieljustus/symaira-desktop/.github/workflows/release.yml@refs/tags/v0.12.2",

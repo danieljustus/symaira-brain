@@ -14,3 +14,14 @@ migration/evidence/memory-cli-758/windows-cleanup-9c-job-111297047149.log binary
 # Preserve exact Windows schema-native failure bytes.
 migration/evidence/memory-schema-649/windows-lint-b2fdd/*.log binary
 migration/evidence/memory-schema-649/windows-lint-b2fdd/corrected-88a/*.log binary
+# Original native Windows process evidence contains CRLF. Keep the artifact's
+# exact bytes and SHA across checkout instead of applying text normalization.
+migration/evidence/doctor-windows-765/original-windows-1288/windows-process.json binary
+migration/evidence/guard-raw-paths-770/independent-806/*.log binary
+# Preserve exact original native failure log bytes.
+migration/evidence/memory-cli-758/windows-cleanup-9c-job-111297047149.log binary
+
+migration/evidence/memory-cli-758/independent-sigpipe-458/*.log binary
+
+# Raw retained output-review evidence preserves the original EOF bytes.
+migration/evidence/doctor-output-765/** -text whitespace=-blank-at-eof

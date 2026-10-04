@@ -44,6 +44,48 @@ commands and two executable failure controls. Native three-OS acceptance is
 pending. Governed writes, configured Hamming prefilter, every database open/error
 shape, new-file permission parity and JSONL decoding remain open. The decision
 and scope are recorded in `docs/adr/memory-native-cli-758.md`.
+The bounded governed-write successor adds native provenance/trust/policy,
+configured embeddings and binary storage, entity linking/audits, kind/staged
+updates and delete access-feedback/audits. Existing-store direct writes are native
+only when the full reachable redaction/extraction/conflict pipeline is bypassed:
+staged writes skip conflicts; other writes require effective config false.
+The prior unconditional default-conflict insert now delegates Go. Malformed or
+unproven hydration and new-file modes also retain Go. Stateful process proof
+compares application rows with explicit UUID/timestamp bindings and logical FTS
+integrity, with executable identity/audit/exit mutants and actual delegation
+observations. Full #758 and native three-OS acceptance remain pending; the
+rationale and exact boundaries are in
+`docs/adr/memory-native-governed-writes-758.md`.
+Clean source `14d2414` passes Linux 60 native set / 16 native delete pairs,
+13 literal delegated-Go boundaries, three write controls, all 590 baseline pairs
+and two baseline controls, plus 161 affected Rust tests and strict lint gates.
+Tracked receipts retain the actual delete-audit sequencing regression and
+earlier rejected harness assumptions. Independent review requested changes for
+zero-row governance updates and failed output on newly native metadata Set.
+The correction checks both governance row counts and Set writer errors while
+preserving Go's committed failure state; a supplemental real-process gate adds
+six callback pairs and two Unix sink pairs where available. Original findings
+and reviewed executable hashes remain retained. Corrected independent review
+and native three-OS acceptance remain pending.
+Clean corrected source `647477f` passes fresh Linux 60 Set/16 Delete/13 actual
+Go boundary pairs, six governance callback pairs, two real Unix output sinks,
+all three write controls, 590 baseline pairs and both baseline controls. All
+163 affected Rust tests and strict lint gates pass. The old independent failure
+bytes/executable archives and new full state proof remain tracked separately.
+The subsequent independent review closed both original findings and requested
+actual Unix Set stdout SIGPIPE parity. The focused successor keeps library
+writers as checked errors, adds both real closed-reader process formats and an
+actual CLI child test, and normally integrates main `e3dbda6c`. Its decision is
+in `docs/adr/memory-set-stdout-sigpipe-758.md`; exact-source independent review,
+native three-OS acceptance and full #758 remain pending.
+Clean combined source `458e8fa5` passes 165 affected Rust tests and strict lint
+gates, fresh 60/16/13 state pairs, six callback and four Unix sink/closed-reader
+pairs, all three write controls, all 590 baseline pairs and both baseline
+controls. Both original independent closed-reader inputs now match literal Go
+SIGPIPE/quiet output while retaining complete committed state. The full fresh
+source/binary-bound evidence and previous executable archives remain separate;
+these Linux author results do not replace independent or native three-OS review.
+
 Independent review found two configured-read differences in the initial CLI
 candidate: memory-specific XDG/legacy resolution and populated rules JSON HTML/
 JavaScript-separator escaping. Corrections remain memory-local, preserve the
@@ -284,3 +326,25 @@ for example `make GO_ORACLE_REF=<commit> rust-check parity-smoke`.
 
 The SwiftUI applications remain Swift. Their CLI JSON contracts are migration
 inputs, not candidates for translation to Rust.
+
+For #770, Guard CLI handlers now live in the Guard-owned `symguard-cli` crate,
+shared by the Brain compatibility route and an independently buildable native
+`symguard` binary. The standalone graph includes no Brain gateway, broker or
+memory dependencies and cannot invoke Go. The real reachable command inventory
+and remaining doctor/audit diagnostics are recorded in
+`migration/guard-standalone-tree-770.md`; nonexistent planned CLI verbs are not
+invented or treated as retired. The scoped process runner executes124 actual
+Go/Rust cases: the current Linux replay has121 full matches and three selected
+TOML diagnostic states explicitly fail closed. Typed anchor errors and the proven
+Unix directory audit-open spelling are native; Windows audit wording remains
+separately unported. Three actual output mutants test the new boundaries. These
+selected states do not inventory all unsupported TOML/discovery/I/O shapes. Native three-OS acceptance, remaining diagnostics and release
+are still pending; #770 stays open. Production Go and frozen fixtures are unchanged.
+
+Doctor output follow-up: the sixth isolated correction preserves the fifth
+independent review's two confirmed output failures, all 145 raw artifacts and
+56 actually executed binaries before target reuse. The new process-stdout seam,
+format-specific completion and recoverable-writer contract are documented in
+`docs/adr/doctor-stdout-failure-boundary.md`; the additive Linux sink/public-caller
+corpus is `scripts/doctor-stdout-oracle`. Source validation, independent review
+and native three-OS CI remain required; no full #765 closure is claimed.
