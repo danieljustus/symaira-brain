@@ -179,3 +179,38 @@ Usage test/library bytes; other packages and targets stay untouched. Candidate
 restoration must still be byte-identical. Retained Go constructor executables run
 with the frozen `internal/usage` working directory, preserving relative fixture
 ownership. This is a harness/provenance correction, without weaker assertions.
+
+## Clean author acceptance and independent review boundary
+
+All final executable gates ran against clean source
+`c0ae71c0bc0a5e39c65458484f1024d5940a19aa`, after normally merging main
+`2b6d49f250a81650eda1b93cec7d859a171873bb`. The actual candidate restored
+byte-identically after both historical parent transitions. The original four
+gates passed89/82 full/7 gated with112 CLI,86/85 full/1 gated with151 CLI,
+96 Hermes with104 CLI, and44 reference reports with110 CLI, including their
+original owner, argv, accounting and genuine negative controls. The expanded
+gate passed64 device inputs/57 full/7 gated,84 remote TLS reports,147 paired
+wire observations, four native body-bound cases,160 diagnostic argv cases,
+fifteen valid gated reports, three native comparison mutants and two argv
+mutants. The original133-report/266-output/four-control Fetch regression also
+passed. Ordinary CLI/Usage tests passed355 with zero failures and five ignored
+explicit oracles, all separately invoked above, across35 parent summaries.
+Strict all-target/all-feature Clippy, workspace formatting and actionlint passed.
+
+The five constructor receipts contain74/66/66/64/60 source hashes and agree on
+all53 shared files. Each source hash was checked against immutable Git; the
+complete scope and unchanged frozen-Go manifest are retained. Actual candidate
+CLI SHA256 is
+`df339eeb2cc57b69d51b913a6e9f8b2828ad7e34f5943a2690ea21c4639096db`.
+Copied native/Go provider-test executables, accepted-parent/native/Go/sentinel
+CLI bytes, complete raw wire captures and every stage log have length/SHA and
+lossless gzip roundtrip receipts. All current ELF artifacts in the exclusive
+target were additionally archived before reviewer handoff, with zero target
+users. No other target or historical source/evidence was changed or retired.
+
+`migration/evidence/usage-next-768/final-linux/validation.json` binds the clean
+source, commands, SDK/environment, full source/proof manifests and archive
+receipt. This is author Linux acceptance, not independent approval or native
+Windows/macOS proof. Different-author full-layer review and all required fresh
+native platform checks remain mandatory before publication/merge; full768 and
+the remaining credential families stay open.
