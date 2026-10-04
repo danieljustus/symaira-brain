@@ -30,7 +30,7 @@ pub fn format_go_quoted_bytes(bytes: &[u8]) -> String {
                 if valid_len > 0 {
                     append_go_quoted_str(
                         &mut out,
-                        &String::from_utf8_lossy(&remaining[..valid_len]),
+                        std::str::from_utf8(&remaining[..valid_len]).expect("valid prefix"),
                     );
                 }
                 append_go_hex_escape(&mut out, remaining[valid_len]);
