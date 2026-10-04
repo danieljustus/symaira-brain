@@ -55,7 +55,7 @@
     },
     {
       "id": "conflict-rule-winners",
-      "required": "actor trust/recency thresholds, similarity float32, pending audit and supersession owner exact"
+      "required": "importance higher wins, then CreatedAt newer, then lexically lower ID; actor attribution remains in audits, not winner ranking; similarity float32, pending audit and supersession owner exact"
     },
     {
       "id": "working-expired-zero-one-many",

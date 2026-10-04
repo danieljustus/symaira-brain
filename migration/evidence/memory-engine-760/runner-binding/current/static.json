@@ -1,0 +1,22 @@
+{
+  "scope": "SOURCE_ONLY; no compiler/SDK/product/target/port execution",
+  "parent": "9f1b1dc07503e7ede84d1e38074100929cb50805",
+  "original_review_records": 24,
+  "original_source_unchanged": true,
+  "full60_and_helper_unchanged": true,
+  "python_checks": 8,
+  "python_ast_files": 4,
+  "runtime_baseline_and_controls": "PREPARED_NOT_EXECUTED",
+  "case_identities_sha256": "7f878e62805ce7cdeb164651e3ddc28f70edc90fa6402a5a33198c12658cc18c",
+  "changed_files_under400": {
+    "scripts/memory-engine-oracle/binding.py": 140,
+    "scripts/memory-engine-oracle/replay.py": 137,
+    "scripts/memory-engine-oracle/test_binding.py": 63,
+    "scripts/memory-engine-oracle/build.py": 72
+  },
+  "remaining_native_platform_SDK_maps": [
+    "Windows",
+    "macOS"
+  ],
+  "SDK_hashing_only_no_SDK_invocation": true
+}

@@ -10,6 +10,8 @@ import subprocess
 import sys
 import tempfile
 
+import binding as proof
+
 
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -52,59 +54,24 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--go-source", type=Path, required=True)
     parser.add_argument("--rust-source", type=Path, required=True)
-    parser.add_argument("--control", choices=["changed-input", "zero-selected", "output-obstruction"])
+    parser.add_argument("--go-sdk", type=Path, required=True)
+    parser.add_argument("--rust-sdk", type=Path, required=True)
+    parser.add_argument("--control", choices=["changed-input", "zero-selected", "output-obstruction", "omitted-case"])
     args = parser.parse_args()
     args.output = args.output.resolve()
     args.output.mkdir(parents=True, exist_ok=False)
     here = Path(__file__).resolve().parent
-    cases = json.loads((here / "cases.json").read_bytes())
-    if not cases or len({case["id"] for case in cases}) != len(cases):
-        raise ValueError("nonempty unique input identities required")
+    cases = proof.cases()
     binding = json.loads(args.binding.read_bytes())
     binaries = {"go": args.go_test.resolve(strict=True),
                 "rust": args.rust_probe.resolve(strict=True)}
-    for role, path in binaries.items():
-        if digest(path) != binding[role + "_binary_sha256"]:
-            raise ValueError("unbound executable: " + role)
-    # A filename or a successful subprocess is not original-source evidence.
-    for key in ["frozen_go_commit", "go_sdk", "rust_source", "rust_sdk",
-                "original_go_file_hashes", "go_helper_sha256", "Cargo_lock_sha256"]:
-        if not binding.get(key):
-            raise ValueError("missing build provenance: " + key)
-    if binding["go_helper_sha256"] != digest(here / "oracle_test.go.txt"):
-        raise ValueError("Go helper differs from its actual build")
-    def verify_sources():
-        for role, checkout in [("go", args.go_source), ("rust", args.rust_source)]:
-            revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=checkout, text=True).strip()
-            expected = binding["frozen_go_commit" if role == "go" else "rust_source"]
-            if revision != expected:
-                raise ValueError("source revision changed: " + role)
-            key = "original_go_file_hashes" if role == "go" else "original_rust_file_hashes"
-            if not binding.get(key):
-                raise ValueError("complete source map required: " + role)
-            tracked = subprocess.check_output(["git", "ls-tree", "-r", "--name-only", "HEAD"], cwd=checkout, text=True).splitlines()
-            required = {name for name in tracked if
-                        (role == "go" and (name.endswith(".go") or name in ["go.mod", "go.sum"])) or
-                        (role == "rust" and (name.endswith(".rs") or name.endswith("Cargo.toml") or name == "Cargo.lock"))}
-            mapped = [item["path"] for item in binding[key]]
-            if set(mapped) != required or len(set(mapped)) != len(mapped):
-                raise ValueError("incomplete or duplicate source map: " + role)
-            for item in binding[key]:
-                relative = Path(item["path"])
-                if relative.is_absolute() or ".." in relative.parts:
-                    raise ValueError("source map escapes checkout")
-                if digest(checkout / relative) != item["sha256"]:
-                    raise ValueError("source bytes changed: " + str(relative))
-        materialized = args.go_source / "internal/memory/contextassembler/zz_native_engine_oracle_test.go"
-        if digest(materialized) != binding["go_helper_sha256"]:
-            raise ValueError("materialized helper changed")
-    verify_sources()
+    before = proof.snapshot(args.go_source, args.rust_source, args.go_sdk, args.rust_sdk, binaries)
+    proof.verify_receipt(binding, before, args.binding)
     result = {"status": "FAIL", "cases": len(cases), "control": args.control,
               "cases_sha256": digest(here / "cases.json"),
               "runner_sha256": digest(Path(__file__)),
               "binding": binding, "binding_sha256": digest(args.binding),
-              "binaries": {role: {"path": str(path), "sha256": digest(path)}
-                           for role, path in binaries.items()}}
+              "before": before}
     with tempfile.TemporaryDirectory(prefix="owned-", dir=args.output) as temporary:
         work = Path(temporary)
         for part in ["home", "config", "data", "cache", "tmp"]:
@@ -121,6 +88,8 @@ def main():
         rust_cases = json.loads(json.dumps(cases))
         if args.control == "changed-input":
             rust_cases[0]["text_hex"] = b"plain greeting without a trigger".hex()
+        if args.control == "omitted-case":
+            rust_cases.pop()
         rust_input.write_text(json.dumps(rust_cases), encoding="utf-8")
         go_output, rust_output = work / "go-results.json", work / "rust-results.json"
         if args.control == "output-obstruction":
@@ -130,7 +99,11 @@ def main():
         selector = "^NoSuchOwnedOracleTest$" if args.control == "zero-selected" else "^TestNativeMemoryEngineOracle$"
         result["environment"] = env
         result["go"] = run([str(binaries["go"]), "-test.run=" + selector, "-test.v"], work, env, "go")
-        result["rust"] = run([str(binaries["rust"]), str(rust_input), str(rust_output)], work, env, "rust")
+        if {role: digest(path) for role, path in binaries.items()} != before["binaries"]:
+            result["executable_change_between_runs"] = True
+            result["rust"] = {"status": None, "skipped": "executable identity changed after oracle"}
+        else:
+            result["rust"] = run([str(binaries["rust"]), str(rust_input), str(rust_output)], work, env, "rust")
         for path in [go_input, rust_input, go_output, rust_output,
                      work / "go.stdout", work / "go.stderr", work / "rust.stdout", work / "rust.stderr"]:
             if path.is_file():
@@ -147,7 +120,13 @@ def main():
             failures.append(str(error))
         result["failures"] = failures
         result["status"] = "PASS" if not failures else "FAIL"
-    verify_sources()
+    try:
+        result["after"] = proof.snapshot(args.go_source, args.rust_source, args.go_sdk, args.rust_sdk, binaries)
+        if result["after"] != before or result.get("executable_change_between_runs"):
+            failures.append("source/input/SDK/executable identity changed during actual processes")
+    except (ValueError, OSError, subprocess.CalledProcessError) as error:
+        failures.append("post-process binding failed: " + str(error))
+    result["status"] = "PASS" if not failures else "FAIL"
     # Preserve source/binary maps and all failures; no runtime receipt is reused.
     (args.output / "receipt.json").write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps({"status": result["status"], "cases": len(cases), "failures": result["failures"]}))

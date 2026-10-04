@@ -1,0 +1,174 @@
+{
+  "original_source": "9f1b1dc07503e7ede84d1e38074100929cb50805",
+  "records": [
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/cases.json",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/cases.json.gz",
+      "sha256": "7f878e62805ce7cdeb164651e3ddc28f70edc90fa6402a5a33198c12658cc18c",
+      "bytes": 11499,
+      "gzip_sha256": "622ca9ab609626320d6e1a825c4c81c47b8cc006d345dd5d6db1d163098afa40"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/census-verification.json",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/census-verification.json.gz",
+      "sha256": "b892040ae362fc3d7a30864c2914d4437ed06f9d33b35a4481f4a5d04c938d18",
+      "bytes": 27374,
+      "gzip_sha256": "73ca60ac80e49c3cc6f7f44284b79b27adb89d73ef623ce86b701a672b57a4bf"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/coverage-predicate-exact.py.txt",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/coverage-predicate-exact.py.txt.gz",
+      "sha256": "24819eaec5f8bc3e01cf9464111834108d8b527c9903f6e02f8ef0f0c22cbe1b",
+      "bytes": 137,
+      "gzip_sha256": "9bcef45ff011838bf96892e3dd426c371a750780f482e6917f4e9ea8597896cc"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/coverage-projection.json",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/coverage-projection.json.gz",
+      "sha256": "ec27380e18bf793955ad93a6e7fc5187168f2abda747ab1f96a47995aeee1297",
+      "bytes": 2084,
+      "gzip_sha256": "b29d2b173bbcfcae0c2c3247e556d8fb3c5a804d2a50fabdfb596118c21159d4"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/coverage-projection.log",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/coverage-projection.log.gz",
+      "sha256": "080cfc8a3cd2d76116b82519491be2324283dd887ad8dcbc9fc652dad99de4de",
+      "bytes": 148,
+      "gzip_sha256": "4cb1ca0bb0f3c344e7eb12456cafb08a41c15c1a0d80ebce0f4a100fed741f37"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/coverage-records-projection.json",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/coverage-records-projection.json.gz",
+      "sha256": "38ef29a945d5a1f1b04a2f9287a45b39691b54e50591ed84993ed96e288729ff",
+      "bytes": 217,
+      "gzip_sha256": "77cc6267427b9bf05037506af4e0b3322a95126919d6215b62131531fcf42cae"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/engine_probe.rs",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/engine_probe.rs.gz",
+      "sha256": "49cf268f3b87be8cc026b708234d43bd56d8d2c14ca8a495ffece27568e18615",
+      "bytes": 4661,
+      "gzip_sha256": "1e9e2129fbffdf298cf21be1b5c7601cfa934e19fc630f11e12457dd7aeb99f8"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/executable-binding-order.json",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/executable-binding-order.json.gz",
+      "sha256": "2b2af18c300b086bd15608e42b63efd389c4b4bb4d3c3b9ec381717f3f4e1ce2",
+      "bytes": 244,
+      "gzip_sha256": "787084226a140bdd6cdaa30a14d2f93f88be422da652c157c0e935a72e1e2b1a"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/final-source-verification.json",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/final-source-verification.json.gz",
+      "sha256": "622c8051802755ebd58c35501f3c3f8962fbbd645628b375f4838b57046dc023",
+      "bytes": 3903,
+      "gzip_sha256": "3b98857c4b7bd83f1bcbdfd1825342353a68500737df348e8bd27fd82451c354"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/independent-review.json",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/independent-review.json.gz",
+      "sha256": "8243557e62f6e6226b15b544eda029d2cf9b07d363d9f90a5db8d4f42ca8dfa7",
+      "bytes": 30629,
+      "gzip_sha256": "fc01a1845f5fb6a170e273f2cab7a740c326022df5d4418f22eb84f0013f393e"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/independent-review.md",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/independent-review.md.gz",
+      "sha256": "fd2e1d3bdba42f63ee24bf83dd8c967036c3f4fc4210925333f39cfc83e35573",
+      "bytes": 10330,
+      "gzip_sha256": "95b6713c87a484596570d615a4cb69f41fc709dc0f06dfd3297ee155532f43f4"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/oracle_test.go.txt",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/oracle_test.go.txt.gz",
+      "sha256": "7d5bfdf1f3c7f58a5189c2bc40eb017b29af126d015bcaaaa1c87996cc0b4122",
+      "bytes": 4060,
+      "gzip_sha256": "79ec5c2c4f72631875d1ac9c1072e6d62529c2537b1c25ea8befe177f90f5d97"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/projection-owned/go/go.mod",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/projection-owned/go/go.mod.gz",
+      "sha256": "6f9d4749f05aaffc08ba95bc65022a4f26a97c33c9a253fafa75c4fdb8220616",
+      "bytes": 15,
+      "gzip_sha256": "54e1e20eba7eb5714a135ce49a3e165a14d365f343ead56bcc154dc4e27b64aa"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/projection-owned/go/internal/memory/contextassembler/zz_native_engine_oracle_test.go",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/projection-owned/go/internal/memory/contextassembler/zz_native_engine_oracle_test.go.gz",
+      "sha256": "7d5bfdf1f3c7f58a5189c2bc40eb017b29af126d015bcaaaa1c87996cc0b4122",
+      "bytes": 4060,
+      "gzip_sha256": "79ec5c2c4f72631875d1ac9c1072e6d62529c2537b1c25ea8befe177f90f5d97"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/projection-owned/go/main.go",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/projection-owned/go/main.go.gz",
+      "sha256": "0c013fb435bf44e7b38b578cbaccfcfa6dc3dadf16395909992c37bdd4990785",
+      "bytes": 61,
+      "gzip_sha256": "6bf76a3e65a526a209877938c6f4ecd7663e29bafff022ba0761f6d107ce0979"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/projection-owned/rust/Cargo.toml",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/projection-owned/rust/Cargo.toml.gz",
+      "sha256": "70a1365af67f69b3cb6317bdc12c9386b4cb4d18cbec57545ad1ed81119bc3ad",
+      "bytes": 28,
+      "gzip_sha256": "3df68327886144e662b994c07600e4bd7abff78cf52649f0f85b6da87c8a0488"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/projection-owned/rust/lib.rs",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/projection-owned/rust/lib.rs.gz",
+      "sha256": "e9a2e0af0008ef584ff34cc0a7923c5a8fcee77f8cf341914a1da148e12fec97",
+      "bytes": 34,
+      "gzip_sha256": "9f4e23600536ce2d967e6f7a4572688bb336fe87559d3a5388c91df122f09c3b"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/provenance-projection.json",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/provenance-projection.json.gz",
+      "sha256": "2f98c713d6511e84cdd96ef46683d7df11eed7098eb7f7cb90fe8fbfcf4e4548",
+      "bytes": 819,
+      "gzip_sha256": "518ebf63f1671135764c3b8dd7e9232fd5daa7b4f1a7424441a85a5366dc317f"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/provenance-projection.log",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/provenance-projection.log.gz",
+      "sha256": "acfe1d33b5100abe836737a03508e8a6354cfa746f9bfc3d7bcc9e6592d1d508",
+      "bytes": 191,
+      "gzip_sha256": "6ac15b99045c55b414578e3b6731a2ffe7662fa536080f6b2f2a49f7d7d8349b"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/replay.py",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/replay.py.gz",
+      "sha256": "53b40d957f86874bc8b62b478b471c02ad1a9b52a2c8edec880218aa58091ba7",
+      "bytes": 8522,
+      "gzip_sha256": "6670c31cfea50b95cef772437478a4eea0e587f1e368f37c038eee380225a56e"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/single-result-projection.json",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/single-result-projection.json.gz",
+      "sha256": "a8de0237b62955a6cffda30bf687771cfc5e10e7b5b0ad60c941ab2e2e67d99d",
+      "bytes": 57,
+      "gzip_sha256": "0905ad8c1cca6493d5cdc138d2a1ea7a146bc23ee9cb494be9056926a682d715"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/truncated-input.json",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/truncated-input.json.gz",
+      "sha256": "f7b89f73fa144f0e2117cb745bc3f42a2f15da0a827f706d23efbd1a31b3d2c0",
+      "bytes": 130,
+      "gzip_sha256": "3d62bfd92d09394ee7f6137c247e64dff9e25f9e7869292d935bb51e06736134"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/verification.json",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/verification.json.gz",
+      "sha256": "9871efc61e2138b5d0fdeb4cda49a315ca15e2d7008b7639d2499c995c060651",
+      "bytes": 60324,
+      "gzip_sha256": "e3eac51a4a80b79a80877bba1bb77a9cb08d1b5908dc3969986fa24a83497bf8"
+    },
+    {
+      "original": "/workspace/review-artifacts/memory760-9f1-review-797/verify_sources-exact.py.txt",
+      "retained": "migration/evidence/memory-engine-760/runner-binding/original-review/verify_sources-exact.py.txt.gz",
+      "sha256": "e10ce7bfe52559bafc57c28b3df4b3ed578ebf7078699e2b10bf41e6b17b4ad5",
+      "bytes": 1835,
+      "gzip_sha256": "7e45355687394546218c5b296cf705bb6698ef4c5a8a93d4bc37bb4815a6e45b"
+    }
+  ],
+  "roundtrip": true
+}
