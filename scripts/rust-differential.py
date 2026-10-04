@@ -25,6 +25,7 @@ from pathlib import Path
 from typing import Callable
 
 from external_env import ensure_external_environment
+from differential_journal import Journal
 from harness_health_contract import HEALTH_DEVIATIONS, legacy_health_view
 if os.name == "posix":
     import pty
@@ -3099,6 +3100,9 @@ def main() -> int:
         return 2
     go_binary = Path(sys.argv[1]).resolve()
     rust_binary = Path(sys.argv[2]).resolve()
+    journal = Journal()
+    journal.bind("Go", go_binary)
+    journal.bind("Rust", rust_binary)
     _build_windows_stub()
     fixture_server = ReleaseFixtureServer()
     RELEASE_BASE_URL = fixture_server.__enter__()
@@ -3119,6 +3123,7 @@ def main() -> int:
         for name, reason in skipped_cases:
             print(f"  {name}: {reason}")
     for case in cases:
+        journal.event("case_begin", case=case.name)
         with tempfile.TemporaryDirectory(prefix="symbrain-parity-") as temp_dir:
             # macOS exposes /var as a symlink to /private/var. The native
             # capability walk intentionally rejects symlink ancestors, so
@@ -3134,9 +3139,11 @@ def main() -> int:
                 go_env.update(case.env_overrides)
                 rust_env.update(case.env_overrides)
             try:
+                journal.event("setup_begin", case=case.name)
                 if case.setup:
                     case.setup(go_root, go_env)
                     case.setup(rust_root, rust_env)
+                journal.event("setup_end", case=case.name)
                 go_argv = materialize_argv(case.argv, go_root)
                 rust_argv = materialize_argv(case.argv, rust_root)
                 # For atime-sensitive cases: capture atime before each run.
@@ -3145,8 +3152,8 @@ def main() -> int:
                 if case.normalize_atime:
                     go_atime_captured = capture_access_time_ns(go_root, "demo")
                     rust_atime_captured = capture_access_time_ns(rust_root, "demo")
-                go_result = run(go_binary, go_argv, go_env, case.stdin, case.pty)
-                rust_result = run(rust_binary, rust_argv, rust_env, case.stdin, case.pty)
+                go_result = journal.run(case.name, "Go", run, go_binary, go_argv, go_env, case.stdin, case.pty)
+                rust_result = journal.run(case.name, "Rust", run, rust_binary, rust_argv, rust_env, case.stdin, case.pty)
                 go_stdout = go_result.stdout
                 rust_stdout = rust_result.stdout
                 go_stderr = go_result.stderr
@@ -3273,6 +3280,7 @@ def main() -> int:
                     print(f"ACCEPTED HAR-007 {case.name} (validated versioned health contract)")
                 observed = (rust_result.returncode, rust_stdout, rust_stderr)
                 expected = (go_result.returncode, go_stdout, go_stderr)
+                journal.event("comparison", case=case.name, equal=observed == expected)
                 if observed != expected:
                     failures.append(
                         f"{case.name}: Go={expected!r}, Rust={observed!r}"
@@ -3289,6 +3297,9 @@ def main() -> int:
                 else:
                     print(f"PASS {case.name}")
             finally:
+                journal.fixture_state(case.name, "Go", go_root)
+                journal.fixture_state(case.name, "Rust", rust_root)
+                journal.event("case_end", case=case.name)
                 for base_root in (go_root, rust_root):
                     if base_root.exists():
                         for p in base_root.rglob("*"):
