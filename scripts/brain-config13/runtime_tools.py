@@ -27,12 +27,23 @@ def source(root, out):
         assert sha((root / name).read_bytes()) == expected, name
     for name, expected in checkpoint["pinned_source_sha256"].items():
         assert sha(Path(name).read_bytes()) == expected, name
+    independent_path = root / "migration/evidence/brain-config13/independent-826/symaira-brain765-corrections-independent-provenance.json.gz"
+    independent = json.loads(gzip.decompress(independent_path.read_bytes()))
+    references = dict(independent["external"])
+    references.update(independent["external_live"])
+    references.update(independent["author_pinned"])
+    for name, expected in references.items():
+        assert sha(Path(name).read_bytes()) == expected, name
+    frozen = Path("/workspace/oracles/daemon772-go-source")
+    for name, expected in independent["frozen_source"].items():
+        assert sha((frozen / name).read_bytes()) == expected, name
     tracked = subprocess.check_output(["git", "ls-files", "-z"], cwd=root).decode().split("\0")
     files = [name for name in tracked if name and (name.startswith(("rust/", "scripts/"))
              or name in ("Cargo.toml", "Cargo.lock"))]
     save(out / "source.json", dict(head=head, source={name: sha((root/name).read_bytes()) for name in files},
          validated_checkpoint_entries=len(checkpoint["candidate_source_sha256"]),
-         pinned_references=len(checkpoint["pinned_source_sha256"]), clean=True))
+         pinned_references=len(references), all_frozen_go_files=len(independent["frozen_source"]),
+         references=references, clean=True))
 
 
 def binaries(root, out, target):
