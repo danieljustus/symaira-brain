@@ -14,6 +14,7 @@ import subprocess
 import tempfile
 import time
 import daemon_state_key as key
+import startup_key_paths
 
 ROOT = key.ROOT
 INTERNAL = "--internal-startup-key-provider"
@@ -269,6 +270,7 @@ def main() -> int:
         provider_sha = key.registry.process.digest(provider)
         refusal_rows = refusals(binary, provider)
         boundaries = source_boundaries(args.rust_source_probe.resolve(), binary, provider, args.go_tool)
+        paths = startup_key_paths.observe(args.rust_source_probe.resolve(), binary, provider, args.go_tool)
         for mode, trigger in (("ab", "normal"), ("4", "normal"), ("descendant", "closed-writer"),
                               ("pipe-holder", "closed-writer"), ("descendant", "helper-deadline"),
                               ("descendant", "daemon-signal"), ("descendant", "client-deadline"),
@@ -281,7 +283,7 @@ def main() -> int:
               "platform": platform.platform(), "rust_binary_sha256": key.registry.process.digest(binary),
               "provider_binary_sha256": provider_sha, "provider_source_sha256": key.registry.process.digest(key.HERE / "state_key_fixture.go.in"),
               "candidate_source_sha256": {name: key.registry.process.digest(ROOT / name) for name in sources},
-              "cases": rows, "source_boundaries": boundaries, "refusals": refusal_rows, "unavailable": unavailable(binary), "matches": True,
+              "cases": rows, "source_boundaries": boundaries, "native_paths": paths, "refusals": refusal_rows, "unavailable": unavailable(binary), "matches": True,
               "scope": "explicit Browse CLI startup only; same-name sibling survives; no operator providers; native host evidence only"}
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2) + "\n")

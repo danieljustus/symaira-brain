@@ -234,3 +234,30 @@ No real keychain or credentials are queried. The probe resolves only, so it neve
 constructs a Store or writes state data. These five cases supplement, rather than
 replace, the eight lifetime cases and all original startup comparisons. All six
 native receipts and independent full review remain required.
+
+### Preserve native provider paths through the private supervisor
+
+Independent full review of source3db found one additional API defect: composing
+`SystemKeySources::with_programs(PathBuf)` with the explicit startup owner
+rejected an absolute Unix provider path containing byteFF before querying it.
+The same owned executable succeeded through the supervisor's internal route;
+ASCII and Unicode paths succeeded through both routes. This is a new public API
+restriction, not a claim that default Go CLI PATH search regressed. The original
+three paired observations, all thirty root-review proof files and the separate
+current-ELF retirement map remain byte-for-byte under `review-3db-root`.
+
+The private owned-command boundary now accepts native `OsString` arguments.
+Provider paths retain their native representation; fixed public provider
+references still pass the existing route validation. No UTF-8 replacement,
+normalization or lossy conversion is appropriate for a filesystem path. The
+standalone provider runner and public API semantics remain unchanged.
+
+Permanent actual observations compare the public resolver probe with the exact
+same provider's internal supervised route: ASCII and Unicode on every native
+platform, plus byteFF on Unix. Each successful route must actually query the
+owned provider with the same public reference. An actual Go child executable
+corrupts the Unicode/raw path before delegating to the real resolver probe; the
+gate rejects its incorrect fallback and missing provider query. This controls
+path identity rather than merely mirroring the new argument type. Fresh builds,
+full gates, independent review and all six native lanes remain required; source
+preparation during the shared compiler hold does not constitute runtime proof.

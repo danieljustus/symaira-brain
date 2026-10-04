@@ -1,6 +1,7 @@
 //! Existing bounded subprocess execution; cancellation is opt-in for startup owners.
 use crate::key_resolver::{MissingReason, ProbeError};
 use std::{
+    ffi::OsString,
     io::{Read, Write},
     path::Path,
     process::{Child, Command, ExitStatus, Stdio},
@@ -42,7 +43,7 @@ pub(super) use standalone::run_command;
 
 pub(super) fn run_owned_command(
     program: &Path,
-    args: &[&str],
+    args: &[OsString],
     input: Option<&[u8]>,
     timeout: Duration,
     ownership: Ownership,

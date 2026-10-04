@@ -37,23 +37,15 @@ pub(super) fn lookup(
     arguments.extend(args.iter().map(OsString::from));
     // Provider names and references are public and bounded; key bytes travel
     // only through the captured stdout pipe, never through argv or diagnostics.
-    let strings = arguments
-        .iter()
-        .map(|arg| {
-            arg.to_str()
-                .ok_or_else(|| ProbeError::Failed("startup provider argument is not UTF-8".into()))
-        })
-        .collect::<Result<Vec<_>, _>>()?;
-    let output = run_owned_command(owner, &strings, None, timeout, Ownership::Supervisor).map_err(
-        |error| match error {
+    let output = run_owned_command(owner, &arguments, None, timeout, Ownership::Supervisor)
+        .map_err(|error| match error {
             // Only the explicitly running supervisor may report a missing
             // provider. A missing owner is a failed ownership boundary.
             ProbeError::Missing(_) => {
                 ProbeError::Failed("startup provider supervisor unavailable".into())
             }
             error => error,
-        },
-    )?;
+        })?;
     if !output.status.success() {
         return Err(ProbeError::Failed(
             "startup provider supervisor failed".into(),
@@ -91,12 +83,12 @@ pub fn run_startup_provider(args: &[OsString]) -> u8 {
         let _ = std::io::stdin().read(&mut byte);
         watch.store(true, Ordering::Release);
     });
-    let strings: Vec<_> = provider_args.iter().map(String::as_str).collect();
+    let arguments: Vec<_> = provider_args.iter().map(OsString::from).collect();
     // The owner's deadline is authoritative. This fallback is later so its
     // normal deadline diagnostic cannot race the parent's timeout adaptation.
     let outcome = match run_owned_command(
         &program,
-        &strings,
+        &arguments,
         None,
         timeout + Duration::from_secs(1),
         Ownership::Provider(cancelled),
