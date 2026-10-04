@@ -67,3 +67,33 @@ This checkpoint performs only source comparison, AST/shell parsing, formatting
 and retention checks. Signature stubs are not native execution. Complete
 different-author runtime review, exact-source Linux/macOS/Windows CI, release
 integration and shipped repair remain required before any #649/#758 closure.
+
+The first allocated actual run at immutable `25292fe` compiled successfully but
+failed four new fixture assertions: the Memory library passed61/failed4, with
+all seven WAL tests and original80 concurrent opens passing. Keep the full
+actual stage log, all36 executed roles and517 ELF files/486 distinct archived
+payloads before any correction. The original failed test databases were removed
+by their owned Drop cleanup; nine fresh source-faithful input recreations and
+actual original252 CLI outcomes are retained explicitly as recreations, not
+misrepresented as recovered original UUID/timestamp bytes.
+
+The test helper's prefix end is inclusive. Catalog position20 is already022,
+so those supposed pre022 fixtures already had id/updated_at and applied UUID/
+timestamp rows. Callback tests could not reach the pending effect; the default
+and late-index tests correctly preserved whole state but wrongly expected an
+absent id column. Choose named before_migration cutoffs for the affected four
+test functions. Derive marker cardinality from that actual catalog position and
+assert the named marker is not present; retain all callback/diagnostic/full-state
+rollback assertions and add explicit missing-id preconditions. Production,
+defaults, WAL, catalog and all frozen resources remain unchanged. The original
+252/9b0/dba branches and failures remain immutable.
+
+Review every other prefix caller:13/14/15 genuinely straddle missing/old FTS;
+36 is the complete37-step owner;28 includes query_log before attribution;22
+already includes the historical sync triggers while remaining before034;
+the remaining20 custom-sync case is intentionally before023 and does not need
+the earlier relation boundary. Exhaustive prefix iteration remains exhaustive.
+No other numeric caller requires a semantic correction. Preserve that audit
+with the fixture source checkpoint, then rerun the complete allocated runtime
+driver. Passing author execution still requires different-author review and
+native three-OS acceptance before publication.

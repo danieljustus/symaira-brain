@@ -5,20 +5,20 @@ use rusqlite::Connection;
 
 #[test]
 fn actual_rule_and_relation_abort_callbacks_preserve_the_whole_database() {
-    for (end, trigger) in [
+    for (version, trigger) in [
         (
-            4,
+            "006_provenance",
             "CREATE TRIGGER reject_rule BEFORE UPDATE ON rules BEGIN SELECT RAISE(ABORT,'owned rule control'); END;",
         ),
         (
-            20,
+            "022_entity_relation_provenance",
             "CREATE TRIGGER reject_relation BEFORE UPDATE ON entity_relations BEGIN SELECT RAISE(ABORT,'owned relation control'); END;",
         ),
     ] {
         let database = OwnedDatabase::new();
         let before = {
             let conn = Connection::open(database.path()).unwrap();
-            prefix(&conn, end, true);
+            before_migration(&conn, version, true);
             conn.execute_batch(trigger).unwrap();
             snapshot(&conn)
         };
@@ -35,24 +35,24 @@ fn actual_rule_and_relation_abort_callbacks_preserve_the_whole_database() {
 
 #[test]
 fn ignored_backfills_and_marker_insert_cannot_publish_false_completion() {
-    for (end, trigger, diagnostic) in [
+    for (version, trigger, diagnostic) in [
         (
-            4,
+            "006_provenance",
             "CREATE TRIGGER ignore_rule BEFORE UPDATE ON rules BEGIN SELECT RAISE(IGNORE); END;",
             "rule timestamp",
         ),
         (
-            20,
+            "022_entity_relation_provenance",
             "CREATE TRIGGER ignore_relation BEFORE UPDATE ON entity_relations BEGIN SELECT RAISE(IGNORE); END;",
             "relation identity",
         ),
         (
-            20,
+            "022_entity_relation_provenance",
             "CREATE TRIGGER ignore_relation_time BEFORE UPDATE OF updated_at ON entity_relations BEGIN SELECT RAISE(IGNORE); END;",
             "relation timestamp",
         ),
         (
-            4,
+            "006_provenance",
             "CREATE TRIGGER ignore_marker BEFORE INSERT ON schema_migrations BEGIN SELECT RAISE(IGNORE); END;",
             "migration marker",
         ),
@@ -60,7 +60,7 @@ fn ignored_backfills_and_marker_insert_cannot_publish_false_completion() {
         let database = OwnedDatabase::new();
         let before = {
             let conn = Connection::open(database.path()).unwrap();
-            prefix(&conn, end, true);
+            before_migration(&conn, version, true);
             conn.execute_batch(trigger).unwrap();
             snapshot(&conn)
         };
@@ -107,12 +107,13 @@ fn missing_check_constraint_is_not_certified_by_column_presence() {
 #[test]
 fn later_wrong_index_rolls_back_uuid_backfill_fts_upgrade_and_new_markers() {
     let database = OwnedDatabase::new();
-    let before = {
+    let (before, marker_count) = {
         let conn = Connection::open(database.path()).unwrap();
-        prefix(&conn, 20, true);
+        let marker_count = before_migration(&conn, "022_entity_relation_provenance", true);
+        assert!(conn.prepare("SELECT id FROM entity_relations").is_err());
         conn.execute("CREATE INDEX idx_query_log_actor ON rules(content)", [])
             .unwrap();
-        snapshot(&conn)
+        (snapshot(&conn), marker_count)
     };
     let error = crate::Store::open(database.path())
         .err()
@@ -120,7 +121,10 @@ fn later_wrong_index_rolls_back_uuid_backfill_fts_upgrade_and_new_markers() {
     assert!(error.to_string().contains("idx_query_log_actor"), "{error}");
     let conn = Connection::open(database.path()).unwrap();
     assert_eq!(snapshot(&conn), before);
-    assert_eq!(scalar(&conn, "SELECT count(*) FROM schema_migrations"), 21);
+    assert_eq!(
+        scalar(&conn, "SELECT count(*) FROM schema_migrations"),
+        marker_count
+    );
     assert!(conn.prepare("SELECT id FROM entity_relations").is_err());
     assert_eq!(
         scalar(

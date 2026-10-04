@@ -26,6 +26,38 @@ pub(super) fn prefix(conn: &Connection, end: usize, seed: bool) {
     }
 }
 
+/// Materialize the real prefix strictly before the named pending effect.
+pub(super) fn before_migration(conn: &Connection, version: &str, seed: bool) -> i64 {
+    let count = catalog::STEPS
+        .iter()
+        .position(|(name, _)| *name == version)
+        .expect("fixture cutoff must name an owned migration");
+    prefix(
+        conn,
+        count
+            .checked_sub(1)
+            .expect("fixture needs an existing base"),
+        seed,
+    );
+    let count = i64::try_from(count).unwrap();
+    assert_eq!(
+        scalar(conn, "SELECT count(*) FROM schema_migrations"),
+        count
+    );
+    let already_applied: bool = conn
+        .query_row(
+            "SELECT EXISTS(SELECT 1 FROM schema_migrations WHERE version=?)",
+            [version],
+            |row| row.get(0),
+        )
+        .unwrap();
+    assert!(
+        !already_applied,
+        "named fixture effect must still be pending"
+    );
+    count
+}
+
 pub(super) fn entities(conn: &Connection) {
     conn.execute_batch("INSERT INTO entities(id,name,created_at,updated_at) VALUES ('a','Alice','2000-01-02 03:04:05','2000-01-02 03:04:05'),('b','Bob','2000-01-02 03:04:05','2000-01-02 03:04:05');").unwrap();
 }

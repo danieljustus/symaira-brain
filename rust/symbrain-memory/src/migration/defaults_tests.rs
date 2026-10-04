@@ -23,9 +23,10 @@ fn changed_table(schema: &str, table: &str, old: &str, new: &str) -> String {
 fn missing_or_wrong_oplog_default_rejects_before_markers_and_row_repairs() {
     for default in ["", " DEFAULT 'not-a-timestamp'"] {
         let database = OwnedDatabase::new();
-        let before = {
+        let (before, marker_count) = {
             let conn = Connection::open(database.path()).unwrap();
-            prefix(&conn, 20, true);
+            let marker_count = before_migration(&conn, "022_entity_relation_provenance", true);
+            assert!(conn.prepare("SELECT id FROM entity_relations").is_err());
             let resource = super::catalog::STEPS
                 .iter()
                 .find(|(name, _)| *name == "023_sync_oplog")
@@ -36,7 +37,7 @@ fn missing_or_wrong_oplog_default_rejects_before_markers_and_row_repairs() {
             assert_ne!(invalid, resource);
             conn.execute_batch(&invalid).unwrap();
             conn.execute_batch("CREATE TRIGGER reject_marker BEFORE INSERT ON schema_migrations BEGIN SELECT RAISE(ABORT,'marker must not be reached'); END;").unwrap();
-            snapshot(&conn)
+            (snapshot(&conn), marker_count)
         };
         let error = crate::Store::open(database.path())
             .err()
@@ -49,7 +50,10 @@ fn missing_or_wrong_oplog_default_rejects_before_markers_and_row_repairs() {
         );
         let conn = Connection::open(database.path()).unwrap();
         assert_eq!(snapshot(&conn), before);
-        assert_eq!(scalar(&conn, "SELECT count(*) FROM schema_migrations"), 21);
+        assert_eq!(
+            scalar(&conn, "SELECT count(*) FROM schema_migrations"),
+            marker_count
+        );
         assert!(conn.prepare("SELECT id FROM entity_relations").is_err());
     }
 }
