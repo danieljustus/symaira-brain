@@ -1,0 +1,419 @@
+{
+  "source": "340e482726f3ee9f858868618b9fa6e5f242b309",
+  "archive_sha256": "2c0096fcbd886704d8bf7ee1cbc86fa9526e4821e0da63dc66db48e1fb02d56d",
+  "bytes": 1292428,
+  "prior42_member_archive_retained_in_Git": true,
+  "members": [
+    {
+      "member": "approved-Source-d559-independent-proof-binding.json",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-Source-d559-independent-proof-binding.json",
+      "sha256": "15d9de74c1cf145aafd7e801047f5d601f4d233ccb0729ab4363ed0a93e8b03d",
+      "bytes": 9794,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131519576887530
+    },
+    {
+      "member": "approved-Source-d559-independent-report.md",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-Source-d559-independent-report.md",
+      "sha256": "72cb6d0b8a602e982873ea7880c222e565acbf53c10fdad238da2aa48d66b2cb",
+      "bytes": 10349,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131519576960851
+    },
+    {
+      "member": "approved-d559-complete-source-tree.bin",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-d559-complete-source-tree.bin",
+      "sha256": "e5e4ba8a8d40efa0b5e4d7836e77d073f580c02ff2dbe7ed04e8c0cc421d5498",
+      "bytes": 648108,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285438653989
+    },
+    {
+      "member": "approved-helper-conflict-index.bin",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-conflict-index.bin",
+      "sha256": "0ae86ba9bbd4e89cac4fd2fd6d6cd7041e390208c86c6caa766c798a8255ba64",
+      "bytes": 911,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285481423738
+    },
+    {
+      "member": "approved-helper-conflict-stage-map.json",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-conflict-stage-map.json",
+      "sha256": "4e813c47cdb6026ca2ef8c90b175b4ed713776bbf4bfc937259cc4da3135b6dd",
+      "bytes": 2575,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285508534787
+    },
+    {
+      "member": "approved-helper-conflict-stages/1/MIGRATION-RUST.md",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-conflict-stages/1/MIGRATION-RUST.md",
+      "sha256": "640065b12566ce1f0582a6eb30b9fdde729ed4657ed605cdebd12d157cbc2678",
+      "bytes": 26696,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285484331479
+    },
+    {
+      "member": "approved-helper-conflict-stages/1/migration/contract-matrix.csv",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-conflict-stages/1/migration/contract-matrix.csv",
+      "sha256": "8ef1a53f76cfb1f6ea36f6c7ab50e4c1c9b72d8091a2824ff171885eb8157716",
+      "bytes": 34140,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285491417165
+    },
+    {
+      "member": "approved-helper-conflict-stages/1/scripts/skills-argv-oracle/test_novel.py",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-conflict-stages/1/scripts/skills-argv-oracle/test_novel.py",
+      "sha256": "ce4c432c98d724bdb777faea056bdaa191d1806cef09759f9304ffde9c357f88",
+      "bytes": 3843,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285503137463
+    },
+    {
+      "member": "approved-helper-conflict-stages/2/MIGRATION-RUST.md",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-conflict-stages/2/MIGRATION-RUST.md",
+      "sha256": "4b1004ec96ad2ec8b36e84aeea1246482ad9819c6d30fc4e7b0a13a6effa795c",
+      "bytes": 30406,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285486959251
+    },
+    {
+      "member": "approved-helper-conflict-stages/2/migration/contract-matrix.csv",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-conflict-stages/2/migration/contract-matrix.csv",
+      "sha256": "7a61f1a3ac5ce15411c235af650bfd3373acfc6572991f33ee3cad4f8263a7b3",
+      "bytes": 36667,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285493517079
+    },
+    {
+      "member": "approved-helper-conflict-stages/2/scripts/skills-argv-oracle/inherited_output.py",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-conflict-stages/2/scripts/skills-argv-oracle/inherited_output.py",
+      "sha256": "fc0a99fdd733b6f585505639d7cb9637e4669ed0c5b6d2b06e5dfd7a8c989407",
+      "bytes": 3847,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285497859138
+    },
+    {
+      "member": "approved-helper-conflict-stages/2/scripts/skills-argv-oracle/test_novel.py",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-conflict-stages/2/scripts/skills-argv-oracle/test_novel.py",
+      "sha256": "110f6dbf3a759c919fa4077e0152193d925bee1825484d201d02d7248d2d4a86",
+      "bytes": 7584,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285505776156
+    },
+    {
+      "member": "approved-helper-conflict-stages/3/MIGRATION-RUST.md",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-conflict-stages/3/MIGRATION-RUST.md",
+      "sha256": "22ea430f7c0d094e0e6bbfde610d16284f90f818c86c9e1b1435a499755bfbd2",
+      "bytes": 27236,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285489334362
+    },
+    {
+      "member": "approved-helper-conflict-stages/3/migration/contract-matrix.csv",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-conflict-stages/3/migration/contract-matrix.csv",
+      "sha256": "0c00202fd4ee26070a624f2bcbdea6e23907fb2a63f054f4af0d44361b029a39",
+      "bytes": 34745,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285495526457
+    },
+    {
+      "member": "approved-helper-conflict-stages/3/scripts/skills-argv-oracle/inherited_output.py",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-conflict-stages/3/scripts/skills-argv-oracle/inherited_output.py",
+      "sha256": "e9267cd0a81153ad84bc33ec405ff9f9cc19ea47b95bc518a3132c6c90b1684c",
+      "bytes": 4050,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285499957576
+    },
+    {
+      "member": "approved-helper-conflict-stages/3/scripts/skills-argv-oracle/test_novel.py",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-conflict-stages/3/scripts/skills-argv-oracle/test_novel.py",
+      "sha256": "55ad91d677f9282db06359bc46aada29fb5a9e21d91995eb8a3ba14122773a98",
+      "bytes": 9949,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285508193682
+    },
+    {
+      "member": "approved-helper-materialized-source-fixtures.json",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-materialized-source-fixtures.json",
+      "sha256": "3579dc1f35bab301de58f9339bd97551eaa420113e2973a1ea58f9fca96974d7",
+      "bytes": 6727,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131333399835893
+    },
+    {
+      "member": "approved-helper-normal-merge.stderr",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-normal-merge.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285477923907
+    },
+    {
+      "member": "approved-helper-normal-merge.stdout",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-normal-merge.stdout",
+      "sha256": "df02a7fe4e5048826a0175ad01cbb6f52e77aeb2fc3bde08140898c9a7303f9b",
+      "bytes": 542,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285477923907
+    },
+    {
+      "member": "approved-helper-working-conflict-bodies/MIGRATION-RUST.md",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-working-conflict-bodies/MIGRATION-RUST.md",
+      "sha256": "fc5e6acb7e4dfd976072a88c875cb431bbc50baf3f71816bebc9b66e74f04c87",
+      "bytes": 31015,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285489451970
+    },
+    {
+      "member": "approved-helper-working-conflict-bodies/migration/contract-matrix.csv",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-working-conflict-bodies/migration/contract-matrix.csv",
+      "sha256": "449453f5a1dbb9dd5a41762dcefd83347165e7aa8e813d89fae79de828e6c37d",
+      "bytes": 37342,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285495621290
+    },
+    {
+      "member": "approved-helper-working-conflict-bodies/scripts/skills-argv-oracle/inherited_output.py",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-working-conflict-bodies/scripts/skills-argv-oracle/inherited_output.py",
+      "sha256": "838bb385192c42390b9106f015e714dfe70d1e40487b9158026e8756b6147eea",
+      "bytes": 4294,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285500160773
+    },
+    {
+      "member": "approved-helper-working-conflict-bodies/scripts/skills-argv-oracle/test_novel.py",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/approved-helper-working-conflict-bodies/scripts/skills-argv-oracle/test_novel.py",
+      "sha256": "3048712968e0b57d71b6aadc131f9835f29379aa75f1dca1d601527244bdb241",
+      "bytes": 10397,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285508269186
+    },
+    {
+      "member": "complete-parent-ci-step-union-check.json",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/complete-parent-ci-step-union-check.json",
+      "sha256": "927cb0d1e7390dc7170000f7a6196efbbd6ae15c43c8c38353823cc429817e4a",
+      "bytes": 2308,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791130847477679028
+    },
+    {
+      "member": "final-actionlint.stderr",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/final-actionlint.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131381691149457
+    },
+    {
+      "member": "final-actionlint.stdout",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/final-actionlint.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131381691149457
+    },
+    {
+      "member": "final-complete-source-parent-owner-map.json",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/final-complete-source-parent-owner-map.json",
+      "sha256": "51b6f0525df6d129a7ccdd125873b5ec3636ea7c34f687fe723356c2683798f7",
+      "bytes": 3061248,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131549666905147
+    },
+    {
+      "member": "final-entire-Source-integration-diffcheck.stderr",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/final-entire-Source-integration-diffcheck.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131520109358563
+    },
+    {
+      "member": "final-entire-Source-integration-diffcheck.stdout",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/final-entire-Source-integration-diffcheck.stdout",
+      "sha256": "c60a718ff2c1120343226d8f15f2cd5871bc8b71f41b6a04ab4385213007e90e",
+      "bytes": 416,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131520109358563
+    },
+    {
+      "member": "final-entire-diffcheck-parent-attribution.json",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/final-entire-diffcheck-parent-attribution.json",
+      "sha256": "09d7607c229b8a4a865914bad2f0f322f493d5a50d4335ecd2697a0ac1fe536e",
+      "bytes": 1100,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131520124661168
+    },
+    {
+      "member": "final-helper-current-profile-controls.json",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/final-helper-current-profile-controls.json",
+      "sha256": "df8d59ce6e42c7d1d34f042432f000be6f1b167bb44c7f6771b24c1d970e9b86",
+      "bytes": 2945,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131381704429221
+    },
+    {
+      "member": "final-helper-whole-diffcheck.stderr",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/final-helper-whole-diffcheck.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131381699149705
+    },
+    {
+      "member": "final-helper-whole-diffcheck.stdout",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/final-helper-whole-diffcheck.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131381699149705
+    },
+    {
+      "member": "final-physical-source-native-bindings.json",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/final-physical-source-native-bindings.json",
+      "sha256": "ae3475fd887c66a3fb1fd9614f7dfa458ff435713977829f520452f87660f78a",
+      "bytes": 176634,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131549668158191
+    },
+    {
+      "member": "final-pure-source-tests.log",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/final-pure-source-tests.log",
+      "sha256": "72db681e3bc6b48face437ab427ba8e0639ff838808c76827ba56717c0de4ad2",
+      "bytes": 3319,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131338385812492
+    },
+    {
+      "member": "final-whole-merge-diffcheck.log",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/final-whole-merge-diffcheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131350958200797
+    },
+    {
+      "member": "handoff.md",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/handoff.md",
+      "sha256": "7767b514be8bda82b3fc815152e69798737c5d99a0e6c8b875a7852668301604",
+      "bytes": 3998,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131621118561709
+    },
+    {
+      "member": "original-own-final-reader-sparse-failure.txt",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/original-own-final-reader-sparse-failure.txt",
+      "sha256": "b5ed87184ca51184b67e346a342a4e8922d984414a23fef490b119553f0f616a",
+      "bytes": 434,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131655499217392
+    },
+    {
+      "member": "original-own-sparse-evidence-add-failure.txt",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/original-own-sparse-evidence-add-failure.txt",
+      "sha256": "3baeaa72fbe243e1cd8922667cd542fd1b0516e87809586e4f4b2308b8eb60ca",
+      "bytes": 385,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791130806331045794
+    },
+    {
+      "member": "pre-helper-complete-source-tree.bin",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/pre-helper-complete-source-tree.bin",
+      "sha256": "dd2fda860c6adf10cb7e4b3f466767e62cb64a69de99a9546410cea705a611bf",
+      "bytes": 1162010,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131285424286890
+    },
+    {
+      "member": "source-only-own-python-bytecode-observation.json",
+      "path": "/workspace/review-proof/memory803-source806-coherent-integration/source-only-own-python-bytecode-observation.json",
+      "sha256": "ed536cace01c85b91603336569ede5f37cc7c3c3013b189f6c59199e208f46b6",
+      "bytes": 434,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791131431778035737
+    }
+  ],
+  "current_product_SDK_SQL_compiler_Target_cache_ports": 0
+}
