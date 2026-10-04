@@ -1,0 +1,1925 @@
+{
+  "source": "74a6b054",
+  "base": "b49372bedcd9c4514706c999447dc4f836be012a",
+  "rows": [
+    {
+      "path": "migration/evidence/skills-strict-lint-813/actionlint.log.gz",
+      "encoding": "gzip-source-evidence",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/actionlint.log",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791135084245763209
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/check_source.py.gz",
+      "encoding": "gzip-source-evidence",
+      "compressed_sha256": "9e1fc56199a947cc211bd3a660d91b758a090e8b305beaaf9a2e9ced39bd6d1e",
+      "original_sha256": "726deb697ede9a547fea38991b286c94f0ca622be96063b9507aa0d6d8838cec",
+      "original_bytes": 8497,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/check_source.py",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791135048000540197
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/diff-check.log.gz",
+      "encoding": "gzip-source-evidence",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/diff-check.log",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134835010074850
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/formatted-files.json.gz",
+      "encoding": "gzip-source-evidence",
+      "compressed_sha256": "c3e3777aca64a793935370d983d5e1ffd4f54ace106e4e569cd45b0d3b18e441",
+      "original_sha256": "021952eb1b8a9185c4cd77859f88fe4286f54b9d35b4ac93663415e8ebb1dc81",
+      "original_bytes": 779,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/formatted-files.json",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134834901969677
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/initial-token-check-observation/check_source.py.gz",
+      "encoding": "gzip-source-evidence",
+      "compressed_sha256": "f4bcc0a914890b9c1547fcf010ef7eb8f8c0525f92fc9f96e11e5e320f368a4e",
+      "original_sha256": "a241c633c79c2880f7b56635eea4fda1c95aa3fd402670c0b60f0ccbe87d2a2a",
+      "original_bytes": 8574,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/initial-token-check-observation/check_source.py",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791135017379624478
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/initial-token-check-observation/observation.txt.gz",
+      "encoding": "gzip-source-evidence",
+      "compressed_sha256": "9832dbe6791570c502316a229e5084e03f6cb4460832caec78193d5f9c7c2919",
+      "original_sha256": "b4b27fa28498aa6e5ff6cd445d2f48d49ecc24a5bd2a409a034a437344a33a82",
+      "original_bytes": 298,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/initial-token-check-observation/observation.txt",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791135048000449810
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/original-Git.json.gz",
+      "encoding": "gzip-source-evidence",
+      "compressed_sha256": "9d58161d5f42553a2e58a8334b83244d277c53b6eef583489096e4d02eaf3606",
+      "original_sha256": "d568525d1f27a3a968b924f995bc6cf4dea3bbc85743f260acce206120a75ae9",
+      "original_bytes": 1073054,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/original-Git.json",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719495556793
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/.github/workflows/browse-chrome-native-e2e.yml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "ec4e963338d355c3c0b4bebc9803684d77e984ff09b2711d0abb8f90cbafba03",
+      "original_sha256": "9c31845bee4d89551a52692fa5ba52691a2a995ccdaf742f3ba66d73b7d6c9a5",
+      "original_bytes": 3090,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/.github/workflows/browse-chrome-native-e2e.yml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718886793335
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/.github/workflows/browse-daemon-native.yml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "2c54e092208302249b9f4e83d04ddd426dee9f4815f2e86545b920374460831c",
+      "original_sha256": "ef1f1bd8ce89401479985e60d6cb84abdeffed67be5ce94010640d2ab3566249",
+      "original_bytes": 2323,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/.github/workflows/browse-daemon-native.yml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718887018846
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/.github/workflows/browse-flow-list.yml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "67557521d441178ccdc5ea5121385e8619ca16727bd1780beae8f42504c8c332",
+      "original_sha256": "545bed59e94d59abe8a0ba4471e5adad31490c99dad64e94e1f6886e5caff0e4",
+      "original_bytes": 1423,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/.github/workflows/browse-flow-list.yml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718887192619
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/.github/workflows/browse-perf003-real-chrome.yml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "d047d842aff82a3a634855c9c9227836d9907042b4fdb103f4e0e579c54c1903",
+      "original_sha256": "8899569b46a914f405800aea0b588f6160af3310c3b690696cdd66e4d6861324",
+      "original_bytes": 9635,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/.github/workflows/browse-perf003-real-chrome.yml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718887638583
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/.github/workflows/browse-profiles.yml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "1927f2aea5bab160c5b94fa7e96915408d771948be2739e1902efa4f8cd1fd42",
+      "original_sha256": "38357e0ad694f0660ec6a60d749368d566ea1cba90374af9a4ef268816c4d349",
+      "original_bytes": 1890,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/.github/workflows/browse-profiles.yml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718887829942
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/.github/workflows/bump-core.yml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "05e1bdc96319a812e4f4ef9daa851a43e676a25d555416c251a245fbd2262f86",
+      "original_sha256": "288e91377769d2e48a4553d122887b1c2e08d0f9f18017d6b4f9f45478515ffc",
+      "original_bytes": 8064,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/.github/workflows/bump-core.yml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718888182996
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/.github/workflows/ci.yml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "c9790a363182e10b86a9a5f83713eed471654a7280580f3032bd3e140de07469",
+      "original_sha256": "f39ed5ccd2e0f30606ad140fdee32eea61a8caa75fdf93592cb23ab479bb49d2",
+      "original_bytes": 75637,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/.github/workflows/ci.yml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718892356205
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/.github/workflows/codeql.yml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "fbf971c5309250d9b597b74cc195508cc490258184f080f44fa3eb856c38c15d",
+      "original_sha256": "da61adae3ab9f339d16f017aee37448723b97f11c34cd2ac12885ef92684a956",
+      "original_bytes": 1333,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/.github/workflows/codeql.yml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718892563979
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/.github/workflows/guard-review-repair.yml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "48c06ea29e95b171a3492c886a81fd657deb6862f0fdf9ab83888cf7e973211a",
+      "original_sha256": "46879b8f3724cab7f2ca0fc4ac976f24736ff1c3484482910dd14d40536f5868",
+      "original_bytes": 1427,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/.github/workflows/guard-review-repair.yml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718892744892
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/.github/workflows/manifest-drift.yml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "53f103a3c133fcf97e7c87a9c11e1fa872962c4bce949b6e6b6ae66285c3811e",
+      "original_sha256": "b828a1051ae35959b50fa6a668dfa38df9477c8e6bf0d44816a3b83489993f72",
+      "original_bytes": 1053,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/.github/workflows/manifest-drift.yml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718892891884
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/.github/workflows/mutation.yml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "684614727023f863bf2b6ed14d3d9acb18c4d8c60d2c9675166db752a7e19cb4",
+      "original_sha256": "03ac4247e1022601529bb54e8a514c91b6fa17268133fd41d972c12a14553294",
+      "original_bytes": 2430,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/.github/workflows/mutation.yml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718893073559
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/.github/workflows/release.yml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "b56ae39022847632c5c1b7665671557662a9994c2a123fe8b830bd7559a2b9e8",
+      "original_sha256": "357c0b52debef48ee86b3d99eb177d995cde72b06e4d633f7caaa1ae96a68413",
+      "original_bytes": 18201,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/.github/workflows/release.yml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718894020180
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/.github/workflows/rust-coverage.yml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "f5aedeefda6a434c074022fee6f458dcb6dd8786d7919344015a22cf07dfbc17",
+      "original_sha256": "a94fff5bb4498b7c0e7ee23b9d845cf95674be6ad04503857364007550bb250c",
+      "original_bytes": 2072,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/.github/workflows/rust-coverage.yml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718894236927
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/.github/workflows/rust.yml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "c3782b8764567330e344b6600cb96edf775f457e56f38132554dd15500f4e851",
+      "original_sha256": "186b4b564326318a572bb9b4a6070ead2a077090208277b89c260dbfbb695321",
+      "original_bytes": 7403,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/.github/workflows/rust.yml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718894676662
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/.github/workflows/skills-native.yml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "1d907970b0f34f176cc53707074e340c437e907f9f7ef14afe149c2c3cf88950",
+      "original_sha256": "90dfbfe7b6da56ec0bbc4c387569fbf9a1d5a5b398a367e2f76dcfa552a9424f",
+      "original_bytes": 3275,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/.github/workflows/skills-native.yml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718894935573
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/AGENTS.md.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "b3be89ad2919cd3d85d0fcfdc635e94344541df6e4e62951e3a7366a8fdfa5fe",
+      "original_sha256": "96501fab340de5969b201a1060581420f9085f923fbcf4c32d1394e4082189b6",
+      "original_bytes": 15652,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/AGENTS.md.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718895674941
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/Cargo.lock.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "e2c3063a1ab34c91c57d6f62617eabf2df9cb28975a4aa833c00c814b06654cf",
+      "original_sha256": "0423d7051babe01c29936d6198f9f106e614a92fa8e413f7333a32cf473a4d29",
+      "original_bytes": 65753,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/Cargo.lock.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718897693983
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/Cargo.toml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "8f04632cf3129938206afdb1c2296f5a56973610edcf8bd45f730a0980909fea",
+      "original_sha256": "982fdf67af364bb689371f888d79e4662bcbd2d7088dec0d7a2aa85f308a0155",
+      "original_bytes": 2785,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/Cargo.toml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134718897885422
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/migration/contract-matrix.csv.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "f4ee4aff5bf8343bb204601b70c16b39aa50b8e65f910df9e5389c46cad37fc4",
+      "original_sha256": "cd3d2a511b98e3148cbb859efcddea88b1c99ec33c5169d75a9abd857b8d83ba",
+      "original_bytes": 31186,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/migration/contract-matrix.csv.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719208897168
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/root-skills813-mac-first-failure.content.json",
+      "encoding": "gzip-original",
+      "compressed_sha256": "63d73e826ec720f362c21a25e97cb777fab21d903fb1914b9a18c5eb4b01a3dc",
+      "original_sha256": "3f72b9230cb0221ea8f8dd439655f48c692c5bb7a60005beb5c20939d28b0057",
+      "original_bytes": 73807,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/root-skills813-mac-first-failure.content.json",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719505694364
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/root-skills813-mac-first-failure.log",
+      "encoding": "gzip-original",
+      "compressed_sha256": "a146bca39680cb10ef7e007c489e5fe209d1358caa8e495d02cf42c6276837b5",
+      "original_sha256": "e95423cf7eccd0aa12a181aae2e21f3375786d73dfd71961edfa9fcd3b41724f",
+      "original_bytes": 72557,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/root-skills813-mac-first-failure.log",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719501020643
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/Cargo.toml.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "20bca500e36a1947be0043b521d39eff4e3f54a5412badb4488aef1b1b55243d",
+      "original_sha256": "bcfc92fc9dbb91cc8d17166504d87f0655cb3099d0af895fab784bee43fa6a12",
+      "original_bytes": 1008,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/Cargo.toml.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719415115714
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/examples/git_stream_fixture.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "e7ecedc094618050010b3dd146ebe3ab52805e55d194cba8141c1f1428c00a48",
+      "original_sha256": "6e79908da22897806d16d1593012dfe9d35e75be91ffbfae73d34b65c8bcd0ec",
+      "original_bytes": 1721,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/examples/git_stream_fixture.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719415588438
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/binary/godebug.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "4bef178dd1767eae4d317872f3b15191e6a305742463830feb06ec2571e3c476",
+      "original_sha256": "51bea6deeb77095424e405a812553c03644d9055c60f447fd15e31bb1552dd39",
+      "original_bytes": 10714,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/binary/godebug.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719417057950
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/binary/path.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "1497bc342acd9afa160bd9b097f3f0d212f6ab753270f25b93ac666e2afa5ee0",
+      "original_sha256": "7ca26682080677affc51f4e0afb9f2f6046f19322f00abaf3c6af5ff94af8d9c",
+      "original_bytes": 9804,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/binary/path.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719417657406
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/binary/windows.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "ef48b5a26da30ad72502d7976b44f7787f3fb991967e00ef96fd507ee2396b88",
+      "original_sha256": "8021874f66032ad18c90f688a7f4b83e164e5fcbeb2490da339cb52c55003c15",
+      "original_bytes": 6814,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/binary/windows.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719418135919
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/binary/windows_lower.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "643c7f1b0d2437ee6782cf60ccc0ecd4434615d1178ae75a9114828fd21d6681",
+      "original_sha256": "b87aa1b9b8f44a049c0765a7675a31b3ec944aeb1cba71467488e8ada74b53c7",
+      "original_bytes": 7406,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/binary/windows_lower.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719418578128
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/binary.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "1ce58bc830bb90e94c9edf9e261f189db354bb408172f0ed8c6d4f50373f32fa",
+      "original_sha256": "ff6904ccd272f4ecba926b9ec94f94e7e89ac7b0c81617268fdaf88920380e52",
+      "original_bytes": 3569,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/binary.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719416227835
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/cap_root.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "9da93ccf3dad600622b36ab05b2df1b9c7189134a507e390fc02eb53f100d466",
+      "original_sha256": "110c59e06ddaca95c8501d1a771127b0c433ded25c030ad796e26074c4682da8",
+      "original_bytes": 3224,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/cap_root.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719418798201
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/config.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "f7c4a2f39bff3c92bbf301dc5801618d0c08fd17dcc97679a608372eb03db006",
+      "original_sha256": "76202ae0e30e2e09430c118b61b26db6c48b3ddbc6e3b49427dc82bb8bb78d6d",
+      "original_bytes": 6140,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/config.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719419225396
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/context_profile.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "09881d6650be1c57e6cfa378708caeb645f6f29b10076a4538c887b16cb2f133",
+      "original_sha256": "9ed4989308d599b47a8a1f9abb85e57b4f2c3abe2a3ce7d943eb1ba862c7dd72",
+      "original_bytes": 10923,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/context_profile.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719419840196
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/discover.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "1f2a7e90b0591a2814100512e92563e3908afe931f345dc3286633ec477fe11f",
+      "original_sha256": "898c68b94f802a726a5c7b7cfd2698e29f70627113a3e565a00c76a9b31b4007",
+      "original_bytes": 7785,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/discover.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719420280391
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/encode.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "0c9b7046d094970877dc1dbab0db24ac5eac1f8d7ac55f5d48fdbc1fbe8de7e0",
+      "original_sha256": "884dded362ac4218f370ddff8eebfc40504056e185b2fccb587dc5af3c49f931",
+      "original_bytes": 3086,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/encode.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719420512011
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/base.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "2810abf954325579bcd21591aa123b4f455954909fc7a3b2b7dd747cb061a133",
+      "original_sha256": "59f52f4710a011ed207d4191c8bc09f39cbece056aa106a860b85c29f10b30c9",
+      "original_bytes": 13276,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/base.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719421069755
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/cache.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "179798a1626311c7292100104541c263114bf1bf2544a4ed1f7a25c96ee2e0e8",
+      "original_sha256": "f66aca3ac02f9193caf6ead5cbcece03afa5a3b02ed3880adf3dad97a7bb6c80",
+      "original_bytes": 1059,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/cache.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719421229316
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/core.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "b2fb25c02872145c757e081c3a375f477c54938958639f1fc230dbbb99495ed5",
+      "original_sha256": "c4d1631595e5fc627b5ef8da5079cf8fefa1586741e5b15ae41cffef610e390a",
+      "original_bytes": 8450,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/core.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719421659596
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/destination.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "49cbd6c154e4d1d9ff2bfe997e7fd6e1495a833834cd883cd169063cd1fbccf5",
+      "original_sha256": "c2bfb87e36f3427ef353b68078cdcde8de29ff8b4bff421fe12e62b521700c1e",
+      "original_bytes": 7226,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/destination.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719422175476
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/drift.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "29bd38e9ce1f3c80b754b77ade8d24b4751f57add2b0b11aa5c4bb3379a91481",
+      "original_sha256": "4d89fed7b088a72e2a1e72b22e2d57d44f5b716e38abbaff808f81e21bba0b6d",
+      "original_bytes": 8541,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/drift.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719422634260
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/event.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "75a12d0f5e05e7c882ca18d18eda98306c036ab75b590d00df4bbbe0fcd461e8",
+      "original_sha256": "3ebf498fed54b2c971b134b2e07722ee2ed88244a9eb999d5efceb91945e4d58",
+      "original_bytes": 9200,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/event.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719423106093
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/event_decode.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "9df43f81cba949834e97f38bc43890428f1e937e8f416f337004688228924fbf",
+      "original_sha256": "f3ed2b600c9ffbafa317a82211f4bbe13cc4626c124b563e100deda2236d45e6",
+      "original_bytes": 2287,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/event_decode.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719423345435
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/lock.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "0fef783dabe36f9c5359e578c5b3ca37e76ed276692966a656f9d33630bb9022",
+      "original_sha256": "e27366e8df14c1a8582920f84b9a87cfc12d2240e520b247e5eadcc12e07768a",
+      "original_bytes": 9798,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/lock.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719423779632
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/marker.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "8d77ccc69d5c24512b4010687152fa42a27c047f279dee441bf370d3bd5a6600",
+      "original_sha256": "7fd722f4cd2c8b95f8d4654828b23f166fb5e1f7cbbe2e57920b96a23ea3f342",
+      "original_bytes": 7731,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/marker.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719424121278
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/marker_json.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "856a75ebd8645c921d339db97958cf44b8f1c5909691abe999dc7ace0f161264",
+      "original_sha256": "5c1b31e26336cb85b2434da9d75e3a5211448a7bf3bd3790a7e486fd984be2bf",
+      "original_bytes": 7742,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/marker_json.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719424685351
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/marker_observation.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "7ae2a015db4ee30d98b40802cdeea69fb3bf9f2c68ccd49eef110117975727c5",
+      "original_sha256": "0d4ff654a185327e6e2736584916ee9cac81d902d1bd1caa30416aff3c8b00a1",
+      "original_bytes": 5860,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/marker_observation.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719425038905
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/marker_string.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "ef19d7586e8b6baaba2f904e453ef106c9c5bfa4c68d308163c0f28217a78f16",
+      "original_sha256": "9fd1e62a34d2c189d5e2f58545813acbff073b8da9f9e916ff5721e5255a4fde",
+      "original_bytes": 3107,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/marker_string.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719425462526
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/mod.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "9b065182fd74d4c7caf52dc45ef39293ecbb6ce471dc25be7a580b1fb4f5b3c4",
+      "original_sha256": "ac4758c2419ff92d57e40bd4afe7ca6c81475f9144032513c2de456a89a81bdf",
+      "original_bytes": 1461,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/mod.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719425794778
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/modes.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "5ef328a826fa392b3f3b22e524d6c82c504d882a9e664b6178e9fdd2114d352b",
+      "original_sha256": "35f97ba22b8c24c27803a52c9c5f0d3a82d171b1350c8b0a68b307e4258e2347",
+      "original_bytes": 3701,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/modes.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719426001521
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/ops.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "3dfa86fdb6a2858b6ad9a9de0e38ef022c122e62315fee14f59997dbdc081a31",
+      "original_sha256": "b03e2bb7a422203b07bbe879cc729925c4d090fe2ab6728f3c78dcfeeb89439e",
+      "original_bytes": 10582,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/ops.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719426743943
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/ops_symlink.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "30f735661f0b22778130f14b7373298496f7ac12f658b6099c069f81a48694a4",
+      "original_sha256": "d4fe488db7458986c03f8459ee13cfe9c8d636e377b2ed3b38c4dfc7ab4d5dcb",
+      "original_bytes": 2644,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/ops_symlink.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719427148094
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/render_status.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "329d3446f67a777bac83069866daea9e399df0ca98f4f1a0a06503c37be96386",
+      "original_sha256": "65e9a8db1f7d6d9eb71781d7d441b08af3a201be8c2771fc18f772cbd8d61319",
+      "original_bytes": 3295,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/render_status.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719427394617
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/replace.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "6a74f2f5031219c9b251508dc28be72385923d89422549e146d270f466e2b331",
+      "original_sha256": "5773c467f1bd37f45e1beb2d785fd823f5e82244150da1b529f10e7ed4d1ccdf",
+      "original_bytes": 13903,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/replace.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719428059041
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/replace_io.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "f8ce2bd7caae5ac5bdee5b68e7fe8bb84f0edd11f2a457c70e2b7cefb40d15f4",
+      "original_sha256": "6317c951bb417b84657b161a524ff685c045da8fe87dabd5fc8264ee24a8a0d6",
+      "original_bytes": 571,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/replace_io.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719428212423
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/status.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "5b418f740c5aaef00712583ef50fdbeb0590643c10163de6f379f0c1a52f6642",
+      "original_sha256": "eb17c938de102bdf8c6388579737892f08b12e6bb523327238836393ab68f73e",
+      "original_bytes": 12190,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/status.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719428909737
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/status_compare.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "34e7b2f1a8d91644d6ed215e94f4fc86c7ff86c5c08664cc384db68c62ba3298",
+      "original_sha256": "e350e3a41ae9615afc98399d82e60b526a27763685bfe0e12814747b9c57ac68",
+      "original_bytes": 8492,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/status_compare.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719429348360
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/sync.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "151e0e0704bdaf9bcdf0f1eb11e826f9789a69685cb6011ef37bbf7675d6219f",
+      "original_sha256": "81f7d1309c978f07f262bdf27745f7305e07e2608a628f8f0018d0f2b5ae7542",
+      "original_bytes": 11758,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/sync.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719429870129
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/sync_lock.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "f6496d6c69bacdf2094d6a9ba449a16db3c5ecf42042eeb03e5d5bbc8cf4b823",
+      "original_sha256": "17855156b7cff61d024093565e86de3ea2745eb8e934bf26788969b7545e4dfe",
+      "original_bytes": 4263,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/sync_lock.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719430119166
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/sync_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "7c880872b932231a518516087e88b9d87d7997a605b290c493a0dd8f4642406c",
+      "original_sha256": "2a96a9936c7afaa346d0db57a6a352f28fbda350391a61220f84097a5e1810ba",
+      "original_bytes": 2631,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/sync_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719430631170
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/transaction.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "c2c6c259a5c7784add471a9cf787248fb1a1e3b518996405afe93cb283e26a42",
+      "original_sha256": "4a96e00c2c13d11b3faab613ba1321f903c9f3ba7db9d9aa4afd849f78f475c0",
+      "original_bytes": 6848,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/transaction.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719430936661
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/install/uninstall.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "afd71a9a588ff27105a069922bbec609c4fdeb71dcad99e8d73966e28eda84f2",
+      "original_sha256": "65eae4b70f2463a62a6a92455da63ca6db28c5e93b356d5da7d0dacb3962d2a0",
+      "original_bytes": 6716,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/install/uninstall.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719431271668
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/io_contract.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "bd7b8a1d3ce6c54733de5874bb96aec6d032439ee158145658e92e60e90ce531",
+      "original_sha256": "065f6d731b958f1687a415f341161b7d7317bc3d0ec12a00c428caf91ec356ab",
+      "original_bytes": 1927,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/io_contract.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719431583289
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/lib.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "185f1cfd081fec9515f153096fc52515b9a9370231fb922bf2b114f587287543",
+      "original_sha256": "bfc43cd8116d34bc9805610427c5e77f6260731667a35cebad2dc43eaafb1751",
+      "original_bytes": 1285,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/lib.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719431783632
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/library.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "aa0f72e0c3bf0eb198ecd303e3ab15a6b94dcece6b20d874a61f5ddd8a9add75",
+      "original_sha256": "2f9449e95238398e182e929049d6ed609ed7abeb085e411489b9e00ae2b7c884",
+      "original_bytes": 8021,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/library.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719432167101
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/load.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "305be27c96b0537c2915f07b01897634857f03954fb2cefc331c5a3030d5efdb",
+      "original_sha256": "9b476351388a9359f4c82540920ec1b2babd844198bb87b79903124f05050590",
+      "original_bytes": 12594,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/load.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719432929204
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/load_control_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "b47bc1f6750db1a7326e773a2e18a43f05e9e65d9ab64cbe02f6b7605c9ab5db",
+      "original_sha256": "6bc99d28b25878e40f9908a1a5f04f4652df514ddee406f86b22058f20ca00e8",
+      "original_bytes": 3061,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/load_control_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719433182096
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/load_helpers.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "8af80738b13a7fdd2ffe6e0d8abae4953f3b15d5485f2763d66d39cbf196cd50",
+      "original_sha256": "757160ccbe672c4fb7d361f08d14dcac84d5f7d275382a3e2a8c95d545a04ec5",
+      "original_bytes": 3867,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/load_helpers.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719433467307
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/load_paths.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "28d8ec11ba238755c25212106886b2a86e98d5a9a1f07308335db85104e4df48",
+      "original_sha256": "44f77965328900d6f236ff938e017baa3e457c92dc6e88c9fef46975f59a6283",
+      "original_bytes": 6527,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/load_paths.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719433796214
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/load_read.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "4ae75d5914bfceca7223087abb366fcd67f3a2b9e076e91b2ebdc72e50d6dc4c",
+      "original_sha256": "2d8e94c91dc0feacee94b6fbfd959f2c1465d5d97cbfed373629a870240b8351",
+      "original_bytes": 10911,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/load_read.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719434420798
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/load_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "f2ead3a19ac82f9f2fac4eaf9badcfafafce908a14ae90f5fea6881e9f3ee25d",
+      "original_sha256": "1743ae794decd2b873f36993cab88ed6f3748126f39727a7192eb8e0c61175fc",
+      "original_bytes": 6611,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/load_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719434739230
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/materialize.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "2e964107522aa48ccdd463a1c20c10af7b010398d57905658a53f1931957496e",
+      "original_sha256": "3eb65969139effabf94fa7e9d74be4d5db6bea96e52139012545a9b335dce450",
+      "original_bytes": 9175,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/materialize.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719435121838
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/materialize_fs.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "03f83b375c72ade1e7f18c7d8b62d27a03c4bedb78a52f79032eab5bbaf61d22",
+      "original_sha256": "de8845e9682b5508e50034287ebf10c63d8773fc1ae5cc1107ebe3989e2264f9",
+      "original_bytes": 11090,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/materialize_fs.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719435693853
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/materialize_manifest.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "bee9889c4f4ac5decf554d9e4ab60351cec4b8c3731db85fb90114952082d480",
+      "original_sha256": "ac7dd8e7563aaafea1e049a4aea9c0c3db0e65e9ce61c1622b62a19a946530b7",
+      "original_bytes": 6965,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/materialize_manifest.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719436034378
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/materialize_stage.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "512437c279cb2044ded15c7d1444bdab6cd5666036ba86259df2084a2017d5e4",
+      "original_sha256": "873ac4792eca25369391de5fec548bdb55387cc8057c04022b5ad2bf492857f4",
+      "original_bytes": 4649,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/materialize_stage.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719436321712
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/metadata.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "22cd81af73f498395259fefa0d2e12f967ccbd1b3760675755fe8a8b8724dc9b",
+      "original_sha256": "936972423ec26e73660f2e09484531e2fd8baf5a33054d8a4c575bbe004631af",
+      "original_bytes": 11017,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/metadata.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719436864683
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/metadata_marker_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "efe0753c7b4c704851a201eed1706396dceb81eb39000affd10af813a61d4da1",
+      "original_sha256": "1cb7730855a8ed2a4962457bb923bd3f4506f0d60d97763f59b9954d77db8c84",
+      "original_bytes": 837,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/metadata_marker_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719437260121
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/metadata_times.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "90eb2b06264fcd6cbc2a0db1065f1c179028305f417456450701a2a0671ef267",
+      "original_sha256": "c5ca71d8190daaa5ad2dd40911a5fc5a0fd90e87fc6c693419b5592a854aa073",
+      "original_bytes": 5314,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/metadata_times.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719437764974
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/model.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "3de812a897c24ccb327165d54af395cb75ed1ae36f03111ca842d22f81e2fbd6",
+      "original_sha256": "72a7ebd5515600462576f2167b8ef7053e9de4349eae8a590fe8d76d69113acc",
+      "original_bytes": 7665,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/model.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719438110988
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/model_parse.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "34b5749541cf4cccdeba3161ebcb7deb1a468142e72b166ae26bb63bea0e2016",
+      "original_sha256": "179ace3238dcff65df1e8802f6979af67968df776186ffdfc46198f4c3f12863",
+      "original_bytes": 12842,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/model_parse.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719438824216
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/render.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "5325d833b81218c0fecaf7e8a3c4b45d1c63602cc1ea118312230934acb990c2",
+      "original_sha256": "161e6773adcb158f4cff0866ce73910a78720ee64ed96944b1c9456e1e4c5cae",
+      "original_bytes": 13846,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/render.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719439423332
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/render_variants.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "9be78f15d42424e995c069eea1f85355a76ee8951d500afcad3fa4e9a71509e8",
+      "original_sha256": "4d0ab5164c46fce22fa913c53898afce52ca5fa6e3bcba4ee31e218fbb1d161c",
+      "original_bytes": 3297,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/render_variants.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719439689123
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/runner.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "b2ed707eda1401d82989191d52434a7c96dd3252fbecfc4abbe383e28ec1b9a5",
+      "original_sha256": "6747f7687eba97151ef82eeb88c7a850e1459b96a5f8e5f6ffb35d58ac0c8e14",
+      "original_bytes": 12922,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/runner.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719440518287
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/runner_support.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "ecf7fc89dfbb120517ef669452b18a8c55780ae96e4185953aa72e2bd39245fb",
+      "original_sha256": "c088f7fc5523c6d845ea7355fd99ff8a7bae66f688880d0cc6d95ce43f3e2c04",
+      "original_bytes": 4168,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/runner_support.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719440929689
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/target.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "1df935685d03046c3846c9ea3bb048e37ea0487255c36f74557d33a8bb4050b7",
+      "original_sha256": "0ecfa59c673b3354e68e02c3d4184066377d5661299504bc92f13deb99e9dc6b",
+      "original_bytes": 6882,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/target.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719441225236
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/targets_status.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "d06176efbc3f279e6619146b89a52835e8522c5c024abadf2261a340f7df5ebb",
+      "original_sha256": "62cb3c6fafb34fd0b1cdeb5e3c1e465a456a844279061acf92d725e8af63d2b9",
+      "original_bytes": 10287,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/targets_status.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719441743108
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/text.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "9ea110e7784571e89329a563040b10ece4361baccda63e8885701a2e36dae990",
+      "original_sha256": "8b3eff24ae94f1d902fddd9c29b4d6fd02ea59cdec6a959c73745b6a91ed1701",
+      "original_bytes": 5698,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/text.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719442056432
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/validation.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "81f4137d8a93f49780cdb38b9830b2cbdf37e6158fa4052a41f1fbd424dae68c",
+      "original_sha256": "6bcb3e966388b8d7ea40be8907eb2d3da5252638dfd2b2b1d10b52f1a354ceb6",
+      "original_bytes": 12542,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/validation.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719442918395
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/variant.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "b089b83c9c32d392365c6e995d9e6cd0de0fdd6909a7416755ef881284f901f6",
+      "original_sha256": "3118358acf982f9891ec14687c4cd8094341592fb2f4aad0f80b1ee4a03d368e",
+      "original_bytes": 10721,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/variant.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719443612615
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/variant_ops.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "d3dd43beeb6bfedd4a9a296593447240a8879ddf55b2bbb26ef1e0cf00f18243",
+      "original_sha256": "944e7341a2eb67856a01f47ce938a024aaa1d51aa59db6c4ca86b3063436db16",
+      "original_bytes": 10330,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/variant_ops.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719444159732
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/variant_types.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "498710b9021855591427d7c2362c38bea31138a8b674b1e25c0d1ab8c4203c50",
+      "original_sha256": "db873fbe1c2273af4c6cce03662c7a034d3a03a5cb0e21de7c8eb4ba5795d40a",
+      "original_bytes": 4093,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/variant_types.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719444390501
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/vcs.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "7f94ce275811ae3e8bd0b1d3fdb59c1c64a9190dc8bd0bec51e51207208c7cb2",
+      "original_sha256": "0920c0681e68fc8f5ba1bff25f7d895564fbd9567dfe9d68c6e3c1a0efbbccfa",
+      "original_bytes": 5037,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/vcs.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719444920011
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/vcs_process.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "d191e533caae92154f7a35a657194164a2b6889247befbb7b3476c8b8db23bd6",
+      "original_sha256": "f0ef490eebee4c6e1650f8e11b87d7544f398029bb20bbeccfe5de0251afa060",
+      "original_bytes": 5055,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/vcs_process.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719445440147
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/vcs_restore.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "45f2702632096efe3999081519d001077502a6e27b041a8531b05d29798878b0",
+      "original_sha256": "7efa207ab8dab1366c87cf1d39bc058353dff04d4d303d29e504b88f0733dfaa",
+      "original_bytes": 7084,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/vcs_restore.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719445972111
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/src/wire.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "cf71a0099ff53c4c2d28bc49cbf2d85f834924b372ba5cf93d6530f3ecc8abd3",
+      "original_sha256": "04de34aab2e9cb6716225949622573b402b8b4eb5bf2c294102308938d803232",
+      "original_bytes": 3708,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/src/wire.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719446280007
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/all_target_scope_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "66ef94578b9d3c4c0e7d19b7b974c4e358d06680cade224844f94469ef63e836",
+      "original_sha256": "6b421cb8edae604349dd4e6d27d3b5e284c155c42c8556801c1e8a378721ae1e",
+      "original_bytes": 7782,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/all_target_scope_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719446832232
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/body_and_control_documents.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "5e90f096b889244844b48a6127e2855ab5da86767cf61ba62b9900d732167d11",
+      "original_sha256": "434e17776a415bb15f0201c0215995f55938f1106d3b443bb7876841f49725be",
+      "original_bytes": 2782,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/body_and_control_documents.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719447088840
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/byte_presentation.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "56974eef03d2a4f44c7d431cd5340367924fe1debcc7f057bcc6169face7ad75",
+      "original_sha256": "76b76e6f97bddad511c66d7c8baf87ca51d57a373500a502a6bebb3fabe3b5dd",
+      "original_bytes": 2692,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/byte_presentation.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719447375283
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/common/mod.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "d373e47dc6046b66c6ca0600fb62208c41e9d57cfaada4ff7fc053c9246605d1",
+      "original_sha256": "7c00acde1eddde40ee105a3a7c164a1b2d0c4ec266973fc20124c3f7835f036f",
+      "original_bytes": 805,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/common/mod.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719447621505
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/concurrent_installs.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "0098bf002a3a59624179affef9218a8d825680e45a9bf4c84d8335fd8dba488a",
+      "original_sha256": "e8c85370cda2dee8f0cba48a3cb710073ed2292cafd3800ba58641057206834d",
+      "original_bytes": 7842,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/concurrent_installs.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719448051696
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/confined_symlink_render_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "63356ed81cbad60f9836cf64043cea07b6107062b96eeea9b3b00ced860cb907",
+      "original_sha256": "15cc37e5ee1b01fb89c0c3eeb3a0b04108e2b1339e9abd1f3094f1145290552e",
+      "original_bytes": 10114,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/confined_symlink_render_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719448555527
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/context_profiles.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "998703bd820c15e8fabf692d45ca7bbe4be3cdae59719216744114da35dc9835",
+      "original_sha256": "9cc340235d8c157c14074fc773d26a1f113658884f8a42f71024c7204b788cca",
+      "original_bytes": 2157,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/context_profiles.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719449002613
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/discovery_control_identity.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "b20d906b65003a65f6ddf6e110bba7d266553516b3b9a393e24ba9750a320be2",
+      "original_sha256": "9eb23747b34c1aedb0263b86870e442f1cb81f9bb59f91371c943bc4cd9f8204",
+      "original_bytes": 2074,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/discovery_control_identity.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719449251299
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/discovery_read_contract.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "0b7089e4041976373c9451a80fc459dd45cf1c9463e0675799132e658ff4dbd5",
+      "original_sha256": "147006679922dd5586f32f680acc55a1748f707b0ef7c25e0b6ef84ef86af27e",
+      "original_bytes": 3774,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/discovery_read_contract.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719449737474
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/event_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "6734841f37e5a91ae7256784986ab117d90613a6d9ec713afc4ba6a82375d334",
+      "original_sha256": "a5fc1c5758527d060d9621fef48c5298a43859c62ec5438f70c9d418f5b65d0f",
+      "original_bytes": 9508,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/event_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719450181586
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/fixtures/install_status_oracle.json.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "95376990b56d816c4cc270b4093bba0d414ce13030caf492efe671cea6449285",
+      "original_sha256": "d4166ccc00d6dbb9ce7da55e3fa70527654526623a015421158010ff70bc7367",
+      "original_bytes": 34094,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/fixtures/install_status_oracle.json.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719450989227
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/fixtures/oracle_expectations.json.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "775d6673d215b28d9e31b4c47504bbaf1b9dbc9b3eb5212887fa07861eacae9a",
+      "original_sha256": "bc908f774253af1b3a0b099534d0f235060751b0b1aebfee358ed68bef5e27c1",
+      "original_bytes": 24537,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/fixtures/oracle_expectations.json.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719451925843
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/fixtures/runner_oracle.json.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "bba5efc2cf98a0d57c4dc9e1caa5fe214b9f5d4e9c61396d682fe625b9cede27",
+      "original_sha256": "526111a705290097d5744ceff54011be59e5859bea2b07099e1c208ad38e102f",
+      "original_bytes": 11627,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/fixtures/runner_oracle.json.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719452332938
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/generated_artifact_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "d362ee91e181087def900ec80b755df1f157bfbb760aa3ff40f3a328048f9290",
+      "original_sha256": "995a6fb39aba305538b55ca978cbc3b85b3ec43e0e0e0f09bbc3a5b4d2bfd888",
+      "original_bytes": 1517,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/generated_artifact_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719452533321
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/input_bounds.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "021d23501ba74c8b97edcc8494fc7faa4e28bdca12b20db94779b3088f27139c",
+      "original_sha256": "1ff790a2445abb92e62e67bbb99ff7a2db1cebb6856e388d46583e11dc0c0307",
+      "original_bytes": 7848,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/input_bounds.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719452896440
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/install_oracle_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "0ed27a64117263b20a58ec268f6f0814addf65734a3622ffaca72b1ad8fd2c61",
+      "original_sha256": "b2ca31dddb0a75975e8d22722ef008ca50cbd102713922672dec797ca153ffee",
+      "original_bytes": 17376,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/install_oracle_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719453779545
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/install_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "060aa4a9132f3d1cc9a2323fec1c7dd7d39b0e2c874ed579571da24457e158ed",
+      "original_sha256": "b0edb617b61a90643de6ab5aeb3bbc3f18fbd0ce9d840ff13d34bda401d8798d",
+      "original_bytes": 9128,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/install_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719454224177
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/metadata_precision.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "45c8ed11662db1cbc9e266d8715f6b1beb77e0b1302439e90990038badb76507",
+      "original_sha256": "b5add7b8a41528dc67fa06ff55bc76d080a0ca4cfdaa05da2246137b5ccbd990",
+      "original_bytes": 2557,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/metadata_precision.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719454531672
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/model_security_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "d787b76c60c4101e41ddef048eda0b9c5fa7063c4c48d52f6eccce9b780e89f6",
+      "original_sha256": "9c0e428b0588e0b210797ea935478d747355bb9c81c4c47baab2e4757d0ea317",
+      "original_bytes": 9187,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/model_security_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719454856132
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/model_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "9adb57003eeb7638c61d37bc84d6c05861976851fd271040ef99d75004250a0f",
+      "original_sha256": "cbc8d9024cd4b584defc5e34219a23b3e73517bb38a2c777c12393c0d7bf0ddc",
+      "original_bytes": 8121,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/model_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719455218440
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/project_identity_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "d0147620b610c7b79e72bdb28402be2c0d590de554cba65dcad1c5ff8f4c3ccb",
+      "original_sha256": "1a8c3750d4f1c3cb6930dc992591ec2f6c10fc839630289984baa17681758ba7",
+      "original_bytes": 4910,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/project_identity_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719455498323
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/recovery_uninstall_smoke.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "ecddad91950185f348a271ec72637e6689176ef5460c84b8e7be946f80e19bcb",
+      "original_sha256": "b00e93f543b8f59fd41d4e7a1bbd39effab52baa78075bb473c392a2fced2d28",
+      "original_bytes": 4847,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/recovery_uninstall_smoke.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719455751957
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/relative_root_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "2790b550bb7cea1f695e3b17862ef94f098445332190d36436804bd24e7cb433",
+      "original_sha256": "93f831dbea77ca20731c97723de9be9f66856e29af61ebb377142b4664914298",
+      "original_bytes": 1234,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/relative_root_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719455931748
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/render_drift_status.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "8aa8b898aab4f64f4f2cc382cfdb5c0f8ae59bae2ad0f312475b1b92795b4f1a",
+      "original_sha256": "e3a8952a32b040c90016587065d8bc2b56f1de0362bc9c091ca085ce093e924e",
+      "original_bytes": 11143,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/render_drift_status.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719456600229
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/render_materialize_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "a08cea6a28c34f19dabc3b3579465f43e96c5b451b26554e66a4d04b636569c0",
+      "original_sha256": "7b80e0e99fc9fff87dd838f4a1c7e3a2ced049a6cf20ccf9cfbd2403a2191fcb",
+      "original_bytes": 14227,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/render_materialize_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719457284734
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/render_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "0bc72755323b2049f751fbd4e692084d1d62914e0fa404270d2d77d2b9c5dace",
+      "original_sha256": "7e858d058ed58909959c7a64697b8550c4f0a373458ee43c8560ec096ae3e631",
+      "original_bytes": 13016,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/render_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719457883459
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/runner_env_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "1fe452f4302503aa3c3550b8bf4d3083db9f943e9302b358e4bf8b70978ad9f0",
+      "original_sha256": "9235656c6739dbe7ed491a168591e618c2e147b5bc3d701fb4b16ebdbc7715b2",
+      "original_bytes": 14937,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/runner_env_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719458585170
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/runner_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "b9b44569ffdcc8dfc637b9e3eca3f6f1056a7f8bdf838afdf527c3ab0aa1c808",
+      "original_sha256": "4e2dba0ab2b557f18b9c826868b99e84e73130507256cf337491e86cb9048eef",
+      "original_bytes": 9905,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/runner_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719459010623
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/status_parity_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "20b5789cdc13bccef27822101981c6dcb8b917dcd421861578507b920df2f147",
+      "original_sha256": "1624089ebb89f40df01fd12bd29b763611228715a609d54f90ebe86b965070bd",
+      "original_bytes": 6115,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/status_parity_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719459325288
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/sync_policy_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "876f14543b3fee13bcccc92b46ad01d75d1be82e33f04ca4421547488b3535f9",
+      "original_sha256": "dff599fc47f895ed61030ed1b465fa57b2a85169645616f600656ec415314bfb",
+      "original_bytes": 12040,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/sync_policy_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719459714307
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/variant_tests.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "6fd9322ad213d2f146f1d6d14ad21593b8c822121357e8a9d6d9b38e2a6a2c48",
+      "original_sha256": "86d9040aca24f19583caba4f4f17fb61f9297698a5f1664343e13bd71e3a6826",
+      "original_bytes": 12510,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/variant_tests.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719460284298
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/originals/rust/symbrain-skills/tests/windows_roots.rs.gz",
+      "encoding": "gzip-original",
+      "compressed_sha256": "aba43d9457df37e781d9348a03d6cf3e8b9b3522edef63ae84a8e5285d54e18d",
+      "original_sha256": "14995ed7d61e2fc9e999b422726c2fc2ef50b253929d16ba1ff02f16bacb2659",
+      "original_bytes": 6482,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/originals/rust/symbrain-skills/tests/windows_roots.rs.gz",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719460654638
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/root-skills813-mac-first-failure.content.json.native.json.gz",
+      "encoding": "gzip-source-evidence",
+      "compressed_sha256": "6a0b0da9d9ec6aa40a03ea8afbf4627bc969a0f737c816f7df499edfd0f5a59b",
+      "original_sha256": "515930b40c4b677507eb0066da1ca3c873e05f47598b0dbbefc0cda4f5775614",
+      "original_bytes": 266,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/root-skills813-mac-first-failure.content.json.native.json",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719505907386
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/root-skills813-mac-first-failure.log.native.json.gz",
+      "encoding": "gzip-source-evidence",
+      "compressed_sha256": "9be90fbe7111a60fbd209d693a3ee8181ae6d9ee18d7914a04a08c6102bebfb1",
+      "original_sha256": "5e437f180c9359a493d6277821e436d25b40a1360dc96666a8658a3db6a33175",
+      "original_bytes": 257,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/root-skills813-mac-first-failure.log.native.json",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134719501266905
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/rustfmt-check.log.gz",
+      "encoding": "gzip-source-evidence",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/rustfmt-check.log",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134834998074479
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/rustfmt-write.log.gz",
+      "encoding": "gzip-source-evidence",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/rustfmt-write.log",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791134834950072996
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/source-checks.json.gz",
+      "encoding": "gzip-source-evidence",
+      "compressed_sha256": "ec8da289cf2b3a1a2c804a4594a2614acec3db52b3207d3fad2c62e16bcd87b5",
+      "original_sha256": "5f9ef9d8eafadb368c5761a5215508a09e0ebeb34e7318a26118e613ea985d9d",
+      "original_bytes": 7232,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/source-checks.json",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791135085218268332
+      }
+    },
+    {
+      "path": "migration/evidence/skills-strict-lint-813/source-checks.log.gz",
+      "encoding": "gzip-source-evidence",
+      "compressed_sha256": "bcb4b09320f77ec89856c0f5ccb0a364297b104484ec14d5dcf8062d446cdf9c",
+      "original_sha256": "7b2addd646bdb43c046328411b0de33f9a4629047aa99f55bb6cb345e5a93ff7",
+      "original_bytes": 111,
+      "original_external_native": {
+        "path": "/workspace/review-proof/skills813-strict-lint/source-checks.log",
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791135085230225435
+      }
+    }
+  ],
+  "preservation": "all3141 full original Git body/blob/mode/native rows plus exact original crate/deps/workflows/full CI log/content; old worktree and Git objects unchanged"
+}
