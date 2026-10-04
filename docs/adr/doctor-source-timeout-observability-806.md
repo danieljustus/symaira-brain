@@ -1,6 +1,6 @@
 # Diagnose source-setup timeouts before changing their budget (#806)
 
-Status: source-only preparation. No new executable or native process was run.
+Status: bounded independent Linux acceptance at source7ea3cfb; native Windows cause and the prepared JobObject experiment remain unverified.
 
 The first independent journal execution at `9faee8b` failed before fixture
 construction, compiler or CLI launch: Python exposes `NamedTemporaryFile`, while
@@ -67,3 +67,8 @@ merely dropping the wrapper would abandon the required descendant termination.
 The diagnostic comparison is not a production fix; actual Windows evidence and
 the Source journal must guide that decision. No timeout increase, dependency
 upgrade, Go production mutation or test projection is justified by this review.
+
+
+Root independently executes all111 original Source pairs at clean7ea3cfb. All111 exact observations match; the journal retains893 events and111 complete pairs, including successful actual native descendant cleanup. Actual wrong-exit and wrong-source children are rejected on exactly their intended fields. A separate real controlled Python child reaches the unchanged25-second watchdog (25.07s): NUL/FF stdout/stderr and all256 marker bytes survive in a failed journal before owned fixture teardown. This establishes diagnostic losslessness, not a new production timeout or a Windows cause.
+
+All288 current-source/four frozen-Go bindings and300 production files identical to fully compiled58fe50 are checked. The exact independently reviewed Rust executable is restored from its archive, while Go CLI9337009 was freshly compiled earlier; no fresh Rust compilation is claimed for this diagnostic-only successor. The Windows ignored test and external watchdog remain source-only; actual current-head Windows/macOS execution is required. Complete Root raw proofs are retained in migration/evidence/doctor-source-progress-806/independent-7ea. The original9fa API failure, complete original CI timeout and original c672 process-proof lineage remain immutable.
