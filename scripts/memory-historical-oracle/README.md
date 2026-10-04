@@ -95,3 +95,7 @@ an unreviewed UI/catalog branch into this Store checkpoint.
 Windows/macOS signature checks are not native runtime evidence. Independent
 review, exact-head native three-OS CI and a shipped Rust release remain required;
 this checkpoint does not close #649 or #758.
+
+## Completed Linux successor validation
+
+The original source-checkpoint statements above remain historical. Author1fc5910 and independent63fbd320 have now each completed all seventeen allocated Linux stages with392 passing tests,37 historical repairs and37 complete-state reopens. Complete raw observations and original failures remain under `migration/evidence/memory-historical-649`; the independent review is `root-63fbd/review.md`. Actual native macOS/Windows and integrated-head CI remain required.
