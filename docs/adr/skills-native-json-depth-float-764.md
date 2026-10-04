@@ -123,7 +123,8 @@ The first local source commit `b617558bea545829061c559aa55cf1bbc7ae3a9e`
 exposed an author provenance error: repository `text=auto eol=lf` normalized
 CRLF in thirteen newly added framed fixture Git blobs, while their physical
 original reviewer bytes still matched. Both full original forms and Git/native
-identities are retained before correction. Scoped `-text` attributes restore
+identities are retained before correction. Scoped `binary` attributes (including `-text`, matching the existing fuzz
+corpus policy) restore
 the exact protocol bytes in Git without modifying any input assertion. Final
 source binding explicitly requires physical fixture bytes equal to immutable
 Git blobs as well as the original reviewer hashes. This is source-provenance
@@ -136,3 +137,11 @@ A naive format-template regex selected a later template; the bounded function
 projection now checks the actual Rust request-body format. An initial patch
 attempt with a redundant out-of-order context hunk was rejected before applying
 changes; its tool error is retained as author tooling, not product evidence.
+
+The initial attribute-only re-add also reused cached normalized Git blobs;
+full final verification caught all thirteen mismatches before handoff. Exact
+Git/native checkpoint `6cb8b112` and its failed complete verification are
+retained. Scoped `git add --renormalize` reindexed only these raw input files,
+and the final check compares every member against the immutable source blob.
+Binary diff attributes keep intentional protocol CRLF out of whitespace lint
+without excluding any Rust/source assertion or raw-byte verification.

@@ -7,4 +7,4 @@
 fuzz/corpus/** binary
 
 # F7/F8/F9 independent exact protocol inputs retain literal CRLF/native bytes.
-scripts/skills-native-oracle/json-review-inputs/** -text
+scripts/skills-native-oracle/json-review-inputs/** binary
