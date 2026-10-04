@@ -21,3 +21,6 @@ migration/evidence/memory-open-race-803/mixed-a112189/*.log binary
 
 # Preserve exact original merge-conflict reports as evidence, never source.
 migration/evidence/memory-historical-649/integration-main5e-wal2fe/*.conflict.txt binary
+
+# Preserve the original complete runtime failure output without text rewriting.
+migration/evidence/memory-historical-649/runtime-25292fe-original-failure/*.log binary
