@@ -9,6 +9,7 @@ import tempfile
 import time
 import replay
 import config_warnings
+from config_path_journal import Journal
 
 
 def cases():
@@ -55,7 +56,7 @@ def metadata(root):
     return result
 
 
-def observe(binary, case, root, native):
+def observe(binary, case, root, native, journal=None):
     env = replay.setup(root, 'empty')
     env.pop('SYMGUARD_CONFIG', None)
     component = os.fsdecode(b'owned-\xe2\x82<&>') if case.get('raw') else 'cfg'
@@ -93,9 +94,28 @@ def observe(binary, case, root, native):
     before = metadata(root)
     command = [str(binary), 'doctor']
     if binary.suffix == '.py': command.insert(0, sys.executable)
+    if journal:
+        journal.event('child-start', case=case['id'], native=native, binary=str(binary),
+                      argv=command, cwd=str(root/'project'), before=before,
+                      environment_bytes={key:os.fsencode(value).hex() for key,value in env.items()},
+                      lexical_input_hex=data.hex(), physical_input_hex=b'physical_owner=1\n'.hex())
     began = time.time()
-    process = subprocess.run(command, cwd=root/'project', env=env, capture_output=True, timeout=5)
+    try:
+        process = subprocess.run(command, cwd=root/'project', env=env, capture_output=True, timeout=5)
+    except BaseException as error:
+        if journal:
+            journal.event('child-exception', case=case['id'], native=native,
+                          exception_type=type(error).__name__, exception=str(error),
+                          stdout_hex=None if getattr(error,'stdout',None) is None else error.stdout.hex(),
+                          stderr_hex=None if getattr(error,'stderr',None) is None else error.stderr.hex(),
+                          after=metadata(root))
+        raise
     ended = time.time()
+    if journal:
+        journal.event('child-returned', case=case['id'], native=native,
+                      exit_code=process.returncode, stdout_hex=process.stdout.hex(),
+                      stderr_hex=process.stderr.hex(), began=began, ended=ended,
+                      after=metadata(root))
     assert metadata(root) == before, 'doctor changed owned file bytes/mode/mtime or links'
     return dict(exit_code=process.returncode, stdout_hex=process.stdout.hex(), stderr_hex=process.stderr.hex(),
                 normalized_stdout_hex=replay.normalized_stream(process.stdout, root, ['doctor'], native, True).hex(),
@@ -122,19 +142,32 @@ def compare(case, go, native):
     return 'matched'
 
 
-def control(go, native, root):
+def control(go, native, root, journal=None):
     root.mkdir()
     wrapper = root/'canonicalize-mutant.py'
     wrapper.write_text("""import os,subprocess,sys
+from pathlib import Path
 old=os.environ['XDG_CONFIG_HOME'];assert '/link/../' in old
-os.environ['XDG_CONFIG_HOME']=os.path.realpath(old)
+if os.name=='nt':
+    # Windows realpath cleans link/.. before resolving the junction. Resolve
+    # the owned link first so the mutant actually selects the physical owner.
+    prefix,tail=old.rsplit('/link/../',1)
+    resolved=os.path.realpath(prefix+'/link')
+    os.environ['XDG_CONFIG_HOME']=os.path.normpath(os.path.join(resolved,'..',tail))
+    assert (Path(os.environ['XDG_CONFIG_HOME'])/'symguard/config.toml').read_bytes()==b'physical_owner=1\\n'
+else:
+    os.environ['XDG_CONFIG_HOME']=os.path.realpath(old)
 assert os.environ['XDG_CONFIG_HOME']!=old
 p=subprocess.run([NATIVE,*sys.argv[1:]],capture_output=True)
 assert p.returncode==0 and b'physical_owner' in p.stderr
 sys.stdout.buffer.write(p.stdout);sys.stderr.buffer.write(p.stderr);sys.exit(p.returncode)
 """.replace('NATIVE',repr(str(native))))
     case=dict(id='canonicalize-owner-mutation',family='xdg',spelling='symlink-dotdot',state='semantic',contract='parity')
-    left=observe(go,case,root/'go',False);right=observe(wrapper,case,root/'native',True)
+    if journal:
+        journal.event('control-prepared', case=case, wrapper_source_hex=wrapper.read_bytes().hex(),
+                      wrapper_sha256=replay.digest(wrapper.read_bytes()))
+    left=observe(go,case,root/'go',False,journal);right=observe(wrapper,case,root/'native',True,journal)
+    if journal: journal.event('control-observed', go=left, mutated_native=right)
     assert right['exit_code']==0 and b'physical_owner' in bytes.fromhex(right['stderr_hex']), 'incidental mutant failure'
     try: compare(case,left,right)
     except AssertionError as error:
@@ -143,18 +176,19 @@ sys.stdout.buffer.write(p.stdout);sys.stderr.buffer.write(p.stderr);sys.exit(p.r
     raise AssertionError('accepted real config owner corruption')
 
 
-def main():
-    go,native,report=map(Path,sys.argv[1:]);go=go.resolve(strict=True);native=native.resolve(strict=True)
+def run(go, native, report, journal):
     rows=[];selected=cases()
     with tempfile.TemporaryDirectory(prefix='guard770-config-paths-') as directory:
         root=Path(directory)
         for index,case in enumerate(selected):
-            left=observe(go,case,root/str(index)/'go',False)
-            right=observe(native,case,root/str(index)/'native',True)
+            left=observe(go,case,root/str(index)/'go',False,journal)
+            right=observe(native,case,root/str(index)/'native',True,journal)
             try: disposition=compare(case,left,right)
             except AssertionError as error: disposition='failed: '+str(error)
             rows.append(dict(**case,disposition=disposition,go=left,native=right))
-        mutant=control(go,native,root/'control')
+            journal.event('pair-complete', observation=rows[-1])
+        mutant=control(go,native,root/'control',journal)
+        journal.event('control-complete', observation=mutant)
     output=dict(candidate_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=replay.ROOT,text=True).strip(),
                 candidate_dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=replay.ROOT)),
                 observed_native_source_override=os.environ.get('OWNED_NATIVE_EXECUTABLE_SOURCE'),
@@ -162,7 +196,7 @@ def main():
                 gated=sum(row['disposition'].startswith('native-fail-closed') for row in rows),results=rows,controls=[mutant],
                 binaries_sha256=dict(go=replay.digest(go.read_bytes()),native=replay.digest(native.read_bytes())),
                 source_sha256={str(path.relative_to(replay.ROOT)):replay.digest(path.read_bytes()) for path in [
-                    Path(__file__),replay.ROOT/'rust/symguard-cli/src/doctor/config.rs',
+                    Path(__file__),Path(__file__).with_name('config_path_journal.py'),replay.ROOT/'rust/symguard-cli/src/doctor/config.rs',
                     replay.ROOT/'rust/symguard-cli/src/guard_scan.rs',replay.ROOT/'rust/symguard-cli/src/guard_paths.rs',
                     replay.ROOT/'rust/symguard-cli/src/guard_path_windows.rs']},
                 inapplicable_unix_raw_cases=['xdg-raw-dotdot','home-raw-dotdot'] if os.name=='nt' else [],
@@ -170,7 +204,22 @@ def main():
                         'Explicit overrides retain OS path interpretation','typed/discovery states remain delegated'])
     report.write_text(json.dumps(output,indent=2)+'\n')
     assert not [row for row in rows if row['disposition'].startswith('failed')], 'see complete raw config-path receipt'
+    journal.complete(output)
     print(f'config paths{len(rows)}: {output["matched"]} full/{output["gated"]} gated; actual owner mutant rejected')
+
+
+def main():
+    go,native,report=map(Path,sys.argv[1:]);go=go.resolve(strict=True);native=native.resolve(strict=True)
+    journal=Journal(report, dict(candidate_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=replay.ROOT,text=True).strip(),
+                                candidate_dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=replay.ROOT)),
+                                binaries_sha256=dict(go=replay.digest(go.read_bytes()),native=replay.digest(native.read_bytes())),
+                                runner_sha256=replay.digest(Path(__file__).read_bytes()),
+                                journal_sha256=replay.digest(Path(__file__).with_name('config_path_journal.py').read_bytes())))
+    try:
+        run(go,native,report,journal)
+    except BaseException as error:
+        journal.failed(error)
+        raise
 
 
 if __name__=='__main__': main()
