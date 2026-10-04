@@ -90,20 +90,41 @@ pub(super) fn equal_fold(bytes: &[u8], ascii: &[u8]) -> bool {
 }
 
 pub(super) fn json_quote(bytes: &[u8]) -> Vec<u8> {
-    let mut text = String::new();
+    // Go appendString distinguishes malformed UTF-8 from a valid literal
+    // U+FFFD. Escape each invalid byte before any Unicode replacement can hide
+    // that distinction in embedded metadata JSON.
+    const HEX: &[u8; 16] = b"0123456789abcdef";
+    let mut out = vec![b'"'];
     let mut index = 0;
     while index < bytes.len() {
         let (ch, width) = rune(&bytes[index..]);
-        text.push(ch);
+        match bytes[index] {
+            b'"' | b'\\' => out.extend([b'\\', bytes[index]]),
+            b'\x08' => out.extend_from_slice(b"\\b"),
+            b'\x0c' => out.extend_from_slice(b"\\f"),
+            b'\n' => out.extend_from_slice(b"\\n"),
+            b'\r' => out.extend_from_slice(b"\\r"),
+            b'\t' => out.extend_from_slice(b"\\t"),
+            b'<' | b'>' | b'&' | 0..=31 => {
+                let byte = bytes[index];
+                out.extend([
+                    b'\\',
+                    b'u',
+                    b'0',
+                    b'0',
+                    HEX[usize::from(byte >> 4)],
+                    HEX[usize::from(byte & 15)],
+                ]);
+            }
+            _ if ch == '\u{fffd}' && width == 1 => out.extend_from_slice(b"\\ufffd"),
+            _ if ch == '\u{2028}' => out.extend_from_slice(b"\\u2028"),
+            _ if ch == '\u{2029}' => out.extend_from_slice(b"\\u2029"),
+            _ => out.extend_from_slice(&bytes[index..index + width]),
+        }
         index += width;
     }
-    crate::gojson::quote(&text)
-        .replace('&', "\\u0026")
-        .replace('<', "\\u003c")
-        .replace('>', "\\u003e")
-        .replace('\u{2028}', "\\u2028")
-        .replace('\u{2029}', "\\u2029")
-        .into_bytes()
+    out.push(b'"');
+    out
 }
 
 pub(super) fn json_map(values: &Metadata) -> Vec<u8> {

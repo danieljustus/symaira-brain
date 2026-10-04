@@ -364,7 +364,7 @@ for example `make GO_ORACLE_REF=<commit> rust-check parity-smoke`.
 4. Harness registry/adapters and the skills store/render/install pipeline.
 5. Guard approval/security state machines and usage providers.
 6. Memory SQLite schema, migrations, CRUD, retrieval, and importers.
-   #761 local importer/marker/Activity-retention source checkpoint is prepared only; see `docs/adr/memory-importer-library-checkpoint-761.md`. It admits no new route and does not complete the 15-family importer or DB-backed Activity acceptance gate.
+   #761 local importer/marker/Activity-retention source checkpoint and three independently requested local contract corrections are prepared only; see `docs/adr/memory-importer-library-checkpoint-761.md` and `docs/adr/memory-importer-local-contract-corrections-761.md`. Original 70 constructor cases remain intact with 23 additive cases, 12 retention cases and 32 unit functions prepared, zero executed. No new route is admitted; the 15-family importer and DB-backed Activity acceptance gates remain open.
 7. Return to the MCP cutover once native skills, usage, and memory handlers
    exist; then complete doctor, sync, release assets, and native smoke tests.
 8. Remove the Go fallback only after every contract row and release gate is

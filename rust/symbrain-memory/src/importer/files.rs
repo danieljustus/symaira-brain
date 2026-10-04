@@ -125,12 +125,20 @@ pub(super) fn relative(root: &Path, path: &Path) -> Result<Vec<u8>, ImportError>
 }
 
 pub(super) fn basename(path: &Path) -> Result<Vec<u8>, ImportError> {
-    // The generated paths here are already clean. Retain raw non-UTF-8 names.
-    let bytes = path_bytes(&clean(path)?)?;
-    if bytes == b"/" {
-        return Ok(bytes);
+    // Go Base removes trailing separators, but never Clean: explicit roots
+    // and command tokens such as npm/. must keep their final dot component.
+    let bytes = path_bytes(path)?;
+    if bytes.is_empty() {
+        return Ok(b".".to_vec());
     }
-    Ok(bytes
+    let end = bytes
+        .iter()
+        .rposition(|byte| *byte != b'/')
+        .map_or(0, |index| index + 1);
+    if end == 0 {
+        return Ok(b"/".to_vec());
+    }
+    Ok(bytes[..end]
         .rsplit(|b| *b == b'/')
         .next()
         .unwrap_or_default()

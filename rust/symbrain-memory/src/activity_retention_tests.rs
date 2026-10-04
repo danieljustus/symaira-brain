@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, TimeZone, Utc};
 use rusqlite::params;
 
 use crate::{Store, gotime};
@@ -131,4 +131,86 @@ fn duplicate_import_marker_updates_count_without_a_second_session() {
             .to_string()
             .contains("driver.Value type string into type *time.Time")
     );
+}
+
+fn seed_nanoseconds(store: &Store, end: &str, expiry: &str) {
+    let conn = store.activity_conn().unwrap();
+    for table in ["activity_segments", "activity_episodes"] {
+        let columns = if table == "activity_segments" {
+            "id,source,granularity,started_at,ended_at,applications,redacted_summary,raw_ref,prior_segment_ids,superseded_by,expires_at"
+        } else {
+            "id,title,scope,started_at,ended_at,confidence,sources,citations,expires_at"
+        };
+        let values = if table == "activity_segments" {
+            "'nano','owned','10min',?,?, '[]','owned','','[]','',?"
+        } else {
+            "'nano','owned','agent',?,?,0.5,'[]','[]',?"
+        };
+        conn.execute(
+            &format!("INSERT INTO {table} ({columns}) VALUES ({values})"),
+            params!["2026-01-01 00:00:00 +0000 UTC", end, expiry],
+        )
+        .unwrap();
+    }
+}
+
+#[test]
+fn expiry_preserves_submicrosecond_order_and_equal_boundary() {
+    for (at, expected) in [(400, 0), (500, 1), (600, 1)] {
+        let store = Store::open_in_memory().unwrap();
+        seed_nanoseconds(
+            &store,
+            "2026-01-01 00:00:00.0000005 +0000 UTC",
+            "2026-01-02 00:00:00.0000005 +0000 UTC",
+        );
+        let result = store.activity_expire(Some(time(&format!("2026-01-02T00:00:00.{at:09}Z"))));
+        assert!(result.error.is_none());
+        assert_eq!(result.deleted.episodes, expected);
+        assert_eq!(result.deleted.segments, expected);
+        assert_eq!(count(&store, "activity_segments"), i64::from(expected == 0));
+    }
+}
+
+#[test]
+fn range_start_does_not_delete_rows_ending_before_or_at_it() {
+    for (start, expected) in [(400, 1), (500, 0), (600, 0)] {
+        let store = Store::open_in_memory().unwrap();
+        seed_nanoseconds(
+            &store,
+            "2026-01-01 00:00:00.0000005 +0000 UTC",
+            "2026-01-02 00:00:00 +0000 UTC",
+        );
+        let result = store.activity_clear_time_range(
+            time(&format!("2026-01-01T00:00:00.{start:09}Z")),
+            time("2026-01-02T00:00:00Z"),
+        );
+        assert!(result.error.is_none());
+        assert_eq!(result.deleted.episodes, expected);
+        assert_eq!(result.deleted.segments, expected);
+    }
+}
+
+#[test]
+fn sql_timestamp_keeps_go_year_width_fraction_and_utc() {
+    for (year, nanos, expected) in [
+        (2026, 500, "2026-01-02 00:00:00.0000005 +0000 UTC"),
+        (1, 123_456_789, "0001-01-02 00:00:00.123456789 +0000 UTC"),
+        (-1, 0, "-0001-01-02 00:00:00 +0000 UTC"),
+        (10_000, 0, "10000-01-02 00:00:00 +0000 UTC"),
+    ] {
+        let at = Utc.with_ymd_and_hms(year, 1, 2, 0, 0, 0).unwrap()
+            + chrono::Duration::nanoseconds(nanos);
+        assert_eq!(super::database_time(at).unwrap(), expected);
+    }
+}
+
+#[test]
+fn unsupported_chrono_leap_second_refuses_before_sql_mutation() {
+    let store = Store::open_in_memory().unwrap();
+    seed(&store);
+    let result = store.activity_expire(Some(time("2026-01-01T23:59:60Z")));
+    assert!(result.error.is_some());
+    assert_eq!(result.deleted, crate::ActivityRetentionResult::default());
+    assert_eq!(count(&store, "activity_segments"), 2);
+    assert_eq!(count(&store, "activity_episodes"), 2);
 }

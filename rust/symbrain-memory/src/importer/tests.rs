@@ -117,8 +117,85 @@ fn codex_list_frontmatter_resets_duplicate_keys() {
 fn go_json_escapes_html_and_each_bad_byte() {
     assert_eq!(
         bytes::json_quote(b"<\xff\xfe>&"),
-        b"\"\\u003c\xef\xbf\xbd\xef\xbf\xbd\\u003e\\u0026\""
+        b"\"\\u003c\\ufffd\\ufffd\\u003e\\u0026\""
     );
+}
+
+#[test]
+fn json_distinguishes_valid_replacement_from_each_invalid_byte() {
+    assert_eq!(
+        bytes::json_quote("\u{fffd}".as_bytes()),
+        b"\"\xef\xbf\xbd\""
+    );
+    for raw in [b"\xff".as_slice(), b"\xc0", b"\x80", b"\xe2"] {
+        assert_eq!(bytes::json_quote(raw), b"\"\\ufffd\"");
+    }
+    assert_eq!(
+        bytes::json_quote(b"\xed\xa0\x80"),
+        b"\"\\ufffd\\ufffd\\ufffd\""
+    );
+    assert_eq!(
+        bytes::json_quote("a\u{2028}\u{2029}東京".as_bytes()),
+        "\"a\\u2028\\u2029東京\"".as_bytes()
+    );
+    assert_eq!(
+        bytes::json_quote(b"\0\x1f\x08\x0c\n\r\t\"\\"),
+        b"\"\\u0000\\u001f\\b\\f\\n\\r\\t\\\"\\\\\""
+    );
+}
+
+#[test]
+fn embedded_json_retains_raw_key_order_and_literal_replacement() {
+    let mut metadata = Metadata::new();
+    bytes::set(&mut metadata, b"\xff", b"\xff".to_vec());
+    bytes::set(
+        &mut metadata,
+        "\u{fffd}".as_bytes(),
+        "\u{fffd}".as_bytes().to_vec(),
+    );
+    assert_eq!(
+        bytes::json_map(&metadata),
+        b"{\"\xef\xbf\xbd\":\"\xef\xbf\xbd\",\"\\ufffd\":\"\\ufffd\"}"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn basename_preserves_dot_components_without_changing_clean_or_join() {
+    for (raw, base) in [
+        (b"".as_slice(), b".".as_slice()),
+        (b"////", b"/"),
+        (b"/owned/vault/.//", b"."),
+        (b"/owned/vault/..", b".."),
+        (b"npm/", b"npm"),
+        (b"/owned/\xff/", b"\xff"),
+    ] {
+        let path = files::from_bytes(raw.to_vec()).unwrap();
+        assert_eq!(files::basename(&path).unwrap(), base);
+    }
+    let path = PathBuf::from("/owned/link/../vault/.");
+    assert_eq!(files::clean(&path).unwrap(), PathBuf::from("/owned/vault"));
+    assert_eq!(
+        files::join(&path, b"../note").unwrap(),
+        PathBuf::from("/owned/note")
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn shell_tag_uses_the_original_final_command_component() {
+    let importer = ShellHistoryImporter::new("owned".into(), true, Vec::new());
+    for (command, tag) in [
+        (b"npm/. install".as_slice(), b"".as_slice()),
+        (b"npm/.. install", b""),
+        (b"npm/ install", b"package-manager"),
+    ] {
+        let mut reference = session();
+        bytes::set(&mut reference.metadata, b"command", command.to_vec());
+        let batch = importer.import(&reference);
+        assert!(batch.error.is_none());
+        assert_eq!(bytes::value(&batch.rows.unwrap()[0].metadata, b"tag"), tag);
+    }
 }
 
 #[test]

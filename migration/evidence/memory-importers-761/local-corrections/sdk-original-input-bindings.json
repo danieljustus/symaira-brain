@@ -1,0 +1,23 @@
+{
+  "status": "source-reference-only-not-SDK-behavior-probes",
+  "unchanged_original_70_runner_inputs": {
+    "fixtures.py": "1e5640178ad5cccfa6ea9e4d8531d251746d93951192495c724e7bea5d062a3f",
+    "main.go": "2e84522c62c75c84918cabf7e6a9f50604cbf4018c00b4069c5f9c877b9f3b01",
+    "compare.py": "3c9a50cf5ca495ddeb9fd6157521b3fb8e545834053279c5552bb98f74ffa764",
+    "state.py": "98cd753f642aa5883538992c9b369f53dac630d4bab5c28155ae59ce4e6f2d73",
+    "mutants.py": "18033dab77aeb20d62178385bd712d873e6e626ba8ffee81b1b939e8f16fba0d",
+    "run.sh": "f840ca2366576150a253ac9f6a206d14a6d73783ef1c7e59d8e12e9a9e096aff",
+    "verify-static.py": "42661d5fbfccc2c8ccaeaa9036129a3c78d3e116f5a948418a7c04778a3ad596",
+    "README.md": "2c9b011743885335455e3208f7408dec4003f46d81f9327a1f9d2b2081f8be0f"
+  },
+  "exact_sdk_module_sources": {
+    "/workspace/toolchains/go1.26.7/src/time/format.go": "f288c56858ab25828551681778f006b591ed140fc12e60122b6a9a7e35b07eb7",
+    "/workspace/toolchains/go1.26.7/src/encoding/json/encode.go": "4012d78aa8236f3067a6330ddf2f719c7e59b262fcf4fff5e51b4abd1ccba235",
+    "/workspace/toolchains/go1.26.7/src/internal/filepathlite/path.go": "dd1a0138328d6353d089d6ba8e04905d9e951bedfef1b85913c64de2ca2fd223",
+    "/workspace/toolchains/go1.26.7/LICENSE": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+    "/workspace/toolchains/go1.26.7/VERSION": "89f723ad27054a2ccc7c22f2a974886f3077f64623a231297fcea2e74a73a782",
+    "/home/agent/go/pkg/mod/modernc.org/sqlite@v1.59.0/conn.go": "85d2a7884941f345cbd42bb20a0923289d63304096f92167bbe30dfcc307fb17",
+    "/home/agent/go/pkg/mod/github.com/danieljustus/symaira-corekit@v0.17.0/sqlitekit/sqlitekit.go": "b54e235b355f24681b22344afc3fb1e2d3e0b6690d2f1d8bf3b576217873065d"
+  },
+  "no_production_Go_change": true
+}

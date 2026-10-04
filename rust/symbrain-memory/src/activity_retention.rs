@@ -1,6 +1,6 @@
 //! Shared-store activity retention. Counts survive post-commit cleanup errors,
 //! just as the Go API returns a RetentionResult together with an error.
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Datelike, Timelike, Utc};
 use rusqlite::{Connection, params};
 use serde::Serialize;
 
@@ -33,10 +33,14 @@ impl Store {
     #[must_use]
     pub fn activity_expire(&self, at: Option<DateTime<Utc>>) -> ActivityDeletion {
         let at = at.filter(|time| !zero(*time)).unwrap_or_else(Utc::now);
+        let at = match database_time(at) {
+            Ok(at) => at,
+            Err(error) => return ActivityDeletion::failed(error),
+        };
         self.activity_delete_rows(
             "DELETE FROM activity_episodes WHERE expires_at <= ?",
             "DELETE FROM activity_segments WHERE expires_at <= ?",
-            &[crate::gotime::format(at)],
+            &[at],
             false,
         )
     }
@@ -54,10 +58,14 @@ impl Store {
                 "activity clear range must be increasing".into(),
             ));
         }
+        let arguments = match (database_time(start), database_time(end)) {
+            (Ok(start), Ok(end)) => [start, end],
+            (Err(error), _) | (_, Err(error)) => return ActivityDeletion::failed(error),
+        };
         self.activity_delete_rows(
             "DELETE FROM activity_episodes WHERE ended_at > ? AND started_at < ?",
             "DELETE FROM activity_segments WHERE ended_at > ? AND started_at < ?",
-            &[crate::gotime::format(start), crate::gotime::format(end)],
+            &arguments,
             true,
         )
     }
@@ -112,6 +120,37 @@ impl Store {
 
 fn zero(time: DateTime<Utc>) -> bool {
     time.timestamp() == -62_135_596_800 && time.timestamp_subsec_nanos() == 0
+}
+
+// These new SQL consumers bind the frozen modernc1.59 default time.Time.String,
+// after UTC removes any monotonic clock. Keep this separate from inherited
+// Store formatting: truncating nanoseconds here changes which rows are deleted.
+fn database_time(time: DateTime<Utc>) -> Result<String, StoreError> {
+    let nanos = time.timestamp_subsec_nanos();
+    if nanos >= 1_000_000_000 {
+        return Err(StoreError::Invalid(
+            "activity time cannot represent a Go UTC leap second".into(),
+        ));
+    }
+    let year = time.year();
+    let sign = if year < 0 { "-" } else { "" };
+    let base = format!(
+        "{sign}{:04}-{:02}-{:02} {:02}:{:02}:{:02}",
+        year.unsigned_abs(),
+        time.month(),
+        time.day(),
+        time.hour(),
+        time.minute(),
+        time.second(),
+    );
+    if nanos == 0 {
+        return Ok(format!("{base} +0000 UTC"));
+    }
+    let fraction = format!("{nanos:09}");
+    Ok(format!(
+        "{base}.{} +0000 UTC",
+        fraction.trim_end_matches('0')
+    ))
 }
 
 fn finalize(connection: &Connection) -> Result<(), StoreError> {

@@ -1,0 +1,30 @@
+{
+  "status": "complete-original-independent-review-preserved-before-isolated-fix",
+  "original_publication": "2946cf2b959ed71ed58dcf44d36c515aab60328e",
+  "records": [
+    {
+      "original_path": "/workspace/symaira-memory761-importers-independent-static-review.md",
+      "bytes": 10421,
+      "sha256": "67fcc813768dead21e85f915d4fb801ec195a9cf7d9bc9098557e46ecc972a0b",
+      "retained_path": "migration/evidence/memory-importers-761/local-corrections/symaira-memory761-importers-independent-static-review.md.gz",
+      "gzip_sha256": "dbfcb296ad11ca4fac34bbd2ff6b1be2d542c86e45a31c616f901456efd0b033"
+    },
+    {
+      "original_path": "/workspace/symaira-memory761-importers-independent-static-review-receipt.json",
+      "bytes": 836457,
+      "sha256": "77344379bda126f8c67fe631db224edc05e1bd03154522a9c75a9255504f74c1",
+      "retained_path": "migration/evidence/memory-importers-761/local-corrections/symaira-memory761-importers-independent-static-review-receipt.json.gz",
+      "gzip_sha256": "69a395032aa29d8e41e6fd1cefb2c9b36dd8291f74078ef3629100919d7e0595"
+    },
+    {
+      "original_path": "/workspace/symaira-memory761-original-review-preservation/receipt.json",
+      "bytes": 1705148,
+      "sha256": "df7bde7855af1cd95bcff117ed81d68f12ae3f180e014c7d5d9fdf1f25c4ff20",
+      "retained_path": "migration/evidence/memory-importers-761/local-corrections/receipt.json.gz",
+      "gzip_sha256": "392dbe5bd027a685efa5824e5ebffbcc2aa1d9d12dc7ad3b79968e26bea99c56"
+    }
+  ],
+  "full_original_raw_preservation_records": 3568,
+  "full_original_archives": "/workspace/symaira-memory761-original-review-preservation",
+  "source_or_runtime_failure_observations": "three source-derived P2; zero actual runtime observations"
+}
