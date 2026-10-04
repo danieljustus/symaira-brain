@@ -1,0 +1,105 @@
+# Remaining Usage credential gates and next bounded scope (#768)
+
+## Inventory at the reviewed checkpoint
+
+This inventory is bound to unchanged source
+`8803847278546f3161eaaa84d2e65bc2eec594a2`, evidence head
+`eea73b7478e62f1bb174d456bbbecccc1de94034`. It is not a new native acceptance
+claim. The source and review-owned target are untouched; all native executions
+use retained immutable copies. No Rust/Cargo build was performed.
+
+The following nine groups are every reachable `needs_go_fallback()` return path.
+Checks happen in this order; the first matching group routes the entire report
+through Go, even if another provider could run natively.
+
+| Group | Exact remaining boundary | Next step and why |
+|---|---|---|
+| Windows home | HOME path differs from USERPROFILE, including empty/unset choices. Linux has no runtime branch. | Native Windows filesystem/environment receipts and Go-owned root selection; do not infer acceptance from pure path algorithms. |
+| Three custom bases | Any nonempty KIMI_CODE_BASE_URL, HERMES_PORTAL_BASE_URL or OPENROUTER_API_URL fails supported_custom_base, even without that provider's credential. | Complete URL families separately: explicit public ports/case then percent paths; preserve trusted HTTPS/private-origin policy and exact constructed/wire URL. |
+| Copilot files | With no nonempty UTF8 env token: apps/hosts unsafe read, distinct eligible tokens in the first usable prefix pass, or selected token containing ASCII controls. | Keep nondeterministic map selection and unsafe reads gated. Env preemption already works. A separate header-wire family may prove permitted control forms. |
+| Claude map | More than one distinct usable nondefault token and no usable default. The file ambiguity check is currently unconditional, even when an OAuth env source preempts the file. | Preserve ambiguous legacy selection. A later explicit-env preemption family can skip a file that Go never reads; no invented account priority. |
+| Nous JWT | Typed Hermes selected JWT expiry outside signed64-bit float-to-int range. The file check also runs when a Nous env source preempts it. | Env-preemption family first; overflow needs actual target/architecture conversion receipts before any native range change. |
+| Kimi token source | Credential file unsafe/unreadable, or selected literal token has ASCII controls. File/CLI strategy remains relevant beside API/web sources. | Preserve file ownership/read bounds and fallback-chain semantics; API presence alone cannot erase an available CLI strategy. |
+| Kimi device | Unsupported device file access, invalid UTF8, or trimmed device bytes outside ASCII space/graphic. This runs even when no CLI token exists. | Next positive family: regular bounded valid UTF8 without internal ASCII controls; preserve exact Unicode bytes and Go TrimSpace. Other forms retain their current boundary. |
+| OpenCode workspace | Nonempty cookie env source plus workspace outside exact wrk_ followed by nonempty ASCII alphanumeric suffix. Without cookie, workspace spelling cannot cause a fetch and is already native. | Prove full normalization and GET/POST/body/query/Referer behavior for complete URL/direct-id families; do not assume parser-only coverage proves transport. |
+| Automatic Claude Keychain | Neither OAuth env nor selected file token, and macOS attribute listing finds a valid service. NonmacOS returns false. | Actual native macOS ownership/ACL/expiry/process evidence; synthetic private empty adapters prove ordering only. No operator inventory/read in this lane. |
+
+`needs_go_fallback_for` also declares other_provider_env and
+other_credential_source, but the only production caller passes false for both.
+Those are not extra reachable gates. Its copilot_file/kimi_cli fields do not gate
+anything at this checkpoint. Claude/Codex malformed or missing regular files,
+Hermes malformed/expired files, allowed environmental references and constrained
+HTTPS/workspace spellings are already native. The capability reader's rejection
+of a Claude/Codex unsafe file does not itself create a distinct Go gate here.
+Inventorying explicit predicates is not proof that every ungated OS/string or
+transport form has complete parity; inherited limitations remain documented.
+
+## Actual read-only evidence
+
+59 owned copied-executable cases exercise the Linux-reachable families:44 require
+Go,15 stay native. The immutable public probe reads current production
+configured/source/status/Authorization and needs_go using canned401. Actual
+current CLI and fresh frozen-Go invalid-flag processes show the existing
+admission-before-parsing boundary; all owned regular files, links, directories
+and FIFOs remain unchanged. Native FIFO rejection is bounded; no Go credential
+FIFO read is attempted. This is not positive native200 or header-stack proof.
+
+Examples demonstrate needless gates without changing them: an explicit Claude
+OAuth env token wins over an ambiguous file, and an explicit Nous env token wins
+over an overflow JWT file, but both current reports still require Go. A Kimi API
+source with no CLI token still requires Go because an unused device_id contains
+Unicode. Copilot's explicit env token already preempts its ambiguous file.
+These are later coherent families, not permissions to widen the current slice.
+Windows-home and actual macOS-Keychain paths remain static inventory only.
+
+A fresh pinned Go1.26.7 private worktree at frozen
+`dcddcef0df5789123c7c9a7ebe6e01f10e941f2c` runs39 complete Kimi constructor,
+strategy-chain, report, request/raw-header-byte and read-only state cases. The
+production Go sources are unchanged.20 device value/trim controls cover Latin,
+CJK, emoji, combining marks, RTL digits, NBSP/NEL/line-separator/zero-width/BOM;
+eight response/strategy cases cover API short-circuit, API->CLI, CLI->web,
+all401,403,429,500 and invalid successful JSON; seven raw/control boundaries,
+65536/65537 file limits, missing device and irrelevant-device API-only are kept.
+Selected bytes, full reports/meters/source/error, exact methods/URLs/headers/body
+and before/after source hashes remain retained. All transport responses are
+owned canned values; this baseline bypasses real HTTP header validation and is
+not a native/wire acceptance claim. Raw ff/internal-tab canned success therefore
+does not justify relaxing those current gates.
+
+All exact inputs, outputs, runners/logs, fourteen immutable predicate/transport
+source digests and frozen-Go source/SDK hashes are retained under
+`migration/evidence/usage-remaining-baseline-768/`. The original103/36 and older
+failed observations remain untouched.
+
+## Authorized next increments and long-term rationale
+
+First, classify Usage argv before credential admission. FlagSet errors, help and
+unexpected positionals are independent of credentials and the presence of a Go
+executor. Root authorized this as a separate successor scope after the full
+review's64 actual triples/32 Go-forward observations classified the current
+limitation as inherited. A single parsed Usage invocation must carry Report,
+Help or the precise diagnostic outcome through Usage dispatch. Normalize once,
+retain first-positional/terminator/help precedence, write raw error bytes and use
+the accepted Go quote primitive. Only Report consults needs_go_fallback. This
+changes the Usage dispatch arm without rewriting the global argument parser.
+Valid gated reports must still forward every original byte to Go. New real
+unsupported-source argv cases and mutated classification controls join all
+existing unchanged parent gates. No credential reads are needed for diagnostics.
+
+Second, admit the complete regular bounded UTF8 Kimi device family: Go TrimSpace,
+exact remaining bytes, strategy-specific identity-header presence, Unicode
+values and outer Unicode whitespace. Retain invalid UTF8, internal ASCII-control
+values and unsafe source shapes unless a separate complete family proves them.
+Do not change token resolution, refresh behavior, request URL trust, owner paths,
+API/CLI/web order or source labels. Unicode must not be transliterated, normalized
+or replaced. Before admission, compare full native constructor/requests/reports
+against all39 frozen-Go values and actual owned HTTP/TLS peer header bytes for
+Unicode plus rejecting controls; custom canned capture alone is insufficient.
+Native3 exact-head CI, source/binary provenance and independent full review are
+required. No new target build starts while the previous reviewer owns its target.
+
+Do not pick an arbitrary token from a distinct Claude/Copilot map to make a test
+pass. Preserve those compatibility gates until a separately designed explicit
+account-selection policy is authorized and evidenced. URL/workspace families,
+actual platform credential ownership, numeric conversion and host Keychain have
+separate acceptance criteria. Neither next increment closes full #768.
