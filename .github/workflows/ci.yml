@@ -534,7 +534,8 @@ jobs:
           owned="$owned_root/skills-wide-argv"
           mkdir -p "$owned"
           go_binary="$owned/symbrain-go.exe"
-          ./scripts/run-go-oracle.sh dcddcef0df5789123c7c9a7ebe6e01f10e941f2c build -o "$go_binary" ./cmd/symbrain
+          python3 -m unittest discover -s scripts/skills-argv-oracle -p test_build_go.py -v
+          python3 scripts/skills-argv-oracle/build_go.py --out "$go_binary" --receipt "$owned/go-build.json" --go-cache "$(go env GOCACHE)" --module-cache "$(go env GOMODCACHE)"
           python3 scripts/skills-argv-oracle/compare.py --go "$go_binary" --rust target/debug/symbrain.exe --out "$owned/process.json"
           for control in flag-input quoted-value normalization; do
             if python3 scripts/skills-argv-oracle/compare.py --go "$go_binary" --rust target/debug/symbrain.exe --out "$owned/$control.json" --negative-control "$control"; then
