@@ -1,0 +1,19 @@
+{
+  "verified_utc": "2026-10-04T17:57:29.533077+00:00",
+  "bundle_verify_exit": 0,
+  "bundle_is_complete_history": true,
+  "exports": [
+    {
+      "file": "symaira-macbook-source-20261004.bundle",
+      "bytes": 384564594,
+      "sha256": "921751e4360cded56ec21b08503a8b4173e0b1b1a202eace543d41acd9fea92a"
+    },
+    {
+      "file": "symaira-macbook-proofs-20261004.tar.gz",
+      "bytes": 86926124,
+      "sha256": "1257d9252f279b9877bb65b59af7a5354ee051c93608f30c313691f3d3c6c2e2"
+    }
+  ],
+  "offline_bundle_location": "/workspace/macbook-handoff-export/symaira-macbook-source-20261004.bundle",
+  "Mac_source_access": "All 137 original local branches are independently backed up on GitHub; offline bundle is optional cloud preservation only."
+}

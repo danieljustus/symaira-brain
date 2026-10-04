@@ -1,0 +1,2 @@
+921751e4360cded56ec21b08503a8b4173e0b1b1a202eace543d41acd9fea92a  symaira-macbook-source-20261004.bundle
+1257d9252f279b9877bb65b59af7a5354ee051c93608f30c313691f3d3c6c2e2  symaira-macbook-proofs-20261004.tar.gz
