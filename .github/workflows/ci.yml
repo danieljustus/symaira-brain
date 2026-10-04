@@ -717,6 +717,10 @@ jobs:
           ./guard/scripts/guard-scan-oracle/run.sh parity target/debug/symbrain.exe
           python3 scripts/rust-differential.py "$RUNNER_TEMP/symbrain-go.exe" target/debug/symbrain.exe
 
+      - name: Fetch the immutable native Skills comparison parent
+        shell: bash
+        run: git fetch --no-tags --depth=1 origin 01f41906e2e021db3c693ec97617bb701e4dad8a
+
       - name: Frozen Go and native Windows wide Skills argv acceptance
         shell: bash
         run: |
