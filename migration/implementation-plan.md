@@ -1,5 +1,20 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Guard doctor equivalent config/Unicode slice — 2026-10-04
+
+The successor to approved PR805 admits nine baseline healthy Go-only TOML
+representations and five healthy anchor Unicode/key forms, using the existing
+TableLike and Guard Go JSON primitive. The additive78 actual process cases
+retain65 full comparisons and13 explicit TOML gates; baseline and final clean-
+source receipts under `migration/evidence/guard-doctor-boundaries-770` bind the
+implementation. All previous exact process/raw/state/kernel tests remain
+required. Three original selected TOML gates, broad discovery/filesystem/output
+boundaries and native macOS/Windows acceptance remain open. The50 actual Go
+runs with two different invalid-default reports stay evidence, not an exception.
+See the linked [ADR](../docs/adr/guard-doctor-equivalent-config-and-anchor-unicode.md)
+and [remaining inventory](guard-doctor-boundary-inventory-770.md). This does not
+close #770/#769 or claim full standalone/Brain cutover.
+
 ## Additional native init, Swift and fuzz evidence — 2026-09-29
 
 Candidate `f1263bea237e99ff9a297fe3146170ce5f2ad4a4` passes the exact

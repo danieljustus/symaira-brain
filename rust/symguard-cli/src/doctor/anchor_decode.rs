@@ -32,7 +32,8 @@ impl<'de> Deserialize<'de> for Object {
     }
 }
 
-/// Syntax is validated separately. `None` preserves unsupported string decoding.
+/// Syntax is validated on original bytes separately. Reuse the kernel's proven
+/// Go string replacement without converting numeric tokens through float64.
 pub(super) fn validate(input: &[u8]) -> Option<Result<(), String>> {
     let first = *input.iter().find(|b| !b.is_ascii_whitespace())?;
     if !matches!(first, b'{' | b'n') {
@@ -41,7 +42,8 @@ pub(super) fn validate(input: &[u8]) -> Option<Result<(), String>> {
             kind(first)
         )));
     }
-    let object: Object = serde_json::from_slice(input).ok()?;
+    let repaired = symbrain_guard_core::go_json::repair_go_json_strings(input);
+    let object: Object = serde_json::from_str(&repaired).ok()?;
     for (field, value) in object.0 {
         let name: String = field
             .chars()
@@ -63,7 +65,7 @@ pub(super) fn validate(input: &[u8]) -> Option<Result<(), String>> {
         }
         let first = *raw.as_bytes().first()?;
         let accepted = if ty == "string" && first == b'"' {
-            // Unsupported Unicode replacement remains gated, never healthy.
+            // String values and keys already received Go Unicode replacement.
             serde_json::from_str::<String>(raw).ok()?;
             true
         } else if ty == "int" {
@@ -92,5 +94,26 @@ fn kind(first: u8) -> &'static str {
         b'{' => "object",
         b't' | b'f' => "bool",
         _ => "number",
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn unicode_replacement_preserves_first_error_and_numeric_tokens() {
+        for input in [
+            br#"{"content_hash":"\ud800","\udc00":1e9999}"#.as_slice(),
+            b"{\"content_hash\":\"\xe2\x82\",\"\xff\":1}",
+        ] {
+            assert_eq!(super::validate(input), Some(Ok(())));
+        }
+        assert_eq!(
+            super::validate(br#"{"content_hash":"\ud800","entry_count":9223372036854775808}"#),
+            Some(Err("json: cannot unmarshal number 9223372036854775808 into Go struct field ChainAnchor.entry_count of type int64".into()))
+        );
+        assert_eq!(
+            super::validate(br#"{"entry_count":true,"\ud800":1e9999}"#),
+            Some(Err("json: cannot unmarshal bool into Go struct field ChainAnchor.entry_count of type int64".into()))
+        );
     }
 }

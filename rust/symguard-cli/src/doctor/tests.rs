@@ -195,3 +195,30 @@ fn multiple_secret_keys_on_one_server_are_sorted() {
     let checks = check_servers(vec![server], &[]);
     assert_eq!(checks[0].secrets, ["API_KEY", "SECRET_KEY"]);
 }
+
+#[test]
+fn equivalent_inline_configuration_keeps_rules_allowlist_and_type_gates() {
+    let command = toml_edit::Value::from(native_command());
+    let inline = format!(
+        "defaults={{read=\"allow\"}}\nrules=[{{decision=\"allow\",match={{server=\"owned\"}}}}]\nspawn={{allowlist=[{{path={command},argv_prefix=[\"owned\"]}}]}}\nremote=[]\naudit={{encrypt=true}}\nsequence={{enabled=true,threshold=0}}\n"
+    );
+    let loaded = parse_and_validate_text(&inline).expect("typed inline configuration is native");
+    assert_eq!(loaded.rules, 1);
+    assert_eq!(loaded.allowlist.len(), 1);
+    assert_eq!(loaded.allowlist[0].path, native_command());
+    assert_eq!(loaded.allowlist[0].argv_prefix, ["owned"]);
+    assert!(parse_and_validate_text("rules=[]\nremote=[]\nspawn={allowlist=[]}\n").is_some());
+    for text in [
+        "rules=[1]\n",
+        "remote=[1]\n",
+        "spawn={allowlist=[1]}\n",
+        "defaults={read=1}\n",
+        "rules=[{decision=\"allow\",match={command_contains=[1]}}]\n",
+        "proxy={owned=1}\n",
+    ] {
+        assert!(
+            parse_and_validate_text(text).is_none(),
+            "must remain gated: {text}"
+        );
+    }
+}

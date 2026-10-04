@@ -3,7 +3,7 @@
 All65 actual ELF artifacts in the author/root-reused target, including the14
 current CLI/test executables for168 ordinary tests, were archived and every
 decompressed byte/SHA verified before target reuse. The archive is local and
-the receipt is tracked. Root's32 proof objects under independent-806 remain
+the receipt is tracked. Root's33 proof objects under independent-806 remain
 unaltered and round-trip to their original literal-byte receipts, including
 original35 additional inputs and approval. Existing80/94/124/63/original53
 archives, raw path failures,31/4/4/6 probes and metadata are retained unchanged.

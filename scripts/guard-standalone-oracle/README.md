@@ -22,3 +22,12 @@ be rejected on Unix. Windows records raw-byte cases as inapplicable and retains
 the existing fail-closed audit wording deviation; these are not equality passes.
 All three CI jobs retain this additional receipt. See
 [the raw-path decision](../../docs/adr/guard-raw-path-diagnostics.md).
+
+The additive `-doctor-boundaries.json` receipt admits equivalent typed inline
+TOML/array forms and Go-compatible anchor string/key Unicode replacement.
+It executes78 actual process cases:65 complete comparisons and13 explicitly
+retained TOML decoder/warning/map-order gates. Three actual mutants remove a
+configured inline allowlist, gate a repaired healthy anchor and hide a later
+typed anchor error. The original124 corpus and its gates/fixtures are unchanged.
+The [remaining boundary inventory](../../migration/guard-doctor-boundary-inventory-770.md)
+distinguishes healthy Go-only states from decoder errors and warning-only states.

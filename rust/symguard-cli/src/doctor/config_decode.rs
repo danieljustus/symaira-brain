@@ -2,7 +2,7 @@
 use super::{LoadedConfig, SpawnEntry};
 use std::path::Path;
 use symbrain_core::config::format_go_quoted;
-use toml_edit::{DocumentMut, Item, Table};
+use toml_edit::{DocumentMut, Item, TableLike};
 
 const DECISIONS: [&str; 6] = ["allow", "ask", "deny", "redact", "readonly", "sandbox"];
 
@@ -80,7 +80,7 @@ pub(super) fn decode_config(doc: &DocumentMut) -> Option<DecodedConfig> {
         ],
     )?;
     let defaults = if let Some(item) = doc.get("defaults") {
-        item.as_table()?
+        item.as_table_like()?
             .iter()
             .map(|(key, value)| Some((key.to_owned(), value.as_str()?.to_owned())))
             .collect::<Option<Vec<_>>>()?
@@ -89,11 +89,11 @@ pub(super) fn decode_config(doc: &DocumentMut) -> Option<DecodedConfig> {
     };
     let mut rules = Vec::new();
     if let Some(item) = doc.get("rules") {
-        for rule in item.as_array_of_tables()? {
+        for rule in table_array(item)? {
             known_keys(rule, &["decision", "match"])?;
             let decision = string_field(rule, "decision")?;
             let criteria = if let Some(item) = rule.get("match") {
-                let matcher = item.as_table()?;
+                let matcher = item.as_table_like()?;
                 known_keys(
                     matcher,
                     &["server", "tool", "capability", "command_contains"],
@@ -113,7 +113,7 @@ pub(super) fn decode_config(doc: &DocumentMut) -> Option<DecodedConfig> {
         }
     }
     let (enabled, threshold) = if let Some(item) = doc.get("sequence") {
-        let table = item.as_table()?;
+        let table = item.as_table_like()?;
         known_keys(table, &["enabled", "threshold"])?;
         let enabled = table.get("enabled").map_or(Some(false), Item::as_bool)?;
         let threshold = table.get("threshold").map_or(Some(3), Item::as_integer)?;
@@ -124,10 +124,10 @@ pub(super) fn decode_config(doc: &DocumentMut) -> Option<DecodedConfig> {
     decode_unprinted(doc)?;
     let mut allowlist = Vec::new();
     if let Some(item) = doc.get("spawn") {
-        let table = item.as_table()?;
+        let table = item.as_table_like()?;
         known_keys(table, &["allowlist"])?;
         if let Some(item) = table.get("allowlist") {
-            for entry in item.as_array_of_tables()? {
+            for entry in table_array(item)? {
                 known_keys(entry, &["path", "argv_prefix"])?;
                 allowlist.push(SpawnEntry {
                     path: string_field(entry, "path")?,
@@ -145,20 +145,20 @@ pub(super) fn decode_config(doc: &DocumentMut) -> Option<DecodedConfig> {
     })
 }
 
-fn known_keys(table: &Table, names: &[&str]) -> Option<()> {
+fn known_keys(table: &dyn TableLike, names: &[&str]) -> Option<()> {
     table
         .iter()
         .all(|(key, _)| names.contains(&key))
         .then_some(())
 }
 
-fn string_field(table: &Table, name: &str) -> Option<String> {
+fn string_field(table: &dyn TableLike, name: &str) -> Option<String> {
     table.get(name).map_or(Some(String::new()), |value| {
         value.as_str().map(str::to_owned)
     })
 }
 
-fn string_array_field(table: &Table, name: &str) -> Option<Vec<String>> {
+fn string_array_field(table: &dyn TableLike, name: &str) -> Option<Vec<String>> {
     table.get(name).map_or(Some(Vec::new()), |value| {
         value
             .as_array()?
@@ -170,12 +170,12 @@ fn string_array_field(table: &Table, name: &str) -> Option<Vec<String>> {
 
 fn decode_unprinted(doc: &DocumentMut) -> Option<()> {
     if let Some(item) = doc.get("proxy") {
-        let table = item.as_table()?;
+        let table = item.as_table_like()?;
         known_keys(table, &["upstream"])?;
         string_field(table, "upstream")?;
     }
     if let Some(item) = doc.get("audit") {
-        let table = item.as_table()?;
+        let table = item.as_table_like()?;
         known_keys(table, &["path", "encrypt_age", "encrypt"])?;
         string_field(table, "path")?;
         string_field(table, "encrypt_age")?;
@@ -184,7 +184,7 @@ fn decode_unprinted(doc: &DocumentMut) -> Option<()> {
         }
     }
     if let Some(item) = doc.get("remote") {
-        for table in item.as_array_of_tables()? {
+        for table in table_array(item)? {
             known_keys(
                 table,
                 &[
@@ -205,6 +205,19 @@ fn decode_unprinted(doc: &DocumentMut) -> Option<()> {
         }
     }
     Some(())
+}
+
+// BurntSushi/toml accepts equivalent inline tables and arrays of inline tables,
+// including empty arrays. Admit only typed table elements; scalar/array nesting
+// stays a decoder-error boundary instead of being mistaken for an empty list.
+fn table_array(item: &Item) -> Option<Vec<&dyn TableLike>> {
+    if let Some(tables) = item.as_array_of_tables() {
+        return Some(tables.iter().map(|table| table as &dyn TableLike).collect());
+    }
+    item.as_array()?
+        .iter()
+        .map(|value| value.as_inline_table().map(|table| table as &dyn TableLike))
+        .collect()
 }
 
 fn quote(value: &str) -> String {
