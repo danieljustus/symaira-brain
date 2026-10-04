@@ -81,6 +81,13 @@ enum Tree {
 impl Tree {
     // Suffix masks form a trie from the low bit, not a sampled hash corpus.
     fn assign(&mut self, bits: u64, width: usize, result: bool) {
+        // Go tests id & mask == bits without masking the stored bits. A
+        // condition with any bit outside its mask matches no ID (including
+        // accepted hex tokens whose leading y reduces the mask to zero).
+        // Ignore that condition without changing earlier additions/removals.
+        if width < 64 && bits >> width != 0 {
+            return;
+        }
         if width == 0 {
             *self = Self::Leaf(result);
             return;
@@ -225,5 +232,66 @@ mod tests {
                 "{pattern}"
             );
         }
+    }
+
+    #[test]
+    fn impossible_conditions_preserve_prior_rules_and_valid_nil_matchers() {
+        for (pattern, expected) in [
+            ("qxyf", false),
+            ("qxya", false),
+            ("qxyF", false),
+            ("qxy9", false),
+            ("q!xyf", true),
+            ("q!!xyf", false),
+            ("q-xyf", true),
+            ("qy-xyf", true),
+            ("q!y-xyf", false),
+            ("qxyf+y", true),
+            ("qy+xyf", true),
+            ("qxyf+0+1", true),
+            ("q0+1-xyf", true),
+            ("qxyf+y-y", false),
+            ("q-xyf-y", false),
+            ("qxy0", true), // Invalid syntax keeps Go's nil matcher.
+            ("qxy00", true),
+            ("qxy", true), // Valid zero bits with mask zero still match.
+        ] {
+            assert_eq!(
+                setting(format!("execerrdot=0#{pattern}").as_bytes()).unwrap(),
+                expected,
+                "{pattern}"
+            );
+        }
+        for pattern in ["qxyf+0", "q!xyf+0", "q0-xyf", "q-xyf-0"] {
+            assert!(
+                setting(format!("execerrdot=0#{pattern}").as_bytes()).is_err(),
+                "{pattern} must retain its real conditional set"
+            );
+        }
+    }
+
+    #[test]
+    fn trie_assignment_preserves_mask_bits_for_every_width() {
+        fn value(tree: &Tree, id: u64) -> bool {
+            match tree {
+                Tree::Leaf(result) => *result,
+                Tree::Branch(children) => value(&children[(id & 1) as usize], id >> 1),
+            }
+        }
+        for width in 0..64 {
+            for previous in [false, true] {
+                let mut tree = Tree::Leaf(previous);
+                tree.assign(1 << width, width, !previous);
+                assert!(matches!(tree, Tree::Leaf(result) if result == previous));
+            }
+        }
+        let mut tree = Tree::Leaf(false);
+        tree.assign(1 << 63, 64, true);
+        assert!(value(&tree, 1 << 63));
+        assert!(!value(&tree, 0));
+        tree.assign(3, 1, false); // Unsatisfiable subtraction leaves it intact.
+        assert!(value(&tree, 1 << 63));
+        tree.assign(0, 0, true); // The satisfiable universal rule still wins.
+        assert!(matches!(tree, Tree::Leaf(true)));
     }
 }

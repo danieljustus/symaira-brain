@@ -104,6 +104,15 @@ def observe(binary: Path, actual_binary: Path, provider: Path, case: str, *, evi
                     "suffix-quiet-none": "execerrdot=0#qn", "suffix-last-opt-in": "execerrdot=1,execerrdot=0#qy",
                     "suffix-last-refusal": "execerrdot=0#qy,execerrdot=1", "suffix-invalid": "execerrdot=0#not-a-pattern",
                     "suffix-quiet-partition-all": "execerrdot=0#q0+1"}
+        impossible_suffixes = {"suffix-impossible-hex": "qxyf", "suffix-impossible-lower": "qxya",
+                               "suffix-impossible-upper": "qxyF", "suffix-impossible-digit": "qxy9",
+                               "suffix-impossible-inverted": "q!xyf", "suffix-impossible-double-inverted": "q!!xyf",
+                               "suffix-impossible-subtract": "q-xyf", "suffix-impossible-prior-all": "qy-xyf",
+                               "suffix-impossible-prior-inverted-all": "q!y-xyf", "suffix-impossible-later-all": "qxyf+y",
+                               "suffix-impossible-later-partition": "qxyf+0+1", "suffix-impossible-prior-partition": "q0+1-xyf",
+                               "suffix-impossible-later-none": "qxyf+y-y", "suffix-invalid-hex": "qxy0"}
+        suffixes.update({name: "execerrdot=0#" + pattern for name, pattern in impossible_suffixes.items()})
+        if case in impossible_suffixes: path = "."
         if case in suffixes: env["GODEBUG"] = suffixes[case]
         if os.name == "nt":
             env["NoDefaultCurrentDirectoryInExePath"] = "1"
@@ -246,6 +255,11 @@ def setting_vectors(probe: Path, owner: Path, provider: Path, tool: str, tools: 
     supported = [("", True), ("qy", True), ("qn", False), ("q!!y", True), ("q0+1", True),
                  ("qy-y", False), ("q!y-y", True), ("not-a-pattern", True), ("q", True),
                  ("q0-1+0", True), ("qyy", True), ("qxy", True), ("q-0-1", False)]
+    supported += [("qxyf", False), ("qxya", False), ("qxyF", False), ("qxy9", False),
+                  ("q!xyf", True), ("q!!xyf", False), ("q-xyf", True), ("qy-xyf", True),
+                  ("q!y-xyf", False), ("qxyf+y", True), ("qy+xyf", True), ("qxyf+0+1", True),
+                  ("q0+1-xyf", True), ("qxyf+y-y", False), ("q-xyf-y", False),
+                  ("qxy0", True), ("qxy00", True)]
     unresolved = ["q0", "q1", "qxf", "y", "n", "qy-0", "qvy", "!y"]
     rows = []
     for pattern, expected in supported + [(pattern, None) for pattern in unresolved]:
@@ -302,6 +316,11 @@ def main() -> int:
     cases = original + ["relative-first", "absolute-first", "missing-first", "directory-first", "empty-entry-first", "opt-in-dot", "opt-in-relative", "opt-in-empty", "last-opt-in", "last-refusal"]
     cases += ["missing-dotdot", "symlink-dotdot", "relative-missing-dotdot", "suffix-empty", "suffix-quiet-all",
               "suffix-quiet-none", "suffix-last-opt-in", "suffix-last-refusal", "suffix-invalid", "suffix-quiet-partition-all"]
+    cases += ["suffix-impossible-hex", "suffix-impossible-lower", "suffix-impossible-upper", "suffix-impossible-digit",
+              "suffix-impossible-inverted", "suffix-impossible-double-inverted", "suffix-impossible-subtract",
+              "suffix-impossible-prior-all", "suffix-impossible-prior-inverted-all", "suffix-impossible-later-all",
+              "suffix-impossible-later-partition", "suffix-impossible-prior-partition", "suffix-impossible-later-none",
+              "suffix-invalid-hex"]
     if os.name == "nt": cases += ["implicit-empty", "implicit-absolute-other", "implicit-same", "implicit-hardlink", "implicit-symlink", "pathext-order", "pathext-no-dot", "pathext-empty-list", "raw-wide-path", "raw-wide-pathext"]
     else: cases.append("nonexec-first")
     with tempfile.TemporaryDirectory(prefix="bd-tools-", dir=key.registry.process.private_temporary_parent()) as folder:
@@ -314,6 +333,7 @@ def main() -> int:
         controls = []
         mutations = [("cwd", "empty-entry-first"), ("suffix-refusal", "suffix-quiet-all")]
         if os.name != "nt": mutations.append(("traversal", "symlink-dotdot"))
+        mutations.append(("impossible-mask", "suffix-impossible-hex"))
         for mode, case in mutations:
             mutated = observe(control, rust, provider, case, evidence=evidence, metadata=True, control=True, control_mode=mode)
             ordinary = next(row for row in rows if row["case"] == case)

@@ -24,6 +24,12 @@ func main() {
 		if err := os.Setenv("GODEBUG", "execerrdot=0#qn"); err != nil {
 			panic(err)
 		}
+	} else if mode == "impossible-mask" {
+		// Reproduce the rejected tree's impossible-mask admission through an
+		// actual otherwise ordinary child, without replacing its output.
+		if err := os.Setenv("GODEBUG", "execerrdot=0#qy"); err != nil {
+			panic(err)
+		}
 	} else {
 		extra := exec.Command(local, "get", "symbrowse/encryption-key")
 		extra.Stdout = io.Discard

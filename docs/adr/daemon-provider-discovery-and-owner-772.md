@@ -175,3 +175,55 @@ Registry510/MCP13/raw-path/lifetime controls, all new actual owner/settings/
 mutation controls, different-author review and all six real native lanes are
 mandatory before acceptance. The original209+16/310 counts refer to their
 original immutable source, not a claim that these new unit cases have run.
+
+
+The independent718 review finds a separate exact P2: accepted hex patterns such
+as qxyf retain bits15 while the leading y sets their suffix mask to0. SDK
+`matchResult` compares `id & mask == bits` without masking bits. This valid
+condition never matches; it is not an invalid parse, nil matcher, conditional
+stack decision or reporting exception. Preserve the complete request, both
+projection/provenance tools and raw results (including5600 patterns/14 original
+source-projection mismatches), matcher/harness/control bytes and pinned SDK
+sources before correction in `discovery-request-718`. The original381/718
+source, earlier48fc/CCC failures and runtime ELF archives remain immutable.
+
+Correct only the private trie assignment boundary: if any stored bit lies
+outside the suffix mask, leave the current set unchanged. Apply this to every
+width below64, including width0. Width64 can contain every uint64 bit. Do not
+mask away the extra bits, reject this accepted syntax, or make a token-specific
+exception. Ordered additions/subtractions and inversion remain exact: qxyf
+selects nothing, q!xyf selects everything, and q-xyf leaves its initially
+universal set untouched. Later valid rules still win; valid mask0/bits0 remains
+universal. Invalid qxy0 retains its distinct nil-matcher behavior. Two new
+private units cover these combinations and impossible bits at all widths, with
+a full-width satisfiable positive control; neither unit has run yet.
+
+Keep all previously prepared contracts and add14 default-CLI owner pairs and17
+supported typed settings. Totals are40 Unix/49 Windows CLI pairs,30 supported
+typed settings plus the unchanged eight explicitly unported stack/report
+observations, unchanged optional five originals and six Windows script vectors.
+Add one real owner-control child that changes the impossible mask to quiet-all
+before delegating actual CLI output, so an otherwise identical result cannot
+hide a forbidden provider query. Prepared controls become four Unix/three
+Windows; their execution remains mandatory. No original compare/assertion is
+removed. These exact nonprinting cases are repaired rather than placed behind
+an unported/full-compatibility waiver. Existing separate native Windows/raw
+argv0/file-ID/conditional-reporting limitations remain unresolved obligations.
+
+A specifically authorized offline SDK-only proof uses owned private HOME/cache,
+Go1.26.7, p2 and a700MiB floor. Copy internal/bisect byte-exact, then build and
+run a typed fixture without any provider or Rust candidate. Its5618 patterns
+retain every original5600 finite pattern plus18 additional unique controls.
+All56180 concrete enable/print observations match the separately bound SDK
+predicate projection. The native source projection has zero mismatches across
+all bounded suffix equivalence classes; this is a source projection, not Rust
+execution. A second actually executed owned SDK copy deliberately masks away
+stored bits in the predicate and produces230 incorrect typed observations,
+including qxyf. Both actual executable payloads, compiler commands/logs, exact
+input/output/source bytes, binary/SDK hashes and the full mutation result are
+retained in `discovery-mask-prepared/actual-sdk-only`. The actual typed proof
+does not invent a Go stack hash or imply native Windows/provider equivalence.
+The strictly owned temporary SDK build cache is retired after proof, preserving
+all actual binaries and reports. No SDK installation, frozen Go source, shared
+Core/standalone runner, provider dependency or global lookup behavior changes.
+Fresh candidate Rust gates and native six-platform runtime are still required.
