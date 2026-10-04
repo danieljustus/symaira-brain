@@ -52,7 +52,7 @@ pub(super) fn run_owned_command(
     // supervisor executable and standalone/public runner keep their contract.
     let resolved = if matches!(ownership, Ownership::Provider(_)) {
         Some(
-            super::startup_discovery::executable(program)
+            super::startup_discovery::executable(program)?
                 .ok_or(ProbeError::Missing(MissingReason::Unavailable))?,
         )
     } else {
@@ -60,11 +60,15 @@ pub(super) fn run_owned_command(
     };
     #[cfg(windows)]
     if let Some(path) = &resolved
-        && let Some(error) = super::startup_discovery::batch_error(program, path)
+        && let Some(error) = super::startup_discovery::batch_error(program, &path.spelling)
     {
         return Err(ProbeError::Failed(error));
     }
-    let mut command = Command::new(resolved.as_deref().unwrap_or(program));
+    let mut command = Command::new(
+        resolved
+            .as_ref()
+            .map_or(program, |path| path.owner.as_path()),
+    );
     #[cfg(unix)]
     {
         use std::os::unix::process::CommandExt;

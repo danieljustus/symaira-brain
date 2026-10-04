@@ -10,14 +10,27 @@ import (
 
 func main() {
 	local := filepath.Join(os.Getenv("DISCOVERY_OWNED_ROOT"), "symvault")
+	mode := os.Getenv("DISCOVERY_OWNER_CONTROL_MODE")
+	if mode == "traversal" {
+		// Deliberately retain physical symlink/.. traversal in this mutant;
+		// filepath.Join would already repair the contract it is meant to break.
+		separator := string(os.PathSeparator)
+		local = os.Getenv("DISCOVERY_OWNED_ROOT") + separator + "link" + separator + ".." + separator + "bin" + separator + "symvault"
+	}
 	if os.PathSeparator == '\\' {
 		local += ".exe"
 	}
-	extra := exec.Command(local, "get", "symbrowse/encryption-key")
-	extra.Stdout = io.Discard
-	extra.Stderr = os.Stderr
-	if err := extra.Run(); err != nil {
-		panic(err)
+	if mode == "suffix-refusal" {
+		if err := os.Setenv("GODEBUG", "execerrdot=0#qn"); err != nil {
+			panic(err)
+		}
+	} else {
+		extra := exec.Command(local, "get", "symbrowse/encryption-key")
+		extra.Stdout = io.Discard
+		extra.Stderr = os.Stderr
+		if err := extra.Run(); err != nil {
+			panic(err)
+		}
 	}
 	child := exec.Command(os.Getenv("DISCOVERY_ACTUAL_RUST"), os.Args[1:]...)
 	child.Stdin = os.Stdin

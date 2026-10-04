@@ -4,26 +4,31 @@
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
+mod godebug;
+mod path;
 #[cfg(windows)]
 mod windows;
+use crate::key_resolver::ProbeError;
 
-pub(super) fn executable(program: &Path) -> Option<PathBuf> {
+pub(super) struct Executable {
+    pub(super) owner: PathBuf,
+    #[cfg(windows)]
+    pub(super) spelling: PathBuf,
+}
+
+pub(super) fn executable(program: &Path) -> Result<Option<Executable>, ProbeError> {
     if explicit(program) {
-        return Some(program.to_owned());
+        return Ok(Some(Executable {
+            owner: program.to_owned(),
+            #[cfg(windows)]
+            spelling: program.to_owned(),
+        }));
     }
     let path = std::env::var_os("PATH").unwrap_or_default();
-    let allow_relative = std::env::var_os("GODEBUG").is_some_and(|value| {
-        value
-            .as_encoded_bytes()
-            .split(|byte| *byte == b',')
-            .filter_map(|part| part.strip_prefix(b"execerrdot="))
-            .next_back()
-            == Some(b"0")
-    });
     #[cfg(unix)]
-    return unix_lookup(program, &path, allow_relative);
+    return unix_lookup(program, &path);
     #[cfg(windows)]
-    return windows::lookup(program, &path, allow_relative);
+    return windows::lookup(program, &path);
 }
 
 fn explicit(program: &Path) -> bool {
@@ -40,25 +45,26 @@ fn explicit(program: &Path) -> bool {
 }
 
 #[cfg(unix)]
-fn unix_lookup(program: &Path, path: &OsStr, allow_relative: bool) -> Option<PathBuf> {
+fn unix_lookup(program: &Path, path: &OsStr) -> Result<Option<Executable>, ProbeError> {
     // Go SplitList("") has zero entries, unlike Rust's split_paths.
     for directory in std::env::split_paths(path).filter(|_| !path.is_empty()) {
-        let candidate = directory.join(program);
+        let candidate = self::path::join(&directory, program);
         if !unix_executable(&candidate) {
             continue;
         }
         // Refuse the FIRST executable relative candidate; do not skip to a
         // later absolute program. Go LookupVault treats ErrDot as absence.
-        if !candidate.is_absolute() && !allow_relative {
-            return None;
+        if !self::path::is_absolute(&candidate) && !godebug::allow_relative()? {
+            return Ok(None);
         }
-        return if candidate.is_absolute() {
+        let owner = if self::path::is_absolute(&candidate) {
             Some(candidate)
         } else {
             std::env::current_dir().ok().map(|cwd| cwd.join(candidate))
         };
+        return Ok(owner.map(|owner| Executable { owner }));
     }
-    None
+    Ok(None)
 }
 
 #[cfg(unix)]
@@ -113,7 +119,15 @@ mod tests {
         ] {
             let path = Path::new(OsStr::from_bytes(value));
             assert!(explicit(path));
-            assert_eq!(executable(path).unwrap().as_os_str().as_bytes(), value);
+            assert_eq!(
+                executable(path)
+                    .unwrap()
+                    .unwrap()
+                    .owner
+                    .as_os_str()
+                    .as_bytes(),
+                value
+            );
         }
         assert!(!explicit(Path::new("symvault")));
     }

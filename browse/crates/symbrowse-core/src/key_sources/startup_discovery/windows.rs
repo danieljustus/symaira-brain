@@ -1,4 +1,6 @@
 //! Native Windows Go LookPath: extensions, implicit cwd and Lstat identity.
+use super::{Executable, godebug, path};
+use crate::key_resolver::ProbeError;
 use std::{
     ffi::{OsStr, OsString},
     fs,
@@ -8,40 +10,48 @@ use std::{
 #[path = "windows_lower.rs"]
 mod windows_lower;
 
-pub(super) fn lookup(program: &Path, path: &OsStr, allow_relative: bool) -> Option<PathBuf> {
+pub(super) fn lookup(program: &Path, path: &OsStr) -> Result<Option<Executable>, ProbeError> {
     let extensions = extensions();
     let mut implicit = if std::env::var_os("NoDefaultCurrentDirectoryInExePath").is_none() {
-        find(&Path::new(".").join(program), &extensions)
+        find(&path::join(Path::new("."), program), &extensions)
     } else {
         None
     };
-    if allow_relative && let Some(found) = &implicit {
-        return absolute(found.clone());
+    if let Some(found) = &implicit
+        && godebug::allow_relative()?
+    {
+        return Ok(absolute(found.clone()));
     }
     for directory in std::env::split_paths(path).filter(|part| !part.as_os_str().is_empty()) {
-        let Some(candidate) = find(&directory.join(program), &extensions) else {
+        let Some(candidate) = find(&path::join(&directory, program), &extensions) else {
             continue;
         };
         if let Some(dot) = &implicit
             && !same_file(dot, &candidate)
         {
-            return None;
+            return Ok(None);
         }
-        if !candidate.is_absolute() && !allow_relative {
+        if !path::is_absolute(&candidate) && !godebug::allow_relative()? {
             implicit.get_or_insert(candidate);
             continue;
         }
-        return absolute(candidate);
+        return Ok(absolute(candidate));
     }
-    None
+    Ok(None)
 }
 
-fn absolute(candidate: PathBuf) -> Option<PathBuf> {
-    if candidate.is_absolute() {
-        Some(candidate)
+fn absolute(candidate: PathBuf) -> Option<Executable> {
+    let owner = if path::is_absolute(&candidate) {
+        Some(candidate.clone())
     } else {
-        std::env::current_dir().ok().map(|cwd| cwd.join(candidate))
-    }
+        // Native GetFullPathName resolves drive-relative and rooted paths;
+        // it does not traverse symlinks or canonicalize the selected owner.
+        std::path::absolute(&candidate).ok()
+    }?;
+    Some(Executable {
+        owner,
+        spelling: candidate,
+    })
 }
 
 fn extensions() -> Vec<OsString> {

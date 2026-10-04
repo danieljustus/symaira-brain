@@ -67,7 +67,7 @@ def install(provider: Path, target: Path, *, permission: int = 0o700):
     shutil.copyfile(provider, target); target.chmod(permission)
 
 
-def observe(binary: Path, actual_binary: Path, provider: Path, case: str, *, evidence: RawEvidence, metadata: bool, control: bool = False) -> dict:
+def observe(binary: Path, actual_binary: Path, provider: Path, case: str, *, evidence: RawEvidence, metadata: bool, control: bool = False, control_mode: str = "cwd") -> dict:
     with tempfile.TemporaryDirectory(prefix="bd-", dir=key.registry.process.private_temporary_parent()) as folder:
         root = Path(folder); env = key.registry.environment(root)
         suffix = ".exe" if os.name == "nt" else ""
@@ -83,13 +83,28 @@ def observe(binary: Path, actual_binary: Path, provider: Path, case: str, *, evi
                   "relative-first": "bin" + separator + str(second.parent), "absolute-first": str(second.parent) + separator + "bin",
                   "missing-first": "absent" + separator + str(second.parent), "nonexec-first": "bin" + separator + str(second.parent),
                   "directory-first": "bin" + separator + str(second.parent), "empty-entry-first": separator + str(second.parent),
-                  "opt-in-dot": ".", "opt-in-relative": "bin", "opt-in-empty": "", "last-opt-in": ".", "last-refusal": "."}
+                  "opt-in-dot": ".", "opt-in-relative": "bin", "opt-in-empty": "", "last-opt-in": ".", "last-refusal": ".",
+                  "missing-dotdot": str(root / "missing" / ".." / "bin"),
+                  "symlink-dotdot": str(root / "link" / ".." / "bin"),
+                  "relative-missing-dotdot": str(Path("missing") / ".." / "bin"),
+                  "suffix-empty": ".", "suffix-quiet-all": ".", "suffix-quiet-none": ".",
+                  "suffix-last-opt-in": ".", "suffix-last-refusal": ".", "suffix-invalid": ".",
+                  "suffix-quiet-partition-all": "."}
         path = values.get(case, str(first.parent))
         if case == "nonexec-first": first.chmod(0o600)
         if case == "directory-first": first.unlink(); first.mkdir()
+        if case == "symlink-dotdot":
+            nested = root / "other" / "nested"; nested.mkdir(parents=True)
+            install(provider, root / "other" / "bin" / local.name)
+            (root / "link").symlink_to(nested, target_is_directory=True)
         if case in ("opt-in-dot", "opt-in-relative", "opt-in-empty", "last-opt-in"): env["GODEBUG"] = "execerrdot=0"
         if case == "last-opt-in": env["GODEBUG"] = "execerrdot=1,execerrdot=0"
         if case == "last-refusal": env["GODEBUG"] = "execerrdot=0,execerrdot=1"
+        suffixes = {"suffix-empty": "execerrdot=0#", "suffix-quiet-all": "execerrdot=0#qy",
+                    "suffix-quiet-none": "execerrdot=0#qn", "suffix-last-opt-in": "execerrdot=1,execerrdot=0#qy",
+                    "suffix-last-refusal": "execerrdot=0#qy,execerrdot=1", "suffix-invalid": "execerrdot=0#not-a-pattern",
+                    "suffix-quiet-partition-all": "execerrdot=0#q0+1"}
+        if case in suffixes: env["GODEBUG"] = suffixes[case]
         if os.name == "nt":
             env["NoDefaultCurrentDirectoryInExePath"] = "1"
             if case.startswith("implicit-"): env.pop("NoDefaultCurrentDirectoryInExePath")
@@ -110,7 +125,7 @@ def observe(binary: Path, actual_binary: Path, provider: Path, case: str, *, evi
         if os.sys.platform == "darwin": path += separator + str(keychain)
         ledger = root / "queries.jsonl"
         env.update(PATH=path, SYMBROWSE_KEY_PROBE_MODE="ab", SYMBROWSE_KEYCHAIN_PROBE_MODE="44", SYMBROWSE_KEY_PROBE_LEDGER=str(ledger), SYMBROWSE_ENCRYPTION_KEY=key.KEY)
-        if control: env.update(DISCOVERY_OWNED_ROOT=str(root), DISCOVERY_ACTUAL_RUST=str(actual_binary))
+        if control: env.update(DISCOVERY_OWNED_ROOT=str(root), DISCOVERY_ACTUAL_RUST=str(actual_binary), DISCOVERY_OWNER_CONTROL_MODE=control_mode)
         session = f"d{os.getpid():x}{int(time.monotonic_ns()):x}"[-24:]
         endpoint = key.registry.harness.daemon_socket_path(Path(env["XDG_RUNTIME_DIR"]), session)
         command = [str(binary), "state", "list", "--session", session, "--json"]
@@ -190,15 +205,17 @@ def script_vectors(probe: Path, owner: Path, tool: str, tools: Path, evidence: R
     oracle = tools / "sdk-oracle.exe"
     subprocess.run([tool, "build", "-o", str(oracle), str(source)], env=dict(os.environ, CGO_ENABLED="0", GO111MODULE="off", GOTOOLCHAIN="local"), capture_output=True, timeout=120, check=True)
     rows = []
-    for extension in ("bat", "cmd"):
+    for extension, mode in ((extension, mode) for extension in ("bat", "cmd") for mode in ("absolute", "relative-opt-in", "raw-wide")):
         with tempfile.TemporaryDirectory(prefix="bd-script-", dir=key.registry.process.private_temporary_parent()) as folder:
-            root = Path(folder); env = key.registry.environment(root); directory = root / "bin"; directory.mkdir(); marker = root / "shell-was-executed"
+            root = Path(folder); env = key.registry.environment(root); directory = root / ("raw-\ud800" if mode == "raw-wide" else "bin"); directory.mkdir(); marker = root / "shell-was-executed"
             script = directory / ("symvault." + extension)
             script.write_bytes(b'@echo off\r\necho forbidden-shell-owner > "%DISCOVERY_MARKER%"\r\n')
-            env.update(PATH=str(directory), PATHEXT="." + extension.upper(), NoDefaultCurrentDirectoryInExePath="1", DISCOVERY_MARKER=str(marker), SYMBROWSE_ENCRYPTION_KEY=key.KEY)
+            env.update(PATH="bin" if mode == "relative-opt-in" else str(directory), PATHEXT="." + extension.upper(), NoDefaultCurrentDirectoryInExePath="1", DISCOVERY_MARKER=str(marker), SYMBROWSE_ENCRYPTION_KEY=key.KEY)
+            if mode == "relative-opt-in": env["GODEBUG"] = "execerrdot=0"
             actual_go = subprocess.run([str(oracle)], env=env, cwd=root, capture_output=True, timeout=5)
             actual_rust = subprocess.run([str(probe), "symvault", str(owner)], env=env, cwd=root, capture_output=True, timeout=5)
-            evidence.append({"phase": "windows.script.observed", "extension": extension,
+            evidence.append({"phase": "windows.script.observed", "extension": extension, "mode": mode,
+                             "native_path_utf16_base64": base64.b64encode(env["PATH"].encode("utf-16le", "surrogatepass")).decode(),
                              "oracle_binary_sha256": key.registry.process.digest(oracle),
                              "probe_binary_sha256": key.registry.process.digest(probe),
                              "go_exit": actual_go.returncode, "rust_exit": actual_rust.returncode,
@@ -213,7 +230,54 @@ def script_vectors(probe: Path, owner: Path, tool: str, tools: Path, evidence: R
             prefix = 'symvault entry "symbrowse/encryption-key": '
             assert rust_value["error"] == prefix + go_value["invoke_error"] and not rust_value["configured"]
             assert not marker.exists(), "native changed Go failed CreateProcess into shell execution"
-            rows.append({"extension": extension, "arguments": ["symvault", str(owner)], "go_stdout_base64": base64.b64encode(actual_go.stdout).decode(), "rust_stdout_base64": base64.b64encode(actual_rust.stdout).decode(), "go": go_value, "rust": rust_value, "shell_executed": False, "script_sha256": key.registry.process.digest(script), "oracle_binary_sha256": key.registry.process.digest(oracle), "matches": True})
+            rows.append({"extension": extension, "mode": mode, "native_path_utf16_base64": base64.b64encode(env["PATH"].encode("utf-16le", "surrogatepass")).decode(), "arguments": ["symvault", str(owner)], "go_stdout_base64": base64.b64encode(actual_go.stdout).decode(), "rust_stdout_base64": base64.b64encode(actual_rust.stdout).decode(), "go": go_value, "rust": rust_value, "shell_executed": False, "script_sha256": key.registry.process.digest(script), "oracle_binary_sha256": key.registry.process.digest(oracle), "matches": True})
+    return rows
+
+
+def setting_vectors(probe: Path, owner: Path, provider: Path, tool: str, tools: Path, evidence: RawEvidence) -> list:
+    source = tools / "bisect-oracle"; source.mkdir(); package = source / "bisect"; package.mkdir()
+    sdk = Path(subprocess.check_output([tool, "env", "GOROOT"], text=True).strip())
+    sdk_source = sdk / "src" / "internal" / "bisect" / "bisect.go"
+    shutil.copyfile(sdk_source, package / "bisect.go"); shutil.copyfile(sdk / "LICENSE", source / "LICENSE")
+    shutil.copyfile(HERE / "discovery_bisect_oracle.go.in", source / "main.go")
+    oracle = tools / ("bisect-oracle.exe" if os.name == "nt" else "bisect-oracle-bin")
+    subprocess.run([tool, "build", "-o", str(oracle), str(source / "main.go")], cwd=source,
+                   env=dict(os.environ, CGO_ENABLED="0", GO111MODULE="off", GOTOOLCHAIN="local"), capture_output=True, timeout=120, check=True)
+    supported = [("", True), ("qy", True), ("qn", False), ("q!!y", True), ("q0+1", True),
+                 ("qy-y", False), ("q!y-y", True), ("not-a-pattern", True), ("q", True),
+                 ("q0-1+0", True), ("qyy", True), ("qxy", True), ("q-0-1", False)]
+    unresolved = ["q0", "q1", "qxf", "y", "n", "qy-0", "qvy", "!y"]
+    rows = []
+    for pattern, expected in supported + [(pattern, None) for pattern in unresolved]:
+        with tempfile.TemporaryDirectory(prefix="bd-setting-", dir=key.registry.process.private_temporary_parent()) as folder:
+            root = Path(folder); env = key.registry.environment(root); suffix = ".exe" if os.name == "nt" else ""
+            install(provider, root / ("symvault" + suffix)); ledger = root / "queries.jsonl"
+            path = "."
+            if os.sys.platform == "darwin":
+                install(provider, root / "keychain" / "security"); path += os.pathsep + str(root / "keychain")
+            env.update(PATH=path, GODEBUG="execerrdot=0#" + pattern, NoDefaultCurrentDirectoryInExePath="1",
+                       SYMBROWSE_KEY_PROBE_LEDGER=str(ledger), SYMBROWSE_ENCRYPTION_KEY=key.KEY)
+            actual_go = subprocess.run([str(oracle), pattern], env=env, cwd=root, capture_output=True, timeout=5)
+            actual_rust = subprocess.run([str(probe), "symvault", str(owner)], env=env, cwd=root, capture_output=True, timeout=5)
+            raw = {"phase": "setting.observed", "pattern": pattern, "expected_allow": expected,
+                   "go_exit": actual_go.returncode, "rust_exit": actual_rust.returncode,
+                   "go_stdout_base64": base64.b64encode(actual_go.stdout).decode(), "go_stderr_base64": base64.b64encode(actual_go.stderr).decode(),
+                   "rust_stdout_base64": base64.b64encode(actual_rust.stdout).decode(), "rust_stderr_base64": base64.b64encode(actual_rust.stderr).decode(),
+                   "ledger_base64": base64.b64encode(ledger.read_bytes()).decode() if ledger.exists() else None,
+                   "oracle_binary_sha256": key.registry.process.digest(oracle), "sdk_bisect_source_sha256": key.registry.process.digest(sdk_source)}
+            evidence.append(raw)
+            assert actual_go.returncode == actual_rust.returncode == 0 and not actual_go.stderr and not actual_rust.stderr
+            go_value, rust_value = json.loads(actual_go.stdout), json.loads(actual_rust.stdout)
+            queries = [json.loads(line) for line in ledger.read_text().splitlines()] if ledger.exists() else []
+            vault_count = sum(query.get("arguments") == ["get", "symbrowse/encryption-key"] for query in queries)
+            if expected is None:
+                assert not rust_value["configured"] and "requires Go runtime stack/report identity" in rust_value["error"] and vault_count == 0
+            else:
+                assert all(row["enabled"] == expected and not row["print"] for row in go_value["typed_ids"])
+                assert rust_value["configured"] and not rust_value["error"] and vault_count == int(expected)
+            rows.append({**raw, "go": go_value, "rust": rust_value,
+                         "disposition": "supported quiet/nil-matcher value contract" if expected is not None else "EXPLICIT UNPORTED Go stack/report identity: fail closed, no parity waiver",
+                         "vault_queries": vault_count})
     return rows
 
 
@@ -236,28 +300,38 @@ def main() -> int:
     evidence = RawEvidence(args.out.with_suffix(".raw.json"), binding)
     original = ["empty", "dot", "dot-bin", "relative-bin", "absolute"]
     cases = original + ["relative-first", "absolute-first", "missing-first", "directory-first", "empty-entry-first", "opt-in-dot", "opt-in-relative", "opt-in-empty", "last-opt-in", "last-refusal"]
+    cases += ["missing-dotdot", "symlink-dotdot", "relative-missing-dotdot", "suffix-empty", "suffix-quiet-all",
+              "suffix-quiet-none", "suffix-last-opt-in", "suffix-last-refusal", "suffix-invalid", "suffix-quiet-partition-all"]
     if os.name == "nt": cases += ["implicit-empty", "implicit-absolute-other", "implicit-same", "implicit-hardlink", "implicit-symlink", "pathext-order", "pathext-no-dot", "pathext-empty-list", "raw-wide-path", "raw-wide-pathext"]
     else: cases.append("nonexec-first")
     with tempfile.TemporaryDirectory(prefix="bd-tools-", dir=key.registry.process.private_temporary_parent()) as folder:
         tools = Path(folder); provider_dir = tools / "provider"; provider_dir.mkdir(); provider = build(provider_dir, args.go_tool)
         rows = pairs(go, rust, provider, cases, evidence=evidence, metadata=True)
         scripts = script_vectors(args.rust_source_probe.resolve(), rust, args.go_tool, tools, evidence)
+        settings = setting_vectors(args.rust_source_probe.resolve(), rust, provider, args.go_tool, tools, evidence)
         original_rows = pairs(go, rust, args.retained_provider.resolve(), original, evidence=evidence, metadata=False) if args.retained_provider else []
         control_dir = tools / "control"; control_dir.mkdir(); control = build(control_dir, args.go_tool, control=True)
-        mutated = observe(control, rust, provider, "empty-entry-first", evidence=evidence, metadata=True, control=True)
-        ordinary = next(row for row in rows if row["case"] == "empty-entry-first")
-        assert mutated["vault_query_count"] != ordinary["go"]["vault_query_count"], "actual false-owner mutant escaped"
+        controls = []
+        mutations = [("cwd", "empty-entry-first"), ("suffix-refusal", "suffix-quiet-all")]
+        if os.name != "nt": mutations.append(("traversal", "symlink-dotdot"))
+        for mode, case in mutations:
+            mutated = observe(control, rust, provider, case, evidence=evidence, metadata=True, control=True, control_mode=mode)
+            ordinary = next(row for row in rows if row["case"] == case)
+            assert mutated["vault_query_count"] != ordinary["go"]["vault_query_count"], ("actual discovery mutant escaped", mode)
+            controls.append({"mode": mode, "observed": mutated, "binary_sha256": key.registry.process.digest(control), "rejected": True})
         report = {"candidate_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
                   "candidate_dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT)),
                   "go_ref": key.registry.process.GO_REF, "go_version": subprocess.check_output([args.go_tool, "version"], text=True).strip(),
                   "go_binary_sha256": key.registry.process.digest(go), "rust_binary_sha256": key.registry.process.digest(rust),
-                  "cases": rows, "original_retained_provider_pairs": original_rows, "windows_script_sdk_vectors": scripts, "source_probe_sha256": key.registry.process.digest(args.rust_source_probe), "matches": True,
-                  "negative_control": {"observed": mutated, "binary_sha256": key.registry.process.digest(control), "rejected": True},
+                  "cases": rows, "original_retained_provider_pairs": original_rows, "windows_script_sdk_vectors": scripts,
+                  "typed_sdk_setting_vectors": settings, "unported_stack_report_patterns": [row["pattern"] for row in settings if row["expected_allow"] is None],
+                  "source_probe_sha256": key.registry.process.digest(args.rust_source_probe), "supported_matches": True, "full_discovery_compatibility": False,
+                  "negative_controls": controls,
                   "scope": "actual native default startup CLI owner/query/bytes; every autostart daemon identity stopped and waited before teardown; Linux original10 retained when provided. Windows argv0/rawGetCommandLine remain explicit observations requiring independent review."}
         report["candidate_source_sha256"] = binding["candidate_source_sha256"]
         args.out.write_text(json.dumps(report, indent=2) + "\n")
         evidence.value["complete"] = True; evidence.flush()
-    print(f"{len(rows)} actual provider-discovery pairs + {len(original_rows)} original retained pairs; actual false-owner child rejected; all owners gone before teardown")
+    print(f"{len(rows)} actual provider-discovery pairs + {len(original_rows)} original retained pairs; {len(controls)} actual mutants rejected; all owners gone before teardown; Go stack/report bisect compatibility remains explicitly open")
     return 0
 
 
