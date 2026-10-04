@@ -65,9 +65,9 @@ fn clean_bytes(path: &[u8]) -> Vec<u8> {
     }
     while read < original.len() {
         let unit = original[read];
-        if separator(unit) {
-            read += 1;
-        } else if unit == 46 && (read + 1 == original.len() || separator(original[read + 1])) {
+        if separator(unit)
+            || (unit == 46 && (read + 1 == original.len() || separator(original[read + 1])))
+        {
             read += 1;
         } else if unit == 46
             && original.get(read + 1) == Some(&46)
