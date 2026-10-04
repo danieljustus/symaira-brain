@@ -8,7 +8,7 @@ full request/response wire capture beside OUTPUT in `.evidence/`, plus copied
 actual Go/accepted-parent/native/sentinel binaries. No operator credentials or
 provider endpoint is contacted.
 
-The original39 device baseline inputs are retained:32 full native comparisons,
+The original39 device baseline inputs are retained and all25 Go White_Space outer-trim code points added:64 cases/57 full native comparisons,
 seven retained invalid-UTF8/internal-ASCII-control gates. Actual TLS additionally
 runs84 cases across twelve remote provider strategies, covering401,403,429,500,
 success, malformed and empty bodies. Four real HTTPS responses verify the

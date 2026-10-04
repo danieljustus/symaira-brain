@@ -22,7 +22,8 @@ def main():
     with tempfile.TemporaryDirectory(prefix='usage-next-owned-')as directory:
         root=Path(directory);source=root/'go-source';peer=None
         run('input',['python3',str(repo/'scripts/usage-next-oracle/device_cases.py'),str(evidence/'input.json')])
-        cases=json.loads((evidence/'input.json').read_text());assert len(cases)==39
+        cases=json.loads((evidence/'input.json').read_text());assert len(cases)==64
+        original=json.loads((repo/'migration/evidence/usage-remaining-baseline-768/symaira-usage768-remaining-device-input.json').read_text());assert cases[:39]==original and len(original)==39
         run('status-input',['python3',str(repo/'scripts/usage-next-oracle/status_cases.py'),str(evidence/'status-input.json')])
         statuses=json.loads((evidence/'status-input.json').read_text())
         run('source',['git','worktree','add','--quiet','--detach',str(source),FROZEN])
@@ -47,7 +48,7 @@ def main():
             run('native',['cargo','test','--locked','-p','symbrain-usage','--lib','device_oracle_matches_fresh_go','--','--ignored','--nocapture'],env)
             main_wire=list(peer.rows)
             controls=[]
-            for kind,field,message in [('missing-device-case','go.json','left: 38'),('device-header-bytes','go.json','complete request/raw header bytes'),('remote-status-diagnostic','status-go.json','actual remote full status/report')]:
+            for kind,field,message in [('missing-device-case','go.json','left: 63'),('device-header-bytes','go.json','complete request/raw header bytes'),('remote-status-diagnostic','status-go.json','actual remote full status/report')]:
                 path=evidence/field;original=path.read_bytes();rows=json.loads(original)
                 if kind=='missing-device-case':rows.pop()
                 elif kind=='device-header-bytes':rows[0]['requests'][0]['header_value_hex']['X-Msh-Device-Id']=['00']
@@ -62,7 +63,7 @@ def main():
                 finally:path.write_bytes(original)
             (evidence/'controls.json').write_text(json.dumps(controls,indent=2)+'\n')
             peer.close();(evidence/'wire.json').write_text(json.dumps(main_wire,indent=2)+'\n');(evidence/'controls-wire.json').write_text(json.dumps(peer.rows[len(main_wire):],indent=2)+'\n');peer=None
-            go=json.loads((evidence/'go-wire.json').read_text());native=json.loads((evidence/'native.json').read_text());wire=json.loads((evidence/'wire.json').read_text());assert len(go)==native['wire']['cases']==32
+            go=json.loads((evidence/'go-wire.json').read_text());native=json.loads((evidence/'native.json').read_text());wire=json.loads((evidence/'wire.json').read_text());assert len(go)==native['wire']['cases']==57
             observations=[]
             statuses_go=json.loads((evidence/'status-go.json').read_text());assert native['statuses']['cases']==len(statuses_go)==84
             for row in go+statuses_go:
@@ -97,8 +98,8 @@ def main():
             paths=[p for p in paths if p.is_file()];source_hashes={str(p.relative_to(repo)):sha(p)for p in paths}
             if not dirty:
                 for p in paths:assert p.read_bytes()==subprocess.check_output(['git','show',head+':'+str(p.relative_to(repo))],cwd=repo)
-            receipt=dict(candidate_head=head,candidate_dirty=dirty,oracle_commit=FROZEN,frozen_source_sha256=frozen,source_sha256=source_hashes,cases=39,full_native_reports=32,retained_gates=7,remote_status_strategy_cases=84,negative_controls=controls,argv=argv,argv_controls=argv_controls,cli_build=cli_build,native=native,wire_observations=observations,evidence_sha256={str(p.name):sha(p)for p in evidence.iterdir()if p.is_file()},go_sdk=subprocess.check_output(['go','version'],text=True).strip(),rust_sdk=subprocess.check_output(['rustc','-Vv'],text=True),native_platforms='Linux author proof only; fresh native macOS/Windows required',clock_policy='All actual Go/native snapshot fetched_at retained and bounded by invocation; canonicalization uses the invocation clock plus exact OpenCode3600/86400 second reset offsets relative to actual fetched_at. No fixed/runtime equality claim.',wire_policy='Exact provider-added header bytes except inherited OpenCode X-Server-Instance runtime/fixed identity, request line/body and response compared. All full raw wire requests retained; inherited transport default/header serialization differences are explicit, not exact wire parity.',private_seam='Test-only trust root and resolver/dial pin original HTTPS public hostnames to owned loopback TLS peer, certificate hostname verified; no provider/operator network. Production execute/parser unchanged. Fast TLS proof does not establish deadline/cancel parity.')
-            output.write_text(json.dumps(receipt,indent=2)+'\n');print('PASS39/32 full native,7 gated; owned TLS comparisons',len(observations))
+            receipt=dict(candidate_head=head,candidate_dirty=dirty,oracle_commit=FROZEN,frozen_source_sha256=frozen,source_sha256=source_hashes,cases=64,original_device_cases=39,exhaustive_trim_cases=25,full_native_reports=57,retained_gates=7,remote_status_strategy_cases=84,negative_controls=controls,argv=argv,argv_controls=argv_controls,cli_build=cli_build,native=native,wire_observations=observations,evidence_sha256={str(p.name):sha(p)for p in evidence.iterdir()if p.is_file()},go_sdk=subprocess.check_output(['go','version'],text=True).strip(),rust_sdk=subprocess.check_output(['rustc','-Vv'],text=True),native_platforms='Linux author proof only; fresh native macOS/Windows required',clock_policy='All actual Go/native snapshot fetched_at retained and bounded by invocation; canonicalization uses the invocation clock plus exact OpenCode3600/86400 second reset offsets relative to actual fetched_at. No fixed/runtime equality claim.',wire_policy='Exact provider-added header bytes except inherited OpenCode X-Server-Instance runtime/fixed identity, request line/body and response compared. All full raw wire requests retained; inherited transport default/header serialization differences are explicit, not exact wire parity.',private_seam='Test-only trust root and resolver/dial pin original HTTPS public hostnames to owned loopback TLS peer, certificate hostname verified; no provider/operator network. Production execute/parser unchanged. Fast TLS proof does not establish deadline/cancel parity.')
+            output.write_text(json.dumps(receipt,indent=2)+'\n');print('PASS64/57 full native,7 gated; owned TLS comparisons',len(observations))
         finally:
             if peer:
                 (evidence/'wire-failed.json').write_text(json.dumps(dict(rows=peer.rows,errors=peer.errors),indent=2)+'\n');peer.close()

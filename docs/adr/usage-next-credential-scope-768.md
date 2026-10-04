@@ -146,9 +146,9 @@ diagnostic; only that precise empty-body text now follows frozen Go. Original
 actual401, empty200, clock and harness failures remain retained, without removing
 existing comparisons or changing body limits.
 
-The new complete gate retains the original39 device inputs:32 full native
+The new complete gate retains the original39 device inputs plus all25 Go White_Space outer-trim values:64 cases,57 full native
 reports and seven retained raw/control gates, including selected bytes, exact
-logical request/raw-header bytes and read-only sources.32 owned TLS device cases
+logical request/raw-header bytes and read-only sources.57 owned TLS device cases
 plus84 remote cases across twelve strategy constructors cover401/403/429/500,
 success/malformed/empty responses. Four actual TLS200/401 exact/over1MiB bodies
 prove the unchanged native bound; Antigravity's shared transport is included,

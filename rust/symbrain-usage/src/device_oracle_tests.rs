@@ -211,7 +211,7 @@ fn device_oracle_matches_fresh_go() {
     let records: Vec<Value> =
         serde_json::from_slice(&std::fs::read(std::env::var("USAGE_DEVICE_GO").unwrap()).unwrap())
             .unwrap();
-    assert_eq!(records.len(), 39);
+    assert_eq!(records.len(), 64);
     let mut observed = Vec::new();
     let mut gated = 0;
     for row in &records {
@@ -263,7 +263,7 @@ fn device_oracle_matches_fresh_go() {
     std::fs::write(
         std::env::var("USAGE_DEVICE_NATIVE").unwrap(),
         serde_json::to_vec_pretty(
-            &json!({"cases":39,"full_reports":32,"gated":7,"records":observed,"wire":wired,"statuses":statuses,"bounds":bounds}),
+            &json!({"cases":64,"full_reports":57,"gated":7,"records":observed,"wire":wired,"statuses":statuses,"bounds":bounds}),
         )
         .unwrap(),
     )

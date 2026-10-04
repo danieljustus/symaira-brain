@@ -60,7 +60,7 @@ impl Transport for Wired {
 pub(super) fn compare(records: &[Value]) -> Value {
     let fixture = std::env::var("USAGE_DEVICE_WIRE_GO").expect("actual TLS Go evidence");
     let expected: Vec<Value> = serde_json::from_slice(&std::fs::read(fixture).unwrap()).unwrap();
-    assert_eq!(expected.len(), 32);
+    assert_eq!(expected.len(), 57);
     let mut output = vec![];
     for row in records
         .iter()
@@ -92,7 +92,7 @@ pub(super) fn compare(records: &[Value]) -> Value {
         readonly(row, &before);
         output.push(json!({"id":row["id"],"report":raw,"started":start,"finished":end,"requests":requests,"read_only":true}));
     }
-    json!({"cases":32,"records":output,"tls_verified":true,"private_dns_only":true,"deadline_claim":false})
+    json!({"cases":57,"records":output,"tls_verified":true,"private_dns_only":true,"deadline_claim":false})
 }
 
 pub(super) fn wired(row: &Value) -> Wired {

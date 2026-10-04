@@ -85,8 +85,8 @@ func TestRemainingDeviceBaseline768(t *testing.T) {
 	if err = json.Unmarshal(input, &cases); err != nil {
 		t.Fatal(err)
 	}
-	if len(cases) != 39 {
-		t.Fatal("complete39-case proposed family baseline required")
+	if len(cases) != 64 {
+		t.Fatal("complete64-case original39 plus25 trim corpus required")
 	}
 	api, err := os.ReadFile("testdata/kimi-api-usages.json")
 	if err != nil {

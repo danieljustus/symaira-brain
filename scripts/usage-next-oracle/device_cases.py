@@ -1,4 +1,4 @@
-"""Go-only complete-value baseline for the proposed valid-UTF8 device-id family."""
+"""Original39 retained, plus every25 Go White_Space outer-trim code point."""
 import json
 from pathlib import Path
 import sys
@@ -33,4 +33,10 @@ cases.append(dict(id='device-absent', device_hex='', device_present=False, token
 cases.append(dict(id='device-unicode-no-cli-api', device_hex='设备'.encode().hex(), device_present=True,
                   token='', api='owned-api', web='', responses=[200], kind='irrelevant-device'))
 assert len(cases) == len({row['id'] for row in cases}) == 39
+whitespace=[*range(9,14),32,0x85,0xa0,0x1680,*range(0x2000,0x200b),0x2028,0x2029,0x202f,0x205f,0x3000]
+assert len(whitespace)==25
+for point in whitespace:
+    value=chr(point)+'owned-设备'+chr(point)
+    cases.append(dict(id=f'device-trim-{point:04x}',device_hex=value.encode().hex(),device_present=True,token='owned-cli',api='',web='',responses=[200],kind='trim-exhaustive'))
+assert len(cases)==len({row['id']for row in cases})==64
 Path(sys.argv[1]).write_text(json.dumps(cases, indent=2) + '\n')
