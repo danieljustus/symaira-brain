@@ -3,11 +3,13 @@ import os
 from pathlib import Path
 import subprocess
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
 import config_paths
 import config_warnings
+import kernel_admission
 
 
 PARENTS = ['.config/hermes', '.cursor', '.vscode', '.config/opencode',
@@ -15,6 +17,16 @@ PARENTS = ['.config/hermes', '.cursor', '.vscode', '.config/opencode',
 
 
 class ConfigPathFixtures(unittest.TestCase):
+    def test_windows_junction_api_is_separate_from_product_environment_callback(self):
+        api = SimpleNamespace(name='nt', environ={'COMSPEC': 'owned-COMSPEC'})
+        returned = subprocess.CompletedProcess([], 0, b'owned API mock', b'')
+        with patch('config_paths.os', api), patch('config_paths.subprocess.run', return_value=returned) as run:
+            config_paths.link_directory(Path('owned-link'), Path('owned-target'))
+        argv, kwargs = run.call_args
+        self.assertEqual(argv[0], ['owned-COMSPEC', '/c', 'mklink', '/J', 'owned-link', 'owned-target'])
+        self.assertEqual(kwargs, dict(capture_output=True, timeout=5))
+        self.assertNotIn('env', kwargs)
+
     def test_all_owned_possible_discovery_bases_have_parents_and_absent_files(self):
         with tempfile.TemporaryDirectory(prefix='guard-fixture-parents-') as directory:
             root = Path(directory)
@@ -29,6 +41,12 @@ class ConfigPathFixtures(unittest.TestCase):
     def test_seeded_parents_preserve_raw_unix_components(self):
         with tempfile.TemporaryDirectory(prefix='guard-fixture-raw-') as directory:
             root = Path(directory)
+            admission = kernel_admission.probe(b'owned-\xe2\x82<&>', root)
+            if not admission['admitted']:
+                self.assertEqual(admission['disposition'], 'unavailable-darwin-EILSEQ92')
+                self.assertTrue(admission['owned_root_removed'])
+                self.assertEqual(admission['entries_after_cleanup'], [])
+                return
             leaf = os.fsdecode(b'owned-\xe2\x82<&>')
             lexical, physical = root/leaf, root/'physical'/leaf
             config_paths.prepare_discovery_parents(root, lexical, physical)
@@ -55,8 +73,12 @@ class ConfigPathFixtures(unittest.TestCase):
                 return subprocess.CompletedProcess(argv, 1, b'symguard doctor\n  Go:        go1.26.7\n',
                                                    b'owned callback diagnostic')
 
-            with patch('config_paths.subprocess.run', side_effect=child):
+            # This unit observes healthy parent seeding, not the platform's
+            # junction API. mklink has no product env; it must not reach child().
+            with patch('config_paths.link_directory', side_effect=lambda link, target: link.mkdir()) as link_api, \
+                 patch('config_paths.subprocess.run', side_effect=child):
                 observed = config_paths.observe(Path('owned-not-executed'), case, root, False)
+            link_api.assert_called_once_with(root/'link', root/'physical/anchor')
             self.assertTrue(observed['readonly'])
             self.assertEqual(len(calls), 1)
 

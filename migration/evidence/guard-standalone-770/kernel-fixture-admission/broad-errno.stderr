@@ -1,0 +1,40 @@
+test_exhaustive_ledger_separates_unexecuted_from_platform_complete (test_config_path_admission.KernelAdmission.test_exhaustive_ledger_separates_unexecuted_from_platform_complete) ... ok
+test_linux_original_domain_and_failed_pairs_cannot_claim_complete (test_config_path_admission.KernelAdmission.test_linux_original_domain_and_failed_pairs_cannot_claim_complete) ... ok
+test_mock_darwin_probe_preserves_raw_exception_cleanup_and_no_child (test_config_path_admission.KernelAdmission.test_mock_darwin_probe_preserves_raw_exception_cleanup_and_no_child) ... ok
+test_only_invalid_utf8_darwin_exact_92_is_unavailable (test_config_path_admission.KernelAdmission.test_only_invalid_utf8_darwin_exact_92_is_unavailable) ... 
+  test_only_invalid_utf8_darwin_exact_92_is_unavailable (test_config_path_admission.KernelAdmission.test_only_invalid_utf8_darwin_exact_92_is_unavailable) (component=b'owned-\xe2\x82', system='darwin', errno=13) ... FAIL
+  test_only_invalid_utf8_darwin_exact_92_is_unavailable (test_config_path_admission.KernelAdmission.test_only_invalid_utf8_darwin_exact_92_is_unavailable) (component=b'owned-\xef\xbf\xbd', system='darwin', errno=92) ... FAIL
+  test_only_invalid_utf8_darwin_exact_92_is_unavailable (test_config_path_admission.KernelAdmission.test_only_invalid_utf8_darwin_exact_92_is_unavailable) (component=b'ordinary', system='darwin', errno=92) ... FAIL
+test_owned_representable_unicode_is_mandatory_and_clean (test_config_path_admission.KernelAdmission.test_owned_representable_unicode_is_mandatory_and_clean) ... ok
+
+======================================================================
+FAIL: test_only_invalid_utf8_darwin_exact_92_is_unavailable (test_config_path_admission.KernelAdmission.test_only_invalid_utf8_darwin_exact_92_is_unavailable) (component=b'owned-\xe2\x82', system='darwin', errno=13)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/review-proof/review-pr800-guard805-kernel-fixtures/owned-tmp/tmpmv6fi4ii/test_config_path_admission.py", line 31, in test_only_invalid_utf8_darwin_exact_92_is_unavailable
+    with self.assertRaises(OSError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: OSError not raised
+
+======================================================================
+FAIL: test_only_invalid_utf8_darwin_exact_92_is_unavailable (test_config_path_admission.KernelAdmission.test_only_invalid_utf8_darwin_exact_92_is_unavailable) (component=b'owned-\xef\xbf\xbd', system='darwin', errno=92)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/review-proof/review-pr800-guard805-kernel-fixtures/owned-tmp/tmpmv6fi4ii/test_config_path_admission.py", line 31, in test_only_invalid_utf8_darwin_exact_92_is_unavailable
+    with self.assertRaises(OSError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: OSError not raised
+
+======================================================================
+FAIL: test_only_invalid_utf8_darwin_exact_92_is_unavailable (test_config_path_admission.KernelAdmission.test_only_invalid_utf8_darwin_exact_92_is_unavailable) (component=b'ordinary', system='darwin', errno=92)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/review-proof/review-pr800-guard805-kernel-fixtures/owned-tmp/tmpmv6fi4ii/test_config_path_admission.py", line 31, in test_only_invalid_utf8_darwin_exact_92_is_unavailable
+    with self.assertRaises(OSError):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: OSError not raised
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.003s
+
+FAILED (failures=3)

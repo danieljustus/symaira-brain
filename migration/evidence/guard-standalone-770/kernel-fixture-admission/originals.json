@@ -1,0 +1,140 @@
+{
+  "base": "e13f4caa07a4aecff5ab54a4ab57e2e248374438",
+  "originals": [
+    {
+      "path": "/workspace/review-proof/root-guard805-e13/diff.stderr",
+      "member": "review-proof/root-guard805-e13/diff.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-e13/diff.stdout",
+      "member": "review-proof/root-guard805-e13/diff.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-e13/independent-review.md",
+      "member": "review-proof/root-guard805-e13/independent-review.md",
+      "bytes": 3308,
+      "sha256": "9db42b9ec8b612eaadf9e6ccfb835f8c71a72eb00aff6f107abd9b26bb39da16"
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-e13/portable15.stderr",
+      "member": "review-proof/root-guard805-e13/portable15.stderr",
+      "bytes": 2613,
+      "sha256": "11951b44a618f3f5cef6b59bd9f9ab4ece074c5cd2559c292f6809bd3e8ef112"
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-e13/portable15.stdout",
+      "member": "review-proof/root-guard805-e13/portable15.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-e13/proof-manifest.json",
+      "member": "review-proof/root-guard805-e13/proof-manifest.json",
+      "bytes": 1255,
+      "sha256": "ad5451bc57bec38b0018357e04a134607062cb274a357176dfdb09fd9bc84eb5"
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-e13/shell.stderr",
+      "member": "review-proof/root-guard805-e13/shell.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-e13/shell.stdout",
+      "member": "review-proof/root-guard805-e13/shell.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-e13/verification.json",
+      "member": "review-proof/root-guard805-e13/verification.json",
+      "bytes": 2705,
+      "sha256": "ddba200cafcdbf10e037608c400fbbbda1129b04465a28de54a1540871ad1c9e"
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-e13/verify.log",
+      "member": "review-proof/root-guard805-e13/verify.log",
+      "bytes": 2705,
+      "sha256": "ddba200cafcdbf10e037608c400fbbbda1129b04465a28de54a1540871ad1c9e"
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-e13/verify.py",
+      "member": "review-proof/root-guard805-e13/verify.py",
+      "bytes": 7148,
+      "sha256": "40c03ba36734568552bdd8d8d31a8c6ee8283f5d316284887322cec84ff46a74"
+    },
+    {
+      "path": "/workspace/review-proof/root-discovery801-8e-macARM/browse-daemon-harness.log",
+      "member": "review-proof/root-discovery801-8e-macARM/browse-daemon-harness.log",
+      "bytes": 100,
+      "sha256": "0fcc5ea8e9006bc32723a78a9c62e42ff1fbec46be798ae5fe7af01aeba2dc52"
+    },
+    {
+      "path": "/workspace/review-proof/root-discovery801-8e-macARM/browse-daemon-lifecycle.log",
+      "member": "review-proof/root-discovery801-8e-macARM/browse-daemon-lifecycle.log",
+      "bytes": 44,
+      "sha256": "bb089a16d8353cfbff0fe8c53f8ec586b55e49f95535f3a3fbdecfb6760e95fe"
+    },
+    {
+      "path": "/workspace/review-proof/root-discovery801-8e-macARM/browse-daemon-macos-15.txt",
+      "member": "review-proof/root-discovery801-8e-macARM/browse-daemon-macos-15.txt",
+      "bytes": 334,
+      "sha256": "810bf70190b75842c9a2a0ff91f8a3cccfbcdb904f96fc860ff622e50b0c5639"
+    },
+    {
+      "path": "/workspace/review-proof/root-discovery801-8e-macARM/browse-daemon-pipe-controls.log",
+      "member": "review-proof/root-discovery801-8e-macARM/browse-daemon-pipe-controls.log",
+      "bytes": 106,
+      "sha256": "75ff54e727b57e4bd7b88956ed0c92c4b9a416e6f0976707e8fb54aa385ac0bd"
+    },
+    {
+      "path": "/workspace/review-proof/root-discovery801-8e-macARM/browse-daemon-races.log",
+      "member": "review-proof/root-discovery801-8e-macARM/browse-daemon-races.log",
+      "bytes": 46,
+      "sha256": "70af09f35bb0b9cf60a931c3e1db1fa0feac2948baac6c4aa2e1f68a03bbf306"
+    },
+    {
+      "path": "/workspace/review-proof/root-discovery801-8e-macARM/browse-daemon-registry-progress-tests.log",
+      "member": "review-proof/root-discovery801-8e-macARM/browse-daemon-registry-progress-tests.log",
+      "bytes": 103,
+      "sha256": "a763e360901062e96b483b564c9bb85ff022dff4c5a1b57ea18308601a510fca"
+    },
+    {
+      "path": "/workspace/review-proof/root-discovery801-8e-macARM/browse-daemon-unit.log",
+      "member": "review-proof/root-discovery801-8e-macARM/browse-daemon-unit.log",
+      "bytes": 14830,
+      "sha256": "01057ab5cc8dbef075fc9f83946c726d92d88fa80d9381060aced7ea5996b12f"
+    },
+    {
+      "path": "/workspace/review-proof/root-discovery801-8e-macARM/job-111412706458.logs.decoded",
+      "member": "review-proof/root-discovery801-8e-macARM/job-111412706458.logs.decoded",
+      "bytes": 115538,
+      "sha256": "3012bf84c2e2b0075459a2de8d50ba47e212d7bcd9d57111e089778ae667b907"
+    },
+    {
+      "path": "/workspace/review-proof/root-discovery801-8e-macARM/job-111412706458.mcp.json",
+      "member": "review-proof/root-discovery801-8e-macARM/job-111412706458.mcp.json",
+      "bytes": 118119,
+      "sha256": "36757f04672b79ce9fc1c186312bd19740e789c517cdf0155e8d2fb72f345e9a"
+    },
+    {
+      "path": "/workspace/review-proof/root-discovery801-8e-macARM/receipt.json",
+      "member": "review-proof/root-discovery801-8e-macARM/receipt.json",
+      "bytes": 1487,
+      "sha256": "f0af23e5c3a3806b3d091f9e337c2e75e79f9242e95885f49e04fdf7763ecc74"
+    },
+    {
+      "path": "/workspace/attachments/23fd422a-dc22-41f8-9233-e6372faf0eac/discovery801-8e-macARM-original.zip",
+      "member": "attachments/23fd422a-dc22-41f8-9233-e6372faf0eac/discovery801-8e-macARM-original.zip",
+      "bytes": 5608,
+      "sha256": "225c0aaa3aad52fff8dbaae2bad2b0afd6fe897df7c30654c4ceaf9f17ddcc99"
+    }
+  ],
+  "archive_sha256": "d0d1acc252405b591cdaa164751f3da1459ba62d106f1976cf26b641b3e1f573",
+  "full_original_zip_members_verified": 7,
+  "production_execution": false
+}

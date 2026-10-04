@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "<stdin>", line 13, in <module>
+  File "original-e13-observer-callback", line 49, in child
+KeyError: 'env'

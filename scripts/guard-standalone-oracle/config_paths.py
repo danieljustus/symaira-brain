@@ -9,6 +9,7 @@ import tempfile
 import time
 import replay
 import config_warnings
+import kernel_admission
 from config_path_journal import Journal
 
 
@@ -209,10 +210,21 @@ sys.stdout.buffer.write(p.stdout);sys.stderr.buffer.write(p.stderr);sys.exit(p.r
 
 
 def run(go, native, report, journal):
-    rows=[];selected=cases()
+    rows=[];selected=cases();unexecuted=[];admissions=[]
     with tempfile.TemporaryDirectory(prefix='guard770-config-paths-') as directory:
         root=Path(directory)
+        raw_admissions={}
+        if any(case.get('raw') for case in selected):
+            for family,component in [('xdg',b'owned-\xe2\x82<&>'), ('home',b'owned-\xe2\x82<&>-home')]:
+                admission=kernel_admission.probe(component,root,journal)
+                admissions.append(admission)
+                raw_admissions[family]=admission
         for index,case in enumerate(selected):
+            if case.get('raw') and not raw_admissions[case['family']]['admitted']:
+                row=kernel_admission.unavailable(case['id'],raw_admissions[case['family']])
+                unexecuted.append(row)
+                journal.event('case-unexecuted',observation=row)
+                continue
             left=observe(go,case,root/str(index)/'go',False,journal)
             right=observe(native,case,root/str(index)/'native',True,journal)
             try: disposition=compare(case,left,right)
@@ -221,14 +233,18 @@ def run(go, native, report, journal):
             journal.event('pair-complete', observation=rows[-1])
         mutant=control(go,native,root/'control',journal)
         journal.event('control-complete', observation=mutant)
+        requested=[case['id'] for case in selected]
+        ledger=kernel_admission.accounting(requested,rows,unexecuted,[mutant['id']],[mutant],[])
+        account_control=kernel_admission.accounting_control(requested,rows,unexecuted,[mutant['id']],[mutant],[])
+        journal.event('domain-accounted',accounting=ledger,accounting_control=account_control)
     output=dict(candidate_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=replay.ROOT,text=True).strip(),
                 candidate_dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=replay.ROOT)),
                 observed_native_source_override=os.environ.get('OWNED_NATIVE_EXECUTABLE_SOURCE'),
-                total=len(rows),matched=sum(row['disposition']=='matched' for row in rows),
+                total=len(rows),kernel_admissions=admissions,unavailable_results=unexecuted,accounting=ledger,accounting_control=account_control,matched=sum(row['disposition']=='matched' for row in rows),
                 gated=sum(row['disposition'].startswith('native-fail-closed') for row in rows),results=rows,controls=[mutant],
                 binaries_sha256=dict(go=replay.digest(go.read_bytes()),native=replay.digest(native.read_bytes())),
                 source_sha256={str(path.relative_to(replay.ROOT)):replay.digest(path.read_bytes()) for path in [
-                    Path(__file__),Path(__file__).with_name('config_path_journal.py'),replay.ROOT/'rust/symguard-cli/src/doctor/config.rs',
+                    Path(__file__),Path(__file__).with_name('config_path_journal.py'),Path(__file__).with_name('kernel_admission.py'),replay.ROOT/'rust/symguard-cli/src/doctor/config.rs',
                     replay.ROOT/'rust/symguard-cli/src/guard_scan.rs',replay.ROOT/'rust/symguard-cli/src/guard_paths.rs',
                     replay.ROOT/'rust/symguard-cli/src/guard_path_windows.rs']},
                 inapplicable_unix_raw_cases=['xdg-raw-dotdot','home-raw-dotdot'] if os.name=='nt' else [],
