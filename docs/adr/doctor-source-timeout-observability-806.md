@@ -2,6 +2,18 @@
 
 Status: source-only preparation. No new executable or native process was run.
 
+The first independent journal execution at `9faee8b` failed before fixture
+construction, compiler or CLI launch: Python exposes `NamedTemporaryFile`, while
+the draft used the Rust-style `NamedTempFile` spelling. Preserve that actual
+AttributeError, the original source/hash and Root's full invocation record in
+`original-9fa-api-failure`. The saved shell driver is explicitly a retrospective
+exact command record; the original command ran directly before that file existed.
+Correct only this API spelling. Six direct owned-file tests now exercise real
+atomic replacement, replacement failure, full binary streams, failed/finished
+states and capture hashes. These Linux Python observations establish journal
+I/O; they do not establish Source CLI or Windows process behavior. The complete
+unchanged Source gate and controls must be rerun independently before acceptance.
+
 Windows CI job111355025851 proves that a native `symbrain setup --from-source`
 invocation exceeded the outer replay timeout of25 seconds. Its command line
 does not identify the case: many cases use identical arguments. The report was

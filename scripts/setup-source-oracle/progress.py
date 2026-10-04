@@ -27,7 +27,7 @@ class Journal:
         if len(raw) > 128 * 1024 * 1024:
             raise RuntimeError("owned source progress journal exceeds128MiB")
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        with tempfile.NamedTempFile(dir=self.path.parent, delete=False) as stream:
+        with tempfile.NamedTemporaryFile(dir=self.path.parent, delete=False) as stream:
             temporary = Path(stream.name)
             try:
                 stream.write(raw)

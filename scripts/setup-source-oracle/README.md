@@ -55,6 +55,11 @@ permissions, production signatures and the complete worker feature ports remain
 outside this fixture proof. See the source setup ADR for decisions and rationale.
 # Failure observability
 
+Run `python3 scripts/setup-source-oracle/test_progress.py` for direct owned-file
+journal verification. It starts no product, Go or Cargo process and exercises
+actual writes/replacement and injected write failure without weakening the
+Source comparison. Current Linux execution is not a native Windows claim.
+
 The replay checkpoints `OUTPUT.json.progress.json` before every invocation and
 after every returned observation, outside compared fixture roots. Failed runs
 retain all earlier pairs, nullable timeout streams and explicitly bounded live
