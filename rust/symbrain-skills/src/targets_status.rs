@@ -7,7 +7,6 @@
 //! harness runtimes.
 
 use std::collections::BTreeMap;
-use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -187,7 +186,13 @@ impl SkillRootCounts {
             return counts;
         };
         counts.readable = true;
-        for entry in entries.flatten() {
+        for (index, entry) in entries.flatten().enumerate() {
+            if index >= crate::MAX_RESOURCE_ENTRIES {
+                counts.readable = false;
+                counts.managed = 0;
+                counts.unmanaged = 0;
+                break;
+            }
             let path = skill_root.join(entry.file_name());
             if is_managed_skill(&path) {
                 counts.managed += 1;
@@ -294,49 +299,10 @@ fn is_managed_skill(path: &Path) -> bool {
     fs::metadata(resolved.join(MARKER_FILE)).is_ok()
 }
 
-/// Resolves an executable name on `PATH` the way the Go implementation does,
-/// including the empty `PATH` entry (current directory) and `PATHEXT`
-/// suffixes on Windows.
+/// Discovery is shared with the skills git caller, including Go ErrDot.
 fn lookup_path(name: &str) -> Option<PathBuf> {
-    let path = env::var_os("PATH")?;
-    let suffixes: &[&str] = if cfg!(windows) {
-        &["", ".exe", ".cmd", ".bat"]
-    } else {
-        &[""]
-    };
-    for directory in env::split_paths(&path) {
-        for suffix in suffixes {
-            let candidate = if suffix.is_empty() {
-                name.to_owned()
-            } else {
-                format!("{name}{suffix}")
-            };
-            let candidate = if directory.as_os_str().is_empty() {
-                PathBuf::from(candidate)
-            } else {
-                directory.join(candidate)
-            };
-            if is_executable_file(&candidate) {
-                return Some(candidate);
-            }
-        }
-    }
-    None
-}
-
-#[cfg(unix)]
-fn is_executable_file(path: &Path) -> bool {
-    use std::os::unix::fs::PermissionsExt;
-
-    let Ok(metadata) = fs::metadata(path) else {
-        return false;
-    };
-    metadata.is_file() && metadata.permissions().mode() & 0o111 != 0
-}
-
-/// Windows has no executable bit in the POSIX sense; `PATHEXT` suffixes and an
-/// existing regular file are the whole contract there.
-#[cfg(not(unix))]
-fn is_executable_file(path: &Path) -> bool {
-    fs::metadata(path).is_ok_and(|metadata| metadata.is_file())
+    crate::binary::executable(Path::new(name))
+        .ok()
+        .flatten()
+        .map(|item| item.spelling)
 }

@@ -14,6 +14,11 @@ impl Gateway {
         context: DispatchContext<'_>,
     ) -> Result<GatewayResponse, GatewayError> {
         let started = Instant::now();
+        let raw_arguments = params.and_then(|raw| {
+            serde_json::from_str::<std::collections::BTreeMap<String, Box<RawValue>>>(raw.get())
+                .ok()
+                .and_then(|mut fields| fields.remove("arguments"))
+        });
         let params = match decode_params(params) {
             Ok(params) => params,
             Err(message) => return Ok(self.invalid_call(id, started, message)),
@@ -34,7 +39,14 @@ impl Gateway {
             || self.activity_tool_names.iter().any(|tool| tool == name)
             || self.skills_tool_names.iter().any(|tool| tool == name)
         {
-            return self.handle_embedded_call(id, name, &params, context, started);
+            return self.handle_embedded_call(
+                id,
+                name,
+                &params,
+                raw_arguments.as_deref(),
+                context,
+                started,
+            );
         }
         self.handle_routed_call(id, name, arguments.as_deref(), context, started)
     }
@@ -128,14 +140,20 @@ impl Gateway {
         id: Value,
         name: &str,
         params: &serde_json::Map<String, Value>,
+        raw_arguments: Option<&RawValue>,
         context: DispatchContext<'_>,
         started: Instant,
     ) -> Result<GatewayResponse, GatewayError> {
-        let response =
-            match self.handle_embedded(id.clone(), name, params.get("arguments"), context) {
-                Ok(response) => response,
-                Err(error) => GatewayResponse::success(id, tool_result(error.to_string(), true))?,
-            };
+        let response = match self.handle_embedded(
+            id.clone(),
+            name,
+            params.get("arguments"),
+            raw_arguments,
+            context,
+        ) {
+            Ok(response) => response,
+            Err(error) => GatewayResponse::success(id, tool_result(error.to_string(), true))?,
+        };
         let failed = response.error.is_some()
             || response
                 .result

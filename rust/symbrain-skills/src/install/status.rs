@@ -16,7 +16,7 @@ use serde::Serialize;
 use super::base::base_path_for_scope;
 use super::destination::entry_metadata;
 use super::lock;
-use super::marker::{MarkerState, read_marker_at};
+use super::marker::MarkerState;
 use super::replace::open_trusted_dir;
 use super::status_compare::{
     compare_one, is_regular_skill_source, marker_row, read_entries, resolve_link,
@@ -234,18 +234,30 @@ fn status_target(
             }
             path.clone()
         };
-        let marker = if file_type.is_symlink() {
-            super::marker::read_marker(&installed_tree)?
+        let skill_cap = if file_type.is_symlink() {
+            open_trusted_dir(&installed_tree)?
         } else {
-            let skill_cap = root_cap
+            root_cap
                 .open_dir_nofollow(&name_os)
-                .map_err(|error| SkillError(format!("open installed skill {name}: {error}")))?;
-            read_marker_at(&skill_cap)?
+                .map_err(|error| SkillError(format!("open installed skill {name}: {error}")))?
         };
-        let MarkerState::Valid(marker) = marker else {
-            rows.push(marker_row(target, &name, path, marker));
-            continue;
+        let observation = match super::marker_observation::read(&skill_cap) {
+            Ok(Some(observation)) => observation,
+            Ok(None) => {
+                rows.push(unmanaged(target, &name, path));
+                continue;
+            }
+            Err(error) => {
+                rows.push(marker_row(
+                    target,
+                    &name,
+                    path,
+                    MarkerState::Rejected(error.0),
+                ));
+                continue;
+            }
         };
+        let marker = observation.marker;
         // A source_hash-only marker is a legacy cache marker, not an owned
         // installation. Do not silently upgrade it into a managed entry.
         let marker_for_row = marker.clone();
@@ -264,6 +276,14 @@ fn status_target(
             render_drift: Vec::new(),
             render_error: None,
         };
+        if let Some(error) = observation.error {
+            rows.push(common(
+                StatusKind::Stale,
+                Vec::new(),
+                Some(format!("reading marker {}: {error}", path.display(),)),
+            ));
+            continue;
+        }
         if marker.managed_by != "symskills"
             || marker.target != target
             || marker.name != name

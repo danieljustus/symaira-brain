@@ -1,249 +1,135 @@
-//! Native embedded skills MCP tools implementation.
-
-use std::collections::BTreeMap;
-use std::path::PathBuf;
-
-use serde::Serialize;
+//! Embedded skills tools use the library core, never an external skills binary.
+use crate::{GatewayError, GatewayResponse};
 use serde_json::{Value, json};
-use symbrain_skills::install::{self, InstallOptions};
-use symbrain_skills::{BundleLoader, RenderMetadata, load_bundle, render_target, validate};
+use symbrain_skills::{Bundle, SkillError, config, load_bundle};
 
-use crate::GatewayError;
-use crate::embedded::common::pretty;
+#[path = "skills_args.rs"]
+mod arguments;
+#[path = "skills_library.rs"]
+mod library;
+#[path = "skills_render.rs"]
+mod render;
+#[path = "skills_versioning.rs"]
+mod versioning;
 
-#[path = "skills_status.rs"]
-mod skills_status;
+pub(super) struct Error {
+    message: String,
+    code: Option<&'static str>,
+}
+impl From<SkillError> for Error {
+    fn from(error: SkillError) -> Self {
+        Self {
+            message: error.to_string(),
+            code: None,
+        }
+    }
+}
+impl Error {
+    fn validation(context: &str, message: impl std::fmt::Display) -> Self {
+        Self {
+            message: format!("{context}: {message}"),
+            code: Some("validation"),
+        }
+    }
+    fn internal(context: &str, message: impl std::fmt::Display) -> Self {
+        Self {
+            message: format!("{context}: {message}"),
+            code: Some("internal"),
+        }
+    }
+}
 
-pub(crate) fn dispatch(name: &str, value: &Value) -> Result<String, GatewayError> {
+pub(crate) fn response(
+    id: Value,
+    name: &str,
+    raw: Option<&serde_json::value::RawValue>,
+) -> Result<GatewayResponse, GatewayError> {
+    let result = arguments::decode(name, raw).and_then(|value| dispatch(name, &value));
+    let body = match result {
+        Ok(text) => json!({"content":[{"type":"text","text":text}],"isError":false}),
+        Err(error) => {
+            let mut result =
+                json!({"content":[{"type":"text","text":error.message}],"isError":true});
+            if let Some(code) = error.code {
+                result["_meta"] =
+                    json!({"symaira.dev/tool_error":{"code":code,"message":error.message}});
+            }
+            result
+        }
+    };
+    GatewayResponse::success(id, body)
+}
+
+fn dispatch(name: &str, value: &Value) -> Result<String, Error> {
     match name {
-        "skills_list" => list(value),
-        "skills_inspect" => inspect(value),
-        "skills_validate" => validate_tool(value),
-        "skills_render_plan" => render_plan(value),
-        "skills_install" => install_tool(value),
-        "skills_targets_status" => skills_status::targets_status(value),
-        _ => Err(GatewayError::UnknownTool(name.to_string())),
+        "skills_list" => library::list(),
+        "skills_inspect" => library::inspect(value),
+        "skills_validate" => library::validate(value),
+        "skills_profile_list" => library::profiles(),
+        "skills_profile_resolve" => library::resolve_profile(value),
+        "skills_targets_status" => library::targets(value),
+        "skills_render_plan" => render::plan(value),
+        "skills_install" => render::install(value),
+        "skills_discover_sources" => versioning::discover(value),
+        "skills_history" => versioning::history(value),
+        "skills_restore" => versioning::restore(value),
+        _ => Err(Error {
+            message: format!("Unknown tool: {name}"),
+            code: None,
+        }),
     }
 }
 
-pub(super) fn resolve_skills_dirs() -> (PathBuf, PathBuf, PathBuf) {
-    let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    let library_dir = if let Some(path) = std::env::var_os("SYMBRAIN_SKILLS_LIBRARY_DIR") {
-        PathBuf::from(path)
-    } else if let Some(data) = symbrain_core::xdg::data_dir() {
-        data.join("skills").join("library")
-    } else {
-        home.join(".local")
-            .join("share")
-            .join("symskills")
-            .join("library")
-    };
-
-    let base_dir = if let Some(path) = std::env::var_os("SYMBRAIN_SKILLS_BASE_DIR") {
-        PathBuf::from(path)
-    } else if let Some(data) = symbrain_core::xdg::data_dir() {
-        data.join("skills").join("base")
-    } else {
-        home.join(".local")
-            .join("share")
-            .join("symskills")
-            .join("base")
-    };
-
-    (library_dir, base_dir, home)
-}
-
-#[derive(Debug, Serialize)]
-struct SkillItem {
-    name: String,
-    description: String,
-    category: String,
-    root: String,
-}
-
-#[derive(Debug, Serialize)]
-struct ListResult {
-    skills: Vec<SkillItem>,
-    category_counts: BTreeMap<String, usize>,
-    issues: Vec<String>,
-}
-
-fn list(_value: &Value) -> Result<String, GatewayError> {
-    let (library_dir, _, _) = resolve_skills_dirs();
-    let mut skills = Vec::new();
-    let mut category_counts = BTreeMap::new();
-    let mut issues = Vec::new();
-
-    let paths = symbrain_skills::library::library_paths(&library_dir)
-        .map_err(|error| GatewayError::InvalidArguments(format!("read skills library: {error}")))?;
-    let loader = BundleLoader::default();
-    for path in paths {
-        if !path.is_dir() {
-            continue;
-        }
-        if path
-            .file_name()
-            .and_then(|n| n.to_str())
-            .is_some_and(|s| s.starts_with('.'))
-        {
-            continue;
-        }
-        if !path.join("SKILL.md").exists() {
-            continue;
-        }
-        match loader.load(&path) {
-            Ok(bundle) => {
-                let cat = bundle.frontmatter.category.clone();
-                if !cat.is_empty() {
-                    *category_counts.entry(cat.clone()).or_insert(0) += 1;
-                }
-                skills.push(SkillItem {
-                    name: bundle.frontmatter.name.clone(),
-                    description: bundle.frontmatter.description.clone(),
-                    category: cat,
-                    root: path.to_string_lossy().into_owned(),
-                });
-            }
-            Err(err) => {
-                issues.push(format!("{}: {err}", path.display()));
-            }
-        }
+fn text(value: &Value, key: &str) -> Result<String, Error> {
+    match value.get(key) {
+        None | Some(Value::Null) => Ok(String::new()),
+        Some(Value::String(text)) => Ok(text.clone()),
+        _ => Err(Error::validation(
+            "parse arguments",
+            format!("field {key} must be a string"),
+        )),
     }
-
-    pretty(&ListResult {
-        skills,
-        category_counts,
-        issues,
-    })
 }
-
-fn resolve_bundle_path(value: &Value) -> Result<PathBuf, GatewayError> {
-    if let Some(path_str) = value.get("path").and_then(Value::as_str) {
-        let path = PathBuf::from(path_str);
-        if !path.exists() {
-            return Err(GatewayError::InvalidArguments(format!(
-                "skill path does not exist: {path_str}"
-            )));
-        }
-        return Ok(path);
+fn boolean(value: &Value, key: &str, default: bool) -> Result<bool, Error> {
+    match value.get(key) {
+        None | Some(Value::Null) => Ok(default),
+        Some(Value::Bool(value)) => Ok(*value),
+        _ => Err(Error::validation(
+            "parse arguments",
+            format!("field {key} must be a boolean"),
+        )),
     }
-    if let Some(name_str) = value.get("name").and_then(Value::as_str) {
-        let (library_dir, _, _) = resolve_skills_dirs();
-        let path = library_dir.join(name_str);
-        if !path.exists() {
-            return Err(GatewayError::InvalidArguments(format!(
-                "skill '{name_str}' not found in library"
-            )));
-        }
-        return Ok(path);
+}
+fn bundle(value: &Value) -> Result<Bundle, Error> {
+    let mut path = text(value, "path")?;
+    let name = text(value, "name")?;
+    if path.is_empty() && !name.is_empty() {
+        path = config::defaults()
+            .library_dir
+            .join(name)
+            .to_string_lossy()
+            .into_owned();
     }
-    Err(GatewayError::InvalidArguments(
-        "either 'path' or 'name' is required".into(),
-    ))
+    if path.is_empty() {
+        return Err(Error::validation(
+            "inspect skill",
+            "path or name is required",
+        ));
+    }
+    load_bundle(std::path::Path::new(&path)).map_err(Into::into)
+}
+fn compact<T: serde::Serialize>(value: &T) -> Result<String, Error> {
+    serde_json::to_string(value)
+        .map(|json| {
+            json.replace('&', "\\u0026")
+                .replace('<', "\\u003c")
+                .replace('>', "\\u003e")
+                .replace('\u{2028}', "\\u2028")
+                .replace('\u{2029}', "\\u2029")
+        })
+        .map_err(|error| Error::internal("serialize result", error))
 }
 
-fn inspect(value: &Value) -> Result<String, GatewayError> {
-    let path = resolve_bundle_path(value)?;
-    let bundle = load_bundle(&path)
-        .map_err(|err| GatewayError::InvalidArguments(format!("load skill bundle: {err}")))?;
-
-    let res = json!({
-        "name": bundle.frontmatter.name,
-        "description": bundle.frontmatter.description,
-        "category": bundle.frontmatter.category,
-        "version": bundle.frontmatter.version,
-        "author": bundle.frontmatter.author,
-        "license": bundle.frontmatter.license,
-        "root": bundle.root.to_string_lossy(),
-        "resources_count": bundle.resources.len(),
-    });
-    pretty(&res)
-}
-
-fn validate_tool(value: &Value) -> Result<String, GatewayError> {
-    let path = resolve_bundle_path(value)?;
-    let bundle = load_bundle(&path)
-        .map_err(|err| GatewayError::InvalidArguments(format!("load skill bundle: {err}")))?;
-
-    let issues = validate(&bundle);
-    let issue_messages: Vec<String> = issues.into_iter().map(|i| i.message).collect();
-    let res = json!({
-        "valid": issue_messages.is_empty(),
-        "issues": issue_messages,
-    });
-    pretty(&res)
-}
-
-fn render_plan(value: &Value) -> Result<String, GatewayError> {
-    let path = resolve_bundle_path(value)?;
-    let target_name = value
-        .get("target")
-        .and_then(Value::as_str)
-        .unwrap_or("opencode");
-
-    let bundle = load_bundle(&path)
-        .map_err(|err| GatewayError::InvalidArguments(format!("load skill bundle: {err}")))?;
-
-    let rendered = render_target(&bundle, target_name, &RenderMetadata::default())
-        .map_err(|err| GatewayError::InvalidArguments(format!("render skill: {err}")))?;
-
-    let res = json!({
-        "action": "planned",
-        "target": target_name,
-        "name": bundle.frontmatter.name,
-        "files_count": rendered.files.len(),
-    });
-    pretty(&res)
-}
-
-fn install_tool(value: &Value) -> Result<String, GatewayError> {
-    let path = resolve_bundle_path(value)?;
-    let target_name = value
-        .get("target")
-        .and_then(Value::as_str)
-        .unwrap_or("opencode");
-    let dry_run = value
-        .get("dry_run")
-        .and_then(Value::as_bool)
-        .unwrap_or(false);
-    let mode = value
-        .get("mode")
-        .and_then(Value::as_str)
-        .unwrap_or("copy")
-        .to_string();
-
-    let bundle = load_bundle(&path)
-        .map_err(|err| GatewayError::InvalidArguments(format!("load skill bundle: {err}")))?;
-
-    let rendered = render_target(&bundle, target_name, &RenderMetadata::default())
-        .map_err(|err| GatewayError::InvalidArguments(format!("render skill: {err}")))?;
-
-    let (_, base_dir, home_dir) = resolve_skills_dirs();
-    let install_opts = InstallOptions {
-        home_dir,
-        project_dir: None,
-        base_dir: Some(base_dir),
-        // No render root here: this gateway path renders in memory and installs
-        // directly, so it keeps the per-user cache as the symlink target rather
-        // than the runner's `RenderDir`. Parity for the runner is asserted in
-        // symbrain-skills' runner_env_tests.
-        render_dir: None,
-        mode,
-        allow_executable: false,
-        force: false,
-        dry_run,
-        fault: None,
-        events_path: None,
-    };
-
-    let result = install::install_rendered(&bundle, &rendered, &install_opts)
-        .map_err(|err| GatewayError::InvalidArguments(format!("install skill: {err}")))?;
-
-    let res = json!({
-        "action": result.action,
-        "target": result.target,
-        "name": result.name,
-        "path": result.path.to_string_lossy(),
-    });
-    pretty(&res)
-}
+#[cfg(test)]
+#[path = "skills_target_tests.rs"]
+mod historical_target_contract_tests;

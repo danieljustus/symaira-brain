@@ -1,0 +1,76 @@
+{
+  "status": "passed-source-checks-only",
+  "candidate_builds": 0,
+  "candidate_processes": 0,
+  "go_sdk_executions": 0,
+  "target_created": false,
+  "archive_roundtrips_verified": 34,
+  "frozen_go_maps_verified": 1217,
+  "changed_rust_files_below_400": [
+    {
+      "path": "rust/symbrain-skills/src/install/marker_json.rs",
+      "lines": 231,
+      "sha256": "5c1b31e26336cb85b2434da9d75e3a5211448a7bf3bd3790a7e486fd984be2bf"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/mod.rs",
+      "lines": 46,
+      "sha256": "ac4758c2419ff92d57e40bd4afe7ca6c81475f9144032513c2de456a89a81bdf"
+    },
+    {
+      "path": "rust/symbrain-skills/src/metadata.rs",
+      "lines": 310,
+      "sha256": "de5c019433623b087813045e59a3631f2134f780a003b04dc25fae1b851c1810"
+    },
+    {
+      "path": "rust/symbrain-skills/src/metadata_marker_tests.rs",
+      "lines": 17,
+      "sha256": "1cb7730855a8ed2a4962457bb923bd3f4506f0d60d97763f59b9954d77db8c84"
+    }
+  ],
+  "python_ast": [
+    {
+      "path": "scripts/skills-native-oracle/cases.py",
+      "sha256": "aa3e39be678cdfb732fcaac5f7726e37cdaaf446cf9a3dd37916a48c2d390d53",
+      "lines": 114
+    },
+    {
+      "path": "scripts/skills-native-oracle/compare.py",
+      "sha256": "0cbadbb1061fce40d98fcbd5c7c986a146753ca77619f480853921a0dbb11c99",
+      "lines": 95
+    },
+    {
+      "path": "scripts/skills-native-oracle/fixtures.py",
+      "sha256": "f673448b3a2f557829a47d22c541580bf1a4a8ae14607c10c70746717ce07e06",
+      "lines": 135
+    },
+    {
+      "path": "scripts/skills-native-oracle/run.py",
+      "sha256": "adfd82037e43a24538455f03f4aba9ae745f74853062489614eee3af7b31b8cb",
+      "lines": 184
+    }
+  ],
+  "rustfmt_source_parse_check": "passed",
+  "workflow_actionlint": "passed",
+  "git_diff_check": "passed",
+  "manifest_lock_parse_only": "passed; cargo locked resolution not executed",
+  "matrix_unique_contracts": 88,
+  "exact_windows_same_file": {
+    "name": "same-file",
+    "version": "1.0.6",
+    "source": "registry+https://github.com/rust-lang/crates.io-index",
+    "checksum": "93fc1dc3aaa9bfed95e02e6eadabb4baf7e3078b0bd1b4d7b6b0b68378900502",
+    "dependencies": [
+      "winapi-util"
+    ]
+  },
+  "prepared_cases": {
+    "cli": 276,
+    "raw_cli": 66,
+    "cli_config": 42,
+    "mcp": 162,
+    "mcp_config": 21
+  },
+  "prepared_total": 567,
+  "strict_type_clippy_tests_native_runtime": "not executed; required after allocation"
+}

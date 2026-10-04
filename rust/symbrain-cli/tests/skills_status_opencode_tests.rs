@@ -125,7 +125,7 @@ fn empty_explicit_user_roots_are_native() {
 }
 
 #[test]
-fn configured_status_keeps_go_fallback() {
+fn configured_status_is_native() {
     let root = TempDir::new().unwrap();
     std::fs::create_dir_all(root.path().join("config/symskills")).unwrap();
     std::fs::write(
@@ -134,19 +134,19 @@ fn configured_status_keeps_go_fallback() {
     )
     .unwrap();
     let output = run(&root, &["skills", "status", "--target", "opencode"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    assert!(output.status.success(), "{:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    assert!(!output.stdout.is_empty());
 }
 
 #[test]
-fn default_status_with_dynamic_target_state_keeps_go_fallback() {
+fn default_status_with_dynamic_target_state_is_native() {
     let root = TempDir::new().unwrap();
     std::fs::create_dir_all(root.path().join("home/.config/opencode/skills")).unwrap();
     let output = run(&root, &["skills", "status"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    assert!(output.status.success(), "{:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    assert!(!output.stdout.is_empty());
 }
 
 #[test]
@@ -160,22 +160,22 @@ fn legacy_go_config_wins_when_new_skills_config_dir_exists() {
     )
     .unwrap();
     let output = run(&root, &["skills", "status", "--target", "opencode"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    assert!(output.status.success(), "{:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    assert!(!output.stdout.is_empty());
 }
 
 #[test]
-fn symskills_config_override_keeps_go_fallback() {
+fn symskills_config_override_is_native() {
     let root = TempDir::new().unwrap();
     let mut command = command(&root, &["skills", "status", "--target", "opencode"]);
     let output = command
         .env("SYMSKILLS_LIBRARY_DIR", "/different/library")
         .output()
         .unwrap();
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    assert!(output.status.success(), "{:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    assert!(!output.stdout.is_empty());
 }
 
 #[cfg(unix)]
@@ -199,7 +199,7 @@ fn opencode_user_status_link_onto_file_matches_go_bytes() {
 
 #[cfg(unix)]
 #[test]
-fn opencode_user_status_symlink_chain_keeps_go_fallback() {
+fn opencode_user_status_symlink_chain_is_native() {
     let root = TempDir::new().unwrap();
     let skills = root.path().join("home/.config/opencode/skills");
     std::fs::create_dir_all(&skills).unwrap();
@@ -210,17 +210,14 @@ fn opencode_user_status_symlink_chain_keeps_go_fallback() {
     std::os::unix::fs::symlink(&real, &middle).unwrap();
     std::os::unix::fs::symlink(&middle, skills.join("chain")).unwrap();
     let output = run(&root, &["skills", "status", "--target", "opencode"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    assert!(output.status.success(), "{:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    assert!(!output.stdout.is_empty());
 }
 
 #[test]
-fn opencode_user_status_marker_states_keep_go_fallback() {
-    // Go reports these markers with encoding/json error text and keeps the
-    // fields it managed to fill (an unknown schema_version is even accepted
-    // outright), so the native scan leaves them to Go instead of exchanging
-    // one set of bytes for another.
+fn opencode_user_status_marker_states_are_native() {
+    // Future-schema observation and malformed fields are native; write refusal remains separate.
     let markers: [(&str, &[u8]); 4] = [
         ("broken", b"{not json"),
         ("emptymarker", b""),
@@ -242,13 +239,23 @@ fn opencode_user_status_marker_states_keep_go_fallback() {
         std::fs::write(skill.join("SKILL.md"), b"body\n").unwrap();
         std::fs::write(skill.join(".symskills.json"), marker).unwrap();
         let output = run(&root, &["skills", "status", "--target", "opencode"]);
-        assert_eq!(output.status.code(), Some(1), "{name}");
-        assert!(output.stdout.is_empty(), "{name}");
-        assert!(
-            String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"),
-            "{name}: {:?}",
-            output.stderr
-        );
+        assert!(output.status.success(), "{name}: {:?}", output.stderr);
+        assert!(output.stderr.is_empty());
+        let table = String::from_utf8(output.stdout).unwrap();
+        assert!(table.contains(name));
+        assert!(table.contains(if name == "schema" {
+            "orphaned"
+        } else {
+            "stale"
+        }));
+        if name == "wrongtype" {
+            assert!(table.contains(
+                "json: cannot unmarshal number into Go struct field Marker.installed of type string"
+            ));
+        }
+        if name == "schema" {
+            assert!(table.contains("copy"));
+        }
     }
 }
 
@@ -338,59 +345,4 @@ fn opencode_project_status_ignores_the_user_root() {
     assert!(String::from_utf8_lossy(&output.stdout).contains("only-here"));
 }
 
-#[cfg(unix)]
-#[test]
-fn opencode_project_status_symlink_chain_keeps_go_fallback() {
-    let root = TempDir::new().unwrap();
-    let skills = root.path().join("project/.opencode/skills");
-    std::fs::create_dir_all(&skills).unwrap();
-    let real = root.path().join("project/.opencode/real");
-    std::fs::create_dir_all(&real).unwrap();
-    std::fs::write(real.join("SKILL.md"), b"real\n").unwrap();
-    let middle = root.path().join("project/.opencode/middle");
-    std::os::unix::fs::symlink(&real, &middle).unwrap();
-    std::os::unix::fs::symlink(&middle, skills.join("chain")).unwrap();
-    let output = run(
-        &root,
-        &[
-            "skills", "status", "--target", "opencode", "--scope", "project",
-        ],
-    );
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
-}
-
-#[test]
-fn opencode_project_status_no_scope_flag_defaults_to_user() {
-    let root = TempDir::new().unwrap();
-    let project_skill = root.path().join("project/.opencode/skills/only-here");
-    std::fs::create_dir_all(&project_skill).unwrap();
-    std::fs::write(project_skill.join("SKILL.md"), b"project\n").unwrap();
-    let output = run(&root, &["skills", "status", "--target", "opencode"]);
-    assert!(output.status.success(), "stderr: {:?}", output.stderr);
-    assert_eq!(output.stdout, b"No installed skills found.\n");
-}
-
-#[test]
-fn opencode_user_status_json_escapes_html_like_go() {
-    let root = TempDir::new().unwrap();
-    let skill = root
-        .path()
-        .join("home")
-        .join(".config")
-        .join("opencode")
-        .join("skills")
-        .join("a&b");
-    std::fs::create_dir_all(&skill).unwrap();
-    std::fs::write(skill.join("SKILL.md"), b"esc\n").unwrap();
-    let output = run(
-        &root,
-        &["skills", "status", "--target", "opencode", "--json"],
-    );
-    assert!(output.status.success(), "stderr: {:?}", output.stderr);
-    // Go encodes with `json.Encoder`, which escapes `&`, `<` and `>`.
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("a\\u0026b"), "{stdout}");
-    assert!(!stdout.contains("a&b"), "{stdout}");
-}
+include!("support/skills_status_remaining.rs");

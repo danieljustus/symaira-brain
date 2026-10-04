@@ -3,7 +3,11 @@
 #![deny(unsafe_code)]
 #![deny(missing_docs)]
 
+mod binary;
 mod cap_root;
+pub mod config;
+pub mod context_profile;
+pub mod discover;
 mod encode;
 pub mod install;
 pub mod library;
@@ -18,6 +22,8 @@ mod target;
 pub mod targets_status;
 mod validation;
 pub mod variant;
+pub mod vcs;
+pub mod wire;
 
 pub use load::{BundleLoader, load_bundle};
 pub use materialize::{Materialized, MaterializedFile, materialize, materialize_with_fault};

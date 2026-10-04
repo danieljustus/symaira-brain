@@ -27,6 +27,10 @@ pub struct InstallOptions {
     pub home_dir: PathBuf,
     /// Project root used for project-scope installs.
     pub project_dir: Option<PathBuf>,
+    /// Retain the historical project base without identity when an adapter's
+    /// Go Options omitted ProjectDir and only the destination defaults to cwd.
+    /// Other callers keep project identities; this never alters their defaults.
+    pub legacy_project_base: bool,
     /// Optional replacement for the default base snapshot root.
     pub base_dir: Option<PathBuf>,
     /// Render root the installed symlink must point into.

@@ -1,3 +1,5 @@
+#[path = "skills_catalog.rs"]
+mod skills_catalog;
 use crate::Gateway;
 use crate::response::{ListedTool, ToolAnnotations};
 use symbrain_policy::Profile;
@@ -24,6 +26,11 @@ pub(crate) const SKILLS_TOOLS: &[&str] = &[
     "skills_render_plan",
     "skills_install",
     "skills_targets_status",
+    "skills_profile_list",
+    "skills_profile_resolve",
+    "skills_discover_sources",
+    "skills_history",
+    "skills_restore",
 ];
 
 fn schema(name: &str) -> Box<serde_json::value::RawValue> {
@@ -75,6 +82,9 @@ fn schema(name: &str) -> Box<serde_json::value::RawValue> {
 }
 
 fn listed(name: &str) -> ListedTool {
+    if SKILLS_TOOLS.contains(&name) {
+        return skills_catalog::listed(name);
+    }
     let read = !matches!(
         name,
         "memory_set"

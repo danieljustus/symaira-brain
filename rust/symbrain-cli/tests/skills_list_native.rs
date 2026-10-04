@@ -196,9 +196,8 @@ fn access_time_inside_the_install_gap_is_not_usage() {
 }
 
 #[test]
-fn unloadable_library_entry_keeps_go_fallback() {
-    // Go reports these with cap-std error text that the native path does not
-    // reproduce, so the whole report stays on Go.
+fn unloadable_library_entry_retains_good_native_rows() {
+    // A broken entry contributes an issue without hiding a valid sibling.
     for (name, body) in [
         ("broken", "no frontmatter here\n"),
         ("empty-dir", ""),
@@ -214,23 +213,25 @@ fn unloadable_library_entry_keeps_go_fallback() {
             std::fs::write(directory.join("SKILL.md"), body).unwrap();
         }
         let output = run(&root, &["skills", "list", "--json"]);
-        assert_eq!(output.status.code(), Some(1), "{name}");
-        assert!(output.stdout.is_empty(), "{name}");
-        assert!(
-            String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"),
-            "{name}: {:?}",
-            output.stderr
-        );
+        assert!(output.status.success(), "{name}: {:?}", output.stderr);
+        assert!(output.stderr.is_empty());
+        let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+        assert_eq!(report["skills"].as_array().unwrap().len(), 1);
+        assert_eq!(report["skills"][0]["name"], "good");
+        assert_eq!(report["issues"].as_array().unwrap().len(), 1);
     }
 }
 
 #[test]
-fn empty_library_with_extra_flag_keeps_go_fallback() {
+fn empty_library_with_extra_flag_has_native_go_flag_diagnostic() {
     let root = TempDir::new().unwrap();
     let output = run(&root, &["skills", "list", "--bogus"]);
-    assert_eq!(output.status.code(), Some(1));
+    assert_eq!(output.status.code(), Some(2));
     assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    assert!(
+        String::from_utf8_lossy(&output.stderr)
+            .starts_with("flag provided but not defined: -bogus\nUsage of skills list:\n")
+    );
 }
 
 #[test]
