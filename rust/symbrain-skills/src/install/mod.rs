@@ -10,6 +10,7 @@ mod lock;
 mod marker;
 mod modes;
 mod ops;
+mod render_status;
 mod replace;
 mod replace_io;
 mod status;
@@ -34,6 +35,7 @@ pub use marker::{
     MARKER_FILE, MARKER_SCHEMA_VERSION, Marker, MarkerState, encode_marker, new_marker,
     parse_marker, read_marker,
 };
+pub use render_status::{RenderDrift, RenderStatus};
 pub use replace::FaultPoint;
 pub use status::{InstallStatus, StatusKind, StatusOptions, status};
 pub use sync::{ConflictPolicy, SyncOptions, SyncResult, sync};
