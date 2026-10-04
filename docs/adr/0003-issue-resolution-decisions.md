@@ -308,3 +308,54 @@ Quellen heißen weiterhin unkompiliert. Apple/TestFlight, externes Darwin-Volume
 und signierter Release mit sieben Tagen Beobachtung behalten ihre tatsächlichen
 Hardware-/Zeit-/Release-Gates. Nur vollständige verifizierte Issue-Kriterien
 rechtfertigen einen Issue-Abschluss.
+
+
+## E-015: Tests mit tatsächlich ausgelieferten Schemas und vollständigen Plattformvoraussetzungen
+
+Die historische Memory-Prüfung verwendet benannte Grenzen vor den realen SQL-
+Migrationen. Ein künstliches Schema wird durch die eingefrorene ausgelieferte
+001-SQL ersetzt, wenn seine Defaults und Nullability den tatsächlichen Vertrag
+verfälschen. Die strenge184-Default-Prüfung, Rollback-, Callback- und
+Gesamtzustandsprüfungen bleiben unverändert. Guard-Tests legen sämtliche
+Discovery-Elternverzeichnisse an, wenn sie einen gesunden Zustand mit fehlenden
+Dateien prüfen: Windows meldet fehlende Elternverzeichnisse anders als fehlende
+Dateien. Die Produktionsklassifizierung bleibt an die Referenz gebunden.
+
+Begründung: Ein Test soll die gemeinte reale Eingangslage erzeugen. Er darf
+weder vorhandene Migrationen als noch ausstehend behandeln noch falsche
+Defaultwerte akzeptieren. Alle tatsächlichen Fehlversuche, Quellen und
+ausgeführten Binärdateien werden vor der Korrektur aufbewahrt. Ein neuer
+Quellstand gilt erst nach der ganzen erneuten Prüfung als bestanden.
+
+## E-016: Oracle-Herkunft durch echte Git-Metadaten belegen
+
+Die Skills-Referenz wird aus einem eigenen lokalen Klon mit echtem .git-
+Verzeichnis und explizitem -buildvcs=true gebaut. Go1.26.7 erkennt die .git-
+Datei eines Linked-Worktrees hier nicht als SDK-VCS-Herkunft. Sämtliche
+Assertions zu Revision und unmodifiziertem Quellstand bleiben erhalten.
+Der gezielte Builder verwendet private Benutzerkonfiguration, feste offline
+Abhängigkeiten und vollständige Blob-, Dateimodus- und Clean-Maps vor und nach
+dem Build. Der allgemeine Go-Oracle-Helper bleibt unverändert.
+
+Begründung: Herkunft ist eine Eigenschaft der tatsächlich gebauten Referenz.
+Eine Metadatenabweichung durch die Build-Umgebung rechtfertigt keine
+Abschwächung der Ausgabe- oder Provenienzvergleiche.
+
+## E-017: Diagnostik an tatsächliche Fehlerphasen binden
+
+Source-Ausgabeprüfungen laden den Logger über seine eigene aufgelöste
+Geschwisterdatei. Der vollständige Linux-Fehler des aktuellen PR806 stammt
+vom Python-Import vor dem Vergleich; nach der Korrektur bestehen alle42
+ursprünglichen Ausgabe-/Writer-Vergleiche und vier reale Kontrollgruppen mit
+den archivierten tatsächlichen Binaries. Eine neue Rust-Kompilierung wird
+daraus nicht abgeleitet. Der Windows-Fortschrittsnachweis begrenzt den ersten
+Timeout auf die Phase nach Go-version-Ausgabe und vor Go-build. Ein natives
+Experiment mit eigenem externen Watchdog unterscheidet Polling und Cleanup.
+Der bestehende25-Sekunden-Vergleich bleibt unverändert.
+
+Begründung: Vollständige Logs und Originalartefakte erlauben gezielte
+Korrekturen. Ein längerer Timeout ohne Ursachenbeleg würde einen möglichen
+Prozess-Lebenszyklusfehler verdecken. Auch die aktuelle Windows-Abweichung
+bei MCP-Initialize und der10-Sekunden-Timeout der unveränderten Go-Memory-
+Referenz bleiben offene Nachweisgates; erfolgreiche Memory-Einzeljobs
+ersetzen diese vollständigen Vergleiche nicht.
