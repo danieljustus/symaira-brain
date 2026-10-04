@@ -1,0 +1,189 @@
+{
+  "source_observed_at": "ee4b85fbf6f53f4f2638483874cc3be7ec61c837",
+  "production_source": "f9b79327b9ad4cc7d6178588a813f7afccf7d136",
+  "proofs": [
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/check-0.stderr",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/check-0.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/check-0.stdout",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/check-0.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/check-1.stderr",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/check-1.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/check-1.stdout",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/check-1.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/check-2.stderr",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/check-2.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/check-2.stdout",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/check-2.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/check-3.stderr",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/check-3.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/check-3.stdout",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/check-3.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/current-driver-check.stderr",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/current-driver-check.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/current-driver-check.stdout",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/current-driver-check.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/parent-driver-check.stderr",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/parent-driver-check.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/parent-driver-check.stdout",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/parent-driver-check.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/pure-preparation-final.json",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/pure-preparation-final.json.gz",
+      "bytes": 1005627,
+      "sha256": "5c0888c1f8fc7ef5965e46adb18e83ab591db3a48cd589db970052db78aadd74",
+      "gzip_sha256": "c22870af8b3ea57adf6d8d1364f01b6db89f877c5396aa07b55238a47e3a1a63"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/pure-preparation-strengthened.json",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/pure-preparation-strengthened.json.gz",
+      "bytes": 1005627,
+      "sha256": "5c0888c1f8fc7ef5965e46adb18e83ab591db3a48cd589db970052db78aadd74",
+      "gzip_sha256": "c22870af8b3ea57adf6d8d1364f01b6db89f877c5396aa07b55238a47e3a1a63"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/pure-preparation.json",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/pure-preparation.json.gz",
+      "bytes": 1002207,
+      "sha256": "c813b49d9e49182c90aeb4b7ac7b28ba597cf56aea0b9c75449d9090c34b82bd",
+      "gzip_sha256": "772c7c485c0b7b5b33524ed7652faccd8ab128c7efc704f39cf7e1a72b9b5c0d"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/source-verification.json",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/source-verification.json.gz",
+      "bytes": 682231,
+      "sha256": "ce985320798e0bc842a2890046d2f25b5c30636ee31ffa43c8b85f5a076561a4",
+      "gzip_sha256": "7935093056141712729910149f1f4e4d5c0ae2bd0576256c7a811091a9e0e5bc"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/sparse-add-reproduction.json",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/sparse-add-reproduction.json.gz",
+      "bytes": 447,
+      "sha256": "8f0e99414d8a5f1e1f2691ada66a24ba33a8f7c83ea0f7cd1d07b69c40d3389a",
+      "gzip_sha256": "a2675c810583a84298db4a148f646e20c5c6cbc6ede5a74999500a01f4242645"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/sparse-add-reproduction.stderr",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/sparse-add-reproduction.stderr.gz",
+      "bytes": 14734,
+      "sha256": "6be5dbf0f10c28cbcccf151ac29479f8cf6fb45b1fec08a84dcfe3c9611519df",
+      "gzip_sha256": "d3bca4b932ded293843eff17094b573e75eb3d2bf8c2752c3919a3a1cb45d473"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/sparse-add-reproduction.stdout",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/sparse-add-reproduction.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/verify-source-first-syntax-error.py",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/verify-source-first-syntax-error.py.gz",
+      "bytes": 7884,
+      "sha256": "695c20e65b0d6d1a0de1da30f0094ed21918a21aa6923873e3521306cd129584",
+      "gzip_sha256": "944cc1d5de112d71aec0e199d5f90bd1d8aa58c32340055d072ab0f72d96c70d"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/verify-source-first-syntax-error.stderr",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/verify-source-first-syntax-error.stderr.gz",
+      "bytes": 1153,
+      "sha256": "2c68d6f784e98bbd712c44ae4502d397e32714e41252746243c2ce853adbcc02",
+      "gzip_sha256": "3086d8f5e2968ddc9c5d8934398c8ef8b3710ded3e7f9c616f599dfa73981142"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/verify-source-first-syntax-error.stdout",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/verify-source-first-syntax-error.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/verify-source.py",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/verify-source.py.gz",
+      "bytes": 7883,
+      "sha256": "e39f9335172c5bbb8472e7d85118ca5598dcff6321252a13a3fe5b9809833476",
+      "gzip_sha256": "53ce0cbe85e13035f2873126b4d16a3d9e169205a923ca6e8263f9ed669fe337"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/verify-source.stderr",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/verify-source.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/verify-source.stdout",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/verify-source.stdout.gz",
+      "bytes": 85744,
+      "sha256": "9e385bb460478f05fbde34943b691345ff5df87245d7929419a798ab3940865c",
+      "gzip_sha256": "881602f0579eab2a16ca344158c54ecd5d3de37acf62d342a7aa3d33a6166207"
+    },
+    {
+      "original": "/workspace/review-artifacts/brain765-8afb-four-fixes/current-driver-check/source.json",
+      "archive": "migration/evidence/brain-config13/startup-four-final-corrections/current-driver-source.json.gz",
+      "bytes": 112677,
+      "sha256": "79883248f66050acb947be4aace294f275fc34171c6164f1df5571e88e18a09f",
+      "gzip_sha256": "ede38501414bc1dae4f8f8979538deef5fe3d9a14ca8d738543baa844d5bb3af"
+    }
+  ],
+  "execution_scope": "source/pure only; full original attempts retained; compiler/SDK/product/SQLite/network/target/ports0"
+}
