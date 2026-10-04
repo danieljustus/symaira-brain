@@ -236,3 +236,75 @@ fixes that bounded race; migration epics remain open. Other branches integrate
 this main normally and retain fresh checks. PR809's Windows-only readonly test
 lint and PR801's Windows named-pipe fixture corrections preserve production
 contracts and test assertions, with complete native failure logs retained.
+
+
+## E-012: WAL-Konfiguration eng begrenzen und ein Wartebudget teilen
+
+Bei parallelen Öffnungen kann die SQLite-WAL-Umschaltung den Busy-Handler
+umgehen. Wiederholt wird deshalb ausschließlich diese Konfiguration vor der
+Migration, bei typisiertem primärem SQLITE_BUSY5 und Autocommit. SQLite-Warten
+und kurze eigene Pausen teilen das bestehende monotone5-Sekunden-Budget.
+Migrationen und Anwendungsoperationen werden nicht wiederholt. Fehler,
+Transaktionen, Daten und5000ms Busy-Timeout bleiben erhalten.
+
+Begründung: Ein globaler Retry würde teilweise geschriebene Daten erneut ändern;
+ein neues volles Budget pro Versuch kann die Laufzeit unkontrolliert verlängern.
+Echte Lock- und Mutantenprüfungen belegen diese Unterschiede. PR803 enthält
+Quellstand2fe09ea plus vollständige unabhängige327 Tests,590 Lesevergleiche,
+Set/Delete-/Output-/Gegenkontrollen und die ursprünglichen Windows-Logs.
+Veröffentlichung5dcac5b ist regulär auf main5e232 integriert. Die native
+Drei-OS-Prüfung dieses veröffentlichten Stands bleibt erforderlich. Die größere
+historische37-Generationen-/Default-Reparatur bleibt getrennt und unkompiliert.
+
+## E-013: Bei Source-Timeouts zuerst den tatsächlichen Fehler erhalten
+
+Die unveränderte25-Sekunden-Grenze bleibt bestehen. Ein atomisches Journal
+außerhalb der verglichenen Fixture-Verzeichnisse erhält gestartete und
+zurückgekehrte Prozesse, vollständige rohe Streams, fertige Vergleichspaare und
+den noch vorhandenen Fehlerzustand vor dem Aufräumen. Live-Snapshots tragen
+explizite Grenzen und erfüllen selbst keine Vergleichs- oder Cleanup-Assertion.
+
+Begründung: Der ursprüngliche Windows-Log benennt weder den konkreten Fall noch
+die blockierte Phase. Ein größeres Timeout würde dieses Informationsdefizit
+verdecken. Ein kalter Go-Cache ist ebenfalls nicht bewiesen: Rust folgt Go mit
+demselben eigenen Cache. PR806 veröffentlicht8359c0b nach unabhängigen111
+Originalpaaren, zwei wirklichen Mutanten und einem wirklichen25-Sekunden-
+Timeout mit erhaltenen NUL/FF-Streams und allen256 Markerbytes. Produktionsbytes
+bleiben identisch zu kompiliertem58fe50; dessen überprüftes ELF wird wieder
+verwendet, keine neue Rust-Kompilierung behauptet. Der Windows-JobObject-Versuch
+ist nur vorbereitet. Ursache und echte native Annahme bleiben offen.
+
+## E-014: Dateieigentümer anhand des SDK-Vertrags auswählen
+
+Bei automatisch gefundenen Providern gelten Gos PATH- und ErrDot-Regeln.
+Leere oder relative PATH-Einträge dürfen ohne wirksamen Opt-in keinen lokalen
+Credential-Provider starten. PATH-Komponenten werden vor Dateizugriff lexikalisch
+bereinigt; eine Symlink-Auflösung wäre ein anderer Vertrag. Insbesondere
+symlink/../bin kann sonst das falsche Konto beziehungsweise Programm auswählen.
+
+Begründung: Vier wirkliche Default-CLI-Vergleiche zeigten ursprüngliche unerwartete
+lokale Provider-Ausführung. Die erste Korrektur48fc363 hat zwei weitere statisch
+belegte Fehler: fehlende lexikalische Bereinigung und abgelehnte gültige
+GODEBUG-Suffixe. Beide werden in einem neuen unveränderlichen Nachfolger
+korrigiert. Stack-selektive Go-Debug-Matcher, Windows-Raw-argv0, Batch-Dateien,
+ACL-/Sharing-Verhalten und native UTF16-Pfade erhalten eigene explizite Gates;
+es gibt keine pauschale SDK-Ausnahme oder Annahme aus Cross-Compilation.
+Standalone-Runner und ursprüngliche57 Rohbelege bleiben unverändert.
+
+## Aktueller Integrationsstand am 2026-10-04
+
+PR807 wurde nach vier aktuellen geschützten Checks und echtem macOS-Vertragslauf
+regulär nach main5e232700bb9031fc34d4995465a4037837540abb gemerged. Das beweist
+keinen echten signierten Release. Noch11 PRs und33 Issues bleiben offen.
+PR805 ist normal auf diese Basis integriert (a114f9a), ohne Änderung der
+unabhängig geprüften Guard-Bytes; neue genaue Head-Checks bleiben erforderlich.
+PR803 muss vor seinen Memory-MCP/HTTP-/Schema-Nachfolgern integriert werden.
+
+Die nächste kompilierte Prüfgruppe behandelt Skills-Argumente; historische
+Schema-Defaults, Provider-Discovery, Usage-Retry-After, alle13 Brain-Konfigurations-
+felder und Memory-Sync-Backends laufen in getrennten überprüfbaren Schritten.
+Vorbereitete Tests heißen weiterhin vorbereitet. Unabhängig statisch geprüfte
+Quellen heißen weiterhin unkompiliert. Apple/TestFlight, externes Darwin-Volume
+und signierter Release mit sieben Tagen Beobachtung behalten ihre tatsächlichen
+Hardware-/Zeit-/Release-Gates. Nur vollständige verifizierte Issue-Kriterien
+rechtfertigen einen Issue-Abschluss.
