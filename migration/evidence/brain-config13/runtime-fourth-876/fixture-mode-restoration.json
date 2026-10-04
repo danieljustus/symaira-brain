@@ -1,0 +1,329 @@
+{
+  "reason": "owned successor checkout had0644 Git fixture resources0600; restore Git canonical modes, every frozen fixture byte unchanged",
+  "files": {
+    "internal/skills/render/testdata/golden/README.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "d576f7dbdab7b06d8543ce25c8d98a19e32dc91878d804b00ffbd4c6044ad890"
+    },
+    "internal/skills/render/testdata/golden/antigravity/.symskills.json": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "cc273dff0e325c52c374527bd4d025202bc7f29c2fcca68714f36880f855fcb9"
+    },
+    "internal/skills/render/testdata/golden/antigravity/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "043a7a0f4a91a2ca0127c4ab5c891c9e184d8694164e93e669b90e1965a88aa4"
+    },
+    "internal/skills/render/testdata/golden/antigravity/scripts/helper.sh": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a"
+    },
+    "internal/skills/render/testdata/golden/claude/.symskills.json": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "e2e90ef8bce9b21d9e00d0ec3217f0aab813254142cff742ae643c74627ea9c9"
+    },
+    "internal/skills/render/testdata/golden/claude/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "8a831a8221727931d56f0f814ee0a03466e1c387d03d99672f5566bf71630054"
+    },
+    "internal/skills/render/testdata/golden/claude/scripts/helper.sh": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a"
+    },
+    "internal/skills/render/testdata/golden/codex/.symskills.json": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "4495b37d2d581634d0f434c43943d4bcbaed6c5b5e31c89f7820b54e03e1d137"
+    },
+    "internal/skills/render/testdata/golden/codex/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "343928fe461c3c94c2bf0c4397c7e3356cc28fb5a22363d0ed729c4ee9fb077e"
+    },
+    "internal/skills/render/testdata/golden/codex/agents/openai.yaml": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "2924e33fda1e0a90a8dbac08ef637c8be2c6c115d19c477a2e8cf481c73e38e9"
+    },
+    "internal/skills/render/testdata/golden/codex/scripts/helper.sh": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a"
+    },
+    "internal/skills/render/testdata/golden/hermes/.symskills.json": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "e06e99d1add634e1e1437884c6e4cf882920a35f0e16d38a223aed1edf4b4fd2"
+    },
+    "internal/skills/render/testdata/golden/hermes/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "1d2272bfe5123db2870f46cacc0b0bf30289482d928fdcb4695434f9194eab46"
+    },
+    "internal/skills/render/testdata/golden/hermes/scripts/helper.sh": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a"
+    },
+    "internal/skills/render/testdata/golden/openclaw/.symskills.json": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "7b09fd77e994e16bae6a72d186035727138e71d02134437eb0a65af1018fa65b"
+    },
+    "internal/skills/render/testdata/golden/openclaw/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "fc5f0617885665506408439b0a2790f3e62f5257496d5f6fe1d931cf5b42a7c6"
+    },
+    "internal/skills/render/testdata/golden/openclaw/scripts/helper.sh": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a"
+    },
+    "internal/skills/render/testdata/golden/opencode/.symskills.json": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "d6967dfe9dcf53fd9389df2fe3ced1f20dbbdee6b0c4e21957d0da4312bb7eae"
+    },
+    "internal/skills/render/testdata/golden/opencode/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "b1b30116e5ae6fb5381c53440d8a5c03e8b66980b61092197b3eac064576ab81"
+    },
+    "internal/skills/render/testdata/golden/opencode/scripts/helper.sh": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a"
+    },
+    "internal/skills/render/testdata/inline-manifest/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "1db370cbebb1ef92e4c0bfb9bc7af8ca422740281929d3ec3617948262a15c3b"
+    },
+    "internal/skills/render/testdata/inline-manifest/symskills.toml": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "ed8c93292d8b064b5cf616309bacba1717d4547abbe87556744f4d06d645044f"
+    },
+    "internal/skills/render/testdata/oracle-edge/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "eb82b196ca01e4162e1d224dcf9c129437c7da86e3f729eef97afbbb66a0b1de"
+    },
+    "internal/skills/render/testdata/oracle-edge/symskills.toml": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "d5f4af7cefdd81c9ada34639275a7282f1fb4c9e7688f1a1ccc3bfcfe50d234b"
+    },
+    "internal/skills/render/testdata/source/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "a9408e835d26bf0709fb692c8e01437b494491ad774a33e4bc6f1766dd8ee2bd"
+    },
+    "internal/skills/render/testdata/source/overlays/opencode/prepend.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "b7de034788e17e15c3fd39bc4ed468609958de3f88bbe6ccd1efd270a1b09530"
+    },
+    "internal/skills/render/testdata/source/scripts/helper.sh": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "dc0e40b53c7963fba4a1aaf9b272ef57942ad10ed7cb7b0a284fb9dd6328862a"
+    },
+    "internal/skills/render/testdata/source/symskills.toml": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "11eaf91b747da25f3167b0ba33bd08ecc6722852aad8bad700a573ad94fe8860"
+    },
+    "internal/skills/render/testdata/variant-golden/README.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "de631758a2e0dc3c71539d8588d10f19073c00153b4f37b7c207af672b7dbfd8"
+    },
+    "internal/skills/render/testdata/variant-golden/antigravity/.symskills.json": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "7809eb4bc62348e9eae313ad68ca2be19f6ada8cf1fc7aa756d2912e6cf071bf"
+    },
+    "internal/skills/render/testdata/variant-golden/antigravity/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "25c0a05aa9667ebe1f6ff5f46b04f36659912837b5420a472d4770ef68d3c6b4"
+    },
+    "internal/skills/render/testdata/variant-golden/antigravity/references/execution-contract.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "365fee8ea3d93fd96c461be2b5c34d69786c0cc126db42765b09bacca259e2ea"
+    },
+    "internal/skills/render/testdata/variant-golden/claude/.symskills.json": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "f5c5ad7a169ba9b9e2781cc55de6628b8694f81c2b6bfd706aee710d6d7c6b8b"
+    },
+    "internal/skills/render/testdata/variant-golden/claude/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "57d33ce591fa43ce544cec5b62aeb606bddee5c3744ba4cde3e8d71c2bb2b3f4"
+    },
+    "internal/skills/render/testdata/variant-golden/claude/references/execution-contract.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "4d9502dc3f0235f2ee13083fe3a70e07ee95548c1b81685e6970caa556c9695c"
+    },
+    "internal/skills/render/testdata/variant-golden/codex/.symskills.json": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "b49c58d6c9af9c0a7039cf7dd77bfcdc0b66120d164b2e54590f0f444a3c05e2"
+    },
+    "internal/skills/render/testdata/variant-golden/codex/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "4b077172eaeb7ed4bdf276b4cdb0c394939e2aedb3b53373096c7b9c0e0e38af"
+    },
+    "internal/skills/render/testdata/variant-golden/codex/agents/openai.yaml": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "db2e26075aec307f3f34afc1be3c5ea1ece2a9a0e6820a6489d1080427789997"
+    },
+    "internal/skills/render/testdata/variant-golden/codex/references/execution-contract.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "365fee8ea3d93fd96c461be2b5c34d69786c0cc126db42765b09bacca259e2ea"
+    },
+    "internal/skills/render/testdata/variant-golden/hermes/.symskills.json": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "309d8b2537c49ca5f6f05e365f5142296867c919ddd21dd5dd6e6c15dcbc0b8b"
+    },
+    "internal/skills/render/testdata/variant-golden/hermes/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "d40469251a036ea2d9de1051fbb328ac0f792d80624f6fba0c7dd13e82e66f17"
+    },
+    "internal/skills/render/testdata/variant-golden/hermes/references/execution-contract.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "f3d06f0ed50f0e6707dafd3a1cbeeecd13268b23b93dfff4be1549c599a16fe7"
+    },
+    "internal/skills/render/testdata/variant-golden/openclaw/.symskills.json": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "20f8dc8a463ac5b3c8fbccfa5424a2b5b20d018ade0052b3e2713cd1a6283bfd"
+    },
+    "internal/skills/render/testdata/variant-golden/openclaw/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "8026f5877a1d63116ceb2128666761b6663ea6f631e37698ff712a04db9b3bf4"
+    },
+    "internal/skills/render/testdata/variant-golden/openclaw/references/execution-contract.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "365fee8ea3d93fd96c461be2b5c34d69786c0cc126db42765b09bacca259e2ea"
+    },
+    "internal/skills/render/testdata/variant-golden/opencode/.symskills.json": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "778c48c970305a3f82415a41a7fd96bb4b41dd1e47726d3647afd3e564a17a73"
+    },
+    "internal/skills/render/testdata/variant-golden/opencode/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "0cab6d61e3fa22f8ca5d7eb7e093223f7ac76290b84c87eef40e8fae14f5ceb9"
+    },
+    "internal/skills/render/testdata/variant-golden/opencode/references/execution-contract.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "365fee8ea3d93fd96c461be2b5c34d69786c0cc126db42765b09bacca259e2ea"
+    },
+    "internal/skills/render/testdata/variant-source/SKILL.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "c691dbfa8ae24136fefa865c21137bc70586455c5c9ba1d35c0f21aee4681976"
+    },
+    "internal/skills/render/testdata/variant-source/overlays/claude/blocks/dispatch.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "716126293afc6a340f69614f3acfc271c6e28f64b51ffef1b51dc131c91f138c"
+    },
+    "internal/skills/render/testdata/variant-source/overlays/claude/blocks/worker-execution.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "3cd8fd0fda6e2f11ae8a693a3e2f1de3c4207a8ba35aed1f6d928b8e9c41a2a7"
+    },
+    "internal/skills/render/testdata/variant-source/overlays/hermes/blocks/dispatch.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "a87fa3ad298f30ed4952dcc19f0727e78fce5b26bb21d1de515162983926c483"
+    },
+    "internal/skills/render/testdata/variant-source/references/execution-contract.md": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "0822dbc4ad3e0ae7ef6842a5a72dd5be36ecc89c617769ded055218d6cd16eda"
+    },
+    "internal/skills/render/testdata/variant-source/symskills.toml": {
+      "before": "0o600",
+      "after": "0o644",
+      "index_mode": "100644",
+      "sha256": "ddd47f01f061dcdd468a5c678d77ab0a10b50e355b1c4fe459c8bae855f9c8ff"
+    }
+  }
+}

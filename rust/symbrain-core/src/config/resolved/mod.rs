@@ -5,6 +5,7 @@ mod convert;
 mod document;
 mod error;
 mod source;
+mod syntax;
 mod value;
 use crate::{GoText, go_path};
 pub use convert::parse_bool;

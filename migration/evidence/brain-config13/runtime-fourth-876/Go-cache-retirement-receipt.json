@@ -1,0 +1,26 @@
+{
+  "source_sha256": "cde83cf7f508c32c4f611ac45f082d7cfdc05636f92f947bb83da728ec383391",
+  "source_head": "876bee090fbd094d21b6f648dc24f89a480be0e2",
+  "actual_Go_binaries": {
+    "go-cli": {
+      "path": "/tmp/symaira-brain765-runtime-876-fourth/go-cli",
+      "bytes": 22090887,
+      "sha256": "b2ac440bd87c31521c83f9c7dcb1251e64cc21ee6d2d10cf51e897115819f8ae",
+      "gzip": "/tmp/symaira-brain765-runtime-876-fourth/go-actual-binaries/go-cli.gz",
+      "gzip_sha256": "5228bd6d6351dc6fb4155b034368ba4257a31692d14a0637ceadfe2819b9cb72"
+    },
+    "go-probe": {
+      "path": "/tmp/symaira-brain765-runtime-876-fourth/go-probe",
+      "bytes": 3479227,
+      "sha256": "c7243d2daee2d2355a45e9997e07c589b962624915879b73207c4fdf8fb1604a",
+      "gzip": "/tmp/symaira-brain765-runtime-876-fourth/go-actual-binaries/go-probe.gz",
+      "gzip_sha256": "c2d0f3d768ae59c694365c65b293674b208ac4f5f9a7e0e6bc93584fc66d9057"
+    }
+  },
+  "owned_derivative_cache": "/tmp/symaira-brain765-runtime-876-fourth/go-cache",
+  "users": [],
+  "cache_files": 4909,
+  "nothing_else_deleted": true,
+  "cache_removed": true,
+  "free_MiB_after": 1442
+}

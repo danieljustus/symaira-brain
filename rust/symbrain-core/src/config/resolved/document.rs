@@ -1,11 +1,10 @@
-//! One locked native parser; syntax/admission priority is a separate acceptance gate.
+//! One native accepting parser with ordered byte/syntax error admission.
 use crate::GoText;
-use toml_edit::DocumentMut;
+use toml_edit::{DocumentMut, TomlError};
 
 pub(super) fn parse(bytes: &[u8]) -> Result<DocumentMut, GoText> {
-    // BurntSushi1.6 strips either UTF16 marker before lexing even when the
-    // remaining file is ordinary UTF8. These accepted inputs are not a
-    // malformed-error wording exception. Preserve its single-prefix rule.
+    // BurntSushi1.6 removes exactly one marker before lexing. It does not
+    // interpret the rest of an FF FE / FE FF file as UTF16.
     let bytes = if bytes.starts_with(b"\xff\xfe") || bytes.starts_with(b"\xfe\xff") {
         &bytes[2..]
     } else if bytes.starts_with(b"\xef\xbb\xbf") {
@@ -13,33 +12,46 @@ pub(super) fn parse(bytes: &[u8]) -> Result<DocumentMut, GoText> {
     } else {
         bytes
     };
-    let text = std::str::from_utf8(bytes).map_err(|error| -> GoText {
-        // Preserve the input byte; a Rust UTF-8 diagnostic is not a Go oracle.
-        let byte = bytes[error.valid_up_to()];
-        let line = bytes[..error.valid_up_to()]
-            .split(|byte| *byte == b'\n')
-            .count();
-        // Grammar-before-invalid-UTF8 priority must be proven against the SDK
-        // before native cutover. No parser wording decision waives that gate.
-        format!("invalid UTF-8 byte 0x{byte:02x} at line {line}").into()
-    })?;
-    text.parse::<DocumentMut>().map_err(|error| {
-        // Native inner wording is deliberately parser-owned; outer selected
-        // file/stage context and ordered typed conversion errors remain strict.
-        // Report position/reason, without reproducing the complete input line.
-        let offset = error.span().map_or(0, |span| span.start.min(bytes.len()));
-        let prefix = &bytes[..offset];
-        let line = prefix.split(|byte| *byte == b'\n').count();
-        let column = offset
-            - prefix
-                .iter()
-                .rposition(|byte| *byte == b'\n')
-                .map_or(0, |index| index + 1)
-            + 1;
-        format!(
-            "TOML parse error at line {line}, column {column}: {}",
-            error.message()
-        )
-        .into()
-    })
+    let text = match std::str::from_utf8(bytes) {
+        Ok(text) => text,
+        Err(utf8) => {
+            let boundary = utf8.valid_up_to();
+            // An invalid later byte cannot hide an earlier grammar failure.
+            // The replacement view is used only to classify a rejecting
+            // parser result; never apply a document built from repaired bytes.
+            let view = String::from_utf8_lossy(bytes);
+            if let Err(error) = view.parse::<DocumentMut>()
+                && error.span().is_some_and(|span| span.start < boundary)
+            {
+                return Err(parse_error(bytes, &error));
+            }
+            let line = bytes[..boundary].split(|byte| *byte == b'\n').count();
+            return Err(format!(
+                "toml: line {line}: invalid UTF-8 byte: 0x{:02x}",
+                bytes[boundary]
+            )
+            .into());
+        }
+    };
+    text.parse::<DocumentMut>()
+        .map_err(|error| parse_error(bytes, &error))
+}
+fn parse_error(bytes: &[u8], error: &TomlError) -> GoText {
+    let offset = error.span().map_or(0, |span| span.start.min(bytes.len()));
+    if let Some(detail) = super::syntax::bare_value_error(bytes, offset + 1) {
+        return detail;
+    }
+    let prefix = &bytes[..offset];
+    let line = prefix.split(|byte| *byte == b'\n').count();
+    let column = offset
+        - prefix
+            .iter()
+            .rposition(|byte| *byte == b'\n')
+            .map_or(0, |index| index + 1)
+        + 1;
+    format!(
+        "TOML parse error at line {line}, column {column}: {}",
+        error.message()
+    )
+    .into()
 }

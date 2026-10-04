@@ -98,3 +98,34 @@ hide later results. The human partial-reader mismatch cut inside two different
 owned temporary directory names. Reuse and restore one exact owned fixture path
 between actual Go/native runs; retain128 requested bytes and every full byte,
 exit and state comparison. Arbitrary prefix trimming is not permitted.
+
+Immutable876 proves all39 promoted typed CLI failures exactly against actual Go,
+raising the unchanged strict102 corpus to93 equal. Its complete no-fail-fast
+workspace run also exposes old tests asserting the deliberately replaced Go
+fallback sentinel42. Retain all raw streams, reports, original test sources and
+981 ELF/rlib paths/913 payloads before replacing those old assertions with
+native2, exact command header/type diagnostics, absent fallback receipt and
+unchanged owned state. The original strict actual-Go matrix remains unchanged.
+Go takes audit verbosity from resolved Brain config, not the profile: explicitly
+set the owned test global verbose value, keeping every redaction and hermetic
+assertion. Original checkout fixture resource modes0600 differ from canonical
+Git0644 and the frozen Go mode oracle; retain the full old mode/hash receipt and
+restore only this owned checkout's canonical index permissions. Fixture bytes,
+Go production and frozen oracle assertions remain unchanged.
+
+The native TOML parser remains the sole accepting parser. A bounded classifier
+improves Go invalid bare-value diagnostics only for complete ASCII bare keys and
+unsupported words in already-rejected input, before the native parser's first
+failure. It declines multiline/quoted keys and inline-table context. Invalid
+UTF8 has Go's byte/line diagnostic; a replacement view may classify an earlier
+rejecting grammar error but can never supply an applied document. Exact raw
+BOM/UTF8/grammar controls are still required; broad parser equivalence is not
+inferred from this classifier. The existing bounded inner wording decision never
+waives earlier grammar, source ownership, exit2, zero children or zero writes.
+
+Both completed private Go caches were retired only after their actual Go CLI
+and probe were SHA-bound and gzip roundtrip archived, with no process/fd/env
+users. Only owned derivative caches were removed. Original binary/raw/source
+proofs and the allocated Rust target remain intact. Future Rust archival may
+reuse a previously verified immutable identical payload; every current role and
+path still records its own exact raw SHA and actual source binding.

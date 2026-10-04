@@ -241,6 +241,11 @@ fn mcp_subprocess_runs_native_initialize_list_call_and_silent_notification() {
 #[test]
 fn native_mcp_audit_creates_redacted_jsonl_without_stdout_pollution() {
     let root = TempDir::new().unwrap();
+    // Frozen Go takes verbosity from resolved Brain config, even when the
+    // profile enables audit. Exercise verbose redaction through that owner.
+    let config = root.path().join("config/symbrain");
+    std::fs::create_dir_all(&config).unwrap();
+    std::fs::write(config.join("config.toml"), "audit.verbose=true\n").unwrap();
     let fake = write_fake(&root);
     let profile = root.path().join("audited.toml");
     std::fs::write(
@@ -279,7 +284,7 @@ fn native_mcp_audit_creates_redacted_jsonl_without_stdout_pollution() {
     assert!(audit_path.is_file(), "audit log was not created");
     let audit = std::fs::read_to_string(audit_path).unwrap();
     assert!(audit.contains("arg_keys"));
-    assert!(audit.contains("[redacted]"));
+    assert!(audit.contains("[redacted]"), "actual audit: {audit}");
     assert!(!audit.contains("token-value"));
     assert!(!audit.contains("private-content"));
     assert!(audit.contains("query=visible"));

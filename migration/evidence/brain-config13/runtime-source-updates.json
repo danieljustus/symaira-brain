@@ -3,9 +3,9 @@
   "changes": {
     "rust/symbrain-core/src/config/resolved/document.rs": {
       "original_sha256": "c5b9cd0aab91ce35ec04a145f9a3b20318e334b5ead449e9fc66f9eef6f83f7d",
-      "current_sha256": "fe11c925071a8d10347b1c18cc60147f9a8cfeee44c3d54c0b566ccfe02c7772",
-      "reason": "actual strict Clippy: documentation markup, equivalent newline split count, borrowed error/slice arguments and collapsible conditional only; no parser/path/admission change",
-      "failed_immutable_head": "e740928f0faddaafaf1e47dc6edaf9d9d78b3c0e"
+      "current_sha256": "043ed580ffd8bbd0280529be0b38a97c7ff0362f9474de8f66ade2fca09b8e32",
+      "reason": "actual fourth runtime correction: preserve earlier rejecting grammar before later invalid UTF8; exact Go invalid-byte and invalid bare-value diagnostic, same accepting parser and single BOM rule",
+      "failed_immutable_head": "876bee090fbd094d21b6f648dc24f89a480be0e2"
     },
     "rust/symbrain-cli/src/doctor_links.rs": {
       "original_sha256": "a71191c2d4deac0236148454917d7237bdd2dfd35429638da5808e0196f30283",
@@ -57,9 +57,9 @@
     },
     "rust/symbrain-core/src/config/resolved/mod.rs": {
       "original_sha256": "3e5ddb5790b73abb3c8da5d0c6d84f992dadc3a533d3100c62eb9a599dfe08f4",
-      "current_sha256": "c932aba833f3be4b978dd7052ab1f6fb0ff51213e9b5da12511293fe4b9e14ec",
-      "reason": "actual strict Clippy: documentation markup, equivalent newline split count, borrowed error/slice arguments and collapsible conditional only; no parser/path/admission change",
-      "failed_immutable_head": "e740928f0faddaafaf1e47dc6edaf9d9d78b3c0e"
+      "current_sha256": "cbd1d7d6142a39b041ea230e9549c08e48dd4b8c2bbfd52f78120da62e6e5f2f",
+      "reason": "actual fourth runtime correction: preserve earlier rejecting grammar before later invalid UTF8; exact Go invalid-byte and invalid bare-value diagnostic, same accepting parser and single BOM rule",
+      "failed_immutable_head": "876bee090fbd094d21b6f648dc24f89a480be0e2"
     },
     "rust/symbrain-core/src/config/resolved/source.rs": {
       "original_sha256": "645efc526c7de53b5d6c621122f63ea174fa208a2fd2a0470b96fd149ae19570",
@@ -72,6 +72,30 @@
       "current_sha256": "e320ca45bd4e020f58812b414df97b9d2cac07714cb5bcb9489cbe520659b850",
       "reason": "actual strict Clippy: documentation markup, equivalent newline split count, borrowed error/slice arguments and collapsible conditional only; no parser/path/admission change",
       "failed_immutable_head": "e740928f0faddaafaf1e47dc6edaf9d9d78b3c0e"
+    },
+    "rust/symbrain-cli/tests/doctor_fix_native.rs": {
+      "original_sha256": "4157f1d5f9ec7c7afec0b930a51789a140ea23d007b1e2b6d6eb1a2ddaa9b57b",
+      "current_sha256": "9e4063451735f1f3e4059ba79f261c99137390baa1fa0ad281b9d914acdafef0",
+      "reason": "actual fourth runtime correction: strengthen promoted native config tests with exit2/header/zero writes/absent fallback; explicitly configure frozenGo global verbose audit owner, preserving full redaction/credential isolation assertions",
+      "failed_immutable_head": "876bee090fbd094d21b6f648dc24f89a480be0e2"
+    },
+    "rust/symbrain-cli/tests/mcp_cli_tests.rs": {
+      "original_sha256": "859dcbfcf03910aaff2ffeccd42f6209ab411355725e7b06acabd169a9e9f0af",
+      "current_sha256": "bbf1f6a2d799fd3e3b51e2c76cd686e835e2b2031fce0aac782c2ef18f3f288a",
+      "reason": "actual fourth runtime correction: strengthen promoted native config tests with exit2/header/zero writes/absent fallback; explicitly configure frozenGo global verbose audit owner, preserving full redaction/credential isolation assertions",
+      "failed_immutable_head": "876bee090fbd094d21b6f648dc24f89a480be0e2"
+    },
+    "rust/symbrain-cli/tests/setup_repair_native.rs": {
+      "original_sha256": "5032cf011006493cce3988b195cf8eb0b4b5a3618f30e8728239d33da765a0dd",
+      "current_sha256": "905da91d601c302ce4a0b863a779be56edf35183999d9ae8a121048506bbf1d9",
+      "reason": "actual fourth runtime correction: strengthen promoted native config tests with exit2/header/zero writes/absent fallback; explicitly configure frozenGo global verbose audit owner, preserving full redaction/credential isolation assertions",
+      "failed_immutable_head": "876bee090fbd094d21b6f648dc24f89a480be0e2"
+    },
+    "rust/symbrain-harness/src/registry_environment.rs": {
+      "original_sha256": "8b0458b00554902f92b0d90858cd2309e24f807f8a8359e3e01e2ef4609f2987",
+      "current_sha256": "98eebb9a0254bf9b621c95a36a92b5d3ab9d8b209e36249c10c7de97fb0539a9",
+      "reason": "actual fourth runtime correction: inherited strict documentation lint markup only",
+      "failed_immutable_head": "876bee090fbd094d21b6f648dc24f89a480be0e2"
     }
   }
 }

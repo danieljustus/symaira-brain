@@ -1,4 +1,4 @@
-//! Runtime path admission reads only relevant OS values, never env::vars().
+//! Runtime path admission reads only relevant OS values, never `env::vars()`.
 use crate::registry::PathKind;
 use crate::{ConfigLocation, HarnessError};
 use std::ffi::{OsStr, OsString};

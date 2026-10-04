@@ -132,8 +132,27 @@ fn invalid_configuration_keeps_the_go_loader_boundary(child: &Path, root: &Path)
                 command.env(variable, value);
             }
         }
-        assert_eq!(command.output().unwrap().status.code(), Some(42));
-        assert_eq!(fs::read_to_string(receipt).unwrap(), "setup\n--fix\n--json");
+        let before = snapshot(&case);
+        let output = command.output().unwrap();
+        assert_eq!(output.status.code(), Some(2));
+        assert!(output.stdout.is_empty());
+        let stderr = String::from_utf8(output.stderr).unwrap();
+        assert!(
+            stderr.starts_with("symbrain setup --fix: config: failed to load "),
+            "{stderr}"
+        );
+        assert!(
+            stderr.contains(": global config error: failed to "),
+            "{stderr}"
+        );
+        let detail = match index {
+            0 => "field \"audit\": field \"enabled\": cannot convert []interface {} to bool",
+            1 => "field \"modules\": field \"browse\": cannot convert int64 to bool",
+            _ => "unclosed array",
+        };
+        assert!(stderr.contains(detail), "{stderr}");
+        assert!(!receipt.exists(), "Go fallback was invoked");
+        assert_eq!(snapshot(&case), before);
         assert!(!case.join("home/.symaira/bin").exists());
     }
 }

@@ -201,16 +201,27 @@ fn config_failures_keep_go_boundary(root: &Path, child: &Path) {
         let config = case.join("config/symbrain");
         fs::create_dir_all(&config).unwrap();
         fs::write(config.join("config.toml"), text).unwrap();
-        assert_eq!(
-            run(&case, &["--fix", "--force-release"], Some(child))
-                .status
-                .code(),
-            Some(42)
+        let before = snapshot(&case);
+        let output = run(&case, &["--fix", "--force-release"], Some(child));
+        assert_eq!(output.status.code(), Some(2));
+        assert_eq!(output.stdout, b"symbrain doctor --fix\n\n");
+        let stderr = String::from_utf8(output.stderr).unwrap();
+        assert!(
+            stderr.starts_with("  ✗  config: failed to load "),
+            "{stderr}"
         );
-        assert_eq!(
-            fs::read_to_string(case.join("go-call")).unwrap(),
-            "doctor\n--fix\n--force-release"
+        assert!(
+            stderr.contains(": global config error: failed to "),
+            "{stderr}"
         );
+        let detail = match index {
+            0 => "field \"audit\": field \"enabled\": cannot convert []interface {} to bool",
+            1 => "field \"modules\": field \"browse\": cannot convert int64 to bool",
+            _ => "unclosed array",
+        };
+        assert!(stderr.contains(detail), "{stderr}");
+        assert!(!case.join("go-call").exists(), "Go fallback was invoked");
+        assert_eq!(snapshot(&case), before);
         assert!(!case.join("home/.symaira/bin").exists());
     }
 }
