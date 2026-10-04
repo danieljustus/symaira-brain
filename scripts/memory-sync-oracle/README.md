@@ -32,3 +32,20 @@ The case plan distinguishes canonical wire cases, actual Go quirks, malformed
 wire families and security/HTTP admission boundaries. Admission cannot be
 opened by a stub transport, a crypto-free identity codec, one passing unit
 test, zero cases, skips, cross-compilation or a source-reference algorithm.
+
+The successor source checkpoint adds concrete ureq HTTP, ordered typed Go JSON
+and pinned RustCrypto AES-GCM/PBKDF2 backends. See
+[backend decision](../../docs/adr/memory-sync-concrete-backends-762.md) and
+`backend-cases.json`. The original230 cases and four controls above are retained
+byte-for-byte. The new code and prepared tests have not been compiled/executed;
+no route has been admitted. The opening description records the original c4
+foundation, not a claim that the successor has passed runtime acceptance.
+
+`go-backends/main.go` adds prepared public-client operations and typed SDK
+response decoding over actual exported frozen types, plus a process-owned
+synthetic crypto sequence/entropy override. It neither substitutes frozen code
+nor proves transport via decoder-only observations. `backend-cases.json` adds
+98 specific JSON/HTTP/crypto plans and four intended controls; all remain
+unexecuted. Run `python3 scripts/memory-sync-oracle/verify-backends-static.py`
+for source/lock provenance only. It does not compile, launch a probe, test a
+cipher, bind a port or establish acceptance.

@@ -1,0 +1,53 @@
+{
+  "status": "static_format_source_and_resolution_only_pass",
+  "commands": [
+    {
+      "command": [
+        "/home/agent/.cargo/bin/rustfmt",
+        "--edition",
+        "2024",
+        "--check",
+        "rust/symbrain-memory/src/sync/mod.rs"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "/workspace/toolchains/go1.26.7/bin/gofmt",
+        "-l",
+        "scripts/memory-sync-oracle/go-backends/main.go"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "python3",
+        "scripts/memory-sync-oracle/verify-backends-static.py"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"status\": \"source_hashes_and_lock_only_pass\",\n  \"frozen\": 1217,\n  \"native\": 420,\n  \"sdk\": 21,\n  \"checkpoint_retained\": 6,\n  \"old_locked_identities\": 273,\n  \"added_locked_identities\": 16,\n  \"prepared_additive_cases\": 98,\n  \"prepared_additive_controls\": 4\n}\n",
+      "stderr": ""
+    }
+  ],
+  "no_compilation": true,
+  "no_runtime_tests": true,
+  "no_listener_or_crypto_operation": true,
+  "prepared_units_not_executed": 14,
+  "original230_and_additive98_cases_not_executed": true,
+  "source_manifest_sha256": "6c0a7345864906fc4f24aa7cf6a842c89dba5f457122d706efb635a5bf9794c1",
+  "dependency_manifest_sha256": "5beda51577252900e477f66af0fa949f6f103715f202c2f3f80014fd581ec83e"
+}

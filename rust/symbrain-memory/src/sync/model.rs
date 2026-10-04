@@ -108,6 +108,9 @@ pub struct RelayBlob {
     pub id: String,
     pub updated_at: SyncTime,
     pub blob: Vec<u8>,
+    /// Distinguishes Go nil bytes from an allocated empty slice on the wire.
+    #[serde(skip)]
+    pub blob_present: bool,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]

@@ -45,6 +45,7 @@ pub(super) fn push(
                     id: memory.id.clone(),
                     updated_at: memory.updated_at,
                     blob: encrypt(*codec, &payload, options.passphrase)?,
+                    blob_present: true,
                 });
             }
             for item in &deleted {
@@ -56,6 +57,7 @@ pub(super) fn push(
                     id: format!("tombstone:{}", item.id),
                     updated_at: item.deleted_at,
                     blob: encrypt(*codec, &payload, options.passphrase)?,
+                    blob_present: true,
                 });
             }
             result.relay_blobs_stored += transport.relay_push(context, &blobs)?.stored;

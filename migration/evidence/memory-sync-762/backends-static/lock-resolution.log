@@ -1,0 +1,19 @@
+    Updating crates.io index
+     Locking 16 packages to latest compatible versions
+      Adding aead v0.6.1
+      Adding aes v0.9.3
+      Adding aes-gcm v0.11.1
+      Adding block-buffer v0.12.1
+      Adding cipher v0.5.2
+      Adding cmov v0.5.4
+      Adding cpubits v0.1.1
+      Adding crypto-common v0.2.2
+      Adding ctr v0.10.1
+      Adding ctutils v0.4.2
+      Adding ghash v0.6.0
+      Adding hybrid-array v0.4.15
+      Adding inout v0.2.2
+      Adding pbkdf2 v0.12.2 (available: v0.13.0)
+      Adding polyval v0.7.3
+      Adding universal-hash v0.6.1
+note: pass `--verbose` to see 34 unchanged dependencies behind latest

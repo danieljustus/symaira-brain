@@ -1,0 +1,329 @@
+//! Concrete bounded HTTP/1 transport; CLI/HTTP admission is still closed.
+
+pub(super) mod body;
+
+use super::{
+    ApplyResult, Changes, DeletedMemory, RelayBlob, RelayChanges, RelayPushResult, RunContext,
+    SyncError, SyncMemory, SyncTransport, json,
+    remote::{Url, diagnostic, query_escape},
+    validate_remote_url, wire,
+};
+use std::time::{Duration, Instant};
+use ureq::{
+    Agent, RequestExt,
+    http::{HeaderValue, Request},
+};
+
+/// Tokens are kept as bytes so synthetic nonUTF8 header cases are not silently
+/// re-encoded. No Debug, credential persistence, cookie jar or log is added.
+pub struct HttpSyncTransport {
+    remote: String,
+    base: String,
+    token: Vec<u8>,
+    agent: Agent,
+}
+impl HttpSyncTransport {
+    /// Creates a client using platform certificate verification.
+    /// # Errors
+    /// Returns synchronous frozen URL-policy validation errors.
+    pub fn new(remote: &str, token: &[u8], allow_insecure: bool) -> Result<Self, SyncError> {
+        let tls = ureq::tls::TlsConfig::builder()
+            .root_certs(ureq::tls::RootCerts::PlatformVerifier)
+            .build();
+        Self::with_tls(remote, token, allow_insecure, tls)
+    }
+    /// Owned TLS fixtures may supply explicit test roots. Never disables TLS
+    /// verification implicitly or changes the protected Memory server owner.
+    /// # Errors
+    /// Returns synchronous URL-policy errors.
+    pub fn with_tls(
+        remote: &str,
+        token: &[u8],
+        allow_insecure: bool,
+        tls: ureq::tls::TlsConfig,
+    ) -> Result<Self, SyncError> {
+        validate_remote_url(remote, allow_insecure)?;
+        let agent = Agent::config_builder()
+            .http_status_as_error(false)
+            .max_redirects(0)
+            .user_agent("Go-http-client/1.1")
+            .accept("")
+            .accept_encoding("gzip")
+            .tls_config(tls)
+            .build()
+            .new_agent();
+        Ok(Self {
+            remote: remote.into(),
+            base: remote.trim_end_matches('/').into(),
+            token: token.into(),
+            agent,
+        })
+    }
+    fn target(&self, endpoint: &str, since: Option<String>, cursor: &str, limit: i64) -> String {
+        let mut target = format!("{}{endpoint}", self.base);
+        let mut query = Vec::new();
+        if !cursor.is_empty() {
+            query.push(format!("cursor={}", query_escape(cursor)));
+        }
+        if limit > 0 {
+            query.push(format!("limit={limit}"));
+        }
+        if cursor.is_empty() {
+            if let Some(since) = since {
+                query.push(format!("since={}", query_escape(&since)));
+            }
+        }
+        if !query.is_empty() {
+            target.push('?');
+            target.push_str(&query.join("&"));
+        }
+        target
+    }
+    fn request(
+        &self,
+        context: &RunContext,
+        method: &str,
+        target: &str,
+        payload: Option<Vec<u8>>,
+    ) -> Result<Vec<u8>, SyncError> {
+        let original =
+            Url::parse(target).map_err(|error| SyncError(format!("build request: {error}")))?;
+        let deadline = Instant::now() + Duration::from_secs(60);
+        let mut current = original.clone();
+        let mut method = method.to_owned();
+        let mut current_payload = payload.clone();
+        let mut include_body = true;
+        let mut sensitive = false;
+        let mut referer = None;
+        let original_auth = if self.token.is_empty() {
+            original.basic()
+        } else {
+            let mut value = b"Bearer ".to_vec();
+            value.extend(&self.token);
+            Some(value)
+        };
+        for hop in 0..10 {
+            let remaining = context.remaining()?.min(
+                deadline
+                    .checked_duration_since(Instant::now())
+                    .ok_or_else(|| SyncError("context deadline exceeded".into()))?,
+            );
+            let uri = current.uri()?;
+            let mut request = Request::builder().method(method.as_str()).uri(&uri);
+            if payload.is_some() && include_body {
+                request = request.header("Content-Type", "application/json");
+            }
+            if !sensitive {
+                if let Some(auth) = original_auth.as_ref() {
+                    let value = HeaderValue::from_bytes(auth).map_err(|_| {
+                        SyncError(
+                            "net/http: invalid header field value for \"Authorization\"".into(),
+                        )
+                    })?;
+                    request = request.header("Authorization", value);
+                }
+            } else if let Some(auth) = current.basic() {
+                request = request.header(
+                    "Authorization",
+                    HeaderValue::from_bytes(&auth).expect("base64 header"),
+                );
+            }
+            if let Some(referer) = &referer {
+                request = request.header("Referer", referer);
+            }
+            let loopback = super::remote::is_loopback(current.hostname());
+            let response = if let Some(body) = current_payload.clone() {
+                self.send(
+                    request
+                        .body(body)
+                        .map_err(|error| SyncError(format!("build request: {error}")))?,
+                    remaining,
+                    loopback,
+                )
+            } else {
+                self.send(
+                    request
+                        .body(())
+                        .map_err(|error| SyncError(format!("build request: {error}")))?,
+                    remaining,
+                    loopback,
+                )
+            };
+            let mut response = response.map_err(|error| {
+                SyncError(format!("request {}: {error}", diagnostic(&self.base)))
+            })?;
+            let status = response.status().as_u16();
+            if matches!(status, 301 | 302 | 303 | 307 | 308) {
+                if let Some(location) = response.headers().get("Location") {
+                    let location = location.to_str().map_err(|_| {
+                        SyncError("native sync raw Location bytes admission unproven".into())
+                    })?;
+                    if !location.is_empty() {
+                        if hop == 9 {
+                            return Err(SyncError(format!(
+                                "request {}: stopped after 10 redirects",
+                                diagnostic(&self.base)
+                            )));
+                        }
+                        let next = current.reference(location)?;
+                        let initial = original.hostname().to_ascii_lowercase();
+                        let destination = next.hostname().to_ascii_lowercase();
+                        let allowed = destination == initial
+                            || (!destination.contains([':', '%'])
+                                && destination
+                                    .strip_suffix(&initial)
+                                    .is_some_and(|prefix| prefix.ends_with('.')));
+                        if !allowed {
+                            sensitive = true;
+                        }
+                        referer = if current.scheme == "https" && next.scheme == "http" {
+                            None
+                        } else {
+                            Some(current.referer()?)
+                        };
+                        if matches!(status, 301 | 302 | 303) {
+                            if method != "GET" && method != "HEAD" {
+                                method = "GET".into();
+                            }
+                            // Go1.26.7 includeBody is sticky across later
+                            // 307/308 hops; it also strips Content-Type.
+                            include_body = false;
+                            current_payload = None;
+                        } else if include_body {
+                            current_payload = payload.clone();
+                        }
+                        current = next;
+                        continue;
+                    }
+                }
+            }
+            let limit = if (200..=300).contains(&status) {
+                10 << 20
+            } else {
+                1 << 16
+            };
+            let decoded = body::first_json(&mut response.body_mut().as_reader(), limit);
+            if !(200..=300).contains(&status) {
+                let (code, message) = decoded
+                    .as_deref()
+                    .map_or_else(|_| (String::new(), String::new()), json::api_error);
+                return Err(SyncError(if code.is_empty() {
+                    format!("remote returned status {status}: {message}")
+                } else {
+                    format!("remote returned {code} ({status}): {message}")
+                }));
+            }
+            return decoded.map_err(|error| SyncError(format!("decode remote response: {error}")));
+        }
+        // Loop bound is checked before following a tenth redirect.
+        Err(SyncError("stopped after 10 redirects".into()))
+    }
+
+    fn send(
+        &self,
+        request: Request<impl ureq::AsSendBody>,
+        timeout: Duration,
+        loopback: bool,
+    ) -> Result<ureq::http::Response<ureq::Body>, ureq::Error> {
+        let configured = request
+            .with_agent(&self.agent)
+            .configure()
+            .timeout_global(Some(timeout));
+        // Frozen ProxyFromEnvironment never proxies literal loopback targets.
+        let configured = if loopback {
+            configured.proxy(None)
+        } else {
+            configured
+        };
+        configured.run()
+    }
+    fn decode<T>(
+        &self,
+        context: &RunContext,
+        method: &str,
+        target: &str,
+        body: Option<Vec<u8>>,
+        decoder: impl FnOnce(&[u8]) -> Result<T, SyncError>,
+    ) -> Result<T, SyncError> {
+        let bytes = self.request(context, method, target, body)?;
+        decoder(&bytes).map_err(|error| SyncError(format!("decode remote response: {error}")))
+    }
+}
+impl SyncTransport for HttpSyncTransport {
+    fn validate(&self, remote: &str, allow: bool) -> Result<(), SyncError> {
+        validate_remote_url(remote, allow)?;
+        // Frozen run persists the literal remote as sync_state's key and
+        // includes it in result/error output. Never persist URL credentials.
+        if Url::parse(remote)?.user.is_some() {
+            return Err(SyncError("native sync credential-bearing remote identity is not admitted; use a separate bearer token".into()));
+        }
+        if remote != self.remote {
+            return Err(SyncError(
+                "sync transport remote does not match cursor owner".into(),
+            ));
+        }
+        Ok(())
+    }
+    fn changes(
+        &mut self,
+        context: &RunContext,
+        since: super::SyncTime,
+        cursor: &str,
+        limit: i64,
+    ) -> Result<Changes, SyncError> {
+        let since = (since != super::SyncTime::default()).then(|| since.plain_since());
+        self.decode(
+            context,
+            "GET",
+            &self.target("/api/sync/changes", since, cursor, limit),
+            None,
+            json::changes,
+        )
+    }
+    fn apply(
+        &mut self,
+        context: &RunContext,
+        memories: &[SyncMemory],
+        deleted: &[DeletedMemory],
+    ) -> Result<ApplyResult, SyncError> {
+        let body = wire::apply(memories, deleted)
+            .map_err(|error| SyncError(format!("encode request body: {error}")))?;
+        self.decode(
+            context,
+            "POST",
+            &self.target("/api/sync/apply", None, "", 0),
+            Some(body),
+            json::apply_result,
+        )
+    }
+    fn relay_pull(
+        &mut self,
+        context: &RunContext,
+        since: super::SyncTime,
+        limit: i64,
+    ) -> Result<RelayChanges, SyncError> {
+        let since = (since != super::SyncTime::default()).then(|| since.relay_since());
+        self.decode(
+            context,
+            "GET",
+            &self.target("/api/sync/relay", since, "", limit),
+            None,
+            json::relay_changes,
+        )
+    }
+    fn relay_push(
+        &mut self,
+        context: &RunContext,
+        blobs: &[RelayBlob],
+    ) -> Result<RelayPushResult, SyncError> {
+        let body = wire::relay(blobs)
+            .map_err(|error| SyncError(format!("encode request body: {error}")))?;
+        self.decode(
+            context,
+            "POST",
+            &self.target("/api/sync/relay", None, "", 0),
+            Some(body),
+            json::relay_result,
+        )
+    }
+}
