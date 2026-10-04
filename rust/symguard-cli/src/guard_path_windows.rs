@@ -4,10 +4,18 @@
 // Volume/post-clean rules follow internal/filepathlite; no filesystem lookup.
 // Source-reference tests do not imply native Windows runtime acceptance.
 
+pub(super) fn clean_units(path: &[u16]) -> Vec<u16> {
+    decode_wtf8(&clean_bytes(&encode_wtf8(path)))
+}
+
 pub(super) fn join_units(base: &[u16], parts: &[&str]) -> Vec<u16> {
+    decode_wtf8(&join_bytes(&encode_wtf8(base), parts))
+}
+
+fn join_bytes(base: &[u8], parts: &[&str]) -> Vec<u8> {
     let mut path = base.to_vec();
     for part in parts {
-        let mut part: &[u16] = &part.encode_utf16().collect::<Vec<_>>();
+        let mut part = part.as_bytes();
         if path.last().is_some_and(|unit| separator(*unit)) {
             while part.first().is_some_and(|unit| separator(*unit)) {
                 part = &part[1..];
@@ -26,12 +34,12 @@ pub(super) fn join_units(base: &[u16], parts: &[&str]) -> Vec<u16> {
     if path.is_empty() {
         path
     } else {
-        clean_units(&path)
+        clean_bytes(&path)
     }
 }
 
-pub(super) fn clean_units(path: &[u16]) -> Vec<u16> {
-    let normalized: Vec<u16> = path
+fn clean_bytes(path: &[u8]) -> Vec<u8> {
+    let normalized: Vec<u8> = path
         .iter()
         .map(|unit| if *unit == 47 { 92 } else { *unit })
         .collect();
@@ -47,7 +55,7 @@ pub(super) fn clean_units(path: &[u16]) -> Vec<u16> {
     let original = &path[volume..];
     let rooted = separator(original[0]);
     let mut result = Vec::new();
-    let mut buffer: Option<Vec<u16>> = None;
+    let mut buffer: Option<Vec<u8>> = None;
     let mut read = 0;
     let mut boundary = 0;
     if rooted {
@@ -115,7 +123,7 @@ pub(super) fn clean_units(path: &[u16]) -> Vec<u16> {
     [prefix, result.as_slice()].concat()
 }
 
-fn append_unit(output: &mut Vec<u16>, unit: u16, original: &[u16], buffer: &mut Option<Vec<u16>>) {
+fn append_unit(output: &mut Vec<u8>, unit: u8, original: &[u8], buffer: &mut Option<Vec<u8>>) {
     if buffer.is_none() && original.get(output.len()) != Some(&unit) {
         let mut slots = vec![0; original.len()];
         slots[..output.len()].copy_from_slice(output);
@@ -127,13 +135,12 @@ fn append_unit(output: &mut Vec<u16>, unit: u16, original: &[u16], buffer: &mut 
     output.push(unit);
 }
 
-fn separator(unit: u16) -> bool {
+fn separator(unit: u8) -> bool {
     matches!(unit, 47 | 92)
 }
 
-fn volume_len(path: &[u16]) -> usize {
-    // Go checks the second UTF8/WTF8 byte; non-ASCII "drive letters" do not qualify.
-    if path.first().is_some_and(|unit| *unit < 128) && path.get(1) == Some(&58) {
+fn volume_len(path: &[u8]) -> usize {
+    if path.get(1) == Some(&58) {
         return 2;
     }
     if !path.starts_with(&[92]) {
@@ -160,21 +167,95 @@ fn volume_len(path: &[u16]) -> usize {
     0
 }
 
-fn prefix_fold(path: &[u16], prefix: &str) -> bool {
+fn prefix_fold(path: &[u8], prefix: &str) -> bool {
     path.len() >= prefix.len()
-        && path.iter().zip(prefix.bytes()).all(|(unit, byte)| {
-            u8::try_from(*unit).is_ok_and(|unit| unit.eq_ignore_ascii_case(&byte))
-        })
+        && path
+            .iter()
+            .zip(prefix.bytes())
+            .all(|(unit, byte)| unit.eq_ignore_ascii_case(&byte))
         && (path.len() == prefix.len() || path.get(prefix.len()) == Some(&92))
 }
 
-fn unc_len(path: &[u16], prefix: usize) -> usize {
+fn unc_len(path: &[u8], prefix: usize) -> usize {
     path.iter()
         .enumerate()
         .skip(prefix)
         .filter(|(_, unit)| **unit == 92)
         .nth(1)
         .map_or(path.len(), |(index, _)| index)
+}
+
+// Go's hidden lazy-buffer slots are byte-addressed. Encode WTF8 before cleaning
+// and reconstruct original native UTF16 afterwards; a lossy Unicode projection
+// or unit-addressed backing buffer would select/format different relative paths.
+fn encode_wtf8(units: &[u16]) -> Vec<u8> {
+    let mut output = Vec::new();
+    let mut index = 0;
+    while index < units.len() {
+        let mut point = u32::from(units[index]);
+        if (0xd800..=0xdbff).contains(&point)
+            && units
+                .get(index + 1)
+                .is_some_and(|unit| (0xdc00..=0xdfff).contains(unit))
+        {
+            point = 0x10000 + ((point - 0xd800) << 10) + u32::from(units[index + 1] - 0xdc00);
+            index += 1;
+        }
+        let low = |value: u32| value.to_le_bytes()[0];
+        match point {
+            0..=0x7f => output.push(low(point)),
+            0x80..=0x7ff => output.extend([0xc0 | low(point >> 6), 0x80 | low(point & 63)]),
+            0x800..=0xffff => output.extend([
+                0xe0 | low(point >> 12),
+                0x80 | low((point >> 6) & 63),
+                0x80 | low(point & 63),
+            ]),
+            _ => output.extend([
+                0xf0 | low(point >> 18),
+                0x80 | low((point >> 12) & 63),
+                0x80 | low((point >> 6) & 63),
+                0x80 | low(point & 63),
+            ]),
+        }
+        index += 1;
+    }
+    output
+}
+
+fn decode_wtf8(bytes: &[u8]) -> Vec<u16> {
+    let mut output = Vec::new();
+    let mut index = 0;
+    while index < bytes.len() {
+        let first = bytes[index];
+        let width = match first {
+            0..=0x7f => 1,
+            0xc0..=0xdf => 2,
+            0xe0..=0xef => 3,
+            _ => 4,
+        };
+        let mask = match width {
+            1 => 0x7f,
+            2 => 31,
+            3 => 15,
+            _ => 7,
+        };
+        let mut point = u32::from(first & mask);
+        for byte in &bytes[index + 1..index + width] {
+            point = (point << 6) | u32::from(byte & 63);
+        }
+        let low = |value: u32| {
+            let raw = value.to_le_bytes();
+            u16::from_le_bytes([raw[0], raw[1]])
+        };
+        if point > 0xffff {
+            point -= 0x10000;
+            output.extend([0xd800 | low(point >> 10), 0xdc00 | low(point & 1023)]);
+        } else {
+            output.push(low(point));
+        }
+        index += width;
+    }
+    output
 }
 
 #[cfg(test)]
