@@ -17,9 +17,11 @@
       "sha256": "a54f826654ec02d487c56f6915c214561abb643e77f741feaea3533a4d28b2af"
     },
     {
-      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/broad-errno.stderr",
-      "bytes": 3730,
-      "sha256": "6380c5d238eecc59c5670601f0fdc11bd679939bff3bf3dff53b4061bab36edd"
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/broad-errno.stderr.gz",
+      "bytes": 589,
+      "sha256": "c5010ccd928832381de4fc57e4f50a05118e3197c56a07e23a3ba039dde968ca",
+      "raw_original_sha256": "6380c5d238eecc59c5670601f0fdc11bd679939bff3bf3dff53b4061bab36edd",
+      "raw_original_bytes": 3730
     },
     {
       "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/broad-errno.stdout",
@@ -131,5 +133,6 @@
   "actual_Linux_owned_component_probes": 11,
   "actual_fixture_machinery_mutants": 2,
   "product_SDK_compiler_target_port_execution": false,
-  "Darwin_Windows_execution": false
+  "Darwin_Windows_execution": false,
+  "historical_manifest_unchanged_at": "f23d01010e3321cc74d06b46009c8e90d94136a0"
 }

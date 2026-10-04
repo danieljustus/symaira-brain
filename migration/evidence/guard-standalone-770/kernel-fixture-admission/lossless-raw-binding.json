@@ -1,0 +1,8 @@
+{
+  "original_path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/broad-errno.stderr",
+  "archive_path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/broad-errno.stderr.gz",
+  "original_bytes": 3730,
+  "original_sha256": "6380c5d238eecc59c5670601f0fdc11bd679939bff3bf3dff53b4061bab36edd",
+  "gzip_sha256": "c5010ccd928832381de4fc57e4f50a05118e3197c56a07e23a3ba039dde968ca",
+  "reason": "unmodified unittest raw output has trailing whitespace; retain exact bytes through gzip and historical Git/full tar, not trimming"
+}
