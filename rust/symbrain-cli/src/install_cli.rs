@@ -5,7 +5,9 @@ use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 
 use symbrain_core::exit;
-use symbrain_harness::{AtomicFile, ConfigLocation, Entry, Harness, HarnessError, SERVER_NAME};
+#[cfg(test)]
+use symbrain_harness::Entry;
+use symbrain_harness::{AtomicFile, ConfigLocation, Harness, HarnessError, SERVER_NAME};
 
 const INSTALL_USAGE: &str = "Usage of install:\n  -dry-run\n    \tprint a unified diff of the change and write nothing\n  -harness string\n    \tharness to install into: claude, claude-desktop, cursor, opencode, codex, antigravity (required)\n  -keep-superseded\n    \tkeep superseded symmemory/symskills MCP entries instead of migrating them out\n  -profile string\n    \tprofile to bind this harness connection to (default: the global config's default_profile)\n  -project string\n    \tproject directory; only meaningful for harnesses with a project-local config (currently: claude's .mcp.json)\n";
 
@@ -353,7 +355,7 @@ fn install_into(
             }
         }
     }
-    document.set_server(SERVER_NAME, Entry::new(&profile.unicode_lossy()));
+    document.set_profile_server(SERVER_NAME, profile);
     let new_content = match document.marshal() {
         Ok(content) => content,
         Err(error) => {
@@ -367,8 +369,8 @@ fn install_into(
     };
 
     if dry_run {
-        let diff = symbrain_harness::unified_diff(
-            &location.path.to_string_lossy(),
+        let diff = symbrain_harness::unified_diff_bytes(
+            &symbrain_core::go_path::os_bytes(location.path.as_os_str()),
             &original,
             &new_content,
         );
@@ -379,7 +381,7 @@ fn install_into(
                 location.path.display()
             );
         } else {
-            let _ = write!(stdout, "{diff}");
+            let _ = stdout.write_all(&diff);
             if !migrated.is_empty() {
                 let _ = writeln!(
                     stdout,
@@ -546,12 +548,12 @@ fn uninstall_from(
         }
     };
     if dry_run {
-        let diff = symbrain_harness::unified_diff(
-            &location.path.to_string_lossy(),
+        let diff = symbrain_harness::unified_diff_bytes(
+            &symbrain_core::go_path::os_bytes(location.path.as_os_str()),
             &original,
             &new_content,
         );
-        let _ = write!(stdout, "{diff}");
+        let _ = stdout.write_all(&diff);
         return exit::OK;
     }
     let Some(capability) = capability else {

@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::io::Read;
 use std::path::Path;
 
@@ -18,6 +19,7 @@ enum Backend {
     Toml {
         document: toml_edit::DocumentMut,
         servers_key: String,
+        raw_profiles: BTreeMap<String, Vec<u8>>,
     },
 }
 
@@ -29,6 +31,7 @@ pub fn empty(harness: &Harness) -> Document {
         Format::Toml => Backend::Toml {
             document: toml_edit::DocumentMut::new(),
             servers_key: key,
+            raw_profiles: BTreeMap::new(),
         },
         Format::Json | Format::Unsupported => Backend::Json {
             root: Value::Object(Object::new()),
@@ -68,6 +71,7 @@ pub fn parse(harness: &Harness, data: &[u8]) -> Result<Document, HarnessError> {
                 .map_err(|_| HarnessError::Toml("input is not UTF-8".into()))?
                 .parse::<toml_edit::DocumentMut>()?,
             servers_key: key,
+            raw_profiles: BTreeMap::new(),
         },
         Format::Unsupported => {
             return Err(HarnessError::Unsupported(
@@ -93,6 +97,8 @@ pub fn load(harness: &Harness, path: &Path) -> Result<Document, HarnessError> {
 impl Document {
     #[must_use]
     /// Returns one stdio server entry when it can be represented as [`Entry`].
+    /// A byte-valued profile set for TOML has a repaired Unicode metadata view;
+    /// only [`Self::marshal`] emits its original bytes.
     pub fn server(&self, name: &str) -> Option<Entry> {
         match &self.backend {
             Backend::Json { root, servers_key } => json::server_map(root, servers_key)?
@@ -101,6 +107,7 @@ impl Document {
             Backend::Toml {
                 document,
                 servers_key,
+                ..
             } => toml_backend::server(document, servers_key, name).and_then(toml_backend::entry),
         }
     }
@@ -115,6 +122,7 @@ impl Document {
             Backend::Toml {
                 document,
                 servers_key,
+                ..
             } => toml_backend::server(document, servers_key, name)
                 .and_then(|item| toml_backend::server_info(name, item)),
         }
@@ -130,6 +138,7 @@ impl Document {
             Backend::Toml {
                 document,
                 servers_key,
+                ..
             } => toml_backend::server_names(document, servers_key),
         };
         names.sort();
@@ -148,7 +157,22 @@ impl Document {
             Backend::Toml {
                 document,
                 servers_key,
-            } => toml_backend::set_server(document, servers_key, name, entry),
+                raw_profiles,
+            } => {
+                raw_profiles.remove(name);
+                toml_backend::set_server(document, servers_key, name, entry);
+            }
+        }
+    }
+
+    /// Inserts a canonical Brain profile without repairing its bytes too early.
+    /// JSON follows Go's rune writer; Codex TOML retains the original string bytes.
+    /// Subsequent [`Self::set_server`] or [`Self::remove_server`] clears that
+    /// byte override for the named entry. No byte repair selects a file or child.
+    pub fn set_profile_server(&mut self, name: &str, profile: &symbrain_core::GoText) {
+        self.set_server(name, Entry::new(&profile.unicode_lossy()));
+        if let Backend::Toml { raw_profiles, .. } = &mut self.backend {
+            raw_profiles.insert(name.to_owned(), profile.as_ref().to_vec());
         }
     }
 
@@ -164,7 +188,11 @@ impl Document {
             Backend::Toml {
                 document,
                 servers_key,
-            } => toml_backend::remove_server(document, servers_key, name),
+                raw_profiles,
+            } => {
+                raw_profiles.remove(name);
+                toml_backend::remove_server(document, servers_key, name)
+            }
         }
     }
 
@@ -175,7 +203,11 @@ impl Document {
     pub fn marshal(&self) -> Result<Vec<u8>, HarnessError> {
         match &self.backend {
             Backend::Json { root, .. } => Ok(json::marshal(root)),
-            Backend::Toml { document, .. } => Ok(document.to_string().into_bytes()),
+            Backend::Toml {
+                document,
+                servers_key,
+                raw_profiles,
+            } => crate::toml_profile::marshal(document, servers_key, raw_profiles),
         }
     }
 }

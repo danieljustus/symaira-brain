@@ -80,6 +80,62 @@ fn decode_base64(input: &str) -> Vec<u8> {
     }
     out
 }
+
+#[test]
+fn sdk_marker_is_removed_once_before_utf8_and_ordered_type_admission() {
+    for prefix in [&b"\xff\xfe"[..], &b"\xfe\xff"[..], &b"\xef\xbb\xbf"[..]] {
+        for project in [false, true] {
+            let bytes = [prefix, b"audit.enabled=false\n"].concat();
+            let source = if project {
+                Source::new(b"", &bytes)
+            } else {
+                Source::new(&bytes, b"")
+            };
+            assert!(!load_with(&source).unwrap().audit.enabled);
+        }
+        let mut source = Source::new(&[prefix, b"audit.enabled=7\n"].concat(), b"");
+        source
+            .env
+            .insert("SYMBRAIN_MODULES_SCOPE".into(), "bad".into());
+        let error = load_with(&source).unwrap_err();
+        assert!(
+            error
+                .text()
+                .as_ref()
+                .ends_with(b"field \"audit\": field \"enabled\": cannot convert int64 to bool")
+        );
+        assert!(!source.calls.borrow().iter().any(|call| call == "cwd"));
+        assert!(
+            !source
+                .calls
+                .borrow()
+                .iter()
+                .any(|call| call == "env:SYMBRAIN_MODULES_SCOPE")
+        );
+        for rest in [&b"[bad config"[..], &b"#\xff\n"[..]] {
+            let source = Source::new(&[prefix, rest].concat(), b"");
+            let error = load_with(&source).unwrap_err();
+            assert!(
+                error
+                    .text()
+                    .as_ref()
+                    .windows(b"failed to parse".len())
+                    .any(|part| part == b"failed to parse")
+            );
+            assert!(!source.calls.borrow().iter().any(|call| call == "cwd"));
+        }
+        // A second marker is content, not another prefix to decode as UTF16.
+        if prefix.len() == 2 {
+            assert!(
+                load_with(&Source::new(
+                    &[prefix, prefix, b"audit.enabled=false\n"].concat(),
+                    b""
+                ))
+                .is_err()
+            );
+        }
+    }
+}
 #[test]
 fn all_thirteen_actual_frozen_go_conversion_failures_have_exact_field_chains() {
     let corpus: serde_json::Value = serde_json::from_str(include_str!(

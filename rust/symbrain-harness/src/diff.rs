@@ -1,4 +1,4 @@
-use std::fmt::Write;
+use std::io::Write;
 
 const CONTEXT: usize = 3;
 const MAX_LINES: usize = 10_000;
@@ -12,7 +12,7 @@ enum Kind {
 }
 struct Op {
     kind: Kind,
-    line: String,
+    line: Vec<u8>,
 }
 struct Hunk {
     old_start: usize,
@@ -25,6 +25,20 @@ struct Hunk {
 /// Produces the Go-compatible three-context unified diff.
 #[must_use]
 pub fn unified_diff(path: &str, old: &[u8], new: &[u8]) -> String {
+    String::from_utf8_lossy(&unified_diff_bytes(path.as_bytes(), old, new)).into_owned()
+}
+
+/// Produces the same bounded diff while preserving raw path and content bytes.
+#[must_use]
+pub fn unified_diff_bytes(path: &[u8], old: &[u8], new: &[u8]) -> Vec<u8> {
+    let headers = || {
+        let mut output = b"--- ".to_vec();
+        output.extend_from_slice(path);
+        output.extend_from_slice(b"\n+++ ");
+        output.extend_from_slice(path);
+        output.push(b'\n');
+        output
+    };
     let old = split_lines(old);
     let new = split_lines(new);
     let comparison_cells = old.len().checked_add(1).and_then(|old| {
@@ -36,34 +50,36 @@ pub fn unified_diff(path: &str, old: &[u8], new: &[u8]) -> String {
         || new.len() > MAX_LINES
         || comparison_cells.is_none_or(|cells| cells > MAX_COMPARISON_CELLS)
     {
-        return format!(
-            "--- {path}\n+++ {path}\nfile too large to diff safely: {} old lines, {} new lines (max {MAX_LINES} lines and {MAX_COMPARISON_CELLS} comparison cells); full diff skipped\n",
-            old.len(),
-            new.len()
-        );
+        let mut output = headers();
+        output.extend_from_slice(format!(
+            "file too large to diff safely: {} old lines, {} new lines (max {MAX_LINES} lines and {MAX_COMPARISON_CELLS} comparison cells); full diff skipped\n",
+            old.len(), new.len()
+        ).as_bytes());
+        return output;
     }
     let ops = lcs(&old, &new);
     let hunks = group_hunks(&ops);
     if hunks.is_empty() {
-        return String::new();
+        return Vec::new();
     }
-    let mut output = format!("--- {path}\n+++ {path}\n");
+    let mut output = headers();
     for hunk in hunks {
         write_hunk(&mut output, hunk);
     }
     output
 }
 
-fn split_lines(bytes: &[u8]) -> Vec<String> {
+fn split_lines(bytes: &[u8]) -> Vec<Vec<u8>> {
     if bytes.is_empty() {
         return Vec::new();
     }
-    let text = String::from_utf8_lossy(bytes);
-    let text = text.strip_suffix('\n').unwrap_or(&text);
-    text.split('\n').map(str::to_owned).collect()
+    let text = bytes.strip_suffix(b"\n").unwrap_or(bytes);
+    text.split(|byte| *byte == b'\n')
+        .map(<[u8]>::to_vec)
+        .collect()
 }
 
-fn lcs(old: &[String], new: &[String]) -> Vec<Op> {
+fn lcs(old: &[Vec<u8>], new: &[Vec<u8>]) -> Vec<Op> {
     let mut table = vec![vec![0usize; new.len() + 1]; old.len() + 1];
     for i in (0..old.len()).rev() {
         for j in (0..new.len()).rev() {
@@ -176,7 +192,7 @@ fn build_hunk(ops: &[Op], old_from: usize, new_from: usize) -> Hunk {
     }
 }
 
-fn write_hunk(output: &mut String, hunk: Hunk) {
+fn write_hunk(output: &mut Vec<u8>, hunk: Hunk) {
     let _ = writeln!(
         output,
         "@@ -{},{} +{},{} @@",
@@ -184,10 +200,12 @@ fn write_hunk(output: &mut String, hunk: Hunk) {
     );
     for op in hunk.ops {
         let prefix = match op.kind {
-            Kind::Equal => ' ',
-            Kind::Delete => '-',
-            Kind::Insert => '+',
+            Kind::Equal => b' ',
+            Kind::Delete => b'-',
+            Kind::Insert => b'+',
         };
-        let _ = writeln!(output, "{prefix}{}", op.line);
+        output.push(prefix);
+        output.extend_from_slice(&op.line);
+        output.push(b'\n');
     }
 }

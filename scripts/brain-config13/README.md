@@ -47,3 +47,40 @@ owned file after fatal admission, changes an exit/type error, or flips a resolve
 value. Selected-case control runs must demonstrate strict gate rejection and
 preserve full output/state/request evidence, with both wrapper/delegated SHAs.
 No control has been built or run in this checkpoint.
+
+`corrections.py` adds the three source-review regressions without editing the
+original corpora or frozen production/Go fixtures. Its `--kind consumers` has
+182 Unix /157 Windows prepared cases, and `--kind values` has146 prepared cases
+on each platform. Every process exit, stdout/stderr byte and full before/after
+filesystem snapshot is compared. Fatal consumers additionally require exit2 and
+zero mutation; positive consumers require exit0. Parser inner wording is not
+projected away, so explicitly open syntax/UTF8 gates can still reject the run.
+Receipts persist before each child and after every observation, including a
+failed child's captured partial streams. No new case or control has executed.
+
+Consumer owner cases copy the prepared `brain_config13_owned_vault` executable
+to labeled private children plus the managed fallback. The child records its
+actual executable label and byte-valued argv, uses no services and reads no
+operator state. Unix same-inode PWD pairs cover ordinary and raw symlink
+spellings, two opposite type failures and mismatched/relative PWD rejection.
+The Windows prepared case preserves Go's PWD-ignore contract; it is not a
+Linux projection of native Windows execution.
+
+After allocation, use `brain_config13_correction_fault` with
+`CONFIG13_CONTROL_NATIVE` pointing to the actual source-bound candidate. Run the
+same strict gate with `--native` pointing to that fault executable,
+`--control-native` pointing to the candidate, and these three pairs:
+
+| Mode | Selected consumer case | Intended rejection |
+| --- | --- | --- |
+|wrong-owner|vault-pwd-different-False|different actually selected child/output|
+|repair-codex|profile-incomplete-codex-True|raw profile bytes changed in stdout|
+|reject-prefix|prefix-fffe-global-codex-False|Go-admitted positive input exits2|
+
+Also run the complete unmodified original gates and all inherited controls. A
+selected-case rejection must retain the exact changed output/state and intended
+fault, not merely an incidental wrapper failure. Runtime gates require clean
+HEAD/source manifests and actual binary/build-source bindings for the CLI,
+loader probes, child fixture and wrappers. SDK1.26.7, frozen Go sources, native3
+execution and independent review remain required. These are future commands,
+not accepted compiled evidence or a #765/#769 cutover.

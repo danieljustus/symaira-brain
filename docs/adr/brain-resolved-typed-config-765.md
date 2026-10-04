@@ -148,3 +148,61 @@ does not change the store/provider. Whole-MCP acceptance therefore remains open.
 Legacy schema/apply/backfill gaps remain #649/#758. Native Linux/macOS/Windows
 runtime, independent review and protected CI remain required. Neither #765 nor
 #769 is closed by this precompile checkpoint.
+
+## Follow-up to the independent e63 source review
+
+The immutable e63 publication and its independent report/projections are kept
+in `migration/evidence/brain-config13/independent-e63e/retention.json`, alongside
+the unchanged initial131 mappings/113 compressed payloads. The review found
+three source defects; it did not execute the uncompiled candidate. This isolated
+successor normally merges main5e. No original observation is rewritten as a
+passing result. The source-only follow-up does not have compiler, target, port
+or product-execution allocation.
+
+Vault admission and override loading now delegate to the same public resolved
+`Sources` implementation as the other Brain consumers. Only the injected Vault
+environment-variable name changes for existing tests. The existing private
+13-field validity parser was removed. Maintaining another parser or calling
+physical `current_dir` here would let Doctor/Setup admission and Vault select a
+different project file from Go's same-inode absolute PWD owner. All selectors
+stay native OS paths; a failed full load still ignores the Vault override, as Go
+does. Existing repair/source fallback predicates remain in force.
+
+Install keeps the resolved profile byte-valued until its specific harness
+encoder. JSON metadata uses Go's one-invalid-byte-per-replacement behavior;
+Codex TOML writes the original bytes using the pinned BurntSushi1.6 quoting
+rules. This intentionally preserves historical raw strings even when the
+result is not UTF8; it is not a new permissive decoding rule. A small module
+replaces only the generated profile token at its parser-provided span. It uses
+no sentinel, global text substitution or new dependency. Existing equal literal
+U+FFFD values, comments and other servers cannot become replacement targets.
+Overwriting/removing an entry clears its byte override. Existing String-valued
+server metadata remains a repaired view and cannot be used as a path selector.
+The retained MIT quoting license accompanies the source-derived rules.
+
+Dry-run needs the same raw bytes as a real write. The additive byte-valued
+unified-diff API therefore retains path/content bytes while keeping the existing
+line/cell budgets, three-context grouping and deletion tie-break. Its String
+wrapper preserves the existing API for Unicode callers. Otherwise a successful
+Codex write would silently change into repaired bytes in its preview, or compare
+an invalid byte as equal to a literal replacement rune.
+
+The resolved parser strips exactly one leading FF FE, FE FF or EF BB BF marker,
+as the pinned Go parser does, before validating the remaining UTF8. This does
+not decode UTF16, recursively remove prefixes or accept later invalid bytes.
+Supported syntax and all13 ordered field conversions remain required. The
+single native parser still has the separately documented earlier-grammar versus
+later-invalid-UTF8 priority gate; the accepted inner diagnostic wording does not
+waive that gate, typing, owner selection, admission order or any mutation.
+
+The original102 CLI/152 Unix/174 Windows definitions and actual older proofs
+remain byte-identical. Additive prepared regressions cover182 Unix/157 Windows
+consumer cases and146 loader cases. They include all13 fields behind markers,
+valid/invalid owners, raw/literal profile collisions, checked positive exits,
+fatal zero-write/no-child boundaries and three actual fault executable
+definitions. Five new Rust test functions cover marker/type order, backend
+serialization, collateral values and raw diffs. They are uncompiled/unexecuted;
+static formatting, Python syntax/case enumeration and archive/source hashing
+cannot substitute for actual Go/Rust pairs, strict Clippy, parent lifecycle
+gates, native Linux/macOS/Windows or independent runtime approval. All previously
+listed #765/#769 and parser/lookup/eager-Memory boundaries remain open.

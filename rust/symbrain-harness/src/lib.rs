@@ -14,10 +14,11 @@ mod registry;
 mod registry_environment;
 mod server_info;
 mod toml_backend;
+mod toml_profile;
 mod write;
 
 pub use backup::{backup, backup_at};
-pub use diff::unified_diff;
+pub use diff::{unified_diff, unified_diff_bytes};
 pub use document::{Document, empty, load, parse};
 pub use entry::{Entry, SUPERSEDED_CORE_NAMES};
 pub use inventory::{
