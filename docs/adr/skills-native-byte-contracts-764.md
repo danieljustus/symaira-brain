@@ -127,3 +127,19 @@ and additive differential pair/control, and real Linux/macOS/Windows gates
 are required. Prior render/preflight/raw-argv/drift evidence and explicit
 #476, #490 and #457 corrective contracts remain unchanged. Source preparation does
 not complete #764 or authorize a merge by itself.
+
+## Normal current-main integration
+
+After the clean correction checkpoint `2d289607a3bdc6cad7bd4184ed8727557999d771`,
+normal merge `541fe2056312be38a7e1b587b672f997804842a7` integrates main
+`9353520a34c5819c7d0a6cd58d3bfaa2b22b045b`. All Rust production/tests and the
+Skills differential runner are byte-identical to the isolated checkpoint.
+The dispatcher conflict retains the prepared six native verbs and their
+existing preflight/writer owners. The CI conflict retains all inherited
+render-drift gates and adds main's explicit module-cache preparation to the
+Windows argv oracle. Oracle builder/tests/readme take the published main
+bytes, including its representable one-second Windows fixture mtime delta;
+assertions remain. Migration docs retain the later Skills/render observations,
+and the existing SKL-008 render / SKL-009 raw-Windows distinction prevents a
+contract-ID collision. Nothing is rebased, forced, published or attributed as
+an executed native result. Original pre-merge source/checks remain in Git.

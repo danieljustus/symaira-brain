@@ -44,7 +44,9 @@ def main():
     os.umask(0o022)
     assert os.statvfs(ROOT).f_bavail * os.statvfs(ROOT).f_frsize >= 700 * 1024 * 1024
     report = {'kind': 'PURE_SOURCE_CHECKS_NOT_NATIVE_OR_COMPILER_VALIDATION',
-              'parent': PARENT, 'product_SDK_compiler_SQLite_target_port_executions': 0}
+              'parent': PARENT, 'validated_source_head': git('rev-parse','HEAD').decode().strip(),
+              'integrated_main': '9353520a34c5819c7d0a6cd58d3bfaa2b22b045b',
+              'product_SDK_compiler_SQLite_target_port_executions': 0}
     retention = json.loads((OUT.parent / 'original/retention.json').read_bytes())
     archive = OUT.parent / 'original/full-review-and-sources.tar.gz'
     assert sha(archive.read_bytes()) == retention['archive_sha256']
@@ -151,7 +153,15 @@ def main():
     assert all(count < 400 for count in report['changed_Rust_line_counts'].values())
     source_names = git('ls-files', 'rust/symbrain-skills','rust/symbrain-cli','rust/symbrain-gateway','rust/symbrain-mcp','scripts/skills-native-oracle','Cargo.lock','migration/contract-matrix.csv','.github/workflows/skills-native.yml').decode().splitlines()
     source_names += [name for name in changed if name.startswith(('rust/','scripts/skills-native-oracle/'))]
+    source_names += ['AGENTS.md','MIGRATION-RUST.md','migration/skills-native-764-inventory.md','.github/workflows/ci.yml',
+                     'scripts/skills-argv-oracle/build_go.py','scripts/skills-argv-oracle/test_build_go.py','scripts/skills-argv-oracle/test_novel.py',
+                     'docs/adr/skills-native-byte-contracts-764.md']
     report['full_candidate_source_graph'] = {name:{'bytes':(ROOT/name).stat().st_size,'sha256':sha((ROOT/name).read_bytes())} for name in sorted(set(source_names))}
+    # Integration is production-byte neutral to the isolated source checkpoint.
+    assert not git('diff','2d289607a3bdc6cad7bd4184ed8727557999d771','HEAD','--','rust','scripts/skills-native-oracle')
+    assert not git('diff','9353520a34c5819c7d0a6cd58d3bfaa2b22b045b','HEAD','--','scripts/skills-argv-oracle/build_go.py','scripts/skills-argv-oracle/test_build_go.py','scripts/skills-argv-oracle/test_novel.py')
+    report['integration_production_unchanged_from_checkpoint'] = '2d289607a3bdc6cad7bd4184ed8727557999d771'
+    report['integrated_builder_fixture_bytes_equal_main'] = True
     report['status'] = 'passed_source_checks_only'
     (OUT/'verification.json').write_text(json.dumps(report,indent=2)+'\n')
     print(json.dumps({key: value for key,value in report.items() if key not in ('unchanged_Go_files','full_candidate_source_graph','prepared_case_projections','unchanged_dependencies','changed_Rust_line_counts')}))

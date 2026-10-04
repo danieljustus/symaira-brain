@@ -1,0 +1,9 @@
+{
+  "archive": "all-workspace-rust-sources.json.gz",
+  "archive_bytes": 27143,
+  "archive_sha256": "b5e6fe329fd6605f14e008ff654067579125fd199b0f3960049f4dac2dc7dfad",
+  "payload_bytes": 85700,
+  "payload_sha256": "22329fe60ca869502185400c439c67fdac121f906889dd9b615c45d7e08bf665",
+  "source_head": "541fe2056312be38a7e1b587b672f997804842a7",
+  "files": 516
+}

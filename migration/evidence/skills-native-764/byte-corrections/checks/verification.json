@@ -1,6 +1,8 @@
 {
   "kind": "PURE_SOURCE_CHECKS_NOT_NATIVE_OR_COMPILER_VALIDATION",
   "parent": "128e1bfc81733e488e25f5b4935300a33009e265",
+  "validated_source_head": "541fe2056312be38a7e1b587b672f997804842a7",
+  "integrated_main": "9353520a34c5819c7d0a6cd58d3bfaa2b22b045b",
   "product_SDK_compiler_SQLite_target_port_executions": 0,
   "all_pre_edit_members_bytes_and_metadata_ledger_verified": 1919,
   "unchanged_Go_files": {
@@ -7955,17 +7957,37 @@
     "rust/symbrain-skills/tests/metadata_precision.rs": 78
   },
   "full_candidate_source_graph": {
+    ".github/workflows/ci.yml": {
+      "bytes": 75469,
+      "sha256": "0f05567c6d045414be004d2cbbda0fb2f37b39f8dde2e9b067c391d41727fae6"
+    },
     ".github/workflows/skills-native.yml": {
       "bytes": 3241,
       "sha256": "a4ce7e10f5e8abbab7b96f610723a1b794c116dc2f94d7f6306207ac88e30fa9"
+    },
+    "AGENTS.md": {
+      "bytes": 15652,
+      "sha256": "96501fab340de5969b201a1060581420f9085f923fbcf4c32d1394e4082189b6"
     },
     "Cargo.lock": {
       "bytes": 65735,
       "sha256": "e51a0c23bbd4ded67f71531a63d828653cdd5c4dbf4c2b4376a07c95483f78b0"
     },
+    "MIGRATION-RUST.md": {
+      "bytes": 23258,
+      "sha256": "c95618ace2104678cc8a22153d6be99d026c04f4acbe01d67a8af3da81c5dd54"
+    },
+    "docs/adr/skills-native-byte-contracts-764.md": {
+      "bytes": 9755,
+      "sha256": "00b9c0ec25cb5df99ff7b3a97588641690e580fded85248c21a55be2a6155a25"
+    },
     "migration/contract-matrix.csv": {
       "bytes": 30471,
       "sha256": "84e80d38c7526487a58e325ec125ecc30006c2d5af87607ba6bf1c8844574c7f"
+    },
+    "migration/skills-native-764-inventory.md": {
+      "bytes": 5288,
+      "sha256": "1bbdea461c0a061fd14f196a083619409e4056f9c00b4afc7f4bc34485b8e925"
     },
     "rust/symbrain-cli/Cargo.toml": {
       "bytes": 1265,
@@ -8975,6 +8997,18 @@
       "bytes": 6482,
       "sha256": "14995ed7d61e2fc9e999b422726c2fc2ef50b253929d16ba1ff02f16bacb2659"
     },
+    "scripts/skills-argv-oracle/build_go.py": {
+      "bytes": 12552,
+      "sha256": "c7a43b310a2cbd2bf906cb06741f3ce6705ca726f340bf41b211a5e01a20564f"
+    },
+    "scripts/skills-argv-oracle/test_build_go.py": {
+      "bytes": 5626,
+      "sha256": "d8b083d80720e873cfdd31451db46bb9e3404adf25697ea3b4369baa493fbc2f"
+    },
+    "scripts/skills-argv-oracle/test_novel.py": {
+      "bytes": 3843,
+      "sha256": "ce4c432c98d724bdb777faea056bdaa191d1806cef09759f9304ffde9c357f88"
+    },
     "scripts/skills-native-oracle/README.md": {
       "bytes": 1879,
       "sha256": "e7dc16674f8bfa90ab1e661019de4ba6276d4ed5461eabce6e57ff8fbf6836c7"
@@ -9008,5 +9042,7 @@
       "sha256": "16d0f26a76151437d4a8d6d1b3c70f45626be4c2c6957956fa74450897f59e2d"
     }
   },
+  "integration_production_unchanged_from_checkpoint": "2d289607a3bdc6cad7bd4184ed8727557999d771",
+  "integrated_builder_fixture_bytes_equal_main": true,
   "status": "passed_source_checks_only"
 }
