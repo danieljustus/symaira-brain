@@ -242,8 +242,15 @@ impl UreqTransport {
                     return Err("provider response exceeds 1048576 bytes".to_string());
                 }
                 let mut headers = BTreeMap::new();
-                for (name, value) in response.headers() {
-                    if let Ok(value) = value.to_str() {
+                for name in response.headers().keys() {
+                    // Go Header.Get selects the first value, even when later
+                    // duplicate lines contain another parseable delay.
+                    let Some(value) = response.headers().get(name) else {
+                        continue;
+                    };
+                    // Go Header.Get preserves valid UTF8 obs-text, including
+                    // Unicode outer whitespace consumed by Retry-After.
+                    if let Ok(value) = std::str::from_utf8(value.as_bytes()) {
                         headers.insert(name.as_str().to_ascii_lowercase(), value.to_string());
                     }
                 }

@@ -7,6 +7,8 @@ use std::sync::{Arc, Mutex};
 
 #[path = "transport_oracle_tests.rs"]
 mod bounds;
+#[path = "retry_after_oracle_tests.rs"]
+mod retry_after;
 #[path = "status_oracle_tests.rs"]
 mod status;
 #[path = "device_oracle_wire_tests.rs"]

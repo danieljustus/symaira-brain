@@ -20,10 +20,18 @@ fn file_state(root: &std::path::Path) -> BTreeMap<String, Value> {
     values
 }
 pub(super) fn compare() -> Value {
+    compare_with_count(84)
+}
+
+pub(super) fn compare_with_count(expected_cases: usize) -> Value {
     let input: Vec<Value> =
         serde_json::from_slice(&std::fs::read(std::env::var("USAGE_STATUS_GO").unwrap()).unwrap())
             .unwrap();
-    assert_eq!(input.len(), 84);
+    assert_eq!(
+        input.len(),
+        expected_cases,
+        "complete remote constructor corpus"
+    );
     let mut observed = vec![];
     for row in &input {
         // The same disposable constructor homes/metadata from actual frozen Go.
@@ -113,7 +121,7 @@ pub(super) fn compare() -> Value {
         );
         observed.push(json!({"id":row["id"],"report":raw,"started":start,"finished":end,"requests":requests,"filesystem":before,"read_only":true}));
     }
-    let output = json!({"cases":84,"records":observed,"full_reports":84,"read_only":84});
+    let output = json!({"cases":expected_cases,"records":observed,"full_reports":expected_cases,"read_only":expected_cases});
     std::fs::write(
         std::env::var("USAGE_STATUS_NATIVE").unwrap(),
         serde_json::to_vec_pretty(&output).unwrap(),

@@ -302,6 +302,19 @@ jobs:
             ${{ runner.temp }}/usage-copilot-kimi-768.evidence
           if-no-files-found: ignore
           retention-days: 14
+      - name: Native Usage Retry-After SDK and full TLS constructor parity
+        shell: bash
+        run: bash scripts/usage-retry-after-oracle/run.sh "$RUNNER_TEMP/usage-retry-after-768.json"
+      - name: Preserve Retry-After SDK and full TLS process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-retry-after-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-retry-after-768.json
+            ${{ runner.temp }}/usage-retry-after-768.evidence
+          if-no-files-found: error
+          retention-days: 14
       - name: Native Usage early-argv device and real TLS status parity
         shell: bash
         run: bash scripts/usage-next-oracle/run.sh "$RUNNER_TEMP/usage-next-768.json"
@@ -516,6 +529,19 @@ jobs:
             ${{ runner.temp }}/usage-copilot-kimi-768.json
             ${{ runner.temp }}/usage-copilot-kimi-768.evidence
           if-no-files-found: ignore
+          retention-days: 14
+      - name: Native Usage Retry-After SDK and full TLS constructor parity
+        shell: bash
+        run: bash scripts/usage-retry-after-oracle/run.sh "$RUNNER_TEMP/usage-retry-after-768.json"
+      - name: Preserve Retry-After SDK and full TLS process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-retry-after-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-retry-after-768.json
+            ${{ runner.temp }}/usage-retry-after-768.evidence
+          if-no-files-found: error
           retention-days: 14
       - name: Native Usage early-argv device and real TLS status parity
         shell: bash
@@ -742,6 +768,19 @@ jobs:
             ${{ runner.temp }}/usage-copilot-kimi-768.json
             ${{ runner.temp }}/usage-copilot-kimi-768.evidence
           if-no-files-found: ignore
+          retention-days: 14
+      - name: Native Usage Retry-After SDK and full TLS constructor parity
+        shell: bash
+        run: bash scripts/usage-retry-after-oracle/run.sh "$RUNNER_TEMP/usage-retry-after-768.json"
+      - name: Preserve Retry-After SDK and full TLS process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-retry-after-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-retry-after-768.json
+            ${{ runner.temp }}/usage-retry-after-768.evidence
+          if-no-files-found: error
           retention-days: 14
       - name: Native Usage early-argv device and real TLS status parity
         shell: bash
