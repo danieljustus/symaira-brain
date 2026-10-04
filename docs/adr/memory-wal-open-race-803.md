@@ -1,6 +1,6 @@
 # Bound WAL setup contention without replaying migrations
 
-Status: isolated source proposal; no compiler/runtime allocation or validation.
+Status: focused Linux author validation in progress; independent/native3 pending.
 Refs #649/#758 and PR803/PR811. Base: immutable PR803 `6ae73a7`.
 
 Windows job `111341331340` in run `37170162739` reports three worker failures

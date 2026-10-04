@@ -1,0 +1,8 @@
+{
+  "command": "git diff --cached --check",
+  "source": "50376b0",
+  "observed_exit": 2,
+  "observed_message": "migration/evidence/memory-open-race-803/passed-9ae35cf/memory-lib-tests.log:47: new blank line at EOF.",
+  "cause": "Literal actual Cargo log retains its final blank line; the log bytes were not rewritten.",
+  "correction": "Narrow binary attributes for retained compiler/test logs, with exact SHA provenance; no source or test assertion waiver."
+}

@@ -92,6 +92,9 @@ fn genuine_wal_upgrade_busy_succeeds_after_reserved_writer_release() {
         "the real WAL upgrade bypasses SQLite's busy callback"
     );
     assert!(follower.is_autocommit());
+    eprintln!(
+        "original pragma batch under reserved writer: {original:?}; actual busy callbacks=0; autocommit=true"
+    );
     let (observed, received) = mpsc::channel();
     let job = std::thread::spawn(move || {
         let mut first = Some(observed);
@@ -123,6 +126,9 @@ fn genuine_wal_upgrade_busy_succeeds_after_reserved_writer_release() {
                     .get::<_, String>(0))
                 .unwrap(),
             "unchanged"
+        );
+        eprintln!(
+            "observed genuine early WAL BUSY then released reserved writer: actual IMMEDIATE migration complete; journal=wal; busy_timeout=5000; retained row unchanged"
         );
     });
     // Release only after an actual failed helper attempt. There is no assumed
@@ -185,7 +191,7 @@ fn many_skipped_handler_attempts_share_one_budget_under_retained_writer() {
     );
     assert!(started.elapsed() >= BUDGET);
     eprintln!(
-        "retained reserved WAL writer: {attempts} real early BUSY attempts in {:?}",
+        "retained reserved WAL writer: {attempts} real early BUSY attempts in {:?}; final error={error:?}",
         started.elapsed()
     );
     assert!(follower.is_autocommit());

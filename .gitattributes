@@ -13,3 +13,7 @@ migration/evidence/memory-cli-758/independent-sigpipe-458/*.log binary
 
 # Retain the actual Windows Store-open failure's original CRLF bytes.
 migration/evidence/memory-open-race-803/windows-111341331340/*.log binary
+# Actual retained compiler/test output includes intentional trailing newlines.
+migration/evidence/memory-open-race-803/first-62b2757/*.log binary
+migration/evidence/memory-open-race-803/passed-9ae35cf/*.log binary
+migration/evidence/memory-open-race-803/final-*/*.log binary
