@@ -1,0 +1,94 @@
+{
+  "status": "CLEAN_SOURCE_ONLY_CORRECTION_NOT_COMPILED_OR_ACCEPTED",
+  "source_commit": "c7940ff2785a1ed7b9ec90441effdf609bbfc1a4",
+  "original_commit": "8a3226828d045b4307d2c3601e283d1ecfa4ce4f",
+  "preservation_commit": "a93305c4bb7c783c9bccb528f2c92a1bbb7d493b",
+  "source_clean": true,
+  "original_worktree_clean_unchanged": true,
+  "source_files": 428,
+  "static_verification": {
+    "status": "SOURCE_HASHES_STATIC_ONLY_NOT_ACCEPTANCE",
+    "retained_review_files": 64,
+    "retained_review_proof_files": 61,
+    "frozen": 1217,
+    "SDK": 21,
+    "current_source": 428,
+    "registry_sources": 617,
+    "registry_archives": 25,
+    "original_cases": 230,
+    "original_controls": 4,
+    "backend_cases": 98,
+    "backend_controls": 4,
+    "new_cases": 64,
+    "new_controls": 3,
+    "prepared_unit_functions": 16,
+    "tests_or_controls_executed": 0,
+    "compilation": false,
+    "runtime": false,
+    "target_access": false,
+    "ports": 0
+  },
+  "static_tools": {
+    "recursive_memory_rustfmt": true,
+    "pinned_go_probe_gofmt": true,
+    "python_AST": true,
+    "TOML": true,
+    "actionlint": true,
+    "git_diff_check": true
+  },
+  "source_projection": {
+    "case_headers": 64,
+    "mutation_definitions_falsifiable": 3,
+    "actual_native_or_Go_observation": false
+  },
+  "production_sha256": {
+    "rust/symbrain-memory/src/sync/model.rs": "122386241dbece4ec4f1cbac41ff59e10e149be5d513dba436995999591791a8",
+    "rust/symbrain-memory/src/sync/http.rs": "dd6e9222792bb84f3a1570817c5fd0089717b045feddddfaa809d876c0d5d439",
+    "rust/symbrain-memory/src/sync/http/headers.rs": "000491e8fcab89f8102367a933fd07c9f54efc24c9bf3b6ba9b71a6ab6e6c3e9"
+  },
+  "module_line_counts": {
+    "rust/symbrain-memory/src/sync/model.rs": 177,
+    "rust/symbrain-memory/src/sync/http.rs": 305,
+    "rust/symbrain-memory/src/sync/http/headers.rs": 57,
+    "rust/symbrain-memory/src/sync/http/headers_tests.rs": 89
+  },
+  "dependency_lock_sha256": "7216f8c8b3eac9acdc40f72309bab061918ce9aae5d2563bb0b24ada8c050a06",
+  "workspace_sha2": "0.10.9 unchanged",
+  "original_230_plus98_plans_unchanged": true,
+  "preserved_full_review_proof_files": 61,
+  "preserved_full_review_artifacts": 64,
+  "prepared_unit_functions": 16,
+  "prepared_cases": {
+    "original": 230,
+    "backends": 98,
+    "corrections": 64
+  },
+  "prepared_intended_controls": {
+    "original": 4,
+    "backends": 4,
+    "corrections": 3
+  },
+  "runtime": {
+    "Cargo": 0,
+    "compiler": 0,
+    "target_access": false,
+    "products": 0,
+    "Go_probes": 0,
+    "HTTP": 0,
+    "TLS": 0,
+    "crypto_operations": 0,
+    "ports": 0,
+    "operator_access": false,
+    "GitHub_writes": 0
+  },
+  "native3": false,
+  "admission": false,
+  "self_approval": false,
+  "required": [
+    "Different-author full source review of corrected immutable source",
+    "Explicit runtime/compiler/target allocation",
+    "Full affected Memory CLI MCP Store parent compilation/strict and original controls",
+    "All230+98+64 materialized protocol/header/crypto/full-state process comparisons plus all11 intended actual controls",
+    "Exact native Linux/macOS/Windows and different-author full runtime/provenance review before any admission"
+  ]
+}

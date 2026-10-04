@@ -1,0 +1,111 @@
+{
+  "scope": "Author static tools and Python source projections only, no execution of Go/Rust/product/crypto/HTTP",
+  "source_commit": "c7940ff2785a1ed7b9ec90441effdf609bbfc1a4",
+  "entries": [
+    {
+      "original": "/tmp/symaira-memory762-sync-corrections-actionlint.log",
+      "archive": "migration/evidence/memory-sync-762/backend-corrections-static/symaira-memory762-sync-corrections-actionlint.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-memory762-sync-corrections-clean-header-projection.json",
+      "archive": "migration/evidence/memory-sync-762/backend-corrections-static/symaira-memory762-sync-corrections-clean-header-projection.json.gz",
+      "bytes": 20353,
+      "sha256": "1986ccb0b34e5f8717026941b31a6d21e6f721aa304f1f3806b0935c19784c9a",
+      "archive_sha256": "bda03d75f2516591b8c870826509f832c7c22e6fe6a5c7946196b20e0acafe08",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-memory762-sync-corrections-clean-header-projection.stderr",
+      "archive": "migration/evidence/memory-sync-762/backend-corrections-static/symaira-memory762-sync-corrections-clean-header-projection.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-memory762-sync-corrections-clean-verification.json",
+      "archive": "migration/evidence/memory-sync-762/backend-corrections-static/symaira-memory762-sync-corrections-clean-verification.json.gz",
+      "bytes": 528,
+      "sha256": "3a28df24ab870ecaff801c2f3654b6243c2a4c7c1f86f3cb4fd55cc28b98a372",
+      "archive_sha256": "b1e7de1171be33a64bda11ab8afef5f5667c6975dfbfe572a1ee31e54fdd317a",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-memory762-sync-corrections-clean-verification.stderr",
+      "archive": "migration/evidence/memory-sync-762/backend-corrections-static/symaira-memory762-sync-corrections-clean-verification.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-memory762-sync-corrections-gofmt.log",
+      "archive": "migration/evidence/memory-sync-762/backend-corrections-static/symaira-memory762-sync-corrections-gofmt.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-memory762-sync-corrections-header-projection.json",
+      "archive": "migration/evidence/memory-sync-762/backend-corrections-static/symaira-memory762-sync-corrections-header-projection.json.gz",
+      "bytes": 20353,
+      "sha256": "1986ccb0b34e5f8717026941b31a6d21e6f721aa304f1f3806b0935c19784c9a",
+      "archive_sha256": "bda03d75f2516591b8c870826509f832c7c22e6fe6a5c7946196b20e0acafe08",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-memory762-sync-corrections-header-projection.stderr",
+      "archive": "migration/evidence/memory-sync-762/backend-corrections-static/symaira-memory762-sync-corrections-header-projection.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-memory762-sync-corrections-original-8a-verification.json",
+      "archive": "migration/evidence/memory-sync-762/backend-corrections-static/symaira-memory762-sync-corrections-original-8a-verification.json.gz",
+      "bytes": 260,
+      "sha256": "c9d8cfb2203e22dbc8e9c5a85768df698bdae5f88e9543e3f7de80f46dd44434",
+      "archive_sha256": "821ca10b331771c0a07ad60a70ddd50d7459edb2c4978ecc6a622647cbeee120",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-memory762-sync-corrections-original-8a-verification.stderr",
+      "archive": "migration/evidence/memory-sync-762/backend-corrections-static/symaira-memory762-sync-corrections-original-8a-verification.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-memory762-sync-corrections-rustfmt.log",
+      "archive": "migration/evidence/memory-sync-762/backend-corrections-static/symaira-memory762-sync-corrections-rustfmt.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-memory762-sync-corrections-static-verification.json",
+      "archive": "migration/evidence/memory-sync-762/backend-corrections-static/symaira-memory762-sync-corrections-static-verification.json.gz",
+      "bytes": 528,
+      "sha256": "3a28df24ab870ecaff801c2f3654b6243c2a4c7c1f86f3cb4fd55cc28b98a372",
+      "archive_sha256": "b1e7de1171be33a64bda11ab8afef5f5667c6975dfbfe572a1ee31e54fdd317a",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-memory762-sync-corrections-static-verification.stderr",
+      "archive": "migration/evidence/memory-sync-762/backend-corrections-static/symaira-memory762-sync-corrections-static-verification.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "roundtrip": true
+    }
+  ],
+  "all_inputs_and_logs_retained": true
+}
