@@ -1,0 +1,1 @@
+A direct rustfmt invocation without --edition failed before commit/runtime because the formatter defaults to Rust 2015 while this workspace uses edition 2024. The exact new let-chain lines require the already declared workspace edition. The follow-up formatter passes --edition 2024, with no Cargo edition or production semantics change.

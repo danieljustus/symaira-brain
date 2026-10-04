@@ -35,6 +35,51 @@ dynamic configuration, governed writes and JSONL decoding remain open; no Go
 fallback route is removed, and #649 remains pending the shipped Rust release.
 The rationale is recorded in `docs/adr/758-native-memory-evidence.md`.
 
+The isolated #649 historical-repair successor preserves the complete original
+314-file census and proposes all 37 ordered migration effects, including rule
+timestamps, relation UUIDs/nullable intervals, attribution/target columns,
+unique indexes, FTS porter rebuilds and sync-exclusion triggers. The source
+draft checks actual postconditions while retaining the approved IMMEDIATE
+transaction and concurrency reservation. Known native false-completion repairs
+are explicit; unknown custom FTS/trigger/index definitions fail with rollback,
+and unrelated legitimate NULLs remain unchanged. The new 37-prefix process
+gate and focused state/rollback tests are prepared but **not executed** at this
+checkpoint. Target/compiler/runtime allocation, independent review, native
+three-OS CI and the shipped Rust release remain pending. The decision is in
+`docs/adr/memory-historical-migration-repair-649.md`.
+
+The focused Store-open successor preserves the actual PR811 Windows BUSY
+failure and bounds only pre-migration WAL plain-BUSY retries to the remaining
+five-second budget. BEGIN IMMEDIATE, migration rollback and all 80 existing
+concurrent-open assertions stay unchanged. At combined source `4c62355`, 40
+Memory library tests and strict checks pass, including actual reserved-writer,
+reader and mixed-lock controls with a rejected compiled timeout-reset mutant.
+The original Windows failure's internal phase, independent review, full CLI
+gates and exact-head native three-OS verification remain pending; this does not
+complete historical repair or close #649/#758. See
+`docs/adr/memory-wal-open-race-803.md` and the preserved `memory-open-race-803`
+evidence.
+
+The isolated historical/default/WAL integration normally merges main 5e and the
+independently approved 2fe WAL prerequisite. At source `1fc5910`, the full
+allocated Linux driver passes 392 tests with no failures/ignores, all 28
+historical cases, seven unchanged WAL cases, strict Clippy/fmt/actionlint,
+37 actual frozen-Go/native constructor pairs, 37 whole-state native reopens,
+nine actual repair/rollback controls and the 184-column SQL default inventory.
+Inherited gates also pass: 590 reads/two 32-case mutation controls,
+60 Set/16 Delete/13 fallback/10 output cases/three process mutants, and the
+32/48/3 evidence corpus/four production Go DB tests/three negative controls.
+Original failed 252 fixtures, the later incompatible handwritten integration
+fixture and first strict lint run are preserved with actual executed binaries
+before precise fixture/style corrections. All 37 SQL resources and approved
+WAL behavior remain unchanged; no lint or callback/state assertion is weakened.
+The complete 23-file default static review and Root WAL prerequisite review
+remain separate lineage. Author Linux validation is not independent acceptance:
+full different-author runtime review, native three-OS CI and the shipped Rust
+release remain pending, and #649/#758 stay open. Decisions and exact proof
+bindings are in `docs/adr/memory-historical-wal-integration-649.md` and
+`migration/evidence/memory-historical-649/final-1fc5910`.
+
 The follow-up #758 CLI increment splits the oversized memory module into focused
 behavior modules, ports raw Go flags/error grammar and all 86 typed memory
 configuration fields, uses configured Ollama query embeddings and corrects the

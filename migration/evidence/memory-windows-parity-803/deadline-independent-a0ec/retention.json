@@ -1,0 +1,36 @@
+{
+  "reviewed_source": "a0ec18b8b90a1282f29bf4766ffd54d8675d9e49",
+  "disposition": "APPROVE diagnostics-only publication",
+  "actual_native_execution": false,
+  "original_failure_cause_proved": false,
+  "files": [
+    {
+      "original": "/tmp/symaira-memory803-deadline-independent-review.md",
+      "retained": "symaira-memory803-deadline-independent-review.md.gz",
+      "sha256": "0e8ce1b5659d5c3c46a65e5f2a55ee6be3c61a1bc6dbcbdd2bd083a7e6dee936",
+      "gzip_sha256": "aa13e5ead9035b88111009c9e901e8f4c0ed37e34bc6b9af2647be8d268228a9",
+      "bytes": 5477
+    },
+    {
+      "original": "/tmp/symaira-memory803-deadline-independent-review.json",
+      "retained": "symaira-memory803-deadline-independent-review.json.gz",
+      "sha256": "e3836d09b158a4fa183e770b8392258e9de231ff03b062fa056592e9fa60de84",
+      "gzip_sha256": "30cdc6ba6b039c9558d267e6519a612468cad9d842debecfde2e3e34adb951a8",
+      "bytes": 4963
+    },
+    {
+      "original": "/tmp/symaira-memory803-deadline-independent-closure.json",
+      "retained": "symaira-memory803-deadline-independent-closure.json.gz",
+      "sha256": "79bf0da9c812845fcc362a717d9bc1fc4188664a8104dc8990710831ac83e612",
+      "gzip_sha256": "b0c68d3bf3bc54def2ede8053a51fac7505b1e86d1cfb81ac7aed5f5a7db4c30",
+      "bytes": 909
+    },
+    {
+      "original": "/tmp/symaira-memory803-deadline-source-control.py",
+      "retained": "symaira-memory803-deadline-source-control.py.gz",
+      "sha256": "8cf7876e925ab3158004f6a5a5152d19bf9cc504819ef27d8a4f7f3923b8f479",
+      "gzip_sha256": "e3f4d615b13887bfb56e04f26c16ada54032507acf91cdae9d01ab0566e0720f",
+      "bytes": 1997
+    }
+  ]
+}

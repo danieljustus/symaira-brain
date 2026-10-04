@@ -23,6 +23,7 @@ mod schema;
 mod schema_inspection;
 mod search_rows;
 mod store;
+mod wal_open;
 mod write;
 
 #[cfg(test)]

@@ -1,0 +1,10 @@
+{
+  "historical_parent": "9b0e6ec9f5a87418ac9e46073c98edc503ea196e",
+  "wal_parent": "2fe09ea78f1beb0225b9c325d76a054c183a9e42",
+  "normal_main": "5e232700bb9031fc34d4995465a4037837540abb",
+  "conflict_files": {
+    "migration/evidence/memory-historical-649/integration-main5e-wal2fe/migration.rs.conflict.txt": "b76dde8f11e5434de838f1a2b76d4bcd25c933e462947a71b7758f18a001522d",
+    "migration/evidence/memory-historical-649/integration-main5e-wal2fe/MIGRATION-RUST.md.conflict.txt": "8bae55524f5f8ebcbfea81c3fa310669be94251bc430118e4a76de8e91c91292"
+  },
+  "actual_merge_status": "content conflicts only migration owner pragma block and ledger paragraphs; no runtime execution"
+}

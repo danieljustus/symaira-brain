@@ -1,0 +1,261 @@
+{
+  "original_head": "a30bba8bbd52323fa5e000207f1c391d576ac86c",
+  "original_CI_merge": "3c4a497cc4efb73c5074f9619b0e6d6e61ea5572",
+  "original_job": 111389627809,
+  "artifact": 11296789771,
+  "files": [
+    {
+      "original_path": "/tmp/symaira-current-ci-job-111389627809.log",
+      "archive": "raw/000-symaira-current-ci-job-111389627809.log.gz",
+      "bytes": 86896,
+      "sha256": "cf2d98d99733c05fdd379d2b2ee25b107cc27a348a4881cbe09311e78fca401d",
+      "gzip_sha256": "20ff40577b52a082b314e7b0acd7a24c2140d64f9e9b6c0a48a58186f90be73e"
+    },
+    {
+      "original_path": "/workspace/attachments/51d566aa-6679-43d0-aba1-3aee66824628/github-actions-artifact-11296789771.zip",
+      "archive": "raw/001-github-actions-artifact-11296789771.zip.gz",
+      "bytes": 149352,
+      "sha256": "c5c14ac038f366c23c2e7b7583f2af0a81039cb10489bf2f7205f62e4e04f93f",
+      "gzip_sha256": "2c29c23332e5a783e25dd8d945cb5a3a03048e181655c6fd78475d3cdce3f141"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-clippy.log",
+      "archive": "raw/002-memory-cli-clippy.log.gz",
+      "bytes": 7092,
+      "sha256": "bc8650b4d13ea5efbefb6a94697507ab4ea91b80e842c770b016faa0ae6b9455",
+      "gzip_sha256": "5072892eb124b85101198371885dd2d43d6f2034911a7e89d08e366d54304f0c"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-historical/001_init/go/memory.db",
+      "archive": "raw/003-memory.db.gz",
+      "bytes": 434176,
+      "sha256": "4f0b94551d62cfa978cea0c7e04f0fc515a98cb79cf3ae35e877c5b0c370049b",
+      "gzip_sha256": "8469b883617181fb06f82dac70387a006f2373871c0c4dd702400318f94f25f7"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-historical/001_init/go/memory.db-shm",
+      "archive": "raw/004-memory.db-shm.gz",
+      "bytes": 32768,
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "gzip_sha256": "39e0d49d316293073d5359dccfb5c45b2545510edfa54a827a72b3bee77d4ab1"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-historical/001_init/go/memory.db-wal",
+      "archive": "raw/005-memory.db-wal.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-historical/001_init/go/result.json",
+      "archive": "raw/006-result.json.gz",
+      "bytes": 150003,
+      "sha256": "5eda670da091a35adbd2cca43ffd50a9b63d0ba613c899dec3b8f52ceb163447",
+      "gzip_sha256": "b92cd41a290f977be99ca97d3a7cf52ef00bdd781fb11e6aacfbc5c19b19241b"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-historical/001_init/native/memory.db",
+      "archive": "raw/007-memory.db.gz",
+      "bytes": 438272,
+      "sha256": "df1e732aa9d32ff52461019835cd97e8b5c7c756e65f61b0bff0c8f0966d7884",
+      "gzip_sha256": "887911dd7183fd7493b03b5088c5e15210030aa49dc33cff7435b71cc881a050"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-historical/001_init/native/memory.db-shm",
+      "archive": "raw/008-memory.db-shm.gz",
+      "bytes": 32768,
+      "sha256": "fd4c9fda9cd3f9ae7c962b0ddf37232294d55580e1aa165aa06129b8549389eb",
+      "gzip_sha256": "39e0d49d316293073d5359dccfb5c45b2545510edfa54a827a72b3bee77d4ab1"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-historical/001_init/native/memory.db-wal",
+      "archive": "raw/009-memory.db-wal.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-historical/001_init/native/result.json",
+      "archive": "raw/010-result.json.gz",
+      "bytes": 148412,
+      "sha256": "4a258e268b800093bbe65f6c4c960c2a6d34ae8ca1359a1844ab3a352b699126",
+      "gzip_sha256": "7aad9d61140425ff1a1e0001a734d761aec9d9e9eee537b24e600fc60e988b2b"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-historical/001_init/seed.db",
+      "archive": "raw/011-seed.db.gz",
+      "bytes": 40960,
+      "sha256": "0734dd30b0021b00b6d1b9351181dca840d8cd5f4d40b7a2dd7b31495f8e25e6",
+      "gzip_sha256": "d7b3cf704309e0f157dbba68f27b4f288f72ce3eb5a7ca549f714426ecf7adc2"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-historical/receipt.json",
+      "archive": "raw/012-receipt.json.gz",
+      "bytes": 6202,
+      "sha256": "ab06eb1a412816207130e583114fb0d7bc47981daee1a82d9fe1f412614aa4ab",
+      "gzip_sha256": "88d4b927b7f1dd82c6b94ff7b210d7a2c4f0b45a1a194d04d74d4086c302d3d8"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-historical.log",
+      "archive": "raw/013-memory-cli-historical.log.gz",
+      "bytes": 701,
+      "sha256": "339bc7980df4d5c2aeacddd7b8408bcb62e862f58f5bb06455a0f6ae5fe48b9c",
+      "gzip_sha256": "5553ead93ba26736af3d441e62aae617da60836224e27684bdbdfacc93bcf9d0"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-native.txt",
+      "archive": "raw/014-memory-cli-native.txt.gz",
+      "bytes": 341,
+      "sha256": "fd3c6cab531707caae5cbc99c2456184fd06ad75f0d01e9aae2a983a4ce9adc5",
+      "gzip_sha256": "4d4479907668dc85fc736e97293eead188243d384d362e25fd7e6719e41dfcf3"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-process.json",
+      "archive": "raw/015-memory-cli-process.json.gz",
+      "bytes": 2278932,
+      "sha256": "ad39f155fb8242be72eb90badfcafcf9d9a5468568bb1cd582b08e70feb6932e",
+      "gzip_sha256": "6e3f070eea3328209e58cf8f3140880502450c4cfae64677bcf43986c3068162"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-process.log",
+      "archive": "raw/016-memory-cli-process.log.gz",
+      "bytes": 819,
+      "sha256": "97cb9126021aae7fdc76275cee96ad9d417d585413269f25702d1a3e22bfce6a",
+      "gzip_sha256": "c154caf81a1bd4ad7945ab59784f386138b2d7a2291e7aad0b77bf6f69c0c207"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/memory-cli-rust-tests.log",
+      "archive": "raw/017-memory-cli-rust-tests.log.gz",
+      "bytes": 9933,
+      "sha256": "1d626fce8d0051b6bb108b3697b0efc86eccae15be3b1653a656141a4abbaeb0",
+      "gzip_sha256": "1f760a876b5e4deaa95eb59a350ee8ab6994c80eee3ad48972afd2ecae315c0e"
+    },
+    {
+      "original_path": "/tmp/symaira-memory803-current-native-11296789771/zip-receipt.json",
+      "archive": "raw/018-zip-receipt.json.gz",
+      "bytes": 2422,
+      "sha256": "f1d597c3287f9224875006eaefd64ec16edf3f5cb124107f433c7fc15c7df178",
+      "gzip_sha256": "b7edf7f4ac0b1f1c191ada809454d9c91bb1fcd7e9a5105a021ac01733ca9df6"
+    },
+    {
+      "original_path": "/tmp/symaira-sqlite345-proof/checker-python-root.json",
+      "archive": "raw/019-checker-python-root.json.gz",
+      "bytes": 2054,
+      "sha256": "d9a40baf5beb23ede01768afe72c0b03a133fc9cfb72dc940c0f85f34769c73d",
+      "gzip_sha256": "45e68b0ab176a0dfffb288cfc2f032b857af347641e5fdddf037409705324e65"
+    },
+    {
+      "original_path": "/tmp/symaira-sqlite345-proof/checker-python-system.json",
+      "archive": "raw/020-checker-python-system.json.gz",
+      "bytes": 2349,
+      "sha256": "da3b8ff90a0968a3383ddf18cbd0cb7c7e4b3cecedd1a8e7c9b9ec75a5d9be1a",
+      "gzip_sha256": "78ea6d2971ec65afc7e5cfabe48527796ea295656bd28259967f0463bab9ca87"
+    },
+    {
+      "original_path": "/tmp/symaira-sqlite345-proof/legacy-checker-rejection.json",
+      "archive": "raw/021-legacy-checker-rejection.json.gz",
+      "bytes": 634,
+      "sha256": "6102686107fc10532b9a8ba27b67e1e9e01d1e5e895ad1b3659b30ccde06cd45",
+      "gzip_sha256": "1a277ebc7543ccbc393b7bbbbcf869dbe7ad81309fd9ed615ed1c1945962949f"
+    },
+    {
+      "original_path": "/tmp/symaira-sqlite345-proof/legacy-checker.stderr",
+      "archive": "raw/022-legacy-checker.stderr.gz",
+      "bytes": 683,
+      "sha256": "ab5ab844f78034366beb131c9d111e79d0ce85e14ce9f91059ef7e8f7a55c67c",
+      "gzip_sha256": "2004f2709d99fbe6b49e81ac5f52f3135acc368726b4a19ac702938debd83912"
+    },
+    {
+      "original_path": "/tmp/symaira-sqlite345-proof/legacy-checker.stdout",
+      "archive": "raw/023-legacy-checker.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-sqlite345-proof/legacy-python-version.stdout",
+      "archive": "raw/024-legacy-python-version.stdout.gz",
+      "bytes": 7,
+      "sha256": "579f464b671ab2018b7fa2fa09c33eb78a598cb639e66aaf4299625aa3ce22cd",
+      "gzip_sha256": "3278f4e2a5ea31ebcc80d6b6da92ba793d5c6afd6e8005f21bd144302e84de7f"
+    },
+    {
+      "original_path": "/tmp/symaira-sqlite345-proof/libsqlite3.so.0",
+      "archive": "raw/025-libsqlite3.so.0.gz",
+      "bytes": 1516352,
+      "sha256": "db8e22d9d19677d1c9893c16f72f0857589b8004e4a35430a0d53dbfc56108cc",
+      "gzip_sha256": "f3ff2a5a8331413bfbd04a54b8d78de19a41b0e104686dbe852bd41a9dce18f4"
+    },
+    {
+      "original_path": "/tmp/symaira-sqlite345-proof/minimal.sql",
+      "archive": "raw/026-minimal.sql.gz",
+      "bytes": 236,
+      "sha256": "c3e5eb2982cc93cc9e659914b8d6d9db5e10484c1593310a1a40556feaf85e36",
+      "gzip_sha256": "068d95e5f8308a3ebc59b7ad5bdf3ad70729e1095c605c037a1af1daa217e479"
+    },
+    {
+      "original_path": "/tmp/symaira-sqlite345-proof/official-changes.html",
+      "archive": "raw/027-official-changes.html.gz",
+      "bytes": 473582,
+      "sha256": "7affb06012865c2b6026630fb6e9c2307642d5930a91857068184a17a0740f41",
+      "gzip_sha256": "b3a608767c4d08a5fd08cf4fa07b5c8055d82733cf9530efedc073ec3fe46167"
+    },
+    {
+      "original_path": "/tmp/symaira-sqlite345-proof/proof.json",
+      "archive": "raw/028-proof.json.gz",
+      "bytes": 6058,
+      "sha256": "abc0ebb43fa1767209635474f623109ab4bb1f3511e6a89486e90359a78f35b8",
+      "gzip_sha256": "2d1f695bbc1e39282427a357f725aa5361996a83d8f43ae18d9d36c1cb30095b"
+    },
+    {
+      "original_path": "/tmp/symaira-sqlite345-proof/shared-build.log",
+      "archive": "raw/029-shared-build.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-sqlite345-proof/sqlite-amalgamation-3450100.zip",
+      "archive": "raw/030-sqlite-amalgamation-3450100.zip.gz",
+      "bytes": 2730697,
+      "sha256": "5592243caf28b2cdef41e6ab58d25d653dfc53deded8450eb66072c929f030c4",
+      "gzip_sha256": "e73530038f015dd6383da04c2213f161dd20752f4842ed89f02b5cc163c3d83d"
+    },
+    {
+      "original_path": "/tmp/symaira-sqlite345-proof/sqlite345",
+      "archive": "raw/031-sqlite345.gz",
+      "bytes": 1551088,
+      "sha256": "f5e92d11db339e639d390e1eeef06bd8f4d402ecca6d2ffb81d122ed1c86148b",
+      "gzip_sha256": "63a38c995b0822b8b27afcb92cc7a7fd550b3d7530acdf063ddfad5de9ee408c"
+    }
+  ],
+  "original_sources": [
+    {
+      "original_source": "a30bba8bbd52323fa5e000207f1c391d576ac86c",
+      "path": ".github/workflows/memory-cli-native.yml",
+      "archive": "raw/original-memory-cli-native.yml.gz",
+      "bytes": 4589,
+      "sha256": "a1c635b92c3e0b741be3c8420e3563b940f6a8cfea907cbcab5da5426a50c755",
+      "gzip_sha256": "5cd33e712a2eb65f193efc356b6c3a290c3b310180ac459360eb212accea8cd5"
+    },
+    {
+      "original_source": "a30bba8bbd52323fa5e000207f1c391d576ac86c",
+      "path": "scripts/memory-historical-oracle/replay.py",
+      "archive": "raw/original-replay.py.gz",
+      "bytes": 14169,
+      "sha256": "4e26278d0676fc6970f3d67b69defb38b86a012725ad8f9404cd6e3ddabbe98c",
+      "gzip_sha256": "9c8cefc01311eb06eeb2e3569f3363968b9a3dafdb708bb19879d1577a487aee"
+    },
+    {
+      "original_source": "a30bba8bbd52323fa5e000207f1c391d576ac86c",
+      "path": "scripts/memory-historical-oracle/run.sh",
+      "archive": "raw/original-run.sh.gz",
+      "bytes": 1053,
+      "sha256": "7e12e8c7f2ca0482101afe7a2cd9ac4da6715054d3b2d57139c9dc17e8df8c8c",
+      "gzip_sha256": "8180b50266b15f51643f059317e6f2674628c3dff9938d2d1fc9b406ca4c206c"
+    }
+  ],
+  "actual_scope": "SQLite checker diagnosis only; no new Go/Rust execution",
+  "pinned_Python_three_OS_native_runtime": "PENDING",
+  "production_Rust_or_Go_change": false
+}

@@ -1,0 +1,34 @@
+{
+  "candidate": "0266879f7458f7116871ddcc9458c22707eca518",
+  "review": "REQUEST_CHANGES diagnostic shared five-second deadline",
+  "files": [
+    {
+      "source": "/tmp/symaira-memory803-diagnostic-independent-review.md",
+      "archive": "symaira-memory803-diagnostic-independent-review.md.gz",
+      "bytes": 6130,
+      "sha256": "4aec80a1cf279edab21aad8618d5b642864cbbd975ee6f8793dfccfed1eeb5d2",
+      "gzip_sha256": "b9e81ea01093c80d9f4c49870535f45c40db1e9d3ddc74a3190e4a5947c208a5"
+    },
+    {
+      "source": "/tmp/symaira-memory803-diagnostic-independent-review.json",
+      "archive": "symaira-memory803-diagnostic-independent-review.json.gz",
+      "bytes": 4350,
+      "sha256": "b305803e432f4f38272b1ecde4453c975d5c57b33126bbff01300c939cc4efb7",
+      "gzip_sha256": "cc3f49277223f85376a183abd411f6bad5678f18d7c21a0878f533385f08c6df"
+    },
+    {
+      "source": "/tmp/symaira-memory803-diagnostic-independent-deadline.json",
+      "archive": "symaira-memory803-diagnostic-independent-deadline.json.gz",
+      "bytes": 903,
+      "sha256": "f44583059f8a63ef1ab9e499e6c1e3f0f8b6a0f7126357634dadd56b6cc0ed9b",
+      "gzip_sha256": "ef3176378d7cb4dd1c8b829b6f47b6514fd1628e16928d9cb690c82a70bdae37"
+    },
+    {
+      "source": "/workspace/symaira-memory803-deadline/rust/symbrain-cli/tests/health_stdio_windows_diagnostic.rs",
+      "archive": "health_stdio_windows_diagnostic.rs.gz",
+      "bytes": 8583,
+      "sha256": "6ca0c2d662eee9629741a8bd03bc65c6443559eecf60f545580c3f2c586123af",
+      "gzip_sha256": "08984655bfd1b4a162fb4936e0f39d964e509dc1d47d6a62767ea988c7412983"
+    }
+  ]
+}

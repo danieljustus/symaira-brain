@@ -1,0 +1,12 @@
+{
+  "resolution": "Keep exact 9b0 runner/apply/IMMEDIATE/commit; use exact 2fe pre-transaction FK/WAL/secure-delete block; retain both independent ledger scope paragraphs. No historical module, owned SQL, defaults/postconditions, WAL helper/test or existing assertions changed.",
+  "source_only": true,
+  "historical_modules_byte_equal_to": "9b0e6ec9f5a87418ac9e46073c98edc503ea196e",
+  "wal_helper_and_tests_byte_equal_to": "2fe09ea78f1beb0225b9c325d76a054c183a9e42",
+  "resolved_hashes": {
+    "rust/symbrain-memory/src/migration.rs": "003a8e19960c45ccab5530ea037dc7b8743f1b8661bb4f2886aa7234aa442e99",
+    "MIGRATION-RUST.md": "d6f4073bb9f224cd1f64120873e25d2c2c4e60c2206b53c4e14222481555068c",
+    "rust/symbrain-memory/src/wal_open.rs": "b7e9db536076793c9d1d5b608869dd9cb6b0dee9a90780022c168d5d30903cf9",
+    "rust/symbrain-memory/src/wal_open/tests.rs": "025c7ca84a4fed61096a3394a9f47c0fe8addd36d6d747d14b0550619a89039a"
+  }
+}

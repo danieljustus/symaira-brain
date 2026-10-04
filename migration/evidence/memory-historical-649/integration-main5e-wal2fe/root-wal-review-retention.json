@@ -1,0 +1,7 @@
+{
+  "original_review": "/tmp/symaira-memory803-root-review.json",
+  "original_review_sha256": "b277352a0d6de397d127b507087c13a32d4102b6622c5097510445f76ffdab04",
+  "original_archive_receipt": "/workspace/oracles/symaira-memory803-root-2fe-binaries/receipt.json",
+  "original_archive_receipt_sha256": "28beb5898536fd4ddb3a0d3dc2e81e65db2fba3682d16906502b36752682c7a6",
+  "scope": "Independent complete Linux WAL review only; all original sources/archives unchanged; no combined historical runtime claim."
+}

@@ -1,0 +1,10 @@
+   Compiling symbrain-memory v0.12.1 (/workspace/symaira-memory803-open/rust/symbrain-memory)
+    Finished `test` profile [unoptimized] target(s) in 1.68s
+     Running unittests src/lib.rs (target/debug/deps/symbrain_memory-dde9bae26a7c26aa)
+
+running 1 test
+mixed real WAL contention: 197 early BUSY attempts; writer released at 1.000563489s; final actual SQLite timeout=3994ms; total=5.00519143s; error=SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some("database is locked"))
+test wal_open::tests::early_writer_then_waiting_reader_share_the_actual_sqlite_timeout ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 39 filtered out; finished in 5.01s
+
