@@ -1,0 +1,94 @@
+{
+  "actual_static_checks": [
+    "standalone rustfmt --edition 2024 --check lib.rs (recursive modules) and native oracle example",
+    "Go gofmt -d prepared caller: no diff (formatter only, no SDK probe)",
+    "actionlint -shellcheck= -pyflakes= on existing workflows",
+    "bash -n prepared process runner",
+    "Python ast.parse of all 5 prepared harness scripts",
+    "JSON parse source preparation maps; 92 eight-column contract matrix rows",
+    "git diff --check; dependency manifests and lock byte-identical to normal prerequisite merge",
+    "source hash binding checker write and independent recheck",
+    "original 14 importer fixtures exact; all 1515 approved parent proof Git objects and disk hashes unchanged",
+    "retained editing correction patch gzip roundtrip equals original bytes"
+  ],
+  "bindings": {
+    "frozen_files": 1231,
+    "module_files": 6,
+    "native_files": 577,
+    "parent_proofs": 1515,
+    "sdk_files": 25
+  },
+  "cargo_or_compiler_runs": 0,
+  "different_author_review": "pending",
+  "logs": {
+    "actionlint.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "bash.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "diff-check.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "gofmt.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "rustfmt.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "source-bindings-recheck.log": {
+      "bytes": 147,
+      "sha256": "022461204685d728815e5e487d258481118094dace5af7123c8ca4179bf6dbdd"
+    },
+    "source-bindings.log": {
+      "bytes": 147,
+      "sha256": "022461204685d728815e5e487d258481118094dace5af7123c8ca4179bf6dbdd"
+    }
+  },
+  "native_three_os": "pending",
+  "normal_parent_merge": "f7a761d3ef77ad55c1727293be50abf301c6e2a2",
+  "normal_store_parent": "a30bba8bbd52323fa5e000207f1c391d576ac86c",
+  "prepared_not_executed": {
+    "constructor_cases": 70,
+    "real_process_controls": 3,
+    "store_activity_process_plans": [
+      "marker missing/duplicate/negative count/typed MAX/text-blob-int-real error",
+      "SQL trigger failure rolls back both deletion tables",
+      "expiry equal boundary/future rows",
+      "strict overlap/touch/zero/non-increasing window",
+      "shared durable memory/evidence/import_state preserved",
+      "postcommit vacuum/checkpoint failure retains real counts",
+      "on-disk WAL secure_delete/vacuum cleanup",
+      "configured raw path/symlink/rename/busy peer cleanup"
+    ],
+    "unit_functions": 24
+  },
+  "product_process_runs": 0,
+  "providers_contacted": false,
+  "remaining_gates": [
+    "generated HOME link/../owner vs explicit raw root and relative roots",
+    "native Windows drive/UNC/device/verbatim/UTF16 ownership",
+    "raw invalid Unix path bytes",
+    "non-UTC zone/DST and Go Local cache changes",
+    "Go Unix/JSON time/chrono epoch limits",
+    "typed Go path/I/O errors and scanner/read error precedence",
+    "owned nonregular/symlink race bounds for each future admission",
+    "All genuine constructor peers/control processes and readonly state receipts",
+    "Store marker and Activity transactional/postcommit cleanup actual peers",
+    "Strict checks and inherited Memory/Activity/CLI/MCP gates after allocation",
+    "Ten remaining importer families and Registry extraction/governance orchestration",
+    "Native Windows byte/volume/default HOME path implementation and native three-OS CI"
+  ],
+  "routing_admission": false,
+  "runtime_tests_executed": 0,
+  "sdk_probe_runs": 0,
+  "source_map_sha256": "e396fc92928e80f136a00612e0f8e6b913547a1163a74aa671020e16c9f67081",
+  "source_revision": "734d2705f6b9312599644700c845db04f07d685c",
+  "status": "source-only-static-pass-runtime-unallocated",
+  "target": null
+}
