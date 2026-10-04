@@ -1,0 +1,39 @@
+{
+  "reviewed_head": "3a85990fa3e91c403c5058d386af068b443cfe41",
+  "verdict": "changes_requested",
+  "findings": [
+    {
+      "severity": "low",
+      "path": "rust/symbrain-cli/src/skills_sync_flags.rs",
+      "line": 100,
+      "issue": "Non-UTF-8 target values bypass whitespace trimming. For inline or separated Unix target bytes `20 62 61 64 ff 20`, Rust quotes `\" bad\\xff \"`; frozen Go resolveTargets applies strings.TrimSpace first and quotes `\"bad\\xff\"`. This is a source-confirmed stderr parity defect; the existing raw-byte probes contain no surrounding whitespace.",
+      "fix": "Trim target values with Go-compatible, byte-preserving whitespace semantics before validation and quoting. Extend the existing raw-value regression to cover padded invalid UTF-8 targets in both inline and separated forms. Keep scope diagnostics untrimmed, matching Go."
+    }
+  ],
+  "checks": [
+    {
+      "command": "git rev-parse HEAD",
+      "exit_code": 0,
+      "limitation": "Exact requested head verified before and after review."
+    },
+    {
+      "command": "git -c core.fsmonitor=false status --porcelain=v1",
+      "exit_code": 0,
+      "limitation": "Clean before and after; branch agent/skills-preflight-793. Disabled fsmonitor after its initial IPC warning."
+    },
+    {
+      "command": "git diff --check dcddcef0df5789123c7c9a7ebe6e01f10e941f2c 3a85990fa3e91c403c5058d386af068b443cfe41",
+      "exit_code": 0,
+      "limitation": "Read all seven changed files and traced the shared reader and every MarkerState caller. The three prior repairs are present; no additional safety defect confirmed."
+    },
+    {
+      "command": "python3 -B (read-only comparison of supplied parity JSON and aggregation of supplied test log)",
+      "exit_code": 0,
+      "limitation": "Independently confirmed 30/30 recorded stdout/stderr/exit comparisons and log totals of 435 passed, 0 failed, 2 ignored. These are parent execution artifacts; reviewer did not rerun tests or builds."
+    }
+  ],
+  "remaining_evidence": [
+    "Fresh native three-OS CI remains a parent merge gate, separate from the code finding. Windows cross-Clippy does not establish native Windows runtime behavior.",
+    "After repair, parent should verify padded raw-target diagnostics against the frozen Go binary and rerun affected checks. Reviewer environment is read-only; no Cargo cache writes were attempted."
+  ]
+}

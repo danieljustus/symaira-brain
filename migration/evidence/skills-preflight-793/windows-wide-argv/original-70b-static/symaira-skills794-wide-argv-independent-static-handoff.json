@@ -1,0 +1,32 @@
+{
+  "head": "70b76390f372c6f05983f01f5a2b8147356ca39e",
+  "candidate_dirty": false,
+  "phase": "independent static/source/corpus review only; runtime pending explicit resource allocation",
+  "artifacts": [
+    {
+      "path": "/tmp/symaira-skills794-wide-argv-independent-static-review.md",
+      "sha256": "b726418ed1424315b4dc142fe0814a37f67b763adfb5ccf905f600d5d05806d3",
+      "bytes": 8826
+    },
+    {
+      "path": "/tmp/symaira-skills794-wide-argv-independent-static-provenance.json",
+      "sha256": "e8f793fa112c431f7d378e2b75c6fdf2d9c199c4cfe5b890bc8e72ca19e815e4",
+      "bytes": 46942
+    },
+    {
+      "path": "/tmp/symaira-skills794-wide-argv-independent-prepared312.json",
+      "sha256": "fa305cec4347862c5cc63a31b324f7728cb42a00ecbfbbc17b6a96ef09f9983e",
+      "bytes": 48784
+    },
+    {
+      "path": "/tmp/symaira-skills794-wide-argv-independent-novel-plan.json",
+      "sha256": "5478c095a73d0332baa987dfae3dea6d3c3863104841be7b4d689edfba762bce",
+      "bytes": 43261
+    }
+  ],
+  "target_access": false,
+  "compiler_or_process_execution": false,
+  "source_edits": false,
+  "native_Windows_observation": false,
+  "approval": false
+}

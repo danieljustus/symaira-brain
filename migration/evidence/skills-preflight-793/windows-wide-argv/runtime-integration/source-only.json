@@ -1,0 +1,172 @@
+{
+  "scope": "source-only normal integration; compiler/runtime/target authorization still pending",
+  "original_skills_source": "97d8ca6a0679ebdf9cf8175a284da335dc6a07de",
+  "integrated_main": "5e232700bb9031fc34d4995465a4037837540abb",
+  "normal_merge_head": "2a76fc7e350ee25ad454b158d41516148731dd04",
+  "changed_paths_from97d": [
+    ".github/workflows/ci.yml",
+    ".github/workflows/release.yml",
+    "docs/adr/release-signing-readback-730.md",
+    "migration/evidence/release-verification-730/independent-probes-e126669.json",
+    "migration/evidence/release-verification-730/independent-review-e126669.md",
+    "migration/evidence/release-verification-730/linux-orchestration-validation.json",
+    "migration/evidence/release-verification-730/main2b-integration.json",
+    "migration/evidence/release-verification-730/main31-integration.json",
+    "migration/evidence/release-verification-730/maine3-integration.json",
+    "scripts/notarize-and-verify.sh",
+    "scripts/test_macos_release_verification.py",
+    "scripts/verify-notary-receipt.py"
+  ],
+  "original_proof_files_unchanged": [
+    {
+      "path": "migration/evidence/skills-preflight-793/raw-flag-repair-linux.json",
+      "sha256": "2cbfa13b5010743882ef5016e0986e544ea01a33245c0b29934b57d9f37dc915"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/windows-unused-test-import-6fff605.json",
+      "sha256": "3720c65b8272a0e31b07d17176f0f33076d9f4c9c130d5842adb8e29de5d673f"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/independent-review-9ae16e7.md",
+      "sha256": "f7adf93be4947d60f4d61e69532483451c7c09a46077f5bde4d5b1ae92b5335b"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/main31-rust-tests.log",
+      "sha256": "81d30664d0b8960194074884095b84694481ad0a6e5975fc3533701cb2a593fa"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/main31-clippy.log",
+      "sha256": "900fc24bfb55e01879d9a830a70f57a82400106bfe3d41e7a297697c5e871a29"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/main31-process.json",
+      "sha256": "828120a99622eccb5adfe4af37d0459212c1c63732585cee939256361036bede"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/raw-target-repair-linux.json",
+      "sha256": "9ec255596406776cd4c25843e5ab9f334d2ed7cbba168de10c09750596bc42d7"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/preserved-checkpoints.json",
+      "sha256": "0eea4057e268942f6afad8af110a0489bb37c34fb6b9ba1116c153b190113250"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/main31-integration.json",
+      "sha256": "00ca827ef0e82f3ce25b3571795ab34a9cdb251cdade550a1c1b5a23b4f5a10c"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/known-padded-target-mismatch.json",
+      "sha256": "aa1fb427e2de73767a4b20b84bce2e5860f7c4c4efb57d1cdd73f63c7f079630"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/inventory.json",
+      "sha256": "8b05b470adf7e0f53979229e5f074ef2ab67e6a9ea724b19526ceda98aa9a43d"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/review-code-head.json",
+      "sha256": "4add4d6778226328b50ebcbb78b234b937cc9bf97973a6aaf31f41df4c4bd9c5"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/independent-failures-d7d0acda.json",
+      "sha256": "6fa11ca5e4415e5613456be1092c0000958ddd13acf22e6e009b26a8e33ed005"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/ci-code-head.json",
+      "sha256": "5040abcfd86bd9bd6a64cb026a37797dffa24c8b7999032aaaa758e1d74ed3fc"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/verification.json",
+      "sha256": "334ac40d417de945fc5bb48a8a8e6187afdadb6b76bf7c9fe39d7c1763d15299"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/independent-review-d7d0acda.md",
+      "sha256": "3fbf57c50986bf7226a518ffd8f9c827d245f55f41658ae6fbff592428fd20d3"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/main2b-integration.json",
+      "sha256": "2448ad8e84310dd715d1daf963f57dd336d12dba47c08d2639e5de82d5033326"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/parity-30-cases.json",
+      "sha256": "d88f566da1d1ace8f1beadc04e8f706cf89f19cfd6909d83a7d9b3fd57acfcd1"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-maine3-clippy.log",
+      "sha256": "9a55c76105968622fb6286999a268608908fd14ba0f7229001717e0ecfd04c35"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-maine3-process.log",
+      "sha256": "2605ec0527c701a831517114f78a07dbe05249bf0d3024b7256c1e095026ad0e"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-maine3-tests.log",
+      "sha256": "b63153636ae15b9f9a082510a484a98edc1d3321cab0af97f493217fce3039cb"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-main31-raw-flag-process.json",
+      "sha256": "7adc21a0034b2c9240f90fd776a89828d36aedae13c39356cdd33e5bdc66e579"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/maine3-integration/verification.json",
+      "sha256": "7513deaf44a424f4ac10aed0a2cd422a4a51fb41ca32d16733a0b5d92fc4fd19"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-maine3-build.log",
+      "sha256": "829c91fd1393d4cb05a5aca6535c19de0876bdfec5b332657e5c2130ef90ed4e"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-01f-source-and-evidence.json",
+      "sha256": "6d489c6a5ad34c9a5d333a99b06e0f30f2eed5fa56bc53cd00c83454b9df0f3b"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-70b-static/symaira-skills794-wide-argv-independent-novel-plan.json",
+      "sha256": "5478c095a73d0332baa987dfae3dea6d3c3863104841be7b4d689edfba762bce"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-70b-static/symaira-skills794-wide-argv-independent-static-provenance.json",
+      "sha256": "e8f793fa112c431f7d378e2b75c6fdf2d9c199c4cfe5b890bc8e72ca19e815e4"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-70b-static/symaira-skills794-wide-argv-precompile.json",
+      "sha256": "0ba10012e2e726646571b5b5eb091adfc0767790444e52ac81b51d1e9bf0b6c2"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-70b-static/retention.json",
+      "sha256": "ce8184a680c102900ee3cc0f7fe75288e35c8e4261c7bfaf6e99fe5d8583ecdd"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-70b-static/symaira-skills794-wide-argv-independent-prepared312.json",
+      "sha256": "fa305cec4347862c5cc63a31b324f7728cb42a00ecbfbbc17b6a96ef09f9983e"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-70b-static/symaira-skills794-wide-argv-independent-static-review.md",
+      "sha256": "b726418ed1424315b4dc142fe0814a37f67b763adfb5ccf905f600d5d05806d3"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-70b-static/symaira-skills794-wide-argv-independent-static-handoff.json",
+      "sha256": "d9807cefb05b067b0c5bbe2e82ac3497c3688cf1a7470f74b60722698b7fbc93"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/windows-wide-argv/sdk-reference/LICENSE",
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/windows-wide-argv/sdk-reference/VERSION",
+      "sha256": "89f723ad27054a2ccc7c22f2a974886f3077f64623a231297fcea2e74a73a782"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/windows-wide-argv/sdk-reference/src/os/exec_windows.go",
+      "sha256": "7a3c8f10605e5ea468538b1833b04ddf609bff84999b037839ef23d99afc50c4"
+    },
+    {
+      "path": "migration/evidence/skills-preflight-793/windows-wide-argv/sdk-reference/src/syscall/wtf8_windows.go",
+      "sha256": "df35fc932a3bf98375eb780c08091f6a0b4a927ba2918a977495fe0b15c77f99"
+    }
+  ],
+  "original_driver_sha256": "d282086685be5c034d3aaf7d40d7ab38147eb9ee7dc259175f2adbcdc936f552",
+  "successor_driver_sha256": "59240d455812b43c4589057bb38f078e5238dd95acd1e890c24634de153ce3f0",
+  "only_driver_change": "repo path",
+  "intended_exclusive_target": "/workspace/symaira-skills794-wide-runtime/target",
+  "target_created_or_accessed": false,
+  "builds_or_replays": 0
+}

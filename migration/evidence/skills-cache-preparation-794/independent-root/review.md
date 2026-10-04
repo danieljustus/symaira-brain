@@ -1,0 +1,9 @@
+# Independent Root source review of Skills cache preparation
+
+Reviewed the complete d2f0047f successor against cec81, including the full builder, tests, changed workflow step, README/ADR, all57 original logs/artifacts and their gzip/hash/length bindings. Recomputed all2438 frozen path/blob/index-mode bindings and source payload hashes. The complete native job and1.77MB builder receipt show go mod verify failed before any process comparison. This is a module-cache admission failure, not an argv mismatch.
+
+The separate download uses the same owned admitted frozen tree, fixed HTTPS proxy/checksum database and unchanged300s limit. The pinned Go1.26.7 SDK download.go loads the complete module graph and downloads the explicitly required modules; verify.go loads that graph before cache verification. The original source/status checks run again after preparation. The original environment remains offline for full verify and actual locked/p2/VCS-bound build. No product source, comparator, parent restoration or control criterion changes. All1737 selected Go/Rust/Cargo/module paths and six original builder helpers are unchanged; the complete diff has only the bounded helper/workflow/docs addition plus retained evidence.
+
+Independent actual seven helper tests and four novel helper tests passed, including real changed-go.sum rejection and mocked download failure propagation. AST/source checks, actionlint and diff check passed. The download call is mocked: no corrected SDK build or native Windows312/112 result is established. Complete original failed attempts and this reviewer’s first inventory-count error are preserved.
+
+Approve bounded source publication with no findings. Fresh corrected native Windows build/process/parent/control evidence and all current three-OS/protected checks remain required before merge. This is not an approval of unexecuted native gates or issue793 closure.

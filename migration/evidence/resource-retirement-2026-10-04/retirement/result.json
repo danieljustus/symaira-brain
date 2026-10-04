@@ -1,0 +1,606 @@
+{
+  "baseline_free": 767492096,
+  "final_free": 2813181952,
+  "target_free": 2684354560,
+  "observed_available_increase": 2045689856,
+  "retired": [
+    {
+      "path": "/workspace/symaira-memory649-root",
+      "head": "ec57961f7bf56a3f8430001fbc9b03f3cbc237eb",
+      "branch": "refs/heads/review/649-historical-runtime-root",
+      "checkpoint_labels": [
+        "803"
+      ],
+      "tracked_manifest": "/workspace/review-proof/review-pr800-worktree-audit/symaira-memory649-root-tracked-files.json",
+      "tracked_manifest_sha256": "fa2d031442df6f806d33253e6b8b426b3a0e959df376e0bf51a80c805e59f29e",
+      "full_tracked_files": 4129,
+      "exact_bytes_and_native_modes_rechecked": true,
+      "visible_consumers": [],
+      "privileged_services_UNVERIFIED": [
+        {
+          "pid": 198,
+          "name": "dockerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "pid": 249,
+          "name": "containerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        }
+      ],
+      "restore_argv": [
+        "git",
+        "-C",
+        "/workspace/symaira-brain",
+        "worktree",
+        "add",
+        "/workspace/symaira-memory649-root",
+        "refs/heads/review/649-historical-runtime-root"
+      ],
+      "native_mode_restoration": "apply each native_mode from full tracked manifest after Git checkout",
+      "free_before": 767488000,
+      "derivative_cleanup": [
+        "/workspace/symaira-memory649-root/scripts/memory-cli-oracle/__pycache__/deletes.cpython-312.pyc",
+        "/workspace/symaira-memory649-root/scripts/memory-cli-oracle/__pycache__/write_failures.cpython-312.pyc",
+        "/workspace/symaira-memory649-root/scripts/memory-cli-oracle/__pycache__/replay.cpython-312.pyc",
+        "/workspace/symaira-memory649-root/scripts/memory-cli-oracle/__pycache__/writes.cpython-312.pyc",
+        "/workspace/symaira-memory649-root/scripts/memory-cli-oracle/__pycache__/write_boundaries.cpython-312.pyc",
+        "/workspace/symaira-memory649-root/scripts/memory-cli-oracle/__pycache__/cases.cpython-312.pyc",
+        "/workspace/symaira-memory649-root/scripts/memory-cli-oracle/__pycache__/path_cases.cpython-312.pyc",
+        "/workspace/symaira-memory649-root/scripts/memory-historical-oracle/__pycache__/replay.cpython-312.pyc"
+      ],
+      "exit": 0,
+      "free_after": 893837312,
+      "branch_and_commit_preserved": true,
+      "directory_absent": true
+    },
+    {
+      "path": "/workspace/symaira-skills794-wide-root",
+      "head": "cec81cfc0acdc9f4bb567f85fa6a27c03cb74467",
+      "branch": "refs/heads/review/794-wide-root-runtime",
+      "checkpoint_labels": [
+        "794"
+      ],
+      "tracked_manifest": "/workspace/review-proof/review-pr800-worktree-audit/symaira-skills794-wide-root-tracked-files.json",
+      "tracked_manifest_sha256": "6b57fbc3860468143c4e57da0f650bc8208d86a95fbd8a1cbecee52368a4a12f",
+      "full_tracked_files": 2767,
+      "exact_bytes_and_native_modes_rechecked": true,
+      "visible_consumers": [],
+      "privileged_services_UNVERIFIED": [
+        {
+          "pid": 198,
+          "name": "dockerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "pid": 249,
+          "name": "containerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        }
+      ],
+      "restore_argv": [
+        "git",
+        "-C",
+        "/workspace/symaira-brain",
+        "worktree",
+        "add",
+        "/workspace/symaira-skills794-wide-root",
+        "refs/heads/review/794-wide-root-runtime"
+      ],
+      "native_mode_restoration": "apply each native_mode from full tracked manifest after Git checkout",
+      "free_before": 893825024,
+      "derivative_cleanup": [
+        "/workspace/symaira-skills794-wide-root/scripts/skills-argv-oracle/__pycache__/test_build_go.cpython-312.pyc",
+        "/workspace/symaira-skills794-wide-root/scripts/skills-argv-oracle/__pycache__/build_go.cpython-312.pyc"
+      ],
+      "exit": 0,
+      "free_after": 967933952,
+      "branch_and_commit_preserved": true,
+      "directory_absent": true
+    },
+    {
+      "path": "/workspace/symaira-memory803-deadline",
+      "head": "a0ec18b8b90a1282f29bf4766ffd54d8675d9e49",
+      "branch": "refs/heads/review/803-diagnostic-deadline",
+      "checkpoint_labels": [
+        "803"
+      ],
+      "tracked_manifest": "/workspace/review-proof/review-pr800-worktree-audit/symaira-memory803-deadline-tracked-files.json",
+      "tracked_manifest_sha256": "eaac14d3aa710b9dc17ad6f3623275042eab5900448d9316bc984cebf537fd94",
+      "full_tracked_files": 3008,
+      "exact_bytes_and_native_modes_rechecked": true,
+      "visible_consumers": [],
+      "privileged_services_UNVERIFIED": [
+        {
+          "pid": 198,
+          "name": "dockerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "pid": 249,
+          "name": "containerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        }
+      ],
+      "restore_argv": [
+        "git",
+        "-C",
+        "/workspace/symaira-brain",
+        "worktree",
+        "add",
+        "/workspace/symaira-memory803-deadline",
+        "refs/heads/review/803-diagnostic-deadline"
+      ],
+      "native_mode_restoration": "apply each native_mode from full tracked manifest after Git checkout",
+      "free_before": 967929856,
+      "derivative_cleanup": [
+        "/workspace/symaira-memory803-deadline/scripts/__pycache__/differential_journal.cpython-312.pyc"
+      ],
+      "exit": 0,
+      "free_after": 1079017472,
+      "branch_and_commit_preserved": true,
+      "directory_absent": true
+    },
+    {
+      "path": "/workspace/symaira-memory649-integrated",
+      "head": "63fbd3205ca907c3adb696ad62d42a5b64311976",
+      "branch": "refs/heads/issue/649-historical-runtime-fixtures",
+      "checkpoint_labels": [
+        "803"
+      ],
+      "tracked_manifest": "/workspace/review-proof/review-pr800-worktree-audit/symaira-memory649-integrated-tracked-files.json",
+      "tracked_manifest_sha256": "3381035e889c0a499997853a15f80f6ea2cf3fa31f01e869c1133133d1608d1b",
+      "full_tracked_files": 3802,
+      "exact_bytes_and_native_modes_rechecked": true,
+      "visible_consumers": [],
+      "privileged_services_UNVERIFIED": [
+        {
+          "pid": 198,
+          "name": "dockerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "pid": 249,
+          "name": "containerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        }
+      ],
+      "restore_argv": [
+        "git",
+        "-C",
+        "/workspace/symaira-brain",
+        "worktree",
+        "add",
+        "/workspace/symaira-memory649-integrated",
+        "refs/heads/issue/649-historical-runtime-fixtures"
+      ],
+      "native_mode_restoration": "apply each native_mode from full tracked manifest after Git checkout",
+      "free_before": 1079009280,
+      "derivative_cleanup": [
+        "/workspace/symaira-memory649-integrated/scripts/memory-cli-oracle/__pycache__/deletes.cpython-312.pyc",
+        "/workspace/symaira-memory649-integrated/scripts/memory-cli-oracle/__pycache__/write_failures.cpython-312.pyc",
+        "/workspace/symaira-memory649-integrated/scripts/memory-cli-oracle/__pycache__/replay.cpython-312.pyc",
+        "/workspace/symaira-memory649-integrated/scripts/memory-cli-oracle/__pycache__/writes.cpython-312.pyc",
+        "/workspace/symaira-memory649-integrated/scripts/memory-cli-oracle/__pycache__/write_boundaries.cpython-312.pyc",
+        "/workspace/symaira-memory649-integrated/scripts/memory-cli-oracle/__pycache__/cases.cpython-312.pyc",
+        "/workspace/symaira-memory649-integrated/scripts/memory-cli-oracle/__pycache__/path_cases.cpython-312.pyc",
+        "/workspace/symaira-memory649-integrated/scripts/memory-historical-oracle/__pycache__/replay.cpython-312.pyc"
+      ],
+      "exit": 0,
+      "free_after": 1200254976,
+      "branch_and_commit_preserved": true,
+      "directory_absent": true
+    },
+    {
+      "path": "/workspace/symaira-decisions",
+      "head": "6c6881db97cf1ef9abd580ab402bd88fec2e9975",
+      "branch": "refs/heads/docs/issue-resolution-decisions",
+      "checkpoint_labels": [
+        "794"
+      ],
+      "tracked_manifest": "/workspace/review-proof/review-pr800-worktree-audit/symaira-decisions-tracked-files.json",
+      "tracked_manifest_sha256": "afa5246d6ce4e29fd7b2ff10450a11590cb50c01234848cdec27547f26b6248b",
+      "full_tracked_files": 2537,
+      "exact_bytes_and_native_modes_rechecked": true,
+      "visible_consumers": [],
+      "privileged_services_UNVERIFIED": [
+        {
+          "pid": 198,
+          "name": "dockerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "pid": 249,
+          "name": "containerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        }
+      ],
+      "restore_argv": [
+        "git",
+        "-C",
+        "/workspace/symaira-brain",
+        "worktree",
+        "add",
+        "/workspace/symaira-decisions",
+        "refs/heads/docs/issue-resolution-decisions"
+      ],
+      "native_mode_restoration": "apply each native_mode from full tracked manifest after Git checkout",
+      "free_before": 1200250880,
+      "derivative_cleanup": [],
+      "exit": 0,
+      "free_after": 1268092928,
+      "branch_and_commit_preserved": true,
+      "directory_absent": true
+    },
+    {
+      "path": "/workspace/symaira-doctor806-journal-import",
+      "head": "74dd7aea5c7a1765dc36c2cbab2ca3fe6b6665d8",
+      "branch": "refs/heads/issue/806-owned-source-journal-import",
+      "checkpoint_labels": [
+        "806"
+      ],
+      "tracked_manifest": "/workspace/review-proof/review-pr800-worktree-audit/symaira-doctor806-journal-import-tracked-files.json",
+      "tracked_manifest_sha256": "69f4d652d9964277956aca8197b0f0b1628db3d4c7d8e8853287f22af3458b82",
+      "full_tracked_files": 4395,
+      "exact_bytes_and_native_modes_rechecked": true,
+      "visible_consumers": [],
+      "privileged_services_UNVERIFIED": [
+        {
+          "pid": 198,
+          "name": "dockerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "pid": 249,
+          "name": "containerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        }
+      ],
+      "restore_argv": [
+        "git",
+        "-C",
+        "/workspace/symaira-brain",
+        "worktree",
+        "add",
+        "/workspace/symaira-doctor806-journal-import",
+        "refs/heads/issue/806-owned-source-journal-import"
+      ],
+      "native_mode_restoration": "apply each native_mode from full tracked manifest after Git checkout",
+      "free_before": 1268080640,
+      "derivative_cleanup": [
+        "/workspace/symaira-doctor806-journal-import/scripts/__pycache__/rust-differential.cpython-312.pyc",
+        "/workspace/symaira-doctor806-journal-import/scripts/__pycache__/harness_health_contract.cpython-312.pyc",
+        "/workspace/symaira-doctor806-journal-import/scripts/__pycache__/external_env.cpython-312.pyc",
+        "/workspace/symaira-doctor806-journal-import/scripts/setup-output-oracle/__pycache__/fixtures.cpython-312.pyc",
+        "/workspace/symaira-doctor806-journal-import/scripts/setup-repair-oracle/__pycache__/replay.cpython-312.pyc",
+        "/workspace/symaira-doctor806-journal-import/scripts/setup-source-oracle/__pycache__/replay.cpython-312.pyc",
+        "/workspace/symaira-doctor806-journal-import/scripts/setup-source-oracle/__pycache__/progress.cpython-312.pyc"
+      ],
+      "exit": 0,
+      "free_after": 1577533440,
+      "branch_and_commit_preserved": true,
+      "directory_absent": true
+    },
+    {
+      "path": "/workspace/symaira-doctor806-windows-job-diagnostic",
+      "head": "e7541a332e44bba59b57028493c1f06a20abace7",
+      "branch": "refs/heads/diagnose/doctor806-windows-source-job",
+      "checkpoint_labels": [
+        "806"
+      ],
+      "tracked_manifest": "/workspace/review-proof/review-pr800-worktree-audit/symaira-doctor806-windows-job-diagnostic-tracked-files.json",
+      "tracked_manifest_sha256": "4ea479ba58125b7fe19a618034b7f09f83a78732abe203535e622d7accd0e530",
+      "full_tracked_files": 4418,
+      "exact_bytes_and_native_modes_rechecked": true,
+      "visible_consumers": [],
+      "privileged_services_UNVERIFIED": [
+        {
+          "pid": 198,
+          "name": "dockerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "pid": 249,
+          "name": "containerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        }
+      ],
+      "restore_argv": [
+        "git",
+        "-C",
+        "/workspace/symaira-brain",
+        "worktree",
+        "add",
+        "/workspace/symaira-doctor806-windows-job-diagnostic",
+        "refs/heads/diagnose/doctor806-windows-source-job"
+      ],
+      "native_mode_restoration": "apply each native_mode from full tracked manifest after Git checkout",
+      "free_before": 1577525248,
+      "derivative_cleanup": [],
+      "exit": 0,
+      "free_after": 1887088640,
+      "branch_and_commit_preserved": true,
+      "directory_absent": true
+    },
+    {
+      "path": "/workspace/symaira-doctor806-source-progress-fix",
+      "head": "7ea3cfb9f816291abecc91eef453ec7f3cbc4492",
+      "branch": "refs/heads/issue/806-source-progress-fix",
+      "checkpoint_labels": [
+        "806"
+      ],
+      "tracked_manifest": "/workspace/review-proof/review-pr800-worktree-audit/symaira-doctor806-source-progress-fix-tracked-files.json",
+      "tracked_manifest_sha256": "e557b834150254f0e8b8680a59b1317904f812c9b8d1c0dfbadf634bc74eaff6",
+      "full_tracked_files": 4355,
+      "exact_bytes_and_native_modes_rechecked": true,
+      "visible_consumers": [],
+      "privileged_services_UNVERIFIED": [
+        {
+          "pid": 198,
+          "name": "dockerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "pid": 249,
+          "name": "containerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        }
+      ],
+      "restore_argv": [
+        "git",
+        "-C",
+        "/workspace/symaira-brain",
+        "worktree",
+        "add",
+        "/workspace/symaira-doctor806-source-progress-fix",
+        "refs/heads/issue/806-source-progress-fix"
+      ],
+      "native_mode_restoration": "apply each native_mode from full tracked manifest after Git checkout",
+      "free_before": 1887080448,
+      "derivative_cleanup": [
+        "/workspace/symaira-doctor806-source-progress-fix/scripts/__pycache__/rust-differential.cpython-312.pyc",
+        "/workspace/symaira-doctor806-source-progress-fix/scripts/__pycache__/harness_health_contract.cpython-312.pyc",
+        "/workspace/symaira-doctor806-source-progress-fix/scripts/__pycache__/external_env.cpython-312.pyc",
+        "/workspace/symaira-doctor806-source-progress-fix/scripts/setup-source-oracle/__pycache__/windows_job_probe.cpython-312.pyc",
+        "/workspace/symaira-doctor806-source-progress-fix/scripts/setup-source-oracle/__pycache__/replay.cpython-312.pyc",
+        "/workspace/symaira-doctor806-source-progress-fix/scripts/setup-source-oracle/__pycache__/test_progress.cpython-312.pyc",
+        "/workspace/symaira-doctor806-source-progress-fix/scripts/setup-source-oracle/__pycache__/progress.cpython-312.pyc"
+      ],
+      "exit": 0,
+      "free_after": 2195992576,
+      "branch_and_commit_preserved": true,
+      "directory_absent": true
+    },
+    {
+      "path": "/workspace/symaira-doctor806-source-progress",
+      "head": "9faee8b0a2619909aa8ee53ed84b2cb4d6ef50b8",
+      "branch": "refs/heads/issue/806-source-progress",
+      "checkpoint_labels": [
+        "806"
+      ],
+      "tracked_manifest": "/workspace/review-proof/review-pr800-worktree-audit/symaira-doctor806-source-progress-tracked-files.json",
+      "tracked_manifest_sha256": "0b496b01eb9f188c1e165f07e184546c89ab088f0ed8fd3f40d9ca1ec7ac6cd3",
+      "full_tracked_files": 4331,
+      "exact_bytes_and_native_modes_rechecked": true,
+      "visible_consumers": [],
+      "privileged_services_UNVERIFIED": [
+        {
+          "pid": 198,
+          "name": "dockerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "pid": 249,
+          "name": "containerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        }
+      ],
+      "restore_argv": [
+        "git",
+        "-C",
+        "/workspace/symaira-brain",
+        "worktree",
+        "add",
+        "/workspace/symaira-doctor806-source-progress",
+        "refs/heads/issue/806-source-progress"
+      ],
+      "native_mode_restoration": "apply each native_mode from full tracked manifest after Git checkout",
+      "free_before": 2195988480,
+      "derivative_cleanup": [
+        "/workspace/symaira-doctor806-source-progress/scripts/__pycache__/rust-differential.cpython-312.pyc",
+        "/workspace/symaira-doctor806-source-progress/scripts/__pycache__/harness_health_contract.cpython-312.pyc",
+        "/workspace/symaira-doctor806-source-progress/scripts/__pycache__/external_env.cpython-312.pyc",
+        "/workspace/symaira-doctor806-source-progress/scripts/setup-source-oracle/__pycache__/windows_job_probe.cpython-312.pyc",
+        "/workspace/symaira-doctor806-source-progress/scripts/setup-source-oracle/__pycache__/replay.cpython-312.pyc",
+        "/workspace/symaira-doctor806-source-progress/scripts/setup-source-oracle/__pycache__/progress.cpython-312.pyc"
+      ],
+      "exit": 0,
+      "free_after": 2504699904,
+      "branch_and_commit_preserved": true,
+      "directory_absent": true
+    },
+    {
+      "path": "/workspace/symaira-doctor806-owned-paths",
+      "head": "c6723ab21a3bfe73e84d715695b3d5ea45c661d1",
+      "branch": "refs/heads/fix/doctor806-owned-executable-paths",
+      "checkpoint_labels": [
+        "806"
+      ],
+      "tracked_manifest": "/workspace/review-proof/review-pr800-worktree-audit/symaira-doctor806-owned-paths-tracked-files.json",
+      "tracked_manifest_sha256": "9330588916324903a67070757a82a96cd718d62925a9075cbd3f6518aea0c9df",
+      "full_tracked_files": 4299,
+      "exact_bytes_and_native_modes_rechecked": true,
+      "visible_consumers": [],
+      "privileged_services_UNVERIFIED": [
+        {
+          "pid": 198,
+          "name": "dockerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        },
+        {
+          "pid": 249,
+          "name": "containerd",
+          "state": "S (sleeping)",
+          "UIDs": [
+            "0",
+            "0",
+            "0",
+            "0"
+          ]
+        }
+      ],
+      "restore_argv": [
+        "git",
+        "-C",
+        "/workspace/symaira-brain",
+        "worktree",
+        "add",
+        "/workspace/symaira-doctor806-owned-paths",
+        "refs/heads/fix/doctor806-owned-executable-paths"
+      ],
+      "native_mode_restoration": "apply each native_mode from full tracked manifest after Git checkout",
+      "free_before": 2504691712,
+      "derivative_cleanup": [
+        "/workspace/symaira-doctor806-owned-paths/scripts/__pycache__/rust-differential.cpython-312.pyc",
+        "/workspace/symaira-doctor806-owned-paths/scripts/__pycache__/harness_health_contract.cpython-312.pyc",
+        "/workspace/symaira-doctor806-owned-paths/scripts/__pycache__/external_env.cpython-312.pyc",
+        "/workspace/symaira-doctor806-owned-paths/scripts/doctor-repair-oracle/__pycache__/replay.cpython-312.pyc",
+        "/workspace/symaira-doctor806-owned-paths/scripts/doctor-repair-oracle/__pycache__/cases.cpython-312.pyc",
+        "/workspace/symaira-doctor806-owned-paths/scripts/doctor-stdout-oracle/__pycache__/identity.cpython-312.pyc"
+      ],
+      "exit": 0,
+      "free_after": 2813186048,
+      "branch_and_commit_preserved": true,
+      "directory_absent": true
+    }
+  ],
+  "remaining_authorized_paths": [
+    "/workspace/symaira-doctor765-stdout",
+    "/workspace/symaira-doctor765-output",
+    "/workspace/symaira-doctor765-json",
+    "/workspace/symaira-doctor765-windows",
+    "/workspace/symaira-usage768-argv"
+  ],
+  "branch_or_Git_object_deletion": false,
+  "force_used": false,
+  "privileged_services_UNVERIFIED": [
+    198,
+    249
+  ],
+  "global_zero_user_claim": false,
+  "compiler_target_port_or_product_execution": false
+}
