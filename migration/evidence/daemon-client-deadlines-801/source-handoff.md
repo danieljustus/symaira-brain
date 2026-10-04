@@ -1,0 +1,13 @@
+# PR801 source-only immutable handoff
+
+Validated source `da70a613252b0e42f15db88ef482242899210e9a` in `/workspace/symaira-daemon801-client-deadlines`; original8e remains clean/unchanged. Source checkpoint591 was followed by normal mergec919 of published main935. Pre-correction endpoint finding was retained in16f7 before this corrected source. The detailed JSON binds every authored source/evidence file by SHA and keeps original8e native-run attribution distinct.
+
+The direct pinned Tokio Windows client retains the prior shared lossy endpoint spelling, existing busy/error/deadline/frame/I/O rules, unchanged server/wake and Unix path. The original OsStr-only source and synthetic UTF16 contrast remain preserved. Seven real Windows scenarios are prepared, including all original four plus ASCII/valid-Unicode/unpaired-replacement endpoint owner pairs and stop/wake assertions. Full rawWTF16 support and non-Unicode diagnostic handling remain separate open contracts.
+
+CLI captures are file-backed with the unchanged15s wait and separate2s cleanup. PID/launch/status/timeout/raw hashes are durable before an assertion or exception. Full registry/process reports are created before operations can fail. Existing comparator and14 source functions are unchanged. ActualWindows stalled phase still unknown; no retained original PE supports a product cause claim.
+
+Mac live raw-path admission reports exact byte/errno/state/cleanup before any child. Exact proven DarwinEILSEQ92 permits only originalE282/C0AF inputs to be explicitly unexecuted; U+FFFD/rawGit and all three original controls remain mandatory. Linux63/Windows35 remain mandatory; Darwin49 admitted completeness is distinct from original-requested-domain completeness. No blanket skip or timeout increase.
+
+Actually passed:24 Python AST parses,14 unchanged function AST comparisons,324 original source/raw archive and11 additive finding roundtrips, byte-boundary checks, direct rustfmt/actionlint/diff checks. Four synthetic accounting tests passed. Three existing dependency packages bind68 retained source files to locked published bytes;25 original ZIP members were verified. All source files stay below400 lines (Rust183/293/96).
+
+Prepared but unexecuted:four owned Python capture tests,one live kernel test,seven Windows scenarios and an OsStr-only endpoint mutant. Zero Cargo/SDK/product/provider/kernel/native runs; no target, endpoint, port or live owned child. No compiler/runtime lease used. Different-author full source review, fresh allocated strict affected/workspace/product/control gates and actual six-platform CI are required before publication/merge. Full #772/native/release remains open.
