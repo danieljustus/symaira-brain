@@ -141,6 +141,9 @@ fn run_native(
         "setup" if process_stdout => Some(setup_cli::run_with_stdout(rest, stdout, stderr, true)),
         "setup" => Some(setup_cli::run(rest, stdout, stderr)),
         "doctor" if doctor_cli::requires_go_fallback(rest) => None,
+        "doctor" if process_stdout => Some(doctor_cli::run_with_stdout(
+            rest, stdout, stderr, format, true,
+        )),
         "doctor" => Some(doctor_cli::run(rest, stdout, stderr, format)),
         "install" => Some(install_cli::run_install(rest, stdout, stderr)),
         "uninstall" => Some(install_cli::run_uninstall(rest, stdout, stderr)),

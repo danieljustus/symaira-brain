@@ -9,6 +9,9 @@ use symbrain_core::{
 
 const DOCTOR_USAGE: &str = "Usage of doctor:\n  -fix\n    \trepair missing or version-mismatched managed binaries\n  -force-release\n    \twith --fix: allow replacing a brain-source build with the pinned release download\n  -json\n    \temit machine-readable JSON\n  -vault-agent string\n    \tvault agent name for MCP handshake probe (default \"claude-code\")\n";
 
+#[path = "doctor_output.rs"]
+mod doctor_output;
+
 #[path = "doctor_render.rs"]
 mod doctor_render;
 
@@ -39,12 +42,27 @@ pub fn run(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
+    run_with_stdout(args, stdout, stderr, format, false)
+}
+
+pub(crate) fn run_with_stdout(
+    args: &[OsString],
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write,
+    format: OutputFormat,
+    process_stdout: bool,
+) -> u8 {
+    let mut output = crate::stdio_output::Output::new(stdout, process_stdout);
     let parsed = match parse_args(args, stderr) {
         Ok(parsed) => parsed,
         Err(code) => return code,
     };
     if parsed.fix {
-        return doctor_fix::run_fix(parsed.force_release, stdout, stderr);
+        return doctor_fix::run_fix(
+            parsed.force_release,
+            &mut doctor_output::GoWriter::new(&mut output),
+            stderr,
+        );
     }
     let report = doctor_checks::run_checks(&parsed.vault_agent);
     let format = if parsed.json {
@@ -52,16 +70,27 @@ pub fn run(
     } else {
         format
     };
-    let result = match format {
-        OutputFormat::Json => writeln!(stdout, "{}", crate::go_json(&report)),
-        OutputFormat::Table => doctor_render::human(stdout, &report),
-    };
-    if result.is_err() {
-        let _ = writeln!(stderr, "symbrain doctor: format output");
-        exit::GENERIC
-    } else {
-        exit::OK
+    match format {
+        OutputFormat::Json => {
+            // json.Encoder submits the complete document and newline together.
+            let document = format!("{}\n", crate::go_json(&report));
+            if let Err(error) = output.write_all(document.as_bytes()) {
+                let _ = writeln!(
+                    stderr,
+                    "symbrain doctor: {}",
+                    crate::stdio_output::io_cause(&error)
+                );
+                return exit::GENERIC;
+            }
+        }
+        OutputFormat::Table => {
+            // Go ignores individual fmt failures and continues the next line.
+            // The outer Output still handles a real process-stdout EPIPE at
+            // the failing write, before this writer can ignore it.
+            let _ = doctor_render::human(&mut doctor_output::GoWriter::new(&mut output), &report);
+        }
     }
+    exit::OK
 }
 
 #[derive(Default)]

@@ -39,9 +39,10 @@ pub(super) fn run_fix(force_release: bool, stdout: &mut dyn Write, stderr: &mut 
         let _ = writeln!(stderr, "  ✗  repair failed: {error}");
         return exit::GENERIC;
     }
-    let _ = stdout.write_all(b"\nDone. Binaries installed to ");
-    let _ = stdout.write_all(&symbrain_core::config::os_bytes(bin_dir.as_os_str()));
-    let _ = stdout.write_all(b"\n");
+    let mut complete = b"\nDone. Binaries installed to ".to_vec();
+    complete.extend_from_slice(&symbrain_core::config::os_bytes(bin_dir.as_os_str()));
+    complete.push(b'\n');
+    let _ = stdout.write_all(&complete);
     exit::OK
 }
 
