@@ -8,6 +8,13 @@ python3 scripts/skills-argv-oracle/build_go.py --out "$OWNED/symbrain-go.exe" --
 python3 scripts/skills-argv-oracle/compare.py --go "$OWNED/symbrain-go.exe" --rust target/debug/symbrain.exe --out "$OWNED/process.json"
 ```
 
+The command above requires a complete preexisting frozen-module cache. Add
+`--prepare-module-cache` when preparing a fresh runner: that separate recorded
+phase uses the public Go proxy and checksum database to fetch the frozen
+dependencies. It verifies the complete frozen Git source again afterwards.
+Module verification and compilation then run with `GOPROXY=off` and
+`GOSUMDB=off`; a failed download or changed source stops the gate.
+
 Use the actual native Windows runner for Windows acceptance. Python Popen
 passes wide arguments to CreateProcessW; the report retains UTF-16LE argument
 code units, including lone surrogates, exact stdout/stderr bytes, exit codes,
@@ -17,8 +24,9 @@ network endpoint is available to the candidate. Optional `--parent` records an
 actual archived prior CLI's output without treating it as the oracle.
 
 The Skills-specific builder requires installed Go exactly1.26.7 and explicit
-preexisting compiler/module caches. Dependencies must already be cached: the
-build disables network downloads, toolchain downloads and user Git/Go config.
+preexisting compiler/module cache directories. Dependencies must already be
+cached or fetched by the explicit preparation phase above: the verification
+and build disable network downloads, toolchain downloads and user Git/Go config.
 It uses private HOME/config/telemetry paths and a local shared clone with a real
 `.git` directory, verifies every frozen blob/index/native mode before and after
 building, and requires the pinned revision with `vcs.modified=false` in the

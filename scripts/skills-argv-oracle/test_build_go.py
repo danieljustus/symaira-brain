@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 
 SPEC = importlib.util.spec_from_file_location("skills_go_builder", Path(__file__).with_name("build_go.py"))
 BUILDER = importlib.util.module_from_spec(SPEC)
@@ -63,6 +64,52 @@ class SourceAdmission(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "outside the checkout"):
             BUILDER.output_path(BUILDER.ROOT / "never-created-go")
         self.assertEqual(existing.read_bytes(), b"prior immutable payload")
+
+    def preparation(self, download):
+        self.report["source_before"] = BUILDER.source_map(
+            self.git, self.source, self.env, self.report)
+        env = dict(self.env, GOPROXY="off", GOSUMDB="off")
+        actual_run = BUILDER.run
+
+        def command(argv, child_env, report, cwd=None, timeout=120):
+            if argv[0] == "unexecuted-go-fixture":
+                self.assertEqual(argv[1:], ["mod", "download"])
+                self.assertEqual(timeout, 300)
+                return download(child_env)
+            return actual_run(argv, child_env, report, cwd, timeout)
+
+        with mock.patch.object(BUILDER, "run", side_effect=command):
+            BUILDER.prepare_module_cache("unexecuted-go-fixture", self.git,
+                                         self.source, env, self.report)
+        self.assertEqual(env["GOPROXY"], "off")
+        self.assertEqual(env["GOSUMDB"], "off")
+
+    def test_preparation_keeps_build_environment_offline(self):
+        def download(env):
+            self.assertEqual(env["GOPROXY"], "https://proxy.golang.org")
+            self.assertEqual(env["GOSUMDB"], "sum.golang.org")
+            return b""
+        self.preparation(download)
+        self.assertEqual(self.report["module_cache_preparation"]["status"], "passed")
+        self.assertEqual(self.report["source_before"],
+                         self.report["source_after_cache_preparation"])
+
+    def test_preparation_rejects_actual_changed_frozen_source(self):
+        def download(_env):
+            source = self.source / "go.sum"
+            source.write_bytes(source.read_bytes() + b"\nactual changed source control\n")
+            return b""
+        with self.assertRaisesRegex(ValueError, "bytes.*committed blob"):
+            self.preparation(download)
+        self.assertEqual(self.report["module_cache_preparation"]["status"], "started")
+
+    def test_preparation_failure_is_not_a_pass(self):
+        def download(_env):
+            raise RuntimeError("owned unexecuted SDK download failed")
+        with self.assertRaisesRegex(RuntimeError, "download failed"):
+            self.preparation(download)
+        self.assertEqual(self.report["module_cache_preparation"]["status"], "started")
+        self.assertNotIn("source_after_cache_preparation", self.report)
 
 
 if __name__ == "__main__":
