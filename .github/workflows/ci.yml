@@ -41,6 +41,13 @@ jobs:
           fi
           echo "All actions are pinned to SHA."
 
+  macos-release-verification-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Prove notarization failures prevent publication
+        run: python3 -m unittest discover -s scripts -p test_macos_release_verification.py -v
+
   # golangci-lint has a known incompatibility with Go 1.26 in this
   # ecosystem (see symaira-scope). gofmt + go vet below are the lint gate
   # until golangci-lint ships a Go-1.26-compatible release — re-enable a
@@ -230,6 +237,22 @@ jobs:
           cargo build -p symbrain-cli --bin symbrain --locked
           python3 scripts/mcp-differential.py "$RUNNER_TEMP/symbrain-go-mcp" target/debug/symbrain
 
+      - name: Native Go/Rust activity validation acceptance
+        shell: bash
+        run: scripts/activity-validation-oracle/run.sh "$RUNNER_TEMP/activity-validation-767.json"
+
+      - name: Preserve native activity validation evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: activity-validation-767-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/activity-validation-767.json
+            ${{ runner.temp }}/activity-validation-767.json.fixture.json
+            ${{ runner.temp }}/activity-validation-767.json.controls.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Go/Rust native setup repair process parity
         shell: bash
         run: scripts/setup-repair-oracle/run.sh "$RUNNER_TEMP/setup-repair-parity.json"
@@ -370,6 +393,22 @@ jobs:
 
       - name: Rust MCP stdio and lifecycle gate on macOS
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
+
+      - name: Native Go/Rust activity validation acceptance
+        shell: bash
+        run: scripts/activity-validation-oracle/run.sh "$RUNNER_TEMP/activity-validation-767.json"
+
+      - name: Preserve native activity validation evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: activity-validation-767-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/activity-validation-767.json
+            ${{ runner.temp }}/activity-validation-767.json.fixture.json
+            ${{ runner.temp }}/activity-validation-767.json.controls.json
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Go/Rust native setup repair process parity
         shell: bash
@@ -520,6 +559,69 @@ jobs:
         with:
           name: skills-render-drift-${{ runner.os }}
           path: ${{ runner.temp }}/skills-render-drift.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Frozen Go and native Windows wide Skills argv acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          owned_root="$RUNNER_TEMP"
+          if command -v cygpath >/dev/null 2>&1; then
+            owned_root="$(cygpath -u "$owned_root")"
+          fi
+          owned="$owned_root/skills-wide-argv"
+          mkdir -p "$owned"
+          go_binary="$owned/symbrain-go.exe"
+          python3 -m unittest discover -s scripts/skills-argv-oracle -p test_build_go.py -v
+          python3 scripts/skills-argv-oracle/build_go.py --prepare-module-cache --out "$go_binary" --receipt "$owned/go-build.json" --go-cache "$(go env GOCACHE)" --module-cache "$(go env GOMODCACHE)"
+          python3 scripts/skills-argv-oracle/compare.py --go "$go_binary" --rust target/debug/symbrain.exe --out "$owned/process.json"
+          for control in flag-input quoted-value normalization; do
+            if python3 scripts/skills-argv-oracle/compare.py --go "$go_binary" --rust target/debug/symbrain.exe --out "$owned/$control.json" --negative-control "$control"; then
+              echo "Skills argv input control unexpectedly passed: $control" >&2
+              exit 1
+            else
+              [[ "$?" == 1 ]]
+            fi
+            python3 scripts/skills-argv-oracle/verify_control.py "$owned/$control.json" "$control"
+          done
+          python3 -m unittest discover -s scripts/skills-argv-oracle -p test_novel.py -v
+          python3 scripts/skills-argv-oracle/build_parent.py --current target/debug/symbrain.exe --target target --saved-current "$owned/current.exe" --parent "$owned/parent-01f.exe" --receipt "$owned/parent-build.json"
+          python3 scripts/skills-argv-oracle/novel.py --go "$go_binary" --rust "$owned/current.exe" --parent "$owned/parent-01f.exe" --parent-proof "$owned/parent-build.json" --out "$owned/novel.json"
+          for control in flag-input parent-input; do
+            if python3 scripts/skills-argv-oracle/novel.py --go "$go_binary" --rust "$owned/current.exe" --parent "$owned/parent-01f.exe" --parent-proof "$owned/parent-build.json" --out "$owned/novel-$control.json" --negative-control "$control"; then
+              echo "Supplemental Skills input control unexpectedly passed: $control" >&2
+              exit 1
+            else
+              [[ "$?" == 1 ]]
+            fi
+            python3 scripts/skills-argv-oracle/verify_novel_control.py "$owned/novel-$control.json" "$control"
+          done
+
+      - name: Preserve actual native Windows Skills argv observations
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: skills-wide-argv-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/skills-wide-argv/*.json
+            ${{ runner.temp }}/skills-wide-argv/*.exe
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native Go/Rust activity validation acceptance
+        shell: bash
+        run: scripts/activity-validation-oracle/run.sh "$RUNNER_TEMP/activity-validation-767.json"
+
+      - name: Preserve native activity validation evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: activity-validation-767-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/activity-validation-767.json
+            ${{ runner.temp }}/activity-validation-767.json.fixture.json
+            ${{ runner.temp }}/activity-validation-767.json.controls.json
           if-no-files-found: error
           retention-days: 14
 
@@ -691,12 +793,22 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cargo test -p symbrain-policy profile::create::tests --locked
+          mkdir -p "$RUNNER_TEMP/profile-create-race"
+          cargo test -p symbrain-policy profile::create::tests --locked -- --nocapture 2>&1 | tee "$RUNNER_TEMP/profile-create-race/threads.log"
+          cargo test -p symbrain-policy --test profile_create_races --locked -- --nocapture 2>&1 | tee "$RUNNER_TEMP/profile-create-race/processes.log"
           cargo test -p symbrain-cli --lib init_cli::tests --locked
           cargo test -p symbrain-cli --test init_cli_tests --locked
           cargo build -p symbrain-cli --locked
           python3 scripts/init-oracle/test_compare.py
           python3 scripts/init-oracle/compare.py --rust-binary "target/debug/symbrain${{ matrix.os == 'windows-2025' && '.exe' || '' }}" --output target/init-oracle/report.json
+      - name: Preserve native profile creation race evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: profile-create-race-${{ matrix.os }}
+          path: ${{ runner.temp }}/profile-create-race
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Test additional Rust contracts on native Windows
         if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
         shell: bash
@@ -1274,14 +1386,6 @@ jobs:
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
-
-      # Same local-path-to-URL patch release.yml applies: harmless no-op
-      # while project.yml pins a URL + exactVersion, but keeps CI working
-      # if a local path ever gets committed by accident.
-      - name: Patch project.yml for CI (replace local path dependency with pinned URL)
-        if: steps.swift.outputs.changed == 'true'
-        run: |
-          perl -i'' -pe "s|path: ../symaira-appkit|url: https://github.com/danieljustus/symaira-appkit\\nexactVersion: 0.6.0|" project.yml
 
       - name: Install XcodeGen
         if: steps.swift.outputs.changed == 'true'

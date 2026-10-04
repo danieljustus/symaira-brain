@@ -28,6 +28,19 @@ merge are authorized by the user's GitHub goal; branch protection still applies.
 #793 closes only after a verified merge; #764/#476 and release/hardware gates
 remain separate. The following checkpoints retain their original observations.
 
+## Current main integration (2026-10-03)
+
+Normally integrate main `e3dbda6c` into the independently approved preflight
+candidate. Clean integrated source `83d3bbff` passes all 315 actual Go/native
+byte comparisons, 459 all-target/all-feature CLI/Skills/Audit tests, zero
+failures, two owned child entrypoints and 69 complete summaries. Strict Clippy,
+formatting and actionlint pass. Exact logs, process receipt and executable
+identities are in `migration/evidence/skills-preflight-793/maine3-integration/`.
+The previous main31 observations remain unchanged. Before target reuse,
+124 actual ELF paths (92 unique binaries) were losslessly archived and
+SHA-verified; the owned target was retained. Fresh exact-head native CI and
+protected checks still determine readiness and merge.
+
 # Previous continuation: raw-target correction (2026-10-03)
 
 The active candidate remains PR #794 on `agent/skills-preflight-793`. The

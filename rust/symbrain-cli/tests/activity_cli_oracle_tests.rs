@@ -22,14 +22,18 @@ struct Suite {
 }
 
 fn fixture() -> Suite {
-    #[cfg(windows)]
-    let path = PathBuf::from(
-        std::env::var_os("SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE")
-            .expect("Windows CI must provide the freshly generated Go oracle fixture"),
+    let path = std::env::var_os("SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE").map_or_else(
+        || {
+            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("tests/fixtures/activity_cli_oracle.json")
+        },
+        PathBuf::from,
     );
-    #[cfg(not(windows))]
-    let path =
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/activity_cli_oracle.json");
+    #[cfg(windows)]
+    assert!(
+        std::env::var_os("SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE").is_some(),
+        "Windows requires a fresh native Go fixture"
+    );
     serde_json::from_slice(&fs::read(path).expect("read Go activity CLI oracle"))
         .expect("parse Go activity CLI oracle")
 }
@@ -96,6 +100,7 @@ fn run_case(oracle: &Oracle) {
         .env_clear()
         .envs(coverage::profile_environment())
         .args(args)
+        .env("SYMBRAIN_GO_BINARY", root.join("absent-go-fallback"))
         .env("HOME", &home)
         .env("XDG_CONFIG_HOME", &config)
         .env("XDG_DATA_HOME", &data)

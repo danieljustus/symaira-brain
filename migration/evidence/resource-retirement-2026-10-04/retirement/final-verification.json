@@ -1,0 +1,111 @@
+{
+  "registered_worktrees_after": 83,
+  "retired": [
+    {
+      "worktree": "/workspace/symaira-memory649-root",
+      "head": "ec57961f7bf56a3f8430001fbc9b03f3cbc237eb",
+      "branch": "refs/heads/review/649-historical-runtime-root",
+      "tracked_files": 4129,
+      "manifest_sha256": "fa2d031442df6f806d33253e6b8b426b3a0e959df376e0bf51a80c805e59f29e",
+      "branch_and_tree_preserved": true
+    },
+    {
+      "worktree": "/workspace/symaira-skills794-wide-root",
+      "head": "cec81cfc0acdc9f4bb567f85fa6a27c03cb74467",
+      "branch": "refs/heads/review/794-wide-root-runtime",
+      "tracked_files": 2767,
+      "manifest_sha256": "6b57fbc3860468143c4e57da0f650bc8208d86a95fbd8a1cbecee52368a4a12f",
+      "branch_and_tree_preserved": true
+    },
+    {
+      "worktree": "/workspace/symaira-memory803-deadline",
+      "head": "a0ec18b8b90a1282f29bf4766ffd54d8675d9e49",
+      "branch": "refs/heads/review/803-diagnostic-deadline",
+      "tracked_files": 3008,
+      "manifest_sha256": "eaac14d3aa710b9dc17ad6f3623275042eab5900448d9316bc984cebf537fd94",
+      "branch_and_tree_preserved": true
+    },
+    {
+      "worktree": "/workspace/symaira-memory649-integrated",
+      "head": "63fbd3205ca907c3adb696ad62d42a5b64311976",
+      "branch": "refs/heads/issue/649-historical-runtime-fixtures",
+      "tracked_files": 3802,
+      "manifest_sha256": "3381035e889c0a499997853a15f80f6ea2cf3fa31f01e869c1133133d1608d1b",
+      "branch_and_tree_preserved": true
+    },
+    {
+      "worktree": "/workspace/symaira-decisions",
+      "head": "6c6881db97cf1ef9abd580ab402bd88fec2e9975",
+      "branch": "refs/heads/docs/issue-resolution-decisions",
+      "tracked_files": 2537,
+      "manifest_sha256": "afa5246d6ce4e29fd7b2ff10450a11590cb50c01234848cdec27547f26b6248b",
+      "branch_and_tree_preserved": true
+    },
+    {
+      "worktree": "/workspace/symaira-doctor806-journal-import",
+      "head": "74dd7aea5c7a1765dc36c2cbab2ca3fe6b6665d8",
+      "branch": "refs/heads/issue/806-owned-source-journal-import",
+      "tracked_files": 4395,
+      "manifest_sha256": "69f4d652d9964277956aca8197b0f0b1628db3d4c7d8e8853287f22af3458b82",
+      "branch_and_tree_preserved": true
+    },
+    {
+      "worktree": "/workspace/symaira-doctor806-windows-job-diagnostic",
+      "head": "e7541a332e44bba59b57028493c1f06a20abace7",
+      "branch": "refs/heads/diagnose/doctor806-windows-source-job",
+      "tracked_files": 4418,
+      "manifest_sha256": "4ea479ba58125b7fe19a618034b7f09f83a78732abe203535e622d7accd0e530",
+      "branch_and_tree_preserved": true
+    },
+    {
+      "worktree": "/workspace/symaira-doctor806-source-progress-fix",
+      "head": "7ea3cfb9f816291abecc91eef453ec7f3cbc4492",
+      "branch": "refs/heads/issue/806-source-progress-fix",
+      "tracked_files": 4355,
+      "manifest_sha256": "e557b834150254f0e8b8680a59b1317904f812c9b8d1c0dfbadf634bc74eaff6",
+      "branch_and_tree_preserved": true
+    },
+    {
+      "worktree": "/workspace/symaira-doctor806-source-progress",
+      "head": "9faee8b0a2619909aa8ee53ed84b2cb4d6ef50b8",
+      "branch": "refs/heads/issue/806-source-progress",
+      "tracked_files": 4331,
+      "manifest_sha256": "0b496b01eb9f188c1e165f07e184546c89ab088f0ed8fd3f40d9ca1ec7ac6cd3",
+      "branch_and_tree_preserved": true
+    },
+    {
+      "worktree": "/workspace/symaira-doctor806-owned-paths",
+      "head": "c6723ab21a3bfe73e84d715695b3d5ea45c661d1",
+      "branch": "refs/heads/fix/doctor806-owned-executable-paths",
+      "tracked_files": 4299,
+      "manifest_sha256": "9330588916324903a67070757a82a96cd718d62925a9075cbd3f6518aea0c9df",
+      "branch_and_tree_preserved": true
+    }
+  ],
+  "active_keep_paths_present": [
+    "symaira-brain",
+    "symaira-pr794",
+    "symaira-memory758-cli-fixes",
+    "symaira-guard770",
+    "symaira-source765-windows-job-cleanup",
+    "symaira-managed803-timeout-diagnostic",
+    "symaira-memory762-sync-backend-fixes",
+    "symaira-usage768-retry-after-decimal",
+    "symaira-daemon772-discovery-runtime",
+    "symaira-brain765-runtime",
+    "symaira-skills764-native",
+    "symaira-memory761-importers",
+    "symaira-memory760-engine"
+  ],
+  "remaining_authorized_paths_present": [
+    "/workspace/symaira-doctor765-stdout",
+    "/workspace/symaira-doctor765-output",
+    "/workspace/symaira-doctor765-json",
+    "/workspace/symaira-doctor765-windows",
+    "/workspace/symaira-usage768-argv"
+  ],
+  "free_bytes_now": 2501992448,
+  "root_git_common_preserved": true,
+  "exact_2GiB_reclaim_claim": false,
+  "stopped_when_2_5GiB_free_budget_reached": true
+}

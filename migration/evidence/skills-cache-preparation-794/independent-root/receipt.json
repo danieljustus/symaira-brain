@@ -1,0 +1,135 @@
+{
+  "reviewed_source": "d2f0047faf5837b85dd1bb842bd67814ea7a0094",
+  "reviewer": "Root; different from author review_pr800",
+  "disposition": "APPROVE_SOURCE_PUBLICATION_ONLY",
+  "raw": [
+    {
+      "original": "/tmp/symaira-skills794-cache-root-review/0.stderr",
+      "archive": "raw/00-0.stderr.gz",
+      "bytes": 1065,
+      "sha256": "4cc96fba8c31930782c76454b3eace9373eabf410cf621e4728ff871f68495ee",
+      "gzip_sha256": "ab86b25ebe49867ba056e750e4b5749931129dbfa5157675585c31822e134d62"
+    },
+    {
+      "original": "/tmp/symaira-skills794-cache-root-review/0.stdout",
+      "archive": "raw/01-0.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-skills794-cache-root-review/1.stderr",
+      "archive": "raw/02-1.stderr.gz",
+      "bytes": 662,
+      "sha256": "1d182bf94e73bc5281ae9d0f0ee1e803cc0373d84b397203b9a60d4372cba442",
+      "gzip_sha256": "8a53b789184565846f616a35e6915312fc19a52ddb674f2fe2630029f85334e0"
+    },
+    {
+      "original": "/tmp/symaira-skills794-cache-root-review/1.stdout",
+      "archive": "raw/03-1.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-skills794-cache-root-review/2.stderr",
+      "archive": "raw/04-2.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-skills794-cache-root-review/2.stdout",
+      "archive": "raw/05-2.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-skills794-cache-root-review/3.stderr",
+      "archive": "raw/06-3.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-skills794-cache-root-review/3.stdout",
+      "archive": "raw/07-3.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-skills794-cache-root-review/first-attempt.log",
+      "archive": "raw/08-first-attempt.log.gz",
+      "bytes": 189,
+      "sha256": "c6772ae52a3b0cb5f742d2fe7f82e5481ee13ec39fa6f8c23649b5ba38e6b473",
+      "gzip_sha256": "09bf4b22ec5db3f5f8fde5b33631c3ad7945f6d413ea0bc28b4993210d431774"
+    },
+    {
+      "original": "/tmp/symaira-skills794-cache-root-review/first-attempt.py",
+      "archive": "raw/09-first-attempt.py.gz",
+      "bytes": 3892,
+      "sha256": "274428dc8cdf623d88d87a6c38eb50f3da2e3a7b86f1a536960bb4db594c53be",
+      "gzip_sha256": "ddd80208fbc0bc1ce2b226173c41e16f39d9aa1798d21f9654aa845a49ae144b"
+    },
+    {
+      "original": "/tmp/symaira-skills794-cache-root-review/receipt.json",
+      "archive": "raw/10-receipt.json.gz",
+      "bytes": 276311,
+      "sha256": "4ccb4830d64ed9e0da8f1ca729802aa6ce4d4aea9b57d3eb42db4f9347413e83",
+      "gzip_sha256": "ca7403477bbdfd67672141cfd2fb85e5c5ee531c522d274a1a70e4c782dde230"
+    },
+    {
+      "original": "/tmp/symaira-skills794-cache-root-review.py",
+      "archive": "raw/11-symaira-skills794-cache-root-review.py.gz",
+      "bytes": 3961,
+      "sha256": "a68e9da3b8f1932b73d05bdaa8f2cf1addb9a9317f25af3fac29878b73b960dc",
+      "gzip_sha256": "1596702d4f2234370cca797d0244ed6bea6fefe29cfd8f1b30bee76109410f06"
+    },
+    {
+      "original": "/tmp/symaira-skills794-cache-root-review.log",
+      "archive": "raw/12-symaira-skills794-cache-root-review.log.gz",
+      "bytes": 49,
+      "sha256": "0b8ce31bce496801832717750e614567ebd7761bc21ce762e002024b85f6cf99",
+      "gzip_sha256": "b796f6d4da7694c43f0b17a894ff7398090b1e62710b6ab32e1d37c33a65e68f"
+    },
+    {
+      "original": "/tmp/symaira-skills794-cache-preparation-final-handoff.md",
+      "archive": "raw/13-symaira-skills794-cache-preparation-final-handoff.md.gz",
+      "bytes": 2094,
+      "sha256": "6aa2a7152bd554159bdfa1c92ffeee6b55dcab79e11d086b72d44b29c6575264",
+      "gzip_sha256": "910bcc06c7ad491b0c1e48ab32804c7cb8e370b22a86a9b2023767a3d3ab1e4a"
+    },
+    {
+      "original": "/tmp/symaira-skills794-cache-preparation-final-handoff.json",
+      "archive": "raw/14-symaira-skills794-cache-preparation-final-handoff.json.gz",
+      "bytes": 5049,
+      "sha256": "a968c4ee2012a35d23171a0934d7b08b1423eeb3fb2514f67f5e3a06d478c33a",
+      "gzip_sha256": "8f71a8f4605a882a8e067f346bfbf24be375ecbc77af9ffdef3a9f5db01a4df2"
+    },
+    {
+      "original": "/workspace/toolchains/go1.26.7/src/cmd/go/internal/modcmd/download.go",
+      "archive": "raw/15-download.go.gz",
+      "bytes": 14227,
+      "sha256": "c31998a4c5d47e6e8205bda13a2abc1ef9c00944ada0e965053e4fa4af303ebf",
+      "gzip_sha256": "076b0dd63a3ebb97411a1095e0f45cfcba699e4b52b83fc63f061b2b54c6cb58"
+    },
+    {
+      "original": "/workspace/toolchains/go1.26.7/src/cmd/go/internal/modcmd/verify.go",
+      "archive": "raw/16-verify.go.gz",
+      "bytes": 3825,
+      "sha256": "8441fffd2705c4cea48f7de9c2445a6d108aebb89353dea4e935c1b79e478eff",
+      "gzip_sha256": "807990ac39fb941265912094b5268336106df9a29562d87853853fa38e97b1e6"
+    }
+  ],
+  "complete_originals57_verified": true,
+  "frozen_Git_tree_blob_mode_path_bindings": 2438,
+  "unchanged_protected_selected_inventory": 1737,
+  "unchanged_original_builder_helpers": 6,
+  "actual_portable_tests": 11,
+  "download_mocked": true,
+  "corrected_SDK_download_build_native_Windows_execution": false,
+  "merge_acceptance": "PENDING_CURRENT_NATIVE_THREE_OS_AND_PROTECTED_CHECKS",
+  "first_local_review_failure": "incorrect fixed count for selected file set; all sourcebytes matched, retained first attempt; reconciled inventory records1737selected .rs/.go/Cargo/go manifest paths"
+}

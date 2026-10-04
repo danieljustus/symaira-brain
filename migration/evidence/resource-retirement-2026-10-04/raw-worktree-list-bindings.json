@@ -1,0 +1,18 @@
+[
+  {
+    "original": "migration/evidence/resource-retirement-2026-10-04/retirement/registered-worktrees.after.txt",
+    "retained": "migration/evidence/resource-retirement-2026-10-04/retirement/registered-worktrees.after.txt.gz",
+    "bytes": 11771,
+    "sha256": "e83fd3476846373c26061138744ce7cb0cb1187b7de422a1449d3d7377c652bd",
+    "gzip_sha256": "8268ef07bd88514d8016db2046d4bce9d1fba1782181004c9fa7f6b3878956f6",
+    "original_also_in_unchanged_full_180_member_tar": true
+  },
+  {
+    "original": "migration/evidence/resource-retirement-2026-10-04/retirement-second/registered-worktrees.after.txt",
+    "retained": "migration/evidence/resource-retirement-2026-10-04/retirement-second/registered-worktrees.after.txt.gz",
+    "bytes": 11520,
+    "sha256": "f0fb3b749fac6af3df04aa681eec52686821d1e17cdd06a5592de43e24987635",
+    "gzip_sha256": "38ed006dfb4987bfe66a6271dc1ff98b1e0ce9df3b16bb2786cd910efadad339",
+    "original_also_in_unchanged_full_180_member_tar": true
+  }
+]
