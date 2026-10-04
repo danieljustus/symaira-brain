@@ -1,5 +1,20 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Guard generated configuration ownership repair — 2026-10-04
+
+Immutable 4d78/fb2844 independent review requested one P2: generated XDG/HOME
+paths must clean lexically before the OS resolves symlink/.. pairs and before
+warning filenames are rendered. Explicit SYMGUARD_CONFIG retains raw OS
+semantics. The isolated successor normally integrates main2b and shares a small
+Guard-only lexical helper with scan. Windows volume/device/postClean and raw
+UTF16 rules are pinned to actual Go SDK source, with a portable source-reference
+gate distinct from native runtime acceptance. Windows config text that cannot
+be emitted exactly remains delegated. Original92 proofs/180 raw-state paths and
+69/46 ELF byte mappings remain retained; all inherited gates remain required.
+[ADR](../docs/adr/guard-generated-config-path-ownership.md). New path process/
+mutation cases, complete fresh verification, independent review and native3
+remain pending at this unvalidated source checkpoint; full770/769 remain open.
+
 ## Guard Doctor ordered warning slice — 2026-10-04
 
 The successor normally includes approved PR805 publication1c04 and ports the

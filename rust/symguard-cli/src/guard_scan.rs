@@ -5,7 +5,11 @@ use std::env;
 use std::fmt::Write as _;
 use std::fs;
 use std::io::{self, IsTerminal, Write};
-use std::path::{Component, Path, PathBuf};
+use std::path::{Path, PathBuf};
+
+#[path = "guard_paths.rs"]
+mod paths;
+pub(crate) use paths::{clean_native_path, join_native_path};
 
 use serde::Serialize;
 use symbrain_core::exit;
@@ -286,55 +290,27 @@ pub(crate) fn read_error_message(path: &std::path::Path, error: &io::Error) -> S
 
 pub(crate) fn source_path(source: Source) -> PathBuf {
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    // Join components so Windows diagnostics use native separators like filepath.Join.
-    let path = match source.client {
-        "hermes" => home.join(".config").join("hermes").join("config.json"),
-        "cursor" => home.join(".cursor").join("mcp.json"),
-        "vscode" => home.join(".vscode").join("mcp.json"),
-        "opencode" => home.join(".config").join("opencode").join("config.json"),
-        "claude-desktop" if cfg!(target_os = "macos") => home
-            .join("Library")
-            .join("Application Support")
-            .join("Claude")
-            .join("claude_desktop_config.json"),
-        "claude-desktop" => env::var_os("XDG_CONFIG_HOME")
-            .filter(|v| !v.is_empty())
-            .map(PathBuf::from)
-            .map_or_else(|| home.join(".config"), PathBuf::from)
-            .join("claude")
-            .join("claude_desktop_config.json"),
-        _ => PathBuf::new(),
-    };
-    clean_native_path(&path)
-}
-
-/// Clean a path like Go `filepath.Clean`, including slash-form Windows input.
-pub(crate) fn clean_native_path(path: &Path) -> PathBuf {
-    #[cfg(windows)]
-    let converted = PathBuf::from(path.to_string_lossy().replace('/', "\\"));
-    #[cfg(windows)]
-    let path = converted.as_path();
-
-    let mut result = PathBuf::new();
-    for component in path.components() {
-        match component {
-            Component::Prefix(_) | Component::RootDir | Component::Normal(_) => {
-                result.push(component.as_os_str());
-            }
-            Component::CurDir => {}
-            Component::ParentDir => {
-                if result.file_name().is_some_and(|name| name != "..") {
-                    result.pop();
-                } else if !result.has_root() {
-                    result.push(component.as_os_str());
-                }
-            }
+    let parts: &[&str] = match source.client {
+        "hermes" => &[".config", "hermes", "config.json"],
+        "cursor" => &[".cursor", "mcp.json"],
+        "vscode" => &[".vscode", "mcp.json"],
+        "opencode" => &[".config", "opencode", "config.json"],
+        "claude-desktop" if cfg!(target_os = "macos") => &[
+            "Library",
+            "Application Support",
+            "Claude",
+            "claude_desktop_config.json",
+        ],
+        "claude-desktop" => {
+            let base = env::var_os("XDG_CONFIG_HOME")
+                .filter(|v| !v.is_empty())
+                .map(PathBuf::from)
+                .unwrap_or_else(|| join_native_path(&home, &[".config"]));
+            return join_native_path(&base, &["claude", "claude_desktop_config.json"]);
         }
-    }
-    if result.as_os_str().is_empty() {
-        result.push(".");
-    }
-    result
+        _ => return PathBuf::new(),
+    };
+    join_native_path(&home, parts)
 }
 
 fn view(server: Server) -> ServerView {

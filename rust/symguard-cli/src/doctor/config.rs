@@ -19,10 +19,12 @@ pub(super) fn config_path() -> PathBuf {
         return PathBuf::from(env);
     }
     if let Some(xdg) = env::var_os("XDG_CONFIG_HOME").filter(|v| !v.is_empty()) {
-        return PathBuf::from(xdg).join("symguard").join("config.toml");
+        return crate::guard_scan::join_native_path(Path::new(&xdg), &["symguard", "config.toml"]);
     }
     let home = symbrain_core::xdg::home_dir().unwrap_or_else(|| PathBuf::from("."));
-    home.join(".config").join("symguard").join("config.toml")
+    // filepath.Join cleans lexically before the OS can resolve a symlink/.. pair.
+    // Explicit SYMGUARD_CONFIG above deliberately keeps the caller's raw path.
+    crate::guard_scan::join_native_path(&home, &[".config", "symguard", "config.toml"])
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -63,6 +65,12 @@ impl ConfigOutcome {
 /// type or map-order-dependent failure remains Go-owned. Warnings are returned
 /// only after typed decoding and buffered until the whole doctor is admitted.
 pub(super) fn load_config(path: &Path) -> Option<ConfigOutcome> {
+    // File selection preserves Windows UTF16, but Core GoText's Windows byte
+    // projection is not yet WTF8-exact. Delegate before reading/emitting text.
+    #[cfg(windows)]
+    if path.to_str().is_none() {
+        return None;
+    }
     let text = match fs::read_to_string(path) {
         Ok(text) => text,
         Err(error) if error.kind() == io::ErrorKind::NotFound => {

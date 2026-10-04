@@ -47,3 +47,22 @@ stay buffered across later native delegation. See the
 Before the temporary frozen-Go tree is removed, the runner copies both actual
 executables to `-binaries/` and verifies every byte/SHA/length. The clean-head
 receipt and all three native CI artifact uploads retain these exact gate binaries.
+
+The `-config-paths.json` successor receipt checks generated XDG/HOME lexical
+ownership and exact warning filenames with plain/dot/dotdot/relative/symlink
+paths. Explicit SYMGUARD_CONFIG keeps its raw OS behavior. Private directory
+junctions provide the Windows symlink-parent control without operator state.
+Unix raw byte paths are explicitly inapplicable on Windows. Typed/discovery
+refusals retain empty native stdout and the explicit unsupported stderr; the
+exact Brain adapter tests additionally require both streams empty before Go
+fallback. One actual process mutant canonicalizes a generated base and reads
+the wrong physical owner, and must be rejected.
+
+The `-windows-path-reference.json` process gate copies exact SHA-pinned Go
+1.26.7 Windows Clean/Join functions and compares the exact production Rust
+helper in an owned portable probe, retaining both executable bytes and drivers.
+It checks drives/UNC/verbatim/device/postClean and raw UTF16/WTF8 inputs.
+The copy/namespace adaptations are declared in the receipt; it is source-
+reference evidence and never substitutes for native Windows CLI/file tests.
+SDK BSD source licensing is retained in `windows-sdk-LICENSE.txt`.
+See [the ownership decision](../../docs/adr/guard-generated-config-path-ownership.md).
