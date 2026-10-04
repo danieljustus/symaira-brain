@@ -23,10 +23,11 @@ cd "$root"
 python3 scripts/brain-config13/runtime_tools.py source --root "$root" --out "$out"
 head=$(git rev-parse HEAD)
 failures=0
-floor() { python3 - "$root" <<'PY'
+floor() { python3 - "$root" "$out" "$GOCACHE" "$TMPDIR" <<'PY'
 import shutil,sys
-free=shutil.disk_usage(sys.argv[1]).free
-assert free >=700*1024*1024, f"stop below700MiB: {free}"
+for path in sys.argv[1:]:
+    free=shutil.disk_usage(path).free
+    assert free >=700*1024*1024, f"stop below700MiB on {path}: {free}"
 PY
 }
 stage() {

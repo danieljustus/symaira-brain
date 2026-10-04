@@ -132,7 +132,7 @@ fn invalid_configuration_keeps_the_go_loader_boundary(child: &Path, root: &Path)
                 command.env(variable, value);
             }
         }
-        let before = snapshot(&case);
+        let before = tree_snapshot(&case);
         let output = command.output().unwrap();
         assert_eq!(output.status.code(), Some(2));
         assert!(output.stdout.is_empty());
@@ -152,9 +152,49 @@ fn invalid_configuration_keeps_the_go_loader_boundary(child: &Path, root: &Path)
         };
         assert!(stderr.contains(detail), "{stderr}");
         assert!(!receipt.exists(), "Go fallback was invoked");
-        assert_eq!(snapshot(&case), before);
+        assert_eq!(tree_snapshot(&case), before);
         assert!(!case.join("home/.symaira/bin").exists());
     }
+}
+
+// Configuration-error fixtures contain directories as well as file bytes.
+// Capture each relative path, exact type, platform permissions and content.
+type TreeSnapshot = std::collections::BTreeMap<std::path::PathBuf, (u32, bool, Vec<u8>)>;
+
+fn tree_snapshot(root: &Path) -> TreeSnapshot {
+    fn visit(root: &Path, directory: &Path, result: &mut TreeSnapshot) {
+        for entry in fs::read_dir(directory).unwrap() {
+            let path = entry.unwrap().path();
+            let metadata = fs::symlink_metadata(&path).unwrap();
+            assert!(
+                !metadata.file_type().is_symlink(),
+                "unexpected fixture link"
+            );
+            #[cfg(unix)]
+            let permissions = {
+                use std::os::unix::fs::PermissionsExt;
+                metadata.permissions().mode()
+            };
+            #[cfg(not(unix))]
+            let permissions = u32::from(metadata.permissions().readonly());
+            let directory = metadata.is_dir();
+            let bytes = if directory {
+                Vec::new()
+            } else {
+                fs::read(&path).unwrap()
+            };
+            result.insert(
+                path.strip_prefix(root).unwrap().to_path_buf(),
+                (permissions, directory, bytes),
+            );
+            if directory {
+                visit(root, &path, result);
+            }
+        }
+    }
+    let mut result = std::collections::BTreeMap::new();
+    visit(root, root, &mut result);
+    result
 }
 
 fn snapshot(directory: &Path) -> std::collections::BTreeMap<String, Vec<u8>> {

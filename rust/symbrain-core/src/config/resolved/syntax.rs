@@ -16,10 +16,9 @@ pub(super) fn bare_value_error(bytes: &[u8], limit: usize) -> Option<GoText> {
             if let Some(inner) = trimmed
                 .strip_prefix(b"[")
                 .and_then(|v| v.strip_suffix(b"]"))
+                && bare_key(inner)
             {
-                if bare_key(inner) {
-                    table = inner.to_vec();
-                }
+                table = inner.to_vec();
             }
             offset += line.len() + 1;
             continue;

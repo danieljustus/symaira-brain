@@ -87,15 +87,33 @@
     },
     "rust/symbrain-cli/tests/setup_repair_native.rs": {
       "original_sha256": "5032cf011006493cce3988b195cf8eb0b4b5a3618f30e8728239d33da765a0dd",
-      "current_sha256": "905da91d601c302ce4a0b863a779be56edf35183999d9ae8a121048506bbf1d9",
-      "reason": "actual fourth runtime correction: strengthen promoted native config tests with exit2/header/zero writes/absent fallback; explicitly configure frozenGo global verbose audit owner, preserving full redaction/credential isolation assertions",
-      "failed_immutable_head": "876bee090fbd094d21b6f648dc24f89a480be0e2"
+      "current_sha256": "928f45413d26282a85ff0d164e1af181aa81b20df68c9cbca10dfb4bd42bf830",
+      "reason": "actual fifth preserved runtime: exact recursive configuration state, semantic-equivalent lint fix, output/cache/TMP mount floors and retained immutable payload reuse",
+      "failed_immutable_head": "5817161902f59db897c9d578692cd4bb173eef53"
     },
     "rust/symbrain-harness/src/registry_environment.rs": {
       "original_sha256": "8b0458b00554902f92b0d90858cd2309e24f807f8a8359e3e01e2ef4609f2987",
       "current_sha256": "98eebb9a0254bf9b621c95a36a92b5d3ab9d8b209e36249c10c7de97fb0539a9",
       "reason": "actual fourth runtime correction: inherited strict documentation lint markup only",
       "failed_immutable_head": "876bee090fbd094d21b6f648dc24f89a480be0e2"
+    },
+    "rust/symbrain-core/src/config/resolved/syntax.rs": {
+      "original_sha256": null,
+      "current_sha256": "9b08b7e9285442190c198af42037b5f8f0981dbef1da315952fcb8fe2c8a1792",
+      "reason": "actual fifth preserved runtime: exact recursive configuration state, semantic-equivalent lint fix, output/cache/TMP mount floors and retained immutable payload reuse",
+      "failed_immutable_head": "5817161902f59db897c9d578692cd4bb173eef53"
+    },
+    "scripts/brain-config13/runtime.sh": {
+      "original_sha256": null,
+      "current_sha256": "b0b72f0afae85366334d03f32959398c60dc68a5e3c1ebe477e60abce78e8e7f",
+      "reason": "actual fifth preserved runtime: exact recursive configuration state, semantic-equivalent lint fix, output/cache/TMP mount floors and retained immutable payload reuse",
+      "failed_immutable_head": "5817161902f59db897c9d578692cd4bb173eef53"
+    },
+    "scripts/brain-config13/runtime_tools.py": {
+      "original_sha256": null,
+      "current_sha256": "93ccc961d9042369524b9bb302bd88ff3298d57740aa713080711241da77c481",
+      "reason": "actual fifth preserved runtime: exact recursive configuration state, semantic-equivalent lint fix, output/cache/TMP mount floors and retained immutable payload reuse",
+      "failed_immutable_head": "5817161902f59db897c9d578692cd4bb173eef53"
     }
   }
 }

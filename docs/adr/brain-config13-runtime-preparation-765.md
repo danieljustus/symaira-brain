@@ -129,3 +129,26 @@ users. Only owned derivative caches were removed. Original binary/raw/source
 proofs and the allocated Rust target remain intact. Future Rust archival may
 reuse a previously verified immutable identical payload; every current role and
 path still records its own exact raw SHA and actual source binding.
+
+The fifth immutable source5817161 completes1020 passed tests, one failed new
+configuration-error test and two explicit ignored gates in135 summaries. Its
+new test incorrectly reads configuration directories as files; replace only
+that snapshot with recursive relative path/type/permission/content capture.
+Collapse the classifier's nested table condition as strict Clippy requests.
+All original process assertions and test output/state criteria remain intact.
+
+Retain240 exact fifth raw/source/proof files before correction, including the
+actual18 extra grammar/BOM/UTF8 pairs (8 exact,10 bounded inner diagnostic
+wording/context differences). Both processes reject all invalid inputs with
+exit2 and unchanged owned state; neither accepts replacement-decoded input.
+The extra report records every input and actual process output separately.
+
+The separate `/tmp` mount exhausted space during actual Doctor embedded-Go
+linking; Memory590 also failed its Go build before comparisons. These are
+failed attempts, not passing acceptance. The original incomplete gzip payload
+and all logs remain; a complete independent981-path/913-unique target archive
+with0 users and roundtrip verification supplies the lost archive footer.
+Archive the actual Go CLI/probe before retiring only the inactive derivative
+Go cache. Check the target, output, private Go cache and TMP mount before each
+stage, and the archive destination before each new payload. Subsequent owned
+runtime outputs use `/workspace`, with the same700MiB floor and no second target.

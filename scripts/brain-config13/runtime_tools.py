@@ -89,7 +89,9 @@ def archive(root, out, target):
     dest = out / "failed-actual-binaries"
     dest.mkdir(exist_ok=False)
     available = {}
-    for receipt in Path("/tmp").glob("symaira-brain765-runtime-*/failed-actual-binaries/receipt.json"):
+    receipts = list(Path("/tmp").glob("symaira-brain765-runtime-*/failed-actual-binaries/receipt.json"))
+    receipts += list(Path("/workspace/oracles").glob("symaira-brain765-runtime-*-actual-binaries/receipt.json"))
+    for receipt in receipts:
         prior = json.loads(receipt.read_text())
         if not prior.get("all_roundtrips") or prior.get("users"):
             continue
@@ -115,7 +117,7 @@ def archive(root, out, target):
             payload = candidate
             reused += 1
         if not payload.exists():
-            assert shutil.disk_usage(root).free >= 700*1024*1024, "cannot archive below allocated floor"
+            assert shutil.disk_usage(dest).free >= 700*1024*1024, "cannot archive below output mount floor"
             payload.write_bytes(gzip.compress(data, compresslevel=1, mtime=0))
         assert gzip.decompress(payload.read_bytes()) == data
         records.append(dict(path=str(path), bytes=len(data), sha256=digest, gzip=str(payload),
