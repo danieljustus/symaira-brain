@@ -74,3 +74,8 @@ The frozen Go revision, archive bytes, all MCP assertions, inputs, timeouts,
 matrices and upload policy remain unchanged. Local shell syntax and workflow
 lint can check this source-only correction; they do not prove Windows runtime.
 Fresh native Windows and all required exact-head checks remain mandatory.
+
+
+Root independent workflow correction review (2026-10-04): the exact Windows failure at source11f, job111341331634, came from GNU/MSYS Tar interpreting a native drive path. Successore49 converts only the owned archive/extraction shell directory with cygpath before mkdir/tar/cd. The frozen Go ref, native output path, production sources, dependency pins, complete MCP comparisons and actual controls remain unchanged. Root independently checked every changed path, all four shell blocks, actionlint and original CRLF log bytes. This proves the bounded static correction; fresh native Windows catalog execution remains required.
+
+A separate original Windows Memory CLI job111341331340 exposes SQLITE_BUSY5 during real concurrent Store::open. Its migration production bytes match PR803. Passing other executions does not dismiss that failure: bounded initialization repair, independent validation and current native acceptance gate the shared Store and dependent PRs before merge. No database assertion or timeout has been weakened.
