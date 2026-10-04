@@ -1,0 +1,101 @@
+[
+  {
+    "name": "source806",
+    "sha": "d2d1373aa618b9fc0334bcae033f412f6b05e384",
+    "cloud_worktree": "/workspace/symaira-source806-main-c741",
+    "backup_ref": "refs/heads/handoff/20261004/source806",
+    "status": "Source + main c741; independent complete integration review pending",
+    "proof": "/workspace/review-proof/source806-main-c741-integration",
+    "clean_at_export": true
+  },
+  {
+    "name": "usage804",
+    "sha": "4777676155ae463f55e58581e690531485f8ec93",
+    "cloud_worktree": "/workspace/symaira-usage804-main-c741",
+    "backup_ref": "refs/heads/handoff/20261004/usage804",
+    "status": "Usage + main c741; independent complete integration review pending",
+    "proof": "/workspace/review-proof/usage804-main-c741-integration",
+    "clean_at_export": true
+  },
+  {
+    "name": "daemon801",
+    "sha": "3e9f48520abe7fd8410508d21cd32998e9d7e48e",
+    "cloud_worktree": "/workspace/symaira-daemon801-main-c741",
+    "backup_ref": "refs/heads/handoff/20261004/daemon801",
+    "status": "Daemon + main c741; independent complete integration review pending; two actual failures unresolved",
+    "proof": "/workspace/review-proof/daemon801-main-c741-integration",
+    "clean_at_export": true
+  },
+  {
+    "name": "memory803",
+    "sha": "894c606ea78d046d601df1a7f6ce764cad500d43",
+    "cloud_worktree": "/workspace/symaira-memory803-source806-main797",
+    "backup_ref": "refs/heads/handoff/20261004/memory803",
+    "status": "Main c741 + Guard dcb integrated; fixture 017 NOT integrated; current complete review pending",
+    "proof": "/workspace/review-proof/memory803-source806-main797-preparation",
+    "clean_at_export": true
+  },
+  {
+    "name": "memory803-fixture",
+    "sha": "017463b3f5648e24442f4c249328bb9c8915caf9",
+    "cloud_worktree": "/workspace/symaira-memory803-fixture-canonical-root",
+    "backup_ref": "refs/heads/handoff/20261004/memory803-fixture",
+    "status": "Author + Doctor complete source review; Root complete proof verification still pending",
+    "proof": "/workspace/review-proof/usage-memory803-fixture-canonical-root",
+    "clean_at_export": true
+  },
+  {
+    "name": "brain765",
+    "sha": "b6a6ad3ab836d3229db3c0f003a9394434310d77",
+    "cloud_worktree": "/workspace/symaira-brain765-output-owner-main797",
+    "backup_ref": "refs/heads/handoff/20261004/brain765",
+    "status": "Author + independent bounded source integration approval; Root proof verification pending; runtime METHOD REQUEST_CHANGES and old owner-map mismatch",
+    "proof": "/workspace/review-proof/usage-brain765-output-owner-main797",
+    "clean_at_export": true
+  },
+  {
+    "name": "skills813",
+    "sha": "c279997c550b94f6625020fa4036d9bb52c1234f",
+    "cloud_worktree": "/workspace/symaira-skills813-strict-lint",
+    "backup_ref": "refs/heads/handoff/20261004/skills813",
+    "status": "23 strict lint fixes; independent Root review incomplete; no actual compile; main c741 NOT integrated",
+    "proof": "/workspace/review-proof/skills813-strict-lint",
+    "clean_at_export": true
+  },
+  {
+    "name": "doctor649",
+    "sha": "ca583913e418e073c17c426511aa9d02c927edc6",
+    "cloud_worktree": "/workspace/symaira-memory649-main935-current-parents",
+    "backup_ref": "refs/heads/handoff/20261004/doctor649",
+    "status": "Historical source approval only; current parents/native 3 pending",
+    "proof": null,
+    "clean_at_export": true
+  },
+  {
+    "name": "memory760",
+    "sha": "4e2b0eede4d7e426f267c62a3bfc7702ec0c4cc1",
+    "cloud_worktree": "/workspace/symaira-memory760-sdk-type-admission",
+    "backup_ref": "refs/heads/handoff/20261004/memory760",
+    "status": "Source approval only; actual 60 pairs + 3 controls and native 3 pending",
+    "proof": null,
+    "clean_at_export": true
+  },
+  {
+    "name": "memory761",
+    "sha": "410ef3b9c0e56361d6de5409b4b88dbbd5d18666",
+    "cloud_worktree": "/workspace/symaira-memory761-resource-time-fix",
+    "backup_ref": "refs/heads/handoff/20261004/memory761",
+    "status": "Source approval only; current native 3 pending",
+    "proof": null,
+    "clean_at_export": true
+  },
+  {
+    "name": "memory762",
+    "sha": "fdd0b276575f0257bdbf92189137349ca4736e36",
+    "cloud_worktree": "/workspace/symaira-memory762-sync-backend-fixes",
+    "backup_ref": "refs/heads/handoff/20261004/memory762",
+    "status": "Source approval only; current native 3 pending",
+    "proof": null,
+    "clean_at_export": true
+  }
+]

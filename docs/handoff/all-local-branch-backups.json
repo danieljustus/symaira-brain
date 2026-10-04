@@ -1,0 +1,687 @@
+[
+  {
+    "original_local_ref": "refs/heads/diagnose/doctor806-windows-source-job",
+    "sha": "e7541a332e44bba59b57028493c1f06a20abace7",
+    "backup_ref": "refs/heads/handoff/20261004/local/diagnose/doctor806-windows-source-job"
+  },
+  {
+    "original_local_ref": "refs/heads/diagnose/memory803-windows-parity",
+    "sha": "0266879f7458f7116871ddcc9458c22707eca518",
+    "backup_ref": "refs/heads/handoff/20261004/local/diagnose/memory803-windows-parity"
+  },
+  {
+    "original_local_ref": "refs/heads/docs/issue-resolution-decisions",
+    "sha": "6c6881db97cf1ef9abd580ab402bd88fec2e9975",
+    "backup_ref": "refs/heads/handoff/20261004/local/docs/issue-resolution-decisions"
+  },
+  {
+    "original_local_ref": "refs/heads/fix/805-rust-kernel-fixture-admission",
+    "sha": "dcbeb0d682c9297e211b440929ba12ff08a8ce38",
+    "backup_ref": "refs/heads/handoff/20261004/local/fix/805-rust-kernel-fixture-admission"
+  },
+  {
+    "original_local_ref": "refs/heads/fix/806-inherited-output-owner",
+    "sha": "d559dc0bba8ec50e9d2e5fe7c337ed8907f62050",
+    "backup_ref": "refs/heads/handoff/20261004/local/fix/806-inherited-output-owner"
+  },
+  {
+    "original_local_ref": "refs/heads/fix/806-windows-job-doc-markdown",
+    "sha": "d07c5daae8b68f053f9c215434ed8e5bc64c6baa",
+    "backup_ref": "refs/heads/handoff/20261004/local/fix/806-windows-job-doc-markdown"
+  },
+  {
+    "original_local_ref": "refs/heads/fix/813-skills-strict-lint",
+    "sha": "c279997c550b94f6625020fa4036d9bb52c1234f",
+    "backup_ref": "refs/heads/handoff/20261004/local/fix/813-skills-strict-lint"
+  },
+  {
+    "original_local_ref": "refs/heads/fix/doctor806-owned-executable-paths",
+    "sha": "c6723ab21a3bfe73e84d715695b3d5ea45c661d1",
+    "backup_ref": "refs/heads/handoff/20261004/local/fix/doctor806-owned-executable-paths"
+  },
+  {
+    "original_local_ref": "refs/heads/fix/guard805-owned-discovery-fixtures",
+    "sha": "e13f4caa07a4aecff5ab54a4ab57e2e248374438",
+    "backup_ref": "refs/heads/handoff/20261004/local/fix/guard805-owned-discovery-fixtures"
+  },
+  {
+    "original_local_ref": "refs/heads/fix/guard805-windows-doctor-fixtures",
+    "sha": "dcada002eb68ff949636a66a04439407a0186bcb",
+    "backup_ref": "refs/heads/handoff/20261004/local/fix/guard805-windows-doctor-fixtures"
+  },
+  {
+    "original_local_ref": "refs/heads/fix/memory-mcp-windows-archive-path",
+    "sha": "e49a80e2560ee3703aa2006c0420ff5885382fc8",
+    "backup_ref": "refs/heads/handoff/20261004/local/fix/memory-mcp-windows-archive-path"
+  },
+  {
+    "original_local_ref": "refs/heads/fix/memory803-provider-admission",
+    "sha": "a5c65c706ac4cb271fde26d9063b0f4afff1b420",
+    "backup_ref": "refs/heads/handoff/20261004/local/fix/memory803-provider-admission"
+  },
+  {
+    "original_local_ref": "refs/heads/fix/policy-create-windows-race",
+    "sha": "e47bbaa56a9ffb7ce492e6b36d8f344a52839af7",
+    "backup_ref": "refs/heads/handoff/20261004/local/fix/policy-create-windows-race"
+  },
+  {
+    "original_local_ref": "refs/heads/fix/skills-preflight-793-review",
+    "sha": "1db828430761f9a3f0e0bb805d696a3ddbe1e0bd",
+    "backup_ref": "refs/heads/handoff/20261004/local/fix/skills-preflight-793-review"
+  },
+  {
+    "original_local_ref": "refs/heads/integration/daemon801-main-c741",
+    "sha": "3e9f48520abe7fd8410508d21cd32998e9d7e48e",
+    "backup_ref": "refs/heads/handoff/20261004/local/integration/daemon801-main-c741"
+  },
+  {
+    "original_local_ref": "refs/heads/integration/source806-main-c741",
+    "sha": "d2d1373aa618b9fc0334bcae033f412f6b05e384",
+    "backup_ref": "refs/heads/handoff/20261004/local/integration/source806-main-c741"
+  },
+  {
+    "original_local_ref": "refs/heads/integration/usage804-main-c741",
+    "sha": "4777676155ae463f55e58581e690531485f8ec93",
+    "backup_ref": "refs/heads/handoff/20261004/local/integration/usage804-main-c741"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/620-usage-fetch-identity",
+    "sha": "d7ca08a6db177a400e2034bff9bcce684fda4e38",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/620-usage-fetch-identity"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/621-skills-render-drift",
+    "sha": "e00365333a041118dd0598157137e0ba3586013d",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/621-skills-render-drift"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/649-historical-runtime-fixtures",
+    "sha": "63fbd3205ca907c3adb696ad62d42a5b64311976",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/649-historical-runtime-fixtures"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/649-historical-store-repair",
+    "sha": "dba88d23dade87eb5194e9c2451a0ad20d08a83e",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/649-historical-store-repair"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/649-integrated-historical-repair",
+    "sha": "25292fe2d3349fe3b716783310096accb1f63007",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/649-integrated-historical-repair"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/649-main935-current-parents",
+    "sha": "ca583913e418e073c17c426511aa9d02c927edc6",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/649-main935-current-parents"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/649-native-doctor-schema",
+    "sha": "64b2c6aceaa0d1f7d1550d1398a5a70ec81aa7a0",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/649-native-doctor-schema"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/649-owned-column-defaults",
+    "sha": "9b0e6ec9f5a87418ac9e46073c98edc503ea196e",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/649-owned-column-defaults"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/682-rust-coverage",
+    "sha": "5931cce3e4fe3e090b361fb3f9aca7e07b7ad49b",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/682-rust-coverage"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/730-release-verification",
+    "sha": "1755e12bad9baa2424e8b3a8c606702443ef1f68",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/730-release-verification"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/758-governed-write-review-fixes",
+    "sha": "55e3038665946a9f077af335bec661d02191d004",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/758-governed-write-review-fixes"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/758-native-governed-writes",
+    "sha": "28e8e7ae1a1eb05b3ba1c83a56bbebf1a3572a24",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/758-native-governed-writes"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/758-native-memory-cli",
+    "sha": "1d8a0904929157d7928cfcd31782c374aa98501a",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/758-native-memory-cli"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/758-native-memory-cli-fixes",
+    "sha": "f428a866d7817c269cdfc32b6affc50dfe014418",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/758-native-memory-cli-fixes"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/758-native-memory-store",
+    "sha": "97a78186c9078f93d1fe09bb8a9ed52904775008",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/758-native-memory-store"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/758-set-stdout-sigpipe",
+    "sha": "1a60e98a6847902299448f92f30ccee82e59913b",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/758-set-stdout-sigpipe"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/759-native-memory-mcp",
+    "sha": "3ce87f529cb02479933eb41a3a7b7be6a5102ca6",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/759-native-memory-mcp"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/760-effective-sdk-owner",
+    "sha": "b8ba0865ac28a98f829843cb34e5e09f19973876",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/760-effective-sdk-owner"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/760-engine-runner-binding",
+    "sha": "c5e8a4db8e9159fbaecd88c791f1486b496fc755",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/760-engine-runner-binding"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/760-hermetic-engine-build",
+    "sha": "7804d91b6f7b712a9d8fdfa68160bb8375b07a60",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/760-hermetic-engine-build"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/760-native-memory-engine",
+    "sha": "9f1b1dc07503e7ede84d1e38074100929cb50805",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/760-native-memory-engine"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/760-sdk-type-admission",
+    "sha": "4e2b0eede4d7e426f267c62a3bfc7702ec0c4cc1",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/760-sdk-type-admission"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/761-codex-resource-time-boundary",
+    "sha": "410ef3b9c0e56361d6de5409b4b88dbbd5d18666",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/761-codex-resource-time-boundary"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/761-local-contract-corrections",
+    "sha": "e55ea752b28d88df0b9d2248a8d32cb6d971f9e5",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/761-local-contract-corrections"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/761-native-memory-importers",
+    "sha": "2946cf2b959ed71ed58dcf44d36c515aab60328e",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/761-native-memory-importers"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/762-native-memory-sync",
+    "sha": "c4a020e0cec77fd38060c591aa1fde244df4b796",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/762-native-memory-sync"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/762-native-memory-sync-backends",
+    "sha": "8a3226828d045b4307d2c3601e283d1ecfa4ce4f",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/762-native-memory-sync-backends"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/762-sync-backend-review-fixes",
+    "sha": "fdd0b276575f0257bdbf92189137349ca4736e36",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/762-sync-backend-review-fixes"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/763-http-authority",
+    "sha": "2c7d1c243b17fd4e85f78c26267a371a25472669",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/763-http-authority"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/763-memory-ui-inventory",
+    "sha": "3f4c28701c5454f0b2b42090db0706fce8d0857c",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/763-memory-ui-inventory"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/763-native-memory-http-reviewed",
+    "sha": "9647ee7343b4bf8fb6942ff1a4de9f4e4af0ad1e",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/763-native-memory-http-reviewed"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/764-json-depth-float-corrections",
+    "sha": "fb43004be5e89e3f489f8a3f38c1224e2a98ff0e",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/764-json-depth-float-corrections"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/764-json-eof-state-correction",
+    "sha": "b49372bedcd9c4514706c999447dc4f836be012a",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/764-json-eof-state-correction"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/764-native-byte-contracts",
+    "sha": "36c13305b56a71e9f6ffcef53f0a3bf5cba1a029",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/764-native-byte-contracts"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/764-native-skills-corrections",
+    "sha": "128e1bfc81733e488e25f5b4935300a33009e265",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/764-native-skills-corrections"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/764-native-skills-surface",
+    "sha": "db9760a3d312173e8cd096d05925319a78308b48",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/764-native-skills-surface"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-brain-config13-source-fixes",
+    "sha": "826af02e04d80d6d52603ca51ed8491dfe9f7e6f",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-brain-config13-source-fixes"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-brain-inherited-output-owner",
+    "sha": "f312138465447df1006a771a41c250abee98244d",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-brain-inherited-output-owner"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-brain-output-owner-main797",
+    "sha": "b6a6ad3ab836d3229db3c0f003a9394434310d77",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-brain-output-owner-main797"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-brain-startup-four-fixes",
+    "sha": "e30676fdaced483a3cd1588a78253a3f15096d04",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-brain-startup-four-fixes"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-config13-runtime",
+    "sha": "9804c0b1b278e71ce5d533e8ee348945b68e530e",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-config13-runtime"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-doctor-stdout",
+    "sha": "fb6d68b337974b03efeb8e9bd547dfbb06bb8fae",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-doctor-stdout"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-memory-startup-review-fixes",
+    "sha": "8afb9a9bf3c266478adea2f154bee9d5e0e1ebe1",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-memory-startup-review-fixes"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-native-doctor-fix",
+    "sha": "44354141e73b5ff4287ec3b1b767c2d0a8e99e6b",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-native-doctor-fix"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-native-setup-doctor",
+    "sha": "c938cbe9ea31d09f07d5facf171a435d26f4192e",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-native-setup-doctor"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-native-source-module-setup",
+    "sha": "0fa47514b076da6435b80194b3d1f447660cbf56",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-native-source-module-setup"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-normal-main-startup",
+    "sha": "78f12abcbb772af07fb48d27b7e70c2aede45603",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-normal-main-startup"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-output-boundaries",
+    "sha": "b3ad77a80b43ebbe639b29b632aab2e738511fa3",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-output-boundaries"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-shared-go-json",
+    "sha": "3f92a768e2a19c1a5533262663d6f85b4ce0b591",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-shared-go-json"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-whole-brain-typed-config",
+    "sha": "e63e20a6faf0f05b3d384b9d2b8e15ac0f234dae",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-whole-brain-typed-config"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-windows-doctor-compat",
+    "sha": "34394496b44d0f95581080885d89d4ed5f43bbd5",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-windows-doctor-compat"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/765-windows-source-owned-job",
+    "sha": "7b10ff20027407ca9bc32f3d72e28d07003fce77",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/765-windows-source-owned-job"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/766-native-vault",
+    "sha": "7a385f065122af765bf9a684c6dce73f48e3a449",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/766-native-vault"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/767-native-activity-validation",
+    "sha": "635d98afd33ee2fd65a9cf50df8c454ae9418ba3",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/767-native-activity-validation"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/768-early-argv-unicode-status",
+    "sha": "5e77418ff03491df61a74dcd6435eeb5b4496260",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/768-early-argv-unicode-status"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/768-hermes-slice-repair",
+    "sha": "c7a7cb4acdc127f69db8fd6f9caf42d831dd7c79",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/768-hermes-slice-repair"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/768-native-copilot-kimi-files",
+    "sha": "abf20713bacdab562644256e27616a9dd7acb81e",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/768-native-copilot-kimi-files"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/768-native-credential-usage",
+    "sha": "097ac8a3b4e7abb8d445be671d383f31480c2f36",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/768-native-credential-usage"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/768-native-jwt-credentials",
+    "sha": "273a93c03d0cc526d81d962ac137a5a6fb0d73e9",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/768-native-jwt-credentials"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/768-native-provider-files",
+    "sha": "b8621bc26e8d9c5985e8517968d679c127fa152a",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/768-native-provider-files"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/768-retry-after",
+    "sha": "780f93987e2f20c6dbd6cbed8a4a07af1b914d11",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/768-retry-after"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/768-retry-after-decimal",
+    "sha": "3797d40fa34c57cf1314853438170e607cbd7875",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/768-retry-after-decimal"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/768-retry-ci-evidence-lints",
+    "sha": "6572c11e34b0540b7cbc5b4ee6fedb9753ac23ed",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/768-retry-ci-evidence-lints"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/768-retry-main935",
+    "sha": "cb2e852ed55b95d5e9f62eecbcf3b3eb7a858cd2",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/768-retry-main935"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/768-retry-test-ci-lints",
+    "sha": "e6506e24b6cfe41837cbfc24db61b4d2405706d0",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/768-retry-test-ci-lints"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/768-usage-argv-bytes",
+    "sha": "eea73b7478e62f1bb174d456bbbecccc1de94034",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/768-usage-argv-bytes"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/770-doctor-boundaries",
+    "sha": "549e1c859e9ff8897d447e054ec3fa51b9ac151e",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/770-doctor-boundaries"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/770-doctor-warnings",
+    "sha": "4d78b6e52c53d1c273126b0dac3c554915a15438",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/770-doctor-warnings"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/770-generated-config-paths",
+    "sha": "7f6faa9924b3d25b5c796ee662b4544184c156d5",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/770-generated-config-paths"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/770-guard-native-diagnostics",
+    "sha": "e8766e354b4f6b21617d4201de23a96d65ac47c7",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/770-guard-native-diagnostics"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/770-raw-diagnostic-paths",
+    "sha": "208aec97423392749f6d947a91977d2c2b092dd2",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/770-raw-diagnostic-paths"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/770-standalone-rust-guard",
+    "sha": "43dfda366437d586b8609478164292e77685665f",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/770-standalone-rust-guard"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/772-daemon-native-acceptance",
+    "sha": "4798e5d099343e89d7a48dac916816df8a421510",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/772-daemon-native-acceptance"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/772-discovery-runtime",
+    "sha": "b17b125f78099ddc0693b4fbfe93b6076d83ac95",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/772-discovery-runtime"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/772-discovery-runtime-crosslint",
+    "sha": "8e41529c86c0415c8ab71ce403a588079320ea61",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/772-discovery-runtime-crosslint"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/772-discovery-runtime-diagnostic",
+    "sha": "a147cedb6fd003f257cc491fcb94c45db4291400",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/772-discovery-runtime-diagnostic"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/772-discovery-runtime-stdin-fixture",
+    "sha": "df16b088c2d7057639383b2eac8d71c3fa328557",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/772-discovery-runtime-stdin-fixture"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/772-native-provider-discovery",
+    "sha": "48fc3639e2265756f3bf8f9c4c914afa971ea5da",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/772-native-provider-discovery"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/772-native-provider-discovery-clean",
+    "sha": "381e324852e70fd7c647dce9bbffccb4c2731484",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/772-native-provider-discovery-clean"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/772-native-provider-discovery-mask",
+    "sha": "7e5c4561c82803403b579d011fb687bbe254d32a",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/772-native-provider-discovery-mask"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/772-native-registry-autostart",
+    "sha": "c31b557be18adfdb32d81212e21b23c3d5e53cd4",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/772-native-registry-autostart"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/772-native-state-key-bridge",
+    "sha": "3c2d731b2b113df81db3601b73f3036c8a558e5c",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/772-native-state-key-bridge"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/772-native-state-key-osargs",
+    "sha": "2b2755231b4ec5ce79de6fb2f022ac423abb44bd",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/772-native-state-key-osargs"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/773-honest-fetch-control",
+    "sha": "52236234a197f00de89edbb185fc762a4f121161",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/773-honest-fetch-control"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/773-proxy-auth-bytes",
+    "sha": "86698a960294a67d11de8ce9c3ec5f465ea0ae5f",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/773-proxy-auth-bytes"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/773-proxy-deadline-fixture",
+    "sha": "6e19b2bdc847915ee645ffe79af0b79d6e726fe7",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/773-proxy-deadline-fixture"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/773-proxy-uri",
+    "sha": "335073aab4bc49b6a4497b38115ed5d8a688374a",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/773-proxy-uri"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/794-frozen-go-cache-preparation",
+    "sha": "d2f0047faf5837b85dd1bb842bd67814ea7a0094",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/794-frozen-go-cache-preparation"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/794-native-mtime-resolution",
+    "sha": "5081205bbc27264bc0c701b92330410fcbe56c02",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/794-native-mtime-resolution"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/794-native-novel-plan",
+    "sha": "7559ba0a4aec8e7baf999c0df3b4e9f330001367",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/794-native-novel-plan"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/794-owned-go-oracle",
+    "sha": "a9493030ee454b2dbf3f244862c35c855e608163",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/794-owned-go-oracle"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/794-wide-argv-public-api-docs",
+    "sha": "522ce5d7db8c45182cc30a1eb8b8d9272d8949d0",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/794-wide-argv-public-api-docs"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/794-wide-argv-runtime",
+    "sha": "53711fb08ddd51b149554e02bf97531f54d18d10",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/794-wide-argv-runtime"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/794-windows-bootstrap-control",
+    "sha": "97d8ca6a0679ebdf9cf8175a284da335dc6a07de",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/794-windows-bootstrap-control"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/794-windows-wide-argv",
+    "sha": "70b76390f372c6f05983f01f5a2b8147356ca39e",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/794-windows-wide-argv"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/801-autostart-cleanup",
+    "sha": "85488c70abf0d62c97a391549b8037c4de58049f",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/801-autostart-cleanup"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/801-native-client-deadlines",
+    "sha": "76132675ee81cae30bd610cd955ae3d28f7b5df8",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/801-native-client-deadlines"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/801-registry-progress-observer",
+    "sha": "8a95b40e854724384b4a551f316215662d7b5815",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/801-registry-progress-observer"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/803-bounded-store-open",
+    "sha": "2fe09ea78f1beb0225b9c325d76a054c183a9e42",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/803-bounded-store-open"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/803-coherent-guard-output-owner",
+    "sha": "a111084cfc34f03b1f58f934cd2420c603e017c3",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/803-coherent-guard-output-owner"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/803-coherent-main797",
+    "sha": "894c606ea78d046d601df1a7f6ce764cad500d43",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/803-coherent-main797"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/803-coherent-source-prerequisites",
+    "sha": "23fa5854df3ca408eb8786c9b6042fe1add61877",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/803-coherent-source-prerequisites"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/803-main935-integration",
+    "sha": "5a4f0464bc24efefa82e26068276fc747c5b1b11",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/803-main935-integration"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/803-managed-timeout-diagnostic",
+    "sha": "a7faefd8b0d218dc20baa5c651bfa8f7fbea1732",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/803-managed-timeout-diagnostic"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/803-owned-sqlite-checker-provider",
+    "sha": "c310cb54bb4f6d871eb6ba419da5e37740a377f2",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/803-owned-sqlite-checker-provider"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/803-portable-admission-fixture",
+    "sha": "c3ccc7ccba6f4b6a0e459adad5c87a41c10a111d",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/803-portable-admission-fixture"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/803-provider-fixture-canonical-root",
+    "sha": "017463b3f5648e24442f4c249328bb9c8915caf9",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/803-provider-fixture-canonical-root"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/805-doctor-warning-owner-fixture",
+    "sha": "0701491b10d10c28759c1c5c2c97d00f01acb09d",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/805-doctor-warning-owner-fixture"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/805-kernel-fixture-admission",
+    "sha": "f1bf67f198580a49365778dcba3ea1af342ac65b",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/805-kernel-fixture-admission"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/805-main935-integration",
+    "sha": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/805-main935-integration"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/805-windows-owner-control",
+    "sha": "207ba8bc7fb5fd0b62a98375dcc3c1d2dc829503",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/805-windows-owner-control"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/805-windows-owner-control-empty-index-proof",
+    "sha": "b2ef6ecc5e0e581c5f0d84ea05d73a837a309742",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/805-windows-owner-control-empty-index-proof"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/806-owned-source-journal-import",
+    "sha": "74dd7aea5c7a1765dc36c2cbab2ca3fe6b6665d8",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/806-owned-source-journal-import"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/806-source-main935",
+    "sha": "d0b58ab03f77e847cd92862f0332f5ebc4952b44",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/806-source-main935"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/806-source-progress",
+    "sha": "9faee8b0a2619909aa8ee53ed84b2cb4d6ef50b8",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/806-source-progress"
+  },
+  {
+    "original_local_ref": "refs/heads/issue/806-source-progress-fix",
+    "sha": "7ea3cfb9f816291abecc91eef453ec7f3cbc4492",
+    "backup_ref": "refs/heads/handoff/20261004/local/issue/806-source-progress-fix"
+  },
+  {
+    "original_local_ref": "refs/heads/review/649-historical-runtime-root",
+    "sha": "ec57961f7bf56a3f8430001fbc9b03f3cbc237eb",
+    "backup_ref": "refs/heads/handoff/20261004/local/review/649-historical-runtime-root"
+  },
+  {
+    "original_local_ref": "refs/heads/review/794-wide-root-runtime",
+    "sha": "cec81cfc0acdc9f4bb567f85fa6a27c03cb74467",
+    "backup_ref": "refs/heads/handoff/20261004/local/review/794-wide-root-runtime"
+  },
+  {
+    "original_local_ref": "refs/heads/review/803-diagnostic-deadline",
+    "sha": "a0ec18b8b90a1282f29bf4766ffd54d8675d9e49",
+    "backup_ref": "refs/heads/handoff/20261004/local/review/803-diagnostic-deadline"
+  },
+  {
+    "original_local_ref": "refs/heads/work",
+    "sha": "e8c7f7990ab61967db0a3cbadaf6e485b4a33d99",
+    "backup_ref": "refs/heads/handoff/20261004/local/work"
+  }
+]

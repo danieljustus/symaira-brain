@@ -1,0 +1,463 @@
+worktree /workspace/symaira-brain
+HEAD e8c7f7990ab61967db0a3cbadaf6e485b4a33d99
+branch refs/heads/work
+
+worktree /tmp/symaira-fetch773-benchmark-go
+HEAD dcddcef0df5789123c7c9a7ebe6e01f10e941f2c
+detached
+
+worktree /tmp/symaira-registry94-root-go
+HEAD dcddcef0df5789123c7c9a7ebe6e01f10e941f2c
+detached
+
+worktree /workspace/oracles/daemon772-go-source
+HEAD dcddcef0df5789123c7c9a7ebe6e01f10e941f2c
+detached
+
+worktree /workspace/symaira-brain765-main-integration
+HEAD 78f12abcbb772af07fb48d27b7e70c2aede45603
+branch refs/heads/issue/765-normal-main-startup
+
+worktree /workspace/symaira-brain765-output-owner
+HEAD f312138465447df1006a771a41c250abee98244d
+branch refs/heads/issue/765-brain-inherited-output-owner
+
+worktree /workspace/symaira-brain765-output-owner-main797
+HEAD b6a6ad3ab836d3229db3c0f003a9394434310d77
+branch refs/heads/issue/765-brain-output-owner-main797
+
+worktree /workspace/symaira-brain765-resolved-config
+HEAD e63e20a6faf0f05b3d384b9d2b8e15ac0f234dae
+branch refs/heads/issue/765-whole-brain-typed-config
+
+worktree /workspace/symaira-brain765-resolved-config-fixes
+HEAD 826af02e04d80d6d52603ca51ed8491dfe9f7e6f
+branch refs/heads/issue/765-brain-config13-source-fixes
+
+worktree /workspace/symaira-brain765-runtime
+HEAD 9804c0b1b278e71ce5d533e8ee348945b68e530e
+branch refs/heads/issue/765-config13-runtime
+
+worktree /workspace/symaira-brain765-startup-final-corrections
+HEAD e30676fdaced483a3cd1588a78253a3f15096d04
+branch refs/heads/issue/765-brain-startup-four-fixes
+
+worktree /workspace/symaira-brain765-startup-fixes
+HEAD 8afb9a9bf3c266478adea2f154bee9d5e0e1ebe1
+branch refs/heads/issue/765-memory-startup-review-fixes
+
+worktree /workspace/symaira-coverage682
+HEAD 5931cce3e4fe3e090b361fb3f9aca7e07b7ad49b
+branch refs/heads/issue/682-rust-coverage
+
+worktree /workspace/symaira-daemon772
+HEAD 4798e5d099343e89d7a48dac916816df8a421510
+branch refs/heads/issue/772-daemon-native-acceptance
+
+worktree /workspace/symaira-daemon772-discovery-runtime
+HEAD 8e41529c86c0415c8ab71ce403a588079320ea61
+branch refs/heads/issue/772-discovery-runtime-crosslint
+
+worktree /workspace/symaira-daemon772-registry
+HEAD c31b557be18adfdb32d81212e21b23c3d5e53cd4
+branch refs/heads/issue/772-native-registry-autostart
+
+worktree /workspace/symaira-daemon772-state-key
+HEAD 3c2d731b2b113df81db3601b73f3036c8a558e5c
+branch refs/heads/issue/772-native-state-key-bridge
+
+worktree /workspace/symaira-daemon772-state-key-discovery
+HEAD 48fc3639e2265756f3bf8f9c4c914afa971ea5da
+branch refs/heads/issue/772-native-provider-discovery
+
+worktree /workspace/symaira-daemon772-state-key-discovery-clean
+HEAD 381e324852e70fd7c647dce9bbffccb4c2731484
+branch refs/heads/issue/772-native-provider-discovery-clean
+
+worktree /workspace/symaira-daemon772-state-key-discovery-mask
+HEAD 7e5c4561c82803403b579d011fb687bbe254d32a
+branch refs/heads/issue/772-native-provider-discovery-mask
+
+worktree /workspace/symaira-daemon772-state-key-osargs
+HEAD 2b2755231b4ec5ce79de6fb2f022ac423abb44bd
+branch refs/heads/issue/772-native-state-key-osargs
+
+worktree /workspace/symaira-daemon801-autostart-cleanup
+HEAD 85488c70abf0d62c97a391549b8037c4de58049f
+branch refs/heads/issue/801-autostart-cleanup
+
+worktree /workspace/symaira-daemon801-client-deadlines
+HEAD 76132675ee81cae30bd610cd955ae3d28f7b5df8
+branch refs/heads/issue/801-native-client-deadlines
+
+worktree /workspace/symaira-daemon801-main-c741
+HEAD 3e9f48520abe7fd8410508d21cd32998e9d7e48e
+branch refs/heads/integration/daemon801-main-c741
+
+worktree /workspace/symaira-daemon801-progress-observer
+HEAD 8a95b40e854724384b4a551f316215662d7b5815
+branch refs/heads/issue/801-registry-progress-observer
+
+worktree /workspace/symaira-doctor765
+HEAD 44354141e73b5ff4287ec3b1b767c2d0a8e99e6b
+branch refs/heads/issue/765-native-doctor-fix
+
+worktree /workspace/symaira-fetch773
+HEAD 52236234a197f00de89edbb185fc762a4f121161
+branch refs/heads/issue/773-honest-fetch-control
+
+worktree /workspace/symaira-fetch773-deadline
+HEAD 6e19b2bdc847915ee645ffe79af0b79d6e726fe7
+branch refs/heads/issue/773-proxy-deadline-fixture
+
+worktree /workspace/symaira-fetch773-proxy-auth
+HEAD 86698a960294a67d11de8ce9c3ec5f465ea0ae5f
+branch refs/heads/issue/773-proxy-auth-bytes
+
+worktree /workspace/symaira-fetch773-proxy-uri
+HEAD 335073aab4bc49b6a4497b38115ed5d8a688374a
+branch refs/heads/issue/773-proxy-uri
+
+worktree /workspace/symaira-guard770-config-paths
+HEAD 7f6faa9924b3d25b5c796ee662b4544184c156d5
+branch refs/heads/issue/770-generated-config-paths
+
+worktree /workspace/symaira-guard770-diagnostics
+HEAD e8766e354b4f6b21617d4201de23a96d65ac47c7
+branch refs/heads/issue/770-guard-native-diagnostics
+
+worktree /workspace/symaira-guard770-doctor-boundaries
+HEAD 549e1c859e9ff8897d447e054ec3fa51b9ac151e
+branch refs/heads/issue/770-doctor-boundaries
+
+worktree /workspace/symaira-guard770-doctor-warnings
+HEAD 4d78b6e52c53d1c273126b0dac3c554915a15438
+branch refs/heads/issue/770-doctor-warnings
+
+worktree /workspace/symaira-guard770-raw-paths
+HEAD 208aec97423392749f6d947a91977d2c2b092dd2
+branch refs/heads/issue/770-raw-diagnostic-paths
+
+worktree /workspace/symaira-guard770-warning-owner
+HEAD 0701491b10d10c28759c1c5c2c97d00f01acb09d
+branch refs/heads/issue/805-doctor-warning-owner-fixture
+
+worktree /workspace/symaira-guard770-windows-fixtures
+HEAD dcada002eb68ff949636a66a04439407a0186bcb
+branch refs/heads/fix/guard805-windows-doctor-fixtures
+
+worktree /workspace/symaira-guard805-config-control
+HEAD 207ba8bc7fb5fd0b62a98375dcc3c1d2dc829503
+branch refs/heads/issue/805-windows-owner-control
+
+worktree /workspace/symaira-guard805-discovery-fixtures
+HEAD e13f4caa07a4aecff5ab54a4ab57e2e248374438
+branch refs/heads/fix/guard805-owned-discovery-fixtures
+
+worktree /workspace/symaira-guard805-kernel-fixtures
+HEAD f1bf67f198580a49365778dcba3ea1af342ac65b
+branch refs/heads/issue/805-kernel-fixture-admission
+
+worktree /workspace/symaira-guard805-main935
+HEAD cdb2aca223bd9030f834608fd13cc4e643ebdc68
+branch refs/heads/issue/805-main935-integration
+
+worktree /workspace/symaira-guard805-rust-fixture-admission
+HEAD dcbeb0d682c9297e211b440929ba12ff08a8ce38
+branch refs/heads/fix/805-rust-kernel-fixture-admission
+
+worktree /workspace/symaira-macbook-handoff
+HEAD c74110425d04dd62c7f2c0f09bb86561bd1ac20e
+branch refs/heads/handoff/20261004/coordination
+
+worktree /workspace/symaira-managed803-timeout-diagnostic
+HEAD a7faefd8b0d218dc20baa5c651bfa8f7fbea1732
+branch refs/heads/issue/803-managed-timeout-diagnostic
+
+worktree /workspace/symaira-memory649-defaults
+HEAD 9b0e6ec9f5a87418ac9e46073c98edc503ea196e
+branch refs/heads/issue/649-owned-column-defaults
+
+worktree /workspace/symaira-memory649-doctor
+HEAD 64b2c6aceaa0d1f7d1550d1398a5a70ec81aa7a0
+branch refs/heads/issue/649-native-doctor-schema
+
+worktree /workspace/symaira-memory649-main935-current-parents
+HEAD ca583913e418e073c17c426511aa9d02c927edc6
+branch refs/heads/issue/649-main935-current-parents
+
+worktree /workspace/symaira-memory649-repair
+HEAD dba88d23dade87eb5194e9c2451a0ad20d08a83e
+branch refs/heads/issue/649-historical-store-repair
+
+worktree /workspace/symaira-memory758
+HEAD 97a78186c9078f93d1fe09bb8a9ed52904775008
+branch refs/heads/issue/758-native-memory-store
+
+worktree /workspace/symaira-memory758-cli
+HEAD 1d8a0904929157d7928cfcd31782c374aa98501a
+branch refs/heads/issue/758-native-memory-cli
+
+worktree /workspace/symaira-memory758-cli-fixes
+HEAD f428a866d7817c269cdfc32b6affc50dfe014418
+branch refs/heads/issue/758-native-memory-cli-fixes
+
+worktree /workspace/symaira-memory758-sigpipe
+HEAD 1a60e98a6847902299448f92f30ccee82e59913b
+branch refs/heads/issue/758-set-stdout-sigpipe
+
+worktree /workspace/symaira-memory758-write-fix
+HEAD 55e3038665946a9f077af335bec661d02191d004
+branch refs/heads/issue/758-governed-write-review-fixes
+
+worktree /workspace/symaira-memory758-writes
+HEAD 28e8e7ae1a1eb05b3ba1c83a56bbebf1a3572a24
+branch refs/heads/issue/758-native-governed-writes
+
+worktree /workspace/symaira-memory759-mcp
+HEAD 3ce87f529cb02479933eb41a3a7b7be6a5102ca6
+branch refs/heads/issue/759-native-memory-mcp
+
+worktree /workspace/symaira-memory759-windows-path
+HEAD e49a80e2560ee3703aa2006c0420ff5885382fc8
+branch refs/heads/fix/memory-mcp-windows-archive-path
+
+worktree /workspace/symaira-memory760-engine
+HEAD 9f1b1dc07503e7ede84d1e38074100929cb50805
+branch refs/heads/issue/760-native-memory-engine
+
+worktree /workspace/symaira-memory760-hermetic-build
+HEAD 7804d91b6f7b712a9d8fdfa68160bb8375b07a60
+branch refs/heads/issue/760-hermetic-engine-build
+
+worktree /workspace/symaira-memory760-runner-binding
+HEAD c5e8a4db8e9159fbaecd88c791f1486b496fc755
+branch refs/heads/issue/760-engine-runner-binding
+
+worktree /workspace/symaira-memory760-sdk-owner
+HEAD b8ba0865ac28a98f829843cb34e5e09f19973876
+branch refs/heads/issue/760-effective-sdk-owner
+
+worktree /workspace/symaira-memory760-sdk-type-admission
+HEAD 4e2b0eede4d7e426f267c62a3bfc7702ec0c4cc1
+branch refs/heads/issue/760-sdk-type-admission
+
+worktree /workspace/symaira-memory761-importer-corrections
+HEAD e55ea752b28d88df0b9d2248a8d32cb6d971f9e5
+branch refs/heads/issue/761-local-contract-corrections
+
+worktree /workspace/symaira-memory761-importers
+HEAD 2946cf2b959ed71ed58dcf44d36c515aab60328e
+branch refs/heads/issue/761-native-memory-importers
+
+worktree /workspace/symaira-memory761-resource-time-fix
+HEAD 410ef3b9c0e56361d6de5409b4b88dbbd5d18666
+branch refs/heads/issue/761-codex-resource-time-boundary
+
+worktree /workspace/symaira-memory762-sync
+HEAD c4a020e0cec77fd38060c591aa1fde244df4b796
+branch refs/heads/issue/762-native-memory-sync
+
+worktree /workspace/symaira-memory762-sync-backend-fixes
+HEAD fdd0b276575f0257bdbf92189137349ca4736e36
+branch refs/heads/issue/762-sync-backend-review-fixes
+
+worktree /workspace/symaira-memory762-sync-backends
+HEAD 8a3226828d045b4307d2c3601e283d1ecfa4ce4f
+branch refs/heads/issue/762-native-memory-sync-backends
+
+worktree /workspace/symaira-memory763-authority
+HEAD 2c7d1c243b17fd4e85f78c26267a371a25472669
+branch refs/heads/issue/763-http-authority
+
+worktree /workspace/symaira-memory763-publication
+HEAD 9647ee7343b4bf8fb6942ff1a4de9f4e4af0ad1e
+branch refs/heads/issue/763-native-memory-http-reviewed
+
+worktree /workspace/symaira-memory763-ui
+HEAD 3f4c28701c5454f0b2b42090db0706fce8d0857c
+branch refs/heads/issue/763-memory-ui-inventory
+
+worktree /workspace/symaira-memory803-coherent-guard
+HEAD a111084cfc34f03b1f58f934cd2420c603e017c3
+branch refs/heads/issue/803-coherent-guard-output-owner
+
+worktree /workspace/symaira-memory803-fixture-canonical-root
+HEAD 017463b3f5648e24442f4c249328bb9c8915caf9
+branch refs/heads/issue/803-provider-fixture-canonical-root
+
+worktree /workspace/symaira-memory803-main935-integration
+HEAD 5a4f0464bc24efefa82e26068276fc747c5b1b11
+branch refs/heads/issue/803-main935-integration
+
+worktree /workspace/symaira-memory803-open
+HEAD 2fe09ea78f1beb0225b9c325d76a054c183a9e42
+branch refs/heads/issue/803-bounded-store-open
+
+worktree /workspace/symaira-memory803-portable-admission-fixture
+HEAD c3ccc7ccba6f4b6a0e459adad5c87a41c10a111d
+branch refs/heads/issue/803-portable-admission-fixture
+
+worktree /workspace/symaira-memory803-provider-admission
+HEAD a5c65c706ac4cb271fde26d9063b0f4afff1b420
+branch refs/heads/fix/memory803-provider-admission
+
+worktree /workspace/symaira-memory803-source806-coherent
+HEAD 23fa5854df3ca408eb8786c9b6042fe1add61877
+branch refs/heads/issue/803-coherent-source-prerequisites
+
+worktree /workspace/symaira-memory803-source806-main797
+HEAD 894c606ea78d046d601df1a7f6ce764cad500d43
+branch refs/heads/issue/803-coherent-main797
+
+worktree /workspace/symaira-memory803-sqlite-provider
+HEAD c310cb54bb4f6d871eb6ba419da5e37740a377f2
+branch refs/heads/issue/803-owned-sqlite-checker-provider
+
+worktree /workspace/symaira-memory803-windows-diagnostics
+HEAD 0266879f7458f7116871ddcc9458c22707eca518
+branch refs/heads/diagnose/memory803-windows-parity
+
+worktree /workspace/symaira-policy-create-race
+HEAD e47bbaa56a9ffb7ce492e6b36d8f344a52839af7
+branch refs/heads/fix/policy-create-windows-race
+
+worktree /workspace/symaira-release730
+HEAD 1755e12bad9baa2424e8b3a8c606702443ef1f68
+branch refs/heads/issue/730-release-verification
+
+worktree /workspace/symaira-setup765
+HEAD c938cbe9ea31d09f07d5facf171a435d26f4192e
+branch refs/heads/issue/765-native-setup-doctor
+
+worktree /workspace/symaira-setup765-source
+HEAD 0fa47514b076da6435b80194b3d1f447660cbf56
+branch refs/heads/issue/765-native-source-module-setup
+
+worktree /workspace/symaira-skills621
+HEAD e00365333a041118dd0598157137e0ba3586013d
+branch refs/heads/issue/621-skills-render-drift
+
+worktree /workspace/symaira-skills764-byte-contracts
+HEAD 36c13305b56a71e9f6ffcef53f0a3bf5cba1a029
+branch refs/heads/issue/764-native-byte-contracts
+
+worktree /workspace/symaira-skills764-corrections
+HEAD 128e1bfc81733e488e25f5b4935300a33009e265
+branch refs/heads/issue/764-native-skills-corrections
+
+worktree /workspace/symaira-skills764-eof-correction
+HEAD b49372bedcd9c4514706c999447dc4f836be012a
+branch refs/heads/issue/764-json-eof-state-correction
+
+worktree /workspace/symaira-skills764-json-corrections
+HEAD fb43004be5e89e3f489f8a3f38c1224e2a98ff0e
+branch refs/heads/issue/764-json-depth-float-corrections
+
+worktree /workspace/symaira-skills764-native
+HEAD db9760a3d312173e8cd096d05925319a78308b48
+branch refs/heads/issue/764-native-skills-surface
+
+worktree /workspace/symaira-skills794-cache-preparation
+HEAD d2f0047faf5837b85dd1bb842bd67814ea7a0094
+branch refs/heads/issue/794-frozen-go-cache-preparation
+
+worktree /workspace/symaira-skills794-mtime-resolution
+HEAD 5081205bbc27264bc0c701b92330410fcbe56c02
+branch refs/heads/issue/794-native-mtime-resolution
+
+worktree /workspace/symaira-skills794-novel-plan
+HEAD 7559ba0a4aec8e7baf999c0df3b4e9f330001367
+branch refs/heads/issue/794-native-novel-plan
+
+worktree /workspace/symaira-skills794-owned-go
+HEAD a9493030ee454b2dbf3f244862c35c855e608163
+branch refs/heads/issue/794-owned-go-oracle
+
+worktree /workspace/symaira-skills794-wide-argv
+HEAD 70b76390f372c6f05983f01f5a2b8147356ca39e
+branch refs/heads/issue/794-windows-wide-argv
+
+worktree /workspace/symaira-skills794-wide-bootstrap
+HEAD 97d8ca6a0679ebdf9cf8175a284da335dc6a07de
+branch refs/heads/issue/794-windows-bootstrap-control
+
+worktree /workspace/symaira-skills794-wide-runtime
+HEAD 522ce5d7db8c45182cc30a1eb8b8d9272d8949d0
+branch refs/heads/issue/794-wide-argv-public-api-docs
+
+worktree /workspace/symaira-skills813-strict-lint
+HEAD c279997c550b94f6625020fa4036d9bb52c1234f
+branch refs/heads/fix/813-skills-strict-lint
+
+worktree /workspace/symaira-source765-windows-job-runtime-review
+HEAD d0b58ab03f77e847cd92862f0332f5ebc4952b44
+branch refs/heads/issue/806-source-main935
+
+worktree /workspace/symaira-source806-job-doc-markdown
+HEAD d07c5daae8b68f053f9c215434ed8e5bc64c6baa
+branch refs/heads/fix/806-windows-job-doc-markdown
+
+worktree /workspace/symaira-source806-main-c741
+HEAD d2d1373aa618b9fc0334bcae033f412f6b05e384
+branch refs/heads/integration/source806-main-c741
+
+worktree /workspace/symaira-source806-output-owner
+HEAD d559dc0bba8ec50e9d2e5fe7c337ed8907f62050
+branch refs/heads/fix/806-inherited-output-owner
+
+worktree /workspace/symaira-usage620
+HEAD d7ca08a6db177a400e2034bff9bcce684fda4e38
+branch refs/heads/issue/620-usage-fetch-identity
+
+worktree /workspace/symaira-usage768
+HEAD 097ac8a3b4e7abb8d445be671d383f31480c2f36
+branch refs/heads/issue/768-native-credential-usage
+
+worktree /workspace/symaira-usage768-files
+HEAD b8621bc26e8d9c5985e8517968d679c127fa152a
+branch refs/heads/issue/768-native-provider-files
+
+worktree /workspace/symaira-usage768-jwt
+HEAD 273a93c03d0cc526d81d962ac137a5a6fb0d73e9
+branch refs/heads/issue/768-native-jwt-credentials
+
+worktree /workspace/symaira-usage768-jwt-fix
+HEAD c7a7cb4acdc127f69db8fd6f9caf42d831dd7c79
+branch refs/heads/issue/768-hermes-slice-repair
+
+worktree /workspace/symaira-usage768-local-files
+HEAD abf20713bacdab562644256e27616a9dd7acb81e
+branch refs/heads/issue/768-native-copilot-kimi-files
+
+worktree /workspace/symaira-usage768-remaining
+HEAD 5e77418ff03491df61a74dcd6435eeb5b4496260
+branch refs/heads/issue/768-early-argv-unicode-status
+
+worktree /workspace/symaira-usage768-retry-after
+HEAD 780f93987e2f20c6dbd6cbed8a4a07af1b914d11
+branch refs/heads/issue/768-retry-after
+
+worktree /workspace/symaira-usage768-retry-after-decimal
+HEAD 3797d40fa34c57cf1314853438170e607cbd7875
+branch refs/heads/issue/768-retry-after-decimal
+
+worktree /workspace/symaira-usage768-retry-ci-fixes
+HEAD 6572c11e34b0540b7cbc5b4ee6fedb9753ac23ed
+branch refs/heads/issue/768-retry-ci-evidence-lints
+
+worktree /workspace/symaira-usage768-retry-main935
+HEAD cb2e852ed55b95d5e9f62eecbcf3b3eb7a858cd2
+branch refs/heads/issue/768-retry-main935
+
+worktree /workspace/symaira-usage768-retry-test-ci-fixes
+HEAD e6506e24b6cfe41837cbfc24db61b4d2405706d0
+branch refs/heads/issue/768-retry-test-ci-lints
+
+worktree /workspace/symaira-usage804-main-c741
+HEAD 4777676155ae463f55e58581e690531485f8ec93
+branch refs/heads/integration/usage804-main-c741
+
+worktree /workspace/symaira-vault766
+HEAD 7a385f065122af765bf9a684c6dce73f48e3a449
+branch refs/heads/issue/766-native-vault
