@@ -1,0 +1,8 @@
+{
+  "tested_head": "a112189b31fb5bf2d7100d42b716bddeac9eb7c7",
+  "executed_binary": "/workspace/symaira-memory803-open/target/debug/deps/symbrain_memory-dde9bae26a7c26aa",
+  "sha256": "3bb58f39fb8b520f8fc80feaf571b762555977237ea05f246220e5addb472015",
+  "gzip": "/workspace/oracles/symaira-memory803-a112189-binaries/3bb58f39fb8b520f8fc80feaf571b762555977237ea05f246220e5addb472015.gz",
+  "gzip_sha256": "6888f3f407aa890addb23c31132189d9785a2ef4c7ff9de30b6e9105d8cb5607",
+  "production_sha256": "b7e9db536076793c9d1d5b608869dd9cb6b0dee9a90780022c168d5d30903cf9"
+}

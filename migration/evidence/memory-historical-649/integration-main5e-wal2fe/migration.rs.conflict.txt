@@ -36,6 +36,13 @@ use std::time::Duration;
 
 pub(crate) fn configure(mut conn: Connection) -> Result<Store, StoreError> {
     conn.busy_timeout(Duration::from_secs(5))?;
+<<<<<<< HEAD
+    conn.execute_batch(
+        "PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA secure_delete=ON;",
+    )?;
+    // Reserve before inspection: busy_timeout cannot retry a deferred snapshot
+    // upgrade after another opener commits (the former BUSY_SNAPSHOT517 bug).
+=======
     // WAL transitions have lock-upgrade paths that skip SQLite's busy handler.
     // Retry only that autocommit pragma within the same five-second budget.
     conn.execute_batch("PRAGMA foreign_keys=ON;")?;
@@ -45,6 +52,7 @@ pub(crate) fn configure(mut conn: Connection) -> Result<Store, StoreError> {
     // cannot be upgraded after another opener commits (BUSY_SNAPSHOT517), and
     // busy_timeout does not retry that invalid snapshot. IMMEDIATE makes the
     // existing bounded timeout wait before any schema inspection instead.
+>>>>>>> 2fe09ea78f1beb0225b9c325d76a054c183a9e42
     let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
     runner::apply(&tx)?;
     tx.commit()?;

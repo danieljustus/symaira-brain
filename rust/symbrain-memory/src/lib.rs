@@ -22,6 +22,7 @@ mod rows;
 mod schema;
 mod search_rows;
 mod store;
+mod wal_open;
 mod write;
 
 #[cfg(test)]
