@@ -1,0 +1,89 @@
+{
+  "tool": "/home/agent/.rustup/toolchains/1.98.0-x86_64-unknown-linux-gnu/bin/rustfmt",
+  "tool_sha256": "5005cdcd39ded526dca8fa6ccd716d42fc7da54469034e055dbf54649bec7877",
+  "compiler": false,
+  "rows": [
+    {
+      "path": "rust/symbrain-memory/src/lib.rs",
+      "parent_sha256": "0cd343125406d626aa4075a5759b8e90181853d855dfde187be6f44ac87de49b",
+      "current_sha256": "363cd76db19594fc334b580b8a36b86dcdd9098b702b0f3fc199079bde2b6490",
+      "mode": "100644",
+      "deterministic_formatter_output_exact": true,
+      "literal_token_sequence_exact": true,
+      "literal_tokens": 1,
+      "original_Git_body_exact": true
+    },
+    {
+      "path": "rust/symbrain-memory/src/migration.rs",
+      "parent_sha256": "e28c8ee8adc0cb2c8786107278b036743293fb7e8f58aae4789091df83c843f0",
+      "current_sha256": "8475395db4e7fb6ae47739ece11c7f95384349a9f02a86455eb3624e0b809891",
+      "mode": "100644",
+      "deterministic_formatter_output_exact": true,
+      "literal_token_sequence_exact": true,
+      "literal_tokens": 39,
+      "original_Git_body_exact": true
+    },
+    {
+      "path": "rust/symbrain-memory/src/startup_db_error.rs",
+      "parent_sha256": "10c0fd9c82a9d6d847c18da04f93a6d321490c361feefe80ca5543811a357670",
+      "current_sha256": "08527f67b3494ade5d3e2d7f1a6bf9a2a3c4f56efc11090fdcc1820661516701",
+      "mode": "100644",
+      "deterministic_formatter_output_exact": true,
+      "literal_token_sequence_exact": true,
+      "literal_tokens": 6,
+      "original_Git_body_exact": true
+    },
+    {
+      "path": "rust/symbrain-memory/src/startup_fs.rs",
+      "parent_sha256": "50a790bc168e76ed6023985eea8ccc438b7852f1a3f00d84a47b5608a3eeff8c",
+      "current_sha256": "20abb5e5aed614608840f1fd5c9d494bfb6f4e846b2ff4bf21543c252fa3c7c6",
+      "mode": "100644",
+      "deterministic_formatter_output_exact": true,
+      "literal_token_sequence_exact": true,
+      "literal_tokens": 31,
+      "original_Git_body_exact": true
+    },
+    {
+      "path": "rust/symbrain-memory/src/startup_json_scan.rs",
+      "parent_sha256": "7e2873de908b7db284f84d63b0008f9da20193875e03f1a34f0ae296394a256d",
+      "current_sha256": "01fc0869d859b7062ad01c51dc50065dfabd45baaeceeb0554c6206f1d779cda",
+      "mode": "100644",
+      "deterministic_formatter_output_exact": true,
+      "literal_token_sequence_exact": true,
+      "literal_tokens": 73,
+      "original_Git_body_exact": true
+    },
+    {
+      "path": "rust/symbrain-memory/src/startup_mkdir.rs",
+      "parent_sha256": "3d318d868c32e2bfa669d592ea2aca82c22cd0e228c5bafdf92dc77a5f20ed08",
+      "current_sha256": "717e131b8d9d28c142cb5ad172a31b12867d4a2a1daca734110acf982966d501",
+      "mode": "100644",
+      "deterministic_formatter_output_exact": true,
+      "literal_token_sequence_exact": true,
+      "literal_tokens": 5,
+      "original_Git_body_exact": true
+    },
+    {
+      "path": "rust/symbrain-usage/src/command_capture.rs",
+      "parent_sha256": "765ea7b823b40631f6523ef443872da107b2d62f45df94cd16454ced63ebe5d9",
+      "current_sha256": "92b9f8c06390c7c9f630df5d5ca6f6957d7d90ad121fb7bf5f5ad3ad90d69081",
+      "mode": "100644",
+      "deterministic_formatter_output_exact": true,
+      "literal_token_sequence_exact": true,
+      "literal_tokens": 1,
+      "original_Git_body_exact": true
+    },
+    {
+      "path": "rust/symbrain-usage/src/secret_exit_status.rs",
+      "parent_sha256": "01cb4e3ca8a5594f8193d4ca852609eea07a60fbaafd52a6b3f07d128e136c58",
+      "current_sha256": "f3fd22dfe9061587ac3ec8e6644436b29d86742136df6f162cae677ba6f67add",
+      "mode": "100644",
+      "deterministic_formatter_output_exact": true,
+      "literal_token_sequence_exact": true,
+      "literal_tokens": 81,
+      "original_Git_body_exact": true
+    }
+  ],
+  "module_import_reordering": "Rustfmt module/import declarations retain attached cfg; no macro_use attributes in changed lib",
+  "logic_assertion_corpus_timeout_edits": false
+}

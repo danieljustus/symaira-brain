@@ -1,11 +1,18 @@
 //! Single existing bounded subprocess capture; retains actual termination status.
-use std::{io::{Read, Seek, SeekFrom}, process::{Command, Stdio}, time::{Duration, Instant}};
+use std::{
+    io::{Read, Seek, SeekFrom},
+    process::{Command, Stdio},
+    time::{Duration, Instant},
+};
 
 /// Why a bounded child command did not yield usable stdout.
 pub(super) enum CommandFailure {
     NotFound,
     TimedOut,
-    ExitFailed { status: std::process::ExitStatus, stderr: Vec<u8> },
+    ExitFailed {
+        status: std::process::ExitStatus,
+        stderr: Vec<u8>,
+    },
     Other(String),
 }
 
@@ -53,10 +60,7 @@ pub(super) fn run_command_capture<S: AsRef<std::ffi::OsStr>>(
             Ok(Some(status)) => {
                 if !status.success() {
                     let stderr = read_capture(stderr_file.as_file(), cap);
-                    return Err(CommandFailure::ExitFailed {
-                        status,
-                        stderr,
-                    });
+                    return Err(CommandFailure::ExitFailed { status, stderr });
                 }
                 break;
             }
@@ -108,7 +112,6 @@ fn read_capture(file: &std::fs::File, cap: u64) -> Vec<u8> {
     }
     buffer
 }
-
 
 fn terminate_child(child: &mut std::process::Child) {
     #[cfg(unix)]

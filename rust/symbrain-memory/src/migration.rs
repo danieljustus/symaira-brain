@@ -9,7 +9,11 @@ use rusqlite::{Connection, TransactionBehavior};
 use std::time::Duration;
 
 #[derive(Debug, Clone, Copy)]
-pub(crate) enum ConfigurePhase { Connection, SecureDelete, Migration }
+pub(crate) enum ConfigurePhase {
+    Connection,
+    SecureDelete,
+    Migration,
+}
 
 pub(crate) struct ConfigureError {
     pub phase: ConfigurePhase,
@@ -22,7 +26,8 @@ pub(crate) fn configure(conn: Connection) -> Result<Store, StoreError> {
 
 pub(crate) fn configure_with_phase(conn: Connection) -> Result<Store, ConfigureError> {
     let error = |phase, error| ConfigureError { phase, error };
-    conn.busy_timeout(Duration::from_secs(5)).map_err(|e| error(ConfigurePhase::Connection, e.into()))?;
+    conn.busy_timeout(Duration::from_secs(5))
+        .map_err(|e| error(ConfigurePhase::Connection, e.into()))?;
     // Go's DSN configures these before the separately labelled secure-delete
     // step. Keep the same connection and original atomic migration below.
     conn.execute_batch("PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL;")
@@ -40,10 +45,15 @@ fn migrate(mut conn: Connection) -> Result<Store, StoreError> {
     apply_column_parity(&tx)?;
     tx.execute_batch(INDEXES)?;
     for version in MIGRATIONS {
-        tx.execute("INSERT OR IGNORE INTO schema_migrations(version) VALUES (?)", [version])?;
+        tx.execute(
+            "INSERT OR IGNORE INTO schema_migrations(version) VALUES (?)",
+            [version],
+        )?;
     }
     tx.commit()?;
-    Ok(Store { conn: std::sync::Mutex::new(conn) })
+    Ok(Store {
+        conn: std::sync::Mutex::new(conn),
+    })
 }
 
 fn apply_column_parity(conn: &Connection) -> Result<(), StoreError> {

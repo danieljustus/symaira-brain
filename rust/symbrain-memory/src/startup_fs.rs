@@ -130,7 +130,8 @@ fn safe_database_directory(path: &Path) -> Result<(), GoText> {
                     #[cfg(unix)]
                     let error = io::Error::from_raw_os_error(20);
                     #[cfg(not(unix))]
-                    let error = io::Error::new(io::ErrorKind::NotADirectory, "path is not a regular file");
+                    let error =
+                        io::Error::new(io::ErrorKind::NotADirectory, "path is not a regular file");
                     return Err(path_error("mkdir", &current, &error));
                 }
             }
@@ -163,9 +164,8 @@ pub(super) fn open_database(path: &Path) -> Result<Store, GoText> {
     let connection = rusqlite::Connection::open(path).map_err(|error| {
         crate::startup_db_error::format(crate::migration::ConfigurePhase::Connection, &error.into())
     })?;
-    let store = crate::migration::configure_with_phase(connection).map_err(|error| {
-        crate::startup_db_error::format(error.phase, &error.error)
-    })?;
+    let store = crate::migration::configure_with_phase(connection)
+        .map_err(|error| crate::startup_db_error::format(error.phase, &error.error))?;
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;

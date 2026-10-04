@@ -1,0 +1,66 @@
+[
+  {
+    "path": "rust/symbrain-memory/src/lib.rs",
+    "sha256": "0cd343125406d626aa4075a5759b8e90181853d855dfde187be6f44ac87de49b",
+    "bytes": 1422,
+    "mode": "0o600",
+    "mtime_ns": 1791121676281758330,
+    "git_blob": "fb9cead0c7627c56fb5894ade19f29c2994f7206"
+  },
+  {
+    "path": "rust/symbrain-memory/src/migration.rs",
+    "sha256": "e28c8ee8adc0cb2c8786107278b036743293fb7e8f58aae4789091df83c843f0",
+    "bytes": 8945,
+    "mode": "0o600",
+    "mtime_ns": 1791121676281758330,
+    "git_blob": "2454f3a8ea0c02780874b1ddcd0e432aa1f16330"
+  },
+  {
+    "path": "rust/symbrain-memory/src/startup_db_error.rs",
+    "sha256": "10c0fd9c82a9d6d847c18da04f93a6d321490c361feefe80ca5543811a357670",
+    "bytes": 1301,
+    "mode": "0o600",
+    "mtime_ns": 1791121676281758330,
+    "git_blob": "111297f433692bbd956a189cef656e637293deee"
+  },
+  {
+    "path": "rust/symbrain-memory/src/startup_fs.rs",
+    "sha256": "50a790bc168e76ed6023985eea8ccc438b7852f1a3f00d84a47b5608a3eeff8c",
+    "bytes": 7435,
+    "mode": "0o600",
+    "mtime_ns": 1791121676281758330,
+    "git_blob": "28dd7a2ae2388154cf83f24c1bcd0431b9bb6ca7"
+  },
+  {
+    "path": "rust/symbrain-memory/src/startup_json_scan.rs",
+    "sha256": "7e2873de908b7db284f84d63b0008f9da20193875e03f1a34f0ae296394a256d",
+    "bytes": 7439,
+    "mode": "0o600",
+    "mtime_ns": 1791121676281758330,
+    "git_blob": "be5d343f7b5bc70a51e1f230857ed4f28060a049"
+  },
+  {
+    "path": "rust/symbrain-memory/src/startup_mkdir.rs",
+    "sha256": "3d318d868c32e2bfa669d592ea2aca82c22cd0e228c5bafdf92dc77a5f20ed08",
+    "bytes": 1639,
+    "mode": "0o600",
+    "mtime_ns": 1791121676281758330,
+    "git_blob": "067b44d84a543ad93afcb9f8f1a5fa08f4b438fd"
+  },
+  {
+    "path": "rust/symbrain-usage/src/command_capture.rs",
+    "sha256": "765ea7b823b40631f6523ef443872da107b2d62f45df94cd16454ced63ebe5d9",
+    "bytes": 4256,
+    "mode": "0o600",
+    "mtime_ns": 1791121676288564147,
+    "git_blob": "60dc22ccb61b79570cd0cddf65effebd04d3d09e"
+  },
+  {
+    "path": "rust/symbrain-usage/src/secret_exit_status.rs",
+    "sha256": "01cb4e3ca8a5594f8193d4ca852609eea07a60fbaafd52a6b3f07d128e136c58",
+    "bytes": 3817,
+    "mode": "0o600",
+    "mtime_ns": 1791121676288564147,
+    "git_blob": "71ea74dd83faf1cbcad55ec00d9b864b0a3d07d2"
+  }
+]

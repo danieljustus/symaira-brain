@@ -1,10 +1,12 @@
 //! Preserve startup failure phase while sharing the Store's atomic migration.
-use symbrain_core::GoText;
 use crate::{StoreError, migration::ConfigurePhase};
+use symbrain_core::GoText;
 
 pub(super) fn format(phase: ConfigurePhase, error: &StoreError) -> GoText {
     let prefix = match phase {
-        ConfigurePhase::Connection => "failed to open sqlite database: failed to open sqlite database: ",
+        ConfigurePhase::Connection => {
+            "failed to open sqlite database: failed to open sqlite database: "
+        }
         ConfigurePhase::SecureDelete => "failed to enable secure sqlite deletes: ",
         ConfigurePhase::Migration => "failed to run migrations: ",
     };
@@ -16,9 +18,13 @@ pub(super) fn format(phase: ConfigurePhase, error: &StoreError) -> GoText {
                 // Frozen modernc preserves the SQLite detail alongside its
                 // result-code label. Actual paired failures remain required.
                 if code.extended_code & 255 == 1 {
-                    message.as_ref().map_or_else(|| error.to_string(),
-                        |message| format!("SQL logic error: {message} ({})", code.extended_code))
-                } else { error.to_string() }
+                    message.as_ref().map_or_else(
+                        || error.to_string(),
+                        |message| format!("SQL logic error: {message} ({})", code.extended_code),
+                    )
+                } else {
+                    error.to_string()
+                }
             }
         }
         _ => error.to_string(),
