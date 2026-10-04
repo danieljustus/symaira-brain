@@ -137,3 +137,10 @@ actual Go/native schema observations and rejection of unchanged Go as the
 false-green control. Strict all-target/all-feature CLI Clippy, formatting and
 actionlint pass. Complete logs/receipts bind the exact CLI and source; native
 Windows/macOS current-head jobs and corrected Doctor parent remain required.
+
+
+## Reviewed Doctor parent integration, 2026-10-04
+
+Normal-merge independently approved Doctor ac81b94/validated58fe50 and main2b6d49f before the next combined-source proof. Resolve only additive .gitattributes/contract-matrix conflicts by preserving both schema exact-log rules and all parent output/native provenance rules and rows; no production conflict is projected away. The earlier Windows inherited Doctor failure remains intact. The complete historical raw-log diff-check reports their original trailing/EOF bytes; retain that failure rather than normalize evidence. New source/documentation whitespace is checked separately from unchanged historical evidence.
+
+This combined source is not yet built or approved. Full affected parent tests, actual schema observations/false-green control and strict checks must run with an explicitly released target, followed by current-head protected/native-three-platform CI. Dependency803 and806 still merge first. This fixes dependency freshness without claiming historical migration backfill/FTS equivalence or closing649 before actual acceptance.

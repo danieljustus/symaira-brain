@@ -1,0 +1,23 @@
+{
+  "previous": "ab4f38d2c88e016be613f5a4b356601232832f8e",
+  "parent": "ac81b94f6d47250baf2ee1ed619802a4affa4817",
+  "main": "2b6d49f250a81650eda1b93cec7d859a171873bb",
+  "normal_merge": "dbba01a3936bcb2c788ad0bed5ee8b1e6c9194f2",
+  "conflict_resolution": "Both additive gitattributes and matrix contracts preserved; no production conflict",
+  "historical_full_diff_check": "Original raw evidence whitespace reports preserved; production/docs source check passes",
+  "proofs": [
+    {
+      "original": "/tmp/symaira-memory649-doctor-ac81-merge-conflicts.patch",
+      "retained": "migration/evidence/memory-schema-649/ac81-parent-integration/symaira-memory649-doctor-ac81-merge-conflicts.patch.gz",
+      "bytes": 8033,
+      "sha256": "1958cc3e34c478c02d3b41d3ec6448db7c06210ad733e71216049a78e8fe1968"
+    },
+    {
+      "original": "/tmp/symaira-memory649-doctor-ac81-full-historical-whitespace.log",
+      "retained": "migration/evidence/memory-schema-649/ac81-parent-integration/symaira-memory649-doctor-ac81-full-historical-whitespace.log.gz",
+      "bytes": 77645,
+      "sha256": "0d8caf34ce2021a67e6d73054a0b3b240dff20b178908081694b290fe86321fd"
+    }
+  ],
+  "combined_native_proof": "NOT YET BUILT OR APPROVED"
+}
