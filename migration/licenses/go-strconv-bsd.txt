@@ -1,6 +1,9 @@
-Go hexadecimal float scanning/rounding and underscore validation, Copyright 2009-2026 The Go Authors.
-Source: Go1.26.7 src/internal/strconv/atof.go, atoi.go and deps.go.
-Adapted into rust/symbrain-usage/src/go_float.rs; all implementations use safe Rust.
+Go floating-point scanning, exact/Eisel-Lemire conversion, bounded decimal fallback,
+shift/power tables and underscore validation, Copyright 2009-2026 The Go Authors.
+Source: Go1.26.7 src/internal/strconv/atof.go, atofeisel.go, decimal.go, math.go,
+pow10tab.go, atoi.go and deps.go. Adapted into rust/symbrain-usage/src/go_float.rs,
+go_decimal.rs, go_decimal_fast.rs, go_decimal_shift.rs and split power tables.
+All implementations use safe Rust; unchanged numeric table values retain attribution.
 
 Copyright 2009 The Go Authors.
 

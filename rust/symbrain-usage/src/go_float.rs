@@ -1,4 +1,4 @@
-//! Go1.26.7 ParseFloat syntax and correctly rounded hexadecimal conversion.
+//! Go1.26.7 ParseFloat grammar and binary64 conversion dispatch.
 // Hex scanning/rounding adapted from Go internal/strconv atof.go/atoi.go;
 // Copyright 2009-2026 The Go Authors. BSD notice: migration/licenses/go-strconv-bsd.txt.
 
@@ -18,20 +18,15 @@ pub(super) fn parse(value: &str) -> Option<f64> {
     if number.hex {
         hex_float(number)
     } else {
-        // Rust and Go both round decimal input to nearest binary64, ties to
-        // even. Go accepts underscores only at validated digit boundaries.
-        let clean = value.replace('_', "");
-        let result = clean.parse::<f64>().ok()?;
-        // Numeric overflow is Go ErrRange; explicit Inf above is successful.
-        (!result.is_infinite()).then_some(result)
+        super::go_decimal::parse(value, &number)
     }
 }
 
-struct Number {
-    mantissa: u64,
-    exponent: i64,
-    negative: bool,
-    truncated: bool,
+pub(super) struct Number {
+    pub(super) mantissa: u64,
+    pub(super) exponent: i64,
+    pub(super) negative: bool,
+    pub(super) truncated: bool,
     hex: bool,
 }
 
@@ -103,7 +98,7 @@ fn scan(value: &str) -> Option<Number> {
     })
 }
 
-fn exponent(bytes: &[u8], mut index: usize, hex: bool) -> Option<(usize, i64)> {
+pub(super) fn exponent(bytes: &[u8], mut index: usize, hex: bool) -> Option<(usize, i64)> {
     let marker = if hex { b'p' } else { b'e' };
     if !bytes
         .get(index)

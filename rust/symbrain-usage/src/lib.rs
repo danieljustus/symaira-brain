@@ -1,6 +1,11 @@
 //! Schema-versioned, read-only AI provider usage reporting.
 #![deny(unsafe_code)]
 
+mod go_decimal;
+mod go_decimal_fast;
+mod go_decimal_shift;
+#[cfg(test)]
+mod go_decimal_tests;
 mod go_float;
 mod model;
 mod parser;

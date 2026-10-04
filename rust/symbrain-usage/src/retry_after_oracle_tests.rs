@@ -25,6 +25,16 @@ fn decoded(value: &str) -> Vec<u8> {
 #[test]
 #[ignore = "requires actual frozen Go scalar processes and private TLS peer"]
 fn retry_after_oracle_matches_fresh_go() {
+    compare_contract(1600, 1164);
+}
+
+#[test]
+#[ignore = "requires actual frozen Go decimal/scalar processes and private TLS peer"]
+fn retry_after_decimal_oracle_matches_fresh_go() {
+    compare_contract(1681, 1356);
+}
+
+fn compare_contract(public_count: usize, tls_count: usize) {
     let corpus: Value = serde_json::from_slice(
         &std::fs::read(std::env::var("USAGE_RETRY_INPUT").unwrap()).unwrap(),
     )
@@ -34,7 +44,7 @@ fn retry_after_oracle_matches_fresh_go() {
             .unwrap();
     let inputs = corpus["public"].as_array().unwrap();
     let rows = go["records"].as_array().unwrap();
-    assert_eq!(inputs.len(), 1600, "complete public scalar inputs");
+    assert_eq!(inputs.len(), public_count, "complete public scalar inputs");
     assert_eq!(rows.len(), inputs.len(), "complete public scalar Go corpus");
     assert_eq!(go["sdk"], "go1.26.7");
     let operating_system = match std::env::consts::OS {
@@ -95,6 +105,6 @@ fn retry_after_oracle_matches_fresh_go() {
         }
         output.push(json!({"id":row["id"],"value_hex":input["value_hex"],"bits":bits,"seconds":seconds,"matched":true}));
     }
-    let status = super::status::compare_with_count(1164);
-    std::fs::write(std::env::var("USAGE_RETRY_NATIVE").unwrap(), serde_json::to_vec_pretty(&json!({"public_cases":1600,"tls_cases":1164,"goos":go["goos"],"goarch":go["goarch"],"sdk":go["sdk"],"int_bits":go["int_bits"],"public":output,"statuses":status})).unwrap()).unwrap();
+    let status = super::status::compare_with_count(tls_count);
+    std::fs::write(std::env::var("USAGE_RETRY_NATIVE").unwrap(), serde_json::to_vec_pretty(&json!({"public_cases":public_count,"tls_cases":tls_count,"goos":go["goos"],"goarch":go["goarch"],"sdk":go["sdk"],"int_bits":go["int_bits"],"public":output,"statuses":status})).unwrap()).unwrap();
 }

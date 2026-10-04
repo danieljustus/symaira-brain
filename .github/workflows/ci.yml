@@ -322,6 +322,19 @@ jobs:
             ${{ runner.temp }}/usage-retry-after-768.evidence
           if-no-files-found: error
           retention-days: 14
+      - name: Native Usage additive long-decimal SDK and full TLS parity
+        shell: bash
+        run: bash scripts/usage-retry-after-oracle/run.sh "$RUNNER_TEMP/usage-retry-decimal-768.json" --decimal
+      - name: Preserve additive long-decimal SDK and TLS evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-retry-decimal-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-retry-decimal-768.json
+            ${{ runner.temp }}/usage-retry-decimal-768.evidence
+          if-no-files-found: error
+          retention-days: 14
       - name: Native Usage early-argv device and real TLS status parity
         shell: bash
         run: bash scripts/usage-next-oracle/run.sh "$RUNNER_TEMP/usage-next-768.json"
@@ -548,6 +561,19 @@ jobs:
           path: |
             ${{ runner.temp }}/usage-retry-after-768.json
             ${{ runner.temp }}/usage-retry-after-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+      - name: Native Usage additive long-decimal SDK and full TLS parity
+        shell: bash
+        run: bash scripts/usage-retry-after-oracle/run.sh "$RUNNER_TEMP/usage-retry-decimal-768.json" --decimal
+      - name: Preserve additive long-decimal SDK and TLS evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-retry-decimal-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-retry-decimal-768.json
+            ${{ runner.temp }}/usage-retry-decimal-768.evidence
           if-no-files-found: error
           retention-days: 14
       - name: Native Usage early-argv device and real TLS status parity
@@ -787,6 +813,19 @@ jobs:
           path: |
             ${{ runner.temp }}/usage-retry-after-768.json
             ${{ runner.temp }}/usage-retry-after-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+      - name: Native Usage additive long-decimal SDK and full TLS parity
+        shell: bash
+        run: bash scripts/usage-retry-after-oracle/run.sh "$RUNNER_TEMP/usage-retry-decimal-768.json" --decimal
+      - name: Preserve additive long-decimal SDK and TLS evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-retry-decimal-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-retry-decimal-768.json
+            ${{ runner.temp }}/usage-retry-decimal-768.evidence
           if-no-files-found: error
           retention-days: 14
       - name: Native Usage early-argv device and real TLS status parity

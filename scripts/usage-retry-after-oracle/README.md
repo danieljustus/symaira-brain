@@ -28,3 +28,22 @@ This gate supplements the unchanged six Usage gates. It does not prove
 production cancellation, deadline or proxy behavior from fast private peers.
 Inherited default-header/OpenCode instance differences stay explicit. Full
 independent review and native three-OS CI are required; full #768 remains open.
+
+The uncompiled long-decimal successor adds `run.sh OUTPUT.json --decimal`.
+That mode appends 81 public scalars and 192 TLS inputs to the complete unchanged
+original corpus:1681/1356 exact records. It includes the confirmed 10010-byte
+Go 0.1 input, the withdrawn giant-negative projection's actual Go 0 control,
+five-/six-digit exponent transitions,19/800-digit state boundaries, signed
+zero, malformed tails, exact normal/subnormal/overflow halfway values and
+genuine dotted sticky-rounding transitions. The public-only 100010-byte input
+is not sent through an HTTP-header limit.
+
+All original four controls remain, plus intended rejection of a missing long
+delay, an incorrect normalized fallback and lost sticky rounding. Only corpus
+counts change in owned disposable Go callers; immutable original fixtures and
+Go production remain unchanged and source/hash restoration assertions stay
+strict. Metadata includes the exact generated caller hashes and all seven SDK
+source bindings. Native3 workflows retain the original gate and add a separate
+additive gate/artifact. No compiled/native/TLS/control result exists yet for this
+successor. The retained81-case probe and unit fixture are actual SDK-only
+Linux/amd64 reference evidence, not current native or provider acceptance.

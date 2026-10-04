@@ -1,0 +1,79 @@
+{
+  "sdk": "go1.26.7",
+  "scope": "Complete unchanged SDK source/attribution used for bounded decimal port; not product runtime",
+  "entries": [
+    {
+      "source": "/workspace/toolchains/go1.26.7/src/internal/strconv/atof.go",
+      "bytes": 15975,
+      "sha256": "2c2205ccab8626b623a188144a7dcaf202ece77002a27a2cd6b0aaf5a61669a5",
+      "archive": "atof.go.gz",
+      "archive_sha256": "cd21232e366ee36648f5a4c9346f98756fef241a8bfe2d0ba55fc0537345d0d1",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/toolchains/go1.26.7/src/internal/strconv/decimal.go",
+      "bytes": 11299,
+      "sha256": "23bd45989d0b5a7b441c45873bf43f210fdf8381132fc74424d381216ac3a8b4",
+      "archive": "decimal.go.gz",
+      "archive_sha256": "0fe3f5f0882afacaa32438a5c3f77ca5d95e33e4aad6c253e28c7cb4f599d8c0",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/toolchains/go1.26.7/src/internal/strconv/atofeisel.go",
+      "bytes": 4866,
+      "sha256": "af5b2e23d8ab9624febb8751364b3c48388e02712817db527dd4abfb89ed7bce",
+      "archive": "atofeisel.go.gz",
+      "archive_sha256": "a30e8a58a672431f5c8ff20a00b8f9f512dc3431d859a77c192f712e1ef717dc",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/toolchains/go1.26.7/src/internal/strconv/math.go",
+      "bytes": 6759,
+      "sha256": "88db7fb281cdfab21f657eab8b37af131f23d822977c7e71bc753ffc5aec0145",
+      "archive": "math.go.gz",
+      "archive_sha256": "0620afd99f5e705f640c7574090099c834198bfc0d3546c4fb4e41125bcb32cf",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/toolchains/go1.26.7/src/internal/strconv/pow10tab.go",
+      "bytes": 43414,
+      "sha256": "1c4356efc589a293b12b6af86f0fca7a88d139d01876ba98306cc1aae2e19ab4",
+      "archive": "pow10tab.go.gz",
+      "archive_sha256": "80510e0c28b75d91bd34c8ee2eb0fd8398fd584fd79a180d3187c4aa13630e39",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/toolchains/go1.26.7/src/internal/strconv/atoi.go",
+      "bytes": 6600,
+      "sha256": "eb5ad640903abe9e8c8b7fbce8dd3487176dbeb43e8b8b4efa6e73ecb5207ddc",
+      "archive": "atoi.go.gz",
+      "archive_sha256": "951edbd944b1f4a88fd8e760d94bf128e570b5e0bbf52cdaeb5108611cb7541a",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/toolchains/go1.26.7/src/internal/strconv/deps.go",
+      "bytes": 866,
+      "sha256": "052459732bddd00d8584351fb6a906566fc664ea40cbb125a6084c266ec32238",
+      "archive": "deps.go.gz",
+      "archive_sha256": "b30e000b3430fa9d4c970af81f64c6c2cafd311c0a50dd02277fd887dd206c6a",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/toolchains/go1.26.7/LICENSE",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "archive": "LICENSE.gz",
+      "archive_sha256": "02d83c094bd4b96c1a044b449e9b9bbf5a93438d3bdc6efd74b2cc65d74e2cb1",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/toolchains/go1.26.7/VERSION",
+      "bytes": 35,
+      "sha256": "89f723ad27054a2ccc7c22f2a974886f3077f64623a231297fcea2e74a73a782",
+      "archive": "VERSION.gz",
+      "archive_sha256": "57d8f9a2c2837d8b77199162f3d03c255db5aa89f57d703878784ba0cc2cd0a3",
+      "roundtrip": true
+    }
+  ],
+  "Go_tool_sha256": "182d1dc98119d61a6241590e1aaca180d771dbcb1133b9846684aee82d457362"
+}
