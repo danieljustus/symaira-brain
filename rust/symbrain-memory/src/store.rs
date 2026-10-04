@@ -21,7 +21,10 @@ impl Store {
             fs::create_dir_all(parent)
                 .map_err(|error| StoreError::Io(format!("create memory directory: {error}")))?;
         }
-        Self::configure(Connection::open(path)?)
+        let store = Self::configure(Connection::open(path)?)?;
+        #[cfg(unix)]
+        crate::migration::secure_files(path)?;
+        Ok(store)
     }
 
     /// Executes a bounded store operation.

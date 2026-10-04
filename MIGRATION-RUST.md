@@ -35,6 +35,19 @@ dynamic configuration, governed writes and JSONL decoding remain open; no Go
 fallback route is removed, and #649 remains pending the shipped Rust release.
 The rationale is recorded in `docs/adr/758-native-memory-evidence.md`.
 
+The isolated #649 historical-repair successor preserves the complete original
+314-file census and proposes all 37 ordered migration effects, including rule
+timestamps, relation UUIDs/nullable intervals, attribution/target columns,
+unique indexes, FTS porter rebuilds and sync-exclusion triggers. The source
+draft checks actual postconditions while retaining the approved IMMEDIATE
+transaction and concurrency reservation. Known native false-completion repairs
+are explicit; unknown custom FTS/trigger/index definitions fail with rollback,
+and unrelated legitimate NULLs remain unchanged. The new 37-prefix process
+gate and focused state/rollback tests are prepared but **not executed** at this
+checkpoint. Target/compiler/runtime allocation, independent review, native
+three-OS CI and the shipped Rust release remain pending. The decision is in
+`docs/adr/memory-historical-migration-repair-649.md`.
+
 The follow-up #758 CLI increment splits the oversized memory module into focused
 behavior modules, ports raw Go flags/error grammar and all 86 typed memory
 configuration fields, uses configured Ollama query embeddings and corrects the

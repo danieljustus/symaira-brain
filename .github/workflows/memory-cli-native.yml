@@ -7,6 +7,7 @@ on:
       - 'rust/symbrain-cli/**'
       - 'rust/symbrain-memory/**'
       - 'scripts/memory-cli-oracle/**'
+      - 'scripts/memory-historical-oracle/**'
       - '.github/workflows/memory-cli-native.yml'
       - 'Cargo.lock'
       - 'Cargo.toml'
@@ -16,6 +17,7 @@ on:
       - 'rust/symbrain-cli/**'
       - 'rust/symbrain-memory/**'
       - 'scripts/memory-cli-oracle/**'
+      - 'scripts/memory-historical-oracle/**'
       - '.github/workflows/memory-cli-native.yml'
       - 'Cargo.lock'
       - 'Cargo.toml'
@@ -72,6 +74,14 @@ jobs:
           set -euo pipefail
           umask 022
           python3 scripts/memory-cli-oracle/replay.py --report "$REPORT" 2>&1 | tee "$PROCESS_LOG"
+      - name: Verify all historical Store migration effects
+        env:
+          REPORT_DIR: ${{ runner.temp }}/memory-cli-historical
+          HISTORICAL_LOG: ${{ runner.temp }}/memory-cli-historical.log
+        run: |
+          set -euo pipefail
+          umask 022
+          bash scripts/memory-historical-oracle/run.sh --output "$REPORT_DIR" 2>&1 | tee "$HISTORICAL_LOG"
       - name: Verify governed direct writes and delete state
         env:
           REPORT_DIR: ${{ runner.temp }}/memory-cli-writes
