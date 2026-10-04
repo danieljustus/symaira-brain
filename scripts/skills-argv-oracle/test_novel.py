@@ -1,11 +1,13 @@
 """Portable preparation tests; these do not execute a Go or Rust CLI."""
 import json
 import os
+import subprocess
 from pathlib import Path
 import tempfile
 import unittest
 
-from novel import PLAN, PLAN_SHA, arguments, digest, seed, selected_cases, snapshot
+from inherited_output import CLI, MAIN, OWNER_PATHS, PARENT_REFS, early_blocks, qualify
+from novel import PLAN, PLAN_SHA, ROOT, arguments, digest, seed, selected_cases, snapshot
 
 
 class NovelPreparation(unittest.TestCase):
@@ -72,6 +74,79 @@ class NovelPreparation(unittest.TestCase):
                 link.symlink_to("project/owned.txt")
                 links = [row for row in snapshot(root) if "link_target_bytes_hex" in row]
                 self.assertEqual(bytes.fromhex(links[0]["link_target_bytes_hex"]), b"project/owned.txt")
+
+
+def sources(reference):
+    return {
+        name: subprocess.check_output(["git", "show", f"{reference}:{name}"], cwd=ROOT)
+        for name in OWNER_PATHS
+    }
+
+
+class InheritedOutputSource(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.parent = sources(PARENT_REFS[0])
+        cls.current = {name: (ROOT / name).read_bytes() for name in OWNER_PATHS}
+
+    def test_actual_windows_parent_owner_and_allowed_reference_names(self):
+        # Unix runtime must still bind its actual parent independently. This
+        # source test needs only the Windows pin explicitly fetched by CI.
+        for reference in PARENT_REFS:
+            self.assertEqual(qualify(reference, self.parent, self.parent)["qualification"], "original-parent")
+
+    def test_reviewed_complete_profiles_bind_real_git_bodies(self):
+        parent = self.parent
+        for reference, expected in [
+            ("5a4f0464bc24efefa82e26068276fc747c5b1b11", "memory803-5a4"),
+            ("cdb2aca223bd9030f834608fd13cc4e643ebdc68", "guard805-cdb"),
+        ]:
+            with self.subTest(reference=reference):
+                self.assertEqual(qualify(PARENT_REFS[0], parent, sources(reference))["qualification"], expected)
+        result = qualify(PARENT_REFS[0], parent, self.current)
+        self.assertEqual(result["qualification"], "memory803-reviewed-guard-integration")
+        self.assertFalse(result["go_parity_claim"])
+        self.assertEqual(set(result["current_owner_sources_sha256"]), set(OWNER_PATHS))
+
+    def test_early_return_is_byte_exact_before_command_handlers(self):
+        parent = self.parent
+        old = early_blocks(parent[CLI], False)
+        new = early_blocks(self.current[CLI], True)
+        self.assertEqual(old, new)
+        self.assertIn(b'return Some(exit::USAGE);', new["early_output_return"])
+        self.assertIn(b'writeln!(stderr, "symbrain: {err}")', new["early_output_return"])
+        self.assertNotIn(b"normalize_flags", new["early_output_return"])
+
+    def test_each_changed_current_owner_requires_fresh_review(self):
+        parent = self.parent
+        for name in OWNER_PATHS:
+            changed = {**self.current, name: self.current[name] + b"\n// unreviewed\n"}
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, "explicit source review"):
+                qualify(PARENT_REFS[0], parent, changed)
+
+    def test_each_changed_parent_owner_is_refused(self):
+        parent = self.parent
+        for name in OWNER_PATHS:
+            changed = {**parent, name: parent[name] + b"\n// not the pinned parent\n"}
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, "immutable reviewed source"):
+                qualify(PARENT_REFS[0], changed, self.current)
+
+    def test_unknown_reference_is_not_a_synthetic_source_binding(self):
+        with self.assertRaisesRegex(ValueError, "immutable reviewed source"):
+            qualify("0" * 40, self.parent, self.current)
+
+    def test_entry_point_cannot_be_mixed_with_another_library(self):
+        parent = self.parent
+        changed = {**self.current, MAIN: parent[MAIN]}
+        with self.assertRaisesRegex(ValueError, "explicit source review"):
+            qualify(PARENT_REFS[0], parent, changed)
+
+    def test_missing_or_extra_owner_cannot_skip_a_dependency(self):
+        parent = self.parent
+        for changed in [{name: data for name, data in self.current.items() if name != MAIN},
+                        {**self.current, "extra": b"unrelated"}]:
+            with self.assertRaisesRegex(ValueError, "source set differs"):
+                qualify(PARENT_REFS[0], parent, changed)
 
 
 if __name__ == "__main__":

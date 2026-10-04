@@ -1,5 +1,14 @@
 # Go → Rust migration
 
+Memory803's isolated coherent-workspace successor normally integrates reviewed
+standalone Guard805 so the unchanged complete runtime plan has its real
+`symguard-cli` owner. Supplemental Skills inheritance now binds five exact
+reviewed source owners and the equal early output-return path; actual parent
+process/state comparisons remain required. The failed5a4 native Windows run and
+missing-package bootstrap attempt remain retained. This checkpoint is source
+preparation only; full runtime, native-three-OS and protected acceptance remain
+pending. See `docs/adr/memory803-coherent-guard-and-inherited-output-owner.md`.
+
 The migration is deliberately incremental. Go remains the executable oracle
 until every contract row is green. Every oracle command is built from the
 immutable revision selected by `GO_ORACLE_REF` (default: the checked-out
