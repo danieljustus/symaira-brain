@@ -69,10 +69,16 @@ def main():
                 assert original(row["original"].removeprefix(prefix)) == data
             else:
                 assert digest(Path(row["original"]).read_bytes()) == row["sha256"]
-    changed = subprocess.check_output(["git", "diff", "--name-only", BASE], cwd=ROOT, text=True).splitlines()
+    scope = ["browse/crates", "browse/port/harness", ".github/workflows/browse-daemon-native.yml",
+             "docs/adr/native-client-deadlines-801.md", "migration/evidence/daemon-client-deadlines-801"]
+    # Current main is an explicitly inherited parent. Its excluded sparse
+    # Brain/Skills files are not authored Browse changes or absent source bytes.
+    changed = subprocess.check_output(["git", "diff", "--name-only", BASE, "--", *scope], cwd=ROOT, text=True).splitlines()
     untracked = subprocess.check_output(["git", "ls-files", "--others", "--exclude-standard"], cwd=ROOT, text=True).splitlines()
     names = sorted(set(changed + untracked))
-    assert not any(name.endswith(".go") or name in ("Cargo.lock", "Cargo.toml", "browse/Cargo.lock", "browse/Cargo.toml") for name in changed)
+    assert not any(name.endswith(".go") for name in changed)
+    for name in ("browse/Cargo.lock", "browse/Cargo.toml"):
+        assert original(name) == (ROOT / name).read_bytes()
     counts = {name: len((ROOT / name).read_text().splitlines()) for name in names if name.endswith(".rs")}
     assert max(counts.values()) < 400
     maps = [{"path": name, "sha256": digest((ROOT / name).read_bytes()), "bytes": (ROOT / name).stat().st_size}
@@ -81,7 +87,8 @@ def main():
               "Python_ASTs": len(parsed), "original_functions_AST_unchanged": unchanged,
               "registry_comparator_byte_identical": True, "Unix_transport_and_Windows_IO_body_byte_identical": True,
               "frame_errors_server_and_child_deadlines_byte_identical": True, "original_archive_roundtrips": 324,
-              "Rust_line_counts": counts, "source_maps": maps, "candidate_runtime_executions": 0}
+              "Rust_line_counts": counts, "source_maps": maps, "explicit_Browse_correction_scope": scope,
+              "candidate_runtime_executions": 0}
     (OUT / "checks.json").write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps({k: v for k, v in result.items() if k != "source_maps"}))
 

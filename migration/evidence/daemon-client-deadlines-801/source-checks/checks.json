@@ -138,5 +138,12 @@
       "bytes": 115897
     }
   ],
+  "explicit_Browse_correction_scope": [
+    "browse/crates",
+    "browse/port/harness",
+    ".github/workflows/browse-daemon-native.yml",
+    "docs/adr/native-client-deadlines-801.md",
+    "migration/evidence/daemon-client-deadlines-801"
+  ],
   "candidate_runtime_executions": 0
 }
