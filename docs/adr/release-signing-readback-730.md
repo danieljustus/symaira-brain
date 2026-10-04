@@ -55,3 +55,8 @@ the comparison scope, preserving actual successful product observations.
 The new source-bound record is `maine3-integration.json`. Fresh protected CI
 remains mandatory. No actual Apple authentication or published signed release
 is claimed; #730 remains open.
+
+
+## Main documentation integration, 2026-10-04
+
+Normal integration of main2b6d49f changes only documentation and preserved historical evidence. The release workflow, all scripts, test cases, dependencies and contract matrix remain byte-identical to reviewed87261c3. Retain the existing complete orchestration/negative-control proof; no repeated local build is needed for unchanged code. Require the new published head's protected CI before merging. Real Apple signing, native publication and full730 acceptance remain open.
