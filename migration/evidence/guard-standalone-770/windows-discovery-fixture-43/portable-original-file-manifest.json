@@ -1,0 +1,114 @@
+{
+  "unchanged-original-criteria.json": {
+    "bytes": 821,
+    "sha256": "2233ca16cc0b1e717cd54b35c14990d2140eb6a6090ec5d8278cb9bbf378feb2"
+  },
+  "first-unit-source.py": {
+    "bytes": 4725,
+    "sha256": "f1b7811334414f4fe9a773c83b88d653118961503b0c317b2c719895faa5922f"
+  },
+  "first-portable-tests.log": {
+    "bytes": 3968,
+    "sha256": "ecf519ae378d463448df419578c40efa5c6fce344b7cb9fd1faa2277db4a6b53"
+  },
+  "actionlint.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "portable-controls.json": {
+    "bytes": 2756,
+    "sha256": "1d1113eb75ed28b6d7c9050965a8874dda19e1608e5cd496198ba01207c88a4e"
+  },
+  "first-failure-context.json": {
+    "bytes": 457,
+    "sha256": "04516d2a4d328dc3038cb601920810894fc72b581b60fb132cbe415a6841eead"
+  },
+  "portable-tests.log": {
+    "bytes": 2613,
+    "sha256": "243ba49e327d85c6c1a9054b7279222ccb1c650ba0d75f9ea4a34d1491390dee"
+  },
+  "incidental-Hermes-error-accepted/scripts/guard-standalone-oracle/config_path_journal.py": {
+    "bytes": 1331,
+    "sha256": "150bd5c13df436fa486b5cda282511ed9a77d14399d0f9895c91fa192922a8fd"
+  },
+  "incidental-Hermes-error-accepted/scripts/guard-standalone-oracle/stdout.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "incidental-Hermes-error-accepted/scripts/guard-standalone-oracle/config_warnings.py": {
+    "bytes": 13397,
+    "sha256": "0dfd8f541b47a0050f7054f96b0be0080b2d4aa04d33922f40d2b45241c24895"
+  },
+  "incidental-Hermes-error-accepted/scripts/guard-standalone-oracle/config_paths.py": {
+    "bytes": 14667,
+    "sha256": "924898636bdc6651e9d170f89b2742184853efb51b39eab06cc7ad91f1e34c68"
+  },
+  "incidental-Hermes-error-accepted/scripts/guard-standalone-oracle/replay.py": {
+    "bytes": 18190,
+    "sha256": "a071b5675701968c891702581e03b93a4f4cbab411f0d6d459df51424da34aa2"
+  },
+  "incidental-Hermes-error-accepted/scripts/guard-standalone-oracle/stderr.log": {
+    "bytes": 1812,
+    "sha256": "8205e65abeb282814e9e41019baa164772942c2bf04f16879c69ae786bdc34ee"
+  },
+  "incidental-Hermes-error-accepted/scripts/guard-standalone-oracle/test_config_path_fixtures.py": {
+    "bytes": 4811,
+    "sha256": "4c4e3775cd24835f630da0668758bfdd22ebd42a17151e83e4ccf322071919a1"
+  },
+  "missing-switched-discovery-parents/scripts/guard-standalone-oracle/config_path_journal.py": {
+    "bytes": 1331,
+    "sha256": "150bd5c13df436fa486b5cda282511ed9a77d14399d0f9895c91fa192922a8fd"
+  },
+  "missing-switched-discovery-parents/scripts/guard-standalone-oracle/stdout.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "missing-switched-discovery-parents/scripts/guard-standalone-oracle/config_warnings.py": {
+    "bytes": 13397,
+    "sha256": "0dfd8f541b47a0050f7054f96b0be0080b2d4aa04d33922f40d2b45241c24895"
+  },
+  "missing-switched-discovery-parents/scripts/guard-standalone-oracle/config_paths.py": {
+    "bytes": 15038,
+    "sha256": "95a1367eac98271d14664a5f4d2706cf8840ff67d2a57b4a1f31aa5862c80d57"
+  },
+  "missing-switched-discovery-parents/scripts/guard-standalone-oracle/replay.py": {
+    "bytes": 18190,
+    "sha256": "a071b5675701968c891702581e03b93a4f4cbab411f0d6d459df51424da34aa2"
+  },
+  "missing-switched-discovery-parents/scripts/guard-standalone-oracle/stderr.log": {
+    "bytes": 3207,
+    "sha256": "1849f05f20bd98c2ac9b469c819602ae2b34e5cf1314e2ffaad121d5ad099b60"
+  },
+  "missing-switched-discovery-parents/scripts/guard-standalone-oracle/test_config_path_fixtures.py": {
+    "bytes": 4811,
+    "sha256": "4c4e3775cd24835f630da0668758bfdd22ebd42a17151e83e4ccf322071919a1"
+  },
+  "wrong-Windows-explicit-owner/scripts/guard-standalone-oracle/config_path_journal.py": {
+    "bytes": 1331,
+    "sha256": "150bd5c13df436fa486b5cda282511ed9a77d14399d0f9895c91fa192922a8fd"
+  },
+  "wrong-Windows-explicit-owner/scripts/guard-standalone-oracle/stdout.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "wrong-Windows-explicit-owner/scripts/guard-standalone-oracle/config_warnings.py": {
+    "bytes": 13397,
+    "sha256": "0dfd8f541b47a0050f7054f96b0be0080b2d4aa04d33922f40d2b45241c24895"
+  },
+  "wrong-Windows-explicit-owner/scripts/guard-standalone-oracle/config_paths.py": {
+    "bytes": 15082,
+    "sha256": "a915fddade90bb5c1721a2b98e281910533b65430e69338329380cc95fbd9836"
+  },
+  "wrong-Windows-explicit-owner/scripts/guard-standalone-oracle/replay.py": {
+    "bytes": 18190,
+    "sha256": "a071b5675701968c891702581e03b93a4f4cbab411f0d6d459df51424da34aa2"
+  },
+  "wrong-Windows-explicit-owner/scripts/guard-standalone-oracle/stderr.log": {
+    "bytes": 3133,
+    "sha256": "b379f9ad0599cc9469848f1d2120abd3e4af5256b1fb1ecdf1de00b2241f8a58"
+  },
+  "wrong-Windows-explicit-owner/scripts/guard-standalone-oracle/test_config_path_fixtures.py": {
+    "bytes": 4811,
+    "sha256": "4c4e3775cd24835f630da0668758bfdd22ebd42a17151e83e4ccf322071919a1"
+  }
+}

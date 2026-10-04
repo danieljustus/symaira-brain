@@ -56,6 +56,23 @@ def metadata(root):
     return result
 
 
+def prepare_discovery_parents(root, lexical_base, physical_base):
+    # Changing HOME/XDG also changes Discovery, including the control's
+    # physical owner. Missing parent directories have a distinct Windows
+    # ERROR_PATH_NOT_FOUND contract; healthy cases must exercise absent FILES.
+    for base in [root/'home', lexical_base, physical_base, root/'unused-config']:
+        for part in ['.config/hermes', '.cursor', '.vscode', '.config/opencode',
+                     '.config/claude', 'Library/Application Support/Claude', 'claude']:
+            (base/part).mkdir(parents=True, exist_ok=True)
+
+
+def expected_owner(case, platform):
+    # Frozen Go's actual Windows explicit-filename observations select the
+    # lexical owner. Unix explicit filenames retain physical symlink traversal.
+    physical = case.get('explicit') and case['spelling'] == 'symlink-dotdot' and platform != 'nt'
+    return b'physical_owner' if physical else b'lexical_owner'
+
+
 def observe(binary, case, root, native, journal=None):
     env = replay.setup(root, 'empty')
     env.pop('SYMGUARD_CONFIG', None)
@@ -87,6 +104,7 @@ def observe(binary, case, root, native, journal=None):
         env['SYMGUARD_CONFIG'] = base+'/'+str(suffix)
         # Explicit config wins over a conflicting generated XDG base.
         env['XDG_CONFIG_HOME'] = str(root/'unused-config')
+    prepare_discovery_parents(root, lexical_base, physical_base)
     if state == 'discovery':
         for home in [root/'home', lexical_base, physical_base]:
             cursor = home/'.cursor/mcp.json'; cursor.parent.mkdir(parents=True, exist_ok=True)
@@ -134,9 +152,15 @@ def compare(case, go, native):
         assert bytes.fromhex(native['stderr_hex']) == config_warnings.UNSUPPORTED, 'warning before fallback'
         warning = b'config: warning: unknown key ' in bytes.fromhex(go['stderr_hex'])
         assert warning == (case['state'] == 'discovery')
+        if case['state'] == 'discovery':
+            # An earlier missing-parent error is not the malformed Cursor
+            # contract this fixture intends to reach.
+            stdout = bytes.fromhex(go['stdout_hex'])
+            assert b'error: discovery: cursor (' in stdout, 'malformed Cursor not reached'
+            assert b"[unsupported] parse JSON: invalid character 'b' looking for beginning of object key string" in stdout
         return 'native-fail-closed-remaining-port'
     assert replay.comparable(go) == replay.comparable(native), 'config owner/warning filename/report/exit/state differs'
-    expected = b'physical_owner' if case.get('explicit') and case['spelling']=='symlink-dotdot' else b'lexical_owner'
+    expected = expected_owner(case, os.name)
     assert expected in bytes.fromhex(native['stderr_hex']), 'wrong selected owner'
     assert native['exit_code'] == (1 if case.get('state') == 'semantic' else 0)
     return 'matched'

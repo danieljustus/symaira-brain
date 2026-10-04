@@ -194,3 +194,41 @@ Guard acceptance and229 binding checks remain attached to their own immutable
 source; actual current-head native-three-OS/protected CI is required before
 merging. Root independent lint27da and fixturedcada reviews are retained under
 windows-fixtures-a114/root-independent.
+
+## Native Windows configuration-path fixture prerequisites
+
+Publication43's complete native Windows job111405014212 reached all23 path
+pairs but failed its owner mutation control. The actual native child selected
+physical_owner correctly; its healthy exit0 assertion failed because the new
+physical XDG base lacked the claude Discovery parent directory. The immutable
+9-member artifact retains both exact PE binaries, the122-event journal and
+every raw child stream. All20 non-gated Go/native comparables were equal;
+actual totals were2matched/3gated/18failed. These results establish fixture
+failures, not a production ownership regression.
+
+Fixture setup seeded Discovery only under its initial HOME, then changed
+HOME/XDG without creating the new parents. Missing Windows PATH and missing
+FILE remain distinct errors in frozen Go and native. Seed every possible owned
+home/XDG parent in lexical, physical, original-home and unused-XDG bases before
+capturing before-state. Leave files absent; add malformed Cursor after its
+parents exist. Keep healthy exit0, semantic exit1, readonly bytes/mode/mtime,
+five-second child deadlines, typed/delegation gates and the original actual
+canonicalization mutant. Require the discovery cases to reach the actual Go
+Cursor parse error, rather than accepting an earlier missing-parent failure.
+
+The same original Windows Go/native observations select lexical_owner for
+explicit link/../cfg and link/../cfg-home filenames; Unix explicit traversal
+selects physical_owner. Preserve this platform distinction in the fixture
+expectation. Pinned Go1.26.7 Windows filepath and os.Open/fixLongPath/
+syscall.Open/CreateFile sources and license are retained with full hashes.
+Source reading explains the distinct filename paths; the original actual
+Windows child observations establish the owner selection. No copied algorithm
+or Linux-only test is treated as new Windows filesystem evidence.
+
+The successor changes only fixture parents/expectation/reachability and portable
+test selection. All original23 Windows/25 Unix cases and complete process
+comparators remain required. Portable owned-directory and pure Windows-branch
+checks do not execute Go/native CLI or establish successor native acceptance.
+All Go/Rust production, capability/kernel, fallback, diagnostics and original
+corpus bytes remain unchanged. Full native-three-OS/protected and770/769
+acceptance remain open until fresh exact-head gates complete.

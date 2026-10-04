@@ -1,0 +1,12 @@
+{
+  "source_only": true,
+  "actual15_portable_checks": true,
+  "actual3_Python_fixture_mutants_rejected": true,
+  "actualSDK_Go_Rust_product_target_port": false,
+  "raw_original_native_Windows_failure_retained_beforefix": true,
+  "alloriginal_cases_andcriteria_preserved_with2stricterreachability_assertions": true,
+  "native3_protected_andfull770_769_pending": true,
+  "portable_tar_bytes": 44979,
+  "portable_tar_sha256": "beb4aef0e67f5e2d7ebf2fa2c1d9ae28313c2a337f767ecc4f48e749c4f5fca6",
+  "fullrawportable_members": 28
+}
