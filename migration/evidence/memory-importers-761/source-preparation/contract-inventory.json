@@ -1,0 +1,433 @@
+{
+  "activity_methods": [
+    {
+      "method": "Search",
+      "source": "internal/memory/activity/api.go",
+      "status": "existing-native-read-owner"
+    },
+    {
+      "method": "GetReadItem",
+      "source": "internal/memory/activity/api.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "Status",
+      "source": "internal/memory/activity/api.go",
+      "status": "existing-native-read-owner"
+    },
+    {
+      "method": "Expire",
+      "source": "internal/memory/activity/retention.go",
+      "status": "new-native-source-prepared"
+    },
+    {
+      "method": "PurgeExpired",
+      "source": "internal/memory/activity/retention.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "DeleteEpisode",
+      "source": "internal/memory/activity/retention.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "ClearEpisode",
+      "source": "internal/memory/activity/retention.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "ClearTimeRange",
+      "source": "internal/memory/activity/retention.go",
+      "status": "new-native-source-prepared"
+    },
+    {
+      "method": "ClearAll",
+      "source": "internal/memory/activity/retention.go",
+      "status": "new-native-source-prepared"
+    },
+    {
+      "method": "ClearAllActivity",
+      "source": "internal/memory/activity/retention.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "ClearLastSession",
+      "source": "internal/memory/activity/retention.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "VerifyDiskClean",
+      "source": "internal/memory/activity/retention.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "Database",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "SaveSegment",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "PutSegment",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "GetSegment",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "ListSegments",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "ListAllSegments",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "RollUp6Hour",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "Rollup",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "SaveEpisode",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "PutEpisode",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "GetEpisode",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "ListEpisodes",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "StageEpisode",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "PromoteEpisodeToCandidate",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "PromoteEpisode",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    },
+    {
+      "method": "DatabaseFileExists",
+      "source": "internal/memory/activity/store.go",
+      "status": "remaining-go-library-contract"
+    }
+  ],
+  "actual_runtime_probes": 0,
+  "discovery_owner": "#760 engine source task; no duplicate discovery implementation",
+  "families": [
+    {
+      "baseline_classes": [
+        "positive",
+        "empty",
+        "malformed",
+        "duplicate",
+        "unicode"
+      ],
+      "baseline_status": "prepared-not-executed",
+      "contracts": "Walk error suppression; byte length; ignored Scanner.Err; marker line body discarded.",
+      "family": "aider",
+      "source_files": {
+        "internal/memory/importer/aider/aider.go": "33d0b8419ffb40456dcaaf198f7bc1c3cb3181c41fc11a8ae0bf798c59d5b52f",
+        "internal/memory/importer/aider/aider_test.go": "301992c89b7f65db3d99da9330b5ed655a17303ebdfa31417813f0cdd2a9cb6d"
+      },
+      "status": "native-source-prepared-runtime-pending"
+    },
+    {
+      "baseline_classes": [
+        "positive",
+        "empty",
+        "malformed",
+        "duplicate",
+        "unicode"
+      ],
+      "baseline_status": "required-not-yet-prepared",
+      "contracts": "Owned OAuth files/env or bounded separate SymVault3s; hardcoded Google transport interception; next-page URL appends cumulatively; all-day events.",
+      "family": "calendar",
+      "source_files": {
+        "internal/memory/importer/calendar/calendar.go": "5a229e67f26b26e65b32c48548aff9b8545bfdee0a2cd135108a19cd6655e5bf",
+        "internal/memory/importer/calendar/calendar_test.go": "873c8c385d117c294e90a1fccdd47d05906efc65df0f555ac435e7c3eefcbfbe"
+      },
+      "status": "unported-go-library-retained"
+    },
+    {
+      "baseline_classes": [
+        "positive",
+        "empty",
+        "malformed",
+        "duplicate",
+        "unicode"
+      ],
+      "baseline_status": "required-not-yet-prepared",
+      "contracts": "JSONL ordered/typed merge; project/model from all entries; assistant OR role; partial scan errors.",
+      "family": "claudecode",
+      "source_files": {
+        "internal/memory/importer/claudecode/claudecode.go": "052708d4c4d3def3c7b9746dd8b7cffd60a1086a2351d640b5ee6ca764f542a9",
+        "internal/memory/importer/claudecode/claudecode_test.go": "51bbe1251a041945ee35654258c0b717d5f682d282cd527d199011ec6427963a"
+      },
+      "status": "unported-go-library-retained"
+    },
+    {
+      "baseline_classes": [
+        "positive",
+        "empty",
+        "malformed",
+        "duplicate",
+        "unicode"
+      ],
+      "baseline_status": "required-not-yet-prepared",
+      "contracts": "Only archived_sessions/rollout-*.jsonl; skip session_index; typed payload.Content is string.",
+      "family": "codex",
+      "source_files": {
+        "internal/memory/importer/codex/codex.go": "159f8be98eabeff1d21e19a9868ecfa499d75743e85e33e3be17dd76f638e2ed",
+        "internal/memory/importer/codex/codex_test.go": "180f7864daa83e522ab9b7247ca840c0bd25f3bd774595145df86cd32a7067d2"
+      },
+      "status": "unported-go-library-retained"
+    },
+    {
+      "baseline_classes": [
+        "positive",
+        "empty",
+        "malformed",
+        "duplicate",
+        "unicode"
+      ],
+      "baseline_status": "prepared-not-executed",
+      "contracts": "Policy deny wins; global old 6h coverage; frontmatter substring closing; bounded 1MiB byte cut and evidence spans.",
+      "family": "codexmemory",
+      "source_files": {
+        "internal/memory/importer/codexmemory/codexmemory.go": "e200d7a338c9e94f6933d644900ef5ecb19e887a0f99f7a9f82078b385b8db39",
+        "internal/memory/importer/codexmemory/codexmemory_test.go": "aa0c9539bd351fd6dab59b555ce9eee209a34626aa99586907c205082ca2c138"
+      },
+      "status": "native-source-prepared-runtime-pending"
+    },
+    {
+      "baseline_classes": [
+        "positive",
+        "empty",
+        "malformed",
+        "duplicate",
+        "unicode"
+      ],
+      "baseline_status": "prepared-not-executed",
+      "contracts": "Claude notes outside memory dir; exact index exclusions; Hermes targets; 5000 byte cut; stat-after-read; file_path is session ID.",
+      "family": "curatedmemory",
+      "source_files": {
+        "internal/memory/importer/curatedmemory/curatedmemory.go": "4f0d1c6d041ceb1a1e6ef53e190ee15d444830a192397c760d04b76205d736bf",
+        "internal/memory/importer/curatedmemory/curatedmemory_test.go": "392cdbe8a9009fdda39abaff4c9f81d791ff25c76429cddbefb21d03fcc4fb64"
+      },
+      "status": "native-source-prepared-runtime-pending"
+    },
+    {
+      "baseline_classes": [
+        "positive",
+        "empty",
+        "malformed",
+        "duplicate",
+        "unicode"
+      ],
+      "baseline_status": "required-not-yet-prepared",
+      "contracts": "Owned himalaya child; sender include takes priority over excludes; byte cut; discovery never provides metadata date so ordinary import time is zero.",
+      "family": "email",
+      "source_files": {
+        "internal/memory/importer/email/email.go": "619248976e0bcf7528b18582a52d3ed202797644440bb2cbfeeeb94e17ba4145",
+        "internal/memory/importer/email/email_cli_test.go": "d4c414dd9fc8ddc91530e48c568f48c8b2cec55e3174b77c92f9ac006f5551bc",
+        "internal/memory/importer/email/email_test.go": "d8fb144f48c6752014421b7f982c5ddb6649978467df2111bf77af196123a4c6"
+      },
+      "status": "unported-go-library-retained"
+    },
+    {
+      "baseline_classes": [
+        "positive",
+        "empty",
+        "malformed",
+        "duplicate",
+        "unicode"
+      ],
+      "baseline_status": "required-not-yet-prepared",
+      "contracts": "Actual git argv; unescaped generated commit JSON; diff failure ignored; last parsed numstat replaces totals; short hash panic must stay gated.",
+      "family": "git",
+      "source_files": {
+        "internal/memory/importer/git/git.go": "c05765e887d770fbacbc78a4cdfa67c204445c1ae48df498f1a7c3022c244a83",
+        "internal/memory/importer/git/git_test.go": "bb5046a1a961d2c28a657eaaaf37777c046ffab4332d02f6f93e596f01cec87f"
+      },
+      "status": "unported-go-library-retained"
+    },
+    {
+      "baseline_classes": [
+        "positive",
+        "empty",
+        "malformed",
+        "duplicate",
+        "unicode"
+      ],
+      "baseline_status": "required-not-yet-prepared",
+      "contracts": "Actual gh argv; typed string author/labels reject object-shaped real output; two discovery errors become warnings; byte cuts.",
+      "family": "github",
+      "source_files": {
+        "internal/memory/importer/github/github.go": "0309c6cf7b9ac57fc43fcc0f39c07811049ed5dc3c715805ad1091e7ddffc0d5",
+        "internal/memory/importer/github/github_cli_test.go": "c992d81d8bef8835b92f677d181ab712aba1371b0534c02de36260783c293368",
+        "internal/memory/importer/github/github_test.go": "60fb152fd2a8db98875f2a03e4edf1b3a83c4ffb3675d053bd724635bdbdb18f"
+      },
+      "status": "unported-go-library-retained"
+    },
+    {
+      "baseline_classes": [
+        "positive",
+        "empty",
+        "malformed",
+        "duplicate",
+        "unicode"
+      ],
+      "baseline_status": "required-not-yet-prepared",
+      "contracts": "Unordered table discovery and last matching role/content/time columns; direct SQL identifiers; time scan skips; public DB schemas.",
+      "family": "hermes",
+      "source_files": {
+        "internal/memory/importer/hermes/hermes.go": "5777624dbdf2f2527705385f1b4ddd6e8d19d03db014ae933a0c44df1d99a2bd",
+        "internal/memory/importer/hermes/hermes_test.go": "17d83a02125fd66522b72ca3031602c7648023983d7d297eef4b80a0d94c671d"
+      },
+      "status": "unported-go-library-retained"
+    },
+    {
+      "baseline_classes": [
+        "positive",
+        "empty",
+        "malformed",
+        "duplicate",
+        "unicode"
+      ],
+      "baseline_status": "required-not-yet-prepared",
+      "contracts": "SessionAdapter; Mem0/OpenMemory; SmartImporter raw-content hash before redaction; ChatGPT secure descriptor-relative nofollow/nonblock and 64MiB/depth16/entry10000 bounds.",
+      "family": "memorytool",
+      "source_files": {
+        "internal/memory/importer/memorytool/adapter.go": "3d7703befb1c08f33916c4edf238db4b24983ee0367e596ed2b57421d674c847",
+        "internal/memory/importer/memorytool/adapter_test.go": "cb35ad1d3a2df5606a5b26c3084b77e3412738e20fa784e7a460d29937712d1c",
+        "internal/memory/importer/memorytool/chatgpt.go": "72b500d39c1e4daeead062e36adc313e1bdc4614bf334d7d45b403681ceedd1e",
+        "internal/memory/importer/memorytool/chatgpt_fifo_other_test.go": "3ef3e2214151b6ed3d22f0ef6a9275fff7edd2d4d79acd5257658d67903079b4",
+        "internal/memory/importer/memorytool/chatgpt_fifo_unix_test.go": "124efdd0c063479a2d8f25177cc97e78563aa77be69c2e10eec7876aa0ddbd04",
+        "internal/memory/importer/memorytool/chatgpt_secure_other.go": "614e42f63db7eb9b10393abe58d4d6536ee66bc06a724a7cb645ca1e70c40d11",
+        "internal/memory/importer/memorytool/chatgpt_secure_unix.go": "31bf9708dc3ff1cfce8a166a74e485c5e968fce18ff773cab8b30e6399be204e",
+        "internal/memory/importer/memorytool/chatgpt_security_test.go": "06b49d1684ef44fb547936090bfc23116268d718edae45aa833648ed0fd6f303",
+        "internal/memory/importer/memorytool/chatgpt_test.go": "83c7cfcc91ac0b14c57aea1c8d96063d5c54a469819cb6e040df51d8d247df75",
+        "internal/memory/importer/memorytool/importer.go": "2b50eb4d11ade3281df032fcb17160793e183de66dc754cd0e3d9ddd08b692a5",
+        "internal/memory/importer/memorytool/mem0.go": "6627d533de769237c2ab190c632a2a5d1a40f4026f0dfb225b0d027214f599bb",
+        "internal/memory/importer/memorytool/mem0_test.go": "601ae9ba54a67850f09d129ce1e69b95a8901c85df23f64911609010b0b9dd43",
+        "internal/memory/importer/memorytool/openmemory.go": "a1bd69bd8a7fe461f35a91e63a251a5af482210c42f75b62db6db706e7688bfa",
+        "internal/memory/importer/memorytool/openmemory_test.go": "7b3d5194ed00188e9a01c27c523cef176f10db7dd85546dfa568a12cc9f462b2",
+        "internal/memory/importer/memorytool/smartimport.go": "3003c35b7dda6cf68598cc7c9264ffa6e8f14ccdfddfa6d56d4fba0f24bd3d7d",
+        "internal/memory/importer/memorytool/smartimport_test.go": "f205ddf25226e795252d9bc32fbe698ab7de7d8e4cfd5abbda391f69da12f7f6"
+      },
+      "status": "unported-go-library-retained"
+    },
+    {
+      "baseline_classes": [
+        "positive",
+        "empty",
+        "malformed",
+        "duplicate",
+        "unicode"
+      ],
+      "baseline_status": "prepared-not-executed",
+      "contracts": "Folder constructor parameter unused; exact lowercase extension; exclusions apply to paths, not directory descent; raw links and byte cut.",
+      "family": "obsidian",
+      "source_files": {
+        "internal/memory/importer/obsidian/obsidian.go": "f4ce1fc93483402285610717a14da9081a488f7237223de38f794e1d43143dae",
+        "internal/memory/importer/obsidian/obsidian_test.go": "9ac9af4c61385ed49fa2fbbfb271c266640152370b4b2d3b0e80d38e7e4f939e"
+      },
+      "status": "native-source-prepared-runtime-pending"
+    },
+    {
+      "baseline_classes": [
+        "positive",
+        "empty",
+        "malformed",
+        "duplicate",
+        "unicode"
+      ],
+      "baseline_status": "required-not-yet-prepared",
+      "contracts": "Epoch milliseconds; part JSON extraction; length >=50 unlike transcript >50; typed rows and prompts.",
+      "family": "opencode",
+      "source_files": {
+        "internal/memory/importer/opencode/opencode.go": "b3e3215a4cbe16cd9fbe404dd9cbcfed358f0ed58e4c0a65a8221f4899f5ecad",
+        "internal/memory/importer/opencode/opencode_test.go": "184aa09e04eb7d3c1986ba359a389212f9d724c1439581646149ed885ee7f873"
+      },
+      "status": "unported-go-library-retained"
+    },
+    {
+      "baseline_classes": [
+        "positive",
+        "empty",
+        "malformed",
+        "duplicate",
+        "unicode"
+      ],
+      "baseline_status": "required-not-yet-prepared",
+      "contracts": "Owned fake HTTP; raw query construction; Next URL delegation; Token auth; typed correspondent/tags; bounded content preview but HTTP body unbounded.",
+      "family": "paperless",
+      "source_files": {
+        "internal/memory/importer/paperless/paperless.go": "0200a6981282a1d226c4806563ea5171d5066e15e274aaad08537c998962008b",
+        "internal/memory/importer/paperless/paperless_test.go": "9e81c85487167dd348518ef43351093073cb01fb73b5bd30fb3988455a816d8c"
+      },
+      "status": "unported-go-library-retained"
+    },
+    {
+      "baseline_classes": [
+        "positive",
+        "empty",
+        "malformed",
+        "duplicate",
+        "unicode"
+      ],
+      "baseline_status": "prepared-not-executed",
+      "contracts": "Bash timestamps not linked to following line; duplicate epochs; filters; ignored success/duration; native epoch domain remains gated.",
+      "family": "shellhistory",
+      "source_files": {
+        "internal/memory/importer/shellhistory/shell_history.go": "92a5f3ec69bad427bab2006b264add2746496d8cda823338d6dc61fb1e654519",
+        "internal/memory/importer/shellhistory/shell_history_test.go": "afb88a0e1315b050e97dcefe471adb9ab08c6b201a7df2c79ff0f89fbcb88258"
+      },
+      "status": "native-source-prepared-runtime-pending"
+    }
+  ],
+  "frozen_revision": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "new_routes": [],
+  "reachability": "static source graph: no production constructor/Registry/Discovery.Scan caller; frozen memory CLI has no import command",
+  "registry_remaining": [
+    "catalog optional interfaces/unknown privacy/map ordering",
+    "last-state/30 local calendar days/incremental max",
+    "cancellation/error count replacement",
+    "untrusted sanitizer before extraction/embedding/storage",
+    "PatternExtractor and ExtractiveSummarizer5",
+    "private staged provenance trust sharing metadata/redaction",
+    "fact/evidence partial commits before durable marker",
+    "embedding failures/state-mark errors/incremental mark precedence"
+  ],
+  "status": "source-only-not-executed"
+}

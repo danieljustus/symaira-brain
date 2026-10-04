@@ -2,6 +2,7 @@
 #![deny(unsafe_code)]
 
 mod activity;
+mod activity_retention;
 mod cli_delete_admission;
 mod cli_entity;
 mod cli_write;
@@ -13,6 +14,7 @@ mod evidence_store;
 mod gojson;
 mod gorand;
 mod gotime;
+pub mod importer;
 mod list_rows;
 mod lsh;
 mod migration;
@@ -30,6 +32,7 @@ mod write;
 mod db_oracle_tests;
 
 pub use activity::{ActivityItem, ActivityPage, ActivitySearch, ActivityStatus, Provenance};
+pub use activity_retention::{ActivityDeletion, ActivityRetentionResult};
 pub use cli_delete_admission::direct_delete_supported;
 pub use cli_entity::direct_entities_supported;
 pub use cli_write::{DirectWrite, direct_project_supported};

@@ -1,0 +1,381 @@
+{
+  "compiler_or_sdk_product_executed": false,
+  "constructor_cases": [
+    {
+      "family": "codex-memory",
+      "id": "I761-001-codex-memory-positive",
+      "recipe": "positive"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-002-codex-memory-empty",
+      "recipe": "empty"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-003-codex-memory-malformed",
+      "recipe": "malformed"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-004-codex-memory-duplicate",
+      "recipe": "duplicate"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-005-codex-memory-unicode",
+      "recipe": "unicode"
+    },
+    {
+      "family": "curated-memory",
+      "id": "I761-006-curated-memory-positive",
+      "recipe": "positive"
+    },
+    {
+      "family": "curated-memory",
+      "id": "I761-007-curated-memory-empty",
+      "recipe": "empty"
+    },
+    {
+      "family": "curated-memory",
+      "id": "I761-008-curated-memory-malformed",
+      "recipe": "malformed"
+    },
+    {
+      "family": "curated-memory",
+      "id": "I761-009-curated-memory-duplicate",
+      "recipe": "duplicate"
+    },
+    {
+      "family": "curated-memory",
+      "id": "I761-010-curated-memory-unicode",
+      "recipe": "unicode"
+    },
+    {
+      "family": "aider",
+      "id": "I761-011-aider-positive",
+      "recipe": "positive"
+    },
+    {
+      "family": "aider",
+      "id": "I761-012-aider-empty",
+      "recipe": "empty"
+    },
+    {
+      "family": "aider",
+      "id": "I761-013-aider-malformed",
+      "recipe": "malformed"
+    },
+    {
+      "family": "aider",
+      "id": "I761-014-aider-duplicate",
+      "recipe": "duplicate"
+    },
+    {
+      "family": "aider",
+      "id": "I761-015-aider-unicode",
+      "recipe": "unicode"
+    },
+    {
+      "family": "shell-history",
+      "id": "I761-016-shell-history-positive",
+      "recipe": "positive"
+    },
+    {
+      "family": "shell-history",
+      "id": "I761-017-shell-history-empty",
+      "recipe": "empty"
+    },
+    {
+      "family": "shell-history",
+      "id": "I761-018-shell-history-malformed",
+      "recipe": "malformed"
+    },
+    {
+      "family": "shell-history",
+      "id": "I761-019-shell-history-duplicate",
+      "recipe": "duplicate"
+    },
+    {
+      "family": "shell-history",
+      "id": "I761-020-shell-history-unicode",
+      "recipe": "unicode"
+    },
+    {
+      "family": "obsidian",
+      "id": "I761-021-obsidian-positive",
+      "recipe": "positive"
+    },
+    {
+      "family": "obsidian",
+      "id": "I761-022-obsidian-empty",
+      "recipe": "empty"
+    },
+    {
+      "family": "obsidian",
+      "id": "I761-023-obsidian-malformed",
+      "recipe": "malformed"
+    },
+    {
+      "family": "obsidian",
+      "id": "I761-024-obsidian-duplicate",
+      "recipe": "duplicate"
+    },
+    {
+      "family": "obsidian",
+      "id": "I761-025-obsidian-unicode",
+      "recipe": "unicode"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-026-codex-memory-old-six-hour-parent",
+      "recipe": "old-six-hour-parent"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-027-codex-memory-cross-extension-coverage",
+      "recipe": "cross-extension-coverage"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-028-codex-memory-deny-wins",
+      "recipe": "deny-wins"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-029-codex-memory-allow-no-match",
+      "recipe": "allow-no-match"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-030-codex-memory-upper-extension",
+      "recipe": "upper-extension"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-031-codex-memory-nested-resources",
+      "recipe": "nested-resources"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-032-codex-memory-raw-body",
+      "recipe": "raw-body"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-033-codex-memory-one-mib-cut",
+      "recipe": "one-mib-cut"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-034-codex-memory-instructions",
+      "recipe": "instructions"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-035-codex-memory-outside-root",
+      "recipe": "outside-root"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-036-codex-memory-duplicate-frontmatter",
+      "recipe": "duplicate-frontmatter"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-037-codex-memory-citations",
+      "recipe": "citations"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-038-codex-memory-lone-surrogate-app",
+      "recipe": "lone-surrogate-app"
+    },
+    {
+      "family": "curated-memory",
+      "id": "I761-039-curated-memory-outside-memory-dir",
+      "recipe": "outside-memory-dir"
+    },
+    {
+      "family": "curated-memory",
+      "id": "I761-040-curated-memory-index-skip",
+      "recipe": "index-skip"
+    },
+    {
+      "family": "curated-memory",
+      "id": "I761-041-curated-memory-raw-body",
+      "recipe": "raw-body"
+    },
+    {
+      "family": "curated-memory",
+      "id": "I761-042-curated-memory-five-k-cut",
+      "recipe": "five-k-cut"
+    },
+    {
+      "family": "curated-memory",
+      "id": "I761-043-curated-memory-link-order",
+      "recipe": "link-order"
+    },
+    {
+      "family": "curated-memory",
+      "id": "I761-044-curated-memory-scanner-limit",
+      "recipe": "scanner-limit"
+    },
+    {
+      "family": "curated-memory",
+      "id": "I761-045-curated-memory-delimiter-suffix",
+      "recipe": "delimiter-suffix"
+    },
+    {
+      "family": "aider",
+      "id": "I761-046-aider-threshold-50",
+      "recipe": "threshold-50"
+    },
+    {
+      "family": "aider",
+      "id": "I761-047-aider-threshold-51",
+      "recipe": "threshold-51"
+    },
+    {
+      "family": "aider",
+      "id": "I761-048-aider-inline-role",
+      "recipe": "inline-role"
+    },
+    {
+      "family": "aider",
+      "id": "I761-049-aider-scanner-ignored",
+      "recipe": "scanner-ignored"
+    },
+    {
+      "family": "aider",
+      "id": "I761-050-aider-headings",
+      "recipe": "headings"
+    },
+    {
+      "family": "aider",
+      "id": "I761-051-aider-raw-body",
+      "recipe": "raw-body"
+    },
+    {
+      "family": "aider",
+      "id": "I761-052-aider-crlf",
+      "recipe": "crlf"
+    },
+    {
+      "family": "shell-history",
+      "id": "I761-053-shell-history-bash-not-paired",
+      "recipe": "bash-not-paired"
+    },
+    {
+      "family": "shell-history",
+      "id": "I761-054-shell-history-excluded",
+      "recipe": "excluded"
+    },
+    {
+      "family": "shell-history",
+      "id": "I761-055-shell-history-filter",
+      "recipe": "filter"
+    },
+    {
+      "family": "shell-history",
+      "id": "I761-056-shell-history-empty-filter",
+      "recipe": "empty-filter"
+    },
+    {
+      "family": "shell-history",
+      "id": "I761-057-shell-history-duplicate-epoch",
+      "recipe": "duplicate-epoch"
+    },
+    {
+      "family": "shell-history",
+      "id": "I761-058-shell-history-zero-duration",
+      "recipe": "zero-duration"
+    },
+    {
+      "family": "shell-history",
+      "id": "I761-059-shell-history-scanner-prefix",
+      "recipe": "scanner-prefix"
+    },
+    {
+      "family": "shell-history",
+      "id": "I761-060-shell-history-raw-command",
+      "recipe": "raw-command"
+    },
+    {
+      "family": "obsidian",
+      "id": "I761-061-obsidian-unused-folder",
+      "recipe": "unused-folder"
+    },
+    {
+      "family": "obsidian",
+      "id": "I761-062-obsidian-exclude-folder",
+      "recipe": "exclude-folder"
+    },
+    {
+      "family": "obsidian",
+      "id": "I761-063-obsidian-tag-filter",
+      "recipe": "tag-filter"
+    },
+    {
+      "family": "obsidian",
+      "id": "I761-064-obsidian-exclude-tag",
+      "recipe": "exclude-tag"
+    },
+    {
+      "family": "obsidian",
+      "id": "I761-065-obsidian-raw-body",
+      "recipe": "raw-body"
+    },
+    {
+      "family": "obsidian",
+      "id": "I761-066-obsidian-five-k-cut",
+      "recipe": "five-k-cut"
+    },
+    {
+      "family": "obsidian",
+      "id": "I761-067-obsidian-links-not-trimmed",
+      "recipe": "links-not-trimmed"
+    },
+    {
+      "family": "obsidian",
+      "id": "I761-068-obsidian-scanner-limit",
+      "recipe": "scanner-limit"
+    },
+    {
+      "family": "codex-memory",
+      "id": "I761-069-codex-memory-frozen-testdata",
+      "recipe": "frozen-testdata"
+    },
+    {
+      "family": "curated-memory",
+      "id": "I761-070-curated-memory-frozen-testdata",
+      "recipe": "frozen-testdata"
+    }
+  ],
+  "native_three_os": "pending",
+  "real_process_controls": [
+    "wrong-source-owner",
+    "shell-filter-corruption",
+    "obsidian-tag-corruption"
+  ],
+  "remaining_path_time_error_plans": [
+    "generated HOME link/../owner vs explicit raw root and relative roots",
+    "native Windows drive/UNC/device/verbatim/UTF16 ownership",
+    "raw invalid Unix path bytes",
+    "non-UTC zone/DST and Go Local cache changes",
+    "Go Unix/JSON time/chrono epoch limits",
+    "typed Go path/I/O errors and scanner/read error precedence",
+    "owned nonregular/symlink race bounds for each future admission"
+  ],
+  "status": "prepared-not-executed",
+  "store_actual_process_plans": [
+    "marker missing/duplicate/negative count/typed MAX/text-blob-int-real error",
+    "SQL trigger failure rolls back both deletion tables",
+    "expiry equal boundary/future rows",
+    "strict overlap/touch/zero/non-increasing window",
+    "shared durable memory/evidence/import_state preserved",
+    "postcommit vacuum/checkpoint failure retains real counts",
+    "on-disk WAL secure_delete/vacuum cleanup",
+    "configured raw path/symlink/rename/busy peer cleanup"
+  ]
+}

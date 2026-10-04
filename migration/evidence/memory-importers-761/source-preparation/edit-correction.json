@@ -1,0 +1,6 @@
+{
+  "kind": "source-editing-count-replacement-corrected-before-commit",
+  "original_patch_sha256": "20900637a8560bdf8e8114c65ea2316078ee54cebd6e8649ff9384d01957cce9",
+  "source_runtime_failure": false,
+  "resolution": "restored all original plan/matrix lines verbatim; retained only one new plan row and three new matrix rows"
+}

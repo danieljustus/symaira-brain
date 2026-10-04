@@ -1904,6 +1904,7 @@ Go remains the production enforcement path until the full Guard-specific matrix 
 ### Task 10.5: Port importers and discovery
 - Port each importer as its own reviewed task: Aider, Calendar, Claude Code, Codex, Codex Memory, Curated Memory, Email, Git, GitHub, Hermes, Memory Tool, Obsidian, OpenCode, Paperless, Shell History.
 - Give every importer positive, empty, malformed, duplicate, and Unicode fixtures.
+- #761 source-only checkpoint adds five local library adapters (Aider/Codex Memory/Curated Memory/Shell History/Obsidian), byte DTO/evidence bridge, shared import markers and three Activity retention mutations. See `docs/adr/memory-importer-library-checkpoint-761.md`. 70 constructor recipes/three controls and 24 unit functions are prepared, not executed; Windows paths, typed I/O/time bounds, registry/engine governance, ten other families and remaining Activity write/promotion APIs stay pending. No import CLI is reachable in frozen Go, and no CLI/MCP/HTTP routing is changed; different-author and actual native-three-OS gates remain required.
 
 ### Task 10.6: Port LLM, extraction, consolidation, context, aging, and working memory
 - Use fake providers for deterministic tests; preserve prompts/output parsers and failure fallback.
