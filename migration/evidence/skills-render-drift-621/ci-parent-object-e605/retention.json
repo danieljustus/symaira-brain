@@ -1,0 +1,106 @@
+{
+  "files": [
+    {
+      "path": "/workspace/review-proof/root-skills797-e605-windows-failure/original-job.log",
+      "member": "000-original-job.log",
+      "sha256": "a164916daac5de474d0e24c8dc93b36d00d98619024ef54fab4eaf2826180e29",
+      "bytes": 375691,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791117468945775469
+    },
+    {
+      "path": "/workspace/review-proof/root-skills797-e605-windows-failure/artifact-original-binding.json",
+      "member": "001-artifact-original-binding.json",
+      "sha256": "b4858cd84a2bbaf5f47e6772ffbaf5c5aa396084b1bcc648d59dae7cb9eddecb",
+      "bytes": 2520,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791117701212196436
+    },
+    {
+      "path": "/workspace/symaira-skills621/scripts/skills-argv-oracle/build_parent.py",
+      "member": "002-build_parent.py",
+      "sha256": "6a864a01aa8f3e9e74934ada473906d6cb27a339b6e57fe03bc8f606d4ea01bc",
+      "bytes": 7865,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113091860412869
+    },
+    {
+      "path": "/workspace/symaira-skills621/.github/workflows/ci.yml",
+      "member": "003-ci.yml",
+      "sha256": "9cdad1aedfd78aebe49767704084101508eaba5acee8365aac8d4498da257390",
+      "bytes": 75469,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113625842847555
+    }
+  ],
+  "zip_original_binding": "/workspace/review-proof/root-skills797-e605-windows-failure/artifact-original-binding.json",
+  "original_zip_sha256": "60dcb2a33b9ac9195b4cbc8466ff2bb5ba18d2c362f428e6832ff0845ae9b412",
+  "original_zip_members": [
+    {
+      "path": "current.exe",
+      "bytes": 26579456,
+      "sha256": "81a5096551b75f38ce298c8fc283393664cec27c0734c210ac90e184f1849d84",
+      "CRC": 3115555043,
+      "native_zip_mode": 33206
+    },
+    {
+      "path": "flag-input.json",
+      "bytes": 52196,
+      "sha256": "73edc71baf2eacae079427e4a409df5894cd809ec75ffc21102d7bd833e2c316",
+      "CRC": 769258177,
+      "native_zip_mode": 33206
+    },
+    {
+      "path": "go-build.json",
+      "bytes": 5308263,
+      "sha256": "ef655079df86c5fcdb8ea4eb9ed9a9425db030d55b0a3f86afe7933f859bb118",
+      "CRC": 336911865,
+      "native_zip_mode": 33206
+    },
+    {
+      "path": "normalization.json",
+      "bytes": 52175,
+      "sha256": "2ff171b3f78e45fe07d99304dafe268677bc5b7411cb9a3e753692e69cb860c1",
+      "CRC": 1782597944,
+      "native_zip_mode": 33206
+    },
+    {
+      "path": "parent-build.json",
+      "bytes": 3206,
+      "sha256": "bf074bc29f113aba12eceb3a3e7e32233b6ad8513711e2fe3dd7f5e8067df704",
+      "CRC": 3643947867,
+      "native_zip_mode": 33206
+    },
+    {
+      "path": "process.json",
+      "bytes": 1125255,
+      "sha256": "339b3e171ddbe4f48c5f2e29e4e90c872c0600e9e55039368c03cd4b01a7a15f",
+      "CRC": 2234285152,
+      "native_zip_mode": 33206
+    },
+    {
+      "path": "quoted-value.json",
+      "bytes": 51962,
+      "sha256": "45c297bca6f4e371cb3e10bbc818d7103285206fa8885bed7f1ca0ace5d3257c",
+      "CRC": 2098965733,
+      "native_zip_mode": 33206
+    },
+    {
+      "path": "symbrain-go.exe",
+      "bytes": 22484480,
+      "sha256": "dc056ae9c5a47f07b0c6dda217acaef86bde750f7af3a1b4dfecc3388cb0b0b7",
+      "CRC": 3419671393,
+      "native_zip_mode": 33206
+    }
+  ],
+  "archive_sha256": "b5500ed14c3adcceda000b59fe24c3d4ebdf9771afd4d8c9f98146cd612984d2",
+  "original_ZIP_bytes_retained_external": "/workspace/attachments/bedea3f3-dc86-4a13-848f-46014f920217/skills797-e605-windows-wide-original.zip"
+}
