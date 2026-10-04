@@ -23,6 +23,10 @@ impl Server {
                 "memory HTTP requires a loopback listener",
             ));
         }
+        self.listener_port.store(
+            listener.local_addr()?.port(),
+            std::sync::atomic::Ordering::Relaxed,
+        );
         listener.set_nonblocking(true)?;
         let listener = tokio::net::TcpListener::from_std(listener)?;
         let mut tasks = tokio::task::JoinSet::new();

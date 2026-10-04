@@ -28,6 +28,12 @@ async function until(condition, label) {
       window.fetch=async (url, options) => {
         assert.equal(new URL(url).origin, base, 'external API request');
         const auth_before=window.document.querySelector("#auth-status")?.textContent;
+        // jsdom has no browser Fetch implementation. Explicitly supply the
+        // browser-equivalent same-origin write header; this is DOM/transport
+        // modeling evidence, not execution of a graphical browser's network stack.
+        if (options && ['POST','DELETE','PUT','PATCH'].includes(options.method)) {
+          options.headers={...options.headers,Origin:base};
+        }
         const response=await fetch(url,options);
         records.push({url,options,auth_before,status:response.status,body_hex:Buffer.from(await response.clone().arrayBuffer()).toString('hex')});
         return response;

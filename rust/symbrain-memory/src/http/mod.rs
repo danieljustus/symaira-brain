@@ -47,6 +47,7 @@ pub struct Server {
     generator: EmbeddingGenerator,
     options: Options,
     limiter: middleware::Limiter,
+    listener_port: std::sync::atomic::AtomicU16,
 }
 
 impl Server {
@@ -72,6 +73,7 @@ impl Server {
             generator,
             options,
             limiter: middleware::Limiter::default(),
+            listener_port: std::sync::atomic::AtomicU16::new(0),
         })
     }
 }

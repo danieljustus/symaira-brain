@@ -59,8 +59,14 @@ pub(super) fn csrf_allowed(method: &Method, headers: &HeaderMap) -> bool {
         })
 }
 
-pub(super) fn origin_allowed(origin: &str) -> bool {
+pub(super) fn origin_allowed(origin: &str, host: &str, listener_port: u16) -> bool {
     origin.is_empty()
+        || (listener_port != 0
+            && loopback_host(host)
+            && origin.strip_prefix("http://") == Some(host)
+            && host
+                .rsplit_once(':')
+                .is_some_and(|(_, port)| port == listener_port.to_string()))
         || origin.starts_with("chrome-extension://")
         || origin.starts_with("moz-extension://")
 }

@@ -71,3 +71,18 @@ actual CTRL_BREAK signal; Go maps it to Interrupt and the native seam selects
 Tokio ctrl_break/ctrl_c. This is CI wiring, not proof of an unexecuted Windows
 signal or console environment. The three-OS `memory-http-native.yml` job must
 actually pass on the final source before the slice's platform gate is green.
+
+The retained actual same-origin POST pair reveals a third inherited defect:
+the old owner admits extension origins but rejects a browser-equivalent local
+Origin even with a valid JWT. The native desired correction admits only the
+exact `http://` validated Host authority with the actual bound listener port.
+`same_origin.py` keeps this behavior separate from Go parity: eighteen actual
+pairs require the desired native status and original Go status, including
+authenticated search/set/delete, OPTIONS, denied authentication/read-only writes
+and foreign, prefix, port, scheme, opaque/null, userinfo and hostile preflight
+origins. A forged Host+Origin with another port is rejected. Every rejected
+operation must leave complete application state unchanged.
+
+The DOM adapter explicitly supplies the same-origin write Origin that jsdom's
+Node fetch does not synthesize. It remains actual DOM/JS plus modeled browser
+transport headers, not graphical-browser networking, rendering or CSP proof.

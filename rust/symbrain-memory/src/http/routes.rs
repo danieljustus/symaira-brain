@@ -33,8 +33,14 @@ impl Server {
         let origin = middleware::header(request.headers(), "origin").to_owned();
         let method = request.method().clone();
         let head = method == Method::HEAD;
+        let origin_allowed = middleware::origin_allowed(
+            &origin,
+            middleware::header(request.headers(), "host"),
+            self.listener_port
+                .load(std::sync::atomic::Ordering::Relaxed),
+        );
         let cors = api
-            && middleware::origin_allowed(&origin)
+            && origin_allowed
             && middleware::csrf_allowed(&method, request.headers())
             && middleware::loopback_host(middleware::header(request.headers(), "host"));
         let mut reply = if !self.limiter.allow(peer) {
@@ -52,7 +58,7 @@ impl Server {
             wire::error(403, "FORBIDDEN", "CSRF validation failed")
         } else if !middleware::loopback_host(middleware::header(request.headers(), "host")) {
             wire::error(403, "FORBIDDEN", "non-loopback Host header rejected")
-        } else if api && !middleware::origin_allowed(&origin) {
+        } else if api && !origin_allowed {
             wire::error(403, "FORBIDDEN", "origin not allowed")
         } else if api && method == Method::OPTIONS {
             {

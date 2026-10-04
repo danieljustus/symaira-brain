@@ -134,3 +134,24 @@ portable-runner successor, all 523 existing ELF artifact paths (489 unique
 byte sequences, including the actual source813 CLI and owner) were compressed,
 SHA-verified and round-tripped into the owned oracle archive; earlier receipts
 and binaries keep their original source attribution.
+
+## Exact same-origin correction
+
+The coordinating maintainer also approved a focused third native correction
+after an actual frozen-Go/native original pair: authenticated POST with
+`Origin: http://127.0.0.1:<listener>` returned 403 and performed no write in both
+old owners. The original extension-only CORS policy prevents normal local
+browser-equivalent writes. Preserve that original pair under
+[same-origin-original-9b](../../migration/evidence/memory-ui-763/same-origin-original-9b/preservation.json).
+This is evidence from supplied Origin headers, not a graphical browser request.
+
+The native owner admits only the exact `http://` validated loopback Host
+authority and the actual listener port, which the lifecycle owner records before
+accepting connections. It does not infer a foreign authority, permit HTTPS or
+arbitrary localhost ports, accept credentialed/prefix/null origins, weaken JWT
+or grant a write role. Existing Host/CSRF/JWT/profile checks remain in sequence.
+A separately recorded desired-behavior suite proves OPTIONS and real
+authenticated POST/search/delete plus hostile Origin controls; this divergence
+is never normalized into Go parity. The existing full serve fallback is unchanged.
+The owned DOM adapter now supplies browser-equivalent write Origin headers
+explicitly and labels that modeling limit; it is not a browser Fetch/CSP proof.

@@ -19,3 +19,9 @@
 - #300, #301, #295, #296, #299, #294
 
 **Full Changelog**: https://github.com/danieljustus/symaira-brain/compare/v0.7.1...v0.7.2
+
+The bounded native Memory HTTP owner corrects protected-read authentication,
+nested search rendering and exact same-origin local writes. These are native
+UI migration fixes; the complete `memory serve` command continues through its
+existing implementation until configuration, all routes and native platform
+gates pass. No shipped command or memory domain operation is removed.
