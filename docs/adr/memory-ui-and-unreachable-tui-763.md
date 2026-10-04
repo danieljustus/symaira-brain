@@ -155,3 +155,22 @@ authenticated POST/search/delete plus hostile Origin controls; this divergence
 is never normalized into Go parity. The existing full serve fallback is unchanged.
 The owned DOM adapter now supplies browser-equivalent write Origin headers
 explicitly and labels that modeling limit; it is not a browser Fetch/CSP proof.
+
+## Final bounded Linux validation
+
+The [source-bound final evidence](../../migration/evidence/memory-ui-763/native-owner-824/README.md)
+records 52 actual HTTP comparisons, seven complete-SQLite no-write boundaries,
+two real negative executions, 18 explicit same-origin desired-behavior pairs and
+the owned DOM/original-defect checks. The inherited shared CLI regression gates
+also pass: 590 reads, 60 Sets, 16 Deletes, 13 delegated boundaries, ten output/
+failure pairs and three actual mutation controls. The final default-port run was
+exclusive; the earlier overlapping run remains preserved as historical evidence.
+
+Production sourceD1 passes 320 affected ordinary tests and strict all-targets/
+all-features Clippy, fmt and workflow lint. The final824 successors strengthen
+test inspection only; production/assets/Cargo/workflow bytes remain identical.
+Earlier six-table no-write receipts keep that narrower attribution. Final824
+records all SQLite columns, rows and blob bytes, including sync and FTS tables.
+Original failures and source-bound binaries are retained and hash-verified.
+This completes the bounded Linux owner proof; full serve admission, native
+Windows/macOS acceptance and independent review remain required.

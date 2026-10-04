@@ -2,7 +2,7 @@
 
 ### Memory UI migration decision (#763)
 - Keep the portable local Memory Web Console reachable through `symbrain memory serve` and port it alongside the native memory HTTP owner. Existing commands and data remain supported during the tested cutover; this decision alone does not replace the Go server.
-- Retire the mandatory port of the legacy Memory TUI, which has no reachable Brain command. No terminal command or memory-domain operation is removed. The accepted Brain GUI/CLI target remains in effect; native Web Console authentication/search corrections and cross-platform runtime gates are still pending.
+- Retire the mandatory port of the legacy Memory TUI, which has no reachable Brain command. No terminal command or memory-domain operation is removed. The accepted Brain GUI/CLI target remains in effect; the bounded native HTTP owner corrects protected-read authentication, nested search rendering and exact local Origin writes, with owned Linux HTTP/DOM evidence. Full `memory serve` admission and native three-platform runtime gates remain pending.
 
 ### Features
 - #302 In-process skill sync and remote memory sync — closes #300 #301. `symbrain sync` now runs skill rendering/installation in-process (no archived `symskills` binary needed), and `symbrain memory sync --remote` replaces the archived `symmemory` runtime workflow with pull/push/token/encrypted-relay modes.
