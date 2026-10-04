@@ -41,3 +41,30 @@ This avoids modifying compatible historical schemas or data to accommodate a
 host diagnostic bug. Explicit SDK selection plus executable semantic controls
 makes future runner-image changes visible. Evidence is under
 `migration/evidence/memory-historical-649/sqlite-checker-a30`.
+
+## Fresh local replay and independent review
+
+The clean64cba289 checker/harness now actually completed all37 original Go/native
+pairs,37 complete-state native reopens and nine separate corrective controls
+under local SQLite3.53.1. The restored actual63fbd CLI has its original archived
+SHA and all549 original Rust/Cargo/SDK/resource inputs matched64cba byte-for-byte.
+No target, compiler or embedding port was used. Both products succeed in all37
+historical pairs. The separate controls retain nine Go successes and three
+native successes/six deliberate fail-closed results, not generalized equality.
+
+A different reviewer verified every222 historical and45 control file hash,
+the full receipts/results/source and both product identities; fresh SQLite-only
+observations also reject three genuine fixture mutants. Full independent review
+has no blocking findings. Its SDK input check preserves the minimal script's
+original stdin without final newline and retained file with newline as distinct
+byte strings; both reproduce the same old-checker failure. This is not evidence
+of the selected Python3.13.7 distribution or native macOS/Windows execution.
+
+The integrated Managed change adds failure-only context to the unchanged Unix
+timeout predicates/fixture/budgets. Its separate different-author source review
+accepts diagnostic publication only. The final publication retains548 unchanged
+original compiled inputs, the one changed Managed test and the additive Windows
+health diagnostic as explicitly uncompiled diagnostic tests. It claims no new
+Managed runtime result or production fix. Complete originals, local runtime and
+both full reviews remain in `current-root-and-independent` beside the original
+checker evidence. Fresh native/coverage/protected CI still governs merging.
