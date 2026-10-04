@@ -73,3 +73,7 @@ or port execution is allocated. Fresh exact-head native runtime, strict affected
 graph, all original gates and different-author review remain required. General
 CI failures and full #803 completion remain open; successful narrower native
 Memory CLI evidence does not supersede the failed full gates.
+
+## Shared deadline correction after independent source review
+
+The review of `0266879f` identified that durable begin-event fsync could consume time after a timeout argument had been calculated. The diagnostic now creates one absolute five-second deadline after spawn and calculates each peer timeout immediately after its durable begin event. An exhausted deadline skips that call and fails the existing success assertion after owned cleanup. Logging, initialization and ping therefore share the unchanged budget; the pre-event estimate is metadata only. The complete original review, deterministic schedule projection and pre-edit source are retained under `migration/evidence/memory-windows-parity-803/deadline-review-026`. This is a source correction; native Windows execution and the original failure cause remain unverified.

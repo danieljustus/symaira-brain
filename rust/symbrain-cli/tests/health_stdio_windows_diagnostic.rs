@@ -99,14 +99,17 @@ fn child_probe() {
 fn probe_lifecycle(client: Client, log: &Path, started: Instant) {
     // The production health budget begins after successful spawn and spans init + ping.
     let probe_started = Instant::now();
-    let budget = std::time::Duration::from_secs(5);
+    let deadline = probe_started + std::time::Duration::from_secs(5);
     event(
         log,
         "initialize_begin",
         started,
         &json!({"budget_ms": 5000}),
     );
-    let initialized = client.initialize(budget);
+    let initialized = deadline
+        .checked_duration_since(Instant::now())
+        .filter(|remaining| !remaining.is_zero())
+        .map(|remaining| client.initialize(remaining));
     event(
         log,
         "initialize_end",
@@ -116,19 +119,19 @@ fn probe_lifecycle(client: Client, log: &Path, started: Instant) {
             "exited": format!("{:?}", client.exited()),
         }),
     );
-    let ping = if initialized.is_ok() {
-        let remaining = budget.saturating_sub(probe_started.elapsed());
+    let ping = if initialized.as_ref().is_some_and(Result::is_ok) {
+        let before_event = deadline.saturating_duration_since(Instant::now());
         event(
             log,
             "ping_begin",
             started,
-            &json!({"remaining_ns": remaining.as_nanos().to_string()}),
+            &json!({"remaining_ns_before_event": before_event.as_nanos().to_string()}),
         );
-        if remaining.is_zero() {
-            None
-        } else {
-            Some(client.ping(remaining))
-        }
+        // Durable logging consumes the same budget as both peer calls.
+        deadline
+            .checked_duration_since(Instant::now())
+            .filter(|remaining| !remaining.is_zero())
+            .map(|remaining| client.ping(remaining))
     } else {
         None
     };
@@ -151,7 +154,10 @@ fn probe_lifecycle(client: Client, log: &Path, started: Instant) {
     );
     drop(client);
     event(log, "drop_end", started, &json!({}));
-    assert!(initialized.is_ok(), "owned Go init failed: {initialized:?}");
+    assert!(
+        initialized.as_ref().is_some_and(Result::is_ok),
+        "owned Go init failed or deadline exhausted: {initialized:?}"
+    );
     assert!(
         matches!(ping, Some(Ok(()))),
         "owned Go ping failed: {ping:?}"
