@@ -139,6 +139,7 @@ def pairs(go: Path, rust: Path, provider: Path, cases: list[str], *, metadata: b
         if metadata and os.name != "nt":
             assert [v["argv0_base64"] for v in left["vectors"]] == [v["argv0_base64"] for v in right["vectors"]]
         rows.append({"case": case, "go": left, "rust": right, "matches": True,
+                     "argv0_equal": [v["argv0_base64"] for v in left["vectors"]] == [v["argv0_base64"] for v in right["vectors"]],
                      "argv0_and_raw_command_line": "raw vectors retained separately for native ownership/argv review; no blanket Windows argv0 equivalence claim"})
     return rows
 
