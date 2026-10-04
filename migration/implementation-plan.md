@@ -1976,3 +1976,5 @@ Go remains the production enforcement path until the full Guard-specific matrix 
 ### Completion definition
 
 The migration is complete only when every row in `migration/contract-matrix.csv` is green, no command invokes Go, the supported release matrix passes, Swift clients work unchanged at their public boundary, and the Rust release has a verified rollback to the last Go release.
+
+- #761 e55 full independent REQUEST (one inherited Codex resource timestamp P2) is retained with all82 proof records and receipt before an isolated local-parser successor. Chrono-only leap resources remain consolidated, do not enter parent coverage, and ordinary59 resources stay valid. Original93/12/32/six controls remain unchanged; six constructor boundaries/three unit definitions/one real filename-domain control are prepared only. See `docs/adr/memory-codex-resource-time-domain-761.md`; no runtime or routing admission, different-author/native3 gates pending.

@@ -24,4 +24,6 @@ pub use obsidian::ObsidianImporter;
 pub use shell::ShellHistoryImporter;
 
 #[cfg(test)]
+mod resource_time_tests;
+#[cfg(test)]
 mod tests;

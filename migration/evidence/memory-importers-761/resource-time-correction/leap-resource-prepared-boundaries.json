@@ -1,0 +1,48 @@
+{
+  "status": "prepared-source-derived-input-specifications-only",
+  "actual_product_or_sdk_runs": 0,
+  "source": "e55ea752b28d88df0b9d2248a8d32cb6d971f9e5",
+  "frozen_go": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "body_hex": "4f776e656420636f6e74657874207265636f726473206f6e652072657461696e6564206465636973696f6e20776974686f75742063726564656e7469616c732e0a",
+  "relative_directory_hex": "657874656e73696f6e732f6f776e65642f7265736f7572636573",
+  "ownership": "new explicitly allocated disposable fixture root only; no operator HOME",
+  "cases": [
+    {
+      "id": "invalid-6h",
+      "basename_hex": "323032362d30312d30315432332d35392d36302d6f776e65642d36682d636f6e746578742e6d64",
+      "future_assertion": "discovery must retain consolidated candidate; direct import must not create timed-resource metadata",
+      "expected_basis": "source-derived, not an executed result"
+    },
+    {
+      "id": "invalid-10min",
+      "basename_hex": "323032362d30312d30315432332d35392d36302d6f776e65642d31306d696e2d636f6e746578742e6d64",
+      "future_assertion": "discovery must retain consolidated candidate; direct import must not create timed-resource metadata",
+      "expected_basis": "source-derived, not an executed result"
+    },
+    {
+      "id": "valid-6h",
+      "basename_hex": "323032362d30312d30315432332d35392d35392d6f776e65642d36682d636f6e746578742e6d64",
+      "future_assertion": "ordinary 6h activity metadata remains identical to actual Go",
+      "expected_basis": "source-derived, not an executed result"
+    },
+    {
+      "id": "valid-10min",
+      "basename_hex": "323032362d30312d30315432332d35392d35392d6f776e65642d31306d696e2d636f6e746578742e6d64",
+      "future_assertion": "ordinary 10min activity metadata remains identical to actual Go",
+      "expected_basis": "source-derived, not an executed result"
+    },
+    {
+      "id": "invalid-parent-with-valid-child",
+      "basename_hex": "323032362d30312d30315432332d35392d36302d6f776e65642d36682d636f6e746578742e6d64",
+      "future_assertion": "invalid parent must not suppress valid 2026-01-02T00-00-00-owned-10min-child.md",
+      "expected_basis": "source-derived, not an executed result"
+    },
+    {
+      "id": "valid-parent-with-valid-child",
+      "basename_hex": "323032362d30312d30315432332d35392d35392d6f776e65642d36682d636f6e746578742e6d64",
+      "future_assertion": "positive valid-parent coverage must continue to suppress same valid child",
+      "expected_basis": "source-derived, not an executed result"
+    }
+  ],
+  "required_future_proof": "actual frozen public discover/import paired processes; complete ordered raw reports + readonly source state + successful Go/native exits; add unit parser controls and retain all 93/12/32 original prepared criteria"
+}

@@ -1,0 +1,36 @@
+{
+  "status": "source-only-no-product-or-SDK-execution",
+  "input_basename_hex": "323032362d30312d30315432332d35392d36302d6f776e65642d36682d636f6e746578742e6d64",
+  "records": {
+    "/workspace/symaira-memory761-importer-corrections/rust/symbrain-memory/src/importer/markdown.rs": {
+      "sha256": "10a1e24e8deb1378b2d58ba5ec01733a7e2cc6afe6a2d1e2e1b82fd4c4b5c691",
+      "bytes": 8973,
+      "preserved": "/workspace/symaira-memory761-e55-independent-source/finding-source/10a1e24e8deb1378b2d58ba5ec01733a7e2cc6afe6a2d1e2e1b82fd4c4b5c691"
+    },
+    "/workspace/symaira-memory761-importer-corrections/rust/symbrain-memory/src/importer/codex_discovery.rs": {
+      "sha256": "dc56fb96321a888a3a4855c5c3a840a378ed0a7867e5b972bc93c17e1bed2d1d",
+      "bytes": 4761,
+      "preserved": "/workspace/symaira-memory761-e55-independent-source/finding-source/dc56fb96321a888a3a4855c5c3a840a378ed0a7867e5b972bc93c17e1bed2d1d"
+    },
+    "/workspace/symaira-memory761-importer-corrections/rust/symbrain-memory/src/importer/codex_memory.rs": {
+      "sha256": "1a456175739c5b3fa8041b86840ff2c032ad6edde6699d0823ae7680e1dfcb87",
+      "bytes": 7227,
+      "preserved": "/workspace/symaira-memory761-e55-independent-source/finding-source/1a456175739c5b3fa8041b86840ff2c032ad6edde6699d0823ae7680e1dfcb87"
+    },
+    "/workspace/oracles/daemon772-go-source/internal/memory/importer/codexmemory/codexmemory.go": {
+      "sha256": "e200d7a338c9e94f6933d644900ef5ecb19e887a0f99f7a9f82078b385b8db39",
+      "bytes": 15692,
+      "preserved": "/workspace/symaira-memory761-e55-independent-source/finding-source/e200d7a338c9e94f6933d644900ef5ecb19e887a0f99f7a9f82078b385b8db39"
+    },
+    "/workspace/toolchains/go1.26.7/src/time/format.go": {
+      "sha256": "f288c56858ab25828551681778f006b591ed140fc12e60122b6a9a7e35b07eb7",
+      "bytes": 50739,
+      "preserved": "/workspace/symaira-memory761-e55-independent-source/finding-source/f288c56858ab25828551681778f006b591ed140fc12e60122b6a9a7e35b07eb7"
+    },
+    "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/chrono-0.4.45/src/format/parsed.rs": {
+      "sha256": "369844ce5079271e526b8420b70d25a69dbfc8dc6ad2a534ea36fd9e80edd093",
+      "bytes": 79444,
+      "preserved": "/workspace/symaira-memory761-e55-independent-source/finding-source/369844ce5079271e526b8420b70d25a69dbfc8dc6ad2a534ea36fd9e80edd093"
+    }
+  }
+}

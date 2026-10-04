@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use chrono::{DateTime, Duration, NaiveDateTime};
+use chrono::{DateTime, Duration, NaiveDateTime, Timelike};
 
 use super::{
     Metadata,
@@ -130,6 +130,11 @@ pub(super) fn resource(base: &[u8]) -> Option<(&'static str, Time)> {
         return None;
     }
     let parsed = NaiveDateTime::parse_from_str(timestamp, "%Y-%m-%dT%H-%M-%S").ok()?;
+    // Chrono encodes second 60 as second 59 plus >=1e9 nanoseconds. Go's
+    // time.Parse rejects it; retain this file as ordinary consolidated Markdown.
+    if parsed.nanosecond() >= 1_000_000_000 {
+        return None;
+    }
     Some((kind, parsed.and_utc().fixed_offset()))
 }
 
