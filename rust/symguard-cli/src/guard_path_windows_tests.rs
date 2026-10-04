@@ -9,6 +9,12 @@ fn join(path: &str, parts: &[&str]) -> String {
 
 #[test]
 fn windows_raw_utf16_paths_keep_lone_surrogates() {
+    for unit in 1..=u16::MAX {
+        if unit != 47 {
+            assert_eq!(clean_units(&[unit]), [unit], "raw unit {unit:#x}");
+        }
+    }
+    assert_eq!(clean_units(&[0xd800, 0xdc00]), [0xd800, 0xdc00]);
     for raw in [0xd800, 0xdc00] {
         let path = [46, 92, raw, 92, 97, 92, 46, 46, 92, 98];
         assert_eq!(clean_units(&path), [raw, 92, 98]);
@@ -94,6 +100,8 @@ fn windows_volume_and_device_paths_follow_go_clean() {
         assert_eq!(clean(expected), expected, "idempotence {input:?}");
     }
     assert_eq!(join("foo:bar/a/..", &["..", "b"]), r".\b");
+    assert_eq!(clean("foo:/a/../../雪a"), "雪a");
+    assert_eq!(clean("雪a:/a/../../abcd"), r".\abcd");
     assert_eq!(
         join_units(&[0xdc00, 58, 47, 97, 47, 46, 46], &["..", "b"]),
         ".\\b".encode_utf16().collect::<Vec<_>>()
