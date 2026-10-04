@@ -52,8 +52,8 @@ jobs:
         run: |
           set -euo pipefail
           cargo fmt --all --check
-          cargo clippy --locked -p symbrain-skills -p symbrain-gateway -p symbrain-cli -p symbrain-mcp --all-targets -- -D warnings
-          cargo test --locked -p symbrain-skills -p symbrain-gateway -p symbrain-cli -p symbrain-mcp
+          cargo clippy --locked -p symbrain-core -p symbrain-skills -p symbrain-gateway -p symbrain-cli -p symbrain-mcp --all-targets -- -D warnings
+          cargo test --locked -p symbrain-core -p symbrain-skills -p symbrain-gateway -p symbrain-cli -p symbrain-mcp
           cargo build --locked -p symbrain-cli
           cargo build --locked -p symbrain-skills --example git_stream_fixture
       - name: Actual owned CLI/MCP differential and input controls

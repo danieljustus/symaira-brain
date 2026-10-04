@@ -145,3 +145,9 @@ retained. Scoped `git add --renormalize` reindexed only these raw input files,
 and the final check compares every member against the immutable source blob.
 Binary diff attributes keep intentional protocol CRLF out of whitespace lint
 without excluding any Rust/source assertion or raw-byte verification.
+
+The native Skills workflow explicitly adds the Core package to its existing
+strict and test invocations so the prepared 81-record converter regression is
+actually scheduled on each native platform when CI runs. Every original
+package, flag, timeout, input and control remains. Core as a dependency alone
+would not execute its unit tests. This is workflow preparation, not execution.
