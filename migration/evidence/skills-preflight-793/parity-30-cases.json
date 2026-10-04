@@ -1,0 +1,539 @@
+{
+  "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "frozen_source_build": "gitarchive source; no Go or fixture mutations",
+  "total": 30,
+  "matched": 30,
+  "results": [
+    {
+      "flags": [
+        "--target"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -target\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -target\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "flags": [
+        "-target"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -target\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -target\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "flags": [
+        "--scope"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -scope\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -scope\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "flags": [
+        "-scope"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -scope\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -scope\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "flags": [
+        "--unknown"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag provided but not defined: -unknown\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag provided but not defined: -unknown\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "flags": [
+        "--dry-run=invalid"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "invalid boolean value \"invalid\" for -dry-run: parse error\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "invalid boolean value \"invalid\" for -dry-run: parse error\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "flags": [
+        "--help"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "Usage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "Usage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "flags": [
+        "-h"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "Usage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "Usage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "flags": [
+        "--target=not-a-target"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"not-a-target\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"not-a-target\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "flags": [
+        "--scope=not-a-scope"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"not-a-scope\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"not-a-scope\" (known: user, project)\n"
+      }
+    },
+    {
+      "flags": [
+        "--dry-run=true"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "flags": [
+        "--dry-run=false"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "flags": [
+        "--dry-run=1"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "flags": [
+        "--dry-run=0"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "flags": [
+        "--",
+        "--target"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "flags": [
+        "positional",
+        "--scope"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "flags": [
+        "---",
+        "--target"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "flags": [
+        "---dry-run=true"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "flags": [
+        "----target"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "bad flag syntax: ---target\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "bad flag syntax: ---target\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "flags": [
+        "--dry-run=true",
+        "--dry-run=false"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "flags": [
+        "--target= opencode ",
+        "--scope= user "
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "flags": [
+        "--scope=bad\u001b"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"bad\\x1b\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"bad\\x1b\" (known: user, project)\n"
+      }
+    },
+    {
+      "flags": [
+        "--dry-run=bad\u001b"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "invalid boolean value \"bad\\x1b\" for -dry-run: parse error\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "invalid boolean value \"bad\\x1b\" for -dry-run: parse error\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "flags": [
+        "--scope",
+        "--bad"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"-bad\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"-bad\" (known: user, project)\n"
+      }
+    },
+    {
+      "flags": [
+        "--target",
+        "--bad"
+      ],
+      "raw_args_hex": null,
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"-bad\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"-bad\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "flags": [
+        "--scope=bad"
+      ],
+      "raw_args_hex": [
+        "2d2d73636f70653d626164ff"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"bad\\xff\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"bad\\xff\" (known: user, project)\n"
+      }
+    },
+    {
+      "flags": [
+        "--scope",
+        "bad"
+      ],
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "626164ff"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"bad\\xff\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"bad\\xff\" (known: user, project)\n"
+      }
+    },
+    {
+      "flags": [
+        "--target=bad"
+      ],
+      "raw_args_hex": [
+        "2d2d7461726765743d626164ff"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "flags": [
+        "--target",
+        "bad"
+      ],
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "626164ff"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "flags": [
+        "--dry-run=bad"
+      ],
+      "raw_args_hex": [
+        "2d2d6472792d72756e3d626164ff"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "invalid boolean value \"bad\\xff\" for -dry-run: parse error\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "invalid boolean value \"bad\\xff\" for -dry-run: parse error\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    }
+  ]
+}
