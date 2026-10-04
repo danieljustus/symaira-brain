@@ -53,10 +53,13 @@ the two CI drift paths were the entire evidence inventory. Its complete failed
 check and correction to the four actual paths are retained; candidate bodies
 and assertions were unchanged by that correction.
 
-Before publication require different-author review, actual strict Clippy and
+Before merge or release require different-author review, actual strict Clippy and
 affected/full Rust tests, both real-Go formatter tests and `make lint`, original
 six Usage gates, original Retry1600/1164 and additive1681/1356 process gates with
-all seven real controls, and fresh exact-source Linux/macOS/Windows CI. This
+all seven real controls, and fresh exact-source Linux/macOS/Windows CI. After
+independent review, the candidate may be pushed normally without rewriting
+remote history to start those fresh CI checks; that push implies no runtime
+acceptance. This
 checkpoint executes no Rust/Go compiler, SDK, product, HTTP peer, port or Cargo
 target and creates no current executable. Prior accepted or prepared evidence
 keeps its original source/platform identity. PR804 and issue #768 remain open.
