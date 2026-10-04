@@ -14,3 +14,4 @@ migration/evidence/browse-registry-772/windows-endpoint-b427/*.log binary
 
 # Preserve original state-key process/test failure bytes.
 migration/evidence/browse-state-key-772/**/*.log binary
+migration/evidence/browse-registry-772/windows-pipe-7f/*.log binary

@@ -1,0 +1,132 @@
+{
+  "head": "c4f953af726ff7c4f3185011bbf1ab05de53eeb7",
+  "result": "APPROVE focused source correction; native Windows/six-platform acceptance still mandatory",
+  "artifacts": {
+    "/tmp/symaira-registry-c4-pipe-control-broad-retry-final.log": {
+      "file": "symaira-registry-c4-pipe-control-broad-retry-final.log.gz",
+      "bytes": 938,
+      "sha256": "8c6a68d08e5003caf584e9e9dd86499b8bad77e09aea0b4bd43f2ee19b4c5b6b",
+      "stored_sha256": "f251ed988481d3b953b689c16514598ada38179e040487866f370b1261a20d4e"
+    },
+    "/tmp/symaira-registry-c4-pipe-control-broad-retry.log": {
+      "file": "symaira-registry-c4-pipe-control-broad-retry.log.gz",
+      "bytes": 125,
+      "sha256": "a71422180e9aad2f64828df8197a7cc73fb126e73e6dcf507d10dc44aa43896e",
+      "stored_sha256": "706256fa1ef3b9ebe6c5aaf4bc94f2ed9ccec560b2a2f7f66ed819e198515b3c"
+    },
+    "/tmp/symaira-registry-c4-pipe-control-broad-retry.py": {
+      "file": "symaira-registry-c4-pipe-control-broad-retry.py",
+      "bytes": 6078,
+      "sha256": "da9d04343cde5fd87a782e14e7f41669c75b606d8303d88b53289b3ebf3e0f41",
+      "stored_sha256": "da9d04343cde5fd87a782e14e7f41669c75b606d8303d88b53289b3ebf3e0f41"
+    },
+    "/tmp/symaira-registry-c4-pipe-control-no-drain-final.log": {
+      "file": "symaira-registry-c4-pipe-control-no-drain-final.log.gz",
+      "bytes": 1141,
+      "sha256": "4db589fcc405a1b49de7dc31da903bd504e344483c21b7e7a499a681daac31f2",
+      "stored_sha256": "276fb484e28394bc66df7aa021a335260cf60c420fa5b6963a24b7e5e54b2894"
+    },
+    "/tmp/symaira-registry-c4-pipe-control-no-drain.log": {
+      "file": "symaira-registry-c4-pipe-control-no-drain.log.gz",
+      "bytes": 1141,
+      "sha256": "4db589fcc405a1b49de7dc31da903bd504e344483c21b7e7a499a681daac31f2",
+      "stored_sha256": "276fb484e28394bc66df7aa021a335260cf60c420fa5b6963a24b7e5e54b2894"
+    },
+    "/tmp/symaira-registry-c4-pipe-control-no-drain.py": {
+      "file": "symaira-registry-c4-pipe-control-no-drain.py",
+      "bytes": 6031,
+      "sha256": "a5624c8c10f991e3ad5c10e659b470c87539a843ffc5997d387ced495ad6cf03",
+      "stored_sha256": "a5624c8c10f991e3ad5c10e659b470c87539a843ffc5997d387ced495ad6cf03"
+    },
+    "/tmp/symaira-registry-c4-pipe-control-truncated-handle-final.log": {
+      "file": "symaira-registry-c4-pipe-control-truncated-handle-final.log.gz",
+      "bytes": 818,
+      "sha256": "98da4363adfa0f1627414f27f45bdb85fef0ad31f90e1960a16701050f773dad",
+      "stored_sha256": "121ebf81f9baaa559a804b8d01eeca4283fbf2f06d1b84a704dc19ded1a633f4"
+    },
+    "/tmp/symaira-registry-c4-pipe-control-truncated-handle.log": {
+      "file": "symaira-registry-c4-pipe-control-truncated-handle.log.gz",
+      "bytes": 818,
+      "sha256": "98da4363adfa0f1627414f27f45bdb85fef0ad31f90e1960a16701050f773dad",
+      "stored_sha256": "121ebf81f9baaa559a804b8d01eeca4283fbf2f06d1b84a704dc19ded1a633f4"
+    },
+    "/tmp/symaira-registry-c4-pipe-control-truncated-handle.py": {
+      "file": "symaira-registry-c4-pipe-control-truncated-handle.py",
+      "bytes": 6061,
+      "sha256": "124726580fb96bdace0c0e6a3977428e65f95c38c1c56315ec63919b606acc27",
+      "stored_sha256": "124726580fb96bdace0c0e6a3977428e65f95c38c1c56315ec63919b606acc27"
+    },
+    "/tmp/symaira-registry-c4-pipe-independent-actionlint.log": {
+      "file": "symaira-registry-c4-pipe-independent-actionlint.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stored_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "/tmp/symaira-registry-c4-pipe-independent-author-tests.log": {
+      "file": "symaira-registry-c4-pipe-independent-author-tests.log.gz",
+      "bytes": 106,
+      "sha256": "75ff54e727b57e4bd7b88956ed0c92c4b9a416e6f0976707e8fb54aa385ac0bd",
+      "stored_sha256": "6a71ac2ec35156e12dd0313e17ab1fd3a4fa5dbcc0a3cfad0633d3d5ac61d007"
+    },
+    "/tmp/symaira-registry-c4-pipe-independent-controls.log": {
+      "file": "symaira-registry-c4-pipe-independent-controls.log.gz",
+      "bytes": 2016,
+      "sha256": "df0fc1566486f94c116119a90b17bda276ec74a0db6c53b4ca3135a9d5195cd0",
+      "stored_sha256": "12085ce292d21800a578f5a4bf9ed5905a036433f3c51e5286b3e19eb6bf4312"
+    },
+    "/tmp/symaira-registry-c4-pipe-independent-controls.py": {
+      "file": "symaira-registry-c4-pipe-independent-controls.py",
+      "bytes": 7557,
+      "sha256": "70bc236bab4227ad3fa9544f57b1f33838b0914e2a9b00178d8ee10c8c0636f7",
+      "stored_sha256": "70bc236bab4227ad3fa9544f57b1f33838b0914e2a9b00178d8ee10c8c0636f7"
+    },
+    "/tmp/symaira-registry-c4-pipe-independent-diffcheck.log": {
+      "file": "symaira-registry-c4-pipe-independent-diffcheck.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stored_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "/tmp/symaira-registry-c4-pipe-independent-harness-tests.log": {
+      "file": "symaira-registry-c4-pipe-independent-harness-tests.log.gz",
+      "bytes": 100,
+      "sha256": "ff0d9d76afc3dbb79c6b38117df28de76fbde4ee2cb805be51be5cfb3e97579d",
+      "stored_sha256": "f891f3c21b480411453bad655c730ae7010739bcbfc2f13e6ac397da81ceae14"
+    },
+    "/tmp/symaira-registry-c4-pipe-independent-provenance.log": {
+      "file": "symaira-registry-c4-pipe-independent-provenance.log.gz",
+      "bytes": 117,
+      "sha256": "26fca411c635ec6336f9d3944554c6291924a394b6b87dc730a7a4d5db7cbbf5",
+      "stored_sha256": "4f3c638215971c29301d235cb2f80b8c4051ec90de55da4330a9565e6be542c0"
+    },
+    "/tmp/symaira-registry-c4-pipe-independent-provenance.py": {
+      "file": "symaira-registry-c4-pipe-independent-provenance.py",
+      "bytes": 1965,
+      "sha256": "e0b42b3a227b76a4381ff7f17e5d4e4d12ceb6bc29fd68d10fdc7228b0379790",
+      "stored_sha256": "e0b42b3a227b76a4381ff7f17e5d4e4d12ceb6bc29fd68d10fdc7228b0379790"
+    },
+    "/tmp/symaira-registry-c4-pipe-independent-review.md": {
+      "file": "symaira-registry-c4-pipe-independent-review.md",
+      "bytes": 5083,
+      "sha256": "c07f2b55c14e8f434f4a8a360609d84ba68f7f192feb71b5aaaeea050060cf3b",
+      "stored_sha256": "c07f2b55c14e8f434f4a8a360609d84ba68f7f192feb71b5aaaeea050060cf3b"
+    },
+    "/tmp/symaira-registry-c4-pipe-negative-controls-final.json": {
+      "file": "symaira-registry-c4-pipe-negative-controls-final.json.gz",
+      "bytes": 360,
+      "sha256": "fbb1d38fbd8928ef8b76904d34c36a10b8693004c56323eb03552d15ddbe25f6",
+      "stored_sha256": "db5df1a74c31b35a4facf439de3c1fc550d5115bce1fb46d7fb589d90c465c4d"
+    },
+    "/tmp/symaira-registry-c4-pipe-negative-controls.json": {
+      "file": "symaira-registry-c4-pipe-negative-controls.json.gz",
+      "bytes": 385,
+      "sha256": "6bafb884cdc79390947eac1ff27dd0b2b9d6b6f6f4d28695f12a441c109f0305",
+      "stored_sha256": "9b9354520fcb7376371673f84f173d3f2d81a11b99e4d40f8ff7a5ac4ae816a9"
+    },
+    "/tmp/symaira-registry-c4-pipe-independent-review-receipt.json": {
+      "file": "symaira-registry-c4-pipe-independent-review-receipt.json.gz",
+      "bytes": 7144,
+      "sha256": "0f8dbd39331025cdefb4171dbd9639b62ac7085eb59b063660a76c7e20170185",
+      "stored_sha256": "42ebf6cea316e079a2802e8b36874f871b8a822b9d4f126bc56d746e77d7cc12"
+    }
+  }
+}

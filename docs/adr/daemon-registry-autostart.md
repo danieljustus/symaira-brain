@@ -188,3 +188,10 @@ combinations, operation-refusal and never-dispatched assertions. Production
 endpoint rules and timeouts remain unchanged. Retain both complete CRLF logs.
 This is a fixture correction; fresh native execution still establishes
 Windows acceptance. No extra retry, skip or relaxed owner check is introduced.
+
+Independent review of the focused d4cb8e6 test delta finds no issue. The
+same fixture, normally integrated into the separate in-progress state-key
+successor, passes all five client contracts/two child fixtures and strict
+workspace Clippy on Linux. Those logs are retained with their actual source
+scope; they do not claim a standalone exact-head rebuild. Current native CI
+on this normally main-integrated publication remains the acceptance gate.

@@ -1,0 +1,13 @@
+{
+  "reviewed_standalone_fix": "d4cb8e67cd20e0f1939c432f740cf1e71b11f209",
+  "reviewer": "/root/review_pr797",
+  "disposition": "approve focused fixture correction; no finding",
+  "reviewer_statement": "unique owned Windows named pipe via existing default_socket_path; Unix spelling/all four engine-policy/refusal/no-dispatch assertions unchanged; no timeout/skip/auth relaxation",
+  "linux_exercise": "same corrected client_contract after normal integration into separate active state-key successor;5 tests and2 child fixtures, strict workspace Clippy passed",
+  "linux_source_scope": "successor also contains in-progress bridge changes; these logs do not claim a separate exact standalone-source rebuild",
+  "native_windows": "exact published head native amd64/arm64 jobs required before merge",
+  "logs_sha256": {
+    "symaira-state-key-d4c-clippy.log": "f72d443d8cc7eef7731c55a5e0b7cafaf9048606327efb3cf229ecaf7ed3bb7a",
+    "symaira-state-key-client-owner-d4c.log": "06c2ad3cc5cb95b9c77c04c7f5fc08f995223702da6e0cc117fa558f8b100dba"
+  }
+}
