@@ -259,6 +259,64 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Native usage credential reference and CLI parity
+        shell: bash
+        run: scripts/usage-credential-oracle/run.sh "$RUNNER_TEMP/usage-credential-768.json"
+
+      - name: Preserve usage credential reference process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-credential-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-credential-768.json
+            ${{ runner.temp }}/usage-credential-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native Claude and Codex credential file process parity
+        shell: bash
+        run: bash scripts/usage-provider-files-oracle/run.sh "$RUNNER_TEMP/usage-provider-files-768.json"
+
+      - name: Preserve provider file and filesystem evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-provider-files-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-provider-files-768.json
+            ${{ runner.temp }}/usage-provider-files-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native read-only Copilot and Kimi file process parity
+        shell: bash
+        run: bash scripts/usage-copilot-kimi-oracle/run.sh "$RUNNER_TEMP/usage-copilot-kimi-768.json"
+      - name: Preserve Copilot and Kimi process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-copilot-kimi-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-copilot-kimi-768.json
+            ${{ runner.temp }}/usage-copilot-kimi-768.evidence
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Native read-only Hermes file and JWT process parity
+        shell: bash
+        run: scripts/usage-hermes-oracle/run.sh "$RUNNER_TEMP/usage-hermes-768.json"
+
+      - name: Preserve Hermes credential and filesystem evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-hermes-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-hermes-768.json
+            ${{ runner.temp }}/usage-hermes-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Go/Rust vault administration process parity
         run: |
           python3 -m unittest discover -s scripts/vault-admin-oracle -p test_replay.py -v
@@ -400,6 +458,64 @@ jobs:
         with:
           name: usage-fetch-620-${{ runner.os }}
           path: ${{ runner.temp }}/usage-fetch-620.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native usage credential reference and CLI parity
+        shell: bash
+        run: scripts/usage-credential-oracle/run.sh "$RUNNER_TEMP/usage-credential-768.json"
+
+      - name: Preserve usage credential reference process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-credential-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-credential-768.json
+            ${{ runner.temp }}/usage-credential-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native Claude and Codex credential file process parity
+        shell: bash
+        run: bash scripts/usage-provider-files-oracle/run.sh "$RUNNER_TEMP/usage-provider-files-768.json"
+
+      - name: Preserve provider file and filesystem evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-provider-files-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-provider-files-768.json
+            ${{ runner.temp }}/usage-provider-files-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native read-only Copilot and Kimi file process parity
+        shell: bash
+        run: bash scripts/usage-copilot-kimi-oracle/run.sh "$RUNNER_TEMP/usage-copilot-kimi-768.json"
+      - name: Preserve Copilot and Kimi process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-copilot-kimi-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-copilot-kimi-768.json
+            ${{ runner.temp }}/usage-copilot-kimi-768.evidence
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Native read-only Hermes file and JWT process parity
+        shell: bash
+        run: scripts/usage-hermes-oracle/run.sh "$RUNNER_TEMP/usage-hermes-768.json"
+
+      - name: Preserve Hermes credential and filesystem evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-hermes-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-hermes-768.json
+            ${{ runner.temp }}/usage-hermes-768.evidence
           if-no-files-found: error
           retention-days: 14
 
@@ -555,6 +671,64 @@ jobs:
         with:
           name: usage-fetch-620-${{ runner.os }}
           path: ${{ runner.temp }}/usage-fetch-620.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native usage credential reference and CLI parity
+        shell: bash
+        run: scripts/usage-credential-oracle/run.sh "$RUNNER_TEMP/usage-credential-768.json"
+
+      - name: Preserve usage credential reference process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-credential-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-credential-768.json
+            ${{ runner.temp }}/usage-credential-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native Claude and Codex credential file process parity
+        shell: bash
+        run: bash scripts/usage-provider-files-oracle/run.sh "$RUNNER_TEMP/usage-provider-files-768.json"
+
+      - name: Preserve provider file and filesystem evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-provider-files-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-provider-files-768.json
+            ${{ runner.temp }}/usage-provider-files-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native read-only Copilot and Kimi file process parity
+        shell: bash
+        run: bash scripts/usage-copilot-kimi-oracle/run.sh "$RUNNER_TEMP/usage-copilot-kimi-768.json"
+      - name: Preserve Copilot and Kimi process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-copilot-kimi-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-copilot-kimi-768.json
+            ${{ runner.temp }}/usage-copilot-kimi-768.evidence
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Native read-only Hermes file and JWT process parity
+        shell: bash
+        run: scripts/usage-hermes-oracle/run.sh "$RUNNER_TEMP/usage-hermes-768.json"
+
+      - name: Preserve Hermes credential and filesystem evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-hermes-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-hermes-768.json
+            ${{ runner.temp }}/usage-hermes-768.evidence
           if-no-files-found: error
           retention-days: 14
 

@@ -1,0 +1,63 @@
+{
+  "decision": "APPROVE bounded corrected Provider Files/Hermes/reference increment; native three-OS CI and full768 pending",
+  "candidate_head": "9bc8ef0d8f2eccb5db04f8d53f389ca223e2f0a8",
+  "tested_source": "7bdde611aef63b1700fed5cbc12d5ce2bafe7a4d",
+  "candidate_dirty": false,
+  "native_binary_sha256": "9aed2a28060fe84f945db937def4ed10c83f13b15a008d4720ebebf3cd853f38",
+  "gate_counts": {
+    "files": [
+      86,
+      85,
+      1,
+      151,
+      5
+    ],
+    "hermes": [
+      96,
+      96,
+      0,
+      104,
+      5
+    ],
+    "references": [
+      44,
+      44,
+      0,
+      110,
+      5
+    ]
+  },
+  "ordinary_tests": 355,
+  "failed": 0,
+  "ignored_fresh_oracles_explicitly_executed": 3,
+  "unfiltered_cargo_summaries": 33,
+  "shared_source_entries": 44,
+  "original_retained_files_verified": 50,
+  "original_failing_input_bytes_reproduced": {
+    "file-total-depth-10000": "67211b6550d418ce6819c5646b9d62266d6ea4215ebe0d509a4871ef8fd2c936",
+    "jwt-total-depth-10000": "58bb6ef3299b14f5eb5c667124a0589eaa249b93bd662ee806fd46e3ab62fa0a",
+    "file-total-depth-10001": "c4894ae437b09aad4de0bccdda763f0a5d3aa5318acba869c2e79eb7e06f9041",
+    "jwt-total-depth-10001": "0daf023944919f427ae57862f656ea3fbe4e68590cc5f634a9e1af1f01156707"
+  },
+  "files_sha256": {
+    "/tmp/symaira-usage768-files-corrected-root-clippy.log": "6a981e4e2a0c9af6dead9afee0224555ade213f42082f62ec9b38c4d1fc0dd36",
+    "/tmp/symaira-usage768-files-corrected-root-tests.log": "707549737bd95ac571507cc90ca09103d46d10fa5009ae35d442fae98f81c653",
+    "/tmp/symaira-usage768-files-corrected-root-reference.json": "40d872efaa9aee1296ac724ee1e7b013c4634f095e6037ad81caf1a6e24d41f2",
+    "/tmp/symaira-usage768-files-corrected-root-reference.log": "520f32696c2bc613db7c32c52b9e3e40007fe9fae1928064637245860874f758",
+    "/tmp/symaira-usage768-files-corrected-root-hermes.json": "762bed5661f9f649571fabeee30227708659595bab7b5d45c7de590ce0ca5077",
+    "/tmp/symaira-usage768-files-corrected-root-hermes.log": "d95da123830fb35159aea674c5fb3a8d44f3a8f564fb4ed237051dbb3c3a4aa0",
+    "/tmp/symaira-usage768-files-corrected-root-process.json": "823d7364ecab7a4b176374eed388d5d80c1fcf8e47379d7ce7b95c2f63764aaa",
+    "/tmp/symaira-usage768-files-corrected-root-process.log": "03a9c7e0356af479569f999b475358c359662411c1a3215eb297d60a073ca246",
+    "/workspace/symaira-usage768-files/scripts/usage-provider-files-oracle/provider_test.go.txt": "0d47915b385687bc6ad3e21a74e0050b84819ea0bd08cafddc72454c6a8c94e7",
+    "/workspace/symaira-usage768-files/scripts/usage-provider-files-oracle/receipt.py": "a292577159ee0443488aafea41ff00739974d37e14d01d37cd010e904c33caf5",
+    "/workspace/symaira-usage768-files/scripts/usage-provider-files-oracle/cli.py": "cbe7794d468a260563c8bd152fcf215ca174af5e14b3278a79de2b5647712ab4",
+    "/workspace/symaira-usage768-files/scripts/usage-provider-files-oracle/controls.py": "14bef478e2e8f9fcc37bdb416a7cf35e92c96359780049f38438d5880ad150eb",
+    "/workspace/symaira-usage768-files/scripts/usage-provider-files-oracle/README.md": "ef7f9945a2f040df24f4451270e0d1fe79cc4e71a829813d189a4b809fc94b88",
+    "/workspace/symaira-usage768-files/scripts/usage-provider-files-oracle/cases.py": "e804ce70ca7de66753757135ea7924c3242b7db5d4b62a9513cbdff20e8c6843",
+    "/workspace/symaira-usage768-files/scripts/usage-provider-files-oracle/run.sh": "80929db0de29cdbeb2c84a888b4d97a4989de6b3a5d89eb69a2231f1a1860851",
+    "/workspace/symaira-usage768-files/scripts/usage-provider-files-oracle/filesystem.py": "dd3c0fb720d707583879ac2eb29561725adc82f04c3ea843980da4a1f32eb5a2",
+    "/workspace/symaira-usage768-files/.github/workflows/ci.yml": "d3ef6df4420d1fafc22dbda81694de89f2a2686bc6eaf0393eea7c3a995df84e"
+  },
+  "initial_command_correction": "All product tests passed; final actionlint invocation first named a nonexistent standalone workflow and exited3. Correct existing .github/workflows/ci.yml was then checked successfully. Original tool output and test logs remain retained.",
+  "operator_credentials_or_endpoints_used": false
+}

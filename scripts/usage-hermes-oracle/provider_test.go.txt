@@ -1,0 +1,82 @@
+// Supplemental replay of unchanged Hermes provider and decoder.
+package usage
+
+import (
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+type hermesCase768 struct {
+	ID          string `json:"id"`
+	DataHex     string `json:"data_hex"`
+	FilePresent bool   `json:"file_present"`
+}
+type hermesTransport768 struct{ Headers []string }
+
+func (r *hermesTransport768) RoundTrip(req *http.Request) (*http.Response, error) {
+	r.Headers = append(r.Headers, req.Header.Get("Authorization"))
+	return &http.Response{StatusCode: 401, Body: io.NopCloser(strings.NewReader("{}")), Header: make(http.Header)}, nil
+}
+func TestUsageHermesOracle768(t *testing.T) {
+	data, err := os.ReadFile(os.Getenv("USAGE_HERMES_INPUT"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cases []hermesCase768
+	if err := json.Unmarshal(data, &cases); err != nil {
+		t.Fatal(err)
+	}
+	if len(cases) == 0 {
+		t.Fatal("missing Hermes cases")
+	}
+	records := []any{}
+	for _, entry := range cases {
+		contents, err := hex.DecodeString(entry.DataHex)
+		if err != nil {
+			t.Fatal(err)
+		}
+		home := filepath.Join(os.Getenv("USAGE_HERMES_ROOT"), entry.ID)
+		auth := filepath.Join(home, "hermes", "auth.json")
+		if err := os.MkdirAll(filepath.Dir(auth), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if entry.FilePresent {
+			if err := os.WriteFile(auth, contents, 0600); err != nil {
+				t.Fatal(err)
+			}
+		}
+		t.Setenv("HOME", home)
+		t.Setenv("USERPROFILE", home)
+		t.Setenv("HERMES_HOME", filepath.Dir(auth))
+		t.Setenv("NOUS_PORTAL_ACCESS_TOKEN", "")
+		t.Setenv("HERMES_PORTAL_BASE_URL", "")
+		rt := &hermesTransport768{Headers: []string{}}
+		provider := NewNousPortalProvider(&http.Client{Transport: rt})
+		report := BuildReport(context.Background(), []Provider{provider})
+		if entry.FilePresent {
+			after, err := os.ReadFile(auth)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if string(after) != string(contents) {
+				t.Fatal("Go constructor mutated Hermes store")
+			}
+		}
+		records = append(records, map[string]any{"id": entry.ID, "home": home, "auth_path": auth, "hermes_home": filepath.Dir(auth), "file_present": entry.FilePresent, "data_hex": entry.DataHex, "sha256": hex.EncodeToString(func() []byte { sum := sha256.Sum256(contents); return sum[:] }()), "token": readNousAccessToken(auth), "report": report, "authorization": rt.Headers})
+	}
+	data, err = json.MarshalIndent(records, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(os.Getenv("USAGE_HERMES_ORACLE"), append(data, '\n'), 0600); err != nil {
+		t.Fatal(err)
+	}
+}

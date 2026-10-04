@@ -1,0 +1,280 @@
+{
+  "source": "f75993eb5155502a69a249c345c258b4277dece2",
+  "candidate": "7e0b63359123f0df8a19176313930a24e0dc4c40",
+  "probe_source_sha256": "7c5fae9921e941f4c5f5f39df0e717791740eb9cd2e44ebbbe410f3fda87fcee",
+  "linked_actual_production_rlib_sha256": "756674bd6730e766f60371dc32c94a568e18d4cab44e3b0ea2d0ea41268a5107",
+  "binaries": {
+    "/tmp/symaira-usage768-f759-root-owner-go": "a999c43455b6e2dd4df84a05e93378a51f6a703e134df5a4280b46cfbfb72b89",
+    "/tmp/symaira-usage768-f759-root-owner-probe": "c6bd36dde27753b08204eb8bd77547cd81f9d861679af2b4d163584b0248bc29"
+  },
+  "pairs": [
+    {
+      "provider": "copilot",
+      "variant": "plain-control",
+      "env": {
+        "HOME": "/tmp/usage-f759-owned-selection-8yzrx9f9/home",
+        "USERPROFILE": "/tmp/usage-f759-owned-selection-8yzrx9f9/home",
+        "PATH": "",
+        "ANTHROPIC_OAUTH_TOKEN": "env://OWNED_ABSENT",
+        "SYMBRAIN_GO_BINARY": "/tmp/usage-f759-owned-selection-8yzrx9f9/absent-go"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer lexical-owner"
+        ],
+        "source": "file",
+        "status": "available"
+      },
+      "rust": {
+        "configured": true,
+        "status": "available",
+        "source": "file",
+        "headers": [
+          "Bearer lexical-owner"
+        ]
+      },
+      "needs_go": false,
+      "matches": true,
+      "before": {
+        "owner/home/.config/github-copilot/apps.json": "5f3124b1ce9326c824845477044c2ee552bfbdd0e7148c71612c626dfcd0284e",
+        "home/.config/github-copilot/apps.json": "6de1ca6155f75c08c413568b716cfa013df691ef1fa21c8e833814671b25500a"
+      },
+      "after": {
+        "owner/home/.config/github-copilot/apps.json": "5f3124b1ce9326c824845477044c2ee552bfbdd0e7148c71612c626dfcd0284e",
+        "home/.config/github-copilot/apps.json": "6de1ca6155f75c08c413568b716cfa013df691ef1fa21c8e833814671b25500a"
+      },
+      "read_only": true
+    },
+    {
+      "provider": "copilot",
+      "variant": "dotdot-control",
+      "env": {
+        "HOME": "/tmp/usage-f759-owned-selection-rxiaj8l5/plain/../home",
+        "USERPROFILE": "/tmp/usage-f759-owned-selection-rxiaj8l5/plain/../home",
+        "PATH": "",
+        "ANTHROPIC_OAUTH_TOKEN": "env://OWNED_ABSENT",
+        "SYMBRAIN_GO_BINARY": "/tmp/usage-f759-owned-selection-rxiaj8l5/absent-go"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer lexical-owner"
+        ],
+        "source": "file",
+        "status": "available"
+      },
+      "rust": {
+        "configured": true,
+        "status": "available",
+        "source": "file",
+        "headers": [
+          "Bearer lexical-owner"
+        ]
+      },
+      "needs_go": false,
+      "matches": true,
+      "before": {
+        "owner/home/.config/github-copilot/apps.json": "5f3124b1ce9326c824845477044c2ee552bfbdd0e7148c71612c626dfcd0284e",
+        "home/.config/github-copilot/apps.json": "6de1ca6155f75c08c413568b716cfa013df691ef1fa21c8e833814671b25500a"
+      },
+      "after": {
+        "owner/home/.config/github-copilot/apps.json": "5f3124b1ce9326c824845477044c2ee552bfbdd0e7148c71612c626dfcd0284e",
+        "home/.config/github-copilot/apps.json": "6de1ca6155f75c08c413568b716cfa013df691ef1fa21c8e833814671b25500a"
+      },
+      "read_only": true
+    },
+    {
+      "provider": "copilot",
+      "variant": "symlink-home",
+      "env": {
+        "HOME": "/tmp/usage-f759-owned-selection-kmac8qa1/link/../home",
+        "USERPROFILE": "/tmp/usage-f759-owned-selection-kmac8qa1/link/../home",
+        "PATH": "",
+        "ANTHROPIC_OAUTH_TOKEN": "env://OWNED_ABSENT",
+        "SYMBRAIN_GO_BINARY": "/tmp/usage-f759-owned-selection-kmac8qa1/absent-go"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer lexical-owner"
+        ],
+        "source": "file",
+        "status": "available"
+      },
+      "rust": {
+        "configured": true,
+        "status": "available",
+        "source": "file",
+        "headers": [
+          "Bearer physical-owner"
+        ]
+      },
+      "needs_go": false,
+      "matches": false,
+      "before": {
+        "owner/home/.config/github-copilot/apps.json": "5f3124b1ce9326c824845477044c2ee552bfbdd0e7148c71612c626dfcd0284e",
+        "home/.config/github-copilot/apps.json": "6de1ca6155f75c08c413568b716cfa013df691ef1fa21c8e833814671b25500a"
+      },
+      "after": {
+        "owner/home/.config/github-copilot/apps.json": "5f3124b1ce9326c824845477044c2ee552bfbdd0e7148c71612c626dfcd0284e",
+        "home/.config/github-copilot/apps.json": "6de1ca6155f75c08c413568b716cfa013df691ef1fa21c8e833814671b25500a"
+      },
+      "read_only": true
+    },
+    {
+      "provider": "kimi",
+      "variant": "plain-control",
+      "env": {
+        "HOME": "/tmp/usage-f759-owned-selection-m5o1u3um/home",
+        "USERPROFILE": "/tmp/usage-f759-owned-selection-m5o1u3um/home",
+        "PATH": "",
+        "ANTHROPIC_OAUTH_TOKEN": "env://OWNED_ABSENT",
+        "SYMBRAIN_GO_BINARY": "/tmp/usage-f759-owned-selection-m5o1u3um/absent-go"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer lexical-owner"
+        ],
+        "source": "cli",
+        "status": "available"
+      },
+      "rust": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer lexical-owner"
+        ]
+      },
+      "needs_go": false,
+      "matches": true,
+      "before": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      },
+      "after": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      },
+      "read_only": true
+    },
+    {
+      "provider": "kimi",
+      "variant": "dotdot-control",
+      "env": {
+        "HOME": "/tmp/usage-f759-owned-selection-ju3tvdw5/plain/../home",
+        "USERPROFILE": "/tmp/usage-f759-owned-selection-ju3tvdw5/plain/../home",
+        "PATH": "",
+        "ANTHROPIC_OAUTH_TOKEN": "env://OWNED_ABSENT",
+        "SYMBRAIN_GO_BINARY": "/tmp/usage-f759-owned-selection-ju3tvdw5/absent-go"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer lexical-owner"
+        ],
+        "source": "cli",
+        "status": "available"
+      },
+      "rust": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer lexical-owner"
+        ]
+      },
+      "needs_go": false,
+      "matches": true,
+      "before": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      },
+      "after": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      },
+      "read_only": true
+    },
+    {
+      "provider": "kimi",
+      "variant": "symlink-home",
+      "env": {
+        "HOME": "/tmp/usage-f759-owned-selection-05vhdtb2/link/../home",
+        "USERPROFILE": "/tmp/usage-f759-owned-selection-05vhdtb2/link/../home",
+        "PATH": "",
+        "ANTHROPIC_OAUTH_TOKEN": "env://OWNED_ABSENT",
+        "SYMBRAIN_GO_BINARY": "/tmp/usage-f759-owned-selection-05vhdtb2/absent-go"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer lexical-owner"
+        ],
+        "source": "cli",
+        "status": "available"
+      },
+      "rust": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer physical-owner"
+        ]
+      },
+      "needs_go": false,
+      "matches": false,
+      "before": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      },
+      "after": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      },
+      "read_only": true
+    },
+    {
+      "provider": "kimi",
+      "variant": "symlink-explicit-home",
+      "env": {
+        "HOME": "/tmp/usage-f759-owned-selection-8qy9cyxg/home",
+        "USERPROFILE": "/tmp/usage-f759-owned-selection-8qy9cyxg/home",
+        "PATH": "",
+        "ANTHROPIC_OAUTH_TOKEN": "env://OWNED_ABSENT",
+        "SYMBRAIN_GO_BINARY": "/tmp/usage-f759-owned-selection-8qy9cyxg/absent-go",
+        "KIMI_CODE_HOME": "/tmp/usage-f759-owned-selection-8qy9cyxg/link/../home/.kimi-code"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer lexical-owner"
+        ],
+        "source": "cli",
+        "status": "available"
+      },
+      "rust": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer physical-owner"
+        ]
+      },
+      "needs_go": false,
+      "matches": false,
+      "before": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      },
+      "after": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      },
+      "read_only": true
+    }
+  ],
+  "operator_credentials_or_live_endpoints": false
+}

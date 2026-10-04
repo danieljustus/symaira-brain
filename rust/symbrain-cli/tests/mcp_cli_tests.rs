@@ -608,21 +608,13 @@ fn configured_antigravity_does_not_force_the_usage_route_to_go() {
 }
 
 #[test]
-fn noncanonical_or_ambiguous_claude_files_remain_on_go() {
+fn deterministic_claude_files_are_native_and_ambiguous_accounts_remain_on_go() {
     let fixture: serde_json::Value = serde_json::from_str(include_str!(
         "../../symbrain-usage/tests/fixtures/claude_file_token_oracle.json"
     ))
     .expect("Go Claude parser oracle");
     for case in fixture["cases"].as_array().expect("oracle cases") {
         let id = case["id"].as_str().expect("case id");
-        if matches!(
-            id,
-            "default-account-precedes-other-accounts"
-                | "single-nondefault-account-is-unambiguous"
-                | "duplicate-account-key-uses-last-token"
-        ) {
-            continue;
-        }
         let root = TempDir::new().unwrap();
         let credentials = root
             .path()
@@ -636,17 +628,22 @@ fn noncanonical_or_ambiguous_claude_files_remain_on_go() {
         )
         .unwrap();
 
-        // Invalid syntax returns before fetching or accessing credentials. An
-        // existing file whose Go interpretation is broader or nondeterministic
-        // must select Go before the native parser or any Keychain read.
+        // Seed an unresolved OAuth source so route checks on macOS cannot
+        // inspect the operator's automatic Keychain. The invalid flag stops
+        // before constructing any provider or sending an HTTP request.
         let output = command(&root, &["usage", "--not-a-usage-flag"])
+            .env("ANTHROPIC_OAUTH_TOKEN", "env://USAGE_TEST_ABSENT")
             .output()
             .unwrap();
-        let stderr = String::from_utf8(output.stderr).unwrap();
-        assert!(
-            stderr.contains("not ported yet and no Go fallback was found"),
-            "Claude file case {id} should remain on Go: {stderr}"
-        );
+        if case["possible_tokens"].is_array() {
+            let stderr = String::from_utf8(output.stderr).unwrap();
+            assert!(
+                stderr.contains("not ported yet and no Go fallback was found"),
+                "ambiguous case {id}: {stderr}"
+            );
+        } else {
+            assert_native_usage_parser(output, id);
+        }
     }
 }
 
@@ -775,15 +772,11 @@ fn codex_default_file_env_and_home_override_routes_are_native() {
     let reference = command(&root, &["usage", "--not-a-usage-flag"])
         .output()
         .unwrap();
-    let reference_stderr = String::from_utf8(reference.stderr).unwrap();
-    assert!(
-        reference_stderr.contains("not ported yet and no Go fallback was found"),
-        "reference-shaped file credential must stay on Go: {reference_stderr}"
-    );
+    assert_native_usage_parser(reference, "literal reference-shaped Codex file credential");
 }
 
 #[test]
-fn kimi_and_nous_supported_home_overrides_route_natively_only_for_proven_files() {
+fn kimi_and_nous_supported_home_overrides_select_native_usage_parser() {
     let default_kimi_root = TempDir::new().unwrap();
     install_synthetic_claude_file(&default_kimi_root);
     let default_kimi_file = default_kimi_root
@@ -855,10 +848,9 @@ fn kimi_and_nous_supported_home_overrides_route_natively_only_for_proven_files()
         .env("HERMES_HOME", &nous_home)
         .output()
         .unwrap();
-    let stderr = String::from_utf8(malformed.stderr).unwrap();
-    assert!(
-        stderr.contains("not ported yet and no Go fallback was found"),
-        "malformed existing Hermes JWT must remain on Go: {stderr}"
+    assert_native_usage_parser(
+        malformed,
+        "malformed Hermes JWT is native missing credentials",
     );
 }
 
@@ -882,7 +874,14 @@ fn copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go() {
             .output()
             .unwrap();
         let stderr = String::from_utf8(output.stderr).unwrap();
-        if case["native_route"] == true {
+        // Historical routing flags are preserved; deterministic token results
+        // now have the expanded source-bound native contract.
+        if case["token"].is_null() {
+            assert!(
+                stderr.contains("not ported yet and no Go fallback was found"),
+                "unproven Copilot file case {id} must remain on Go: {stderr}"
+            );
+        } else {
             assert_eq!(output.status.code(), Some(2), "{id}: {stderr}");
             assert!(
                 stderr.starts_with("flag provided but not defined: -not-a-usage-flag\n"),
@@ -891,11 +890,6 @@ fn copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go() {
             assert!(
                 !stderr.contains("no Go fallback") && !stderr.contains("Go fallback"),
                 "Copilot file case {id} unexpectedly selected Go fallback: {stderr}"
-            );
-        } else {
-            assert!(
-                stderr.contains("not ported yet and no Go fallback was found"),
-                "unproven Copilot file case {id} must remain on Go: {stderr}"
             );
         }
     }
@@ -916,7 +910,7 @@ fn copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go() {
 }
 
 #[test]
-fn nous_auth_file_presence_keeps_unproven_shapes_on_go() {
+fn nous_auth_file_shapes_select_native_parser_and_overflow_retains_go() {
     let fixture: serde_json::Value = serde_json::from_str(include_str!(
         "../../symbrain-usage/tests/fixtures/nous_file_token_oracle.json"
     ))
@@ -955,15 +949,7 @@ fn nous_auth_file_presence_keeps_unproven_shapes_on_go() {
         let output = command(&root, &["usage", "--not-a-usage-flag"])
             .output()
             .unwrap();
-        if case["file_present"] != true || case["native_route"] == true {
-            assert_native_usage_parser(output, id);
-        } else {
-            let stderr = String::from_utf8(output.stderr).unwrap();
-            assert!(
-                stderr.contains("not ported yet and no Go fallback was found"),
-                "unproven Nous auth.json case {id} must remain on Go: {stderr}"
-            );
-        }
+        assert_native_usage_parser(output, id);
     }
 
     #[cfg(unix)]
@@ -976,13 +962,30 @@ fn nous_auth_file_presence_keeps_unproven_shapes_on_go() {
         let output = command(&root, &["usage", "--not-a-usage-flag"])
             .output()
             .unwrap();
-        assert!(
-            String::from_utf8(output.stderr)
-                .unwrap()
-                .contains("not ported yet and no Go fallback was found"),
-            "dangling Nous auth.json symlink must remain on Go"
+        assert_native_usage_parser(
+            output,
+            "dangling Hermes symlink is native missing credentials",
         );
     }
+    // Numeric overflow has architecture-dependent Go conversion semantics.
+    // This real CLI process must still choose the oracle routing boundary.
+    let root = TempDir::new().unwrap();
+    let auth = root.path().join("home/.hermes/auth.json");
+    std::fs::create_dir_all(auth.parent().unwrap()).unwrap();
+    std::fs::write(
+        &auth,
+        br#"{"providers":[{"id":"nous","invoke_jwt":"header.eyJleHAiOjFlMTl9.signature"}]}"#,
+    )
+    .unwrap();
+    let overflow = command(&root, &["usage", "--not-a-usage-flag"])
+        .output()
+        .unwrap();
+    assert!(
+        String::from_utf8(overflow.stderr)
+            .unwrap()
+            .contains("not ported yet and no Go fallback was found"),
+        "numeric-overflow JWT must retain Go routing"
+    );
 }
 
 #[cfg(windows)]
@@ -1044,15 +1047,7 @@ fn kimi_default_file_routes_follow_the_source_bound_candidate_contract() {
         let output = command(&root, &["usage", "--not-a-usage-flag"])
             .output()
             .unwrap();
-        if case["file_present"] != true || id == "canonical-with-ignored-refresh-token" {
-            assert_native_usage_parser(output, id);
-        } else {
-            let stderr = String::from_utf8(output.stderr).unwrap();
-            assert!(
-                stderr.contains("not ported yet and no Go fallback was found"),
-                "unproven Kimi case {id} must remain on Go: {stderr}"
-            );
-        }
+        assert_native_usage_parser(output, id);
     }
 }
 

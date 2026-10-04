@@ -1,0 +1,11 @@
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.030s
+    Finished `test` profile [unoptimized] target(s) in 0.08s
+     Running tests/credential_reference_tests.rs (target/debug/deps/credential_reference_tests-3947d25183938a37)
+
+running 1 test
+test usage_credential_768_matches_fresh_go_constructors_and_requests ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+    Finished `dev` profile [unoptimized] target(s) in 0.13s
+usage credential CLI oracle: 110/110 byte/exit matches

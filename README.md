@@ -718,6 +718,14 @@ full architectural boundary rules referenced above. See
 [CODE_OF_CONDUCT.md](.github/CODE_OF_CONDUCT.md) for community
 expectations.
 
+The Claude/Codex file gate (`scripts/usage-provider-files-oracle/run.sh`) requires
+86 source cases, 85 complete reports, one retained ambiguous-account gate, 151
+CLI comparisons and five actual failure controls in isolated credential roots.
+
+The Hermes usage credential gate (`scripts/usage-hermes-oracle/run.sh`) retains
+96 actual Go/native constructor and request cases, 104 CLI comparisons, and five
+real failure controls, including duplicate-array shrink/regrowth regressions.
+
 ## Native Apps
 
 Native SwiftUI apps for macOS and iOS are included in the repo. They use
