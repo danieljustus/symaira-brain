@@ -11,16 +11,18 @@ import binding
 def main():
     os.umask(0o022)
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ("go-source", "rust-source", "go-sdk", "rust-sdk", "target", "output"):
+    for name in ("go-source", "rust-source", "go-sdk", "rust-sdk", "go-modcache", "target", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
     args = parser.parse_args()
-    for name in ("go_source", "rust_source", "go_sdk", "rust_sdk", "target", "output"):
+    for name in ("go_source", "rust_source", "go_sdk", "rust_sdk", "go_modcache", "target", "output"):
         setattr(args, name, getattr(args, name).resolve())
     args.output.mkdir(parents=True, exist_ok=False)
     # The owner supplies an exclusive, existing Cargo target; never select a
     # target implicitly or build before checking independently frozen inputs.
     if not args.target.is_dir():
         raise ValueError("allocated existing target required")
+    if not args.go_modcache.is_dir():
+        raise ValueError("explicit existing offline Go module cache required")
     binding.cases()
     source_before = binding.sources(args.go_source, args.rust_source)
     sdk_before = binding.sdks(args.go_sdk, args.rust_sdk)
@@ -30,7 +32,7 @@ def main():
     environment = dict(inherited, HOME=str(args.output / "home"),
                        USERPROFILE=str(args.output / "home"), TMPDIR=str(args.output / "tmp"),
                        TMP=str(args.output / "tmp"), TEMP=str(args.output / "tmp"),
-                       GOCACHE=str(args.output / "go-cache"), GOTOOLCHAIN="local",
+                       GOCACHE=str(args.output / "go-cache"), GOMODCACHE=str(args.go_modcache), GOTOOLCHAIN="local",
                        GOTELEMETRY="off", GOENV="off", GOFLAGS="", GOPROXY="off",
                        RUSTC=str(args.rust_sdk / "bin/rustc"), RUSTDOC=str(args.rust_sdk / "bin/rustdoc"),
                        RUSTC_WRAPPER="", RUSTC_WORKSPACE_WRAPPER="",
