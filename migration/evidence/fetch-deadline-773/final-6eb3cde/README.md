@@ -39,7 +39,7 @@ permit an unproved default cutover. Native six-platform exact-head CI and full
 independent review are still required. Parent240 value samples and120 wire/cost
 pairs remain retained; no new-source benchmark or size claim is made here.
 
-`validation.json` maps68 complete raw logs, reports, environment/source checks,
+`validation.json` maps69 complete raw logs, reports, environment/source checks,
 compiler-artifact records and exact runner inputs with gzip roundtrip hashes.
 The unchanged process runner's actual generated Go binary was copied from its
 owned temporary directory before cleanup and checked against its executed SHA.
