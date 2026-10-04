@@ -1,0 +1,75 @@
+{
+  "status": "source-only-uncompiled-no-native-proof",
+  "base": "c6723ab21a3bfe73e84d715695b3d5ea45c661d1",
+  "original": "f9447c5e01bd8c3d78df5115fd62636ac807cbd0",
+  "ci_job": 111355025851,
+  "api": {
+    "src/std/core.rs": {
+      "source": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/process-wrap-10.0.1/src/std/core.rs",
+      "bytes": 13771,
+      "sha256": "e5ed0d0714bafc648f0fe497e4b2eb5682adfd8c31ba4c74a7ed2d13f6e7dfc5",
+      "preserved": "migration/evidence/doctor-source-progress-806/static-c672/process-wrap-src-std-core.rs.gz",
+      "gzip_sha256": "e6da199a4e1a2c96455d659882643aabc4733843b7d6fcad4c11c81ab191b3b9"
+    },
+    "src/std/job_object.rs": {
+      "source": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/process-wrap-10.0.1/src/std/job_object.rs",
+      "bytes": 5629,
+      "sha256": "06db35984042016079d7cb5fa2e953189b1fddc227094e1011d9b939d13c6968",
+      "preserved": "migration/evidence/doctor-source-progress-806/static-c672/process-wrap-src-std-job_object.rs.gz",
+      "gzip_sha256": "2c85dd10e7e44ae47f6887c963d5a324ec6dff06de50361df1fd8df2dd865cb4"
+    },
+    "src/windows.rs": {
+      "source": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/process-wrap-10.0.1/src/windows.rs",
+      "bytes": 7778,
+      "sha256": "76214e10c89af6589af8fc9c2ae1d4c319596a07b2a2945afbc4a23b1d52a2b9",
+      "preserved": "migration/evidence/doctor-source-progress-806/static-c672/process-wrap-src-windows.rs.gz",
+      "gzip_sha256": "50d9ba6cc343f65f2946670ae95a5ec29fd584240c3c85836163f424b4fab8c3"
+    },
+    "tests/std_windows/try_wait_after_die.rs": {
+      "source": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/process-wrap-10.0.1/tests/std_windows/try_wait_after_die.rs",
+      "bytes": 920,
+      "sha256": "1a53250803dbe41bd402265863ddcfe83121c55e1f5c9e53a830e99c3e35f75e",
+      "preserved": "migration/evidence/doctor-source-progress-806/static-c672/process-wrap-tests-std_windows-try_wait_after_die.rs.gz",
+      "gzip_sha256": "9af52e0ed7781c7ea9cb8b83b54a49d2675d8a7c3ac82d4086a45f775c33c651"
+    }
+  },
+  "ci_inputs": {
+    "/tmp/symaira-current-ci-job-111355025851.log": {
+      "bytes": 474450,
+      "sha256": "4097dc401d6d2bb380511c521de9705eb5a3a6dc40595957de3c89957780672c"
+    },
+    "/tmp/symaira-current-ci-job-111355025851-decoded.json": {
+      "bytes": 488957,
+      "sha256": "69ca6daab7e1fbb5544d30d61d31294a7c99865a4eac4c13d34ea0b2d037f3bb"
+    }
+  },
+  "unchanged_contracts": [
+    "cases",
+    "normalize",
+    "filesystem",
+    "configure",
+    "native_cleanup",
+    "observe subprocess.run argv/cwd/env/capture_output/timeout AST"
+  ],
+  "runtime_executed": false,
+  "cargo_lock_sha256": "b3dfc50eeffd441de466592bbf204840b65d16940f8639dacad56a7f1153594f",
+  "unchanged_contract_ast_sha256": {
+    "cases": "b119ed69a4cd9b2b0337ea8bf9546665576f5b9e877bf45f2e6ecc034fed39d1",
+    "normalize": "eeee4d2e8735259c19f67705d333ce4059ff599e0d0d96fbd6fcba01be6a7b25",
+    "filesystem": "c352aedc79a8ec6a5d84fb024a08b30410fd49c4f80e582ff4e4bda4872ee2d9",
+    "configure": "668bd163677b5588ace68ba87d1d434e58c7f20f39f017dc2585383d213d250a",
+    "native_cleanup": "1e21500cb169748febcee2542afdb2d942268460b90686cc5376394765d32b01"
+  },
+  "unchanged_observe_subprocess_ast_sha256": "c18466873a1928159d3106fd8014cf9119c75d898addbc5558e1c1ebffeaf306",
+  "ci_checkout_merge": "92d0b1697144e77f4a2feeec8ddee3881ba3b591",
+  "ci_checkout_merge_object_locally_available": false,
+  "ci_original_head_from_log": "f9447c5e01bd8c3d78df5115fd62636ac807cbd0",
+  "ci_checkout_source_limit": "Merge object not locally available; source inspection bound to immutable f944/c672, CI checkout identity from original log only.",
+  "prepared_source_sha256": {
+    "scripts/setup-source-oracle/replay.py": "7688e0d185e5257ed1a45c61659e36234ac1660e623b0e442fc016a15b91f17a",
+    "scripts/setup-source-oracle/progress.py": "98a1529025fbdee11dcfa77692a071ebe9fcea674e9b883db9f84b10dea84fdd",
+    "scripts/setup-source-oracle/windows_job_probe.py": "2a126793f177d72e7297feac03bd0aa9381a9384a21135661ddc34989779b3ec",
+    "rust/symbrain-cli/tests/source_job_notifications.rs": "51d14e6ac39dc37802ec382f9706a41e88e4e314102451eabd48c3ee5b4cccc6",
+    "docs/adr/doctor-source-timeout-observability-806.md": "cefa504cf5ded6d5f6c84eb62dbc64b2008e81c7a6b0d0cf4d9b37dc9b86d493"
+  }
+}

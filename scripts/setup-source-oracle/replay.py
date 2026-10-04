@@ -16,6 +16,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+from progress import Journal, diagnostic_tree, raw
 
 ROOT = Path(__file__).resolve().parents[2]
 ORACLE = "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
@@ -248,15 +249,38 @@ def configure(case,root,go,tool):
     return env,args
 
 
-def observe(binary,case,root,go,tool,control=None):
+def observe(binary,case,root,go,tool,control=None,journal=None,label=None):
+    if journal:
+        journal.event("configure",case=case["name"],implementation=label,fixture_root=str(root),
+                      binary=str(binary),real_go=bool(case.get("real_go")))
     env,args=configure(case,root,go,tool)
     if control:env.update(SOURCE_CONTROL_TARGET=str(control[0]),SOURCE_CONTROL_MUTATION=control[1])
     originals={p.relative_to(root).as_posix():normalize(p.read_bytes(),root) for p in root.rglob("*.provenance.json") if p.is_file()}
     commit=case.get("expected_commit","7650123456789abcdef0123456789abcdef0123456")
     started=time.time();before=filesystem(root,originals,started,started,commit)
-    proc=subprocess.run([str(binary),*args],cwd=env["PROJECT"],env=env,capture_output=True,timeout=25);ended=time.time()
+    if journal:
+        journal.event("child-start",case=case["name"],implementation=label,started=started,
+                      argv=[str(binary),*args],argv_os_bytes_base64=[raw(os.fsencode(arg)) for arg in [str(binary),*args]],
+                      environment={key:env.get(key) for key in ("PROJECT","HOME","USERPROFILE","PATH","PATHEXT","GOROOT","GOCACHE","GOTOOLCHAIN","GO111MODULE","GOTELEMETRYDIR","TMPDIR","TMP","TEMP","CGO_ENABLED","SOURCE_TOOL_LOG")},
+                      real_go=bool(case.get("real_go")),outer_timeout_seconds=25,before=before)
+    try:
+        proc=subprocess.run([str(binary),*args],cwd=env["PROJECT"],env=env,capture_output=True,timeout=25);ended=time.time()
+    except BaseException as error:
+        if journal:
+            journal.event("child-exception",case=case["name"],implementation=label,
+                          exception_type=type(error).__name__,exception=str(error),
+                          timeout_stdout_base64=raw(getattr(error,"stdout",None)),
+                          timeout_stderr_base64=raw(getattr(error,"stderr",None)),
+                          fixture=diagnostic_tree(root),
+                          real_go_cache=diagnostic_tree(env["GOCACHE"]) if case.get("real_go") else None)
+        raise
+    if journal:
+        journal.event("child-returned",case=case["name"],implementation=label,started=started,ended=ended,
+                      actual_exit=proc.returncode,raw_stdout_base64=raw(proc.stdout),raw_stderr_base64=raw(proc.stderr))
     contract={"exit":proc.returncode,"stdout_base64":base64.b64encode(normalize(proc.stdout,root)).decode(),"stderr_base64":base64.b64encode(normalize(proc.stderr,root)).decode(),"filesystem":filesystem(root,originals,started,ended,commit)}
-    return {"started":started,"ended":ended,"actual_exit":proc.returncode,"raw_stdout_base64":base64.b64encode(proc.stdout).decode(),"raw_stderr_base64":base64.b64encode(proc.stderr).decode(),"before":before,"contract":contract}
+    observation={"started":started,"ended":ended,"actual_exit":proc.returncode,"raw_stdout_base64":base64.b64encode(proc.stdout).decode(),"raw_stderr_base64":base64.b64encode(proc.stderr).decode(),"before":before,"contract":contract}
+    if journal:journal.event("child-complete",case=case["name"],implementation=label,observation=observation)
+    return observation
 
 
 def native_cleanup(rust,go,tool):
@@ -284,28 +308,48 @@ def main():
     go,rust,report=(Path(p).resolve() for p in sys.argv[1:4]);control=sys.argv[4] if len(sys.argv)>4 else None
     observations=[];failures=[]; selected=cases() if not control else cases()[:1]
     cleanup=None
+    proof_paths=["scripts/setup-source-oracle/replay.py","scripts/setup-source-oracle/progress.py","scripts/setup-source-oracle/tool_fixture.go.txt","scripts/setup-source-oracle/windows_job_probe.py","rust/symbrain-cli/tests/source_job_notifications.rs","rust/symbrain-cli/src/setup_source_process.rs","rust/symbrain-cli/src/setup_source_build.rs","rust/symbrain-cli/src/setup_source_layout.rs","rust/symbrain-cli/src/setup_source_temp.rs","Cargo.lock"]
+    journal=Journal(report,selected,control,{"candidate_source_sha256":{name:digest(ROOT/name) for name in proof_paths},"go_binary":str(go),"go_binary_sha256":digest(go),"rust_binary":str(rust),"rust_binary_sha256":digest(rust),"candidate_head":subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip(),"go_oracle_ref":ORACLE})
     with tempfile.TemporaryDirectory(prefix="setup-source-tools-") as working:
         working=Path(working);src=working/"fixture.go";src.write_bytes((ROOT/"scripts/setup-source-oracle/tool_fixture.go.txt").read_bytes());tool=working/("tool.exe" if os.name=="nt" else "tool")
+        journal.event("fixture-tool-build-start",working_root=str(working),tool=str(tool))
         subprocess.run(["go","build","-trimpath","-o",str(tool),str(src)],cwd=working,env={**os.environ,"CGO_ENABLED":"0","GO111MODULE":"off"},check=True)
         tool_digest=digest(tool)
+        journal.event("fixture-tool-build-complete",tool_sha256=tool_digest)
         candidate=rust
         if control:
             candidate=working/("control.exe" if os.name=="nt" else "control");shutil.copyfile(tool,candidate);candidate.chmod(0o755)
         real_cache=working/"real-go-cache";real_cache.mkdir();os.environ["SOURCE_REAL_GO_CACHE"]=str(real_cache)
+        journal.event("real-cache-created",cache=str(real_cache),initial=diagnostic_tree(real_cache))
         for case in selected:
             item={"case":case["name"]}
             for label,binary in (("go",go),("rust",candidate)):
                 with tempfile.TemporaryDirectory(prefix="setup-source-case-") as fixture:
-                    item[label]=observe(binary,case,Path(fixture),go,tool,(rust,control) if label=="rust" and control else None)
+                    try:
+                        item[label]=observe(binary,case,Path(fixture),go,tool,(rust,control) if label=="rust" and control else None,journal,label)
+                    except BaseException as error:
+                        if journal.data["events"][-1]["phase"]!="child-exception":
+                            journal.event("observation-exception",case=case["name"],implementation=label,
+                                          exception_type=type(error).__name__,exception=str(error),fixture=diagnostic_tree(Path(fixture)))
+                        raise
             fields=[key for key in item["go"]["contract"] if item["go"]["contract"][key]!=item["rust"]["contract"][key]]
             if fields:failures.append({"case":case["name"],"fields":fields});print("FAIL",case["name"],fields)
             observations.append(item)
-        if not control:cleanup=native_cleanup(rust,go,tool)
+            journal.pair(item)
+        if not control:
+            journal.event("native-cleanup-start")
+            cleanup=native_cleanup(rust,go,tool)
+            journal.event("native-cleanup-complete",observation=cleanup)
     names=subprocess.check_output(["git","diff","--name-only",ORACLE,"HEAD"],cwd=ROOT,text=True).splitlines()
     names+=subprocess.check_output(["git","diff","--name-only"],cwd=ROOT,text=True).splitlines()
     names+=subprocess.check_output(["git","ls-files","--others","--exclude-standard"],cwd=ROOT,text=True).splitlines()
     data={"go_oracle_ref":ORACLE,"candidate_head":subprocess.check_output(["git","rev-parse","HEAD"],cwd=ROOT,text=True).strip(),"candidate_dirty":bool(subprocess.check_output(["git","status","--porcelain"],cwd=ROOT)),"runtime":platform.platform(),"go_sdk":subprocess.check_output(["go","version"],text=True).strip(),"go_binary_sha256":digest(go),"rust_binary_sha256":digest(rust),"tool_binary_sha256":tool_digest,"real_worker_toolchain":"Actual go build -trimpath ./cmd/symbrowse on owned dependency-free module; shared owned cache outside individual fixture snapshots, removed with the runner temporary directory.","total":len(selected),"matched":len(selected)-len(failures),"complete_observations":len(observations),"control":control,"native_cleanup":cleanup,"exit":int(bool(failures)),"failures":failures,"observations":observations,"comparison":"Exact stdout, stderr, exit and full owned fixture files/types/modes/hashes, including real tool argv/cwd/CGO and actual installed-payload hash. Only owned fixture roots, observed unique source staging paths, and new validated UTC install timestamps normalize. No failures or files are dropped.","remaining_scope":"Full typed invalid-configuration diagnostics remain Go-owned; hardware, signing and native macOS/Windows execution are not established by this Linux receipt.","candidate_source_sha256":{name:digest(ROOT/name) for name in sorted(set(names)) if (ROOT/name).is_file() and not name.startswith("migration/evidence/")},"go_source_sha256":{name:hashlib.sha256(subprocess.check_output(["git","show",f"{ORACLE}:{name}"],cwd=ROOT)).hexdigest() for name in ("cmd/symbrain/cmd_setup.go","cmd/symbrain/cmd_setup_source.go","internal/managed/install.go","internal/managed/provenance.go")}}
-    report.write_text(json.dumps(data,indent=2)+"\n");print(f"Source setup: {data['matched']}/{data['total']} matched");return data["exit"]
+    report.write_text(json.dumps(data,indent=2)+"\n");journal.finish(data);print(f"Source setup: {data['matched']}/{data['total']} matched");return data["exit"]
 
 
-if __name__=="__main__":raise SystemExit(main())
+if __name__=="__main__":
+    try:raise SystemExit(main())
+    except BaseException as error:
+        if not isinstance(error,SystemExit) and Journal.latest:
+            Journal.latest.failed(error)
+        raise

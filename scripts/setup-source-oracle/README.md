@@ -53,3 +53,20 @@ builds; rejected/failed builds must not downgrade silently. Full invalid-config
 loader diagnostics remain a separately tracked Go-owned boundary. Hardware, native
 permissions, production signatures and the complete worker feature ports remain
 outside this fixture proof. See the source setup ADR for decisions and rationale.
+# Failure observability
+
+The replay checkpoints `OUTPUT.json.progress.json` before every invocation and
+after every returned observation, outside compared fixture roots. Failed runs
+retain all earlier pairs, nullable timeout streams and explicitly bounded live
+fixture/capture/cache diagnostics. The unchanged final report and exact
+comparisons still determine acceptance; progress cannot turn a failure green.
+
+The source-only Windows experiment is an ignored owned integration test
+`source_job_notifications::owned_job_diagnostic_helper`. Once its actual native
+test executable has been built in the exclusive target, run
+`python3 scripts/setup-source-oracle/windows_job_probe.py ACTUAL_TEST_EXE OUTPUT.json`.
+It requires native Windows, retains all phases/raw streams/PIDs, and watchdogs
+the deliberately historical blocking sequence. The bounded inner-wait and
+successful-descendant comparisons must also complete. This diagnoses pinned
+JobObject APIs; it does not establish the phase of the original CI failure or
+implement a production correction. No Linux/cross-target run counts as proof.
