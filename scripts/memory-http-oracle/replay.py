@@ -8,7 +8,7 @@ import subprocess
 import time
 import uuid
 from datetime import datetime
-from support import GO,GO_SHA,Peer,Embeddings,digest,token,owned_env,seed,snapshot
+from support import GO,GO_SHA,FROZEN,ORACLE,Peer,Embeddings,digest,token,owned_env,seed,snapshot
 
 HEADERS=['content-type','x-content-type-options','x-frame-options','content-security-policy','access-control-allow-origin','access-control-allow-methods','access-control-allow-headers','vary','allow']
 
@@ -23,16 +23,15 @@ def run(args):
     repo=Path(__file__).resolve().parents[2];root=args.report.with_suffix('.evidence');root.mkdir(exist_ok=False)
     assert digest(GO)==GO_SHA,'frozen executable changed'
     embedding=Embeddings();peers=[];records=[];limits=[];shutdown=[]
-    frozen=Path('/workspace/oracles/daemon772-go-source')
-    frozen_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=frozen,text=True).strip()
-    assert frozen_head=='dcddcef0df5789123c7c9a7ebe6e01f10e941f2c'
-    frozen_files=sorted((frozen/'internal/memory').rglob('*.go'))
-    frozen_manifest={str(p.relative_to(frozen)):digest(p) for p in frozen_files}
+    frozen=FROZEN;frozen_head=ORACLE
+    if (frozen/'.git').exists():assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=frozen,text=True).strip()==ORACLE
+    frozen_files=sorted((frozen/'internal/memory').rglob('*.go'))+sorted((frozen/'cmd/symbrain').glob('*.go'))+[frozen/'go.mod',frozen/'go.sum']
+    frozen_manifest={p.relative_to(frozen).as_posix():digest(p) for p in frozen_files}
     for name,sha in frozen_manifest.items():
-        literal=subprocess.check_output(['git','show',frozen_head+':'+name],cwd=frozen)
+        literal=subprocess.check_output(['git','show',frozen_head+':'+name],cwd=repo)
         import hashlib
         assert hashlib.sha256(literal).hexdigest()==sha,name
-    receipt=dict(frozen_go_revision=frozen_head,frozen_go_source_sha256=frozen_manifest,candidate_dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=repo)),control=args.control,go=str(GO),go_sha256=digest(GO),native=str(args.native),native_sha256=digest(args.native),head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip(),source_manifest={str(p.relative_to(repo)):digest(p) for p in [repo/'Cargo.lock',repo/'rust/symbrain-memory/Cargo.toml',*sorted((repo/'rust/symbrain-memory/src').rglob('*.rs')),*sorted((repo/'rust/symbrain-memory/assets').rglob('*'))] if p.is_file()},records=records,limits=limits,shutdown=shutdown)
+    receipt=dict(frozen_go_revision=frozen_head,frozen_go_source_sha256=frozen_manifest,candidate_dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=repo)),control=args.control,go=str(GO),go_sha256=digest(GO),native=str(args.native),native_sha256=digest(args.native),head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip(),source_manifest={p.relative_to(repo).as_posix():digest(p) for p in [repo/'Cargo.lock',repo/'rust/symbrain-memory/Cargo.toml',*sorted((repo/'rust/symbrain-memory/src').rglob('*.rs')),*sorted((repo/'rust/symbrain-memory/assets').rglob('*'))] if p.is_file()},records=records,limits=limits,shutdown=shutdown)
     try:
         seedroot=root/'seed';seedenv=owned_env(seedroot,embedding.url);database,receipt['actual_go_seed']=seed(seedroot,seedenv)
         for native,label,binary in [(False,'go',GO),(True,'rust',args.native)]:

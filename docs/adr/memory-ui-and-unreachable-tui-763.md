@@ -122,3 +122,15 @@ raw pairs and the failing equality assertion are retained rather than rewritten.
 HTTP Get also uses the existing nanosecond SQLite timestamp renderer, consistent
 with the shared direct-delete service. These are explicit clock/state contracts;
 independent process timestamps are not asserted byte-equal.
+
+The additive HTTP workflow runs the actual owner, freshly native-built frozen
+Go and the owned DOM suite on Ubuntu, macOS and Windows. Windows shutdown uses
+an explicitly owned console process group and CTRL_BREAK; Go's runtime maps
+that event to Interrupt, and the native seam explicitly handles it. Linux
+execution does not prove that platform path. The CI workflow retains every raw
+receipt and fails both wrong-key and missing-row process controls. All native
+three-OS workflow outcomes remain pending until those jobs execute. Before this
+portable-runner successor, all 523 existing ELF artifact paths (489 unique
+byte sequences, including the actual source813 CLI and owner) were compressed,
+SHA-verified and round-tripped into the owned oracle archive; earlier receipts
+and binaries keep their original source attribution.

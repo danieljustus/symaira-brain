@@ -31,6 +31,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 async fn shutdown() {
+    #[cfg(windows)]
+    {
+        if let Ok(mut interrupt) = tokio::signal::windows::ctrl_break() {
+            tokio::select! { _=interrupt.recv()=>{},_=tokio::signal::ctrl_c()=>{} }
+            return;
+        }
+    }
     #[cfg(unix)]
     {
         if let Ok(mut signal) =

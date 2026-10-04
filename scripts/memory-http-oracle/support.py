@@ -14,8 +14,10 @@ import subprocess
 import threading
 import time
 
-GO = Path('/workspace/oracles/symbrain-go-dcddcef0')
-GO_SHA = 'a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41'
+GO = Path(os.environ.get('MEMORY_HTTP_ORACLE_GO','/workspace/oracles/symbrain-go-dcddcef0'))
+GO_SHA = os.environ.get('MEMORY_HTTP_ORACLE_SHA','a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41')
+FROZEN = Path(os.environ.get('MEMORY_HTTP_ORACLE_SOURCE','/workspace/oracles/daemon772-go-source'))
+ORACLE = 'dcddcef0df5789123c7c9a7ebe6e01f10e941f2c'
 SECRET = 'synthetic-memory763-owned-http-secret'
 TIME = '2000-01-01 00:00:00 +0000 UTC'
 
@@ -35,7 +37,7 @@ def owned_env(root, embedding):
         (root/name).mkdir()
     config=root/'config/symmemory'; config.mkdir()
     (config/'config.toml').write_text('[ollama]\nurl = "'+embedding+'"\nmodel = "nomic-embed-text"\n[conflict]\nenabled = false\n')
-    return dict(HOME=str(root/'home'),USERPROFILE=str(root/'home'),XDG_CONFIG_HOME=str(root/'config'),XDG_DATA_HOME=str(root/'data'),XDG_CACHE_HOME=str(root/'cache'),PATH='',JWT_SECRET_KEY=SECRET,SYMMEMORY_OLLAMA_URL=embedding,SYMBRAIN_GO_BINARY=str(root/'absent-go'))
+    return dict(HOME=str(root/'home'),USERPROFILE=str(root/'home'),XDG_CONFIG_HOME=str(root/'config'),XDG_DATA_HOME=str(root/'data'),XDG_CACHE_HOME=str(root/'cache'),PATH='',SYSTEMROOT=os.environ.get('SYSTEMROOT',''),WINDIR=os.environ.get('WINDIR',''),JWT_SECRET_KEY=SECRET,SYMMEMORY_OLLAMA_URL=embedding,SYMBRAIN_GO_BINARY=str(root/'absent-go'))
 
 class Embeddings:
     def __init__(self):
@@ -61,7 +63,7 @@ class Peer:
             sock.bind(('127.0.0.1',0));self.port=sock.getsockname()[1]
         self.out=open(root/'stdout.log','wb');self.err=open(root/'stderr.log','wb')
         args=[str(database),str(self.port)] if native else ['memory','serve','--db',str(database),'--port',str(self.port)]
-        self.process=subprocess.Popen([str(binary),*args],env=self.env,cwd=root,stdout=self.out,stderr=self.err)
+        self.process=subprocess.Popen([str(binary),*args],env=self.env,cwd=root,stdout=self.out,stderr=self.err,creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if os.name=='nt' else 0)
         deadline=time.monotonic()+15
         while time.monotonic()<deadline:
             if self.process.poll() is not None:raise AssertionError(('server exited',self.process.returncode,(root/'stderr.log').read_text()))
@@ -79,7 +81,7 @@ class Peer:
         conn.close();return row
     def close(self):
         start=time.monotonic()
-        if self.process.poll() is None:self.process.send_signal(signal.SIGTERM)
+        if self.process.poll() is None:self.process.send_signal(signal.CTRL_BREAK_EVENT if os.name=='nt' else signal.SIGTERM)
         try:self.process.wait(timeout=8)
         except subprocess.TimeoutExpired:self.process.kill();self.process.wait();raise
         self.out.close();self.err.close()

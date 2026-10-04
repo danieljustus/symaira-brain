@@ -19,7 +19,7 @@ python3 scripts/memory-http-oracle/replay.py \
   --report /tmp/memory-http-proof.json
 ```
 
-The runner verifies the approved immutable Linux Go executable by SHA, executes
+The direct runner verifies the approved immutable Linux Go executable by SHA, executes
 its actual governed CLI to create a fresh complete schema and real 768-vector
 row against an owned OpenAI-compatible embedding peer, and seeds deterministic
 current rules/entities/profiles. SQLite's backup API copies committed WAL state;
@@ -61,3 +61,13 @@ owned loopback origin.
 Use a new report path for every execution; preserve failures and earlier evidence.
 The original Go-only 13 CLI / 17 HTTP inventory stays separate. Native three-OS
 execution, complete serve admission and independent review remain pending.
+
+`run.py` is the portable native-CI entrypoint. It archives unchanged `dcddcef0`,
+builds its actual command with native Go 1.26.7 in an owned build HOME, binds the
+new executable/source hashes, then runs the positive HTTP gate, both actual
+negative executions and the DOM/original-defect gate. It records native OS/SDK,
+module and binary identity. Windows peers get their own process groups and an
+actual CTRL_BREAK signal; Go maps it to Interrupt and the native seam selects
+Tokio ctrl_break/ctrl_c. This is CI wiring, not proof of an unexecuted Windows
+signal or console environment. The three-OS `memory-http-native.yml` job must
+actually pass on the final source before the slice's platform gate is green.
