@@ -33,3 +33,21 @@ The312 wide Windows vectors, wrapper ASCII bootstrap and actual controls must
 run on native Windows; exact-source Linux/macOS/Windows and protected CI remain
 open until those results exist. Broader Skills cutover/global-output limits,
 Brain13 and historical Memory-default repair retain their own acceptance scope.
+
+The initial full author attempt at53711 failed the Skills loader fixture because
+this new checkout inherited0600/0700 file modes instead of Git-declared
+0644/0755. Original full stdout and all585/543 ELF paths/payloads were archived
+before restoring only tracked-file permissions in the exclusive checkout.
+The corrected-mode full attempt retains the same53711 source bytes; affected
+tests and Core tests pass, but strict Core Clippy rejects a missing public API
+Panics section for the existing checked UTF-8 prefix assertion. All587/545
+current ELF paths/payloads and the full second attempt were archived before
+this separate successor. No historic output is rewritten or waived.
+
+Add the precise public API panic contract without changing the formatter body,
+assertion, tests or lint settings. The second attempt has447 primary affected
+tests over56 Cargo parents,2 intentional child-entry ignores, and14 separately
+reported child-harness passes; its70 raw summaries sum to461. Core has104 tests
+over2 parents. The historical459 count retains its original source/aggregation;
+it is not silently relabeled as this run. Repeat the entire final-source driver
+and all actual315 raw pairs/three controls after the documentation correction.
