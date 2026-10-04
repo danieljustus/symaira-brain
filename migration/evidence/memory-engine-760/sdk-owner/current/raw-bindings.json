@@ -1,0 +1,72 @@
+{
+  "kind": "preserved-full-author-preparation-streams-and-failures",
+  "files": [
+    {
+      "path": "initial-preparation-errors.json",
+      "bytes": 911,
+      "sha256": "70051e4aa7439668b503119f8999bfae22192f253d45c3596e0dc57f99de7f03"
+    },
+    {
+      "path": "inventory_preparation.log.gz",
+      "bytes": 182,
+      "sha256": "0f5c538a1e3d3a8bca26b411e71719783ebb44734a4b447dffa955afd08429e7",
+      "gzip_sha256": "7a0ab7043f640928fc409d8583452c40282594195058aac7f20b23cbc1da3618"
+    },
+    {
+      "path": "inventory_preparation.py",
+      "bytes": 1452,
+      "sha256": "2b9459f05aad3d3b4a7867e64ae4890aaef30f32afc3e2e7b89c0620d47d5e9f"
+    },
+    {
+      "path": "portable-attempt1.log.gz",
+      "bytes": 8139,
+      "sha256": "69ca53a149eaa819d55343f178f5bed46f627bb41a1101de10c690412e7eabd2",
+      "gzip_sha256": "2414070afb394d3a852ef0dcd449c23c147bb41c49e1f6ae8d0ab6204ea4ce60"
+    },
+    {
+      "path": "portable-attempt2.log.gz",
+      "bytes": 4571,
+      "sha256": "a7d593210c93504877f9d6a4cdd9ceb11563b6f0a98b868d82f641ed5821ae6c",
+      "gzip_sha256": "2e7a52a9c7c9fdb24882ac46a18c308bc4ac90b7966516855a8f227e43e07592"
+    },
+    {
+      "path": "portable-exact-final.log.gz",
+      "bytes": 4722,
+      "sha256": "e6590a22a0d7ed4c450bbeea8b63624f9e3bfde51ff622b10cff6bfc8d2cb38a",
+      "gzip_sha256": "0e81c9a7eb5531269474d9f5e1bbe346ebc21498a48eff7d0cff564439379cf3"
+    },
+    {
+      "path": "portable-final.log.gz",
+      "bytes": 4722,
+      "sha256": "930734bc7abe762ab07917efcbcdc3b28f4f99f68499f6a1cc46eba165774f30",
+      "gzip_sha256": "18470a5dde8d96589e9aa71239e13f6f010518c835b3b453d2ef0324ed531f38"
+    },
+    {
+      "path": "read-only-current-sdk.log.gz",
+      "bytes": 138,
+      "sha256": "339118318223e569a84b695fe689163aece13d45a318bf23d295235db7f895b7",
+      "gzip_sha256": "4de19378730f3eef8e393271f7c32291ee4be90de119a77e61652ebebe7e1534"
+    },
+    {
+      "path": "static-verification.json",
+      "bytes": 1200,
+      "sha256": "e889d405dcac3d59ee36eae87052485fabcc5a01d4db19257c202c782ce157d5"
+    },
+    {
+      "path": "static-verification.log.gz",
+      "bytes": 775,
+      "sha256": "44f8be505815f4e18c7f7e9861b7cf2f7490aee176a7a4501e4073bfa4faff15",
+      "gzip_sha256": "9394a0ad757f1fb24bbed6ca279ac99a8b5f48d36e2885e500dbaabdfbf43b8f"
+    },
+    {
+      "path": "test_sdk-attempt1.py.gz",
+      "bytes": 2271,
+      "sha256": "aa22774320546504a26ebd52d36340694ad5691a08d51feec2af2b1e8af9c93a"
+    },
+    {
+      "path": "verify_preparation.py",
+      "bytes": 4069,
+      "sha256": "3b2fda65f24a64783bfa930aefeaa8fc139536d2d295361ab4313f533486ded4"
+    }
+  ]
+}

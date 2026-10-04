@@ -1,0 +1,10 @@
+{
+  "initial_worktree_setup": "git worktree invoked from /workspace outside Git repository; original retention succeeded, no worktree existed; rerun only setup with explicit source cwd",
+  "test_attempt1": [
+    "directory fixture removed owner traverse bit and produced PermissionError, which correctly rejects SDK but did not match test ValueError expectation",
+    "fake runner HERE omitted cases.json; build rejected before intended SDK admission; added actual original60 case return to owned mocked preflight"
+  ],
+  "test_source_sha256": "d9dcd3b4e49f66e5434780b7c63a2cc0186f8420c8df299fdc83506573a74237",
+  "oversized_read": "read-only cat sdk-readonly-current.json output was unnecessarily large; original file untouched",
+  "raw_log_whitespace_gate": "git diff --cached --check rejected existing whitespace in original failed unittest log; preserve full raw log bytes in gzip, no trimming/redaction"
+}

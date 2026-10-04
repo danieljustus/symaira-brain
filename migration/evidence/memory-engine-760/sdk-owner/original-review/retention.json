@@ -1,0 +1,1525 @@
+{
+  "kind": "lossless-original94-review-plus-receipt",
+  "files": [
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/author-final-handoff.json",
+      "bytes": 10313,
+      "sha256": "8fb70d75e95ad1de47831491ad39fbc92662385a8b56a2b4134952add8584d51",
+      "retained": "000-author-final-handoff.json.gz",
+      "gzip_sha256": "978341d00e1a310802c2b906e1db1c9ec51eabda2456f11e15e6e901debbda5c",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818778205119,
+        "atime_ns": 1791112279737650981,
+        "inode": 1853107,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/docs/adr/memory-engine-owned-build-inputs-760.md",
+      "bytes": 6437,
+      "sha256": "0b910b441066498dedf56a3162ebd41dd207ac9925b4cb3ba5addb6dd6ff22c5",
+      "retained": "001-memory-engine-owned-build-inputs-760.md.gz",
+      "gzip_sha256": "698d6e71a6c2fea08d7a95c122d104183660009c13136dce5f9fa793abfbdf85",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818778408126,
+        "atime_ns": 1791112867067665448,
+        "inode": 1853111,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/current/dependency-availability.json",
+      "bytes": 8553,
+      "sha256": "79ace52efc7d3cb8ca41897f9728f56485019bbc086beaaf0c6a15a26cb5d051",
+      "retained": "002-dependency-availability.json.gz",
+      "gzip_sha256": "7dd08f2ad58ee4f3eaad27bd99da13ca2f4d3ff16aac073a9795091772f9602c",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818778570462,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853118,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/current/portable-final-19.log",
+      "bytes": 2797,
+      "sha256": "bb31c715ff56d228f1b4c25386b67cd0345cacc6b85288eea4b9e1ac39ecb974",
+      "retained": "003-portable-final-19.log.gz",
+      "gzip_sha256": "3b7430e9347d8a956f3d30cf26ef24ad10f19be1d5ea19de5c5e5bcc1a069db1",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818778643252,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853119,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/current/portable-final-20.log",
+      "bytes": 2937,
+      "sha256": "06cece08cce4bbad983979f30f3ffd344bf188f1553f40b46015adadf35cf65a",
+      "retained": "004-portable-final-20.log.gz",
+      "gzip_sha256": "b5aeeabc5b8bd6266454aecbbb0f630d43d2bff12022a8b7bc6da95f751d0681",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818778696552,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853120,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/current/portable-first-18.log",
+      "bytes": 2645,
+      "sha256": "8ce2ed84201250c7e83e6209c2e4302541d62cf5d63ca0dd73d6c5a56fff8444",
+      "retained": "005-portable-first-18.log.gz",
+      "gzip_sha256": "a470fb157231c9ca2decb3158fa8a0afcb03f0b7428a1c8d2506aaaf62da4e3c",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818778745406,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853122,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/current/portable-second-19.log",
+      "bytes": 2797,
+      "sha256": "814ac301be56f4b273830ed155a67843fbb9de7f5c222b1d0b87f8d6d64fd610",
+      "retained": "006-portable-second-19.log.gz",
+      "gzip_sha256": "f68dcec331052ebee83f997bf47b35fd2b9727c2023cb60e08a83cb1bafd8921",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818778794030,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853123,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/current/static.json",
+      "bytes": 1302,
+      "sha256": "a92c6ef6d076c03ee19a08778345b129ce3255c2055de2692a0ede3ecfeb1f27",
+      "retained": "007-static.json.gz",
+      "gzip_sha256": "0a44147a180d05babe19f61857dd9e15ab313d834050d2c8e5f40c6d0144cabb",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818778837746,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853124,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/000-full-scope-verification.json.gz",
+      "bytes": 812,
+      "sha256": "a66eace80e9084ff9086d66a690498a97cfcfbba7e3a09d957bb6790b185f412",
+      "retained": "008-000-full-scope-verification.json.gz.gz",
+      "gzip_sha256": "970c0fc40d46911db989e2583a1d1bd2dacb737751e413d0352c20890ce85fce",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818778893770,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853126,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/001-independent-review.md.gz",
+      "bytes": 5196,
+      "sha256": "b742cf1aca3b2b7e11601b84436edde9e2fcc777a36146b0a512432bc81f5536",
+      "retained": "009-001-independent-review.md.gz.gz",
+      "gzip_sha256": "5775bdfb32db23b2403debdefe3ed7b9f90322e0ee3bbb3da45db0312a2ba7e5",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818778964808,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853127,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/002-native-input-projection.json.gz",
+      "bytes": 643,
+      "sha256": "e0e806f8d76782ec711dcad682fcd1365ab412fc3ee38d5e153650cc1d500033",
+      "retained": "010-002-native-input-projection.json.gz.gz",
+      "gzip_sha256": "ece2185e5053364dbffca7faf1369e9b95f09565d3b188927d63e87e1f596b17",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818779019761,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853128,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/003-native-input-projection.log.gz",
+      "bytes": 643,
+      "sha256": "e0e806f8d76782ec711dcad682fcd1365ab412fc3ee38d5e153650cc1d500033",
+      "retained": "011-003-native-input-projection.log.gz.gz",
+      "gzip_sha256": "ece2185e5053364dbffca7faf1369e9b95f09565d3b188927d63e87e1f596b17",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818779061684,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853129,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/004-native-input-projection.py.gz",
+      "bytes": 1006,
+      "sha256": "97670c7859ea84b11a79a2b682c912be22ad094a627fb7e5534e4911c6c2727b",
+      "retained": "012-004-native-input-projection.py.gz.gz",
+      "gzip_sha256": "87b9bb46c4eee596a3adc975c0afdfef5e19b3784c82f59fac7da5b02ad59dd8",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818779102356,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853130,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/005-config.toml.gz",
+      "bytes": 79,
+      "sha256": "1dc15730bc7c6402b7d65ffb4de0fab7e320b729b8230d6af4c550b12b5accec",
+      "retained": "013-005-config.toml.gz.gz",
+      "gzip_sha256": "c996c79335bbd41863d9e510aa55370c0132b2f616898ba30d376df78b2420c7",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818779141885,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853131,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/006-Cargo.lock.gz",
+      "bytes": 15929,
+      "sha256": "dec159f30e634396f5390fdd70293196e64a67bec35b0c72710763ad8b3e9765",
+      "retained": "014-006-Cargo.lock.gz.gz",
+      "gzip_sha256": "c3ee9aca4d3ceef8f791a98f60e29a7182c180fe514b7921e91c82373f38140a",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818779193594,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853132,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/007-Cargo.toml.gz",
+      "bytes": 786,
+      "sha256": "8f04632cf3129938206afdb1c2296f5a56973610edcf8bd45f730a0980909fea",
+      "retained": "015-007-Cargo.toml.gz.gz",
+      "gzip_sha256": "f355132c2c721b65dcf0c8d6305d1be3f884216803c0ab74f290fa8db9fc5f70",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818779239954,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853133,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/008-Cargo.toml.gz",
+      "bytes": 357,
+      "sha256": "7a5b025dcc83f4ae0e85a414c70a2c829e066ea2ca36013bd45d1b895d69446d",
+      "retained": "016-008-Cargo.toml.gz.gz",
+      "gzip_sha256": "fa1706d07e559f91962aaf20a145502a1c43fa80b8c77a445df50d51e0df261a",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818779278191,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853134,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/009-build.rs.gz",
+      "bytes": 88,
+      "sha256": "c2bf5d823da296b783dc3ff47200fafc36a97e32ff6300e592fc0479350ae357",
+      "retained": "017-009-build.rs.gz.gz",
+      "gzip_sha256": "130a5bb1d64ffb47426325aa13a1dbb1740e2d8371a6870ec10381179bbd7029",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818779342879,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853140,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/010-lib.rs.gz",
+      "bytes": 510,
+      "sha256": "3730cd2c73bac217e5c7542f2f1236f10d8366dd0a158862f5313239a2197be1",
+      "retained": "018-010-lib.rs.gz.gz",
+      "gzip_sha256": "1f72cb9b06b7fd690b63f8ce75d56e96e5b35f4eb2a437f902b1d4924d726325",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818779384622,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853141,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/011-portable-tests.stderr.gz",
+      "bytes": 54,
+      "sha256": "dcb398ed4575c625994456f4caa1bc7167d589a33ad092648e19dc35d154895f",
+      "retained": "019-011-portable-tests.stderr.gz.gz",
+      "gzip_sha256": "abe56f90348f4655f9f2485b1a53cb6ab3b0147f130b02181fad4a4d28fb57b0",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818779424563,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853142,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/012-portable-tests.stdout.gz",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "retained": "020-012-portable-tests.stdout.gz.gz",
+      "gzip_sha256": "e860dba6f12d00e6f05f9c29f3ac246b67efb295dfcdb684ebb3400db057363f",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818779465164,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853143,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/013-reviewer-protected-expectation-correction.json.gz",
+      "bytes": 207,
+      "sha256": "ee82d29b98bbefc1690c9ced5149f3a3069d0ba5c4c632cb8f11ea966fc894ec",
+      "retained": "021-013-reviewer-protected-expectation-correction.json.gz.gz",
+      "gzip_sha256": "3dc38743e60986be9a107c53845ec011998ecede277a909baea65013a023bfa2",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818779506967,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853144,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/014-sdk-bytes-verification.json.gz",
+      "bytes": 407555,
+      "sha256": "53d6df152596638daf00592e35dba5a51747e4850d67afe375ed8c92789cd0ee",
+      "retained": "022-014-sdk-bytes-verification.json.gz.gz",
+      "gzip_sha256": "12373a0dbde4d5b24d9f567b9d553485d0aebd7b4df78ac1f08b0092154e07ee",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818779973192,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853145,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/015-verification.json.gz",
+      "bytes": 9891,
+      "sha256": "d8f00f4d5b81884e9432e734d7591fb876b2ecd69339989ee4d7ffde0c1a821a",
+      "retained": "023-015-verification.json.gz.gz",
+      "gzip_sha256": "38b66c0018cb51ff0189fc036dd19f740af59548bc6826ec1e65539fd78b1c82",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818780111351,
+        "atime_ns": 1791112867071665572,
+        "inode": 1853146,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/016-review-receipt.json.gz",
+      "bytes": 1477,
+      "sha256": "383b895f604f7ce56af1872acdb7759b5113fdd62444926057eb4d4672902899",
+      "retained": "024-016-review-receipt.json.gz.gz",
+      "gzip_sha256": "b01558d842d06b950172c4c18e6d2867eee6f454869f67823402842a56dbbb20",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818780160956,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853147,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/original-review/original-retention.json",
+      "bytes": 7122,
+      "sha256": "4c305703447629726e6ec5556462e22baf1035cd8763db833f8225c366a6ef30",
+      "retained": "025-original-retention.json.gz",
+      "gzip_sha256": "9b4eebd8f17456c901122446550e0a24f4e51b306c574ef483eec8078ce7cfa8",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818780206645,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853148,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/migration/evidence/memory-engine-760/hermetic-build/retention.json",
+      "bytes": 49160,
+      "sha256": "f6d21c88fb943cdfae2676a196e9195525f6941fa2b4af49232922466dd2ab41",
+      "retained": "026-retention.json.gz",
+      "gzip_sha256": "fd8723ff8e476bfd645c09a51e21b30c7fc50f3ae5ffe4a8139dfcb410bc8c10",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818780287407,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853149,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/scripts/memory-engine-oracle/README.md",
+      "bytes": 2896,
+      "sha256": "d91441dbc8dacbe33972052cd2a08b71fa9920e276210d877bcfcbf99c4e4d27",
+      "retained": "027-README.md.gz",
+      "gzip_sha256": "217228b15cac2f3984928bc9d9382035f6906d7830a27c3acbd2bba4d68aa7f0",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818780417474,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853152,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/scripts/memory-engine-oracle/binding.py",
+      "bytes": 9025,
+      "sha256": "436c7b745f5368f4ef6a9d0332f4a801685f229e8564b4bf1cb2b03671fe6f16",
+      "retained": "028-binding.py.gz",
+      "gzip_sha256": "43aac6a78a1d4237726ef880d49bc382087aa518005bdb17c16979430f0d6804",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818780470364,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853153,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/scripts/memory-engine-oracle/build.py",
+      "bytes": 4814,
+      "sha256": "8199ff86e17fc6e2fd130098122c0e493f529f4b58546d3ff9586d458d697437",
+      "retained": "029-build.py.gz",
+      "gzip_sha256": "4cd5629f25fd6ead0a161b6595bb1e8f88d9ad2744516505e94518f89c53e786",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818780517635,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853154,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/scripts/memory-engine-oracle/dependencies.py",
+      "bytes": 7435,
+      "sha256": "7ca6675a339980ab1128104cdfa5e35cce93175873ba8109e58a3ffdc055f419",
+      "retained": "030-dependencies.py.gz",
+      "gzip_sha256": "7d40b531a5b92a6d61f52d2c256c2236cffbf25f9844441beb74f71c41e93607",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818780561491,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853155,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/scripts/memory-engine-oracle/dependency-inputs.json",
+      "bytes": 93618,
+      "sha256": "a6d4f957cfb56913af3ef00b7c190cdcc356db0416c8737b669bea52c237d5a9",
+      "retained": "031-dependency-inputs.json.gz",
+      "gzip_sha256": "c6869675a47d936eaeca1875b1b4a14e4ab767b0b8993b556e892ed6f7f28ca9",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818780680942,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853156,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/scripts/memory-engine-oracle/owner.py",
+      "bytes": 4826,
+      "sha256": "4ef5cc726778114f844715b0c954af82ba16318480c718b1966dc03e9a202a60",
+      "retained": "032-owner.py.gz",
+      "gzip_sha256": "0781487c9eaf1f137b2201c0f3c8936bb4d0b47be5917f0b1848f69ee69840e9",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818780737377,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853157,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/scripts/memory-engine-oracle/reader.py",
+      "bytes": 1910,
+      "sha256": "d25d733edb11550e0d3f8e8e2689e68f2e22b7c1cfab0f37b0740c7207c475f5",
+      "retained": "033-reader.py.gz",
+      "gzip_sha256": "643ec9a465d68c67502e8002d6644ea38c4cd412e45b6105dd1f974aa18bc41b",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818780777648,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853158,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/scripts/memory-engine-oracle/replay.py",
+      "bytes": 7444,
+      "sha256": "e0a270c6da28f5e5ffca86584211ecbe07f75bf46d28ddbbf26befb72ea896f8",
+      "retained": "034-replay.py.gz",
+      "gzip_sha256": "6bbdf8f05a1d49f896ba59a8b798cb6128ee5fd277b1af89e8c6628889042ed2",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818780820343,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853159,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/scripts/memory-engine-oracle/test_binding.py",
+      "bytes": 3218,
+      "sha256": "5d98d53407ff815bbbb22c0b34dab298bc819cdca0d9dc3ee80e53c3a3d70940",
+      "retained": "035-test_binding.py.gz",
+      "gzip_sha256": "333e46e7ee55b5aaf928f3abdda35de4c375e4279f9edc7f1dfc063087411796",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818780861836,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853160,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/candidate/scripts/memory-engine-oracle/test_ownership.py",
+      "bytes": 10759,
+      "sha256": "7816666b38533c56b21f1acaece8ebf05356e5634e0d91f7c7360f2d169bc5c0",
+      "retained": "036-test_ownership.py.gz",
+      "gzip_sha256": "2aa24c6b2f36c96e5d18b832e0432eeaec73f903b102561ee8f25ba1b421c72b",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818780905832,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853161,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/dependency-body-verification.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "retained": "037-dependency-body-verification.exit.gz",
+      "gzip_sha256": "cabc3a30b39528db601f65ca3ced008dd775595c901102d08ac8ae8976b29bcf",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112609685419832,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853250,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/dependency-body-verification.json",
+      "bytes": 87982,
+      "sha256": "0dcadf1deb10b23668cdf3c897a5957be706346a8e9b74c6faea2d70b3596f9e",
+      "retained": "038-dependency-body-verification.json.gz",
+      "gzip_sha256": "97d6eaac608927956e6a6188e734a604a832db7e31a4365d93fec231b1618300",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112814126246428,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853248,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/dependency-body-verification.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "039-dependency-body-verification.stderr.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112607255746920,
+        "atime_ns": 1791112609685419832,
+        "inode": 1853023,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/dependency-body-verification.stdout",
+      "bytes": 138,
+      "sha256": "9780300709a085efefead5dd52e6b3a098ef1a7f9994be3803ef4c6d6be90d89",
+      "retained": "040-dependency-body-verification.stdout.gz",
+      "gzip_sha256": "318a6383368df1fe7d73c81479f9ae3f21aa5412a6a608319048bea576a5707a",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112609663402447,
+        "atime_ns": 1791112609685419832,
+        "inode": 1853022,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/dependency_body_inventory.py",
+      "bytes": 4029,
+      "sha256": "41037bf31adb90cbbfc013f6f22d75e0e75d520e9d386e93b35493bd6a46a5ec",
+      "retained": "041-dependency_body_inventory.py.gz",
+      "gzip_sha256": "36033d71d11bfbf9fe9dfd644a07ace43e93ad92ef375c4244edadf861d19b6b",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112607255746920,
+        "atime_ns": 1791112607259650758,
+        "inode": 1853021,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/diff-check.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "retained": "042-diff-check.exit.gz",
+      "gzip_sha256": "cabc3a30b39528db601f65ca3ced008dd775595c901102d08ac8ae8976b29bcf",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112485850766292,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853051,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/diff-check.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "043-diff-check.stderr.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112485839923008,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853030,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/diff-check.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "044-diff-check.stdout.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112485839923008,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853020,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/finding-sdk-source/go.env",
+      "bytes": 505,
+      "sha256": "98fcab78e155e9fa0c36b18874add30724d04c2452078117c78618107ebfbc9e",
+      "retained": "045-go.env.gz",
+      "gzip_sha256": "8c2dea608b11511b0086a548eff5dc8f5522a93da822b4e8e220de2599f0fad4",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111894861192067,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853185,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/finding-sdk-source/pkg/include/asm_amd64.h",
+      "bytes": 631,
+      "sha256": "85fc2d5bb80e6db36cef4da5e5c02278d0dcaa6103e5660629b4b713cff15d54",
+      "retained": "046-asm_amd64.h.gz",
+      "gzip_sha256": "33eb20c8fd3de4e4de20d601afca3c0f1a4bb2ba3185762da6e87ea1e30b86fa",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112607295272777,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853034,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/finding-sdk-source/pkg/include/asm_ppc64x.h",
+      "bytes": 1979,
+      "sha256": "443dd7c93c404f7039a48acdeb7a860ace231b3d2b45daec9ed926e577b7cf61",
+      "retained": "047-asm_ppc64x.h.gz",
+      "gzip_sha256": "8f7f71fde625dadde0bb5899a65355cd8eb59e1b3358d70a6a6be855cdce3c79",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112607295542775,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853035,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/finding-sdk-source/pkg/include/asm_riscv64.h",
+      "bytes": 535,
+      "sha256": "25631f053993036af2a03634699de446120671b17c197976fc66b74afb18fb34",
+      "retained": "048-asm_riscv64.h.gz",
+      "gzip_sha256": "2ca86e25e0c1b8f6ad6c7850b848d4880caf17c47074c9d8cb68ffb8076de054",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112607295769197,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853036,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/finding-sdk-source/pkg/include/funcdata.h",
+      "bytes": 2616,
+      "sha256": "bd73b7c27a4d3f8560a5a9dd1a5da54e0e48572311a744cf7843e709b7f2a015",
+      "retained": "049-funcdata.h.gz",
+      "gzip_sha256": "b904836a0c380ebff4fb21fe6de6e340f658ec611438e7d6df5d20d08b540662",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112607295857651,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853037,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/finding-sdk-source/pkg/include/textflag.h",
+      "bytes": 1501,
+      "sha256": "a9d761d03aecdcc117691b6a55eacd43eb7d47d9ad9ca7510b8669ac403b380e",
+      "retained": "050-textflag.h.gz",
+      "gzip_sha256": "205e650b0d57320617aad19e18c4edec60f47672dc8d269c395a86d320adeb7c",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112607295922439,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853038,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/finding-sdk-source/src/cmd/go/internal/base/goflags.go",
+      "bytes": 4580,
+      "sha256": "cf287bd9d900d6f1c3b4b99dad154f226edb675d49c5ec0f315204ff5212239d",
+      "retained": "051-goflags.go.gz",
+      "gzip_sha256": "afb7690a738fb97dec83eccaa830d5a4430021eabc76e0a52b167188fdca9d86",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112607294807905,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853076,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/finding-sdk-source/src/cmd/go/internal/cfg/cfg.go",
+      "bytes": 22259,
+      "sha256": "b8098e142f62dcbb9fc903928dad070607a51efff8520a5e84192ab6ebfa7c3c",
+      "retained": "052-cfg.go.gz",
+      "gzip_sha256": "66ebc573b7826156795f3cfa5c48206e65eb11197cc023e65244c42c3bf33aad",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111894860880996,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853179,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/finding-sdk-source/src/cmd/go/internal/modindex/scan.go",
+      "bytes": 8701,
+      "sha256": "751915000cd027a051928ee9b5bce6857e54259b0270fdde2e33d1e498a15916",
+      "retained": "053-scan.go.gz",
+      "gzip_sha256": "08410b5abfb76ce8b0c810172c555a961381f784ff46bbfa050f45e8bb4e4e53",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111894861131786,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853184,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/finding-sdk-source/src/cmd/go/internal/work/gc.go",
+      "bytes": 24979,
+      "sha256": "7b91523777a11587412b7d4e35f965d771ca7bde60ca6d65d54206171544819f",
+      "retained": "054-gc.go.gz",
+      "gzip_sha256": "6e3433634e4522c58f1c26a4d0616f722aaa37c5a882f7cb1ecb77def4810beb",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112607295120006,
+        "atime_ns": 1791112867075665695,
+        "inode": 1853031,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/finding-sdk-source/src/go/build/build.go",
+      "bytes": 63650,
+      "sha256": "64a2053da6f34c5ccf2c2a1bdefd737fcbcba0ce3b38a654b15855cc85408ce6",
+      "retained": "055-build.go.gz",
+      "gzip_sha256": "19de4fcd84b848573c9aa7c96ab4519d7acd3bd68a2af7416045edb093f7e56a",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111894861016812,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853182,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/fixed-dependency-inputs-readonly.json",
+      "bytes": 115363,
+      "sha256": "31ffb3cbe5e8cc9d7f1276e4ccf6fe7f7aa63dcde37fa5a9da09972e5668a985",
+      "retained": "056-fixed-dependency-inputs-readonly.json.gz",
+      "gzip_sha256": "ffcbe5f06643587e708007f4ae1d310e2c3f33f33b8f44a671c4805d1730d881",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112387420634472,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853056,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/frozen-go-readonly.json",
+      "bytes": 209753,
+      "sha256": "7730be6f39b66bbed502be5a4a9de8feaec170f096ebe102544f874962c3db91",
+      "retained": "057-frozen-go-readonly.json.gz",
+      "gzip_sha256": "86ad02a0a354a9226122ad42b747334e987efcf805891d1ac12cf43061872c38",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112386283181088,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853054,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/full-current-index.json",
+      "bytes": 1204522,
+      "sha256": "48eaf369ff29e20fc17f7342d77d03c5290cdfe06587924fc0ef815f9532e5cf",
+      "retained": "058-full-current-index.json.gz",
+      "gzip_sha256": "34da22e8f03dde5eed536ec53b9e058d4462deb69194934d8a2ae24a4c36aaa7",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112383399424133,
+        "atime_ns": 1791112639144628721,
+        "inode": 1853040,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/independent-review.md",
+      "bytes": 15843,
+      "sha256": "12693e65ef343c5e15218d5aeeeb52b06696b57855c4abd00d32de13e7a46f0b",
+      "retained": "059-independent-review.md.gz",
+      "gzip_sha256": "e2c3eb80b126a152b817946bdfcba5bbff0b13e0b15e01d10e14da4ebea880e7",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112814126625240,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853274,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/initial-dependency-body-verification.json",
+      "bytes": 77191,
+      "sha256": "f0628444114c16183b187440a8760ad0a3550c44b8eec751b2c9183c50368eaa",
+      "retained": "060-initial-dependency-body-verification.json.gz",
+      "gzip_sha256": "611f63971f0429736ada15c2c6a3a5e0101cb08a75edd95399843c8cae55812f",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112814124822965,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853287,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/initial-dependency_body_inventory.py",
+      "bytes": 4029,
+      "sha256": "41037bf31adb90cbbfc013f6f22d75e0e75d520e9d386e93b35493bd6a46a5ec",
+      "retained": "061-initial-dependency_body_inventory.py.gz",
+      "gzip_sha256": "36033d71d11bfbf9fe9dfd644a07ace43e93ad92ef375c4244edadf861d19b6b",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112814124751057,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853286,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/initial-independent-review.md",
+      "bytes": 15518,
+      "sha256": "a4701abe46fa8ad70e33d8c49d7b821afecc636df7436d7705979f9802143662",
+      "retained": "062-initial-independent-review.md.gz",
+      "gzip_sha256": "edf8c1f7653b04a568d7254ea50883eed80b0658dd1a6b746b9b1481a193dc2a",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112814124883577,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853288,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/initial-source-verification.exit",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "retained": "063-initial-source-verification.exit.gz",
+      "gzip_sha256": "d381e5a9b7c1c71b5fb3fef202103bf4b6098ce288f148735de1ecf61d4e3b75",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112325505647411,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853049,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/initial-source-verification.stderr",
+      "bytes": 428,
+      "sha256": "dd69631880a3d1456f5e6af7819aa216dd5bc53ff55ae502a1765762eef889d7",
+      "retained": "064-initial-source-verification.stderr.gz",
+      "gzip_sha256": "4e08d2d85fbf3da97e50e475665455277a79fe5fce55380ebd718784692852a5",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112325505603425,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853048,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/initial-source-verification.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "065-initial-source-verification.stdout.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112325505485536,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853047,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/initial-verify_source.py",
+      "bytes": 7775,
+      "sha256": "c81e1d1a0045425f8db8111814a1288a2851fc019dc20b99d66dbbabbbd92485",
+      "retained": "066-initial-verify_source.py.gz",
+      "gzip_sha256": "bba6796d48d350701ee05c97057b2e683ee595b1b65d7b800c95c850ba94cdd6",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112325505485536,
+        "atime_ns": 1791112325505738579,
+        "inode": 1853046,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/original-125-retention-verified.json",
+      "bytes": 49116,
+      "sha256": "24b91a6eab9fbf14d03467b9c60b52cd20f69015a60147f77b94ec6363aae201",
+      "retained": "067-original-125-retention-verified.json.gz",
+      "gzip_sha256": "6422935588fb124e8461cec1450aa299ace40467f5377f1146c51501122a8158",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111818796878720,
+        "atime_ns": 1791112639176629711,
+        "inode": 1853162,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/portable-tests.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "retained": "068-portable-tests.exit.gz",
+      "gzip_sha256": "cabc3a30b39528db601f65ca3ced008dd775595c901102d08ac8ae8976b29bcf",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112189800653123,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853019,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/portable-tests.stderr",
+      "bytes": 2937,
+      "sha256": "cd8e1022458a080bfe21af353b3c2d1e4a8810a3208c5d68c50b79c26b119b5b",
+      "retained": "069-portable-tests.stderr.gz",
+      "gzip_sha256": "fb7c1a18b606a0177e6b9ca4a8cd1fe19068f626698889958500fee844584de2",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112189784038787,
+        "atime_ns": 1791112189800653123,
+        "inode": 1853018,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/portable-tests.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "070-portable-tests.stdout.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112189618864306,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853017,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/reviewer-census-scope-expectation-correction.json",
+      "bytes": 413,
+      "sha256": "51d9b4514c112f9ae851c977fc7a887539c7d37774a72dcc8c7143bc026ba3dc",
+      "retained": "071-reviewer-census-scope-expectation-correction.json.gz",
+      "gzip_sha256": "fac555960675e9afe14bec4194cf3eac2f5eb2a7f1adf6fbd514df54b634470c",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112382471030369,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853071,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/reviewer-dependency-inventory-scope-correction.json",
+      "bytes": 519,
+      "sha256": "651854fe9d05ecd4ce8e1f41f42d06ce44ef6562b76ec279bdd62093c294a1e8",
+      "retained": "072-reviewer-dependency-inventory-scope-correction.json.gz",
+      "gzip_sha256": "95945f800988706bf7166144820fc2bcad014e525014ecfd08cfbc3ccbeda322",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112814126703228,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853289,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/reviewer-protected-map-expectation-correction.json",
+      "bytes": 344,
+      "sha256": "a1703ce317707f9fb844b4a4a222c3e1f79c43e7a3d241732e83ff08edfc8567",
+      "retained": "073-reviewer-protected-map-expectation-correction.json.gz",
+      "gzip_sha256": "45df69d85ab19cc335fe3f6fb9f25c23a0788e02fc0fa4d4e1628bf1323604c1",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112325505895566,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853050,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/sdk-input-projection.json",
+      "bytes": 2282,
+      "sha256": "8dfdc5b41f9accef8f253465dde85ded87900e94d235119616efa4e73fe42bf9",
+      "retained": "074-sdk-input-projection.json.gz",
+      "gzip_sha256": "4bb9fd82124c48a076f83dc50f4e49597489642e06687bffa1171b01cde7295a",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111894861380301,
+        "atime_ns": 1791112305178437795,
+        "inode": 1853186,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/sdk-input-projection.log",
+      "bytes": 2282,
+      "sha256": "8dfdc5b41f9accef8f253465dde85ded87900e94d235119616efa4e73fe42bf9",
+      "retained": "075-sdk-input-projection.log.gz",
+      "gzip_sha256": "4bb9fd82124c48a076f83dc50f4e49597489642e06687bffa1171b01cde7295a",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111894861380301,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853012,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/sdk-omitted-includes-source.json",
+      "bytes": 2552,
+      "sha256": "59d69b7b69e229f8481e724ba70952ab6d67e7bb4cc52389d364e6862f305807",
+      "retained": "076-sdk-omitted-includes-source.json.gz",
+      "gzip_sha256": "b7c4bb6a22003f5624e3f19bebe2118d67b527014314c6cf82529d81f400fa37",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112607296052505,
+        "atime_ns": 1791112867079665819,
+        "inode": 1853072,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/sdk-projection-owned/go/bin/go",
+      "bytes": 29,
+      "sha256": "4a2e691cc2b1854334114445cb59990960685fd3c9c86e955a3c6d3df0ff5b31",
+      "retained": "077-go.gz",
+      "gzip_sha256": "b9885c99b9bbd90c99d3961a1e37a53d4e4440098526d20b8c2ce303bf378a42",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111894855597559,
+        "atime_ns": 1791111894855778072,
+        "inode": 1853163,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/sdk-projection-owned/go/go.env",
+      "bytes": 31,
+      "sha256": "c474a06e104180decb5ce2d3891cf5ff78358bb7807b66a8cf20032c34082f64",
+      "retained": "078-go.env.gz",
+      "gzip_sha256": "bde8e0e6119db3c6eec376e29a9eb1debfb075e9f8b620fd9576578777064956",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111894856356837,
+        "atime_ns": 1791111894856438521,
+        "inode": 1853172,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/sdk-projection-owned/go/src/fmt/doc.go",
+      "bytes": 19,
+      "sha256": "869b811b5ce9230040529c4b03c9f78da7be9e8a6e57621fad0f0bd43e0c4f73",
+      "retained": "079-doc.go.gz",
+      "gzip_sha256": "55e0de209b5440a80721aac1c681cc5d0ada5373676f1dc81e116a84ed8a1e92",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111894856464931,
+        "atime_ns": 1791111894856579864,
+        "inode": 1853166,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/sdk-projection-owned/go/src/fmt/owned_added.go",
+      "bytes": 43,
+      "sha256": "6e94bb4af22f9e71e0d1512424880365d7e76b303ac53f9207fa8586fe5a0d88",
+      "retained": "080-owned_added.go.gz",
+      "gzip_sha256": "d600daab39f0dcea919ad2188eecc2fbab70878c8c88190777d9f0ca64f116fe",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111894856213811,
+        "atime_ns": 1791111894856326491,
+        "inode": 1853171,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/sdk-projection-owned/rust/bin/cargo",
+      "bytes": 32,
+      "sha256": "375da3204fead40b80c5c0dec42ffed4e686e6687fc09017d2ed05aff88e8ddc",
+      "retained": "081-cargo.gz",
+      "gzip_sha256": "7dfe2e72eaeb832d7f66484fad7a058548222b407bdaeec7fc2ef0be43b5c968",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111894855742899,
+        "atime_ns": 1791111894855778072,
+        "inode": 1853169,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/sdk-projection-owned/rust/bin/rustc",
+      "bytes": 31,
+      "sha256": "5704334262c2d75a5922dfe250314f251db5e8e5164ffa357dfa0ac15b3bc717",
+      "retained": "082-rustc.gz",
+      "gzip_sha256": "76d6bc680dba5b516559e0abccd2d6563919e071154290bf783f11fe12160ab9",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111894855778072,
+        "atime_ns": 1791111894856181692,
+        "inode": 1853170,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/sdk-readonly-current.json",
+      "bytes": 2035168,
+      "sha256": "62095b9fa705a6653eed33e824e2665cec89e4d367e0c09c8946df32d3689756",
+      "retained": "083-sdk-readonly-current.json.gz",
+      "gzip_sha256": "dc0c29dbc117432ae7cf10f27f099ac84bc1a317a125dc8f5e4acd9868104be7",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112387312654300,
+        "atime_ns": 1791112867083665943,
+        "inode": 1853055,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/sdk_input_projection.py",
+      "bytes": 4437,
+      "sha256": "63670327035ba272906b66b8364ee32676b13075455b190fff6dc9162e01a006",
+      "retained": "084-sdk_input_projection.py.gz",
+      "gzip_sha256": "719bc91a72990502bf2c8a059a4c9f3af90e91d39b0cecb417e3f1df141c75f2",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791111894561742243,
+        "atime_ns": 1791111894769748681,
+        "inode": 1853007,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/second-source-verification.exit",
+      "bytes": 2,
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "retained": "085-second-source-verification.exit.gz",
+      "gzip_sha256": "d381e5a9b7c1c71b5fb3fef202103bf4b6098ce288f148735de1ecf61d4e3b75",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112382470808043,
+        "atime_ns": 1791112867083665943,
+        "inode": 1853070,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/second-source-verification.stderr",
+      "bytes": 377,
+      "sha256": "666e8785444218ca8d06f558cd8fbc40fd0afc032b2c957155a8925886c006ad",
+      "retained": "086-second-source-verification.stderr.gz",
+      "gzip_sha256": "a1c9eaecdf63f589b617cfb5d93f00e60844979aa65b19f4048339b5062a3f41",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112382470761082,
+        "atime_ns": 1791112867083665943,
+        "inode": 1853069,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/second-source-verification.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "087-second-source-verification.stdout.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112382470634280,
+        "atime_ns": 1791112867083665943,
+        "inode": 1853068,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/second-verify_source.py",
+      "bytes": 7749,
+      "sha256": "de63ac738aa7d3a5165d8369c430066cd869b1dc1777a14d04e860e44d590330",
+      "retained": "088-second-verify_source.py.gz",
+      "gzip_sha256": "64662f37effb05a1eea63f84e6f2912de76eabce46ba12914073de3aa7b013ae",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112382470634280,
+        "atime_ns": 1791112867083665943,
+        "inode": 1853067,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/source-verification-summary.json",
+      "bytes": 811,
+      "sha256": "55bc1e9ab2287e27f2de9cdc7fc40d12d839295eecc490812a6c428a0e975234",
+      "retained": "089-source-verification-summary.json.gz",
+      "gzip_sha256": "25dcde801da12c7bf4c7d2658431278a4c459a813d5fe8be26570b593bceb0ea",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112387443644899,
+        "atime_ns": 1791112867083665943,
+        "inode": 1853077,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/source-verification.exit",
+      "bytes": 2,
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "retained": "090-source-verification.exit.gz",
+      "gzip_sha256": "cabc3a30b39528db601f65ca3ced008dd775595c901102d08ac8ae8976b29bcf",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112387461201078,
+        "atime_ns": 1791112867083665943,
+        "inode": 1853045,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/source-verification.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "091-source-verification.stderr.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112382472813228,
+        "atime_ns": 1791112387461201078,
+        "inode": 1853028,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/source-verification.stdout",
+      "bytes": 811,
+      "sha256": "55bc1e9ab2287e27f2de9cdc7fc40d12d839295eecc490812a6c428a0e975234",
+      "retained": "092-source-verification.stdout.gz",
+      "gzip_sha256": "25dcde801da12c7bf4c7d2658431278a4c459a813d5fe8be26570b593bceb0ea",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112387443644899,
+        "atime_ns": 1791112387461201078,
+        "inode": 1853014,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/verify_source.py",
+      "bytes": 7788,
+      "sha256": "143d56281718df272d947f33593204bb6222832034babd39c13bbbbcc42339e5",
+      "retained": "093-verify_source.py.gz",
+      "gzip_sha256": "975f84f0b07c7f2c7c60b4358d49db840a2058c96483ff08330c14e08068a28e",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112382470898650,
+        "atime_ns": 1791112382480813470,
+        "inode": 1852982,
+        "device": 27
+      }
+    },
+    {
+      "path": "/workspace/review-proof/memory760-780-independent-source/independent-review-receipt.json",
+      "sha256": "6fd2e8300f175a06a7aa0d3fc96c05096b6918fa356986878a3c66669a6a7e0a",
+      "bytes": 26514,
+      "retained": "094-independent-review-receipt.json.gz",
+      "gzip_sha256": "a9894f450bf409d9d068ad522a0871addb7f159aa7c594bd58508c269a0deb70",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791112867088484329,
+        "atime_ns": 1791112867088629318,
+        "inode": 1853293,
+        "device": 27
+      }
+    }
+  ]
+}

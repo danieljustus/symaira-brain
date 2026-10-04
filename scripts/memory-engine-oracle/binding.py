@@ -6,6 +6,7 @@ import platform
 import reader
 import owner
 import dependencies
+import sdk
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -13,7 +14,7 @@ GO_REF = "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
 HELPER = "internal/memory/contextassembler/zz_native_engine_oracle_test.go"
 PROOF_FILES = {"scripts/memory-engine-oracle/" + name for name in (
     "binding.py", "build.py", "replay.py", "trusted.json", "cases.json", "oracle_test.go.txt",
-    "owner.py", "dependencies.py", "reader.py", "dependency-inputs.json")}
+    "owner.py", "dependencies.py", "reader.py", "dependency-inputs.json", "sdk.py", "sdk-inputs.json")}
 
 
 def digest(path):
@@ -108,12 +109,16 @@ def sdks(go_sdk, rust_sdk):
     plan = trusted()["sdk_platforms"].get(key)
     if plan is None:
         raise ValueError("native SDK platform not yet independently pinned: " + key)
+    inventory_plan = json.loads((HERE / "sdk-inputs.json").read_bytes())
+    if inventory_plan.get("kind") != "memory760-whole-sdk-v1" or key not in inventory_plan["platforms"]:
+        raise ValueError("complete independently pinned SDK inventory required")
     result = {}
     for role, root in (("go", go_sdk), ("rust", rust_sdk)):
         for name, expected in {**plan[role]["files"], **plan[role].get("source_files", {})}.items():
             if digest(root / name) != expected:
                 raise ValueError("unbound SDK bytes: " + role + ":" + name)
-        result[role] = plan[role]
+        observed = sdk.admit(root, role, inventory_plan["platforms"][key][role])
+        result[role] = {**plan[role], "physical_inventory": observed}
     return result
 
 

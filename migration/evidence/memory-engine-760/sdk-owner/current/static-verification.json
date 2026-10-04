@@ -1,0 +1,50 @@
+{
+  "kind": "source-only-memory760-sdk-owner-preparation",
+  "parent": "7804d91b6f7b712a9d8fdfa68160bb8375b07a60",
+  "original125": 125,
+  "new94_plus_receipt": 95,
+  "sdk_inventory": {
+    "go": {
+      "files": 15034,
+      "directories": 1667,
+      "legacy_unchanged": 7720
+    },
+    "rust": {
+      "files": 303,
+      "directories": 28,
+      "legacy_unchanged": 227
+    }
+  },
+  "headers": [
+    "pkg/include/asm_amd64.h",
+    "pkg/include/asm_ppc64x.h",
+    "pkg/include/asm_riscv64.h",
+    "pkg/include/funcdata.h",
+    "pkg/include/textflag.h"
+  ],
+  "corpus": 60,
+  "original_controls": [
+    "changed-input",
+    "zero-selected",
+    "output-obstruction"
+  ],
+  "python_ast_functions": {
+    "binding.py": 9,
+    "build.py": 1,
+    "dependencies.py": 8,
+    "owner.py": 6,
+    "reader.py": 2,
+    "replay.py": 4,
+    "sdk.py": 4,
+    "test_binding.py": 8,
+    "test_ownership.py": 16,
+    "test_sdk.py": 17
+  },
+  "parent_changes": [
+    "M\tscripts/memory-engine-oracle/README.md",
+    "M\tscripts/memory-engine-oracle/binding.py",
+    "M\tscripts/memory-engine-oracle/owner.py"
+  ],
+  "actual_sdk_compiler_product_http_port_runs": 0,
+  "real_target_or_cache_access_or_allocation": 0
+}
