@@ -91,3 +91,9 @@ Das Gesamtziel bleibt offen. Tatsächliche Apple-/Geräteprüfungen, die
 Darwin-External-Volume-Regression, signierte Releases und die verlangte
 mindestens siebentägige Beobachtungszeit benötigen ihre realen Ergebnisse.
 Sie werden weder durch Quelltests noch durch Linux-Projektionen geschlossen.
+
+## Cache und strenge Lints
+
+Root entscheidet, ausschließlich vollständig archivierte nicht ausführbare Cachekörper bei nachgewiesen freigegebenen Ressourcen zu entfernen, um vorgeschriebene Reserven für echte Prüfungen zu erhalten. Originalarchive, ausführbare Dateikörper und deren historische Rollen bleiben geschützt; jeder Pfad braucht aktuelle Body-/Metadatenprüfung und ein dauerhaftes Journal. Freie Kapazität wird nachher gemessen, nicht aus Dateigrößen abgeleitet. Wiederherstellung verspricht Bytes, Rechte, Eigentümer und gespeicherte atime/mtime; neue Inodes und ctime sind nicht dieselbe ursprüngliche Identität.
+
+Aktuelle strenge Lintfehler werden gezielt behoben. Ganze Crates erhalten kein pauschales Allow. Eine begründete enge Ausnahme kann einen bereits bestehenden öffentlichen Eingabevertrag oder eine genaue Go-Fehlermeldung erhalten. Source- oder Lintprüfungen ersetzen keine tatsächlichen Prozessvergleiche und Negativkontrollen.
