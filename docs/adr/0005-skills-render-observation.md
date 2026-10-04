@@ -17,3 +17,11 @@ Keep the original independent review and failed actual CLI observations under `m
 ## Consequences
 
 Consumers receive the render diagnostic even when three-way classification fails after a fresh render is available. Existing installation errors keep their meaning. A failure to load or materialize the library before any fresh render exists still uses the ordinary status error path. This is a scoped observational correction, not completion of #764 or the full Rust cutover. PR #794 must land first; the integrated corrected head needs independent review and fresh native CI before merge.
+
+## Integration after the bounded preflight merge (2026-10-04)
+
+PR #794 merged as `9353520a34c5819c7d0a6cd58d3bfaa2b22b045b`; issue #793 is closed. Integrate that exact main commit by a normal merge, preserving the previous #621 head `4f3c0032b122c29804ccb0aea674202a5165f7a6` and its original runtime evidence. Retain the reviewed raw-byte/WTF-8 Skills sync flag implementation from main in full. Render observations are an additive status feature and do not justify reverting platform-correct argument handling.
+
+Keep both the #621 render-drift and #794 Windows argv workflow groups, their independent artifact uploads, and main's Activity checks. Preserve historical diagnostics and handoff documentation rather than rewriting old source-only observations as current acceptance. The contract matrix keeps main's `SKL-008` Windows argv identifier and assigns the new render observation `SKL-009`, so independent contracts do not share a key. Original merge conflicts are retained with full bytes and SHA bindings under `/workspace/review-proof/root-skills621-main935-integration/`.
+
+The merged source keeps the complete #621 status/render implementation and tests byte-identical to its previously reviewed head; its shared CLI additionally inherits main's bounded preflight corrections. Source checks at the integrated head and fresh actual Linux/macOS/Windows CI are required. Earlier runtime reports remain acceptance only of their recorded heads; this integration does not close #764 or establish full Rust cutover.
