@@ -26,23 +26,31 @@ fn generated_owner_and_delegation_are_shared_by_brain() {
                 "role {role}: stdout={stdout:?}, stderr={stderr:?}"
             );
             assert!(stdout.starts_with(b"symguard doctor\n"));
-            assert!(stderr.starts_with(b"config: warning: unknown key \"lexical_owner\" in "));
             let expected = std::env::var_os("OWNED_EXPECTED_CONFIG_PATH").unwrap();
-            let path = symbrain_core::GoText::path("", std::path::Path::new(&expected), "");
-            // Report and warnings must use the lexically generated file name.
-            assert!(
-                stderr
-                    .windows(path.as_ref().len())
-                    .any(|part| part == path.as_ref())
+            let warning = symbrain_core::GoText::path(
+                "config: warning: unknown key \"lexical_owner\" in ",
+                std::path::Path::new(&expected),
+                "\n",
             );
+            // Exact owner bytes, including generated/native versus explicit separators.
+            assert_eq!(stderr, warning.as_ref(), "role {role}: warning owner bytes");
             assert!(!stderr.windows(2).any(|part| part == b".."));
         }
         return;
     }
-    for role in ["healthy", "semantic", "typed", "discovery"] {
+    let roles = ["healthy", "semantic", "typed", "discovery"].into_iter();
+    #[cfg(windows)]
+    let roles = roles.chain(["healthy-slash-xdg", "healthy-slash-override"]);
+    for role in roles {
         let root = tempfile::tempdir().unwrap();
         let home = root.path().join("home");
-        let config = root.path().join("config/symguard/config.toml");
+        // A slash inside one PathBuf component survives verbatim on Windows.
+        // The generated Go owner uses native separators, not that mixed spelling.
+        let config = root
+            .path()
+            .join("config")
+            .join("symguard")
+            .join("config.toml");
         fs::create_dir_all(config.parent().unwrap()).unwrap();
         fs::create_dir_all(root.path().join("discard")).unwrap();
         fs::create_dir_all(&home).unwrap();
@@ -59,6 +67,20 @@ fn generated_owner_and_delegation_are_shared_by_brain() {
             fs::write(home.join(".cursor/mcp.json"), "{bad").unwrap();
         }
         let before = fs::metadata(&config).unwrap().modified().unwrap();
+        let xdg = root.path().join("discard").join("..").join("config");
+        #[cfg(windows)]
+        let xdg = if role == "healthy-slash-xdg" {
+            std::path::PathBuf::from(xdg.to_str().unwrap().replace('\\', "/"))
+        } else {
+            xdg
+        };
+        let expected_config = config.clone();
+        #[cfg(windows)]
+        let expected_config = if role == "healthy-slash-override" {
+            std::path::PathBuf::from(config.to_str().unwrap().replace('\\', "/"))
+        } else {
+            expected_config
+        };
         let mut command = Command::new(std::env::current_exe().unwrap());
         command
             .args([
@@ -68,17 +90,17 @@ fn generated_owner_and_delegation_are_shared_by_brain() {
             ])
             .env_clear()
             .env("OWNED_GUARD_CONFIG_PATH_ROLE", role)
-            .env("OWNED_EXPECTED_CONFIG_PATH", &config)
+            .env("OWNED_EXPECTED_CONFIG_PATH", &expected_config)
             .env("HOME", &home)
             .env("USERPROFILE", &home)
-            .env(
-                "XDG_CONFIG_HOME",
-                root.path().join("discard").join("..").join("config"),
-            )
+            .env("XDG_CONFIG_HOME", &xdg)
             .env("XDG_DATA_HOME", root.path().join("data"))
             .env("XDG_CACHE_HOME", root.path().join("cache"))
             .env("PATH", "")
             .current_dir(root.path());
+        if role == "healthy-slash-override" {
+            command.env("SYMGUARD_CONFIG", &expected_config);
+        }
         for key in ["SystemRoot", "WINDIR", "TMP", "TEMP"] {
             if let Some(value) = std::env::var_os(key) {
                 command.env(key, value);
