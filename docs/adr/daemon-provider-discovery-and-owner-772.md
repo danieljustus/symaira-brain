@@ -1,0 +1,7 @@
+# Preserve provider discovery before owned daemon startup
+
+Decision, 2026-10-04: keep the scoped lifetime supervisor and raw native Path/OsStr transport, but resolve a bare provider with the pinned Go discovery policy before running it. An empty or relative PATH must not silently expand execution to an unrelated project-local symvault. The actual default CLI reproduces this owner change even when command output matches. Explicit paths remain exact; standalone users retain their existing public contract. Preserve first-relative executable refusal, documented Go opt-in and platform-specific Windows rules rather than treating all relative text as equally executable.
+
+Reason: executable discovery chooses the process entrusted with a key lookup. Adopting Rust's different search behavior would change that trust boundary during an otherwise compatible cutover. A complete independently passing standard corpus cannot substitute for the concrete failing owner observation. Original observations, failures and binaries remain immutable; source-only SDK/cross checks do not replace real native acceptance.
+
+Full independent review of sourceccc/publication2b275 remains REQUEST_CHANGES until the scoped discovery successor passes the complete original and additional actual process/control gates. See migration/evidence/browse-state-key-772/independent-ccc/review.md and receipt.json. Full #772 and release cutover remain open.
