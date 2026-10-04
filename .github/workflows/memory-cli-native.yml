@@ -45,6 +45,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+      - name: Set up the pinned SQLite checker interpreter
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.13.7'
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: '1.26.7'
@@ -117,6 +121,8 @@ jobs:
             rustc -Vv
             cargo -V
             go version
+            python3 --version
+            python3 -c 'import sqlite3; print("sqlite_checker=" + sqlite3.sqlite_version)'
           } > "$RECEIPT"
       - name: Retain acceptance receipts
         if: always()

@@ -14,6 +14,7 @@ import sqlite3
 import stat
 import subprocess
 import time
+from checker import preflight
 
 FROZEN = "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
 CREATED = "2000-01-01 00:00:00 +0000 UTC"
@@ -196,7 +197,8 @@ def main():
     receipt = dict(frozen_go=revision, source=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo).decode().strip(),
                    dirty_source=subprocess.check_output(["git", "status", "--porcelain"], cwd=repo).decode(),
                    binaries={str(args.go): digest(args.go), str(args.native): digest(args.native)},
-                   resources={str(path): digest(path) for path in resources}, python_sqlite=sqlite3.sqlite_version, cases=[])
+                   resources={str(path): digest(path) for path in resources}, python_sqlite=sqlite3.sqlite_version,
+                   checker=preflight(), cases=[])
     save(args.output / "receipt.json", receipt)
     for count, resource in enumerate(resources, 1):
         root = args.output / resource.stem

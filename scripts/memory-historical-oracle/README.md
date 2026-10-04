@@ -99,3 +99,11 @@ this checkpoint does not close #649 or #758.
 ## Completed Linux successor validation
 
 The original source-checkpoint statements above remain historical. Author1fc5910 and independent63fbd320 have now each completed all seventeen allocated Linux stages with392 passing tests,37 historical repairs and37 complete-state reopens. Complete raw observations and original failures remain under `migration/evidence/memory-historical-649`; the independent review is `root-63fbd/review.md`. Actual native macOS/Windows and integrated-head CI remain required.
+
+The native Memory CLI workflow selects Python3.13.7 explicitly. `run.sh` and
+direct historical replay also require the actual SQLite checker preflight:
+historical REAL defaults must pass integrity, FTS5 porter/integrity must work,
+and a genuinely corrupt NOT NULL fixture must fail. Receipts retain the engine
+identity. The original host SQLite3.45.1 false-positive failure is preserved;
+see `docs/adr/memory-historical-sqlite-checker-803.md`. No product acceptance
+criterion is waived by changing the checker interpreter.

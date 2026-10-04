@@ -9,6 +9,7 @@ if [[ $# != 2 || $1 != --output ]]; then
   exit 2
 fi
 report=$2
+python3 "$repo/scripts/memory-historical-oracle/checker.py" --output "$report-checker.json"
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 mkdir "$work/source"
