@@ -39,8 +39,17 @@ Keep foreign_keys before WAL and secure_delete after it, with pragmas outside
 IMMEDIATE. In-memory journal behavior stays SQLite's existing memory mode.
 The helper changes no application schema/data and retains original SQL errors.
 
+The first actual Linux control at source `62b2757` disproved the retained-reader
+assumption: its busy callback ran once. All original tests and the held-reader
+five-second budget passed (37 passed/one new control failed). Preserve the full
+failed log/source map and gzip-roundtripped executed test binary. SQLite's
+reader conflict permits RESERVED acquisition, then waits on EXCLUSIVE, where
+the handler runs. Correct the fixture to a reserved writer: that blocks the
+SHARED-to-RESERVED upgrade, where the handler is skipped. This changes the new
+lock-owner fixture, not the production budget, helper or original assertions.
+
 Allocation-stage proof must first bind the actual failing phase. Prepare a real
-rollback-mode reader control whose WAL transition returns plain BUSY while the
+rollback-mode reserved-writer control whose WAL transition returns plain BUSY while the
 busy callback is not invoked, then release the reader after observing the
 helper's real BUSY attempt and require WAL setup success. A retained reader
 must exhaust the same five-second budget and preserve the original error/state.

@@ -46,6 +46,14 @@ fn retained_reader(database: &OwnedDatabase) -> Connection {
     conn
 }
 
+fn retained_writer(database: &OwnedDatabase) -> Connection {
+    let conn = retained_reader(database);
+    // A reader permits RESERVED acquisition, then blocks EXCLUSIVE (handler
+    // used). A reserved writer blocks SHARED-to-RESERVED (handler skipped).
+    conn.execute_batch("ROLLBACK; BEGIN IMMEDIATE;").unwrap();
+    conn
+}
+
 #[test]
 fn only_observed_plain_busy_is_retryable() {
     for code in [
@@ -66,9 +74,9 @@ fn only_observed_plain_busy_is_retryable() {
 }
 
 #[test]
-fn genuine_wal_upgrade_busy_succeeds_after_reader_release() {
+fn genuine_wal_upgrade_busy_succeeds_after_reserved_writer_release() {
     let database = OwnedDatabase::new();
-    let reader = retained_reader(&database);
+    let writer = retained_writer(&database);
     let follower = Connection::open(&database.0).unwrap();
     // The exact isolated pragma is the real failing phase, not Store::open's
     // outer error. Record its typed failure before exercising the helper.
@@ -120,7 +128,7 @@ fn genuine_wal_upgrade_busy_succeeds_after_reader_release() {
     // Release only after an actual failed helper attempt. There is no assumed
     // sleep duration or weakened concurrency assertion.
     received.recv_timeout(BUDGET).unwrap();
-    reader.execute_batch("COMMIT;").unwrap();
+    writer.execute_batch("COMMIT;").unwrap();
     job.join().unwrap();
 }
 
