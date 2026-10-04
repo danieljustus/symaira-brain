@@ -28,9 +28,11 @@ represented as raw parity, and the original requested domain remains incomplete.
 The failed job did not reach it; its inclusion is a connected source-derived
 fixture correction, not a second observed CI failure. Its independent help
 assertions now precede that creation and still execute. If the actual kernel
-rejects the name, all five raw audit-risk inputs and the invalid-JSON input are
-accounted as UNEXECUTED with zero product children; otherwise every original
-raw byte/deny/error/JSON assertion executes unchanged.
+rejects the name, only low/medium/high audit-write inputs are accounted as
+UNEXECUTED with zero product children. The pre-existing critical/unknown denial
+checks and invalid-JSON parse control still execute because they do not depend
+on creating that directory. Otherwise every original raw byte/deny/error/JSON
+assertion executes unchanged.
 
 The existing Python kernel_admission/raw_paths/config_warnings/config_paths
 criteria, accounting controls and corpus IDs are unchanged. The Rust helper is

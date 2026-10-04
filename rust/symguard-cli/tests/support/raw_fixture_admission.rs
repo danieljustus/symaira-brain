@@ -22,6 +22,14 @@ fn exact_unavailable(macos: bool, component: &[u8], errno: Option<i32>) -> bool 
     macos && component == COMPONENT && errno == Some(92)
 }
 
+pub fn exact_raw_kernel_failure(path: &Path, error: &io::Error) -> bool {
+    exact_unavailable(
+        cfg!(target_os = "macos"),
+        path.file_name().unwrap().as_bytes(),
+        error.raw_os_error(),
+    )
+}
+
 fn hex(bytes: &[u8]) -> String {
     bytes.iter().map(|value| format!("{value:02x}")).collect()
 }
@@ -54,7 +62,7 @@ pub fn record_failed_creation(
     assert_eq!(component, COMPONENT, "unrecognized raw fixture component");
     assert!(path.starts_with(root.path()), "foreign fixture root");
     let after = entries(path.parent().unwrap());
-    let allowed = exact_unavailable(cfg!(target_os = "macos"), component, error.raw_os_error());
+    let allowed = exact_raw_kernel_failure(path, &error);
     let owned_root = root.path().to_owned();
     let attempted_path_hex = hex(path.as_os_str().as_bytes());
     let component_hex = hex(component);
