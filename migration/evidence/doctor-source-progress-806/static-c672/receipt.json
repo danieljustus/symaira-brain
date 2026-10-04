@@ -69,7 +69,7 @@
     "scripts/setup-source-oracle/replay.py": "7688e0d185e5257ed1a45c61659e36234ac1660e623b0e442fc016a15b91f17a",
     "scripts/setup-source-oracle/progress.py": "98a1529025fbdee11dcfa77692a071ebe9fcea674e9b883db9f84b10dea84fdd",
     "scripts/setup-source-oracle/windows_job_probe.py": "2a126793f177d72e7297feac03bd0aa9381a9384a21135661ddc34989779b3ec",
-    "rust/symbrain-cli/tests/source_job_notifications.rs": "51d14e6ac39dc37802ec382f9706a41e88e4e314102451eabd48c3ee5b4cccc6",
+    "rust/symbrain-cli/tests/source_job_notifications.rs": "4cb2a621011f987be6941d185650f5f3d845a9030d3af7e582401c9cd221ce5d",
     "docs/adr/doctor-source-timeout-observability-806.md": "cefa504cf5ded6d5f6c84eb62dbc64b2008e81c7a6b0d0cf4d9b37dc9b86d493"
   }
 }

@@ -46,6 +46,16 @@ impl Drop for HistoricalOwned {
     }
 }
 
+// The native JobObject experiment requires a successful parent with a still
+// live child. The wrapper owns termination; the external watchdog retains and
+// forcibly cleans the recorded owned PID if that contract fails.
+#[allow(clippy::zombie_processes)]
+fn owned_live_descendant(root: &Path) {
+    let child = command(root, "held").spawn().unwrap();
+    fs::write(root.join("descendant.pid"), child.id().to_string()).unwrap();
+    event(root, "descendant-created", child.id());
+}
+
 #[test]
 #[ignore = "owned Windows watchdog required; deliberately blocks historical cleanup"]
 fn owned_job_diagnostic_helper() {
@@ -62,9 +72,7 @@ fn owned_job_diagnostic_helper() {
         return;
     }
     if mode == "with-descendant" {
-        let child = command(&root, "held").spawn().unwrap();
-        fs::write(root.join("descendant.pid"), child.id().to_string()).unwrap();
-        event(&root, "descendant-created", child.id());
+        owned_live_descendant(&root);
         return;
     }
     assert!(matches!(
