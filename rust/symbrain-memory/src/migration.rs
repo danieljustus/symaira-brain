@@ -10,10 +10,11 @@ use std::time::Duration;
 
 pub(crate) fn configure(mut conn: Connection) -> Result<Store, StoreError> {
     conn.busy_timeout(Duration::from_secs(5))?;
-    // journal_mode cannot be changed inside a transaction.
-    conn.execute_batch(
-        "PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA secure_delete=ON;",
-    )?;
+    // WAL transitions have lock-upgrade paths that skip SQLite's busy handler.
+    // Retry only that autocommit pragma within the same five-second budget.
+    conn.execute_batch("PRAGMA foreign_keys=ON;")?;
+    crate::wal_open::ensure_wal(&conn)?;
+    conn.execute_batch("PRAGMA secure_delete=ON;")?;
     // Reserve the writer before inspecting schema. A deferred read snapshot
     // cannot be upgraded after another opener commits (BUSY_SNAPSHOT517), and
     // busy_timeout does not retry that invalid snapshot. IMMEDIATE makes the

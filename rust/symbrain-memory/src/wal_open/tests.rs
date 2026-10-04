@@ -1,0 +1,208 @@
+//! Real rollback-reader contention and typed retry boundaries, never fake rows.
+
+use super::*;
+use std::cell::Cell;
+use std::{path::PathBuf, sync::mpsc};
+
+thread_local! {
+    static BUSY_CALLBACKS: Cell<usize> = const { Cell::new(0) };
+}
+
+fn count_busy_callback(_attempt: i32) -> bool {
+    BUSY_CALLBACKS.with(|calls| calls.set(calls.get() + 1));
+    false
+}
+
+struct OwnedDatabase(PathBuf);
+
+impl OwnedDatabase {
+    fn new() -> Self {
+        let mut entropy = [0_u8; 16];
+        getrandom::fill(&mut entropy).unwrap();
+        let directory = std::env::temp_dir().join(format!(
+            "symbrain-wal-open-{:032x}",
+            u128::from_le_bytes(entropy)
+        ));
+        std::fs::create_dir(&directory).unwrap();
+        Self(directory.join("memory.db"))
+    }
+}
+
+impl Drop for OwnedDatabase {
+    fn drop(&mut self) {
+        std::fs::remove_dir_all(self.0.parent().unwrap()).unwrap();
+    }
+}
+
+fn retained_reader(database: &OwnedDatabase) -> Connection {
+    let conn = Connection::open(&database.0).unwrap();
+    conn.execute_batch("PRAGMA journal_mode=DELETE; CREATE TABLE retained(id TEXT PRIMARY KEY, value TEXT NOT NULL); INSERT INTO retained VALUES ('id','unchanged'); BEGIN;").unwrap();
+    assert_eq!(
+        conn.query_row("SELECT value FROM retained", [], |row| row
+            .get::<_, String>(0))
+            .unwrap(),
+        "unchanged"
+    );
+    conn
+}
+
+#[test]
+fn only_observed_plain_busy_is_retryable() {
+    for code in [
+        rusqlite::ffi::SQLITE_BUSY,
+        rusqlite::ffi::SQLITE_BUSY_RECOVERY,
+        rusqlite::ffi::SQLITE_BUSY_SNAPSHOT,
+        rusqlite::ffi::SQLITE_BUSY_TIMEOUT,
+        rusqlite::ffi::SQLITE_LOCKED,
+        rusqlite::ffi::SQLITE_IOERR,
+        rusqlite::ffi::SQLITE_CORRUPT,
+    ] {
+        let error = Error::SqliteFailure(
+            rusqlite::ffi::Error::new(code),
+            Some("not classified by this text".into()),
+        );
+        assert_eq!(plain_busy(&error), code == rusqlite::ffi::SQLITE_BUSY);
+    }
+}
+
+#[test]
+fn genuine_wal_upgrade_busy_succeeds_after_reader_release() {
+    let database = OwnedDatabase::new();
+    let reader = retained_reader(&database);
+    let follower = Connection::open(&database.0).unwrap();
+    // The exact isolated pragma is the real failing phase, not Store::open's
+    // outer error. Record its typed failure before exercising the helper.
+    BUSY_CALLBACKS.with(|calls| calls.set(0));
+    follower.busy_handler(Some(count_busy_callback)).unwrap();
+    let original = follower
+        .execute_batch("PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA secure_delete=ON;")
+        .unwrap_err();
+    assert!(plain_busy(&original), "{original}");
+    assert_eq!(
+        BUSY_CALLBACKS.with(Cell::get),
+        0,
+        "the real WAL upgrade bypasses SQLite's busy callback"
+    );
+    assert!(follower.is_autocommit());
+    let (observed, received) = mpsc::channel();
+    let job = std::thread::spawn(move || {
+        let mut first = Some(observed);
+        with_busy_observer(&follower, || {
+            if let Some(sender) = first.take() {
+                sender.send(()).unwrap();
+            }
+        })
+        .unwrap();
+        // Continue through the actual unchanged IMMEDIATE migration owner;
+        // application state in the unrelated preexisting table must survive.
+        let store = crate::migration::configure(follower).unwrap();
+        let follower = store.lock().unwrap();
+        assert_eq!(
+            follower
+                .query_row("PRAGMA journal_mode", [], |row| row.get::<_, String>(0))
+                .unwrap(),
+            "wal"
+        );
+        assert_eq!(
+            follower
+                .query_row("PRAGMA busy_timeout", [], |row| row.get::<_, i64>(0))
+                .unwrap(),
+            5000
+        );
+        assert_eq!(
+            follower
+                .query_row("SELECT value FROM retained", [], |row| row
+                    .get::<_, String>(0))
+                .unwrap(),
+            "unchanged"
+        );
+    });
+    // Release only after an actual failed helper attempt. There is no assumed
+    // sleep duration or weakened concurrency assertion.
+    received.recv_timeout(BUDGET).unwrap();
+    reader.execute_batch("COMMIT;").unwrap();
+    job.join().unwrap();
+}
+
+#[test]
+fn retained_reader_exhausts_one_budget_and_preserves_original_error_and_rows() {
+    let database = OwnedDatabase::new();
+    let reader = retained_reader(&database);
+    let follower = Connection::open(&database.0).unwrap();
+    let started = Instant::now();
+    let error = ensure_wal(&follower).unwrap_err();
+    assert!(plain_busy(&error), "{error}");
+    assert!(started.elapsed() >= BUDGET);
+    // Scheduler delays are outside SQLite's timeout, so timing is recorded
+    // rather than mistaken for a portable upper-bound performance assertion.
+    eprintln!(
+        "retained WAL reader exhausted shared budget: {:?}",
+        started.elapsed()
+    );
+    assert!(follower.is_autocommit());
+    assert_eq!(
+        follower
+            .query_row("PRAGMA busy_timeout", [], |row| row.get::<_, i64>(0))
+            .unwrap(),
+        5000
+    );
+    assert_eq!(
+        reader
+            .query_row("SELECT value FROM retained", [], |row| row
+                .get::<_, String>(0))
+            .unwrap(),
+        "unchanged"
+    );
+    reader.execute_batch("COMMIT;").unwrap();
+    assert_eq!(
+        follower
+            .query_row("PRAGMA journal_mode", [], |row| row.get::<_, String>(0))
+            .unwrap(),
+        "delete"
+    );
+}
+
+#[test]
+fn caller_transaction_is_not_retried_or_rolled_back() {
+    let conn = Connection::open_in_memory().unwrap();
+    conn.execute_batch(
+        "CREATE TABLE retained(value TEXT); BEGIN; INSERT INTO retained VALUES ('caller-owned');",
+    )
+    .unwrap();
+    let result = with_busy_observer(&conn, || panic!("active caller transaction cannot retry"));
+    // SQLite may leave an in-memory journal unchanged without raising an error;
+    // either result must preserve caller ownership and its uncommitted row.
+    if let Err(error) = result {
+        assert!(!plain_busy(&error));
+    }
+    assert!(!conn.is_autocommit());
+    assert_eq!(
+        conn.query_row("SELECT value FROM retained", [], |row| row
+            .get::<_, String>(0))
+            .unwrap(),
+        "caller-owned"
+    );
+    conn.execute_batch("ROLLBACK;").unwrap();
+}
+
+#[test]
+fn disk_read_transaction_retains_ownership_after_forbidden_mode_change() {
+    let database = OwnedDatabase::new();
+    let conn = retained_reader(&database);
+    let error =
+        with_busy_observer(&conn, || panic!("caller transaction cannot retry")).unwrap_err();
+    assert!(!plain_busy(&error));
+    assert!(!conn.is_autocommit());
+    assert_eq!(
+        conn.query_row("SELECT value FROM retained", [], |row| row
+            .get::<_, String>(0))
+            .unwrap(),
+        "unchanged"
+    );
+    conn.execute_batch("ROLLBACK;").unwrap();
+    assert_eq!(
+        conn.query_row("PRAGMA journal_mode", [], |row| row.get::<_, String>(0))
+            .unwrap(),
+        "delete"
+    );
+}
