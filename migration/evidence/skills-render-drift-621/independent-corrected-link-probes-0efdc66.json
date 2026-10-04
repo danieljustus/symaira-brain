@@ -1,0 +1,83 @@
+{
+  "head": "0efdc66f8f7786fe42eb9db062bfbc5ae817c807",
+  "base": "d7d0acda1ec5d07c8cfb18f8b6ba67060a4d608c",
+  "main": "e8c7f7990ab61967db0a3cbadaf6e485b4a33d99",
+  "unchanged_source_hashes_verified": 8,
+  "corrected_source_hashes_verified": 3,
+  "binary_sha256": {
+    "go": "a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41",
+    "rust": "1f7ab418d8702de6897eed69f4fe7aecff7dca9581e73308e510312b4922f5e4"
+  },
+  "cases": [
+    {
+      "kind": "clean",
+      "filesystem_snapshot_unchanged": true,
+      "table": {
+        "exit_code": 0,
+        "stdout": "TARGET\tSKILL\tSTATUS\tMODE\tPATH\tRENDER\nopencode\tdemo\tin-sync\tlinked\t/tmp/independent797-fixed-rq8oak7y/home/.config/opencode/skills/demo\tin-sync\n",
+        "stderr": ""
+      },
+      "json": {
+        "exit_code": 0,
+        "stdout": "{\"installs\":[{\"target\":\"opencode\",\"name\":\"demo\",\"path\":\"/tmp/independent797-fixed-rq8oak7y/home/.config/opencode/skills/demo\",\"status\":\"in-sync\",\"mode\":\"linked\",\"installed_at\":\"2026-01-02T03:04:05Z\",\"source_hash\":\"448dd4061bb4dfee776e3da33beace4d3f10177db1d83f3417046e5d6b9bb70a\",\"render_status\":\"in-sync\"}],\"summary\":{\"in_sync\":1,\"stale\":0,\"harness_changed\":0,\"conflict\":0,\"orphaned\":0,\"unmanaged\":0}}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "kind": "edited-reference",
+      "filesystem_snapshot_unchanged": true,
+      "table": {
+        "exit_code": 0,
+        "stdout": "TARGET\tSKILL\tSTATUS\tMODE\tPATH\tRENDER\nopencode\tdemo\tharness-changed\tlinked\t/tmp/independent797-fixed-vmzk31lv/home/.config/opencode/skills/demo\tdrift\n",
+        "stderr": ""
+      },
+      "json": {
+        "exit_code": 0,
+        "stdout": "{\"installs\":[{\"target\":\"opencode\",\"name\":\"demo\",\"path\":\"/tmp/independent797-fixed-vmzk31lv/home/.config/opencode/skills/demo\",\"status\":\"harness-changed\",\"mode\":\"linked\",\"installed_at\":\"2026-01-02T03:04:05Z\",\"source_hash\":\"448dd4061bb4dfee776e3da33beace4d3f10177db1d83f3417046e5d6b9bb70a\",\"drift\":[{\"path\":\"SKILL.md\",\"kind\":\"unchanged\",\"base\":\"f1efcc6e6326bd7268d056dfba212685243849c2f5616c05787e12979bb0c17e\",\"left\":\"f1efcc6e6326bd7268d056dfba212685243849c2f5616c05787e12979bb0c17e\",\"right\":\"f1efcc6e6326bd7268d056dfba212685243849c2f5616c05787e12979bb0c17e\"},{\"path\":\"references/lesson.md\",\"kind\":\"harness-changed\",\"right\":\"f240803533ae5d2841bac445a96fa800fb00cbfa72939f53676d1a1890df3d07\"}],\"render_status\":\"drift\",\"render_drift\":[{\"path\":\"references/lesson.md\",\"library_hash\":\"\",\"render_hash\":\"f240803533ae5d2841bac445a96fa800fb00cbfa72939f53676d1a1890df3d07\"}]}],\"summary\":{\"in_sync\":0,\"stale\":0,\"harness_changed\":1,\"conflict\":0,\"orphaned\":0,\"unmanaged\":0}}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "kind": "nested-link",
+      "filesystem_snapshot_unchanged": true,
+      "table": {
+        "exit_code": 0,
+        "stdout": "TARGET\tSKILL\tSTATUS\tMODE\tPATH\tRENDER\nopencode\tdemo\tstale\tsymlink\t/tmp/independent797-fixed-viz7zmwd/home/.config/opencode/skills/demo\tunreadable\n",
+        "stderr": ""
+      },
+      "json": {
+        "exit_code": 0,
+        "stdout": "{\"installs\":[{\"target\":\"opencode\",\"name\":\"demo\",\"path\":\"/tmp/independent797-fixed-viz7zmwd/home/.config/opencode/skills/demo\",\"status\":\"stale\",\"mode\":\"symlink\",\"installed_at\":\"2026-01-02T03:04:05Z\",\"source_hash\":\"448dd4061bb4dfee776e3da33beace4d3f10177db1d83f3417046e5d6b9bb70a\",\"error\":\"skill tree contains symlink ./nested-link\",\"render_status\":\"unreadable\",\"render_error\":\"skill tree contains symlink ./nested-link\"}],\"summary\":{\"in_sync\":0,\"stale\":1,\"harness_changed\":0,\"conflict\":0,\"orphaned\":0,\"unmanaged\":0}}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "kind": "fifo",
+      "filesystem_snapshot_unchanged": true,
+      "table": {
+        "exit_code": 0,
+        "stdout": "TARGET\tSKILL\tSTATUS\tMODE\tPATH\tRENDER\nopencode\tdemo\tstale\tsymlink\t/tmp/independent797-fixed-tiu_zwr_/home/.config/opencode/skills/demo\tunreadable\n",
+        "stderr": ""
+      },
+      "json": {
+        "exit_code": 0,
+        "stdout": "{\"installs\":[{\"target\":\"opencode\",\"name\":\"demo\",\"path\":\"/tmp/independent797-fixed-tiu_zwr_/home/.config/opencode/skills/demo\",\"status\":\"stale\",\"mode\":\"symlink\",\"installed_at\":\"2026-01-02T03:04:05Z\",\"source_hash\":\"448dd4061bb4dfee776e3da33beace4d3f10177db1d83f3417046e5d6b9bb70a\",\"error\":\"skill tree contains special file ./blocked\",\"render_status\":\"unreadable\",\"render_error\":\"skill tree contains special file ./blocked\"}],\"summary\":{\"in_sync\":0,\"stale\":1,\"harness_changed\":0,\"conflict\":0,\"orphaned\":0,\"unmanaged\":0}}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "kind": "depth",
+      "filesystem_snapshot_unchanged": true,
+      "table": {
+        "exit_code": 0,
+        "stdout": "TARGET\tSKILL\tSTATUS\tMODE\tPATH\tRENDER\nopencode\tdemo\tstale\tsymlink\t/tmp/independent797-fixed-05v921dk/home/.config/opencode/skills/demo\tunreadable\n",
+        "stderr": ""
+      },
+      "json": {
+        "exit_code": 0,
+        "stdout": "{\"installs\":[{\"target\":\"opencode\",\"name\":\"demo\",\"path\":\"/tmp/independent797-fixed-05v921dk/home/.config/opencode/skills/demo\",\"status\":\"stale\",\"mode\":\"symlink\",\"installed_at\":\"2026-01-02T03:04:05Z\",\"source_hash\":\"448dd4061bb4dfee776e3da33beace4d3f10177db1d83f3417046e5d6b9bb70a\",\"error\":\"skill tree exceeds maximum directory depth\",\"render_status\":\"unreadable\",\"render_error\":\"skill tree exceeds maximum directory depth\"}],\"summary\":{\"in_sync\":0,\"stale\":1,\"harness_changed\":0,\"conflict\":0,\"orphaned\":0,\"unmanaged\":0}}\n",
+        "stderr": ""
+      }
+    }
+  ]
+}

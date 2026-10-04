@@ -13,7 +13,9 @@ use sha2::{Digest, Sha256};
 use super::destination::entry_metadata;
 use super::marker::MARKER_FILE;
 use super::replace::open_trusted_dir;
-use crate::model::{MAX_INPUT_SIZE, MAX_RESOURCE_ENTRIES, MAX_TOTAL_RESOURCE_BYTES, SkillError};
+use crate::model::{
+    MAX_INPUT_SIZE, MAX_RESOURCE_DEPTH, MAX_RESOURCE_ENTRIES, MAX_TOTAL_RESOURCE_BYTES, SkillError,
+};
 
 /// A file's relationship to the frozen base, fresh library render, and target.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -153,6 +155,7 @@ pub(crate) fn file_hashes(
         &mut output,
         &mut entries,
         &mut total,
+        0,
     )?;
     Ok(output)
 }
@@ -164,7 +167,13 @@ fn walk_hashes(
     output: &mut BTreeMap<String, String>,
     entries: &mut usize,
     total: &mut u64,
+    depth: usize,
 ) -> Result<(), SkillError> {
+    if depth > MAX_RESOURCE_DEPTH {
+        return Err(SkillError(
+            "skill tree exceeds maximum directory depth".to_owned(),
+        ));
+    }
     let mut children = root
         .read_dir(current)
         .map_err(|error| SkillError(format!("read directory: {error}")))?
@@ -194,7 +203,15 @@ fn walk_hashes(
             )));
         }
         if metadata.is_dir() {
-            walk_hashes(root, &path, exclude_manifest, output, entries, total)?;
+            walk_hashes(
+                root,
+                &path,
+                exclude_manifest,
+                output,
+                entries,
+                total,
+                depth + 1,
+            )?;
             continue;
         }
         if !metadata.is_file() {
