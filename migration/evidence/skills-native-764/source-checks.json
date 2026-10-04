@@ -8,14 +8,224 @@
   "frozen_go_maps_verified": 1217,
   "changed_rust_files_below_400": [
     {
+      "path": "rust/symbrain-cli/src/skills_cli.rs",
+      "lines": 84,
+      "sha256": "9b89bf958283007ac687ca83570f450d1b52c50c58bd4a8d19a10f3fc5f9ec93"
+    },
+    {
+      "path": "rust/symbrain-cli/src/skills_cli_flags.rs",
+      "lines": 257,
+      "sha256": "9dcbc2ecde6f5808d48a8dcb7cc424d8f912d0c777d682ad08e05388a4aa2861"
+    },
+    {
+      "path": "rust/symbrain-cli/src/skills_cli_list.rs",
+      "lines": 122,
+      "sha256": "fe99eccb81146989ccb8889ec43750977c5cfa0acfdfcc6ca73858dd02b239c9"
+    },
+    {
+      "path": "rust/symbrain-cli/src/skills_cli_misc.rs",
+      "lines": 245,
+      "sha256": "2feb1dd12ef8ebe6152160de18025eb6c0babe9241ed41cb87b736bff82c27d3"
+    },
+    {
+      "path": "rust/symbrain-cli/src/skills_cli_status.rs",
+      "lines": 219,
+      "sha256": "5a48a4b3a94461cda697d2452121384f402645216ae14fced40f9d59133ccb2e"
+    },
+    {
+      "path": "rust/symbrain-cli/tests/skills_doctor_native.rs",
+      "lines": 146,
+      "sha256": "7e5d901f8d3350cb18c46ac0ec6120f2cca98894d7c42ccbf5044c6afbddb372"
+    },
+    {
+      "path": "rust/symbrain-cli/tests/skills_list_native.rs",
+      "lines": 294,
+      "sha256": "81645c0197d63b376e06cb3d210b57e98743af8a0a254893424dc89fd8800945"
+    },
+    {
+      "path": "rust/symbrain-cli/tests/skills_log_native.rs",
+      "lines": 276,
+      "sha256": "2e7dea8571015c4c705bc526b4ac21df448659bbd8d78580f267010cbbe19d5a"
+    },
+    {
+      "path": "rust/symbrain-cli/tests/skills_status_opencode_tests.rs",
+      "lines": 348,
+      "sha256": "a4fb5968969997a0e09972887f72bd8ee2b6de5d5ebac28862e62a2ec3053696"
+    },
+    {
+      "path": "rust/symbrain-cli/tests/skills_targets_native.rs",
+      "lines": 243,
+      "sha256": "9acbdc6258b9d2def9f10bc30fe353b5235d767b64a99d6d3b78e31165cbf294"
+    },
+    {
+      "path": "rust/symbrain-cli/tests/support/skills_status_remaining.rs",
+      "lines": 57,
+      "sha256": "4c54f69dab4e8a8841bbd9931b169af3b2603cdf2c1a739112da7d7eb542b705"
+    },
+    {
+      "path": "rust/symbrain-gateway/src/dispatch.rs",
+      "lines": 251,
+      "sha256": "715a8b91a3bbb5257755164cc8552c093e72b3eab72e670cb29b97c120e2a2de"
+    },
+    {
+      "path": "rust/symbrain-gateway/src/embedded.rs",
+      "lines": 51,
+      "sha256": "5fd52a6bc09f8c9235d0e7f3a5f930a44ab09f9a7de310666a419ae34d6feab3"
+    },
+    {
+      "path": "rust/symbrain-gateway/src/embedded/catalog.rs",
+      "lines": 158,
+      "sha256": "219912f7714cb7258a66af9b24d6ca140ed71d6f02cdadc83f891c6e44eb4bf6"
+    },
+    {
+      "path": "rust/symbrain-gateway/src/embedded/skills.rs",
+      "lines": 135,
+      "sha256": "34f00aec5032bcbb55f01975271ffba3a27f00ffc41155ee715d347691c74788"
+    },
+    {
+      "path": "rust/symbrain-gateway/src/embedded/skills_args.rs",
+      "lines": 206,
+      "sha256": "2362740484c68d50951faa52865071142afee7837bf148beea1420760c44ad1c"
+    },
+    {
+      "path": "rust/symbrain-gateway/src/embedded/skills_catalog.rs",
+      "lines": 99,
+      "sha256": "3a4a23d4aa3e8dea445f842fcf9e8417758e5aeac2721e05b3d4928210eed9be"
+    },
+    {
+      "path": "rust/symbrain-gateway/src/embedded/skills_library.rs",
+      "lines": 95,
+      "sha256": "5ead6c8108bf337a432ea9fe22f179bba15b4b269a75a8d5791fb03800ece98c"
+    },
+    {
+      "path": "rust/symbrain-gateway/src/embedded/skills_render.rs",
+      "lines": 264,
+      "sha256": "f8d42e3402d20cce36ca74be4601db14c7cdc97e6b4b732dcc7932c4e9a47095"
+    },
+    {
+      "path": "rust/symbrain-gateway/src/embedded/skills_target_tests.rs",
+      "lines": 90,
+      "sha256": "66babefbdd5f6e2cc6aa30801c83c39a26ea7a6cd21661e7a5c965101eb5f43d"
+    },
+    {
+      "path": "rust/symbrain-gateway/src/embedded/skills_versioning.rs",
+      "lines": 216,
+      "sha256": "d3adf44a5ed284e1fb3aaa9b8bbb8621d23921c1d45c0746ed9491d91e9b1870"
+    },
+    {
+      "path": "rust/symbrain-skills/src/binary.rs",
+      "lines": 106,
+      "sha256": "ff6904ccd272f4ecba926b9ec94f94e7e89ac7b0c81617268fdaf88920380e52"
+    },
+    {
+      "path": "rust/symbrain-skills/src/binary/godebug.rs",
+      "lines": 297,
+      "sha256": "51bea6deeb77095424e405a812553c03644d9055c60f447fd15e31bb1552dd39"
+    },
+    {
+      "path": "rust/symbrain-skills/src/binary/path.rs",
+      "lines": 294,
+      "sha256": "7ca26682080677affc51f4e0afb9f2f6046f19322f00abaf3c6af5ff94af8d9c"
+    },
+    {
+      "path": "rust/symbrain-skills/src/binary/windows.rs",
+      "lines": 200,
+      "sha256": "8021874f66032ad18c90f688a7f4b83e164e5fcbeb2490da339cb52c55003c15"
+    },
+    {
+      "path": "rust/symbrain-skills/src/binary/windows_lower.rs",
+      "lines": 237,
+      "sha256": "b87aa1b9b8f44a049c0765a7675a31b3ec944aeb1cba71467488e8ada74b53c7"
+    },
+    {
+      "path": "rust/symbrain-skills/src/config.rs",
+      "lines": 183,
+      "sha256": "76202ae0e30e2e09430c118b61b26db6c48b3ddbc6e3b49427dc82bb8bb78d6d"
+    },
+    {
+      "path": "rust/symbrain-skills/src/context_profile.rs",
+      "lines": 294,
+      "sha256": "0634ba304295f229df2e76dd66c8b6a356a09ea7457c7e630f3f361b8bb7f756"
+    },
+    {
+      "path": "rust/symbrain-skills/src/discover.rs",
+      "lines": 180,
+      "sha256": "c05152217cb1c288d897bc00bd2aea4ba48b2d6a1a764095b4539289bb87f845"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/core.rs",
+      "lines": 218,
+      "sha256": "d103c299431a344dccd928f3095b3d00eb0fad0e8a17bf1d8e11d1083263b4b6"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/destination.rs",
+      "lines": 229,
+      "sha256": "c2bfb87e36f3427ef353b68078cdcde8de29ff8b4bff421fe12e62b521700c1e"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/event.rs",
+      "lines": 302,
+      "sha256": "ccc4d7fc98ea2864cd373f3b571183bb55e9f1d1cc8e254469943612a9869fdf"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/event_decode.rs",
+      "lines": 58,
+      "sha256": "437b0adf5c5b82da2353ca47c40c67aab9b40dc383a760a8e133adfd9e7a81e7"
+    },
+    {
       "path": "rust/symbrain-skills/src/install/marker_json.rs",
       "lines": 231,
       "sha256": "5c1b31e26336cb85b2434da9d75e3a5211448a7bf3bd3790a7e486fd984be2bf"
     },
     {
+      "path": "rust/symbrain-skills/src/install/marker_observation.rs",
+      "lines": 175,
+      "sha256": "1f67de72820c3d7c457da932bff500a5c69acab7e88d27ce0e0d21dc00f22482"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/marker_string.rs",
+      "lines": 83,
+      "sha256": "9fd1e62a34d2c189d5e2f58545813acbff073b8da9f9e916ff5721e5255a4fde"
+    },
+    {
       "path": "rust/symbrain-skills/src/install/mod.rs",
       "lines": 46,
       "sha256": "ac4758c2419ff92d57e40bd4afe7ca6c81475f9144032513c2de456a89a81bdf"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/ops.rs",
+      "lines": 341,
+      "sha256": "b03e2bb7a422203b07bbe879cc729925c4d090fe2ab6728f3c78dcfeeb89439e"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/ops_symlink.rs",
+      "lines": 71,
+      "sha256": "d4fe488db7458986c03f8459ee13cfe9c8d636e377b2ed3b38c4dfc7ab4d5dcb"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/status.rs",
+      "lines": 332,
+      "sha256": "0878614ff2203bf67f69e0caa99fc267ec4908164cf106cc15028bca8d4c838a"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/status_compare.rs",
+      "lines": 236,
+      "sha256": "e350e3a41ae9615afc98399d82e60b526a27763685bfe0e12814747b9c57ac68"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/sync.rs",
+      "lines": 338,
+      "sha256": "a79cce3a2d07a42aecbed390b1f6699002c0d9d4091f29436238d0c26544b484"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/sync_tests.rs",
+      "lines": 76,
+      "sha256": "2a96a9936c7afaa346d0db57a6a352f28fbda350391a61220f84097a5e1810ba"
+    },
+    {
+      "path": "rust/symbrain-skills/src/lib.rs",
+      "lines": 40,
+      "sha256": "9015b5f9a6c76d9d880d6981f1dbeace0d611451353af34c2419a3a446cc1bf2"
     },
     {
       "path": "rust/symbrain-skills/src/metadata.rs",
@@ -26,6 +236,51 @@
       "path": "rust/symbrain-skills/src/metadata_marker_tests.rs",
       "lines": 17,
       "sha256": "1cb7730855a8ed2a4962457bb923bd3f4506f0d60d97763f59b9954d77db8c84"
+    },
+    {
+      "path": "rust/symbrain-skills/src/metadata_times.rs",
+      "lines": 158,
+      "sha256": "c5ca71d8190daaa5ad2dd40911a5fc5a0fd90e87fc6c693419b5592a854aa073"
+    },
+    {
+      "path": "rust/symbrain-skills/src/runner.rs",
+      "lines": 386,
+      "sha256": "6747f7687eba97151ef82eeb88c7a850e1459b96a5f8e5f6ffb35d58ac0c8e14"
+    },
+    {
+      "path": "rust/symbrain-skills/src/runner_support.rs",
+      "lines": 118,
+      "sha256": "c088f7fc5523c6d845ea7355fd99ff8a7bae66f688880d0cc6d95ce43f3e2c04"
+    },
+    {
+      "path": "rust/symbrain-skills/src/targets_status.rs",
+      "lines": 308,
+      "sha256": "1ab10a6bc8602447dc7fce4acf59845ffa82a1ba1c2ac7c7c6725aea094389d4"
+    },
+    {
+      "path": "rust/symbrain-skills/src/vcs.rs",
+      "lines": 259,
+      "sha256": "fb0d901843edfbe9edbbcad923bf9d1c228d58997ed3f5496a5db6a4bfe0b5f9"
+    },
+    {
+      "path": "rust/symbrain-skills/src/vcs_restore.rs",
+      "lines": 178,
+      "sha256": "c9090b437dccd9c1a4252510c01836eb2867d5f16ebe71541d9b9bbb648f88d1"
+    },
+    {
+      "path": "rust/symbrain-skills/src/wire.rs",
+      "lines": 79,
+      "sha256": "7e7570de7abb67ff07d65bc3965b72b99cfaf14e6b60c82eaf0d6233dc8e2d58"
+    },
+    {
+      "path": "rust/symbrain-skills/tests/context_profiles.rs",
+      "lines": 68,
+      "sha256": "9cc340235d8c157c14074fc773d26a1f113658884f8a42f71024c7204b788cca"
+    },
+    {
+      "path": "rust/symbrain-skills/tests/metadata_precision.rs",
+      "lines": 78,
+      "sha256": "217763f2c87f02814b4e93549ced117227a655e60c4ce8a0502e9fd73dd5cd73"
     }
   ],
   "python_ast": [
@@ -72,5 +327,6 @@
     "mcp_config": 21
   },
   "prepared_total": 567,
-  "strict_type_clippy_tests_native_runtime": "not executed; required after allocation"
+  "strict_type_clippy_tests_native_runtime": "not executed; required after allocation",
+  "source_checkpoint": "aebb98b11316c8006b6284bf5f53650411dfca63"
 }
