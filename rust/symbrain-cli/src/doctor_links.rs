@@ -126,7 +126,7 @@ fn probe_handshake(
             result.hidden = report.hidden.len();
             result.unknown = report.unknown.len();
         }
-        Err(error) => result.error = format!("policy: {error}"),
+        Err(error) => result.error = format!("policy: {error}").into(),
     }
     result
 }

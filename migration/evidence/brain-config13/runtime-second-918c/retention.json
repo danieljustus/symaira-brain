@@ -1,0 +1,82 @@
+{
+  "source_head": "918cababa2923c1aae281a5dee3978ca48847ba2",
+  "build_exit": 101,
+  "error": "E0308 Doctor policy String assigned to GoText; proven unused install std::fs",
+  "all_actual_paths": 842,
+  "unique_payloads": 782,
+  "roundtrips": true,
+  "users_before_fix": [],
+  "archive_receipt_sha256": "c90f7fbf9c870b3289fc8c66898a9224bc22abd802575e560693ca2c2e6121d5",
+  "records": [
+    {
+      "original": "/tmp/symaira-brain765-runtime-918c-second/build.stdout",
+      "retained": "migration/evidence/brain-config13/runtime-second-918c/build.stdout.gz",
+      "sha256": "3dbe6e13df29c72af1d949e321f5d739bc0c3741f7a23132379c33da4e5a9034",
+      "bytes": 190352,
+      "gzip_sha256": "09cd7b8757b87f5b73da09b4cbc811539a595f3084c8d366a951963a298874bb"
+    },
+    {
+      "original": "/tmp/symaira-brain765-runtime-918c-second/build.stderr",
+      "retained": "migration/evidence/brain-config13/runtime-second-918c/build.stderr.gz",
+      "sha256": "b21cc16361443c6514942cbcace6c087106f3fdfe199c129ef825218c7e804ae",
+      "bytes": 2897,
+      "gzip_sha256": "360b5331d1ae420fa3aeb2e11d2123d50b9c7af4dae92e52a6367af05d13f081"
+    },
+    {
+      "original": "/tmp/symaira-brain765-runtime-918c-second/source.json",
+      "retained": "migration/evidence/brain-config13/runtime-second-918c/source.json.gz",
+      "sha256": "d3f6f68bd8621ae976cfc7ba07d17a56b860c7d67fe0ba1da5bb3205be1f06ff",
+      "bytes": 89849,
+      "gzip_sha256": "94248d98fe816ae8555fcc3ff7dbdbaa7ebdd820dc14c319f413d268a1ef4c77"
+    },
+    {
+      "original": "/tmp/symaira-brain765-runtime-918c-second/stages.started",
+      "retained": "migration/evidence/brain-config13/runtime-second-918c/stages.started.gz",
+      "sha256": "f10ec3ffef16a8dace9b58801e0da28819c98af4c8933410d7e7cacc952f9e9b",
+      "bytes": 6,
+      "gzip_sha256": "c52aae11396e8e3088b9c999b0289fde7a01980d9f5d3ac87ba4e899e2dea2f8"
+    },
+    {
+      "original": "/tmp/symaira-brain765-runtime-918c-second/stages.exit",
+      "retained": "migration/evidence/brain-config13/runtime-second-918c/stages.exit.gz",
+      "sha256": "20122f63361dbab1c4adfa49bce33ca34b27e5d3e510b3270746960792e9a77d",
+      "bytes": 10,
+      "gzip_sha256": "1d02a3d1781fdea0b44c0a4a72ecdbc8d1cefd4b4f2ea358ba4f1930d3dbdc46"
+    },
+    {
+      "original": "/tmp/symaira-brain765-runtime-918c-second/failed-actual-binaries/receipt.json",
+      "retained": "migration/evidence/brain-config13/runtime-second-918c/receipt.json.gz",
+      "sha256": "c90f7fbf9c870b3289fc8c66898a9224bc22abd802575e560693ca2c2e6121d5",
+      "bytes": 495731,
+      "gzip_sha256": "38619664e491119c375350fdfb103023ffad4ffd1bb9b547538276041d82174c"
+    },
+    {
+      "original": "/tmp/symaira-brain765-runtime-918c-driver.log",
+      "retained": "migration/evidence/brain-config13/runtime-second-918c/symaira-brain765-runtime-918c-driver.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/symaira-brain765-runtime/rust/symbrain-cli/src/doctor_links.rs",
+      "retained": "migration/evidence/brain-config13/runtime-second-918c/doctor_links.rs.gz",
+      "sha256": "a71191c2d4deac0236148454917d7237bdd2dfd35429638da5808e0196f30283",
+      "bytes": 13233,
+      "gzip_sha256": "d6ca428fb1da74680d8e9af914955890cf6e82792b44ab5638741e2f6fa2dca5"
+    },
+    {
+      "original": "/workspace/symaira-brain765-runtime/rust/symbrain-cli/src/install_cli.rs",
+      "retained": "migration/evidence/brain-config13/runtime-second-918c/install_cli.rs.gz",
+      "sha256": "74ba0f3868d52ad339b2c9e91cb52e54f2fb527b5f47f0cc8a1f1ceaf6a876b0",
+      "bytes": 21608,
+      "gzip_sha256": "209170ecabba40c7413dac46d7699700387a03dbad1f7c198be99396c5427725"
+    },
+    {
+      "original": "/workspace/symaira-brain765-runtime/migration/evidence/brain-config13/runtime-source-updates.json",
+      "retained": "migration/evidence/brain-config13/runtime-second-918c/runtime-source-updates.json.gz",
+      "sha256": "25df98804112f361c5a0e8cbf2179c5f0b8244555b51888a334c0d91a5a5e6b5",
+      "bytes": 504,
+      "gzip_sha256": "8855017494f5a1eedf7606a6dae2dc2b92b965580fdc73c18bef5528fb65cac6"
+    }
+  ]
+}

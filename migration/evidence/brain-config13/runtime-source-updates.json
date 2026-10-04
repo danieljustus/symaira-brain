@@ -5,6 +5,18 @@
       "original_sha256": "c5b9cd0aab91ce35ec04a145f9a3b20318e334b5ead449e9fc66f9eef6f83f7d",
       "current_sha256": "1af3803873a3499a9fdc98ad095f5c8e59e0aad8fc0a0c514ecb0f87f4a4cd8d",
       "reason": "actual E0283 compile error: explicitly annotate existing UTF8 error closure GoText return; diagnostic bytes and admission criteria unchanged"
+    },
+    "rust/symbrain-cli/src/doctor_links.rs": {
+      "original_sha256": "a71191c2d4deac0236148454917d7237bdd2dfd35429638da5808e0196f30283",
+      "current_sha256": "20c93326c4887225a6559e30cec4d3d110bc3c84cdae2b8778e93c86b1d850e7",
+      "reason": "actual E0308 policy error String assigned to GoText; add existing intended .into with identical diagnostic text",
+      "failed_immutable_head": "918cababa2923c1aae281a5dee3978ca48847ba2"
+    },
+    "rust/symbrain-cli/src/install_cli.rs": {
+      "original_sha256": "74ba0f3868d52ad339b2c9e91cb52e54f2fb527b5f47f0cc8a1f1ceaf6a876b0",
+      "current_sha256": "c05d844635b79ed652515c653da3cd4d37b72c6a764054cd96e10148396fa023",
+      "reason": "actual compiler warning unused std::fs; remove import only",
+      "failed_immutable_head": "918cababa2923c1aae281a5dee3978ca48847ba2"
     }
   }
 }

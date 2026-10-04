@@ -65,3 +65,12 @@ Annotate only that closure's existing intended GoText return type. Its bytes,
 parser order and error/admission rules are unchanged. Keep the original570
 source map intact and record this one explicit old/new source hash in a separate
 runtime-source-updates ledger. No test or consumer gate ran in the failed build.
+
+The next actual918c full build passes that Core error and reaches the CLI,
+then exits101 with E0308 assigning policy String text to the typed Doctor
+GoText field; it also reports an unused install std::fs import. Preserve this
+complete second source/build/artifact attempt before adding the same existing
+String-to-GoText conversion used by adjacent Doctor branches and removing only
+the proven unused import. No policy diagnostic text, criteria or corpus changes.
+The exact second ELF/rlib counts and all raw source/streams are in its retained
+runtime-second-918c receipt, including zero target users before this correction.
