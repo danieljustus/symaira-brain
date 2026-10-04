@@ -86,3 +86,10 @@ operation must leave complete application state unchanged.
 The DOM adapter explicitly supplies the same-origin write Origin that jsdom's
 Node fetch does not synthesize. It remains actual DOM/JS plus modeled browser
 transport headers, not graphical-browser networking, rendering or CSP proof.
+
+No-write receipts retain the complete before/after SQLite table columns, rows
+and blob bytes, including sync/association and FTS shadow tables. Journal/header
+bytes are outside the application-state contract. Earlier sourceD1 receipts
+verified six named domain tables only; they remain historical and are not
+relabeled complete-state proof. The additive final replay strengthens this
+inspection without changing production or earlier outcomes.

@@ -91,8 +91,17 @@ class Peer:
         return dict(exit=self.process.returncode,elapsed_seconds=time.monotonic()-start,listener_closed=True)
 
 def snapshot(path):
+    # Every table/column/blob, including sync/association/FTS state, stays
+    # observable. WITHOUT ROWID shadow tables need content ordering, not rowid.
     with sqlite3.connect(path) as conn:
-        return {name:[list(row) for row in conn.execute('SELECT * FROM "'+name+'" ORDER BY rowid')] for (name,) in conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name IN ('memories','rules','entities','profiles','audit_log','jwt_revocations')")}
+        state={}
+        names=[name for (name,) in conn.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
+        for name in names:
+            cursor=conn.execute('SELECT * FROM "'+name.replace('"','""')+'"')
+            columns=[field[0] for field in cursor.description]
+            rows=[[{'blob_hex':value.hex()} if isinstance(value,bytes) else value for value in row] for row in cursor]
+            state[name]=dict(columns=columns,rows=sorted(rows,key=lambda row:json.dumps(row,sort_keys=True)))
+        return state
 
 def seed(root, env):
     database=root/'seed.db'

@@ -129,12 +129,12 @@ def run(args):
         admin={'Authorization':'Bearer '+token('administrator')}
         for name,path,method,body in [('sync-unported','/api/sync/changes','GET',None),('policy-unported','/api/list?client_id=other','GET',None),('pii-unported','/api/set','POST',{'content':'alice@example.invalid'}),('working-unported','/api/set','POST',{'content':'Blue fox','working':True})]:
             time.sleep(.61);before=snapshot(peers[1].database);row=peers[1].request(name,path,method,body,admin);after=snapshot(peers[1].database)
-            limits.append(dict(id=name,actual_native=row,state_unchanged=before==after));assert row['status']==501 and before==after,(name,row)
+            limits.append(dict(id=name,actual_native=row,state_before=before,state_after=after,state_unchanged=before==after));assert row['status']==501 and before==after,(name,row)
         with sqlite3.connect(peers[1].database) as conn:
             conn.execute("UPDATE memories SET content='alice@example.invalid' WHERE id='owned-seed'")
         for name,path,method,body in [('unsafe-list','/api/list','GET',None),('unsafe-get','/api/get?id=owned-seed','GET',None),('unsafe-search','/api/search','POST',{'query':'Blue fox sample'})]:
             time.sleep(.61);before=snapshot(peers[1].database);row=peers[1].request(name,path,method,body,admin);after=snapshot(peers[1].database)
-            limits.append(dict(id=name,actual_native=row,state_unchanged=before==after));assert row['status']==501 and before==after,(name,row)
+            limits.append(dict(id=name,actual_native=row,state_before=before,state_after=after,state_unchanged=before==after));assert row['status']==501 and before==after,(name,row)
     finally:
         for peer in peers:shutdown.append(peer.close())
         embedding.close();receipt['embedding_requests']=embedding.requests

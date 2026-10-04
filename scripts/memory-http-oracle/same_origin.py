@@ -27,7 +27,7 @@ def run(args):
                 h['Origin']=origin(authority,peer) if origin else 'http://'+authority
                 if host:h['Host']=host(authority,peer)
                 row=peer.request(name,path,method,body,h);after=snapshot(peer.database)
-                pair.append(dict(actual=row,state_unchanged=before==after))
+                pair.append(dict(actual=row,state_before=before,state_after=after,state_unchanged=before==after))
             records.append(dict(id=name,go=pair[0],native=pair[1],desired_divergence=go_status!=native_status))
             assert pair[0]['actual']['status']==go_status and pair[1]['actual']['status']==native_status,records[-1]
             assert pair[0]['state_unchanged'],records[-1]
