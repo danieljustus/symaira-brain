@@ -1,9 +1,9 @@
 {
   "source": "114f63fb0d5b1b4b9ea97b03d2ca5d2a7f630f27",
   "archive": "migration/evidence/skills-native-764/json-depth-float-preparation/full-source-preparation.tar.gz",
-  "archive_bytes": 1994074,
-  "archive_sha256": "82f1493f07f1f80d906dfb64e04b3ef6d180723c0c4296286e4fee591512bccd",
-  "payload_sha256": "800ea56c27438df13affd7586064c23dfef207aa33984861774138610d598843",
+  "archive_bytes": 1994853,
+  "archive_sha256": "26e9ac7a96778327061d7d742dfac5d2d484bc5009dc1cd390e5750168ccc0cb",
+  "payload_sha256": "802dda5d484d9b62d349d6aef08bd122e644477eb9f5d9fe54493b677f452f47",
   "full_roundtrip": true,
   "members": [
     {
@@ -601,6 +601,17 @@
       "atime_ns": 1791125846740128602
     },
     {
+      "original": "/workspace/review-proof/skills764-json-corrections-preparation/initial-83-package-retention.json",
+      "member": "initial-83-package-retention.json",
+      "bytes": 539,
+      "sha256": "d76d859aec4e7f142a133367a6dd16ec6a2fd3f7b8c77e8b764226d486bd0de8",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125898562827925,
+      "atime_ns": 1791125924778538494
+    },
+    {
       "original": "/workspace/review-proof/skills764-json-corrections-preparation/initial-format-projection.py",
       "member": "initial-format-projection.py",
       "bytes": 279,
@@ -700,37 +711,48 @@
       "atime_ns": 1791125846748128849
     },
     {
-      "original": "/workspace/review-proof/skills764-json-corrections-preparation/package.py",
-      "member": "package.py",
+      "original": "/workspace/review-proof/skills764-json-corrections-preparation/package-initial83.py",
+      "member": "package-initial83.py",
       "bytes": 2955,
       "sha256": "828a1d5c243d85df67fc3b2da8b03336325a34dd9dfef50e8ccfbb0c4f6ad92a",
       "mode": 33152,
       "uid": 1000,
       "gid": 1000,
-      "mtime_ns": 1791125846632491364,
-      "atime_ns": 1791125846636125387
+      "mtime_ns": 1791125898562943179,
+      "atime_ns": 1791125924786538740
     },
     {
-      "original": "/workspace/review-proof/skills764-json-corrections-preparation/package.stderr",
-      "member": "package.stderr",
-      "bytes": 0,
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original": "/workspace/review-proof/skills764-json-corrections-preparation/package-replay-existing-dir.py",
+      "member": "package-replay-existing-dir.py",
+      "bytes": 3076,
+      "sha256": "a5262adbf944388af49c257563550026aabfa5acedbf36270d5ff7faeb7bc62a",
       "mode": 33152,
       "uid": 1000,
       "gid": 1000,
-      "mtime_ns": 1791125846632491364,
-      "atime_ns": 1791125846748128849
+      "mtime_ns": 1791125924616903357,
+      "atime_ns": 1791125924786538740
     },
     {
-      "original": "/workspace/review-proof/skills764-json-corrections-preparation/package.stdout",
-      "member": "package.stdout",
-      "bytes": 0,
-      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original": "/workspace/review-proof/skills764-json-corrections-preparation/package-replay-existing-dir.stderr",
+      "member": "package-replay-existing-dir.stderr",
+      "bytes": 663,
+      "sha256": "362cf79b96d4b8380de63f4826dc46c476d49e617fb53ee02f5e959621c72baf",
       "mode": 33152,
       "uid": 1000,
       "gid": 1000,
-      "mtime_ns": 1791125846632491364,
-      "atime_ns": 1791125846748128849
+      "mtime_ns": 1791125924618632450,
+      "atime_ns": 1791125924786538740
+    },
+    {
+      "original": "/workspace/review-proof/skills764-json-corrections-preparation/package.py",
+      "member": "package.py",
+      "bytes": 3090,
+      "sha256": "56322ef290e5805042b190a2b7c32200563d6ff4688fa0edb91e605849a860e1",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125924664384343,
+      "atime_ns": 1791125924670535173
     },
     {
       "original": "/workspace/review-proof/skills764-json-corrections-preparation/prepare_cases.py",
