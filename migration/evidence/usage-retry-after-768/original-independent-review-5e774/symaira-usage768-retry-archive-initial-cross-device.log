@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/symaira-usage768-retry-archive.py", line 42, in <module>
+    if not archive.exists():os.link(p,archive)
+                            ^^^^^^^^^^^^^^^^^^
+OSError: [Errno 18] Invalid cross-device link: '/tmp/symaira-usage768-next-independent-local.evidence/argv-candidate-clean.tar.gz' -> '/workspace/oracles/symaira-usage768-retry-original-review/package-sha256/3c681e522678c21d794ff10011734a2532b97a404c522c7a47e85413651498df.tar.gz'
