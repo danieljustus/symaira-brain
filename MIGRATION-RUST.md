@@ -35,6 +35,18 @@ dynamic configuration, governed writes and JSONL decoding remain open; no Go
 fallback route is removed, and #649 remains pending the shipped Rust release.
 The rationale is recorded in `docs/adr/758-native-memory-evidence.md`.
 
+The focused Store-open successor preserves the actual PR811 Windows BUSY
+failure and bounds only pre-migration WAL plain-BUSY retries to the remaining
+five-second budget. BEGIN IMMEDIATE, migration rollback and all 80 existing
+concurrent-open assertions stay unchanged. At combined source `4c62355`, 40
+Memory library tests and strict checks pass, including actual reserved-writer,
+reader and mixed-lock controls with a rejected compiled timeout-reset mutant.
+The original Windows failure's internal phase, independent review, full CLI
+gates and exact-head native three-OS verification remain pending; this does not
+complete historical repair or close #649/#758. See
+`docs/adr/memory-wal-open-race-803.md` and the preserved `memory-open-race-803`
+evidence.
+
 The follow-up #758 CLI increment splits the oversized memory module into focused
 behavior modules, ports raw Go flags/error grammar and all 86 typed memory
 configuration fields, uses configured Ollama query embeddings and corrects the

@@ -1,6 +1,6 @@
 # Bound WAL setup contention without replaying migrations
 
-Status: focused Linux author checks and mixed-lock control passed; independent/native3 pending.
+Status: 40 focused Linux author tests and strict checks passed; independent/native3 pending.
 Refs #649/#758 and PR803/PR811. Base: immutable PR803 `6ae73a7`.
 
 Windows job `111341331340` in run `37170162739` reports three worker failures
@@ -82,6 +82,17 @@ patch, commands and raw logs are archived. The production helper was restored
 byte-for-byte afterwards. This control checks the actual budget assignment
 without a scheduler-sensitive upper wall-clock assertion; the original
 reader/writer timeout and restored-connection controls remain intact.
+
+The final combined source `4c62355` normally integrates main `5e23270`.
+Rust/Cargo inputs are byte-identical to `d751daa`, whose new test uses checked
+Duration subtraction after the retained first Clippy diagnostic. On this clean
+combined source all 40 tests, strict all-target/all-feature Memory Clippy,
+formatting and actionlint passed. The mixed phase used 3994 ms after 196 early
+failures and ended at 5.003546279 seconds; the persistent writer performed 980
+early failures in 5.000072542 seconds. Complete original failures, successful
+runs, source maps, actual executable bytes and archive receipts remain retained
+under `migration/evidence/memory-open-race-803`. This is author validation of
+the focused Memory library, not the full CLI graph or native Windows runtime.
 
 This proposal does not assert that the Windows race is closed. If actual phase
 proof identifies BEGIN IMMEDIATE or migration/commit contention instead, retain
