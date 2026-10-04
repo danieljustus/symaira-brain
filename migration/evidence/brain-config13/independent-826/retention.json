@@ -1,0 +1,84 @@
+{
+  "source_publication": "826af02e04d80d6d52603ca51ed8491dfe9f7e6f",
+  "production_source": "04f1acf90b9142d9bf8edd47c715de10caf4f8ef",
+  "scope": "Full different-author static approval and10artifacts retained before author runtime prep; NOT runtime approval",
+  "records": [
+    {
+      "original": "/tmp/symaira-brain765-corrections-independent-provenance.py",
+      "retained": "migration/evidence/brain-config13/independent-826/symaira-brain765-corrections-independent-provenance.py.gz",
+      "bytes": 5243,
+      "sha256": "b927a4ba926dc0de891bf782e4e1179ba3c0086af5fcfa9d6b769c3eb6e3da78",
+      "gzip_sha256": "cc7d1da269a297814ededf1ddce536f1dd5b85f0c28af4a3a7859e3bf300e35c"
+    },
+    {
+      "original": "/tmp/symaira-brain765-corrections-independent-provenance.json",
+      "retained": "migration/evidence/brain-config13/independent-826/symaira-brain765-corrections-independent-provenance.json.gz",
+      "bytes": 264577,
+      "sha256": "8e2a8c09bd3627be3cf86f5b85f498cb02a1f82ded5b2c72795491505888e850",
+      "gzip_sha256": "22d3d3454ae2140a6d9f801817f3c4719030660fda63b2a1ee4f8944c4308292"
+    },
+    {
+      "original": "/tmp/symaira-brain765-corrections-independent-provenance.log",
+      "retained": "migration/evidence/brain-config13/independent-826/symaira-brain765-corrections-independent-provenance.log.gz",
+      "bytes": 291,
+      "sha256": "9f99b815e2729f2e3906517c4596a8940fb2b6a081cf88f4419a89da2f4569a1",
+      "gzip_sha256": "93d92bbb4fe4b5ccfb371f9e56cb1fac41321799611a96f704a235c5a26f066f"
+    },
+    {
+      "original": "/tmp/symaira-brain765-corrections-independent-projections.py",
+      "retained": "migration/evidence/brain-config13/independent-826/symaira-brain765-corrections-independent-projections.py.gz",
+      "bytes": 5449,
+      "sha256": "3268b0b94a9615e8117e105f162554295f83b6af37aad5c010606d805b057819",
+      "gzip_sha256": "58405bd072a4d24cae51718c7649a24e17ee50a52b076abfd058f1d4cec25916"
+    },
+    {
+      "original": "/tmp/symaira-brain765-corrections-independent-projections.json",
+      "retained": "migration/evidence/brain-config13/independent-826/symaira-brain765-corrections-independent-projections.json.gz",
+      "bytes": 50222,
+      "sha256": "d67b682ed1fbdd36f402b59a0dc270b788892adf3fbbe6f3a772d83f25195b13",
+      "gzip_sha256": "12470842403ee253a752342ad8737e531c4ea42d445d9ca540596270fa9ea1de"
+    },
+    {
+      "original": "/tmp/symaira-brain765-corrections-independent-projections.log",
+      "retained": "migration/evidence/brain-config13/independent-826/symaira-brain765-corrections-independent-projections.log.gz",
+      "bytes": 146,
+      "sha256": "7fc92f4b0ce59ec4a020ea8dd25a3b3ba8bd243c4aeaa92a53da9a453b405da7",
+      "gzip_sha256": "c89e2360d0143e24b664d285c14ad1a7f0108922eb20d2db0f5a55d2cc16abff"
+    },
+    {
+      "original": "/tmp/symaira-brain765-corrections-independent-types.json",
+      "retained": "migration/evidence/brain-config13/independent-826/symaira-brain765-corrections-independent-types.json.gz",
+      "bytes": 636,
+      "sha256": "a2f41883f412fb064267031efd409e47d5298214f0f39d03a262a782cd403e1f",
+      "gzip_sha256": "1d567d3b601579715332d0204a3a8ac848d7f5aee8a624a18a3201c38a315389"
+    },
+    {
+      "original": "/tmp/symaira-brain765-corrections-independent-rustfmt.log",
+      "retained": "migration/evidence/brain-config13/independent-826/symaira-brain765-corrections-independent-rustfmt.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-brain765-corrections-independent-static-checks.json",
+      "retained": "migration/evidence/brain-config13/independent-826/symaira-brain765-corrections-independent-static-checks.json.gz",
+      "bytes": 267,
+      "sha256": "2be163819a7e0c5632c3a2486ee28228fb5a3ddd38d96dbe4ae7491ab1215359",
+      "gzip_sha256": "190de86ce8703f0b40e7dc6dbb3b66d80e3d86953e11b26e01ecb320f47d8b40"
+    },
+    {
+      "original": "/tmp/symaira-brain765-corrections-independent-review.md",
+      "retained": "migration/evidence/brain-config13/independent-826/symaira-brain765-corrections-independent-review.md.gz",
+      "bytes": 11649,
+      "sha256": "9f2f71d1613d6e54c6d5120df2c1d4c35ec88fac73b9431472544619e03f1f71",
+      "gzip_sha256": "40f50ac6e78e0eb739d132b30f447cbc5cb08ad1f18f0569bd08005c37e12ba2"
+    },
+    {
+      "original": "/tmp/symaira-brain765-corrections-independent-review-receipt.json",
+      "retained": "migration/evidence/brain-config13/independent-826/symaira-brain765-corrections-independent-review-receipt.json.gz",
+      "bytes": 3170,
+      "sha256": "f0e6edf940098d95e6772c86967ad609b27f5bc337176fe46e8882c106ebfc72",
+      "gzip_sha256": "27d9b0cfa551348b92df4b9bc6699fe5274992b6f2b6bd6f60ae73a4dd13d4c9"
+    }
+  ]
+}
