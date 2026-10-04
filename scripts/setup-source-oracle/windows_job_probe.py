@@ -90,11 +90,6 @@ def main():
                             result=system(mode + "-finally-taskkill", "taskkill.exe", ["/PID", str(child.pid), "/T", "/F"])))
                         child.wait(timeout=5)
             observation.update(ended=time.time(), status="returned")
-            phases = [json.loads(line) for line in (root / "phases.jsonl").read_bytes().splitlines()]
-            observation["phases"] = phases
-            observation["streams"] = {str(path.relative_to(root)):dict(bytes=len(raw), sha256=hashlib.sha256(raw).hexdigest(),
-                                          raw_base64=encoded(raw)) for path in root.iterdir() if path.is_file()
-                                      for raw in [path.read_bytes()]}
             descendants = root / "descendant.pid"
             observation["descendant_checks"] = []
             if descendants.exists():
@@ -112,6 +107,11 @@ def main():
                 pid = observation["descendant"]["pid"]
                 observation["forced_cleanup"].append(dict(pid=pid,
                     result=system(mode + "-descendant-taskkill", "taskkill.exe", ["/PID", str(pid), "/T", "/F"])))
+            phases = [json.loads(line) for line in (root / "phases.jsonl").read_bytes().splitlines()]
+            observation["phases"] = phases
+            observation["streams"] = {str(path.relative_to(root)):dict(bytes=len(raw), sha256=hashlib.sha256(raw).hexdigest(),
+                                          raw_base64=encoded(raw)) for path in root.iterdir() if path.is_file()
+                                      for raw in [path.read_bytes()]}
             observed = {row["phase"] for row in phases}
             if mode == "historical":
                 matched = observation["timed_out"] and {"parent-exited", "post-exit-notifications-polled", "historical-drop-enter", "historical-kill-enter"} <= observed and "wrapper-drop-returned" not in observed

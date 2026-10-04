@@ -94,3 +94,40 @@ are retained in import-boundary-8359. The actual Windows journal now narrows
 the first explicit-browse-json timeout to after captured Go-version output and
 before the build invocation; polling versus cleanup still needs native phase
 evidence. Keep the25-second budget and execute the owned diagnostic watchdog.
+
+
+Current native Windows job111372954990 supplies the previously missing case and
+phase evidence. Its complete provider ZIP and CRLF log, decoded journal and
+all10 journal-bound sources are retained in `windows-job111372954990-original`.
+The actual merge head is d38421b; its recorded source hashes match8359c0b. The
+artifact records the actual Go639b9d and Rust58d0de executable hashes but does
+not contain those PE payloads; no executable-byte archive is claimed. The first
+`explicit-browse-json` Go invocation exits0. Rust exceeds the unchanged25-second
+watchdog, with empty CLI streams and no completed pair. Its invocation ledger
+contains Git rev-parse and Go version; a live private capture contains exactly
+36bytes of Go-version output. The staging directory is still empty and no
+Go-build invocation is recorded. This establishes a boundary after identity
+output and before build, without choosing between polling and cleanup.
+
+Activate the existing ignored native Windows owned experiment in CI after the
+unaltered Source gate, with `always()` so a Source failure preserves diagnostic
+evidence. Cargo JSON selects exactly the test artifact from its exact source
+path; the external watchdog invokes that absolute executable. Record entry and
+return results separately for historical kill/wait and comparison job termination
+and inner wait. Keep the historical APIs/order,16 post-exit polls, all original
+assertions,12-second watchdog and descendant test. Cleanup uses only the retained
+owned parent and recorded descendant PID, and refuses a different image. Read
+phase files after descendant cleanup so malformed diagnostic phases cannot by
+themselves abandon that descendant. Preserve raw files and Cargo attribution
+even on failure. The report distinguishes an expected diagnostic observation
+from production acceptance and proof of the original CLI cause; both latter
+claims remain false. No Rust/Go production code, process dependency, global
+signal behavior or Source budget changes. Actual Windows execution is still
+required, and any cleanup correction needs a subsequent independently reviewed
+production change informed by that evidence.
+
+Normally integrate independently approved74dd7ae's sibling-only journal import
+correction. Its complete retained Linux observations use the unchanged archived
+production executables, not a new Rust build or a Windows result. The independent
+review and isolated Python import/foreign-module control are retained separately
+in `import74dd-independent`; every replay function/class AST is unchanged.
