@@ -26,9 +26,16 @@ def main():
     evidence.mkdir(parents=True, exist_ok=False)
     data = dict(status="running", actual_windows=True, binary=str(binary),
                 binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),
-                observations=[], acceptance=False,
+                observations=[], acceptance=False, production_acceptance=False,
+                original_cli_timeout_cause_proved=False,
                 scope="Owned test-only historical JobObject polling/drop and bounded comparison. "
                 "This does not establish the phase or cause of the original CI timeout.")
+    source = Path(__file__).resolve().parents[2]
+    data["candidate_head"] = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=source, text=True).strip()
+    data["candidate_dirty"] = bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=source))
+    inputs = ["scripts/setup-source-oracle/windows_job_run.sh", "scripts/setup-source-oracle/windows_job_probe.py",
+              "rust/symbrain-cli/tests/source_job_notifications.rs", "rust/symbrain-cli/src/setup_source_process.rs", "Cargo.lock"]
+    data["candidate_source_sha256"] = {name:hashlib.sha256((source / name).read_bytes()).hexdigest() for name in inputs}
 
     def checkpoint():
         report.write_bytes((json.dumps(data, indent=2) + "\n").encode("utf-8"))
@@ -48,8 +55,11 @@ def main():
         result = system(label, "tasklist.exe", ["/FI", f"PID eq {pid}", "/FO", "CSV", "/NH"])
         rows = csv.reader(base64.b64decode(result["stdout_base64"]).decode(errors="replace").splitlines())
         result["pid"] = pid
-        result["active"] = any(len(row) > 1 and row[1] == str(pid) for row in rows)
+        matching = [row for row in rows if len(row) > 1 and row[1] == str(pid)]
+        result["active"] = bool(matching)
+        result["owned_image_name_matches"] = all(row[0].casefold() == binary.name.casefold() for row in matching)
         assert result["exit"] == 0, result
+        assert result["owned_image_name_matches"], "recorded descendant PID names an unrelated image; refuse cleanup"
         return result
 
     checkpoint()
@@ -104,7 +114,7 @@ def main():
                     result=system(mode + "-descendant-taskkill", "taskkill.exe", ["/PID", str(pid), "/T", "/F"])))
             observed = {row["phase"] for row in phases}
             if mode == "historical":
-                matched = observation["timed_out"] and {"parent-exited", "post-exit-notifications-polled", "historical-drop-enter"} <= observed and "wrapper-drop-returned" not in observed
+                matched = observation["timed_out"] and {"parent-exited", "post-exit-notifications-polled", "historical-drop-enter", "historical-kill-enter"} <= observed and "wrapper-drop-returned" not in observed
             else:
                 matched = not observation["timed_out"] and observation["exit"] == 0 and "inner-wait-returned" in observed and "wrapper-drop-returned" in observed and not observation["forced_cleanup"] and (not observation["descendant"] or not observation["descendant"]["active"])
             observation["intended_observation_matched"] = matched

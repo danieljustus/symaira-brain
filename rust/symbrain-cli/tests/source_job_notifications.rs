@@ -20,6 +20,23 @@ fn event(root: &Path, phase: &str, pid: u32) {
     println!("owned phase={phase} pid={pid}");
 }
 
+fn event_result<T>(root: &Path, phase: &str, pid: u32, result: &std::io::Result<T>) {
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(root.join("phases.jsonl"))
+        .unwrap();
+    serde_json::to_writer(
+        &mut file,
+        &serde_json::json!({"phase": phase, "pid": pid, "ok": result.is_ok(),
+                           "error": result.as_ref().err().map(ToString::to_string)}),
+    )
+    .unwrap();
+    writeln!(file).unwrap();
+    file.sync_all().unwrap();
+    println!("owned phase={phase} pid={pid} ok={}", result.is_ok());
+}
+
 fn command(root: &Path, mode: &str) -> Command {
     let mut child = Command::new(std::env::current_exe().unwrap());
     child
@@ -37,12 +54,16 @@ fn command(root: &Path, mode: &str) -> Command {
     child
 }
 
-struct HistoricalOwned(Box<dyn ChildWrapper>);
+struct HistoricalOwned(Box<dyn ChildWrapper>, std::path::PathBuf);
 impl Drop for HistoricalOwned {
     fn drop(&mut self) {
         // Exact existing setup_source_process::Owned Windows cleanup calls.
-        let _ = self.0.kill();
-        let _ = self.0.wait();
+        event(&self.1, "historical-kill-enter", self.0.id());
+        let killed = self.0.kill();
+        event_result(&self.1, "historical-kill-returned", self.0.id(), &killed);
+        event(&self.1, "historical-wait-enter", self.0.id());
+        let waited = self.0.wait();
+        event_result(&self.1, "historical-wait-returned", self.0.id(), &waited);
     }
 }
 
@@ -111,13 +132,19 @@ fn owned_job_diagnostic_helper() {
     event(&root, "post-exit-notifications-polled", child.id());
     if mode == "historical" {
         event(&root, "historical-drop-enter", child.id());
-        drop(HistoricalOwned(child));
+        drop(HistoricalOwned(child, root.clone()));
     } else {
         // A diagnostic comparison, not a production correction. Kill the
         // complete owned job; await only the cached top-level child status.
-        child.start_kill().unwrap();
+        event(&root, "job-termination-enter", child.id());
+        let terminated = child.start_kill();
+        event_result(&root, "job-termination-returned", child.id(), &terminated);
+        terminated.unwrap();
         event(&root, "job-termination-requested", child.id());
-        assert!(child.inner_mut().wait().unwrap().success());
+        event(&root, "inner-wait-enter", child.id());
+        let waited = child.inner_mut().wait();
+        event_result(&root, "inner-wait-result", child.id(), &waited);
+        assert!(waited.unwrap().success());
         event(&root, "inner-wait-returned", child.id());
         drop(child);
     }

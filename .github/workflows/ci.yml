@@ -704,6 +704,23 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Diagnose owned Windows source JobObject polling and cleanup
+        if: always()
+        shell: bash
+        run: scripts/setup-source-oracle/windows_job_run.sh "$RUNNER_TEMP/source-job-diagnostic.json"
+
+      - name: Preserve complete native Windows source job diagnostic
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: source-job-diagnostic-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/source-job-diagnostic.json
+            ${{ runner.temp }}/source-job-diagnostic.json.cargo.jsonl
+            ${{ runner.temp }}/source-job-diagnostic.json.evidence/
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Credentialed usage requests, report JSON and table parity
         shell: bash
         run: scripts/usage-fetch-oracle/run.sh "$RUNNER_TEMP/usage-fetch-620.json"
