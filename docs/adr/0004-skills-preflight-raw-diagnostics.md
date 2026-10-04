@@ -79,3 +79,19 @@ not an actual Windows CLI result. New genuine CreateProcessW wide-argument
 Go/native comparisons, fresh original gates, native three-OS CI and independent
 full review are required before approving this correction. No local Windows
 before-fix process observation is claimed. Broader Skills cutover stays open.
+
+### Windows process-helper bootstrap follow-up
+
+The independent static review of immutable source `70b76390` found that the new
+Windows integration test called only the private support module's `run_os`;
+its ASCII `run` wrapper could consequently trigger native Windows strict
+all-target dead-code lint. No Windows failure or runtime approval was claimed.
+Each wide test now first runs an actual ASCII undefined flag through `run`,
+asserting exit2, empty stdout, exact complete diagnostic/usage bytes and absent
+skill state. Its subsequent wide calls still use `run_os`. This proves both
+wrapper entrypoints reach the same preflight boundary and uses neither a lint
+allowance nor weaker assertions. Production and all315/312 corpus inputs stay
+byte-identical to70b. The original precompile/static reports are retained under
+`windows-wide-argv/original-70b-static`. Fresh Core and full affected-package
+tests/strict checks, native process gates and independent full review remain
+pending; this is a source-only successor until resource allocation.

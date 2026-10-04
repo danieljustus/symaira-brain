@@ -12,6 +12,7 @@ mod process;
 
 #[test]
 fn native_wide_flag_operands_do_not_become_replacement_characters() {
+    ascii_preflight_bootstrap();
     for (prefix, suffix, diagnostic) in [
         (
             "--bad",
@@ -41,6 +42,7 @@ fn native_wide_flag_operands_do_not_become_replacement_characters() {
 
 #[test]
 fn native_wide_values_quote_original_bytes_and_trim_target_only() {
+    ascii_preflight_bootstrap();
     for (flag, padded, expected) in [
         ("--target=", true, "unknown target \"\\xed\\xa0\\x80\""),
         ("--scope=", true, "unknown scope \" \\xed\\xa0\\x80 \""),
@@ -69,4 +71,20 @@ fn native_wide_values_quote_original_bytes_and_trim_target_only() {
         assert!(String::from_utf8(output.stderr).unwrap().contains(expected));
         assert!(!root.path().join("data/symbrain/skills").exists());
     }
+}
+
+fn ascii_preflight_bootstrap() {
+    let root = TempDir::new().unwrap();
+    let output = process::run(
+        &root,
+        &["skills", "sync", "--bootstrap-invalid=value"],
+        false,
+    );
+    assert_eq!(output.status.code(), Some(2));
+    assert!(output.stdout.is_empty());
+    assert_eq!(
+        output.stderr,
+        b"flag provided but not defined: -bootstrap-invalid\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+    );
+    assert!(!root.path().join("data/symbrain/skills").exists());
 }
