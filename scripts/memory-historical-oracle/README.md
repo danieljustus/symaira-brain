@@ -8,6 +8,32 @@ recipe, is retained under `migration/evidence/memory-historical-649/census-6ae`.
 Run only after the coordinator allocates the existing exclusive target and
 compiler resources. This source checkpoint has **not** executed the gate.
 
+The integrated default/WAL successor offers a full local runtime driver after
+explicit coordinator resource allocation. It uses the released existing target
+and an oracle whose exact hash is supplied from preserved build/source evidence.
+For the retained Linux census oracle that hash is
+`a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41`.
+Provide explicit CARGO_HOME/RUSTUP_HOME/GOMODCACHE/GOCACHE SDK cache paths and
+the pinned Go1.26.7/Rust SDK PATH, and run under the lifecycle subreaper:
+
+```sh
+python3 /tmp/symaira-subreaper.py python3 scripts/memory-historical-oracle/validate.py \
+  --go /workspace/oracles/symbrain-go-dcddcef0 \
+  --go-sha256 a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41 \
+  --go-source /workspace/oracles/daemon772-go-source \
+  --target ALLOCATED_EXISTING_TARGET \
+  --actionlint /workspace/toolchains/bin/actionlint \
+  --output /tmp/NEW_SOURCE_BOUND_REPORT_ROOT
+```
+
+This is preparation, not authorization to use another lane's target or port.
+The driver preserves raw failed stages, checks zero test failures/ignored tests
+and all expected historical function names, records actual Cargo executable
+hashes, then builds the production CLI explicitly before process comparisons.
+Its isolated child HOME/XDG environment contains no operator credentials; cache
+paths are the approved SDK inputs rather than application data. The complete
+driver has not run at this source checkpoint.
+
 ```sh
 python3 scripts/memory-historical-oracle/replay.py \
   --go /workspace/oracles/symbrain-go-dcddcef0 \

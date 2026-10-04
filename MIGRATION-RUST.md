@@ -60,6 +60,17 @@ complete historical repair or close #649/#758. See
 `docs/adr/memory-wal-open-race-803.md` and the preserved `memory-open-race-803`
 evidence.
 
+The isolated historical/default/WAL integration normally merges main 5e and the
+independently approved 2fe WAL prerequisite while retaining every 9b0 historical
+module, all 37 owned SQL resources and 28 prepared migration tests. Its complete
+23-file default static review and Root 327-test WAL prerequisite receipt are
+retained separately. A full source-bound runtime driver is prepared, including
+a fresh production CLI build, 37 constructor pairs/reopens/nine controls, the
+184-column inventory and inherited Memory gates. No combined constructor/test
+execution or target allocation has occurred; native three-OS and shipped/full
+649/758 acceptance remain pending. Decisions are in
+`docs/adr/memory-historical-wal-integration-649.md`.
+
 The follow-up #758 CLI increment splits the oversized memory module into focused
 behavior modules, ports raw Go flags/error grammar and all 86 typed memory
 configuration fields, uses configured Ollama query embeddings and corrects the
