@@ -234,11 +234,7 @@ pub(super) fn run(
         report.results.push(result);
     }
     if json {
-        let bytes = serde_json::to_string(&report).map(|text| crate::go_json_escape::escape(&text));
-        if let Err(error) = bytes
-            .map_err(std::io::Error::other)
-            .and_then(|text| writeln!(stdout, "{text}"))
-        {
+        if let Err(error) = crate::stdio_output::write_json(&report, stdout) {
             return failed(
                 stderr,
                 format!("encode JSON: {}", crate::stdio_output::io_cause(&error)),

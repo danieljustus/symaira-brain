@@ -371,10 +371,7 @@ fn finish(
     stderr: &mut dyn Write,
 ) -> u8 {
     if json {
-        let result = serde_json::to_string(report)
-            .map(|text| crate::go_json_escape::escape(&text))
-            .map_err(std::io::Error::other)
-            .and_then(|text| writeln!(stdout, "{text}"));
+        let result = crate::stdio_output::write_json(report, stdout);
         if let Err(error) = result {
             let _ = writeln!(
                 stderr,

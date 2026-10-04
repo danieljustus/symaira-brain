@@ -23,8 +23,20 @@ pub(crate) fn io_cause(error: &io::Error) -> String {
     let suffix = format!(" (os error {code})");
     let message = literal.strip_suffix(&suffix).unwrap_or(&literal);
     #[cfg(unix)]
-    let message = message.to_lowercase();
-    message.to_string()
+    {
+        message.to_lowercase()
+    }
+    #[cfg(not(unix))]
+    {
+        message.to_owned()
+    }
+}
+
+pub(crate) fn write_json(report: &impl serde::Serialize, stdout: &mut dyn Write) -> io::Result<()> {
+    let text = serde_json::to_string(report)
+        .map(|text| crate::go_json_escape::escape(&text))
+        .map_err(io::Error::other)?;
+    writeln!(stdout, "{text}")
 }
 
 pub(crate) fn go_write_error(error: &io::Error) -> String {
