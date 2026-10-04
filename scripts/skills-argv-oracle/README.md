@@ -38,3 +38,21 @@ with a separate output path. Each changes an actual candidate process input
 and must return 1; the original Go input stays unchanged. Preserve their full
 reports. Build/oracle failures and mismatches remain evidence, never a skip or
 an approval. Native three-OS CI and independent full review remain required.
+
+The separate immutable supplemental plan is enforced by `novel.py`. It selects
+53 cases on Unix (51 Go/native pairs and two actual-parent pairs), or 112 on
+Windows (109 Go/native pairs and three actual-parent pairs). The runner requires
+an actual parent binary and archive/build proof; it never invents inherited
+output or converts it to Go parity. All three process results and complete
+seeded filesystem snapshots are retained. Run its `flag-input` and
+`parent-input` controls with separate outputs and verify each using
+`verify_novel_control.py`.
+
+On Unix, pass the original FAA native CLI and its round-trip archive receipt as
+`--parent` and `--parent-proof`. On native Windows, `build_parent.py` saves the
+current CLI, builds immutable 01f with the same existing target/cache, and
+restores and verifies the current bytes even if the build fails. CI then runs
+`novel.py` using the saved current CLI and both actual references, and preserves
+all three executables and JSON evidence. This is a native CI build; portable
+tests and source review cannot establish the Windows runtime result. See
+`docs/adr/skills-native-supplemental-plan-794.md` for the exact ownership contract.
