@@ -1,6 +1,6 @@
 //! One middleware and route owner; unported routes remain explicit migration limits.
 
-use super::{Server, auth::Claims, middleware, read, wire};
+use super::{Server, auth::Claims, authority, middleware, read, wire};
 use http_body_util::BodyExt;
 use hyper::{Method, Request, body::Incoming};
 use std::{net::IpAddr, sync::Arc, time::Duration};
@@ -28,6 +28,10 @@ impl Server {
         request: Request<Incoming>,
         peer: IpAddr,
     ) -> wire::Reply {
+        let host = match authority::effective_host(&request) {
+            Ok(host) => host,
+            Err(rejection) => return wire::protocol_error(rejection.reason()),
+        };
         let path = request.uri().path().to_owned();
         let api = API_ROUTES.contains(&path.as_str());
         let origin = middleware::header(request.headers(), "origin").to_owned();
@@ -35,14 +39,14 @@ impl Server {
         let head = method == Method::HEAD;
         let origin_allowed = middleware::origin_allowed(
             &origin,
-            middleware::header(request.headers(), "host"),
+            host,
             self.listener_port
                 .load(std::sync::atomic::Ordering::Relaxed),
         );
         let cors = api
             && origin_allowed
             && middleware::csrf_allowed(&method, request.headers())
-            && middleware::loopback_host(middleware::header(request.headers(), "host"));
+            && middleware::loopback_host(host);
         let mut reply = if !self.limiter.allow(peer) {
             let mut reply = wire::bytes(
                 429,
@@ -56,7 +60,7 @@ impl Server {
             return reply;
         } else if !middleware::csrf_allowed(&method, request.headers()) {
             wire::error(403, "FORBIDDEN", "CSRF validation failed")
-        } else if !middleware::loopback_host(middleware::header(request.headers(), "host")) {
+        } else if !middleware::loopback_host(host) {
             wire::error(403, "FORBIDDEN", "non-loopback Host header rejected")
         } else if api && !origin_allowed {
             wire::error(403, "FORBIDDEN", "origin not allowed")

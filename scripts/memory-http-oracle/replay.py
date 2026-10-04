@@ -40,7 +40,7 @@ def run(args):
                 original.backup(copied)
                 assert copied.execute('SELECT id FROM memories').fetchone()[0]=='owned-seed'
                 assert copied.execute('SELECT count(*) FROM entities').fetchone()[0]==1
-            
+
             if native and args.control=='wrong-secret':env['JWT_SECRET_KEY']='synthetic-deliberately-wrong-key'
             if native and args.control=='empty-state':
                 with sqlite3.connect(target) as conn:conn.execute('DELETE FROM memories')

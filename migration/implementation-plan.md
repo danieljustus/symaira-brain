@@ -1915,6 +1915,7 @@ Go remains the production enforcement path until the full Guard-specific matrix 
 ### Task 10.8: Preserve the reachable portable Memory Console
 - Accepted #763 decision: port the Web Console reachable through `memory serve` with the shared native HTTP/store owner (#759/#762/#763); verify assets, authentication, nested search results, read/write safety and lifecycle using actual isolated Go/native processes and an owned frontend runtime.
 - Retire the mandatory Ratatui port plan for the unconnected legacy TUI under ADR0003/E010 and `docs/adr/memory-ui-and-unreachable-tui-763.md`. Main's12 actual Go/native command probes and the original13 Go-only CLI probes remain separate source-bound evidence; both dependency inventories exclude the production TUI. Keep domain operations and frozen Go intact; no shipped command or new terminal client is introduced by this decision.
+- The scoped Host/absolute-request authority correction preserves original source824 failure proofs and early Go rejection precedence; fresh Linux gates, independent review and native three-OS acceptance remain required (`docs/adr/memory-http-request-authority-763.md`).
 - Resources or a partial UI server do not complete `memory serve`: keep #763 open and preserve fallback until the admitted HTTP/API/sync/configuration contracts are proved, with genuine native three-platform CI and independent review. Go source remains frozen until its separately gated removal.
 
 ### Phase 10 acceptance

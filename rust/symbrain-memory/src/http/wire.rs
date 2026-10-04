@@ -77,6 +77,24 @@ pub(super) fn error(status: u16, code: &str, message: &str) -> Reply {
     raw_json(status, json!({"code":code,"error":message}).to_string())
 }
 
+// These are Go parser errors, before application middleware, not JSON errors.
+pub(super) fn protocol_error(reason: &'static str) -> Reply {
+    let mut reply = bytes(
+        400,
+        "text/plain; charset=utf-8",
+        format!("400 {reason}"),
+        true,
+    );
+    reply
+        .extensions_mut()
+        .insert(hyper::ext::ReasonPhrase::from_static(reason.as_bytes()));
+    reply.headers_mut().insert(
+        hyper::header::CONNECTION,
+        hyper::header::HeaderValue::from_static("close"),
+    );
+    reply
+}
+
 pub(super) fn unsupported() -> Reply {
     error(
         501,

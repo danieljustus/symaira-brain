@@ -9,6 +9,7 @@ use crate::{EmbeddingGenerator, Store, StoreError};
 use std::sync::Arc;
 
 mod auth;
+mod authority;
 mod middleware;
 mod read;
 mod routes;

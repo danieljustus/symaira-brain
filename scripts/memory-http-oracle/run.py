@@ -46,6 +46,18 @@ def run(args):
             assert result.returncode==1 and last['id']=='cors-extension' and not last['match'],(mode,result.returncode,last)
         else:assert result.returncode==0,(root/(label+'.log')).read_text()
         records.append(dict(mode=mode,exit=result.returncode,report_sha256=support.digest(report),native_sha256=proof['native_sha256'],go_sha256=proof['go_sha256']))
+    for mode in [None,'omit-duplicate','foreign-to-local']:
+        label='authority-'+(mode or 'http');report=root/(label+'.json')
+        command=[sys.executable,str(repo/'scripts/memory-http-oracle/authority.py'),'--native',str(args.native.resolve()),'--report',str(report)]
+        if mode:command+=['--control',mode]
+        result=invoke(command,repo,env,root/(label+'.log'));proof=json.loads(report.read_text())
+        if mode:
+            expected='duplicate-host-local-first-read' if mode=='omit-duplicate' else 'absolute-foreign-target-read'
+            assert result.returncode==1 and proof['records'][-1]['name']==expected and not proof['records'][-1]['match'],(mode,result.returncode)
+        else:assert result.returncode==0 and len(proof['records'])==15,(root/(label+'.log')).read_text()
+        records.append(dict(mode=label,exit=result.returncode,report_sha256=support.digest(report),native_sha256=proof['native_sha256'],go_sha256=proof['go_sha256']))
+    command=[sys.executable,str(repo/'scripts/memory-http-oracle/transport.py'),'--native',str(args.native.resolve()),'--report',str(root/'transport.json')]
+    result=invoke(command,repo,env,root/'transport.log');assert result.returncode==0,(root/'transport.log').read_text()
     command=[sys.executable,str(repo/'scripts/memory-http-oracle/same_origin.py'),'--native',str(args.native.resolve()),'--report',str(root/'same-origin.json')]
     result=invoke(command,repo,env,root/'same-origin.log');assert result.returncode==0,(root/'same-origin.log').read_text()
     command=[sys.executable,str(repo/'scripts/memory-http-oracle/dom.py'),'--native',str(args.native.resolve()),'--node',str(args.node.resolve()),'--jsdom',str(args.jsdom.resolve()),'--report',str(root/'dom.json')]
@@ -54,7 +66,7 @@ def run(args):
     module=json.loads((args.jsdom/'package.json').read_text());assert module['version']=='26.1.0',module['version']
     receipt=dict(head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip(),candidate_dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=repo)),platform=platform.platform(),go_version=version,node_version=node_version,jsdom_version=module['version'],frozen_go_revision=support.ORACLE,frozen_source_sha256=manifest,go_binary_sha256=support.digest(go),native_binary_sha256=support.digest(args.native),records=records)
     (root/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
-    print(json.dumps(dict(head=receipt['head'],platform=receipt['platform'],gates=5,controls=2,report_dir=str(root))))
+    print(json.dumps(dict(head=receipt['head'],platform=receipt['platform'],gates=9,controls=4,report_dir=str(root))))
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--native',type=Path,required=True);parser.add_argument('--node',type=Path,required=True);parser.add_argument('--jsdom',type=Path,required=True);parser.add_argument('--report-dir',type=Path,required=True);run(parser.parse_args())

@@ -93,3 +93,18 @@ bytes are outside the application-state contract. Earlier sourceD1 receipts
 verified six named domain tables only; they remain historical and are not
 relabeled complete-state proof. The additive final replay strengthens this
 inspection without changing production or earlier outcomes.
+
+The scoped authority successor preserves the original 12 literal Host/absolute
+request-target finding inputs and eight raw transport controls. `authority.py`
+asserts 15 actual Go/native pairs, including positive committed writes with
+bound UUIDs, timestamps, actor, audit and FTS integrity. Duplicate Host and
+missing HTTP/1.1 Host refuse before authentication/body/state; absolute-form URI
+authority supplies the existing Host and same-origin gate without canonicalizing
+loopback spellings. Two actual request mutation controls independently omit a
+duplicate or replace a foreign URI authority; both must fail the comparator.
+`transport.py` keeps all eight original framing/deadline controls. Early 400
+reason/body are compared; complete Date/chunking/header-order wire parity is
+still pending. See `docs/adr/memory-http-request-authority-763.md`. Original
+source824 receipts remain original proof and are not rewritten as correction
+evidence. The successor still requires fresh native three-OS CI and a separate
+author's full review before acceptance.
