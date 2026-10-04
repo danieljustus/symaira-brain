@@ -1,0 +1,118 @@
+{
+  "scope": "actual Python SQLite invariant only, no compiled candidate or Go runtime",
+  "original_files": 15,
+  "owned_column_defaults": {
+    "columns": 184,
+    "declared_defaults": 62,
+    "absent_defaults": 122,
+    "known_native_compatibility_differences": 1
+  },
+  "cases": 3,
+  "retained_files": [
+    {
+      "original": "/tmp/symaira-memory649-defaults-owned-sql/receipt.json",
+      "sha256": "d048be18cebaa4326437edd8ff761a857cc62c1a07cb0b1fab52ba756e015395",
+      "bytes": 46029,
+      "retained": "migration/evidence/memory-historical-defaults-649/source-preparation/retained/d048be18cebaa4326437edd8ff761a857cc62c1a07cb0b1fab52ba756e015395.gz",
+      "retained_sha256": "2db80f1b277f17d81731993ea561d16813bfd43268a5261734d908781c556170"
+    },
+    {
+      "original": "/tmp/symaira-memory649-defaults-owned-sql/oplog-wrong.db",
+      "sha256": "65b231aa7d77e3944a7a50520334bf999b59143320a23098ee7e1a78f627f13b",
+      "bytes": 233472,
+      "retained": "migration/evidence/memory-historical-defaults-649/source-preparation/retained/65b231aa7d77e3944a7a50520334bf999b59143320a23098ee7e1a78f627f13b.gz",
+      "retained_sha256": "4f83762c3f16444dfd0809dc8c2d2987b0661cacdafcb072da9d62f81ec69dda"
+    },
+    {
+      "original": "/tmp/symaira-memory649-defaults-owned-sql/oplog-wrong.sql",
+      "sha256": "9392b502778e5e23f19b0162eaf7aeb6829554035331564f10b940ee4dcb00dc",
+      "bytes": 9103,
+      "retained": "migration/evidence/memory-historical-defaults-649/source-preparation/retained/9392b502778e5e23f19b0162eaf7aeb6829554035331564f10b940ee4dcb00dc.gz",
+      "retained_sha256": "ee8cf92f3feaf890236969bb3fc3e193cb6857a806044e4e43d90e83909ede0c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-defaults-owned-sql/oplog-missing.db",
+      "sha256": "e698e461f313bfbaa90e26ba80f0762c0381ff82932f8b5fdff11453616c565e",
+      "bytes": 233472,
+      "retained": "migration/evidence/memory-historical-defaults-649/source-preparation/retained/e698e461f313bfbaa90e26ba80f0762c0381ff82932f8b5fdff11453616c565e.gz",
+      "retained_sha256": "44e2a8f511a82173202d0186177b15dfade907cdfc6f24d884fb64690bbcaa7f"
+    },
+    {
+      "original": "/tmp/symaira-memory649-defaults-owned-sql/oplog-missing.sql",
+      "sha256": "2b336b17527ec55b2ebc7f6968bb0c7f4355c3e729f0e5a1f6ef8dcf95d49539",
+      "bytes": 9077,
+      "retained": "migration/evidence/memory-historical-defaults-649/source-preparation/retained/2b336b17527ec55b2ebc7f6968bb0c7f4355c3e729f0e5a1f6ef8dcf95d49539.gz",
+      "retained_sha256": "b8b5d7099792656ccce39746827d2122ac8ff841f261efb0e2fcb2622c0dd1bb"
+    },
+    {
+      "original": "/tmp/symaira-memory649-defaults-owned-sql/oplog-unchanged.db",
+      "sha256": "aed359ec46d2a6083c6dde71752b5a039e383a6d3219ab3ccc87c32d022e2ece",
+      "bytes": 233472,
+      "retained": "migration/evidence/memory-historical-defaults-649/source-preparation/retained/aed359ec46d2a6083c6dde71752b5a039e383a6d3219ab3ccc87c32d022e2ece.gz",
+      "retained_sha256": "c0857a67b6703a1eec639dce48f7551e63905b0698d7360c1aded5662eb327ac"
+    },
+    {
+      "original": "/tmp/symaira-memory649-defaults-owned-sql/oplog-unchanged.sql",
+      "sha256": "ff6e4d863e5ad0048d9cfcec6ea498048c6081bd559ba3f6f29227a5e4a93540",
+      "bytes": 9125,
+      "retained": "migration/evidence/memory-historical-defaults-649/source-preparation/retained/ff6e4d863e5ad0048d9cfcec6ea498048c6081bd559ba3f6f29227a5e4a93540.gz",
+      "retained_sha256": "d3532183e227d5ff03928724bcb688af23f928387d539dbd53c1b4d2a1608a98"
+    },
+    {
+      "original": "/tmp/symaira-memory649-defaults-owned-sql/timestamp-equivalence.db",
+      "sha256": "895bd65e89121a349699498cb963d6540f7ce39c9602e29f924d7e0b73af512c",
+      "bytes": 8192,
+      "retained": "migration/evidence/memory-historical-defaults-649/source-preparation/retained/895bd65e89121a349699498cb963d6540f7ce39c9602e29f924d7e0b73af512c.gz",
+      "retained_sha256": "6b6b211e0f1961f76559f53ac0144142151ccf162fbccc6868703fbe3f18e724"
+    },
+    {
+      "original": "/tmp/symaira-memory649-defaults-owned-sql/native-successor.db",
+      "sha256": "69980ee80628e3ac8ea25bedc5f88e0284a09416f88a41207b68316821303b25",
+      "bytes": 233472,
+      "retained": "migration/evidence/memory-historical-defaults-649/source-preparation/retained/69980ee80628e3ac8ea25bedc5f88e0284a09416f88a41207b68316821303b25.gz",
+      "retained_sha256": "45f62d2b9d53dd8bddfeeb07927292ab7de08e8d3d6fe11a3fd37f40676a25c4"
+    },
+    {
+      "original": "/tmp/symaira-memory649-defaults-owned-sql/native-successor.sql",
+      "sha256": "ff6e4d863e5ad0048d9cfcec6ea498048c6081bd559ba3f6f29227a5e4a93540",
+      "bytes": 9125,
+      "retained": "migration/evidence/memory-historical-defaults-649/source-preparation/retained/ff6e4d863e5ad0048d9cfcec6ea498048c6081bd559ba3f6f29227a5e4a93540.gz",
+      "retained_sha256": "d3532183e227d5ff03928724bcb688af23f928387d539dbd53c1b4d2a1608a98"
+    },
+    {
+      "original": "/tmp/symaira-memory649-defaults-owned-sql/native-known-base.db",
+      "sha256": "bd83199e5d584a5a038c6251c739c1dfb2649e95468f88605e255080d123acfa",
+      "bytes": 233472,
+      "retained": "migration/evidence/memory-historical-defaults-649/source-preparation/retained/bd83199e5d584a5a038c6251c739c1dfb2649e95468f88605e255080d123acfa.gz",
+      "retained_sha256": "29f0aebc9ba47d9a7028666d8eb6b723302b903e8aa0ae9a55f2f55c65afb835"
+    },
+    {
+      "original": "/tmp/symaira-memory649-defaults-owned-sql/native-known-base.sql",
+      "sha256": "5a01eb4377fa35f385501d378e68610c5df1a721c9104d4a4316acd255d68d2b",
+      "bytes": 9125,
+      "retained": "migration/evidence/memory-historical-defaults-649/source-preparation/retained/5a01eb4377fa35f385501d378e68610c5df1a721c9104d4a4316acd255d68d2b.gz",
+      "retained_sha256": "90ae58e40284f681664ac5b972dc0fc7a68bae3bb93476eb353d46241927eeb1"
+    },
+    {
+      "original": "/tmp/symaira-memory649-defaults-owned-sql/frozen-go.db",
+      "sha256": "0e944e1caa27a9df4dc93ccb45019ec6bc8b44b06801c91e5dfd282d9f213f10",
+      "bytes": 434176,
+      "retained": "migration/evidence/memory-historical-defaults-649/source-preparation/retained/0e944e1caa27a9df4dc93ccb45019ec6bc8b44b06801c91e5dfd282d9f213f10.gz",
+      "retained_sha256": "3ea41bbad9a049a1ae4eec35da4b44018a99f1d5733dc2ccd0651e111608bad2"
+    },
+    {
+      "original": "/tmp/symaira-memory649-defaults-owned-sql/frozen-go.sql",
+      "sha256": "fb40d583262d24f1a00b5a345737d07b26702b3c6acf95be237a6b642e6c21fd",
+      "bytes": 23522,
+      "retained": "migration/evidence/memory-historical-defaults-649/source-preparation/retained/fb40d583262d24f1a00b5a345737d07b26702b3c6acf95be237a6b642e6c21fd.gz",
+      "retained_sha256": "b1661c2ffd7ccf300430ae81ab167c966a6351305fad0493ed6dd4c548c1f24f"
+    },
+    {
+      "original": "/tmp/symaira-memory649-defaults-owned-sql.log",
+      "sha256": "b07eb564525a5a7afd23ff786f302c432beedb2d20a72da3ef52b73c814c8aec",
+      "bytes": 188,
+      "retained": "migration/evidence/memory-historical-defaults-649/source-preparation/retained/b07eb564525a5a7afd23ff786f302c432beedb2d20a72da3ef52b73c814c8aec.gz",
+      "retained_sha256": "a5c667ca183e19e30d81a6cb3bfd393f8f90c4a9fb5d612df9c9cdcf0b288095"
+    }
+  ]
+}

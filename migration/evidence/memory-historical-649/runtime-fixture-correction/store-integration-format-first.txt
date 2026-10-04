@@ -1,0 +1,1 @@
+The initial rustfmt --check at cd5d92d parent worktree returned 1: the include_str! argument must be rendered on the execute_batch call line. The non-fail-fast shell continued to the source commit. No runtime test/build was started at cd5d92d. The following commit applies rustfmt and repeats the source checks with set -euo pipefail.
