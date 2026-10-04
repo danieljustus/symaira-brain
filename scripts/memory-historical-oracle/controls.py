@@ -6,6 +6,8 @@ from contextlib import closing
 import json
 from pathlib import Path
 import shutil
+from provider import activate
+activate()
 import sqlite3
 
 import replay

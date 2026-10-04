@@ -107,3 +107,15 @@ and a genuinely corrupt NOT NULL fixture must fail. Receipts retain the engine
 identity. The original host SQLite3.45.1 false-positive failure is preserved;
 see `docs/adr/memory-historical-sqlite-checker-803.md`. No product acceptance
 criterion is waived by changing the checker interpreter.
+
+The pinned Linux Python distribution dynamically links the host SQLite library;
+the Python pin alone does not select a working checker engine. Linux CI prepares
+official SQLite3.50.4 in its exclusive `memory-cli-checker-provider` prefix,
+verifies the retained ZIP/source hashes and SONAME, and selects it only for the
+historical checker/replay/control Python processes. The actual extension binding
+and unchanged semantic preflight must pass before historical Go/native children.
+The selector is consumed and no loader or Python environment path changes.
+Windows and macOS retain their native engines; the pinned macOS extension embeds
+SQLite3.50.4 statically. All native semantic and full process gates remain required.
+See `docs/adr/owned-sqlite-checker-provider-803.md` for original distribution
+identities, the cancelled Windows job and the separately scoped CI job budget.

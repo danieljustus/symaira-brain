@@ -1,0 +1,173 @@
+{
+  "first13_full_raw_archive_commit": "5081205bbc27264bc0c701b92330410fcbe56c02",
+  "first13_full_raw_archive_path": "migration/evidence/resource-retirement-2026-10-04/full-audit.tar.gz",
+  "first13_original_tracked_manifests_in_that_archive": true,
+  "completion": [
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/05c2fc4569df5512bd68bd5a33107c60060a197b9f74bdd76721536413562a33.pyc.gz",
+      "retained": "05c2fc4569df5512bd68bd5a33107c60060a197b9f74bdd76721536413562a33.pyc.gz.gz",
+      "bytes": 11862,
+      "sha256": "cad7c88dfb9c7d0e0acf86d6e7b7beb858f8b9b3d187783fa37d5a3b8449afd0",
+      "gzip_sha256": "74bf8997bb25a8e913147d5fb264ae66d438cb3a4848759e6a6aa4500632f6b3",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/35dbcebe92949dfa46445ce4ee415f6aca694e2bbac46ceeb1f0d27cb69ed6f3.pyc.gz",
+      "retained": "35dbcebe92949dfa46445ce4ee415f6aca694e2bbac46ceeb1f0d27cb69ed6f3.pyc.gz.gz",
+      "bytes": 55050,
+      "sha256": "f6f5f4d84157b653fdec58cd9bdc0c96753fdfe801d2ea6d46b6a49d2f1db992",
+      "gzip_sha256": "7f22b80a3b26fbbc086a9a2750809844915532ef9380add9227b3f700c78d61c",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/372b09fbabab4546c3bce281b8601c86feeb87d7fd4fd05dfc5d1c81b5165073.pyc.gz",
+      "retained": "372b09fbabab4546c3bce281b8601c86feeb87d7fd4fd05dfc5d1c81b5165073.pyc.gz.gz",
+      "bytes": 2173,
+      "sha256": "e550117546548dd050a1437a5054272d7990da9a3b7d5ce8d9a669587d9c1712",
+      "gzip_sha256": "8c3f10aeb030fecc76d8edb211706548629ceec8856289d055b46cf43ecbbccf",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/9436665042a1a5360d8a472d49d0fcd991e040249219433eb93be4518a33b9c3.pyc.gz",
+      "retained": "9436665042a1a5360d8a472d49d0fcd991e040249219433eb93be4518a33b9c3.pyc.gz.gz",
+      "bytes": 2201,
+      "sha256": "0d613c1371da3a3532761e271ccb54bcc3d043122bda69575e2e5ad55ba81af3",
+      "gzip_sha256": "a26e7d9d9523eef48d52234a7c7011ece47a82448bd50a57b421ecd8b5538a2d",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/ac17bb5a3f09ccdb0f9130d7fd2930ec0b24b0a9d0865d859b423408531a0dbd.pyc.gz",
+      "retained": "ac17bb5a3f09ccdb0f9130d7fd2930ec0b24b0a9d0865d859b423408531a0dbd.pyc.gz.gz",
+      "bytes": 9209,
+      "sha256": "5724f87c81f4d106397e1794f67a04121fda8c21807724d2e1f67c96280f95c5",
+      "gzip_sha256": "96de4d83b1bcbe5fef66753e1c280d51137e17d3f757a1fd67880a44ad664e11",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/completed.json",
+      "retained": "completed.json.gz",
+      "bytes": 3775,
+      "sha256": "9ea4310794a9195f9d3379cfa18e0fd50bf592cde0bd2cd33a090ddbdc55e19c",
+      "gzip_sha256": "8f391baa4a09e1c74690d08fb8dfd7b78e479a6057a7b1522c3d5cc28c18dc07",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/f421e866de2906c1f1536fa681d7fa37e50082738e85eefe7e8274038fc15eae.pyc.gz",
+      "retained": "f421e866de2906c1f1536fa681d7fa37e50082738e85eefe7e8274038fc15eae.pyc.gz.gz",
+      "bytes": 5164,
+      "sha256": "dc57a0b3e4659e16479721148b71ce6608bb24e7d5eb0a10dec343733f6052f8",
+      "gzip_sha256": "869aae3234dcfaf4e1685dda22696b4eda9e70a2a06dcff09cb3ddfc2cd9bcb3",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/fa162caa7a4769e80c50b19e6dc987f73c46463711a71fdefefe5c9be8aa5c65.pyc.gz",
+      "retained": "fa162caa7a4769e80c50b19e6dc987f73c46463711a71fdefefe5c9be8aa5c65.pyc.gz.gz",
+      "bytes": 6315,
+      "sha256": "b38207d3c3b4269efbfeb8ba1f2bbc3fac4bfae9fb0ed1506b3eb472b9553bae",
+      "gzip_sha256": "87fc9c37c50073155936ce335b1b7dbdca15cdb218e17369c0091cef04b8011a",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/fe25b97eb858de59a9e66755e90f6457151ba5c64ad751ce1823bb8f92b598bf.pyc.gz",
+      "retained": "fe25b97eb858de59a9e66755e90f6457151ba5c64ad751ce1823bb8f92b598bf.pyc.gz.gz",
+      "bytes": 17387,
+      "sha256": "e447d511ee0b4e79ffc685c920a3eb0816348687c02a979442e6aef11cefdf2b",
+      "gzip_sha256": "b21babea7bb31f4190fcec3d27330f5c4de6efbba283fb9ebc41a918475f2e10",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/final-verification.json",
+      "retained": "final-verification.json.gz",
+      "bytes": 1630,
+      "sha256": "c9ad9251d9f5a09ce2ec80e26aff26c7b52c9165289e4bf0ffd0b8d196be911d",
+      "gzip_sha256": "4d42da57972f9f23574d087dfb48edcd821cdd3af042788751e610206e7aee90",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/journal.jsonl",
+      "retained": "journal.jsonl.gz",
+      "bytes": 25475,
+      "sha256": "bc0c687112b13c7ce9bb9c413219b97fd6956baa554ab3290e84a51d6af56551",
+      "gzip_sha256": "ac74d84872b82932bde85238d99774d8022eb59e7fc12fa880953d91ceb85660",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/registered-worktrees.after.txt",
+      "retained": "registered-worktrees.after.txt.gz",
+      "bytes": 11552,
+      "sha256": "13e633e938917fa596329b80cd4faba4645dee23e096a588e50143202a1032d3",
+      "gzip_sha256": "c13740599de6ace6d749159317408abe8a0bb9ddbea57ae0d3b4048bee5a25ba",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/report.md",
+      "retained": "report.md.gz",
+      "bytes": 1045,
+      "sha256": "49cf2ee3ab4fca08650ffcc80d4f9c5332ae2f997454464554c82296b7404bea",
+      "gzip_sha256": "a62a0b35d48f4e456ebdc0321c8f7eb02230883c86bbc205580edc05e67cff2e",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/result.json",
+      "retained": "result.json.gz",
+      "bytes": 4487,
+      "sha256": "40837f0fb66aa8b0514686cd6427015c805102b1d2efb7903e890fcd3e5506e8",
+      "gzip_sha256": "f398c01cac6f419433e23011e5626e984f76ab61ddeaf62b258de85c4244049a",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/retire.stderr",
+      "retained": "retire.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retirement-third/retire.stdout",
+      "retained": "retire.stdout.gz",
+      "bytes": 173,
+      "sha256": "8dc0109baa97574f5a32d52ac53067c53bc0eb83dcc288172c9b2f20aa613ba8",
+      "gzip_sha256": "f737ed9aa7cf5eb2ff75cd116c01511fb88f1220d709f431e73ccf714ac6cb85",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/prioritized-remaining-2.json",
+      "retained": "prioritized-remaining-2.json.gz",
+      "bytes": 3368,
+      "sha256": "96551a5b52d71f85f1ba2a6031ba859d6287ddd9eb2afd8eba6f420123118f24",
+      "gzip_sha256": "21dc6028b344a165c9ab118a42392f44674a844c7e6f7793356a051a852cc9ba",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-worktree-audit/retire-third.py",
+      "retained": "retire-third.py.gz",
+      "bytes": 11825,
+      "sha256": "9a4a0820ca8a951bd4d65fbac5872acebe01c61158896638ed68b38eb3bd53d1",
+      "gzip_sha256": "dd86dbd3106e25c1a3f38224ad19e117237678b24d75835cde0af6ce6786f05c",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/derivative-retirement.json",
+      "retained": "derivative-retirement.json.gz",
+      "bytes": 7804,
+      "sha256": "d4ddfbe8a57b07332cacb7b839267f56f664a8a4e847a2dbbef6f928a0bace7b",
+      "gzip_sha256": "0f0478f81c385fd546c4491d476cb9621073c690294d5e875f1e9724a672be8d",
+      "roundtrip": true
+    },
+    {
+      "original": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/derivative-retirement.jsonl",
+      "retained": "derivative-retirement.jsonl.gz",
+      "bytes": 10888,
+      "sha256": "ca0c36adacc84f9292f006c5ab12b379afb53038186a06691fd46b77cb0aec1a",
+      "gzip_sha256": "b67a440399ce35f56e36d7417017d76578baff8eaae723b9f9498d3954acd9bc",
+      "roundtrip": true
+    }
+  ],
+  "total_original_authorized_retirements": 15,
+  "concurrent_shared_disk_activity": "possible; no isolated gain claim for final2/derivatives",
+  "privileged_services_UNVERIFIED": [
+    198,
+    249
+  ]
+}

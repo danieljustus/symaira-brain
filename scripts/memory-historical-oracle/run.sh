@@ -9,7 +9,16 @@ if [[ $# != 2 || $1 != --output ]]; then
   exit 2
 fi
 report=$2
-python3 "$repo/scripts/memory-historical-oracle/checker.py" --output "$report-checker.json"
+checker_provider=${MEMORY_SQLITE_CHECKER_PROVIDER:-}
+unset MEMORY_SQLITE_CHECKER_PROVIDER
+checker_python() {
+  if [[ -n $checker_provider ]]; then
+    MEMORY_SQLITE_CHECKER_PROVIDER="$checker_provider" python3 "$@"
+  else
+    python3 "$@"
+  fi
+}
+checker_python "$repo/scripts/memory-historical-oracle/checker.py" --output "$report-checker.json"
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 mkdir "$work/source"
@@ -21,9 +30,9 @@ if [[ ${OS:-} == Windows_NT ]]; then suffix=.exe; fi
   go build -o "$work/symbrain-go$suffix" ./cmd/symbrain
 )
 native_target=${CARGO_TARGET_DIR:-$repo/target}
-python3 "$repo/scripts/memory-historical-oracle/replay.py" \
+checker_python "$repo/scripts/memory-historical-oracle/replay.py" \
   --go "$work/symbrain-go$suffix" --go-source "$work/source" \
   --native "$native_target/debug/symbrain$suffix" --output "$report"
-python3 "$repo/scripts/memory-historical-oracle/controls.py" \
+checker_python "$repo/scripts/memory-historical-oracle/controls.py" \
   --go "$work/symbrain-go$suffix" --go-source "$work/source" \
   --native "$native_target/debug/symbrain$suffix" --output "$report-controls"

@@ -6,6 +6,8 @@ from contextlib import closing
 import hashlib
 import json
 from pathlib import Path
+from provider import activate, identity
+activate()
 import sqlite3
 import sys
 import tempfile
@@ -23,7 +25,7 @@ def preflight():
             assert value == [("retained", 0.5, "real")], value
             assert integrity == [("ok",)], (
                 "SQLite checker misreports a historical REAL NOT NULL DEFAULT; "
-                "use the workflow's pinned Python instead of the host interpreter", integrity)
+                "use the verified checker engine rather than a Python-version-only pin", integrity)
             db.execute("CREATE VIRTUAL TABLE terms USING fts5(content, tokenize='porter unicode61')")
             db.execute("INSERT INTO terms(content) VALUES ('running')")
             assert list(db.execute("SELECT content FROM terms WHERE terms MATCH 'run'")) == [("running",)]
@@ -48,7 +50,7 @@ def preflight():
                     compile_options=options, historical_default=dict(rows=value, integrity=integrity),
                     real_null_control=rejected, fts5_porter_and_integrity="passed",
                     checker_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-                    go_or_native_product_execution=False)
+                    go_or_native_product_execution=False, sqlite_provider=identity())
 
 
 def main():

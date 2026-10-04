@@ -10,6 +10,8 @@ import os
 from pathlib import Path
 import re
 import shutil
+from provider import activate
+activate()
 import sqlite3
 import stat
 import subprocess

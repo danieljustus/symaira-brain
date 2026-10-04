@@ -1,0 +1,328 @@
+{
+  "all_retained": [
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/job-111400013694.logs.decoded",
+      "retained": "job-111400013694.logs.decoded.gz",
+      "bytes": 93820,
+      "sha256": "a9b6cee61820876022179158bba2c299ebe58995f3e21b4ae6efae661e23ab93",
+      "gzip_sha256": "ba4c2ac9b155af8de134e57534f25ec0c415d413f1a5c9f8bd31745cf2b948d0",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/job-111400013639.logs.decoded",
+      "retained": "job-111400013639.logs.decoded.gz",
+      "bytes": 111206,
+      "sha256": "4a99171359923eb58c51b695ec9e3acc215a046d0d5cb5f08521bd540d9f0032",
+      "gzip_sha256": "a177a81433d49ff9134d717a0841abe549d1181fde92841a459ebddd9ee8da18",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/job-111400013639.metadata.json",
+      "retained": "job-111400013639.metadata.json.gz",
+      "bytes": 4086,
+      "sha256": "8eb7d768032f5c893fdabad479ea373a9a481b00270fa501f35e6bfa570ba5fa",
+      "gzip_sha256": "4b6d84f60e559164e5de74ac4f63882d9a21a64673bebc9d399ecd6f88c78f63",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/pr803-memory-cli-ubuntu24.zip",
+      "retained": "pr803-memory-cli-ubuntu24.zip.gz",
+      "bytes": 106304,
+      "sha256": "c59f9d7a98e11ae1602afee11c10af6421635d659e7a4d62435019d8386e637c",
+      "gzip_sha256": "971b7e98acd5f90cc530b55a517fec9eedb6b8e19b2028db69231642b1477b81",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/pr803-memory-cli-windows.zip",
+      "retained": "pr803-memory-cli-windows.zip.gz",
+      "bytes": 3440982,
+      "sha256": "363fae295dfcaa943a92cc18b334e3ebce5517a566e966b76b1612b04a0594a1",
+      "gzip_sha256": "038ddc5d060aca48c176fcfb0d1857dd2a391f63a9c405bef5029af833e7f1e6",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/downloaded-windows803-artifact-manifest.json",
+      "retained": "downloaded-windows803-artifact-manifest.json.gz",
+      "bytes": 57226,
+      "sha256": "c603d20bbaf84d88dd88f0f2b09a05ce5617a8bd27690e8d64375391c29834f1",
+      "gzip_sha256": "073c7b35df4395ecc999f21a7e6c75252f3df26bf834870866de294b5fd1a203",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/downloaded-artifacts-manifest.json",
+      "retained": "downloaded-artifacts-manifest.json.gz",
+      "bytes": 2838,
+      "sha256": "e92939d786dc7fc1630ba9f646dc8310d6616a491c0aac16e0cfda35f6d1f437",
+      "gzip_sha256": "dae90efb35c7b9b64cf221e9cad99a964779f6a32205eb321dad95a33c94fd2b",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/pr803.json",
+      "retained": "pr803.json.gz",
+      "bytes": 22130,
+      "sha256": "d0d8f28d952b1077b97a8f78f36704fac556b7c0dc4bf0d435a556cf9804afcc",
+      "gzip_sha256": "de2181efa0ad72e8f9b8944e7d6e05ce9e7b3563da311354490fa1c7750ac7aa",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/head803-commit.json",
+      "retained": "head803-commit.json.gz",
+      "bytes": 1194,
+      "sha256": "cb75b7caa9bb9a16a19ace37dfaa89765f37297897b1336401b2b37a373ac2ed",
+      "gzip_sha256": "b52932f44a7e1057db13dbccd6213f4813cca7ac988009d3799422316e6cdb03",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/merge803-commit.json",
+      "retained": "merge803-commit.json.gz",
+      "bytes": 2709,
+      "sha256": "2c8b8621c1f956645ff206eb77c4e5684f246f6d80ab352b7e255440b486ffcf",
+      "gzip_sha256": "a5c6ca0a067a641ee3db0e497da65502b107b928c6f0c07955eaa4ac4c0a586e",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/source-bindings.json",
+      "retained": "source-bindings.json.gz",
+      "bytes": 535,
+      "sha256": "4d2f39e715e9632cce45d76774f5eba08f5ca2619d266d2672dcc953b4d50e72",
+      "gzip_sha256": "f29c36617437d3a6e7f5b4c634dda1d8eeaf35db12df65d262b4ddcefc02f789",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/jobs803-current-0.json",
+      "retained": "jobs803-current-0.json.gz",
+      "bytes": 6624,
+      "sha256": "965223de1d7c85281ba8139523bab50639a815f7ae073e6bda51cf7a28f2b805",
+      "gzip_sha256": "ec9566863515104eefc87b8ee9a46058aabe3f48947c5cd257d031ef48e0377e",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/jobs803-current-1.json",
+      "retained": "jobs803-current-1.json.gz",
+      "bytes": 42687,
+      "sha256": "d8e4757ff42baec7349013306d01c287ffddfcaa3e37a072d3297954cf930d59",
+      "gzip_sha256": "a62e7de6376c6ed9faa5490d34c9cbe8541681030ec805af4835c4d43c2c04f7",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/downloads.json",
+      "retained": "downloads.json.gz",
+      "bytes": 927,
+      "sha256": "f68f4ee82f284674e9c03897dab1d7d199a50df4906c80d8669d4e7a27c13624",
+      "gzip_sha256": "6db5545f9e58b79c394c658e967c3ee4482fd70624487286d359128bcc6143b1",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/python-release-assets.jsonl",
+      "retained": "python-release-assets.jsonl.gz",
+      "bytes": 5567,
+      "sha256": "f5d85684033f40abe8e45ab4847d896607c962a7b63122f195b2b45c4ab34476",
+      "gzip_sha256": "63fa944e42adf5e4e327da00522c4ccc3d9155136a08f2dc54b31490106b19a5",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/linux-sqlite-members.json",
+      "retained": "linux-sqlite-members.json.gz",
+      "bytes": 5727,
+      "sha256": "b92353760dc5032eeeae408d2808b8a08d6e28c5663226d760451407b0e4cc64",
+      "gzip_sha256": "62f9b5d154b519900c91ce1bc7fe31dae07bb76ade8c1e8372238cbc8045cdc5",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/linux-sqlite-extension-dynamic.txt",
+      "retained": "linux-sqlite-extension-dynamic.txt.gz",
+      "bytes": 1482,
+      "sha256": "9c6575ba03073e945d3560122c5628432b7be511e65e991e3ecc7af693e3e5e8",
+      "gzip_sha256": "cd552c835832de1245be327cdea87127f3f0c65b239c23c2d7cbed28cf2b010d",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/_sqlite3.cpython-313-x86_64-linux-gnu.so",
+      "retained": "_sqlite3.cpython-313-x86_64-linux-gnu.so.gz",
+      "bytes": 898288,
+      "sha256": "b1d8ca7f9e6c31e62149078992c91a406f2da29830de5a21f1189a74b224d5ff",
+      "gzip_sha256": "5bec2d7874b78e3196ddb38b9949463fe08aa8dcda5c81bd8733f09c6861f937",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/darwin-distribution.json",
+      "retained": "darwin-distribution.json.gz",
+      "bytes": 271,
+      "sha256": "a329b56aad99008406164bf89b7cd879f86a73002c98339c8fa451b174c57830",
+      "gzip_sha256": "d11700a8cbaac7c68924f825e29238ce17ee3704323757b4c70e3ebd4856c684",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/darwin-package-toc.xml",
+      "retained": "darwin-package-toc.xml.gz",
+      "bytes": 33739,
+      "sha256": "b1915917615fde79c5b990d34839ed202771aac5928b097342defa63608778be",
+      "gzip_sha256": "bf346aa742b0ec43909c8a10974dfbdb9ae07ad1aa2aec5a328a9fcc011c03d3",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/darwin-package-header.json",
+      "retained": "darwin-package-header.json.gz",
+      "bytes": 260,
+      "sha256": "cfe1739327ae545c58fec53518561f3c46a09e897137e509849c3f23f6aa8c5e",
+      "gzip_sha256": "3b8d773ce2c74ed7ca80632681c576c6498f9efad379ad0e00276df3e1a1fce0",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/darwin-framework-sqlite-members.json",
+      "retained": "darwin-framework-sqlite-members.json.gz",
+      "bytes": 545,
+      "sha256": "c1c173af44b30bc8c66e294acff11cc8ee8c9f1308d7440e6a8c6a470c9c1543",
+      "gzip_sha256": "d820013e12ae2be2656270e17b5c86fbbc2a9832eb9bfff4b09c691ebb56bad7",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/darwin-_sqlite3.cpython-313-darwin.so",
+      "retained": "darwin-_sqlite3.cpython-313-darwin.so.gz",
+      "bytes": 2563184,
+      "sha256": "09fcc99746cd6520f0fe8ef4e79eac98f5dc39eda45398289b7358f1f44a11da",
+      "gzip_sha256": "43384dffea0bf1b71803cf2be2084385da510cd9df9ed46641f45d78f69477a4",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/darwin-_sqlite3.cpython-313-darwin.so.load-commands.json",
+      "retained": "darwin-_sqlite3.cpython-313-darwin.so.load-commands.json.gz",
+      "bytes": 183,
+      "sha256": "9c7c465170a8b68bfb18e9b7f9718b0349da41ae13d296254a516e472127601f",
+      "gzip_sha256": "38c3b362cb54b71d8984ec0d2ecf0be04f48245c9fb197ee417371a16bc2d336",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/darwin-static-sqlite-observations.json",
+      "retained": "darwin-static-sqlite-observations.json.gz",
+      "bytes": 493,
+      "sha256": "2683cad84bf84762fff1568e78a0daa5fbacd3c67fc05e1cc30e6034a0e4ba1f",
+      "gzip_sha256": "c7f37285d50017d161431a5d8e65ee070d8e072df08267782fa975844a7b557d",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/sqlite3504-members.json",
+      "retained": "sqlite3504-members.json.gz",
+      "bytes": 997,
+      "sha256": "d9ff2549fa50461a1edf30fac87199129b2b07b66a9fdcc6ec99b8666f5fe977",
+      "gzip_sha256": "91db0658574cc16a435f8e11940307d40f5e56c13fe0cfb34d5c514bcb3048d0",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/sqlite-3504-release.html",
+      "retained": "sqlite-3504-release.html.gz",
+      "bytes": 11450,
+      "sha256": "299c0d2e035413d853c693f7b2515fba1929e660f370ef76425ff327708a5920",
+      "gzip_sha256": "9f5f90ea66f13549f3fc92fc2f7389e058c7c284c5f891b5192262e36031706d",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/own-first-MachO-inspection-error.json",
+      "retained": "own-first-MachO-inspection-error.json.gz",
+      "bytes": 266,
+      "sha256": "0b8f2af71891f0979a7d7efd7a70894050522dee92e80476137bc7cffe99d0b0",
+      "gzip_sha256": "ee27fca18306b17de335088a2dbcc13ac52757c5cbbfb9a5fde8e803796b3f1a",
+      "roundtrip": true
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-tests/portable-first.log",
+      "retained": "portable-first.log",
+      "bytes": 3866,
+      "sha256": "73ec8cda575e3f3ec8d26dcda8a6cf608d1eb59d22cb97ec62e6b383c0bab65a"
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-tests/actionlint.stderr",
+      "retained": "actionlint.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-tests/actionlint.stdout",
+      "retained": "actionlint.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "/workspace/review-proof/review-pr800-ci794-803-current/provider-tests/portable-final.log",
+      "retained": "portable-final.log",
+      "bytes": 1230,
+      "sha256": "16cbaff184aebe3a34db9fc32256d3bb662e06c64f0c2ac827e69117118c923f"
+    },
+    {
+      "retained": "actionlint-final.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "retained": "actionlint-final.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "retained": "actual-original-CI-observations.json",
+      "bytes": 1818,
+      "sha256": "292ab2b4d5bdc49bf30b64319af63ac9a6ff9fde5c586f5e016f25ce030583e5"
+    },
+    {
+      "retained": "author-first-test-source-retrospective.py.gz",
+      "bytes": 5442,
+      "gzip_sha256": "de69c246281550bab7303cce8f1491e41ff85ee64f8ec297e70f3c8387951f11",
+      "sha256": "58465957a10246ad101a3dcfb66a2e0785cb105940bf98d0ef5c34cd99f68459",
+      "roundtrip": true
+    },
+    {
+      "retained": "criteria-preservation.json",
+      "bytes": 993,
+      "sha256": "bef2c13610eaac78c7ad030376e16e1b3391c2aa648eb83ef7c1e66241c82ece"
+    },
+    {
+      "retained": "own-source-only-initialization-errors.json.gz",
+      "bytes": 296,
+      "gzip_sha256": "7b40df28c94a68b706fa8864f3832e67b5f59c6582e9cdd845bfd9296b2a4480",
+      "sha256": "a875eb047bf0dd09efd040ab6194b388b0a1db344dd376782b01ffdcd577939d",
+      "roundtrip": true
+    },
+    {
+      "retained": "portable-source-final.log",
+      "bytes": 1230,
+      "sha256": "f10e68619dfc954972ee5eb2d83867156e63a7e48334be99d7dcd72640aaad5a"
+    },
+    {
+      "retained": "runtime-control-plan.json",
+      "bytes": 1376,
+      "sha256": "74f99206770e53e20582fb92e34cbd5cade504a0a99950139bc1e6b8a65a25c1"
+    },
+    {
+      "retained": "unchanged-product-tree-map.json",
+      "bytes": 311954,
+      "sha256": "32b16bdfa33eec665d355e30928b292867a027b60a34c23ced72eca88164dc49"
+    }
+  ],
+  "full_owned_external_distribution_archives": [
+    {
+      "retained_original": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/linux-python3137.tar.gz",
+      "bytes": 129082630,
+      "sha256": "06962ffec2157889b6edaddcfc47e96c3b002a55db076adcd0144d7d7a3b716d",
+      "not_executed": true
+    },
+    {
+      "retained_original": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/python-3.13.7-darwin-arm64.tar.gz",
+      "bytes": 70602131,
+      "sha256": "6380430c3b4741b4e13148cbfdaad4bbd06c7855ec017fd6286d1e04c6b8f4b1",
+      "not_executed": true
+    },
+    {
+      "retained_original": null,
+      "bytes": 32963218,
+      "sha256": "5c1e942482112896e429fd9713b8c57052d0657a275a4178d7a3e8a8eb1d7d4a",
+      "not_executed": true,
+      "retired_derivative_original_path": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/darwin-framework-payload",
+      "primary_archive_original": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/python-3.13.7-darwin-arm64.tar.gz",
+      "derivative_retirement_receipt": "/workspace/review-proof/review-pr800-ci794-803-current/provider-inspection/derivative-retirement.json"
+    }
+  ],
+  "official_sqlite_sdk_zip": {
+    "name": "sqlite-amalgamation-3500400.zip",
+    "sha256": "1d3049dd0f830a025a53105fc79fd2ab9431aea99e137809d064d8ee8356b032"
+  }
+}

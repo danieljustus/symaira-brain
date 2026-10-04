@@ -8,6 +8,7 @@ on:
       - 'rust/symbrain-memory/**'
       - 'scripts/memory-cli-oracle/**'
       - 'scripts/memory-historical-oracle/**'
+      - 'migration/evidence/memory-historical-649/sqlite-provider-f428/sqlite-amalgamation-3500400.zip'
       - '.github/workflows/memory-cli-native.yml'
       - 'Cargo.lock'
       - 'Cargo.toml'
@@ -18,6 +19,7 @@ on:
       - 'rust/symbrain-memory/**'
       - 'scripts/memory-cli-oracle/**'
       - 'scripts/memory-historical-oracle/**'
+      - 'migration/evidence/memory-historical-649/sqlite-provider-f428/sqlite-amalgamation-3500400.zip'
       - '.github/workflows/memory-cli-native.yml'
       - 'Cargo.lock'
       - 'Cargo.toml'
@@ -33,7 +35,7 @@ jobs:
       matrix:
         runner: [ubuntu-24.04, macos-15, windows-2025]
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 30
+    timeout-minutes: 60
     defaults:
       run:
         shell: bash
@@ -49,6 +51,22 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: '3.13.7'
+      - name: Verify portable checker provider preparation contracts
+        run: |
+          set -euo pipefail
+          umask 022
+          python3 -m unittest discover -s scripts/memory-historical-oracle -p test_provider.py -v
+      - name: Prepare the verified Linux SQLite checker library
+        if: runner.os == 'Linux'
+        env:
+          PROVIDER_DIR: ${{ runner.temp }}/memory-cli-checker-provider
+        run: |
+          set -euo pipefail
+          umask 022
+          python3 scripts/memory-historical-oracle/prepare_provider.py \
+            --archive migration/evidence/memory-historical-649/sqlite-provider-f428/sqlite-amalgamation-3500400.zip \
+            --output "$PROVIDER_DIR"
+          echo "MEMORY_SQLITE_CHECKER_PROVIDER=$PROVIDER_DIR" >> "$GITHUB_ENV"
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: '1.26.7'
@@ -122,7 +140,8 @@ jobs:
             cargo -V
             go version
             python3 --version
-            python3 -c 'import sqlite3; print("sqlite_checker=" + sqlite3.sqlite_version)'
+            python3 -c 'import sqlite3; print("sqlite_native_stdlib=" + sqlite3.sqlite_version)'
+            echo "historical_checker_provider=${MEMORY_SQLITE_CHECKER_PROVIDER:-native-stdlib}"
           } > "$RECEIPT"
       - name: Retain acceptance receipts
         if: always()
