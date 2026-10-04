@@ -17,3 +17,4 @@ migration/evidence/memory-open-race-803/windows-111341331340/*.log binary
 migration/evidence/memory-open-race-803/first-62b2757/*.log binary
 migration/evidence/memory-open-race-803/passed-9ae35cf/*.log binary
 migration/evidence/memory-open-race-803/final-*/*.log binary
+migration/evidence/memory-open-race-803/mixed-a112189/*.log binary

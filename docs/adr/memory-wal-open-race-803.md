@@ -1,6 +1,6 @@
 # Bound WAL setup contention without replaying migrations
 
-Status: focused Linux author checks passed; mixed-lock control and independent/native3 pending.
+Status: focused Linux author checks and mixed-lock control passed; independent/native3 pending.
 Refs #649/#758 and PR803/PR811. Base: immutable PR803 `6ae73a7`.
 
 Windows job `111341331340` in run `37170162739` reports three worker failures
@@ -69,6 +69,19 @@ failed because PATH lacked the tool; its literal log is retained and the
 existing absolute tool invocation passed. These single-phase controls still
 need a mixed writer-to-reader control: initial skipped-handler time must reduce
 the later genuine SQLite-handler wait, rather than granting it five new seconds.
+
+That additional real control at `a112189` retains a SHARED reader throughout,
+releases a RESERVED writer only after repeated actual BUSY failures for at least
+one second, and lets the next WAL pragma wait on the reader. It records the
+SQLite connection's actual last busy_timeout before wrapper restoration. It
+passed with 197 early attempts, writer release at 1.000563489 seconds, 3994 ms
+remaining handler timeout and 5.00519143 seconds total. A genuinely compiled
+mutant giving every attempt the full BUDGET instead failed this assertion with
+actual timeout 5000 ms and 6.01 seconds total. Both executable bytes, source
+patch, commands and raw logs are archived. The production helper was restored
+byte-for-byte afterwards. This control checks the actual budget assignment
+without a scheduler-sensitive upper wall-clock assertion; the original
+reader/writer timeout and restored-connection controls remain intact.
 
 This proposal does not assert that the Windows race is closed. If actual phase
 proof identifies BEGIN IMMEDIATE or migration/commit contention instead, retain
