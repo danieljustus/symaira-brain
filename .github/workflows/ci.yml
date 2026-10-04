@@ -41,6 +41,13 @@ jobs:
           fi
           echo "All actions are pinned to SHA."
 
+  macos-release-verification-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Prove notarization failures prevent publication
+        run: python3 -m unittest discover -s scripts -p test_macos_release_verification.py -v
+
   # golangci-lint has a known incompatibility with Go 1.26 in this
   # ecosystem (see symaira-scope). gofmt + go vet below are the lint gate
   # until golangci-lint ships a Go-1.26-compatible release — re-enable a
@@ -1545,14 +1552,6 @@ jobs:
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
-
-      # Same local-path-to-URL patch release.yml applies: harmless no-op
-      # while project.yml pins a URL + exactVersion, but keeps CI working
-      # if a local path ever gets committed by accident.
-      - name: Patch project.yml for CI (replace local path dependency with pinned URL)
-        if: steps.swift.outputs.changed == 'true'
-        run: |
-          perl -i'' -pe "s|path: ../symaira-appkit|url: https://github.com/danieljustus/symaira-appkit\\nexactVersion: 0.6.0|" project.yml
 
       - name: Install XcodeGen
         if: steps.swift.outputs.changed == 'true'
