@@ -40,8 +40,8 @@ class Progress:
             base64.b64encode(value if isinstance(value, bytes) else os.fsencode(value)).decode()
             for value in arguments])
 
-    def end_cli(self, case: int, result) -> None:
-        self.event("cli.end", case=case, exit=result.returncode,
+    def end_cli(self, case: int, result, **diagnostic) -> None:
+        self.event("cli.end", case=case, exit=result.returncode, **diagnostic,
                    stdout_bytes=len(result.stdout), stderr_bytes=len(result.stderr),
                    stdout_sha256=hashlib.sha256(result.stdout).hexdigest(),
                    stderr_sha256=hashlib.sha256(result.stderr).hexdigest())

@@ -1,0 +1,142 @@
+{
+  "kind": "SOURCE_ONLY; synthetic accounting unit tests separate; no kernel/product/SDK/compiler/native proof",
+  "Python_ASTs": 24,
+  "original_functions_AST_unchanged": {
+    "daemon_process.py": [
+      "observe",
+      "normalized",
+      "compare",
+      "controls",
+      "private_temporary_parent",
+      "absent_keychain_path"
+    ],
+    "daemon_registry.py": [
+      "observe",
+      "environment",
+      "start",
+      "request",
+      "stop",
+      "oracle_api"
+    ],
+    "daemon_registry_cli.py": [
+      "observe",
+      "compare"
+    ]
+  },
+  "registry_comparator_byte_identical": true,
+  "Unix_transport_and_Windows_IO_body_byte_identical": true,
+  "frame_errors_server_and_child_deadlines_byte_identical": true,
+  "original_archive_roundtrips": 324,
+  "Rust_line_counts": {
+    "browse/crates/symbrowse-daemon/src/client/transport.rs": 181,
+    "browse/crates/symbrowse-daemon/tests/windows_client_deadlines.rs": 285
+  },
+  "source_maps": [
+    {
+      "path": ".github/workflows/browse-daemon-native.yml",
+      "sha256": "620c49140d715a15d217a86146480da98f77ab717c83b69e24eb45e030b3e1aa",
+      "bytes": 8566
+    },
+    {
+      "path": "browse/crates/symbrowse-daemon/src/client/transport.rs",
+      "sha256": "835e443454d15daccba9f823e52a1365041369017620e41ebe91e57333f6d295",
+      "bytes": 7194
+    },
+    {
+      "path": "browse/crates/symbrowse-daemon/tests/windows_client_deadlines.rs",
+      "sha256": "c3b75c529d044ab625af960594177ff2b0dcb8b792f60a9358349ddaf9d01c61",
+      "bytes": 10215
+    },
+    {
+      "path": "browse/port/harness/daemon_process.py",
+      "sha256": "e4ab4cb79c0d26fefe17de9a68a283140a39f001b65f36474e2b8c20ab1e5cd1",
+      "bytes": 14139
+    },
+    {
+      "path": "browse/port/harness/daemon_registry.py",
+      "sha256": "5243f45cdc1e65d8d708f36951fed09331ed8dc1002337adf65707611fd13d47",
+      "bytes": 18608
+    },
+    {
+      "path": "browse/port/harness/daemon_registry_cli.py",
+      "sha256": "88391525190120e4fe35ae4bae924bbc709d1ad0cf1615a90c06e555146cdd4f",
+      "bytes": 6105
+    },
+    {
+      "path": "browse/port/harness/raw_path_admission.py",
+      "sha256": "ec66c45954b8ba5f8779ad2f1a6568b4d74e9305aa5fc0ee80f39f68cfa55130",
+      "bytes": 7162
+    },
+    {
+      "path": "browse/port/harness/registry_cli_process.py",
+      "sha256": "f401efdd82bcaaef89ff2de4bf42216a5807c55612a62640b154592e5f089843",
+      "bytes": 4224
+    },
+    {
+      "path": "browse/port/harness/registry_progress.py",
+      "sha256": "498d859f1dd03024b9386f153abaf2631411a6ebb6bc215c6c0b241d84324e78",
+      "bytes": 2170
+    },
+    {
+      "path": "browse/port/harness/test_raw_path_admission.py",
+      "sha256": "111ce9549d139e3bf13cce2055c7d3f844825d98bc61ce3b3750f447d37a3714",
+      "bytes": 4838
+    },
+    {
+      "path": "browse/port/harness/test_registry_cli_process.py",
+      "sha256": "6148786ffc50188c8979d9fdb55330a3c6145552afe68e485af9491ee2d3b61d",
+      "bytes": 4722
+    },
+    {
+      "path": "docs/adr/native-client-deadlines-801.md",
+      "sha256": "590e5fd93ea972201b3b09404fa25054c6c1437711f1bb4829fc89613345da94",
+      "bytes": 8368
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/dependency-bindings/interprocess-2.4.4.crate",
+      "sha256": "6cb02ffbf25e8ef0f4a95bff054eef75f6d1bf16919474cf2caa63b21997478a",
+      "bytes": 149182
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/dependency-bindings/mio-1.2.3.crate",
+      "sha256": "4b18443e9c262bfe8fa82f51666e2642c53393f7e5c27b3e1aeab922cff5b9d8",
+      "bytes": 110455
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/dependency-bindings/receipt.json",
+      "sha256": "3674775a6725996743c54db443bb3ec3b41ef64adfd5b8eea00656454fbbb6cc",
+      "bytes": 5846
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/dependency-bindings/tokio-1.53.1.crate",
+      "sha256": "202caea871b69668250d242070849eb495be178ed697a3e98aebce5bc81a0bed",
+      "bytes": 920101
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/original-ci-diagnosis.json",
+      "sha256": "2711df3a5a48fadf8299548823614524b535b1300264f3ec4317dc3abeb35659",
+      "bytes": 48285
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/original/initial-empty-archive.tar.gz",
+      "sha256": "16372bbdcfd612e8c711d6b2aa30b7ab13feb1abd41879cbfe0076895c323dab",
+      "bytes": 39
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/original/initial-retention-tool-failure.txt",
+      "sha256": "50de3660bdd38e4f88f7aab09c81974a6ee9ebd6d7cf9bf16215b22c927612eb",
+      "bytes": 401
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/original/raw-and-source.tar.gz",
+      "sha256": "07f40f5be16af310d851241fd1e25ae6a773860a3a848f75b662acdc87ca1b34",
+      "bytes": 1060202
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/original/retention.json",
+      "sha256": "90d0f4ba93feea0b8fbfaca0bc131b86825d36440e0f1be3359cd9a456d8b6e8",
+      "bytes": 115897
+    }
+  ],
+  "candidate_runtime_executions": 0
+}

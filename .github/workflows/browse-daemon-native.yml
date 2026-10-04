@@ -58,6 +58,14 @@ jobs:
           set -euo pipefail
           python3 port/harness/key_test_environment.py -- cargo test -p symbrowse-daemon --locked 2>&1 | tee "$RUNNER_TEMP/browse-daemon-unit.log"
 
+      - name: Require Windows client cancellation and eight-client contracts
+        if: runner.os == 'Windows'
+        run: |
+          set -euo pipefail
+          cargo test -p symbrowse-daemon --test windows_client_deadlines --locked \
+            native_windows_client_deadlines -- --ignored --exact --nocapture \
+            2>&1 | tee "$RUNNER_TEMP/browse-daemon-client-deadlines.log"
+
       - name: Exercise native daemon lifecycle and races
         env:
           SYMBROWSE_RUST_BINARY: ${{ github.workspace }}/browse/target/release/symbrowse${{ runner.os == 'Windows' && '.exe' || '' }}
@@ -69,6 +77,8 @@ jobs:
           python3 port/harness/test_run.py DaemonExitTests 2>&1 | tee "$RUNNER_TEMP/browse-daemon-harness.log"
           python3 port/harness/test_windows_pipe.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-pipe-controls.log"
           python3 port/harness/test_registry_progress.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-registry-progress-tests.log"
+          python3 port/harness/test_registry_cli_process.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-cli-capture-tests.log"
+          python3 port/harness/test_raw_path_admission.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-raw-path-tests.log"
           python3 port/harness/run.py --suite daemon 2>&1 | tee "$RUNNER_TEMP/browse-daemon-lifecycle.log"
           python3 port/harness/run.py --suite daemon-races --repeat 50 2>&1 | tee "$RUNNER_TEMP/browse-daemon-races.log"
 
@@ -142,12 +152,17 @@ jobs:
             ${{ runner.temp }}/browse-daemon-harness.log
             ${{ runner.temp }}/browse-daemon-pipe-controls.log
             ${{ runner.temp }}/browse-daemon-registry-progress-tests.log
+            ${{ runner.temp }}/browse-daemon-cli-capture-tests.log
+            ${{ runner.temp }}/browse-daemon-raw-path-tests.log
+            ${{ runner.temp }}/browse-daemon-client-deadlines.log
+            ${{ runner.temp }}/browse-daemon-client-deadlines/**
             ${{ runner.temp }}/browse-daemon-lifecycle.log
             ${{ runner.temp }}/browse-daemon-races.log
             ${{ runner.temp }}/browse-daemon-process.json
             ${{ runner.temp }}/browse-daemon-registry.json
             ${{ runner.temp }}/browse-daemon-registry.raw.json
             ${{ runner.temp }}/browse-daemon-registry.progress.jsonl
+            ${{ runner.temp }}/browse-daemon-registry.progress.cli/**
             ${{ runner.temp }}/browse-daemon-state-key.json
             ${{ runner.temp }}/browse-daemon-state-key.raw.json
             ${{ runner.temp }}/browse-daemon-state-key.log

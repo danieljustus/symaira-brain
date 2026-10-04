@@ -16,6 +16,7 @@ import tempfile
 import time
 from registry_progress import Progress, event
 from registry_compare import compare, controls, normalize
+from registry_cli_process import capture
 
 HERE = Path(__file__).resolve().parent
 SPEC = importlib.util.spec_from_file_location("process", HERE / "daemon_process.py")
@@ -43,10 +44,7 @@ def environment(root: Path) -> dict:
 
 
 def cli(binary: Path, root: Path, env: dict, arguments: list[str], progress=None) -> dict:
-    case = progress.begin_cli(binary, arguments) if progress is not None else None
-    result = subprocess.run([str(binary), *arguments], cwd=root, env=env,
-                            capture_output=True, timeout=15)
-    if progress is not None: progress.end_cli(case, result)
+    result = capture(binary, root, env, arguments, progress)
     return {"arguments": arguments, "exit": result.returncode,
             "stdout": result.stdout.decode(), "stderr": result.stderr.decode()}
 
@@ -249,6 +247,23 @@ def main() -> int:
         "cli_source_sha256": process.digest(HERE / "daemon_registry_cli.py"),
         "go_ref": process.GO_REF, "go_binary_sha256": process.digest(args.go),
         "rust_binary_sha256": process.digest(args.rust), "scope": "diagnostic only; full assertions unchanged"})
+    report = {"status": "started", "binding": progress.path.read_text().splitlines()[0],
+              "case": {}, "matches": False}
+    save_report(args, report)
+    try:
+        return run_gate(args, source, progress, report)
+    except BaseException as error:
+        report.update(status="failed", failure={"type": type(error).__name__, "message": str(error)})
+        save_report(args, report)
+        raise
+
+
+def save_report(args, report):
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(report, indent=2) + "\n")
+
+
+def run_gate(args, source, progress, report):
     event(progress, "oracle.api.begin")
     api = oracle_api(source)
     event(progress, "oracle.api.end")
@@ -256,7 +271,11 @@ def main() -> int:
     assert not subprocess.check_output(["git", "-C", str(source), "status", "--porcelain"], text=True), "oracle API modified frozen Go"
     session = f"r{os.getpid()}"
     fixtures = api["observations"]["state_fixtures_hex"]
-    case = {"go": observe(args.go.resolve(), session, fixtures, progress), "rust": observe(args.rust.resolve(), session, fixtures, progress)}
+    case = {}
+    report["case"] = case
+    for owner, binary in (("go", args.go), ("rust", args.rust)):
+        case[owner] = observe(binary.resolve(), session, fixtures, progress)
+        save_report(args, report)
     args.out.with_suffix(".raw.json").write_text(json.dumps(case, indent=2) + "\n")
     event(progress, "comparison.begin")
     case["matches"] = compare(case)
@@ -264,7 +283,7 @@ def main() -> int:
     root = HERE.parents[2]
     files = subprocess.check_output(["git", "-C", str(root), "ls-files", "browse/crates", "browse/port/harness"], text=True).splitlines()
     go_files = subprocess.check_output(["git", "-C", str(source), "ls-files", "browse"], text=True).splitlines()
-    report = {"candidate_head": subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip(),
+    report.update({"candidate_head": subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip(),
               "candidate_dirty": bool(subprocess.check_output(["git", "-C", str(root), "status", "--porcelain"], text=True)),
               "go_ref": process.GO_REF, "platform": platform.platform(),
               "go_binary_sha256": process.digest(args.go), "rust_binary_sha256": process.digest(args.rust),
@@ -273,9 +292,8 @@ def main() -> int:
               "counts_per_binary": {"cli_observations": 108 + len(case["go"]["cli_edges"]["invalid"]) + 4 + 6, "invalid_session_cli_observations": 48,
                                     "literal_cli_edge_observations": len(case["go"]["cli_edges"]["invalid"]), "selected_invalid_output_observations": 4, "implemented_help_observations": 6, "recorded_raw_frames": 20,
                                     "concurrent_clients": 8, "persisted_go_fixtures": 3},
-              "case": case, "oracle_api": api, "matches": case["matches"], "negative_controls": controls(case)}
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(report, indent=2) + "\n")
+              "case": case, "oracle_api": api, "matches": case["matches"], "negative_controls": controls(case), "status": "complete"})
+    save_report(args, report)
     if not case["matches"]:
         left, right = normalize(case["go"], rust=False), normalize(case["rust"], rust=True)
         for key in left:

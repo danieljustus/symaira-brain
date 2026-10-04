@@ -1,0 +1,1271 @@
+{
+  "kind": "actual immutable PR801 run37194257690 diagnosis, not successor runtime proof",
+  "source_head": "8e41529c86c0415c8ab71ce403a588079320ea61",
+  "jobs": [
+    {
+      "root": "/workspace/review-proof/root-discovery801-8e-macARM",
+      "receipt": {
+        "job": 111412706458,
+        "full_log_bytes": 115538,
+        "full_log_sha256": "3012bf84c2e2b0075459a2de8d50ba47e212d7bcd9d57111e089778ae667b907",
+        "zip": "/workspace/attachments/23fd422a-dc22-41f8-9233-e6372faf0eac/discovery801-8e-macARM-original.zip",
+        "zip_sha256": "225c0aaa3aad52fff8dbaae2bad2b0afd6fe897df7c30654c4ceaf9f17ddcc99",
+        "members": [
+          {
+            "name": "browse-daemon-unit.log",
+            "bytes": 14830,
+            "sha256": "01057ab5cc8dbef075fc9f83946c726d92d88fa80d9381060aced7ea5996b12f"
+          },
+          {
+            "name": "browse-daemon-harness.log",
+            "bytes": 100,
+            "sha256": "0fcc5ea8e9006bc32723a78a9c62e42ff1fbec46be798ae5fe7af01aeba2dc52"
+          },
+          {
+            "name": "browse-daemon-pipe-controls.log",
+            "bytes": 106,
+            "sha256": "75ff54e727b57e4bd7b88956ed0c92c4b9a416e6f0976707e8fb54aa385ac0bd"
+          },
+          {
+            "name": "browse-daemon-macos-15.txt",
+            "bytes": 334,
+            "sha256": "810bf70190b75842c9a2a0ff91f8a3cccfbcdb904f96fc860ff622e50b0c5639"
+          },
+          {
+            "name": "browse-daemon-registry-progress-tests.log",
+            "bytes": 103,
+            "sha256": "a763e360901062e96b483b564c9bb85ff022dff4c5a1b57ea18308601a510fca"
+          },
+          {
+            "name": "browse-daemon-lifecycle.log",
+            "bytes": 44,
+            "sha256": "bb089a16d8353cfbff0fe8c53f8ec586b55e49f95535f3a3fbdecfb6760e95fe"
+          },
+          {
+            "name": "browse-daemon-races.log",
+            "bytes": 46,
+            "sha256": "70af09f35bb0b9cf60a931c3e1db1fa0feac2948baac6c4aa2e1f68a03bbf306"
+          }
+        ]
+      },
+      "files": [
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-macARM/browse-daemon-harness.log",
+          "sha256": "0fcc5ea8e9006bc32723a78a9c62e42ff1fbec46be798ae5fe7af01aeba2dc52",
+          "bytes": 100
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-macARM/browse-daemon-lifecycle.log",
+          "sha256": "bb089a16d8353cfbff0fe8c53f8ec586b55e49f95535f3a3fbdecfb6760e95fe",
+          "bytes": 44
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-macARM/browse-daemon-macos-15.txt",
+          "sha256": "810bf70190b75842c9a2a0ff91f8a3cccfbcdb904f96fc860ff622e50b0c5639",
+          "bytes": 334
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-macARM/browse-daemon-pipe-controls.log",
+          "sha256": "75ff54e727b57e4bd7b88956ed0c92c4b9a416e6f0976707e8fb54aa385ac0bd",
+          "bytes": 106
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-macARM/browse-daemon-races.log",
+          "sha256": "70af09f35bb0b9cf60a931c3e1db1fa0feac2948baac6c4aa2e1f68a03bbf306",
+          "bytes": 46
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-macARM/browse-daemon-registry-progress-tests.log",
+          "sha256": "a763e360901062e96b483b564c9bb85ff022dff4c5a1b57ea18308601a510fca",
+          "bytes": 103
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-macARM/browse-daemon-unit.log",
+          "sha256": "01057ab5cc8dbef075fc9f83946c726d92d88fa80d9381060aced7ea5996b12f",
+          "bytes": 14830
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-macARM/job-111412706458.logs.decoded",
+          "sha256": "3012bf84c2e2b0075459a2de8d50ba47e212d7bcd9d57111e089778ae667b907",
+          "bytes": 115538
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-macARM/job-111412706458.mcp.json",
+          "sha256": "36757f04672b79ce9fc1c186312bd19740e789c517cdf0155e8d2fb72f345e9a",
+          "bytes": 118119
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-macARM/receipt.json",
+          "sha256": "f0af23e5c3a3806b3d091f9e337c2e75e79f9242e95885f49e04fdf7763ecc74",
+          "bytes": 1487
+        }
+      ],
+      "failure_lines": [
+        "2026-10-04T10:52:21.6883760Z     cwd.mkdir(mode=0o700)",
+        "2026-10-04T10:52:21.6893410Z OSError: [Errno 92] Illegal byte sequence: '/tmp/bd-zplfimzg/origin-\\udce2\\udc82'"
+      ],
+      "raw_origin_case_pre_Go_launch_failure": true
+    },
+    {
+      "root": "/workspace/review-proof/root-discovery801-8e-winAMD64",
+      "receipt": {
+        "job": 111412706413,
+        "full_log_bytes": 116440,
+        "full_log_sha256": "e817acce19fde1dd434057ccf304a63f3697fcfdd8493d09e132cc3bced25a1e",
+        "zip": "/workspace/attachments/da9cc891-8e7a-45d2-98f5-5fa44012c3db/discovery801-8e-winAMD64-original.zip",
+        "zip_sha256": "d6a2262fe5a832679be381a9f72930622fa3d7149ca73b7fe4c31edc8ea7c049",
+        "members": [
+          {
+            "name": "browse-daemon-harness.log",
+            "bytes": 105,
+            "sha256": "bb7a874061d8b3ee14efd29a47a3ee70f8fd937ff831b165998ce3a89074933a"
+          },
+          {
+            "name": "browse-daemon-windows-2025.txt",
+            "bytes": 341,
+            "sha256": "52f307584ed9cc89955a8a1ebaad76436470aa26a36df500a04f395c404bc61c"
+          },
+          {
+            "name": "browse-daemon-unit.log",
+            "bytes": 13713,
+            "sha256": "fe9e2f22922ff89821fb23c7ce16928332dff91afeaeae74637e46b7ae29ab7a"
+          },
+          {
+            "name": "browse-daemon-pipe-controls.log",
+            "bytes": 111,
+            "sha256": "5a5f749959c4ae7181e38c088af369be85d1a42b1b45a6b98ce7e8fe0b1f8f64"
+          },
+          {
+            "name": "browse-daemon-registry-progress-tests.log",
+            "bytes": 108,
+            "sha256": "e4d092f55bf75eb66f4b92fc2bf8b4da70f90be100a60b902ecc19167e83b4a9"
+          },
+          {
+            "name": "browse-daemon-lifecycle.log",
+            "bytes": 45,
+            "sha256": "3627fa48e7a3f917fe5a1da07e73effdc065c508b523d56c27daf638fb0d7abe"
+          },
+          {
+            "name": "browse-daemon-races.log",
+            "bytes": 47,
+            "sha256": "86b027d590d4232c301ecba1102c0e720cd20166f4a224dba6e9473b78f5b268"
+          },
+          {
+            "name": "browse-daemon-process.json",
+            "bytes": 152934,
+            "sha256": "1c6b6d906ea33cfe443e66789270b07b8a8b7e42868339e18c67128ae816b67d"
+          },
+          {
+            "name": "browse-daemon-registry.progress.jsonl",
+            "bytes": 326246,
+            "sha256": "032e244cd291df5aec4c23438b71449b87b22d8039f82ab880b95b38a480796f"
+          }
+        ]
+      },
+      "files": [
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-winAMD64/browse-daemon-harness.log",
+          "sha256": "bb7a874061d8b3ee14efd29a47a3ee70f8fd937ff831b165998ce3a89074933a",
+          "bytes": 105
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-winAMD64/browse-daemon-lifecycle.log",
+          "sha256": "3627fa48e7a3f917fe5a1da07e73effdc065c508b523d56c27daf638fb0d7abe",
+          "bytes": 45
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-winAMD64/browse-daemon-pipe-controls.log",
+          "sha256": "5a5f749959c4ae7181e38c088af369be85d1a42b1b45a6b98ce7e8fe0b1f8f64",
+          "bytes": 111
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-winAMD64/browse-daemon-process.json",
+          "sha256": "1c6b6d906ea33cfe443e66789270b07b8a8b7e42868339e18c67128ae816b67d",
+          "bytes": 152934
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-winAMD64/browse-daemon-races.log",
+          "sha256": "86b027d590d4232c301ecba1102c0e720cd20166f4a224dba6e9473b78f5b268",
+          "bytes": 47
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-winAMD64/browse-daemon-registry-progress-tests.log",
+          "sha256": "e4d092f55bf75eb66f4b92fc2bf8b4da70f90be100a60b902ecc19167e83b4a9",
+          "bytes": 108
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-winAMD64/browse-daemon-registry.progress.jsonl",
+          "sha256": "032e244cd291df5aec4c23438b71449b87b22d8039f82ab880b95b38a480796f",
+          "bytes": 326246
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-winAMD64/browse-daemon-unit.log",
+          "sha256": "fe9e2f22922ff89821fb23c7ce16928332dff91afeaeae74637e46b7ae29ab7a",
+          "bytes": 13713
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-winAMD64/browse-daemon-windows-2025.txt",
+          "sha256": "52f307584ed9cc89955a8a1ebaad76436470aa26a36df500a04f395c404bc61c",
+          "bytes": 341
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-winAMD64/job-111412706413.logs.decoded",
+          "sha256": "e817acce19fde1dd434057ccf304a63f3697fcfdd8493d09e132cc3bced25a1e",
+          "bytes": 116440
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-winAMD64/job-111412706413.mcp.json",
+          "sha256": "965fcea8106f6798cac41e7c9864e093e2c73c3eac4c978a7f5091c7b99ebfb0",
+          "bytes": 121281
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-winAMD64/receipt.json",
+          "sha256": "824fb9eefab870c18b28d7a7557f54e09173ce2b0a2aeddad41582d47b17cdb9",
+          "bytes": 1830
+        }
+      ],
+      "events": 1259,
+      "last_event": {
+        "case": 1252,
+        "exit": 0,
+        "monotonic": 766.812,
+        "sequence": 1259,
+        "stage": "cli.end",
+        "stderr_bytes": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 59,
+        "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+      },
+      "unmatched_cli_begins": [
+        {
+          "arguments_filesystem_base64": [
+            "c3RhdGU=",
+            "bGlzdA==",
+            "LS1zZXNzaW9u",
+            "cjQ3MzJh",
+            "LS1qc29u"
+          ],
+          "binary": "D:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+          "monotonic": 765.796,
+          "sequence": 1246,
+          "stage": "cli.begin"
+        }
+      ],
+      "autostart_groups": [
+        {
+          "begin": {
+            "monotonic": 762.093,
+            "sequence": 589,
+            "session": "r4732a",
+            "stage": "autostart.begin"
+          },
+          "clients": [
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 762.093,
+                "sequence": 590,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 590,
+                "exit": 0,
+                "monotonic": 762.5,
+                "sequence": 603,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 762.093,
+                "sequence": 591,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 591,
+                "exit": 0,
+                "monotonic": 762.515,
+                "sequence": 605,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 762.093,
+                "sequence": 592,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 592,
+                "exit": 0,
+                "monotonic": 762.5,
+                "sequence": 602,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 762.093,
+                "sequence": 593,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 593,
+                "exit": 0,
+                "monotonic": 762.5,
+                "sequence": 600,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 762.093,
+                "sequence": 594,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 594,
+                "exit": 0,
+                "monotonic": 762.5,
+                "sequence": 604,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 762.093,
+                "sequence": 595,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 595,
+                "exit": 0,
+                "monotonic": 762.5,
+                "sequence": 598,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 762.093,
+                "sequence": 596,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 596,
+                "exit": 0,
+                "monotonic": 762.5,
+                "sequence": 599,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 762.093,
+                "sequence": 597,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 597,
+                "exit": 0,
+                "monotonic": 762.5,
+                "sequence": 601,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            }
+          ]
+        },
+        {
+          "begin": {
+            "monotonic": 765.796,
+            "sequence": 1244,
+            "session": "r4732a",
+            "stage": "autostart.begin"
+          },
+          "clients": [
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 765.796,
+                "sequence": 1245,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 1245,
+                "exit": 0,
+                "monotonic": 766.39,
+                "sequence": 1256,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 765.796,
+                "sequence": 1246,
+                "stage": "cli.begin"
+              },
+              "end": null
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 765.796,
+                "sequence": 1247,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 1247,
+                "exit": 0,
+                "monotonic": 766.281,
+                "sequence": 1253,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 765.796,
+                "sequence": 1248,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 1248,
+                "exit": 0,
+                "monotonic": 766.375,
+                "sequence": 1255,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 765.796,
+                "sequence": 1249,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 1249,
+                "exit": 0,
+                "monotonic": 766.453,
+                "sequence": 1258,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 765.796,
+                "sequence": 1250,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 1250,
+                "exit": 0,
+                "monotonic": 766.328,
+                "sequence": 1254,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 765.796,
+                "sequence": 1251,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 1251,
+                "exit": 0,
+                "monotonic": 766.437,
+                "sequence": 1257,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjQ3MzJh",
+                  "LS1qc29u"
+                ],
+                "binary": "D:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 765.796,
+                "sequence": 1252,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 1252,
+                "exit": 0,
+                "monotonic": 766.812,
+                "sequence": 1259,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "root": "/workspace/review-proof/root-discovery801-8e-windowsARM",
+      "receipt": {
+        "head": "8e41529c86c0415c8ab71ce403a588079320ea61",
+        "merge": "a67f97c3346930abf1b99b175d7f5d767359f781",
+        "run": 37194257690,
+        "job": 111412706420,
+        "original_zip": "/workspace/attachments/91f7d639-99dc-49fa-b5f6-5e63111a6729/discovery801-8e-windowsARM-original.zip",
+        "zip_sha256": "86f1c61c242911afdfaef2a0959c04e3baffca7ce7324afd13380f4b182db9b6",
+        "all_members": [
+          {
+            "path": "browse-daemon-windows-11-arm.txt",
+            "bytes": 344,
+            "sha256": "8237e813291bc1be6737f8f374afeb25020dd3a56ed3e1944dd46149d338aec1"
+          },
+          {
+            "path": "browse-daemon-unit.log",
+            "bytes": 13713,
+            "sha256": "e9d3686baa97d2e5460caa086ec2bc4710f4e83514470ee5aedddb0fe7c77f57"
+          },
+          {
+            "path": "browse-daemon-harness.log",
+            "bytes": 105,
+            "sha256": "4ea35901dba90efbb6d536a0a994ed2d02afc483503244a35d308220109c3406"
+          },
+          {
+            "path": "browse-daemon-pipe-controls.log",
+            "bytes": 111,
+            "sha256": "6f4b69226e1da006d05172474adec2d1085ecb4b09fb9f8ec664793bb37db5f4"
+          },
+          {
+            "path": "browse-daemon-registry-progress-tests.log",
+            "bytes": 108,
+            "sha256": "e8d959e42dd8a12e9304fa12d8c674a1dcc0daaf86e3b965de145faa6043b867"
+          },
+          {
+            "path": "browse-daemon-lifecycle.log",
+            "bytes": 45,
+            "sha256": "3627fa48e7a3f917fe5a1da07e73effdc065c508b523d56c27daf638fb0d7abe"
+          },
+          {
+            "path": "browse-daemon-races.log",
+            "bytes": 47,
+            "sha256": "86b027d590d4232c301ecba1102c0e720cd20166f4a224dba6e9473b78f5b268"
+          },
+          {
+            "path": "browse-daemon-process.json",
+            "bytes": 152965,
+            "sha256": "c3876d2ef9bbcf9ffd69fd4f73e8a92fa8a0cd65fedf3db122864bab0a08721f"
+          },
+          {
+            "path": "browse-daemon-registry.progress.jsonl",
+            "bytes": 332632,
+            "sha256": "0b809f9c233bda608372f73fadfbcdbef5c37b950df739f813cf637181040a48"
+          }
+        ],
+        "full_log_bytes": 126359,
+        "full_log_sha256": "c8a172b0bfa140291d295d5a41c34855e2773332a8d09dc2d499319bf85daafc",
+        "cancel_is_not_acceptance": true
+      },
+      "files": [
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-windowsARM/browse-daemon-harness.log",
+          "sha256": "4ea35901dba90efbb6d536a0a994ed2d02afc483503244a35d308220109c3406",
+          "bytes": 105
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-windowsARM/browse-daemon-lifecycle.log",
+          "sha256": "3627fa48e7a3f917fe5a1da07e73effdc065c508b523d56c27daf638fb0d7abe",
+          "bytes": 45
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-windowsARM/browse-daemon-pipe-controls.log",
+          "sha256": "6f4b69226e1da006d05172474adec2d1085ecb4b09fb9f8ec664793bb37db5f4",
+          "bytes": 111
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-windowsARM/browse-daemon-process.json",
+          "sha256": "c3876d2ef9bbcf9ffd69fd4f73e8a92fa8a0cd65fedf3db122864bab0a08721f",
+          "bytes": 152965
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-windowsARM/browse-daemon-races.log",
+          "sha256": "86b027d590d4232c301ecba1102c0e720cd20166f4a224dba6e9473b78f5b268",
+          "bytes": 47
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-windowsARM/browse-daemon-registry-progress-tests.log",
+          "sha256": "e8d959e42dd8a12e9304fa12d8c674a1dcc0daaf86e3b965de145faa6043b867",
+          "bytes": 108
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-windowsARM/browse-daemon-registry.progress.jsonl",
+          "sha256": "0b809f9c233bda608372f73fadfbcdbef5c37b950df739f813cf637181040a48",
+          "bytes": 332632
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-windowsARM/browse-daemon-unit.log",
+          "sha256": "e9d3686baa97d2e5460caa086ec2bc4710f4e83514470ee5aedddb0fe7c77f57",
+          "bytes": 13713
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-windowsARM/browse-daemon-windows-11-arm.txt",
+          "sha256": "8237e813291bc1be6737f8f374afeb25020dd3a56ed3e1944dd46149d338aec1",
+          "bytes": 344
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-windowsARM/job-111412706420.logs.decoded",
+          "sha256": "c8a172b0bfa140291d295d5a41c34855e2773332a8d09dc2d499319bf85daafc",
+          "bytes": 126359
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-windowsARM/job-111412706420.mcp.json",
+          "sha256": "aef4a51ebb4bcf0315bbddaba6d07d231341aa86b6d275fda220ec4429bc3e8d",
+          "bytes": 131498
+        },
+        {
+          "path": "/workspace/review-proof/root-discovery801-8e-windowsARM/receipt.json",
+          "sha256": "5ca3d04c864771e14d304a94bbdf0a8801f4505ebece81714524c5feafab4a54",
+          "bytes": 2014
+        }
+      ],
+      "events": 1259,
+      "last_event": {
+        "case": 1246,
+        "exit": 0,
+        "monotonic": 1020.8023655,
+        "sequence": 1259,
+        "stage": "cli.end",
+        "stderr_bytes": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 59,
+        "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+      },
+      "unmatched_cli_begins": [
+        {
+          "arguments_filesystem_base64": [
+            "c3RhdGU=",
+            "bGlzdA==",
+            "LS1zZXNzaW9u",
+            "cjY3NzZh",
+            "LS1qc29u"
+          ],
+          "binary": "C:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+          "monotonic": 1020.3970578,
+          "sequence": 1249,
+          "stage": "cli.begin"
+        }
+      ],
+      "autostart_groups": [
+        {
+          "begin": {
+            "monotonic": 1014.4696898,
+            "sequence": 589,
+            "session": "r6776a",
+            "stage": "autostart.begin"
+          },
+          "clients": [
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 1014.4725841,
+                "sequence": 590,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 590,
+                "exit": 0,
+                "monotonic": 1014.672922,
+                "sequence": 599,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 1014.4730936,
+                "sequence": 591,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 591,
+                "exit": 0,
+                "monotonic": 1014.6417298,
+                "sequence": 598,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 1014.4737677,
+                "sequence": 592,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 592,
+                "exit": 0,
+                "monotonic": 1014.693255,
+                "sequence": 602,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 1014.4745015,
+                "sequence": 593,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 593,
+                "exit": 0,
+                "monotonic": 1014.7252135,
+                "sequence": 605,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 1014.4749447,
+                "sequence": 594,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 594,
+                "exit": 0,
+                "monotonic": 1014.7029662,
+                "sequence": 603,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 1014.4876261,
+                "sequence": 595,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 595,
+                "exit": 0,
+                "monotonic": 1014.6860296,
+                "sequence": 601,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 1014.4965646,
+                "sequence": 596,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 596,
+                "exit": 0,
+                "monotonic": 1014.6790343,
+                "sequence": 600,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\_temp\\symbrowse-daemon-go.exe",
+                "monotonic": 1014.5035853,
+                "sequence": 597,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 597,
+                "exit": 0,
+                "monotonic": 1014.7142032,
+                "sequence": 604,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            }
+          ]
+        },
+        {
+          "begin": {
+            "monotonic": 1020.3939806,
+            "sequence": 1244,
+            "session": "r6776a",
+            "stage": "autostart.begin"
+          },
+          "clients": [
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 1020.3945349,
+                "sequence": 1245,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 1245,
+                "exit": 0,
+                "monotonic": 1020.7945046,
+                "sequence": 1258,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 1020.3950378,
+                "sequence": 1246,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 1246,
+                "exit": 0,
+                "monotonic": 1020.8023655,
+                "sequence": 1259,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 1020.3960652,
+                "sequence": 1247,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 1247,
+                "exit": 0,
+                "monotonic": 1020.7940554,
+                "sequence": 1257,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 1020.3966853,
+                "sequence": 1248,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 1248,
+                "exit": 0,
+                "monotonic": 1020.7819157,
+                "sequence": 1255,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 1020.3970578,
+                "sequence": 1249,
+                "stage": "cli.begin"
+              },
+              "end": null
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 1020.3974626,
+                "sequence": 1250,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 1250,
+                "exit": 0,
+                "monotonic": 1020.7824252,
+                "sequence": 1256,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 1020.3984813,
+                "sequence": 1251,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 1251,
+                "exit": 0,
+                "monotonic": 1020.7537312,
+                "sequence": 1254,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            },
+            {
+              "begin": {
+                "arguments_filesystem_base64": [
+                  "c3RhdGU=",
+                  "bGlzdA==",
+                  "LS1zZXNzaW9u",
+                  "cjY3NzZh",
+                  "LS1qc29u"
+                ],
+                "binary": "C:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+                "monotonic": 1020.3989698,
+                "sequence": 1252,
+                "stage": "cli.begin"
+              },
+              "end": {
+                "case": 1252,
+                "exit": 0,
+                "monotonic": 1020.7353279,
+                "sequence": 1253,
+                "stage": "cli.end",
+                "stderr_bytes": 0,
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 59,
+                "stdout_sha256": "92a25fc3616b65e97a3204b9cbcaf2d24811893e1519fb685c961d2b9f07c41b"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "source_owner_findings": [
+    "interprocess2.4.4 busy connect can spawn_blocking",
+    "interprocess2.4.4 TokioFlusher spawns blocking FlushFileBuffers",
+    "interprocess2.4.4 RawPipeStream can hand unflushed handles to linger_pool",
+    "Tokio1.53.1 Runtime::drop waits indefinitely for blocking work",
+    "Python subprocess.run Windows timeout cleanup can perform communicate without timeout"
+  ],
+  "original_native_inner_phase_known": false,
+  "original_native_PE_available": false
+}

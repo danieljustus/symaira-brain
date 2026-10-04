@@ -3,6 +3,7 @@ import base64
 import copy
 import os
 import subprocess
+from registry_cli_process import capture
 
 UNSUPPORTED_ID_ROW = b"  id          Derive a stable, collision-free session id from the local repository layout\n"
 COMMANDS = [("session", "list"), ("session", "info"), ("daemon", "status"), ("state", "list")]
@@ -10,11 +11,8 @@ FORMATS = [[], ["--json"], ["--output", "yaml"]]
 
 
 def execute(binary, root, env, arguments, progress=None):
-    case = progress.begin_cli(binary, arguments) if progress is not None else None
     argv = arguments if os.name == "posix" else [value.decode() for value in arguments]
-    result = subprocess.run([str(binary), *argv], cwd=root, env=env,
-                            capture_output=True, timeout=15)
-    if progress is not None: progress.end_cli(case, result)
+    result = capture(binary, root, env, argv, progress)
     return {"arguments_base64": [base64.b64encode(value).decode() for value in arguments],
             "exit": result.returncode, "stdout_base64": base64.b64encode(result.stdout).decode(),
             "stderr_base64": base64.b64encode(result.stderr).decode()}
