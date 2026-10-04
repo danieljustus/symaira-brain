@@ -6,6 +6,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
+import sdk_fixture
 
 HERE = Path(__file__).resolve().parent
 SPEC = importlib.util.spec_from_file_location("proof", HERE / "binding.py")
@@ -38,8 +39,11 @@ class Admission(unittest.TestCase):
             proof.sources(Path("unused"), proof.ROOT)
 
     def test_wrong_sdk_bytes_are_rejected(self):
-        with patch.object(proof, "digest", return_value="invented"), self.assertRaisesRegex(ValueError, "unbound SDK bytes"):
-            proof.sdks(Path("owned-go"), Path("owned-rust"))
+        with tempfile.TemporaryDirectory() as temporary:
+            fixture = sdk_fixture.prepare(Path(temporary))
+            (fixture["go"] / "bin/go").write_bytes(b"invented")
+            with sdk_fixture.selected(proof, fixture), self.assertRaisesRegex(ValueError, "unbound SDK bytes"):
+                proof.sdks(fixture["go"], fixture["rust"])
 
     def test_missing_platform_cannot_become_native_acceptance(self):
         with patch.object(proof.platform, "system", return_value="Unallocated"), self.assertRaisesRegex(ValueError, "not yet independently pinned"):

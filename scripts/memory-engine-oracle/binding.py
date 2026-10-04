@@ -112,12 +112,19 @@ def sdks(go_sdk, rust_sdk):
     inventory_plan = json.loads((HERE / "sdk-inputs.json").read_bytes())
     if inventory_plan.get("kind") != "memory760-whole-sdk-v1" or key not in inventory_plan["platforms"]:
         raise ValueError("complete independently pinned SDK inventory required")
+    roots = (("go", go_sdk), ("rust", rust_sdk))
+    shapes = {}
+    # Both roots must pass the whole type/name/mode gate before any SDK byte
+    # reader. A legacy mapped FIFO must never reach the earlier digest loop.
+    for role, root in roots:
+        shapes[role] = sdk.census(root)
+        sdk.check_shape(shapes[role], role, inventory_plan["platforms"][key][role])
     result = {}
-    for role, root in (("go", go_sdk), ("rust", rust_sdk)):
+    for role, root in roots:
+        observed = sdk.admit(root, role, inventory_plan["platforms"][key][role], shapes[role])
         for name, expected in {**plan[role]["files"], **plan[role].get("source_files", {})}.items():
-            if digest(root / name) != expected:
+            if observed["files"].get(name, {}).get("sha256") != expected:
                 raise ValueError("unbound SDK bytes: " + role + ":" + name)
-        observed = sdk.admit(root, role, inventory_plan["platforms"][key][role])
         result[role] = {**plan[role], "physical_inventory": observed}
     return result
 

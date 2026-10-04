@@ -1,0 +1,355 @@
+{
+  "scope": "Source and owned filesystem Python admission only; actual SDK/compiler/product/Store/target/cache/port/network runs zero",
+  "files": [
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/admission-final-precommit-journal.jsonl",
+      "retained": "admission-final-precommit-journal.jsonl.gz",
+      "bytes": 22807,
+      "sha256": "f607b38fd5e07306b6f2b829de12fd9cfe434288be5b515174a96be078d58ab4",
+      "gzip_sha256": "dced82ac75c42f2bbd32a46596c6fbb52944b5336e3f7ee463414419d2828178",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117914128624557,
+        "atime_ns": 1791117916279470369
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/admission-journal.jsonl",
+      "retained": "admission-journal.jsonl.gz",
+      "bytes": 22807,
+      "sha256": "f607b38fd5e07306b6f2b829de12fd9cfe434288be5b515174a96be078d58ab4",
+      "gzip_sha256": "dced82ac75c42f2bbd32a46596c6fbb52944b5336e3f7ee463414419d2828178",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117674022791629,
+        "atime_ns": 1791117705289048777
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/all42-attempt2.log",
+      "retained": "all42-attempt2.log.gz",
+      "bytes": 6075,
+      "sha256": "3615f9638277a3a7dfbe8cd036a38f65b0868119ea4dde7f2a471899262303e2",
+      "gzip_sha256": "3b3b61042de32dc682b974913e4c1076f33f53d7ea9324404123c6bd3dbc89e7",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117674027882094,
+        "atime_ns": 1791117674040083360
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/all42-final-precommit.log",
+      "retained": "all42-final-precommit.log.gz",
+      "bytes": 6075,
+      "sha256": "202e96728c7ce50d9d60b326654e63f6534aab42c5a13a22eefc29b5b0f7f3d4",
+      "gzip_sha256": "daa8c817c68f3e870ff91b9a67112e9b51722c6e3cd120db3cfbe5cbda7431d9",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117914132480805,
+        "atime_ns": 1791117916284661463
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/attempt1-binding.py",
+      "retained": "attempt1-binding.py.gz",
+      "bytes": 9822,
+      "sha256": "f910077d9baf1076ffc647a5c9200192bf5436ced05b3dacc47e460196def2ea",
+      "gzip_sha256": "a71d581e38eccf0bb165fbc2c615104742077c2414810dbb270c2e11b4ca3331",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117245665786262,
+        "atime_ns": 1791117916284800934
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/attempt1-sdk.py",
+      "retained": "attempt1-sdk.py.gz",
+      "bytes": 4017,
+      "sha256": "947d38259bc32416714a655427e2c58e709e872c8b80e294eba9f737eb07d46b",
+      "gzip_sha256": "600cf28bcc42d2ae45b8b0b485cce3178fb503747323d550f3ecf8dca69f4e84",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117327462053162,
+        "atime_ns": 1791117916285084462
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/attempt1-test_binding.py",
+      "retained": "attempt1-test_binding.py.gz",
+      "bytes": 3218,
+      "sha256": "5d98d53407ff815bbbb22c0b34dab298bc819cdca0d9dc3ee80e53c3a3d70940",
+      "gzip_sha256": "333e46e7ee55b5aaf928f3abdda35de4c375e4279f9edc7f1dfc063087411796",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117170624512664,
+        "atime_ns": 1791117916285253298
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/attempt2-test_sdk_read_order.py",
+      "retained": "attempt2-test_sdk_read_order.py.gz",
+      "bytes": 10747,
+      "sha256": "3f3e5c6375fad198aa82169b794779f7be03b2f0303cfbe7569661a0904b8b0e",
+      "gzip_sha256": "8b1aec7c9bd8783085fc7d0cbd909344b3b425e2ccdba8ab184cd52959fcf09d",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117912304118666,
+        "atime_ns": 1791117916285423435
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/final-precommit-binding.py",
+      "retained": "final-precommit-binding.py.gz",
+      "bytes": 9822,
+      "sha256": "f910077d9baf1076ffc647a5c9200192bf5436ced05b3dacc47e460196def2ea",
+      "gzip_sha256": "a71d581e38eccf0bb165fbc2c615104742077c2414810dbb270c2e11b4ca3331",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117912304454073,
+        "atime_ns": 1791117916285773644
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/final-precommit-build.py",
+      "retained": "final-precommit-build.py.gz",
+      "bytes": 4814,
+      "sha256": "8199ff86e17fc6e2fd130098122c0e493f529f4b58546d3ff9586d458d697437",
+      "gzip_sha256": "4cd5629f25fd6ead0a161b6595bb1e8f88d9ad2744516505e94518f89c53e786",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117912304701317,
+        "atime_ns": 1791117916286055240
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/final-precommit-dependencies.py",
+      "retained": "final-precommit-dependencies.py.gz",
+      "bytes": 7435,
+      "sha256": "7ca6675a339980ab1128104cdfa5e35cce93175873ba8109e58a3ffdc055f419",
+      "gzip_sha256": "7d40b531a5b92a6d61f52d2c256c2236cffbf25f9844441beb74f71c41e93607",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117912304637360,
+        "atime_ns": 1791117916286280300
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/final-precommit-owner.py",
+      "retained": "final-precommit-owner.py.gz",
+      "bytes": 4874,
+      "sha256": "af5eb25f6e3d00cec2f266ee5b22c82fa33defdcf86fe5b6ab7249626d5a4ced",
+      "gzip_sha256": "e5b54afb7edf08802915bdf8ef7b7630b8dfb3f860f30730e461524079f59165",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117912304364398,
+        "atime_ns": 1791117916286545891
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/final-precommit-reader.py",
+      "retained": "final-precommit-reader.py.gz",
+      "bytes": 1910,
+      "sha256": "d25d733edb11550e0d3f8e8e2689e68f2e22b7c1cfab0f37b0740c7207c475f5",
+      "gzip_sha256": "643ec9a465d68c67502e8002d6644ea38c4cd412e45b6105dd1f974aa18bc41b",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117912304518401,
+        "atime_ns": 1791117916286804172
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/final-precommit-replay.py",
+      "retained": "final-precommit-replay.py.gz",
+      "bytes": 7444,
+      "sha256": "e0a270c6da28f5e5ffca86584211ecbe07f75bf46d28ddbbf26befb72ea896f8",
+      "gzip_sha256": "6bbdf8f05a1d49f896ba59a8b798cb6128ee5fd277b1af89e8c6628889042ed2",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117912304548426,
+        "atime_ns": 1791117916286925845
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/final-precommit-sdk.py",
+      "retained": "final-precommit-sdk.py.gz",
+      "bytes": 4017,
+      "sha256": "947d38259bc32416714a655427e2c58e709e872c8b80e294eba9f737eb07d46b",
+      "gzip_sha256": "600cf28bcc42d2ae45b8b0b485cce3178fb503747323d550f3ecf8dca69f4e84",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117912304609168,
+        "atime_ns": 1791117916287173770
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/final-precommit-sdk_fixture.py",
+      "retained": "final-precommit-sdk_fixture.py.gz",
+      "bytes": 1685,
+      "sha256": "0d08e5bca1ec0f4c27eb9e8495de5de3bc9dbb0ce761902ba0d24662491ba7e3",
+      "gzip_sha256": "6b96c4024ea86d6bc8c4e8a716232083b68199bd3e94dc2b91f7f16795d2ae1b",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117912304488395,
+        "atime_ns": 1791117916287374484
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/final-precommit-test_binding.py",
+      "retained": "final-precommit-test_binding.py.gz",
+      "bytes": 3401,
+      "sha256": "cbe29a85dcabf5d4ce814330caa5594a35dd390a8d24520a41421bb42864bf41",
+      "gzip_sha256": "bb13598e1d71cc387bafa0f8c66ba434ae9bf5b450ff3c5b8bc98bc724ad8a5e",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117912304581686,
+        "atime_ns": 1791117916287489898
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/final-precommit-test_ownership.py",
+      "retained": "final-precommit-test_ownership.py.gz",
+      "bytes": 10759,
+      "sha256": "7816666b38533c56b21f1acaece8ebf05356e5634e0d91f7c7360f2d169bc5c0",
+      "gzip_sha256": "2aa24c6b2f36c96e5d18b832e0432eeaec73f903b102561ee8f25ba1b421c72b",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117912304742009,
+        "atime_ns": 1791117916287615558
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/final-precommit-test_sdk.py",
+      "retained": "final-precommit-test_sdk.py.gz",
+      "bytes": 8344,
+      "sha256": "bc10286be2b352f2953493fc1c9b709f0179ed4593c0b6f77dfa640aa3edae2f",
+      "gzip_sha256": "e333ade31eaa764703fd6122efeeb600e567dc74c32d853cc4b3aade35594855",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117912304414383,
+        "atime_ns": 1791117916287923403
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/final-precommit-test_sdk_read_order.py",
+      "retained": "final-precommit-test_sdk_read_order.py.gz",
+      "bytes": 10909,
+      "sha256": "daccce6e001f49e55383cc8084ba3936e34e93866e9e7a7c0fa9d201913cb701",
+      "gzip_sha256": "ef09ee8fc65a98e24a0a18bad80b0d95a6a9ed98d2acc55877bfa588a56b6869",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117912304668407,
+        "atime_ns": 1791117916288202305
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/original33-attempt1.log",
+      "retained": "original33-attempt1.log.gz",
+      "bytes": 5619,
+      "sha256": "12e850333ec4afd970575a81ceffa7c689e8fa20ac40c43fdbc0841bab2206a3",
+      "gzip_sha256": "ace4077215dca6f6882f656525098566b9083ae3a86728f12b765c088f85a6a7",
+      "native_metadata": {
+        "mode": 33152,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117327733959445,
+        "atime_ns": 1791117521879382991
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/static-final-precommit.log",
+      "retained": "static-final-precommit.log.gz",
+      "bytes": 980,
+      "sha256": "106b0ba0f33919ca8271f368f48b117a4514725ab7ea3a89dba61412d78719ff",
+      "gzip_sha256": "dca77fcab35800cd38714e4b3c23ed8481fdabf2f10561a302b52c32d3471769",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117916248704648,
+        "atime_ns": 1791117916288742231
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/static-verification.json",
+      "retained": "static-verification.json.gz",
+      "bytes": 980,
+      "sha256": "106b0ba0f33919ca8271f368f48b117a4514725ab7ea3a89dba61412d78719ff",
+      "gzip_sha256": "dca77fcab35800cd38714e4b3c23ed8481fdabf2f10561a302b52c32d3471769",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117916248704648,
+        "atime_ns": 1791117916288845467
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/static-verification.log",
+      "retained": "static-verification.log.gz",
+      "bytes": 980,
+      "sha256": "d84737f25d0af06366d11da12acfef983bc919d01b14d12f298c375306b9758c",
+      "gzip_sha256": "4e73930d77affdf48a4aafd49a4567db2e2113c986abc0aa2ce00e7c9f92feba",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117788310070742,
+        "atime_ns": 1791117788315559883
+      }
+    },
+    {
+      "original": "/workspace/review-proof/memory760-sdk-type-admission-preparation/current/verify_preparation.py",
+      "retained": "verify_preparation.py.gz",
+      "bytes": 5334,
+      "sha256": "a7fed297299a354400d54052800f829a8462e650f049752d74b5c2240dbf4ada",
+      "gzip_sha256": "a88d9fe61f863eea6677e794c06daba27b4bbb1d9595e5f9facf1c6ea468978e",
+      "native_metadata": {
+        "mode": 33188,
+        "uid": 1000,
+        "gid": 1000,
+        "mtime_ns": 1791117912303921158,
+        "atime_ns": 1791117914151405256
+      }
+    }
+  ]
+}
