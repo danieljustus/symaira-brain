@@ -1,0 +1,52 @@
+rust/symguard-cli/src/doctor/audit.rs:18:        Err(_) => return None,
+rust/symguard-cli/src/doctor/audit.rs:26:        Err(error) if error.kind() == io::ErrorKind::NotFound => None,
+rust/symguard-cli/src/doctor/audit.rs:27:        Err(_) => return None,
+rust/symguard-cli/src/doctor/audit.rs:31:        None => Some((
+rust/symguard-cli/src/doctor/tests.rs:12:    let doc = text.parse::<DocumentMut>().ok()?;
+rust/symguard-cli/src/doctor/tests.rs:144:            None,
+rust/symguard-cli/src/doctor/discovery.rs:44:        let entries = guard_scan_config::parse_config(&data, source.key).ok()?;
+rust/symguard-cli/src/doctor/discovery.rs:50:                return None;
+rust/symguard-cli/src/doctor/config_decode.rs:18:    /// `None` preserves the Go map-order gate when several defaults fail.
+rust/symguard-cli/src/doctor/config_decode.rs:26:            return None;
+rust/symguard-cli/src/doctor/config_decode.rs:81:    )?;
+rust/symguard-cli/src/doctor/config_decode.rs:93:            known_keys(rule, &["decision", "match"])?;
+rust/symguard-cli/src/doctor/config_decode.rs:94:            let decision = string_field(rule, "decision")?;
+rust/symguard-cli/src/doctor/config_decode.rs:96:                let matcher = item.as_table()?;
+rust/symguard-cli/src/doctor/config_decode.rs:100:                )?;
+rust/symguard-cli/src/doctor/config_decode.rs:101:                let server = string_field(matcher, "server")?;
+rust/symguard-cli/src/doctor/config_decode.rs:102:                let tool = string_field(matcher, "tool")?;
+rust/symguard-cli/src/doctor/config_decode.rs:103:                let capability = string_field(matcher, "capability")?;
+rust/symguard-cli/src/doctor/config_decode.rs:104:                let commands = string_array_field(matcher, "command_contains")?;
+rust/symguard-cli/src/doctor/config_decode.rs:116:        let table = item.as_table()?;
+rust/symguard-cli/src/doctor/config_decode.rs:117:        known_keys(table, &["enabled", "threshold"])?;
+rust/symguard-cli/src/doctor/config_decode.rs:118:        let enabled = table.get("enabled").map_or(Some(false), Item::as_bool)?;
+rust/symguard-cli/src/doctor/config_decode.rs:119:        let threshold = table.get("threshold").map_or(Some(3), Item::as_integer)?;
+rust/symguard-cli/src/doctor/config_decode.rs:124:    decode_unprinted(doc)?;
+rust/symguard-cli/src/doctor/config_decode.rs:127:        let table = item.as_table()?;
+rust/symguard-cli/src/doctor/config_decode.rs:128:        known_keys(table, &["allowlist"])?;
+rust/symguard-cli/src/doctor/config_decode.rs:131:                known_keys(entry, &["path", "argv_prefix"])?;
+rust/symguard-cli/src/doctor/config_decode.rs:173:        let table = item.as_table()?;
+rust/symguard-cli/src/doctor/config_decode.rs:174:        known_keys(table, &["upstream"])?;
+rust/symguard-cli/src/doctor/config_decode.rs:175:        string_field(table, "upstream")?;
+rust/symguard-cli/src/doctor/config_decode.rs:178:        let table = item.as_table()?;
+rust/symguard-cli/src/doctor/config_decode.rs:179:        known_keys(table, &["path", "encrypt_age", "encrypt"])?;
+rust/symguard-cli/src/doctor/config_decode.rs:180:        string_field(table, "path")?;
+rust/symguard-cli/src/doctor/config_decode.rs:181:        string_field(table, "encrypt_age")?;
+rust/symguard-cli/src/doctor/config_decode.rs:183:            value.as_bool()?;
+rust/symguard-cli/src/doctor/config_decode.rs:198:            )?;
+rust/symguard-cli/src/doctor/config_decode.rs:200:                string_field(table, name)?;
+rust/symguard-cli/src/doctor/config_decode.rs:203:                string_array_field(table, name)?;
+rust/symguard-cli/src/doctor/config.rs:43:/// Ports proven `config.Load()` states. `None` means a decoder diagnostic,
+rust/symguard-cli/src/doctor/config.rs:49:        Err(_) => return None,
+rust/symguard-cli/src/doctor/config.rs:54:            let diagnostic = go_missing_equals_diagnostic(&text, &error)?;
+rust/symguard-cli/src/doctor/config.rs:58:    let decoded = decode_config(&doc)?;
+rust/symguard-cli/src/doctor/config.rs:72:        return None;
+rust/symguard-cli/src/doctor/config.rs:74:    let span = error.span()?;
+rust/symguard-cli/src/doctor/config.rs:76:        return None;
+rust/symguard-cli/src/doctor/config.rs:78:    let byte = *text.as_bytes().get(span.start)?;
+rust/symguard-cli/src/doctor/config.rs:80:        return None;
+rust/symguard-cli/src/doctor/anchor_decode.rs:35:/// Syntax is validated separately. `None` preserves unsupported string decoding.
+rust/symguard-cli/src/doctor/anchor_decode.rs:37:    let first = *input.iter().find(|b| !b.is_ascii_whitespace())?;
+rust/symguard-cli/src/doctor/anchor_decode.rs:44:    let object: Object = serde_json::from_slice(input).ok()?;
+rust/symguard-cli/src/doctor/anchor_decode.rs:64:        let first = *raw.as_bytes().first()?;
+rust/symguard-cli/src/doctor/anchor_decode.rs:67:            serde_json::from_str::<String>(raw).ok()?;

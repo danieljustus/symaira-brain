@@ -224,6 +224,29 @@ jobs:
           cargo build -p symbrain-cli --bin symbrain --locked
           python3 scripts/mcp-differential.py "$RUNNER_TEMP/symbrain-go-mcp" target/debug/symbrain
 
+      - name: Native standalone Guard process contracts
+        shell: bash
+        run: scripts/guard-standalone-oracle/run.sh "$RUNNER_TEMP/guard-standalone.json"
+
+      - name: Upload native standalone Guard evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: guard-standalone-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/guard-standalone.json
+            ${{ runner.temp }}/guard-standalone-controls.json
+            ${{ runner.temp }}/guard-standalone-raw-paths.json
+            ${{ runner.temp }}/guard-standalone-doctor-boundaries.json
+            ${{ runner.temp }}/guard-standalone-config-warnings.json
+            ${{ runner.temp }}/guard-standalone-config-paths.json
+            ${{ runner.temp }}/guard-standalone-config-paths.json.progress.json
+            ${{ runner.temp }}/guard-standalone-windows-path-reference.json
+            ${{ runner.temp }}/guard-standalone-windows-path-reference-artifacts/
+            ${{ runner.temp }}/guard-standalone-binaries/
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Native Go/Rust activity validation acceptance
         shell: bash
         run: scripts/activity-validation-oracle/run.sh "$RUNNER_TEMP/activity-validation-767.json"
@@ -367,6 +390,27 @@ jobs:
 
       - name: Rust MCP stdio and lifecycle gate on macOS
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
+
+      - name: Native standalone Guard process contracts
+        shell: bash
+        run: scripts/guard-standalone-oracle/run.sh "$RUNNER_TEMP/guard-standalone.json"
+
+      - name: Upload native standalone Guard evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: guard-standalone-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/guard-standalone.json
+            ${{ runner.temp }}/guard-standalone-controls.json
+            ${{ runner.temp }}/guard-standalone-raw-paths.json
+            ${{ runner.temp }}/guard-standalone-doctor-boundaries.json
+            ${{ runner.temp }}/guard-standalone-config-warnings.json
+            ${{ runner.temp }}/guard-standalone-config-paths.json
+            ${{ runner.temp }}/guard-standalone-config-paths.json.progress.json
+            ${{ runner.temp }}/guard-standalone-binaries/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Native Go/Rust activity validation acceptance
         shell: bash
@@ -524,6 +568,27 @@ jobs:
           SYMBRAIN_VERSION=dev cargo build --workspace --locked
           ./guard/scripts/guard-scan-oracle/run.sh parity target/debug/symbrain.exe
           python3 scripts/rust-differential.py "$RUNNER_TEMP/symbrain-go.exe" target/debug/symbrain.exe
+
+      - name: Native standalone Guard process contracts
+        shell: bash
+        run: scripts/guard-standalone-oracle/run.sh "$RUNNER_TEMP/guard-standalone.json"
+
+      - name: Upload native standalone Guard evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: guard-standalone-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/guard-standalone.json
+            ${{ runner.temp }}/guard-standalone-controls.json
+            ${{ runner.temp }}/guard-standalone-raw-paths.json
+            ${{ runner.temp }}/guard-standalone-doctor-boundaries.json
+            ${{ runner.temp }}/guard-standalone-config-warnings.json
+            ${{ runner.temp }}/guard-standalone-config-paths.json
+            ${{ runner.temp }}/guard-standalone-config-paths.json.progress.json
+            ${{ runner.temp }}/guard-standalone-binaries/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Fetch the immutable native Skills comparison parent
         shell: bash
@@ -965,6 +1030,20 @@ jobs:
           go run ./scripts/activity-cli-oracle -go-binary "$activity_cli_go_binary" -output "$activity_cli_fixture"
           export SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE="$activity_cli_fixture"
           cargo test --workspace --all-features --locked --no-fail-fast
+      - name: Guard Doctor empty-source and missing-parent boundaries on Windows
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: pwsh
+        run: |
+          cargo test --locked -p symguard-cli --test doctor_config_paths --test doctor_warnings -- --nocapture 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP/guard-doctor-windows-fixtures.log"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Retain native Windows Guard Doctor fixture diagnostics
+        if: ${{ always() && matrix.os == 'windows-2025' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: guard-doctor-windows-fixtures-${{ runner.os }}
+          path: ${{ runner.temp }}/guard-doctor-windows-fixtures.log
+          if-no-files-found: error
+          retention-days: 14
       - name: Retain native init observations
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

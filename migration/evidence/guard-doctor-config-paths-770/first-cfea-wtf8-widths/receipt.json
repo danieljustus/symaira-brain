@@ -1,0 +1,104 @@
+{
+  "source": "cfea37f73b5007de6b7cff39d08e53a03760b814",
+  "sdk_reference": true,
+  "native_windows_runtime_proof": false,
+  "matches380_of386": true,
+  "failures": [
+    {
+      "mode": "clean",
+      "base": "foo:/a/../../\u96eaa",
+      "parts": [],
+      "go": "\u96eaa",
+      "native": ".\\\u96eaa",
+      "matched": false
+    },
+    {
+      "mode": "clean",
+      "base": "\u96eaa:/a/../../abcd",
+      "parts": [],
+      "go": ".\\abcd",
+      "native": "abcd",
+      "matched": false
+    },
+    {
+      "mode": "join",
+      "base": "foo:/a/../../\u96eaa",
+      "parts": [],
+      "go": "\u96eaa",
+      "native": ".\\\u96eaa",
+      "matched": false
+    },
+    {
+      "mode": "join",
+      "base": "foo:/a/../../\u96eaa",
+      "parts": [
+        "..",
+        "b"
+      ],
+      "go": "b",
+      "native": ".\\b",
+      "matched": false
+    },
+    {
+      "mode": "join",
+      "base": "\u96eaa:/a/../../abcd",
+      "parts": [],
+      "go": ".\\abcd",
+      "native": "abcd",
+      "matched": false
+    },
+    {
+      "mode": "join",
+      "base": "\u96eaa:/a/../../abcd",
+      "parts": [
+        "..",
+        "b"
+      ],
+      "go": ".\\b",
+      "native": "b",
+      "matched": false
+    }
+  ],
+  "records": [
+    {
+      "original": "/tmp/symaira-guard770-config-paths-wide-first-reference.json",
+      "retained": "symaira-guard770-config-paths-wide-first-reference.json.gz",
+      "sha256": "20480ac438d5394b8c18b6dc9beebe9cf0e7965bb1536fd367ddbb33a239d36c",
+      "bytes": 80312
+    },
+    {
+      "original": "/tmp/symaira-guard770-config-paths-wide-first-reference.log",
+      "retained": "symaira-guard770-config-paths-wide-first-reference.log.gz",
+      "sha256": "9ba270d99b208fbe42b650a0de68a4f10317d184473db3a64b88ba51f3bb7ccf",
+      "bytes": 570
+    },
+    {
+      "original": "/tmp/guard770-win-source-reference-i9fl1ev_/main.go",
+      "retained": "/tmp/symaira-guard770-config-paths-wide-first-reference-artifacts/main.go.gz",
+      "sha256": "9d1d864f764de4f4d9691eed8c1abe07780d761333fe235165b359f57ef525c1",
+      "bytes": 8346,
+      "tracked_gzip": "main.go.gz"
+    },
+    {
+      "original": "/tmp/guard770-win-source-reference-i9fl1ev_/main.rs",
+      "retained": "/tmp/symaira-guard770-config-paths-wide-first-reference-artifacts/main.rs.gz",
+      "sha256": "f9e116089c5c80d3bcd24d456a915d0a1b31650bf5359951a1f537dfe836cb1e",
+      "bytes": 927,
+      "tracked_gzip": "main.rs.gz"
+    },
+    {
+      "original": "/tmp/guard770-win-source-reference-i9fl1ev_/go-reference",
+      "retained": "/tmp/symaira-guard770-config-paths-wide-first-reference-artifacts/go-reference.gz",
+      "sha256": "ba2c9e4b963064e47266245bfc5b98cc3e3220d337cce74dc7f6e8e9fce0f01b",
+      "bytes": 2988389,
+      "tracked_gzip": "go-reference.gz"
+    },
+    {
+      "original": "/tmp/guard770-win-source-reference-i9fl1ev_/native-reference",
+      "retained": "/tmp/symaira-guard770-config-paths-wide-first-reference-artifacts/native-reference.gz",
+      "sha256": "10c7e0b2ea4daea4e20caee4c591e2a8b4af61d482d8650f4e91785ef213cca3",
+      "bytes": 4703704,
+      "tracked_gzip": "native-reference.gz"
+    }
+  ]
+}

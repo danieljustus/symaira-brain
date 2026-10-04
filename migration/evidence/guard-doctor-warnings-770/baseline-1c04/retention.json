@@ -1,0 +1,106 @@
+{
+  "approved_parent": "1c04ad92f9537d5b4d552d080433635c5f0c5403",
+  "original_inventory_source": "9603d24e6749ee67e5eac1b7ddda6900af022cd5",
+  "original14_input_bytes_unchanged": true,
+  "original10_warning_repeats_unchanged": true,
+  "original50_invalid_defaults": "Inherited baseline-8e3 in approved parent;50 actualGo/two outputs; no exception or modification",
+  "records": [
+    {
+      "original": "/tmp/symaira-brain769-positive-slice-probe.json",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-brain769-positive-slice-probe.json.gz",
+      "sha256": "8289570e95553be33bac96607994f4a292136fbbb2a310be02f4762f4da03e1b",
+      "bytes": 52499
+    },
+    {
+      "original": "/tmp/symaira-brain769-slice-probe.py",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-brain769-slice-probe.py",
+      "sha256": "385112ff09877f96699803437857cc86a5e7c168e53acf0fd5285373d6968423",
+      "bytes": 4942
+    },
+    {
+      "original": "/tmp/symaira-brain769-positive-slice-recommendation.md",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-brain769-positive-slice-recommendation.md",
+      "sha256": "fca3b2a406b43afa12652d1a1dc42f615ff0fe01f88b86ca3c5bed5c6e148d61",
+      "bytes": 12729
+    },
+    {
+      "original": "/tmp/symaira-brain769-positive-slice-recommendation-receipt.json",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-brain769-positive-slice-recommendation-receipt.json.gz",
+      "sha256": "ac5d0f874d300ae82d2cb9823c90314871efc07941840a62b54fd1e7d2d64a40",
+      "bytes": 5632
+    },
+    {
+      "original": "/tmp/symaira-brain769-go-buildinfo.txt",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-brain769-go-buildinfo.txt.gz",
+      "sha256": "87bcb1397ba164bf70910a11dacebc400a125ab3329b402e7d7564004319f4af",
+      "bytes": 1647
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-parent-retention.json",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-guard770-warnings-parent-retention.json.gz",
+      "sha256": "d37c3105d95f2b714335b5c42b3b23882b8e55bb7d06b15480ac6524aac09461",
+      "bytes": 675
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-prototype.py",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-guard770-warnings-prototype.py",
+      "sha256": "15bb4abd523acac3ec8c09716701f54383602bce4f00099527883c1b4d4534f4",
+      "bytes": 1693
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-prototype.json",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-guard770-warnings-prototype.json.gz",
+      "sha256": "4fa4a87d60fa3b5bf1d3236ae9581369fbccf4ee47aa8c1c52874acc16c7ef37",
+      "bytes": 158248
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-prototype.log",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-guard770-warnings-prototype.log.gz",
+      "sha256": "b771cb6f91dfbb6c43600cfac626e8a871b6b661ce69fb0a30e312fcc72544bd",
+      "bytes": 9145
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-first-tests.log",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-guard770-warnings-first-tests.log.gz",
+      "sha256": "3000686b6e1ddacc8b1054a8e842d4e90c245e4362f06585183a2f969cf93b47",
+      "bytes": 1175
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-second-tests.log",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-guard770-warnings-second-tests.log.gz",
+      "sha256": "ec6c32130263dfdcab5c933c931f95227f71847f0c34e9d5a1c2336cae8beff5",
+      "bytes": 1109
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-actual-focused-tests.log",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-guard770-warnings-actual-focused-tests.log.gz",
+      "sha256": "6636a5e533fe8ccd9428015e3268b9b4901a3e5d6a62f3caa57f323ef9822b36",
+      "bytes": 1231
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-clippy-dirty.log",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-guard770-warnings-clippy-dirty.log.gz",
+      "sha256": "3ca8e470336d944a122a8bf03036d929915bcf70607d47003ff4472268c3ecf8",
+      "bytes": 4671
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-clippy-second.log",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-guard770-warnings-clippy-second.log.gz",
+      "sha256": "8f38d8b4433f1fbe1860295ad104ff6ee792613f96cbb656b619adeae021e9cc",
+      "bytes": 2750
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-dirty-process.json",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-guard770-warnings-dirty-process.json.gz",
+      "sha256": "355a8d0bdc58cf4d75dd5129164b29f5b826f5efd10fa3b683c47ff410fba8ea",
+      "bytes": 412406
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-dirty-process.log",
+      "retained": "migration/evidence/guard-doctor-warnings-770/baseline-1c04/symaira-guard770-warnings-dirty-process.log.gz",
+      "sha256": "54c87dffb9647f0b4a219c378201191637ea71fd4512cb82f9a5d2596e980525",
+      "bytes": 96
+    }
+  ],
+  "dirty_attempts": "Original compile/type signature error, filtered-zero test attempt, strict lint failures, dirty prototypes retained; not acceptance evidence"
+}

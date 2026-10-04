@@ -1,0 +1,7 @@
+{
+  "source": "3d39eaa77e40abfa0501e64b2a339d678ad82ab3",
+  "failure": "clippy::if_same_then_else",
+  "log_sha256": "c08702c6cad69aaff3a2ef2c63bf229e1dc1f6c1be7f18d6e5cb7c0dfb63383f",
+  "tests177_passed_before_strict_check": true,
+  "binary_archive": "/workspace/oracles/symaira-guard770-config-paths-3d-binaries/receipt.json"
+}

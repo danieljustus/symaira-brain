@@ -1,0 +1,15 @@
+test_actual_observer_retains_child_before_readonly_assertion (test_config_path_progress.ProgressTests.test_actual_observer_retains_child_before_readonly_assertion) ... ok
+test_actual_observer_retains_timeout_partial_streams_and_unchanged_budget (test_config_path_progress.ProgressTests.test_actual_observer_retains_timeout_partial_streams_and_unchanged_budget) ... ok
+test_actual_wrapper_still_rejects_incidental_child_failure (test_config_path_progress.ProgressTests.test_actual_wrapper_still_rejects_incidental_child_failure) ... ok
+test_complete_retains_the_supplied_exact_result (test_config_path_progress.ProgressTests.test_complete_retains_the_supplied_exact_result) ... ok
+test_completed_pairs_survive_later_failure (test_config_path_progress.ProgressTests.test_completed_pairs_survive_later_failure) ... ok
+test_failed_control_keeps_raw_outputs_and_environment (test_config_path_progress.ProgressTests.test_failed_control_keeps_raw_outputs_and_environment) ... ok
+test_replace_failure_preserves_previous_document_and_cleans_stage (test_config_path_progress.ProgressTests.test_replace_failure_preserves_previous_document_and_cleans_stage) ... ok
+test_unix_wrapper_keeps_original_realpath_branch (test_config_path_progress.ProgressTests.test_unix_wrapper_keeps_original_realpath_branch) ... ok
+test_windows_current_resolves_link_prefix_first (test_config_path_progress.ProgressTests.test_windows_current_resolves_link_prefix_first) ... ok
+test_windows_original_folds_link_parent_before_resolution (test_config_path_progress.ProgressTests.test_windows_original_folds_link_parent_before_resolution) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.049s
+
+OK

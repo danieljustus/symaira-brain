@@ -1,0 +1,125 @@
+{
+  "reviewed_head": "207ba8bc7fb5fd0b62a98375dcc3c1d2dc829503",
+  "source_only": true,
+  "full_records": [
+    {
+      "original": "/workspace/review-proof/root-guard805-207/all-source-bindings.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207/all-source-bindings.json.gz",
+      "bytes": 372864,
+      "sha256": "0158b4b2528ac414ee504e3e01007232c748a5a9d02c2eea85dc3489a46daf20",
+      "gzip_sha256": "74e208b0715a4ca66f52d90188ebdf9c860fbc9c58c7ca13d609320b39f50d1a"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207/receipt.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207/receipt.json.gz",
+      "bytes": 998,
+      "sha256": "93c0f278ab7233e580af5e16e484e56f4d345b50092e79393babbc4e9029eaea",
+      "gzip_sha256": "b55857ba3549e1c233205ddfb4f4d96124cc80b11a1351d941b225f59f6a5e71"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207/review.md",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207/review.md.gz",
+      "bytes": 2592,
+      "sha256": "2cba64e458a57c120b1a38b0ca5e9d0117959be0da2a2064ea79ca000607cfad",
+      "gzip_sha256": "3ec2c03f1a81f3dd6e0f3caf3c32d3ac9b24591e6277b43b6b66bd7a3be9c9e6"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207/review.py",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207/review.py.gz",
+      "bytes": 4414,
+      "sha256": "050dbd8b521704b6c5c8b7583f03ff3e8b3c340e19bd6f8d2d1aacb7a2e8d00b",
+      "gzip_sha256": "2567f7bd4a15fec407093ffeb4fa548734d57a10cc52436f32aab3465b10626f"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207/review.stderr",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207/review.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207/review.stdout",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207/review.stdout.gz",
+      "bytes": 998,
+      "sha256": "93c0f278ab7233e580af5e16e484e56f4d345b50092e79393babbc4e9029eaea",
+      "gzip_sha256": "b55857ba3549e1c233205ddfb4f4d96124cc80b11a1351d941b225f59f6a5e71"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207-source-validator/actionlint.stderr",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207-source-validator/actionlint.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207-source-validator/actionlint.stdout",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207-source-validator/actionlint.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207-source-validator/actual-local-CPython-ntpath.py",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207-source-validator/actual-local-CPython-ntpath.py.gz",
+      "bytes": 30404,
+      "sha256": "6c0d55ee892f98ef87b1ed3c50c9dfc7e267a98d2db47e08d3dc67529af56725",
+      "gzip_sha256": "7fcb3f009f7bbaa5afc0451652809f4d7c9e75c23b0a07fc8d6244558c7fbc6a"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207-source-validator/portable-tests.stderr",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207-source-validator/portable-tests.stderr.gz",
+      "bytes": 1709,
+      "sha256": "802d4216d73ab2eb98352f9ea8dcc9cad5f8769811f5c1e2e60b635d530c68ca",
+      "gzip_sha256": "1f5ea521e4318177ba44ecd1767bf0116345d55e99f45421defc26999cfa8f6b"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207-source-validator/portable-tests.stdout",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207-source-validator/portable-tests.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207-source-validator/prepared-vectors.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207-source-validator/prepared-vectors.json.gz",
+      "bytes": 6758,
+      "sha256": "6aba92c1f9dff8f3d77486eb2587f46e0e7b06d26f766953d1d94a5ed50ecd6a",
+      "gzip_sha256": "54dedf767fe29dfcc5de932d99dd9f7895cb5b7aa10485d3539d6eabdfb50777"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207-source-validator/shell-syntax.stderr",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207-source-validator/shell-syntax.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207-source-validator/shell-syntax.stdout",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207-source-validator/shell-syntax.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207-source-validator/validation.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207-source-validator/validation.json.gz",
+      "bytes": 32340,
+      "sha256": "255a8388a2d096d196efcfd087bb3b01789aef8625e0485b3ab76f36e7db953c",
+      "gzip_sha256": "1d4d555dbf5cb0115c7a1225936c1f4fc5c30690abaca8abd95a0db3ba3fafdd"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207-source-validator/whitespace.stderr",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207-source-validator/whitespace.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-proof/root-guard805-207-source-validator/whitespace.stdout",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/root-independent/raw/root-guard805-207-source-validator/whitespace.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    }
+  ]
+}
