@@ -1,3 +1,7 @@
+#[path = "spec_paths.rs"]
+mod paths;
+pub(crate) use paths::{default_session_cache_root, worktree_origin};
+
 use std::{path::PathBuf, time::Duration};
 
 use symbrowse_core::config::{Config, resolve_selection};
@@ -108,7 +112,7 @@ impl SessionSpec {
 
     #[must_use]
     pub fn user_data_dir(&self) -> PathBuf {
-        self.state_dir.join("sessions").join(&self.session)
+        default_session_cache_root().join(&self.session)
     }
 
     #[must_use]

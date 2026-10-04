@@ -1,0 +1,114 @@
+name: Browse honest fetch native contracts
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'browse/**'
+      - '.github/workflows/browse-fetch-native.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'browse/**'
+      - '.github/workflows/browse-fetch-native.yml'
+
+jobs:
+  fetch-contract:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-15-intel, macos-15, windows-2025, windows-11-arm]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: browse
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.7'
+          cache: false
+      - name: Verify pinned Rust toolchain
+        run: rustup show active-toolchain
+      - name: Test honest fetch and original controls
+        env:
+          CGO_ENABLED: '0'
+        run: |
+          set -euo pipefail
+          umask 022
+          cargo test -p symbrowse-fetch --all-targets --locked 2>&1 | tee "$RUNNER_TEMP/browse-fetch-tests.log"
+          go run ./scripts/rust-port/fetch_fixture_gen.go --check
+          go run -tags rustport ./scripts/rust-port/cmd/fetchcontrolgen --check
+          python3 scripts/rust-port/test_benchmark_harness.py
+          python3 port/bench/test_identity.py
+      - name: Compare actual frozen-Go and native honest requests
+        run: port/harness/run_fetch_control_773.sh "$RUNNER_TEMP/browse-fetch-process.json"
+      - name: Verify native honest fetch lint
+        run: |
+          cargo clippy -p symbrowse-fetch --all-targets --all-features --locked -- -D warnings
+          cargo fmt --all --check
+      - name: Upload exact-head native fetch proof
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browse-fetch-${{ matrix.runner }}-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/browse-fetch-tests.log
+            ${{ runner.temp }}/browse-fetch-process.json
+            ${{ runner.temp }}/browse-fetch-process-controls.json
+            ${{ runner.temp }}/browse-fetch-process-raw-proxy.json
+            ${{ runner.temp }}/browse-fetch-process-raw-proxy-controls.json
+            ${{ runner.temp }}/browse-fetch-process-proxy-auth.json
+            ${{ runner.temp }}/browse-fetch-process-proxy-auth-controls.json
+          if-no-files-found: error
+          retention-days: 14
+
+  paired-value:
+    # Supplemental Linux receipt; remaining native platform/value gates stay open.
+    continue-on-error: true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: browse
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.7'
+          cache: false
+      - name: Build immutable paired release executables and source receipts
+        run: |
+          set -euo pipefail
+          umask 022
+          cargo build --release --locked -p symbrowse-cli
+          python3 port/bench/build_receipt.py --kind rust --source .. --binary target/release/symbrowse --output "$RUNNER_TEMP/fetch-rust-build.json"
+          git worktree add --detach "$RUNNER_TEMP/fetch-go-source" dcddcef0df5789123c7c9a7ebe6e01f10e941f2c
+          (cd "$RUNNER_TEMP/fetch-go-source/browse" && CGO_ENABLED=0 go build -buildvcs=true -trimpath -mod=readonly -o "$RUNNER_TEMP/fetch-go" ./cmd/symbrowse)
+          python3 port/bench/build_receipt.py --kind go --source "$RUNNER_TEMP/fetch-go-source" --binary "$RUNNER_TEMP/fetch-go" --output "$RUNNER_TEMP/fetch-go-build.json"
+      - name: Record exactly thirty paired samples and enforce unchanged value gate
+        run: |
+          set -euo pipefail
+          python3 port/bench/run.py --go "$RUNNER_TEMP/fetch-go" --rust target/release/symbrowse --runs 30 --strict --go-build-receipt "$RUNNER_TEMP/fetch-go-build.json" --rust-build-receipt "$RUNNER_TEMP/fetch-rust-build.json" --output "$RUNNER_TEMP/fetch-paired-30.json"
+          python3 port/bench/compare.py docs/rust-port/baseline.json "$RUNNER_TEMP/fetch-paired-30.json" | tee "$RUNNER_TEMP/fetch-paired-comparison.json"
+      - name: Upload raw paired value evidence including failures
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: browse-fetch-paired-linux-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/fetch-*-build.json
+            ${{ runner.temp }}/fetch-paired-*.json
+          if-no-files-found: error
+          retention-days: 14

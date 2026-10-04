@@ -32,6 +32,14 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Resolve pinned supplemental Go toolchain
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.7'
+          cache: false
 
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
@@ -39,8 +47,13 @@ jobs:
       - name: Build the Rust CLI
         run: cargo build -p symbrowse-cli --bin symbrowse --release --locked
 
+      - name: Verify native daemon and workspace lint
+        run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+
       - name: Verify daemon platform and lifecycle contracts
-        run: cargo test -p symbrowse-daemon --locked
+        run: |
+          set -euo pipefail
+          cargo test -p symbrowse-daemon --locked 2>&1 | tee "$RUNNER_TEMP/browse-daemon-unit.log"
 
       - name: Exercise native daemon lifecycle and races
         env:
@@ -49,9 +62,35 @@ jobs:
           TMP: ${{ runner.temp }}
           TEMP: ${{ runner.temp }}
         run: |
-          python3 port/harness/test_run.py DaemonExitTests
-          python3 port/harness/run.py --suite daemon
-          python3 port/harness/run.py --suite daemon-races --repeat 50
+          set -euo pipefail
+          python3 port/harness/test_run.py DaemonExitTests 2>&1 | tee "$RUNNER_TEMP/browse-daemon-harness.log"
+          python3 port/harness/run.py --suite daemon 2>&1 | tee "$RUNNER_TEMP/browse-daemon-lifecycle.log"
+          python3 port/harness/run.py --suite daemon-races --repeat 50 2>&1 | tee "$RUNNER_TEMP/browse-daemon-races.log"
+
+      - name: Compare immutable integrated Go and actual native daemon
+        env:
+          CGO_ENABLED: '0'
+        run: |
+          set -euo pipefail
+          oracle="$RUNNER_TEMP/browse-daemon-go-source"
+          go_binary="$RUNNER_TEMP/symbrowse-daemon-go"
+          rust_binary="$GITHUB_WORKSPACE/browse/target/release/symbrowse"
+          if [ "${OS:-}" = Windows_NT ]; then
+            go_binary="$(cygpath -m "$go_binary.exe")"
+            rust_binary="$(cygpath -m "$rust_binary.exe")"
+          fi
+          git worktree add --detach "$oracle" dcddcef0df5789123c7c9a7ebe6e01f10e941f2c
+          go -C "$oracle/browse" build -o "$go_binary" ./cmd/symbrowse
+          python3 port/harness/daemon_process.py --go "$go_binary" --rust "$rust_binary" \
+            --go-source "$oracle" --out "$RUNNER_TEMP/browse-daemon-process.json"
+          fixture_binary="$RUNNER_TEMP/symbrowse-mcp-go-v0.8.0"
+          if [ "${OS:-}" = Windows_NT ]; then
+            fixture_binary="$(cygpath -m "$fixture_binary.exe")"
+          fi
+          go -C "$oracle/browse" build -ldflags '-X main.version=v0.8.0' -o "$fixture_binary" ./cmd/symbrowse
+          python3 port/harness/daemon_mcp.py --go "$go_binary" --go-fixture "$fixture_binary" \
+            --rust "$rust_binary" --go-source "$oracle" --workspace \
+            --out "$RUNNER_TEMP/browse-daemon-mcp.json"
 
       - name: Retain exact-head daemon receipt
         if: always()
@@ -63,12 +102,21 @@ jobs:
             echo "runner=${{ matrix.runner }}"
             rustc -Vv
             cargo -V
+            go version
           } > "$RECEIPT"
       - name: Upload native daemon receipt
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: browse-daemon-${{ matrix.runner }}-${{ github.sha }}
-          path: ${{ runner.temp }}/browse-daemon-${{ matrix.runner }}.txt
+          path: |
+            ${{ runner.temp }}/browse-daemon-${{ matrix.runner }}.txt
+            ${{ runner.temp }}/browse-daemon-unit.log
+            ${{ runner.temp }}/browse-daemon-harness.log
+            ${{ runner.temp }}/browse-daemon-lifecycle.log
+            ${{ runner.temp }}/browse-daemon-races.log
+            ${{ runner.temp }}/browse-daemon-process.json
+            ${{ runner.temp }}/browse-daemon-mcp.json
+            ${{ runner.temp }}/browse-daemon-mcp.json.tests.log
           if-no-files-found: error
           retention-days: 14

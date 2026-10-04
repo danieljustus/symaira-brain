@@ -1,0 +1,49 @@
+{
+  "source_revision": "cc8a1673bead86b1d34b6f84ea9bcbf5ced86017",
+  "source_clean": true,
+  "native_parent_summaries": 24,
+  "native_parent_passed": 117,
+  "native_parent_failed": 0,
+  "native_parent_ignored": 1,
+  "ignored_child_reason": "One isolated daemon cache environment child invoked seven times by its successful parent; each invocation asserts 1 passed.",
+  "ignored_child_executions": 7,
+  "fetch_tests_passed": 49,
+  "harness_workflow_sha256": {
+    "browse/port/harness/fetch_control_process.py": "f018e50fc2977f820e23774a59f61afd8de197c58609dc5e5a9bdbcf6e9e9eaf",
+    "browse/port/harness/fetch_control_negative.py": "0a7b20628da27fc3c7278805233c1aec818efc1da7b9f4c6dbc770ee73578417",
+    "browse/port/harness/fetch_control_773.go.txt": "9e0729730cedd8402b0aeff0604ad0a56bde67f0178d5391df076c49c071f3d4",
+    "browse/port/harness/run_fetch_control_773.sh": "df7f86906d56f5e1baecb341bdf5276883581826fab4ee99c5d75413a3136c04",
+    "browse/port/bench/run.py": "7075dc12cc32af3141edc5920de3232a61842fe0cb225285fbcef8dbc84959c9",
+    "browse/port/bench/compare.py": "b361e42ec8988de38dc4c1e6e53a4a80717b11fe7ea85c22503ca9586b5010d2",
+    "browse/port/bench/build_receipt.py": "b50b232e98f80b3f2cf49a4ff4f67c3cb97d376f41e15e081b9f9f12add1c14d",
+    "browse/port/bench/test_identity.py": "c570b32f7856e47f175e3c16ab22761c5c5df40f4214b0c5cc3a7a251c9470fd",
+    ".github/workflows/browse-fetch-native.yml": "13635cae9710df9bc9fb9678c39854f18a507f01e4c218e5df989cf0e91e9a5e"
+  },
+  "logs_sha256": {
+    "symaira-fetch773-clean-native-tests-pinned-go.log": "f5e00f9d582c175a2307c6deaa97e0ab50ff30430093bb2c894fb5e71df0e85f",
+    "symaira-fetch773-clean-clippy.log": "9ae36bb22d8f0f810a77044760863f70b81405396a32cce477ec08eecd4e6d59",
+    "symaira-fetch773-original-gate.log": "ce331f7d660d49b2bc52222b201a59f16a06547d014a3808d40d03c8f27a74d9"
+  },
+  "paired_30": {
+    "schema_version": 2,
+    "gate": "pass",
+    "workloads": {
+      "cli": {
+        "p95_change_percent": -46.06907564230956
+      },
+      "mcp": {
+        "p95_change_percent": -49.470771914638966
+      },
+      "daemon": {
+        "p95_change_percent": -1.1311802556145945
+      },
+      "fetch": {
+        "p95_change_percent": -59.993538792785394,
+        "hard_gate": "<=10%"
+      }
+    },
+    "reasons": [],
+    "size_reduction_percent": 42.299208323454515
+  },
+  "independent_review": "NO_PROXY grammar and multistream gzip findings confirmed; source remains immutable pending complete review"
+}

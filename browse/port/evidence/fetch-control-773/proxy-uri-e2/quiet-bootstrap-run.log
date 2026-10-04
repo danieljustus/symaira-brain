@@ -1,0 +1,20 @@
+Go: Unknown option: version
+Traceback (most recent call last):
+  File "/workspace/symaira-fetch773-proxy-uri/browse/port/bench/run.py", line 662, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/symaira-fetch773-proxy-uri/browse/port/bench/run.py", line 619, in main
+    report["binaries"][name] = run_binary(
+                               ^^^^^^^^^^^
+  File "/workspace/symaira-fetch773-proxy-uri/browse/port/bench/run.py", line 562, in run_binary
+    result: dict[str, object] = {"identity": binary_identity(binary, repo_root,
+                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-fetch773-proxy-uri/browse/port/bench/run.py", line 525, in binary_identity
+    metadata = subprocess.check_output(["go", "version", "-m", str(binary)], text=True)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 466, in check_output
+    return run(*popenargs, stdout=PIPE, timeout=timeout, check=True,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['go', 'version', '-m', '/tmp/symaira-fetch773-proxy-uri-e2-go-release']' returned non-zero exit status 1.

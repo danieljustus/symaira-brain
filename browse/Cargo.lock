@@ -1995,13 +1995,19 @@ dependencies = [
 name = "symbrowse-fetch"
 version = "0.0.0"
 dependencies = [
+ "base64",
  "brotli",
  "encoding_rs",
  "flate2",
  "futures-util",
  "html5ever",
+ "http",
  "httpdate",
+ "hyper",
+ "hyper-util",
  "markup5ever_rcdom",
+ "native-tls",
+ "percent-encoding",
  "rand",
  "reqwest",
  "ruzstd",
@@ -2011,6 +2017,7 @@ dependencies = [
  "symbrowse-core",
  "time",
  "tokio",
+ "tokio-native-tls",
  "url",
 ]
 

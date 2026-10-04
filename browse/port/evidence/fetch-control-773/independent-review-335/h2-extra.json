@@ -1,0 +1,97 @@
+{
+  "pairs": [
+    {
+      "case": {
+        "id": "h2-https-proxy-080",
+        "url": "http://93.184.216.34:080/echo",
+        "proxy": "https://127.0.0.1:42821"
+      },
+      "go": {
+        "detail": "fetch http://93.184.216.34:080/echo: Get \"http://93.184.216.34:080/echo\": http2: unencrypted HTTP/2 not enabled",
+        "error": "transport",
+        "id": "h2-https-proxy-080"
+      },
+      "rust": {
+        "body_hex": "7b22686f7374223a2239332e3138342e3231362e33343a303830222c2270726f746f636f6c223a22485454502f312e31222c22726571756573745f757269223a22687474703a2f2f39332e3138342e3231362e33343a3038302f6563686f227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "96"
+          ],
+          "content-type": [
+            "application/json"
+          ]
+        },
+        "id": "h2-https-proxy-080",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:080/echo"
+      },
+      "matched": false
+    },
+    {
+      "case": {
+        "id": "h2-https-proxy-80",
+        "url": "http://93.184.216.34:80/echo",
+        "proxy": "https://127.0.0.1:42821"
+      },
+      "go": {
+        "detail": "fetch http://93.184.216.34:80/echo: Get \"http://93.184.216.34:80/echo\": http2: unencrypted HTTP/2 not enabled",
+        "error": "transport",
+        "id": "h2-https-proxy-80"
+      },
+      "rust": {
+        "body_hex": "7b22686f7374223a2239332e3138342e3231362e33343a3830222c2270726f746f636f6c223a22485454502f312e31222c22726571756573745f757269223a22687474703a2f2f39332e3138342e3231362e33343a38302f6563686f227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "94"
+          ],
+          "content-type": [
+            "application/json"
+          ]
+        },
+        "id": "h2-https-proxy-80",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:80/echo"
+      },
+      "matched": false
+    },
+    {
+      "case": {
+        "id": "h2-https-proxy-81",
+        "url": "http://93.184.216.34:81/echo",
+        "proxy": "https://127.0.0.1:42821"
+      },
+      "go": {
+        "detail": "fetch http://93.184.216.34:81/echo: Get \"http://93.184.216.34:81/echo\": http2: unencrypted HTTP/2 not enabled",
+        "error": "transport",
+        "id": "h2-https-proxy-81"
+      },
+      "rust": {
+        "body_hex": "7b22686f7374223a2239332e3138342e3231362e33343a3831222c2270726f746f636f6c223a22485454502f322e30222c22726571756573745f757269223a222f6563686f227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "71"
+          ],
+          "content-type": [
+            "application/json"
+          ]
+        },
+        "id": "h2-https-proxy-81",
+        "protocol": "HTTP/2.0",
+        "status": 200,
+        "url": "http://93.184.216.34:81/echo"
+      },
+      "matched": false
+    }
+  ],
+  "peer_stderr": "",
+  "binaries": {
+    "/tmp/symaira-fetch773-second-fix-independent-go-probe": "8e92be70d9b908c11f47720b1bf34c5717b327c246686dbb71e03b336f820786",
+    "/workspace/symaira-fetch773-proxy-uri/target/debug/examples/control_probe": "ef2dc9ac7d95e7be58499cf70acf9e8e64cdee0ddc13adb6682a741b938a0920"
+  },
+  "peer_source_sha256": "8317ace79214935002f881159b01a65eed7cd7209f1515bba343ea6de5dac53d"
+}

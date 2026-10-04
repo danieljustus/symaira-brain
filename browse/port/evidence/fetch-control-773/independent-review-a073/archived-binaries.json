@@ -1,0 +1,20 @@
+{
+  "candidate_revision": "a0732ec57357fd0e1a60dbf1ca5f8c42d8c59c41",
+  "binaries": {
+    "native-probe": {
+      "original_path": "/workspace/symaira-fetch773/target/debug/examples/control_probe",
+      "archived_path": "/tmp/symaira-fetch773-a073-immutable-binaries/native-probe",
+      "sha256": "972882b60a0421c5cb974e47d6892792652900ec9c40483a5f725c198f007f0c"
+    },
+    "native-release": {
+      "original_path": "/workspace/symaira-fetch773/target/release/symbrowse",
+      "archived_path": "/tmp/symaira-fetch773-a073-immutable-binaries/native-release",
+      "sha256": "c7f988b3266666ef8a577e2adc5863885fd8830bd2f7c80961747fdcde00eb32"
+    },
+    "go-probe": {
+      "original_path": "/tmp/symaira-fetch773-go-probe",
+      "archived_path": "/tmp/symaira-fetch773-a073-immutable-binaries/go-probe",
+      "sha256": "d52a94fccfa0d07c571f7109c0f43a9771ab6f5b3ea207569f539945bf8c4401"
+    }
+  }
+}

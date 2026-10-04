@@ -1,0 +1,150 @@
+{
+  "source": "c7beb3a7a39dbc10f7e84769fccea5cf20e7f09e",
+  "samples_recomputed": 240,
+  "sets": [
+    {
+      "side": "go",
+      "workload": "cli",
+      "samples": 30,
+      "p95_ns": 8188410,
+      "median_ns": 6759694
+    },
+    {
+      "side": "go",
+      "workload": "daemon",
+      "samples": 30,
+      "p95_ns": 20738435,
+      "median_ns": 20475291
+    },
+    {
+      "side": "go",
+      "workload": "fetch",
+      "samples": 30,
+      "p95_ns": 1934811,
+      "median_ns": 1156070
+    },
+    {
+      "side": "go",
+      "workload": "mcp",
+      "samples": 30,
+      "p95_ns": 8710829,
+      "median_ns": 6594734
+    },
+    {
+      "side": "rust",
+      "workload": "cli",
+      "samples": 30,
+      "p95_ns": 3204026,
+      "median_ns": 2731338
+    },
+    {
+      "side": "rust",
+      "workload": "daemon",
+      "samples": 30,
+      "p95_ns": 20419893,
+      "median_ns": 20292551
+    },
+    {
+      "side": "rust",
+      "workload": "fetch",
+      "samples": 30,
+      "p95_ns": 867299,
+      "median_ns": 652134
+    },
+    {
+      "side": "rust",
+      "workload": "mcp",
+      "samples": 30,
+      "p95_ns": 4279864,
+      "median_ns": 2995471
+    }
+  ],
+  "load_observations": 17,
+  "load_receipt_sha256": "4fbf31647b3326bc9bca8e92e8d00f03d6aedac514eb3632f1fb837d7230bc2d",
+  "current_size_bytes": {
+    "go": 26611127,
+    "rust": 10711464
+  },
+  "historical_size_reference": "Unchanged comparator uses recorded Darwin-arm64 release baseline18,330,466B; current Go Linux release is separately26,611,127B.",
+  "unchanged_comparator": {
+    "schema_version": 2,
+    "gate": "pass",
+    "workloads": {
+      "cli": {
+        "p95_change_percent": -60.87120698646014
+      },
+      "mcp": {
+        "p95_change_percent": -50.867316991298985
+      },
+      "daemon": {
+        "p95_change_percent": -1.535998256377591
+      },
+      "fetch": {
+        "p95_change_percent": -55.17396789660592,
+        "hard_gate": "<=10%"
+      }
+    },
+    "reasons": [],
+    "size_reduction_percent": 41.56469344532757
+  },
+  "cost_pairs": 120,
+  "cost": [
+    {
+      "scheme": "http",
+      "port": "81",
+      "side": "go",
+      "connections": 1,
+      "later_response_median_ms": 0.18055299999999974
+    },
+    {
+      "scheme": "http",
+      "port": "81",
+      "side": "rust",
+      "connections": 1,
+      "later_response_median_ms": 0.5855640000000015
+    },
+    {
+      "scheme": "http",
+      "port": "080",
+      "side": "go",
+      "connections": 1,
+      "later_response_median_ms": 0.22880499999999948
+    },
+    {
+      "scheme": "http",
+      "port": "080",
+      "side": "rust",
+      "connections": 30,
+      "later_response_median_ms": 0.7062460000000002
+    },
+    {
+      "scheme": "https",
+      "port": "81",
+      "side": "go",
+      "connections": 1,
+      "later_response_median_ms": 0.2000220000000006
+    },
+    {
+      "scheme": "https",
+      "port": "81",
+      "side": "rust",
+      "connections": 1,
+      "later_response_median_ms": 0.6181540000000005
+    },
+    {
+      "scheme": "https",
+      "port": "080",
+      "side": "go",
+      "connections": 1,
+      "later_response_median_ms": 0.21370299999999887
+    },
+    {
+      "scheme": "https",
+      "port": "080",
+      "side": "rust",
+      "connections": 30,
+      "later_response_median_ms": 2.5353020000000015
+    }
+  ],
+  "scope": "Author recomputation, not independent approval; no sample exclusions or threshold/reference edits."
+}

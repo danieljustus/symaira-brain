@@ -1,0 +1,11 @@
+    Checking symbrowse-core v0.0.0 (/workspace/symaira-fetch773-proxy-auth/browse/crates/symbrowse-core)
+    Checking symbrowse-engine v0.0.0 (/workspace/symaira-fetch773-proxy-auth/browse/crates/symbrowse-engine)
+    Checking symbrowse-compat v0.0.0 (/workspace/symaira-fetch773-proxy-auth/browse/crates/symbrowse-compat)
+    Checking symbrowse-protocol v0.0.0 (/workspace/symaira-fetch773-proxy-auth/browse/crates/symbrowse-protocol)
+    Checking symbrowse-engine-chrome v0.0.0 (/workspace/symaira-fetch773-proxy-auth/browse/crates/symbrowse-engine-chrome)
+    Checking symbrowse-engine-firefox v0.0.0 (/workspace/symaira-fetch773-proxy-auth/browse/crates/symbrowse-engine-firefox)
+    Checking symbrowse-fetch v0.0.0 (/workspace/symaira-fetch773-proxy-auth/browse/crates/symbrowse-fetch)
+    Checking symbrowse-daemon v0.0.0 (/workspace/symaira-fetch773-proxy-auth/browse/crates/symbrowse-daemon)
+    Checking symbrowse-mcp v0.0.0 (/workspace/symaira-fetch773-proxy-auth/browse/crates/symbrowse-mcp)
+    Checking symbrowse-cli v0.0.0 (/workspace/symaira-fetch773-proxy-auth/browse/crates/symbrowse-cli)
+    Finished `dev` profile [unoptimized] target(s) in 4.03s

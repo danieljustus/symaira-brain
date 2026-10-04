@@ -1,0 +1,312 @@
+{
+  "original_head": "335073aab4bc49b6a4497b38115ed5d8a688374a",
+  "original_source": "e2ecf4026806dd4d9fd219f15f931848b1fd56d9",
+  "files": [
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-actionlint.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/actionlint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-auth-extra.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/auth-extra.json",
+      "sha256": "61564d303fbf50d3a228615f3af9b3e28a9a31beec3a656c4d43dcc53d6f1d4a",
+      "bytes": 55817
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-auth-extra.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/auth-extra.log",
+      "sha256": "6c0b0f7af814d22ea1196d4d3afda4610316aefbcf195b5448c5a6400b2fc4c3",
+      "bytes": 24901
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-auth-extra.py",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/auth-extra.py",
+      "sha256": "9bbb1cc5d6f5fc7482735343b8ea43d3f8115bb73769e82701eb3c9436a2ea15",
+      "bytes": 1949
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-auth-parent.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/auth-parent.json",
+      "sha256": "b837b2545316865336e0702ce958d6c1851371e71c06728d368dee412c6c656c",
+      "bytes": 55408
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-auth-parent.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/auth-parent.log",
+      "sha256": "fa3bc91b3ec66e2d38477c7e5e0b17934b74f8b5b307173eca598966b9ed1e86",
+      "bytes": 41474
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-auth-parent.py",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/auth-parent.py",
+      "sha256": "7b7f8b91d6c83d71af37569b3c25f34a38ffab8d8e2c5a1d58d4f78c75b15e08",
+      "bytes": 1923
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-auth-required.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/auth-required.json",
+      "sha256": "83214480ab45525c98dd1b4c22d601897701f2472eddba62a0c62943df7a6e3f",
+      "bytes": 8369
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-auth-required.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/auth-required.log",
+      "sha256": "3a57704d1bfa51a014f09a46bfefe6997e3ec85d53fa39305b1d2859f1125d7b",
+      "bytes": 488
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-auth-required.py",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/auth-required.py",
+      "sha256": "bd6a22d8d1e631f6ee52110fbbbd553e166e51c9359daf8723ed1151ec83f38c",
+      "bytes": 2365
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-benchmark-tests.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/benchmark-tests.log",
+      "sha256": "233d7385de70b0d5291436ee858178071ad42353e4b7f91145bec281b4722a77",
+      "bytes": 117
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-body-extra-final.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/body-extra-final.log",
+      "sha256": "d6e4acdb65451af00a2cca5ac8c811927b92c89e637b49c68c6db1a68292836c",
+      "bytes": 28036
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-body-extra-first.py",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/body-extra-first.py",
+      "sha256": "3e507146074ec67f96612acdd480b86c3921d6b346e7f0f46ed31fb05ff5f0c5",
+      "bytes": 2498
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-body-extra.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/body-extra.json",
+      "sha256": "d6e4acdb65451af00a2cca5ac8c811927b92c89e637b49c68c6db1a68292836c",
+      "bytes": 28036
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-body-extra.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/body-extra.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-body-extra.py",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/body-extra.py",
+      "sha256": "da68b7306ce64b5adaa8c17c99f373947d528f347d1435b2281b564df331b69a",
+      "bytes": 3227
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-body-parent.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/body-parent.json",
+      "sha256": "d2dca0e0d6b8fe964014878324800399131b11e54411927b1a170f4a7a858342",
+      "bytes": 28093
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-body-parent.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/body-parent.log",
+      "sha256": "d2dca0e0d6b8fe964014878324800399131b11e54411927b1a170f4a7a858342",
+      "bytes": 28093
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-body-parent.py",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/body-parent.py",
+      "sha256": "a17fdc559fcf73abf6c4882482c64177f2012493003515faa77b7efb2a7f1454",
+      "bytes": 3201
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-classification.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/classification.json",
+      "sha256": "2cf34eae85cee46eb4e787c01b39d7158d91952eb1a5485f8a0d56c040904e44",
+      "bytes": 7311
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-clippy.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/clippy.log",
+      "sha256": "60752725ea6f194f20ebc7150276eef9d351f09c52a8c6e784e05f6a10ca45df",
+      "bytes": 60
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-comparison.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/comparison.json",
+      "sha256": "fd60490810d45286738881cbc28ec25bc9a966157aac1ce4d8ce7727174063d0",
+      "bytes": 432
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-fmt.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-go-fixtures.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/go-fixtures.log",
+      "sha256": "3857f7c3cf52b842d130fcdb37f182bd171e8c2b66890c0a74b686b260d91b73",
+      "bytes": 1163
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-h2-extra.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/h2-extra.json",
+      "sha256": "ee68035299e67d48ed1f31248cd93c04c30a1387adbe9f986296c1152e6facc8",
+      "bytes": 3285
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-h2-extra.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/h2-extra.log",
+      "sha256": "ee68035299e67d48ed1f31248cd93c04c30a1387adbe9f986296c1152e6facc8",
+      "bytes": 3285
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-h2-extra.py",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/h2-extra.py",
+      "sha256": "847c887109f4a29ff7af00acbb50fd78acc3a5eb67b3d8a13d40c01acaab4c23",
+      "bytes": 1600
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-h2-parent.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/h2-parent.json",
+      "sha256": "e0c952f1f85ba14393f31df3f4a8cf00eccb25af6a2a840eb2b3c601c2792f36",
+      "bytes": 3150
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-h2-parent.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/h2-parent.log",
+      "sha256": "e0c952f1f85ba14393f31df3f4a8cf00eccb25af6a2a840eb2b3c601c2792f36",
+      "bytes": 3150
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-h2-parent.py",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/h2-parent.py",
+      "sha256": "33012a9af4452e6f8136bcd6430be9a5c76bf33590b8a9f30f7aff7fcd54109a",
+      "bytes": 1574
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-identity.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/identity.log",
+      "sha256": "feabb4add9e2ca3374e538560634d1ec97dc4f4ce89aab12f3d726e36ea9b2f6",
+      "bytes": 102
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-matrix.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/matrix.log",
+      "sha256": "f5bfa3059aad5fdddb33c5356c9bfa859a33d90f12f51ff8393cf106c56421b4",
+      "bytes": 58
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-original5.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/original5.json",
+      "sha256": "f87534a4a4c232e07554422d7f6b42810cf26fae55b4d39609d667a6dfde92ee",
+      "bytes": 5951
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-original5.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/original5.log",
+      "sha256": "93d91eef7811cb26d6178dca1f0b0955acd3c463f189c040cc7cb6d9bc359ce3",
+      "bytes": 965
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-original5.py",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/original5.py",
+      "sha256": "014bc348e2e236d8f496b8df7a3e8049294eb95b1584e59b1fe025f2f77b2d3f",
+      "bytes": 1827
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-original8.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/original8.json",
+      "sha256": "2c7fdb92a5242eead2f965eb6edc2e0f9a778fa2d36e24605a71f520834c3f48",
+      "bytes": 13898
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-original8.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/original8.log",
+      "sha256": "e1359aef2387660b469cd3c9f0bbac6b9c0e410de0398746f037ab4c34e895d7",
+      "bytes": 1649
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-original8.py",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/original8.py",
+      "sha256": "23470b6a0f71d4060bfa63409abefe26b7fe16e21cac81393208219451591802",
+      "bytes": 2533
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-process-controls.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/process-controls.json",
+      "sha256": "e8ef9432811679ebb0aac91970908897d27cfe9033cc1824a34ef3cc39c5362d",
+      "bytes": 4415
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-process-raw-proxy-controls.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/process-raw-proxy-controls.json",
+      "sha256": "bd4b33b8434e59b55ac1b6a757002afe20a5a209b83b2ac59b82c1ab5d158833",
+      "bytes": 13355
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-process-raw-proxy.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/process-raw-proxy.json",
+      "sha256": "22238bdb48892b09669af450362b52eb18c3b7839d8fac9cc960672cf0fbccfd",
+      "bytes": 64401
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-process.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/process.json",
+      "sha256": "fdb1c18c309133282753a427ee402fa331d28f6802f99e1c6d89b125fb0e29b9",
+      "bytes": 265939
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-process.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/process.log",
+      "sha256": "72373242f5f11d7beaac3157f8514d0005b1683e1155409bd40d8079f17af536",
+      "bytes": 311
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-provenance.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/provenance.json",
+      "sha256": "3418ef10bed0ac6aa73833a77138b5bf43a88d7142e7cc0a5829e6521d2a230b",
+      "bytes": 441
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-review-receipt.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/review-receipt.json",
+      "sha256": "f5a0c7544610bbf1c6af9ebd3065353e5b421618549793cd6f277b72cc11d980",
+      "bytes": 15324
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-review.md",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/review.md",
+      "sha256": "f1806006c8898fc9fac73bae63276c460e13af32986f6d2cf94c3a24be5c4291",
+      "bytes": 13324
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-tests.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/tests.log",
+      "sha256": "f933ba8f07b5d6dc9ff207c7c271d92587bdf5da82a9f6e81b86213f7a880701",
+      "bytes": 14739
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-value-check.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/value-check.json",
+      "sha256": "63fca944f9eee746afae18b28375fb16b8b0bbf1fd7a14f9fbea56dfd813b0a0",
+      "bytes": 3152
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-verify.log",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/verify.log",
+      "sha256": "6e695ee1e8f3d11fcae1a47c3199ecf463402c39343c8e1f1a8237e311213a20",
+      "bytes": 397
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/review-proof/symaira-fetch773-proxy-uri-independent-verify.py",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/verify.py",
+      "sha256": "0729e48c75ccab632a9d8dabfc606ab7fc86e0d58666723f15fc279252d7192d",
+      "bytes": 3469
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-335-binaries/receipt.json",
+      "retained": "browse/port/evidence/fetch-control-773/independent-review-335/binary-preservation.json",
+      "sha256": "db112988cdbf13eb3bf552b19fafbd556612cfa2ef8a8df4643344458f20ae8b",
+      "bytes": 80965
+    }
+  ]
+}

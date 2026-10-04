@@ -1,0 +1,41 @@
+{
+  "candidate_head": "cc8a1673bead86b1d34b6f84ea9bcbf5ced86017",
+  "candidate_dirty": false,
+  "oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "go": [
+    {
+      "body_hex": "66697273747365636f6e64",
+      "error": "",
+      "headers": {
+        "content-type": [
+          "text/plain; charset=utf-8"
+        ]
+      },
+      "id": "concatenated-gzip",
+      "protocol": "HTTP/1.1",
+      "status": 200,
+      "url": "http://127.0.0.1:41539/"
+    }
+  ],
+  "rust": [
+    {
+      "body_hex": "6669727374",
+      "error": "",
+      "headers": {
+        "content-type": [
+          "text/plain; charset=utf-8"
+        ]
+      },
+      "id": "concatenated-gzip",
+      "protocol": "HTTP/1.1",
+      "status": 200,
+      "url": "http://127.0.0.1:41539/"
+    }
+  ],
+  "matched": false,
+  "actual_local_http": true,
+  "binary_sha256": {
+    "go": "d52a94fccfa0d07c571f7109c0f43a9771ab6f5b3ea207569f539945bf8c4401",
+    "rust": "bd4a50f0e5bc1ee884bcf4095b247ab32e74f84574d1c14a6679f6afa28dc151"
+  }
+}

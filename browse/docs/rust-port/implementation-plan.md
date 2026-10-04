@@ -178,6 +178,8 @@ remains assigned to RUST-006.
 
 ## RUST-006: Daemon IPC, lifecycle and MCP handoff
 
+The supplemental `port/harness/daemon_process.py` gate compares 21 actual daemon requests with immutable integrated Go `dcddcef0`, including policy reporting, session cache/scope metadata and unknown-command errors. It retains source/binary hashes and three rejection controls. The historical `652453d` fixtures remain unchanged. The MCP companion `port/harness/daemon_mcp.py` verifies that all four Go MCP source files exactly match the historical manifest, regenerates the thirteen existing inputs in disposable roots, compares actual CLI frames and supplies those outputs to the existing production-proxy tests. The full local workspace now passes; its initial missing-output failure remains retained. Three actual native fixture controls require failure for missing output, changed bytes and an absent production daemon. Native receipts on all six declared runners and the remaining registry/autostart cases are still required before RUST-006 completes.
+
 **Objective:** Reproduce protected local IPC, concurrency, process ownership,
 lifecycle control and MCP daemon handoff.
 
@@ -214,6 +216,16 @@ retry/backoff and per-host circuit/rate control. Pinned-source control fixtures,
 redirect/proxy/error coverage and missing production-pipeline integration; the
 existing fixtures are representative slices, not full FETCH-001/003/004/005
 parity. Browser profiles remain on the explicit Go fallback.
+
+**#773 supplement:** Real frozen-Go/native request comparisons now cover honest
+header precedence, request defaults, redirect/body/deadline boundaries, ephemeral
+cookies, explicit/implicit proxy peers and environment routing. Routing-only
+observations are counted separately from HTTP exchanges. Five executable mutants
+must fail; the benchmark preserves exact 30 pairs and unchanged thresholds while
+binding executable identity to clean source/build receipts. See
+[the decision](adr-honest-fetch-control-773.md) and
+`port/evidence/fetch-control-773/`. Native CI and complete pipeline/value parity
+remain pending; matrix rows are fixture-ready rather than full-parity claims.
 
 **Files:**
 

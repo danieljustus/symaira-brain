@@ -92,6 +92,7 @@ mod unix {
     }
 
     #[test]
+    #[allow(clippy::result_large_err)]
     fn unix_listener_shutdown_runs_runtime_cleanup_hook() {
         let root = root("shutdown-hook");
         let socket = root.join("default.sock");

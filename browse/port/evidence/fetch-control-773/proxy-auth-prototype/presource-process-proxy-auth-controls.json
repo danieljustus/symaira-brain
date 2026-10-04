@@ -1,0 +1,36 @@
+{
+  "rejected": 3,
+  "controls": [
+    {
+      "name": "drop-password-octet",
+      "case": "http-auth-080-6-False",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/workspace/symaira-fetch773-proxy-auth/browse/port/harness/fetch_control_proxy_auth.py\", line 144, in <module>\n    main()\n  File \"/workspace/symaira-fetch773-proxy-auth/browse/port/harness/fetch_control_proxy_auth.py\", line 79, in main\n    assert_echo(results, [info for _ in [\"080\", \"81\"] for info in USERINFO for _ in [False, True]])\n  File \"/workspace/symaira-fetch773-proxy-auth/browse/port/harness/fetch_control_proxy_auth.py\", line 37, in assert_echo\n    assert row[\"matched\"], row\n           ~~~^^^^^^^^^^^\nAssertionError: {'id': 'http-auth-080-6-False', 'request': {'id': 'http-auth-080-6-False', 'url': 'http://93.184.216.34:080/echo', 'proxy': 'http://user:%ff@127.0.0.1:37703', 'headers': {}}, 'go': {'body_hex': '7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b2239332e3138342e3231362e33343a303830225d2c2270726f78792d617574686f72697a6174696f6e223a5b2242617369632064584e6c636a722f225d7d2c226d6574686f64223a22474554222c22746172676574223a22687474703a2f2f39332e3138342e3231362e33343a3038302f6563686f227d', 'error': '', 'headers': {'content-length': ['149']}, 'id': 'http-auth-080-6-False', 'protocol': 'HTTP/1.1', 'status': 200, 'url': 'http://93.184.216.34:080/echo'}, 'rust': {'body_hex': '7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b2239332e3138342e3231362e33343a303830225d2c2270726f78792d617574686f72697a6174696f6e223a5b2242617369632064584e6c636a6f3d225d7d2c226d6574686f64223a22474554222c22746172676574223a22687474703a2f2f39332e3138342e3231362e33343a3038302f6563686f227d', 'error': '', 'headers': {'content-length': ['149']}, 'id': 'http-auth-080-6-False', 'protocol': 'HTTP/1.1', 'status': 200, 'url': 'http://93.184.216.34:080/echo'}, 'matched': False}\n",
+      "wrapper_sha256": "7835e121b6425834d14bdd3f74b7b7167670f69cf1ddce5b42800f747923d758"
+    },
+    {
+      "name": "reverse-caller-order",
+      "case": "http-auth-81-6-True",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/workspace/symaira-fetch773-proxy-auth/browse/port/harness/fetch_control_proxy_auth.py\", line 144, in <module>\n    main()\n  File \"/workspace/symaira-fetch773-proxy-auth/browse/port/harness/fetch_control_proxy_auth.py\", line 79, in main\n    assert_echo(results, [info for _ in [\"080\", \"81\"] for info in USERINFO for _ in [False, True]])\n  File \"/workspace/symaira-fetch773-proxy-auth/browse/port/harness/fetch_control_proxy_auth.py\", line 37, in assert_echo\n    assert row[\"matched\"], row\n           ~~~^^^^^^^^^^^\nAssertionError: {'id': 'http-auth-81-6-True', 'request': {'id': 'http-auth-81-6-True', 'url': 'http://93.184.216.34:81/echo', 'proxy': 'http://user:%ff@127.0.0.1:33275', 'headers': {'Proxy-Authorization': 'synthetic-caller'}}, 'go': {'body_hex': '7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b2239332e3138342e3231362e33343a3831225d2c2270726f78792d617574686f72697a6174696f6e223a5b2273796e7468657469632d63616c6c6572222c2242617369632064584e6c636a722f225d7d2c226d6574686f64223a22474554222c22746172676574223a22687474703a2f2f39332e3138342e3231362e33343a38312f6563686f227d', 'error': '', 'headers': {'content-length': ['166']}, 'id': 'http-auth-81-6-True', 'protocol': 'HTTP/1.1', 'status': 200, 'url': 'http://93.184.216.34:81/echo'}, 'rust': {'body_hex': '7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b2239332e3138342e3231362e33343a3831225d2c2270726f78792d617574686f72697a6174696f6e223a5b2242617369632064584e6c636a722f222c2273796e7468657469632d63616c6c6572225d7d2c226d6574686f64223a22474554222c22746172676574223a22687474703a2f2f39332e3138342e3231362e33343a38312f6563686f227d', 'error': '', 'headers': {'content-length': ['166']}, 'id': 'http-auth-81-6-True', 'protocol': 'HTTP/1.1', 'status': 200, 'url': 'http://93.184.216.34:81/echo'}, 'matched': False}\n",
+      "wrapper_sha256": "85ad33701a5dddd63c407d811987e450ffa5888603ed8ce20a4d26600bda3d8c"
+    },
+    {
+      "name": "proxy-auth-rejected",
+      "case": "enforced-username-080",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/workspace/symaira-fetch773-proxy-auth/browse/port/harness/fetch_control_proxy_auth.py\", line 144, in <module>\n    main()\n  File \"/workspace/symaira-fetch773-proxy-auth/browse/port/harness/fetch_control_proxy_auth.py\", line 129, in main\n    assert row[\"matched\"] and row[\"go\"][\"status\"] == row[\"rust\"][\"status\"] == 200, row\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'id': 'enforced-username-080', 'request': {'id': 'enforced-username-080', 'url': 'http://93.184.216.34:080/username', 'proxy': 'http://%ff:password@127.0.0.1:40969'}, 'go': {'body_hex': '7b226163636570746564223a747275652c2268656164657273223a5b224261736963202f7a707759584e7a643239795a413d3d225d7d', 'error': '', 'headers': {'content-length': ['54']}, 'id': 'enforced-username-080', 'protocol': 'HTTP/1.1', 'status': 200, 'url': 'http://93.184.216.34:080/username'}, 'rust': {'body_hex': '7b226163636570746564223a747275652c2268656164657273223a5b224261736963202f7a707759584e7a643239795a413d3d225d7d', 'error': '', 'headers': {'content-length': ['54']}, 'id': 'enforced-username-080', 'protocol': 'HTTP/1.1', 'status': 407, 'url': 'http://93.184.216.34:080/username'}, 'matched': False}\n",
+      "wrapper_sha256": "813916c22cb98e0869b1d87fcc4aa556a05afce98f98039d64b81ff4eb997254"
+    }
+  ],
+  "binaries_sha256": {
+    "go": "8e92be70d9b908c11f47720b1bf34c5717b327c246686dbb71e03b336f820786",
+    "rust": "9b20e709f1c29ba2df49d1072bae4a101d038ca0de6dc54702a4f7551f5e726c"
+  }
+}

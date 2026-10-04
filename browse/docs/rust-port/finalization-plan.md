@@ -98,6 +98,16 @@ those exact-candidate native receipts pass.
 --suite fetch-control` and a programmatic set-equality check of declared versus
 executed case IDs.
 
+#773 adds the source-bound process and environment-proxy corpus, native
+six-target workflow and honest executable provenance described in
+[ADR: honest fetch controls](adr-honest-fetch-control-773.md). This is a bounded
+slice: all remaining redirect/proxy/error/pipeline branches and platform/value
+evidence are still required before marking RUST-007 complete.
+Independent review corrections preserve signed-CIDR and literal-authority-port
+routing against the actual Go SDK and isolate transport identities structurally.
+The 251 Unix/249 Windows process corpus includes real redirect and distinct-proxy
+regressions; native named-session tests additionally preserve jar isolation.
+
 ### 1C. Static document pipeline (RUST-008)
 
 **Files:** `crates/symbrowse-fetch/src/{dom,render,semantic,relevance,cache,batch,archive,pipeline}.rs`,

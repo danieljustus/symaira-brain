@@ -1,0 +1,57 @@
+import datetime
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import threading
+import time
+
+ROOT = Path('/workspace/symaira-fetch773/browse')
+PREFIX = '/tmp/symaira-fetch773-second-fix-quiet-'
+GO = Path('/tmp/symaira-fetch773-second-fix-go-release')
+RUST = Path('/workspace/symaira-fetch773/target/release/symbrowse')
+expected = {'go': '221b047aa18e2c4eb421dd970de18e6e82372059c492f6bd52ac337c95c5a5f6',
+            'rust': '6384a60885922ed76902432712fd4ff2a82f63b0430cd8b06f0defeaa1834853'}
+def digests():
+    return {k: hashlib.sha256(v.read_bytes()).hexdigest() for k, v in [('go', GO), ('rust', RUST)]}
+assert digests() == expected
+assert not subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT)
+observations = []
+stop = threading.Event()
+def sample():
+    while not stop.is_set():
+        observations.append(dict(utc=datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                                 loadavg=Path('/proc/loadavg').read_text().strip(),
+                                 cgroup_cpu_stat=Path('/sys/fs/cgroup/cpu.stat').read_text(),
+                                 cpu=Path('/proc/stat').read_text().splitlines()[0]))
+        stop.wait(0.25)
+before = subprocess.check_output(['ps', '-eo', 'comm,pcpu', '--sort=-pcpu'], text=True).splitlines()[:15]
+thread = threading.Thread(target=sample, daemon=True)
+thread.start()
+try:
+    command = ['python3', '/tmp/symaira-subreaper.py', 'python3', 'port/bench/run.py',
+               '--go', str(GO), '--rust', str(RUST), '--runs', '30', '--strict',
+               '--go-build-receipt', '/tmp/symaira-fetch773-second-fix-clean-go-build.json',
+               '--rust-build-receipt', '/tmp/symaira-fetch773-second-fix-clean-rust-build.json',
+               '--output', PREFIX + 'paired-30.json']
+    with open(PREFIX + 'run.log', 'wb') as log:
+        result = subprocess.run(command, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)
+    with open(PREFIX + 'comparison.json', 'wb') as output:
+        comparison = subprocess.run(['python3', 'port/bench/compare.py', 'docs/rust-port/baseline.json',
+                                     PREFIX + 'paired-30.json'], cwd=ROOT, stdout=output, stderr=subprocess.PIPE)
+finally:
+    stop.set()
+    thread.join()
+after = subprocess.check_output(['ps', '-eo', 'comm,pcpu', '--sort=-pcpu'], text=True).splitlines()[:15]
+assert digests() == expected
+receipt = dict(candidate_source=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+               candidate_dirty=bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT)),
+               coordination='Root held compilation/replays across all lanes before explicit quiet-window start; no threshold/sample changes',
+               binary_sha256=expected, benchmark_exit=result.returncode, comparator_exit=comparison.returncode,
+               process_snapshot_before=before, process_snapshot_after=after,
+               cgroup_cpu_max=Path('/sys/fs/cgroup/cpu.max').read_text(), observations=observations,
+               report_sha256=hashlib.sha256(Path(PREFIX + 'paired-30.json').read_bytes()).hexdigest(),
+               comparator_sha256=hashlib.sha256(Path(PREFIX + 'comparison.json').read_bytes()).hexdigest())
+Path(PREFIX + 'load-receipt.json').write_bytes((json.dumps(receipt, indent=2) + '\n').encode())
+print(f'Full quiet-window paired30 finished: benchmark exit{result.returncode}; comparator exit{comparison.returncode}; {len(observations)} quarter-second load observations')
+raise SystemExit(result.returncode or comparison.returncode)
