@@ -43,6 +43,9 @@ def main():
         assert path.is_relative_to(target), line
         if path.is_file():
             files.append(path)
+    # Cargo package clean need not list the top-level hard-linked executable;
+    # the next build still overwrites it, so preserve those actual bytes too.
+    files.extend(path for path in [target / 'debug/symbrain', target / 'debug/symbrain.exe'] if path.is_file())
     records, unique = [], {}
     archive = output.with_suffix('.tar.gz')
     assert not output.exists() and not archive.exists()
