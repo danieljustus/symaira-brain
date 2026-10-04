@@ -1,8 +1,0 @@
-core     14 tools  Page interaction and reading: open, snapshot, click, fill, type, press, wait, read, get, find. The default profile.
-           tools: open, snapshot, click, fill, type, press, wait, read, get, find, fetch_url, fetch_batch, cache_get, wayback_snapshots
-nav       3 tools  History navigation: back, forward, reload.
-           tools: back, forward, reload
-state     0 tools  Sessions, cookies, storage, state save/load, auth login. Tools land with the state milestone (v0.4.0).
-network   0 tools  Routing, mocking, request inspection, HAR, headers, offline. Tools land with the network milestone (v1.0.0).
-debug     0 tools  Console, errors, eval, a11y, diff, doctor. Tools land with the reach milestones (v1.0.0).
-flows     0 tools  Flow list/run/record. Tools land with the flows milestone (v0.6.0).

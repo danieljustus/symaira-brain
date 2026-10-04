@@ -1,8 +1,0 @@
-    Finished `dev` profile [unoptimized] target(s) in 0.07s
-Traceback (most recent call last):
-  File "/workspace/symaira-guard770-diagnostics/scripts/guard-standalone-oracle/replay.py", line 300, in <module>
-    main()
-  File "/workspace/symaira-guard770-diagnostics/scripts/guard-standalone-oracle/replay.py", line 295, in main
-    assert not failures, "\n".join(failures)
-           ^^^^^^^^^^^^
-AssertionError: doctor-anchor-string-number: failed: stdout/stderr/exit/state differs

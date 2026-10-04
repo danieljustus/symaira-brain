@@ -1,1 +1,0 @@
-[('normal', 'allow', 'allow'), ('directory', 'deny', 'deny'), ('parent-file', 'deny', 'deny'), ('final-symlink', 'allow', 'deny'), ('ancestor-symlink', 'allow', 'deny'), ('unsafe-parent', 'allow', 'deny')]

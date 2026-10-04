@@ -1,9 +1,0 @@
-{
-  "src/internal/filepathlite/path.go": "dd1a0138328d6353d089d6ba8e04905d9e951bedfef1b85913c64de2ca2fd223",
-  "src/internal/filepathlite/path_windows.go": "ad313fae9fd1e150df082ad7f43c34b0830ce79433d0eef89c7724fdb07d06bb",
-  "src/path/filepath/path_windows.go": "96c1af1caace59a146241f5a48a700a142f2e5520f932fb2fc6376ce5a94ed81",
-  "src/path/filepath/path_test.go": "105f092974157239e0cd5a09025abcb9b7ed247382d27e1f8fd8179f03c08c1e",
-  "LICENSE": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
-  "src/syscall/env_windows.go": "5fc24ad0663552b191c8f1014a5cecb976855778b1d7e57244040fbb74c0df32",
-  "src/syscall/syscall_windows.go": "f1b22dde6bb980cf036561cee7ece968daa260cb622f32c96cebd52477b7a346"
-}

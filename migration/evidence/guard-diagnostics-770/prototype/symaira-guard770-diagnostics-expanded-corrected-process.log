@@ -1,3 +1,0 @@
-   Compiling symguard-cli v0.12.1 (/workspace/symaira-guard770-diagnostics/rust/symguard-cli)
-    Finished `dev` profile [unoptimized] target(s) in 0.75s
-124 actual standalone process cases; 121 full matches; 3 remaining doctor diagnostic states and 0 audit diagnostic deviations explicitly retained

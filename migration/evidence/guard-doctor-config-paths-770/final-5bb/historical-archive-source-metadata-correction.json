@@ -1,8 +1,0 @@
-{
-  "original_receipt": "/workspace/oracles/symaira-guard770-config-paths-9e9-binaries/receipt.json",
-  "original_receipt_sha256": "050c5e447f3e899486310b79e16f2e6d335a29cc8bfea7280385442f62b108f9",
-  "original_source_field": "9e9dce22 (see exact HEAD in source maps)",
-  "authoritative_head": "9e9dce2108adc5008ffba9a0e1339668740b022a",
-  "correction": "The preserved source field contains an imprecise shorthand. Its exact full head field is authoritative; original metadata/bytes are unchanged.",
-  "not_new_test_evidence": true
-}

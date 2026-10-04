@@ -1,1 +1,0 @@
-[('dangling-final-symlink', 2, True), ('final-symlink-other-file', 2, True), ('final-directory', 2, True), ('parent-is-file', 2, True), ('traversal', 2, True), ('write-failure', 1, True)]

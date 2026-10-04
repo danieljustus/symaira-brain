@@ -1,8 +1,0 @@
-{
-  "previous": "87261c3b753217442fd11cbd622b1b3ead68b60c",
-  "main": "2b6d49f250a81650eda1b93cec7d859a171873bb",
-  "merge": "ae5197b7cf7b7a9e94d7ff1af2dc1543b5e92b87",
-  "production_tests_workflows_dependencies_matrix_byte_identical": true,
-  "previous_ci": 37162669120,
-  "decision": "Retain full reviewed execution proof for unchanged code; require current-head protected CI; actual signed release remains open"
-}

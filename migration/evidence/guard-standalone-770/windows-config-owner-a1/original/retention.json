@@ -1,0 +1,876 @@
+{
+  "publication": "a1a29878f9b1b236862c09ac5c2bb5fb6cd3f4db",
+  "original_CI_merge": "375d77c504d0665a6416a0278a9dd381ebc30f3e",
+  "frozen_before_harness_fix": true,
+  "original_failed_control_output_gap_preserved": true,
+  "records": [
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/artifacts-api.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/artifacts-api.json.gz",
+      "bytes": 16311,
+      "sha256": "8a4c581d9813e5668664ba6aaf61f35feb224de9aea666c79ed17dd73cf8521a",
+      "gzip_sha256": "288c5402d1073db80744883a98ced053debc19c47d83d7f331ad433477fc6700"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/guard805-a1-windows-original.zip",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/guard805-a1-windows-original.zip.gz",
+      "bytes": 5314265,
+      "sha256": "8c8104083d613acace0fe92c4ba4d3d082ef0a082eadb7b845b98d9624e663cc",
+      "gzip_sha256": "903afa5fc440ab96fb1a0bc4e892f1303cfd0a6a8adc7a8ef0bac0c18c8be415"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/job-api.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/job-api.json.gz",
+      "bytes": 401,
+      "sha256": "32f9807a1c18edaabdae37a922a9c94684927f67e0a209d2443f7b2030a895f2",
+      "gzip_sha256": "1948251caf92a8167e4e5c7465b734bb7076358901237fa307d7819446182a07"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/jobs-api.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/jobs-api.json.gz",
+      "bytes": 48266,
+      "sha256": "82541d2a6e3c50847e45ef72e2bf7abe9d7dc602d29228629222f858e248e047",
+      "gzip_sha256": "6f9fefcf89c3ff9f226cec9cd8717e04bc3f9bd12107954a76783a49ddce9dd8"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/log-api.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/log-api.json.gz",
+      "bytes": 381905,
+      "sha256": "600507a8fc7b260a7a0b8ccf4103c8e569c536da0671303de5196f0e54036dc5",
+      "gzip_sha256": "123403f82ff493c0f065f56737a75a21b79b230c29fe830d5d2d4c0942086880"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/members/guard-standalone-binaries/go.exe",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/members/guard-standalone-binaries/go.exe.gz",
+      "bytes": 7318016,
+      "sha256": "3cebfcdc4c162d45771cd533da0572780304b4d66240ad7e30cb24b69acad4b8",
+      "gzip_sha256": "44058e21ddb259c1d40923180020089b7de90c46e9b65310c1c6c42d379555be"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/members/guard-standalone-binaries/native.exe",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/members/guard-standalone-binaries/native.exe.gz",
+      "bytes": 3009536,
+      "sha256": "3bc7c9c8d2300f19adc30a2b8b6bdae672cd0e25d49e2221c410c3206a75a574",
+      "gzip_sha256": "1ba40b3763b0296cc0160a434e2f293ae760a9cc30d75b5ba42c5dc7821206f8"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/members/guard-standalone-binaries/receipt.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/members/guard-standalone-binaries/receipt.json.gz",
+      "bytes": 901,
+      "sha256": "02d24979ee67d45713256f0dad980ab098f997adf0abbded5683431f6b45a9a6",
+      "gzip_sha256": "cb469e13dc7a63120f6c07b1b4dba5bec80477b11eb8abd50c75854b507441fd"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/members/guard-standalone-config-warnings.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/members/guard-standalone-config-warnings.json.gz",
+      "bytes": 419949,
+      "sha256": "d364c07510114a6ada3ac5c10f68adb241b7030dc3636553a8f4bce3af8c605e",
+      "gzip_sha256": "5c6ab3918a3031e2378fd443fd04511ba06b0fe9ea2849271b036218604d1bef"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/members/guard-standalone-controls.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/members/guard-standalone-controls.json.gz",
+      "bytes": 12558,
+      "sha256": "ee579fd16fd72507ee1c697623ad78279716c122b4913e79096054c8a7ae5b2a",
+      "gzip_sha256": "8f106f9939a2b68b6733c6141e8a089e3a945604247854bb016602f885562ebe"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/members/guard-standalone-doctor-boundaries.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/members/guard-standalone-doctor-boundaries.json.gz",
+      "bytes": 427763,
+      "sha256": "ff522710a9f3b41a39ca9f52464d1e0e14ab5d04283ad2abcf070a09a3dddf35",
+      "gzip_sha256": "e90531eb31577d3b421acd529439607bd7e61867d39cb9f622c6825f9d718849"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/members/guard-standalone-raw-paths.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/members/guard-standalone-raw-paths.json.gz",
+      "bytes": 47265,
+      "sha256": "dfa16de7e32dcaae2454667eaf891975a0f560fd6b64773c6bb76f216290473e",
+      "gzip_sha256": "bd9b5256ca8dbef69e84c45c208e74342d7b107f59d6dfdf3f6849d650e783d3"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/members/guard-standalone.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/members/guard-standalone.json.gz",
+      "bytes": 682993,
+      "sha256": "c0150ddb524c7a736d4b36fc5666c3cc192316ac9b19d10e0fa60d2d188a90b9",
+      "gzip_sha256": "4bc713e1d30c075829f89bc7e1ba032e9e6f558ed238144fb8b8c40ef341aa6c"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/protected-source.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/protected-source.json.gz",
+      "bytes": 198037,
+      "sha256": "10f1a5dc5a0864fcef4fcf4ec2c5d2ba2483cf5b08d80cc6273aaa05db233daf",
+      "gzip_sha256": "ea5981b3f5e25ed232fe9c5927001425a8c26dd8414745e2aed9f1a279f443f2"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/provenance.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/provenance.json.gz",
+      "bytes": 957,
+      "sha256": "5a73e747763e3e40934ee0deabf43e373dfd5bd07e58e1897ebbf174afe35e59",
+      "gzip_sha256": "3e512e1b159cc01b71d8e6d07c471de375e14288bdf1d6cbc97d98342909c8fa"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/.github/workflows/ci.yml",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/.github/workflows/ci.yml.gz",
+      "bytes": 74603,
+      "sha256": "a55be3ef67440abad3b8826409fef852093a74b7af486b3bdf645f8adc771848",
+      "gzip_sha256": "8b98b661ac7372b24d793e12ae412529043e2232b8ea99d90579d2b102377bcd"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/AGENTS.md",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/AGENTS.md.gz",
+      "bytes": 15652,
+      "sha256": "96501fab340de5969b201a1060581420f9085f923fbcf4c32d1394e4082189b6",
+      "gzip_sha256": "b3be89ad2919cd3d85d0fcfdc635e94344541df6e4e62951e3a7366a8fdfa5fe"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/Cargo.lock",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/Cargo.lock.gz",
+      "bytes": 65896,
+      "sha256": "273fedc324f5acf687ef66d46a6914e16fc2b6ad643541b03c3021532c4b2acc",
+      "gzip_sha256": "3da79ee27f1c5f65f3d3dfebf5f4a8b7cef274404219c353eccb380f6820c489"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/Cargo.toml",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/Cargo.toml.gz",
+      "bytes": 2876,
+      "sha256": "dfa1fc858d8556f92d8175a5a298deec96776ac9f7bef90555954c7cfa4440a3",
+      "gzip_sha256": "c2c52443bfc4f9040b0c7114723656ae29de1a4fffcfdd62e828179ec05e75d9"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/guard/AGENTS.md",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/guard/AGENTS.md.gz",
+      "bytes": 12038,
+      "sha256": "f90d4a9daecfaa08c35e568b2b942ab3802ec6deac6c731b03dc1930dff53d6c",
+      "gzip_sha256": "ab046dec3338dc2ccaa881533857a3dd1cfd208057c68ce42c1062a7a6861bd8"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-audit/Cargo.toml",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-audit/Cargo.toml.gz",
+      "bytes": 609,
+      "sha256": "315e0c0a628053ac7b8526f40dac0a13f1ea87730bf9795ddd477f16e8b9745a",
+      "gzip_sha256": "6d8b1664d7c4ede247c946c2d50ad144c86267e6e5e043fd6d9899651c2b9cf9"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-audit/src/lib.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-audit/src/lib.rs.gz",
+      "bytes": 1471,
+      "sha256": "3eecae6a46dcdae73478729a1d79ee7fb7e61c76f26cdd6a739c2766f2dc0c22",
+      "gzip_sha256": "79dd107ef4be03c0d85a104dc3afecf4b406df0e286d889c9017aa03c2770647"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-audit/src/logger.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-audit/src/logger.rs.gz",
+      "bytes": 8833,
+      "sha256": "65ce1366e8fa4b09f0b447b25d498ceb3ce3ded6b014d357f96fd33fdbf9ad8d",
+      "gzip_sha256": "cbf64682e29e517032f2371ebd2c883d89e95740696cf52c6d17ca64e48855d5"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-audit/src/model.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-audit/src/model.rs.gz",
+      "bytes": 2073,
+      "sha256": "74edfcbfec2cbc510a059c9b79b0dacadacb5b9d13494960e081fd0e95252564",
+      "gzip_sha256": "43209dac600548e23d0a2ae4f608411300f6aa476265a2c672526b66a34c6234"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-audit/src/raw.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-audit/src/raw.rs.gz",
+      "bytes": 12034,
+      "sha256": "a78dad01de7a89ce8b3c2d5b05593ec4ea1e51ee3e926d9af93c651723a222fe",
+      "gzip_sha256": "eaa050778f086a3878c0d1a70bd0355065b064c3197817cd6ca018d723b6c8a2"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-audit/src/raw_unix.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-audit/src/raw_unix.rs.gz",
+      "bytes": 4273,
+      "sha256": "906266b42a6587155ad236d3dd2470656b104b947a86ee0fbe505579f93b7981",
+      "gzip_sha256": "e50370aada2bed04b2b179bc582a5b7aba581975d442997e4d49575d6170888b"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-audit/src/raw_windows.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-audit/src/raw_windows.rs.gz",
+      "bytes": 13788,
+      "sha256": "cb96db4fdd4ca8f3c3f0ff9345f4c832f2fea6560a0a4e973a05e82d97032949",
+      "gzip_sha256": "940471602409ef55b7f99440a69b428ce340de08b8cd28c25592055084fa2604"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-audit/src/redact.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-audit/src/redact.rs.gz",
+      "bytes": 12785,
+      "sha256": "0f071038acd66c1995b025fddefab83b0cd100330d6d9b69cd5d71b01e4ec553",
+      "gzip_sha256": "d2237961258be469173a76f312045bd7a4200e2440fd6aea8819efa70c8dd8ea"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-audit/src/sink.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-audit/src/sink.rs.gz",
+      "bytes": 22787,
+      "sha256": "c2ace5ff8c9a17aec89f7b7796c48436cb68dc6ff140b91a824f902bea7b45f2",
+      "gzip_sha256": "bfd16709a1e1dc0ad73b05f1f235493b1a990f3ca4ba0dc46f23d7729f7a11d8"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-audit/src/tail.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-audit/src/tail.rs.gz",
+      "bytes": 9317,
+      "sha256": "fb90e63d4bb05a5aeca832b062ba0e2f668182f1d6e5deafc84d13f2e5cb67d8",
+      "gzip_sha256": "d2430cbb63cb7bd8a476abfdd385fcfcf062d88881d11f416dc59b72af6a6e9f"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-audit/tests/oracle_differential_tests.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-audit/tests/oracle_differential_tests.rs.gz",
+      "bytes": 3887,
+      "sha256": "f65e55089ec39d8f13f5ea35ce29d889e0ee43d9488dc6d2c7321adab62851ba",
+      "gzip_sha256": "b9a37f119f6414fb99126c77a7aebade8f9ff7dbe67df23ee14a29134947c9f2"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-audit/tests/raw_windows_tests.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-audit/tests/raw_windows_tests.rs.gz",
+      "bytes": 7420,
+      "sha256": "2e31118c0439b335e2056f949a70cbde89a3a205dad12a83574614bc67e9fcd9",
+      "gzip_sha256": "9cc3fe8c0d0e2907f4fecdafd199d9b9864540556f213b9c3d8079cf59979fc3"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-cli/Cargo.toml",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-cli/Cargo.toml.gz",
+      "bytes": 1264,
+      "sha256": "36938ec59de2eb48c71f61b8933c3e5e2bc3b6f19a6799fd94745155c50fce6e",
+      "gzip_sha256": "595eddb85599ff6925afb094d38a768e8cacb3876783a29a45467bc88380e69f"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/Cargo.toml",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/Cargo.toml.gz",
+      "bytes": 550,
+      "sha256": "bbb39f7ec4c81d407b4a5d5d00f73768d69ff17132a80fefe25bde9150c610e8",
+      "gzip_sha256": "6976ec43df3bd09d70784b340edb253d9b0179610e9060ebd6a5a70583dbb95f"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/config/atomic.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/config/atomic.rs.gz",
+      "bytes": 8448,
+      "sha256": "a933dcb9d86d7e704e31bcbffb80a0207f31e49e4a2440725b3d5421aef48621",
+      "gzip_sha256": "8ac288911a345240ed86391648ed6197499045ff1dffb753bf012f1c19ae35e7"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/config/bytes_tests.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/config/bytes_tests.rs.gz",
+      "bytes": 3149,
+      "sha256": "629b276170d3313df1309ed680a6f8909072453d997fa3269cdd19ee1b932270",
+      "gzip_sha256": "fa6ab3f0a1d17fd0bba73a6264e734f85811755d335135583573733bcd56ea68"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/config/encode.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/config/encode.rs.gz",
+      "bytes": 10815,
+      "sha256": "0f6feed0f98c83c061292db1ffb957044eddba0f230f17ece1b4c0d6f1e98aec",
+      "gzip_sha256": "2e8a8cfc141e9e43bc96276a5484ca449a6b106959a3a6936c7b8cd8b51383dc"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/config/format.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/config/format.rs.gz",
+      "bytes": 8441,
+      "sha256": "9e6f68b61896e6f5c559c948a533b633e099bf91dde65b6c5bd03796cc3e8a7c",
+      "gzip_sha256": "3e5d72252a46727a13b89e9335d5dd631bdc8e467d54f3a7e1a9eb1b7f1feb51"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/config/format_tests.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/config/format_tests.rs.gz",
+      "bytes": 7491,
+      "sha256": "60bbfce6074e323b6288e60aa5a9590c2dac4be6b80e7595aabf59244a42edb8",
+      "gzip_sha256": "4259268708e29e2b7037b1b5d730dfda850eba3180c8cc74d416a90860331746"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/config/get.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/config/get.rs.gz",
+      "bytes": 4017,
+      "sha256": "736bb2ad63e4c244281a0db8846d16518586e22484cfb71aab030f330467066b",
+      "gzip_sha256": "cf90d5308516eab38b38f170ba064c0734a45c593c76cd4861d5bac6224e59fd"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/config/get_tests.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/config/get_tests.rs.gz",
+      "bytes": 5882,
+      "sha256": "b4009c3365fc20c9cea4a23708dab3b82e25b45d8808a10e93dd4771a5e59f45",
+      "gzip_sha256": "44798b938dec585cd74bcc61d57777bae29ca5489dbc18afe0ad4e38d83aedb1"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/config/lossless.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/config/lossless.rs.gz",
+      "bytes": 6478,
+      "sha256": "597878ad7289376f85baca09efda6ceedbf3474f48013e3064b590e2c453f45a",
+      "gzip_sha256": "60b2c35802c933630fb49543278db8295e982b1d593bc757ab6bce6f8a542f28"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/config/mod.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/config/mod.rs.gz",
+      "bytes": 348,
+      "sha256": "40d3f5382e4f9e6136f98fa6581cfb3e59d954f4a53d8eafb0f28a51ae3ef86d",
+      "gzip_sha256": "59efce4996a51dfe5b71125614d400c1db4e425bd6b5ba5a548647a26f2e240f"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/config/set.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/config/set.rs.gz",
+      "bytes": 6338,
+      "sha256": "c76abd5ccd9e41f856c0abaaeade081f9d9113041928f13512ece10e5715fa2e",
+      "gzip_sha256": "12c54859e0910ab3f552cc4c524b61e56dc50db84bce6e31e6a5dccfdf6f996f"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/config/set_fixtures_tests.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/config/set_fixtures_tests.rs.gz",
+      "bytes": 8839,
+      "sha256": "f70c22fcf867709a36491acf365cf7e009994381fa73b45444fb95aef3f126b9",
+      "gzip_sha256": "c54e28c70bba158f815f4c4d2bdef921b19e4b926ed15f980188c5c5591cb98c"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/config/set_flag_alias_tests.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/config/set_flag_alias_tests.rs.gz",
+      "bytes": 1363,
+      "sha256": "716069a7ab0e0ce01a5aa8cd68ea6ef3fb6ad976eb2dc8a6e05858d75e10a5fb",
+      "gzip_sha256": "16880d1c49b71f854e1ab986abe25218e8c96cf78f9bd23b6eaebd3abfda6323"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/config/set_tests.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/config/set_tests.rs.gz",
+      "bytes": 6978,
+      "sha256": "51f06844332c48bb33cad1a7c550a33580ab377720843405cd02fd48e93dd11f",
+      "gzip_sha256": "31742523cce85ce2d5c1515c9c097378e6320ac944ae7a7605a9921a605769b6"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/exit.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/exit.rs.gz",
+      "bytes": 906,
+      "sha256": "7f5efe594eb3bc7f5957a12bfd9642e07846fc71cff181647884d781ae66d2ea",
+      "gzip_sha256": "40a8dc48aa01c22e7c0c1a453ee3952ecef636a383690826b559933878d02c52"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/go_printable.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/go_printable.rs.gz",
+      "bytes": 17052,
+      "sha256": "f9c9e9fc24130e3d2ef59649ebedbb0586137d21fd5af2bcae232d812734de9a",
+      "gzip_sha256": "5e59acaefd4be57975f6593cb5a26919e1ea06f9d2313d6ee7a03684375e29e3"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/go_text.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/go_text.rs.gz",
+      "bytes": 2980,
+      "sha256": "d92030cd11a4de6682eef7508e0a18959847ceb46f560cff2748239d517a08a6",
+      "gzip_sha256": "1da0ed8fc769fbde1ebd492544eac25a4931edae0f489b9afc7b8959e0c77211"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/json_string.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/json_string.rs.gz",
+      "bytes": 1434,
+      "sha256": "9595500d2fcf5e125f070f8c69f1d98a19c593887c470ee8a04e84b9b11dcad4",
+      "gzip_sha256": "06e21866a111570e37dce84c7fc6006c206785d54ea72b3f58a3dabf3ca2bd21"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/lib.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/lib.rs.gz",
+      "bytes": 314,
+      "sha256": "4df524358123e41fb3a7959de3dd3064e477dd738bf8b36faf4cec961dc77d75",
+      "gzip_sha256": "7537de727eeeb49282d773f83cb7fd65f083b618852f02887dd573769a94123e"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/output.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/output.rs.gz",
+      "bytes": 5953,
+      "sha256": "a8e01e7d19d7eadc8f71d1634166691294b0223959248b0a8fc50b1d8264856a",
+      "gzip_sha256": "7227b8e2e9aee694c066fc62ba859b4a46aa38fc43fa7b8d4cecbe622bed6828"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/output_tests.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/output_tests.rs.gz",
+      "bytes": 7254,
+      "sha256": "91a449506c9af3a50a6b402121b786da104ea8a39e338cde776224afb9ca10c8",
+      "gzip_sha256": "72a3ee57fe05bc7a44adfb5f200f0a060e80ec39f96c4b83d7654873b3fd1f31"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/paths.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/paths.rs.gz",
+      "bytes": 13894,
+      "sha256": "db2a7633131b77577afa9e5aac6956c479e62ca6f27b3990298917ec03673c34",
+      "gzip_sha256": "af72517f995a09c1e81844385803ac0cda5cb838da79669f47800d74235f05b8"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/version.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/version.rs.gz",
+      "bytes": 5929,
+      "sha256": "3f8ce20ca4877e98f180d5da31a91f097ae0921804fb582ebd7e6c1bc2b87442",
+      "gzip_sha256": "6d4fd209c56c05108492021fa5e5d08754648b4c94e033d4f82c7090bbcd7842"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/src/xdg.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/src/xdg.rs.gz",
+      "bytes": 18900,
+      "sha256": "41d4d4367d5c3ac7766f054ddb91a71b79547701997271f80347990ffabda201",
+      "gzip_sha256": "9bafe5d05851cd2f2e376996266d318f1c75b4a7f6192c9b1c6faed69b67d059"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-core/tests/xdg_paths_tests.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-core/tests/xdg_paths_tests.rs.gz",
+      "bytes": 5022,
+      "sha256": "af07faabe7b9b003e2df4b0a1677a5376ff23693825512656caa8369c3e8457d",
+      "gzip_sha256": "e9cea36e8496d0ca3a9c07ee58b128b8903ef3540231c85fd4bd5ba8acc53a1a"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/Cargo.toml",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/Cargo.toml.gz",
+      "bytes": 653,
+      "sha256": "64ba7eec3b3c31e830f46e769e498f2643f72d12bff6899012b001a6a836fbd3",
+      "gzip_sha256": "4edfcf302fe47fa9ff7abcae1a2ef4d181d66e7e70f676f2f4046a3dac22ad31"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/approval.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/approval.rs.gz",
+      "bytes": 3601,
+      "sha256": "3d02bd8625858023cbed9251354365e5392da75a072cd61eb75c2dcfb66473ac",
+      "gzip_sha256": "d1a40ab96d3ea3fa7e2d841bd4ac9dba723a735c1d3f0be9d22fae5aba70cfd1"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/audit.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/audit.rs.gz",
+      "bytes": 4817,
+      "sha256": "82b10af924ac2ca015d1b566f745b0387cfc266a8426fe83c07eac6e25e0bc7b",
+      "gzip_sha256": "2356a65bc89f5ee3d196f898c22927a514c604c8d729e11986acf30199d6d677"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/capability.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/capability.rs.gz",
+      "bytes": 7917,
+      "sha256": "d5fd61dba31b80f926c9f79a9a4fae1ef97d476ca14416c15fff2762505c3b42",
+      "gzip_sha256": "7fdd911da352eb58c7aac1bcc5e18aeecc17785c4a4efb0fc5542584c4564a07"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/capability_wire.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/capability_wire.rs.gz",
+      "bytes": 7606,
+      "sha256": "eeee0bb77e5aa4c0bf8c39c69dc73b9beb87dd88c46cd7ded273336bc8052d27",
+      "gzip_sha256": "e8725e5e05d9ed276bc0e7bd0586695a9a96a2a8c40d90b65c8e0b0e86cbfb31"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/external_deadline.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/external_deadline.rs.gz",
+      "bytes": 5427,
+      "sha256": "8b533f31814da5d2de442405741f093a289a58f3ab6a5763ea23210b708c1f35",
+      "gzip_sha256": "cbc9c4d8be4e03865e9b40b17bc92a3116a1c2461eec37eeb52f8c84d13e4e22"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/external_decision.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/external_decision.rs.gz",
+      "bytes": 12698,
+      "sha256": "00036f841a6a0afa5fba154b44404a04e041e64d6592f8f154a0b53965732224",
+      "gzip_sha256": "e96cc754c9aa010a088a7b08c7fd5d9746e836154f9fdbb8ae59aeda41d49eb0"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/external_decode.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/external_decode.rs.gz",
+      "bytes": 8639,
+      "sha256": "07597791456ed82e451bbb0e0268791b1cd8521a7f9e543a712a3b3fff8f62a4",
+      "gzip_sha256": "feb879a679e4e900af12efad10b01999e8fccb19f2e93e1f8f97cee3894e284e"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/external_json.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/external_json.rs.gz",
+      "bytes": 7821,
+      "sha256": "98d431108b16547dc6f741ae6c928e82a844834ff2ba5364a00e5826bdcf4aea",
+      "gzip_sha256": "4d8ffc44ca795e9bc85f051f3f0c1c48a7b4ff79e4274eb36499bf700ab613da"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/go_json.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/go_json.rs.gz",
+      "bytes": 5052,
+      "sha256": "aeb4c051d6b9fb7bb58e5c657b47620d9ebf112a9b4a89aab81c6a8022337534",
+      "gzip_sha256": "786a8207a3736da927944b579b934411c095bff711619e51e1ef72966aef22f4"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/grant.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/grant.rs.gz",
+      "bytes": 5008,
+      "sha256": "7db0fc3ec825251b74e38862714716fd50dfda53e475e44cb49b8bc3061d94f9",
+      "gzip_sha256": "b02ea91038995b46f9a760aa57f177aeeeca1fc3a187ab73b5594931f6c1ec0e"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/key_storage.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/key_storage.rs.gz",
+      "bytes": 8977,
+      "sha256": "5cd9a9da06f29f5ee9f7199e8978d61616146a8af5db1b9cf9d9a3c4315e2364",
+      "gzip_sha256": "8689a86645caead3232412fa46d6252d93ec79f1948c2469613ea09509a22d4a"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/lib.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/lib.rs.gz",
+      "bytes": 1493,
+      "sha256": "272d9c892047e4e5d4f44c0368c8a168262f7b5cfbfcd94fd37f7af58ed7d568",
+      "gzip_sha256": "1e0d7eae6c357204ac22b87ace5958100063554ae44195a90b0b4004966a7b37"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/marginal.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/marginal.rs.gz",
+      "bytes": 4507,
+      "sha256": "28a9bbf50d5e43a721090bdb9a37734d4f79517774f5806157b83660b5857f41",
+      "gzip_sha256": "065122764deaacc7d86beb05d68cdcaadca2bd7e58bb5f70acc066fc78e10c12"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/model.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/model.rs.gz",
+      "bytes": 12007,
+      "sha256": "4d9649271162f9d9e1ec571df8126700d3d7575b91d765a5f1afc0e3d6912d66",
+      "gzip_sha256": "7b08d124e51a1ecc759d9b53d12f425949a8b8a58ae0d1cc69d61cdf9b99b724"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/model_validation.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/model_validation.rs.gz",
+      "bytes": 4890,
+      "sha256": "ff2801bad1c26b15946034aaf1dd9a5bf2323a5698b4f293e28fc2becec6ec7f",
+      "gzip_sha256": "b05b99cb529a33dd28cb61a5c114a55493fa4875cbba6219b84c9e3cbcaa65a2"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/policy.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/policy.rs.gz",
+      "bytes": 15854,
+      "sha256": "819bb9cc479f484dc6dd7c2f6d42e2cf14d2b1b848cbae876c0e9a1ee573325b",
+      "gzip_sha256": "ac10f5122465a4f38cc46d28eac42b5e17f5629609b826f5ad5125cb81966c94"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/scope.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/scope.rs.gz",
+      "bytes": 843,
+      "sha256": "cf412da982a5b4e0e66cc73e4ea513e0a8d1a963cf2b565408736eb6f12a5b4a",
+      "gzip_sha256": "71cf7341fdba8aff7c34306b57036f920ee24b039a1e2c80778f1bdd13b39733"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/src/sequence.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/src/sequence.rs.gz",
+      "bytes": 20233,
+      "sha256": "9d440ff6eb20decca4545616ba34c5d566af5281900e9f2a42c83c8ae37afb75",
+      "gzip_sha256": "a5aa5c52de425410199e3970e1a28f63d48b3b62780438f160b8af1f86f59054"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/tests/capability_oracle_tests.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/tests/capability_oracle_tests.rs.gz",
+      "bytes": 5771,
+      "sha256": "a5b47b1629c43407d30996056fd6719e54362fbefef417024cf367d4b5c16ba8",
+      "gzip_sha256": "92e5694e06ac01c7891dd6769dfa221dfe8b236d2246304a4340052a80bfa74b"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/tests/external_decision.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/tests/external_decision.rs.gz",
+      "bytes": 13041,
+      "sha256": "4a6c5c1fe03d2393f5a630b891f61d32fab69fcac877e39aae9c1701bd079e66",
+      "gzip_sha256": "eee3a37652a838c743f8b037cf678f11759b240400298630ba62f7ed662ce98b"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/tests/external_decision_review.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/tests/external_decision_review.rs.gz",
+      "bytes": 3588,
+      "sha256": "1bdab7cd879f81cd2fe87c56f26ce276d8d3aff88054619b73d5ba5b52cfe1d8",
+      "gzip_sha256": "4213f3130facb872a6eb4d22a2aa2bb4a7ab43fc067600d8f2705ea55aee5754"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/tests/external_decision_serialization.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/tests/external_decision_serialization.rs.gz",
+      "bytes": 2796,
+      "sha256": "3509df7b4b3c1bc574a0491959157be8e9a58b3b366b897bb21a3e3dd7407f7a",
+      "gzip_sha256": "9acbd0815fae31eee77fa933ff6445455718579011cc164869d1250066f07f52"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/tests/external_repair.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/tests/external_repair.rs.gz",
+      "bytes": 3872,
+      "sha256": "e145b95e84cac3dc939f1df8cf5eaf84e80e4a640ad160289f6c42fa3be4e858",
+      "gzip_sha256": "de3e4bb9aa6ee831d33d58152cb943657db1697c16f23665cd04aa72e749ab0f"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/tests/fixtures/external_repair_trust_anchor.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/tests/fixtures/external_repair_trust_anchor.rs.gz",
+      "bytes": 1330,
+      "sha256": "6f975a886c0610e23258b19a58f7f658892f2e7802bb54bee3a77aabf24194d6",
+      "gzip_sha256": "9e169264ec1449f32b0cb0c30d2aa077bf4ca14f682429a9aa5da90d3ad62c0c"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symbrain-guard-core/tests/oracle_tests.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symbrain-guard-core/tests/oracle_tests.rs.gz",
+      "bytes": 18439,
+      "sha256": "b81ffd3b99019250e8c99e8c3307d5a83be7829066809cf5786682fa5f83ae63",
+      "gzip_sha256": "db5e42d695c38326eec7b34fc02fade6adc2f6aefcf3782c2b46258794bbe0b2"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/Cargo.toml",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/Cargo.toml.gz",
+      "bytes": 726,
+      "sha256": "478f252e7eeed5f54809363af2c23608f0001be16776519f207feb9806704a4b",
+      "gzip_sha256": "fc55c88d9907f63450820a0c68fd3019390f80dfce047d77f296a4286ffc7e35"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/build.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/build.rs.gz",
+      "bytes": 442,
+      "sha256": "c7d6abd8014332091d999c1a72c5db224044694c1f4571c24572327c0da87267",
+      "gzip_sha256": "5cd6ca19c6707e228b648e7147313d26f773d6249541aa4e98e490e8b4241be7"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/audit_error.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/audit_error.rs.gz",
+      "bytes": 611,
+      "sha256": "b9d5da0c92812abbd70ffe0ede8c5652482bb4b1f54579c2b0e15dcda522c301",
+      "gzip_sha256": "572b244723c91297ddd024f0e87037c3043f90db0c83fa3f0ca732b3a4d02007"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/doctor/anchor_decode.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/doctor/anchor_decode.rs.gz",
+      "bytes": 4222,
+      "sha256": "76279dd69b69d3e4e62f89258ea1ec854b37b9ef3a1702e8c21f416ca9e85718",
+      "gzip_sha256": "f70c5957300e96bf1e0ef981f9df00f9d2ccf7435e6822fe304c6700a9b26d38"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/doctor/audit.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/doctor/audit.rs.gz",
+      "bytes": 2018,
+      "sha256": "a5f5b6ff44219e127b1dea771c0d21f1cb55038af6dd1f762233eca341f0e257",
+      "gzip_sha256": "ac2069c15df8d46b84c2e97694007865afbd1deaf8dfba6f12b4b6e8105af8e3"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/doctor/config.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/doctor/config.rs.gz",
+      "bytes": 4247,
+      "sha256": "5ea424bf2d2b9e56d8cf52a368e3e225228eb01139b08bd8d423609e4046e6c7",
+      "gzip_sha256": "ee4c0b10585dd0c7825bb68afe52e52551f82839de87f4b1356a6145ae81797d"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/doctor/config_decode.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/doctor/config_decode.rs.gz",
+      "bytes": 8611,
+      "sha256": "809c1fc74e1e386a8e800eaaf6f5b0e909d22b311da59dc9a646bbebe7407815",
+      "gzip_sha256": "422fbe290388ee92c2a175060dca1831334d4c89f60276cd943134d3fe94de0d"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/doctor/config_warnings.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/doctor/config_warnings.rs.gz",
+      "bytes": 7163,
+      "sha256": "8c4f1d4e51a3456872bc3344d23fcd3d7f87763b7a8c13b75fd2de4e596ea359",
+      "gzip_sha256": "a42d5a74006abb5fe375c2ce6ec97ad92899c6a59a88efc3b4bd9158363bfea6"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/doctor/discovery.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/doctor/discovery.rs.gz",
+      "bytes": 8549,
+      "sha256": "8ac715a13972c2678647e825f723c16cf1385c1f4f3b49dc0c03173306a92ff2",
+      "gzip_sha256": "8cc45e9d1b5039e508af5e27092a83279c56411f3f92d052a98a71e5f7c42203"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/doctor/tests.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/doctor/tests.rs.gz",
+      "bytes": 8375,
+      "sha256": "2d761a6ab89d3a4db8d3b7c4eec5f23921cca91fb94734bf396ec6f47fae17cf",
+      "gzip_sha256": "7fe7657545aaa1007775ce298ce822f5349e66814d964901b3679903b0afd28d"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/guard_doctor.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/guard_doctor.rs.gz",
+      "bytes": 7755,
+      "sha256": "9c6c0300df55b3587d8533a77bbdd6e5daeb72e49aabc2628ddcae96e2781c54",
+      "gzip_sha256": "fabb03a95207ade21f6e8306c75977cbca40c22071ef4cabf3b57619d519e764"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/guard_grants.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/guard_grants.rs.gz",
+      "bytes": 6386,
+      "sha256": "056d60b2b8b54a717fab673e8468aff5d60e19fdcae9a41753f76d9188414dc7",
+      "gzip_sha256": "dec7a85c331b645a7026b14ea9f66396809dac360ffbdc782be871c1485d2b85"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/guard_grants_store.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/guard_grants_store.rs.gz",
+      "bytes": 9814,
+      "sha256": "05daf2ce769bbe0ab6ef600eab15ef1a4d18ad595a34c026ee9e137a57b9db51",
+      "gzip_sha256": "c662342e56d95fc0507e084d32634720089fcac50e9aef326b57c7b32280831d"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/guard_path_windows.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/guard_path_windows.rs.gz",
+      "bytes": 8516,
+      "sha256": "0c6900d24b52e43b5603f677e10088be438a34f7d369450e076d51ccc6a91660",
+      "gzip_sha256": "c26a3373bf676cdb14c810af35242839ad70c73e0beb2e1a43c3b7ae6e217103"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/guard_path_windows_tests.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/guard_path_windows_tests.rs.gz",
+      "bytes": 3928,
+      "sha256": "b2e865f9560af5084899cd52b21e85d4b186027cd631941e64aa582035fd80e0",
+      "gzip_sha256": "3e112546790950b5648190cb4ae2a993e21f738890ea9b9f172384682fe9a519"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/guard_paths.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/guard_paths.rs.gz",
+      "bytes": 2178,
+      "sha256": "3d7cd17cdd6328e04da999fef40dd3efbdc018aba0ae13a6db08c4d79307ad3c",
+      "gzip_sha256": "4e51cd41fae6e409a484e161e5fe7908b0fe694d1ebab69f1ea798e3488a9ffb"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/guard_scan.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/guard_scan.rs.gz",
+      "bytes": 11484,
+      "sha256": "fe89325a0c9f90217315ffd1a5137579024f0c9acb8c7865bf4e6f175eca420b",
+      "gzip_sha256": "e2725e57b823c673f94bf6aef12fe62db6eeea60db9cf7a81d9affca0c4596e5"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/guard_scan_config.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/guard_scan_config.rs.gz",
+      "bytes": 8512,
+      "sha256": "3f4403534bcba6ce3d0c994ba6b1120b7ea8a75ab9a1b50884d8d06c4c31a1e7",
+      "gzip_sha256": "ec8bd6230ef467754743b87eb12297145f23cd17f254c12b6d6938202023c28c"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/guard_scan_tests.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/guard_scan_tests.rs.gz",
+      "bytes": 3039,
+      "sha256": "92ed217a9488b9dca0723d0c7d40959bf1cf99fe3000aee80d2ecdc190991556",
+      "gzip_sha256": "2c5738ad98e8e43d1e4d8a6c67a42ab9f6bbd36281f07a4d908cb8152f4d3635"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/guard_version.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/guard_version.rs.gz",
+      "bytes": 1792,
+      "sha256": "6d80e39df0df50fb7fceb3f55d400e06d01c31e014f136ce0c7ffe432db24a0b",
+      "gzip_sha256": "ebefe105e4fdd708cee66151168e033a7b94075824656356227350112a66c1d4"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/lib.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/lib.rs.gz",
+      "bytes": 9892,
+      "sha256": "ad3e30d2f66bc553e317fefa9a39f0490c6dd473015996afdbf250dc179d3fe2",
+      "gzip_sha256": "4686309c0276f92f6dad02f7ac97dda015d35fad82188eb36cfb5a7d56f2f31e"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/main.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/main.rs.gz",
+      "bytes": 319,
+      "sha256": "5a976dba1eba154e41ca2738ca12be29a90950b6f29c79fe8050c4b66d0d2904",
+      "gzip_sha256": "6e1cc36f7103cb5adaec87ee751396d042eafbd25b08d1444a56100bbc9a758f"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/src/standalone.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/src/standalone.rs.gz",
+      "bytes": 1789,
+      "sha256": "9793fbe0207583b378c0ae35ec6491375c40a734a55bb81f593010d05744cb75",
+      "gzip_sha256": "a61bca631eb90a0756ad162a053270a0b4bbc3fb3aa881d6c104cf5c0ad0fa82"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/tests/doctor_config_paths.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/tests/doctor_config_paths.rs.gz",
+      "bytes": 9600,
+      "sha256": "c58d0820ea69acdcb4e983434d51d980589f1c898b6eb8594d21e5806bd4b090",
+      "gzip_sha256": "c9c202882c52d824afd74104e197c8c99ee3d5a9cc3f4ff57fe78c70bf448171"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/tests/doctor_warnings.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/tests/doctor_warnings.rs.gz",
+      "bytes": 3909,
+      "sha256": "200fdd7440eb1564c15701f91cef6d7d89c720a71c9ae616fd154ed8f3df580e",
+      "gzip_sha256": "a140cd7ae8aca6d79dc40743244af9357c1187befa03c2543fa2549582d664dd"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/tests/raw_diagnostics.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/tests/raw_diagnostics.rs.gz",
+      "bytes": 2169,
+      "sha256": "ab6432dd9654c630dc39b78ce91dd7b5ba82c037dce4122ad5a05be307fb3ca5",
+      "gzip_sha256": "f123c1eba2b53ff2894cc1d704fd16fbe0cb05b6e4c486115c1e98c3545c401d"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/tests/standalone.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/tests/standalone.rs.gz",
+      "bytes": 5034,
+      "sha256": "49fe6d451ebfb8c42992d4ad7c54f20403b0f2494a8383d937dfad4839927bd3",
+      "gzip_sha256": "dc25cbfda549711d6cdb44812634bce5e46c56999df1f12a4faadbab192b26fd"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust/symguard-cli/tests/support/windows_discovery.rs",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust/symguard-cli/tests/support/windows_discovery.rs.gz",
+      "bytes": 561,
+      "sha256": "0df615ca37b61fabbee3805fbb5386bcef7178820696f358dc7e335e56e22f11",
+      "gzip_sha256": "1c7d855638a8463cd8469e57f73e0c315d2bd4ce3d4fe06936597b2f99f9ccb3"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/rust-toolchain.toml",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/rust-toolchain.toml.gz",
+      "bytes": 86,
+      "sha256": "c7bdffe5b4c71aeafb84939751c9a1690bc39d0e305d4a534ddf7ce9ce64c675",
+      "gzip_sha256": "67b055027cdd4e4962103d9742f21f994132168194bce213d563d9379ac70cfb"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/scripts/guard-standalone-oracle/config_paths.py",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/scripts/guard-standalone-oracle/config_paths.py.gz",
+      "bytes": 10080,
+      "sha256": "b67fbb630f0c15f4f7b16e3b292d764c1709c999ced5b01a1e9dacc9ba9a231d",
+      "gzip_sha256": "3cf336c059a8f8bc3877eeee310cef9ba99aaf6dd882f485aab65919d58b2f3a"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/scripts/guard-standalone-oracle/config_warnings.py",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/scripts/guard-standalone-oracle/config_warnings.py.gz",
+      "bytes": 13397,
+      "sha256": "0dfd8f541b47a0050f7054f96b0be0080b2d4aa04d33922f40d2b45241c24895",
+      "gzip_sha256": "821e8f44f0b0ef0fd59f6f923518ef436e2d323cd0d54b79aa7f3391944c24a7"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/scripts/guard-standalone-oracle/controls.py",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/scripts/guard-standalone-oracle/controls.py.gz",
+      "bytes": 2797,
+      "sha256": "188846aaa11d626b34eedbade7ba4f4fd6e8b37bd851785b559a4573ffda62f0",
+      "gzip_sha256": "37100c222d4d0238ceeb5456770cf2cc48dfd926af3cf501428ad7b240fd37c5"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/scripts/guard-standalone-oracle/replay.py",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/scripts/guard-standalone-oracle/replay.py.gz",
+      "bytes": 18190,
+      "sha256": "a071b5675701968c891702581e03b93a4f4cbab411f0d6d459df51424da34aa2",
+      "gzip_sha256": "d38f5e16c7480e9d0e53b4b1f2ddf02b280338db8ad65cfa55717538c02008f5"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/scripts/guard-standalone-oracle/retain_binaries.py",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/scripts/guard-standalone-oracle/retain_binaries.py.gz",
+      "bytes": 1435,
+      "sha256": "4d9e15cd35d18cde6fe60bf005b4add50f25e8ac9afebe1870229130f73499ab",
+      "gzip_sha256": "3412a193448a88fb8ac902a934ea962dad93fb64a31d799876ce1583f910726b"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/scripts/guard-standalone-oracle/run.sh",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/scripts/guard-standalone-oracle/run.sh.gz",
+      "bytes": 1985,
+      "sha256": "c5ad7387051d74a18cf05b3101b69771ee34e8fdc5c24e5e285b48589a270560",
+      "gzip_sha256": "37f8b09c7ef2781b4d8fcd10b28737b76df54aee92e5c5a4e120703d62d95112"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/publication-source/scripts/guard-standalone-oracle/windows_path_reference.py",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/publication-source/scripts/guard-standalone-oracle/windows_path_reference.py.gz",
+      "bytes": 8253,
+      "sha256": "a0644e1bdf4b5b7c6810454fca9778f689c8a91887cc0fe4edb3ec57218b2c2a",
+      "gzip_sha256": "421e6f39e3cd356c95d84222da48a5fae01eec5e2c94b58029ecfcd083982dd6"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/root-ci-job-111390702060.log",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/root-ci-job-111390702060.log.gz",
+      "bytes": 370417,
+      "sha256": "33fa7d516cc2ba4297bad3e27d674e1daae0d204dd7299b2e98b2f93fab20d2d",
+      "gzip_sha256": "4916b71cbf51a447f750e7488baefe79e954be2184d498eb6592a18f1188c7a7"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/run-api.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/run-api.json.gz",
+      "bytes": 29519,
+      "sha256": "b84dc408491ad648a45c25ecdc3176a338ef3f6d50776b04517cb1961f85c90d",
+      "gzip_sha256": "ad562da19f7202b00c5ec8d71efda6807856f0d531cc3b1c91326dd9224fc615"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/verify.py",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/verify.py.gz",
+      "bytes": 4008,
+      "sha256": "18141ce8c2cdca89f06fab0d880ab3809f41b60d097543a39082128e9302d24d",
+      "gzip_sha256": "216c0ac8211e7782873593426a4ec0bd7c4ffe3dae41e2973c5d29f4d645dc98"
+    },
+    {
+      "original": "/workspace/symaira-guard805-config-control-original/zip-receipt.json",
+      "retained": "migration/evidence/guard-standalone-770/windows-config-owner-a1/original/zip-receipt.json.gz",
+      "bytes": 3938,
+      "sha256": "4e741837b8f67e3016ae423ff2d001169c4928165b8d931af693df067a4bd6ee",
+      "gzip_sha256": "962e7360747b2d23b39ab1755b6bc6683e47263c53771591fc9d996ac1a7dd3d"
+    }
+  ]
+}

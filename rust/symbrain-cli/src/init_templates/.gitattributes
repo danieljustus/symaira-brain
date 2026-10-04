@@ -1,2 +1,0 @@
-# Go raw-string init templates emit LF bytes on every platform.
-*.toml text eol=lf

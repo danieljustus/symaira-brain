@@ -1,9 +1,0 @@
-{
-  "source": "9e9dce2108adc5008ffba9a0e1339668740b022a",
-  "actual_clippy_failure": "clippy::map_unwrap_or",
-  "log_sha256": "7dac01275c531249963144a69957536590548f8655a3d3798c097fc8aef62060",
-  "binary_archive": "/workspace/oracles/symaira-guard770-config-paths-9e9-binaries/receipt.json",
-  "archive_sha256": "050c5e447f3e899486310b79e16f2e6d335a29cc8bfea7280385442f62b108f9",
-  "ELF_paths": 67,
-  "unique_ELF_bytes": 45
-}
