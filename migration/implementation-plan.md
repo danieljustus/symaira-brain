@@ -1,5 +1,18 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Native memory evidence and atomic schema increment — 2026-10-03
+
+#758 now has a local grounded-evidence implementation and additive pinned-Go
+oracle. Its exact/normalized/fuzzy offsets and tie-breaking, strict validation,
+JSONL encoding and transactional persistence are implemented. Schema repair for
+#649 inspects real columns despite applied migration names; DDL, indexes and
+bookkeeping commit together. Local affected tests, source-bound replay and real
+failure controls are recorded in `migration/evidence/memory-evidence-758`.
+Native Linux/macOS/Windows CI remains the acceptance gate. Full memory CLI/config,
+governed writes and JSONL decoding remain open; no memory Go fallback is removed.
+#649 requires the shipped repaired store and its Doctor diagnostic. See
+`docs/adr/758-native-memory-evidence.md` for the long-term ownership decision.
+
 ## Additional native init, Swift and fuzz evidence — 2026-09-29
 
 Candidate `f1263bea237e99ff9a297fe3146170ce5f2ad4a4` passes the exact

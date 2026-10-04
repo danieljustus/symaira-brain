@@ -1,0 +1,31 @@
+    Checking symbrain-memory v0.12.1 (/workspace/symaira-memory649-integrated/rust/symbrain-memory)
+    Checking serde_yaml_ng v0.10.0
+    Checking fs2 v0.4.3
+    Checking symbrain-skills v0.12.1 (/workspace/symaira-memory649-integrated/rust/symbrain-skills)
+    Checking symbrain-broker v0.12.1 (/workspace/symaira-memory649-integrated/rust/symbrain-broker)
+    Checking symbrain-usage v0.12.1 (/workspace/symaira-memory649-integrated/rust/symbrain-usage)
+    Checking symbrain-audit v0.12.1 (/workspace/symaira-memory649-integrated/rust/symbrain-audit)
+    Checking symbrain-catalog v0.12.1 (/workspace/symaira-memory649-integrated/rust/symbrain-catalog)
+    Checking symbrain-patterns v0.12.1 (/workspace/symaira-memory649-integrated/rust/symbrain-patterns)
+    Checking simd-adler32 v0.3.10
+    Checking adler2 v2.0.1
+    Checking miniz_oxide v0.9.1
+    Checking crc32fast v1.5.1
+    Checking symbrain-gateway v0.12.1 (/workspace/symaira-memory649-integrated/rust/symbrain-gateway)
+    Checking flate2 v1.1.10
+    Checking hmac v0.12.1
+    Checking filetime v0.2.29
+    Checking errno v0.3.14
+    Checking typed-path v0.12.3
+    Checking tar v0.4.46
+    Checking signal-hook-registry v1.4.8
+    Checking hkdf v0.12.4
+    Checking symbrain-instructions v0.12.1 (/workspace/symaira-memory649-integrated/rust/symbrain-instructions)
+   Compiling symbrain-cli v0.12.1 (/workspace/symaira-memory649-integrated/rust/symbrain-cli)
+    Checking zip v8.6.0
+    Checking symbrain-adapter v0.12.1 (/workspace/symaira-memory649-integrated/rust/symbrain-adapter)
+    Checking symbrain-guard-core v0.12.1 (/workspace/symaira-memory649-integrated/rust/symbrain-guard-core)
+    Checking symbrain-managed v0.12.1 (/workspace/symaira-memory649-integrated/rust/symbrain-managed)
+    Checking signal-hook v0.3.18
+    Checking symbrain-mcp v0.12.1 (/workspace/symaira-memory649-integrated/rust/symbrain-mcp)
+    Finished `dev` profile [unoptimized] target(s) in 7.38s

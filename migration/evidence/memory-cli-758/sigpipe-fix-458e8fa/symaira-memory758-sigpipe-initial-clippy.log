@@ -1,0 +1,55 @@
+    Checking symbrain-core v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-core)
+    Checking symbrain-harness v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-harness)
+    Checking symbrain-policy v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-policy)
+    Checking symbrain-mcp v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-mcp)
+    Checking symbrain-skills v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-skills)
+    Checking symbrain-activity v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-activity)
+    Checking symbrain-memory v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-memory)
+    Checking symbrain-catalog v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-catalog)
+    Checking symbrain-broker v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-broker)
+    Checking symbrain-audit v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-audit)
+    Checking symbrain-usage v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-usage)
+    Checking symbrain-instructions v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-instructions)
+    Checking symbrain-patterns v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-patterns)
+   Compiling symbrain-cli v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-cli)
+    Checking symbrain-adapter v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-adapter)
+    Checking symbrain-gateway v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-gateway)
+    Checking symbrain-guard-core v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-guard-core)
+    Checking symbrain-managed v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-managed)
+error: this argument is passed by value, but not consumed in the function body
+  --> rust/symbrain-cli/src/memory_cli/write_output.rs:13:12
+   |
+13 |     reply: SetReply<'_>,
+   |            ^^^^^^^^^^^^
+   |
+help: or consider marking this type as `Copy`
+  --> rust/symbrain-cli/src/memory_cli/write_output.rs:5:1
+   |
+ 5 | pub(super) struct SetReply<'a> {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_pass_by_value
+   = note: `-D clippy::needless-pass-by-value` implied by `-D clippy::pedantic`
+   = help: to override `-D clippy::pedantic` add `#[allow(clippy::needless_pass_by_value)]`
+help: consider taking a reference instead
+   |
+13 |     reply: &SetReply<'_>,
+   |            +
+
+error: this function could have a `#[must_use]` attribute
+  --> rust/symbrain-cli/src/lib.rs:68:8
+   |
+68 | pub fn run_stdio(args: &[OsString]) -> u8 {
+   |        ^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#must_use_candidate
+   = note: `-D clippy::must-use-candidate` implied by `-D clippy::pedantic`
+   = help: to override `-D clippy::pedantic` add `#[allow(clippy::must_use_candidate)]`
+help: add the attribute
+   |
+68 + #[must_use]
+69 | pub fn run_stdio(args: &[OsString]) -> u8 {
+   |
+
+error: could not compile `symbrain-cli` (lib) due to 2 previous errors
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `symbrain-cli` (lib test) due to 2 previous errors

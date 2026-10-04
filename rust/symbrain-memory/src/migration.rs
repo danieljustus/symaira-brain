@@ -1,0 +1,54 @@
+//! Atomic owned schema/data/FTS transitions, with truthful ordered bookkeeping.
+
+mod backfill;
+mod catalog;
+mod defaults;
+mod facts;
+mod fts;
+mod initial;
+#[cfg(unix)]
+mod permissions;
+mod runner;
+mod sql;
+
+#[cfg(unix)]
+pub(crate) use permissions::secure_files;
+#[cfg(test)]
+mod backfill_tests;
+#[cfg(test)]
+mod defaults_tests;
+#[cfg(test)]
+mod fts_tests;
+#[cfg(test)]
+mod historical_tests;
+#[cfg(test)]
+mod rollback_tests;
+#[cfg(test)]
+mod sql_tests;
+#[cfg(test)]
+mod test_support;
+#[cfg(test)]
+mod tests;
+
+use crate::{Store, StoreError};
+use rusqlite::{Connection, TransactionBehavior};
+use std::time::Duration;
+
+pub(crate) fn configure(mut conn: Connection) -> Result<Store, StoreError> {
+    conn.busy_timeout(Duration::from_secs(5))?;
+    // WAL transitions have lock-upgrade paths that skip SQLite's busy handler.
+    // Retry only that autocommit pragma within the same five-second budget.
+    conn.execute_batch("PRAGMA foreign_keys=ON;")?;
+    crate::wal_open::ensure_wal(&conn)?;
+    conn.execute_batch("PRAGMA secure_delete=ON;")?;
+    // Reserve the writer before inspecting schema. A deferred read snapshot
+    // cannot be upgraded after another opener commits (BUSY_SNAPSHOT517), and
+    // busy_timeout does not retry that invalid snapshot. IMMEDIATE makes the
+    // existing bounded timeout wait before any schema inspection instead.
+    let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
+    runner::apply(&tx)?;
+    tx.commit()?;
+    Ok(Store {
+        conn: std::sync::Mutex::new(conn),
+    })
+}

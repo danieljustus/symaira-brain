@@ -1,0 +1,787 @@
+{
+  "actual_cli_sha256": "356d240a0bbd23f7c62fd6e4cfc3908145810a07d53d4d02fba8ea1ccb05ebf2",
+  "files": {
+    "late-index/before.db": "98f49f4a04facda33e8a969e5229e9687cdd2c217670fec21a5692c707fd0d6c",
+    "late-index/memory.db": "a4774f84c536fae5e601d31c3350563fed0f88209405050df6856661032e1843",
+    "late-index/recreated-fixture.sql": "ef6dff22b2e5ba9b17fd1ff5fdd6e1b142339ce7321919753b595e279bf44764",
+    "late-index/result.json": "6f1f2e36f81167874faef27cc72b7b69223a3b100c110079db78d8a8ab74c907",
+    "marker-ignore/before.db": "9fe08ca0056dd8ce921833dcec36f2f92213efc26a1debf240897b4d57048509",
+    "marker-ignore/memory.db": "919f12c06a2a52a6261316053eb401683963a06cffd8fc95a8a100faa97e8217",
+    "marker-ignore/recreated-fixture.sql": "4a310117e87b79d955559ef6abd6d347f931c71ec7598b7072d2b261fd765e06",
+    "marker-ignore/result.json": "66d53e4accdbc937833ed419bad8c0bf367edd2c1abeaa78be4c63b2c62e8337",
+    "oplog-missing-default/before.db": "2bc32066bbff17b56e243b1a21e1bbbe64fbab9202d11baa38e39185016681cc",
+    "oplog-missing-default/memory.db": "59b53aa2c91f2ce809135c16709c7af9eb10471fd8aa86c09dc2311356f84eae",
+    "oplog-missing-default/recreated-fixture.sql": "e25e78de6794cfe1ddef565a0c1eb774de6b68c0452687496cb8dd4053d28c0f",
+    "oplog-missing-default/result.json": "f4e89cbafb4603306a592108b5444640ee07092073c00ecffb1ba18198303f47",
+    "oplog-wrong-default/before.db": "f76ca7e54e4baf2bebe7c64453ecbe53d18ed97d08f9fc1c6f5c293fced28b4b",
+    "oplog-wrong-default/memory.db": "cdac01352e312572055f7bb86803ed919350bcaffcfd8d3005ebcd4af2486db6",
+    "oplog-wrong-default/recreated-fixture.sql": "a0e5048f37e5da16ff7e942fc9b872ace59dbe7056bb0266c397aa758c6c66e2",
+    "oplog-wrong-default/result.json": "99908be7f9ac3a57b9d2a461a0661fd2ca0bc947b2e5d108be830ccd561ec704",
+    "relation-abort/before.db": "84cd375a4f7d2a87bf26d1ca4aa5d327dc0ca9d343f271800fba8117d729df47",
+    "relation-abort/memory.db": "a1ec12760de7d8961f9d3c65e5ee191a3bb3bee011fd66181a3d2f2eced2a924",
+    "relation-abort/recreated-fixture.sql": "0538cd8e4c693c3c7957c0a61896a57338e6660593710c5c0221ce45a4fd498f",
+    "relation-abort/result.json": "93e1e67916c40229ee0d968dc4eec448a4a225e73f0aab1ce0b8eb16205ae13c",
+    "relation-ignore/before.db": "6486d5204f3d126aab6182005c5abdeaf4905f9d71c59e9eac57a8684af1afeb",
+    "relation-ignore/memory.db": "7815b0cfdc7cddc6ad166b13b3ca6eb0363d767b4b9241c7ec8dbcaec0ae33ea",
+    "relation-ignore/recreated-fixture.sql": "3f1e974bea7b79b9c50650215113123a36b51e8c4965bd88512b03497e9405c8",
+    "relation-ignore/result.json": "16b5a72ff03485a62fb582cd26f376c4ac63fe7524db421094b1dbe67fe724e5",
+    "relation-time-ignore/before.db": "986a7ac0e28e971977e64c66279e77e8ef721e86bb6ee694809f1816cf7f6588",
+    "relation-time-ignore/memory.db": "f76fb8798102f61f8e80f8b7bf232e2af7140cbd5be5fa3fd078d832c6eaff23",
+    "relation-time-ignore/recreated-fixture.sql": "817e1f05420d1128eac6417a8f1501c7b7056bd45ad9385b4b27aed83acdb4a5",
+    "relation-time-ignore/result.json": "10870c5149dad121dbd5d3e7ed6803ed0d5926d558e0bef53682ec89468e078a",
+    "rule-abort/before.db": "24f2b1553014cd071e2777350ce79ab68788b094461579ce03a35694d2c2d53f",
+    "rule-abort/memory.db": "2f8c7c2481047a8b45dfb60076aee1ccb923056e6e5d8f4d16090a333d85ebe3",
+    "rule-abort/recreated-fixture.sql": "3191f4ee94a54e240bd2c9d4ee41c9620afcfdc7aa73566e043e726888dd8d0c",
+    "rule-abort/result.json": "cedde0d95ccfbea20c11b17684cee0b963eb8927484be9f4dc7447ea2247dfad",
+    "rule-ignore/before.db": "ae23e8f980f25ec06e6e6c139bfd42d1ddaaf2328c3e7ffde8020325159a9116",
+    "rule-ignore/memory.db": "e9753fb118d7c6af664a702f461ebabf0d0cfaf699302b0eb362b19ff2331e31",
+    "rule-ignore/recreated-fixture.sql": "4fb2ec8c7aa341a8ee8d865859c1828dd8079c5a9e56a962a60e28a442ca2619",
+    "rule-ignore/result.json": "0e1e3e9309432567bddf3d02f91e79758c79b1103181ee030ec0fa55b65096d9"
+  },
+  "original_test_DBs_removed_by_owned_fixture_Drop": true,
+  "reconstructed_input_not_original_test_state": true,
+  "records": [
+    {
+      "case": "rule-abort",
+      "exit": 1,
+      "precondition": {
+        "inclusive_end": 4,
+        "last_applied": "005_indexes",
+        "marker_count": 5,
+        "relation_columns": []
+      },
+      "whole_state_unchanged": true
+    },
+    {
+      "case": "relation-abort",
+      "exit": 0,
+      "precondition": {
+        "inclusive_end": 20,
+        "last_applied": "022_entity_relation_provenance",
+        "marker_count": 21,
+        "relation_columns": [
+          [
+            0,
+            "from_entity_id",
+            "TEXT",
+            1,
+            null,
+            1
+          ],
+          [
+            1,
+            "to_entity_id",
+            "TEXT",
+            1,
+            null,
+            2
+          ],
+          [
+            2,
+            "relation_type",
+            "TEXT",
+            1,
+            null,
+            3
+          ],
+          [
+            3,
+            "created_by",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            4,
+            "created_at",
+            "DATETIME",
+            1,
+            null,
+            0
+          ],
+          [
+            5,
+            "id",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            6,
+            "source",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            7,
+            "source_ref",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            8,
+            "verification",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            9,
+            "evidence",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            10,
+            "updated_at",
+            "DATETIME",
+            0,
+            null,
+            0
+          ]
+        ],
+        "relations": [
+          [
+            "a",
+            "b",
+            "knows",
+            "8a6542a3-b409-40f8-840b-7797287fc26d",
+            "2000-01-02 03:04:05",
+            "2000-01-02 03:04:05"
+          ],
+          [
+            "b",
+            "a",
+            "knows",
+            "c1da33eb-5142-4e4d-b05f-d8f80d675e2f",
+            "2000-01-02 03:04:05",
+            "2000-01-02 03:04:05"
+          ]
+        ]
+      },
+      "whole_state_unchanged": false
+    },
+    {
+      "case": "rule-ignore",
+      "exit": 1,
+      "precondition": {
+        "inclusive_end": 4,
+        "last_applied": "005_indexes",
+        "marker_count": 5,
+        "relation_columns": []
+      },
+      "whole_state_unchanged": true
+    },
+    {
+      "case": "relation-ignore",
+      "exit": 0,
+      "precondition": {
+        "inclusive_end": 20,
+        "last_applied": "022_entity_relation_provenance",
+        "marker_count": 21,
+        "relation_columns": [
+          [
+            0,
+            "from_entity_id",
+            "TEXT",
+            1,
+            null,
+            1
+          ],
+          [
+            1,
+            "to_entity_id",
+            "TEXT",
+            1,
+            null,
+            2
+          ],
+          [
+            2,
+            "relation_type",
+            "TEXT",
+            1,
+            null,
+            3
+          ],
+          [
+            3,
+            "created_by",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            4,
+            "created_at",
+            "DATETIME",
+            1,
+            null,
+            0
+          ],
+          [
+            5,
+            "id",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            6,
+            "source",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            7,
+            "source_ref",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            8,
+            "verification",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            9,
+            "evidence",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            10,
+            "updated_at",
+            "DATETIME",
+            0,
+            null,
+            0
+          ]
+        ],
+        "relations": [
+          [
+            "a",
+            "b",
+            "knows",
+            "5c9301dc-06b8-439e-95b2-888e7a83025a",
+            "2000-01-02 03:04:05",
+            "2000-01-02 03:04:05"
+          ],
+          [
+            "b",
+            "a",
+            "knows",
+            "313b38e8-39fb-45d4-8c6d-3f9a12085c80",
+            "2000-01-02 03:04:05",
+            "2000-01-02 03:04:05"
+          ]
+        ]
+      },
+      "whole_state_unchanged": false
+    },
+    {
+      "case": "relation-time-ignore",
+      "exit": 0,
+      "precondition": {
+        "inclusive_end": 20,
+        "last_applied": "022_entity_relation_provenance",
+        "marker_count": 21,
+        "relation_columns": [
+          [
+            0,
+            "from_entity_id",
+            "TEXT",
+            1,
+            null,
+            1
+          ],
+          [
+            1,
+            "to_entity_id",
+            "TEXT",
+            1,
+            null,
+            2
+          ],
+          [
+            2,
+            "relation_type",
+            "TEXT",
+            1,
+            null,
+            3
+          ],
+          [
+            3,
+            "created_by",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            4,
+            "created_at",
+            "DATETIME",
+            1,
+            null,
+            0
+          ],
+          [
+            5,
+            "id",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            6,
+            "source",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            7,
+            "source_ref",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            8,
+            "verification",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            9,
+            "evidence",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            10,
+            "updated_at",
+            "DATETIME",
+            0,
+            null,
+            0
+          ]
+        ],
+        "relations": [
+          [
+            "a",
+            "b",
+            "knows",
+            "430f58e2-5533-4cbd-9de7-57c506fae0dd",
+            "2000-01-02 03:04:05",
+            "2000-01-02 03:04:05"
+          ],
+          [
+            "b",
+            "a",
+            "knows",
+            "7d893b5b-83d9-4774-9667-3c4675fa1a87",
+            "2000-01-02 03:04:05",
+            "2000-01-02 03:04:05"
+          ]
+        ]
+      },
+      "whole_state_unchanged": false
+    },
+    {
+      "case": "marker-ignore",
+      "exit": 1,
+      "precondition": {
+        "inclusive_end": 4,
+        "last_applied": "005_indexes",
+        "marker_count": 5,
+        "relation_columns": []
+      },
+      "whole_state_unchanged": true
+    },
+    {
+      "case": "oplog-missing-default",
+      "exit": 1,
+      "precondition": {
+        "inclusive_end": 20,
+        "last_applied": "022_entity_relation_provenance",
+        "marker_count": 21,
+        "relation_columns": [
+          [
+            0,
+            "from_entity_id",
+            "TEXT",
+            1,
+            null,
+            1
+          ],
+          [
+            1,
+            "to_entity_id",
+            "TEXT",
+            1,
+            null,
+            2
+          ],
+          [
+            2,
+            "relation_type",
+            "TEXT",
+            1,
+            null,
+            3
+          ],
+          [
+            3,
+            "created_by",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            4,
+            "created_at",
+            "DATETIME",
+            1,
+            null,
+            0
+          ],
+          [
+            5,
+            "id",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            6,
+            "source",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            7,
+            "source_ref",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            8,
+            "verification",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            9,
+            "evidence",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            10,
+            "updated_at",
+            "DATETIME",
+            0,
+            null,
+            0
+          ]
+        ],
+        "relations": [
+          [
+            "a",
+            "b",
+            "knows",
+            "f42c43bc-0b42-4e57-8aee-1e23f7b9e205",
+            "2000-01-02 03:04:05",
+            "2000-01-02 03:04:05"
+          ],
+          [
+            "b",
+            "a",
+            "knows",
+            "b4f12603-ec04-4730-a9bb-1d81c7b2658f",
+            "2000-01-02 03:04:05",
+            "2000-01-02 03:04:05"
+          ]
+        ]
+      },
+      "whole_state_unchanged": true
+    },
+    {
+      "case": "oplog-wrong-default",
+      "exit": 1,
+      "precondition": {
+        "inclusive_end": 20,
+        "last_applied": "022_entity_relation_provenance",
+        "marker_count": 21,
+        "relation_columns": [
+          [
+            0,
+            "from_entity_id",
+            "TEXT",
+            1,
+            null,
+            1
+          ],
+          [
+            1,
+            "to_entity_id",
+            "TEXT",
+            1,
+            null,
+            2
+          ],
+          [
+            2,
+            "relation_type",
+            "TEXT",
+            1,
+            null,
+            3
+          ],
+          [
+            3,
+            "created_by",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            4,
+            "created_at",
+            "DATETIME",
+            1,
+            null,
+            0
+          ],
+          [
+            5,
+            "id",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            6,
+            "source",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            7,
+            "source_ref",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            8,
+            "verification",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            9,
+            "evidence",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            10,
+            "updated_at",
+            "DATETIME",
+            0,
+            null,
+            0
+          ]
+        ],
+        "relations": [
+          [
+            "a",
+            "b",
+            "knows",
+            "132a043a-76e8-4762-a7cd-e0b3e729b688",
+            "2000-01-02 03:04:05",
+            "2000-01-02 03:04:05"
+          ],
+          [
+            "b",
+            "a",
+            "knows",
+            "16594676-80ea-4fc0-8ff6-26e3e35ec41b",
+            "2000-01-02 03:04:05",
+            "2000-01-02 03:04:05"
+          ]
+        ]
+      },
+      "whole_state_unchanged": true
+    },
+    {
+      "case": "late-index",
+      "exit": 1,
+      "precondition": {
+        "inclusive_end": 20,
+        "last_applied": "022_entity_relation_provenance",
+        "marker_count": 21,
+        "relation_columns": [
+          [
+            0,
+            "from_entity_id",
+            "TEXT",
+            1,
+            null,
+            1
+          ],
+          [
+            1,
+            "to_entity_id",
+            "TEXT",
+            1,
+            null,
+            2
+          ],
+          [
+            2,
+            "relation_type",
+            "TEXT",
+            1,
+            null,
+            3
+          ],
+          [
+            3,
+            "created_by",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            4,
+            "created_at",
+            "DATETIME",
+            1,
+            null,
+            0
+          ],
+          [
+            5,
+            "id",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            6,
+            "source",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            7,
+            "source_ref",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            8,
+            "verification",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            9,
+            "evidence",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            10,
+            "updated_at",
+            "DATETIME",
+            0,
+            null,
+            0
+          ]
+        ],
+        "relations": [
+          [
+            "a",
+            "b",
+            "knows",
+            "55070395-8843-4cc9-a66c-a0dfdd1c17a9",
+            "2000-01-02 03:04:05",
+            "2000-01-02 03:04:05"
+          ],
+          [
+            "b",
+            "a",
+            "knows",
+            "a3150c74-59e5-4117-9f7d-0aa2cce50d02",
+            "2000-01-02 03:04:05",
+            "2000-01-02 03:04:05"
+          ]
+        ]
+      },
+      "whole_state_unchanged": true
+    }
+  ],
+  "source": "25292fe2d3349fe3b716783310096accb1f63007"
+}

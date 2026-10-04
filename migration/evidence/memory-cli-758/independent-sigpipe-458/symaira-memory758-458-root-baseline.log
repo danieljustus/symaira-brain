@@ -1,0 +1,16 @@
+{
+  "go_oracle_revision": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "go_binary_sha256": "57b024427a660c52d23b4053649f15bcdf26cddbf9facede8879e4f77c9309f7",
+  "rust_binary_sha256": "74baed15ec319a894fc5fc3001c0afb03572c0a12b2d0690b52802fe664fc804",
+  "corekit_configkit_sha256": "bd812ed747352c76b9f223a19ec64970b61fda59050f7ed436f5b2e74b997218",
+  "reflected_go_schema_sha256": "64d6052099e3d6147e478a667711c46576b71dfb644fe31c48e9a26620b9f62a",
+  "known_config_fields": 86,
+  "schema_generator_sha256": "3475e6dba5991f01fd7317772f24dd3b96e6380e80332ab6c248b29df30d9ff7",
+  "candidate_revision": "1a60e98a6847902299448f92f30ccee82e59913b",
+  "candidate_dirty": false,
+  "go_version": "go version go1.26.7 linux/amd64",
+  "operator_home_used": false,
+  "fallback_available": false,
+  "cases": 590,
+  "passed": 590
+}

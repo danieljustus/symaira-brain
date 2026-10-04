@@ -5,3 +5,28 @@
 # Treat them as binary so Git preserves those exact bytes and diff checks do not
 # mistake the carriage returns for accidental trailing whitespace.
 fuzz/corpus/** binary
+
+# Preserve exact original native failure log bytes.
+migration/evidence/memory-cli-758/windows-cleanup-9c-job-111297047149.log binary
+
+migration/evidence/memory-cli-758/independent-sigpipe-458/*.log binary
+
+# Retain the actual Windows Store-open failure's original CRLF bytes.
+migration/evidence/memory-open-race-803/windows-111341331340/*.log binary
+# Actual retained compiler/test output includes intentional trailing newlines.
+migration/evidence/memory-open-race-803/first-62b2757/*.log binary
+migration/evidence/memory-open-race-803/passed-9ae35cf/*.log binary
+migration/evidence/memory-open-race-803/final-*/*.log binary
+migration/evidence/memory-open-race-803/mixed-a112189/*.log binary
+
+# Preserve exact original merge-conflict reports as evidence, never source.
+migration/evidence/memory-historical-649/integration-main5e-wal2fe/*.conflict.txt binary
+
+# Preserve the original complete runtime failure output without text rewriting.
+migration/evidence/memory-historical-649/runtime-25292fe-original-failure/*.log binary
+
+migration/evidence/memory-historical-649/runtime-ab561d5-original-failure/*.log binary
+
+migration/evidence/memory-historical-649/runtime-687289d-original-failure/*.log binary
+
+migration/evidence/memory-historical-649/final-1fc5910/*.log binary

@@ -73,14 +73,24 @@ impl EmbeddingGenerator {
         }
     }
 
+    /// Returns the model recorded for a successful Ollama embedding.
+    #[must_use]
+    pub fn model(&self) -> &str {
+        &self.model
+    }
+
     /// Produces the embedding for `text`.
     #[must_use]
     pub fn generate(&self, text: &str) -> GeneratedEmbedding {
         match self.query_ollama(text) {
-            Some(vector) if vector.len() == DIMENSIONS => GeneratedEmbedding {
-                vector,
-                source: OLLAMA_SOURCE.to_owned(),
-            },
+            Some(vector)
+                if vector.len() == DIMENSIONS && vector.iter().all(|value| value.is_finite()) =>
+            {
+                GeneratedEmbedding {
+                    vector,
+                    source: OLLAMA_SOURCE.to_owned(),
+                }
+            }
             _ => GeneratedEmbedding {
                 vector: local_hash_vector(text),
                 source: HASH_FALLBACK_SOURCE.to_owned(),

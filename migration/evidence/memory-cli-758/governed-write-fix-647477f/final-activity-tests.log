@@ -1,0 +1,9 @@
+   Compiling symbrain-cli v0.12.1 (/workspace/symaira-memory758-write-fix/rust/symbrain-cli)
+    Finished `test` profile [unoptimized] target(s) in 0.32s
+     Running tests/activity_validation_tests.rs (/workspace/symaira-memory758-writes/target/debug/deps/activity_validation_tests-7406bd09e3c3536c)
+
+running 1 test
+test activity_validation_matches_complete_go_process_fixture_without_fallback ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.78s
+
