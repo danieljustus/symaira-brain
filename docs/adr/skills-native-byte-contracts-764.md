@@ -143,3 +143,15 @@ assertions remain. Migration docs retain the later Skills/render observations,
 and the existing SKL-008 render / SKL-009 raw-Windows distinction prevents a
 contract-ID collision. Nothing is rebased, forced, published or attributed as
 an executed native result. Original pre-merge source/checks remain in Git.
+
+## Follow-up source preparation for F7/F8/F9
+
+The full review of immutable `36c13305` requested complete JSON depth admission,
+linear metadata traversal and pinned Go float conversion. The isolated
+successor is described in `skills-native-json-depth-float-764.md`. Its prepared
+926 Unix / 884 Windows process inputs retain all 826 / 784 previous records as
+an exact prefix, append all 26 exact independent wires and further boundaries,
+and retain the five old actual-input controls plus two prepared new controls.
+These are unexecuted plans; earlier source/static observations and all original
+failures remain unchanged. Core's finite-JSON converter is an exact private
+copy with narrow admission, not a Usage cutover or generic runtime approval.

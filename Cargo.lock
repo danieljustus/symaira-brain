@@ -1805,6 +1805,7 @@ version = "0.12.1"
 dependencies = [
  "serde",
  "serde_json",
+ "symbrain-core",
 ]
 
 [[package]]

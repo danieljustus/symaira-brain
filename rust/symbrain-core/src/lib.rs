@@ -2,6 +2,7 @@
 
 pub mod config;
 pub mod exit;
+pub mod go_json_float;
 pub mod output;
 pub mod paths;
 pub mod version;

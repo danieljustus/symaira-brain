@@ -18,6 +18,8 @@ from fixtures import setup, variant
 from output_cases import run_pairs as output_pairs, required_ids as output_ids
 from library_denied import run_pairs as denied_pairs, required_ids as denied_ids
 from byte_cases import cases as byte_cases, variant as byte_variant, input_description, run_controls as byte_controls
+from json_cases import cases as json_cases, run_controls as json_controls
+from json_compare import json_matched
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -93,7 +95,7 @@ def incoming(name, arguments, framed=False):
 
 def source_map():
     names = subprocess.check_output(["git", "ls-files", "rust/symbrain-skills", "rust/symbrain-cli",
-                                     "rust/symbrain-gateway", "rust/symbrain-mcp", "scripts/skills-native-oracle", "Cargo.lock", "migration/contract-matrix.csv",
+                                     "rust/symbrain-gateway", "rust/symbrain-mcp", "rust/symbrain-core", "scripts/skills-native-oracle", "Cargo.lock", "migration/contract-matrix.csv",
                                      ".github/workflows/skills-native.yml"], cwd=ROOT, text=True).splitlines()
     return {name: {"sha256": sha(ROOT / name), "bytes": (ROOT / name).stat().st_size} for name in names}
 
@@ -153,6 +155,7 @@ def main():
             cases += [(f"library-{selected}-{form}", ["skills", "list", *flags], None, selected)
                       for selected in ("empty-entry", "malformed-entry") for form, flags in (("table", []), ("json", ["--json"]))]
             cases += byte_cases(root, incoming)
+            cases += json_cases(root, incoming)
             assert len({name for name, _, _, _ in cases}) == len(cases)
             report["required_ids"] = [name for name, _, _, _ in cases] + denied_ids() + output_ids()
             for name, argv, data, selected in cases:
@@ -180,7 +183,8 @@ def main():
                     finally:
                         output.write_text(json.dumps(report, indent=2) + "\n")
                 try:
-                    pair["matched"] = matched(pair["go"], pair["rust"], root, data is not None)
+                    pair["matched"] = (json_matched(name, pair["go"], pair["rust"], root) if name.startswith("json-")
+                                       else matched(pair["go"], pair["rust"], root, data is not None))
                 except Exception as error:
                     pair["comparison_error"] = {"type": type(error).__name__, "message": str(error)}
                     raise
@@ -221,6 +225,8 @@ def main():
                     assert bytes.fromhex(mutant["stderr_hex"]), "actual argument rejection diagnostic required"
             byte_controls(report, lambda: output.write_text(json.dumps(report, indent=2) + "\n"),
                           binaries, root, retained, env, invoke, incoming, matched, mcp_view)
+            json_controls(report, lambda: output.write_text(json.dumps(report, indent=2) + "\n"),
+                          binaries, root, retained, env, invoke, incoming)
             assert report["candidate_sources"] == source_map()
             assert report["binaries"] == {name: {"path": str(path), "sha256": sha(path)} for name, path in binaries.items()}
             report.update(status="passed", native_surface_gate_passed=True)

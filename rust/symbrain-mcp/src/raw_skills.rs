@@ -6,6 +6,8 @@ use std::fmt;
 
 #[path = "raw_skills_strings.rs"]
 mod strings;
+#[path = "raw_skills_syntax.rs"]
+mod syntax;
 
 /// Original CoreKit registration order; also scopes raw transport admission.
 pub const SKILLS_TOOL_NAMES: &[&str] = &[
@@ -76,30 +78,19 @@ fn field_error(raw: &str, field: &str, ty: &str) -> String {
 // Map[string]any numbers use float64, even in otherwise ignored metadata.
 // Preserve encounter order rather than validating a duplicate-free Value.
 fn validate_any(raw: &str) -> Option<String> {
-    match kind(raw) {
-        "object" => serde_json::from_str::<Fields>(&strings::repair(raw.as_bytes(), true))
-            .ok()?
-            .0
-            .iter()
-            .find_map(|(_, v)| validate_any(v.get())),
-        "array" => {
-            serde_json::from_str::<Vec<Box<RawValue>>>(&strings::repair(raw.as_bytes(), true))
-                .ok()?
-                .iter()
-                .find_map(|v| validate_any(v.get()))
+    let mut first = None;
+    let _ = syntax::scan(raw.as_bytes(), |number| {
+        if first.is_some() {
+            return;
         }
-        "number"
-            if raw
-                .parse::<f64>()
-                .ok()
-                .is_none_or(|value| !value.is_finite()) =>
-        {
-            Some(format!(
-                "Invalid params: json: cannot unmarshal number {raw} into Go struct field ._meta of type float64"
-            ))
+        let number = std::str::from_utf8(number).expect("syntax-validated ASCII number");
+        if symbrain_core::go_json_float::parse_finite(number).is_none() {
+            first = Some(format!(
+                "Invalid params: json: cannot unmarshal number {number} into Go struct field ._meta of type float64"
+            ));
         }
-        _ => None,
-    }
+    });
+    first
 }
 
 /// Known Skills name and its separately decoded raw handler arguments.
@@ -107,10 +98,15 @@ pub type RawSkillsCall = (String, Option<Box<RawValue>>);
 
 /// Validates Go's Name string / Arguments RawMessage / Meta map[string]any.
 /// A recognized call retains its first outer error and must never execute.
-/// None leaves other RPC owners on their original admission path.
+/// None leaves syntactically valid other RPC owners on their original path.
+/// Complete syntax errors precede owner matching and typed field decoding.
 #[must_use]
 pub fn raw_skills_params(params: Option<&RawValue>) -> Option<Result<RawSkillsCall, String>> {
-    let repaired = strings::transport(params?.get().as_bytes(), 1)?;
+    let bytes = params?.get().as_bytes();
+    if let Err(error) = syntax::validate(bytes) {
+        return Some(Err(format!("Invalid params: {error}")));
+    }
+    let repaired = strings::transport(bytes, 1)?;
     let fields = serde_json::from_str::<Fields>(&repaired).ok()?;
     let (mut name, mut arguments, mut first) = (String::new(), None, None);
     for (key, value) in fields.0 {
@@ -145,6 +141,9 @@ pub fn raw_skills_params(params: Option<&RawValue>) -> Option<Result<RawSkillsCa
 }
 
 pub(crate) fn transport_request(bytes: &[u8]) -> Option<Result<crate::Request, String>> {
+    if let Err(error) = syntax::validate(bytes) {
+        return Some(Err(error));
+    }
     let repaired = strings::transport(bytes, 2)?;
     let fields = serde_json::from_str::<Fields>(&repaired).ok()?;
     let (mut jsonrpc, mut method, mut params, mut id, mut has_id, mut first) =
@@ -207,3 +206,7 @@ pub(crate) fn trim_go_space(raw: &[u8]) -> &[u8] {
 #[cfg(test)]
 #[path = "raw_skills_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "raw_skills_boundary_tests.rs"]
+mod boundary_tests;
