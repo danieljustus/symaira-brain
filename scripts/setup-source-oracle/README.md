@@ -74,4 +74,20 @@ It requires native Windows, retains all phases/raw streams/PIDs, and watchdogs
 the deliberately historical blocking sequence. The bounded inner-wait and
 successful-descendant comparisons must also complete. This diagnoses pinned
 JobObject APIs; it does not establish the phase of the original CI failure or
-implement a production correction. No Linux/cross-target run counts as proof.
+establish production acceptance. No Linux/cross-target run counts as proof.
+
+Two additive `source-cleanup` and `source-descendant` modes invoke the exact
+production Windows helper: poll the inner parent, preserve completion-port
+notifications, terminate the whole job and wait through its wrapper. They must
+return successfully without watchdog cleanup and leave the recorded descendant
+inactive. The original historical failure remains an observed negative control;
+the original two parent-only-wait comparisons remain diagnostic comparisons.
+Source's full native95Windows/111Unix cases and original controls still determine
+acceptance, with the unchanged25second per-process limit.
+
+On native Windows, the wrappers also retain actual Source Go/current CLI and
+executed diagnostic test PE bytes and SHA/size/machine manifests outside the
+compared roots, before temporary cleanup. CI uploads these additive files with
+the complete reports. Original443artifacts omitted PE bytes; the retained
+original source/observations explicitly preserve that gap. See the owned-job
+notification ADR for the source-only correction and required native follow-up.

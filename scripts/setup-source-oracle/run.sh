@@ -13,6 +13,9 @@ fi
 report="${1:?usage: scripts/setup-source-oracle/run.sh OUTPUT_JSON}"
 ./scripts/run-go-oracle.sh "$oracle_ref" build -o "$go_binary" ./cmd/symbrain
 cargo build -p symbrain-cli --bin symbrain --locked
+if [ "${OS:-}" = Windows_NT ]; then
+  python3 scripts/setup-source-oracle/native_binaries.py --output "$report.binaries.json" --binary source-go "$go_binary" --binary source-current "$rust_binary"
+fi
 python3 scripts/setup-source-oracle/replay.py "$go_binary" "$rust_binary" "$report"
 for control in wrong-exit wrong-source; do
   control_report="$report.$control.json"

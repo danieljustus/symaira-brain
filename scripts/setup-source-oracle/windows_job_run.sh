@@ -23,4 +23,5 @@ assert artifacts[0].is_file()
 print(artifacts[0])
 PY
 )"
+python3 scripts/setup-source-oracle/native_binaries.py --output "$report.binaries.json" --binary source-job-test "$binary"
 python3 scripts/setup-source-oracle/windows_job_probe.py "$binary" "$report"

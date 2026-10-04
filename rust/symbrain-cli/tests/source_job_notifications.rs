@@ -9,6 +9,9 @@ use std::process::{Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
 
+#[path = "../src/setup_source_windows_job.rs"]
+mod source_job;
+
 fn event(root: &Path, phase: &str, pid: u32) {
     let mut file = OpenOptions::new()
         .create(true)
@@ -98,9 +101,10 @@ fn owned_job_diagnostic_helper() {
     }
     assert!(matches!(
         mode.as_str(),
-        "historical" | "inner-wait" | "descendant"
+        "historical" | "inner-wait" | "descendant" | "source-cleanup" | "source-descendant"
     ));
-    let child_mode = if mode == "descendant" {
+    let source_mode = mode.starts_with("source-");
+    let child_mode = if matches!(mode.as_str(), "descendant" | "source-descendant") {
         "with-descendant"
     } else {
         "quick"
@@ -112,7 +116,12 @@ fn owned_job_diagnostic_helper() {
     event(&root, "wrapper-created", child.id());
     let started = Instant::now();
     loop {
-        if let Some(status) = child.try_wait().unwrap() {
+        let status = if source_mode {
+            source_job::poll_parent(child.as_mut())
+        } else {
+            child.try_wait()
+        };
+        if let Some(status) = status.unwrap() {
             assert!(status.success());
             break;
         }
@@ -123,16 +132,36 @@ fn owned_job_diagnostic_helper() {
         thread::sleep(Duration::from_millis(10));
     }
     event(&root, "parent-exited", child.id());
-    // Consume any remaining notifications after the exit, while asserting the
-    // documented cached-status contract on every further poll.
+    // Original comparison modes consume wrapper notifications. Source modes
+    // repeat the exact parent-only production poll and leave job events intact.
     for _ in 0..16 {
-        assert!(child.try_wait().unwrap().unwrap().success());
+        let status = if source_mode {
+            source_job::poll_parent(child.as_mut())
+        } else {
+            child.try_wait()
+        };
+        assert!(status.unwrap().unwrap().success());
         thread::sleep(Duration::from_millis(10));
     }
-    event(&root, "post-exit-notifications-polled", child.id());
+    event(
+        &root,
+        if source_mode {
+            "post-exit-parent-polled"
+        } else {
+            "post-exit-notifications-polled"
+        },
+        child.id(),
+    );
     if mode == "historical" {
         event(&root, "historical-drop-enter", child.id());
         drop(HistoricalOwned(child, root.clone()));
+    } else if source_mode {
+        // Exercise the exact production helper, retaining full JobObject wait.
+        event(&root, "source-cleanup-enter", child.id());
+        let waited = source_job::terminate_and_reap(child.as_mut());
+        event_result(&root, "source-cleanup-returned", child.id(), &waited);
+        assert!(waited.unwrap().success());
+        drop(child);
     } else {
         // A diagnostic comparison, not a production correction. Kill the
         // complete owned job; await only the cached top-level child status.

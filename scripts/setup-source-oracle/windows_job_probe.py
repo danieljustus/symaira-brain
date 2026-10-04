@@ -34,7 +34,9 @@ def main():
     data["candidate_head"] = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=source, text=True).strip()
     data["candidate_dirty"] = bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=source))
     inputs = ["scripts/setup-source-oracle/windows_job_run.sh", "scripts/setup-source-oracle/windows_job_probe.py",
-              "rust/symbrain-cli/tests/source_job_notifications.rs", "rust/symbrain-cli/src/setup_source_process.rs", "Cargo.lock"]
+              "rust/symbrain-cli/tests/source_job_notifications.rs", "rust/symbrain-cli/src/setup_source_process.rs",
+              "rust/symbrain-cli/src/setup_source_windows_job.rs",
+              "scripts/setup-source-oracle/native_binaries.py", "Cargo.lock"]
     data["candidate_source_sha256"] = {name:hashlib.sha256((source / name).read_bytes()).hexdigest() for name in inputs}
 
     def checkpoint():
@@ -64,7 +66,7 @@ def main():
 
     checkpoint()
     try:
-        for mode in ["historical", "inner-wait", "descendant"]:
+        for mode in ["historical", "inner-wait", "descendant", "source-cleanup", "source-descendant"]:
             root = evidence / mode
             root.mkdir()
             observation = dict(mode=mode, started=time.time(), status="starting", forced_cleanup=[])
@@ -115,6 +117,8 @@ def main():
             observed = {row["phase"] for row in phases}
             if mode == "historical":
                 matched = observation["timed_out"] and {"parent-exited", "post-exit-notifications-polled", "historical-drop-enter", "historical-kill-enter"} <= observed and "wrapper-drop-returned" not in observed
+            elif mode.startswith("source-"):
+                matched = not observation["timed_out"] and observation["exit"] == 0 and {"parent-exited", "post-exit-parent-polled", "source-cleanup-enter", "source-cleanup-returned", "wrapper-drop-returned"} <= observed and not observation["forced_cleanup"] and (not observation["descendant"] or not observation["descendant"]["active"])
             else:
                 matched = not observation["timed_out"] and observation["exit"] == 0 and "inner-wait-returned" in observed and "wrapper-drop-returned" in observed and not observation["forced_cleanup"] and (not observation["descendant"] or not observation["descendant"]["active"])
             observation["intended_observation_matched"] = matched

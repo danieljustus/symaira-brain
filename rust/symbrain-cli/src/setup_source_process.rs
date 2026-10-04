@@ -1,6 +1,9 @@
 //! Owned argv-based source tool processes with cancellation and file capture.
 #[cfg(windows)]
 use process_wrap::std::{ChildWrapper, CommandWrap, JobObject};
+#[cfg(windows)]
+#[path = "setup_source_windows_job.rs"]
+mod windows_job;
 use std::ffi::{OsStr, OsString};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -205,7 +208,11 @@ pub(super) fn run(
     };
     let started = Instant::now();
     let error = loop {
-        match owned.child.try_wait() {
+        #[cfg(windows)]
+        let status = windows_job::poll_parent(owned.child.as_mut());
+        #[cfg(not(windows))]
+        let status = owned.child.try_wait();
+        match status {
             Ok(Some(status)) => {
                 break (!status.success()).then(|| format_process_exit_status(status));
             }
@@ -239,8 +246,13 @@ impl Drop for Owned {
             .stdout(Stdio::null())
             .stderr(Stdio::null())
             .status();
-        let _ = self.child.kill();
-        let _ = self.child.wait();
+        #[cfg(windows)]
+        let _ = windows_job::terminate_and_reap(self.child.as_mut());
+        #[cfg(not(windows))]
+        {
+            let _ = self.child.kill();
+            let _ = self.child.wait();
+        }
     }
 }
 
