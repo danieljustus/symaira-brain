@@ -107,3 +107,32 @@ Go/native whole reports, both transport modes, writable-owner denial state,
 all existing families/controls, affected strict all-target graph tests and
 native Linux/macOS/Windows CI are still required. No issue closure, whole #764
 cutover, publication or merge approval is claimed.
+
+## Main CI parent acquisition and fixture Git identity
+
+After the focused source checkpoint, normally merge the exact common CI leaf
+`e00365333a041118dd0598157137e0ba3586013d` (which includes
+`cc3f4e62dcb133b616c6b58c135463ad81058801`). Preserve all current render,
+main/Activity and native checks; the workflow is exactly the previous Skills
+workflow plus the four-line immutable-parent fetch. Its command retains
+`--no-tags` and complete history, with no `--depth`. The original Windows
+missing-parent failure and the rejected depth-one attempt remain inherited
+as full lossless Git-bound evidence; no remote/native check is inferred here.
+
+The first local source commit `b617558bea545829061c559aa55cf1bbc7ae3a9e`
+exposed an author provenance error: repository `text=auto eol=lf` normalized
+CRLF in thirteen newly added framed fixture Git blobs, while their physical
+original reviewer bytes still matched. Both full original forms and Git/native
+identities are retained before correction. Scoped `-text` attributes restore
+the exact protocol bytes in Git without modifying any input assertion. Final
+source binding explicitly requires physical fixture bytes equal to immutable
+Git blobs as well as the original reviewer hashes. This is source-provenance
+repair, not an actual product mismatch or executed acceptance.
+
+Two pure checker mistakes are retained with scripts and full tracebacks: a
+Python3.12 projection changed global `os.name` and attempted a WindowsPath on
+Linux; the corrected projection binds only generator module platform views.
+A naive format-template regex selected a later template; the bounded function
+projection now checks the actual Rust request-body format. An initial patch
+attempt with a redundant out-of-order context hunk was rejected before applying
+changes; its tool error is retained as author tooling, not product evidence.

@@ -29,11 +29,11 @@ Skills gates and independent review are additional acceptance requirements.
 Copied SDK source and case generation do not satisfy any native gate.
 
 The F7/F8/F9 successor appends `json_cases.py` inputs and the complete 26 original
-independent review wires in `json-review-inputs/`. Prepared totals become926
-Unix /884 Windows; five existing actual-input controls remain unchanged and
+independent review wires in `json-review-inputs/`. Prepared totals become 926
+Unix / 884 Windows; five existing actual-input controls remain unchanged and
 two new controls require accepted baselines before actual depth/overflow input
 mutations. `compare.py` is unchanged. `json_compare.py` admits only the explicit
-syntax-error IDs and requires `[1,2,null]`, code-32700 and complete messages,
+syntax-error IDs and requires `[1,2,null]`, code -32700 and complete messages,
 exits, stderr and filesystem state; valid inputs use the original comparator.
 These are prepared plans, with zero current product/compiler/native executions.
 See `docs/adr/skills-native-json-depth-float-764.md` for exact owner boundaries.
