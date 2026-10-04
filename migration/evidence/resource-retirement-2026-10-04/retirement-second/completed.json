@@ -1,0 +1,193 @@
+[
+  {
+    "path": "/workspace/symaira-doctor765-stdout",
+    "head": "fb6d68b337974b03efeb8e9bd547dfbb06bb8fae",
+    "branch": "refs/heads/issue/765-doctor-stdout",
+    "checkpoint_labels": [
+      "806"
+    ],
+    "tracked_manifest": "/workspace/review-proof/review-pr800-worktree-audit/symaira-doctor765-stdout-tracked-files.json",
+    "tracked_manifest_sha256": "2d3a4cb42d98a0795e84a522d05fd6031e58b8450c73d161a3926c826459ad6a",
+    "full_tracked_files": 4042,
+    "exact_bytes_and_native_modes_rechecked": true,
+    "visible_consumers": [],
+    "privileged_services_UNVERIFIED": [
+      {
+        "pid": 198,
+        "name": "dockerd",
+        "state": "S (sleeping)",
+        "UIDs": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      },
+      {
+        "pid": 249,
+        "name": "containerd",
+        "state": "S (sleeping)",
+        "UIDs": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      }
+    ],
+    "restore_argv": [
+      "git",
+      "-C",
+      "/workspace/symaira-brain",
+      "worktree",
+      "add",
+      "/workspace/symaira-doctor765-stdout",
+      "refs/heads/issue/765-doctor-stdout"
+    ],
+    "native_mode_restoration": "apply each native_mode from full tracked manifest after Git checkout",
+    "free_before": 1916325888,
+    "derivative_cleanup": [
+      "/workspace/symaira-doctor765-stdout/scripts/__pycache__/rust-differential.cpython-312.pyc",
+      "/workspace/symaira-doctor765-stdout/scripts/__pycache__/harness_health_contract.cpython-312.pyc",
+      "/workspace/symaira-doctor765-stdout/scripts/__pycache__/external_env.cpython-312.pyc",
+      "/workspace/symaira-doctor765-stdout/scripts/doctor-repair-oracle/__pycache__/replay.cpython-312.pyc",
+      "/workspace/symaira-doctor765-stdout/scripts/doctor-repair-oracle/__pycache__/cases.cpython-312.pyc"
+    ],
+    "exit": 0,
+    "free_after": 2212704256,
+    "branch_and_commit_preserved": true,
+    "directory_absent": true
+  },
+  {
+    "path": "/workspace/symaira-doctor765-output",
+    "head": "b3ad77a80b43ebbe639b29b632aab2e738511fa3",
+    "branch": "refs/heads/issue/765-output-boundaries",
+    "checkpoint_labels": [
+      "806"
+    ],
+    "tracked_manifest": "/workspace/review-proof/review-pr800-worktree-audit/symaira-doctor765-output-tracked-files.json",
+    "tracked_manifest_sha256": "d5b5d3ef96bb568bca286574fbf11423aa8c9e114c4e7e573a977ddb2b53aaaf",
+    "full_tracked_files": 3771,
+    "exact_bytes_and_native_modes_rechecked": true,
+    "visible_consumers": [],
+    "privileged_services_UNVERIFIED": [
+      {
+        "pid": 198,
+        "name": "dockerd",
+        "state": "S (sleeping)",
+        "UIDs": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      },
+      {
+        "pid": 249,
+        "name": "containerd",
+        "state": "S (sleeping)",
+        "UIDs": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      }
+    ],
+    "restore_argv": [
+      "git",
+      "-C",
+      "/workspace/symaira-brain",
+      "worktree",
+      "add",
+      "/workspace/symaira-doctor765-output",
+      "refs/heads/issue/765-output-boundaries"
+    ],
+    "native_mode_restoration": "apply each native_mode from full tracked manifest after Git checkout",
+    "free_before": 2212687872,
+    "derivative_cleanup": [
+      "/workspace/symaira-doctor765-output/scripts/__pycache__/rust-differential.cpython-312.pyc",
+      "/workspace/symaira-doctor765-output/scripts/__pycache__/harness_health_contract.cpython-312.pyc",
+      "/workspace/symaira-doctor765-output/scripts/__pycache__/external_env.cpython-312.pyc",
+      "/workspace/symaira-doctor765-output/scripts/doctor-repair-oracle/__pycache__/replay.cpython-312.pyc",
+      "/workspace/symaira-doctor765-output/scripts/doctor-repair-oracle/__pycache__/cases.cpython-312.pyc",
+      "/workspace/symaira-doctor765-output/scripts/guard-standalone-oracle/__pycache__/replay.cpython-312.pyc",
+      "/workspace/symaira-doctor765-output/scripts/memory-cli-oracle/__pycache__/deletes.cpython-312.pyc",
+      "/workspace/symaira-doctor765-output/scripts/memory-cli-oracle/__pycache__/write_failures.cpython-312.pyc",
+      "/workspace/symaira-doctor765-output/scripts/memory-cli-oracle/__pycache__/replay.cpython-312.pyc",
+      "/workspace/symaira-doctor765-output/scripts/memory-cli-oracle/__pycache__/writes.cpython-312.pyc",
+      "/workspace/symaira-doctor765-output/scripts/memory-cli-oracle/__pycache__/write_boundaries.cpython-312.pyc",
+      "/workspace/symaira-doctor765-output/scripts/memory-cli-oracle/__pycache__/cases.cpython-312.pyc",
+      "/workspace/symaira-doctor765-output/scripts/memory-cli-oracle/__pycache__/path_cases.cpython-312.pyc",
+      "/workspace/symaira-doctor765-output/scripts/setup-output-oracle/__pycache__/fixtures.cpython-312.pyc",
+      "/workspace/symaira-doctor765-output/scripts/setup-repair-oracle/__pycache__/replay.cpython-312.pyc",
+      "/workspace/symaira-doctor765-output/scripts/setup-source-oracle/__pycache__/replay.cpython-312.pyc"
+    ],
+    "exit": 0,
+    "free_after": 2482413568,
+    "branch_and_commit_preserved": true,
+    "directory_absent": true
+  },
+  {
+    "path": "/workspace/symaira-doctor765-json",
+    "head": "3f92a768e2a19c1a5533262663d6f85b4ce0b591",
+    "branch": "refs/heads/issue/765-shared-go-json",
+    "checkpoint_labels": [
+      "806"
+    ],
+    "tracked_manifest": "/workspace/review-proof/review-pr800-worktree-audit/symaira-doctor765-json-tracked-files.json",
+    "tracked_manifest_sha256": "4364e974a5951113119b7592d801683aa215ea8a21d3076fb639633a3cbcb7d6",
+    "full_tracked_files": 3156,
+    "exact_bytes_and_native_modes_rechecked": true,
+    "visible_consumers": [],
+    "privileged_services_UNVERIFIED": [
+      {
+        "pid": 198,
+        "name": "dockerd",
+        "state": "S (sleeping)",
+        "UIDs": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      },
+      {
+        "pid": 249,
+        "name": "containerd",
+        "state": "S (sleeping)",
+        "UIDs": [
+          "0",
+          "0",
+          "0",
+          "0"
+        ]
+      }
+    ],
+    "restore_argv": [
+      "git",
+      "-C",
+      "/workspace/symaira-brain",
+      "worktree",
+      "add",
+      "/workspace/symaira-doctor765-json",
+      "refs/heads/issue/765-shared-go-json"
+    ],
+    "native_mode_restoration": "apply each native_mode from full tracked manifest after Git checkout",
+    "free_before": 2482401280,
+    "derivative_cleanup": [
+      "/workspace/symaira-doctor765-json/scripts/__pycache__/rust-differential.cpython-312.pyc",
+      "/workspace/symaira-doctor765-json/scripts/__pycache__/harness_health_contract.cpython-312.pyc",
+      "/workspace/symaira-doctor765-json/scripts/__pycache__/external_env.cpython-312.pyc",
+      "/workspace/symaira-doctor765-json/scripts/doctor-repair-oracle/__pycache__/replay.cpython-312.pyc",
+      "/workspace/symaira-doctor765-json/scripts/doctor-repair-oracle/__pycache__/cases.cpython-312.pyc",
+      "/workspace/symaira-doctor765-json/scripts/guard-standalone-oracle/__pycache__/replay.cpython-312.pyc",
+      "/workspace/symaira-doctor765-json/scripts/setup-repair-oracle/__pycache__/replay.cpython-312.pyc",
+      "/workspace/symaira-doctor765-json/scripts/setup-source-oracle/__pycache__/replay.cpython-312.pyc"
+    ],
+    "exit": 0,
+    "free_after": 2698588160,
+    "branch_and_commit_preserved": true,
+    "directory_absent": true
+  }
+]

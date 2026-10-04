@@ -1,0 +1,413 @@
+{
+  "head": "cec81cfc0acdc9f4bb567f85fa6a27c03cb74467",
+  "merge": "1fb22f06b16dcf7e08c0c1531d827aee3a8c399d",
+  "tree": "cfedf54df4c0d39a7b9685586ace3e69f2093de4",
+  "run": 37186788497,
+  "windows_job": 111390294303,
+  "native_failure_stage": "Go mod verify before process comparisons/parent build",
+  "source_files_admitted": 2438,
+  "downloaded_artifact_id": 11297401683,
+  "decoded_logs": "MCP complete UTF8 bytes with original CRLF; failed gh downloads retained separately; watcher complete_logs_saved true with exit1/zero bytes is not full-log evidence",
+  "local_preservation_error": "first full-log write attempted as one shell argument exceeded exec argument limit; no partial file created; subsequent <=30000 character writes preserved exact complete bytes",
+  "files": [
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/artifacts-complete.json",
+      "archive": "artifacts-complete.json.gz",
+      "bytes": 12847,
+      "sha256": "89355fa9e910bc6f8f3e6a543b6e0cdccc99442dc3fef49b854585f87a0afad2",
+      "archive_sha256": "088b51919f8a2d0e73cd4970ab2eba13f1aff8142caf7e21f957904aae43159e"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/head-commit.json",
+      "archive": "head-commit.json.gz",
+      "bytes": 1197,
+      "sha256": "88195fe93d0e7c107a032028dc68b40e43c855474a68cd0d5e5230d46450555d",
+      "archive_sha256": "d709dfa101c1980ba73d407488f8906914ac15d0dff3bedcafab4b3847539f58"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/jobs-initial.json",
+      "archive": "jobs-initial.json.gz",
+      "bytes": 56792,
+      "sha256": "d60f81db53402420e20428c70e8d814076f0a1b6a6a113c94e7165d9d5d4e154",
+      "archive_sha256": "993677f1567a67d7c10c225b2838cbd17420577b6723f078a186ca52098b5bf5"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/jobs-third.json",
+      "archive": "jobs-third.json.gz",
+      "bytes": 60048,
+      "sha256": "47966f7a0edcedb426382de2fb5ce64ba0b579231c7e5102432c089c14e6f62d",
+      "archive_sha256": "1662a5afac7a347906538b62a8976d2fa718e10f22ce7c87f86a052b95b5edfe"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/linux-complete-job.json",
+      "archive": "linux-complete-job.json.gz",
+      "bytes": 4680,
+      "sha256": "791977e28d6be3a64379b0214d8977df625c422afe793d55ce29ef9b8b573b92",
+      "archive_sha256": "f7e95c08e60487eaa49fc82f809550247a36e14eca43f952dfd0e9435afdec60"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/linux-complete-job.logs.decoded",
+      "archive": "linux-complete-job.logs.decoded.gz",
+      "bytes": 375405,
+      "sha256": "42efcffa7dddd28824905a1afdadf861fcabcad7f35ce00aa72473d1be8b29b4",
+      "archive_sha256": "1fcbe8ade200c6618259ee123856e20d9e109b6f2ac21cb57c32dbe0d1532d17"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/linux-complete-job.logs.raw",
+      "archive": "linux-complete-job.logs.raw.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/linux-log-download-failure.json",
+      "archive": "linux-log-download-failure.json.gz",
+      "bytes": 542,
+      "sha256": "3a7ba61235bbbfbeaeb4bd0bc75531d9fbed9bfbd96695a74446d2c2baf1686f",
+      "archive_sha256": "00e3e7872bd906809808f8f2ba39c9537e50e417f1acc75499f7841608387490"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/merge-commit.json",
+      "archive": "merge-commit.json.gz",
+      "bytes": 2709,
+      "sha256": "1bd87897a2961fe5d6044217e593458d4d7198722cf1796ef1a4bbda0d111307",
+      "archive_sha256": "cfe1b4702e92d3625d6dcae97161632a6d43449eda3df68c97c30bd6f0d575e2"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/pr-initial.json",
+      "archive": "pr-initial.json.gz",
+      "bytes": 20105,
+      "sha256": "46f9a59d46576250c8a298a32ee9755f96a2bb7e77212b46888d8fbc3e196702",
+      "archive_sha256": "dd10fd0fbc7daae6735d0424edaea12924f83a52d6497e2989a23779fd592556"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/required-check-observation.json",
+      "archive": "required-check-observation.json.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/required-check-observation.stderr",
+      "archive": "required-check-observation.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/required-check-observation.txt",
+      "archive": "required-check-observation.txt.gz",
+      "bytes": 437,
+      "sha256": "1c91e69da2d7d506fff176a432057dcfb1d7e9243390accb51a2ba3be91b0bc3",
+      "archive_sha256": "fc8df3dde3263256f49ed25efab6ee32e217e3b36aa0a648a9b67505b7bd3e62"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/required-check-second.stderr",
+      "archive": "required-check-second.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/required-check-second.txt",
+      "archive": "required-check-second.txt.gz",
+      "bytes": 437,
+      "sha256": "1c91e69da2d7d506fff176a432057dcfb1d7e9243390accb51a2ba3be91b0bc3",
+      "archive_sha256": "fc8df3dde3263256f49ed25efab6ee32e217e3b36aa0a648a9b67505b7bd3e62"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/required-checks.json",
+      "archive": "required-checks.json.gz",
+      "bytes": 174,
+      "sha256": "35357f311cf671c4479822659e16db0ce25d033bf898dc3595a5256ce181ed8c",
+      "archive_sha256": "690dfdeec532b247bd7e4ccd741b76556afcd52933513cc8b914ccd9d33e54f2"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/run-initial.json",
+      "archive": "run-initial.json.gz",
+      "bytes": 13600,
+      "sha256": "67c990006d21448ee0ee0ebbcba319bbc93ff9b145e76d7c969ea62490599af0",
+      "archive_sha256": "a674454508d680f4355ca3d3b53369e3cdc71b2e07fc14265de6405ec13631dc"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/skills-artifact/go-build.json",
+      "archive": "skills-artifact/go-build.json.gz",
+      "bytes": 1771097,
+      "sha256": "83c26f1ca5c4fbfee2fdc892cebd8578bff82905119d5625ef3dafe86952360c",
+      "archive_sha256": "a7940c411f5f8da7eab172f009e7073701500fb871d7fba0821a55f73c791419"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/skills-artifact-manifest.json",
+      "archive": "skills-artifact-manifest.json.gz",
+      "bytes": 254,
+      "sha256": "a85ecf45e7a8b177fc41a039f6cfd82566660788da637d0a0f61ef8c85b4c4ca",
+      "archive_sha256": "3daa841c3c609895d67f5ee1c6b3959f6182c0198c583ce6803e385204dade8b"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/skills-wide-argv-Windows.zip",
+      "archive": "skills-wide-argv-Windows.zip.gz",
+      "bytes": 375167,
+      "sha256": "6ef790f2d525d08e7d27853d71aecbc2fe73b09b5a4d53b4124eb84cee0ee366",
+      "archive_sha256": "f38c3ff4e135c9a7ab91f0adfcf4f287dff6a1d164853069e14f482fbc3afeb8"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/source-binding.json",
+      "archive": "source-binding.json.gz",
+      "bytes": 1243,
+      "sha256": "09a15683a9f1b6e8e604dc133b8e5744f22cf85aa98bfa08de12df7bf91c1939",
+      "archive_sha256": "9bcf2d92b2f7cba8e0ced4556c5961b9f6684d998b0522891e445c53538d886e"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/watch_windows-first.py.txt",
+      "archive": "watch_windows-first.py.txt.gz",
+      "bytes": 1523,
+      "sha256": "b571f9dc5275a775ece106e23a40ba1cc822f6dedc4d1a6b9e89e745eb05ba02",
+      "archive_sha256": "3c98036fbd9df463e639afe39a56485847db3d7ef3fd6c60278701e90d8b0b55"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/watch_windows.py",
+      "archive": "watch_windows.py.gz",
+      "bytes": 1544,
+      "sha256": "f68a1b4f981247ae2d1de68650d47b141e3051ce3b84f63b812bdd7064c9c7c1",
+      "archive_sha256": "791fdc3bedd6e4f9105df015a27b48931275df59f95efd4cd5ed2bd5ec16e2ba"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T075357Z.json",
+      "archive": "windows-20261004T075357Z.json.gz",
+      "bytes": 4772,
+      "sha256": "07f29436c5608182c2317f030c1ad190a03f05712720dcdff25b7231f7e729dc",
+      "archive_sha256": "51e6a64bced09025584b816224c529afbfba00d2f3c5b45d5e89559fe043421f"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T075357Z.stderr",
+      "archive": "windows-20261004T075357Z.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T075458Z.json",
+      "archive": "windows-20261004T075458Z.json.gz",
+      "bytes": 4772,
+      "sha256": "07f29436c5608182c2317f030c1ad190a03f05712720dcdff25b7231f7e729dc",
+      "archive_sha256": "51e6a64bced09025584b816224c529afbfba00d2f3c5b45d5e89559fe043421f"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T075458Z.stderr",
+      "archive": "windows-20261004T075458Z.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T075559Z.json",
+      "archive": "windows-20261004T075559Z.json.gz",
+      "bytes": 4772,
+      "sha256": "07f29436c5608182c2317f030c1ad190a03f05712720dcdff25b7231f7e729dc",
+      "archive_sha256": "51e6a64bced09025584b816224c529afbfba00d2f3c5b45d5e89559fe043421f"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T075559Z.stderr",
+      "archive": "windows-20261004T075559Z.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T075659Z.json",
+      "archive": "windows-20261004T075659Z.json.gz",
+      "bytes": 112,
+      "sha256": "15cefd0528700471275adcd28427cb4efc001367156b099ea3300fc79d9c1292",
+      "archive_sha256": "dc99dada891191d1d7e9a7d06388e12e9b73fbccd7b013353def641c8e562698"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T075659Z.stderr",
+      "archive": "windows-20261004T075659Z.stderr.gz",
+      "bytes": 31,
+      "sha256": "33b0294298d5029730486a8c9671a03841dcf76b0b8afc686b0279a10cb55722",
+      "archive_sha256": "3ebe4502fc324df10d9744ed9f750ae9940d1d5d6840bcf158d96bd30610a51f"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T075740Z.json",
+      "archive": "windows-20261004T075740Z.json.gz",
+      "bytes": 4772,
+      "sha256": "07f29436c5608182c2317f030c1ad190a03f05712720dcdff25b7231f7e729dc",
+      "archive_sha256": "51e6a64bced09025584b816224c529afbfba00d2f3c5b45d5e89559fe043421f"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T075740Z.stderr",
+      "archive": "windows-20261004T075740Z.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T075841Z.json",
+      "archive": "windows-20261004T075841Z.json.gz",
+      "bytes": 4772,
+      "sha256": "07f29436c5608182c2317f030c1ad190a03f05712720dcdff25b7231f7e729dc",
+      "archive_sha256": "51e6a64bced09025584b816224c529afbfba00d2f3c5b45d5e89559fe043421f"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T075841Z.stderr",
+      "archive": "windows-20261004T075841Z.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T075941Z.json",
+      "archive": "windows-20261004T075941Z.json.gz",
+      "bytes": 4815,
+      "sha256": "39bcec479ddd0c6edb733dcdd69eb1b26e2368a93bf87095b0516b8cf464377d",
+      "archive_sha256": "cda6f78c6884f9b475b17277befb167c06c23dc147d52092d09d677ba06ce208"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T075941Z.stderr",
+      "archive": "windows-20261004T075941Z.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T080042Z.json",
+      "archive": "windows-20261004T080042Z.json.gz",
+      "bytes": 4815,
+      "sha256": "39bcec479ddd0c6edb733dcdd69eb1b26e2368a93bf87095b0516b8cf464377d",
+      "archive_sha256": "cda6f78c6884f9b475b17277befb167c06c23dc147d52092d09d677ba06ce208"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T080042Z.stderr",
+      "archive": "windows-20261004T080042Z.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T080142Z.json",
+      "archive": "windows-20261004T080142Z.json.gz",
+      "bytes": 4815,
+      "sha256": "39bcec479ddd0c6edb733dcdd69eb1b26e2368a93bf87095b0516b8cf464377d",
+      "archive_sha256": "cda6f78c6884f9b475b17277befb167c06c23dc147d52092d09d677ba06ce208"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T080142Z.stderr",
+      "archive": "windows-20261004T080142Z.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T080243Z.json",
+      "archive": "windows-20261004T080243Z.json.gz",
+      "bytes": 4858,
+      "sha256": "d6e412d2ca6c97f132b922a781832cbde4f2cdc9bbc6f7f357cb60b4263986cd",
+      "archive_sha256": "dfd746d82f969c315369821cd7dd093e9dc17d7ae37041fbfd96a939d842066f"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T080243Z.stderr",
+      "archive": "windows-20261004T080243Z.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T080344Z.json",
+      "archive": "windows-20261004T080344Z.json.gz",
+      "bytes": 5656,
+      "sha256": "72f0b1d41af173e1ac4f295dcedbab8a3e18a8b75d8ad83e10350e76b4851f82",
+      "archive_sha256": "fbe25aa2ed0f597fe8dad832132c3d20cd8fe84a49a641919c3ca9a6d0bc53a1"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-20261004T080344Z.stderr",
+      "archive": "windows-20261004T080344Z.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-after-api-error.json",
+      "archive": "windows-after-api-error.json.gz",
+      "bytes": 4772,
+      "sha256": "07f29436c5608182c2317f030c1ad190a03f05712720dcdff25b7231f7e729dc",
+      "archive_sha256": "51e6a64bced09025584b816224c529afbfba00d2f3c5b45d5e89559fe043421f"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-after-api-error.stderr",
+      "archive": "windows-after-api-error.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-complete-job-log-command.json",
+      "archive": "windows-complete-job-log-command.json.gz",
+      "bytes": 8004,
+      "sha256": "805b28d6b45b52cec998f18693dde81edb5d8997903cf766cc436ac2bff9d771",
+      "archive_sha256": "5186e1ca338e09dd3e25a3a09cc82e2189926f891544c3f59199274e464e45e8"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-complete-job.logs.decoded",
+      "archive": "windows-complete-job.logs.decoded.gz",
+      "bytes": 361026,
+      "sha256": "1dfebf1c221718de83cfca7ef65f68fb4df5b5cf6cbda86f1b66dba43d879f0c",
+      "archive_sha256": "48d300ed66036e493046a9e461d3ff6b2a7d2d17aacff827f3bd0b45d6805456"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-complete-job.logs.raw",
+      "archive": "windows-complete-job.logs.raw.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-complete-job.logs.stderr",
+      "archive": "windows-complete-job.logs.stderr.gz",
+      "bytes": 521,
+      "sha256": "ebedeebc41c91e08936fd64f8072657421fa75ea1414ddce54073b10f3f443e6",
+      "archive_sha256": "aa269f651d5b97f9f996bf63012f2e93cf14125feb2de1fdf1f808b6ca1842dc"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-observation-2.json",
+      "archive": "windows-observation-2.json.gz",
+      "bytes": 4772,
+      "sha256": "07f29436c5608182c2317f030c1ad190a03f05712720dcdff25b7231f7e729dc",
+      "archive_sha256": "51e6a64bced09025584b816224c529afbfba00d2f3c5b45d5e89559fe043421f"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-watch-first.log",
+      "archive": "windows-watch-first.log.gz",
+      "bytes": 697,
+      "sha256": "6d6cc06cb60e596a7abdf20907e082b3d0b52b7784fb8103cdc0d23e433da45c",
+      "archive_sha256": "3cdb3c35a126a47db39d06b754f9a43c345a028b682cbaf0c4c328025268e9f1"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-watch-second.log",
+      "archive": "windows-watch-second.log.gz",
+      "bytes": 4198,
+      "sha256": "1bf273e5645169df835af2ff59ae43841a74d04bae61e442a5a058358187e80f",
+      "archive_sha256": "73c3ee30f12867a39c478da68067f0f7ca692855405e546bfff4a7f2f8276ca3"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-watch-second.stderr",
+      "archive": "windows-watch-second.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-watch.log",
+      "archive": "windows-watch.log.gz",
+      "bytes": 697,
+      "sha256": "6d6cc06cb60e596a7abdf20907e082b3d0b52b7784fb8103cdc0d23e433da45c",
+      "archive_sha256": "3cdb3c35a126a47db39d06b754f9a43c345a028b682cbaf0c4c328025268e9f1"
+    },
+    {
+      "original_path": "/tmp/symaira-pr794-cec81-ci-follow/windows-watch.stderr",
+      "archive": "windows-watch.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    }
+  ]
+}

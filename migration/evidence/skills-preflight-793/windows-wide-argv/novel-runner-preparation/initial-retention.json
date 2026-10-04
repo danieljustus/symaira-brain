@@ -1,0 +1,82 @@
+{
+  "scope": "uncompiled Python preparation failure before portable args transport correction",
+  "files": [
+    {
+      "original": "/tmp/symaira-skills794-novel-preparation-initial/build_go.py",
+      "tracked": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/build_go.py.gz",
+      "sha256": "9f3efb8051e24288aa8ad13aa692531212e8320c67487d98364a9292af08a292",
+      "bytes": 11300,
+      "roundtrip_verified": true
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-preparation-initial/build_parent.py",
+      "tracked": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/build_parent.py.gz",
+      "sha256": "6a864a01aa8f3e9e74934ada473906d6cb27a339b6e57fe03bc8f606d4ea01bc",
+      "bytes": 7865,
+      "roundtrip_verified": true
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-preparation-initial/compare.py",
+      "tracked": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/compare.py.gz",
+      "sha256": "7e61896f02c55012ab78754e09be848efb299c59961d19c7f2bea79ffff38d86",
+      "bytes": 8605,
+      "roundtrip_verified": true
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-preparation-initial/novel.py",
+      "tracked": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/novel.py.gz",
+      "sha256": "e2d786841c03a00d9e35882c092369ab21f9a3fa06214f5c4e8553436415a064",
+      "bytes": 12272,
+      "roundtrip_verified": true
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-preparation-initial/receipt.json",
+      "tracked": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/receipt.json.gz",
+      "sha256": "c221f9ab35d3a96eb6b94662ab5510012f45910f79fc6126f77bc86eae16c483",
+      "bytes": 1346,
+      "roundtrip_verified": true
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-preparation-initial/stderr",
+      "tracked": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/stderr.gz",
+      "sha256": "80d3f2fcf76660d82e264648b9c14eedaa2f68143ef95380c90a66bbe4c36461",
+      "bytes": 2247,
+      "roundtrip_verified": true
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-preparation-initial/stdout",
+      "tracked": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/stdout.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "roundtrip_verified": true
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-preparation-initial/test_build_go.py",
+      "tracked": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/test_build_go.py.gz",
+      "sha256": "e4499998fd4e1cec76c18321c4c00bc6384cd48cea237f115e96d40ba36db278",
+      "bytes": 3318,
+      "roundtrip_verified": true
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-preparation-initial/test_novel.py",
+      "tracked": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/test_novel.py.gz",
+      "sha256": "5f52c43c39ab02e06ced63ca486baedc7725c1df9f05f1a328a7c696e11f5c9e",
+      "bytes": 3507,
+      "roundtrip_verified": true
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-preparation-initial/verify_control.py",
+      "tracked": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/verify_control.py.gz",
+      "sha256": "205cec23997fdc1c517447ccadfa6160c761b92c06995134b087c985ed2fb55e",
+      "bytes": 795,
+      "roundtrip_verified": true
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-preparation-initial/verify_novel_control.py",
+      "tracked": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/verify_novel_control.py.gz",
+      "sha256": "8ebce334025726e9af10552b89545467d204e8d161889beca52e22cc2d36beba",
+      "bytes": 1062,
+      "roundtrip_verified": true
+    }
+  ]
+}

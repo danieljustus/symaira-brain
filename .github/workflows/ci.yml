@@ -588,6 +588,53 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Frozen Go and native Windows wide Skills argv acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          owned_root="$RUNNER_TEMP"
+          if command -v cygpath >/dev/null 2>&1; then
+            owned_root="$(cygpath -u "$owned_root")"
+          fi
+          owned="$owned_root/skills-wide-argv"
+          mkdir -p "$owned"
+          go_binary="$owned/symbrain-go.exe"
+          python3 -m unittest discover -s scripts/skills-argv-oracle -p test_build_go.py -v
+          python3 scripts/skills-argv-oracle/build_go.py --prepare-module-cache --out "$go_binary" --receipt "$owned/go-build.json" --go-cache "$(go env GOCACHE)" --module-cache "$(go env GOMODCACHE)"
+          python3 scripts/skills-argv-oracle/compare.py --go "$go_binary" --rust target/debug/symbrain.exe --out "$owned/process.json"
+          for control in flag-input quoted-value normalization; do
+            if python3 scripts/skills-argv-oracle/compare.py --go "$go_binary" --rust target/debug/symbrain.exe --out "$owned/$control.json" --negative-control "$control"; then
+              echo "Skills argv input control unexpectedly passed: $control" >&2
+              exit 1
+            else
+              [[ "$?" == 1 ]]
+            fi
+            python3 scripts/skills-argv-oracle/verify_control.py "$owned/$control.json" "$control"
+          done
+          python3 -m unittest discover -s scripts/skills-argv-oracle -p test_novel.py -v
+          python3 scripts/skills-argv-oracle/build_parent.py --current target/debug/symbrain.exe --target target --saved-current "$owned/current.exe" --parent "$owned/parent-01f.exe" --receipt "$owned/parent-build.json"
+          python3 scripts/skills-argv-oracle/novel.py --go "$go_binary" --rust "$owned/current.exe" --parent "$owned/parent-01f.exe" --parent-proof "$owned/parent-build.json" --out "$owned/novel.json"
+          for control in flag-input parent-input; do
+            if python3 scripts/skills-argv-oracle/novel.py --go "$go_binary" --rust "$owned/current.exe" --parent "$owned/parent-01f.exe" --parent-proof "$owned/parent-build.json" --out "$owned/novel-$control.json" --negative-control "$control"; then
+              echo "Supplemental Skills input control unexpectedly passed: $control" >&2
+              exit 1
+            else
+              [[ "$?" == 1 ]]
+            fi
+            python3 scripts/skills-argv-oracle/verify_novel_control.py "$owned/novel-$control.json" "$control"
+          done
+
+      - name: Preserve actual native Windows Skills argv observations
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: skills-wide-argv-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/skills-wide-argv/*.json
+            ${{ runner.temp }}/skills-wide-argv/*.exe
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Native Go/Rust activity validation acceptance
         shell: bash
         run: scripts/activity-validation-oracle/run.sh "$RUNNER_TEMP/activity-validation-767.json"
