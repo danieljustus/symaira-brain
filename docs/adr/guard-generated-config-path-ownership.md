@@ -179,3 +179,18 @@ vectors retained as an artifact. This is prepared source, not a local Windows
 execution or proof that no other runtime issue exists. Fresh native3/protected
 acceptance and different-author review remain required. No production, frozen
 Go, corpus, threshold or existing assertion is weakened.
+
+
+Root independently approves dcada002's bounded test preparation after full
+source review:709 protected production/frozen/Cargo/script paths remain exact
+against27da, all seven original archives roundtrip, and all existing admission,
+warning, ownership and readonly assertions remain. The original exact327583B
+Windows job proves healthy exit1; its missing-Hermes report row is a source
+prediction because the old assertion discarded child streams. The new actual
+Windows control preserves errno2 versus3 classification and captures complete
+child output. Whole workspace formatter/actionlint pass. No fresh compiler or
+nativeWindows observation is claimed for this successor. Prior full Root
+Guard acceptance and229 binding checks remain attached to their own immutable
+source; actual current-head native-three-OS/protected CI is required before
+merging. Root independent lint27da and fixturedcada reviews are retained under
+windows-fixtures-a114/root-independent.
