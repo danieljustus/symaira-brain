@@ -49,3 +49,15 @@ runtime method and full independent source review are mandatory; this source
 merge cannot declare SDK, SQLite, native Windows/macOS, product, protected CI,
 #649, #758 or #765 acceptance. Actual Go/source/read/write/output/state gates,
 all historical constructors/reopens and all inherited controls remain required.
+
+## Exact inherited-output profile admission
+
+After Root verified the complete different-author d559 Source review and its
+thirty proof bodies, we normally integrate that exact reviewed Source helper.
+The integrated CLI/Core/main/output/exit tuple is byte-identical Source d07; no
+additional mixed or wildcard profile is introduced. Both complete Python helper
+and portable preparation-test bodies are exactly d559. The runtime comparison,
+immutable corpus and parent-image archive/build/restoration requirements remain
+unchanged. Source fixtures serve portable source tests only. Actual native
+process parity and the newly bound thirty-two plus seventeen stage method remain
+unexecuted for this integrated source.

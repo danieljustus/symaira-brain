@@ -29,7 +29,13 @@ MEMORY_HASHES = {
     MAIN: "3e94f3f39e073b32151350707bc0416a3d01bba19903a0e5ad4a2cb47cf4fff7",
 }
 GUARD_CORE_HASH = "4df524358123e41fb3a7959de3dd3064e477dd738bf8b36faf4cec961dc77d75"
+SOURCE_HASHES = {
+    **MEMORY_HASHES,
+    CLI: "b4fa7a9df8312bb72cca213bb26b867537f8f916fa30ea6c140e446a57c3f2e2",
+    CORE: GUARD_CORE_HASH,
+}
 PROFILES = {
+    "source806-d07": SOURCE_HASHES,
     "original-parent": PARENT_HASHES,
     "memory803-5a4": MEMORY_HASHES,
     "guard805-cdb": {**PARENT_HASHES, CORE: GUARD_CORE_HASH},
@@ -72,7 +78,7 @@ def qualify(reference, parent, current):
     if len(profiles) != 1:
         raise ValueError("inherited output current owner needs explicit source review")
     parent_blocks = early_blocks(parent[CLI], False)
-    current_blocks = early_blocks(current[CLI], current_hashes[CLI] == MEMORY_HASHES[CLI])
+    current_blocks = early_blocks(current[CLI], current_hashes[CLI] in (MEMORY_HASHES[CLI], SOURCE_HASHES[CLI]))
     if parent_blocks != current_blocks:
         raise ValueError("inherited early output path differs from actual parent source")
     return {

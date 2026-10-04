@@ -1,7 +1,6 @@
 """Portable preparation tests; these do not execute a Go or Rust CLI."""
 import json
 import os
-import subprocess
 from pathlib import Path
 import tempfile
 import unittest
@@ -77,17 +76,27 @@ class NovelPreparation(unittest.TestCase):
 
 
 def sources(reference):
-    return {
-        name: subprocess.check_output(["git", "show", f"{reference}:{name}"], cwd=ROOT)
-        for name in OWNER_PATHS
-    }
+    # Pure source snapshots from the reviewed Git commits. Actual runtime
+    # provenance still reads its real immutable Git parent and binary receipt.
+    root = ROOT / "migration/evidence/skills-output-owner-806/reviewed-profile-sources"
+    manifest = json.loads((root / "source-bindings.json").read_bytes())
+    rows = [row for row in manifest["files"] if row["reference"] == reference]
+    if {row["path"] for row in rows} != set(OWNER_PATHS):
+        raise ValueError("reviewed owner fixture set differs")
+    result = {}
+    for row in rows:
+        raw = (root / row["fixture"]).read_bytes()
+        if digest(raw) != row["sha256"]:
+            raise ValueError("reviewed owner fixture bytes differ")
+        result[row["path"]] = raw
+    return result
 
 
 class InheritedOutputSource(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.parent = sources(PARENT_REFS[0])
-        cls.current = {name: (ROOT / name).read_bytes() for name in OWNER_PATHS}
+        cls.current = sources("a111084cfc34f03b1f58f934cd2420c603e017c3")
 
     def test_actual_windows_parent_owner_and_allowed_reference_names(self):
         # Unix runtime must still bind its actual parent independently. This
@@ -147,6 +156,35 @@ class InheritedOutputSource(unittest.TestCase):
                         {**self.current, "extra": b"unrelated"}]:
             with self.assertRaisesRegex(ValueError, "source set differs"):
                 qualify(PARENT_REFS[0], parent, changed)
+
+
+class SourceOutputSource(unittest.TestCase):
+    def setUp(self):
+        self.parent = sources(PARENT_REFS[0])
+        self.current = {name: (ROOT / name).read_bytes() for name in OWNER_PATHS}
+
+    def test_actual_source_profile_has_equal_early_return_and_explicit_owner(self):
+        result = qualify(PARENT_REFS[0], self.parent, self.current)
+        self.assertEqual(result["qualification"], "source806-d07")
+        self.assertFalse(result["go_parity_claim"])
+        self.assertEqual(early_blocks(self.parent[CLI], False), early_blocks(self.current[CLI], True))
+        self.assertNotEqual(self.parent[CLI], self.current[CLI])
+
+    def test_source_owner_mutations_and_foreign_main_are_refused(self):
+        for name in OWNER_PATHS:
+            changed = {**self.current, name: self.current[name] + b"\n// unreviewed source owner\n"}
+            with self.subTest(name=name), self.assertRaisesRegex(ValueError, "explicit source review"):
+                qualify(PARENT_REFS[0], self.parent, changed)
+        with self.assertRaisesRegex(ValueError, "explicit source review"):
+            qualify(PARENT_REFS[0], self.parent, {**self.current, MAIN: self.parent[MAIN]})
+
+    def test_changed_output_or_exit_is_not_an_inherited_qualification(self):
+        for before, after in [(b'return Some(exit::USAGE);', b'return Some(exit::OK);'),
+                              (b'writeln!(stderr, "symbrain: {err}")', b'writeln!(stdout, "changed: {err}")')]:
+            self.assertIn(before, self.current[CLI])
+            changed = {**self.current, CLI: self.current[CLI].replace(before, after, 1)}
+            with self.subTest(before=before), self.assertRaisesRegex(ValueError, "explicit source review"):
+                qualify(PARENT_REFS[0], self.parent, changed)
 
 
 if __name__ == "__main__":

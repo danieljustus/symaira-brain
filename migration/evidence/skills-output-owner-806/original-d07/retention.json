@@ -1,0 +1,612 @@
+{
+  "source": "d4e65c2df053f5fc92f7f067c4d3f80da66e352e",
+  "parent": "d07c5daae8b68f053f9c215434ed8e5bc64c6baa",
+  "archive": "source-native-inputs-and-checks.tar.gz",
+  "archive_bytes": 1599983,
+  "archive_sha256": "7392c1819d6f7b759307864b814da4b924da13245b30a4addfc185fe82e43553",
+  "all_member_bytes_mode_uid_gid_nsmtime_roundtrip_exact": true,
+  "members": [
+    {
+      "member": "actionlint.log",
+      "original": "/workspace/review-proof/source806-output-owner-successor/actionlint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129098200566038
+    },
+    {
+      "member": "complete-current-source-map.json",
+      "original": "/workspace/review-proof/source806-output-owner-successor/complete-current-source-map.json",
+      "bytes": 1264870,
+      "sha256": "5c03d991c3978f940eca006483bfbd38c239103e7df2261f2c137d99d3e143a9",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129044388879292
+    },
+    {
+      "member": "complete-original-native-source-bindings.json",
+      "original": "/workspace/review-proof/source806-output-owner-successor/complete-original-native-source-bindings.json",
+      "bytes": 790253,
+      "sha256": "84d73b160b54e433426713b8b93b54066684f53c9aa0436b58cf128f1f5103f7",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128868847495048
+    },
+    {
+      "member": "full-reviewed-helper-authority-bindings.json",
+      "original": "/workspace/review-proof/source806-output-owner-successor/full-reviewed-helper-authority-bindings.json",
+      "bytes": 15648,
+      "sha256": "298f839c796c1fd6621498f4468c6b096eec05875d5e8fe0d7333a71cd2459db",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129177498071440
+    },
+    {
+      "member": "independent-source-controls.json",
+      "original": "/workspace/review-proof/source806-output-owner-successor/independent-source-controls.json",
+      "bytes": 1973,
+      "sha256": "4f37da6b6f08121dcb45f440b4add1ac3f85391bf1215359e1824f5515a2241e",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129352991072808
+    },
+    {
+      "member": "independent-source-controls.log",
+      "original": "/workspace/review-proof/source806-output-owner-successor/independent-source-controls.log",
+      "bytes": 107,
+      "sha256": "4a768c26c889b02a36f66872e6182cc24bf77173c7eef7dcd4eb1fbe550fc26e",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129352991072808
+    },
+    {
+      "member": "independent-source-controls.py",
+      "original": "/workspace/review-proof/source806-output-owner-successor/independent-source-controls.py",
+      "bytes": 2059,
+      "sha256": "f8f35257c400110ebb9d08d74454ad94ebcc1f465de94be7272508bd9cfbf741",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129352938004428
+    },
+    {
+      "member": "original-full-git-tree.bin",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-full-git-tree.bin",
+      "bytes": 643310,
+      "sha256": "5c05056a681762df2d36ba33993124f6197d1612f9be5b3d5f988d02ac367c64",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128485235026385
+    },
+    {
+      "member": "original-native-three-control-validation.log",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-native-three-control-validation.log",
+      "bytes": 207,
+      "sha256": "3bdbbc36355991001b0686796eb3789640bc858e83ce0f8edd98175cc74bd4e5",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129098272568261
+    },
+    {
+      "member": "original-owner-sources/01f41906e2e021db3c693ec97617bb701e4dad8a/rust/symbrain-cli/src/lib.rs",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/01f41906e2e021db3c693ec97617bb701e4dad8a/rust/symbrain-cli/src/lib.rs",
+      "bytes": 15619,
+      "sha256": "decf6229c8fd9295893c456ca15dc8ab20ab79390988de051591bc80f21aa9ca",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585575836779
+    },
+    {
+      "member": "original-owner-sources/01f41906e2e021db3c693ec97617bb701e4dad8a/rust/symbrain-cli/src/main.rs",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/01f41906e2e021db3c693ec97617bb701e4dad8a/rust/symbrain-cli/src/main.rs",
+      "bytes": 325,
+      "sha256": "e6dd8093173873f5eddab3d213368e90aacad77092d03c37d5b5b1ff3426a7a6",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585578089955
+    },
+    {
+      "member": "original-owner-sources/01f41906e2e021db3c693ec97617bb701e4dad8a/rust/symbrain-core/src/exit.rs",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/01f41906e2e021db3c693ec97617bb701e4dad8a/rust/symbrain-core/src/exit.rs",
+      "bytes": 906,
+      "sha256": "7f5efe594eb3bc7f5957a12bfd9642e07846fc71cff181647884d781ae66d2ea",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585583710812
+    },
+    {
+      "member": "original-owner-sources/01f41906e2e021db3c693ec97617bb701e4dad8a/rust/symbrain-core/src/lib.rs",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/01f41906e2e021db3c693ec97617bb701e4dad8a/rust/symbrain-core/src/lib.rs",
+      "bytes": 215,
+      "sha256": "9e9e2d32f3cd59f939544e213a7cd05a585513d4ea8962016ca8b3cdb40d6cc4",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585579813751
+    },
+    {
+      "member": "original-owner-sources/01f41906e2e021db3c693ec97617bb701e4dad8a/rust/symbrain-core/src/output.rs",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/01f41906e2e021db3c693ec97617bb701e4dad8a/rust/symbrain-core/src/output.rs",
+      "bytes": 5953,
+      "sha256": "a8e01e7d19d7eadc8f71d1634166691294b0223959248b0a8fc50b1d8264856a",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585581942869
+    },
+    {
+      "member": "original-owner-sources/d07c5daae8b68f053f9c215434ed8e5bc64c6baa/rust/symbrain-cli/src/lib.rs",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/d07c5daae8b68f053f9c215434ed8e5bc64c6baa/rust/symbrain-cli/src/lib.rs",
+      "bytes": 13835,
+      "sha256": "b4fa7a9df8312bb72cca213bb26b867537f8f916fa30ea6c140e446a57c3f2e2",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585561980602
+    },
+    {
+      "member": "original-owner-sources/d07c5daae8b68f053f9c215434ed8e5bc64c6baa/rust/symbrain-cli/src/main.rs",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/d07c5daae8b68f053f9c215434ed8e5bc64c6baa/rust/symbrain-cli/src/main.rs",
+      "bytes": 222,
+      "sha256": "3e94f3f39e073b32151350707bc0416a3d01bba19903a0e5ad4a2cb47cf4fff7",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585564136501
+    },
+    {
+      "member": "original-owner-sources/d07c5daae8b68f053f9c215434ed8e5bc64c6baa/rust/symbrain-core/src/exit.rs",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/d07c5daae8b68f053f9c215434ed8e5bc64c6baa/rust/symbrain-core/src/exit.rs",
+      "bytes": 906,
+      "sha256": "7f5efe594eb3bc7f5957a12bfd9642e07846fc71cff181647884d781ae66d2ea",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585570074488
+    },
+    {
+      "member": "original-owner-sources/d07c5daae8b68f053f9c215434ed8e5bc64c6baa/rust/symbrain-core/src/lib.rs",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/d07c5daae8b68f053f9c215434ed8e5bc64c6baa/rust/symbrain-core/src/lib.rs",
+      "bytes": 314,
+      "sha256": "4df524358123e41fb3a7959de3dd3064e477dd738bf8b36faf4cec961dc77d75",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585565889110
+    },
+    {
+      "member": "original-owner-sources/d07c5daae8b68f053f9c215434ed8e5bc64c6baa/rust/symbrain-core/src/output.rs",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/d07c5daae8b68f053f9c215434ed8e5bc64c6baa/rust/symbrain-core/src/output.rs",
+      "bytes": 5953,
+      "sha256": "a8e01e7d19d7eadc8f71d1634166691294b0223959248b0a8fc50b1d8264856a",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585568429200
+    },
+    {
+      "member": "original-owner-sources/d07c5daae8b68f053f9c215434ed8e5bc64c6baa/scripts/skills-argv-oracle/novel.py",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/d07c5daae8b68f053f9c215434ed8e5bc64c6baa/scripts/skills-argv-oracle/novel.py",
+      "bytes": 12389,
+      "sha256": "a0f4a07f3e4cb22082f0b20c4ffb8750b5f22282d6586d8be2ba0852ac9baaee",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585571948911
+    },
+    {
+      "member": "original-owner-sources/d07c5daae8b68f053f9c215434ed8e5bc64c6baa/scripts/skills-argv-oracle/test_novel.py",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/d07c5daae8b68f053f9c215434ed8e5bc64c6baa/scripts/skills-argv-oracle/test_novel.py",
+      "bytes": 3843,
+      "sha256": "ce4c432c98d724bdb777faea056bdaa191d1806cef09759f9304ffde9c357f88",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585573925770
+    },
+    {
+      "member": "original-owner-sources/faa8f12f6c77aad694003c9fa8c5e66d94919ba0/rust/symbrain-cli/src/lib.rs",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/faa8f12f6c77aad694003c9fa8c5e66d94919ba0/rust/symbrain-cli/src/lib.rs",
+      "bytes": 15619,
+      "sha256": "decf6229c8fd9295893c456ca15dc8ab20ab79390988de051591bc80f21aa9ca",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585588559792
+    },
+    {
+      "member": "original-owner-sources/faa8f12f6c77aad694003c9fa8c5e66d94919ba0/rust/symbrain-cli/src/main.rs",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/faa8f12f6c77aad694003c9fa8c5e66d94919ba0/rust/symbrain-cli/src/main.rs",
+      "bytes": 325,
+      "sha256": "e6dd8093173873f5eddab3d213368e90aacad77092d03c37d5b5b1ff3426a7a6",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585590255285
+    },
+    {
+      "member": "original-owner-sources/faa8f12f6c77aad694003c9fa8c5e66d94919ba0/rust/symbrain-core/src/exit.rs",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/faa8f12f6c77aad694003c9fa8c5e66d94919ba0/rust/symbrain-core/src/exit.rs",
+      "bytes": 906,
+      "sha256": "7f5efe594eb3bc7f5957a12bfd9642e07846fc71cff181647884d781ae66d2ea",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585595748600
+    },
+    {
+      "member": "original-owner-sources/faa8f12f6c77aad694003c9fa8c5e66d94919ba0/rust/symbrain-core/src/lib.rs",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/faa8f12f6c77aad694003c9fa8c5e66d94919ba0/rust/symbrain-core/src/lib.rs",
+      "bytes": 215,
+      "sha256": "9e9e2d32f3cd59f939544e213a7cd05a585513d4ea8962016ca8b3cdb40d6cc4",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585591937529
+    },
+    {
+      "member": "original-owner-sources/faa8f12f6c77aad694003c9fa8c5e66d94919ba0/rust/symbrain-core/src/output.rs",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-owner-sources/faa8f12f6c77aad694003c9fa8c5e66d94919ba0/rust/symbrain-core/src/output.rs",
+      "bytes": 5953,
+      "sha256": "a8e01e7d19d7eadc8f71d1634166691294b0223959248b0a8fc50b1d8264856a",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585593570998
+    },
+    {
+      "member": "original-retention.json",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-retention.json",
+      "bytes": 14247,
+      "sha256": "975465006a54bef355e66745ccb0145acf719d54a6332f1d56cc90233c22f093",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128485218545320
+    },
+    {
+      "member": "original-reviewed-inherited_output.py",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-reviewed-inherited_output.py",
+      "bytes": 3847,
+      "sha256": "fc0a99fdd733b6f585505639d7cb9637e4669ed0c5b6d2b06e5dfd7a8c989407",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128751673007279
+    },
+    {
+      "member": "original-source806-native-artifact-receipt.json",
+      "original": "/workspace/review-proof/source806-output-owner-successor/original-source806-native-artifact-receipt.json",
+      "bytes": 3826,
+      "sha256": "0af668101d81045b412df2fcdc1bad378835767664f812a62515c71af9d67d11",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128858435975823
+    },
+    {
+      "member": "originals/review-proof/root-ci-1535-job-111460150997.content.json",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/review-proof/root-ci-1535-job-111460150997.content.json",
+      "bytes": 750968,
+      "sha256": "3153696e9a4433cb0e3890124d08ba3a088c1fcd0b74c08f8af4d6c54694e3a6",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128071920832460
+    },
+    {
+      "member": "originals/review-proof/root-ci-1535-job-111460150997.log",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/review-proof/root-ci-1535-job-111460150997.log",
+      "bytes": 701110,
+      "sha256": "d65d1404c9784302d53f5eb816341cf627d5c0686ba389f00fcbdc114b6fc85f",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128091429037328
+    },
+    {
+      "member": "originals/review-proof/root-source806-doc-markdown-independent/all4867-original-bodies.json.gz",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/review-proof/root-source806-doc-markdown-independent/all4867-original-bodies.json.gz",
+      "bytes": 250592,
+      "sha256": "a0d0ba3132151b4e09c121ba6700f4fe7f71ead98a256719d48fb45f206f0f68",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125020341835471
+    },
+    {
+      "member": "originals/review-proof/root-source806-doc-markdown-independent/independent-review.md",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/review-proof/root-source806-doc-markdown-independent/independent-review.md",
+      "bytes": 1019,
+      "sha256": "bce0fd51e64615710e3f5893831fd053488c72a5491af9a076b97f2342f0eb47",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125020342168073
+    },
+    {
+      "member": "originals/review-proof/root-source806-doc-markdown-independent/receipt.json",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/review-proof/root-source806-doc-markdown-independent/receipt.json",
+      "bytes": 853,
+      "sha256": "e9005a6c8e93838e816f0ac33658131e7c9add3125a8e85b07d831a75168a45b",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791125020342072979
+    },
+    {
+      "member": "originals/review-proof/source806-job-doc-markdown/handoff.json",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/review-proof/source806-job-doc-markdown/handoff.json",
+      "bytes": 4838,
+      "sha256": "a21cb514abd1143c57230d5285ace0f421394159b7b723675a25bb336ceada74",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791124762333504433
+    },
+    {
+      "member": "originals/review-proof/source806-job-doc-markdown/handoff.md",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/review-proof/source806-job-doc-markdown/handoff.md",
+      "bytes": 2049,
+      "sha256": "88bcb300d473e4937a5539457c1001099169ebf4846bfacea543ab27e395f4a1",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791124762344272631
+    },
+    {
+      "member": "originals/review-proof/usage-memory803-coherent-source-independent/independent-review-receipt.json",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/review-proof/usage-memory803-coherent-source-independent/independent-review-receipt.json",
+      "bytes": 15814,
+      "sha256": "eba2f340c47f37091ae11d5518f5f534577b8d4c6d428e4b2588df1b8a9be67f",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791127673561148402
+    },
+    {
+      "member": "originals/review-proof/usage-memory803-coherent-source-independent/independent-review.md",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/review-proof/usage-memory803-coherent-source-independent/independent-review.md",
+      "bytes": 10785,
+      "sha256": "153430754e494542d01af20a9acdfea8fc46de05b7b2a8c380f8ed7f510a2deb",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791127673512159521
+    },
+    {
+      "member": "originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/check.log.gz",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/check.log.gz",
+      "bytes": 398,
+      "sha256": "bd192509af46d2d97dff395a97dd31f8d533008c8dd008326602100a5508f887",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791124709716413156
+    },
+    {
+      "member": "originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/check.py.gz",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/check.py.gz",
+      "bytes": 1266,
+      "sha256": "9a9a0905e7ca5aaedcdab7a851474fc70ca4f32c8b9c96420cbc3a8bf7313859",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791124709716699880
+    },
+    {
+      "member": "originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/checks.json.gz",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/checks.json.gz",
+      "bytes": 398,
+      "sha256": "bd192509af46d2d97dff395a97dd31f8d533008c8dd008326602100a5508f887",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791124709716888204
+    },
+    {
+      "member": "originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/complete-original-source-and-native-logs.tar.gz",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/complete-original-source-and-native-logs.tar.gz",
+      "bytes": 121244,
+      "sha256": "b84a982bd6c0eb50605b35fb3da64830a288bf9db7111641eb276a9162c9b9fa",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791124554988270719
+    },
+    {
+      "member": "originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/diff.stderr.gz",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/diff.stderr.gz",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791124709717024420
+    },
+    {
+      "member": "originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/diff.stdout.gz",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/diff.stdout.gz",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791124709717138162
+    },
+    {
+      "member": "originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/preserve.py",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/preserve.py",
+      "bytes": 2920,
+      "sha256": "2d8d75e42f9bd9094a8a7e5ce3b77f9de75523a53188e1ee8c617d1b9d4f7db0",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791124600755631158
+    },
+    {
+      "member": "originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/preserve.py.gz",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/preserve.py.gz",
+      "bytes": 1492,
+      "sha256": "bdea2ffd55fcefca52d7b5031065f5498900c9d3d796e651fc91a0b63a9da6a9",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791124709717346798
+    },
+    {
+      "member": "originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/retention.json",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/retention.json",
+      "bytes": 7144,
+      "sha256": "42e12ad5f50b7e68a09c9e21206da1e153998b4739df812c96aa8757925092f4",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791124555038078552
+    },
+    {
+      "member": "originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/rustfmt.stderr.gz",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/rustfmt.stderr.gz",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791124709717521171
+    },
+    {
+      "member": "originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/rustfmt.stdout.gz",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/rustfmt.stdout.gz",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791124709717650306
+    },
+    {
+      "member": "originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/source-check-retention.json",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/source-check-retention.json",
+      "bytes": 3166,
+      "sha256": "c7dae59509e11bcd5dcf308d61bcb1116422bf82770af02c81a7e406dffd7d0f",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791124709717813603
+    },
+    {
+      "member": "originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/whole-original-parent-modes-blobs.json.gz",
+      "original": "/workspace/review-proof/source806-output-owner-successor/originals/symaira-source806-job-doc-markdown/migration/evidence/setup-source-windows-job/doc-markdown-ci/whole-original-parent-modes-blobs.json.gz",
+      "bytes": 162277,
+      "sha256": "12077982c239791e885dfe6367b70196dfb196cb3b880b2d6671ff1b1e35ebbe",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791124555037596103
+    },
+    {
+      "member": "previous-full4867-map-verification.json",
+      "original": "/workspace/review-proof/source806-output-owner-successor/previous-full4867-map-verification.json",
+      "bytes": 270,
+      "sha256": "3ba2bb4f267aee68c7958f443bfa8be2326f3c136e5956bb9760845064df7dfb",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585441064528
+    },
+    {
+      "member": "pure-source-tests-final.log",
+      "original": "/workspace/review-proof/source806-output-owner-successor/pure-source-tests-final.log",
+      "bytes": 3319,
+      "sha256": "960b623fb53e51e89bb39a6d5f8e96dae29f1b313f936f8aac4d8dbe4e303585",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129098184565544
+    },
+    {
+      "member": "pure-source-tests-first.log",
+      "original": "/workspace/review-proof/source806-output-owner-successor/pure-source-tests-first.log",
+      "bytes": 3319,
+      "sha256": "b519256b7dbe9b088bbf3dbd8632d55403ac00174be8627b4ec888bf75edd5de",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128757310025449
+    },
+    {
+      "member": "retain.py",
+      "original": "/workspace/review-proof/source806-output-owner-successor/retain.py",
+      "bytes": 2080,
+      "sha256": "1e811402e50107c3f3fce67309e44fa8f6b0157477d5c6180bb2b25f23fa0660",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129438327071089
+    },
+    {
+      "member": "scoped-diffcheck.log",
+      "original": "/workspace/review-proof/source806-output-owner-successor/scoped-diffcheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129098208566286
+    },
+    {
+      "member": "source-verification.json",
+      "original": "/workspace/review-proof/source806-output-owner-successor/source-verification.json",
+      "bytes": 690,
+      "sha256": "9385dd6533b3cf389a63442af3c33cc25e1cb3dc22081896199cbf24073afdbf",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129044512099793
+    },
+    {
+      "member": "source-verification.log",
+      "original": "/workspace/review-proof/source806-output-owner-successor/source-verification.log",
+      "bytes": 193,
+      "sha256": "12a960a955434e009c3624450a7fe95296a9a6048f4dfe007de29d2233529e13",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129044512099793
+    },
+    {
+      "member": "verify-source.py",
+      "original": "/workspace/review-proof/source806-output-owner-successor/verify-source.py",
+      "bytes": 6217,
+      "sha256": "1de531cf6ae5b4069b62361dd3b4a00ca0b32c8182edff882856e80845fbc27b",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129042738125981
+    },
+    {
+      "member": "whole-successor-diffcheck.log",
+      "original": "/workspace/review-proof/source806-output-owner-successor/whole-successor-diffcheck.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129352992435179
+    }
+  ],
+  "actual_native_PE_ZIP_preserved_external": "/workspace/review-proof/root-source806-d07-windows-wide-originals/receipt.json",
+  "own_SDK_compiler_SQL_product_Target_cache_ports": 0
+}

@@ -8,6 +8,13 @@ process/state comparisons remain required. The failed5a4 native Windows run and
 missing-package bootstrap attempt remain retained. This checkpoint is source
 preparation only; full runtime, native-three-OS and protected acceptance remain
 pending. See `docs/adr/memory803-coherent-guard-and-inherited-output-owner.md`.
+Source806's isolated inherited-output successor copies the independently reviewed
+Skills source-qualification helper and adds only the exact current Source owner
+profile. The original native Windows refusal, all earlier failures and real
+parent images remain retained. Actual parent/raw process/state admission and all
+existing corpora/CI/fetch commands are unchanged. This is source preparation only;
+different-author review and fresh native/protected acceptance remain pending.
+See `docs/adr/source806-inherited-global-output-owner.md`.
 
 The migration is deliberately incremental. Go remains the executable oracle
 until every contract row is green. Every oracle command is built from the
