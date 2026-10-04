@@ -144,3 +144,14 @@ Windows/macOS current-head jobs and corrected Doctor parent remain required.
 Normal-merge independently approved Doctor ac81b94/validated58fe50 and main2b6d49f before the next combined-source proof. Resolve only additive .gitattributes/contract-matrix conflicts by preserving both schema exact-log rules and all parent output/native provenance rules and rows; no production conflict is projected away. The earlier Windows inherited Doctor failure remains intact. The complete historical raw-log diff-check reports their original trailing/EOF bytes; retain that failure rather than normalize evidence. New source/documentation whitespace is checked separately from unchanged historical evidence.
 
 This combined source is not yet built or approved. Full affected parent tests, actual schema observations/false-green control and strict checks must run with an explicitly released target, followed by current-head protected/native-three-platform CI. Dependency803 and806 still merge first. This fixes dependency freshness without claiming historical migration backfill/FTS equivalence or closing649 before actual acceptance.
+
+## Current main and reviewed parent preparation
+
+The next isolated source successor normally integrates Main935 and exact
+Memory8035a4f0464/Source806d0b58ab0 parents. Ownership, full original retention,
+CI union and conflict reasons are recorded in
+`649-main935-current-parent-integration.md`. Schema production, original
+comparisons and actual-control assertions remain unchanged. This newly combined
+source is uncompiled and has zero current schema process observations; full
+independent review, allocated fresh acceptance and native three-platform gates
+remain required before publication or issue closure.
