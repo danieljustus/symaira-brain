@@ -16,6 +16,7 @@ for name, original in [('go', go), ('native', native)]:
     original = original.resolve(strict=True)
     destination = output/(name+original.suffix)
     shutil.copyfile(original, destination)
+    shutil.copymode(original, destination)
     raw = original.read_bytes()
     assert destination.read_bytes() == raw, 'actual executable retention failed'
     records.append(dict(role=name, original=str(original), retained=str(destination.resolve()),
