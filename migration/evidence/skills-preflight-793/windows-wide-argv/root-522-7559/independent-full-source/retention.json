@@ -1,0 +1,181 @@
+{
+  "reviewed_source": "7559ba0a4aec8e7baf999c0df3b4e9f330001367",
+  "full_artifacts": [
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-Git-admission.stderr",
+      "retained": "symaira-skills794-novel-independent-Git-admission.stderr.gz",
+      "sha256": "ad02a4399df245cc4c8860e0b2bc6b1c108df270e8c6591d8722cc5b308ca93f",
+      "gzip_sha256": "3b6df4f0e794322e2239bd3b60e133fecd53b5b4e344a238461c4e34a24d0441",
+      "bytes": 664
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-Git-admission.stdout",
+      "retained": "symaira-skills794-novel-independent-Git-admission.stdout.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-actionlint.stderr",
+      "retained": "symaira-skills794-novel-independent-actionlint.stderr.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-actionlint.stdout",
+      "retained": "symaira-skills794-novel-independent-actionlint.stdout.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-archives-first-schema.log",
+      "retained": "symaira-skills794-novel-independent-archives-first-schema.log.gz",
+      "sha256": "d0bfcc6b5557dee64572ca69b63abca1514b1149ccdcbc1ba6dd5758ce3c27b1",
+      "gzip_sha256": "706109b64693df65c17ac888a8b9a8c5e446c538542141ddc5df914976a6bdd5",
+      "bytes": 346
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-archives-first-schema.py.txt",
+      "retained": "symaira-skills794-novel-independent-archives-first-schema.py.txt.gz",
+      "sha256": "e862197a647090bb7054eef177d8c268bdcb29f2f75618407158559197941f2b",
+      "gzip_sha256": "09a7e244a62f4ba4fda72366493c1c122adc52a0a35edfaf296669658446a58f",
+      "bytes": 1756
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-archives.json",
+      "retained": "symaira-skills794-novel-independent-archives.json.gz",
+      "sha256": "bd71f8a7be92ba549cecce3e865cea2a4bd95244443d8ac9235173cfccffa5f5",
+      "gzip_sha256": "4326b2620804543668cf91f5a20a478c614cd60968f6b2b4ed0c88e9aace5cae",
+      "bytes": 251282
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-archives.log",
+      "retained": "symaira-skills794-novel-independent-archives.log.gz",
+      "sha256": "9606987015f2ae199f3a941eec3243dfca244f318e06305b2e450e948c97c41c",
+      "gzip_sha256": "9d999ec473787d3c2680869e343675e3d143f41850af224df08545c3fa3db261",
+      "bytes": 350
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-archives.py",
+      "retained": "symaira-skills794-novel-independent-archives.py.gz",
+      "sha256": "c3820e929e0a1e6f136ce61059e96387c1510af590083f211b59dc4fb1ff9503",
+      "gzip_sha256": "809de11c8d44eb52e0ffbb7449f47e32112f91230613a25946bd9033640f989a",
+      "bytes": 1905
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-archives.stderr",
+      "retained": "symaira-skills794-novel-independent-archives.stderr.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-existing-process.json",
+      "retained": "symaira-skills794-novel-independent-existing-process.json.gz",
+      "sha256": "e7a5eb463cd36e991abb3ea1822b05160114b1b908191422d9b91e80e8b2e817",
+      "gzip_sha256": "731918edc0b8404c81ccaf109fb58341f275cd19a7a8d2253cd5240228526a33",
+      "bytes": 2384
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-existing-process.log",
+      "retained": "symaira-skills794-novel-independent-existing-process.log.gz",
+      "sha256": "73ffcf68eca79da955a5a70d0bd9d7afc10c0db1c83823fa476db99cd49d7e35",
+      "gzip_sha256": "20200bbeb5ef89040d29ec1502a84b83d152da1c3cc73638ed7b99e16b473c49",
+      "bytes": 174
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-existing-process.py",
+      "retained": "symaira-skills794-novel-independent-existing-process.py.gz",
+      "sha256": "5dbf2638c5bb816e3e4baf01e199160050bc6608121511e2d6f3dae834ebf278",
+      "gzip_sha256": "cb4991b91761a2e93775bca87f8eb24b937ee98b68c2c5ee3cb2a9c3f16e7669",
+      "bytes": 3715
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-existing-process.stderr",
+      "retained": "symaira-skills794-novel-independent-existing-process.stderr.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-plan.json",
+      "retained": "symaira-skills794-novel-independent-plan.json.gz",
+      "sha256": "535ff0fc833d6898d55857933c71daa0eebe956500f69c873fd095a58e4767ba",
+      "gzip_sha256": "464e7def95c0c323802a5fefcb033d922b88c55d1423fed03703ed3b49362da5",
+      "bytes": 7388
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-plan.log",
+      "retained": "symaira-skills794-novel-independent-plan.log.gz",
+      "sha256": "dc0f3bae71fa7f09faea93e70d819d1541b30ec673040f95429495527203877b",
+      "gzip_sha256": "dad3eb81dc1262ee7b52cc1430aa787629cc6d13206b5dbb0bc32db26bca9653",
+      "bytes": 735
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-plan.py",
+      "retained": "symaira-skills794-novel-independent-plan.py.gz",
+      "sha256": "f93e7bb26883e52d815ebcc289cc827d5a6269efcc12a0ba9edec8e0a1bbb465",
+      "gzip_sha256": "859071c9ad25233f43e8a6af6f2ae6bfbc0ddd380319f2a585c1631bfcf524ce",
+      "bytes": 4142
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-plan.stderr",
+      "retained": "symaira-skills794-novel-independent-plan.stderr.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-preparation.stderr",
+      "retained": "symaira-skills794-novel-independent-preparation.stderr.gz",
+      "sha256": "00061644fbda16ecfe15821c732ae06ef709f211495e0b2cb64f141d0b443a26",
+      "gzip_sha256": "10f8960adfc4e2cb55767b870972318be11d97b7e1846b7f1079f2236983d47c",
+      "bytes": 662
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-preparation.stdout",
+      "retained": "symaira-skills794-novel-independent-preparation.stdout.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-provenance.json",
+      "retained": "symaira-skills794-novel-independent-provenance.json.gz",
+      "sha256": "7bf76b5687e7ee5b2a3fd666c046e218756d405ddb5e01bf0dbc27995c9f5ba7",
+      "gzip_sha256": "05594e4f94604ac338512cd011cd340b6e84795b297771b778c743a842c8042b",
+      "bytes": 88851
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-provenance.log",
+      "retained": "symaira-skills794-novel-independent-provenance.log.gz",
+      "sha256": "beaf27ecb4291012f408b425e2881f703ec39a98accd1b72a813cd7b820f645f",
+      "gzip_sha256": "d8f267034a92b689143e3af0b03c11479fc958647928453201a3d129f1567b5a",
+      "bytes": 497
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-provenance.py",
+      "retained": "symaira-skills794-novel-independent-provenance.py.gz",
+      "sha256": "a9f5efba54f4083c7c6450447ee2215264dcf339ac7058222b5bb93749175527",
+      "gzip_sha256": "084fa5d2da7ece838fe00da45520885ad0f2522098255331fa8d2f00be21c386",
+      "bytes": 4710
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-provenance.stderr",
+      "retained": "symaira-skills794-novel-independent-provenance.stderr.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-skills794-novel-independent-review.md",
+      "retained": "symaira-skills794-novel-independent-review.md.gz",
+      "sha256": "7978e76af10783bc507fe5800edddc227379e9a33bbd6f1e7856f66b1f0fa15d",
+      "gzip_sha256": "2bbffcc7892e262f6df893833481ae73baaafabd2dff445e539bfa424626348f",
+      "bytes": 11776
+    }
+  ],
+  "native_acceptance": false
+}

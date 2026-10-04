@@ -111,3 +111,33 @@ process gates and different-author review remain required. No Cargo target,
 current Rust product or TLS process was allocated/executed for this source-only
 checkpoint; no cross-platform/native acceptance, performance or full #768 closure
 is claimed. Main 5e was normally integrated without Go/Rust production changes.
+
+## Normal main integration after PR794
+
+Normally integrate main `9353520a34c5819c7d0a6cd58d3bfaa2b22b045b`
+into the immutable prepared Retry source `3797d40`. Preserve the approved main
+Skills byte parser, local Windows WTF8 admission, bounded marker handling and
+its native workflow; retain the existing Activity and Usage owners and all
+additive Usage workflow gates. The only content conflict is the contract
+matrix: preserve both Usage rows and the main Skills row rather than treating
+an independent subsystem contract as a replacement. No production file,
+dependency, case, comparator, assertion or control is edited to resolve it.
+
+Before this integration, the complete original Root source review, its receipt
+and all preliminary source/projection logs were losslessly retained under
+`main935-source-only/original-root-review-3797`. All 503 original source bodies
+were checked against immutable Git and the original clean worktree. The original
+3797 worktree and its historical checkpoint remain unchanged. That review is
+source-only evidence for 3797, not approval of this merge or runtime acceptance.
+
+The integration checks are pure corpus construction, immutable source binding,
+Python/Bash syntax, Rust formatting and workflow lint. The unchanged original
+1600 scalar/1164 TLS definitions, additive 1681/1356 definitions and seven
+intended actual-process controls remain prepared. No compiler, SDK probe,
+product process, TLS peer, Cargo target or port is allocated in this integration
+step. Fresh affected-package/strict checks, all original gates, both Retry
+modes, different-author review and exact-head native Linux/macOS/Windows
+process acceptance are still required before publication or cutover. Historical
+SDK81 observations and parent355 acceptance retain their original source and
+platform identities; neither is promoted to this source's runtime evidence.
+Full #768 and the broader credential-gated fallback remain open.

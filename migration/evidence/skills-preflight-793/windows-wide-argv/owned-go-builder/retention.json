@@ -1,0 +1,90 @@
+{
+  "source": "4a541e1ee837390a4ba88fa45906a77c23f55278",
+  "parent": "522ce5d7db8c45182cc30a1eb8b8d9272d8949d0",
+  "scope": "source-only successor with actual LIGHT SDK/Git controls; Root owns full native CLI review",
+  "originals": [
+    {
+      "original": "/tmp/symaira-skills794-owned-go-source-tests.log",
+      "sha256": "094648b677b7ee9703d4a5b8bd05c6cae06aa760eb341f3881bfad6b1f91db2d",
+      "bytes": 664,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/00-symaira-skills794-owned-go-source-tests.log.gz",
+      "gzip_sha256": "d78f5c07b9feacbae87740e4fe188cf8ab388df72d16aa91a45a8171abd50745"
+    },
+    {
+      "original": "/tmp/symaira-skills794-owned-go-actionlint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/01-symaira-skills794-owned-go-actionlint.log.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-skills794-owned-go-4a541-sdk/build.json",
+      "sha256": "b8494f33279f7ff21cc4c2318dedf32873db8f3afbd4d7287e64c1a62953fa5d",
+      "bytes": 3500612,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/02-build.json.gz",
+      "gzip_sha256": "25b04d8f3159249aae2470f9634b2ea57b14aaa857d9d57dfeeffa04d536d2e5"
+    },
+    {
+      "original": "/tmp/symaira-skills794-owned-go-4a541-sdk/build.log",
+      "sha256": "dbbe079f5aa7f94b9fb1d8b421a8bdf9ad07d29d5cc89344ac5da82c0e970b58",
+      "bytes": 99,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/03-build.log.gz",
+      "gzip_sha256": "458b0ea3844b80d05447bd31250c5a97e06c1cae9524d1c6dc1eba1a2210f718"
+    },
+    {
+      "original": "/tmp/symaira-skills794-owned-go-4a541-linked-control/receipt.json",
+      "sha256": "72de08562881fe6ae2f53ce1df7acc8a0863255801cc869776162c2c79d19517",
+      "bytes": 6333,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/04-receipt.json.gz",
+      "gzip_sha256": "003a9e86d4396571f0f28e7fdb999635b5336fbed91273d6dfdd222752159cc1"
+    },
+    {
+      "original": "/tmp/symaira-skills794-owned-go-linked-control.py",
+      "sha256": "7f88b9925dce5ea5c22cd2a32353c39ab5132955b25b64a9571babf9454ee3a5",
+      "bytes": 2983,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/05-symaira-skills794-owned-go-linked-control.py.gz",
+      "gzip_sha256": "8d0c3b6f454f596af3199b2733542fddd2a1e0ab22914bddc9ab8bd41b722eb2"
+    },
+    {
+      "original": "/tmp/symaira-skills794-owned-go-linked-control.log",
+      "sha256": "1e7c251b56050ece851ed04aa3f031b053ab3024d50ffd01f8d1396c4799440b",
+      "bytes": 230,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/06-symaira-skills794-owned-go-linked-control.log.gz",
+      "gzip_sha256": "955891aa53fbb0abe320e70c913f706e6bfa86d94639a315915c18e26f57ad97"
+    },
+    {
+      "original": "/workspace/oracles/symaira-skills794-owned-go-4a541-binaries/receipt.json",
+      "sha256": "f8562dde9f6484a3074956770877649f829988a03c665b4128d794d1ea849284",
+      "bytes": 1210,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/07-receipt.json.gz",
+      "gzip_sha256": "7cbe479ba71fb7a465960fd59088309b688b97072ef12bfc3d410e0f7b3e482c"
+    },
+    {
+      "original": "/tmp/symaira-skills794-owned-go-preserve.py",
+      "sha256": "e22569c78c7ff8f46ca499c2532dc4936956cfe135c6e7963268b5ea8c1f99ac",
+      "bytes": 3555,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/08-symaira-skills794-owned-go-preserve.py.gz",
+      "gzip_sha256": "421a8c7d35010ac468f9030d42ee9ad7443f28cbffef41e04ee1f70aeca2445b"
+    }
+  ],
+  "all_existing_Rust_Cargo_Go_bodies_unchanged": true,
+  "originals_byte_identical": {
+    "scripts/run-go-oracle.sh": "01aa265389f54a0ba71e75bf015d9d0048cd3996729daa21960694690fa479fb",
+    "scripts/skills-argv-oracle/compare.py": "7e61896f02c55012ab78754e09be848efb299c59961d19c7f2bea79ffff38d86",
+    "scripts/skills-argv-oracle/verify_control.py": "205cec23997fdc1c517447ccadfa6160c761b92c06995134b087c985ed2fb55e",
+    "Cargo.toml": "982fdf67af364bb689371f888d79e4662bcbd2d7088dec0d7a2aa85f308a0155",
+    "Cargo.lock": "95657aeeba4f12cde301afa9aaf6b01b021b0d7892ed4cad6907a1db390785c0",
+    "go.mod": "cd360aeb19457381d88720aa1dd6b62e493c44ac5a4d0b5c5172561ecd4e9d0c",
+    "go.sum": "fb3ec3bc981beb60ae88833cab55335ce3880e68b70a8ad1e931cb02de955aab",
+    "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-main31-raw-flag-process.json": "7adc21a0034b2c9240f90fd776a89828d36aedae13c39356cdd33e5bdc66e579"
+  },
+  "four_actual_Git_admission_tests": "PASS",
+  "actionlint": "PASS",
+  "SDK_positive": "actual offline go1.26.7, privateHOME, p2/modreadonly, cached integrity, exact2438 before/after maps, pinned cleanVCS",
+  "linked_control": "actual old build succeeds withoutVCS; unmodified comparator exit1 AssertionError before anycandidate case; full commands/errorbytes retained",
+  "archive": "/workspace/oracles/symaira-skills794-owned-go-4a541-binaries/receipt.json",
+  "archive_sha256": "f8562dde9f6484a3074956770877649f829988a03c665b4128d794d1ea849284",
+  "nativeWindows_claim": false,
+  "native315_312_fullreview_pending": true,
+  "no_Cargo_target_or_ports_used": true
+}

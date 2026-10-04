@@ -1,0 +1,103 @@
+[
+  {
+    "branch": "handoff/20261003-skills-457-partial",
+    "head": "cc12e8aeb9fbfcf73d7db9984c4d0dc92f494298",
+    "base": "dfd55866a80e2c45509abf6f6bc17b897707d659",
+    "status": "historical-incomplete-not-mergeable",
+    "files": [
+      {
+        "path": "migration/contract-matrix.csv",
+        "sha256": "1e4626df4bb27cf69f38b26fa5a11020879b27301e2600f40f88178e614c80b6",
+        "bytes": 21938
+      },
+      {
+        "path": "rust/symbrain-skills/src/install/base.rs",
+        "sha256": "59f52f4710a011ed207d4191c8bc09f39cbece056aa106a860b85c29f10b30c9",
+        "bytes": 13276
+      },
+      {
+        "path": "rust/symbrain-skills/src/install/lock.rs",
+        "sha256": "9a8760d63722c25ac8f0cde4da3361421b2f4874efa1c68ef9fbc7c0430bddf6",
+        "bytes": 5198
+      },
+      {
+        "path": "rust/symbrain-skills/src/install/ops.rs",
+        "sha256": "d3c4ad2803675049b701f3bffbe75bb01cc097bfd0d85da12969cb15f22e12b6",
+        "bytes": 13236
+      },
+      {
+        "path": "rust/symbrain-skills/src/install/replace.rs",
+        "sha256": "5773c467f1bd37f45e1beb2d785fd823f5e82244150da1b529f10e7ed4d1ccdf",
+        "bytes": 13903
+      },
+      {
+        "path": "rust/symbrain-skills/src/install/status.rs",
+        "sha256": "971c5764dfcc6ff0e1f7c845bbf0df4c801030274fd460ace0168b1e94f02fee",
+        "bytes": 9968
+      },
+      {
+        "path": "rust/symbrain-skills/src/install/uninstall.rs",
+        "sha256": "f710399bbf36c8731a79104a6e1006a44c28877eaf623ef43bf582b2664a05d6",
+        "bytes": 6524
+      },
+      {
+        "path": "rust/symbrain-skills/tests/concurrent_installs.rs",
+        "sha256": "8f414e9d83e84064adc7f75936ebb0342788acb4075eb9f4e6515abaeaeb40eb",
+        "bytes": 7306
+      }
+    ]
+  },
+  {
+    "branch": "handoff/20261003-skills-476-interrupted",
+    "head": "2703b37c757234f0172b641a2d8b0bd4590c8313",
+    "base": "7a37e601c34195e30d9297b737573d58eabea55c",
+    "status": "historical-incomplete-not-mergeable",
+    "files": [
+      {
+        "path": "rust/symbrain-cli/src/skills_cli.rs",
+        "sha256": "642466a274e3c698cdf6c8c9cc2291fc5fe9df8f4811f245e0a7889777b98933",
+        "bytes": 42004
+      },
+      {
+        "path": "rust/symbrain-skills/src/library.rs",
+        "sha256": "758b8c83fc8589b99cba73148fabbcd499e664dbaf72167c1549b7669eeb1e56",
+        "bytes": 6773
+      },
+      {
+        "path": "rust/symbrain-skills/src/load.rs",
+        "sha256": "d32a83928a8d82896821239e96dbdfd5d3ca259a010bb4c3319da11995c290c4",
+        "bytes": 18938
+      },
+      {
+        "path": "rust/symbrain-skills/src/load_helpers.rs",
+        "sha256": "e1b47ba76ebb65076e1a5d076c43c10cc80f6928d094096ba616ced1a8270e8a",
+        "bytes": 3449
+      },
+      {
+        "path": "rust/symbrain-skills/src/metadata.rs",
+        "sha256": "ee2ffd411f78c5267372f01b30378b36660f8c43edb5757707376fd759f28756",
+        "bytes": 14425
+      },
+      {
+        "path": "rust/symbrain-skills/src/model.rs",
+        "sha256": "4ec4c5c579995a691420265c247ea7ba206b4f82ac4340198c8dd70af6613b46",
+        "bytes": 7342
+      },
+      {
+        "path": "rust/symbrain-skills/src/model_parse.rs",
+        "sha256": "3eacef0b08c3fc692de405aeb20259604599b7976175b61149cdba095934e4b0",
+        "bytes": 12583
+      },
+      {
+        "path": "rust/symbrain-skills/src/runner.rs",
+        "sha256": "31203b010f5af61c3669880b53bc85cb6fc62f08b3b153bf382c3ca2685307b1",
+        "bytes": 16886
+      }
+    ]
+  },
+  {
+    "branch": "handoff/20261003-skills-457-worker",
+    "head": "4e368f94b66ace1c0d677436e9129b09a5fe203d",
+    "status": "historical-worker-version-superseded-by-789"
+  }
+]
