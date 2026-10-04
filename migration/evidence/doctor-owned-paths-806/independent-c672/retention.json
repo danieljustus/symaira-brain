@@ -1,0 +1,182 @@
+{
+  "full_review": {
+    "reviewer": "Root different author",
+    "source": "c6723ab21a3bfe73e84d715695b3d5ea45c661d1",
+    "result": "BOUNDED APPROVE executable-path harness fix",
+    "fresh_process_cases": 9,
+    "fresh_fix_cases": 4,
+    "fresh_embedded_cases": 27,
+    "actual_mutant_groups": 3,
+    "actual_rejected_cases": 6,
+    "unmodified_control_observations": 21,
+    "runner_prefix_cases": 4,
+    "current_source_hashes_checked": {
+      "process": 200,
+      "fix": 200,
+      "embedded": 200,
+      "controls": 200
+    },
+    "frozen_go_hashes_checked": {
+      "process": 108,
+      "fix": 108,
+      "embedded": 108,
+      "controls": 108
+    },
+    "actual_go_cli_sha256": "933700975d043f76b019b9e7c922f58f735b66b4bb1f45ddb133f74b1e751f6e",
+    "actual_go_cli_bytes": 22090846,
+    "go_cli_archive": "/workspace/oracles/symaira-doctor806-owned-paths-root-go/933700975d043f76b019b9e7c922f58f735b66b4bb1f45ddb133f74b1e751f6e.gz",
+    "go_cli_roundtrip_verified": true,
+    "actual_rust_reused_archives": [
+      {
+        "role": "symbrain",
+        "actual_sha256": "256e5efe3d05b9fe5c8afa41d9821a13ee2dee32de9719a4acd7e79364fde8ee",
+        "archive": "/workspace/oracles/symaira-doctor765-sixth-independent-fb6-binaries/256e5efe3d05b9fe5c8afa41d9821a13ee2dee32de9719a4acd7e79364fde8ee.gz",
+        "compiled_source": "58fe50b9d275f0cc8a7ab6a8252a6595a58e52ab",
+        "scope": "reused actual reviewed compiled executable; unchanged production, no new compilation claim"
+      },
+      {
+        "role": "doctor_embedded_output",
+        "actual_sha256": "50f7528fe3a505bfc7997a0a4a11750b39aaff93fa693279624d129f856bdf4b",
+        "archive": "/workspace/oracles/symaira-doctor765-sixth-independent-fb6-binaries/50f7528fe3a505bfc7997a0a4a11750b39aaff93fa693279624d129f856bdf4b.gz",
+        "compiled_source": "58fe50b9d275f0cc8a7ab6a8252a6595a58e52ab",
+        "scope": "reused actual reviewed compiled executable; unchanged production, no new compilation claim"
+      }
+    ],
+    "production_source_byte_identical_to58": true,
+    "test_only_coverage4line_successor_preserved": true,
+    "fresh_rust_compilation": false,
+    "ephemeral_go_fixture_callers": "actual source/hash/complete observations retained in reports; their removed transient ELF payloads are not claimed archived",
+    "original_provider_coverage_success": "37174759811/job111354979402:37645/46353=81.21%, unchanged80floor/scope; decoded216403byte log retained",
+    "native_windows_macOS": "required current-head CI, Linux proof/source-only cross checks do not waive it",
+    "separate_windows_source_timeout": "25s outer replay timeout remains unresolved; no production or timeout change"
+  },
+  "raw_proof_files": [
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-controls.json",
+      "retained": "symaira-doctor806-root-owned-controls.json.gz",
+      "bytes": 2465462,
+      "sha256": "da0b8feab9012231108b9ef978e70aac05a735fd725618ef321e7d7de459a15f",
+      "compressed_sha256": "dfd637fd2f22d6e30b6da994190bb7021b21651c5f17d652dc7b4326da900d50"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-controls.log",
+      "retained": "symaira-doctor806-root-owned-controls.log.gz",
+      "bytes": 82,
+      "sha256": "0800002a7b93ed12e57d463f59378c8666bf28f93ea18081340a77abc32b4505",
+      "compressed_sha256": "2c16faad9a746d185ae44a7e7e704051383636a75fb12aef6b243d8aa3b38144"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-embedded.json",
+      "retained": "symaira-doctor806-root-owned-embedded.json.gz",
+      "bytes": 512490,
+      "sha256": "3d1f90e5b11949ad0baf86913893649857b5fe20d03d023cdd02a80a0b8240b6",
+      "compressed_sha256": "9ea4033c8ae140c99e3353d06c5f0baf64bec434b1b1e0079cdce87a44695e05"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-embedded.log",
+      "retained": "symaira-doctor806-root-owned-embedded.log.gz",
+      "bytes": 991,
+      "sha256": "7e260d63a485bd882c6a74050c5d6de749cb5b93bc3f8435e7dbe4684988a235",
+      "compressed_sha256": "52f1690eef07133431828e9b96cb7fb44248449aa6856ed12538f56c2ab49dce"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-fix.json",
+      "retained": "symaira-doctor806-root-owned-fix.json.gz",
+      "bytes": 83595,
+      "sha256": "d249c5eafff43c53c7960b72d92bcb97f6f043a3fc6372c033b77981c64620ed",
+      "compressed_sha256": "b5835de77f52bdf01071994aeee44f430f520173ab310571cc4c2f5aee9b121b"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-fix.log",
+      "retained": "symaira-doctor806-root-owned-fix.log.gz",
+      "bytes": 197,
+      "sha256": "6a1961162d04af3dd2422441bb9027ec0cab65b2b7fb7b0d49a7b7f5f15d4d0e",
+      "compressed_sha256": "b473a1fc19b9f8663efdabe7845262c5d75e2899df8976eb259d21928e7e89cf"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-go-build.log",
+      "retained": "symaira-doctor806-root-owned-go-build.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-process.json",
+      "retained": "symaira-doctor806-root-owned-process.json.gz",
+      "bytes": 786856,
+      "sha256": "8b05394d6524d055c75f458787c8fc35eae10f78c8ec4deb334d780fdd89ae38",
+      "compressed_sha256": "2ea36c8d624676c434e24b56b2924ac7aa05af86b2881f66cc75e2534cbbd9af"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-process.log",
+      "retained": "symaira-doctor806-root-owned-process.log.gz",
+      "bytes": 377,
+      "sha256": "794b9c1cd8c5b32e4ea073cd8f6f9570c2abb515d083fd5f035600da3e69f354",
+      "compressed_sha256": "75d4bd6b7d32b5c379b989b0f58fb7ef1caf9395c9a5ef0e3a0e3a2d5957eff2"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-publish-review.py",
+      "retained": "symaira-doctor806-root-owned-publish-review.py.gz",
+      "bytes": 4289,
+      "sha256": "f84b2e37abdb4d6b337cf55e1b1fd9b2a2167b5a9784254e15e87880b7de0760",
+      "compressed_sha256": "6402bea808475a0684202c932474901cc7941c9e62e233524be8a99c56742866"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-review-receipt.json",
+      "retained": "symaira-doctor806-root-owned-review-receipt.json.gz",
+      "bytes": 2564,
+      "sha256": "ac0a05a032b6ad45a35d5d65f9afdb8ae2c61da05efe65b7ef9b72a84c18f91e",
+      "compressed_sha256": "7d25d173b24fcd08d57dd51f47a6ca9f830874dfbb57c55cc7bf2b1b9ef06d7b"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-runtime-bindings.json",
+      "retained": "symaira-doctor806-root-owned-runtime-bindings.json.gz",
+      "bytes": 3608,
+      "sha256": "25f19c26e7dd91030591111308031d2aa2fcb62a7800278cf833f048b774a380",
+      "compressed_sha256": "c1865217d31fe622591b6a98771935df61bc8e8dd6243eeb14a4f23969b3c026"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-runtime-corrected.log",
+      "retained": "symaira-doctor806-root-owned-runtime-corrected.log.gz",
+      "bytes": 50,
+      "sha256": "4567a41e82a18bd1138bff6c36b97865ad1b48490159803006ce72438562c76e",
+      "compressed_sha256": "5ead73a2ca9352d6b6c52f042424ebc1d4dfbafb1f0c1f277dd35b344bd23ae6"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-runtime-corrected.py",
+      "retained": "symaira-doctor806-root-owned-runtime-corrected.py.gz",
+      "bytes": 3536,
+      "sha256": "27fcecaa0a89b2859fcbaf5d6eb2bdb47f10e559cb2dc16d861bfca481192581",
+      "compressed_sha256": "3808412ee08139670f4f6990c9b630c820d2553c5300d8e87a34293f170e5a66"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-runtime.log",
+      "retained": "symaira-doctor806-root-owned-runtime.log.gz",
+      "bytes": 2346,
+      "sha256": "0e9fdbb67099663773d1fd892e43d96f5181b6d05bd22d9893ad5e39ae4e5f41",
+      "compressed_sha256": "b7c32150bbbc4a0d6f0524fc347c44603b3de2cc5625c9dba0d8823959aa4552"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-owned-runtime.py",
+      "retained": "symaira-doctor806-root-owned-runtime.py.gz",
+      "bytes": 3463,
+      "sha256": "9da79993888fffbfc5c9425a6f250705df34f7aab8de9f455674565d2373ea59",
+      "compressed_sha256": "af17e520c386cd151c644874b31ffb5dc7ac273706968ef4b681207e0dc79409"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-runner-path-prefix.json",
+      "retained": "symaira-doctor806-root-runner-path-prefix.json.gz",
+      "bytes": 2226,
+      "sha256": "d5dc1d3945be19055d49314c99ae6c6cfa3e0d9be6d167f6c7c85b861c2bbdc0",
+      "compressed_sha256": "19675bac5e9e9adc690dda003d2eeebd73710cf25613a7d1839fcc60e3d54df8"
+    },
+    {
+      "original": "/workspace/oracles/symaira-doctor806-owned-paths-root-go/receipt.json",
+      "retained": "receipt.json.gz",
+      "bytes": 2564,
+      "sha256": "ac0a05a032b6ad45a35d5d65f9afdb8ae2c61da05efe65b7ef9b72a84c18f91e",
+      "compressed_sha256": "7d25d173b24fcd08d57dd51f47a6ca9f830874dfbb57c55cc7bf2b1b9ef06d7b"
+    }
+  ],
+  "compiled_elf_storage": "reuse original verified source58 Rust archives; fresh Go CLI payload retained outside Git. Removed transient helper Go ELFs have hashes/source/raw observations, not archived payload claims."
+}
