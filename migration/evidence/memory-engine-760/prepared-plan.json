@@ -1,0 +1,14 @@
+{
+  "status": "PREPARED_NOT_EXECUTED",
+  "case_count": 60,
+  "by_operation": {
+    "pattern": 18,
+    "summary": 10,
+    "tokens": 9,
+    "aging": 13,
+    "budget": 10
+  },
+  "floating_point_comparison": "exact IEEE-754 bit string, no tolerance or NaN canonicalization",
+  "original_functions": "real frozen Go functions including private enforceBudget via test-package helper; native production engine functions",
+  "current_outputs": null
+}

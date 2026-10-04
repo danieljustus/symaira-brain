@@ -1,0 +1,581 @@
+{
+  "scope": "source census; no compiled/runtime acceptance",
+  "source": "a30bba8bbd52323fa5e000207f1c391d576ac86c",
+  "functions": [
+    {
+      "path": "internal/memory/aging/aging.go",
+      "line": 34,
+      "declaration": "func DefaultConfig() Config {"
+    },
+    {
+      "path": "internal/memory/aging/aging.go",
+      "line": 44,
+      "declaration": "func FromConfig(cfg config.AgingConfig) Config {"
+    },
+    {
+      "path": "internal/memory/aging/aging.go",
+      "line": 62,
+      "declaration": "func DecayFactor(cfg Config, createdAt time.Time, lastAccess *time.Time, accessCount int64, now time.Time) float64 {"
+    },
+    {
+      "path": "internal/memory/aging/aging.go",
+      "line": 120,
+      "declaration": "func (r *Report) String() string {"
+    },
+    {
+      "path": "internal/memory/aging/aging.go",
+      "line": 140,
+      "declaration": "func Run(database *db.DB, cfg Config, now time.Time, dryRun bool) (*Report, error) {"
+    },
+    {
+      "path": "internal/memory/conflict/conflict.go",
+      "line": 70,
+      "declaration": "func (v Verdict) String() string {"
+    },
+    {
+      "path": "internal/memory/conflict/conflict.go",
+      "line": 127,
+      "declaration": "func NewChecker(database *db.DB, cfg config.ConflictConfig) *Checker {"
+    },
+    {
+      "path": "internal/memory/conflict/conflict.go",
+      "line": 138,
+      "declaration": "func (c *Checker) SetVerdictProvider(p VerdictProvider) {"
+    },
+    {
+      "path": "internal/memory/conflict/conflict.go",
+      "line": 142,
+      "declaration": "func normalize(cfg config.ConflictConfig) config.ConflictConfig {"
+    },
+    {
+      "path": "internal/memory/conflict/conflict.go",
+      "line": 164,
+      "declaration": "func (c *Checker) Check(ctx context.Context, m *db.Memory) ([]Resolution, error) {"
+    },
+    {
+      "path": "internal/memory/conflict/conflict.go",
+      "line": 333,
+      "declaration": "func policyWinner(newM, cand *db.Memory) (newWins bool, rule string) {"
+    },
+    {
+      "path": "internal/memory/conflict/conflict.go",
+      "line": 354,
+      "declaration": "func SupersedeDetail(winnerID, winnerActor, loserActor, rule string, similarity float32) string {"
+    },
+    {
+      "path": "internal/memory/conflict/conflict.go",
+      "line": 376,
+      "declaration": "func ConflictPendingDetail(candidateID, candidateActor string, similarity float32) string {"
+    },
+    {
+      "path": "internal/memory/conflict/llm.go",
+      "line": 17,
+      "declaration": "func verdictResponseSchema() map[string]any {"
+    },
+    {
+      "path": "internal/memory/conflict/llm.go",
+      "line": 54,
+      "declaration": "func NewLLMVerdictProvider(cfg config.ConflictConfig) *LLMVerdictProvider {"
+    },
+    {
+      "path": "internal/memory/conflict/llm.go",
+      "line": 63,
+      "declaration": "func (p *LLMVerdictProvider) Verdicts(ctx context.Context, pairs []Pair) ([]Verdict, error) {"
+    },
+    {
+      "path": "internal/memory/conflict/llm.go",
+      "line": 104,
+      "declaration": "func parseVerdictResponse(raw string, want int) ([]Verdict, error) {"
+    },
+    {
+      "path": "internal/memory/consolidation/engine.go",
+      "line": 53,
+      "declaration": "func NewEngine(database *db.DB, embeddings *extractor.EmbeddingsGenerator, llmURL, llmModel, llmProvider string, piiEnabled bool, promptMode string, llmTimeout time.Duration) *Engine {"
+    },
+    {
+      "path": "internal/memory/consolidation/engine.go",
+      "line": 81,
+      "declaration": "func reportScopeFailures(failures []scopeFailure, succeeded int) error {"
+    },
+    {
+      "path": "internal/memory/consolidation/engine.go",
+      "line": 94,
+      "declaration": "func (eng *Engine) RunConsolidation(ctx context.Context, scopeFilter string, dryRun bool) ([]ScopeChangeSummary, error) {"
+    },
+    {
+      "path": "internal/memory/consolidation/engine.go",
+      "line": 290,
+      "declaration": "func (eng *Engine) RunConsolidationForMemories(ctx context.Context, memories []*db.Memory, dryRun bool) ([]ScopeChangeSummary, error) {"
+    },
+    {
+      "path": "internal/memory/consolidation/engine.go",
+      "line": 474,
+      "declaration": "func buildMemoryPrompt(scope string, memories []*db.Memory) (string, []memoryIndex) {"
+    },
+    {
+      "path": "internal/memory/consolidation/engine.go",
+      "line": 491,
+      "declaration": "func mapLLMIDxToUUID(refs []string, indices []memoryIndex) []string {"
+    },
+    {
+      "path": "internal/memory/consolidation/engine.go",
+      "line": 507,
+      "declaration": "func (eng *Engine) consolidateWithLLM(ctx context.Context, scope string, memories []*db.Memory) (*ConsolidationResult, error) {"
+    },
+    {
+      "path": "internal/memory/consolidation/engine.go",
+      "line": 548,
+      "declaration": "func parseJSONResponse(rawResponse string) (*ConsolidationResult, error) {"
+    },
+    {
+      "path": "internal/memory/consolidation/engine.go",
+      "line": 609,
+      "declaration": "func validateConsolidationResult(res *ConsolidationResult) error {"
+    },
+    {
+      "path": "internal/memory/consolidation/journal.go",
+      "line": 17,
+      "declaration": "func buildRunSummary(summaries []ScopeChangeSummary) *db.RunSummary {"
+    },
+    {
+      "path": "internal/memory/consolidation/journal.go",
+      "line": 47,
+      "declaration": "func (eng *Engine) journalRun(dryRun bool, summaries []ScopeChangeSummary) {"
+    },
+    {
+      "path": "internal/memory/consolidation/journal.go",
+      "line": 83,
+      "declaration": "func (eng *Engine) UndoLastConsolidation(ctx context.Context) (string, error) {"
+    },
+    {
+      "path": "internal/memory/consolidation/journal.go",
+      "line": 164,
+      "declaration": "func hardDeleteMemoryTx(tx *sql.Tx, id string) error {"
+    },
+    {
+      "path": "internal/memory/consolidation/prompts.go",
+      "line": 26,
+      "declaration": "func ValidPromptFamily(family string) bool {"
+    },
+    {
+      "path": "internal/memory/consolidation/prompts.go",
+      "line": 34,
+      "declaration": "func BuildSystemPrompt(family string) string {"
+    },
+    {
+      "path": "internal/memory/consolidation/prompts.go",
+      "line": 49,
+      "declaration": "func BuildUserPrompt(family, scope, promptContent string) string {"
+    },
+    {
+      "path": "internal/memory/consolidation/prompts.go",
+      "line": 84,
+      "declaration": "func fmtUserPromptChat(scope, promptContent string) string {"
+    },
+    {
+      "path": "internal/memory/consolidation/prompts.go",
+      "line": 115,
+      "declaration": "func ResolveFamily(memories []*db.Memory, configuredDefault string) string {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 50,
+      "declaration": "func (d DegradationLevel) String() string {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 184,
+      "declaration": "func WithSummarizer(s *summarizer.ExtractiveSummarizer) AssemblerOption {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 222,
+      "declaration": "func NewAssembler(database *db.DB, embeddings *extractor.EmbeddingsGenerator, cfg *config.ContextConfig) *Assembler {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 239,
+      "declaration": "func (a *Assembler) WithTokenEstimator(fn TokenEstimator) *Assembler {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 247,
+      "declaration": "func (a *Assembler) estimate(text string) int {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 255,
+      "declaration": "func (a *Assembler) WithDegradationConfig(cfg *config.DegradationConfig) *Assembler {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 263,
+      "declaration": "func (a *Assembler) WithDeltaPackConfig(cfg *config.DeltaPackConfig) *Assembler {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 271,
+      "declaration": "func (a *Assembler) WithProfileLayerConfig(cfg *config.ProfileLayerConfig) *Assembler {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 279,
+      "declaration": "func (a *Assembler) WithSessionContextConfig(cfg *config.SessionContextConfig) *Assembler {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 289,
+      "declaration": "func (a *Assembler) WithRecallReceipts(enabled bool) *Assembler {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 297,
+      "declaration": "func (a *Assembler) WithFullConfig(cfg *config.Config) *Assembler {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 306,
+      "declaration": "func (a *Assembler) SetWorkingMemoryConfig(cfg *config.WorkingMemoryConfig) {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 318,
+      "declaration": "func (a *Assembler) receiptFor(m *db.Memory) string {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 325,
+      "declaration": "func (a *Assembler) fillRetrievalWithDegradation(results []db.SearchResult, budget int) []AssembledPiece {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 420,
+      "declaration": "func scoreBand(score float32) int {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 426,
+      "declaration": "func degradeRetrievalBlock(results []db.SearchResult, budget int) []AssembledPiece {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 457,
+      "declaration": "func computeSnapshot(sessionID string, ctx *AssembledContext) ContentHashSnapshot {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 486,
+      "declaration": "func (s ContentHashSnapshot) Key() string {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 492,
+      "declaration": "func computeDelta(sessionID string, prev, curr ContentHashSnapshot) *DeltaPack {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 545,
+      "declaration": "func (a *Assembler) maybeSnapshot(sessionID string, ctx *AssembledContext) *DeltaPack {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 593,
+      "declaration": "func (a *Assembler) Snapshots(sessionID string) []ContentHashSnapshot {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 608,
+      "declaration": "func (a *Assembler) synthesizeProfile(sessionID string) *SynthesizedProfile {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 654,
+      "declaration": "func (a *Assembler) loadUserPreferences() (StaticProfileInfo, error) {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 679,
+      "declaration": "func formatProfile(profile *SynthesizedProfile, cfg *config.ProfileLayerConfig) string {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 735,
+      "declaration": "func (a *Assembler) buildSessionContextSourceLinks(sessionID string) ([]ExpandableSource, error) {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 793,
+      "declaration": "func formatSessionContext(sources []ExpandableSource) string {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 818,
+      "declaration": "func (a *Assembler) Assemble(query string, sessionText string, sessionID string) (*AssembledContext, error) {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 958,
+      "declaration": "func (a *Assembler) ProduceSessionSummary(sessionText string, sessionID string) (string, error) {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 973,
+      "declaration": "func (a *Assembler) retrieveRelevant(query string, tokenBudget int) ([]db.SearchResult, error) {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 997,
+      "declaration": "func extractWorkingContext(sessionText string, maxTurns int) string {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 1012,
+      "declaration": "func estimateTokens(text string) int {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 1021,
+      "declaration": "func formatSingleResult(r db.SearchResult, level DegradationLevel) string {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 1036,
+      "declaration": "func formatRetrievalResults(results []db.SearchResult) string {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 1048,
+      "declaration": "func formatWorkingMemories(mems []*db.Memory) string {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 1061,
+      "declaration": "func summarizeContent(content string, maxLen int) string {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 1077,
+      "declaration": "func truncateText(text string, maxLen int) string {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 1085,
+      "declaration": "func extractFirstLine(content string) string {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 1100,
+      "declaration": "func extractLanguage(text string) string {"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 1111,
+      "declaration": "func extractTimezone(text string) string {"
+    },
+    {
+      "path": "internal/memory/contextassembler/budget.go",
+      "line": 17,
+      "declaration": "func DefaultTokenEstimator(text string) int {"
+    },
+    {
+      "path": "internal/memory/contextassembler/budget.go",
+      "line": 58,
+      "declaration": "func (a *Assembler) enforceBudget(ctx *AssembledContext, maxTokens int) {"
+    },
+    {
+      "path": "internal/memory/discovery/discovery.go",
+      "line": 53,
+      "declaration": "func Scan(providers []Provider, now time.Time) Response {"
+    },
+    {
+      "path": "internal/memory/entity/resolve.go",
+      "line": 45,
+      "declaration": "func Normalize(s string) string {"
+    },
+    {
+      "path": "internal/memory/entity/resolve.go",
+      "line": 62,
+      "declaration": "func IsPII(s string) bool {"
+    },
+    {
+      "path": "internal/memory/entity/resolve.go",
+      "line": 88,
+      "declaration": "func BestMatch(hints []string, name string, aliases []string) (kind MatchKind, reason string, score float64, ok bool) {"
+    },
+    {
+      "path": "internal/memory/entity/resolve.go",
+      "line": 116,
+      "declaration": "func reasonFor(kind MatchKind, hint, target string) string {"
+    },
+    {
+      "path": "internal/memory/extractor/embeddings.go",
+      "line": 53,
+      "declaration": "func NewEmbeddingsGenerator(cfg *config.Config) *EmbeddingsGenerator {"
+    },
+    {
+      "path": "internal/memory/extractor/embeddings.go",
+      "line": 90,
+      "declaration": "func (eg *EmbeddingsGenerator) GenerateVector(text string) EmbeddingResult {"
+    },
+    {
+      "path": "internal/memory/extractor/embeddings.go",
+      "line": 97,
+      "declaration": "func (eg *EmbeddingsGenerator) GenerateVectorWithContext(ctx context.Context, text string) EmbeddingResult {"
+    },
+    {
+      "path": "internal/memory/extractor/embeddings.go",
+      "line": 138,
+      "declaration": "func (eg *EmbeddingsGenerator) ActiveBackend() string {"
+    },
+    {
+      "path": "internal/memory/extractor/embeddings.go",
+      "line": 148,
+      "declaration": "func (eg *EmbeddingsGenerator) Dimensions() int {"
+    },
+    {
+      "path": "internal/memory/extractor/embeddings.go",
+      "line": 155,
+      "declaration": "func (eg *EmbeddingsGenerator) MarkOllamaFailed() {"
+    },
+    {
+      "path": "internal/memory/extractor/embeddings.go",
+      "line": 162,
+      "declaration": "func (eg *EmbeddingsGenerator) Metrics() EmbeddingMetrics {"
+    },
+    {
+      "path": "internal/memory/extractor/embeddings.go",
+      "line": 193,
+      "declaration": "func (eg *EmbeddingsGenerator) cacheKey(text string) string {"
+    },
+    {
+      "path": "internal/memory/extractor/embeddings.go",
+      "line": 207,
+      "declaration": "func (eg *EmbeddingsGenerator) ollamaClient() (*llmkit.Client, error) {"
+    },
+    {
+      "path": "internal/memory/extractor/embeddings.go",
+      "line": 243,
+      "declaration": "func ollamaBaseURL(raw string) string {"
+    },
+    {
+      "path": "internal/memory/extractor/embeddings.go",
+      "line": 255,
+      "declaration": "func (eg *EmbeddingsGenerator) queryOllamaWithContext(ctx context.Context, text string) ([]float32, error) {"
+    },
+    {
+      "path": "internal/memory/extractor/embeddings.go",
+      "line": 276,
+      "declaration": "func GenerateLocalHashVector(text string, dimensions int) []float32 {"
+    },
+    {
+      "path": "internal/memory/extractor/embeddings.go",
+      "line": 323,
+      "declaration": "func isStopWord(w string) bool {"
+    },
+    {
+      "path": "internal/memory/extractor/pattern.go",
+      "line": 30,
+      "declaration": "func NewPatternExtractor() *PatternExtractor {"
+    },
+    {
+      "path": "internal/memory/extractor/pattern.go",
+      "line": 58,
+      "declaration": "func (pe *PatternExtractor) ExtractFacts(text string) []Fact {"
+    },
+    {
+      "path": "internal/memory/extractor/pattern.go",
+      "line": 127,
+      "declaration": "func groundEvidence(text, evidenceText, factText string) evidencekit.Extraction {"
+    },
+    {
+      "path": "internal/memory/extractor/pattern.go",
+      "line": 137,
+      "declaration": "func splitSentences(text string) []string {"
+    },
+    {
+      "path": "internal/memory/extractor/pattern.go",
+      "line": 158,
+      "declaration": "func cleanCapturedMatch(text string) string {"
+    },
+    {
+      "path": "internal/memory/extractor/pattern.go",
+      "line": 173,
+      "declaration": "func containsHighValueKeywords(text string) bool {"
+    },
+    {
+      "path": "internal/memory/extractor/pattern.go",
+      "line": 188,
+      "declaration": "func cleanSentenceForFact(text string) string {"
+    },
+    {
+      "path": "internal/memory/summarizer/summary.go",
+      "line": 11,
+      "declaration": "func NewExtractiveSummarizer() *ExtractiveSummarizer {"
+    },
+    {
+      "path": "internal/memory/summarizer/summary.go",
+      "line": 22,
+      "declaration": "func (es *ExtractiveSummarizer) SummarizeSession(sessionText string, maxSentences int) string {"
+    },
+    {
+      "path": "internal/memory/summarizer/summary.go",
+      "line": 114,
+      "declaration": "func stripRoleLabels(text string) string {"
+    },
+    {
+      "path": "internal/memory/summarizer/summary.go",
+      "line": 125,
+      "declaration": "func splitSentences(text string) []string {"
+    },
+    {
+      "path": "internal/memory/summarizer/summary.go",
+      "line": 144,
+      "declaration": "func scoreSentence(text string, index, total int) float64 {"
+    },
+    {
+      "path": "internal/memory/temporal/temporal.go",
+      "line": 86,
+      "declaration": "func Extract(s string, now time.Time) *Result {"
+    },
+    {
+      "path": "internal/memory/temporal/temporal.go",
+      "line": 268,
+      "declaration": "func lastWeekResult(matched string, now time.Time, loc *time.Location) *Result {"
+    },
+    {
+      "path": "internal/memory/temporal/temporal.go",
+      "line": 278,
+      "declaration": "func lastMonthResult(matched string, now time.Time, loc *time.Location) *Result {"
+    },
+    {
+      "path": "internal/memory/temporal/temporal.go",
+      "line": 288,
+      "declaration": "func lastYearResult(matched string, now time.Time, loc *time.Location) *Result {"
+    },
+    {
+      "path": "internal/memory/temporal/temporal.go",
+      "line": 298,
+      "declaration": "func nDurationResult(matched, numStr string, now time.Time, hoursPerUnit int, confidence string) *Result {"
+    },
+    {
+      "path": "internal/memory/temporal/temporal.go",
+      "line": 315,
+      "declaration": "func startOfWeek(t time.Time, loc *time.Location) time.Time {"
+    },
+    {
+      "path": "internal/memory/working/evictor.go",
+      "line": 25,
+      "declaration": "func NewEvictor(database *db.DB, embeddings *extractor.EmbeddingsGenerator, engine *consolidation.Engine, piiEnabled bool) *Evictor {"
+    },
+    {
+      "path": "internal/memory/working/evictor.go",
+      "line": 34,
+      "declaration": "func (e *Evictor) CompactWorkingMemories(ctx context.Context, dryRun bool) (*CompactResult, error) {"
+    },
+    {
+      "path": "internal/memory/working/evictor.go",
+      "line": 74,
+      "declaration": "func (e *Evictor) EvictExpired() (int64, error) {"
+    }
+  ]
+}

@@ -7,6 +7,7 @@ mod cli_entity;
 mod cli_write;
 mod direct_admission;
 mod embedding;
+pub mod engine;
 mod entity;
 pub mod evidence;
 mod evidence_store;

@@ -1,0 +1,182 @@
+{
+  "source": "a30bba8bbd52323fa5e000207f1c391d576ac86c",
+  "scope": "tracked non-test cmd/internal Go source; imported-symbol calls, not runtime acceptance",
+  "calls": [
+    {
+      "path": "cmd/symbrain/cmd_memory_read.go",
+      "line": 172,
+      "package": "extractor",
+      "symbol": "NewEmbeddingsGenerator",
+      "own_engine_package": null,
+      "declaration": "embeddings := extractor.NewEmbeddingsGenerator(memcfg)"
+    },
+    {
+      "path": "cmd/symbrain/cmd_memory_write.go",
+      "line": 43,
+      "package": "conflict",
+      "symbol": "NewChecker",
+      "own_engine_package": null,
+      "declaration": "service.SetConflictChecker(conflict.NewChecker(database, memcfg.Conflict))"
+    },
+    {
+      "path": "cmd/symbrain/cmd_memory_write.go",
+      "line": 40,
+      "package": "extractor",
+      "symbol": "NewEmbeddingsGenerator",
+      "own_engine_package": null,
+      "declaration": "service := memorymcp.NewMemoryService(database, extractor.NewEmbeddingsGenerator(memcfg), true)"
+    },
+    {
+      "path": "internal/memory/bench/aging.go",
+      "line": 63,
+      "package": "aging",
+      "symbol": "DefaultConfig",
+      "own_engine_package": null,
+      "declaration": "cfg := aging.DefaultConfig()"
+    },
+    {
+      "path": "internal/memory/bench/aging.go",
+      "line": 115,
+      "package": "aging",
+      "symbol": "DecayFactor",
+      "own_engine_package": null,
+      "declaration": "return composite * aging.DecayFactor(cfg, f.createdAt, f.lastAccess, f.access, now)"
+    },
+    {
+      "path": "internal/memory/bench/harness.go",
+      "line": 118,
+      "package": "extractor",
+      "symbol": "NewEmbeddingsGenerator",
+      "own_engine_package": null,
+      "declaration": "embeddings := extractor.NewEmbeddingsGenerator(cfg)"
+    },
+    {
+      "path": "internal/memory/bench/harness.go",
+      "line": 237,
+      "package": "extractor",
+      "symbol": "GenerateLocalHashVector",
+      "own_engine_package": null,
+      "declaration": "vec := extractor.GenerateLocalHashVector(gt.Query, extractor.DefaultDimensions)"
+    },
+    {
+      "path": "internal/memory/bench/harness.go",
+      "line": 245,
+      "package": "extractor",
+      "symbol": "GenerateLocalHashVector",
+      "own_engine_package": null,
+      "declaration": "vec := extractor.GenerateLocalHashVector(gt.Query, extractor.DefaultDimensions)"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 229,
+      "package": "summarizer",
+      "symbol": "NewExtractiveSummarizer",
+      "own_engine_package": "contextassembler",
+      "declaration": "summarizer: summarizer.NewExtractiveSummarizer(),"
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "line": 962,
+      "package": "summarizer",
+      "symbol": "SummarizeSession",
+      "own_engine_package": "contextassembler",
+      "declaration": "summary := a.summarizer.SummarizeSession(sessionText, 5)"
+    },
+    {
+      "path": "internal/memory/db/entities.go",
+      "line": 197,
+      "package": "entity",
+      "symbol": "IsPII",
+      "own_engine_package": null,
+      "declaration": "if a == \"\" || len(a) > entity.MaxHintLength || entity.IsPII(a) {"
+    },
+    {
+      "path": "internal/memory/db/entities.go",
+      "line": 213,
+      "package": "entity",
+      "symbol": "BestMatch",
+      "own_engine_package": null,
+      "declaration": "kind, reason, score, ok := entity.BestMatch(hints, e.Name, e.Aliases)"
+    },
+    {
+      "path": "internal/memory/db/entities.go",
+      "line": 235,
+      "package": "entity",
+      "symbol": "Normalize",
+      "own_engine_package": null,
+      "declaration": "ni, nj := entity.Normalize(candidates[i].Name), entity.Normalize(candidates[j].Name)"
+    },
+    {
+      "path": "internal/memory/db/entities.go",
+      "line": 235,
+      "package": "entity",
+      "symbol": "Normalize",
+      "own_engine_package": null,
+      "declaration": "ni, nj := entity.Normalize(candidates[i].Name), entity.Normalize(candidates[j].Name)"
+    },
+    {
+      "path": "internal/memory/importer/registry.go",
+      "line": 328,
+      "package": "extractor",
+      "symbol": "NewPatternExtractor",
+      "own_engine_package": null,
+      "declaration": "pe := extractor.NewPatternExtractor()"
+    },
+    {
+      "path": "internal/memory/importer/registry.go",
+      "line": 329,
+      "package": "summarizer",
+      "symbol": "NewExtractiveSummarizer",
+      "own_engine_package": null,
+      "declaration": "es := summarizer.NewExtractiveSummarizer()"
+    },
+    {
+      "path": "internal/memory/mcp/mcp_tools.go",
+      "line": 1196,
+      "package": "temporal",
+      "symbol": "Extract",
+      "own_engine_package": null,
+      "declaration": "result := temporal.Extract(query, time.Now())"
+    },
+    {
+      "path": "internal/memory/mcp/server.go",
+      "line": 64,
+      "package": "conflict",
+      "symbol": "NewChecker",
+      "own_engine_package": null,
+      "declaration": "service.SetConflictChecker(conflict.NewChecker(database, cfg.Conflict))"
+    },
+    {
+      "path": "internal/memory/mcp/server.go",
+      "line": 58,
+      "package": "extractor",
+      "symbol": "NewEmbeddingsGenerator",
+      "own_engine_package": null,
+      "declaration": "embeddings := extractor.NewEmbeddingsGenerator(cfg)"
+    },
+    {
+      "path": "internal/memory/mcp/service.go",
+      "line": 33,
+      "package": "extractor",
+      "symbol": "NewPatternExtractor",
+      "own_engine_package": null,
+      "declaration": "extractor:  extractor.NewPatternExtractor(),"
+    },
+    {
+      "path": "internal/memory/memory/prep.go",
+      "line": 536,
+      "package": "conflict",
+      "symbol": "ConflictPendingDetail",
+      "own_engine_package": null,
+      "declaration": "conflict.ConflictPendingDetail(r.Candidate.ID, r.Candidate.CreatedBy, r.Similarity)); err != nil {"
+    },
+    {
+      "path": "internal/memory/memory/prep.go",
+      "line": 557,
+      "package": "conflict",
+      "symbol": "SupersedeDetail",
+      "own_engine_package": null,
+      "declaration": "detail := conflict.SupersedeDetail(r.WinnerID, r.WinnerActor, r.LoserActor, r.Rule, r.Similarity)"
+    }
+  ]
+}

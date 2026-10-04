@@ -1,0 +1,117 @@
+{
+  "source": "a30bba8bbd52323fa5e000207f1c391d576ac86c",
+  "records": [
+    {
+      "path": "cmd/symbrain/cmd_memory_read.go",
+      "sha256": "4df921c8bd982476ea1ef4eafd9d18d3f96c78b5ffaed6ece83971a777ba4ac8",
+      "archive": "cmd__symbrain__cmd_memory_read.go.gz",
+      "archive_sha256": "54d68587ab07a0d37052e8d753d7d9dfea36f15c78ae73d674e4d332b4e6510d",
+      "roundtrip": true
+    },
+    {
+      "path": "cmd/symbrain/cmd_memory_write.go",
+      "sha256": "4f7fa0560c003e058db06f82f949336a6071bd646d77f5cd3bcd7141ce897216",
+      "archive": "cmd__symbrain__cmd_memory_write.go.gz",
+      "archive_sha256": "29ec64b2e959638f5eec4fc36ba4c307a36438d40f58cf1903d06cbcc1964b56",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/bench/aging.go",
+      "sha256": "b5bbd1e78a22749e8c008256753f1b7def9bb3847ba628c6c5702065b8c5a1e1",
+      "archive": "internal__memory__bench__aging.go.gz",
+      "archive_sha256": "a7340b3b26a3bb6f70d346e1f4bd94e13c3749da5db0162a0cc143de2a1280b6",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/bench/harness.go",
+      "sha256": "7460aaf7f362443b6db3c463a2c58c626d06a3fb9ba8f29e303d7936ac1333d6",
+      "archive": "internal__memory__bench__harness.go.gz",
+      "archive_sha256": "064b9e0041342c85c523ff6c56c7f73f0fe15c10bd9932a84bb80c4c6ff69b8a",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/consolidation/engine.go",
+      "sha256": "8a80ee1fc4130bf64475a0b744c7cf58a9f6b19e2f48c01b93250e1644a3721d",
+      "archive": "internal__memory__consolidation__engine.go.gz",
+      "archive_sha256": "22b834bd51943ef40dfea00b1eefd724da36af153d374eb6a1dccfbe7d814e75",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "sha256": "a0bea60bf2b3a8974d7bf08aadcf3c7af6fdfef15af129efa417f4243fbf9f07",
+      "archive": "internal__memory__contextassembler__assembler.go.gz",
+      "archive_sha256": "8382bb912f1cc96a0654303d87708264e846486840a503db3c0667f136d635d1",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/db/entities.go",
+      "sha256": "e7184dbdc4a07f8549358d45aadddc1040696607b248cfbec29cb621f5f83371",
+      "archive": "internal__memory__db__entities.go.gz",
+      "archive_sha256": "c4a33e8eb6e4e029b68ba22d55a56ea7ca89f89bae75bcca97c10bb7b2a7946a",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/importer/memorytool/chatgpt.go",
+      "sha256": "72b500d39c1e4daeead062e36adc313e1bdc4614bf334d7d45b403681ceedd1e",
+      "archive": "internal__memory__importer__memorytool__chatgpt.go.gz",
+      "archive_sha256": "38b0772c766c7cd38fc0398f11bd64af36972c6a9badb226a4c36ca6ca4ff4dc",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/importer/memorytool/mem0.go",
+      "sha256": "6627d533de769237c2ab190c632a2a5d1a40f4026f0dfb225b0d027214f599bb",
+      "archive": "internal__memory__importer__memorytool__mem0.go.gz",
+      "archive_sha256": "411e8deb887bf54b825e9ec2ceffe12a3591c58ab2724fdf97f72f443e250e77",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/importer/opencode/opencode.go",
+      "sha256": "b3e3215a4cbe16cd9fbe404dd9cbcfed358f0ed58e4c0a65a8221f4899f5ecad",
+      "archive": "internal__memory__importer__opencode__opencode.go.gz",
+      "archive_sha256": "8ee92f53bba9c6b0421b9971b2bf54f0a654df895d68898c7c3b8417d23be33a",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/importer/registry.go",
+      "sha256": "28bae9a9a99473a9e249639ce87fc1834dace0ee0c9013ce27530f46d7598de5",
+      "archive": "internal__memory__importer__registry.go.gz",
+      "archive_sha256": "f1d482756a211a29a24dc04f5d56533d1f912fd567f82b397bb7e487c630a90a",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/mcp/mcp_tools.go",
+      "sha256": "46721e3dbba08365977590db79d3e432a63be28f7286784323cb5a5c8aae57a1",
+      "archive": "internal__memory__mcp__mcp_tools.go.gz",
+      "archive_sha256": "2b7861d396f529e9152532a156c035fd948b20cecbf0fcaff460352048a4c234",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/mcp/server.go",
+      "sha256": "b1b7c5a45456431fac34de5b34634e8982691ad2babec3cc1252519ec317607c",
+      "archive": "internal__memory__mcp__server.go.gz",
+      "archive_sha256": "e1c2d087b61bd2669c4a41efd579aa85b90acfac25994454d31af1022cb6c322",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/mcp/service.go",
+      "sha256": "fef94d51b2e3c94f8b8842e18807e4e91e6bfb00d38bb0ab63930e943dd32b61",
+      "archive": "internal__memory__mcp__service.go.gz",
+      "archive_sha256": "2e602e37c7efbcc10fe3f0d5a99ebe9059b8b426ad35b41a7e65797cc59ed09e",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/memory/prep.go",
+      "sha256": "9fa3de0a2383d8ab3fcf34747117334afe01a43cbbfc247753dee57b4669d88b",
+      "archive": "internal__memory__memory__prep.go.gz",
+      "archive_sha256": "5e8d6733dd901e8d0258243abf1a6a6e9ef50932e5b06ed0bf966d4ca88ac4b7",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/working/evictor.go",
+      "sha256": "79b621d0f28abc88bb0351f6d4309efb042cb6c7f812381d6bcb95a11eaccea2",
+      "archive": "internal__memory__working__evictor.go.gz",
+      "archive_sha256": "45186e6a1992fb901108a0183d4b4e8b84057ca61d18e49c4816cc84dd7594d7",
+      "roundtrip": true
+    }
+  ]
+}

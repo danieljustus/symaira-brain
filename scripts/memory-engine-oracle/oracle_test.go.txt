@@ -1,0 +1,106 @@
+// Materialize only in a disposable, source-verified Go contextassembler package.
+// This template calls the frozen functions; it is not a copied implementation.
+package contextassembler
+
+import (
+	"encoding/hex"
+	"encoding/json"
+	"math"
+	"os"
+	"strconv"
+	"testing"
+	"time"
+
+	"github.com/danieljustus/symaira-brain/internal/memory/aging"
+	"github.com/danieljustus/symaira-brain/internal/memory/extractor"
+	"github.com/danieljustus/symaira-brain/internal/memory/summarizer"
+)
+
+type oraclePiece struct {
+	LayerHex string `json:"layer_hex"`
+	Tokens int `json:"tokens"`
+}
+
+type oracleCase struct {
+	ID string `json:"id"`
+	Operation string `json:"operation"`
+	TextHex string `json:"text_hex"`
+	Max int `json:"max"`
+	Created string `json:"created"`
+	Last string `json:"last"`
+	Now string `json:"now"`
+	AccessCount int64 `json:"access_count"`
+	Enabled bool `json:"enabled"`
+	HalfLifeBits string `json:"half_life_bits"`
+	BoostCap int64 `json:"boost_cap"`
+	Pieces []oraclePiece `json:"pieces"`
+}
+
+func oracleBytes(t *testing.T, raw string) []byte {
+	t.Helper()
+	value, err := hex.DecodeString(raw)
+	if err != nil { t.Fatal(err) }
+	return value
+}
+
+func oracleTime(t *testing.T, raw string) time.Time {
+	t.Helper()
+	value, err := time.Parse(time.RFC3339Nano, raw)
+	if err != nil { t.Fatal(err) }
+	return value
+}
+
+func TestNativeMemoryEngineOracle(t *testing.T) {
+	input, output := os.Getenv("SYMBRAIN_ENGINE_ORACLE_INPUT"), os.Getenv("SYMBRAIN_ENGINE_ORACLE_OUTPUT")
+	if input == "" || output == "" { t.Fatal("explicit owned input and output paths required") }
+	raw, err := os.ReadFile(input)
+	if err != nil { t.Fatal(err) }
+	var cases []oracleCase
+	if err := json.Unmarshal(raw, &cases); err != nil { t.Fatal(err) }
+	if len(cases) == 0 { t.Fatal("zero-case oracle is not evidence") }
+	results := make([]map[string]any, 0, len(cases))
+	for _, c := range cases {
+		text := oracleBytes(t, c.TextHex)
+		result := map[string]any{"id": c.ID, "operation": c.Operation}
+		switch c.Operation {
+		case "pattern":
+			result["facts"] = extractor.NewPatternExtractor().ExtractFacts(string(text))
+		case "summary":
+			result["summary_hex"] = hex.EncodeToString([]byte(summarizer.NewExtractiveSummarizer().SummarizeSession(string(text), c.Max)))
+		case "tokens":
+			result["tokens"] = DefaultTokenEstimator(string(text))
+		case "aging":
+			cfg := aging.DefaultConfig()
+			cfg.Enabled, cfg.AccessBoostCap = c.Enabled, c.BoostCap
+			halfLifeBits, parseError := strconv.ParseUint(c.HalfLifeBits, 16, 64)
+			err = parseError
+			if err != nil { t.Fatal(err) }
+			cfg.AccessHalfLifeDays = math.Float64frombits(halfLifeBits)
+			var last *time.Time
+			if c.Last != "" { value := oracleTime(t, c.Last); last = &value }
+			factor := aging.DecayFactor(cfg, oracleTime(t, c.Created), last, c.AccessCount, oracleTime(t, c.Now))
+			result["factor_bits"] = strconv.FormatUint(math.Float64bits(factor), 16)
+		case "budget":
+			ctx := &AssembledContext{}
+			for _, piece := range c.Pieces {
+				ctx.Pieces = append(ctx.Pieces, AssembledPiece{Layer: ContextLayer(string(oracleBytes(t, piece.LayerHex))), Tokens: piece.Tokens})
+			}
+			(&Assembler{}).enforceBudget(ctx, c.Max)
+			remaining := make([]string, 0, len(ctx.Pieces))
+			for _, piece := range ctx.Pieces { remaining = append(remaining, hex.EncodeToString([]byte(piece.Layer))) }
+			result["remaining_layers_hex"] = remaining
+			result["report"] = nil
+			if report := ctx.BudgetReport; report != nil {
+				dropped := make([]string, 0, len(report.DroppedIDs))
+				for _, id := range report.DroppedIDs { dropped = append(dropped, hex.EncodeToString([]byte(id))) }
+				result["report"] = map[string]any{"max_tokens": report.MaxTokens, "estimated_tokens": report.EstimatedTokens, "dropped_pieces": report.DroppedPieces, "dropped_ids_hex": dropped, "reason": report.Reason, "fit": report.Fit}
+			}
+		default:
+			t.Fatalf("unknown operation %q", c.Operation)
+		}
+		results = append(results, result)
+	}
+	encoded, err := json.Marshal(results)
+	if err != nil { t.Fatal(err) }
+	if err := os.WriteFile(output, encoded, 0600); err != nil { t.Fatal(err) }
+}

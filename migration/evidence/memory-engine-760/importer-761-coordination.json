@@ -1,0 +1,11 @@
+{
+  "source": "734d2705f6b9312599644700c845db04f07d685c",
+  "publication": "2946cf2b959ed71ed58dcf44d36c515aab60328e",
+  "worktree": "/workspace/symaira-memory761-importers",
+  "canonical_DTO": "rust/symbrain-memory/src/importer/model.rs",
+  "fields": "raw Tool/session/content/metadata/evidence Vec<u8>; PathBuf; ModifiedAt Option<DateTime<FixedOffset>>; None=Go zero",
+  "grounded_bridge": "checked to_extraction rejects invalid UTF8 or oversized spans; no lossy Engine adaptation",
+  "integrated": false,
+  "registry_owner": "composition deferred to complete engine service; no duplicate extractor or summarizer",
+  "resource_or_runtime_used": false
+}

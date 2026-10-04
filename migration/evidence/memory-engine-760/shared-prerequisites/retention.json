@@ -1,0 +1,54 @@
+{
+  "source": "a30bba8bbd52323fa5e000207f1c391d576ac86c",
+  "records": [
+    {
+      "path": "Cargo.toml",
+      "sha256": "982fdf67af364bb689371f888d79e4662bcbd2d7088dec0d7a2aa85f308a0155",
+      "archive": "Cargo.toml.gz",
+      "archive_sha256": "8f04632cf3129938206afdb1c2296f5a56973610edcf8bd45f730a0980909fea",
+      "roundtrip": true
+    },
+    {
+      "path": "go.mod",
+      "sha256": "cd360aeb19457381d88720aa1dd6b62e493c44ac5a4d0b5c5172561ecd4e9d0c",
+      "archive": "go.mod.gz",
+      "archive_sha256": "ed3a546aa88e0226b962281a937136b9de31952464454a78da450b8a6e862e0c",
+      "roundtrip": true
+    },
+    {
+      "path": "go.sum",
+      "sha256": "fb3ec3bc981beb60ae88833cab55335ce3880e68b70a8ad1e931cb02de955aab",
+      "archive": "go.sum.gz",
+      "archive_sha256": "f643c312a9b75f64261bf8aa91455406fd8de06d4af022016798d3b20193ea73",
+      "roundtrip": true
+    },
+    {
+      "path": "cmd/symbrain/cmd_serve.go",
+      "sha256": "a972c45fc9b1b23b7cbad5846de47d0d7e0315ed00517b507c4aad7a7500558e",
+      "archive": "cmd__symbrain__cmd_serve.go.gz",
+      "archive_sha256": "21a49af6201939030f542688747f66741685402d7c3b58d2a9b579a7e7143a73",
+      "roundtrip": true
+    },
+    {
+      "path": "cmd/symbrain/cmd_memory_serve.go",
+      "sha256": "d2d8975835e2fe935738c9626fd132408459fdc5cc32131df64e84e603980144",
+      "archive": "cmd__symbrain__cmd_memory_serve.go.gz",
+      "archive_sha256": "e4f03ba2b1a312359ae791afe2c9ebb55206bdc7f0957a337ab2348d455c9f3c",
+      "roundtrip": true
+    },
+    {
+      "path": "rust/symbrain-cli/src/memory_cli/write.rs",
+      "sha256": "b4602b68bfca95cd0670bf19a20c1a9a9233a5bf3f05db75a913b0fdd698a78e",
+      "archive": "rust__symbrain-cli__src__memory_cli__write.rs.gz",
+      "archive_sha256": "e3576d13d7c685681f0efb2e800c451cc6b857ea9d053548b72f1f712aae5463",
+      "roundtrip": true
+    },
+    {
+      "path": "rust/symbrain-cli/src/memory_cli/routing.rs",
+      "sha256": "51a79ff1ca014758e536b3c6aba80f02cd9c5995ddbcfea11865991efecb066e",
+      "archive": "rust__symbrain-cli__src__memory_cli__routing.rs.gz",
+      "archive_sha256": "54ca2ea4a8fbc5a0272e6ae74b4d6ad043a06f3126b51f8faa6a2cdb05952eb4",
+      "roundtrip": true
+    }
+  ]
+}

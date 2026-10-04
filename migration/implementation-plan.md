@@ -1,3 +1,16 @@
+## Native Memory engine source preparation — issue #760
+
+Additive `symbrain-memory::engine` now prepares the complete fixed pattern
+extractor, byte-valued offline summarizer, injected-time aging curve and exact
+context budget algorithm. Source census retains 61 original inputs, all115 Go
+function declarations and22 imported production-call anchors. All39 engine Go
+files remain identical to dcddcef0. Ten unit assertions and60 real-function
+Go/native probe inputs are PREPARED, NOT EXECUTED. No target/compiler/GoSDK/HTTP
+or process acceptance is claimed. Existing fallback/admission predicates remain
+unchanged; full Store/service/conflict/provider/context/discovery and raw evidence
+integration, independent review and native three-OS acceptance remain required.
+See `migration/memory-engine-760-inventory.md` and the corresponding ADR.
+
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
 ## Native memory evidence and atomic schema increment — 2026-10-03

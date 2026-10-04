@@ -1,0 +1,493 @@
+{
+  "source": "a30bba8bbd52323fa5e000207f1c391d576ac86c",
+  "records": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "96501fab340de5969b201a1060581420f9085f923fbcf4c32d1394e4082189b6",
+      "bytes": 15652,
+      "archive": "AGENTS.md.gz",
+      "archive_sha256": "b3be89ad2919cd3d85d0fcfdc635e94344541df6e4e62951e3a7366a8fdfa5fe",
+      "roundtrip": true
+    },
+    {
+      "path": "Cargo.lock",
+      "sha256": "95657aeeba4f12cde301afa9aaf6b01b021b0d7892ed4cad6907a1db390785c0",
+      "bytes": 65682,
+      "archive": "Cargo.lock.gz",
+      "archive_sha256": "dec159f30e634396f5390fdd70293196e64a67bec35b0c72710763ad8b3e9765",
+      "roundtrip": true
+    },
+    {
+      "path": "cmd/symbrain/cmd_memory_read.go",
+      "sha256": "4df921c8bd982476ea1ef4eafd9d18d3f96c78b5ffaed6ece83971a777ba4ac8",
+      "bytes": 8464,
+      "archive": "cmd__symbrain__cmd_memory_read.go.gz",
+      "archive_sha256": "54d68587ab07a0d37052e8d753d7d9dfea36f15c78ae73d674e4d332b4e6510d",
+      "roundtrip": true
+    },
+    {
+      "path": "cmd/symbrain/cmd_memory_write.go",
+      "sha256": "4f7fa0560c003e058db06f82f949336a6071bd646d77f5cd3bcd7141ce897216",
+      "bytes": 8216,
+      "archive": "cmd__symbrain__cmd_memory_write.go.gz",
+      "archive_sha256": "29ec64b2e959638f5eec4fc36ba4c307a36438d40f58cf1903d06cbcc1964b56",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/aging/aging.go",
+      "sha256": "0ea8ef08717fe2bea79b9202c99939779af3f3f80060bae52b036bc42f73ec0a",
+      "bytes": 5897,
+      "archive": "internal__memory__aging__aging.go.gz",
+      "archive_sha256": "ef1cac975659978f4c60a214f3b384552de3ac0c33924e2a959f9d0468ed3788",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/aging/aging_test.go",
+      "sha256": "ad0e56ad4fe7fa767b82f80c231fcaccc3d6b08b5ffe6360becfb66ffb6e49e2",
+      "bytes": 6151,
+      "archive": "internal__memory__aging__aging_test.go.gz",
+      "archive_sha256": "d6a1c3e784a3402beaeae6745e369dd9165c620bc6dd2f7061ee1acf65283ef5",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/config/config.go",
+      "sha256": "aff1ac0993e97d13996b12a00c627e118ff865be98051aae84784b41149ac250",
+      "bytes": 18908,
+      "archive": "internal__memory__config__config.go.gz",
+      "archive_sha256": "5f33eccd32f3e41bdd1ec79a670e9918aaab4e728589c240300c213f60090a18",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/conflict/conflict.go",
+      "sha256": "86fb844182797ef9bf8173a8a918257048d5dd9cf5245ea7577a47e1e7e80929",
+      "bytes": 12917,
+      "archive": "internal__memory__conflict__conflict.go.gz",
+      "archive_sha256": "6db3a01e30f427ef3bec346c388d46e18ad3828531e04eaf42500700da5234f0",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/conflict/conflict_test.go",
+      "sha256": "f93f02b30ff283aba2a67c2974a3e78cb943ed67afaaa768182c5bf0ec48fb11",
+      "bytes": 17022,
+      "archive": "internal__memory__conflict__conflict_test.go.gz",
+      "archive_sha256": "968bb2f95e8597b0f35b73d8981450bc78a4f3db47eab3a89e0d6db3c0dde321",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/conflict/llm.go",
+      "sha256": "eb195a999ffb8779af8983fb59c6f9cf81f9fda65923371c84b58f97695621f9",
+      "bytes": 5526,
+      "archive": "internal__memory__conflict__llm.go.gz",
+      "archive_sha256": "b67d69ef39195da06bbf738e917e6b96f6f53f4e357f5f62bf017b91ee8dca78",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/conflict/llm_test.go",
+      "sha256": "d5d0c8ff90e5d39bfbfa975fa718a4422ab3ed87b866a3810fbb423e7d066944",
+      "bytes": 10877,
+      "archive": "internal__memory__conflict__llm_test.go.gz",
+      "archive_sha256": "61d0743f941296d509b5cbf917510ee08067317b5ebdd6a4381416e3411f06e3",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/conflict/security_test.go",
+      "sha256": "f607266c2a94e1e993de187de76b18b04cd20851e8379002dff2b466afcd0222",
+      "bytes": 1609,
+      "archive": "internal__memory__conflict__security_test.go.gz",
+      "archive_sha256": "1fe0c348493bcbe7d84a420704eef96a4c8004d43554c8519f2f92f64bd4b3a1",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/consolidation/engine.go",
+      "sha256": "8a80ee1fc4130bf64475a0b744c7cf58a9f6b19e2f48c01b93250e1644a3721d",
+      "bytes": 19270,
+      "archive": "internal__memory__consolidation__engine.go.gz",
+      "archive_sha256": "22b834bd51943ef40dfea00b1eefd724da36af153d374eb6a1dccfbe7d814e75",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/consolidation/engine_test.go",
+      "sha256": "fdeb6a7493e0f5e72852490d81d4d43e2fa91101692b1a410bde6e623390ce8e",
+      "bytes": 19374,
+      "archive": "internal__memory__consolidation__engine_test.go.gz",
+      "archive_sha256": "51906eea5e63b1b4716e59e528827372cca4cd597f949c79adae799099cd81d5",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/consolidation/journal.go",
+      "sha256": "e844e44a3af798bf0819aa21462d268f530faa318742cd8fb6b98fddb031560c",
+      "bytes": 5596,
+      "archive": "internal__memory__consolidation__journal.go.gz",
+      "archive_sha256": "97f5d0c4cdfe88698ac93be5476933d2112881b51a90e73c280df6003c95f388",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/consolidation/journal_test.go",
+      "sha256": "eb13629fab995e19b0ad8608915a59c535cc5bf0bf21bcab7bff1fc46a823a99",
+      "bytes": 6485,
+      "archive": "internal__memory__consolidation__journal_test.go.gz",
+      "archive_sha256": "abababa25ead1f38287493d710c28f99e5b065feedc8885439ef552e842bebce",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/consolidation/prompts.go",
+      "sha256": "b6efea95577b0c377e8e6a039e0b3a77fecdba4cbcdda4620042496e203b30c1",
+      "bytes": 6119,
+      "archive": "internal__memory__consolidation__prompts.go.gz",
+      "archive_sha256": "7288ed633351b5a578434d3427f31c32b96ae466890d4c5c4fbd8f5aaace7cae",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/consolidation/prompts_test.go",
+      "sha256": "dc1740e0900f4e05ecc7606d1d74d4ad9376100ac65b7b8c34b708cbf7c88f50",
+      "bytes": 3911,
+      "archive": "internal__memory__consolidation__prompts_test.go.gz",
+      "archive_sha256": "21f772e3380381355d86436f6a77a550069c92d27b524b713a9e99ff6f53ae2f",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/consolidation/run_for_memories_test.go",
+      "sha256": "9a4077e548d03bf843802b39bd2a6cb937921c247d69a82426957720f6399b6e",
+      "bytes": 5502,
+      "archive": "internal__memory__consolidation__run_for_memories_test.go.gz",
+      "archive_sha256": "1c418c482551b3492783d7b362abea0e145b2c8d8297c696891f8c3ce15b5d08",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/consolidation/security_test.go",
+      "sha256": "d00d000aef0af613c11cc8e33b783be3fc9bcd729a2c8c70f7b1a26f94c293c0",
+      "bytes": 1408,
+      "archive": "internal__memory__consolidation__security_test.go.gz",
+      "archive_sha256": "712bcec7bb5e4080c14b522396f56a92a725b2f268958d3f57cb0d5622ce782f",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler.go",
+      "sha256": "a0bea60bf2b3a8974d7bf08aadcf3c7af6fdfef15af129efa417f4243fbf9f07",
+      "bytes": 35033,
+      "archive": "internal__memory__contextassembler__assembler.go.gz",
+      "archive_sha256": "8382bb912f1cc96a0654303d87708264e846486840a503db3c0667f136d635d1",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler_test.go",
+      "sha256": "9243a9e900c07791ad0263119644beb942d6bbff68b887ff5ca7ed3b53d517c8",
+      "bytes": 29608,
+      "archive": "internal__memory__contextassembler__assembler_test.go.gz",
+      "archive_sha256": "30829c0c556981c13745f4898d981313e0f98cdaaf97cf6f30b933c2bf5c1734",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/contextassembler/assembler_working_test.go",
+      "sha256": "097c33d796fe4f6946f955eef18cd50cb547d988d75f91ad637fcb6535d0caee",
+      "bytes": 2506,
+      "archive": "internal__memory__contextassembler__assembler_working_test.go.gz",
+      "archive_sha256": "b3ecffc352b667f6db461c64afc22b6c64a0e83ddb3c3db8ac38895da7348296",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/contextassembler/budget.go",
+      "sha256": "cd0f21a2f9fd49786dbea1f846f611d161af244db95c802b2203c9665a96ef3b",
+      "bytes": 3590,
+      "archive": "internal__memory__contextassembler__budget.go.gz",
+      "archive_sha256": "e78b8c8551abdb399e69c0ea43573b336246ad7af96078046ee790cc51698d96",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/contextassembler/budget_test.go",
+      "sha256": "f5afd027ed196aa896a363c3620ab8c849c7d33004f7d197e19422b6f0139e1c",
+      "bytes": 4248,
+      "archive": "internal__memory__contextassembler__budget_test.go.gz",
+      "archive_sha256": "d025bf292aec8ce3ba2d3de28ba77ca62b475c531a85f6963df0c95a7ef20872",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/contextassembler/recall_receipt_test.go",
+      "sha256": "8e368a7e0746cbcd76cc80ce1b15afeff121b0af81b7f16c69d447fa3b41837c",
+      "bytes": 2001,
+      "archive": "internal__memory__contextassembler__recall_receipt_test.go.gz",
+      "archive_sha256": "6b7ecadb2da14c5c339a4309c766597d0a9fd28b57010c66fa782729da5fe28b",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/contextassembler/redact_test.go",
+      "sha256": "1bdc6faa72c689826e35d9084441b3586821642d12a22fa46bfd4754d2623025",
+      "bytes": 3700,
+      "archive": "internal__memory__contextassembler__redact_test.go.gz",
+      "archive_sha256": "761b8f59f9df7b20a2811456fb3bc247d420866c9b1f8c4c017040afa963a57f",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/contextassembler/testmain_test.go",
+      "sha256": "751aaa1fc4427ad49aa93b4c04ef998f51aad7a4213d6da4fa54d2baa77d9ad8",
+      "bytes": 663,
+      "archive": "internal__memory__contextassembler__testmain_test.go.gz",
+      "archive_sha256": "46527a58c8ee20943df8fc471c8bf9040bba05836b6c73bbbad2adcf05ca7aba",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/db/entities.go",
+      "sha256": "e7184dbdc4a07f8549358d45aadddc1040696607b248cfbec29cb621f5f83371",
+      "bytes": 12276,
+      "archive": "internal__memory__db__entities.go.gz",
+      "archive_sha256": "c4a33e8eb6e4e029b68ba22d55a56ea7ca89f89bae75bcca97c10bb7b2a7946a",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/db/governance.go",
+      "sha256": "9180ccb18fd3468e5c8e9117efb8c48a6b8f4925ea15401f7f4c8d56854ef51c",
+      "bytes": 8325,
+      "archive": "internal__memory__db__governance.go.gz",
+      "archive_sha256": "28168111fcc291209698d29d2b250b5ae929ff31f3431da1031588fa90523814",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/db/memory.go",
+      "sha256": "a7c43bbb33abde37c2977746a7f2d29cd0dff8b630bec51a0ff5d6f45fb88bf0",
+      "bytes": 71558,
+      "archive": "internal__memory__db__memory.go.gz",
+      "archive_sha256": "63026b0dbfdf86a314ddc26306aece960a7d9c1d18fba9c04a285247e3d4f865",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/discovery/discovery.go",
+      "sha256": "df8ab5ceaa15160d8f3f22b1c4f5e3999992d84e9263024734bc692a60bd128d",
+      "bytes": 3167,
+      "archive": "internal__memory__discovery__discovery.go.gz",
+      "archive_sha256": "dbd3680958904a5cb96bc081a60ce71a4e9ff385ab891a33ac72411ce3714ed6",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/discovery/discovery_test.go",
+      "sha256": "91175f35c7b3c9ba8b441dfb63939fbec33ad178e70368f9fe38197190809e59",
+      "bytes": 2305,
+      "archive": "internal__memory__discovery__discovery_test.go.gz",
+      "archive_sha256": "f78e89d76178c844ecab84ceec9e44b5d87ad651108848a10de02afafe57d26d",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/entity/resolve.go",
+      "sha256": "11673f294eed7885ffddcbc43333d56a1cd6e7c614fb450c15791387844a4b69",
+      "bytes": 4029,
+      "archive": "internal__memory__entity__resolve.go.gz",
+      "archive_sha256": "c2c92f302e64d711db6af2717ff6941f88ced4c860b634e6b0272dc273051401",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/entity/resolve_test.go",
+      "sha256": "a50bb390d6be005091ce1823b43d47253c446ae9409d9eaa5acf72c90b032707",
+      "bytes": 4665,
+      "archive": "internal__memory__entity__resolve_test.go.gz",
+      "archive_sha256": "346f8562f2f6e074162d9fc08c41c30a6bc8d29cb0bb63faccb05cc5a2d028f2",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/extractor/coverage_test.go",
+      "sha256": "0d37223400339066a4c6fb156f40e02989541aa0a8dd8179f10e05e82bf37fb7",
+      "bytes": 4226,
+      "archive": "internal__memory__extractor__coverage_test.go.gz",
+      "archive_sha256": "6e9b9c8f42e696fec517e8e3430c9f939dd50b55dbb190ec0be34acf2290ed1e",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/extractor/embeddings.go",
+      "sha256": "a74f5e2d636f27752839356b1154f0ac70f8154bffbad5e24b4a5121363311af",
+      "bytes": 10949,
+      "archive": "internal__memory__extractor__embeddings.go.gz",
+      "archive_sha256": "2ef046b298d8e398c7b4045104939d513390b218b20dfd3d66d9563e1fe70730",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/extractor/embeddings_test.go",
+      "sha256": "eccf0e9972af4dca4385c0ca1c9f0a7f12e9a812f4ed25622717b86e7fc119d9",
+      "bytes": 7148,
+      "archive": "internal__memory__extractor__embeddings_test.go.gz",
+      "archive_sha256": "cd6f8db650c0b50f8cffb759c053817e81271d71d1d306e609324106df26d2b8",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/extractor/pattern.go",
+      "sha256": "e73a652fa2ac2ed33c50e125367236c2b1bd820d01198d4780138307695c1f99",
+      "bytes": 7209,
+      "archive": "internal__memory__extractor__pattern.go.gz",
+      "archive_sha256": "31ed34ee6d0b4446f1270f1ebd335b79ac2dc39c791c4a53871810c3bd636b27",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/extractor/pattern_test.go",
+      "sha256": "169c059585fe0bbc1665499852b7962d4b11d709db126535bdcd0ad52b7bae2c",
+      "bytes": 3561,
+      "archive": "internal__memory__extractor__pattern_test.go.gz",
+      "archive_sha256": "4502d981389bfc5917119229f610ac6d94eae9435986961511ae3f4ef4f5cc23",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/importer/registry.go",
+      "sha256": "28bae9a9a99473a9e249639ce87fc1834dace0ee0c9013ce27530f46d7598de5",
+      "bytes": 11615,
+      "archive": "internal__memory__importer__registry.go.gz",
+      "archive_sha256": "f1d482756a211a29a24dc04f5d56533d1f912fd567f82b397bb7e487c630a90a",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/llm/client.go",
+      "sha256": "f6a1cad483d8d876b65dfe41139c602fdacac281571a335726858e29f0e2923a",
+      "bytes": 7467,
+      "archive": "internal__memory__llm__client.go.gz",
+      "archive_sha256": "33ac460941d4d48c543110f25a5c68acee00c77e61cb3fa82b1d422acc61b9b3",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/mcp/mcp_tools.go",
+      "sha256": "46721e3dbba08365977590db79d3e432a63be28f7286784323cb5a5c8aae57a1",
+      "bytes": 52143,
+      "archive": "internal__memory__mcp__mcp_tools.go.gz",
+      "archive_sha256": "2b7861d396f529e9152532a156c035fd948b20cecbf0fcaff460352048a4c234",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/mcp/server.go",
+      "sha256": "b1b7c5a45456431fac34de5b34634e8982691ad2babec3cc1252519ec317607c",
+      "bytes": 4964,
+      "archive": "internal__memory__mcp__server.go.gz",
+      "archive_sha256": "e1c2d087b61bd2669c4a41efd579aa85b90acfac25994454d31af1022cb6c322",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/mcp/service.go",
+      "sha256": "fef94d51b2e3c94f8b8842e18807e4e91e6bfb00d38bb0ab63930e943dd32b61",
+      "bytes": 14206,
+      "archive": "internal__memory__mcp__service.go.gz",
+      "archive_sha256": "2e602e37c7efbcc10fe3f0d5a99ebe9059b8b426ad35b41a7e65797cc59ed09e",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/memory/prep.go",
+      "sha256": "9fa3de0a2383d8ab3fcf34747117334afe01a43cbbfc247753dee57b4669d88b",
+      "bytes": 21454,
+      "archive": "internal__memory__memory__prep.go.gz",
+      "archive_sha256": "5e8d6733dd901e8d0258243abf1a6a6e9ef50932e5b06ed0bf966d4ca88ac4b7",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/summarizer/summary.go",
+      "sha256": "b8c71288d46333661af8d06cf13d016b2e0858c4097bd5a5bc4792d69e4a7b09",
+      "bytes": 5060,
+      "archive": "internal__memory__summarizer__summary.go.gz",
+      "archive_sha256": "18c430d251de1a1e15420e97dfc897cd7e744279d6a70b4464ad2d61b56ab690",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/summarizer/summary_test.go",
+      "sha256": "93af0a889ed0e7b1bdc507b4b5e4596f83da5a65ed8f80068627673b944fcf50",
+      "bytes": 1196,
+      "archive": "internal__memory__summarizer__summary_test.go.gz",
+      "archive_sha256": "fb25e615ac79c16eccb28b1fe21791cc413c54bcf64a01ff1b65e2e7d8b706b4",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/temporal/temporal.go",
+      "sha256": "8f7c6655c44e423ea427ba18d9ca8a20527b6858bcc1200902dbdac5f24d7dd7",
+      "bytes": 12174,
+      "archive": "internal__memory__temporal__temporal.go.gz",
+      "archive_sha256": "3ee5dab979ebff1e3030dc32668ad63c47e843f1fd7e81e3ffb45ca7da3c33ac",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/temporal/temporal_test.go",
+      "sha256": "bbbfe6ca84b3546035e56e977cd4aa1ab00751bd42b75aee068f0d15f6b95ec6",
+      "bytes": 9299,
+      "archive": "internal__memory__temporal__temporal_test.go.gz",
+      "archive_sha256": "5dd739ea2d6801484930609ee31e58927b0ae596d40be5ac1205bf60becf5594",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/working/e2e_test.go",
+      "sha256": "c27723353116ca5f31cce2e9228dc7abd017dc80a229a258ae7a039750cce16b",
+      "bytes": 5856,
+      "archive": "internal__memory__working__e2e_test.go.gz",
+      "archive_sha256": "d77cd79822c76bcd45f9d741345935613949cf59f9bfb9d54e431e4b299e00ac",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/working/evictor.go",
+      "sha256": "79b621d0f28abc88bb0351f6d4309efb042cb6c7f812381d6bcb95a11eaccea2",
+      "bytes": 2075,
+      "archive": "internal__memory__working__evictor.go.gz",
+      "archive_sha256": "45186e6a1992fb901108a0183d4b4e8b84057ca61d18e49c4816cc84dd7594d7",
+      "roundtrip": true
+    },
+    {
+      "path": "internal/memory/working/evictor_test.go",
+      "sha256": "8c4f39d5e28b951d9831fdbf8e4587fe9f8ad266af9f2ba9736ff1a1830525c2",
+      "bytes": 12371,
+      "archive": "internal__memory__working__evictor_test.go.gz",
+      "archive_sha256": "2d581f7025396c44a963be567b618184c81e0de18217dea2008331d6a4a64463",
+      "roundtrip": true
+    },
+    {
+      "path": "migration/contract-matrix.csv",
+      "sha256": "9b97d548791b18fc298ab96eb9cf893c944d769c47c6846cba498fb78c6ef14f",
+      "bytes": 30863,
+      "archive": "migration__contract-matrix.csv.gz",
+      "archive_sha256": "58c58debe9f775f62ab9160d69cf0275577e6613e92731ac7e1ac0221d1f0bec",
+      "roundtrip": true
+    },
+    {
+      "path": "migration/implementation-plan.md",
+      "sha256": "c40447098408e94db0ea97324c111ce8dc2255bb3b58b6c021f648d2722eb652",
+      "bytes": 160944,
+      "archive": "migration__implementation-plan.md.gz",
+      "archive_sha256": "009b5efdadcf831ca765d1c981a1e530ff73e46de09126288fe34e6a0b773313",
+      "roundtrip": true
+    },
+    {
+      "path": "rust/symbrain-gateway/src/embedded/memory.rs",
+      "sha256": "fe7b00a875ac70adcfb0fd8027621e0e7c30f7ee766e63068bf1e596f6b973f3",
+      "bytes": 7793,
+      "archive": "rust__symbrain-gateway__src__embedded__memory.rs.gz",
+      "archive_sha256": "c75e0db48bdda133a964731e7acb775db1d891e5d5f199f54361e22130227ab7",
+      "roundtrip": true
+    },
+    {
+      "path": "rust/symbrain-memory/Cargo.toml",
+      "sha256": "418e282e1fc9ab7ebac4d7324ee8e39b2242acdd4ecf7193fd9477753cfe0a0d",
+      "bytes": 743,
+      "archive": "rust__symbrain-memory__Cargo.toml.gz",
+      "archive_sha256": "7a5b025dcc83f4ae0e85a414c70a2c829e066ea2ca36013bd45d1b895d69446d",
+      "roundtrip": true
+    },
+    {
+      "path": "rust/symbrain-memory/src/direct_admission.rs",
+      "sha256": "61fcbd1f59700ac0c25cb592ea2364edd148912c6538a0e179d469d6611c2c1d",
+      "bytes": 4230,
+      "archive": "rust__symbrain-memory__src__direct_admission.rs.gz",
+      "archive_sha256": "e2b2c2a3b353efeb6e46b310fa36b4da0ba0b39c10013f4b351ca85cf74a8402",
+      "roundtrip": true
+    },
+    {
+      "path": "rust/symbrain-memory/src/embedding.rs",
+      "sha256": "ebe619a9c5a132967658a59196b5c45df6651bae7282f48a6004723732760af9",
+      "bytes": 13537,
+      "archive": "rust__symbrain-memory__src__embedding.rs.gz",
+      "archive_sha256": "0468b3c31b5f6680d72074a9f93e9a97fb864b7a9db973d3865d599fc4729054",
+      "roundtrip": true
+    },
+    {
+      "path": "rust/symbrain-memory/src/evidence/mod.rs",
+      "sha256": "f0af751e82d6598dc3c7f0ed3b3d30b08afaaab6e39cec0d7a8e0be9c5f1343d",
+      "bytes": 6399,
+      "archive": "rust__symbrain-memory__src__evidence__mod.rs.gz",
+      "archive_sha256": "98413bcb0cc950ad842b2288d4aa3635576e9c804eeb929666958c5c73529faa",
+      "roundtrip": true
+    },
+    {
+      "path": "rust/symbrain-memory/src/lib.rs",
+      "sha256": "f4400debbcd9b313e706d7ee7fd4285d0acd96f4309cb1536c48abf165a69bfc",
+      "bytes": 1122,
+      "archive": "rust__symbrain-memory__src__lib.rs.gz",
+      "archive_sha256": "8ae3a8aaa08cb5f59a9d87620935f14e098d5a0157ecc9c571a7918694aec2cf",
+      "roundtrip": true
+    }
+  ]
+}

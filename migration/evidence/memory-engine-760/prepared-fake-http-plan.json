@@ -1,0 +1,73 @@
+{
+  "status": "PREPARED_NOT_EXECUTED",
+  "provider_owner": "existing pinned symaira-core-llm, no hand-written production HTTP",
+  "ports": "allocate private random loopback ports only; no default11434 or paid endpoint",
+  "constructors": "injected IDs/clock, raw payload and fixed actor/config; retain actual eager admission ordering with #759",
+  "checks": "full headers/request/body, no operator secrets/provider env, all stream errors, DB/evidence/audit/journal/query-log/namespace states before/after",
+  "scenarios": [
+    {
+      "id": "embedding-success-and-cache-hit",
+      "required": "same text twice: exact finite float32 payload, request count/cache key/model/backend metrics"
+    },
+    {
+      "id": "embedding-bad-count-and-dimensions",
+      "required": "extra embedding item, wrong dimension, NaN or infinity reject; configured namespace/hash fallback exact"
+    },
+    {
+      "id": "embedding-http-stall-cooldown",
+      "required": "actual bounded stalled transport; no new request during injected30s cooldown; retry after clock advances"
+    },
+    {
+      "id": "consolidation-one-row",
+      "required": "no LLM request; same ID update, status/timestamp mapping and journal/dry-run exact"
+    },
+    {
+      "id": "consolidation-two-scopes-partial-failure",
+      "required": "one scope fails, other commits; full returned summary/error and committed sideeffects retained"
+    },
+    {
+      "id": "consolidation-all-scopes-fail",
+      "required": "actual aggregated error after all attempts; no newly committed rows"
+    },
+    {
+      "id": "consolidation-schema-and-malformed-response",
+      "required": "native-Ollama Generate schema and OpenAI Chat schema; null/case/duplicate/wrong-type/fenced/salvage/empty IDs output tested against Go"
+    },
+    {
+      "id": "consolidation-prompt-injection",
+      "required": "original untrusted prompts/sanitizer/redaction, unknown replace IDs do not acquire ownership"
+    },
+    {
+      "id": "consolidation-save-failure-undo",
+      "required": "per-scope rollback/journal/evidence reparent; undo state, custom schema/constraint error preserved"
+    },
+    {
+      "id": "conflict-disabled-and-staged",
+      "required": "no candidate/verdict requests; normal governed row and audit order"
+    },
+    {
+      "id": "conflict-exact-repeat-near-duplicate",
+      "required": "scope/hash namespace wins before LLM; near duplicate short circuits band with exact timestamps/actor rule"
+    },
+    {
+      "id": "conflict-verdict-degradation",
+      "required": "HTTP/error/timeout/malformed/out-of-order/missing verdict causes no decision, both facts preserved and exact audit behavior"
+    },
+    {
+      "id": "conflict-rule-winners",
+      "required": "actor trust/recency thresholds, similarity float32, pending audit and supersession owner exact"
+    },
+    {
+      "id": "working-expired-zero-one-many",
+      "required": "no request for0; exact single delete; many invoke consolidation before eviction; dryrun no side effects"
+    },
+    {
+      "id": "context-budget-receipt-profile",
+      "required": "real Store retrieval/working/profile/session layers, snapshot/delta FIFO/recall receipt redaction, injected token estimator boundaries"
+    },
+    {
+      "id": "aging-per-row-error",
+      "required": "full-row candidate scan, staged inclusion, dry-run state and unchanged timestamps, first write error retains earlier writes; no invented atomic batch"
+    }
+  ]
+}
