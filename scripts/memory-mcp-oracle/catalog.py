@@ -81,6 +81,8 @@ def mutate(kind, command):
     target = next(tool for tool in tools if tool["name"] == "memory_get")
     if kind == "title":
         target["annotations"]["title"] = "wrong title"
+    elif kind == "hint":
+        target["annotations"]["idempotentHint"] = True
     elif kind == "schema":
         target["inputSchema"]["required"] = []
     elif kind == "order":
@@ -127,7 +129,7 @@ def main():
         profile = root / "explicit-all.toml"
         expected = next(record["go"] for record in records
                         if record["case"] == "explicit-all-line-mcp")
-        for kind in ("title", "schema", "order", "exposure"):
+        for kind in ("title", "hint", "schema", "order", "exposure"):
             result = wire(rust, root / ("control-" + kind), profile, "line", "mcp", mutant=kind)
             controls.append({"kind": kind, "rejected": result != expected,
                              "actual_child_exit": result["exit"], "go": expected, "mutant": result})

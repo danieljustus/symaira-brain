@@ -16,6 +16,10 @@ struct Descriptor {
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(
+    clippy::struct_excessive_bools,
+    reason = "The MCP wire schema defines four independent optional boolean hints"
+)]
 struct Annotations {
     title: String,
     #[serde(default)]
