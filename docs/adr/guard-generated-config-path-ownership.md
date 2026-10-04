@@ -140,3 +140,6 @@ required; independent bounded approval does not waive those boundaries.
 
 
 Normally integrate currentmain5e232 after regular807 merge. All reviewed Rust/Cargo/Guard harness bytes remain byte-identical to independently approved24f source; this integration adds release-check scripts/workflows/docs only. Historical native results remain historical. Require fresh published-head protected/nativeLinux/macOS/Windows acceptance before regular805 merge. Source-bound receipt: migration/evidence/guard-doctor-config-paths-770/main5e-integration.json.
+
+
+Actual native Windows run37181040219/job111373552414 rejects the invalid-text-path early return under strict Clippy question_mark before owner comparisons. Preserve the complete original log and source in migration/evidence/guard-doctor-config-paths-770/windows-lint-a114. Replace only ifNone/returnNone with the identical Option question-mark early return under the same Windowscfg. Invalid raw Windows paths still refuse before read/output; no compatibility gate, lint or assertion is weakened. This is a source-only mechanical correction; fresh exact-head native acceptance remains required. The separate rust-init-native formatting/lint step has failed too, but its in-progress log/cause is not yet available and is not inferred here.

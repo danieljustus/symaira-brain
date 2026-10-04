@@ -68,9 +68,7 @@ pub(super) fn load_config(path: &Path) -> Option<ConfigOutcome> {
     // File selection preserves Windows UTF16, but Core GoText's Windows byte
     // projection is not yet WTF8-exact. Delegate before reading/emitting text.
     #[cfg(windows)]
-    if path.to_str().is_none() {
-        return None;
-    }
+    path.to_str()?;
     let text = match fs::read_to_string(path) {
         Ok(text) => text,
         Err(error) if error.kind() == io::ErrorKind::NotFound => {
