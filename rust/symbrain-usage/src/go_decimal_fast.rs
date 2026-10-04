@@ -40,6 +40,7 @@ fn multiply(left: u64, right: u64) -> (u64, u64) {
     ((product >> 64) as u64, product as u64)
 }
 
+#[allow(clippy::verbose_bit_mask)] // Preserve Go SDK's low-nine-bit fallback test.
 pub(super) fn eisel(mut mantissa: u64, exponent: i64, negative: bool) -> Option<f64> {
     let sign = if negative { 1_u64 << 63 } else { 0 };
     if mantissa == 0 {

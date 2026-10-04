@@ -1,4 +1,4 @@
-//! Go1.26.7 ParseFloat grammar and binary64 conversion dispatch.
+//! Go1.26.7 `ParseFloat` grammar and binary64 conversion dispatch.
 // Hex scanning/rounding adapted from Go internal/strconv atof.go/atoi.go;
 // Copyright 2009-2026 The Go Authors. BSD notice: migration/licenses/go-strconv-bsd.txt.
 
@@ -22,6 +22,7 @@ pub(super) fn parse(value: &str) -> Option<f64> {
     }
 }
 
+#[derive(Clone, Copy)]
 pub(super) struct Number {
     pub(super) mantissa: u64,
     pub(super) exponent: i64,

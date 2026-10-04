@@ -298,13 +298,14 @@ lint: vet fmt-check
 # Keep file discovery in find so its POSIX `-exec ... {} +` batching stays
 # below the platform's exec limit instead of expanding every path in make.
 # Linked checkouts are independent trees, not sources owned by this checkout.
-GOFMT_FIND := find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -not -path './.worktrees/*' -exec
+# Original evidence is immutable input data, not formatter-owned source.
+GOFMT_FIND := find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -not -path './.worktrees/*' -not -path './migration/evidence/*' -exec
 
-## fmt: Format all Go source files
+## fmt: Format owned Go source files
 fmt:
 	$(GOFMT_FIND) gofmt -w -s {} +
 
-## fmt-check: Fail if gofmt would change any file
+## fmt-check: Fail if gofmt would change any owned source file
 fmt-check:
 	@set -eu; \
 	tmp_dir="$$(mktemp -d)"; \

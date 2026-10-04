@@ -145,6 +145,7 @@ impl Decimal {
         Some(f64::from_bits(bits))
     }
 
+    #[allow(clippy::manual_is_multiple_of)] // Preserve Go SDK shouldRoundUp's parity expression.
     fn rounded_integer(&self) -> u64 {
         // Go shouldRoundUp rejects a negative digit index. Converting it to
         // zero would spuriously round tiny subnormals using their first digit.
