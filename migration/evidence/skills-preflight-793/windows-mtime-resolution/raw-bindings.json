@@ -1,0 +1,74 @@
+[
+  {
+    "original": "/workspace/review-proof/review-pr800-ci794-803-current/job-111396574636.logs.decoded",
+    "retained": "migration/evidence/skills-preflight-793/windows-mtime-resolution/job-111396574636.logs.decoded.gz",
+    "bytes": 371868,
+    "sha256": "9c9f6284bac66f3156645fd69daadb00a2e47d9f623b20472d70fe7b5d07584b",
+    "gzip_sha256": "0331c5403fc6d6824c43bde3278eaea6af0c64d632941a11d1e069b1b183f630",
+    "roundtrip": true
+  },
+  {
+    "original": "/workspace/review-proof/review-pr800-ci794-803-current/pr794-skills-wide-argv-Windows.zip",
+    "retained": "migration/evidence/skills-preflight-793/windows-mtime-resolution/pr794-skills-wide-argv-Windows.zip.gz",
+    "bytes": 13720426,
+    "sha256": "ca5b32f90d9f55c7a064895584e042b9c845322ea2cda4da03e539753de0e3b4",
+    "gzip_sha256": "9fd05ca61a928175fff506cdb3080b0ddd83b9c94d384104a5e00a2eb2a4fc3a",
+    "roundtrip": true
+  },
+  {
+    "original": "/workspace/review-proof/review-pr800-ci794-803-current/pr794-actual-unit-state-diff.json",
+    "retained": "migration/evidence/skills-preflight-793/windows-mtime-resolution/pr794-actual-unit-state-diff.json.gz",
+    "bytes": 507,
+    "sha256": "4c8d233c4938e49bb2ae655d10c715e422536f2e547960e09840b3415e0b317b",
+    "gzip_sha256": "657134b10f04692ee59b1f5215dc4b03f115a212ac356e4d9013a07bea684b2e",
+    "roundtrip": true
+  },
+  {
+    "original": "/workspace/review-proof/review-pr800-ci794-803-current/pr794.json",
+    "retained": "migration/evidence/skills-preflight-793/windows-mtime-resolution/pr794.json.gz",
+    "bytes": 21110,
+    "sha256": "759e290197b6aad7098882e7239c3a9e253dbebed9af0ab8457a68d58b456538",
+    "gzip_sha256": "ead57ce90172e0b8d4a11688499d97402ca01e2623336e76ea9f1df89ea84730",
+    "roundtrip": true
+  },
+  {
+    "original": "/workspace/review-proof/review-pr800-ci794-803-current/head794-commit.json",
+    "retained": "migration/evidence/skills-preflight-793/windows-mtime-resolution/head794-commit.json.gz",
+    "bytes": 1190,
+    "sha256": "7a225f7fb57909fefbe3edab4eaaee3d46b1fc40b2f66946a290018d572ceddc",
+    "gzip_sha256": "fe1d235a8c970467b5d39e033154fd79dcff18b23c0259e547c3fdd151a538da",
+    "roundtrip": true
+  },
+  {
+    "original": "/workspace/review-proof/review-pr800-ci794-803-current/merge794-commit.json",
+    "retained": "migration/evidence/skills-preflight-793/windows-mtime-resolution/merge794-commit.json.gz",
+    "bytes": 2709,
+    "sha256": "0a2661385e6bee2f7c1a4889984cfa4c86cdbf17b7822e8f713f3681e2ce55c8",
+    "gzip_sha256": "530f4acca30d013d9a93768660c69df1ef6dad95312277b80ddd614e7a98a056",
+    "roundtrip": true
+  },
+  {
+    "original": "/workspace/review-proof/review-pr800-ci794-803-current/source-bindings.json",
+    "retained": "migration/evidence/skills-preflight-793/windows-mtime-resolution/source-bindings.json.gz",
+    "bytes": 535,
+    "sha256": "4d2f39e715e9632cce45d76774f5eba08f5ca2619d266d2672dcc953b4d50e72",
+    "gzip_sha256": "f29c36617437d3a6e7f5b4c634dda1d8eeaf35db12df65d262b4ddcefc02f789",
+    "roundtrip": true
+  },
+  {
+    "original": "/workspace/review-proof/review-pr800-ci794-803-current/downloaded-artifacts-manifest.json",
+    "retained": "migration/evidence/skills-preflight-793/windows-mtime-resolution/downloaded-artifacts-manifest.json.gz",
+    "bytes": 2838,
+    "sha256": "e92939d786dc7fc1630ba9f646dc8310d6616a491c0aac16e0cfda35f6d1f437",
+    "gzip_sha256": "dae90efb35c7b9b64cf221e9cad99a964779f6a32205eb321dad95a33c94fd2b",
+    "roundtrip": true
+  },
+  {
+    "original": "/workspace/review-proof/review-pr800-ci794-803-current/own-first-unit-parse-error.json",
+    "retained": "migration/evidence/skills-preflight-793/windows-mtime-resolution/own-first-unit-parse-error.json.gz",
+    "bytes": 122,
+    "sha256": "dba9cde50925db96cd76762b04091179a8fe2f118b7fb39d9133d30650b2cd13",
+    "gzip_sha256": "ca1c7b7dbbf48073977ba0e07c974bc03b195ec109b7996c16f358db0e121cce",
+    "roundtrip": true
+  }
+]

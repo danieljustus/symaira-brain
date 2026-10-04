@@ -1,0 +1,25 @@
+{
+  "source": "83d3bbff53c06205196db252e0f7e7080c2a474b",
+  "main": "e3dbda6cbb95429237d15a9b176209b7d107792c",
+  "reviewed_source": "9ae16e787ea05544db54c773a0599db6daa3712c",
+  "actual_process_pairs": 315,
+  "passed": 459,
+  "failed": 0,
+  "ignored_child_entrypoints": 2,
+  "summaries": 69,
+  "strict_all_target_all_feature_clippy": true,
+  "fmt": true,
+  "actionlint": true,
+  "candidate_clean_at_execution": true,
+  "platform": "Linux x86_64",
+  "native_three_os": "required at published head",
+  "prior_124_ELF_92_unique_archive": "/workspace/oracles/symaira-pr794-idle-binaries/receipt.json",
+  "archive_retired_target": false,
+  "files_sha256": {
+    "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-main31-raw-flag-process.json": "7adc21a0034b2c9240f90fd776a89828d36aedae13c39356cdd33e5bdc66e579",
+    "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-maine3-build.log": "829c91fd1393d4cb05a5aca6535c19de0876bdfec5b332657e5c2130ef90ed4e",
+    "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-maine3-clippy.log": "9a55c76105968622fb6286999a268608908fd14ba0f7229001717e0ecfd04c35",
+    "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-maine3-process.log": "2605ec0527c701a831517114f78a07dbe05249bf0d3024b7256c1e095026ad0e",
+    "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-maine3-tests.log": "b63153636ae15b9f9a082510a484a98edc1d3321cab0af97f493217fce3039cb"
+  }
+}
