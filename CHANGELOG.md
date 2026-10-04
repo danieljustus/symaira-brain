@@ -9,6 +9,12 @@ the [Unreleased] section is moved into a dated version section.
 
 ## [Unreleased]
 
+### Changed
+- The Rust migration plan preserves the reachable Memory web interface and
+  retires the unused legacy TUI target, which the shipped Brain command tree
+  does not expose (ADR0003/E010, #763). HTTP UI implementation remains tracked
+  separately; this decision does not remove a currently reachable command.
+
 ## [v0.12.1] - 2026-09-24
 
 ### Security
