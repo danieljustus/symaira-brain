@@ -1,7 +1,9 @@
 # Brain765 inherited Skills output owner qualification
 
 Status: source preparation only. The user delegated implementation decisions.
-Frozen Go and Brain product/lock/manifest/workflow bytes remain unchanged.
+The original Brain78f harness preparation preserved all product, lock, manifest
+and workflow bytes. The normal main/797 integration described below imports only
+its already reviewed and merged owners. Frozen Go remains unchanged.
 
 Brain78f (`78f12abcbb772af07fb48d27b7e70c2aede45603`) already includes the reviewed
 published-main Skills owners. Its whole CLI library equals the Source806 profile,
@@ -43,12 +45,33 @@ control verifiers, corpora, all process functions and deadlines stay unchanged.
 No Source/Memory/Skills764 production is imported. Original Brain94Unix/82Win,
 startup10, CLI/loader8 and consumer3 controls and all32 parent groups remain
 required. A prepared profile and pure tests are not actual process qualification.
-Main935 stays the exact reviewed ancestor. A later normal main/797 integration
-may change a complete owner and requires another explicit profile review, rather
-than silently qualifying it. Doctor's separate method/PIDidentity review remains.
+Main935 stays the exact reviewed ancestor. A later owner change requires another
+explicit full-profile review. Doctor's separate method/PIDidentity review remains.
 
 Before edits, complete original Brain/Source Git bodies, native proof metadata,
 handoffs/raw archives and edited original bodies were preserved. Different-author
 full source/method review, explicit allocation, affected actual runtime and exact-
 head native Linux/Windows/macOS/protected CI remain required. No issue/PR closure,
 binary borrowing, reduced coverage or full765 cutover follows from this decision.
+
+## Normal main/797 integration
+
+The first source checkpoint `f312138465447df1006a771a41c250abee98244d` and
+its complete original packet remain immutable. A new isolated successor normally
+merges actual main `c74110425d04dd62c7f2c0f09bb86561bd1ac20e`, the protected/native
+accepted Skills render-drift #621 squash. This imports its exact Skills CLI and
+installation owners, two tests, harness and documentation, rather than borrowing
+executables or importing unapproved Skills764/Memory code. There are no Rust,
+Cargo or lock conflicts. Both full conflict-stage bodies were preserved before
+resolving the CI and migration text as ordered unions; every Guard and Skills CI
+step, upload, failure policy and retention remains.
+
+All five Brain profile owners are rechecked against their complete Git bodies.
+The approved Skills render changes do not alter these five files. The existing
+explicit `brain765-main78f` profile therefore applies to exactly the same body
+combination after the merge. It is not a wildcard for main or Skills changes.
+Full-owner corruption, unknown parent and mixed-profile refusals remain required.
+The original Source helper functions, builders, process/comparison AST, corpora,
+deadlines, Brain94/82 and startup/loader/consumer controls and32 parent groups
+remain exact. Pure-source checks establish source preparation only; they do not
+qualify any actual product binary or native platform.
