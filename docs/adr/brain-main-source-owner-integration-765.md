@@ -99,3 +99,20 @@ Cargo graphs were identical, status expectations for SKL-006/SET-002, and a
 reused preparation output path were rejected. The corrections to source checks
 name the real owners; the original case generators and their no-overwrite guard
 are unchanged. These observations are not native product failures.
+
+Final source checks inspect 19 package manifests and 128 projected ordinary
+Cargo/module entrypoints with standalone Rustfmt; all pass. The 181 inherited/
+integrated changed Rust paths and 19 final integration Rust paths also pass.
+Actual Cargo fmt remains mandatory in the future allocated runtime driver.
+An additional standalone audit of every one of 474 .rs files reports five
+unchanged include/support fragments: tests/support/setup_child.rs,
+tests/support/vault_child.rs, materialize_fs.rs, materialize_manifest.rs and
+materialize_stage.rs. Root explicitly chose the required module-root gate and
+kept these fragments exact their parents; the broader failure is retained, not
+relabeled as a blanket full-workspace pass.
+
+The source preflight succeeds after the eight formatting-only overlays, checking
+763 whole source bodies/modes and all original checkpoints and frozen Go refs.
+All complete parent CI step dictionaries survive. The final workflow minus its
+exact four-line reviewed fetch is byte-identical to the normal merge workflow;
+the exact e003 ADR and four retained artifacts remain unchanged in Git.

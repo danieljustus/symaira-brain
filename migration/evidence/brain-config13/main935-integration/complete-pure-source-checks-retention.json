@@ -1,0 +1,568 @@
+{
+  "validated_source": "e40cc6512275a53089151641240db17c6c21d63c",
+  "records": [
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/before/actionlint.stderr",
+      "member": "before/actionlint.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791121709824615105
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/before/actionlint.stdout",
+      "member": "before/actionlint.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791121709824615105
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/before/bash.stderr",
+      "member": "before/bash.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791121709780613749
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/before/bash.stdout",
+      "member": "before/bash.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791121709780613749
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/before/bindings.json",
+      "member": "before/bindings.json",
+      "bytes": 590993,
+      "sha256": "f4cda7a8a55c9383df58bcacd640fd1006d2821f1cf6a5d4496cc5eefcb2a129",
+      "native_mode": 33152,
+      "mtime_ns": 1791121709839421625
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/before/diff.stderr",
+      "member": "before/diff.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791121709812614736
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/before/diff.stdout",
+      "member": "before/diff.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791121709812614736
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/before/full-original-verification.log",
+      "member": "before/full-original-verification.log",
+      "bytes": 1664,
+      "sha256": "9e93d5ac28235696a73f4cd7db749922fbe1720c042fc1941d598b2db51ff26f",
+      "native_mode": 33152,
+      "mtime_ns": 1791121709839632975
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/before/verification.json",
+      "member": "before/verification.json",
+      "bytes": 1664,
+      "sha256": "9e93d5ac28235696a73f4cd7db749922fbe1720c042fc1941d598b2db51ff26f",
+      "native_mode": 33152,
+      "mtime_ns": 1791121709839632975
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/before/verify.py",
+      "member": "before/verify.py",
+      "bytes": 9476,
+      "sha256": "33a21890f596ac242ece5f42b82f7d1dae20af7d0f158e38b0159370d8f599a3",
+      "native_mode": 33152,
+      "mtime_ns": 1791121702425899837
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/bind_effective.py",
+      "member": "bind_effective.py",
+      "bytes": 2629,
+      "sha256": "d0ecc41e9656157c3cc9ce1fb032621559f1f2a3d91f3393ffa23d5f664a5b6f",
+      "native_mode": 33152,
+      "mtime_ns": 1791122944096132084
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/check-composed-final-1.log",
+      "member": "check-composed-final-1.log",
+      "bytes": 697,
+      "sha256": "7c3a25278c8bdf5b31b5a3fba73ad3084a326911264adc185cb1b63a9857d942",
+      "native_mode": 33152,
+      "mtime_ns": 1791123145764551023
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/check-fifth-inherited-format-failure.log",
+      "member": "check-fifth-inherited-format-failure.log",
+      "bytes": 88190,
+      "sha256": "8826d3e247066ced5f8ba6f3f5ea5a0ce23539708d5584018f8b89bc1f1299e3",
+      "native_mode": 33152,
+      "mtime_ns": 1791122668992669932
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/check-first-owner-union-failure.log",
+      "member": "check-first-owner-union-failure.log",
+      "bytes": 337,
+      "sha256": "9dea119adbba5e17095d400ea4c25d39401c33b0c8ece2c92fa10334f1bc1477",
+      "native_mode": 33152,
+      "mtime_ns": 1791122393778206804
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/check-fourth-SET002-status-expectation-failure.log",
+      "member": "check-fourth-SET002-status-expectation-failure.log",
+      "bytes": 278,
+      "sha256": "a33f6d2b15ef621ab4aa06ac52ca27ef813325e77d7e81bd9c3c35db45510ba4",
+      "native_mode": 33152,
+      "mtime_ns": 1791122574826362933
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/check-second-Cargo-parent-expectation-failure.log",
+      "member": "check-second-Cargo-parent-expectation-failure.log",
+      "bytes": 306,
+      "sha256": "10e93bb2fc045b1d60272bdb93d6044f38b607191f58b64f2f11e940340b44a7",
+      "native_mode": 33152,
+      "mtime_ns": 1791122472133195851
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/check-third-matrix-status-expectation-failure.log",
+      "member": "check-third-matrix-status-expectation-failure.log",
+      "bytes": 456,
+      "sha256": "e3fe8f3b43fdc46b06732d15896bd7ca22ad52526329cf3699e36df3b7d9d22f",
+      "native_mode": 33152,
+      "mtime_ns": 1791122525506550382
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/check.log",
+      "member": "check.log",
+      "bytes": 918,
+      "sha256": "f307397c3f046d2563f5be6b17f6203dad2fa9e3f6a33dd2de02e469a797bfe6",
+      "native_mode": 33152,
+      "mtime_ns": 1791122671555204206
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/check.py",
+      "member": "check.py",
+      "bytes": 6522,
+      "sha256": "0777b8596e144ccd30ff169f7b907c58d98b4cf24549e81ce3a0b06d15e5ee21",
+      "native_mode": 33152,
+      "mtime_ns": 1791123140415925799
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks/actionlint.stderr",
+      "member": "checks/actionlint.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791122577599299676
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks/actionlint.stdout",
+      "member": "checks/actionlint.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791122577599299676
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks/bash.stderr",
+      "member": "checks/bash.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791122577587299305
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks/bash.stdout",
+      "member": "checks/bash.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791122577587299305
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks/plans.stderr",
+      "member": "checks/plans.stderr",
+      "bytes": 441,
+      "sha256": "87b6f060de19dd0398572d68c559bc7dac2e7a84ebf96c2a63c80642c52b5b5a",
+      "native_mode": 33152,
+      "mtime_ns": 1791122671555204206
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks/plans.stdout",
+      "member": "checks/plans.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791122671550204839
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks/prepared.json",
+      "member": "checks/prepared.json",
+      "bytes": 1005627,
+      "sha256": "5c0888c1f8fc7ef5965e46adb18e83ab591db3a48cd589db970052db78aadd74",
+      "native_mode": 33152,
+      "mtime_ns": 1791122577574576099
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks/rustfmt.stderr",
+      "member": "checks/rustfmt.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791122578692800987
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks/rustfmt.stdout",
+      "member": "checks/rustfmt.stdout",
+      "bytes": 85023,
+      "sha256": "4b09372abc1cff680b2452be3ea8807e2dcb4d6ed54d5577ade0326434f4f0ea",
+      "native_mode": 33152,
+      "mtime_ns": 1791122578692800987
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks-composed-final-1/actionlint.stderr",
+      "member": "checks-composed-final-1/actionlint.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791123143244757684
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks-composed-final-1/actionlint.stdout",
+      "member": "checks-composed-final-1/actionlint.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791123143244757684
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks-composed-final-1/bash.stderr",
+      "member": "checks-composed-final-1/bash.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791123143232757313
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks-composed-final-1/bash.stdout",
+      "member": "checks-composed-final-1/bash.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791123143232757313
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks-composed-final-1/integration-rustfmt.stderr",
+      "member": "checks-composed-final-1/integration-rustfmt.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791123144416793939
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks-composed-final-1/integration-rustfmt.stdout",
+      "member": "checks-composed-final-1/integration-rustfmt.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791123144416793939
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks-composed-final-1/plans.stderr",
+      "member": "checks-composed-final-1/plans.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791123143228757189
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks-composed-final-1/plans.stdout",
+      "member": "checks-composed-final-1/plans.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791123143228757189
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks-composed-final-1/prepared.json",
+      "member": "checks-composed-final-1/prepared.json",
+      "bytes": 1005627,
+      "sha256": "5c0888c1f8fc7ef5965e46adb18e83ab591db3a48cd589db970052db78aadd74",
+      "native_mode": 33152,
+      "mtime_ns": 1791123143215966232
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks-composed-final-1/result.json",
+      "member": "checks-composed-final-1/result.json",
+      "bytes": 197393,
+      "sha256": "e7eed2b8a4b872aecef8f47b0f2b60e19940a0f388158b67485593064cea8e0d",
+      "native_mode": 33152,
+      "mtime_ns": 1791123145764551023
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks-composed-final-1/rustfmt.stderr",
+      "member": "checks-composed-final-1/rustfmt.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791123144372792578
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks-composed-final-1/rustfmt.stdout",
+      "member": "checks-composed-final-1/rustfmt.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791123144372792578
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks-composed-final-1/source-diff.stderr",
+      "member": "checks-composed-final-1/source-diff.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791123144424794186
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/checks-composed-final-1/source-diff.stdout",
+      "member": "checks-composed-final-1/source-diff.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791123144424794186
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/cherry-pick-cc3.log",
+      "member": "cherry-pick-cc3.log",
+      "bytes": 490,
+      "sha256": "20343165f98be099aeed87dda0fd5a4644b7b3fafe1e5554b583d873558835e2",
+      "native_mode": 33152,
+      "mtime_ns": 1791122091756279839
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/cherry-pick-e003.log",
+      "member": "cherry-pick-e003.log",
+      "bytes": 472,
+      "sha256": "38bb49250fa9636966d469ba8130845d6b922aa8a2d56dff956fc4deafeedd84",
+      "native_mode": 33152,
+      "mtime_ns": 1791122098990234230
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/final-owner-checks.json",
+      "member": "final-owner-checks.json",
+      "bytes": 791,
+      "sha256": "fd6344876a51abcbe8e837fa829be994b24654fe323e676f1cb47b710905c649",
+      "native_mode": 33152,
+      "mtime_ns": 1791123352304901510
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/final-owner-checks.log",
+      "member": "final-owner-checks.log",
+      "bytes": 791,
+      "sha256": "fd6344876a51abcbe8e837fa829be994b24654fe323e676f1cb47b710905c649",
+      "native_mode": 33152,
+      "mtime_ns": 1791123352304901510
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/final_checks.py",
+      "member": "final_checks.py",
+      "bytes": 2743,
+      "sha256": "5238e1054e56d9946d97cb93d46c04dce8291c439fed538dfbc12ce4162b5e07",
+      "native_mode": 33152,
+      "mtime_ns": 1791123352127121079
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/first-conflicts.json",
+      "member": "first-conflicts.json",
+      "bytes": 529843,
+      "sha256": "bef84ace7a246c3e9678f6c244d3a3d7ed56777d0039c3f587c42ce1fd047c2d",
+      "native_mode": 33152,
+      "mtime_ns": 1791121785917426575
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/format-overlay-binding.log",
+      "member": "format-overlay-binding.log",
+      "bytes": 25,
+      "sha256": "9d133e94eeca22a32b99449ed086dd466d677b2560cc338d6411eaca225b0ae1",
+      "native_mode": 33152,
+      "mtime_ns": 1791122967480281038
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/format_preserve.py",
+      "member": "format_preserve.py",
+      "bytes": 1477,
+      "sha256": "e6b423c09ef8e4c0b6dcb70e61de806c69b102b499b9b9f753102723f3547c71",
+      "native_mode": 33152,
+      "mtime_ns": 1791122840828209931
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/full-workspace-rustfmt.stderr",
+      "member": "full-workspace-rustfmt.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791122994018591761
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/full-workspace-rustfmt.stdout",
+      "member": "full-workspace-rustfmt.stdout",
+      "bytes": 5819,
+      "sha256": "6d9d90be9ed6001a98e26f0ccb6f89216a681d47004b0f9d6076b3c404c63a7c",
+      "native_mode": 33152,
+      "mtime_ns": 1791122994018591761
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/merge.log",
+      "member": "merge.log",
+      "bytes": 546,
+      "sha256": "5efd38e91f3bdce229c50611e19cce06434bde7718a504e096831b08023db953",
+      "native_mode": 33152,
+      "mtime_ns": 1791121795950031013
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/module-root-rustfmt.json",
+      "member": "module-root-rustfmt.json",
+      "bytes": 7496,
+      "sha256": "e6ff7a8d7894e9dc04b5f08cdd2035e0fb0a5272a955abc5829491eedcd015ae",
+      "native_mode": 33152,
+      "mtime_ns": 1791123222130279777
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/module-root-rustfmt.stderr",
+      "member": "module-root-rustfmt.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791123222123196772
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/module-root-rustfmt.stdout",
+      "member": "module-root-rustfmt.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791123222123196772
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/module_format.py",
+      "member": "module_format.py",
+      "bytes": 2233,
+      "sha256": "8850a5cddbce7f87ffe538fcf6e9eccb60e2704ac2644b9adc295f953e8dcbff",
+      "native_mode": 33152,
+      "mtime_ns": 1791123221229485237
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/original-runtime-tools.py",
+      "member": "original-runtime-tools.py",
+      "bytes": 13686,
+      "sha256": "3ad599253b1990473cb7d3c4314dc876eb5242ffeea76140146874d18a676535",
+      "native_mode": 33152,
+      "mtime_ns": 1791122068571568079
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/owner-controls-formatted.log",
+      "member": "owner-controls-formatted.log",
+      "bytes": 101,
+      "sha256": "33060fd73862c5e1af97335504d5b45211fce6d229657f556d8deceeadc52ce4",
+      "native_mode": 33152,
+      "mtime_ns": 1791123352395229469
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/owner-controls.log",
+      "member": "owner-controls.log",
+      "bytes": 101,
+      "sha256": "33060fd73862c5e1af97335504d5b45211fce6d229657f556d8deceeadc52ce4",
+      "native_mode": 33152,
+      "mtime_ns": 1791122407954052830
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/preflight/source.json",
+      "member": "preflight/source.json",
+      "bytes": 252116,
+      "sha256": "1f8775ec99de8be1a346478de42855bbe2770da5ba48dac0641ceae61320b8bd",
+      "native_mode": 33152,
+      "mtime_ns": 1791122410751507609
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/preflight-formatted/source.json",
+      "member": "preflight-formatted/source.json",
+      "bytes": 254207,
+      "sha256": "79aa38f80e23016b727bc9481d58802f329c58affbe438b9698803f7e0cf7dda",
+      "native_mode": 33152,
+      "mtime_ns": 1791123186496371495
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/preflight-formatted.log",
+      "member": "preflight-formatted.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791123183610005310
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/preflight.log",
+      "member": "preflight.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "mtime_ns": 1791122407854049739
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/preservation.log",
+      "member": "preservation.log",
+      "bytes": 633,
+      "sha256": "3a41c00decacd4bb4191966b8df5b0267b24da8488e061d2289f38ff18a1662a",
+      "native_mode": 33152,
+      "mtime_ns": 1791121754637783478
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/preserve.py",
+      "member": "preserve.py",
+      "bytes": 2985,
+      "sha256": "996dff74f71d21cbb3223ae89f5e22960a770e168020bcf1e579e469b717a674",
+      "native_mode": 33152,
+      "mtime_ns": 1791121751249453143
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/preserve_final_checks.py",
+      "member": "preserve_final_checks.py",
+      "bytes": 1294,
+      "sha256": "5f8804dbaf725a6fb8cca3d8bcd06ae93e79693af284ae5df8ba3aa7b610f5cf",
+      "native_mode": 33152,
+      "mtime_ns": 1791123458250506402
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/resolve.py",
+      "member": "resolve.py",
+      "bytes": 1467,
+      "sha256": "302f90e0ba457cd348c0ba12ef0871f375f5e25779ea789be324eba3a43824d9",
+      "native_mode": 33152,
+      "mtime_ns": 1791121836323463233
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/verify_format.py",
+      "member": "verify_format.py",
+      "bytes": 1853,
+      "sha256": "6c83c5b3ae6953c64c4731ad7a5a30e9dfdb8348f9164511a8a088db5718adf0",
+      "native_mode": 33152,
+      "mtime_ns": 1791122921859017319
+    },
+    {
+      "path": "/workspace/review-proof/brain765-main-integration/whole-diff-raw-evidence-whitespace.log",
+      "member": "whole-diff-raw-evidence-whitespace.log",
+      "bytes": 1503,
+      "sha256": "eb7490dacd0c8afd7f80e0457239e23cd8e7c6262022fe3f758a514ec696e1de",
+      "native_mode": 33152,
+      "mtime_ns": 1791123418397273487
+    }
+  ],
+  "archive_sha256": "6885283691d43ed75ea5e38b5d62f6f898c388962416f912acff86f2a5543af5",
+  "all_roundtrips": true,
+  "compiler_Cargo_SDK_product_SQLite_target_port_GitHub": 0
+}
