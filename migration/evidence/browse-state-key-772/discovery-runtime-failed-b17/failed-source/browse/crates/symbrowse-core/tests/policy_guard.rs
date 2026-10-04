@@ -67,10 +67,7 @@ mod unix {
             timeout: Duration::from_millis(20),
         };
         let error = timeout.decide(&input()).unwrap_err();
-        assert!(
-            error.to_string().contains("timed out"),
-            "actual Guard error: {error}"
-        );
+        assert!(error.to_string().contains("timed out"));
         let descendant = Guard {
             executable: script(
                 &root,
@@ -80,10 +77,7 @@ mod unix {
             timeout: Duration::from_millis(50),
         };
         let error = descendant.decide(&input()).unwrap_err();
-        assert!(
-            error.to_string().contains("timed out"),
-            "actual Guard error: {error}"
-        );
+        assert!(error.to_string().contains("timed out"));
         fs::remove_dir_all(root).unwrap();
     }
 
