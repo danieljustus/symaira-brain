@@ -41,3 +41,7 @@ The original baseline also records Go-created JWT-secret and audit files that
 the native startup does not currently create; they are remaining lifecycle
 contracts, not normalization allowances. Full platform acceptance, independent
 review and protected checks remain required before merge.
+
+## Fresh clean-source result
+
+Source2f5a59d, normally based on approved Memory27001b1 and maine3dbda6c, passes32 complete actual Go/native process pairs across eight profiles, both framing modes and both command aliases. All five actual title/hint/schema/order/exposure mutant processes are rejected.316 gateway/MCP/CLI all-target/all-feature tests pass with zero failures or ignores (35 summaries); strict Clippy, formatting and Actionlint pass. The original MCP process suite, foreign-child routing, malformed frames and Unix SIGTERM behavior also pass.215 current source hashes and107 actual ELF paths/75 unique hashes were verified and retained before target release. First source855 Clippy failure and its passing32/4 process proof remain unchanged in the baseline evidence. Complete receipts are under `migration/evidence/memory-mcp-759/final-2f5a59`. Independent review and genuine native-three-OS acceptance are still pending; this is no closure or filesystem-parity claim.
