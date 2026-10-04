@@ -52,7 +52,7 @@ pub fn join_bytes(parts: &[&[u8]], windows: bool) -> Vec<u8> {
     }
 }
 
-/// Go Windows IsAbs needs a volume and separator; a root-only slash isn't absolute.
+/// Go Windows `IsAbs` needs a volume and separator; a root-only slash isn't absolute.
 #[must_use]
 pub fn is_absolute(bytes: &[u8], windows: bool) -> bool {
     if !windows {
@@ -164,7 +164,7 @@ pub fn clean_bytes(original: &[u8], windows: bool) -> Vec<u8> {
             if output.len() > boundary {
                 output.pop();
                 while output.len() > boundary
-                    && !is_separator(index(&output, path, &slots), windows)
+                    && !is_separator(index(&output, path, slots.as_deref()), windows)
                 {
                     output.pop();
                 }
@@ -208,9 +208,9 @@ pub fn clean_bytes(original: &[u8], windows: bool) -> Vec<u8> {
     result.extend(output);
     from_slash(result, windows)
 }
-fn index(output: &[u8], original: &[u8], slots: &Option<Vec<u8>>) -> u8 {
+fn index(output: &[u8], original: &[u8], slots: Option<&[u8]>) -> u8 {
     // Go backtracking reads the backing byte at w, after decrementing w.
-    slots.as_deref().unwrap_or(original)[output.len()]
+    slots.unwrap_or(original)[output.len()]
 }
 fn append(output: &mut Vec<u8>, byte: u8, original: &[u8], slots: &mut Option<Vec<u8>>) {
     if slots.is_none() && original.get(output.len()) != Some(&byte) {

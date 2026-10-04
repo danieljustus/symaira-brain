@@ -74,3 +74,27 @@ String-to-GoText conversion used by adjacent Doctor branches and removing only
 the proven unused import. No policy diagnostic text, criteria or corpus changes.
 The exact second ELF/rlib counts and all raw source/streams are in its retained
 runtime-second-918c receipt, including zero target users before this correction.
+
+The immutablee740 first complete run builds successfully, detects all three
+correction and eight original genuine mutants, and records all original report
+failures without altering equality. Retain its221 raw report/log/source files,
+including actual128-byte stdout prefix, and981 ELF/rlib paths/913 unique payloads
+before any corrections. The strict MCP unit exposed a real unreachable optional
+backend branch: the embedded-core skip included Operate/Scope. Exclude those
+aliases from that skip so the existing global/profile gate and authoritative
+path lookup construct only lazy children; retain all original unit criteria.
+
+The source and repair native handlers already invoke the shared typed loader at
+Go's ordered boundary. Their obsolete configuration-error fallback alone caused
+39 strict missing-Go failures. Promote those existing native admissions, retaining
+Doctor's initial header and setup/source prefixes and filesystem/error precedence.
+Preserve every original102 case and all13 field vectors; fresh actual processes
+must prove the promotion. This does not resolve other owner/grammar/JWT limits.
+
+Strict Clippy fixes use borrowed byte slices/errors, equivalent newline split
+count and documentation markup, without adding a dependency or lint suppression.
+Run workspace tests with no-fail-fast so the original first failing crate cannot
+hide later results. The human partial-reader mismatch cut inside two different
+owned temporary directory names. Reuse and restore one exact owned fixture path
+between actual Go/native runs; retain128 requested bytes and every full byte,
+exit and state comparison. Arbitrary prefix trimming is not permitted.

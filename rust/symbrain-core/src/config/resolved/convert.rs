@@ -1,4 +1,4 @@
-//! CoreKit reflection semantics in explicit Go field declaration order.
+//! `CoreKit` reflection semantics in explicit Go field declaration order.
 use super::{BrainConfig, Sources};
 use crate::{GoText, config::format_go_quoted_bytes, go_path};
 use toml_edit::{DocumentMut, Item, Value};

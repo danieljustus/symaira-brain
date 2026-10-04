@@ -10,7 +10,7 @@ pub trait Sources {
     /// Returns the actual cwd failure; the loader skips its project stage.
     fn current_directory(&self) -> io::Result<PathBuf>;
     /// # Errors
-    /// Returns the actual stat failure; only NotFound suppresses admission.
+    /// Returns the actual stat failure; only `NotFound` suppresses admission.
     fn metadata(&self, path: &Path) -> io::Result<()>;
     /// # Errors
     /// Returns the actual open/read operation and OS error.

@@ -2,10 +2,6 @@
 use std::path::{Path, PathBuf};
 use symbrain_core::config::resolved::{self, ProcessSources, Sources};
 
-pub(crate) fn valid_configuration() -> bool {
-    resolved::load().is_ok()
-}
-
 pub(super) fn configured_override(path: &Path, variable: &str) -> Option<PathBuf> {
     let config = resolved::load_with_global_path(path, &OverrideSources(variable)).ok()?;
     (!config.servers.vault.is_empty()).then(|| {

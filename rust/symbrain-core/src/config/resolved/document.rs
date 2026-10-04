@@ -17,10 +17,8 @@ pub(super) fn parse(bytes: &[u8]) -> Result<DocumentMut, GoText> {
         // Preserve the input byte; a Rust UTF-8 diagnostic is not a Go oracle.
         let byte = bytes[error.valid_up_to()];
         let line = bytes[..error.valid_up_to()]
-            .iter()
-            .filter(|b| **b == b'\n')
-            .count()
-            + 1;
+            .split(|byte| *byte == b'\n')
+            .count();
         // Grammar-before-invalid-UTF8 priority must be proven against the SDK
         // before native cutover. No parser wording decision waives that gate.
         format!("invalid UTF-8 byte 0x{byte:02x} at line {line}").into()
@@ -31,7 +29,7 @@ pub(super) fn parse(bytes: &[u8]) -> Result<DocumentMut, GoText> {
         // Report position/reason, without reproducing the complete input line.
         let offset = error.span().map_or(0, |span| span.start.min(bytes.len()));
         let prefix = &bytes[..offset];
-        let line = prefix.iter().filter(|byte| **byte == b'\n').count() + 1;
+        let line = prefix.split(|byte| *byte == b'\n').count();
         let column = offset
             - prefix
                 .iter()

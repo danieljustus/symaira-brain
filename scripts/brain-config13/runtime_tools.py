@@ -101,7 +101,7 @@ def archive(root, out, target):
         payload = dest / (digest + ".gz")
         if not payload.exists():
             assert shutil.disk_usage(root).free >= 700*1024*1024, "cannot archive below allocated floor"
-            payload.write_bytes(gzip.compress(data, mtime=0))
+            payload.write_bytes(gzip.compress(data, compresslevel=1, mtime=0))
         assert gzip.decompress(payload.read_bytes()) == data
         records.append(dict(path=str(path), bytes=len(data), sha256=digest, gzip=str(payload),
                             gzip_sha256=sha(payload.read_bytes())))

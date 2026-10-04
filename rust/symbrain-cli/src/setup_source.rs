@@ -83,10 +83,6 @@ struct ResultRow {
     error: symbrain_managed::GoText,
 }
 
-pub(super) fn valid_root(root: &OsStr) -> bool {
-    absolute(root).is_ok_and(|root| root.is_dir())
-}
-
 fn absolute(root: &OsStr) -> Result<PathBuf, String> {
     let root = Path::new(root);
     let joined = if root.is_absolute() {

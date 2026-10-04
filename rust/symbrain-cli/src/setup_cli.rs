@@ -19,26 +19,10 @@ use flags::{SetupArgs, parse_args};
 #[path = "setup_source.rs"]
 mod source;
 
-/// Preserve full typed configuration diagnostics until their native cutover.
-pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
-    parse_args(args, &mut Vec::new()).is_ok_and(|parsed| {
-        if crate::managed_home::bin_dir().is_none() {
-            return false;
-        }
-        let source = !parsed.from_source.is_empty();
-        if source && (parsed.fix || parsed.allow_unsigned) {
-            return false;
-        }
-        if !source && !parsed.modules.is_empty() {
-            return false;
-        }
-        // Go validates the source root before loading configuration.
-        if source && !source::valid_root(&parsed.from_source) {
-            return false;
-        }
-        (parsed.fix || source)
-            && (!crate::vault_config::valid_configuration() || enabled_cores().is_err())
-    })
+/// Source and repair now share native typed configuration admission.
+/// Invalid config reaches the command's ordered diagnostic before any work.
+pub(crate) fn requires_go_fallback(_args: &[OsString]) -> bool {
+    false
 }
 
 #[derive(Serialize)]

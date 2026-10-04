@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Actual Linux output/state boundary; retained independent inputs, no assertion weakening."""
 from pathlib import Path
-import base64,datetime,fcntl,hashlib,importlib.util,json,os,stat,subprocess,sys,tempfile,time
+import base64,datetime,fcntl,hashlib,importlib.util,json,os,stat,subprocess,sys,tempfile,time,shutil
 ROOT=Path(__file__).resolve().parents[2];GO=Path(os.environ["SETUP_OUTPUT_GO"]);RUST=Path(os.environ["SETUP_OUTPUT_RUST"]).resolve()
 def load(name,path):
  spec=importlib.util.spec_from_file_location(name,path);m=importlib.util.module_from_spec(spec);sys.modules[name]=m;spec.loader.exec_module(m);return m
@@ -25,9 +25,12 @@ with tempfile.TemporaryDirectory(prefix='fourth-pipe-tools-')as temporary,setup.
  for mode in ['closed-reader','partial-reader']:
   for route in ['install','fix','source']:
    row={'case':mode+'-'+route+'-human','reader_bytes_requested':128 if mode=='partial-reader'else 0}
-   for label,binary in [('go',GO),('rust',RUST)]:
-    with tempfile.TemporaryDirectory(prefix='fourth-pipe-case-')as fixture:
+   with tempfile.TemporaryDirectory(prefix='fourth-pipe-case-')as fixture:
+    for label,binary in [('go',GO),('rust',RUST)]:
      root=Path(fixture)
+     for entry in root.iterdir():
+      if entry.is_dir()and not entry.is_symlink():shutil.rmtree(entry)
+      else:entry.unlink()
      if route=='source':env,args=source.configure(source.cases()[0],root,GO,tool)
      else:
       env=setup.legacy.prepare_root(root,GO);setup.legacy.setup_release_fixture(root,env);args=['setup']+(['--fix']if route=='fix'else[])+['--allow-unsigned','--json']

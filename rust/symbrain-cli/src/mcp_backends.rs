@@ -38,7 +38,10 @@ pub(super) fn build_backends(
     }
 
     for alias in profile.server_aliases() {
-        if symbrain_policy::is_core_alias(&alias) {
+        if symbrain_policy::is_core_alias(&alias)
+            && alias != SERVER_OPERATE
+            && alias != SERVER_SCOPE
+        {
             continue;
         }
         let config = profile.server(&alias);

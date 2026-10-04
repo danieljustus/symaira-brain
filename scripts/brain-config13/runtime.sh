@@ -48,7 +48,7 @@ if ! stage build cargo build --workspace --all-targets --all-features --locked -
   exit 1
 fi
 python3 scripts/brain-config13/runtime_tools.py binaries --root "$root" --out "$out" --target "$CARGO_TARGET_DIR"
-stage tests cargo test --workspace --all-targets --all-features --locked || true
+stage tests cargo test --workspace --all-targets --all-features --locked --no-fail-fast || true
 stage clippy cargo clippy --workspace --all-targets --all-features --locked -- -D warnings || true
 stage fmt cargo fmt --all -- --check || true
 stage actionlint /workspace/toolchains/bin/actionlint || true

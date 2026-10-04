@@ -14,17 +14,17 @@ use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 pub use value::{Audit, BrainConfig, Gateway, Modules, Patterns, Servers, UpdateCheck};
 
-/// Returns CoreKit DefaultPath even without a usable HOME.
+/// Returns `CoreKit` `DefaultPath` even without a usable HOME.
 #[must_use]
 pub fn default_path() -> PathBuf {
     default_path_with(&ProcessSources)
 }
 #[must_use]
 pub fn default_path_with(source: &impl Sources) -> PathBuf {
-    if let Some(xdg) = source.environment("XDG_CONFIG_HOME") {
-        if go_path::is_absolute(&go_path::os_bytes(&xdg), cfg!(windows)) {
-            return go_path::join(&[&xdg, OsStr::new("symbrain"), OsStr::new("config.toml")]);
-        }
+    if let Some(xdg) = source.environment("XDG_CONFIG_HOME")
+        && go_path::is_absolute(&go_path::os_bytes(&xdg), cfg!(windows))
+    {
+        return go_path::join(&[&xdg, OsStr::new("symbrain"), OsStr::new("config.toml")]);
     }
     let home = source
         .environment(go_path::home_variable())
@@ -52,9 +52,9 @@ pub fn load() -> Result<BrainConfig, ConfigError> {
 /// # Errors
 /// Returns the first stage error, preserving its byte-valued context.
 pub fn load_with(source: &impl Sources) -> Result<BrainConfig, ConfigError> {
-    load_stages(source, None).map_err(|detail| wrap_error(&default_path_with(source), detail))
+    load_stages(source, None).map_err(|detail| wrap_error(&default_path_with(source), &detail))
 }
-/// Loads all stages with an injected global file (production uses DefaultPath).
+/// Loads all stages with an injected global file (production uses `DefaultPath`).
 ///
 /// # Errors
 /// Returns the same ordered stage errors as [`load_with`].
@@ -62,9 +62,9 @@ pub fn load_with_global_path(
     global: &Path,
     source: &impl Sources,
 ) -> Result<BrainConfig, ConfigError> {
-    load_stages(source, Some(global)).map_err(|detail| wrap_error(global, detail))
+    load_stages(source, Some(global)).map_err(|detail| wrap_error(global, &detail))
 }
-fn wrap_error(global: &Path, detail: GoText) -> ConfigError {
+fn wrap_error(global: &Path, detail: &GoText) -> ConfigError {
     let mut text = GoText::from("config: failed to load ");
     text.push(&go_path::os_bytes(global.as_os_str()));
     text.push(b": ");
@@ -123,11 +123,11 @@ fn merge_file(config: &mut BrainConfig, path: &Path, source: &impl Sources) -> R
         text
     })?;
     let document =
-        document::parse(&bytes).map_err(|error| path_error("failed to parse ", path, error))?;
+        document::parse(&bytes).map_err(|error| path_error("failed to parse ", path, &error))?;
     convert::apply_document(config, &document)
-        .map_err(|error| path_error("failed to apply ", path, error))
+        .map_err(|error| path_error("failed to apply ", path, &error))
 }
-fn path_error(prefix: &str, path: &Path, error: GoText) -> GoText {
+fn path_error(prefix: &str, path: &Path, error: &GoText) -> GoText {
     let mut text = GoText::from(prefix);
     text.push(&go_path::os_bytes(path.as_os_str()));
     text.push(b": ");
