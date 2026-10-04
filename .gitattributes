@@ -44,3 +44,6 @@ migration/evidence/memory-historical-649/runtime-ab561d5-original-failure/*.log 
 migration/evidence/memory-historical-649/runtime-687289d-original-failure/*.log binary
 
 migration/evidence/memory-historical-649/final-1fc5910/*.log binary
+
+# Preserve complete original Doctor CI CRLF logs without normalization.
+migration/evidence/doctor-owned-paths-806/original-f944/*.log binary

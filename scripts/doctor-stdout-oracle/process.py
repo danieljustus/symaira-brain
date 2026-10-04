@@ -1,7 +1,7 @@
 from pathlib import Path
 import base64,fcntl,importlib.util,json,os,subprocess,sys,tempfile,time
 from identity import identity
-ROOT=Path(__file__).resolve().parents[2];GO=Path(os.environ['DOCTOR_STDOUT_GO']);RUST=Path(os.environ['DOCTOR_STDOUT_RUST']);BASE=Path(os.environ.get('DOCTOR_STDOUT_BASELINE',str(RUST)))
+ROOT=Path(__file__).resolve().parents[2];GO=Path(os.environ['DOCTOR_STDOUT_GO']).resolve();RUST=Path(os.environ['DOCTOR_STDOUT_RUST']).resolve();BASE=Path(os.environ.get('DOCTOR_STDOUT_BASELINE',str(RUST))).resolve()
 sys.path.insert(0,str(ROOT/'scripts/doctor-repair-oracle'))
 spec=importlib.util.spec_from_file_location('fifth_other_doctor_output',ROOT/'scripts/doctor-repair-oracle/replay.py');m=importlib.util.module_from_spec(spec);sys.modules[spec.name]=m;spec.loader.exec_module(m)
 rows=[]

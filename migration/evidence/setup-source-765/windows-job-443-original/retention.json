@@ -1,0 +1,449 @@
+{
+  "original_publication": "44354141e73b5ff4287ec3b1b767c2d0a8e99e6b",
+  "original_ci_merge": "fb39903f721f0958de9ab6119a0ab094e13e50a2",
+  "originals_frozen_before_production_changes": true,
+  "original_native_pe_bytes_available": false,
+  "files": [
+    {
+      "path": "/tmp/symaira-doctor806-443-native-windows-phase-report.md",
+      "bytes": 4957,
+      "sha256": "57ccc75cd7bbc50ee698bdb5af4b5c937d9526eda0b32db47bc4a71c0e1493aa",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/000-symaira-doctor806-443-native-windows-phase-report.md.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-windows-original.log",
+      "bytes": 719385,
+      "sha256": "878e72f3ee49a4a3e3c400bebaff3618a7b3fb41f03b0d71ad173dd795d6b4cd",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/001-symaira-doctor806-443-windows-original.log.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-windows-original-log-api.json",
+      "bytes": 769388,
+      "sha256": "e2c4aa8aced2429d2665e7ae782c17a3f3a6b7930af9d04a359cafb3a15924df",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/002-symaira-doctor806-443-windows-original-log-api.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-initial-api.json",
+      "bytes": 80783,
+      "sha256": "07b15f777ec375e0191300a8529057f366ea2100c626c7fe16c895e7898e7191",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/003-symaira-doctor806-443-current-initial-api.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-run-api.json",
+      "bytes": 29505,
+      "sha256": "d0559c41ebc19a52697ddcb1db5d66d42cb142afdd08de9a87a22aa4c96f8836",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/004-symaira-doctor806-443-current-run-api.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-final-artifacts-api.json",
+      "bytes": 23356,
+      "sha256": "e96fa3298bf54f7e9984f2d23589be58442f6725dff682f04f439009385892b0",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/005-symaira-doctor806-443-final-artifacts-api.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-final-jobs-api.json",
+      "bytes": 50290,
+      "sha256": "14f1abbcd0497f1324c35b34b3d572509749af061d2d1fdc55397da1ef2b5632",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/006-symaira-doctor806-443-final-jobs-api.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifact-downloads.json",
+      "bytes": 3177,
+      "sha256": "17d0652d64ce6594d5e99ecdcf21f9d5ae815461e15b273d7dfad1271e606b73",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/007-symaira-doctor806-443-artifact-downloads.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-source-binding.json",
+      "bytes": 4274,
+      "sha256": "e0eabf33b453c68836d70c98c84160e154f6aa49d83b3bc39f2dc5fbd40ba01c",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/008-symaira-doctor806-443-source-binding.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/original-archive-receipt.json",
+      "bytes": 14169,
+      "sha256": "2dd3ca6d829f55af2e921ffa7ff1e8637262aeef40720adf1d0da986e7b82359",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/009-original-archive-receipt.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/original-member-receipt.json",
+      "bytes": 9856,
+      "sha256": "320100c2decc544a6c86f0512913b2909f6d9d6a1433354ff3d549ebd87c06fb",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/010-original-member-receipt.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.cargo.jsonl",
+      "bytes": 230634,
+      "sha256": "3995b7629dd24fc35cf86f55afd956eebb0fe1fdd0e245296092525e2d63bb52",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/011-source-job-diagnostic.json.cargo.jsonl.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json",
+      "bytes": 13816,
+      "sha256": "2fb0cf3b8d81294713bcf83ae3b23276919ccbb2ecea7fc26541c63bda4cdaae",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/012-source-job-diagnostic.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297193135/original-member-receipt.json",
+      "bytes": 2370,
+      "sha256": "d79c8bc04171ae6f6892201fa7169e181c0cfbf3c36ec089971046cedaa278d5",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/013-original-member-receipt.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297193135/doctor-repair-parity.json.wrong-exit.json",
+      "bytes": 60728,
+      "sha256": "ea38c3797c98cf754a04652965a245de2d7d4f2d1aa9ba829eee3b652255aa0f",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/014-doctor-repair-parity.json.wrong-exit.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297193135/doctor-repair-parity.json.missing-header.json",
+      "bytes": 60683,
+      "sha256": "a136c85c85e829fecc059227c2d7079366d83789c20d0c297093138fc2212fef",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/015-doctor-repair-parity.json.missing-header.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297193135/doctor-repair-parity.json.missing-core-event.json",
+      "bytes": 60487,
+      "sha256": "2525711ef7ca78c3b7d91570cb877efe0ea229ae43fc088eaf1cfb1ac176bbe9",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/016-doctor-repair-parity.json.missing-core-event.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297193135/doctor-repair-parity.json",
+      "bytes": 6415550,
+      "sha256": "69f0aacbd0ffea6e23db02e896469a41a5337f1c59a1b9c9f1740fc120a96102",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/017-doctor-repair-parity.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297420931/original-member-receipt.json",
+      "bytes": 1375,
+      "sha256": "dea7ea87412fca9caba766ace8ab5a9c9d61538bf01400ae87cca0359581e612",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/018-original-member-receipt.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297420931/setup-source-parity.json.progress.json",
+      "bytes": 66765,
+      "sha256": "519275c8077d91bad2a9391b769b55b3a10724622ad37bbc52526bd3214fd868",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/019-setup-source-parity.json.progress.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/historical-parent-taskkill.stdout",
+      "bytes": 86,
+      "sha256": "8b374aa189e3b562b16ab562ae09aafaa83476bf611bdf43aa0eedd1b42dd12d",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/020-historical-parent-taskkill.stdout.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/historical-parent-taskkill.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/021-historical-parent-taskkill.stderr.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/descendant-descendant-tasklist-0.stdout",
+      "bytes": 64,
+      "sha256": "943b315e065238b7073b033f534ef954b6b6461fb3f03a3f5b8555b11bc4c0a2",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/022-descendant-descendant-tasklist-0.stdout.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/descendant-descendant-tasklist-0.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/023-descendant-descendant-tasklist-0.stderr.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/inner-wait/quick.stdout",
+      "bytes": 171,
+      "sha256": "6ab29b743f9eda958fcddb499fc671957bb9412e3dbe9d079fe67b8dbd49ff44",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/024-quick.stdout.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/inner-wait/quick.stderr",
+      "bytes": 19,
+      "sha256": "547699cf686065bde1303208d3a904bb13f1ecade7fda7141a98fc6dfb318230",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/025-quick.stderr.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/inner-wait/phases.jsonl",
+      "bytes": 487,
+      "sha256": "b84725d85840ba788cb2beb494f4ab4624525e5e871e428e4990d2412c20f71d",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/026-phases.jsonl.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/inner-wait/parent.stdout",
+      "bytes": 589,
+      "sha256": "0aa6506046357709c8621cb33c4fdae8cd9c2a07b87f264596becca8c5209de1",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/027-parent.stdout.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/inner-wait/parent.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/028-parent.stderr.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/historical/quick.stdout",
+      "bytes": 171,
+      "sha256": "6ab29b743f9eda958fcddb499fc671957bb9412e3dbe9d079fe67b8dbd49ff44",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/029-quick.stdout.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/historical/quick.stderr",
+      "bytes": 19,
+      "sha256": "547699cf686065bde1303208d3a904bb13f1ecade7fda7141a98fc6dfb318230",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/030-quick.stderr.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/historical/phases.jsonl",
+      "bytes": 220,
+      "sha256": "d051f98e4137aec690c258efcb61c7dabb6a95d3532123ef2fb996f18e72efd9",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/031-phases.jsonl.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/historical/parent.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/032-parent.stderr.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/historical/parent.stdout",
+      "bytes": 226,
+      "sha256": "2d2c1f24cf117195aa20d72c1c70f2a9f2e28d5b5d805a8a2fc97f9e9cbfb911",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/033-parent.stdout.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/descendant/with-descendant.stdout",
+      "bytes": 191,
+      "sha256": "3e6917b6f0754abd4fab8f2edf495d3422d9c60625e0ca03debcfa8ddd00edfd",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/034-with-descendant.stdout.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/descendant/with-descendant.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/035-with-descendant.stderr.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/descendant/phases.jsonl",
+      "bytes": 560,
+      "sha256": "17611b891f5ab1881df3324a1bca9e41c1f26a76af82e9907394e5cb2baffbd4",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/036-phases.jsonl.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/descendant/parent.stdout",
+      "bytes": 589,
+      "sha256": "0d7a89dd65ef75bc4c64f268f1fc7734c285149a7d8d2e9b6a41146786eb6b8f",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/037-parent.stdout.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/descendant/parent.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/038-parent.stderr.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/descendant/held.stdout",
+      "bytes": 46,
+      "sha256": "94bcbffef3d35ccc25e509888d5831f969899e3785b9cc53ec6e3cffe5618eaf",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/039-held.stdout.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/descendant/held.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/040-held.stderr.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-artifacts/11297098945/source-job-diagnostic.json.evidence/descendant/descendant.pid",
+      "bytes": 3,
+      "sha256": "33eb7e4ae43f9873d9c84c0f07b055946b24a71ca27daa60acbbf95b44c7c5e0",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/041-descendant.pid.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-source/process-wrap10.0.1-src-windows.rs",
+      "bytes": 7778,
+      "sha256": "76214e10c89af6589af8fc9c2ae1d4c319596a07b2a2945afbc4a23b1d52a2b9",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/042-process-wrap10.0.1-src-windows.rs.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-source/process-wrap10.0.1-src-tokio-job_object.rs",
+      "bytes": 6296,
+      "sha256": "5bdc2eca24955c1580ab2966dc25102363852f3f8a78a2ecab24f1799e8dbf6e",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/043-process-wrap10.0.1-src-tokio-job_object.rs.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-source/process-wrap10.0.1-src-std-job_object.rs",
+      "bytes": 5629,
+      "sha256": "06db35984042016079d7cb5fa2e953189b1fddc227094e1011d9b939d13c6968",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/044-process-wrap10.0.1-src-std-job_object.rs.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-source/process-wrap10.0.1-src-std-core.rs",
+      "bytes": 13771,
+      "sha256": "e5ed0d0714bafc648f0fe497e4b2eb5682adfd8c31ba4c74a7ed2d13f6e7dfc5",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/045-process-wrap10.0.1-src-std-core.rs.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-source/receipt.json",
+      "bytes": 2521,
+      "sha256": "6b32a90e57c067ef4e5b991bf2b62da88d9c818f6f07081e2d40fe0f5e3b5600",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/046-receipt.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-source/Cargo.lock",
+      "bytes": 67744,
+      "sha256": "b3dfc50eeffd441de466592bbf204840b65d16940f8639dacad56a7f1153594f",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/047-Cargo.lock.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-source/setup_source_process.rs",
+      "bytes": 11069,
+      "sha256": "86699b00d9858f75bfb5b41c6c6c7424287b95661d4275afc55541acaabc2967",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/048-setup_source_process.rs.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-source/source_job_notifications.rs",
+      "bytes": 5642,
+      "sha256": "26b271aea333337d39dcaa47ef37846e1df13013816f9b2bff5246824075d990",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/049-source_job_notifications.rs.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-source/windows_job_run.sh",
+      "bytes": 1306,
+      "sha256": "a1b4aa8b105270e671d53a2b581946d4b7f3ad1e7d00ffc57d15458b494e4b50",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/050-windows_job_run.sh.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-source/windows_job_probe.py",
+      "bytes": 7685,
+      "sha256": "ed55b88583c88a0ffa9843d681bcf70d1b808baa87e563664096a697ee46833f",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/051-windows_job_probe.py.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-source/progress.py",
+      "bytes": 5047,
+      "sha256": "015bce6d0ede65d8f5d087c302b4294d44e94e719e18a3eb874b91a271c95b4b",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/052-progress.py.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-source/replay.py",
+      "bytes": 26897,
+      "sha256": "b3263f2f30769623c35ba1bca2d4e66a38a23807ab4af22638027e84a901115b",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/053-replay.py.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-source/run.sh",
+      "bytes": 1440,
+      "sha256": "f4a22007724136b746bbfd4359e214c3c0c579b1b379125dd93ea6d5bdabdeaf",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/054-run.sh.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-current-source/ci.yml",
+      "bytes": 78107,
+      "sha256": "8df913a557a88e3a66a599895aef3d4f507f825f466dc67b3e77f2b7513848e5",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/055-ci.yml.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-setup-repair-windows-original/receipt.json",
+      "bytes": 663,
+      "sha256": "713dd73db9c3fdfb53bb8ff566fe3f96e10c98dbe20cc35751130d7a628dc02f",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/056-receipt.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-setup-repair-windows-original/setup-repair-parity.json",
+      "bytes": 1917476,
+      "sha256": "f09cbd53824d455db16017ce3497c9020e2d294a4f31dd3cb558c04702033aec",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/057-setup-repair-parity.json.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/workspace/attachments/5ee3757b-3307-4d37-80d8-89f6ca2fe6e2/doctor806-443-setup-repair-windows-original.zip",
+      "bytes": 48780,
+      "sha256": "33ace5936c7d95422a00824c9021bb8959fc273859eb81f7c221366db655791e",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/058-doctor806-443-setup-repair-windows-original.zip.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/workspace/attachments/c0de0bb7-a176-47d4-8af1-bf046442e2c0/doctor806-443-11297420931-original.zip",
+      "bytes": 6617,
+      "sha256": "ef91924e270b9e32ae4bbb95fe787fbf1c3739d53a546ea37f7c97be798bc1f1",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/059-doctor806-443-11297420931-original.zip.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/workspace/attachments/c86c805d-d3e4-45af-8df8-2825829b3721/doctor806-443-11297193135-original.zip",
+      "bytes": 241732,
+      "sha256": "c79e984961040d71d690532e9723afcf1286c33969718453df2019929853982f",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/060-doctor806-443-11297193135-original.zip.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/workspace/attachments/90970e58-4340-41da-8911-eefff40d63c1/doctor806-443-11297098945-original.zip",
+      "bytes": 26982,
+      "sha256": "3652d274fe448e15385ab82aa29734cd3cd5133f435f24180499d80b4d6f2a98",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/061-doctor806-443-11297098945-original.zip.gz",
+      "roundtrip_verified": true
+    },
+    {
+      "path": "/tmp/symaira-doctor806-443-native-windows-phase-receipt.json",
+      "retained": "migration/evidence/setup-source-765/windows-job-443-original/original-phase-receipt.json.gz",
+      "sha256": "bf8bcedc00ebe87da4499751f3865b3fc764a45607163c7dec9eb410c4f6cc21",
+      "bytes": 13857,
+      "roundtrip_verified": true
+    }
+  ]
+}
