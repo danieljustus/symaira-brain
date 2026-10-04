@@ -48,3 +48,5 @@ raw63, original3/raw2 controls, ordered31, Unicode/raw/unsafe-audit and Root35
 proofs remain mandatory. Native Linux evidence does not replace native macOS
 or Windows. CLI and Brain share the Guard handler directly; this slice does
 not complete #770/#769, remove the Go executor or claim full Brain acceptance.
+
+Root full independent review approves source9603/publication549e1c8:170tests0fail0ignore/13summaries, all original current124/raw63/additive78/80/94/31/35/raw4/Unicode4/audit6 process gates and8 actual mutants pass.32 new actual process pairs allmatch.100source/1217frozenGo hashes,31authorproof files,33tracked gzip objects,21actualcurrent executables and65baseline archive members independentlyverified. Fullreport/receipt/evidence retained under independent-9603. Native3OS/protected/finalcurrentmain and full770/769 remain required; no new parity exception.
