@@ -42,3 +42,15 @@ unchanged. New portable units and isolated Python corruption checks verify
 fixture machinery; Linux mkdir probes verify only local kernel admission.
 They do not establish current Guard, Darwin or Windows acceptance. Native3,
 protected checks and the remaining #770/#769 contracts stay open.
+
+The inherited observer unit also intercepted Windows `cmd /c mklink /J` with
+a callback intended only for a product invocation. That host API supplies no
+product `env` argument; the exact original callback raises `KeyError('env')`.
+The original source and a complete actual Python callback trace are retained.
+The unit now mocks directory-link construction separately and verifies its
+exact inputs. An additional pure Windows-API mock verifies the real helper's
+argv and kwargs. This does not simulate a successful Guard invocation or prove
+Windows junction behavior. The real junction helper and full owner mutation
+control remain unchanged. Invalid-byte probe units have only their explicit
+Unix filename domain; valid Unicode and all pure accounting tests remain
+mandatory on every platform.
