@@ -88,7 +88,15 @@ def archive(root, out, target):
     assert not users, users
     dest = out / "failed-actual-binaries"
     dest.mkdir(exist_ok=False)
+    available = {}
+    for receipt in Path("/tmp").glob("symaira-brain765-runtime-*/failed-actual-binaries/receipt.json"):
+        prior = json.loads(receipt.read_text())
+        if not prior.get("all_roundtrips") or prior.get("users"):
+            continue
+        for record in prior["all_actual_ELF_and_rlib"]:
+            available[record["sha256"]] = record
     records = []
+    reused = 0
     for path in sorted(target.rglob("*")):
         if not path.is_file() or path.is_symlink():
             continue
@@ -99,6 +107,13 @@ def archive(root, out, target):
         data = path.read_bytes()
         digest = sha(data)
         payload = dest / (digest + ".gz")
+        if digest in available:
+            prior = available[digest]
+            candidate = Path(prior["gzip"])
+            assert sha(candidate.read_bytes()) == prior["gzip_sha256"]
+            assert gzip.decompress(candidate.read_bytes()) == data
+            payload = candidate
+            reused += 1
         if not payload.exists():
             assert shutil.disk_usage(root).free >= 700*1024*1024, "cannot archive below allocated floor"
             payload.write_bytes(gzip.compress(data, compresslevel=1, mtime=0))
@@ -106,7 +121,8 @@ def archive(root, out, target):
         records.append(dict(path=str(path), bytes=len(data), sha256=digest, gzip=str(payload),
                             gzip_sha256=sha(payload.read_bytes())))
     save(dest / "receipt.json", dict(source=json.loads((out/"source.json").read_text()), users=users,
-         all_actual_ELF_and_rlib=records, all_roundtrips=True, nothing_deleted=True))
+         all_actual_ELF_and_rlib=records, all_roundtrips=True, nothing_deleted=True,
+         reused_immutable_payload_paths=reused))
 
 
 def historical(root, out):
