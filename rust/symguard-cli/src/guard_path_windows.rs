@@ -72,6 +72,9 @@ pub(super) fn clean_units(path: &[u16]) -> Vec<u16> {
                 {
                     result.pop();
                 }
+                if result.len() > boundary {
+                    result.pop();
+                }
             } else if !rooted {
                 if !result.is_empty() {
                     append_unit(&mut result, 92, original, &mut changed);

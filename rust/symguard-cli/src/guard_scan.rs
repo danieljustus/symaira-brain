@@ -5,11 +5,15 @@ use std::env;
 use std::fmt::Write as _;
 use std::fs;
 use std::io::{self, IsTerminal, Write};
-use std::path::{Path, PathBuf};
+#[cfg(test)]
+use std::path::Path;
+use std::path::PathBuf;
 
 #[path = "guard_paths.rs"]
 mod paths;
-pub(crate) use paths::{clean_native_path, join_native_path};
+#[cfg(test)]
+pub(crate) use paths::clean_native_path;
+pub(crate) use paths::join_native_path;
 
 use serde::Serialize;
 use symbrain_core::exit;
