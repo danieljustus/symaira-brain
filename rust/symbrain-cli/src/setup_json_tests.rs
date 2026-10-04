@@ -62,5 +62,8 @@ fn setup_json_write_failure_remains_checked() {
         ),
         1
     );
-    assert_eq!(stderr, b"symbrain setup --fix: encode JSON\n");
+    assert_eq!(
+        stderr,
+        b"symbrain setup --fix: encode JSON: owned failure\n"
+    );
 }

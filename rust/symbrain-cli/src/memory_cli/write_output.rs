@@ -44,39 +44,15 @@ pub(super) fn finish_set(
     match result {
         Ok(()) => exit::OK,
         Err(error) => {
-            #[cfg(unix)]
-            if process_stdout
-                && error.raw_os_error().is_some()
-                && error.kind() == std::io::ErrorKind::BrokenPipe
-            {
-                // Rust ignores SIGPIPE at startup. Emulate Go's actual fd1
-                // completion only after EPIPE, after the write is committed.
-                let _ =
-                    signal_hook::low_level::emulate_default_handler(signal_hook::consts::SIGPIPE);
-            }
-            #[cfg(not(unix))]
-            let _ = process_stdout;
+            crate::stdio_output::pipe_boundary(&error, process_stdout);
             let _ = writeln!(
                 stderr,
                 "symbrain memory set: format output: {}",
-                go_write_error(&error)
+                crate::stdio_output::go_write_error(&error)
             );
             exit::GENERIC
         }
     }
-}
-
-fn go_write_error(error: &std::io::Error) -> String {
-    let Some(code) = error.raw_os_error() else {
-        return error.to_string();
-    };
-    let literal = error.to_string();
-    let suffix = format!(" (os error {code})");
-    let message = literal.strip_suffix(&suffix).unwrap_or(&literal);
-    // Go's Unix errno strings are lowercase; Windows retains FormatMessage.
-    #[cfg(unix)]
-    let message = message.to_lowercase();
-    format!("write /dev/stdout: {message}")
 }
 
 #[cfg(test)]

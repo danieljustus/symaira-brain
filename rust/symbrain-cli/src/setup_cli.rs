@@ -82,6 +82,20 @@ impl CoreResult {
 }
 
 pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {
+    run_with_stdout(args, stdout, stderr, false)
+}
+
+pub(crate) fn run_with_stdout(
+    args: &[OsString],
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write,
+    process_stdout: bool,
+) -> u8 {
+    let mut output = crate::stdio_output::Output::new(stdout, process_stdout);
+    run_setup(args, &mut output, stderr)
+}
+
+fn run_setup(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {
     let parsed = match parse_args(args, stderr) {
         Ok(args) => args,
         Err(code) => return code,
@@ -356,14 +370,19 @@ fn finish(
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
 ) -> u8 {
-    if json
-        && serde_json::to_string(report)
+    if json {
+        let result = serde_json::to_string(report)
             .map(|text| crate::go_json_escape::escape(&text))
-            .and_then(|text| writeln!(stdout, "{text}").map_err(serde_json::Error::io))
-            .is_err()
-    {
-        let _ = writeln!(stderr, "{prefix}: encode JSON");
-        return exit::GENERIC;
+            .map_err(std::io::Error::other)
+            .and_then(|text| writeln!(stdout, "{text}"));
+        if let Err(error) = result {
+            let _ = writeln!(
+                stderr,
+                "{prefix}: encode JSON: {}",
+                crate::stdio_output::io_cause(&error)
+            );
+            return exit::GENERIC;
+        }
     }
     if report.errors.is_empty() {
         exit::OK

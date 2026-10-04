@@ -13,8 +13,8 @@ mod activity_cli;
 mod audit_cli;
 mod cli_flags;
 mod config_cli;
+mod stdio_output;
 
-use cli_flags::has_go_owned_flag;
 pub use cli_flags::normalize_flags;
 mod doctor_cli;
 mod go_json_escape;
@@ -58,51 +58,6 @@ impl FallbackExecutor for InheritedProcessExecutor {
     }
 }
 
-/// Normalizes CLI arguments matching Go's `normalizeFlags`:
-/// - Converts `--flag` to `-flag` when length > 2
-/// - Preserves positional arguments and bare `-`
-/// - Preserves `--` and all arguments following `--`
-#[must_use]
-pub fn normalize_flags(args: &[OsString]) -> Vec<OsString> {
-    let mut out = Vec::with_capacity(args.len());
-    let mut terminated = false;
-    for arg in args {
-        if terminated {
-            out.push(arg.clone());
-            continue;
-        }
-        #[cfg(unix)]
-        {
-            use std::os::unix::ffi::{OsStrExt, OsStringExt};
-            let bytes = arg.as_os_str().as_bytes();
-            if bytes == b"--" {
-                terminated = true;
-                out.push(arg.clone());
-            } else if bytes.starts_with(b"--") && bytes.len() > 2 {
-                let mut normalized = Vec::with_capacity(bytes.len() - 1);
-                normalized.push(b'-');
-                normalized.extend_from_slice(&bytes[2..]);
-                out.push(OsString::from_vec(normalized));
-            } else {
-                out.push(arg.clone());
-            }
-        }
-        #[cfg(not(unix))]
-        {
-            let s = arg.to_string_lossy();
-            if s == "--" {
-                terminated = true;
-                out.push(arg.clone());
-            } else if s.starts_with("--") && s.len() > 2 {
-                out.push(OsString::from(format!("-{}", &s[2..])));
-            } else {
-                out.push(arg.clone());
-            }
-        }
-    }
-    out
-}
-
 /// Runs `symbrain` with the production inherited-process fallback executor.
 pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {
     run_with_executor(args, stdout, stderr, &InheritedProcessExecutor)
@@ -110,8 +65,8 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
 
 /// Runs the CLI on its actual process standard streams.
 ///
-/// Only native Memory Set completion uses this stdout identity to retain Go's
-/// Unix broken-pipe termination. Embedded writers keep ordinary errors.
+/// Native Setup writes and Memory Set completion use this stdout identity to
+/// retain Go's Unix broken-pipe termination. Embedded writers keep ordinary errors.
 #[must_use]
 pub fn run_stdio(args: &[OsString]) -> u8 {
     let mut stdout = io::stdout();
@@ -183,6 +138,7 @@ fn run_native(
         "profile" => profile_cli::run(rest, stdout, stderr, format),
         "audit" => Some(audit_cli::run(rest, stdout, stderr, format)),
         "setup" if setup_cli::requires_go_fallback(rest) => None,
+        "setup" if process_stdout => Some(setup_cli::run_with_stdout(rest, stdout, stderr, true)),
         "setup" => Some(setup_cli::run(rest, stdout, stderr)),
         "doctor" if doctor_cli::requires_go_fallback(rest) => None,
         "doctor" => Some(doctor_cli::run(rest, stdout, stderr, format)),

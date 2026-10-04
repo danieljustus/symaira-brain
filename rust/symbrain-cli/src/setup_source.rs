@@ -239,7 +239,11 @@ pub(super) fn run(
             .map_err(std::io::Error::other)
             .and_then(|text| writeln!(stdout, "{text}"))
         {
-            return failed(stderr, format!("encode JSON: {error}"), exit::GENERIC);
+            return failed(
+                stderr,
+                format!("encode JSON: {}", crate::stdio_output::io_cause(&error)),
+                exit::GENERIC,
+            );
         }
     } else {
         let _ = stdout.write_all(b"\nInstalled to ");

@@ -288,6 +288,19 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Compare actual Linux Setup output boundaries and embedded writers
+        shell: bash
+        run: scripts/setup-output-oracle/run.sh "$RUNNER_TEMP/setup-output-parity"
+
+      - name: Preserve complete Setup output observations and negative controls
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: setup-output-parity-${{ github.sha }}
+          path: ${{ runner.temp }}/setup-output-parity/
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Credentialed usage requests, report JSON and table parity
         shell: bash
         run: scripts/usage-fetch-oracle/run.sh "$RUNNER_TEMP/usage-fetch-620.json"

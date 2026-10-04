@@ -1,4 +1,4 @@
-//! Raw Go flag normalization and delegated-flag stop boundaries.
+//! Raw Go flag normalization shared by native command parsers.
 
 use std::ffi::OsString;
 
@@ -45,47 +45,4 @@ pub fn normalize_flags(args: &[OsString]) -> Vec<OsString> {
         }
     }
     out
-}
-
-/// Returns whether an invocation reaches a Go-owned flag before its native
-/// parser would stop. This follows the relevant `flag.FlagSet` boundaries so
-/// unrelated invalid invocations do not accidentally require the fallback.
-pub(crate) fn has_go_owned_flag(
-    args: &[OsString],
-    known_flags: &[&str],
-    value_flags: &[&str],
-    go_owned_flags: &[&str],
-    go_owned_bool_flags: &[&str],
-) -> bool {
-    let normalized = normalize_flags(args);
-    let mut index = 0;
-    while index < normalized.len() {
-        let argument = normalized[index].to_string_lossy();
-        if argument == "--" || argument == "-" || !argument.starts_with('-') {
-            break;
-        }
-        let flag = argument.trim_start_matches('-');
-        let (name, value) = flag
-            .split_once('=')
-            .map_or((flag, None), |(name, value)| (name, Some(value)));
-        if !known_flags.contains(&name) {
-            return false;
-        }
-        if matches!(name, "h" | "help") {
-            return false;
-        }
-        if go_owned_flags.contains(&name)
-            || (go_owned_bool_flags.contains(&name) && value != Some("false"))
-        {
-            return true;
-        }
-        if value.is_none() && value_flags.contains(&name) {
-            index += 1;
-            if index == normalized.len() {
-                return false;
-            }
-        }
-        index += 1;
-    }
-    false
 }
