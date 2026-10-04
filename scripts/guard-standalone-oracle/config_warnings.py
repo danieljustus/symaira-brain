@@ -201,6 +201,8 @@ def main():
                   total=len(rows), matched=sum(r['disposition']=='matched' for r in rows),
                   gated=sum(r['disposition'].startswith('native-fail-closed') for r in rows), results=rows,
                   repeated_go_runs=repeated, repeated_distinct_stderr=1, controls=mutants,
+                  unix_raw_paths_skipped=os.name == 'nt',
+                  inapplicable_raw_cases=['raw-path-0', 'raw-path-1'] if os.name == 'nt' else [],
                   original14_input_sha256={c['id']:replay.digest(c['data']) for c in selected if c.get('original')},
                   binaries_sha256=dict(go=replay.digest(go.read_bytes()), native=replay.digest(native.read_bytes())),
                   source_sha256={str(p.relative_to(replay.ROOT)):replay.digest(p.read_bytes()) for p in [
