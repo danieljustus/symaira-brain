@@ -1,0 +1,1755 @@
+{
+  "schema": 1,
+  "status": "prepared_not_executed",
+  "original_head": "8a3226828d045b4307d2c3601e283d1ecfa4ce4f",
+  "frozen_go": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "original230_case_plan_sha256": "152bc32b15979b6c42bc9bfc602a55371c8ccf2ed0ef162e09d18a3eb0c824dd",
+  "original98_backend_plan_sha256": "47bbc3039619f55da20ef18bed53bfd6aef892eb81626b489d1b6dea5756f716",
+  "case_count": 64,
+  "constructor_recipes": 16,
+  "operations": 4,
+  "cases": [
+    {
+      "id": "REDIRECT-FIX-changes-lower-upper-return",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://LOCALHOST:{port}/next",
+        "http://localhost:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        null,
+        null
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-changes-upper-lower-return",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://LOCALHOST:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next",
+        "http://LOCALHOST:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        null,
+        null
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-changes-mixed-case-same-host",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://LOCALHOST:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://LOCALHOST:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426561726572206f776e65642d746f6b656e"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-changes-port-only-explicit-bearer",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{second_port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426561726572206f776e65642d746f6b656e"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-changes-basic-absolute-remove",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-changes-basic-absolute-replace",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        "426173696320626d56334f6e6476636d513d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-changes-basic-relative-inherit",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        "4261736963206232786b4f6e426863334d3d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-changes-basic-case-new-user",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@LOCALHOST:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        "426173696320626d56334f6e6476636d513d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-changes-bearer-preempts-new-basic",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426561726572206f776e65642d746f6b656e"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-changes-stripped-bearer-current-basic",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@127.0.0.1:{port}/next",
+        "http://old:pass@localhost:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426173696320626d56334f6e6476636d513d",
+        "4261736963206232786b4f6e426863334d3d"
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-changes-stripped-bearer-no-user",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://127.0.0.1:{port}/next",
+        "http://localhost:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        null,
+        null
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-changes-basic-empty-user",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963204f673d3d",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-changes-basic-user-no-password",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://old@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new@localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f673d3d",
+        "426173696320626d56334f673d3d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-changes-basic-raw-bytes-absolute-remove",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://%ff:%80@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963202f7a7141",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-changes-basic-raw-bytes-relative",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://%ff:%80@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963202f7a7141",
+        "4261736963202f7a7141"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-changes-basic-port-absolute-remove",
+      "status": "prepared_not_executed",
+      "operation": "changes",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{second_port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-lower-upper-return",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://LOCALHOST:{port}/next",
+        "http://localhost:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        null,
+        null
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-upper-lower-return",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://LOCALHOST:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next",
+        "http://LOCALHOST:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        null,
+        null
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-mixed-case-same-host",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://LOCALHOST:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://LOCALHOST:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426561726572206f776e65642d746f6b656e"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-port-only-explicit-bearer",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{second_port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426561726572206f776e65642d746f6b656e"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-basic-absolute-remove",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-basic-absolute-replace",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        "426173696320626d56334f6e6476636d513d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-basic-relative-inherit",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        "4261736963206232786b4f6e426863334d3d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-basic-case-new-user",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@LOCALHOST:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        "426173696320626d56334f6e6476636d513d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-bearer-preempts-new-basic",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426561726572206f776e65642d746f6b656e"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-stripped-bearer-current-basic",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@127.0.0.1:{port}/next",
+        "http://old:pass@localhost:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426173696320626d56334f6e6476636d513d",
+        "4261736963206232786b4f6e426863334d3d"
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-stripped-bearer-no-user",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://127.0.0.1:{port}/next",
+        "http://localhost:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        null,
+        null
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-basic-empty-user",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963204f673d3d",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-basic-user-no-password",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://old@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new@localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f673d3d",
+        "426173696320626d56334f673d3d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-basic-raw-bytes-absolute-remove",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://%ff:%80@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963202f7a7141",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-basic-raw-bytes-relative",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://%ff:%80@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963202f7a7141",
+        "4261736963202f7a7141"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-apply-basic-port-absolute-remove",
+      "status": "prepared_not_executed",
+      "operation": "apply",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{second_port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-lower-upper-return",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://LOCALHOST:{port}/next",
+        "http://localhost:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        null,
+        null
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-upper-lower-return",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://LOCALHOST:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next",
+        "http://LOCALHOST:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        null,
+        null
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-mixed-case-same-host",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://LOCALHOST:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://LOCALHOST:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426561726572206f776e65642d746f6b656e"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-port-only-explicit-bearer",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{second_port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426561726572206f776e65642d746f6b656e"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-basic-absolute-remove",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-basic-absolute-replace",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        "426173696320626d56334f6e6476636d513d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-basic-relative-inherit",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        "4261736963206232786b4f6e426863334d3d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-basic-case-new-user",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@LOCALHOST:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        "426173696320626d56334f6e6476636d513d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-bearer-preempts-new-basic",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426561726572206f776e65642d746f6b656e"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-stripped-bearer-current-basic",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@127.0.0.1:{port}/next",
+        "http://old:pass@localhost:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426173696320626d56334f6e6476636d513d",
+        "4261736963206232786b4f6e426863334d3d"
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-stripped-bearer-no-user",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://127.0.0.1:{port}/next",
+        "http://localhost:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        null,
+        null
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-basic-empty-user",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963204f673d3d",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-basic-user-no-password",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://old@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new@localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f673d3d",
+        "426173696320626d56334f673d3d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-basic-raw-bytes-absolute-remove",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://%ff:%80@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963202f7a7141",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-basic-raw-bytes-relative",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://%ff:%80@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963202f7a7141",
+        "4261736963202f7a7141"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_pull-basic-port-absolute-remove",
+      "status": "prepared_not_executed",
+      "operation": "relay_pull",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{second_port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-lower-upper-return",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://LOCALHOST:{port}/next",
+        "http://localhost:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        null,
+        null
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-upper-lower-return",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://LOCALHOST:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next",
+        "http://LOCALHOST:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        null,
+        null
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-mixed-case-same-host",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://LOCALHOST:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://LOCALHOST:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426561726572206f776e65642d746f6b656e"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-port-only-explicit-bearer",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{second_port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426561726572206f776e65642d746f6b656e"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-basic-absolute-remove",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-basic-absolute-replace",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        "426173696320626d56334f6e6476636d513d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-basic-relative-inherit",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        "4261736963206232786b4f6e426863334d3d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-basic-case-new-user",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@LOCALHOST:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        "426173696320626d56334f6e6476636d513d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-bearer-preempts-new-basic",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426561726572206f776e65642d746f6b656e"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-stripped-bearer-current-basic",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new:word@127.0.0.1:{port}/next",
+        "http://old:pass@localhost:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        "426173696320626d56334f6e6476636d513d",
+        "4261736963206232786b4f6e426863334d3d"
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-stripped-bearer-no-user",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "6f776e65642d746f6b656e",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://127.0.0.1:{port}/next",
+        "http://localhost:{port}/final"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "426561726572206f776e65642d746f6b656e",
+        null,
+        null
+      ],
+      "expected_request_count": 3,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-basic-empty-user",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963204f673d3d",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-basic-user-no-password",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://old@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://new@localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f673d3d",
+        "426173696320626d56334f673d3d"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-basic-raw-bytes-absolute-remove",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://%ff:%80@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963202f7a7141",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-basic-raw-bytes-relative",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://%ff:%80@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963202f7a7141",
+        "4261736963202f7a7141"
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    },
+    {
+      "id": "REDIRECT-FIX-relay_push-basic-port-absolute-remove",
+      "status": "prepared_not_executed",
+      "operation": "relay_push",
+      "remote_template": "http://old:pass@localhost:{port}",
+      "token_hex": "",
+      "response_redirect_status": 307,
+      "location_templates": [
+        "http://localhost:{second_port}/next"
+      ],
+      "final_status": 200,
+      "final_body_utf8": "{}",
+      "source_projected_authorization_value_hex": [
+        "4261736963206232786b4f6e426863334d3d",
+        null
+      ],
+      "expected_request_count": 2,
+      "required_actual_observations": [
+        "unchanged_frozen_public_sync_client_process",
+        "source_bound_native_HttpSyncTransport",
+        "literal_raw_request_and_response_hex_for_every_hop",
+        "original_process_stdout_stderr_exit",
+        "owned_HOME_readonly_state_and_no_SQLite_created"
+      ],
+      "identity_scope": "Standalone constructor only; native Run userinfo refusal remains unchanged"
+    }
+  ],
+  "controls": [
+    {
+      "id": "REDIRECT-CONTROL-ascii-case-fold",
+      "status": "prepared_not_executed",
+      "production_mutation": "Replace case-sensitive hostname comparison with to_ascii_lowercase on both hosts",
+      "intended_assertion": "actual per-hop Authorization literal bytes mismatch",
+      "required_failure": "actual native differential assertion failure, not bootstrap/URL-policy/build failure",
+      "case_ids": [
+        "REDIRECT-FIX-changes-lower-upper-return",
+        "REDIRECT-FIX-apply-lower-upper-return",
+        "REDIRECT-FIX-relay_pull-lower-upper-return",
+        "REDIRECT-FIX-relay_push-lower-upper-return"
+      ]
+    },
+    {
+      "id": "REDIRECT-CONTROL-cache-url-basic",
+      "status": "prepared_not_executed",
+      "production_mutation": "Seed original-header Authorization with initial URL Basic when Bearer token is absent",
+      "intended_assertion": "actual per-hop Authorization literal bytes mismatch",
+      "required_failure": "actual native differential assertion failure, not bootstrap/URL-policy/build failure",
+      "case_ids": [
+        "REDIRECT-FIX-changes-basic-absolute-replace",
+        "REDIRECT-FIX-apply-basic-absolute-replace",
+        "REDIRECT-FIX-relay_pull-basic-absolute-replace",
+        "REDIRECT-FIX-relay_push-basic-absolute-replace"
+      ]
+    },
+    {
+      "id": "REDIRECT-CONTROL-restore-after-return",
+      "status": "prepared_not_executed",
+      "production_mutation": "Clear sticky stripped state upon returning to initial raw Host",
+      "intended_assertion": "actual per-hop Authorization literal bytes mismatch",
+      "required_failure": "actual native differential assertion failure, not bootstrap/URL-policy/build failure",
+      "case_ids": [
+        "REDIRECT-FIX-changes-lower-upper-return",
+        "REDIRECT-FIX-apply-lower-upper-return",
+        "REDIRECT-FIX-relay_pull-lower-upper-return",
+        "REDIRECT-FIX-relay_push-lower-upper-return"
+      ]
+    }
+  ],
+  "controls_count": 3,
+  "runtime_count": 0,
+  "compiled_tests": 0,
+  "original230_and98_unchanged": true,
+  "limitations": "Header expectations are pinned-SDK source projections, never actual Go or native observations. Materialize private random loopback port(s), never11434; only owned synthetic credentials. Require all original230/98/8 controls and parent Store/CLI/MCP/native3 plus these complete new cases/controls before admission."
+}

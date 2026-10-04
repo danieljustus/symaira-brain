@@ -1,6 +1,7 @@
 //! Concrete bounded HTTP/1 transport; CLI/HTTP admission is still closed.
 
 pub(super) mod body;
+pub(super) mod headers;
 
 use super::{
     ApplyResult, Changes, DeletedMemory, RelayBlob, RelayChanges, RelayPushResult, RunContext,
@@ -93,15 +94,8 @@ impl HttpSyncTransport {
         let mut method = method.to_owned();
         let mut current_payload = payload.clone();
         let mut include_body = true;
-        let mut sensitive = false;
+        let mut authorization = headers::RedirectAuthorization::new(&self.token);
         let mut referer = None;
-        let original_auth = if self.token.is_empty() {
-            original.basic()
-        } else {
-            let mut value = b"Bearer ".to_vec();
-            value.extend(&self.token);
-            Some(value)
-        };
         for hop in 0..10 {
             let remaining = context.remaining()?.min(
                 deadline
@@ -113,20 +107,11 @@ impl HttpSyncTransport {
             if payload.is_some() && include_body {
                 request = request.header("Content-Type", "application/json");
             }
-            if !sensitive {
-                if let Some(auth) = original_auth.as_ref() {
-                    let value = HeaderValue::from_bytes(auth).map_err(|_| {
-                        SyncError(
-                            "net/http: invalid header field value for \"Authorization\"".into(),
-                        )
-                    })?;
-                    request = request.header("Authorization", value);
-                }
-            } else if let Some(auth) = current.basic() {
-                request = request.header(
-                    "Authorization",
-                    HeaderValue::from_bytes(&auth).expect("base64 header"),
-                );
+            if let Some(auth) = authorization.for_request(&current) {
+                let value = HeaderValue::from_bytes(&auth).map_err(|_| {
+                    SyncError("net/http: invalid header field value for \"Authorization\"".into())
+                })?;
+                request = request.header("Authorization", value);
             }
             if let Some(referer) = &referer {
                 request = request.header("Referer", referer);
@@ -166,16 +151,7 @@ impl HttpSyncTransport {
                             )));
                         }
                         let next = current.reference(location)?;
-                        let initial = original.hostname().to_ascii_lowercase();
-                        let destination = next.hostname().to_ascii_lowercase();
-                        let allowed = destination == initial
-                            || (!destination.contains([':', '%'])
-                                && destination
-                                    .strip_suffix(&initial)
-                                    .is_some_and(|prefix| prefix.ends_with('.')));
-                        if !allowed {
-                            sensitive = true;
-                        }
+                        authorization.redirect(&original, &next);
                         referer = if current.scheme == "https" && next.scheme == "http" {
                             None
                         } else {

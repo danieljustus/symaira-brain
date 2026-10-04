@@ -48,4 +48,17 @@ nor proves transport via decoder-only observations. `backend-cases.json` adds
 98 specific JSON/HTTP/crypto plans and four intended controls; all remain
 unexecuted. Run `python3 scripts/memory-sync-oracle/verify-backends-static.py`
 for source/lock provenance only. It does not compile, launch a probe, test a
-cipher, bind a port or establish acceptance.
+ cipher, bind a port or establish acceptance.
+
+The isolated review successor preserves the complete8a three-P2 source review
+and all61 proof files before correcting model helper registration, ASCII host
+identity and URL Basic/header-copy ownership. See
+[correction decision](../../docs/adr/memory-sync-backend-review-corrections-762.md).
+The original verifier above binds the immutable8a source; run it with `--root`
+pointing to that original worktree. Use `verify-corrections-static.py` in the
+successor for its separate source/dependency/preservation map. Neither command
+builds or executes a product. `redirect-correction-cases.json` separately plans
+64 full public-client comparisons and three intended mutation controls, with
+all original230/98 cases and eight control definitions untouched. These and
+the two new unit functions are prepared, uncompiled and unexecuted. Native
+Run's userinfo refusal and CLI/HTTP admission gates remain unchanged.
