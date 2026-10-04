@@ -13,6 +13,8 @@ use symbrain_core::output::OutputFormat;
 use symbrain_memory::Store;
 
 mod config;
+mod startup;
+pub(crate) use startup::open_runtime;
 mod config_float;
 mod config_schema;
 mod config_value;

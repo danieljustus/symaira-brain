@@ -21,6 +21,13 @@ mod retrieval;
 mod rows;
 mod schema;
 mod search_rows;
+mod startup;
+mod startup_fallback;
+mod startup_fs;
+mod startup_rotation_json;
+mod startup_secret;
+#[cfg(test)]
+mod startup_tests;
 mod store;
 mod write;
 
@@ -37,5 +44,6 @@ pub use embedding::{EmbeddingGenerator, GeneratedEmbedding};
 pub use list_rows::{MemoryListRow, RuleRow};
 pub use model::{Memory, SetOptions, Store, StoreError};
 pub use search_rows::{SearchHit, SearchRow};
+pub use startup::{MemoryRuntime, SecretOptions, StartupError};
 
 pub use evidence_store::{EvidenceSpan, reparent_memory_evidence_tx, save_memory_evidence_tx};

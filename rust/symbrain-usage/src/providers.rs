@@ -35,7 +35,7 @@ use provider_fetch::fetch_one;
 mod provider_config;
 pub use provider_config::{
     all_providers, is_secret_reference, is_vault_uri, needs_go_fallback, resolve_reference,
-    resolve_reference_or_env, secretref_timeout, set_secretref_timeout,
+    resolve_reference_bytes, resolve_reference_or_env, secretref_timeout, set_secretref_timeout,
 };
 #[cfg(test)]
 pub(crate) use provider_config::{

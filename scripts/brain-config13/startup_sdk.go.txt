@@ -1,0 +1,29 @@
+// Owned stdlib-only AES/JSON oracle; never replaces a frozen production file.
+package main
+import (
+ "crypto/aes"
+ "crypto/cipher"
+ "crypto/sha256"
+ "encoding/base64"
+ "encoding/json"
+ "fmt"
+ "io"
+ "os"
+ "time"
+)
+type input struct { Primary string; Payload string }
+type entry struct { Secret string `json:"secret"`; Expires time.Time `json:"expires_at"` }
+func main() {
+ raw,err:=io.ReadAll(os.Stdin); if err!=nil { panic(err) }
+ var in input; if err=json.Unmarshal(raw,&in);err!=nil { panic(err) }
+ primary,err:=base64.StdEncoding.DecodeString(in.Primary);if err!=nil { panic(err) }
+ payload,err:=base64.StdEncoding.DecodeString(in.Payload);if err!=nil { panic(err) }
+ if len(payload)<44 { fmt.Fprintln(os.Stderr,"encrypted payload too short");os.Exit(2) }
+ h:=sha256.New();h.Write(primary);h.Write(payload[:16]);block,err:=aes.NewCipher(h.Sum(nil));if err!=nil { panic(err) }
+ gcm,err:=cipher.NewGCM(block);if err!=nil { panic(err) }
+ plain,err:=gcm.Open(nil,payload[16:28],payload[28:],nil)
+ if err!=nil { fmt.Fprintln(os.Stderr,"fallback secrets decryption failed: invalid primary secret or corrupted data");os.Exit(2) }
+ var entries []entry;if err=json.Unmarshal(plain,&entries);err!=nil { fmt.Fprintf(os.Stderr,"unmarshal fallback entries: %v\n",err);os.Exit(2) }
+ out:=struct { Plaintext string `json:"plaintext_base64"`; Entries []entry `json:"entries"` }{base64.StdEncoding.EncodeToString(plain),entries}
+ if err=json.NewEncoder(os.Stdout).Encode(out);err!=nil { panic(err) }
+}

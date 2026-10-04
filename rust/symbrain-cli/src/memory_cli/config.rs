@@ -11,6 +11,8 @@ use super::config_value;
 
 pub(super) struct Config {
     pub database: OsString,
+    pub jwt_secret: OsString,
+    pub jwt_secret_path: OsString,
     pub ollama_url: String,
     pub ollama_model: String,
     pub prefilter: bool,
@@ -22,6 +24,8 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             database: OsString::new(),
+            jwt_secret: OsString::new(),
+            jwt_secret_path: OsString::new(),
             ollama_url: "http://localhost:11434/api/embeddings".to_owned(),
             ollama_model: "nomic-embed-text".to_owned(),
             prefilter: false,
@@ -63,6 +67,10 @@ fn load_checked() -> Option<Config> {
             config_value::validate_env(kind, &text)?;
             if path == "database.path" {
                 config.database = raw;
+            } else if path == "jwt.secret" {
+                config.jwt_secret = raw;
+            } else if path == "jwt.secret_path" {
+                config.jwt_secret_path = raw;
             } else {
                 apply(&mut config, path, &text);
             }
@@ -115,6 +123,10 @@ fn is_zero(item: &toml_edit::Item) -> bool {
 fn apply(config: &mut Config, path: &str, value: &str) {
     match path {
         "database.path" => config.database = OsString::from(value),
+        "jwt.secret" => config.jwt_secret = OsString::from(value),
+        "jwt.secret_path" => {
+            config.jwt_secret_path = symbrain_core::go_path::from_bytes(value.as_bytes())
+        }
         "ollama.url" => value.clone_into(&mut config.ollama_url),
         "ollama.model" => value.clone_into(&mut config.ollama_model),
         "hybrid_search.prefilter_enabled" => {

@@ -54,7 +54,7 @@ def source(root, out):
 def binaries(root, out, target):
     records = {}
     names = {"cli": target / "debug/symbrain", "guard": target / "debug/symguard"}
-    for name in ("brain_config13_probe", "brain_config13_fault", "brain_config13_correction_fault", "brain_config13_owned_vault"):
+    for name in ("brain_config13_probe", "brain_config13_fault", "brain_config13_correction_fault", "brain_config13_owned_vault", "brain_config13_secret_peer"):
         names[name] = target / "debug/examples" / name
     for role, original in names.items():
         copied = out / "bin" / role

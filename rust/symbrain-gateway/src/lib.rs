@@ -104,6 +104,7 @@ pub struct Gateway {
     usage: Option<Arc<Service>>,
     usage_allowed: bool,
     memory: Option<Arc<symbrain_memory::Store>>,
+    _memory_runtime: Option<Arc<symbrain_memory::MemoryRuntime>>,
     memory_tool_names: Vec<String>,
     activity_tool_names: Vec<String>,
     skills_allowed: bool,
@@ -120,6 +121,30 @@ impl Gateway {
         profile: Profile,
         servers: BTreeMap<String, Arc<dyn GatewayBackend>>,
         version: impl Into<String>,
+    ) -> Result<Self, GatewayError> {
+        Self::new_inner(profile, servers, version, None)
+    }
+
+    /// Uses an already initialized Memory owner without reopening storage.
+    /// `None` represents a failed startup and removes native Memory tools;
+    /// profile permissions still control every successful owner's exposure.
+    ///
+    /// # Errors
+    /// Returns policy failures or namespaced tool collisions.
+    pub fn new_with_memory_runtime(
+        profile: Profile,
+        servers: BTreeMap<String, Arc<dyn GatewayBackend>>,
+        version: impl Into<String>,
+        memory: Option<Arc<symbrain_memory::MemoryRuntime>>,
+    ) -> Result<Self, GatewayError> {
+        Self::new_inner(profile, servers, version, Some(memory))
+    }
+
+    fn new_inner(
+        profile: Profile,
+        servers: BTreeMap<String, Arc<dyn GatewayBackend>>,
+        version: impl Into<String>,
+        supplied_memory: Option<Option<Arc<symbrain_memory::MemoryRuntime>>>,
     ) -> Result<Self, GatewayError> {
         let assembly = build_catalog(&profile, &servers)?;
         let usage_config = profile.server(symbrain_policy::SERVER_USAGE);
@@ -139,12 +164,15 @@ impl Gateway {
         // `mcp` intentionally does not create a memory child, so it takes the
         // embedded path below.
         let has_memory_backend = servers.contains_key(symbrain_policy::SERVER_MEMORY);
-        let (memory_tool_names, activity_tool_names) = if has_memory_backend {
-            (Vec::new(), Vec::new())
-        } else {
-            embedded::exposed_native(&profile)
-        };
-        let memory = if !has_memory_backend
+        let (memory_tool_names, activity_tool_names) =
+            if has_memory_backend || supplied_memory.as_ref().is_some_and(Option::is_none) {
+                (Vec::new(), Vec::new())
+            } else {
+                embedded::exposed_native(&profile)
+            };
+        let memory = if let Some(runtime) = &supplied_memory {
+            runtime.as_ref().map(|runtime| runtime.store())
+        } else if !has_memory_backend
             && profile.server(symbrain_policy::SERVER_MEMORY).enabled
             && (!memory_tool_names.is_empty() || !activity_tool_names.is_empty())
         {
@@ -184,6 +212,7 @@ impl Gateway {
             usage: None,
             usage_allowed,
             memory,
+            _memory_runtime: supplied_memory.flatten(),
             memory_tool_names,
             activity_tool_names,
             skills_allowed,

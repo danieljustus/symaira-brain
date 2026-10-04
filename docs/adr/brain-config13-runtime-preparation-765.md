@@ -152,3 +152,60 @@ Archive the actual Go CLI/probe before retiring only the inactive derivative
 Go cache. Check the target, output, private Go cache and TMP mount before each
 stage, and the archive destination before each new payload. Subsequent owned
 runtime outputs use `/workspace`, with the same700MiB floor and no second target.
+
+
+Memory startup owns its database, primary-key provisioning and encrypted fallback
+records even when the profile disables Memory tool exposure. The Gateway holds a
+private MemoryRuntime owner, receives only its Store handle, and retains its
+existing catalog/policy filters. JWT keys never enter MCP tool parameters.
+The CLI resolves raw selectors and shared references after successful database
+construction; a failed startup logs its original phase and gracefully omits the
+Memory owner. Existing standalone Store and Gateway constructors remain intact.
+
+An actual same-Go baseline replays the three original healthy strict102 inputs
+twice at the same restored owned path. All six executions exit0; all three exact
+snapshots differ solely in jwt.secret, committed WAL and SHM bytes. Raw bytes,
+original strict assertions and both observations are retained in
+`migration/evidence/brain-config13/startup-go-go-baseline/retention.json`.
+The first baseline helper's serialization failure is also retained; unavailable
+first-attempt observations are not reconstructed or counted.
+
+Decision: an additional Memory-owned live constructor comparison validates the
+complete file set, types, permissions, every readonly file, full column/default/
+foreign-key/index/application-row facts, owned SQLite integrity/FTS/constraint
+behavior, and persistent engine properties. Only generated primary-key bytes,
+encrypted fallback salt/nonce and SQLite WAL/SHM engine bytes have local entropy
+contracts. Every raw role remains SHA-bound. Fresh keys must be64 lowercase hexadecimal
+characters (32 random bytes) plus newline and repeated constructions must be unique. Actual pinned Go
+AES-GCM decrypts both owners' rotation payloads; canonical records, legacy
+migration, expiry purge and warning/failure ordering remain compared. WAL header/
+frame/salt checksums and cloned-file SQLite integrity remain mandatory. Only
+new schema_migrations.applied_at cells may vary inside each actual process
+interval; original cells are retained. No global byte/SQL normalization is used.
+Changes to an actual input key, schema, secret mode and missing key must produce
+real detected failures. Existing strict102 and all13-field typed/grammar tests
+remain unchanged; this additional state comparator does not rewrite their exits.
+
+The additional raw-reference API reuses Usage's one bounded subprocess capture
+and cleanup lifecycle with OsStr arguments. It preserves provider stdout/stderr
+bytes, Go TrimSpace and reference-only errors, including vault-only fallback.
+Existing String-valued Usage APIs and callers keep their original semantics.
+Synthetic private provider cases cover success, empty value, exit failure, raw
+selectors/output/error bytes and validation before any child access. No actual
+operator vault or host Keychain is consulted.
+
+The implementation uses already locked ring0.17.14 AES-GCM, SHA256 and getrandom
+without a new crypto version or deterministic randomness. No JWT mint/verify/
+HTTP startup cutover or full765/759 closure is inferred. All new owner code,
+comparator, crypto and process controls are currently PREPARED and uncompiled;
+fresh complete allocated Linux execution, independent review and native three-OS
+CI remain required. Earlier bounded inner-TOML diagnostic wording decisions do
+not cover grammar acceptance, owner errors, state writes or startup failures.
+
+The pinned BurntSushi1.6 pre-lexer NULL check inspects exactly the first six
+bytes after removing one BOM. Preserve this earlier admission before UTF8 and
+grammar classification; the original actual UTF16-content failures remain
+retained. Later NULL bytes stay accepting-parser owned. Prepared rotation-time
+cases also cover Go's intentionally disabled strict RFC3339 checks, including
+one-digit hours/comma fractions/long fractions/offset24/minute60; Chrono
+compatibility is unproven until actual SDK/live owner comparison, not waived.

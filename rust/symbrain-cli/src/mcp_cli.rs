@@ -81,6 +81,10 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
         &mut backends,
     );
 
+    // Memory startup is unconditional in Go. It owns DB/JWT state before
+    // audit setup, independently of the profile's eventual tool exposure.
+    let memory = crate::memory_cli::open_runtime(stderr);
+
     let audit = if profile.audit.enabled || config.audit.enabled {
         match Logger::open(
             &profile.name,
@@ -99,10 +103,11 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
         None
     };
 
-    let gateway = match Gateway::new(
+    let gateway = match Gateway::new_with_memory_runtime(
         profile,
         backends,
         option_env!("SYMBRAIN_VERSION").unwrap_or("dev"),
+        memory,
     )
     .map(|gateway| {
         Arc::new(

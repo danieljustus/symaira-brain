@@ -1,0 +1,34 @@
+// Owned live-constructor probe, compiled only in the archived frozen Go scratch.
+package main
+
+import (
+ "encoding/json"
+ "os"
+ "path/filepath"
+ "github.com/danieljustus/symaira-brain/internal/memory/config"
+ "github.com/danieljustus/symaira-brain/internal/memory/db"
+ "github.com/danieljustus/symaira-brain/internal/memory/security"
+)
+
+func main() {
+ root:=os.Args[1]
+ if !filepath.IsAbs(root) { panic("owned root must be absolute") }
+ cfg:=config.Defaults()
+ cfg.Database.Path=filepath.Join(root,"database/default.db")
+ cfg.JWT.SecretPath=filepath.Join(root,"config/jwt.secret")
+ store,err:=db.Open(cfg);if err!=nil { panic(err) }
+ if _,err=security.NewJWTProvider(cfg,store);err!=nil { panic(err) }
+ out:=make(map[string]interface{})
+ for _,name:=range []string{"foreign_keys","busy_timeout","secure_delete"} {
+  var value int64
+  if err=store.Conn().QueryRow("PRAGMA "+name).Scan(&value);err!=nil { panic(err) }
+  out[name]=value
+ }
+ var journal string
+ if err=store.Conn().QueryRow("PRAGMA journal_mode").Scan(&journal);err!=nil { panic(err) }
+ out["journal_mode"]=journal
+ _,err=store.Conn().Exec("INSERT INTO entities_aliases(entity_id,alias) VALUES ('absent','owned')")
+ out["actual_invalid_foreign_key_rejected"]=err!=nil
+ if err=json.NewEncoder(os.Stdout).Encode(out);err!=nil { panic(err) }
+ // Process exit, matching real CLI owner lifetime, preserves raw WAL/SHM.
+}

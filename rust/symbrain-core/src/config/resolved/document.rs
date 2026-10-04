@@ -12,6 +12,11 @@ pub(super) fn parse(bytes: &[u8]) -> Result<DocumentMut, GoText> {
     } else {
         bytes
     };
+    // BurntSushi's pre-lexer check inspects precisely six bytes after BOM
+    // removal, before either UTF-8 decoding or ordinary grammar diagnostics.
+    if bytes[..bytes.len().min(6)].contains(&0) {
+        return Err("toml: line 1: files cannot contain NULL bytes; probably using UTF-16; TOML files must be UTF-8".into());
+    }
     let text = match std::str::from_utf8(bytes) {
         Ok(text) => text,
         Err(utf8) => {
@@ -35,6 +40,26 @@ pub(super) fn parse(bytes: &[u8]) -> Result<DocumentMut, GoText> {
     };
     text.parse::<DocumentMut>()
         .map_err(|error| parse_error(bytes, &error))
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn six_byte_null_admission_precedes_grammar_and_invalid_utf8() {
+        let diagnostic=b"toml: line 1: files cannot contain NULL bytes; probably using UTF-16; TOML files must be UTF-8";
+        for bytes in [
+            b"a\0".as_slice(),
+            b"\xff\xfea\0u\0d\0",
+            b"\xef\xbb\xbf\xff\0",
+            b"[bad\0",
+        ] {
+            assert_eq!(super::parse(bytes).unwrap_err().as_ref(), diagnostic);
+        }
+        assert_ne!(
+            super::parse(b"a=\"six\0\"").unwrap_err().as_ref(),
+            diagnostic
+        );
+    }
 }
 fn parse_error(bytes: &[u8], error: &TomlError) -> GoText {
     let offset = error.span().map_or(0, |span| span.start.min(bytes.len()));

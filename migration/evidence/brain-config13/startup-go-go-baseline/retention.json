@@ -1,0 +1,236 @@
+{
+  "scope": "Six actual frozen Go processes, not native acceptance. First helper serialization failure retained without fabricated missing observations.",
+  "files": [
+    {
+      "original": "/workspace/oracles/symaira-brain765-memory-startup-baseline/checkpoint-bool-aliases.json",
+      "sha256": "d300d34b2a43ffa1b7b8d42a991c6c825bf29a2f8ebf73c4d0ad71f1faa69f24",
+      "bytes": 3121299,
+      "gzip": "migration/evidence/brain-config13/startup-go-go-baseline/d300d34b2a43ffa1b7b8d42a991c6c825bf29a2f8ebf73c4d0ad71f1faa69f24.gz",
+      "gzip_sha256": "3ccaa6fe00f7449a40b71161e1cdfe58b25ef2a549908940477b5e46a2cb28ca"
+    },
+    {
+      "original": "/workspace/oracles/symaira-brain765-memory-startup-baseline/checkpoint-plain-pointer-false.json",
+      "sha256": "38c5f74463fd49492a5f8d6cfe7efceab093d86bc50b94349c93d73206830d4c",
+      "bytes": 3121318,
+      "gzip": "migration/evidence/brain-config13/startup-go-go-baseline/38c5f74463fd49492a5f8d6cfe7efceab093d86bc50b94349c93d73206830d4c.gz",
+      "gzip_sha256": "28fb284785044b132bcb349080f6166bd96dc172132b5ff980d70c3752f05b2f"
+    },
+    {
+      "original": "/workspace/oracles/symaira-brain765-memory-startup-baseline/checkpoint-unknown-scalar-struct.json",
+      "sha256": "dad9f160b8af0687c204fc1c98a6b24582337849225696339ef7d7887867304a",
+      "bytes": 3122374,
+      "gzip": "migration/evidence/brain-config13/startup-go-go-baseline/dad9f160b8af0687c204fc1c98a6b24582337849225696339ef7d7887867304a.gz",
+      "gzip_sha256": "d3852eb6daa803cf13b92265fc7efcae5260a92641090fe427cde5bf8abaf610"
+    },
+    {
+      "original": "/workspace/oracles/symaira-brain765-memory-startup-baseline/corrected.log",
+      "sha256": "2c752533e64ba997a80bde2f0dabf25122e76d8bd9514f42e66b63c6181b06f5",
+      "bytes": 116,
+      "gzip": "migration/evidence/brain-config13/startup-go-go-baseline/2c752533e64ba997a80bde2f0dabf25122e76d8bd9514f42e66b63c6181b06f5.gz",
+      "gzip_sha256": "103b1208ea0390b09cd7eeb5f3f77d510775bac9328124210834b662798db61d"
+    },
+    {
+      "original": "/workspace/oracles/symaira-brain765-memory-startup-baseline/go_go.initial.py.gz",
+      "sha256": "2b0cba9a3363d088b1cc0ee995d0f07fe36049becb85dfbc77aaff06e468a7d3",
+      "bytes": 1246,
+      "gzip": "migration/evidence/brain-config13/startup-go-go-baseline/2b0cba9a3363d088b1cc0ee995d0f07fe36049becb85dfbc77aaff06e468a7d3.gz",
+      "gzip_sha256": "d1c9a3a067c9cc26fba8c720bfe5c18033c7e8331293438b9c1dfd2d7b8d286b"
+    },
+    {
+      "original": "/workspace/oracles/symaira-brain765-memory-startup-baseline/go_go.py",
+      "sha256": "440602968eb0f9cc782c69ebd5ad5b9d681694b556ef229c3b1d51eb5d0b8897",
+      "bytes": 2635,
+      "gzip": "migration/evidence/brain-config13/startup-go-go-baseline/440602968eb0f9cc782c69ebd5ad5b9d681694b556ef229c3b1d51eb5d0b8897.gz",
+      "gzip_sha256": "ef6635fe94565ba96725c8992587cd72964654580cdece44b42fafd80217d757"
+    },
+    {
+      "original": "/workspace/oracles/symaira-brain765-memory-startup-baseline/initial-failure.json",
+      "sha256": "c2771cbc6dc41ef4edaad6cbf0bc455aafe5fa4737e804617c97f6c869170b31",
+      "bytes": 403,
+      "gzip": "migration/evidence/brain-config13/startup-go-go-baseline/c2771cbc6dc41ef4edaad6cbf0bc455aafe5fa4737e804617c97f6c869170b31.gz",
+      "gzip_sha256": "54c0f6bbc84530d66f4fdd8e201dda198684b919ff5cf49942c1ba806905edb0"
+    },
+    {
+      "original": "/workspace/oracles/symaira-brain765-memory-startup-baseline/prepared-metadata.json",
+      "sha256": "63f0c4c3b6e47bb25755209e6c12e1e8073a85e77672b94e154bfb8cb12eb810",
+      "bytes": 83423,
+      "gzip": "migration/evidence/brain-config13/startup-go-go-baseline/63f0c4c3b6e47bb25755209e6c12e1e8073a85e77672b94e154bfb8cb12eb810.gz",
+      "gzip_sha256": "4beee5bf681fb8fc97d84d7c1893be340432b70bad784bec850fef44b420e111"
+    },
+    {
+      "original": "/workspace/oracles/symaira-brain765-memory-startup-baseline/report.json",
+      "sha256": "bdf4536e53730db7db1495d134ccbb88f0040e9aa9a94021d439bb24ca1ea9ab",
+      "bytes": 9370077,
+      "gzip": "migration/evidence/brain-config13/startup-go-go-baseline/bdf4536e53730db7db1495d134ccbb88f0040e9aa9a94021d439bb24ca1ea9ab.gz",
+      "gzip_sha256": "3b6a96f4e4a4fe8077560b85f9013aa1255ff16a78bc308ddf9cd30cd76b11e5"
+    }
+  ],
+  "actual_go_sha256": "5989a7ff57accc96f79ea3eb83d8a6bb74160f6f612d46831439b19013a2404e",
+  "census": [
+    {
+      "case": {
+        "id": "plain-pointer-false",
+        "command": "mcp",
+        "global_bytes": "W2F1ZGl0XQplbmFibGVkPWZhbHNlCnZlcmJvc2U9ZmFsc2UKW21vZHVsZXNdCmJyb3dzZT1mYWxzZQo=",
+        "project_bytes": "",
+        "env": {}
+      },
+      "actual_exits": [
+        0,
+        0
+      ],
+      "strict_exact": false,
+      "differing_roles": [
+        {
+          "role": "config/symbrain/memory/jwt.secret",
+          "left": {
+            "kind": "file",
+            "sha256": "874360a46d4eebb492c1afbd536d16283f7d9f848e6edf1eddc5c3c4aaa6d4b9",
+            "mode": "0o600"
+          },
+          "right": {
+            "kind": "file",
+            "sha256": "8e99899dd71228f01b34b72e5f88c0058f417ae4bd80454eef3a8f1aa0c3307c",
+            "mode": "0o600"
+          }
+        },
+        {
+          "role": "data/symbrain/memory/default.db-shm",
+          "left": {
+            "kind": "file",
+            "sha256": "f43103c734c6e6f8570a0d5b126536cb668feaa709aea2c71d5aed889001283c",
+            "mode": "0o600"
+          },
+          "right": {
+            "kind": "file",
+            "sha256": "2f6c49e98bd3d74612839b54f2d58d719e3c4454447ca27af249301f20cebae8",
+            "mode": "0o600"
+          }
+        },
+        {
+          "role": "data/symbrain/memory/default.db-wal",
+          "left": {
+            "kind": "file",
+            "sha256": "2216261fe77c2d3de648ec44a52013a88ff6a149c769e7d0636608551eb1fc00",
+            "mode": "0o600"
+          },
+          "right": {
+            "kind": "file",
+            "sha256": "f8e50af66ed10837c7c1b7b1fbd1cfdd15306ce6deb4597f865e066409a9cb40",
+            "mode": "0o600"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "unknown-scalar-struct",
+        "command": "mcp",
+        "global_bytes": "YXVkaXQ9Imlnbm9yZWQiCm1vZHVsZXM9W10KdW5rbm93bj10cnVlCg==",
+        "project_bytes": "",
+        "env": {}
+      },
+      "actual_exits": [
+        0,
+        0
+      ],
+      "strict_exact": false,
+      "differing_roles": [
+        {
+          "role": "config/symbrain/memory/jwt.secret",
+          "left": {
+            "kind": "file",
+            "sha256": "c1797b3d8aed2f939da5ca1f37dc0f2800bfcb5252aea9411607075c8b8cdb8c",
+            "mode": "0o600"
+          },
+          "right": {
+            "kind": "file",
+            "sha256": "23ff267cfbb983f13c228b7f0eeb1aeeabfc6671e0fe9230c4f3deacd3debb35",
+            "mode": "0o600"
+          }
+        },
+        {
+          "role": "data/symbrain/memory/default.db-shm",
+          "left": {
+            "kind": "file",
+            "sha256": "991549a321130bbe55c2d6a584a6cb872af2fb66a59a7e0d8485c9af0eec38ef",
+            "mode": "0o600"
+          },
+          "right": {
+            "kind": "file",
+            "sha256": "61646ef428f5ac98aa0c301fe5938214a1d063162aec4c58d561a6bf8b9779e1",
+            "mode": "0o600"
+          }
+        },
+        {
+          "role": "data/symbrain/memory/default.db-wal",
+          "left": {
+            "kind": "file",
+            "sha256": "e3aa535d504fc40f48c9b9032f56afb343ac0326e31725c4723f0c4cafc48fd2",
+            "mode": "0o600"
+          },
+          "right": {
+            "kind": "file",
+            "sha256": "0cc9854802527cad51af0c151df5a4edc4cf0c29d391703652d670a17466debe",
+            "mode": "0o600"
+          }
+        }
+      ]
+    },
+    {
+      "case": {
+        "id": "bool-aliases",
+        "command": "mcp",
+        "global_bytes": "W2F1ZGl0XQplbmFibGVkPSJGQUxTRSIKW2dhdGV3YXldCmlkZW50aXR5X2luamVjdGlvbj0iMCIK",
+        "project_bytes": "",
+        "env": {}
+      },
+      "actual_exits": [
+        0,
+        0
+      ],
+      "strict_exact": false,
+      "differing_roles": [
+        {
+          "role": "config/symbrain/memory/jwt.secret",
+          "left": {
+            "kind": "file",
+            "sha256": "4db7411db1260928954e241e4050683d6874534e420006a2cd52e54fc9e80c70",
+            "mode": "0o600"
+          },
+          "right": {
+            "kind": "file",
+            "sha256": "ed6bec3b4ecfd58a0db92ddab7a5bc6df5cb840c99ac0b25efe853936783b954",
+            "mode": "0o600"
+          }
+        },
+        {
+          "role": "data/symbrain/memory/default.db-shm",
+          "left": {
+            "kind": "file",
+            "sha256": "d3b4277b72e4129d2926b924afce7f235521c1c3d73a0edf138e68c4dc8e2880",
+            "mode": "0o600"
+          },
+          "right": {
+            "kind": "file",
+            "sha256": "5f3cf56a15f3e14c1e4fb2ab4a630adfa0325dfd923213ab997a89143be7e827",
+            "mode": "0o600"
+          }
+        },
+        {
+          "role": "data/symbrain/memory/default.db-wal",
+          "left": {
+            "kind": "file",
+            "sha256": "02b59eccc6c5060073fb4711dcc857e9ba6ef1fc2fe3e4070a14feff36a8a9c9",
+            "mode": "0o600"
+          },
+          "right": {
+            "kind": "file",
+            "sha256": "63b63416874a345db423754bdeecc5124864e92481e026bf9d126e5ebe9c25a8",
+            "mode": "0o600"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -23,6 +23,10 @@ use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::{Duration, Instant, SystemTime};
 
+#[path = "secret_reference_bytes.rs"]
+mod secret_reference_bytes;
+pub use secret_reference_bytes::resolve_reference_bytes;
+
 /// The service Claude Code stores its OAuth credentials under in the macOS
 /// login keychain. Current versions append a per-installation hex suffix that
 /// is not derivable from disk, so the bare name is tried first and every
@@ -153,9 +157,9 @@ enum CommandFailure {
 /// holding a pipe open cannot outlive cancellation. This is the single
 /// subprocess runner behind both the legacy `Option` API and the
 /// Go-parity secret-reference path.
-fn run_command_capture(
+fn run_command_capture<S: AsRef<std::ffi::OsStr>>(
     command: &str,
-    args: &[&str],
+    args: &[S],
     timeout: Duration,
     cap: u64,
 ) -> Result<Vec<u8>, CommandFailure> {

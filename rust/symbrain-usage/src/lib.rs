@@ -9,8 +9,8 @@ mod transport;
 pub use model::{AuthStatus, ProviderUsage, Report, UsageMeter, UsageSnapshot};
 pub use providers::{
     Provider, ProviderSpec, UsageError, all_providers, is_secret_reference, is_vault_uri,
-    needs_go_fallback, resolve_reference, resolve_reference_or_env, secretref_timeout,
-    set_secretref_timeout,
+    needs_go_fallback, resolve_reference, resolve_reference_bytes, resolve_reference_or_env,
+    secretref_timeout, set_secretref_timeout,
 };
 pub use transport::{Cancellation, FixtureTransport, Request, Response, Transport, UreqTransport};
 
