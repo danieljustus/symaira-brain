@@ -13,11 +13,13 @@ if command -v cygpath >/dev/null 2>&1; then
 fi
 scratch=$(mktemp -d "$temporary_root/symbrain-copilot-kimi-768.XXXXXX")
 source_root="$scratch/source"
+parent_root="$scratch/argv-parent-source"
+parent_commit=abf20713bacdab562644256e27616a9dd7acb81e
 evidence_dir="${output%.json}.evidence"
 mkdir -p "$evidence_dir"
 cleanup() {
   stage_exit=$?
-  for receipt in go native input cli controls filesystem baseline-input baseline-go baseline-native owner owner-native owner-cli owner-controls path path-native; do
+  for receipt in go native input cli controls filesystem baseline-input baseline-go baseline-native owner owner-native owner-cli owner-controls path path-native argv argv-controls argv-build; do
     if [[ -f "$scratch/$receipt.json" ]]; then cp "$scratch/$receipt.json" "$evidence_dir/$receipt.json"; fi
   done
   if [[ $stage_exit != 0 ]]; then
@@ -27,6 +29,7 @@ pathlib.Path(sys.argv[1]).write_text(json.dumps({"schema_version":1,"gate_exit":
 PYFAIL
   fi
   git -C "$repo_root" worktree remove --force "$source_root" >/dev/null 2>&1 || true
+  git -C "$repo_root" worktree remove --force "$parent_root" >/dev/null 2>&1 || true
   rm -rf "$scratch"
 }
 trap cleanup EXIT INT TERM
@@ -66,8 +69,48 @@ git -C "$source_root" diff --exit-code --quiet
 run_stage go-original-baseline go -C "$source_root" test ./internal/usage -run '^TestUsageLocalFilesBaseline768$' -count=1
 run_stage go-owners go -C "$source_root" test ./internal/usage -run '^TestUsageCredential(Owner|Path)768$' -count=1
 run_stage native-constructors cargo test --locked -p symbrain-usage --lib copilot_kimi_oracle_matches_fresh_go -- --ignored --nocapture
+target_root=$(python3 -c 'import os; print(os.path.abspath(os.environ.get("CARGO_TARGET_DIR","target")))')
+run_stage argv-initial-clean python3 "$repo_root/scripts/usage-copilot-kimi-oracle/clean_cli.py" "$target_root" "$repo_root" "$evidence_dir/argv-initial-clean.json"
 run_stage native-build cargo build --locked -p symbrain-cli
+python3 - "$target_root/debug/symbrain$executable_suffix" "$scratch/argv-candidate-initial$executable_suffix" <<'PYCOPY'
+import shutil,sys
+shutil.copyfile(sys.argv[1],sys.argv[2]);shutil.copymode(sys.argv[1],sys.argv[2])
+PYCOPY
 run_stage cli python3 "$repo_root/scripts/usage-copilot-kimi-oracle/cli.py" "$scratch/go.json" "$scratch/go-usage$executable_suffix" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix" "$scratch/cli.json"
 run_stage owner-cli python3 "$repo_root/scripts/usage-copilot-kimi-oracle/cli.py" "$scratch/owner.json" "$scratch/go-usage$executable_suffix" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix" "$scratch/owner-cli.json" --owner
 run_stage controls python3 "$repo_root/scripts/usage-copilot-kimi-oracle/controls.py" "$scratch" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix"
+# Parent and candidate variants share only dependencies in one exclusive target.
+# Archive and clean the CLI package between variants, then verify restoration.
+git -C "$repo_root" worktree add --quiet --detach "$parent_root" "$parent_commit"
+run_stage argv-parent-clean python3 "$repo_root/scripts/usage-copilot-kimi-oracle/clean_cli.py" "$target_root" "$repo_root" "$evidence_dir/argv-parent-clean.json"
+run_stage argv-parent-build cargo build --locked -p symbrain-cli --manifest-path "$parent_root/Cargo.toml" --target-dir "$target_root"
+python3 - "$target_root/debug/symbrain$executable_suffix" "$scratch/argv-parent$executable_suffix" <<'PYCOPY'
+import shutil,sys
+shutil.copyfile(sys.argv[1],sys.argv[2]);shutil.copymode(sys.argv[1],sys.argv[2])
+PYCOPY
+run_stage argv-candidate-clean python3 "$repo_root/scripts/usage-copilot-kimi-oracle/clean_cli.py" "$target_root" "$repo_root" "$evidence_dir/argv-candidate-clean.json"
+run_stage argv-candidate-build cargo build --locked -p symbrain-cli --target-dir "$target_root"
+python3 - "$parent_root" "$parent_commit" "$scratch/argv-parent$executable_suffix" "$target_root/debug/symbrain$executable_suffix" "$scratch/argv-build.json" "$scratch/argv-candidate-initial$executable_suffix" "$repo_root" <<'PYBUILD'
+import hashlib,json,pathlib,subprocess,sys
+root=pathlib.Path(sys.argv[1]);commit=sys.argv[2]
+assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()==commit
+assert not subprocess.check_output(['git','status','--porcelain'],cwd=root)
+files=['Cargo.toml','Cargo.lock','rust/symbrain-cli/src/usage_cli.rs','rust/symbrain-cli/src/lib.rs']
+manifest={}
+for name in files:
+    data=(root/name).read_bytes()
+    assert data==subprocess.check_output(['git','show',commit+':'+name],cwd=root)
+    manifest[name]=hashlib.sha256(data).hexdigest()
+assert pathlib.Path(sys.argv[4]).read_bytes()==pathlib.Path(sys.argv[6]).read_bytes(),'Actual candidate binary restored byte-identically after parent variant'
+candidate=pathlib.Path(sys.argv[7]);candidate_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=candidate,text=True).strip()
+candidate_clean=not subprocess.check_output(['git','status','--porcelain'],cwd=candidate)
+candidate_manifest={name:hashlib.sha256((candidate/name).read_bytes()).hexdigest()for name in files}
+if candidate_clean:
+    for name in files:assert (candidate/name).read_bytes()==subprocess.check_output(['git','show',candidate_head+':'+name],cwd=candidate)
+pathlib.Path(sys.argv[5]).write_text(json.dumps(dict(parent_source=commit,parent_source_clean=True,parent_source_sha256=manifest,candidate_source=candidate_head,candidate_source_clean=candidate_clean,candidate_source_sha256=candidate_manifest,candidate_restored_byte_identical=True,
+    binaries_sha256={kind:hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()for kind,path in [('parent',sys.argv[3]),('rust',sys.argv[4])]},
+    rust_sdk=subprocess.check_output(['rustc','-Vv'],text=True),scope='One exclusive target; every CLI variant package-cleaned after verified lossless artifact archive. Actual parent copied; candidate restored byte-identically to actual initial candidate. Clean candidate source checked against immutable Git, no duplicate target'),indent=2)+'\n')
+PYBUILD
+run_stage argv python3 "$repo_root/scripts/usage-copilot-kimi-oracle/argv.py" --go "$scratch/go-usage$executable_suffix" --parent "$scratch/argv-parent$executable_suffix" --rust "$target_root/debug/symbrain$executable_suffix" --parent-source "$parent_commit" --output "$scratch/argv.json"
+run_stage argv-controls python3 "$repo_root/scripts/usage-copilot-kimi-oracle/argv_controls.py" --go "$scratch/go-usage$executable_suffix" --parent "$scratch/argv-parent$executable_suffix" --rust "$target_root/debug/symbrain$executable_suffix" --parent-source "$parent_commit" --output "$scratch/argv-controls.json"
 python3 "$repo_root/scripts/usage-copilot-kimi-oracle/receipt.py" "$scratch/go.json" "$scratch/native.json" "$output" "$oracle_commit"

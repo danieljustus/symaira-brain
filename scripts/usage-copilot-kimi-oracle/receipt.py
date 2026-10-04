@@ -27,6 +27,20 @@ assert owner_cli['cases']==owner_cli['passed']==owner_cli['route_cases']==owner_
 assert owner_cli['binary_sha256']==cli['binary_sha256']
 assert [row['exit']for row in owner_controls]==[101]
 assert len(paths)==paths_native['cases']==paths_native['passed']==(21 if sys.platform=='win32'else 22) and paths_native['failed']==0
+argv=json.loads(go.with_name('argv.json').read_text())
+argv_controls=json.loads(go.with_name('argv-controls.json').read_text())
+argv_build=json.loads(go.with_name('argv-build.json').read_text())
+assert argv['cases']==argv['passed']==(56 if sys.platform=='win32'else 82) and argv['failed']==0
+assert argv['original_cases']==(14 if sys.platform=='win32'else 22) and argv['original_parent_mismatches']==(6 if sys.platform=='win32'else 12)
+assert argv_controls['rejected']==(2 if sys.platform=='win32'else 3) and all(row['rejected']for row in argv_controls['controls'])
+assert argv['parent_source']==argv_build['parent_source']=='abf20713bacdab562644256e27616a9dd7acb81e' and argv_build['parent_source_clean']
+assert argv['binary_sha256']==argv_controls['binary_sha256']
+assert argv['binary_sha256']['go']==cli['binary_sha256']['go']
+assert argv['binary_sha256']['rust']==cli['binary_sha256']['rust']==argv_build['binaries_sha256']['rust']
+assert argv['binary_sha256']['parent']==argv_build['binaries_sha256']['parent']
+assert argv_build['candidate_restored_byte_identical'] and argv_build['candidate_source']==argv['candidate_head']
+assert argv['candidate_head']==subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
+assert all(hashlib.sha256((pathlib.Path(subprocess.check_output(['git','rev-parse','--show-toplevel'],text=True).strip())/name).read_bytes()).hexdigest()==digest for name,digest in argv['source_sha256'].items())
 
 repo=pathlib.Path(subprocess.check_output(['git','rev-parse','--show-toplevel'],text=True).strip())
 baseline_path=repo/'migration/evidence/usage-local-files-768/linux-go-baseline.json'
@@ -63,5 +77,6 @@ baseline_accounting=dict(original_head=original_head,historical_receipt_sha256=h
 
 files=sorted((repo/'rust/symbrain-usage/src').rglob('*.rs'))+[repo/path for path in ['rust/symbrain-usage/Cargo.toml','Cargo.lock','rust/symbrain-cli/tests/mcp_cli_tests.rs','rust/symbrain-cli/src/usage_cli.rs','rust/symbrain-cli/src/lib.rs']]+sorted((repo/'scripts/usage-copilot-kimi-oracle').glob('*'))+sorted((repo/'scripts/usage-local-files-baseline').glob('*'))+[baseline_path]
 files=[p for p in files if p.is_file()]
-receipt={'schema_version':1,'oracle_commit':sys.argv[4],'candidate_head':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'candidate_dirty':bool(subprocess.check_output(['git','status','--porcelain'],text=True).strip()),'platform':sys.platform,'arch':platform.machine(),'go_sdk':subprocess.check_output(['go','version'],text=True).strip(),'rust_sdk':subprocess.check_output(['rustc','--version'],text=True).strip(),'cases':89,'passed':89,'failed':0,'full_report_cases':89-expected_gates,'retained_gates':expected_gates,'source_sha256':{str(p.relative_to(repo)):hashlib.sha256(p.read_bytes()).hexdigest()for p in files},'oracle_sha256':hashlib.sha256(go.read_bytes()).hexdigest(),'records':records,'owner_selection':dict(go_cases=16,native=owner_native,records=owner,cli=owner_cli,negative_controls=owner_controls),'native_path_semantics':dict(records=paths,native=paths_native),'original_97_accounting':baseline_accounting,'cli':cli,'negative_controls':controls,'native_macos_windows':'native exact-head CI required; Linux alone does not establish these targets','remaining_scope':'distinct Copilot tokens, unsafe/unreadable sources, unproven device headers, home mismatch on Windows, base/workspace/numeric expiry and automatic host Keychain remain gated; full #768 remains open'}
+files += [repo/path for path in ['rust/symbrain-core/src/config/format.rs', 'rust/symbrain-core/src/config/set.rs', 'rust/symbrain-core/src/config/mod.rs', 'rust/symbrain-core/src/go_printable.rs']]
+receipt={'schema_version':1,'oracle_commit':sys.argv[4],'candidate_head':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),'candidate_dirty':bool(subprocess.check_output(['git','status','--porcelain'],text=True).strip()),'platform':sys.platform,'arch':platform.machine(),'go_sdk':subprocess.check_output(['go','version'],text=True).strip(),'rust_sdk':subprocess.check_output(['rustc','--version'],text=True).strip(),'cases':89,'passed':89,'failed':0,'full_report_cases':89-expected_gates,'retained_gates':expected_gates,'source_sha256':{str(p.relative_to(repo)):hashlib.sha256(p.read_bytes()).hexdigest()for p in files},'oracle_sha256':hashlib.sha256(go.read_bytes()).hexdigest(),'records':records,'argv_diagnostics':dict(actual=argv,controls=argv_controls,build=argv_build),'owner_selection':dict(go_cases=16,native=owner_native,records=owner,cli=owner_cli,negative_controls=owner_controls),'native_path_semantics':dict(records=paths,native=paths_native),'original_97_accounting':baseline_accounting,'cli':cli,'negative_controls':controls,'native_macos_windows':'native exact-head CI required; Linux alone does not establish these targets','remaining_scope':'distinct Copilot tokens, unsafe/unreadable sources, unproven device headers, home mismatch on Windows, base/workspace/numeric expiry and automatic host Keychain remain gated; full #768 remains open'}
 output.write_text(json.dumps(receipt,indent=2)+'\n')

@@ -1,6 +1,7 @@
 use std::ffi::OsString;
 use std::io::Write;
 
+use symbrain_core::config::format_go_quoted;
 use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
 use symbrain_usage::{Report, Service, UsageMeter};
@@ -37,37 +38,35 @@ pub fn run(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    let args = normalize_flags(args);
-    if let Some(arg) = args.iter().find(|arg| {
-        let value = arg.to_string_lossy();
-        value == "-h" || value == "-help" || value == "--help"
-    }) {
-        if args.len() == 1 {
-            let _ = write!(stderr, "{HELP}");
-            return exit::USAGE;
+    let args = crate::normalize_flags(args);
+    // Usage has no local flags: FlagSet stops at its first positional or
+    // terminator, or immediately returns an unknown-flag/help error.
+    let positional = if let Some(arg) = args.first() {
+        let bytes = arg.as_encoded_bytes();
+        if bytes == b"--" {
+            args.get(1)
+        } else if bytes.len() < 2 || !bytes.starts_with(b"-") {
+            Some(arg)
+        } else {
+            let name = &bytes[if bytes[1] == b'-' { 2 } else { 1 }..];
+            if name.is_empty() || matches!(name[0], b'-' | b'=') {
+                return flag_error(stderr, b"bad flag syntax: ", bytes);
+            }
+            let name = name.split(|byte| *byte == b'=').next().unwrap_or_default();
+            if matches!(name, b"h" | b"help") {
+                let _ = stderr.write_all(HELP.as_bytes());
+                return exit::USAGE;
+            }
+            return flag_error(stderr, b"flag provided but not defined: -", name);
         }
+    } else {
+        None
+    };
+    if let Some(arg) = positional {
         let _ = writeln!(
             stderr,
             "symbrain usage: unexpected argument {}",
-            debug_arg(arg)
-        );
-        return exit::USAGE;
-    }
-    if let Some(arg) = args
-        .iter()
-        .find(|arg| arg.to_string_lossy().starts_with('-'))
-    {
-        let name = arg.to_string_lossy();
-        let name = name.trim_start_matches('-').split('=').next().unwrap_or("");
-        let _ = writeln!(stderr, "flag provided but not defined: -{name}");
-        let _ = write!(stderr, "{HELP}");
-        return exit::USAGE;
-    }
-    if let Some(arg) = args.first() {
-        let _ = writeln!(
-            stderr,
-            "symbrain usage: unexpected argument {}",
-            debug_arg(arg)
+            format_go_quoted(arg)
         );
         return exit::USAGE;
     }
@@ -83,9 +82,12 @@ pub fn run(
     exit::OK
 }
 
-#[allow(clippy::unnecessary_debug_formatting)]
-fn debug_arg(arg: &OsString) -> String {
-    format!("{arg:?}")
+fn flag_error(stderr: &mut dyn Write, prefix: &[u8], value: &[u8]) -> u8 {
+    let _ = stderr.write_all(prefix);
+    let _ = stderr.write_all(value);
+    let _ = stderr.write_all(b"\n");
+    let _ = stderr.write_all(HELP.as_bytes());
+    exit::USAGE
 }
 
 fn render_report_table(writer: &mut dyn Write, report: &Report) -> std::io::Result<()> {
@@ -119,19 +121,6 @@ fn meter_value(meter: &UsageMeter) -> String {
         .limit
         .as_deref()
         .map_or_else(|| used.to_owned(), |limit| format!("{used}/{limit}"))
-}
-
-fn normalize_flags(args: &[OsString]) -> Vec<OsString> {
-    args.iter()
-        .map(|arg| {
-            let value = arg.to_string_lossy();
-            if value.starts_with("--") && value.len() > 2 {
-                OsString::from(format!("-{}", &value[2..]))
-            } else {
-                arg.clone()
-            }
-        })
-        .collect()
 }
 
 // Keep table rendering testable without making the public usage report depend

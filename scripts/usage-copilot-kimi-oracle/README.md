@@ -71,3 +71,15 @@ actual native CI. A separate wrong-owner request mutation must produce a real
 exit101 at the full native request assertion; the original five controls remain.
 Original failed review and executed binaries are preserved before target reuse.
 See `docs/adr/usage-credential-path-owner-768.md` for the decision and limits.
+
+The argv correction adds actual frozen-Go/immutable-abf-parent/current triples:
+82 Unix cases include the unchanged original22 and60 grammar/byte controls.
+All processes use literal file credentials with absent fallback, return2 before
+HTTP and preserve owned files. The12 original parent mismatches must reproduce;
+three real output mutations must be rejected. Windows declares56 launchable
+cases/14 original/two mutations and explicitly skips26 Unix invalid-byte vectors.
+Native Windows/macOS CI remains required. The runner archives and verifies all
+CLI-package artifacts before package-only cleaning between parent/candidate
+variants and requires byte-identical restoration of the initial candidate CLI.
+The original failed shared-target restoration attempt remains preserved. See
+`docs/adr/usage-cli-argv-bytes-768.md` for helper reuse and acceptance boundaries.
