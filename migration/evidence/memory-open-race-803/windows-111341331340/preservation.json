@@ -32,5 +32,6 @@
     }
   },
   "historical_candidate_unchanged": "dba88d23dade87eb5194e9c2451a0ad20d08a83e",
-  "operations": "static/read-only preservation; no target/compiler/runtime/port"
+  "operations": "static/read-only preservation; no target/compiler/runtime/port",
+  "git_retention_note": "Initial preservation commit ad61338 applied the existing text=auto/eol=lf filter to the .log Git blob; the original /tmp and worktree bytes remained intact. A narrow binary attribute restores the exact raw Git blob in the next preservation commit. ad61338 remains retained, without rewriting input or runtime evidence."
 }

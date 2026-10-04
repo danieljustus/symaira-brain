@@ -10,3 +10,6 @@ fuzz/corpus/** binary
 migration/evidence/memory-cli-758/windows-cleanup-9c-job-111297047149.log binary
 
 migration/evidence/memory-cli-758/independent-sigpipe-458/*.log binary
+
+# Retain the actual Windows Store-open failure's original CRLF bytes.
+migration/evidence/memory-open-race-803/windows-111341331340/*.log binary
