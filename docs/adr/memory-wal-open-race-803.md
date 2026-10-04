@@ -1,6 +1,6 @@
 # Bound WAL setup contention without replaying migrations
 
-Status: focused Linux author validation in progress; independent/native3 pending.
+Status: focused Linux author checks passed; mixed-lock control and independent/native3 pending.
 Refs #649/#758 and PR803/PR811. Base: immutable PR803 `6ae73a7`.
 
 Windows job `111341331340` in run `37170162739` reports three worker failures
@@ -50,7 +50,7 @@ lock-owner fixture, not the production budget, helper or original assertions.
 
 Allocation-stage proof must first bind the actual failing phase. Prepare a real
 rollback-mode reserved-writer control whose WAL transition returns plain BUSY while the
-busy callback is not invoked, then release the reader after observing the
+busy callback is not invoked, then release the writer after observing the
 helper's real BUSY attempt and require WAL setup success. A retained reader
 must exhaust the same five-second budget and preserve the original error/state.
 Also retain a reserved writer through expiry, require multiple genuine early
@@ -58,6 +58,17 @@ BUSY attempts, and bind elapsed time/error/restored timeout/unchanged rows to th
 one shared budget. Test error classification and active-transaction refusal separately. Keep the
 original ten-by-eight concurrency assertions verbatim; exercise opening and
 closing in the full inherited gates and native Windows/macOS/Linux CI.
+
+At source `bdf2371`, 39 library tests, strict Memory all-target/all-feature
+Clippy, formatting and actionlint passed. The held writer caused 984 real early
+BUSY attempts in 5.000088261 seconds; the held reader waited 5.007606427 seconds.
+The original 80 concurrent public opens/writes passed without assertion changes.
+All current ELF bytes are gzip-roundtrip/SHA archived, with the one actually
+executed Memory test binary separately identified. The first actionlint launch
+failed because PATH lacked the tool; its literal log is retained and the
+existing absolute tool invocation passed. These single-phase controls still
+need a mixed writer-to-reader control: initial skipped-handler time must reduce
+the later genuine SQLite-handler wait, rather than granting it five new seconds.
 
 This proposal does not assert that the Windows race is closed. If actual phase
 proof identifies BEGIN IMMEDIATE or migration/commit contention instead, retain
