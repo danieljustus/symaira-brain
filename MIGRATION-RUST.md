@@ -22,6 +22,76 @@ for binding checks, fails closed on unsafe/unreadable/malformed configs unless
 through no-follow removal. The Go implementation remains the source-bound oracle
 for this seam until all release gates pass.
 
+The #758 memory increment adds Brain-owned grounded evidence to
+`symbrain-memory`: source refs, UTF-8 byte spans, exact/normalized/fuzzy
+alignment, strict validation, Go-compatible JSONL encoding, evidence persistence
+and transaction-aware reparenting. The additive oracle executes frozen Go
+CoreKit v0.17.0 for 32 alignment pairs, 48 validation boundaries, three JSONL
+records and four existing production database tests. Actual schema inspection
+continues to repair #649's five missing columns despite applied migration names;
+DDL, repairs, indexes and bookkeeping now commit atomically. The native
+three-OS workflow is required before accepting this increment. Full memory CLI,
+dynamic configuration, governed writes and JSONL decoding remain open; no Go
+fallback route is removed, and #649 remains pending the shipped Rust release.
+The rationale is recorded in `docs/adr/758-native-memory-evidence.md`.
+
+The follow-up #758 CLI increment splits the oversized memory module into focused
+behavior modules, ports raw Go flags/error grammar and all 86 typed memory
+configuration fields, uses configured Ollama query embeddings and corrects the
+list default to 100. The supplemental immutable-Go replay compares 590 Unix/553
+Windows cases, including full seeded database state for configuration/read
+commands and two executable failure controls. Native three-OS acceptance is
+pending. Governed writes, configured Hamming prefilter, every database open/error
+shape, new-file permission parity and JSONL decoding remain open. The decision
+and scope are recorded in `docs/adr/memory-native-cli-758.md`.
+The bounded governed-write successor adds native provenance/trust/policy,
+configured embeddings and binary storage, entity linking/audits, kind/staged
+updates and delete access-feedback/audits. Existing-store direct writes are native
+only when the full reachable redaction/extraction/conflict pipeline is bypassed:
+staged writes skip conflicts; other writes require effective config false.
+The prior unconditional default-conflict insert now delegates Go. Malformed or
+unproven hydration and new-file modes also retain Go. Stateful process proof
+compares application rows with explicit UUID/timestamp bindings and logical FTS
+integrity, with executable identity/audit/exit mutants and actual delegation
+observations. Full #758 and native three-OS acceptance remain pending; the
+rationale and exact boundaries are in
+`docs/adr/memory-native-governed-writes-758.md`.
+Clean source `14d2414` passes Linux 60 native set / 16 native delete pairs,
+13 literal delegated-Go boundaries, three write controls, all 590 baseline pairs
+and two baseline controls, plus 161 affected Rust tests and strict lint gates.
+Tracked receipts retain the actual delete-audit sequencing regression and
+earlier rejected harness assumptions. Independent review requested changes for
+zero-row governance updates and failed output on newly native metadata Set.
+The correction checks both governance row counts and Set writer errors while
+preserving Go's committed failure state; a supplemental real-process gate adds
+six callback pairs and two Unix sink pairs where available. Original findings
+and reviewed executable hashes remain retained. Corrected independent review
+and native three-OS acceptance remain pending.
+Clean corrected source `647477f` passes fresh Linux 60 Set/16 Delete/13 actual
+Go boundary pairs, six governance callback pairs, two real Unix output sinks,
+all three write controls, 590 baseline pairs and both baseline controls. All
+163 affected Rust tests and strict lint gates pass. The old independent failure
+bytes/executable archives and new full state proof remain tracked separately.
+The subsequent independent review closed both original findings and requested
+actual Unix Set stdout SIGPIPE parity. The focused successor keeps library
+writers as checked errors, adds both real closed-reader process formats and an
+actual CLI child test, and normally integrates main `e3dbda6c`. Its decision is
+in `docs/adr/memory-set-stdout-sigpipe-758.md`; exact-source independent review,
+native three-OS acceptance and full #758 remain pending.
+Clean combined source `458e8fa5` passes 165 affected Rust tests and strict lint
+gates, fresh 60/16/13 state pairs, six callback and four Unix sink/closed-reader
+pairs, all three write controls, all 590 baseline pairs and both baseline
+controls. Both original independent closed-reader inputs now match literal Go
+SIGPIPE/quiet output while retaining complete committed state. The full fresh
+source/binary-bound evidence and previous executable archives remain separate;
+these Linux author results do not replace independent or native three-OS review.
+
+Independent review found two configured-read differences in the initial CLI
+candidate: memory-specific XDG/legacy resolution and populated rules JSON HTML/
+JavaScript-separator escaping. Corrections remain memory-local, preserve the
+original failed process reports and add meaningful directory/file and populated
+rules cases to the replay. Other domains' data-path convention stays unchanged.
+
 The native memory embedding adapter uses CoreKit's Rust `symaira-core-llm`
 transport at the exact Git revision pinned in `Cargo.toml`. Brain retains its
 Ollama URL normalization, two-second timeout, 768-dimension gate, and local hash

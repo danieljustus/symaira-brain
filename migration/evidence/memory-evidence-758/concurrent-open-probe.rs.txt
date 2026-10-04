@@ -1,0 +1,22 @@
+use std::{path::PathBuf, sync::{Arc, Barrier}, thread};
+use symbrain_memory::Store;
+fn main() {
+    let path = PathBuf::from(std::env::args_os().nth(1).unwrap());
+    for _ in 0..2 {
+        let store = Store::open(&path).unwrap();
+        assert_eq!(store.get("preserved").unwrap().unwrap().content, "existing Unicode 世界 < & > remains");
+        let row = store.set("independent post-repair write", "global", "user", Default::default(), false).unwrap();
+        assert_eq!(store.get(&row.id).unwrap().unwrap().content, row.content);
+    }
+    let barrier = Arc::new(Barrier::new(8));
+    let jobs = (0..8).map(|_| {
+        let path = path.clone(); let barrier = barrier.clone();
+        thread::spawn(move || {
+            barrier.wait(); let store = Store::open(&path).unwrap();
+            assert_eq!(store.get("preserved").unwrap().unwrap().content, "existing Unicode 世界 < & > remains");
+            store.set("concurrent independent write", "global", "user", Default::default(), false).unwrap();
+        })
+    }).collect::<Vec<_>>();
+    for job in jobs { job.join().unwrap(); }
+    println!("reopen/write/data-preservation/concurrent-open checks passed");
+}

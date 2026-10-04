@@ -1,0 +1,11 @@
+{"passed": 60, "total": 60}
+{"passed": 12, "total": 12}
+{"fallback_boundaries": 12}
+Traceback (most recent call last):
+  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/write_gate.py", line 67, in <module>
+    if __name__=='__main__': main()
+                             ^^^^^^
+  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/write_gate.py", line 55, in main
+    assert detected, (mode,result.returncode,result.stderr)
+           ^^^^^^^^
+AssertionError: ('audit', 1, b'Traceback (most recent call last):\n  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/writes.py", line 303, in <module>\n    execute(args.go.resolve(),args.rust.resolve(),args.report)\n  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/writes.py", line 269, in execute\n    assert transcript[\'exit\'] == 0, (\'native set exit must be zero\',case,binary,transcript)\n           ^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: (\'native set exit must be zero\', {\'name\': \'repeat-disabled\', \'repeat\': True}, PosixPath(\'/tmp/memory-write-oracle-1uk_out4/control\'), {\'exit\': 99, \'stdout\': \'\', \'stderr\': \'\'})\n')

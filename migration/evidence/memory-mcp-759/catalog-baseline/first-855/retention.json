@@ -1,0 +1,30 @@
+{
+  "source": "855f2130e15f476de3f0696316e02a66366bfcc3",
+  "build": true,
+  "strict_clippy": false,
+  "clippy_failure": "external MCP schema has four boolean hints; explicit local reason added in successor",
+  "actual_wire_pairs": 32,
+  "actual_mutants_rejected": 4,
+  "retained": {
+    "symaira-memory759-catalog-build.log": {
+      "original_sha256": "019377a00363508c5d11fc009e4874a7a4f20f9e81e6378a9c5eedc540f635a3",
+      "tracked_sha256": "13348338d2e82b01a8aa67baaf7b72db21cb1b32e614504d783753c7f187468e",
+      "bytes": 7606
+    },
+    "symaira-memory759-catalog-clippy.log": {
+      "original_sha256": "4757d006ca0d107247a482f3c0c12b0392c13e6128465a7f1222d43979d60cd1",
+      "tracked_sha256": "7b5ca21871a51470888838dc5c364af11058c00babcd986378f57af12ace97c0",
+      "bytes": 6783
+    },
+    "symaira-memory759-catalog-855.json": {
+      "original_sha256": "2aa7028ac4254cd4c1abefc82897dd24eb60e21a21799ac6f03ae8a00adbc816",
+      "tracked_sha256": "94987036b3b36c7cf83b7b0b2ccbaf6ef203b56fb7290656fdc4820bc6996f4c",
+      "bytes": 795934
+    },
+    "symaira-memory759-catalog-855.log": {
+      "original_sha256": "d54531f18010ae3e76fd66123bb50a06b385e6714e9251af3f90889331caf630",
+      "tracked_sha256": "dcb593cc00f2e92ad83bf9af307840abfd6e26814d45afc0c6decc365485cd22",
+      "bytes": 73
+    }
+  }
+}

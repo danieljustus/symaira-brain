@@ -1,0 +1,179 @@
+{
+  "source_revision": "1d8a0904929157d7928cfcd31782c374aa98501a",
+  "reason": "full independent review complete; rejected candidate original binaries and failures retained before retiring exclusively owned inactive ignored build cache",
+  "files": {
+    "target/debug/deps/symbrain_cli-9b8d2c092400099e": {
+      "sha256": "e93c10e757f099b812f3c52b99137b11ebbacdbe31ce6da0deba591a74048944",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/symbrain_cli-9b8d2c092400099e",
+      "bytes": 39772552
+    },
+    "target/debug/deps/symbrain-f1f6fbf71ec1aa63": {
+      "sha256": "2ea184c5545866649c86666c39a1b65d6a985d0364feba7748a5136f059f8ea2",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/symbrain-f1f6fbf71ec1aa63",
+      "bytes": 1079880
+    },
+    "target/debug/deps/activity_cli_oracle_tests-700a98b0a8de7a49": {
+      "sha256": "c99ca7bf20002fdaa61d4d84f7be2c53be295f436fcd0eade3d1494ea83bcf83",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/activity_cli_oracle_tests-700a98b0a8de7a49",
+      "bytes": 4735176
+    },
+    "target/debug/deps/cli_tree_tests-ceba0787634cfe15": {
+      "sha256": "69adfd4637c3145cf17f2714fddca7c20d9895270db910f0758b8d3fd078b008",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/cli_tree_tests-ceba0787634cfe15",
+      "bytes": 6912688
+    },
+    "target/debug/deps/doctor_modules-250223f0526fd13e": {
+      "sha256": "c786ded5b9bd84310e5ad5054e4dfbfe22771d81f4947e343e993a6b5c25b9a2",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/doctor_modules-250223f0526fd13e",
+      "bytes": 1885488
+    },
+    "target/debug/deps/doctor_native-5ae956c528ebdeeb": {
+      "sha256": "cf03c78a3d7d86c0a279171ab5b51a53c20ad716f702e4ae5e7299119d499187",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/doctor_native-5ae956c528ebdeeb",
+      "bytes": 1837096
+    },
+    "target/debug/deps/guard_decide_adapter-a5c0f26d100a51c5": {
+      "sha256": "dc715ad6f84e6cc3106a585ea884244fdf4e39c27c2fea1fb94196cc4896214b",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/guard_decide_adapter-a5c0f26d100a51c5",
+      "bytes": 4486536
+    },
+    "target/debug/deps/guard_decide_raw_bytes-68c9f422b5c309bf": {
+      "sha256": "9844eb3cf55c156dd610776fc98eb001d1bc887d3fdfb6407ce51a7153106bb9",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/guard_decide_raw_bytes-68c9f422b5c309bf",
+      "bytes": 2261568
+    },
+    "target/debug/deps/guard_doctor_oracle_tests-95b9a8d4db6b4a10": {
+      "sha256": "ebe18b854dc4a7ed66b7839b8f5df1eccd12082e1a6e830aa0fbd643128bc06e",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/guard_doctor_oracle_tests-95b9a8d4db6b4a10",
+      "bytes": 7254912
+    },
+    "target/debug/deps/guard_grants_native-45ac1f521f7de8b0": {
+      "sha256": "c253754253e844fa013211fc3f5fc77b748db03ac48c74721616c2229dd20226",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/guard_grants_native-45ac1f521f7de8b0",
+      "bytes": 2376736
+    },
+    "target/debug/deps/guard_oracle_grants-2262c4b0375472ef": {
+      "sha256": "7b6f59ec391b62ccc04cf9c45a29e0c30371fb0929488fe476e5b450534556d8",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/guard_oracle_grants-2262c4b0375472ef",
+      "bytes": 2790368
+    },
+    "target/debug/deps/harness_health_tests-d73fa568ba96c74d": {
+      "sha256": "31bcb3da8b86987cdc57be92de435ad5e43d183c2c10202c0b58b3abada8398d",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/harness_health_tests-d73fa568ba96c74d",
+      "bytes": 1956184
+    },
+    "target/debug/deps/harness_list_tests-47cb4e2f0d3d999a": {
+      "sha256": "d8cf79c07a77db740c846dbee93e96da8b051be190e283e9396c798d7f0c7cc0",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/harness_list_tests-47cb4e2f0d3d999a",
+      "bytes": 1884672
+    },
+    "target/debug/deps/init_cli_tests-f249f5d2a3a1c6d5": {
+      "sha256": "ed008edbd408859e5595248cfaddd8f7c43b6667589286efe95e01698b2be10d",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/init_cli_tests-f249f5d2a3a1c6d5",
+      "bytes": 1410592
+    },
+    "target/debug/deps/install_oracle_tests-aee1081d1144d9b2": {
+      "sha256": "9b9fde79e1cdffd6f9c16ba33f6050b42bd9615111b0b66cf609462aeb4cb0cb",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/install_oracle_tests-aee1081d1144d9b2",
+      "bytes": 1970200
+    },
+    "target/debug/deps/mcp_cli_tests-a29d5de1af307680": {
+      "sha256": "fd202f18db3effe4f09759047e98aa92983c6a50a9e7cbc018106b3d7a747cde",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/mcp_cli_tests-a29d5de1af307680",
+      "bytes": 2556856
+    },
+    "target/debug/deps/profile_cli_tests-71a767540fb277c8": {
+      "sha256": "89894274d5c5804480a6a5e1e79f56946c97bc69c64ef78e8323b36c151b570a",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/profile_cli_tests-71a767540fb277c8",
+      "bytes": 1964768
+    },
+    "target/debug/deps/setup_fix_native-45fee3cb6db9ac90": {
+      "sha256": "d2bd7a1a58a3faf63cde1c1650ad8a9f53df7f5920e1b1c4381b004f6913b109",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/setup_fix_native-45fee3cb6db9ac90",
+      "bytes": 1079960
+    },
+    "target/debug/deps/setup_repair_native-50608834ffd54fb4": {
+      "sha256": "1e866a0d388816ed19450bf1f543acb24798bd4ecb76784f3f0b2b0600baf9aa",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/setup_repair_native-50608834ffd54fb4",
+      "bytes": 2646160
+    },
+    "target/debug/deps/skills_doctor_native-a580db5a82c59c36": {
+      "sha256": "1a823db3ee88a3ebfca68cc2ee214b4d7fa96a25fb8f74717c97f66098413a7a",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/skills_doctor_native-a580db5a82c59c36",
+      "bytes": 1807048
+    },
+    "target/debug/deps/skills_list_native-629c3f268ced6d43": {
+      "sha256": "88130f553e564b88fc1a259746f39673e226138f6eebb147efb9d5238fae97b1",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/skills_list_native-629c3f268ced6d43",
+      "bytes": 2389248
+    },
+    "target/debug/deps/skills_log_native-e9bffceb58cc6884": {
+      "sha256": "6cb90876d50399a60ad99b4de836aa130a45c691a3218b04f563e92ff3e475ac",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/skills_log_native-e9bffceb58cc6884",
+      "bytes": 1831352
+    },
+    "target/debug/deps/skills_status_opencode_tests-1165c4d976ea58da": {
+      "sha256": "771e6f6dc502b2e7444ea7a125f511b23fcddd391c0f5f3270fbaa8b7078cfc2",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/skills_status_opencode_tests-1165c4d976ea58da",
+      "bytes": 1456896
+    },
+    "target/debug/deps/skills_sync_legacy_roots-fe87829cecc50b86": {
+      "sha256": "f6d7afcc4f81539184c01b05155888bc26834cfd45365140d22172ef88003751",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/skills_sync_legacy_roots-fe87829cecc50b86",
+      "bytes": 1931760
+    },
+    "target/debug/deps/skills_targets_native-cc1a0ae9119033dc": {
+      "sha256": "83842c7cf4e841f69a49224520231be1be1f7014b24ce51916dfaa0856f0a9db",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/skills_targets_native-cc1a0ae9119033dc",
+      "bytes": 1911016
+    },
+    "target/debug/deps/sync_native-2ae56af95214971e": {
+      "sha256": "1a47a0eb70667606c07242c2e5a9d1250e9e801b21e7c4031b4780c2463a309b",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/sync_native-2ae56af95214971e",
+      "bytes": 1795048
+    },
+    "target/debug/deps/vault_admin_native-d8ba88d7dc018ce8": {
+      "sha256": "b878d2923d191e909f3a5e457ed931c8e840c3c16a70feab43208d6e333ba29e",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/vault_admin_native-d8ba88d7dc018ce8",
+      "bytes": 38966992
+    },
+    "target/debug/deps/symbrain_gateway-5436d8234fd1fb98": {
+      "sha256": "01a8c42b690b187ed8b0b981cc66fe1a3b5a3528512a9ed7507d5e1e47662793",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/symbrain_gateway-5436d8234fd1fb98",
+      "bytes": 3378984
+    },
+    "target/debug/deps/gateway_tests-2dc17a77d24b6fd0": {
+      "sha256": "764dff8b94463e956d39bc299c67c737975d66d4ea20cefb07c88f9fe9a356aa",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/gateway_tests-2dc17a77d24b6fd0",
+      "bytes": 28866184
+    },
+    "target/debug/deps/usage_tests-10d1c4bcfcfa3562": {
+      "sha256": "af96651dacf1bbb9c0add99beb4025f2f7ab42059ae177b3f62c5f465ed5bc4c",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/usage_tests-10d1c4bcfcfa3562",
+      "bytes": 27510672
+    },
+    "target/debug/deps/symbrain_memory-3f3baeac75127579": {
+      "sha256": "ae4e30d823480beae0971fd5c42d64f1b32476c44569c687c9161efcd4e80c9a",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/symbrain_memory-3f3baeac75127579",
+      "bytes": 18819256
+    },
+    "target/debug/deps/evidence_oracle_tests-d6439b659ed1e8cb": {
+      "sha256": "5fb28f1bbfa0a7af170c70782fcb343364ef2f357f1abae355047f2b407b4a57",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/evidence_oracle_tests-d6439b659ed1e8cb",
+      "bytes": 3011648
+    },
+    "target/debug/deps/store_contract_tests-6076a640985e2433": {
+      "sha256": "bb3def4c2090ebe42bfa62690ee154d680fbeb487c57ef3fe550a9bd099f65ed",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/store_contract_tests-6076a640985e2433",
+      "bytes": 10437128
+    },
+    "target/debug/symbrain": {
+      "sha256": "5b76d21337248d59f42b9f1f70c9296559e23ff03929c7f9d03c7323c44a650a",
+      "retained_path": "/workspace/oracles/symaira-memory758-cli-1d8-binaries/symbrain",
+      "bytes": 38186376
+    }
+  },
+  "source_clean": true,
+  "tracked_target_files": false,
+  "target": "/workspace/symaira-memory758-cli/target"
+}
