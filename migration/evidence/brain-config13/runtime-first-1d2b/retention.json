@@ -1,0 +1,74 @@
+{
+  "source_head": "1d2b5febd5cf62512644b6ad40ed6e302d1fd6a5",
+  "first_actual_build_exit": 101,
+  "error": "E0283 UTF8 map_err closure return type ambiguous",
+  "compiled_native_acceptance": false,
+  "actual_ELF_rlib_archive": "/tmp/symaira-brain765-runtime-1d2b-first/failed-actual-binaries/receipt.json",
+  "all818_paths774_unique_preserved": true,
+  "users_before_fix": [],
+  "records": [
+    {
+      "original": "/tmp/symaira-brain765-runtime-1d2b-first/build.stdout",
+      "retained": "migration/evidence/brain-config13/runtime-first-1d2b/build.stdout.gz",
+      "bytes": 172579,
+      "sha256": "b9b20b0088963d1a97b558d6b02af2bf789a151dcb80c6ef24f4f31574e6ea73",
+      "gzip_sha256": "c3b9d5e21f9ce5d68ebdae4e5fc562bb5097596af921c82e3253a07df878170f"
+    },
+    {
+      "original": "/tmp/symaira-brain765-runtime-1d2b-first/build.stderr",
+      "retained": "migration/evidence/brain-config13/runtime-first-1d2b/build.stderr.gz",
+      "bytes": 2174,
+      "sha256": "f3a9405ac770d277127c606b0eeda5c98dc87006a015f38b91418aac9baa1b61",
+      "gzip_sha256": "16bd724473973610464136675d6d302bd54e6838022a8bc819484757a776ca87"
+    },
+    {
+      "original": "/tmp/symaira-brain765-runtime-1d2b-first/source.json",
+      "retained": "migration/evidence/brain-config13/runtime-first-1d2b/source.json.gz",
+      "bytes": 89403,
+      "sha256": "d375466449a9126103d1835315ecac42d9bfeb15ba28888c8a2a3352c36348ad",
+      "gzip_sha256": "909ee802c45ba13c7026bbfb60aa3a06ef8318e57d4f44219c8fe5a539c4db3b"
+    },
+    {
+      "original": "/tmp/symaira-brain765-runtime-1d2b-first/stages.started",
+      "retained": "migration/evidence/brain-config13/runtime-first-1d2b/stages.started.gz",
+      "bytes": 6,
+      "sha256": "f10ec3ffef16a8dace9b58801e0da28819c98af4c8933410d7e7cacc952f9e9b",
+      "gzip_sha256": "c52aae11396e8e3088b9c999b0289fde7a01980d9f5d3ac87ba4e899e2dea2f8"
+    },
+    {
+      "original": "/tmp/symaira-brain765-runtime-1d2b-first/stages.exit",
+      "retained": "migration/evidence/brain-config13/runtime-first-1d2b/stages.exit.gz",
+      "bytes": 10,
+      "sha256": "20122f63361dbab1c4adfa49bce33ca34b27e5d3e510b3270746960792e9a77d",
+      "gzip_sha256": "1d02a3d1781fdea0b44c0a4a72ecdbc8d1cefd4b4f2ea358ba4f1930d3dbdc46"
+    },
+    {
+      "original": "/tmp/symaira-brain765-runtime-1d2b-first/failed-actual-binaries/receipt.json",
+      "retained": "migration/evidence/brain-config13/runtime-first-1d2b/receipt.json.gz",
+      "bytes": 483492,
+      "sha256": "4cfca618a52c45abe19a08bda662ca4a27e755e4c9e64f0a94a39ba4e20a301e",
+      "gzip_sha256": "85cdb60836782105c2183e7445ea942935e34b0fff23a997c133ce559ee8c3ec"
+    },
+    {
+      "original": "/tmp/symaira-brain765-runtime-1d2b-driver.log",
+      "retained": "migration/evidence/brain-config13/runtime-first-1d2b/symaira-brain765-runtime-1d2b-driver.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-brain765-runtime-precompile-handoff.json",
+      "retained": "migration/evidence/brain-config13/runtime-first-1d2b/symaira-brain765-runtime-precompile-handoff.json.gz",
+      "bytes": 1999,
+      "sha256": "33de0e60f7290e7a4240b5c38804eb2c44731ee8fd8a0bb712e4e74810b4843a",
+      "gzip_sha256": "af3e507e722981481fbc89d6e2ee212b724e4a781ffc79edb1faccc9f4bfc74e"
+    },
+    {
+      "original": "/workspace/symaira-brain765-runtime/rust/symbrain-core/src/config/resolved/document.rs",
+      "retained": "migration/evidence/brain-config13/runtime-first-1d2b/document.rs.gz",
+      "bytes": 2026,
+      "sha256": "c5b9cd0aab91ce35ec04a145f9a3b20318e334b5ead449e9fc66f9eef6f83f7d",
+      "gzip_sha256": "c8cf7be68df400cf9502f707f4514bfa14d725b2d212872e9d7a9e0163b35621"
+    }
+  ]
+}

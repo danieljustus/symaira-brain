@@ -13,7 +13,7 @@ pub(super) fn parse(bytes: &[u8]) -> Result<DocumentMut, GoText> {
     } else {
         bytes
     };
-    let text = std::str::from_utf8(bytes).map_err(|error| {
+    let text = std::str::from_utf8(bytes).map_err(|error| -> GoText {
         // Preserve the input byte; a Rust UTF-8 diagnostic is not a Go oracle.
         let byte = bytes[error.valid_up_to()];
         let line = bytes[..error.valid_up_to()]

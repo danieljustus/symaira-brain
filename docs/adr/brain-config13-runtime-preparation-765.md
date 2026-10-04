@@ -54,3 +54,14 @@ all actual owned target ELF/rlib bytes/SHA/gzip roundtrips before any source fix
 Later failing stages receive the same preservation before correction. Fresh
 full different-author review and exact-head native3/protected CI remain required;
 no #765/#769/full cutover or GitHub publication is authorized by this driver.
+
+The first actual Linux build at immutable1d2b exits101 with E0283 in
+`config/resolved/document.rs`: the UTF8 map_err closure's `format!(...).into()`
+does not have a unique inferred intermediate error type before `?` converts it.
+Retain the complete raw build/source/driver receipts and pre-edit module under
+`runtime-first-1d2b`; all818 current owned ELF/rlib paths/774 unique gzip payloads
+are roundtrip-preserved externally before correction, with zero target users.
+Annotate only that closure's existing intended GoText return type. Its bytes,
+parser order and error/admission rules are unchanged. Keep the original570
+source map intact and record this one explicit old/new source hash in a separate
+runtime-source-updates ledger. No test or consumer gate ran in the failed build.

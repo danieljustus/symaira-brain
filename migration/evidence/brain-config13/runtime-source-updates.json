@@ -1,0 +1,10 @@
+{
+  "failed_immutable_head": "1d2b5febd5cf62512644b6ad40ed6e302d1fd6a5",
+  "changes": {
+    "rust/symbrain-core/src/config/resolved/document.rs": {
+      "original_sha256": "c5b9cd0aab91ce35ec04a145f9a3b20318e334b5ead449e9fc66f9eef6f83f7d",
+      "current_sha256": "1af3803873a3499a9fdc98ad095f5c8e59e0aad8fc0a0c514ecb0f87f4a4cd8d",
+      "reason": "actual E0283 compile error: explicitly annotate existing UTF8 error closure GoText return; diagnostic bytes and admission criteria unchanged"
+    }
+  }
+}

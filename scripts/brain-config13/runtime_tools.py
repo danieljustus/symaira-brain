@@ -23,7 +23,12 @@ def source(root, out):
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root).decode().strip()
     assert not subprocess.check_output(["git", "status", "--porcelain"], cwd=root)
     checkpoint = json.loads((root / "migration/evidence/brain-config13/corrections-source-only/checkpoint.json").read_text())
+    updates_path = root / "migration/evidence/brain-config13/runtime-source-updates.json"
+    updates = json.loads(updates_path.read_text())["changes"] if updates_path.exists() else {}
     for name, expected in checkpoint["candidate_source_sha256"].items():
+        if name in updates:
+            assert updates[name]["original_sha256"] == expected, name
+            expected = updates[name]["current_sha256"]
         assert sha((root / name).read_bytes()) == expected, name
     for name, expected in checkpoint["pinned_source_sha256"].items():
         assert sha(Path(name).read_bytes()) == expected, name
@@ -43,7 +48,7 @@ def source(root, out):
     save(out / "source.json", dict(head=head, source={name: sha((root/name).read_bytes()) for name in files},
          validated_checkpoint_entries=len(checkpoint["candidate_source_sha256"]),
          pinned_references=len(references), all_frozen_go_files=len(independent["frozen_source"]),
-         references=references, clean=True))
+         references=references, explicit_source_updates=updates, clean=True))
 
 
 def binaries(root, out, target):
