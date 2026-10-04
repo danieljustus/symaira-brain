@@ -1,0 +1,416 @@
+{
+  "runtime": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "kind": "actual supplemental publisher fixture processes on Linux; not native Windows or production signature authenticity",
+  "source_sha256": "861543c272164566fa21baafeea06f77d0348e25975d707784a14ce4797b61ce",
+  "probe_sha256": "939331872734b0d956cb3f79369be0c83d064e943721f570f4ac94bae78d5671",
+  "total": 45,
+  "accepted_positive": 9,
+  "rejected_controls": 36,
+  "observations": [
+    {
+      "executable_suffix": "",
+      "asset": "symaira-vault_0.22.1_windows_amd64.zip",
+      "control": null,
+      "exit": 0,
+      "stdout_base64": "",
+      "stderr_base64": "",
+      "receipt": "symvault https://github.com/danieljustus/symaira-vault/.github/workflows/release.yml@refs/tags/v0.22.1\n"
+    },
+    {
+      "executable_suffix": "",
+      "asset": "symaira-vault_0.22.1_windows_amd64.zip",
+      "control": "identity",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": "",
+      "asset": "symaira-vault_0.22.1_windows_amd64.zip",
+      "control": "issuer",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": "",
+      "asset": "symaira-vault_0.22.1_windows_amd64.zip",
+      "control": "signature",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": "",
+      "asset": "symaira-vault_0.22.1_windows_amd64.zip",
+      "control": "certificate",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": "",
+      "asset": "symvault_linux_amd64.tar.gz",
+      "control": null,
+      "exit": 0,
+      "stdout_base64": "",
+      "stderr_base64": "",
+      "receipt": "symvault https://github.com/danieljustus/symaira-vault/.github/workflows/release.yml@refs/tags/v0.22.1\n"
+    },
+    {
+      "executable_suffix": "",
+      "asset": "symvault_linux_amd64.tar.gz",
+      "control": "identity",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": "",
+      "asset": "symvault_linux_amd64.tar.gz",
+      "control": "issuer",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": "",
+      "asset": "symvault_linux_amd64.tar.gz",
+      "control": "signature",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": "",
+      "asset": "symvault_linux_amd64.tar.gz",
+      "control": "certificate",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": "",
+      "asset": "symdesk_windows_amd64.zip",
+      "control": null,
+      "exit": 0,
+      "stdout_base64": "",
+      "stderr_base64": "",
+      "receipt": "symdesk https://github.com/danieljustus/symaira-desktop/.github/workflows/release.yml@refs/tags/v0.12.2\n"
+    },
+    {
+      "executable_suffix": "",
+      "asset": "symdesk_windows_amd64.zip",
+      "control": "identity",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": "",
+      "asset": "symdesk_windows_amd64.zip",
+      "control": "issuer",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": "",
+      "asset": "symdesk_windows_amd64.zip",
+      "control": "signature",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": "",
+      "asset": "symdesk_windows_amd64.zip",
+      "control": "certificate",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".exe",
+      "asset": "symaira-vault_0.22.1_windows_amd64.zip",
+      "control": null,
+      "exit": 0,
+      "stdout_base64": "",
+      "stderr_base64": "",
+      "receipt": "symvault https://github.com/danieljustus/symaira-vault/.github/workflows/release.yml@refs/tags/v0.22.1\n"
+    },
+    {
+      "executable_suffix": ".exe",
+      "asset": "symaira-vault_0.22.1_windows_amd64.zip",
+      "control": "identity",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".exe",
+      "asset": "symaira-vault_0.22.1_windows_amd64.zip",
+      "control": "issuer",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".exe",
+      "asset": "symaira-vault_0.22.1_windows_amd64.zip",
+      "control": "signature",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".exe",
+      "asset": "symaira-vault_0.22.1_windows_amd64.zip",
+      "control": "certificate",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".exe",
+      "asset": "symvault_linux_amd64.tar.gz",
+      "control": null,
+      "exit": 0,
+      "stdout_base64": "",
+      "stderr_base64": "",
+      "receipt": "symvault https://github.com/danieljustus/symaira-vault/.github/workflows/release.yml@refs/tags/v0.22.1\n"
+    },
+    {
+      "executable_suffix": ".exe",
+      "asset": "symvault_linux_amd64.tar.gz",
+      "control": "identity",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".exe",
+      "asset": "symvault_linux_amd64.tar.gz",
+      "control": "issuer",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".exe",
+      "asset": "symvault_linux_amd64.tar.gz",
+      "control": "signature",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".exe",
+      "asset": "symvault_linux_amd64.tar.gz",
+      "control": "certificate",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".exe",
+      "asset": "symdesk_windows_amd64.zip",
+      "control": null,
+      "exit": 0,
+      "stdout_base64": "",
+      "stderr_base64": "",
+      "receipt": "symdesk https://github.com/danieljustus/symaira-desktop/.github/workflows/release.yml@refs/tags/v0.12.2\n"
+    },
+    {
+      "executable_suffix": ".exe",
+      "asset": "symdesk_windows_amd64.zip",
+      "control": "identity",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".exe",
+      "asset": "symdesk_windows_amd64.zip",
+      "control": "issuer",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".exe",
+      "asset": "symdesk_windows_amd64.zip",
+      "control": "signature",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".exe",
+      "asset": "symdesk_windows_amd64.zip",
+      "control": "certificate",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".EXE",
+      "asset": "symaira-vault_0.22.1_windows_amd64.zip",
+      "control": null,
+      "exit": 0,
+      "stdout_base64": "",
+      "stderr_base64": "",
+      "receipt": "symvault https://github.com/danieljustus/symaira-vault/.github/workflows/release.yml@refs/tags/v0.22.1\n"
+    },
+    {
+      "executable_suffix": ".EXE",
+      "asset": "symaira-vault_0.22.1_windows_amd64.zip",
+      "control": "identity",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".EXE",
+      "asset": "symaira-vault_0.22.1_windows_amd64.zip",
+      "control": "issuer",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".EXE",
+      "asset": "symaira-vault_0.22.1_windows_amd64.zip",
+      "control": "signature",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".EXE",
+      "asset": "symaira-vault_0.22.1_windows_amd64.zip",
+      "control": "certificate",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".EXE",
+      "asset": "symvault_linux_amd64.tar.gz",
+      "control": null,
+      "exit": 0,
+      "stdout_base64": "",
+      "stderr_base64": "",
+      "receipt": "symvault https://github.com/danieljustus/symaira-vault/.github/workflows/release.yml@refs/tags/v0.22.1\n"
+    },
+    {
+      "executable_suffix": ".EXE",
+      "asset": "symvault_linux_amd64.tar.gz",
+      "control": "identity",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".EXE",
+      "asset": "symvault_linux_amd64.tar.gz",
+      "control": "issuer",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".EXE",
+      "asset": "symvault_linux_amd64.tar.gz",
+      "control": "signature",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".EXE",
+      "asset": "symvault_linux_amd64.tar.gz",
+      "control": "certificate",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".EXE",
+      "asset": "symdesk_windows_amd64.zip",
+      "control": null,
+      "exit": 0,
+      "stdout_base64": "",
+      "stderr_base64": "",
+      "receipt": "symdesk https://github.com/danieljustus/symaira-desktop/.github/workflows/release.yml@refs/tags/v0.12.2\n"
+    },
+    {
+      "executable_suffix": ".EXE",
+      "asset": "symdesk_windows_amd64.zip",
+      "control": "identity",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".EXE",
+      "asset": "symdesk_windows_amd64.zip",
+      "control": "issuer",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IHVucGlubmVkIHZlcmlmaWVyIGlkZW50aXR5Cgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286OTggKzB4ODcwCm1haW4ubWFpbigpCgkuL21haW4uZ286MjggKzB4NzEK",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".EXE",
+      "asset": "symdesk_windows_amd64.zip",
+      "control": "signature",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    },
+    {
+      "executable_suffix": ".EXE",
+      "asset": "symdesk_windows_amd64.zip",
+      "control": "certificate",
+      "exit": 2,
+      "stdout_base64": "",
+      "stderr_base64": "cGFuaWM6IG1pc3NpbmcgdmVyaWZpZXIgaW5wdXRzCgpnb3JvdXRpbmUgMSBbcnVubmluZ106Cm1haW4udmVyaWZ5Rml4dHVyZSgpCgkuL21haW4uZ286MTA5ICsweDg0NQptYWluLm1haW4oKQoJLi9tYWluLmdvOjI4ICsweDcxCg==",
+      "receipt": null
+    }
+  ]
+}

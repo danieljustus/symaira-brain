@@ -1,0 +1,692 @@
+{
+  "original_source": "280914bc6bc9c3b3faac404dcd5d84856a424ed7",
+  "original_publication": "3f92a768e2a19c1a5533262663d6f85b4ce0b591",
+  "original_files": {
+    "/tmp/symaira-doctor-source-independent-fourth-actionlint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained": "symaira-doctor-source-independent-fourth-actionlint.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-baseline-human-pipe-probes.json": {
+      "sha256": "88347d3e0b268fb0d6023443dcec36c28de2014c28c4fa5476a53dbf9bcfa680",
+      "bytes": 482239,
+      "retained": "symaira-doctor-source-independent-fourth-baseline-human-pipe-probes.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "2c062c65385a91799f88f6850bb2b3771555fad31591c8d352e41303cd3240af"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-baseline-human-pipe-probes.log": {
+      "sha256": "f7fe230aea47946e7f4abf6050f1a5c3dceae9bcc213f2ae593301507ca759d1",
+      "bytes": 746,
+      "retained": "symaira-doctor-source-independent-fourth-baseline-human-pipe-probes.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "7a07adc8a2081aa44835eae5ad830d0613c5d1799abf06ceb64a34a86bf30132"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-baseline-output-probes.json": {
+      "sha256": "b548b27db7a131d5f9d0280645fd1e18fe226ed3d4f76e1a1d37395ac8d81058",
+      "bytes": 33431,
+      "retained": "symaira-doctor-source-independent-fourth-baseline-output-probes.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "54c422b54659a4a230525d8f7cb04df66ac8b2445f16f8e3c75e7b41c8dc4d8f"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-baseline-output-probes.log": {
+      "sha256": "acb8573a4aed1439cee3cd97acdf7d49f5e9bd32b485cf8c16c32cb8e5df20bd",
+      "bytes": 776,
+      "retained": "symaira-doctor-source-independent-fourth-baseline-output-probes.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "b21b716e84887a46e8456563396283fe745e1ef4a1b2d1491b36cd003e0ef891"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-baseline-output-probes.py": {
+      "sha256": "5190d87ba8333d65738378839ad0406fb640e7f4ed21c0728b129188b8d38e41",
+      "bytes": 3187,
+      "retained": "symaira-doctor-source-independent-fourth-baseline-output-probes.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "cb1c9bd7c68648106d453ecddb0b78bb2e161ddd649bb71a297fe6d4b0c6c9ab"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-baseline-pipe-probes.json": {
+      "sha256": "07d4f9f1d8ab0e740c3525b1ca0ab436ee520a645e44a5dc226ab9c58142a93b",
+      "bytes": 362781,
+      "retained": "symaira-doctor-source-independent-fourth-baseline-pipe-probes.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "07fbb3813b26a5fc2e917d562f070def5d8c01f5468f7f6d83ead528356411cb"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-baseline-pipe-probes.log": {
+      "sha256": "904a8ff5e9c6ae8edfc4452fe99b9956e0a605b0354733048146283eab4ddeae",
+      "bytes": 778,
+      "retained": "symaira-doctor-source-independent-fourth-baseline-pipe-probes.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "24032888b24cba55d7b1b737d5b3aac8bbe4280bb3d3ea6e7f8c8bc7eed14197"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-baseline-source-output.json": {
+      "sha256": "eb4f069df45de4969c2bd6160050803083904686215f140100ed7371f3944949",
+      "bytes": 23548,
+      "retained": "symaira-doctor-source-independent-fourth-baseline-source-output.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "7e2d78bbdd504c82e04cb6ab5352cf3a90f5a7da383d06f6ae872b75c280c35d"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-baseline-source-output.log": {
+      "sha256": "c7a86ea629b519f9313d5569cb86dddabcaa66f8ede88b4bf30433057fa1494a",
+      "bytes": 435,
+      "retained": "symaira-doctor-source-independent-fourth-baseline-source-output.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "4edf10cf74da411eb2f77cd038e862d7675fe2737761b52644a3e769dd7e8ded"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-baseline-source-output.py": {
+      "sha256": "026f69998a26a8e64149c791c74b06690f464af169a6d8f1022feeddce0c9423",
+      "bytes": 2476,
+      "retained": "symaira-doctor-source-independent-fourth-baseline-source-output.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "e58fcffa307888d1e7bb1de354f65f2a708e608cd41c733b1e04f873da99f5dd"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-boundaries.json": {
+      "sha256": "8a3ffd34873cb28fd91afadaa5ae80a9fffeafab381c37bc3fd3b50a4887f791",
+      "bytes": 105144,
+      "retained": "symaira-doctor-source-independent-fourth-boundaries.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "72196e30626d255b549a5c38fccc51f95481dee1a02152f55639b2cf11531a8e"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-boundaries.log": {
+      "sha256": "4959c845f18e7c4825f4b89e952c866f811bbff9919f8e85c75cf69cb9bce3e6",
+      "bytes": 143,
+      "retained": "symaira-doctor-source-independent-fourth-boundaries.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "11979db6e9ebaaf8dab46b409250be86944ed313e1911db81199291cb99d7bc6"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-boundaries.py": {
+      "sha256": "8efe4c8c8c59aad1e067f05de96c2f4b7709ff363dd53b9feeb0d2d3bed12891",
+      "bytes": 2785,
+      "retained": "symaira-doctor-source-independent-fourth-boundaries.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "e13490f9ab14317dc7b0d97b5f7b59d1a32388823f933d360718d576a7b443bb"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-clippy.log": {
+      "sha256": "9ae36bb22d8f0f810a77044760863f70b81405396a32cce477ec08eecd4e6d59",
+      "bytes": 60,
+      "retained": "symaira-doctor-source-independent-fourth-clippy.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "30c0bb910d3d16d0ea28f0a9457efcf27c07224e898cf121e655abaca2ce2e01"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-consumers-doctor.json": {
+      "sha256": "3a9f331a8fe80bb9ea8b97a8dfcd669a7f77143e045e5a7720dcb03a51c06210",
+      "bytes": 64462,
+      "retained": "symaira-doctor-source-independent-fourth-consumers-doctor.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "7f6b848d67a9b691c4388c460af4c006f4549bc5e0001f905a2d6bbfb7eaf92a"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-consumers-setup.json": {
+      "sha256": "2beb5740d5e0aca399905bac48030ab98bf99de9080e9929ad9d88427e60c5da",
+      "bytes": 85939,
+      "retained": "symaira-doctor-source-independent-fourth-consumers-setup.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "a3dac872fc86e39ecc625ddc2c1ad90d324c1ba33f0d3b24893e045d3d4c8757"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-consumers-source.json": {
+      "sha256": "55b33f500290d8a5eefc964464e045d7e490ba181c1b698bbbf12ea2587acc39",
+      "bytes": 54838,
+      "retained": "symaira-doctor-source-independent-fourth-consumers-source.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "a4541fce82a0ab826db8f1a68e065bc0f8d0e556294a1ed73bd59989bb74a6b3"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-consumers.log": {
+      "sha256": "1e887240ae41064e7877e968f78337542e2da47a29a6d4dc478eed8e96bcbdb6",
+      "bytes": 1088,
+      "retained": "symaira-doctor-source-independent-fourth-consumers.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "ff72443776568ea7812d91c24b404b7acbf2f4b46ab6e7a2b03251dd36e7cc13"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-consumers.py": {
+      "sha256": "45ed5335d6c6dd49bb313daafc7b404f332b9ab8733daf530312dd26261f26f3",
+      "bytes": 5928,
+      "retained": "symaira-doctor-source-independent-fourth-consumers.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "cdee1f6ec7541c1b35a8f3d7951c9798492e73795abc98b33a139eaa2b099b99"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-doctor.json": {
+      "sha256": "749ffde8f53b8bc948a51ad5bed315a3927ac9d96860f26b7b103764cc640a59",
+      "bytes": 5569660,
+      "retained": "symaira-doctor-source-independent-fourth-doctor.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "a2546c81c8da90908cdd8bd9dac847bb8115b27682ac409d557e2fe806701f0e"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-doctor.json.missing-core-event.json": {
+      "sha256": "a43bb41e8bfde62e8354362972be871487573d295d841c404266548aab7fda1a",
+      "bytes": 42045,
+      "retained": "symaira-doctor-source-independent-fourth-doctor.json.missing-core-event.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "eb41e4ef8af8fd4670ed6e5f31690cfd771330077854c4e8667e1ddec5bca201"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-doctor.json.missing-header.json": {
+      "sha256": "493a42953dd398a3fc2c1e08b81bb89891fd4ca07e2bc358e683c5179e8059b9",
+      "bytes": 42227,
+      "retained": "symaira-doctor-source-independent-fourth-doctor.json.missing-header.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "ffd9071801027c999090a20f369a2cbeab97145a4e88e50bd3860afea2dfc09f"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-doctor.json.wrong-exit.json": {
+      "sha256": "4be0fcc728a011a3ac019aa7b0fe93e22f9f7a077d3c0cb7303f573361ff80df",
+      "bytes": 42273,
+      "retained": "symaira-doctor-source-independent-fourth-doctor.json.wrong-exit.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "82de8fc6c4fe74c6cb440914ca7e51e85b69da16cdd357b3c8a12aa5f5dc42d7"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-doctor.log": {
+      "sha256": "41c02d7ea92d946d1b5ce6f924466c307c11f70dca20419bc6f6dd852c89674e",
+      "bytes": 295,
+      "retained": "symaira-doctor-source-independent-fourth-doctor.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "edea74358a630521bbace450cd6fd5715574ea26f28cd80354a1621f5dc7ec3b"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-eight-extra.json": {
+      "sha256": "1f7ea8127fcae5b341217bf04f14ace748c77ec84a0f548932036bf2bc8c3f57",
+      "bytes": 101732,
+      "retained": "symaira-doctor-source-independent-fourth-eight-extra.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "f2a49926d3764b1f8509fdbc42850fa5132fba6417ffd8ea9e892512941d171d"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-eight-extra.log": {
+      "sha256": "68a857023756e6395539ed3c2e9bcd90ccfd2ab57b278ddbdd93dba5bd3477e2",
+      "bytes": 197,
+      "retained": "symaira-doctor-source-independent-fourth-eight-extra.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "1b70eb9b7cdc1d8ae1c590160c01a561d93d43b72adc09f18def5bf570087f36"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-eight-extra.py": {
+      "sha256": "29d5763e51d4d621bc302d426ff8ee73ad309a252e4058b0594e494f5fb683cc",
+      "bytes": 3188,
+      "retained": "symaira-doctor-source-independent-fourth-eight-extra.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "f347ffa25259be1712ba756fc8d43d2c466a438128c1273284a23b1d86a4e749"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-eight-home.json": {
+      "sha256": "f4089eaa231fb2fb2afd9198a91d15f257e13ca31887c8925c810f64ca445032",
+      "bytes": 8954,
+      "retained": "symaira-doctor-source-independent-fourth-eight-home.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "4ef4f79fb7cf13d9556df62fdc97d6d11bb62baffe729934178401aa461bedb0"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-eight-home.log": {
+      "sha256": "dce1bcdb4ef76ae6edd74bea035972224be1dbb9779bf5467ca1714bfc192b2a",
+      "bytes": 55,
+      "retained": "symaira-doctor-source-independent-fourth-eight-home.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "23b704c0d83d659d588377ba0a5744f8b11a730ccbcc3e5135c3ed23b5fe5347"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-eight-home.py": {
+      "sha256": "2625cbb05ccacdbea89d6f94f378b1759209ba332c3a4eaae9fcc8fd91c0d5cd",
+      "bytes": 1782,
+      "retained": "symaira-doctor-source-independent-fourth-eight-home.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "401a150e0e1a54531dd385ceb4b847185f590c64434f2b0695ba52a0cb2bc147"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-extra-gates.sh": {
+      "sha256": "ab297dc737b78c1818755b31e8e8923a102ebec9e42cb2349e688b6ef38a6d7a",
+      "bytes": 1427,
+      "retained": "symaira-doctor-source-independent-fourth-extra-gates.sh.gz",
+      "encoding": "gzip",
+      "retained_sha256": "bd40c9d88e2cca7a8d8cf25aaaf1624bea851600aeb83632f550b0544c0a9be4"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-findings.json": {
+      "sha256": "50eb94ac3e0f0e12684861db2c4e5ec028ed7c98eda27a668c81fb577b1baede",
+      "bytes": 173574,
+      "retained": "symaira-doctor-source-independent-fourth-findings.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "a1d0b4bc713b637af1ae6a30107c5badcbffcf288f5c06ee9cefe773d7f65c03"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-findings.log": {
+      "sha256": "453b5f4fe955e3e7fc5b53e28c4baf4918023be616d86b8c22908d27c363335a",
+      "bytes": 312,
+      "retained": "symaira-doctor-source-independent-fourth-findings.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "1bfd53dca97034d300424bf44ac63c06a3d41b4c80078a86eb67acd975358352"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-findings.py": {
+      "sha256": "ec8baabea2e449b41d66536ca394b479a3a893e8a04d40f0b67903c40255d2bc",
+      "bytes": 3288,
+      "retained": "symaira-doctor-source-independent-fourth-findings.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "f860d20385399161fd679e835ed81258c58c293fa54df82e11daf625c082409d"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-fix-consumers-setup.json": {
+      "sha256": "81a2893635bdd0c47670128b520ce22a5a27cf3d78ca3e6d729a2bba3988e097",
+      "bytes": 85771,
+      "retained": "symaira-doctor-source-independent-fourth-fix-consumers-setup.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "8156d66a8b19cdb5c5dc0ff6bd11b0d36ecb73064919f062828b5c57579f51c9"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-fix-consumers.log": {
+      "sha256": "923295956c4adb4db6da1bc78a738731b6fbdafad529775c7c79d0190cbb36c0",
+      "bytes": 797,
+      "retained": "symaira-doctor-source-independent-fourth-fix-consumers.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "0c1e87542e79f991f66764d0736407a52b08b516d30eb319a0b6a9cbc2d46706"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-fix-consumers.py": {
+      "sha256": "7dccc5d9006f4bbe95ca4ffd384eed3fda5b8674ede0fb791cc60e377547f059",
+      "bytes": 1704,
+      "retained": "symaira-doctor-source-independent-fourth-fix-consumers.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "85f7810a52f16b4c00f97582aa633c6749bf847880122bb343c8169ae7bc61a4"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-fmt.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained": "symaira-doctor-source-independent-fourth-fmt.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-gates.sh": {
+      "sha256": "c5be201a42d61e94a94a3c4956a043045166ff21eeef684b23347aa644122049",
+      "bytes": 1539,
+      "retained": "symaira-doctor-source-independent-fourth-gates.sh.gz",
+      "encoding": "gzip",
+      "retained_sha256": "a46829bdbc993a0d8445ddfdc87f613a2f5a873e118b55293248f440d77fa6f1"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-guard-controls.json": {
+      "sha256": "0c6ba9d3c3f3a32a58121ab3bf0475b2a257e99107531b86cdc560da3c47d78c",
+      "bytes": 12170,
+      "retained": "symaira-doctor-source-independent-fourth-guard-controls.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "f34409fdc8905fa05bfffe58418aed1cfa63f1fa8766455978443125b773bf3b"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-guard-raw-paths.json": {
+      "sha256": "04171a917724fb3cd3e8d285af4cf8a57155cb20fb07dd062825dc9302a0ab18",
+      "bytes": 209090,
+      "retained": "symaira-doctor-source-independent-fourth-guard-raw-paths.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "3f8533c31a5bdecc8d955db8f1ef3d6579a5621ee40d3e30a54160d310120d1c"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-guard.json": {
+      "sha256": "a88b1a7fc61bc7da49ad8744f643795c0597f9ba01acb79ef5641145a903972c",
+      "bytes": 663435,
+      "retained": "symaira-doctor-source-independent-fourth-guard.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "fc909c9b3d8793212d9db3a27dd19779bb2573244a2782baa022c295577d281a"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-guard.log": {
+      "sha256": "5a2324ce908536dca6b0e805b5a94f3f6fcfc29683e77f8b1bc474b423ea2eab",
+      "bytes": 312,
+      "retained": "symaira-doctor-source-independent-fourth-guard.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "fd2b7fe6f1e79d4afc0eb4948e0052705e0d854379081e80d0343ad28ad16405"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-human-pipe-probes.json": {
+      "sha256": "75023f2e857051a3f4cff2792c95160ad3b8a5e733c53343a12a80ab405e75ca",
+      "bytes": 482239,
+      "retained": "symaira-doctor-source-independent-fourth-human-pipe-probes.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "92cdcd77c857e1c01f20fc2e84b1f22c8f6c98a715c176ec6f020747a7b6fd1a"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-human-pipe-probes.log": {
+      "sha256": "f7fe230aea47946e7f4abf6050f1a5c3dceae9bcc213f2ae593301507ca759d1",
+      "bytes": 746,
+      "retained": "symaira-doctor-source-independent-fourth-human-pipe-probes.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "7a07adc8a2081aa44835eae5ad830d0613c5d1799abf06ceb64a34a86bf30132"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-human-pipe-probes.py": {
+      "sha256": "4f944e04bc233e32e54c19acdc0671369036ab7613506f081d24d0d4cd86753f",
+      "bytes": 4958,
+      "retained": "symaira-doctor-source-independent-fourth-human-pipe-probes.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "8462f3459a0d70de6d7ea4be9397730fbd238e02a2f8e48bec6660de4a0e4310"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-lookup.json": {
+      "sha256": "fe65f35fc2031cea79ce651b13e5e71c2d91d5fab0b5e2961f7aa52b2e619747",
+      "bytes": 31127,
+      "retained": "symaira-doctor-source-independent-fourth-lookup.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "67f0145af905d44c9fe5241ccf0d0945d371891f1d10fbb08fd9bf17db340ef0"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-lookup.log": {
+      "sha256": "7e3500bddfde8fcf2baf7b8de43539a9b6536c950372fc23df20420011fa8463",
+      "bytes": 67,
+      "retained": "symaira-doctor-source-independent-fourth-lookup.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "10baf638fff934c504145542e07b4f382e6d4939397d6e9b6780038ebfa9679a"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-lookup.py": {
+      "sha256": "273e5f250da77f47a29821bb73e507e97e9704c63e2536c6929e9f41f1b4c5df",
+      "bytes": 2172,
+      "retained": "symaira-doctor-source-independent-fourth-lookup.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "1ad636bf0b3989803fb868028a1d436b518db83acb756c87809b0111a43bceea"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-output-probes.json": {
+      "sha256": "9fa16aa685978dc32f7b18f150dd4ed17c42de7dbd01c88d509d14b05cfc945e",
+      "bytes": 33431,
+      "retained": "symaira-doctor-source-independent-fourth-output-probes.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "51807cb8bb6fd62ff2c830632a75a4e40543b74db7b547fbe04e62f6a69b3eaf"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-output-probes.log": {
+      "sha256": "7319a6f6f418b8ce46aa970afaf249f4ce367b09deccc68ee8d422353127a047",
+      "bytes": 767,
+      "retained": "symaira-doctor-source-independent-fourth-output-probes.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "84882f8e6ab02d6bd343cd0c8b1310b4e4469e995bbcd589705d1d10f90968cb"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-output-probes.py": {
+      "sha256": "5f2beaebba762d6cfb8eec1fe3a2711afc3e5e64e38d932881012e5e0eeb8422",
+      "bytes": 3198,
+      "retained": "symaira-doctor-source-independent-fourth-output-probes.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "58961517b968e6ae54a4cf93ab62230b559610885b45c9c095bf921ecbb52baf"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-pipe-probes.json": {
+      "sha256": "4952edb03ad1cc5bcb0f6d5e758c7d121a3f846bb555b5594dae3df7843e8539",
+      "bytes": 362781,
+      "retained": "symaira-doctor-source-independent-fourth-pipe-probes.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "98167cf5add9e0f8a2e3c4818c535189bb1471e99da97af4dfb33e54eb74650c"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-pipe-probes.log": {
+      "sha256": "904a8ff5e9c6ae8edfc4452fe99b9956e0a605b0354733048146283eab4ddeae",
+      "bytes": 778,
+      "retained": "symaira-doctor-source-independent-fourth-pipe-probes.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "24032888b24cba55d7b1b737d5b3aac8bbe4280bb3d3ea6e7f8c8bc7eed14197"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-pipe-probes.py": {
+      "sha256": "1886ddf0a9ce4c571666b38532d2b247e5ddc9f8323ebaffae20b1028240d166",
+      "bytes": 4900,
+      "retained": "symaira-doctor-source-independent-fourth-pipe-probes.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "fdceff7490319f98db8d089e73ff86709fbc72dcc67f0f008a2188c4b5a65c28"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-provenance.json": {
+      "sha256": "f2f229b59bbf962f18e9777c9386b8cae05f3a1e959298ea100c0ebbe5004793",
+      "bytes": 1533,
+      "retained": "symaira-doctor-source-independent-fourth-provenance.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "5a72675f15d4a956b5cc1ac716caf1fea40c48b4024b7e676495bb3ee40e93a5"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-provenance.log": {
+      "sha256": "f2f229b59bbf962f18e9777c9386b8cae05f3a1e959298ea100c0ebbe5004793",
+      "bytes": 1533,
+      "retained": "symaira-doctor-source-independent-fourth-provenance.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "5a72675f15d4a956b5cc1ac716caf1fea40c48b4024b7e676495bb3ee40e93a5"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-provenance.py": {
+      "sha256": "e854f7afb8609f5ddf96bf1e8f722ad7d3493df61af9d10de916ee6bea795c08",
+      "bytes": 6229,
+      "retained": "symaira-doctor-source-independent-fourth-provenance.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "a1f13517bd577d85ed78b590928695028e961c3ff347f5cc1e04c8194773c7b2"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-raw-signals.json": {
+      "sha256": "c9c51a235704e571e8dbdec9ca79c922ef0287a49f575198bbe1e83473416761",
+      "bytes": 66446,
+      "retained": "symaira-doctor-source-independent-fourth-raw-signals.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "2e4167d0f75b665fa8299d8fdfb9f234ae4321427635dcae0215321423354ad4"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-raw-signals.log": {
+      "sha256": "e5194bbb6f8a11456f57e66acde83b8c151fa2c2e3923551a0007c9f2a4eb3f1",
+      "bytes": 220,
+      "retained": "symaira-doctor-source-independent-fourth-raw-signals.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "f3cd2491c01d64440283a8dfc3b0068312258f716c8c20b230aa44e71bccf055"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-raw-signals.py": {
+      "sha256": "56e582f0aa4a44416be8ec6d48d4b76af265cc91fb07bf89f33b72225de743b0",
+      "bytes": 4784,
+      "retained": "symaira-doctor-source-independent-fourth-raw-signals.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "7fb0be6ff429384e383503e3d88267972cbff5359ba9ffcc51f1f22f6ad2ef4d"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-resumed-extras.sh": {
+      "sha256": "53e8f13ef3df888ec98c30717a5fb2994f605d0d89ae987aad5d2ec0f7126078",
+      "bytes": 1265,
+      "retained": "symaira-doctor-source-independent-fourth-resumed-extras.sh.gz",
+      "encoding": "gzip",
+      "retained_sha256": "44f9f0749f3a6690433389bedca03fcbce06482009b78837616f0bdf6285d638"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-review.md": {
+      "sha256": "97aed8caf8e374edc67396abe7d07749744870df2da2b7c5caeed5c8dc82dbf5",
+      "bytes": 8988,
+      "retained": "symaira-doctor-source-independent-fourth-review.md.gz",
+      "encoding": "gzip",
+      "retained_sha256": "eb8c156050bb73854c7db661960d35c239b981fb6f16e666a8deb778890f4988"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-setup.json": {
+      "sha256": "968a7613587849cb729bf8cccb7aed7a2b6598990134f53ef0a1f89cb13cdb34",
+      "bytes": 1854628,
+      "retained": "symaira-doctor-source-independent-fourth-setup.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "8ae10eb0b8092fe74028d0bcd4c4a5a5fb85ce3c751fe9c2661b053539827384"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-setup.log": {
+      "sha256": "bf2018539f68f1485398038a86967a0fcaabf603ea23eb03ddcb06a71237ce1f",
+      "bytes": 17149,
+      "retained": "symaira-doctor-source-independent-fourth-setup.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "42069aae6d5cf0256ae813a1c75f8f0a00d75b487844fe32e639e4b2982c37e3"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-source-output.json": {
+      "sha256": "0b0b31c7739bc8919ba253f428b153712273ba7f22b30b2b7074196672d9b395",
+      "bytes": 23548,
+      "retained": "symaira-doctor-source-independent-fourth-source-output.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "6b025699a4f7944bff12a3aa81a4616ce514a8ec931bb65d45fb8fba4d36d759"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-source-output.log": {
+      "sha256": "abbda29b6192c64a8aff642cebe1c19305c71ef7d1cc5baf5235485fc0d99abd",
+      "bytes": 426,
+      "retained": "symaira-doctor-source-independent-fourth-source-output.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "35f7df690d6f9e04a2b939fec01516f242d4856758a296822de93e91c2543f65"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-source-output.py": {
+      "sha256": "29782caba56abc7d4e29f2689b5ac4655469ddd667edde6cc5ad199405de9d3d",
+      "bytes": 2487,
+      "retained": "symaira-doctor-source-independent-fourth-source-output.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "537f4eac7bcef1e261a6f89d0c0f4bf504af2503290485f251560bf49de6e705"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-source.json": {
+      "sha256": "5b758f3b1676627e85f4a547b898cd5df0295cf798ce7283d53b5fbe1d3c4fc4",
+      "bytes": 1369876,
+      "retained": "symaira-doctor-source-independent-fourth-source.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "8213f55bc62eb849c384d182bbbdb5de207042eaddd20f176eac6f0d2c08d03d"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-source.json.wrong-exit.json": {
+      "sha256": "b7362e097a40b36c13150db6356941e97b5af7378583d96a10e1acc71bd71ab1",
+      "bytes": 37069,
+      "retained": "symaira-doctor-source-independent-fourth-source.json.wrong-exit.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "a73090db49a91d0e534c82fc6a73086806ac1334bc13cde15e3320174bb36996"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-source.json.wrong-source.json": {
+      "sha256": "8af984fbb6b4c2a379280ef9951535a2c66c46358d53b32eecb52f92f8334ca7",
+      "bytes": 37067,
+      "retained": "symaira-doctor-source-independent-fourth-source.json.wrong-source.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "d5c482f178fc3496655e96b23a86c511364f3b78fcd728d902b77760dbb53473"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-source.log": {
+      "sha256": "ab2e6af6eaf39a9f93504bf1e310733425c1c5b471a47c1dce5fe1ebf4a7248b",
+      "bytes": 221,
+      "retained": "symaira-doctor-source-independent-fourth-source.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "dc6a91fb02ed7d47d98f8f631da7fe89b770cb4425f1ed7c3b4ee5c851963ede"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-supplement-inputs.json": {
+      "sha256": "2b1cfde4ce39a60e503b560d2adad334fa33a35d3ea5a3b9b44d784e3842960a",
+      "bytes": 4776,
+      "retained": "symaira-doctor-source-independent-fourth-supplement-inputs.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "6eefcf419f95ededb6d2ae3bee23e342c2f35c3c2d74d6b37602e5e7328d8c5e"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-supplements.sh": {
+      "sha256": "9f6113dc2bf653aa8ca1fbfc8a9a83449e1b550f0174b4636242c278b2db1286",
+      "bytes": 567,
+      "retained": "symaira-doctor-source-independent-fourth-supplements.sh.gz",
+      "encoding": "gzip",
+      "retained_sha256": "76265e4602d2d92b8d6099391167aa87d5d9604f56e20bac481383d7ce3b8766"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-symlink.json": {
+      "sha256": "dc03dbe97d44b9d35cac75ce58f4fc2307e722b5fe56e007443b6bada614358f",
+      "bytes": 26286,
+      "retained": "symaira-doctor-source-independent-fourth-symlink.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "73dbbc393c50ab62fd7aa1fd378dbfb5855d7ab9f89666ae1132bd42c79f82f5"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-symlink.log": {
+      "sha256": "541244f6874fc75a5f19cdb16931ba416030d9911fe51b879872e3a707cd4044",
+      "bytes": 30,
+      "retained": "symaira-doctor-source-independent-fourth-symlink.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "c1a5ff002bc4d5d183da5ece600fba08a5f0e1e422ec6e8c5fe46e981761f0f0"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-symlink.py": {
+      "sha256": "b9f4e0e148ca26f90adbaf156b63d0685349210dbfea118700faa2b7b227d666",
+      "bytes": 2857,
+      "retained": "symaira-doctor-source-independent-fourth-symlink.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "7bc2f0d464ec7beb8cb6ae4012dd58d04dc93232a24d6596c370f91bd1149cc3"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-tests.log": {
+      "sha256": "f9d59355274068ee44f1cc88ed772f81bb40cfa882e3bf1c5fdd62cf6c711eee",
+      "bytes": 43243,
+      "retained": "symaira-doctor-source-independent-fourth-tests.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "bd1876eb99f7c69d503afb2df506e11da6f909dc6f02cf74ad3163dace60da38"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-verify.log": {
+      "sha256": "1bf35a589b1876f2af5ffdc06ef759f119540c8cd61afa25d1aaef5337e01828",
+      "bytes": 1096,
+      "retained": "symaira-doctor-source-independent-fourth-verify.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "35e61f13b71a1df0378486b1b56c8124ecc56cdb6619dbf5f5812f29fb3597e8"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-verify.py": {
+      "sha256": "5418e2e5c69a079ee773ce7bf4fe84659510b4da49c6749f478ae1678e88f195",
+      "bytes": 7815,
+      "retained": "symaira-doctor-source-independent-fourth-verify.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "9bff7dd139cf3aff02bb41e13adee9927d24d9c4ca1bac59079eca31235ecd04"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-whitespace-correction-original.log": {
+      "sha256": "f07d953343c5432906b61a9bf83264eeb181562952b4eb035366635dc529254d",
+      "bytes": 121,
+      "retained": "symaira-doctor-source-independent-fourth-whitespace-correction-original.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "b16f10b4334abdf0c995dde6d603ff5e84be54e277b1e89e11a55b1de1706e07"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-whitespace-correction.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained": "symaira-doctor-source-independent-fourth-whitespace-correction.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-whitespace-original.log": {
+      "sha256": "5a5bc598f9687f548601819d469621ae639d4da68722c19a35f9f78ff71f1b62",
+      "bytes": 75527,
+      "retained": "symaira-doctor-source-independent-fourth-whitespace-original.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "9b614bf55b6c0da9cdd2c34c5754c96eb0806292aa9abddd4f54f5e374115107"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-whitespace-production.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "retained": "symaira-doctor-source-independent-fourth-whitespace-production.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "59869db34853933b239f1e2219cf7d431da006aa919635478511fabbfc8849d2"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-whitespace.json": {
+      "sha256": "fb9f73b1a9f7d2710bb211fa7f8b728dc89c8d169e457867bb7e670394a68d6a",
+      "bytes": 597,
+      "retained": "symaira-doctor-source-independent-fourth-whitespace.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "1b321fc2b79affb4dd67daf89331e2735af7268256686c1225c006f3914d4b13"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-whitespace.log": {
+      "sha256": "530be870830a193387e2f3f5081871e6c061bb3e16be80489c082b2790170fac",
+      "bytes": 75382,
+      "retained": "symaira-doctor-source-independent-fourth-whitespace.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "f58049eeaa9721d5c5ce2bac37a71e821d21a4f54291b95954ec0ff8e31c4d1b"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-windows-admitted.json": {
+      "sha256": "bbaa6b3bda0e66bf16fc26bed04bab5cd68057af942a1aaeac08a74703030fd3",
+      "bytes": 188,
+      "retained": "symaira-doctor-source-independent-fourth-windows-admitted.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "6cbf3d13843fff3a02f2ffcee4c3747007db7bcfc589cc51de6d53c0655c5826"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-windows-managed-join.json": {
+      "sha256": "789b99753a50fc7bb15e6ead6484c6cbc75af95fe4908366afd52574eaf4219a",
+      "bytes": 18900,
+      "retained": "symaira-doctor-source-independent-fourth-windows-managed-join.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "73ef24555e17a0970d34dea37640d1dcffab12380a7a0b895798efd01fbe455a"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-windows-managed-join.log": {
+      "sha256": "42866eb0c2548acfaa9b139cb27827f063018b7c786c3a732117cc4dcf158862",
+      "bytes": 743,
+      "retained": "symaira-doctor-source-independent-fourth-windows-managed-join.log.gz",
+      "encoding": "gzip",
+      "retained_sha256": "246704145eeae70e5f647dfd90c3e99e91abc52633406946c218d3bf437fd1ee"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-windows-managed-join.py": {
+      "sha256": "bebcaeefcf92739989ce36e72e68563cca025b27c016229fbdb0605c0f6ee774",
+      "bytes": 5586,
+      "retained": "symaira-doctor-source-independent-fourth-windows-managed-join.py.gz",
+      "encoding": "gzip",
+      "retained_sha256": "c644f8eaaf59f4dacf2cb1aeca0babc6f8d9cf52793b2997f5edb71f946c9b5f"
+    },
+    "/tmp/symaira-doctor-source-independent-fourth-review-receipt.json": {
+      "sha256": "20565d431a52823f1f539b888ede4459836b6e4fcb3217d193c70ff1d5478f1b",
+      "bytes": 37265,
+      "retained": "symaira-doctor-source-independent-fourth-review-receipt.json.gz",
+      "encoding": "gzip",
+      "retained_sha256": "345fcf0eb12d56b0a5ded08ff35d516c3baf8cb140058c698c6d3d8df597f91c"
+    }
+  },
+  "all39_author_artifacts_verified": {
+    "symaira-doctor765-json-final-source.json": "8757cb4ae099e644d6dcefa72e4fd1e2f61ef5a842a942c84c5f49a8b57170cb",
+    "symaira-doctor765-json-final-doctor.json": "8929e5e9b36e6be04238b9c2d3b75a5f5e374cf66daf7f42b5cf1cf5d6aca876",
+    "symaira-doctor765-json-final-setup.json": "70489e3bd613f3068eb8304f2791ad33942d5034861dd135f1cc710b4055136e",
+    "symaira-doctor765-json-final-source.json.wrong-exit.json": "5f4050c4cefbb79fc64de81d79c4a7863a139dc88ee190728c408ff0069c495f",
+    "symaira-doctor765-json-final-source.json.wrong-source.json": "bea7e55af805aeba6a76c8f39997f24015338008ada5f82ec2b046075c20b08e",
+    "symaira-doctor765-json-final-doctor.json.wrong-exit.json": "2da535c951d90ae34ee76baf949575e31364c59577d6e161f2a84d607f648f85",
+    "symaira-doctor765-json-final-doctor.json.missing-header.json": "a8de9f1c7ba657551e73020a9f01a7ff78999aee2128efe738f0e0ce8be6ffe3",
+    "symaira-doctor765-json-final-doctor.json.missing-core-event.json": "ca5f08105e8debd696aeb59b46cf3d15276aa9094141c22403a89a874abefe65",
+    "symaira-doctor765-json-final-findings.json": "4f762d3bdcf9ef08661b89379baa02003a56958e268dcf82f17d3e397ecb5e34",
+    "symaira-doctor765-json-final-findings.py": "0d485eddac0b2fd3844f571010857ce268b29e27ba8e84a908ffb2f9d105e01f",
+    "symaira-doctor765-json-final-lookup.json": "006e1915ba052dd04720f3fbcda0fea88d9b31e31571b88b8cc5c5e6ef5106b8",
+    "symaira-doctor765-json-final-lookup.py": "959ff3da54b157e4daae86c86f81dfed7d9bf298d4ae4225e28284abccb414dc",
+    "symaira-doctor765-json-final-raw-signals.json": "6a0b17aaca955d74cedb6577eaa5331a01b170d04e4970f62f8508afcf378858",
+    "symaira-doctor765-json-final-raw-signals.py": "869d74f91c5ba967721da33b71f2fd73efb5c54c4a27fb8ac7803b0d4bbadf44",
+    "symaira-doctor765-json-final-eight-extra.json": "117ae114678a0e29b906e71b45f10445f82408496e04ca7ddf152491f78f9b08",
+    "symaira-doctor765-json-final-eight-extra.py": "07331521722e60e09f4b65639b801678df8ecd3734446cf1e23006c01e54d3f0",
+    "symaira-doctor765-json-final-eight-home.json": "224d763e1049830f7633e843715f2fc40dbeaec119535b63f17ea6d0d20c00db",
+    "symaira-doctor765-json-final-eight-home.py": "626ebf02cfc70f2e9e59b0738b27c9531222592900141b3340d8553d4ac33f95",
+    "symaira-doctor765-json-final-boundaries.json": "c50696c6b48b513f93251d5edeb8d2e9d2ef278207ed23d0a47fecfb5cb61cee",
+    "symaira-doctor765-json-final-boundaries.py": "2759e147a94e6ea0ef675cc1d0df554e08c644b61b19fbaed2ca450483e26900",
+    "symaira-doctor765-json-final-symlink.json": "d3049bb74aa702e10a2ac311f913489ce25ae6e0c0a9ba3a7543844573ee37d7",
+    "symaira-doctor765-json-final-symlink.py": "8620904596320e55a98b8c66b8a503d258144371aa8cf90c9df31e26a40597c1",
+    "symaira-doctor765-json-final-consumers-setup.json": "7b0bc507e57edd4d6e0eeb5ce9871f9f14ad38a017b67b99bbd3721f14a70566",
+    "symaira-doctor765-json-final-fix-consumers-setup.json": "75e9f63ae0dcb146be088fed3771ced626b53321b9a3a398508dc3ccec7ed11b",
+    "symaira-doctor765-json-final-consumers-source.json": "e94e4f8fe0f446a2eaad4aad5e72672b62464bb0eb367bb9d73ff5943c6cfa02",
+    "symaira-doctor765-json-final-consumers-doctor.json": "480eb4f6a804bab763dcc73ef2e77b418ee1ca5f863f2c18f8a8ea56b4e470e0",
+    "symaira-doctor765-json-final-consumers.py": "edcab3e05c81fbaa2729e59777133f57c1ba98c411d678dbb63940783548f69c",
+    "symaira-doctor765-json-final-fix-consumers.py": "23cc2474ec3a2e66a5693289d3c0be49f9cfa96c5496ce3d1d979ad4281efc15",
+    "symaira-doctor765-json-final-guard.json": "d0fc38f8870e35280205e8baaa69d53aa32be62200feddde8316b9ff5032a487",
+    "symaira-doctor765-json-final-guard-controls.json": "577bc2da69161e9775e1d69c135a76ccef57c863411a4aefc4b0e4185b6e7464",
+    "symaira-doctor765-json-final-guard-raw-paths.json": "10763025a083755dc70636c066fb08dc4447c753c24d61ee4ae435d902b80b00",
+    "symaira-doctor765-json-final-windows-managed-join.json": "f14abcd17089ea351f8c3ed2e95e062794ed7988376632c7e2adffe859254dc7",
+    "symaira-doctor765-json-final-windows-managed-join.py": "2c671e5372cf056a61c3c9e199aea8cf3c47ac9839fcef2ea0fe6ac8152285ce",
+    "symaira-doctor765-json-final-windows-lexical.json": "7f37ff67166f105b1b42b5a7959a5c051629d693a16018933f6360b00bf292c8",
+    "symaira-doctor765-json-final-windows-lexical.py": "7ceb037dfcb1a42fd452d6a0447dfa410e2a521a4307344d331e29fac6d4a185",
+    "logs.json": "1e42fdb3ee23693a098497f949f39dfe2096da069eb507d56acc47844068e5df",
+    "signature-stub-harness.json": "d200ab8b5e86041c738b1de481ddc8a66f89c2e6d84d981ffcdd7fbdfa6a46b4",
+    "README.md": "3251a2439b8e619e3dd6e553519907845c91ec474296dcb620787e4c4e1b369a",
+    "symaira-doctor765-json-final-validation.py": "eae02925f87eb700015fd91fe4c336826184ba2527858efb5c0c97e8baff53db"
+  },
+  "all50_executable_bytes_archived": "/workspace/oracles/symaira-doctor765-280-binaries/receipt.json"
+}

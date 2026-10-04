@@ -19,6 +19,7 @@ pub enum ManagedError {
     Cosign(String),
     Process(String),
     Context(String),
+    RawContext(crate::GoText),
     IoContext(String, std::io::Error),
     Io(std::io::Error),
 }
@@ -38,6 +39,7 @@ impl fmt::Display for ManagedError {
             Self::Cosign(detail) => write!(formatter, "cosign: {detail}"),
             Self::Process(detail) => write!(formatter, "managed: {detail}"),
             Self::Context(detail) => formatter.write_str(detail),
+            Self::RawContext(detail) => detail.fmt(formatter),
             Self::IoContext(context, error) => write!(formatter, "managed: {context}: {error}"),
             Self::Io(error) => write!(formatter, "managed: {error}"),
         }
@@ -47,6 +49,14 @@ impl fmt::Display for ManagedError {
 impl std::error::Error for ManagedError {}
 
 impl ManagedError {
+    #[must_use]
+    pub fn into_go_text(self) -> crate::GoText {
+        match self {
+            Self::RawContext(detail) => detail,
+            other => other.to_string().into(),
+        }
+    }
+
     #[must_use]
     pub const fn is_download_not_found(&self) -> bool {
         matches!(self, Self::DownloadNotFound(_))

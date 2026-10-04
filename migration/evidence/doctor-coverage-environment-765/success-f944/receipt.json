@@ -1,0 +1,17 @@
+{
+  "head": "f9447c5e01bd8c3d78df5115fd62636ac807cbd0",
+  "run": 37174759811,
+  "job": 111354979402,
+  "conclusion": "success",
+  "covered_lines": 37645,
+  "instrumented_lines": 46353,
+  "percentage": 81.21,
+  "floor": 80,
+  "scope": "unchanged complete Rust workspace",
+  "raw_decoded_provider_log_bytes": 216403,
+  "raw_sha256": "74623251eaadcc6565569203d1bc6fac1c3359bc29c7c209122f52816c6ec36e",
+  "retained_log": "symaira-doctor806-f944-coverage-job-111354979402.log.gz",
+  "compressed_sha256": "7360b5a84982ab6c17f4d0dd16fb6519e8cfb811f0a15036934cfcf7dafb5b9d",
+  "format": "exact UTF8 decoded provider log; no original ZIP byte claim",
+  "current_head_requirement": "success applies to f944; later head must run fresh required coverage/native/protected gates"
+}

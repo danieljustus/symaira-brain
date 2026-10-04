@@ -1,6 +1,6 @@
 //! Bounded managed-version probes with Go-compatible Windows path resolution.
 use crate::ManagedError;
-use serde::Deserialize;
+use crate::process_status;
 use std::fs;
 use std::path::Path;
 #[cfg(any(windows, test))]
@@ -10,11 +10,6 @@ use std::thread;
 use std::time::{Duration, Instant};
 const VERSION_PROBE_TIMEOUT: Duration = Duration::from_secs(3);
 
-#[derive(Deserialize)]
-struct VersionPayload {
-    version: String,
-}
-
 /// Probes `<binary> version --json`, returning an empty string when absent.
 ///
 /// # Errors
@@ -22,15 +17,16 @@ struct VersionPayload {
 /// or emits malformed JSON.
 pub fn installed_version(bin_dir: &Path, binary_name: &str) -> Result<String, ManagedError> {
     let path = bin_dir.join(binary_name);
-    if !path.exists() {
+    if fs::metadata(&path).is_err_and(|error| error.kind() == std::io::ErrorKind::NotFound) {
         return Ok(String::new());
     }
 
     #[cfg(windows)]
     let path =
         windows_probe_path(&path, std::env::var("PATHEXT").ok().as_deref()).ok_or_else(|| {
-            ManagedError::Process(format!(
-                "probe {binary_name}: executable file not found in %PATH%"
+            ManagedError::Context(format!(
+                "probe {binary_name}: exec: {}: executable file not found in %PATH%",
+                symbrain_core::config::format_go_quoted(path.as_os_str())
             ))
         })?;
 
@@ -47,9 +43,13 @@ pub fn installed_version(bin_dir: &Path, binary_name: &str) -> Result<String, Ma
         .stdout(Stdio::from(output_writer))
         .stderr(Stdio::null());
     configure_probe_process(&mut command);
-    let mut child = command
-        .spawn()
-        .map_err(|error| ManagedError::Process(format!("probe {binary_name}: {error}")))?;
+    let mut child = command.spawn().map_err(|error| {
+        ManagedError::RawContext(crate::GoText::path(
+            &format!("probe {binary_name}: fork/exec "),
+            &path,
+            &format!(": {}", crate::provenance::go_io_error(&error)),
+        ))
+    })?;
     let process_group = child.id();
     let started = Instant::now();
     loop {
@@ -58,22 +58,26 @@ pub fn installed_version(bin_dir: &Path, binary_name: &str) -> Result<String, Ma
                 terminate_probe_descendants(process_group);
                 let bytes = fs::read(output.path()).map_err(ManagedError::Io)?;
                 if !status.success() {
-                    return Err(ManagedError::Process(format!(
-                        "probe {binary_name}: process exited with {status}"
+                    let status = process_status::format(status);
+                    return Err(ManagedError::Context(format!(
+                        "probe {binary_name}: {status}"
                     )));
                 }
-                let payload: VersionPayload = serde_json::from_slice(&bytes).map_err(|error| {
-                    ManagedError::Process(format!("parse {binary_name} version: {error}"))
-                })?;
-                return Ok(payload.version);
+                return crate::json_record::version(&bytes).map_err(|error| {
+                    ManagedError::Context(format!("parse {binary_name} version: {error}"))
+                });
             }
             Ok(None) if started.elapsed() < VERSION_PROBE_TIMEOUT => {
                 thread::sleep(Duration::from_millis(10));
             }
             Ok(None) => {
                 terminate_probe(&mut child, process_group);
-                return Err(ManagedError::Process(format!(
-                    "probe {binary_name}: timed out"
+                #[cfg(windows)]
+                let status = "exit status 1";
+                #[cfg(not(windows))]
+                let status = "signal: killed";
+                return Err(ManagedError::Context(format!(
+                    "probe {binary_name}: {status}"
                 )));
             }
             Err(error) => {
@@ -98,15 +102,9 @@ fn configure_probe_process(_command: &mut Command) {}
 fn terminate_probe(child: &mut std::process::Child, process_group: u32) {
     #[cfg(unix)]
     {
-        signal_probe_group(process_group, "-TERM");
-        let deadline = Instant::now() + Duration::from_millis(250);
-        while Instant::now() < deadline {
-            if child.try_wait().ok().flatten().is_some() {
-                terminate_probe_descendants(process_group);
-                return;
-            }
-            thread::sleep(Duration::from_millis(10));
-        }
+        // Go CommandContext kills the child immediately at its deadline.
+        // Also kill the owned process group so descendants cannot retain a
+        // capture descriptor or survive the bounded probe.
         terminate_probe_descendants(process_group);
         let _ = child.wait();
     }

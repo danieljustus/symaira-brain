@@ -1,0 +1,337 @@
+{
+  "head": "e6e96a227410a293d240f33f4fb6f88ccd829298",
+  "dirty": false,
+  "go_sha": "a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41",
+  "rust_sha": "4581c82278857476063c536ef14a588385f2ff47a24536e6137b36b6afaad490",
+  "probe_sha": "1d3a79a1a1a901b3b892552f5e5b272d183ab2a2f4b0e00cec52bcd7dbafe5bc",
+  "cases": [
+    {
+      "case": "doctor-home-empty",
+      "go": {
+        "binary": "/workspace/oracles/symbrain-go-dcddcef0",
+        "fixture_root": "/tmp/doctor-home-case-kbvi879d",
+        "started": 1791076292.6912212,
+        "ended": 1791076292.6948452,
+        "exit": 1,
+        "stdout_base64": "",
+        "stderr_base64": "c3ltYnJhaW4gZG9jdG9yIC0tZml4OiBtYW5hZ2VkOiBjYW5ub3QgZGV0ZXJtaW5lIGhvbWUgZGlyZWN0b3J5OiAkSE9NRSBpcyBub3QgZGVmaW5lZAo=",
+        "filesystem_before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "empty-path": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          }
+        },
+        "contract": {
+          "exit": 1,
+          "stdout_base64": "",
+          "logs": {
+            "encoding": "base64 exact line bytes",
+            "cores": {},
+            "tail": [
+              "c3ltYnJhaW4gZG9jdG9yIC0tZml4OiBtYW5hZ2VkOiBjYW5ub3QgZGV0ZXJtaW5lIGhvbWUgZGlyZWN0b3J5OiAkSE9NRSBpcyBub3QgZGVmaW5lZAo="
+            ]
+          },
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "empty-path": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            }
+          }
+        }
+      },
+      "rust": {
+        "binary": "/workspace/symaira-setup765-source/target/debug/symbrain",
+        "fixture_root": "/tmp/doctor-home-case-onnd9cpb",
+        "started": 1791076292.695675,
+        "ended": 1791076292.6983066,
+        "exit": 1,
+        "stdout_base64": "",
+        "stderr_base64": "c3ltYnJhaW4gZG9jdG9yIC0tZml4OiBtYW5hZ2VkOiBjYW5ub3QgZGV0ZXJtaW5lIGhvbWUgZGlyZWN0b3J5OiAkSE9NRSBpcyBub3QgZGVmaW5lZAo=",
+        "filesystem_before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "empty-path": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          }
+        },
+        "contract": {
+          "exit": 1,
+          "stdout_base64": "",
+          "logs": {
+            "encoding": "base64 exact line bytes",
+            "cores": {},
+            "tail": [
+              "c3ltYnJhaW4gZG9jdG9yIC0tZml4OiBtYW5hZ2VkOiBjYW5ub3QgZGV0ZXJtaW5lIGhvbWUgZGlyZWN0b3J5OiAkSE9NRSBpcyBub3QgZGVmaW5lZAo="
+            ]
+          },
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "empty-path": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            }
+          }
+        }
+      },
+      "differences": []
+    },
+    {
+      "case": "doctor-home-unset",
+      "go": {
+        "binary": "/workspace/oracles/symbrain-go-dcddcef0",
+        "fixture_root": "/tmp/doctor-home-case-oklvcjtm",
+        "started": 1791076292.699637,
+        "ended": 1791076292.7026274,
+        "exit": 1,
+        "stdout_base64": "",
+        "stderr_base64": "c3ltYnJhaW4gZG9jdG9yIC0tZml4OiBtYW5hZ2VkOiBjYW5ub3QgZGV0ZXJtaW5lIGhvbWUgZGlyZWN0b3J5OiAkSE9NRSBpcyBub3QgZGVmaW5lZAo=",
+        "filesystem_before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "empty-path": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          }
+        },
+        "contract": {
+          "exit": 1,
+          "stdout_base64": "",
+          "logs": {
+            "encoding": "base64 exact line bytes",
+            "cores": {},
+            "tail": [
+              "c3ltYnJhaW4gZG9jdG9yIC0tZml4OiBtYW5hZ2VkOiBjYW5ub3QgZGV0ZXJtaW5lIGhvbWUgZGlyZWN0b3J5OiAkSE9NRSBpcyBub3QgZGVmaW5lZAo="
+            ]
+          },
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "empty-path": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            }
+          }
+        }
+      },
+      "rust": {
+        "binary": "/workspace/symaira-setup765-source/target/debug/symbrain",
+        "fixture_root": "/tmp/doctor-home-case-dq2ewr4x",
+        "started": 1791076292.7031531,
+        "ended": 1791076292.7050242,
+        "exit": 1,
+        "stdout_base64": "",
+        "stderr_base64": "c3ltYnJhaW4gZG9jdG9yIC0tZml4OiBtYW5hZ2VkOiBjYW5ub3QgZGV0ZXJtaW5lIGhvbWUgZGlyZWN0b3J5OiAkSE9NRSBpcyBub3QgZGVmaW5lZAo=",
+        "filesystem_before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "empty-path": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          }
+        },
+        "contract": {
+          "exit": 1,
+          "stdout_base64": "",
+          "logs": {
+            "encoding": "base64 exact line bytes",
+            "cores": {},
+            "tail": [
+              "c3ltYnJhaW4gZG9jdG9yIC0tZml4OiBtYW5hZ2VkOiBjYW5ub3QgZGV0ZXJtaW5lIGhvbWUgZGlyZWN0b3J5OiAkSE9NRSBpcyBub3QgZGVmaW5lZAo="
+            ]
+          },
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "empty-path": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            }
+          }
+        }
+      },
+      "differences": []
+    }
+  ]
+}

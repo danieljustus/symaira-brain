@@ -430,6 +430,13 @@ separately unported. Three actual output mutants test the new boundaries. These
 selected states do not inventory all unsupported TOML/discovery/I/O shapes. Native three-OS acceptance, remaining diagnostics and release
 are still pending; #770 stays open. Production Go and frozen fixtures are unchanged.
 
+Doctor output follow-up: the sixth isolated correction preserves the fifth
+independent review's two confirmed output failures, all 145 raw artifacts and
+56 actually executed binaries before target reuse. The new process-stdout seam,
+format-specific completion and recoverable-writer contract are documented in
+`docs/adr/doctor-stdout-failure-boundary.md`; the additive Linux sink/public-caller
+corpus is `scripts/doctor-stdout-oracle`. Source validation, independent review
+and native three-OS CI remain required; no full #765 closure is claimed.
 ### Skills sync Windows raw argv follow-up (#793 / #794)
 
 Source preparation corrects the earlier Windows replacement assumption: pinned
