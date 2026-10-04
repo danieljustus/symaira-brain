@@ -1,0 +1,43 @@
+{
+  "original_source": "cf7d4b090748fd547b5eafccc5ea9f540f33d882",
+  "original_publication": "e63e20a6faf0f05b3d384b9d2b8e15ac0f234dae",
+  "review_disposition": "REQUEST_CHANGES_SOURCE_ONLY",
+  "existing_initial_archive": "migration/evidence/brain-config13/initial-58fe/retention.json",
+  "existing_initial_SHA256": "4a7f9eb9b77d31f86ef5df50775e8e98746de02cbeab67923309c835a157872b",
+  "new_entries": [
+    {
+      "original": "/tmp/symaira-brain765-resolved-config-independent-static-review.md",
+      "bytes": 13641,
+      "sha256": "42381e2fc98baaacc444cc0cee990443b3413f57d9a9004793ccfefca0f601ce",
+      "archive": "migration/evidence/brain-config13/independent-e63e/symaira-brain765-resolved-config-independent-static-review.md.gz",
+      "archive_sha256": "eb6c54eb7282c2e44cc58ea923ee3e74a6b7bd112b9a3dc1dcdb0b78356f6485",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-brain765-resolved-config-independent-static-review-receipt.json",
+      "bytes": 60151,
+      "sha256": "dc7cacf423ac1fb0f22ffef6d777de62afd28f9d0d8f0dcc04ae0ba4066d014b",
+      "archive": "migration/evidence/brain-config13/independent-e63e/symaira-brain765-resolved-config-independent-static-review-receipt.json.gz",
+      "archive_sha256": "303d588abee373d48344303a6fb6a3913a5f541a350239eeb7f0054b6458c9b8",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-brain765-resolved-config-static-projections.py",
+      "bytes": 7505,
+      "sha256": "07b3e2c0ac328851c55da4348732ebaf507c0e695b96653b48dc9c6ac8306e72",
+      "archive": "migration/evidence/brain-config13/independent-e63e/symaira-brain765-resolved-config-static-projections.py.gz",
+      "archive_sha256": "04a9b424d4f37909f842ce2889b26c6b424e62907a426e057612f7e291ef90fc",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-brain765-resolved-config-static-projections.json",
+      "bytes": 59099,
+      "sha256": "71950a777580239fb35a7630dfbf468d8cd742e77db4a28e853fed5b91701129",
+      "archive": "migration/evidence/brain-config13/independent-e63e/symaira-brain765-resolved-config-static-projections.json.gz",
+      "archive_sha256": "6748c9a744b78dc862134643b919a2f64c520c25968466cfd389e0768d6ae249",
+      "roundtrip": true
+    }
+  ],
+  "new_product_execution": false,
+  "original_archives_not_rewritten": true
+}
