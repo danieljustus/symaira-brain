@@ -8,6 +8,16 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
+# Existing locked codecs/HTTP runtime; one bounded native memory HTTP owner.
+base64 = "=0.22.1"
+hmac = "=0.12.1"
+zeroize = "=1.9.0"
+hyper = { version = "=1.11.1", features = ["server", "http1"] }
+hyper-util = { version = "=0.1.21", features = ["tokio"] }
+http-body-util = "=0.1.5"
+bytes = "=1.12.1"
+percent-encoding = "=2.3.2"
+tokio = { version = "=1.53.1", features = ["rt-multi-thread", "net", "time", "signal", "sync", "macros"] }
 chrono.workspace = true
 rusqlite.workspace = true
 serde.workspace = true

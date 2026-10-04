@@ -25,15 +25,15 @@ unchanged until its separately verified retirement under #783.
 
 The original source-bound inventory is retained under
 [go-reachability-e3](../../migration/evidence/memory-ui-763/go-reachability-e3/README.md).
-It includes13 actual CLI invocations,17 actual HTTP requests, exact asset bytes,
+It includes 13 actual CLI invocations, 17 actual HTTP requests, exact asset bytes,
 the actual Go dependency graph, synthetic SQLite state, raw logs, source hashes
 and the original recommendation. Everything ran in disposable HOME/XDG roots
-with a synthetic JWT and owned local embedding peer. Go exited0 on SIGTERM.
+with a synthetic JWT and owned local embedding peer. Go exited 0 on SIGTERM.
 This is Go reachability evidence, not native parity or browser execution.
 
 Two inherited frontend errors must be corrected explicitly in the native copy.
-The public `/api/status` returns200 even with an invalid token, while a protected
-list returns401; it cannot establish authentication. Verify a protected read
+The public `/api/status` returns 200 even with an invalid token, while a protected
+list returns 401; it cannot establish authentication. Verify a protected read
 instead. Search returns `{memory: {...}, similarity_score: ...}` records, while
 the old JavaScript expects outer `id/content/score`; consume the real nested
 shape. Preserve original source and actual payloads; test the corrected native
@@ -60,3 +60,56 @@ Use the existing Brain-owned assets and typed API instead of a new frontend
 framework. Reuse locked HTTP/cryptographic libraries when needed, justify direct
 dependency edges, and retain a single lifecycle/store owner. Pixel parity is not
 the gate; working authentication, queries, writes, errors and safe shutdown are.
+
+## Bounded native owner before CLI admission
+
+The first production increment adds `symbrain_memory::http::Server`, built on
+Hyper's existing HTTP/1 parser/runtime and the existing `Arc<Store>`. No native
+Memory HTTP owner previously existed: the Go command owns thirteen API routes,
+including sync/relay, so a static-assets port would silently lose advertised
+operations. The explicit constructor accepts a caller-owned key and embedding
+runtime snapshot; it opens no second database, resolves no Vault reference,
+generates no signing/master key and starts no automatic worker or browser.
+Writes are disabled by default. An actual example invokes this production owner
+for owned process evidence; it is not a replacement CLI command or a native
+`memory serve` admission claim.
+
+The positive boundary includes original HTML, semantically identical CSS with
+blank lines removed to keep the asset below the repository's 400-line limit,
+and the two narrowly corrected JavaScript behaviors. The same owner enforces
+loopback-only listener admission, bounded connections/body/header handling,
+Host/CSRF/CORS, signature/issuer/expiry, SQLite profile roles and persistent plus
+in-memory JWT revocation. It serves UI reads and explicit conservative direct
+writes through existing Store methods. Shared write adapters preserve CLI kind
+and provenance while HTTP uses its actual legacy kind-empty/source-tool-HTTP
+contract. The governed CLI requirement for an explicit kind is unchanged.
+Read admission precedes retrieval/Get access feedback, so rejected unsafe data
+cannot partially mutate history. Unsupported policies, extraction/PII writes,
+working/session/entity writes and unported routes fail explicitly with 501.
+
+Dependencies already pinned in the workspace are reused directly. Enabling the
+existing Hyper server feature adds exactly one previously absent package:
+`httpdate 1.0.3`, checksum
+`df3b46402a9d5adb4c86a0cf463f42e19994e3ee891101b1841f30a545cb49a9`,
+for Hyper's HTTP Date handling. Existing package versions/sources/checksums are
+unchanged; Tokio signal support reuses the already locked signal-hook-registry.
+This avoids a new web framework, custom HTTP parser and Ratatui dependency.
+The optional jsdom runtime is an owned test tool, not a product dependency.
+
+Fresh complete Go-created databases are the proved state boundary. The
+coordinator's separate actual Doctor inventory identifies historical rules
+`updated_at` backfill, entity-relation UUID/time upgrades and Porter FTS rebuild
+as still unproven on this parent Store. This owner does not repair or claim all
+legacy schemas; #649/#758 remain the store-history owner. No duplicate migration
+or private API database is added.
+
+The remaining complete-command gates include configuration/credential-source
+resolution and key rotation, stats/sync/relay, full typed ordered/null/duplicate
+JSON and JWT decoding, policy/client/profile-specific retrieval, unrestricted
+redaction/extraction/governed writes, trusted proxy/custom CORS configuration,
+URL/path and static Range/conditional behavior, complete read/write/idle timeout
+semantics, blocking-work cancellation and native Windows/macOS runtime evidence.
+The positive owner slice cannot bypass these gates: the entire existing
+`memory serve` route remains delegated. The actual process and DOM runner,
+negative executions and exact retained limitations live in
+[scripts/memory-http-oracle](../../scripts/memory-http-oracle/README.md).

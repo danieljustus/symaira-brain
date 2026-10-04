@@ -13,6 +13,7 @@ mod evidence_store;
 mod gojson;
 mod gorand;
 mod gotime;
+pub mod http;
 mod list_rows;
 mod lsh;
 mod migration;
