@@ -1,4 +1,6 @@
-use super::{Output, go_write_error, io_cause};
+#[cfg(unix)]
+use super::go_write_error;
+use super::{Output, io_cause};
 use std::io::{self, Write};
 
 struct Broken(bool);
