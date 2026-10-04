@@ -31,3 +31,31 @@ Retain executable SHA/length/source mappings and lossless archives outside Git r
 Actual full-workspace LLVM CI at ac81b94 fails the missing-managed-home fixture's complete filesystem snapshot: its newly added direct child command clears LLVM_PROFILE_FILE, so the instrumented CLI creates a default profiler file inside the owned test root. The raw 10.8 MB job and original ZIP are preserved under migration/evidence/doctor-coverage-environment-765/original-ac81; formatted CLI log views omit the very large assertion line and cannot replace the original evidence.
 
 Preserve only LLVM_PROFILE_FILE after the existing environment clear, as the established coverage helper and the other repair test already do. Profiling writes to the runner's existing output path; all product-owned filesystem/output/exit assertions and the complete workspace's 80% floor remain unchanged. With profiling absent the environment is unchanged. This test-only correction requires current-head CI with actual instrumentation; the prior full independent production review remains source-bound to unchanged58fe50. No profile-file exclusion, test skip, floor reduction or production change is introduced.
+
+## Owned executable identity after changing child directories
+
+Actual Linux CI run37174759809/job111355025735 at immutablef944 failed the
+first stdout process probe before observing Doctor: `run.sh` supplied relative
+`target/debug/symbrain`, while the child executes from its disposable owned
+PROJECT. The complete job, exact one-file artifact ZIP and extracted traceback,
+plus original runner/probe sources are retained before correction under
+`migration/evidence/doctor-owned-paths-806/original-f944`. This is an executable
+fixture-ownership failure, not a successful parity observation.
+
+Resolve explicit `CARGO_TARGET_DIR` or default `target` against the invoking
+repository directory before building. Export that same absolute directory to
+Cargo and derive both CLI and embedded caller paths from it. Resolve the owned
+Go output directory too. Each probe resolves executable inputs before any
+owned child cwd: process/fix resolve Go/native/optional archived baseline;
+embedded resolves Go and its existing resolved public caller; controls already
+resolves native and creates absolute owned wrappers. All process arguments,
+writer/signal/filesystem assertions, original negative controls and time limits
+remain unchanged. No product or frozen-Go code changes.
+
+The same CI run's separate Windows source-worker command exceeded its existing
+25-second bound. Its complete raw job111355025851 is retained independently.
+This path correction does not establish its cause or resolution; no timeout
+increase, native Windows claim or weakened source assertion is authorized here.
+Preparation uses only static Bash/Python/workflow checks; fresh actual output
+corpora and controls require a separately allocated target, followed by
+independent review and current-head native CI before merge.
