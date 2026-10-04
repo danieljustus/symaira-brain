@@ -169,3 +169,13 @@ proof is not a new cancellation/deadline or operator proxy claim. All credential
 are synthetic; pinned Go1.26.7 production/frozen fixtures remain unchanged. Fresh
 native3 exact-head CI and different-author full review are required; full #768,
 other URL/workspace/Keychain/account/numeric/platform families remain open.
+
+A first clean replay rejected CLI-only package isolation: the candidate's actual
+bytes differed after the historical parent variant, because Usage production
+now also differs. Both actual initial/final CLI copies, every original stage
+record and lossless package archive are retained. Variant transitions now
+archive/verify/clean only the declared CLI plus Usage packages, including actual
+Usage test/library bytes; other packages and targets stay untouched. Candidate
+restoration must still be byte-identical. Retained Go constructor executables run
+with the frozen `internal/usage` working directory, preserving relative fixture
+ownership. This is a harness/provenance correction, without weaker assertions.

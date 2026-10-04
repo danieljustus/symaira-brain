@@ -32,7 +32,11 @@ def main():
     output = Path(sys.argv[3]).resolve()
     assert target != root and target not in root.parents and target.is_dir()
     users = target_users(target)
-    command = ['cargo', 'clean', '--locked', '-p', 'symbrain-cli', '--target-dir', str(target)]
+    assert len(sys.argv) in (4,5) and (len(sys.argv)==4 or sys.argv[4]=='--with-usage')
+    packages=['symbrain-cli','symbrain-usage'] if len(sys.argv)==5 else ['symbrain-cli']
+    command=['cargo','clean','--locked']
+    for package in packages:command += ['-p',package]
+    command += ['--target-dir',str(target)]
     dry = subprocess.run(command + ['--dry-run', '--verbose'], cwd=root, capture_output=True, check=True)
     output.with_suffix('.dry-run.log').write_bytes(dry.stdout + dry.stderr)
     files = []
@@ -64,18 +68,18 @@ def main():
         for digest, length in unique.items():
             data = bundle.extractfile('sha256/' + digest).read()
             assert len(data) == length and hashlib.sha256(data).hexdigest() == digest
-    receipt = dict(target=str(target), package='symbrain-cli', target_users=users,
+    receipt = dict(target=str(target), package='symbrain-cli', packages=packages, target_users=users,
                    proc_check=Path('/proc').is_dir(), records=records, unique_files=len(unique),
                    archive=str(archive), archive_bytes=archive.stat().st_size,
                    archive_sha256=hashlib.sha256(archive.read_bytes()).hexdigest(), roundtrip_verified=True,
-                   command=command, scope='One runner-owned exclusive target, all cargo dry-run regular files losslessly retained before package-only clean; no other package/target cleaned. /proc check is Linux-only, not a Windows lifecycle proof.')
+                   command=command, scope='One runner-owned exclusive target, all cargo dry-run regular files losslessly retained before package-only clean; only explicitly declared packages cleaned; no other package/target cleaned. /proc check is Linux-only, not a Windows lifecycle proof.')
     output.write_text(json.dumps(receipt, indent=2) + '\n')
     assert not target_users(target)
     for row in records:
         assert hashlib.sha256(Path(row['path']).read_bytes()).hexdigest() == row['sha256'], row
     clean = subprocess.run(command, cwd=root, capture_output=True, check=True)
     output.with_suffix('.clean.log').write_bytes(clean.stdout + clean.stderr)
-    print('Preserved CLI package:', len(records), 'paths/', len(unique), 'unique files before package-only clean')
+    print('Preserved packages',packages,':', len(records), 'paths/', len(unique), 'unique files before package-only clean')
 
 
 if __name__ == '__main__':

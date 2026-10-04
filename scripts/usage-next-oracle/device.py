@@ -16,8 +16,8 @@ sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('output',type=Path);args=parser.parse_args();output=args.output.resolve();output.parent.mkdir(parents=True,exist_ok=True)
     repo=Path(__file__).resolve().parents[2];evidence=output.with_suffix('.evidence');evidence.mkdir(exist_ok=True)
-    def run(label,command,env=None):
-        process=subprocess.run(command,cwd=repo,env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=300)
+    def run(label,command,env=None,cwd=None):
+        process=subprocess.run(command,cwd=cwd or repo,env=env,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,timeout=300)
         (evidence/(label+'.log')).write_bytes(process.stdout)
         assert process.returncode==0,(label,process.returncode,process.stdout[-8000:])
     with tempfile.TemporaryDirectory(prefix='usage-next-owned-')as directory:
@@ -40,14 +40,14 @@ def main():
             suffix='.exe'if os.name=='nt'else''
             go_tests=evidence/('go-provider-tests'+suffix)
             run('go-tests-build',['go','-C',str(source),'test','-c','-trimpath','-o',str(go_tests),'./internal/usage'],env)
-            run('go-canned',[str(go_tests),'-test.run','^TestRemainingDeviceBaseline768$','-test.count=1'],env)
+            run('go-canned',[str(go_tests),'-test.run','^TestRemainingDeviceBaseline768$','-test.count=1'],env,source/'internal/usage')
             bounds=[dict(id=f'transport-bound-{status}-{kind}',responses=[status],kind='transport-bound',length=1048576+(kind=='over'))for status in [200,401]for kind in ['exact','over']]
             peer=Peer(root,cases+statuses+bounds,(evidence/'api.json').read_bytes(),(evidence/'web.json').read_bytes())
             peer.fixtures={row['fixture']:(source/'internal/usage/testdata'/row['fixture']).read_bytes()for row in statuses}
             env.update(USAGE_DEVICE_PEER=peer.address,USAGE_DEVICE_CA=str(root/'ca.pem'),USAGE_REMAINING_OUTPUT=str(evidence/'go-wire.json'))
-            run('go-tls',[str(go_tests),'-test.run','^TestRemainingDeviceBaseline768$','-test.count=1'],env)
+            run('go-tls',[str(go_tests),'-test.run','^TestRemainingDeviceBaseline768$','-test.count=1'],env,source/'internal/usage')
             env.update(USAGE_STATUS_ROOT=str(root/'status-homes'),USAGE_STATUS_INPUT=str(evidence/'status-input.json'),USAGE_STATUS_GO=str(evidence/'status-go.json'),USAGE_STATUS_HOSTS='|api.kimi.com||www.kimi.com||api.anthropic.com||chatgpt.com||api.github.com||cursor.com||api.moonshot.ai||portal.nousresearch.com||opencode.ai||openrouter.ai|')
-            run('go-status-tls',[str(go_tests),'-test.run','^TestUsageStatusTLS768$','-test.count=1'],env)
+            run('go-status-tls',[str(go_tests),'-test.run','^TestUsageStatusTLS768$','-test.count=1'],env,source/'internal/usage')
             peer.phase='rust';env.update(USAGE_DEVICE_GO=str(evidence/'go.json'),USAGE_DEVICE_WIRE_GO=str(evidence/'go-wire.json'),USAGE_DEVICE_API=str(evidence/'api.json'),USAGE_DEVICE_WEB=str(evidence/'web.json'),USAGE_DEVICE_NATIVE=str(evidence/'native.json'),USAGE_STATUS_NATIVE=str(evidence/'status-native.json'))
             run('native',['cargo','test','--locked','-p','symbrain-usage','--lib','device_oracle_matches_fresh_go','--','--ignored','--nocapture'],env)
             matches=re.findall(r'Running unittests [^\n]*\(([^)]+)\)',(evidence/'native.log').read_text());assert len(matches)==1

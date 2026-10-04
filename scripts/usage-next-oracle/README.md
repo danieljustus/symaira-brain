@@ -34,7 +34,7 @@ Windows-launchable cases, and records fifteen valid gated reports through an
 owned no-network fallback. Original raw Unix bytes not launchable on Windows
 remain explicitly skipped controls, without a Windows-runtime claim. An actual
 accepted880 parent is built in the same exclusive target, with lossless archives
-and package cleans around each variant. The restored candidate must match its
+and CLI plus Usage package cleans around each variant. The restored candidate must match its
 initial copied bytes. Two process mutants reject late credential admission and
 double normalization. Every original four constructor/process gate still runs
 separately; exact-head native Linux/macOS/Windows and full independent review are
