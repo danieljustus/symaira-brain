@@ -1,0 +1,30 @@
+{
+  "scope": "original dictionary-shaped receipt and non-executable ELF object assumptions failed before any cache removal; successful successor archives all ELF payloads, receipt retained",
+  "files": [
+    {
+      "original": "/tmp/symaira-memory759-root-preserve-retire-objects.log",
+      "sha256": "e456dbada165dfef436b9ac81d1f7a28d1a2948361cb8078fca853740c0958a5",
+      "gzip": "symaira-memory759-root-preserve-retire-objects.log.gz"
+    },
+    {
+      "original": "/tmp/symaira-memory759-root-preserve-retire-initial.log",
+      "sha256": "8e2878bf799978c9563e22a2b1a172e339c9c983ceee2002dfdc882ef20b1b0b",
+      "gzip": "symaira-memory759-root-preserve-retire-initial.log.gz"
+    },
+    {
+      "original": "/tmp/symaira-memory759-root-preserve-retire-initial.py",
+      "sha256": "9bf667f7a237bcff95b6c4efd3b7019c337bbb4b25a699560c34fe4e40460ccc",
+      "gzip": "symaira-memory759-root-preserve-retire-initial.py.gz"
+    },
+    {
+      "original": "/tmp/symaira-memory759-root-preserve-retire.log",
+      "sha256": "14a167f9bf3551f15476a6988da7e513a7521248d2104a1d01e40b6b57c3fdb5",
+      "gzip": "symaira-memory759-root-preserve-retire.log.gz"
+    },
+    {
+      "original": "/tmp/symaira-memory759-root-preserve-retire.py",
+      "sha256": "45e40abd21003f3d7904291ce17590a3e855fe020d2bd12883042ee00485cc21",
+      "gzip": "symaira-memory759-root-preserve-retire.py.gz"
+    }
+  ]
+}
