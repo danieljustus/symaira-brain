@@ -308,8 +308,7 @@ pub(crate) fn source_path(source: Source) -> PathBuf {
         "claude-desktop" => {
             let base = env::var_os("XDG_CONFIG_HOME")
                 .filter(|v| !v.is_empty())
-                .map(PathBuf::from)
-                .unwrap_or_else(|| join_native_path(&home, &[".config"]));
+                .map_or_else(|| join_native_path(&home, &[".config"]), PathBuf::from);
             return join_native_path(&base, &["claude", "claude_desktop_config.json"]);
         }
         _ => return PathBuf::new(),
