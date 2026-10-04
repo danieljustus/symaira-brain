@@ -6,7 +6,7 @@ use std::{
 
 use symbrain_core::{GoText, go_path};
 
-use crate::{Store, StoreError};
+use crate::Store;
 
 pub(super) fn path_error(operation: &str, path: &Path, error: &io::Error) -> GoText {
     let message = match error.raw_os_error() {
@@ -70,16 +70,7 @@ pub(super) fn read_file(path: &Path) -> Result<Vec<u8>, ReadError> {
 }
 
 pub(super) fn mkdir_private(path: &Path) -> Result<(), GoText> {
-    let mut builder = fs::DirBuilder::new();
-    builder.recursive(true);
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::DirBuilderExt;
-        builder.mode(0o700);
-    }
-    builder
-        .create(path)
-        .map_err(|error| path_error("mkdir", path, &error))
+    crate::startup_mkdir::private(path)
 }
 
 pub(super) fn write_private(path: &Path, bytes: &[u8]) -> Result<(), GoText> {
@@ -139,7 +130,7 @@ fn safe_database_directory(path: &Path) -> Result<(), GoText> {
                     #[cfg(unix)]
                     let error = io::Error::from_raw_os_error(20);
                     #[cfg(not(unix))]
-                    let error = io::Error::new(io::ErrorKind::NotADirectory, "unsafe path");
+                    let error = io::Error::new(io::ErrorKind::NotADirectory, "path is not a regular file");
                     return Err(path_error("mkdir", &current, &error));
                 }
             }
@@ -169,18 +160,11 @@ pub(super) fn open_database(path: &Path) -> Result<Store, GoText> {
     safe_database_directory(parent).map_err(|error| {
         error.with_prefix("failed to open sqlite database: failed to create database directory: ")
     })?;
-    let store = Store::open(path).map_err(|error| {
-        let detail = match &error {
-            StoreError::Sql(rusqlite::Error::SqliteFailure(code, _))
-                if code.extended_code == 14 =>
-            {
-                "unable to open database file: out of memory (14)".to_owned()
-            }
-            _ => error.to_string(),
-        };
-        GoText::from(format!(
-            "failed to open sqlite database: failed to open sqlite database: {detail}"
-        ))
+    let connection = rusqlite::Connection::open(path).map_err(|error| {
+        crate::startup_db_error::format(crate::migration::ConfigurePhase::Connection, &error.into())
+    })?;
+    let store = crate::migration::configure_with_phase(connection).map_err(|error| {
+        crate::startup_db_error::format(error.phase, &error.error)
     })?;
     #[cfg(unix)]
     {

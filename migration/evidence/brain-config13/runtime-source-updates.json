@@ -70,9 +70,11 @@
     },
     "rust/symbrain-core/src/go_path.rs": {
       "original_sha256": "40c93b5b1b9cee46eb747a8e9f6c3a8969dcec8dbed9b548553cf1b4f55b18b8",
-      "current_sha256": "e320ca45bd4e020f58812b414df97b9d2cac07714cb5bcb9489cbe520659b850",
-      "reason": "actual strict Clippy: documentation markup, equivalent newline split count, borrowed error/slice arguments and collapsible conditional only; no parser/path/admission change",
-      "failed_immutable_head": "e740928f0faddaafaf1e47dc6edaf9d9d78b3c0e"
+      "current_sha256": "f03eab70122a303d9d430f1cf28be60f3b515b3643057f469255ab53f619e2ee",
+      "reason": "Memory startup six-finding local source correction; uncompiled, full exact runtime gates still required",
+      "failed_immutable_head": "e740928f0faddaafaf1e47dc6edaf9d9d78b3c0e",
+      "previous_current_sha256": "e320ca45bd4e020f58812b414df97b9d2cac07714cb5bcb9489cbe520659b850",
+      "prepared_successor_of": "9804c0b1b278e71ce5d533e8ee348945b68e530e"
     },
     "rust/symbrain-cli/tests/doctor_fix_native.rs": {
       "original_sha256": "4157f1d5f9ec7c7afec0b930a51789a140ea23d007b1e2b6d6eb1a2ddaa9b57b",
@@ -160,9 +162,11 @@
     },
     "rust/symbrain-memory/src/lib.rs": {
       "original_sha256": "fee8661041add1e63275a788021ab88bc4a08ff1eb840a8d4e684e51a7c0be53",
-      "current_sha256": "161f3e8a249f09dcf5e33951c8040ba2fcd6736885178b9d9919dc146fa1d572",
-      "reason": "Prepared eager Memory startup owner/raw reference and SDK early NULL admission; previous runtime failures and immutable sources retained; uncompiled at this checkpoint",
-      "prepared_after": "43f7d6e85b1889bbd1e9b46b2561b7a66515ef1a"
+      "current_sha256": "0cd343125406d626aa4075a5759b8e90181853d855dfde187be6f44ac87de49b",
+      "reason": "Memory startup six-finding local source correction; uncompiled, full exact runtime gates still required",
+      "prepared_after": "43f7d6e85b1889bbd1e9b46b2561b7a66515ef1a",
+      "previous_current_sha256": "161f3e8a249f09dcf5e33951c8040ba2fcd6736885178b9d9919dc146fa1d572",
+      "prepared_successor_of": "9804c0b1b278e71ce5d533e8ee348945b68e530e"
     },
     "rust/symbrain-usage/Cargo.toml": {
       "original_sha256": "6cac15132956d7fe2dd72b285688adc0a75d75cee126a986ab1ff49dda2cacd2",
@@ -178,15 +182,25 @@
     },
     "rust/symbrain-usage/src/provider_config.rs": {
       "original_sha256": "0eaa489559aa76da6a1d1d3fdb8856bf5a98ebbaa95383cf3841376b27e82095",
-      "current_sha256": "6102dfb89b8db910f84b1c893cc4dc18effee7819f1b219a0b56fb2bb716c520",
-      "reason": "Prepared eager Memory startup owner/raw reference and SDK early NULL admission; previous runtime failures and immutable sources retained; uncompiled at this checkpoint",
-      "prepared_after": "43f7d6e85b1889bbd1e9b46b2561b7a66515ef1a"
+      "current_sha256": "9ce45612b7f0f37c8dd069c4a04cb98b062dad014de026f7e8974ad4af15ffd9",
+      "reason": "Memory startup six-finding local source correction; uncompiled, full exact runtime gates still required",
+      "prepared_after": "43f7d6e85b1889bbd1e9b46b2561b7a66515ef1a",
+      "previous_current_sha256": "6102dfb89b8db910f84b1c893cc4dc18effee7819f1b219a0b56fb2bb716c520",
+      "prepared_successor_of": "9804c0b1b278e71ce5d533e8ee348945b68e530e"
     },
     "rust/symbrain-usage/src/providers.rs": {
       "original_sha256": "5f6631bde7a1cc918469d9a7e1f0fbe26fb6c54c8d3921b98425d514f33966b0",
       "current_sha256": "1e727affdb9ede573f6658be868b77044f85183ef7a2abd7f7d5faa8cbf7a88b",
       "reason": "Prepared eager Memory startup owner/raw reference and SDK early NULL admission; previous runtime failures and immutable sources retained; uncompiled at this checkpoint",
       "prepared_after": "43f7d6e85b1889bbd1e9b46b2561b7a66515ef1a"
+    },
+    "rust/symbrain-memory/src/migration.rs": {
+      "original_sha256": "837e1bfb55d02d569bc708beea2b9d460e6d2e751a73236425d5624e5911f74c",
+      "previous_current_sha256": null,
+      "current_sha256": "e28c8ee8adc0cb2c8786107278b036743293fb7e8f58aae4789091df83c843f0",
+      "prepared_successor_of": "9804c0b1b278e71ce5d533e8ee348945b68e530e",
+      "reason": "Memory startup six-finding local source correction; uncompiled, full exact runtime gates still required"
     }
-  }
+  },
+  "prepared_source_only_successor_of": "9804c0b1b278e71ce5d533e8ee348945b68e530e"
 }

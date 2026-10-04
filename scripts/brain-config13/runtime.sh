@@ -61,6 +61,8 @@ stage go-probe go -C "$out/go-probe-source" build -mod=readonly -o "$out/go-prob
 common=(--source-root "$root" --source-head "$head")
 cp scripts/brain-config13/startup_sdk.go.txt "$out/startup_sdk.go"
 stage memory-startup-sdk go build -o "$out/startup-sdk" "$out/startup_sdk.go"
+cp scripts/brain-config13/startup_fixture_sdk.go.txt "$out/startup_fixture_sdk.go"
+stage memory-startup-fixture-sdk go build -o "$out/startup-fixture-sdk" "$out/startup_fixture_sdk.go"
 mkdir -p "$out/frozen-go/cmd/owned-startup-probe" "$out/live-go-constructor"
 cp scripts/brain-config13/startup_constructor.go.txt "$out/frozen-go/cmd/owned-startup-probe/main.go"
 stage memory-live-go-build go -C "$out/frozen-go" build -mod=readonly -o "$out/startup-live-go" ./cmd/owned-startup-probe
@@ -71,8 +73,12 @@ assert json.load(open(sys.argv[1]))==dict(foreign_keys=1,busy_timeout=5000,secur
 PY
 startup=(python3 scripts/brain-config13/startup_replay.py --go "$out/go-cli" --native "$out/bin/cli" --sdk "$out/startup-sdk" --secret-peer "$out/bin/brain_config13_secret_peer" --root "$root" --head "$head")
 stage memory-startup "${startup[@]}" --out "$out/memory-startup" || true
+stage memory-startup-corrections "${startup[@]}" --corrections --fixture-sdk "$out/startup-fixture-sdk" --out "$out/memory-startup-corrections" || true
 for mode in input-key schema mode missing-key; do
   stage "memory-startup-control-$mode" "${startup[@]}" --control "$mode" --out "$out/memory-startup-control-$mode" || true
+done
+for mode in missing-trigger changed-trigger added-view changed-view; do
+  stage "memory-startup-control-$mode" "${startup[@]}" --corrections --fixture-sdk "$out/startup-fixture-sdk" --control "$mode" --out "$out/memory-startup-control-$mode" || true
 done
 stage cli102 python3 scripts/brain-config13/process.py --go "$out/go-cli" --native "$out/bin/cli" "${common[@]}" --out "$out/cli102.json" || true
 stage values152 python3 scripts/brain-config13/values.py --go "$out/go-probe" --native "$out/bin/brain_config13_probe" "${common[@]}" --out "$out/values152.json" || true

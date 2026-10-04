@@ -1,0 +1,29 @@
+// Owned deterministic AES fixture construction only. Production CSPRNG is untouched.
+package main
+
+import (
+ "crypto/aes"
+ "crypto/cipher"
+ "crypto/sha256"
+ "encoding/base64"
+ "encoding/json"
+ "io"
+ "os"
+)
+
+func main() {
+ var input struct { Primary, Plaintext string }
+ raw, err := io.ReadAll(os.Stdin); if err != nil { panic(err) }
+ if err = json.Unmarshal(raw, &input); err != nil { panic(err) }
+ key, err := base64.StdEncoding.DecodeString(input.Primary); if err != nil { panic(err) }
+ plain, err := base64.StdEncoding.DecodeString(input.Plaintext); if err != nil { panic(err) }
+ // These fixed bytes are synthetic fixture salt/nonce, never generated keys.
+ salt := []byte("0123456789abcdef")
+ nonce := []byte("0123456789ab")
+ h := sha256.New(); h.Write(key); h.Write(salt)
+ block, err := aes.NewCipher(h.Sum(nil)); if err != nil { panic(err) }
+ gcm, err := cipher.NewGCM(block); if err != nil { panic(err) }
+ payload := append(append([]byte{}, salt...), nonce...)
+ payload = gcm.Seal(payload, nonce, plain, nil)
+ if _, err = os.Stdout.Write(payload); err != nil { panic(err) }
+}

@@ -45,6 +45,16 @@ def semantic_controls(conn):
         results['fts_update_new_present']=[r[0]for r in conn.execute("SELECT id FROM memories_fts WHERE memories_fts MATCH 'revised'")]
         conn.execute("DELETE FROM memories WHERE id='owned-observer'")
         results['fts_delete_absent']=conn.execute("SELECT COUNT(*) FROM memories_fts WHERE memories_fts MATCH 'revised'").fetchone()[0]
+        results['oplog_insert_update_delete']=conn.execute("SELECT op,memory_id FROM sync_oplog WHERE memory_id='owned-observer' ORDER BY event_id").fetchall()
+        conn.execute("INSERT INTO memories(id,content,scope,metadata,embedding,created_at,updated_at) VALUES ('owned-observer-exclude','excluded','private','{\"sync_exclude\":\"true\"}','[]','2000-01-01','2000-01-01')")
+        conn.execute("UPDATE memories SET content='excluded revised' WHERE id='owned-observer-exclude'")
+        results['oplog_excluded_insert_update']=conn.execute("SELECT op,memory_id FROM sync_oplog WHERE memory_id='owned-observer-exclude' ORDER BY event_id").fetchall()
+        conn.execute("DELETE FROM memories WHERE id='owned-observer-exclude'")
+        results['oplog_excluded_delete']=conn.execute("SELECT op,memory_id FROM sync_oplog WHERE memory_id='owned-observer-exclude' ORDER BY event_id").fetchall()
+        conn.execute("INSERT INTO memories(id,content,scope,metadata,embedding,created_at,updated_at) VALUES ('owned-observer-exclude','excluded','private','{\"sync_exclude\":\"true\"}','[]','2000-01-01','2000-01-01')")
+        conn.execute("UPDATE memories SET metadata='{}' WHERE id='owned-observer-exclude'")
+        conn.execute("DELETE FROM memories WHERE id='owned-observer-exclude'")
+        results['oplog_leave_exclusion_then_delete']=conn.execute("SELECT op,memory_id FROM sync_oplog WHERE memory_id='owned-observer-exclude' ORDER BY event_id").fetchall()
         for name,statement in [
             ('op_check',"INSERT INTO sync_oplog(op,memory_id) VALUES ('invalid','owned')"),
             ('granularity_check',"INSERT INTO activity_segments(id,source,granularity,started_at,ended_at,redacted_summary,expires_at) VALUES ('owned','owned','invalid','2000','2000','owned','2099')"),
@@ -59,6 +69,29 @@ def semantic_controls(conn):
         return results
     finally:
         conn.execute('ROLLBACK TO owned_semantic');conn.execute('RELEASE owned_semantic')
+
+def program_inventory(schemas):
+    """Only trigger/view formatting is canonicalized; literals and tokens stay.
+
+    Keep full raw DDL separately. No table/row/default/error SQL is rewritten.
+    An unknown lexical form fails rather than silently omitting a program.
+    """
+    import re
+    token=re.compile(r"--[^\n]*(?:\n|$)|/\*.*?\*/|'(?:''|[^'])*'|\"(?:\"\"|[^\"])*\"|`(?:``|[^`])*`|\[[^]]*\]|[A-Za-z_][A-Za-z_0-9]*|[0-9]+(?:\.[0-9]+)?|[^\s]",re.S)
+    result={}
+    for kind,name,table,ddl in schemas:
+        if kind not in ('trigger','view'):continue
+        assert isinstance(ddl,str) and ddl, (kind,name,'missing body')
+        parts=[]
+        for match in token.finditer(ddl):
+            text=match.group()
+            if text.startswith(('--','/*')):continue
+            if text[0] in "'\"`[":parts.append(text)
+            else:parts.append(text.lower())
+        assert (kind,name) not in result,('duplicate program',kind,name)
+        result[(kind,name)]=(table,parts)
+    # A JSON-friendly stable inventory retains original identity and order.
+    return [[kind,name,table,parts] for (kind,name),(table,parts)in sorted(result.items())]
 
 def sql_state(database,owned):
     if not database.is_file():return None
@@ -89,7 +122,7 @@ def sql_state(database,owned):
                 fts[name]=conn.execute('SELECT rowid FROM '+quoted+' WHERE '+quoted+" MATCH 'owned'").fetchall()
         connection_pragmas={p:conn.execute('PRAGMA '+p).fetchall()for p in ['foreign_keys','busy_timeout','secure_delete']}
         semantics=semantic_controls(conn)
-        return dict(raw_schema=schemas,tables=tables,indexes=indexes,fts_queries=fts,semantic_controls=semantics,integrity=conn.execute('PRAGMA integrity_check').fetchall(),foreign_key_check=conn.execute('PRAGMA foreign_key_check').fetchall(),persistent_pragmas={p:conn.execute('PRAGMA '+p).fetchall()for p in ['journal_mode','user_version','application_id','encoding','page_size']},observer_connection_pragmas=connection_pragmas,observer='owned SQLite file+WAL+SHM copies only; semantic writes roll back on this clone; observer pragma is not a live-owner pragma claim')
+        return dict(raw_schema=schemas,program_inventory=program_inventory(schemas),tables=tables,indexes=indexes,fts_queries=fts,semantic_controls=semantics,integrity=conn.execute('PRAGMA integrity_check').fetchall(),foreign_key_check=conn.execute('PRAGMA foreign_key_check').fetchall(),persistent_pragmas={p:conn.execute('PRAGMA '+p).fetchall()for p in ['journal_mode','user_version','application_id','encoding','page_size']},observer_connection_pragmas=connection_pragmas,observer='owned SQLite file+WAL+SHM copies only; semantic writes roll back on this clone; observer pragma is not a live-owner pragma claim')
     finally:conn.close();shutil.rmtree(owned)
 
 def ledger_interval(state,start,end):

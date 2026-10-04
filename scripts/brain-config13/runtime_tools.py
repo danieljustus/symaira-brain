@@ -22,6 +22,22 @@ def save(path, record):
 def source(root, out):
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root).decode().strip()
     assert not subprocess.check_output(["git", "status", "--porcelain"], cwd=root)
+    review = root / "migration/evidence/brain-config13/startup-review-corrections"
+    current = json.loads((review / "checkpoint.json").read_bytes())
+    for name, expected in current["candidate_source_sha256"].items():
+        actual = (root / name).read_bytes()
+        assert sha(actual) == expected, name
+        immutable = subprocess.check_output(["git", "show", "HEAD:" + name], cwd=root)
+        assert actual == immutable, (name, "source differs from immutable Git")
+    for name, expected in current["references_sha256"].items():
+        assert sha(Path(name).read_bytes()) == expected, name
+    retention = json.loads((review / "original-review/retention.json").read_bytes())
+    assert sha((review / "original-review/retention.json").read_bytes()) == current["original_review_retention_sha256"]
+    for record in retention["records"]:
+        archived = (root / record["archive"]).read_bytes()
+        assert sha(archived) == record["gzip_sha256"]
+        restored = gzip.decompress(archived)
+        assert len(restored) == record["bytes"] and sha(restored) == record["sha256"]
     checkpoint = json.loads((root / "migration/evidence/brain-config13/corrections-source-only/checkpoint.json").read_text())
     updates_path = root / "migration/evidence/brain-config13/runtime-source-updates.json"
     updates = json.loads(updates_path.read_text())["changes"] if updates_path.exists() else {}

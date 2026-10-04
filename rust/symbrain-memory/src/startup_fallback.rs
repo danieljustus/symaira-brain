@@ -4,7 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use chrono::{DateTime, FixedOffset, Utc};
+use chrono::Utc;
 use ring::aead::{AES_256_GCM, Aad, LessSafeKey, Nonce, UnboundKey};
 use sha2::{Digest, Sha256};
 use symbrain_core::{GoText, go_path};
@@ -14,7 +14,7 @@ use startup_rotation_json::Records;
 
 pub(super) struct Entry {
     pub secret: String,
-    pub expires: DateTime<FixedOffset>,
+    pub expires: crate::startup_time::Time,
 }
 
 const SHORT: &str = "encrypted payload too short";
@@ -62,6 +62,9 @@ fn persist(path: &Path, entries: &Records, primary: &[u8]) -> Result<(), GoText>
             .filter(|p| !p.as_os_str().is_empty())
             .unwrap_or(Path::new(".")),
     )?;
+    let mut body = startup_rotation_json::render(entries)
+        .map_err(|error| error.with_prefix("encrypt fallback secrets: marshal fallback entries: "))?
+        .into_bytes();
     let mut salt = [0; 16];
     getrandom::fill(&mut salt).map_err(|error| {
         GoText::from(format!("encrypt fallback secrets: generate salt: {error}"))
@@ -70,7 +73,6 @@ fn persist(path: &Path, entries: &Records, primary: &[u8]) -> Result<(), GoText>
     getrandom::fill(&mut nonce).map_err(|error| {
         GoText::from(format!("encrypt fallback secrets: generate nonce: {error}"))
     })?;
-    let mut body = startup_rotation_json::render(entries).into_bytes();
     key(primary, &salt)
         .seal_in_place_append_tag(Nonce::assume_unique_for_key(nonce), Aad::empty(), &mut body)
         .map_err(|_| GoText::from("encrypt fallback secrets: seal failed"))?;
@@ -129,7 +131,7 @@ pub(super) fn load(secret_path: &Path, primary: &[u8], warnings: &mut dyn Write)
     let entries: Vec<_> = entries
         .entries
         .into_iter()
-        .filter(|entry| entry.expires > now)
+        .filter(|entry| entry.expires.after(now))
         .collect();
     let valid = Records {
         nil: entries.is_empty(),

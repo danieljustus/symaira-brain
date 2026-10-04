@@ -2,6 +2,9 @@
 //! String-valued Usage callers retain their existing admission and diagnostics.
 use symbrain_core::{GoText, go_path};
 
+#[path = "secret_exit_status.rs"]
+mod secret_exit_status;
+
 use super::{CommandFailure, MAX_CREDENTIAL_FILE_BYTES, run_command_capture, secretref_timeout};
 
 fn trim(mut bytes: &[u8]) -> &[u8] {
@@ -47,11 +50,8 @@ fn capture(command: &str, args: &[Vec<u8>], action: &str) -> Result<Vec<u8>, GoT
     let args: Vec<_> = args.iter().map(|arg| go_path::from_bytes(arg)).collect();
     match run_command_capture(command, &args, timeout, MAX_CREDENTIAL_FILE_BYTES) {
         Ok(bytes) => Ok(trim(&bytes).to_vec()),
-        Err(CommandFailure::ExitFailed { code, stderr }) => {
-            let mut bytes = code.map_or_else(
-                || b"signal: killed".to_vec(),
-                |code| format!("exit status {code}").into_bytes(),
-            );
+        Err(CommandFailure::ExitFailed { status, stderr }) => {
+            let mut bytes = secret_exit_status::go(status).into_bytes();
             let detail = trim(&stderr);
             if !detail.is_empty() {
                 bytes.extend(b": ");

@@ -24,10 +24,16 @@ mod search_rows;
 mod startup;
 mod startup_fallback;
 mod startup_fs;
+mod startup_db_error;
+mod startup_mkdir;
 mod startup_rotation_json;
+mod startup_json_scan;
+mod startup_time;
 mod startup_secret;
 #[cfg(test)]
 mod startup_tests;
+#[cfg(test)]
+mod startup_review_tests;
 mod store;
 mod write;
 

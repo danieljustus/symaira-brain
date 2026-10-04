@@ -1,0 +1,9 @@
+{
+  "kind": "Own preliminary pure projection output path correction; no SDK/product/fixture/SQLite execution",
+  "original_filename_bytes_hex": "6d6967726174696f6e5c65766964656e63655c627261696e2d636f6e66696731335c737461727475702d7265766965772d636f7272656374696f6e735c707572652d7072657061726174696f6e2e6a736f6e",
+  "raw_sha256": "2f21b572339f1fed24310d6bc7b10d123d7e60b4a605d9ec1d28f4661ffd5b5e",
+  "bytes": 161135,
+  "archive": "migration/evidence/brain-config13/startup-review-corrections/preliminary-windows-projection-path.json.gz",
+  "gzip_sha256": "6bc0c0fb275a7b94e76c5094e05d2a93afc73ca1764cf844a40ea86aee6996ab",
+  "cause": "Transient pure projection assigned os.name=nt before constructing output Path, producing a backslash-containing Unix filename. Permanent helper restores os.name in finally before writing its preallocated output Path. Original contents retained losslessly."
+}

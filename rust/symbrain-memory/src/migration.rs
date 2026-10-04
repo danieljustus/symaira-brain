@@ -8,32 +8,42 @@ use crate::{Store, StoreError};
 use rusqlite::{Connection, TransactionBehavior};
 use std::time::Duration;
 
-pub(crate) fn configure(mut conn: Connection) -> Result<Store, StoreError> {
-    conn.busy_timeout(Duration::from_secs(5))?;
-    // journal_mode cannot be changed inside a transaction.
-    conn.execute_batch(
-        "PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA secure_delete=ON;",
-    )?;
-    // Reserve the writer before inspecting schema. A deferred read snapshot
-    // cannot be upgraded after another opener commits (BUSY_SNAPSHOT517), and
-    // busy_timeout does not retry that invalid snapshot. IMMEDIATE makes the
-    // existing bounded timeout wait before any schema inspection instead.
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum ConfigurePhase { Connection, SecureDelete, Migration }
+
+pub(crate) struct ConfigureError {
+    pub phase: ConfigurePhase,
+    pub error: StoreError,
+}
+
+pub(crate) fn configure(conn: Connection) -> Result<Store, StoreError> {
+    configure_with_phase(conn).map_err(|error| error.error)
+}
+
+pub(crate) fn configure_with_phase(conn: Connection) -> Result<Store, ConfigureError> {
+    let error = |phase, error| ConfigureError { phase, error };
+    conn.busy_timeout(Duration::from_secs(5)).map_err(|e| error(ConfigurePhase::Connection, e.into()))?;
+    // Go's DSN configures these before the separately labelled secure-delete
+    // step. Keep the same connection and original atomic migration below.
+    conn.execute_batch("PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL;")
+        .map_err(|e| error(ConfigurePhase::Connection, e.into()))?;
+    conn.execute_batch("PRAGMA secure_delete=ON;")
+        .map_err(|e| error(ConfigurePhase::SecureDelete, e.into()))?;
+    migrate(conn).map_err(|e| error(ConfigurePhase::Migration, e))
+}
+
+fn migrate(mut conn: Connection) -> Result<Store, StoreError> {
+    // Reserve the writer before inspecting schema. IMMEDIATE retains the
+    // existing bounded BUSY wait and prevents a read-snapshot upgrade.
     let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
     tx.execute_batch(SCHEMA)?;
     apply_column_parity(&tx)?;
-    // Build indexes after legacy columns exist, and commit them together with
-    // schema and bookkeeping. Failed repair must not publish applied entries.
     tx.execute_batch(INDEXES)?;
     for version in MIGRATIONS {
-        tx.execute(
-            "INSERT OR IGNORE INTO schema_migrations(version) VALUES (?)",
-            [version],
-        )?;
+        tx.execute("INSERT OR IGNORE INTO schema_migrations(version) VALUES (?)", [version])?;
     }
     tx.commit()?;
-    Ok(Store {
-        conn: std::sync::Mutex::new(conn),
-    })
+    Ok(Store { conn: std::sync::Mutex::new(conn) })
 }
 
 fn apply_column_parity(conn: &Connection) -> Result<(), StoreError> {

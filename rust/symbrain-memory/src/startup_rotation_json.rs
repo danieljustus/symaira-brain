@@ -1,143 +1,71 @@
-//! Typed persisted rotation records: retain declaration/duplicate field order.
-use std::fmt;
-
-use chrono::DateTime;
-use serde::{
-    Deserialize, Deserializer,
-    de::{MapAccess, Visitor},
-};
-use serde_json::value::RawValue;
+//! Ordered rotation fields over original JSON byte spans and local Go time.
 use symbrain_core::GoText;
+use crate::{startup_fallback::Entry, startup_json_scan::{self, Kind}, startup_time::Time};
 
-use crate::startup_fallback::Entry;
-
-pub(super) struct Records {
-    pub entries: Vec<Entry>,
-    pub nil: bool,
-}
+pub(super) struct Records { pub entries: Vec<Entry>, pub nil: bool }
 
 fn field(actual: &str, expected: &str) -> bool {
-    actual
-        .chars()
-        .map(|c| match c {
-            '\u{17f}' => 's',
-            '\u{212a}' => 'k',
-            _ => c.to_ascii_lowercase(),
-        })
-        .eq(expected.chars())
+    actual.chars().map(|c| match c {
+        '\u{17f}' => 's', '\u{212a}' => 'k', _ => c.to_ascii_lowercase(),
+    }).eq(expected.chars())
 }
-
-impl<'de> Deserialize<'de> for Entry {
-    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        struct Fields;
-        impl<'de> Visitor<'de> for Fields {
-            type Value = Entry;
-            fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-                f.write_str("fallback entry")
-            }
-            fn visit_unit<E: serde::de::Error>(self) -> Result<Entry, E> {
-                Ok(Entry {
-                    secret: String::new(),
-                    expires: DateTime::parse_from_rfc3339("0001-01-01T00:00:00Z")
-                        .expect("Go zero time"),
-                })
-            }
-            fn visit_map<M: MapAccess<'de>>(self, mut map: M) -> Result<Entry, M::Error> {
-                let mut entry = self.visit_unit()?;
-                while let Some(name) = map.next_key::<String>()? {
-                    let raw = map.next_value::<Box<RawValue>>()?;
-                    if raw.get() == "null" {
-                        continue;
-                    }
-                    if field(&name, "secret") {
-                        entry.secret =
-                            serde_json::from_str(raw.get()).map_err(serde::de::Error::custom)?;
-                    } else if field(&name, "expires_at") {
-                        let text: String =
-                            serde_json::from_str(raw.get()).map_err(serde::de::Error::custom)?;
-                        entry.expires = DateTime::parse_from_rfc3339(&text)
-                            .map_err(serde::de::Error::custom)?;
-                    }
-                }
-                Ok(entry)
-            }
-        }
-        deserializer.deserialize_any(Fields)
-    }
+fn string(raw: &[u8]) -> String {
+    serde_json::from_str(&symbrain_core::go_json_compatible_text(raw))
+        .expect("scanner admitted JSON string")
+}
+fn kind(value: Kind) -> &'static str {
+    match value { Kind::Array => "array", Kind::Object => "object", Kind::String => "string", Kind::Number => "number", Kind::Bool => "bool", Kind::Null => "null" }
+}
+fn type_error(value: Kind, target: &str) -> GoText {
+    format!("json: cannot unmarshal {} into Go value of type {target}",kind(value)).into()
 }
 
 pub(super) fn parse(bytes: &[u8]) -> Result<Records, GoText> {
-    // Like Go encoding/json: malformed string bytes become one replacement per
-    // byte; unknown fields are raw/skipped rather than float64-converted.
-    let mut quoted = false;
-    let mut escaped = false;
-    let mut depth = 0usize;
-    for &byte in bytes {
-        if quoted {
-            if escaped {
-                escaped = false;
-            } else if byte == b'\\' {
-                escaped = true;
-            } else if byte == b'"' {
-                quoted = false;
+    // Syntax is checked completely before typed decoding, exactly as Go
+    // Unmarshal. Unknown fields retain grammar/depth without float conversion.
+    let nodes = startup_json_scan::scan(bytes)?;
+    let root = &nodes[0];
+    if root.kind == Kind::Null { return Ok(Records { entries: Vec::new(), nil: true }); }
+    if root.kind != Kind::Array { return Err(type_error(root.kind,"[]security.fallbackEntry")); }
+    let mut entries = Vec::new();
+    let mut first_type_error = None;
+    for (index,node) in nodes.iter().enumerate().filter(|(_,node)| node.parent == Some(0)) {
+        let mut entry = Entry { secret: String::new(), expires: Time::zero() };
+        if node.kind == Kind::Object {
+            for child in nodes.iter().filter(|child| child.parent == Some(index)) {
+                let name = string(&bytes[child.key.clone().expect("object key")]);
+                if child.kind == Kind::Null { continue; }
+                let raw = &bytes[child.span.clone()];
+                if field(&name,"secret") {
+                    if child.kind == Kind::String { entry.secret = string(raw); }
+                    else if first_type_error.is_none() {
+                        first_type_error = Some(format!("json: cannot unmarshal {} into Go struct field fallbackEntry.secret of type string",kind(child.kind)).into());
+                    }
+                } else if field(&name,"expires_at") {
+                    // An UnmarshalJSON error is immediately fatal in Go,
+                    // including when an earlier ordinary type error was saved.
+                    entry.expires = Time::json(raw)?;
+                }
             }
-        } else if byte == b'"' {
-            quoted = true;
-        } else if matches!(byte, b'[' | b'{') {
-            depth += 1;
-            if depth > 10_000 {
-                return Err(format!(
-                    "invalid character '{}' exceeded max depth",
-                    char::from(byte)
-                )
-                .into());
-            }
-        } else if matches!(byte, b']' | b'}') {
-            depth = depth.saturating_sub(1);
+        } else if node.kind != Kind::Null && first_type_error.is_none() {
+            first_type_error = Some(type_error(node.kind,"security.fallbackEntry"));
         }
+        entries.push(entry);
     }
-    let repaired = symbrain_core::go_json_compatible_text(bytes);
-    let entries: Option<Vec<Entry>> =
-        serde_json::from_str(&repaired).map_err(|error| GoText::from(error.to_string()))?;
-    Ok(Records {
-        nil: entries.is_none(),
-        entries: entries.unwrap_or_default(),
-    })
+    if let Some(error) = first_type_error { return Err(error); }
+    Ok(Records { entries, nil: false })
 }
 
-pub(super) fn render(entries: &Records) -> String {
-    if entries.nil {
-        return "null".to_owned();
+pub(super) fn render(entries: &Records) -> Result<String, GoText> {
+    if entries.nil { return Ok("null".to_owned()); }
+    let mut records = Vec::new();
+    for entry in &entries.entries {
+        let expiry = entry.expires.render().map_err(|error| error.with_prefix("json: error calling MarshalJSON for type time.Time: "))?;
+        let secret = symbrain_core::go_json_string_bytes(entry.secret.as_bytes()).expect("valid JSON string");
+        let expiry = symbrain_core::go_json_string_bytes(expiry.as_bytes()).expect("valid JSON timestamp");
+        records.push(format!("{{\"secret\":{},\"expires_at\":{}}}",secret.get(),expiry.get()));
     }
-    let records: Vec<_> = entries
-        .entries
-        .iter()
-        .map(|entry| {
-            let base = entry.expires.format("%Y-%m-%dT%H:%M:%S").to_string();
-            let nanos = entry.expires.timestamp_subsec_nanos();
-            let fraction = if nanos == 0 {
-                String::new()
-            } else {
-                format!(".{}", format!("{nanos:09}").trim_end_matches('0'))
-            };
-            let offset = if entry.expires.offset().local_minus_utc() == 0 {
-                "Z".to_owned()
-            } else {
-                entry.expires.format("%:z").to_string()
-            };
-            let expiry = format!("{base}{fraction}{offset}");
-            let secret = symbrain_core::go_json_string_bytes(entry.secret.as_bytes())
-                .expect("valid JSON string");
-            let expiry = symbrain_core::go_json_string_bytes(expiry.as_bytes())
-                .expect("valid JSON timestamp");
-            format!(
-                "{{\"secret\":{},\"expires_at\":{}}}",
-                secret.get(),
-                expiry.get()
-            )
-        })
-        .collect();
-    format!("[{}]", records.join(","))
+    Ok(format!("[{}]",records.join(",")))
 }
 
 #[cfg(test)]
@@ -147,7 +75,7 @@ mod tests {
         let rows = super::parse(br#"[{"secret":"old","Secret":"new","expires_at":"2099-01-01T00:00:00.1234Z","unknown":1e400}]"#).unwrap();
         assert_eq!(rows.entries[0].secret, "new");
         assert_eq!(
-            super::render(&rows),
+            super::render(&rows).unwrap(),
             "[{\"secret\":\"new\",\"expires_at\":\"2099-01-01T00:00:00.1234Z\"}]"
         );
     }
@@ -171,7 +99,7 @@ mod tests {
 
     #[test]
     fn retains_nil_slice_distinct_from_empty_rotation_records() {
-        assert_eq!(super::render(&super::parse(b"null").unwrap()), "null");
-        assert_eq!(super::render(&super::parse(b"[]").unwrap()), "[]");
+        assert_eq!(super::render(&super::parse(b"null").unwrap()).unwrap(), "null");
+        assert_eq!(super::render(&super::parse(b"[]").unwrap()).unwrap(), "[]");
     }
 }

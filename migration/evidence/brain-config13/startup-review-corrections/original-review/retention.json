@@ -1,0 +1,428 @@
+{
+  "scope": "lossless all57 source-review proof files + full report/receipt/provenance before successor; no SDK/product/target/runtime",
+  "original_source": "bc0fc7778b8c4afb43e50028158de15220cedf3d",
+  "additive_source": "9804c0b1b278e71ce5d533e8ee348945b68e530e",
+  "records": [
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source-review.md",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/000-symaira-brain765-bc0-independent-source-review.md.gz",
+      "bytes": 12947,
+      "sha256": "73a4947769bb445a9c27996f3e5555602bcf083fbe9247dab284364e4a185f9c",
+      "gzip_sha256": "bfb07d917364abadacdcff9ae896cd01905ff5e969f71ecb4e829d3546517395"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source-review-receipt.json",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/001-symaira-brain765-bc0-independent-source-review-receipt.json.gz",
+      "bytes": 16921,
+      "sha256": "58771042d2709621b65ab08627550e77fd42b5265044ec79fdbffdecf83608e4",
+      "gzip_sha256": "6e504fbdffbef4b6061c7adf31bfe4b85cf3f6f7143581bf8e92f203741226cf"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/additive-9804/docs/adr/brain-config13-runtime-preparation-765.md",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/002-brain-config13-runtime-preparation-765.md.gz",
+      "bytes": 14939,
+      "sha256": "63c741fbee466b3d41abfd2a322080ca0204fa18e8cda67cde1962273a7be9eb",
+      "gzip_sha256": "8713ee8945ca435f0ad21ea3598265f02e49e54d7055b18372960f0b2588bf1f"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/additive-9804/migration/evidence/brain-config13/startup-preparation/checkpoint.json",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/003-checkpoint.json.gz",
+      "bytes": 76675,
+      "sha256": "86fdaf863d9910a13c9bc61b2c407687f2c15f9474d988987e7d798a5139ac56",
+      "gzip_sha256": "e6808ba2672062a0699bd1679ffd6fae49ffe79331583fe55e97fbd458fa8e27"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/additive-9804/rust/symbrain-gateway/tests/startup_owner.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/004-startup_owner.rs.gz",
+      "bytes": 2881,
+      "sha256": "ed2ede9381aef7cede17de693ddedad604cbe036f4de6a63f302df18ed117f6a",
+      "gzip_sha256": "be9e0177612d5b88732695fea0ac8e4282574799ea6a73c8d3a66cec5df59f06"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/Cargo.lock",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/005-Cargo.lock.gz",
+      "bytes": 67825,
+      "sha256": "131b4608eacc7032b187a2499634704b9e1b73761c276997dc7936d3fdc98a24",
+      "gzip_sha256": "064553b6b60f913041d1d661ec8c0ac7569e66a0aa3e83070eea10a0dd9e0f47"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/docs/adr/brain-config13-runtime-preparation-765.md",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/006-brain-config13-runtime-preparation-765.md.gz",
+      "bytes": 14541,
+      "sha256": "c69c93398c72a29093c08ed39e6f8c3349be02c7a8327c99fc0d022a8b01852c",
+      "gzip_sha256": "a7ed49cbed4f91d64d3755c6909321a76934303b6de8d2f3668e2f112a974108"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/runtime-source-updates.json",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/007-runtime-source-updates.json.gz",
+      "bytes": 15091,
+      "sha256": "bda39d64f2111230c5de6aa5769ef7d04a00defb2bb6f2e8ebb066399b219431",
+      "gzip_sha256": "27c810d463260ef7e578ffa2f88335708852086d13cab252762f6c7323457beb"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/startup-go-go-baseline/2b0cba9a3363d088b1cc0ee995d0f07fe36049becb85dfbc77aaff06e468a7d3.gz",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/008-2b0cba9a3363d088b1cc0ee995d0f07fe36049becb85dfbc77aaff06e468a7d3.gz.gz",
+      "bytes": 1269,
+      "sha256": "d1c9a3a067c9cc26fba8c720bfe5c18033c7e8331293438b9c1dfd2d7b8d286b",
+      "gzip_sha256": "aa6dd06e60a3a0c1b3837897aa7abaeac9e8e44eead4beaa8b3787ec3d75ad22"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/startup-go-go-baseline/2c752533e64ba997a80bde2f0dabf25122e76d8bd9514f42e66b63c6181b06f5.gz",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/009-2c752533e64ba997a80bde2f0dabf25122e76d8bd9514f42e66b63c6181b06f5.gz.gz",
+      "bytes": 100,
+      "sha256": "103b1208ea0390b09cd7eeb5f3f77d510775bac9328124210834b662798db61d",
+      "gzip_sha256": "d762832243c7bd9ad7a315494112adc0e31ab1db2b6283c0dd10fe82f55246d2"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/startup-go-go-baseline/38c5f74463fd49492a5f8d6cfe7efceab093d86bc50b94349c93d73206830d4c.gz",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/010-38c5f74463fd49492a5f8d6cfe7efceab093d86bc50b94349c93d73206830d4c.gz.gz",
+      "bytes": 240027,
+      "sha256": "28fb284785044b132bcb349080f6166bd96dc172132b5ff980d70c3752f05b2f",
+      "gzip_sha256": "997e9f1c8c482e9e168d0417450b6b9ad092cfb67fb36e312f9f25f371b91b3e"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/startup-go-go-baseline/440602968eb0f9cc782c69ebd5ad5b9d681694b556ef229c3b1d51eb5d0b8897.gz",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/011-440602968eb0f9cc782c69ebd5ad5b9d681694b556ef229c3b1d51eb5d0b8897.gz.gz",
+      "bytes": 1305,
+      "sha256": "ef6635fe94565ba96725c8992587cd72964654580cdece44b42fafd80217d757",
+      "gzip_sha256": "7ee9e0482d9a4e26ef25ef6195a87e30c73080d665aec4b165fd86d234efcda1"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/startup-go-go-baseline/63f0c4c3b6e47bb25755209e6c12e1e8073a85e77672b94e154bfb8cb12eb810.gz",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/012-63f0c4c3b6e47bb25755209e6c12e1e8073a85e77672b94e154bfb8cb12eb810.gz.gz",
+      "bytes": 4466,
+      "sha256": "4beee5bf681fb8fc97d84d7c1893be340432b70bad784bec850fef44b420e111",
+      "gzip_sha256": "53872ce8b807f986aad4a626368ae6521460c3d4484880204c10d1b02e7156db"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/startup-go-go-baseline/bdf4536e53730db7db1495d134ccbb88f0040e9aa9a94021d439bb24ca1ea9ab.gz",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/013-bdf4536e53730db7db1495d134ccbb88f0040e9aa9a94021d439bb24ca1ea9ab.gz.gz",
+      "bytes": 720547,
+      "sha256": "3b6a96f4e4a4fe8077560b85f9013aa1255ff16a78bc308ddf9cd30cd76b11e5",
+      "gzip_sha256": "583c4b4f3df628c9bfec27df6121630d4633279f60657a3d8ead5a7f4b5cbded"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/startup-go-go-baseline/c2771cbc6dc41ef4edaad6cbf0bc455aafe5fa4737e804617c97f6c869170b31.gz",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/014-c2771cbc6dc41ef4edaad6cbf0bc455aafe5fa4737e804617c97f6c869170b31.gz.gz",
+      "bytes": 300,
+      "sha256": "54c0f6bbc84530d66f4fdd8e201dda198684b919ff5cf49942c1ba806905edb0",
+      "gzip_sha256": "71162f24761d25c5720de3ef000a01e86b9dd537042839273bcc1e8d381e1f09"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/startup-go-go-baseline/d300d34b2a43ffa1b7b8d42a991c6c825bf29a2f8ebf73c4d0ad71f1faa69f24.gz",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/015-d300d34b2a43ffa1b7b8d42a991c6c825bf29a2f8ebf73c4d0ad71f1faa69f24.gz.gz",
+      "bytes": 240104,
+      "sha256": "3ccaa6fe00f7449a40b71161e1cdfe58b25ef2a549908940477b5e46a2cb28ca",
+      "gzip_sha256": "0c05e0947c5aaa39218a49d54ddc4c99078fab3ecee74429d4d261fe83a08fed"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/startup-go-go-baseline/dad9f160b8af0687c204fc1c98a6b24582337849225696339ef7d7887867304a.gz",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/016-dad9f160b8af0687c204fc1c98a6b24582337849225696339ef7d7887867304a.gz.gz",
+      "bytes": 240118,
+      "sha256": "d3852eb6daa803cf13b92265fc7efcae5260a92641090fe427cde5bf8abaf610",
+      "gzip_sha256": "41f553b69e78f0030a0d5ccb350faa10faaa0445fe128c92409bcad20ee5ac5f"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/startup-go-go-baseline/retention.json",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/017-retention.json.gz",
+      "bytes": 9360,
+      "sha256": "4f8690171a821f1f955d7a21b67ae57402d6be4c44f27cd05f6307a69ac48cb0",
+      "gzip_sha256": "5b75693da9d09bffe4a55db525047d32a32370c50b005a10917fdfaaba5b2a36"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/startup-preparation/714da16f329a3822c63ffc2595d56abbb4d44b8e4af2c77bb66535007ccefff4.gz",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/018-714da16f329a3822c63ffc2595d56abbb4d44b8e4af2c77bb66535007ccefff4.gz.gz",
+      "bytes": 3534,
+      "sha256": "92e20f1e8399e4dcbffe53a30917df7730dd2c7805a48d139e48103c7fbf3647",
+      "gzip_sha256": "803537530e7700f8307cd5b19d1ab31bd48dff3b30ca0e83d7b9d3b5c6759c30"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/startup-preparation/checkpoint.json",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/019-checkpoint.json.gz",
+      "bytes": 76337,
+      "sha256": "b7915efa88293594f62da8d9c7820f06b7619f74a1c5957d0a1aee487169a37c",
+      "gzip_sha256": "b7ef84ec28fcb7e1a405963f279318815d6ff4a1fc8a5a2af8ad6c844e32a60c"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/startup-preparation/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/020-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz.gz",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "gzip_sha256": "e860dba6f12d00e6f05f9c29f3ac246b67efb295dfcdb684ebb3400db057363f"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/startup-preparation/e87f2f06b51bea64a77beb52ad32647acf5ef1e150b56ba4d7c8c16eaeb71031.gz",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/021-e87f2f06b51bea64a77beb52ad32647acf5ef1e150b56ba4d7c8c16eaeb71031.gz.gz",
+      "bytes": 3638,
+      "sha256": "e735db5837ddd743f2370c28ac1909671c086c7ca6090582448bb68cca8892e8",
+      "gzip_sha256": "6c36f03e6220789497afc1697f4e6c6bb9b0ad619fcfc933a7c9f2873f37d3ff"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/migration/evidence/brain-config13/startup-preparation/ec0799a4c04ee26143e5310533d563608b046e2db5c5a4a913ff4f7927853c89.gz",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/022-ec0799a4c04ee26143e5310533d563608b046e2db5c5a4a913ff4f7927853c89.gz.gz",
+      "bytes": 1694,
+      "sha256": "adcccede4117c7d435989f6088452ff9d4a4173ea52491f7e33902872ea929c9",
+      "gzip_sha256": "61b3462005118674362b5f29514a98c56d267a6c3261a32efbac2f6c928cca05"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-cli/src/mcp_cli.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/023-mcp_cli.rs.gz",
+      "bytes": 11194,
+      "sha256": "9ed5c32b31d3dd72de3f9cbe7ff0622e0f014a7ba67cf71f601eb72989b0aef5",
+      "gzip_sha256": "fbb36125f95749423b10921af410fd84b11c6929bfb7a3554affd87077b271a0"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-cli/src/memory_cli/config.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/024-config.rs.gz",
+      "bytes": 5327,
+      "sha256": "6376462633966ed5f93db3a4428b606cedfe2b173b5124a499d83591a1225a48",
+      "gzip_sha256": "85828529270ea640649c8b9bdc92f3fe578fd64ab0e636883f5e0bd3bc982d77"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-cli/src/memory_cli/startup.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/025-startup.rs.gz",
+      "bytes": 3186,
+      "sha256": "a6f4be7d8d086e0b93b09c98f8773d1be9d373fc05aff9653852c6756e6a32f1",
+      "gzip_sha256": "7798fb99364f14316ea70cb8849f4d63eb7c69762a11b2ab3685f29b6b12a0fe"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-cli/src/memory_cli.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/026-memory_cli.rs.gz",
+      "bytes": 2950,
+      "sha256": "bf41363188f389df32196cd44217724f561ca31dc9f5d6e34e02536e6a5931d8",
+      "gzip_sha256": "c950a1b309f482bc28fc701d66e9f735fb65edc8e2eae58ffac691a987517e6d"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-core/examples/brain_config13_secret_peer.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/027-brain_config13_secret_peer.rs.gz",
+      "bytes": 898,
+      "sha256": "59658ad44c543df5ad9f7726988fa15573647d30b3bd04d0d2caeb47a841daf7",
+      "gzip_sha256": "d9ba249e65e5862e1c60281e5afd4745f7ff178ed32655946b907ca3cd469476"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-core/src/config/resolved/document.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/028-document.rs.gz",
+      "bytes": 3107,
+      "sha256": "d214487f3bee7e04a07b41fd47ec59b58e72be0722c8813be93a1eef99b58964",
+      "gzip_sha256": "985779af2275e6e15383318c8f7edf99b69eaa7dc3bb5255b005db7a7fdd8d55"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-core/src/json_decode.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/029-json_decode.rs.gz",
+      "bytes": 4442,
+      "sha256": "811d68089a2749dcaac58494b1f19be6a0d2935743d66d310435c7dd28e10bac",
+      "gzip_sha256": "6ac0901468156eac529e375b1d61e0b851b95faa378f5b4a66f80348c93d94d5"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-core/src/lib.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/030-lib.rs.gz",
+      "bytes": 394,
+      "sha256": "a6e887f6f1228fb340164202f8bcc099afaed61115991e8fa6be40d518f29d68",
+      "gzip_sha256": "0765dfb211074e320d95807fd76e962dcc2ac13702f3f45c4209d4be321decd9"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-gateway/src/lib.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/031-lib.rs.gz",
+      "bytes": 12813,
+      "sha256": "f1500011e2c8ae72e8e0a1da899957b1c07d2cb359958b54e6e6277a1e526c90",
+      "gzip_sha256": "5a4d83102a77658948c2780ccc005b23eb2430ee9bf74331f0fa64b3f2e00ba4"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-memory/Cargo.toml",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/032-Cargo.toml.gz",
+      "bytes": 870,
+      "sha256": "e38f6f711eec86a2d0edcd80ad722c7185757b519d3735319a3aa402fc671d8f",
+      "gzip_sha256": "668b20bb0372673dc3316a6c65d460daa9a00a57bde59ef22c496a2fa71dc695"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-memory/src/lib.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/033-lib.rs.gz",
+      "bytes": 1301,
+      "sha256": "161f3e8a249f09dcf5e33951c8040ba2fcd6736885178b9d9919dc146fa1d572",
+      "gzip_sha256": "0dd3bc29b13fa9def3fc17679ab4ec419ddb838c3647c671b1dc430127e2761b"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-memory/src/startup.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/034-startup.rs.gz",
+      "bytes": 1738,
+      "sha256": "9e35f51eda235181056e529bd1679960cee5338b8abcd6f1ab368d4906d5eb40",
+      "gzip_sha256": "c56912de46038da7d7bdf44f37e8ea6b54a676cbeab95973ee76633caec7285d"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-memory/src/startup_fallback.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/035-startup_fallback.rs.gz",
+      "bytes": 5400,
+      "sha256": "4055a720c9bd171dc3423c5aa8d42570a56204d18f38487f7c4a6dcbfc04e0ac",
+      "gzip_sha256": "8052b060f8085f821c132dd3f84867d6a79557bee776ce43cdbf08d1cac76677"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-memory/src/startup_fs.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/036-startup_fs.rs.gz",
+      "bytes": 7817,
+      "sha256": "559d01e0caab9d7b5e032ea150b71ffe1382da2a8fb54d5156a6fff60e8ad2c4",
+      "gzip_sha256": "27e011feb76428c506e58b94359ec8234c0f1ac86f8b2cbeac80f8fd5fa15212"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-memory/src/startup_rotation_json.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/037-startup_rotation_json.rs.gz",
+      "bytes": 6234,
+      "sha256": "cac9457eba6ca145b58d9b48c1e309f8551d1e5ff0cfe294e7da538837234b95",
+      "gzip_sha256": "3acf4088f824f894b2f332c8ffbd85bb4309511567987e6dfe49a9948eef0547"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-memory/src/startup_secret.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/038-startup_secret.rs.gz",
+      "bytes": 2846,
+      "sha256": "d84eeb8c047598128117c368268120eb62cf157b29caa63cadd4e46c5605bca1",
+      "gzip_sha256": "52edfa57276122fb730bfc06f50a6096b29fddbfd51c078bb5db428b93f8a05d"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-memory/src/startup_tests.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/039-startup_tests.rs.gz",
+      "bytes": 3943,
+      "sha256": "df7e6795954a1a1c6ee91ecd23f138f24868ab8584f1510560a60c5b0dd72e06",
+      "gzip_sha256": "fcc10584a76169774e47dd861ddca8b3f3de11faedb82bfbbc4f01c81eee784f"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-usage/Cargo.toml",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/040-Cargo.toml.gz",
+      "bytes": 857,
+      "sha256": "3f6b02c99c7c83206934abd8051a8218f174d79a820f2adbfd343510c3574b76",
+      "gzip_sha256": "c776869196ba6dda52bc840b283b5d3e760cb0052fa8e005e155472be46f3e0d"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-usage/src/lib.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/041-lib.rs.gz",
+      "bytes": 11333,
+      "sha256": "34ed8105b13178900c7c21770299826c864db63f5c5d585fabe101c9e1d37bf2",
+      "gzip_sha256": "638bef7b766b4ac394cc4a332f1294511afdb487e1c63867140998ce853aaa8a"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-usage/src/provider_config.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/042-provider_config.rs.gz",
+      "bytes": 72138,
+      "sha256": "6102dfb89b8db910f84b1c893cc4dc18effee7819f1b219a0b56fb2bb716c520",
+      "gzip_sha256": "17cab52598f11fc803e72203904d9a172b8ff29272b79eeda7e6400a3cb7fa47"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-usage/src/providers.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/043-providers.rs.gz",
+      "bytes": 11645,
+      "sha256": "1e727affdb9ede573f6658be868b77044f85183ef7a2abd7f7d5faa8cbf7a88b",
+      "gzip_sha256": "fd9bcaa21b3e9e493683b7291910e14d13b4249c23844529b96f66c13f13f5ad"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/rust/symbrain-usage/src/secret_reference_bytes.rs",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/044-secret_reference_bytes.rs.gz",
+      "bytes": 7169,
+      "sha256": "07d1a54deaf94c8f5d75a72ddf30601b5a51cb8b464223e70627088320bafdbd",
+      "gzip_sha256": "2ed709c20b59538d606dae9f807098f8c68020ca981aee06fd0e424e130f2015"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/scripts/brain-config13/runtime.sh",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/045-runtime.sh.gz",
+      "bytes": 8792,
+      "sha256": "6e4b05f4e54955428b758c95b6372d8784d95e90c42a5843d6c01d6fc36034f1",
+      "gzip_sha256": "00eb9a5bf4c20cb9d854bd7a355f0624202d06cd721f40afb16a4e428575ef4f"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/scripts/brain-config13/runtime_tools.py",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/046-runtime_tools.py.gz",
+      "bytes": 11428,
+      "sha256": "8674cd916c10531a69b3e03d3a908f1ecc07bcf5a9f74c114b449889f3e4ba11",
+      "gzip_sha256": "fbbc2f11f5b9425cdc63b04b8347c81a84bfca45e6cbce4b6472acbb94d47fd3"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/scripts/brain-config13/startup_cases.py",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/047-startup_cases.py.gz",
+      "bytes": 7014,
+      "sha256": "9dca5096742607068538ea14c443880c5051b306edb600300efc4fc9ca6ab909",
+      "gzip_sha256": "b2c99d016350651c758d3c190109bcb13d26a9aca8d33797acf6eafcdb697069"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/scripts/brain-config13/startup_constructor.go.txt",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/048-startup_constructor.go.txt.gz",
+      "bytes": 1380,
+      "sha256": "f1bea0848dad46479947c0f1cab031bd1faf462a575e70f48d9b169b306111c7",
+      "gzip_sha256": "200f185f23d31523271471c0863092217197d040540310df3edce4f7d2e0c3a6"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/scripts/brain-config13/startup_replay.py",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/049-startup_replay.py.gz",
+      "bytes": 10549,
+      "sha256": "09620b84005b0808b7557bf89be8ada74784346589b1cfd08edd1478d5f3cad1",
+      "gzip_sha256": "52c0130f212ca5e8bce8f8381dd05679c8641bb0f303a432dcb8e0f33a571d55"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/scripts/brain-config13/startup_sdk.go.txt",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/050-startup_sdk.go.txt.gz",
+      "bytes": 1489,
+      "sha256": "b1e5cd0aa9f775edb1dd68fff7be006e95818d0a80a4b0822c42f5d15d56b001",
+      "gzip_sha256": "57f85f9352c8a63a66ca450409956915461d4f8ae3f12e68a7a860f9762104f0"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/candidate/scripts/brain-config13/startup_state.py",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/051-startup_state.py.gz",
+      "bytes": 10412,
+      "sha256": "d43e731d0f230a6763a2715a6d3011e26a5b44bfb5756923cf59de4f03a59ca4",
+      "gzip_sha256": "3ff738e4df93450ecc3eb145dcc8bacc71a58560712df6c3123d47c13e3b3d4c"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/findings.json",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/052-findings.json.gz",
+      "bytes": 1782,
+      "sha256": "b7bbd78eb55e4ab169e066c3341f41d734227c87bc4950d99ea608d723688aa0",
+      "gzip_sha256": "14917327b0300432ea654bc8b7592ae2371381641f732da8e1fa35ffdbd4266b"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/provenance.json",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/053-provenance.json.gz",
+      "bytes": 354196,
+      "sha256": "2ea71bfa44c9d70535a557e1097966b5f2628115e32124899e923d2b32590da2",
+      "gzip_sha256": "8b9a4421d42d5e75a2e233b182347bd6bfa0757d8d5969dae2e7a3992ce5ea71"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/static-controls.json",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/054-static-controls.json.gz",
+      "bytes": 6253,
+      "sha256": "92c2ad774ff5e9d0cd290b918e289610f92bb11212b9ab0d63b2383e92d42a23",
+      "gzip_sha256": "5d3c675eda2d5aceeff2220a40f15d16b53c2cbdfd3bc1c1f8db165c2ce7ad7b"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/static-controls.log",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/055-static-controls.log.gz",
+      "bytes": 95,
+      "sha256": "88c4d5c017339828f207466c95641bbab4bd478eb6c92641538c70b36bb531fd",
+      "gzip_sha256": "bb63a7700b3329ce2b0809b083da75fba77b85b40a43ac66b6cb996870fba56d"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/static_controls.py",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/056-static_controls.py.gz",
+      "bytes": 2954,
+      "sha256": "9ed5894c317b48a2a463c66257f3b10a2e49b55da850f94096d2315141df00cc",
+      "gzip_sha256": "edd8b54f9c60f984f7dcca2d15c7156455e9af2cf8135ca4c47e637bdc46faf5"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/verify.log",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/057-verify.log.gz",
+      "bytes": 260,
+      "sha256": "e2a613c048979ef5e71f75c0982057cdccd4f69ed55e2a368abecb0b05e2f1db",
+      "gzip_sha256": "c8a5230c8bb13281a9b4994f030ce1dd5e0c1c1fcb5ed9c88ad4334c0c285933"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/verify.py",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/058-verify.py.gz",
+      "bytes": 5902,
+      "sha256": "4ed861f25cc8fe1ee7f60bdc9c5555f99d0d36c83d0607e37caa65191e86f297",
+      "gzip_sha256": "9a2df8fe80965d4bac44cdd96ed50696e2a0e43f805ea8702509542d929dd83a"
+    },
+    {
+      "source": "/workspace/symaira-brain765-bc0-independent-source/provenance.json",
+      "archive": "migration/evidence/brain-config13/startup-review-corrections/original-review/059-provenance.json.gz",
+      "bytes": 354196,
+      "sha256": "2ea71bfa44c9d70535a557e1097966b5f2628115e32124899e923d2b32590da2",
+      "gzip_sha256": "8b9a4421d42d5e75a2e233b182347bd6bfa0757d8d5969dae2e7a3992ce5ea71"
+    }
+  ],
+  "review_proofs": 57
+}

@@ -1,6 +1,6 @@
 """Actual live Memory startup owners; bounded per-role state contracts only."""
 from pathlib import Path
-import argparse,base64,copy,gzip,hashlib,json,os,re,shutil,subprocess,time
+import argparse,base64,copy,gzip,hashlib,json,os,re,shutil,subprocess,time,sys
 import startup_cases as fixtures
 import startup_state as state
 
@@ -27,6 +27,9 @@ def sql_comparison(observation):
     # Acceptance covers exact column/default/FK/index facts, application rows,
     # actual FTS queries/integrity and persistent engine properties. Source-bound
     # live constructor unit probes separately establish per-connection flags.
+    # Never discard schema programs. Tables/columns/indexes are represented
+    # below; triggers/views need their own complete identity/body contract.
+    sql['program_inventory']=state.program_inventory(sql.get('raw_schema',[]))
     sql.pop('raw_schema',None);sql.pop('observer_connection_pragmas',None)
     return sql
 
@@ -69,7 +72,9 @@ def main():
     for name in ['go','native','sdk','root','out','secret-peer']:p.add_argument('--'+name,type=Path,required=True)
     p.add_argument('--head',required=True)
     p.add_argument('--case')
-    p.add_argument('--control',choices=['input-key','schema','mode','missing-key'])
+    p.add_argument('--corrections',action='store_true')
+    p.add_argument('--fixture-sdk',type=Path)
+    p.add_argument('--control',choices=['input-key','schema','mode','missing-key','missing-trigger','changed-trigger','added-view','changed-view'])
     a=p.parse_args();a.out.mkdir(exist_ok=False)
     assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=a.root,text=True).strip()==a.head
     assert not subprocess.check_output(['git','status','--porcelain'],cwd=a.root)
@@ -78,12 +83,25 @@ def main():
     def persist():
         report.update(total=len(rows),equal=sum(not r.get('differences',['pending'])for r in rows),generated_key_repetition_unique=len(keys)==len(set(keys)),rotation_salt_nonce_repetition_unique=len(salts)==len(set(salts)))
         (a.out/'report.json').write_text(json.dumps(report,indent=2)+'\n')
-    for case in fixtures.cases():
+    if a.corrections:
+        import startup_correction_cases
+        planned=startup_correction_cases
+        assert a.fixture_sdk and a.fixture_sdk.is_file()
+        report['fixture_sdk_sha256']=state.sha(a.fixture_sdk.read_bytes())
+    else:planned=fixtures
+    for case in planned.cases():
         if a.case and case['id']!=a.case:continue
         if a.control and case['id']!=('legacy-rotation-valid'if a.control=='input-key'else'generated-default'):continue
         root=a.out/'owned-live';row=dict(case=json.loads(json.dumps(case,default=lambda value: {'bytes_base64':state.b64(value)})),observations={});rows.append(row)
         for label,binary in [('go',a.go),('native',a.native)]:
-            assert not root.exists();paths=fixtures.fixture(root,case)
+            assert not root.exists();paths=planned.fixture(root,case)
+            if 'encrypted_plaintext'in case:
+                data=json.dumps(dict(Primary=state.b64(primary(case,paths)),Plaintext=state.b64(case['encrypted_plaintext']))).encode()
+                built=subprocess.run([str(a.fixture_sdk.resolve())],input=data,capture_output=True,timeout=10)
+                assert built.returncode==0 and not built.stderr and len(built.stdout)>=44
+                rotation=Path(paths['rotation']);rotation.write_bytes(built.stdout);rotation.chmod(0o640)
+                row.setdefault('authenticated_fixture',{})[label]=dict(input=state.retain(data,a.out),payload=state.retain(built.stdout,a.out))
+            row['case']=json.loads(json.dumps(case,default=lambda value:{'bytes_base64':state.b64(value)}))
             base={k:v for k,v in os.environ.items()if not k.startswith(('SYMBRAIN_','SYMMEMORY_','XDG_','JWT_','OWNED_'))and k not in('HOME','USERPROFILE','PWD','HOMEDRIVE','HOMEPATH')}
             base.update(HOME=str(root/'home'),USERPROFILE=str(root/'home'),XDG_CONFIG_HOME=str(root/'config'),XDG_DATA_HOME=str(root/'data'),XDG_CACHE_HOME=str(root/'cache'),PATH='',SYMBRAIN_GO_BINARY=str(root/'missing-fallback'))
             base.update(case.get('env',{}));base.update(case.get('original_case',{}).get('env',{}))
@@ -93,6 +111,23 @@ def main():
                 for name in ['stdout','stderr']:(peer/name).write_bytes(case['provider'][name])
                 (peer/'exit').write_text(str(case['provider']['code']))
                 base.update(PATH=str(binary_dir),OWNED_JWT_PEER_ROOT=str(peer))
+                if 'signal'in case['provider']:
+                    assert os.name!='nt'
+                    # A real owned provider resets inherited SIGPIPE explicitly.
+                    # No process-global handler or production runner is changed.
+                    source=('#!'+sys.executable+'\n'
+                        'import json,os,pathlib,resource,signal,sys\n'
+                        'root=pathlib.Path(os.environ["OWNED_JWT_PEER_ROOT"])\n'
+                        'root.joinpath("actual-argv.json").write_bytes(json.dumps([list(os.fsencode(a)) for a in sys.argv[1:]]).encode())\n'
+                        'os.write(1,root.joinpath("stdout").read_bytes())\n'
+                        'os.write(2,root.joinpath("stderr").read_bytes())\n'
+                        'resource.setrlimit(resource.RLIMIT_CORE,(0,0))\n'
+                        'sig=getattr(signal,"SIG'+case['provider']['signal']+'")\n'
+                        'if sig != signal.SIGKILL: signal.signal(sig,signal.SIG_DFL)\n'
+                        'os.kill(os.getpid(),sig)\n'
+                        'raise AssertionError("signal provider survived")\n').encode()
+                    executable.write_bytes(source);executable.chmod(0o755)
+                    row.setdefault('signal_provider_source',{})[label]=state.retain(source,a.out)
             if label=='native'and a.control=='input-key':base['JWT_SECRET_KEY']='owned-mutated-key'
             before=state.snapshot(root,a.out);start=time.time()
             actual=subprocess.run([str(binary.resolve()),'mcp','--profile-file',str(root/'profile.toml')],cwd=root/'project',env=base,input=b'',capture_output=True,timeout=20);end=time.time()
@@ -101,6 +136,22 @@ def main():
                 connection=sqlite3.connect(paths['database']);connection.execute('CREATE TABLE owned_schema_mutation(value TEXT DEFAULT \'wrong\')');connection.close()
             if label=='native'and a.control=='mode':Path(paths['secret']).chmod(0o644)
             if label=='native'and a.control=='missing-key':Path(paths['secret']).unlink()
+            if a.control in ('missing-trigger','changed-trigger','added-view','changed-view'):
+                import sqlite3
+                connection=sqlite3.connect(paths['database'])
+                if a.control in ('added-view','changed-view'):
+                    # Identical baseline view, then a real native-only change.
+                    connection.execute('CREATE VIEW owned_acceptance_view AS SELECT id,content FROM memories')
+                    if label=='native'and a.control=='changed-view':
+                        connection.execute('DROP VIEW owned_acceptance_view')
+                        connection.execute('CREATE VIEW owned_acceptance_view AS SELECT id,scope AS content FROM memories')
+                    if label=='native'and a.control=='added-view':
+                        connection.execute('CREATE VIEW owned_extra_view AS SELECT id FROM memories')
+                elif label=='native':
+                    connection.execute('DROP TRIGGER trg_memories_oplog_insert')
+                    if a.control=='changed-trigger':
+                        connection.execute("CREATE TRIGGER trg_memories_oplog_insert AFTER INSERT ON memories BEGIN INSERT INTO sync_oplog(op,memory_id) VALUES ('delete',NEW.id); END")
+                connection.commit();connection.close()
             after=state.snapshot(root,a.out)
             if case.get('no_provider'):assert not(root/'owned-provider/actual-argv.json').exists(),'validation accessed credential subprocess'
             key_file=Path(paths['secret']);key_contract=None
@@ -115,7 +166,12 @@ def main():
                 sdk_input=json.dumps(dict(Primary=state.b64(secret),Payload=state.b64(payload))).encode()
                 result=subprocess.run([str(a.sdk.resolve())],input=sdk_input,capture_output=True,timeout=10)
                 obs['crypto']=dict(exit=result.returncode,stdout_base64=state.b64(result.stdout),stderr_base64=state.b64(result.stderr),raw_sdk_input=state.retain(sdk_input,a.out),raw_payload=state.retain(payload,a.out))
-                if result.returncode==0:salts.append(payload[:28])
+                # Existing authenticated fixtures use deliberately fixed test
+                # bytes. Only actual owner-created envelopes test CSPRNG reuse.
+                original_envelope=row.get('authenticated_fixture',{}).get(label)
+                unchanged_fixture=original_envelope and payload==gzip.decompress(Path(original_envelope['payload']['gzip']).read_bytes())
+                obs['crypto']['unchanged_authenticated_fixture']=bool(unchanged_fixture)
+                if result.returncode==0 and not unchanged_fixture:salts.append(payload[:28])
             row['observations'][label]=obs;persist();shutil.rmtree(root)
         go,native=row['observations']['go'],row['observations']['native']
         # Retain raw entropy in each record while comparing only its format;
@@ -129,6 +185,10 @@ def main():
     assert rows and all('differences'in row for row in rows)
     if a.control:
         assert len(rows)==1 and rows[0]['differences'],'actual owner/input/state mutant escaped'
+        if a.control in ('missing-trigger','changed-trigger','added-view','changed-view'):
+            assert 'full-SQL-facts/defaults/appRows/FTS'in rows[0]['differences']
+            left,right=[state.program_inventory(rows[0]['observations'][label]['sql']['raw_schema']) for label in ('go','native')]
+            assert left!=right,'intended schema-program mutation absent'
     else:
         assert all(not row['differences']for row in rows),[(row['case']['id'],row['differences'])for row in rows if row['differences']]
         assert report['generated_key_repetition_unique']and report['rotation_salt_nonce_repetition_unique']

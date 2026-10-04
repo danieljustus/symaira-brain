@@ -127,6 +127,13 @@ fn volume_len(path: &[u8]) -> usize {
     }
 }
 
+/// Length of Go's lexical volume prefix; Unix paths have no volume.
+/// Used by owners which must preserve the original failing path component.
+#[must_use]
+pub fn volume_name_len(path: &[u8], windows: bool) -> usize {
+    if windows { volume_len(path) } else { 0 }
+}
+
 /// Mirrors the SDK lazy buffer, including stale allocated bytes used by postClean.
 #[must_use]
 pub fn clean_bytes(original: &[u8], windows: bool) -> Vec<u8> {
