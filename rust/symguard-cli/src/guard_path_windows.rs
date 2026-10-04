@@ -1,4 +1,6 @@
 //! Go 1.26.7 Windows lexical rules, preserving native UTF16 path units.
+// Derived from Go Authors' BSD-3-Clause Windows filepath rules (2024).
+// The source license is retained in scripts/guard-standalone-oracle/windows-sdk-LICENSE.txt.
 // Volume/post-clean rules follow internal/filepathlite; no filesystem lookup.
 // Source-reference tests do not imply native Windows runtime acceptance.
 
@@ -42,34 +44,58 @@ pub(super) fn clean_units(path: &[u16]) -> Vec<u16> {
         }
         return out;
     }
-    let rooted = rest.starts_with(&[92]);
-    let mut parts: Vec<&[u16]> = Vec::new();
-    for part in rest.split(|unit| *unit == 92) {
-        match part {
-            [] | [46] => {}
-            [46, 46] if parts.last().is_some_and(|previous| *previous != [46, 46]) => {
-                parts.pop();
-            }
-            [46, 46] if !rooted => parts.push(part),
-            [46, 46] => {}
-            _ => parts.push(part),
-        }
-    }
+    let original = &path[volume..];
+    let rooted = separator(original[0]);
     let mut result = Vec::new();
+    let mut changed = false;
+    let mut read = 0;
+    let mut boundary = 0;
     if rooted {
-        result.push(92);
+        append_unit(&mut result, 92, original, &mut changed);
+        read = 1;
+        boundary = 1;
     }
-    for (index, part) in parts.iter().enumerate() {
-        if index > 0 {
-            result.push(92);
+    while read < original.len() {
+        let unit = original[read];
+        if separator(unit) {
+            read += 1;
+        } else if unit == 46 && (read + 1 == original.len() || separator(original[read + 1])) {
+            read += 1;
+        } else if unit == 46
+            && original.get(read + 1) == Some(&46)
+            && (read + 2 == original.len() || separator(original[read + 2]))
+        {
+            read += 2;
+            if result.len() > boundary {
+                result.pop();
+                while result.len() > boundary && !result.last().is_some_and(|unit| separator(*unit))
+                {
+                    result.pop();
+                }
+            } else if !rooted {
+                if !result.is_empty() {
+                    append_unit(&mut result, 92, original, &mut changed);
+                }
+                append_unit(&mut result, 46, original, &mut changed);
+                append_unit(&mut result, 46, original, &mut changed);
+                boundary = result.len();
+            }
+        } else {
+            if (rooted && result.len() != 1) || (!rooted && !result.is_empty()) {
+                append_unit(&mut result, 92, original, &mut changed);
+            }
+            while read < original.len() && !separator(original[read]) {
+                append_unit(&mut result, original[read], original, &mut changed);
+                read += 1;
+            }
         }
-        result.extend_from_slice(part);
     }
     if result.is_empty() {
-        result.push(46);
+        append_unit(&mut result, 46, original, &mut changed);
     }
-    // Do not create drive-relative or Root Local Device paths by dropping dots.
-    if volume == 0 && result != normalized {
+    // Go postClean only acts after an actual buffer rewrite. Merely trimming
+    // trailing separators or backtracking an unchanged prefix must not add .\.
+    if volume == 0 && changed {
         if result
             .split(|unit| *unit == 92)
             .next()
@@ -81,6 +107,11 @@ pub(super) fn clean_units(path: &[u16]) -> Vec<u16> {
         }
     }
     [prefix, result.as_slice()].concat()
+}
+
+fn append_unit(output: &mut Vec<u16>, unit: u16, original: &[u16], changed: &mut bool) {
+    *changed |= original.get(output.len()) != Some(&unit);
+    output.push(unit);
 }
 
 fn separator(unit: u16) -> bool {

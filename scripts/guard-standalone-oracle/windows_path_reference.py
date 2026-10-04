@@ -50,7 +50,7 @@ def main():
     actual+="const Separator='\\\\'\n"
     actual+=copied+'\n'+adapted_join+driver
     bases=['','.', '..','../..','a/..','a/../c:','a/../c:/a','a/../../c:',
-           'foo:bar','foo:','c:','c:.','c:foo','c:foo/../../bar','c:/',r'C:\a\..',
+           'foo:bar','foo:bar/','foo:bar/a/..','foo:bar\\a\\..\\','foo:bar/a/../b','foo:bar\\a\\..\\b','foo:','c:','c:.','c:foo','c:foo/../../bar','c:/',r'C:\a\..',
            '/',r'\a\..\??',r'\??\C:\a\..',r'\\host\share',r'\\host\share\foo\..\..',
            r'\\?\C:\a\..',r'\\?\UNC\host\share\a\..',r'\\.\UNC\host\share\..',
            r'\\.\C:\a\..',r'\\i\..\c$',r'\\',r'\\abc\\','///abc','雪/../cfg','a\ufffd/../cfg','a/../\ud800','\udc00:/a/..','C:/\ud800/a/../b']

@@ -40,6 +40,10 @@ The pinned Go 1.26.7 Windows source also supplies rules that Rust Components
 alone cannot express: cleaning dot components inside verbatim/device paths,
 retaining UNC volumes and rooted boundaries, joining bare drive-relative bases,
 and preventing cleanup from creating a drive or Root Local Device path.
+The Go lazy-buffer rewrite flag also matters: merely removing a trailing
+separator can leave a colon-bearing relative spelling unchanged, while slash
+rewrites or removal of interior components trigger postClean. The reference
+corpus retains both forms rather than simplifying them into one path type.
 A small Windows-only implementation preserves UTF16 units, including unpaired
 surrogates. The initial static assumption that Go Getenv replaces those units
 was corrected before compilation: this actual SDK's `UTF16ToString` explicitly
