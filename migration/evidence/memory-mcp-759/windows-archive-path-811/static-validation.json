@@ -13,5 +13,11 @@
   "target_accessed": false,
   "compiler_or_runtime_executed": false,
   "native_windows_result": "pending fresh native exact-head CI; static path normalization only",
-  "original_11f_and_Skills97d_preserved": true
+  "original_11f_and_Skills97d_preserved": true,
+  "initial_evidence_git_storage_attempt": {
+    "commit": "5371099167d5cd9745efc6668d64d00030ff22b2",
+    "reason": "Repository text attributes normalized original CRLF log when staged. Original working and /tmp raw bytes untouched. Successor local exact-file -text attribute restores immutable Git raw-byte retention.",
+    "normalized_blob_sha256": "a6c4933ab18f61bd5c1b4ac954a3525a73ec87e443def230191573aafc5a1648",
+    "original_sha256": "f3be0a729c4d03cceb1e7ddad0b911456c86fb1b96711eed0c53defaca9f9dc8"
+  }
 }
