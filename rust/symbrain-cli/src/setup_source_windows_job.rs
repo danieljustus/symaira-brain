@@ -1,4 +1,4 @@
-//! Preserve owned JobObject completion notifications until whole-tree cleanup.
+//! Preserve owned `JobObject` completion notifications until whole-tree cleanup.
 use process_wrap::std::ChildWrapper;
 use std::io;
 use std::process::ExitStatus;
