@@ -19,7 +19,7 @@
 //! spawn-allowlist and plaintext-secret findings. The gates are:
 //!
 //! * TOML syntax/type errors except the simple missing-`=` diagnostic,
-//!   unknown-key warnings and multiple invalid defaults with Go map ordering;
+//!   unproven case-fold aliases and multiple invalid defaults with Go map ordering;
 //!   known semantic validation errors are rendered natively;
 //! * unsupported audit-anchor Unicode decoding still gates; known typed JSON
 //!   failures preserve Go's first field error and original numeric spelling;
@@ -50,18 +50,41 @@ use discovery::{
 /// Runs `symbrain guard doctor`. Returns `None` when any part of this
 /// machine's state cannot be reproduced byte-for-byte, so the caller falls
 /// back to the Go binary.
-pub(crate) fn run(stdout: &mut dyn Write) -> Option<u8> {
-    let (report, code) = build_report()?;
-    let _ = stdout.write_all(&report);
-    Some(code)
+pub(crate) fn run(stdout: &mut dyn Write, stderr: &mut dyn Write) -> Option<u8> {
+    let report = build_report()?;
+    // Go emits these after typed decoding and before validation. Flush only
+    // once the whole native report is admitted, so delegation cannot duplicate
+    // warnings or expose a partial native result.
+    for warning in report.warnings {
+        let _ = stderr.write_all(warning.as_ref());
+    }
+    let _ = stdout.write_all(&report.stdout);
+    Some(report.code)
+}
+
+struct DoctorReport {
+    stdout: Vec<u8>,
+    warnings: Vec<GoText>,
+    code: u8,
+}
+
+impl DoctorReport {
+    fn new(stdout: Vec<u8>, warnings: Vec<GoText>, code: u8) -> Self {
+        Self {
+            stdout,
+            warnings,
+            code,
+        }
+    }
 }
 
 /// Builds the whole report in memory. `None` means "fall back to Go" — no
 /// byte is written in that case, by construction.
-fn build_report() -> Option<(Vec<u8>, u8)> {
+fn build_report() -> Option<DoctorReport> {
     let config = load_config(&config_path())?;
     let audit = audit_status(&super::audit_path())?;
-    let (config_status, loaded) = describe_config(config);
+    let warnings = config.warnings;
+    let (config_status, loaded) = describe_config(config.state);
 
     let mut out = Vec::new();
     let build_version = option_env!("SYMBRAIN_VERSION").unwrap_or("dev");
@@ -107,7 +130,7 @@ fn build_report() -> Option<(Vec<u8>, u8)> {
     if loaded.is_none() {
         let issues = 2 + usize::from(audit.1);
         let _ = writeln!(out, "\n{issues} issue(s) found. See details above.");
-        return Some((out, exit::GENERIC));
+        return Some(DoctorReport::new(out, warnings, exit::GENERIC));
     }
     let loaded = loaded?;
 
@@ -161,10 +184,10 @@ fn build_report() -> Option<(Vec<u8>, u8)> {
         out.extend_from_slice(
             b"All basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
         );
-        return Some((out, exit::OK));
+        return Some(DoctorReport::new(out, warnings, exit::OK));
     }
     let _ = writeln!(out, "{problems} issue(s) found. See details above.");
-    Some((out, exit::GENERIC))
+    Some(DoctorReport::new(out, warnings, exit::GENERIC))
 }
 
 fn describe_config(config: ConfigState) -> (GoText, Option<LoadedConfig>) {

@@ -25,3 +25,4 @@ python3 scripts/guard-standalone-oracle/replay.py "$go_binary" "$rust_binary" "$
 python3 scripts/guard-standalone-oracle/controls.py "$go_binary" "$rust_binary" "${report%.json}-controls.json"
 python3 scripts/guard-standalone-oracle/raw_paths.py "$go_binary" "$rust_binary" "${report%.json}-raw-paths.json"
 python3 scripts/guard-standalone-oracle/doctor_boundaries.py "$go_binary" "$rust_binary" "${report%.json}-doctor-boundaries.json"
+python3 scripts/guard-standalone-oracle/config_warnings.py "$go_binary" "$rust_binary" "${report%.json}-config-warnings.json"

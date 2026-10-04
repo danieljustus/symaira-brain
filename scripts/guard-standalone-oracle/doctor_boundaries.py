@@ -86,7 +86,9 @@ def cases():
     ]
     return ([dict(id='table-'+name, kind='config', data=data.encode(), contract='parity') for name,data in tables]
             +[dict(id='anchor-'+name,kind='anchor',data=data,contract='parity') for name,data in anchors]
-            +[dict(id='gated-'+name,kind='config',data=data.encode(),contract='native-fail-closed') for name,data in gated])
+            +[dict(id='gated-'+name,kind='config',data=data.encode(),
+                   contract='parity' if name in ['unknown-root', 'unknown-inline'] else 'native-fail-closed')
+              for name,data in gated])
 
 
 def observe(binary, case, root, native):

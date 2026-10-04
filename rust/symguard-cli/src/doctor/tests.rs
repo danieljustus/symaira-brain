@@ -208,13 +208,16 @@ fn equivalent_inline_configuration_keeps_rules_allowlist_and_type_gates() {
     assert_eq!(loaded.allowlist[0].path, native_command());
     assert_eq!(loaded.allowlist[0].argv_prefix, ["owned"]);
     assert!(parse_and_validate_text("rules=[]\nremote=[]\nspawn={allowlist=[]}\n").is_some());
+    // This exact formerly delegated input now has an actual Go warning/report
+    // comparison in the permanent additive process gate.
+    assert!(parse_and_validate_text("proxy={owned=1}\n").is_some());
     for text in [
         "rules=[1]\n",
         "remote=[1]\n",
         "spawn={allowlist=[1]}\n",
         "defaults={read=1}\n",
         "rules=[{decision=\"allow\",match={command_contains=[1]}}]\n",
-        "proxy={owned=1}\n",
+        "proxy={Upstream=\"owned\"}\n",
     ] {
         assert!(
             parse_and_validate_text(text).is_none(),

@@ -2,7 +2,7 @@
 use super::{LoadedConfig, SpawnEntry};
 use std::path::Path;
 use symbrain_core::config::format_go_quoted;
-use toml_edit::{DocumentMut, Item, TableLike};
+use toml_edit::{Item, Table, TableLike};
 
 const DECISIONS: [&str; 6] = ["allow", "ask", "deny", "redact", "readonly", "sandbox"];
 
@@ -71,10 +71,10 @@ impl DecodedConfig {
 }
 
 /// Decode every known field first: Go TOML type errors precede validation.
-/// Unknown keys remain gated until their ordered stderr warnings are ported.
-pub(super) fn decode_config(doc: &DocumentMut) -> Option<DecodedConfig> {
+/// Unknown fields are ignored by Go; unproven case-fold aliases remain gated.
+pub(super) fn decode_config(doc: &Table) -> Option<DecodedConfig> {
     known_keys(
-        doc.as_table(),
+        doc,
         &[
             "defaults", "rules", "proxy", "audit", "remote", "sequence", "spawn",
         ],
@@ -148,7 +148,21 @@ pub(super) fn decode_config(doc: &DocumentMut) -> Option<DecodedConfig> {
 fn known_keys(table: &dyn TableLike, names: &[&str]) -> Option<()> {
     table
         .iter()
-        .all(|(key, _)| names.contains(&key))
+        .all(|(key, _)| {
+            // BurntSushi matches struct fields with strings.EqualFold. Keep
+            // aliases Go-owned until typed resolution/duplicate precedence is
+            // proved; treating them as unknown would hide configured fields.
+            names.contains(&key)
+                || !names.iter().any(|name| {
+                    key.chars()
+                        .map(|c| match c {
+                            '\u{017f}' => 's',
+                            '\u{212a}' => 'k',
+                            _ => c.to_ascii_lowercase(),
+                        })
+                        .eq(name.chars())
+                })
+        })
         .then_some(())
 }
 
@@ -168,7 +182,7 @@ fn string_array_field(table: &dyn TableLike, name: &str) -> Option<Vec<String>> 
     })
 }
 
-fn decode_unprinted(doc: &DocumentMut) -> Option<()> {
+fn decode_unprinted(doc: &Table) -> Option<()> {
     if let Some(item) = doc.get("proxy") {
         let table = item.as_table_like()?;
         known_keys(table, &["upstream"])?;

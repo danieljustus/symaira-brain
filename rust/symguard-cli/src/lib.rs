@@ -65,7 +65,7 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
         // Go's dispatcher (cmd/symbrain/cmd_guard.go) calls `doctor.Run(stdout)`
         // with no arguments at all — anything after `doctor` is ignored there,
         // so the port ignores it too.
-        "doctor" => guard_doctor::run(stdout),
+        "doctor" => guard_doctor::run(stdout, stderr),
         _ => {
             let _ = writeln!(stderr, "symbrain guard: unknown command {verb:?}\n");
             let _ = writeln!(stderr, "{GUARD_USAGE}");

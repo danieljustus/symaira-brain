@@ -2,11 +2,16 @@
 use std::io;
 use std::path::{Path, PathBuf};
 use std::{env, fs};
+use symbrain_core::GoText;
+use toml_edit::Document;
+#[cfg(test)]
 use toml_edit::DocumentMut;
 
 #[path = "config_decode.rs"]
 mod decode;
 use decode::decode_config;
+#[path = "config_warnings.rs"]
+mod warnings;
 
 /// Go configuration path precedence: explicit override, XDG, then home.
 pub(super) fn config_path() -> PathBuf {
@@ -40,26 +45,47 @@ pub(super) enum ConfigState {
     ValidationError(String),
 }
 
+pub(super) struct ConfigOutcome {
+    pub(super) state: ConfigState,
+    pub(super) warnings: Vec<GoText>,
+}
+
+impl ConfigOutcome {
+    fn silent(state: ConfigState) -> Self {
+        Self {
+            state,
+            warnings: Vec::new(),
+        }
+    }
+}
+
 /// Ports proven `config.Load()` states. `None` means a decoder diagnostic,
-/// warning or map-order-dependent failure remains Go-owned.
-pub(super) fn load_config(path: &Path) -> Option<ConfigState> {
+/// type or map-order-dependent failure remains Go-owned. Warnings are returned
+/// only after typed decoding and buffered until the whole doctor is admitted.
+pub(super) fn load_config(path: &Path) -> Option<ConfigOutcome> {
     let text = match fs::read_to_string(path) {
         Ok(text) => text,
-        Err(error) if error.kind() == io::ErrorKind::NotFound => return Some(ConfigState::Missing),
+        Err(error) if error.kind() == io::ErrorKind::NotFound => {
+            return Some(ConfigOutcome::silent(ConfigState::Missing));
+        }
         Err(_) => return None,
     };
-    let doc = match text.parse::<DocumentMut>() {
+    let doc = match Document::parse(text.as_str()) {
         Ok(doc) => doc,
         Err(error) => {
             let diagnostic = go_missing_equals_diagnostic(&text, &error)?;
-            return Some(ConfigState::ParseError(format!("toml: {diagnostic}")));
+            return Some(ConfigOutcome::silent(ConfigState::ParseError(format!(
+                "toml: {diagnostic}"
+            ))));
         }
     };
-    let decoded = decode_config(&doc)?;
-    match decoded.validate()? {
-        Ok(loaded) => Some(ConfigState::Loaded(loaded)),
-        Err(error) => Some(ConfigState::ValidationError(error)),
-    }
+    let decoded = decode_config(doc.as_table())?;
+    let warnings = warnings::collect(doc.as_table(), path)?;
+    let state = match decoded.validate()? {
+        Ok(loaded) => ConfigState::Loaded(loaded),
+        Err(error) => ConfigState::ValidationError(error),
+    };
+    Some(ConfigOutcome { state, warnings })
 }
 
 /// Maps only `toml_edit`'s missing-`=` error with a printable ASCII offender;
@@ -89,5 +115,5 @@ pub(super) fn go_missing_equals_diagnostic(
 /// Healthy configuration helper used by the native fixture tests.
 #[cfg(test)]
 pub(super) fn parse_and_validate(doc: &DocumentMut) -> Option<LoadedConfig> {
-    decode_config(doc)?.validate()?.ok()
+    decode_config(doc.as_table())?.validate()?.ok()
 }

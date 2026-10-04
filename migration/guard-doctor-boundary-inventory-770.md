@@ -9,7 +9,8 @@ an error: some valid forms formerly returned None. No wildcard waiver is used.
 |---|---|---|
 | config: inline tables and inline/empty struct arrays | reachable healthy and semantic-error states | admitted after all known typed fields; actual equivalence proof |
 | config: known scalar/list/struct type checks | reachable decoder errors before semantic validation; ordering follows source fields | exact decoder wording/order remains delegated |
-| config: known-key checks, including unknown root/nested keys | reachable warning-only healthy states, or warnings before semantic validation | delegated; warnings must be ported before admitting |
+| config: unknown root/nested keys | reachable warning-only healthy states, or warnings before semantic validation | ordered warnings admitted after typed decoding; buffered until full report admission |
+| config: case-fold aliases of known fields | reachable healthy or typed/duplicate-precedence states | delegated; never misclassify configured aliases as unknown keys |
 | config: multiple invalid defaults | reachable validation error; Go map iteration chooses different invalid fields | delegated;50 actual runs/two reports preserved, no exception |
 | config: unsupported parser diagnostic/span/offending byte | reachable TOML syntax errors; only proven missing-equals form is currently admitted | delegated; no generic parser text substitution |
 | config: read-to-string failure | reachable read errors, directories and invalid UTF-8 TOML content; may involve stat/read stage distinctions | delegated; actual directory probe retains complete Go report |

@@ -79,7 +79,7 @@ def cases():
         add("doctor-" + state, ["doctor"], state)
     for state in ["invalid-anchor-shape", "decode-before-validation", "multiple-invalid-defaults", "unknown-key"]:
         add("doctor-unported-" + state, ["doctor"], state,
-            "parity" if state == "invalid-anchor-shape" else "native-fail-closed")
+            "parity" if state in ["invalid-anchor-shape", "unknown-key"] else "native-fail-closed")
     for state in ANCHORS:
         add("doctor-anchor-" + state, ["doctor"], "anchor:" + state)
     add("decide-help", ["decide", "--help"])

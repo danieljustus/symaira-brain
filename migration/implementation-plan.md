@@ -1,5 +1,21 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Guard Doctor ordered warning slice — 2026-10-04
+
+The successor normally includes approved PR805 publication1c04 and ports the
+fourteen healthy unknown-key configurations observed against actual frozen Go.
+It reuses immutable TOML source spans and Core GoText/Go quoting; warnings are
+buffered after typed decode and emitted once only after full native admission.
+The new54-case Linux gate requires46 complete comparisons and8 explicit
+remaining typed/alias/discovery/map-order refusals, ten Go warning repeats and
+five real mutations. The three specifically proved original unknown-key inputs
+now require equality, yielding122/124 and67/78 comparisons with the remaining
+original refusals unchanged. All prior raw/kernel/process controls and the
+original50/two invalid-default Go reports remain mandatory and unchanged.
+[ADR](../docs/adr/guard-doctor-ordered-config-warnings.md) explains output and
+ownership. Independent review/native3/protected checks are pending; full770/769
+and the other Brain configuration consumers remain open.
+
 ## Guard doctor equivalent config/Unicode slice — 2026-10-04
 
 The successor to approved PR805 admits nine baseline healthy Go-only TOML
