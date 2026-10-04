@@ -34,41 +34,7 @@ pub(super) fn compare_with_count(expected_cases: usize) -> Value {
     );
     let mut observed = vec![];
     for row in &input {
-        // The same disposable constructor homes/metadata from actual frozen Go.
-        for name in [
-            "ANTHROPIC_ADMIN_KEY",
-            "ANTHROPIC_OAUTH_TOKEN",
-            "CODEX_ACCESS_TOKEN",
-            "COPILOT_ACCESS_TOKEN",
-            "CURSOR_COOKIE",
-            "KIMI_CODE_API_KEY",
-            "KIMI_AUTH_TOKEN",
-            "MOONSHOT_API_KEY",
-            "NOUS_PORTAL_ACCESS_TOKEN",
-            "OPENCODE_COOKIE",
-            "OPENROUTER_API_KEY",
-            "CODEX_HOME",
-            "KIMI_CODE_HOME",
-            "HERMES_HOME",
-            "KIMI_CODE_BASE_URL",
-            "HERMES_PORTAL_BASE_URL",
-            "OPENROUTER_API_URL",
-            "OPENCODE_WORKSPACE_ID",
-            "USAGE_STATUS_ABSENT",
-        ] {
-            set(name, "");
-        }
-        set("HOME", row["home"].as_str().unwrap());
-        set("USERPROFILE", row["home"].as_str().unwrap());
-        set("PATH", "");
-        set("ANTHROPIC_OAUTH_TOKEN", "env://USAGE_STATUS_ABSENT");
-        let variable = row["input"]["env"].as_str().unwrap();
-        if !variable.is_empty() {
-            set(variable, "owned-status-token");
-        }
-        if row["provider"] == "opencode" {
-            set("OPENCODE_WORKSPACE_ID", "wrk_owned");
-        }
+        prepare_environment(row);
         let home = std::path::Path::new(row["home"].as_str().unwrap());
         let before = file_state(home);
         let provider = match row["provider"].as_str().unwrap() {
@@ -128,4 +94,42 @@ pub(super) fn compare_with_count(expected_cases: usize) -> Value {
     )
     .unwrap();
     output
+}
+
+fn prepare_environment(row: &Value) {
+    // The same disposable constructor homes/metadata from actual frozen Go.
+    for name in [
+        "ANTHROPIC_ADMIN_KEY",
+        "ANTHROPIC_OAUTH_TOKEN",
+        "CODEX_ACCESS_TOKEN",
+        "COPILOT_ACCESS_TOKEN",
+        "CURSOR_COOKIE",
+        "KIMI_CODE_API_KEY",
+        "KIMI_AUTH_TOKEN",
+        "MOONSHOT_API_KEY",
+        "NOUS_PORTAL_ACCESS_TOKEN",
+        "OPENCODE_COOKIE",
+        "OPENROUTER_API_KEY",
+        "CODEX_HOME",
+        "KIMI_CODE_HOME",
+        "HERMES_HOME",
+        "KIMI_CODE_BASE_URL",
+        "HERMES_PORTAL_BASE_URL",
+        "OPENROUTER_API_URL",
+        "OPENCODE_WORKSPACE_ID",
+        "USAGE_STATUS_ABSENT",
+    ] {
+        set(name, "");
+    }
+    set("HOME", row["home"].as_str().unwrap());
+    set("USERPROFILE", row["home"].as_str().unwrap());
+    set("PATH", "");
+    set("ANTHROPIC_OAUTH_TOKEN", "env://USAGE_STATUS_ABSENT");
+    let variable = row["input"]["env"].as_str().unwrap();
+    if !variable.is_empty() {
+        set(variable, "owned-status-token");
+    }
+    if row["provider"] == "opencode" {
+        set("OPENCODE_WORKSPACE_ID", "wrk_owned");
+    }
 }
