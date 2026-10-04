@@ -113,3 +113,12 @@ The positive owner slice cannot bypass these gates: the entire existing
 `memory serve` route remains delegated. The actual process and DOM runner,
 negative executions and exact retained limitations live in
 [scripts/memory-http-oracle](../../scripts/memory-http-oracle/README.md).
+
+A retained first final replay exposed a bad test expectation that HTTP creation
+and update times must be equal. Actual Go Prepare/Save observes them separately.
+The shared save adapter now takes the same two clock observations; validation
+checks the actual `valid_from <= created_at <= updated_at` ordering. Original
+raw pairs and the failing equality assertion are retained rather than rewritten.
+HTTP Get also uses the existing nanosecond SQLite timestamp renderer, consistent
+with the shared direct-delete service. These are explicit clock/state contracts;
+independent process timestamps are not asserted byte-equal.

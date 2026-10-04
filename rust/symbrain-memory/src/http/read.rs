@@ -161,7 +161,7 @@ impl Server {
             let sql = format!("SELECT {SEARCH_COLUMNS} FROM memories WHERE id=?");
             let row = conn.query_row(&sql, [id], SearchRow::from_row).optional()?;
             if row.as_ref().is_some_and(safe_row) {
-                conn.execute("UPDATE memories SET access_count=access_count+1,prev_access=last_access,last_access=? WHERE id=?",rusqlite::params![crate::gotime::format(chrono::Utc::now()),id])?;
+                conn.execute("UPDATE memories SET access_count=access_count+1,prev_access=last_access,last_access=? WHERE id=?",rusqlite::params![crate::cli_write::timestamp(),id])?;
             }
             Ok(row)
         })();

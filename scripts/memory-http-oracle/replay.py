@@ -23,7 +23,16 @@ def run(args):
     repo=Path(__file__).resolve().parents[2];root=args.report.with_suffix('.evidence');root.mkdir(exist_ok=False)
     assert digest(GO)==GO_SHA,'frozen executable changed'
     embedding=Embeddings();peers=[];records=[];limits=[];shutdown=[]
-    receipt=dict(go=str(GO),go_sha256=digest(GO),native=str(args.native),native_sha256=digest(args.native),head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip(),source_manifest={str(p.relative_to(repo)):digest(p) for p in [repo/'Cargo.lock',repo/'rust/symbrain-memory/Cargo.toml',*sorted((repo/'rust/symbrain-memory/src').rglob('*.rs')),*sorted((repo/'rust/symbrain-memory/assets').rglob('*'))] if p.is_file()},records=records,limits=limits,shutdown=shutdown)
+    frozen=Path('/workspace/oracles/daemon772-go-source')
+    frozen_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=frozen,text=True).strip()
+    assert frozen_head=='dcddcef0df5789123c7c9a7ebe6e01f10e941f2c'
+    frozen_files=sorted((frozen/'internal/memory').rglob('*.go'))
+    frozen_manifest={str(p.relative_to(frozen)):digest(p) for p in frozen_files}
+    for name,sha in frozen_manifest.items():
+        literal=subprocess.check_output(['git','show',frozen_head+':'+name],cwd=frozen)
+        import hashlib
+        assert hashlib.sha256(literal).hexdigest()==sha,name
+    receipt=dict(frozen_go_revision=frozen_head,frozen_go_source_sha256=frozen_manifest,candidate_dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=repo)),control=args.control,go=str(GO),go_sha256=digest(GO),native=str(args.native),native_sha256=digest(args.native),head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip(),source_manifest={str(p.relative_to(repo)):digest(p) for p in [repo/'Cargo.lock',repo/'rust/symbrain-memory/Cargo.toml',*sorted((repo/'rust/symbrain-memory/src').rglob('*.rs')),*sorted((repo/'rust/symbrain-memory/assets').rglob('*'))] if p.is_file()},records=records,limits=limits,shutdown=shutdown)
     try:
         seedroot=root/'seed';seedenv=owned_env(seedroot,embedding.url);database,receipt['actual_go_seed']=seed(seedroot,seedenv)
         for native,label,binary in [(False,'go',GO),(True,'rust',args.native)]:
@@ -95,7 +104,7 @@ def run(args):
             with sqlite3.connect(peer.database) as conn:
                 cols=[r[1] for r in conn.execute('pragma table_info(memories)')]
                 row=dict(zip(cols,conn.execute('select * from memories where id=?',(identifier,)).fetchone()))
-                assert row['created_at']==row['updated_at'] and row['valid_from']<=row['created_at']
+                assert row['valid_from']<=row['created_at']<=row['updated_at']
                 for key in ['id','created_at','updated_at','valid_from']:row.pop(key)
                 metadata=json.loads(row['metadata']);metadata.pop('observed_at');row['metadata']=metadata
                 inserted.append(row)

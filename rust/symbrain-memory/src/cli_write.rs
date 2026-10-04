@@ -105,12 +105,14 @@ impl Store {
         let id = crate::write::new_uuid();
         let created_at = timestamp();
         let conn = self.lock()?;
+        // Go preserves Prepare creation time and observes Save update time.
+        let updated_at = timestamp();
         conn.execute(
             "INSERT INTO memories(id,content,scope,metadata,embedding,embedding_binary,embedding_dim,embedding_source,embedding_model,embedding_quantization,content_hash,lsh_hash,created_at,updated_at,created_by,updated_by,created_session,updated_session,consolidation_status,consolidated_into_id,importance,valid_from,valid_to,superseded_by,tier,expires_at,access_count,last_access,prev_access,review_status,kind,decay_factor,retired_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'','','raw',NULL,0,?,NULL,NULL,'long_term',NULL,1,NULL,NULL,'approved','',1,NULL)",
             params![id, request.content, scope, metadata, embedding_json(&embedding.vector), binary,
                 i64::try_from(embedding.vector.len()).unwrap_or(768), embedding.source, model, "",
                 crate::write::content_hash(&request.content), crate::lsh::compute_lsh(&embedding.vector).map_err(StoreError::Invalid)?,
-                created_at, created_at, request.author, request.author, valid_from],
+                created_at, updated_at, request.author, request.author, valid_from],
         ).map_err(|error| StoreError::Invalid(format!("failed to save memory: {error}")))?;
         if audit_enabled {
             audit(&conn, "set", &id, scope, "", &request.author, "");
@@ -242,7 +244,7 @@ pub fn direct_project_supported() -> bool {
     crate::direct_text_supported(&active_project())
 }
 
-fn timestamp() -> String {
+pub(crate) fn timestamp() -> String {
     let now = Utc::now();
     let base = now.format("%Y-%m-%d %H:%M:%S").to_string();
     let nanos = now.timestamp_subsec_nanos();
