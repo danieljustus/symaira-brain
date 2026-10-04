@@ -171,6 +171,47 @@ fn retained_reader_exhausts_one_budget_and_preserves_original_error_and_rows() {
 }
 
 #[test]
+fn many_skipped_handler_attempts_share_one_budget_under_retained_writer() {
+    let database = OwnedDatabase::new();
+    let writer = retained_writer(&database);
+    let follower = Connection::open(&database.0).unwrap();
+    let mut attempts = 0_u32;
+    let started = Instant::now();
+    let error = with_busy_observer(&follower, || attempts += 1).unwrap_err();
+    assert!(plain_busy(&error), "{error}");
+    assert!(
+        attempts > 1,
+        "this control must exercise actual early BUSY retries"
+    );
+    assert!(started.elapsed() >= BUDGET);
+    eprintln!(
+        "retained reserved WAL writer: {attempts} real early BUSY attempts in {:?}",
+        started.elapsed()
+    );
+    assert!(follower.is_autocommit());
+    assert_eq!(
+        follower
+            .query_row("PRAGMA busy_timeout", [], |row| row.get::<_, i64>(0))
+            .unwrap(),
+        5000
+    );
+    assert_eq!(
+        writer
+            .query_row("SELECT value FROM retained", [], |row| row
+                .get::<_, String>(0))
+            .unwrap(),
+        "unchanged"
+    );
+    writer.execute_batch("ROLLBACK;").unwrap();
+    assert_eq!(
+        follower
+            .query_row("PRAGMA journal_mode", [], |row| row.get::<_, String>(0))
+            .unwrap(),
+        "delete"
+    );
+}
+
+#[test]
 fn caller_transaction_is_not_retried_or_rolled_back() {
     let conn = Connection::open_in_memory().unwrap();
     conn.execute_batch(

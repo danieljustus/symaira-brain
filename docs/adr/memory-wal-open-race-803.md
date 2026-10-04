@@ -53,7 +53,9 @@ rollback-mode reserved-writer control whose WAL transition returns plain BUSY wh
 busy callback is not invoked, then release the reader after observing the
 helper's real BUSY attempt and require WAL setup success. A retained reader
 must exhaust the same five-second budget and preserve the original error/state.
-Test error classification and active-transaction refusal separately. Keep the
+Also retain a reserved writer through expiry, require multiple genuine early
+BUSY attempts, and bind elapsed time/error/restored timeout/unchanged rows to the
+one shared budget. Test error classification and active-transaction refusal separately. Keep the
 original ten-by-eight concurrency assertions verbatim; exercise opening and
 closing in the full inherited gates and native Windows/macOS/Linux CI.
 
