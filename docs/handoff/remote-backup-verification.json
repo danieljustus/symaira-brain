@@ -1,0 +1,9 @@
+{
+  "verified_utc": "2026-10-04T17:56:19.586559+00:00",
+  "main_unchanged": "c74110425d04dd62c7f2c0f09bb86561bd1ac20e",
+  "all_137_original_local_branch_backups_verified": true,
+  "all_11_named_candidates_verified": true,
+  "proof_export_commit": "ed51eaf725ed866107dd627d85f08bbf691ed7b3",
+  "proof_archive_bodies_verified": 1651,
+  "product_merge_or_source_change_during_handoff": false
+}
