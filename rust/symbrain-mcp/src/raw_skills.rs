@@ -210,3 +210,7 @@ mod tests;
 #[cfg(test)]
 #[path = "raw_skills_boundary_tests.rs"]
 mod boundary_tests;
+
+#[cfg(test)]
+#[path = "raw_skills_eof_tests.rs"]
+mod eof_tests;

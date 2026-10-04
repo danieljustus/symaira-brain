@@ -1,6 +1,7 @@
 """Additive complete-JSON/metadata inputs; comparison and old vectors unchanged."""
 from pathlib import Path
 from byte_cases import request, transport
+from eof_cases import cases as eof_cases
 
 INPUTS = Path(__file__).with_name('json-review-inputs')
 
@@ -50,6 +51,7 @@ def cases(root, incoming):
         for framed in (False, True):
             rows.append(('json-boundary-' + name + ('-framed' if framed else '-line'),
                          argv, transport(bootstrap, body, framed), None))
+    rows.extend(eof_cases(root, incoming))
     return rows
 
 

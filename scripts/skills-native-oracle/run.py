@@ -19,6 +19,7 @@ from output_cases import run_pairs as output_pairs, required_ids as output_ids
 from library_denied import run_pairs as denied_pairs, required_ids as denied_ids
 from byte_cases import cases as byte_cases, variant as byte_variant, input_description, run_controls as byte_controls
 from json_cases import cases as json_cases, run_controls as json_controls
+from eof_cases import run_controls as eof_controls
 from json_compare import json_matched
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -227,6 +228,8 @@ def main():
                           binaries, root, retained, env, invoke, incoming, matched, mcp_view)
             json_controls(report, lambda: output.write_text(json.dumps(report, indent=2) + "\n"),
                           binaries, root, retained, env, invoke, incoming)
+            eof_controls(report, lambda: output.write_text(json.dumps(report, indent=2) + "\n"),
+                         binaries, root, retained, env, invoke, incoming)
             assert report["candidate_sources"] == source_map()
             assert report["binaries"] == {name: {"path": str(path), "sha256": sha(path)} for name, path in binaries.items()}
             report.update(status="passed", native_surface_gate_passed=True)

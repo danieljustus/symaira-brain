@@ -1,9 +1,12 @@
 """Exact syntax-error protocol view for additive JSON boundary cases only."""
 import json
 from compare import matched
+from eof_cases import is_parse_case as eof_parse_case
 
 
 def is_parse_case(name):
+    if eof_parse_case(name):
+        return True
     if name.startswith('json-boundary-syntax-before-type-'):
         return True
     if name.startswith('json-review-novel-ignored-depth-'):
@@ -38,6 +41,8 @@ def parse_view(record):
 
 
 def json_matched(name, go, rust, root):
+    if eof_parse_case(name):
+        return parse_view(go) == parse_view(rust) and go['filesystem'] == rust['filesystem']
     if not is_parse_case(name):
         return matched(go, rust, root, True)
     return parse_view(go) == parse_view(rust) and go['filesystem']['files'] == rust['filesystem']['files']

@@ -137,6 +137,14 @@ fn next(raw: &[u8], index: usize) -> Result<u8, String> {
         .copied()
         .ok_or_else(|| "unexpected end of JSON input".into())
 }
+fn token_byte(raw: &[u8], index: usize) -> u8 {
+    // Go scanner.eof feeds ASCII space to the active token state before using
+    // the generic end error. Every required token byte below rejects that
+    // space in its existing grammar/context; no synthetic input is admitted.
+    // Containers and ordinary strings accept the space but remain incomplete,
+    // so their lookups deliberately retain next's generic end error.
+    raw.get(index).copied().unwrap_or(b' ')
+}
 fn error(byte: u8, context: &str) -> String {
     // Go scanner.quoteChar delegates a one-byte string to strconv.Quote.
     // It displays UTF-8 bytes as Latin-1 codepoints, rather than losing them.
@@ -160,13 +168,13 @@ fn string(raw: &[u8], index: &mut usize) -> Result<(), String> {
         match byte {
             b'"' => return Ok(()),
             b'\\' => {
-                let escape = next(raw, *index)?;
+                let escape = token_byte(raw, *index);
                 *index += 1;
                 match escape {
                     b'b' | b'f' | b'n' | b'r' | b't' | b'\\' | b'/' | b'"' => {}
                     b'u' => {
                         for _ in 0..4 {
-                            let hex = next(raw, *index)?;
+                            let hex = token_byte(raw, *index);
                             if !hex.is_ascii_hexdigit() {
                                 return Err(error(hex, "in \\u hexadecimal character escape"));
                             }
@@ -185,7 +193,7 @@ fn string(raw: &[u8], index: &mut usize) -> Result<(), String> {
 fn literal(raw: &[u8], index: &mut usize, word: &[u8]) -> Result<(), String> {
     *index += 1;
     for &expected in &word[1..] {
-        let byte = next(raw, *index)?;
+        let byte = token_byte(raw, *index);
         if byte != expected {
             let word = std::str::from_utf8(word).expect("ASCII literal");
             return Err(error(
@@ -199,7 +207,7 @@ fn literal(raw: &[u8], index: &mut usize, word: &[u8]) -> Result<(), String> {
 }
 
 fn digit(raw: &[u8], index: &mut usize, context: &str) -> Result<(), String> {
-    let byte = next(raw, *index)?;
+    let byte = token_byte(raw, *index);
     if !byte.is_ascii_digit() {
         return Err(error(byte, context));
     }
@@ -212,7 +220,7 @@ fn numeric(raw: &[u8], index: &mut usize) -> Result<(), String> {
     if raw.get(*index) == Some(&b'-') {
         *index += 1;
     }
-    match next(raw, *index)? {
+    match token_byte(raw, *index) {
         b'0' => *index += 1,
         b'1'..=b'9' => digit(raw, index, "in numeric literal")?,
         byte => return Err(error(byte, "in numeric literal")),

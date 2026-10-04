@@ -37,3 +37,13 @@ syntax-error IDs and requires `[1,2,null]`, code -32700 and complete messages,
 exits, stderr and filesystem state; valid inputs use the original comparator.
 These are prepared plans, with zero current product/compiler/native executions.
 See `docs/adr/skills-native-json-depth-float-764.md` for exact owner boundaries.
+
+The F10 EOF successor appends `eof_cases.py`: all eighteen exact independent
+line/framed wires, every required-token EOF state, ordinary incomplete/valid
+contrasts and syntax-before-type positions. It retains the complete926/884
+prefix and appends186 inputs for prepared1112Unix/1070Windows. The original
+seven actual-input controls remain unchanged; two new genuine EOF-input plans
+require matched valid baselines, exact nil-ID errors, stderr and complete
+file/raw-hash/validated-lock state. All nine remain unexecuted. Exact parse-case
+IDs use the existing strict comparator, valid cases use the old comparator;
+no old response/input is normalized. See `docs/adr/skills-native-json-eof-764.md`.
