@@ -73,6 +73,15 @@ their existing behavior. Two actual pinned-SDK/native public-resolver script
 vectors must compare the complete cause and verify no owned shell marker exists;
 static SDK/API inspection is not a native Windows runtime result.
 
+The new gate writes an incremental raw receipt after each completed CLI and
+owner cleanup, before parsing provider vectors or asserting pair equality. The
+receipt binds the candidate's source files and actual binary hashes, retains
+complete stdout/stderr, native discovery environment, raw query ledger and
+cleanup errors, and starts with complete=false. Complete is set only after all
+pairs and the actual false-owner control pass. CI preserves this receipt even
+if the summarized gate fails; a failing first native case must not disappear
+with its temporary directory or a final-only report.
+
 All original209+16/310 tests, key31, process63, Registry510, MCP13, owned lifetime
 controls and original three raw API paths remain required. The current source
 checkpoint is preparatory only: no compiler/target/port/runtime allocation has

@@ -154,6 +154,7 @@ jobs:
             ${{ runner.temp }}/browse-daemon-state-key-ownership.json
             ${{ runner.temp }}/browse-daemon-state-key-ownership.log
             ${{ runner.temp }}/browse-daemon-provider-discovery.json
+            ${{ runner.temp }}/browse-daemon-provider-discovery.raw.json
             ${{ runner.temp }}/browse-daemon-provider-discovery.log
             ${{ runner.temp }}/browse-daemon-mcp.json
             ${{ runner.temp }}/browse-daemon-mcp.json.tests.log
