@@ -16,6 +16,11 @@ from unittest.mock import patch
 
 import provider
 
+# The fixture simulates Linux independently of its host's loader API. Distinct
+# flag bits also let its fake loader reject missing/eager/global flag mistakes.
+LINUX_RTLD_GLOBAL = 0x100
+LINUX_RTLD_NOW = 0x2
+
 
 class Symbol:
     def __init__(self, address):
@@ -30,6 +35,7 @@ class AdmissionFixture:
                  source_id=provider.SOURCE_ID):
         self.root = root
         self.trace = []
+        self.loader_calls = []
         self.library = root / 'libsqlite3.so.0'
         self.extension = root / 'owned-test-extension.so'
         self.library.write_bytes(b'owned loader callback fixture; not an ELF')
@@ -44,13 +50,17 @@ class AdmissionFixture:
                         library_sha256=hashlib.sha256(self.library.read_bytes()).hexdigest())
         (root / 'provider.json').write_bytes(json.dumps(manifest).encode('utf-8'))
 
-    def load(self, path, **_kwargs):
+    def load(self, path, **kwargs):
         if path == str(self.library):
+            assert kwargs == {'mode': LINUX_RTLD_GLOBAL | LINUX_RTLD_NOW}, 'verified-library loader flags'
+            self.loader_calls.append((path, kwargs.copy()))
             self.trace.append('verified-library-handle')
             sys.modules['_sqlite3'] = SimpleNamespace(__file__=str(self.extension))
             sys.modules['sqlite3'] = self.module
             return self.library_handle
         assert path == str(self.extension)
+        assert kwargs == {}, 'extension lookup must retain its default loader mode'
+        self.loader_calls.append((path, kwargs.copy()))
         self.trace.append('actual-extension-handle')
         return self.extension_handle
 
@@ -83,6 +93,8 @@ class AdmissionFixture:
             stack.enter_context(patch.dict(sys.modules))
             sys.modules.pop('_sqlite3', None)
             stack.enter_context(patch.object(sys, 'platform', 'linux'))
+            stack.enter_context(patch.object(os, 'RTLD_NOW', LINUX_RTLD_NOW, create=True))
+            stack.enter_context(patch.object(provider.ctypes, 'RTLD_GLOBAL', LINUX_RTLD_GLOBAL, create=True))
             stack.enter_context(patch.object(provider, '_active', None))
             stack.enter_context(patch.object(provider, '_library', None))
             stack.enter_context(patch.object(provider.ctypes, 'CDLL', side_effect=self.load))
