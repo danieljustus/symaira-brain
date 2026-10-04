@@ -1,0 +1,133 @@
+{
+  "target": "/workspace/symaira-usage768-argv/target",
+  "package": "symbrain-cli",
+  "target_users": [],
+  "proc_check": true,
+  "records": [
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-29729099236c6b08/run-build-script-build-script-build",
+      "sha256": "593777629253ce330a5ca9e2f09b40e9bd131063d8d57ce7588d6cb7c7ddec70",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-29729099236c6b08/run-build-script-build-script-build.json",
+      "sha256": "85f5b836d0f03837846b9b4d1ec3e60dd05a0581f9ab7da316aec3d76c3cc64c",
+      "bytes": 289
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-34d0705f27e1023f/build-script-build-script-build",
+      "sha256": "53d2820d95131c510e5e6365ed2671e55b7ac78f52695509757c47b19a2645d2",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-34d0705f27e1023f/build-script-build-script-build.json",
+      "sha256": "9cf89a26e481e92778a3e34a3b2334e077738f3f37c35a2bb0189c0338ad796e",
+      "bytes": 373
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-34d0705f27e1023f/dep-build-script-build-script-build",
+      "sha256": "a71f952e7f3252ef5608298951fd55b25f3590c98bc0765ae4145e623604ee7d",
+      "bytes": 28
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-34d0705f27e1023f/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-3bd99f4836667d75/dep-lib-symbrain_cli",
+      "sha256": "5202f29d6681fc8a2b76317b9788333d390e6ceca4881ddaca28fcd895130ba4",
+      "bytes": 1174
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-3bd99f4836667d75/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-3bd99f4836667d75/lib-symbrain_cli",
+      "sha256": "09fa02093a394588f74a159ab04a4667b996fe8b27debe54fcf6faa4cd5cbb8c",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-3bd99f4836667d75/lib-symbrain_cli.json",
+      "sha256": "cd989545cf1cfbd0aadd960b2a66f784368afb24f32161eafba400a0cd194d1c",
+      "bytes": 1986
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-461fa531e6ee22e0/bin-symbrain",
+      "sha256": "6a54537a0cb1efb34a784e612abd5de1c8b2a66de957a0ff63f8b82ba7364a62",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-461fa531e6ee22e0/bin-symbrain.json",
+      "sha256": "86398c278dcddbdd26c0e7bd898829a8103175f49f64d0868146cce80fc157cf",
+      "bytes": 2046
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-461fa531e6ee22e0/dep-bin-symbrain",
+      "sha256": "dd32b16937730a9a92a8070aa73e4dbbc632703f88e1395eb2196a4f6b11a95a",
+      "bytes": 31
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-461fa531e6ee22e0/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-29729099236c6b08/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-29729099236c6b08/output",
+      "sha256": "1c718843ad723cdedd190e0695c6d852607d60ee60b40ddb4d1092c854167d4a",
+      "bytes": 110
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-29729099236c6b08/root-output",
+      "sha256": "15f2304eed177ef4598a68a10129e260e6c69a7c4b185fec3ee1ad9bef0277bb",
+      "bytes": 85
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-29729099236c6b08/stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-34d0705f27e1023f/build-script-build",
+      "sha256": "4750a0dea9023c0cc5b171b562482d65014f61367ca0d8a699a9aedd4d48fdee",
+      "bytes": 575624
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-34d0705f27e1023f/build_script_build-34d0705f27e1023f",
+      "sha256": "4750a0dea9023c0cc5b171b562482d65014f61367ca0d8a699a9aedd4d48fdee",
+      "bytes": 575624
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-34d0705f27e1023f/build_script_build-34d0705f27e1023f.d",
+      "sha256": "bfa4b69641b4a3428bf8ec7f4d63bfeb5a57eb29c08856254877132d8b95ff5b",
+      "bytes": 324
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/symbrain",
+      "sha256": "f657a231ac1bae1472718e10c9ae30418d7589286b2300f882eb4b51b7b04743",
+      "bytes": 38007480
+    }
+  ],
+  "unique_files": 18,
+  "archive": "/tmp/symaira-usage768-argv-final2-local.evidence/argv-parent-clean.tar.gz",
+  "archive_bytes": 11570447,
+  "archive_sha256": "3bfbc8e21ea31d38807167060dc2541fe254c9e2046a6b87405087a9bc411306",
+  "roundtrip_verified": true,
+  "command": [
+    "cargo",
+    "clean",
+    "--locked",
+    "-p",
+    "symbrain-cli",
+    "--target-dir",
+    "/workspace/symaira-usage768-argv/target"
+  ],
+  "scope": "One runner-owned exclusive target, all cargo dry-run regular files losslessly retained before package-only clean; no other package/target cleaned. /proc check is Linux-only, not a Windows lifecycle proof."
+}

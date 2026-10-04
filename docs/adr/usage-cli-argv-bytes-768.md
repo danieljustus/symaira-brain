@@ -76,3 +76,33 @@ ignores, strict Clippy/fmt/actionlint and matching source/binary manifests remai
 required. This focused fix needs a new full independent review; authorship and
 Linux validation do not approve it. Full #768 and native platform acceptance
 remain open.
+
+## Observed clean Linux checkpoint
+
+Source `8803847278546f3161eaaa84d2e65bc2eec594a2` passes all82 exact argv
+triples (22 original,12 reproduced original-parent mismatches) and three actual
+mutation controls. All original gates pass unchanged: Local89/81 full/111 CLI,
+Owner16/16 CLI/22 Unix paths and wrong-owner control, Files86/85 full/151 CLI,
+Hermes96/104 and Reference44/110, with each original five controls. All97 original
+inputs remain accounted for. Original12 owner inputs and32 additional public
+constructor pairs match and remain read-only; these public probes compare the
+narrower configured/source/status/Authorization surface. Fresh frozen-Go and the
+archived accepted9aed parent match the corrected candidate for all22 original
+arguments; only that accepted pre-admission parent has fallback available.
+
+The69/61/59/55 source manifests agree on52 shared hashes and one actual CLI
+`f657a231ac1bae1472718e10c9ae30418d7589286b2300f882eb4b51b7b04743`.
+The retained fresh frozen-Go CLI hash `0654376cf8fc33c3be0b03bd394b665842d04e6659b3dfd67c0d6786d2f136e2`
+matches every actual gate build. Ordinary355/zero failed/four explicitly replayed
+ignores, strict Clippy, workspace and18 included-fragment formatting, actionlint
+and diff checks pass. All lifecycle tests use the container subreaper.
+
+The earlier clean d066 checkpoint is retained separately. A static follow-up
+removed the new helper's unnecessary `target` basename restriction: existing
+external macOS storage uses a worktree-hash directory. The final source repeats
+all complete gates; production bytes are identical to d066.39 actual executed or
+linked binary paths (38 unique hashes, including33 ordinary test binaries) are
+losslessly archived and decompressed/hash/length checked before target release.
+The earlier failed shared-target parent/candidate were both byte-identical to
+the abf CLI in the original36-file archive. No failure or attempt was discarded.
+Full independent review and native exact-head three-OS CI remain pending.
