@@ -1,0 +1,66 @@
+{
+  "parent": "8afb9a9bf3c266478adea2f154bee9d5e0e1ebe1",
+  "changes": {
+    "rust/symbrain-cli/src/memory_cli/config.rs": {
+      "parent_sha256": "6376462633966ed5f93db3a4428b606cedfe2b173b5124a499d83591a1225a48",
+      "current_sha256": "3a2645d4115fba6799e4229f5046e4cc621e8e05319313b6727b345c126521cb"
+    },
+    "rust/symbrain-usage/src/command_capture.rs": {
+      "parent_sha256": "c9640be0592586295dffc45bf76a73c28f4f8dccc8fbfe8f569ec77bebfb0652",
+      "current_sha256": "765ea7b823b40631f6523ef443872da107b2d62f45df94cd16454ced63ebe5d9"
+    },
+    "rust/symbrain-core/src/config/resolved/mod.rs": {
+      "parent_sha256": "cbd1d7d6142a39b041ea230e9549c08e48dd4b8c2bbfd52f78120da62e6e5f2f",
+      "current_sha256": "8a928d20cd0452212f0368735d260002ad3763730d9d7c081a3d4ab37d1a547b"
+    },
+    "rust/symbrain-memory/src/startup_time.rs": {
+      "parent_sha256": "e6c1df178b96c16c7c471653272726519918c4ad8512a3cc738113dea6b2eebf",
+      "current_sha256": "448824e972955055c56a469bfa345b6bd22f3de5d4d892ae58dfd9729182936f"
+    },
+    "rust/symbrain-memory/src/startup_review_tests.rs": {
+      "parent_sha256": "855dfc24fd94a613b7da802ab8f46eadc41371d3cbd7bf1999a758d09fb468df",
+      "current_sha256": "7e08f47d9cf82fefc614fcabf9e661971f87a22e8acc2f37b60ad6a4e12e8838"
+    },
+    "rust/symbrain-memory/src/startup_rotation_json.rs": {
+      "parent_sha256": "ed298a1cbb3ba88a30dd6c3682446d2bb9a0c895810f946a6163355d16068a66",
+      "current_sha256": "3b2372d7e9748a32c5c319e6c11bdfc6343afe0c11319511cc15c8dc4153769f"
+    },
+    "scripts/brain-config13/runtime_tools.py": {
+      "parent_sha256": "b0a032c4eb832ca1391c0e681f4e5da99652a11cabc4336807064a00df64bb55",
+      "current_sha256": "3ad599253b1990473cb7d3c4314dc876eb5242ffeea76140146874d18a676535"
+    },
+    "scripts/brain-config13/README.md": {
+      "parent_sha256": "8d0d2f66d403281220983c63ea2834fe9618f45d5a719a8adcc801fe708b6469",
+      "current_sha256": "78d011699e97a617a731927fc56b0f2454b4f08f8e13f68a0382a2ee4894c1c4"
+    },
+    "scripts/brain-config13/startup_replay.py": {
+      "parent_sha256": "344621dd1f47db6c3880ba8b6ae1e6091f5740496cd7fd71d914fb5ddbfe9138",
+      "current_sha256": "5ba03f28fcef3c5eba96280b128c8988b3d97cd6be09021b332d78e98e65afeb"
+    },
+    "scripts/brain-config13/runtime.sh": {
+      "parent_sha256": "4d2165bd8ee20a29eb08b52823ba68619a841e4189f368be822e29b3791359d5",
+      "current_sha256": "0152bbf320f3ad34bf96262aa0a73b575079603be26a48dbb43eed44af6a2783"
+    },
+    "scripts/brain-config13/startup_correction_cases.py": {
+      "parent_sha256": "ebfbb6bd4c84141d8845260ccfa19aaa58320b68155f770bea8593a976ce4542",
+      "current_sha256": "baed199273f6190cf269e42b7fa674586b63b03a2356986b356dad915e00fa77"
+    }
+  },
+  "added_source_sha256": {
+    "rust/symbrain-cli/src/memory_cli/config_document_tests.rs": "c09a6772a0153ee859b2cbc6d2797f46df4db9c3baad1d3f25c0d258be1010d5",
+    "scripts/brain-config13/startup_final_preparation.py": "7f1fb0ff79c01e3efd28085dcb04717fdbdb7f925667bec50b04823922446c70",
+    "scripts/brain-config13/startup_fixture_admission.py": "e1dc5c9ce3a7b7f56782d80f4c30e48fd27014e8d41fb742fa550ce4f933b1dc",
+    "scripts/brain-config13/startup_final_cases.py": "7170fc5840c40c176d7018617288b406be8dca4b4347798730db724f1c4c271d"
+  },
+  "scope": "Immutable parent/current source overlay only; historical maps and frozen Go/case bytes retained.",
+  "executions": {
+    "compiler": 0,
+    "Cargo": 0,
+    "SDK": 0,
+    "product": 0,
+    "SQLite": 0,
+    "network": 0,
+    "target": 0,
+    "ports": 0
+  }
+}

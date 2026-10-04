@@ -1,0 +1,24 @@
+{
+  "source_edit_anchor_attempt": {
+    "exit": 1,
+    "stdout": "zoneold? False\nlet zone_start = p.at;\n        let offset = if raw.get(p.at) == Some(&b'Z') { p.at += 1; 0 }\n        else {\n            let zone = raw.get(p.at..p.at+6).filter(|zone| zone[3] == b':')\n                .ok_or_else(|| cannot(raw, &raw[zone_start..], \"Z07:00\"))?;\n            if !zone[1..3].iter().chain(&zone[4..6]).all(u8::is_ascii_digit) {\n                return Err(cannot(raw,&raw[zone_start..],\"Z07:00\"));\n            }\n",
+    "stderr": "exact anchor absent; earlier edits retained\n",
+    "meaning": "Editing-script exact anchor mismatch; Memory/Core edits had already completed in isolated successor; Time remained unchanged until the next corrected exact-anchor script. This retained excerpt is not represented as the full original tool transcript."
+  },
+  "sparse_option_attempt": {
+    "diagnostic": "error: unknown option `no-cone'",
+    "meaning": "git sparse-checkout add rejected unsupported option; no sparse/source change; retry used the existing non-cone configuration",
+    "enclosing_shell_exit": 0,
+    "git_exit_not_separately_captured": true
+  },
+  "executions": {
+    "compiler": 0,
+    "Cargo": 0,
+    "SDK": 0,
+    "product": 0,
+    "SQLite": 0,
+    "network": 0,
+    "target": 0,
+    "ports": 0
+  }
+}
