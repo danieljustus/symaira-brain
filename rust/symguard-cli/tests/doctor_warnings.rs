@@ -1,5 +1,8 @@
 //! The actual Brain compatibility adapter must buffer warnings before fallback.
 use std::{fs, process::Command};
+#[cfg(windows)]
+#[path = "support/windows_discovery.rs"]
+mod windows_discovery;
 
 #[path = "../../symbrain-cli/src/guard_cli.rs"]
 #[expect(
@@ -34,7 +37,11 @@ fn brain_doctor_warning_admission() {
             assert_eq!(outcome, None);
             assert!(stdout.is_empty() && stderr.is_empty());
         } else {
-            assert_eq!(outcome, Some(u8::from(role == "semantic")));
+            assert_eq!(
+                outcome,
+                Some(u8::from(role == "semantic")),
+                "role {role}: stdout={stdout:?}, stderr={stderr:?}"
+            );
             assert!(stdout.starts_with(b"symguard doctor\n"));
             assert!(stderr.starts_with(b"config: warning: unknown key \"owned\" in "));
             assert!(!stderr.strip_suffix(b"\n").unwrap().contains(&b'\n'));
@@ -50,6 +57,8 @@ fn brain_doctor_warning_admission() {
         let home = root.path().join("home");
         let directory = home.join(".config/symguard");
         fs::create_dir_all(&directory).unwrap();
+        #[cfg(windows)]
+        windows_discovery::create_parents(&home, &home.join(".config"));
         let config = config_path(&directory, role);
         let text = match role {
             "semantic" => "owned=1\nsequence={enabled=true,threshold=1}\n",

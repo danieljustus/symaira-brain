@@ -143,3 +143,39 @@ Normally integrate currentmain5e232 after regular807 merge. All reviewed Rust/Ca
 
 
 Actual native Windows run37181040219/job111373552414 rejects the invalid-text-path early return under strict Clippy question_mark before owner comparisons. Preserve the complete original log and source in migration/evidence/guard-doctor-config-paths-770/windows-lint-a114. Replace only ifNone/returnNone with the identical Option question-mark early return under the same Windowscfg. Invalid raw Windows paths still refuse before read/output; no compatibility gate, lint or assertion is weakened. This is a source-only mechanical correction; fresh exact-head native acceptance remains required. The separate rust-init-native formatting/lint step has failed too, but its in-progress log/cause is not yet available and is not inferred here.
+
+## Native Windows empty-discovery fixture correction
+
+The later complete init job111373552465 from run37181040219 proves that both
+`generated_owner_and_delegation_are_shared_by_brain` and
+`brain_doctor_warning_admission` received Some(1) instead of their healthy
+Some(0). HOME and USERPROFILE were already set to the same owned home. The
+original child assertions omitted the captured Doctor stdout/stderr, so the
+actual failing report row is not present in that log. Preserve the whole raw
+log and pre-edit fixtures/source with SHA/length/gzip roundtrips under
+`migration/evidence/guard-doctor-config-paths-770/windows-fixtures-a114/`.
+
+The source diagnosis is the deliberately preserved Go discovery contract.
+`containsNotExist` recognizes "cannot find the file", but not "cannot find the
+path". Native Windows keeps ERROR_FILE_NOT_FOUND2 silent and reports
+ERROR_PATH_NOT_FOUND3. The first source is HOME/.config/hermes/config.json;
+both healthy fixtures omit its parent. This is a real discovery issue, not a
+reason to alter production's error predicate or accept an unhealthy exit.
+
+On Windows only, create every default discovery source's empty parent directory
+inside the private fixture home/XDG root before the adapter runs. Keep the files
+absent, original healthySome(0)/semanticSome(1), warning bytes/lexical owner,
+typed/discovery empty-stream refusals and source readonly assertions. Unix
+fixture setup is unchanged. A shared test helper prevents the two fixtures
+from drifting. Complete captured stdout/stderr now accompanies an unexpected
+admission result.
+
+An additional actual Windows child control first checks missing-file errno2 and
+healthySome(0), then removes only the owned empty Hermes parent, checks errno3
+and requires Some(1) with a Hermes discovery error and exactly one issue. Config
+bytes/mtime remain unchanged across both calls. A scoped native Windows CI step
+executes both original fixture tests and this control with full diagnostic byte
+vectors retained as an artifact. This is prepared source, not a local Windows
+execution or proof that no other runtime issue exists. Fresh native3/protected
+acceptance and different-author review remain required. No production, frozen
+Go, corpus, threshold or existing assertion is weakened.
