@@ -1,0 +1,59 @@
+{
+  "actual_helper_tests": {
+    "test_build_go": 7,
+    "test_novel": 4
+  },
+  "actual_git_source_admission": true,
+  "sdk_download_mocked": true,
+  "go_sdk_or_rust_or_cli_or_target_or_port_execution": false,
+  "python_ast": "passed",
+  "actionlint": "passed with shellcheck disabled as existing validation",
+  "diff_check": "passed",
+  "original_windows_source_bindings": 2438,
+  "original_comparison_controls_parent_builder_rust_go_criteria": "unchanged",
+  "original_builder_digest_floor_output_path_stop_child_run_source_map_AST": "unchanged",
+  "files": [
+    {
+      "original_path": "/tmp/symaira-skills794-cache-preparation-actionlint.stdout",
+      "archive": "symaira-skills794-cache-preparation-actionlint.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-skills794-cache-preparation-novel-tests.stdout",
+      "archive": "symaira-skills794-cache-preparation-novel-tests.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-skills794-cache-preparation-tests.stdout",
+      "archive": "symaira-skills794-cache-preparation-tests.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-skills794-cache-preparation-actionlint.stderr",
+      "archive": "symaira-skills794-cache-preparation-actionlint.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-skills794-cache-preparation-novel-tests.stderr",
+      "archive": "symaira-skills794-cache-preparation-novel-tests.stderr.gz",
+      "bytes": 662,
+      "sha256": "1d182bf94e73bc5281ae9d0f0ee1e803cc0373d84b397203b9a60d4372cba442",
+      "archive_sha256": "8a53b789184565846f616a35e6915312fc19a52ddb674f2fe2630029f85334e0"
+    },
+    {
+      "original_path": "/tmp/symaira-skills794-cache-preparation-tests.stderr",
+      "archive": "symaira-skills794-cache-preparation-tests.stderr.gz",
+      "bytes": 1065,
+      "sha256": "d348b476b7f19bcadaf016e08c2c9e9fd08a60e9ecedeb320b082ae62a145e3d",
+      "archive_sha256": "99487a22e38a0f5c9df7e24fe9580eeb92a0ca62f4f354953af2b7eccc77eb56"
+    }
+  ]
+}

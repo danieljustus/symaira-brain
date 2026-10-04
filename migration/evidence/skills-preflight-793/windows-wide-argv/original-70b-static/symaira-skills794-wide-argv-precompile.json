@@ -1,0 +1,52 @@
+{
+  "prior_head": "01f41906e2e021db3c693ec97617bb701e4dad8a",
+  "main": "2b6d49f250a81650eda1b93cec7d859a171873bb",
+  "phase": "source preparation only; no compiler, Cargo target, Go builder or CLI executed",
+  "dispatch": [
+    "run_in_process: output::extract_format clones unmatched original OsString",
+    "skills_cli::run: sync requires no preceding global normalize",
+    "run_sync: sync_flags::parse before path resolution",
+    "sync_flags::parse: local byte normalization once, bytes retained through values and diagnostics"
+  ],
+  "source_files_sha256": {
+    ".github/workflows/ci.yml": "a4fa5890061fd928db6168ccab8c94676105805b01f6e64e2a70a4a0a80bdd6e",
+    "MIGRATION-RUST.md": "30002e19b4debcc10451cd943a33cafc9a64a2ca17cae60e9d67b53ec080a1d2",
+    "docs/adr/0004-skills-preflight-raw-diagnostics.md": "a3168b1608c6c2783c8c27760122d7059ff885e8a3cca09bf6c2dd2a355ad00c",
+    "migration/contract-matrix.csv": "3d128ba0bcfad3add7205c1ba258c6ed1912eb8970885d28526f6dea8ea17c1e",
+    "rust/symbrain-cli/src/skills_sync_flags.rs": "ff7c39a6cb28abbfc4c4a92802c4c46bd71e8b094937e8cf316d33c8f7ea5b8b",
+    "rust/symbrain-core/src/config/bytes_tests.rs": "8ec133484314484892e45ab059f127019ef1fc393220d08da21cc7c3b3446605",
+    "rust/symbrain-core/src/config/format.rs": "924b9fe31b88d53ee5caa877a22e459a4bb1b920f7b81162d0739d1ac8c402dc",
+    "rust/symbrain-core/src/config/mod.rs": "f90494018160e6fa6f630b00d6a6046c31931ff207efcc09de5f7d58282be29c",
+    "migration/evidence/skills-preflight-793/windows-wide-argv/original-01f-source-and-evidence.json": "6d489c6a5ad34c9a5d333a99b06e0f30f2eed5fa56bc53cd00c83454b9df0f3b",
+    "migration/evidence/skills-preflight-793/windows-wide-argv/sdk-reference/LICENSE": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+    "migration/evidence/skills-preflight-793/windows-wide-argv/sdk-reference/VERSION": "89f723ad27054a2ccc7c22f2a974886f3077f64623a231297fcea2e74a73a782",
+    "migration/evidence/skills-preflight-793/windows-wide-argv/sdk-reference/src/os/exec_windows.go": "7a3c8f10605e5ea468538b1833b04ddf609bff84999b037839ef23d99afc50c4",
+    "migration/evidence/skills-preflight-793/windows-wide-argv/sdk-reference/src/syscall/wtf8_windows.go": "df35fc932a3bf98375eb780c08091f6a0b4a927ba2918a977495fe0b15c77f99",
+    "rust/symbrain-cli/src/skills_sync_bytes.rs": "33bee3aea7b09167602fc1483a6dee6bdea81335b41a8d5a93e563ee19c70ac5",
+    "rust/symbrain-cli/tests/skills_windows_wide_flags.rs": "7ab4084031d4de15717009dd600f989cae10647ae0743ae03bd9ef3a06922da2",
+    "scripts/skills-argv-oracle/README.md": "ce137bf75fc1ed7340e7280ef3a2be62cb543971ec27937697a8141b5982ced2",
+    "scripts/skills-argv-oracle/compare.py": "7e61896f02c55012ab78754e09be848efb299c59961d19c7f2bea79ffff38d86",
+    "scripts/skills-argv-oracle/verify_control.py": "205cec23997fdc1c517447ccadfa6160c761b92c06995134b087c985ed2fb55e"
+  },
+  "planned_acceptance": {
+    "Unix_retained_pairs": 315,
+    "Windows_actual_wide_pairs": 312,
+    "actual_input_controls": 3,
+    "historical_affected_suite_tests": 459,
+    "new_unit_and_process_tests_pending": true,
+    "native_three_os_and_different_author_review_pending": true
+  },
+  "formatter_coordination": "doctor765_port confirms identical additive public format_go_quoted_bytes API exists on its later parent; no collision",
+  "source_boundaries": "Global normalize_flags, Core os_bytes/OsStr quote, recognized global output diagnostics, provider/fallback paths and filesystem protections unchanged",
+  "static_checks": [
+    "rustfmt applied to affected Rust sources without building",
+    "Python AST parse",
+    "CSV row width",
+    "git diff --check",
+    "all24 original evidence hashes preserved"
+  ],
+  "native_Windows_observation": "None locally. SDK reference only; pending genuine CreateProcessW Go/native runtime.",
+  "source_head": "70b76390f372c6f05983f01f5a2b8147356ca39e",
+  "candidate_dirty": false,
+  "target_created_or_used": false
+}

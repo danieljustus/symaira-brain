@@ -1,0 +1,24 @@
+{
+  "source_head": "e1266694a1a454d1d9182351a4bc7c17cb388999",
+  "base": "e8c7f7990ab61967db0a3cbadaf6e485b4a33d99",
+  "candidate_dirty": false,
+  "host": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "source_sha256": {
+    ".github/workflows/ci.yml": "bf72b4519982beac99435fce519737053cefedccfbc3ee1ea57bc424ee02c5b3",
+    ".github/workflows/release.yml": "357c0b52debef48ee86b3d99eb177d995cde72b06e4d633f7caaa1ae96a68413",
+    "docs/adr/release-signing-readback-730.md": "282df707a00e619b6f9260f075c5c4389f5a158bc990030879a2e449169fec17",
+    "scripts/notarize-and-verify.sh": "2c0595b5feac8d2a7329e884efaef965b4e12d25d32969fe5fc0141edbe99164",
+    "scripts/test_macos_release_verification.py": "4fa2a75621326474f558e56925cbbe2721d0546a09a6ac7c333d25807a2b8363",
+    "scripts/verify-notary-receipt.py": "016a7c85094cdd7de65b08ede7b38ca86f3ef4b8e73c7461bdc737cd4dcdcb7a"
+  },
+  "tests": 5,
+  "owned_orchestration_replays": 14,
+  "test_log_sha256": "b614331b48cbd8ec8c88434cf09401d6fbc7b897ef54d9eb6e601feddcc08f8e",
+  "log": "test_app_and_dmg_require_verified_submission_and_readback_before_publication (test_macos_release_verification.ReleaseVerification.test_app_and_dmg_require_verified_submission_and_readback_before_publication) ... ok\ntest_downloaded_asset_requires_checks_without_resubmitting (test_macos_release_verification.ReleaseVerification.test_downloaded_asset_requires_checks_without_resubmitting) ... ok\ntest_each_real_command_failure_prevents_publication (test_macos_release_verification.ReleaseVerification.test_each_real_command_failure_prevents_publication) ... ok\ntest_invalid_team_prevents_any_external_execution (test_macos_release_verification.ReleaseVerification.test_invalid_team_prevents_any_external_execution) ... ok\ntest_nonaccepted_or_mismatched_readback_prevents_stapling_and_publication (test_macos_release_verification.ReleaseVerification.test_nonaccepted_or_mismatched_readback_prevents_stapling_and_publication) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 2.069s\n\nOK\n",
+  "actual_Apple_signing_notarization_or_published_release": "not executed; requires macOS/release secrets/actual release",
+  "checks": [
+    "bash syntax",
+    "actionlint",
+    "git diff --check"
+  ]
+}

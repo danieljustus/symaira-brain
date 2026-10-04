@@ -1,0 +1,475 @@
+{
+  "source": "51e42aa959fbec416f20221db6fa41e8c91b5862",
+  "scope": "lossless original attempts/permissions/API-doc/PATH/VCS failure preservation + actual final Linux gates; original bytes unchanged; executable archives separate",
+  "files": [
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-53711-author/affected-tests.log",
+      "original_sha256": "fde8eea0da3d5c5d89626f4ae2f0c49881b88388a72cec76580a3a5441f8f412",
+      "original_size": 42939,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/000-affected-tests.log.gz",
+      "gzip_sha256": "02187d96c75756759589bc7556980eb6adf9168b0e16a157b4866ac49863ee7f"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-53711-author/initial-driver.exit",
+      "original_sha256": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+      "original_size": 4,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/001-initial-driver.exit.gz",
+      "gzip_sha256": "1667a2aa790d68a83c2352393cd402515dabeb53fcbee2a8d0ad98b774e14015"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-53711-modes-author/affected-tests.log",
+      "original_sha256": "feb451014125526e812839e96bc314eaeb783d19b447538905a72c715d33154e",
+      "original_size": 44564,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/002-affected-tests.log.gz",
+      "gzip_sha256": "a2793e430ba0ef977914a451775807c2d9f8acf9582057fc0bebf6a63e9c3154"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-53711-modes-author/core-tests.log",
+      "original_sha256": "0c75cb0299fcb7251d732b74b91f1fa6702c27f033024185f34ae496bca9228c",
+      "original_size": 8073,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/003-core-tests.log.gz",
+      "gzip_sha256": "aecfa86670bbdc95dbb7f2975c5ea1e81b2bf6201b2234cf369e7d1ea0cd24b6"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-53711-modes-author/modes-driver.exit",
+      "original_sha256": "39b8dc3fc8b44765c8e6f1adee04c5b465e555ab791cc42d0d9e810d5b64297c",
+      "original_size": 4,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/004-modes-driver.exit.gz",
+      "gzip_sha256": "1667a2aa790d68a83c2352393cd402515dabeb53fcbee2a8d0ad98b774e14015"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-53711-modes-author/strict-clippy.log",
+      "original_sha256": "36568a5e249e3d5aa30165116ebac695ed31cbe63297a9cf29b1ca9245ba0bdf",
+      "original_size": 1159,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/005-strict-clippy.log.gz",
+      "gzip_sha256": "2422e747ef5f200f73b2e4bc7b5165d836c0c4be551489016010b8faade5569f"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-author/actionlint.log",
+      "original_sha256": "0e7ce0d763b1f7dc2c03c22d074776efe618a7b14288d5053780eddf6ea92853",
+      "original_size": 622,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/006-actionlint.log.gz",
+      "gzip_sha256": "4cdb8036c4959138c56b00dd0d9f2d5b2ff56e8755b9d89f88c974a6f525bd91"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-author/affected-tests.log",
+      "original_sha256": "02d8e139e08ef4840ea93dfe156c6c160d29f4ddbae027baf875c0e7306ab830",
+      "original_size": 45487,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/007-affected-tests.log.gz",
+      "gzip_sha256": "b8bc24ad01632c211f4485559ed2a18406fc75a964604dc71ded32055eb1f6c6"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-author/core-tests.log",
+      "original_sha256": "79e01e41544055fd6758fa18bae7eda3403943e270215c50186c09cdde6c693e",
+      "original_size": 8073,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/008-core-tests.log.gz",
+      "gzip_sha256": "87cbf697ac072beeb5e20e69f91857f20231b5dd25cc55aa1f603feb8cb9b851"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-author/fmt.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_size": 0,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/009-fmt.log.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-author/preflight-driver.exit",
+      "original_sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "original_size": 2,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/010-preflight-driver.exit.gz",
+      "gzip_sha256": "d381e5a9b7c1c71b5fb3fef202103bf4b6098ce288f148735de1ecf61d4e3b75"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-author/strict-clippy.log",
+      "original_sha256": "63e555ea49124af45a7b25dea1c9c97bf7de570d05afb22923e884dc50df974e",
+      "original_size": 1810,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/011-strict-clippy.log.gz",
+      "gzip_sha256": "59e5b3deaba9c6316d32b3531ffdff89f458aa23d7854cf3d672a40f7b2959ca"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-complete-author/actionlint.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_size": 0,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/012-actionlint.log.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-complete-author/affected-tests.log",
+      "original_sha256": "0798ecd09873f49979f54c188f2fc6c34ae89094c96f6e7df0a98c80a2b98bca",
+      "original_size": 44564,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/013-affected-tests.log.gz",
+      "gzip_sha256": "e68a135988673b2216622d22df1662e0418b0b5cbcb7f6f0bca34cddc4276e50"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-complete-author/cli-build.log",
+      "original_sha256": "148008a3dc2c6b75a26c1aeb8523e537a1b87f96be0df0e649a3ed5d2efd948f",
+      "original_size": 60,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/014-cli-build.log.gz",
+      "gzip_sha256": "8ca31e088a4eb84fed38fd8f964fab4150d07ee1a265ed96bb39ea7ee01d0e28"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-complete-author/core-tests.log",
+      "original_sha256": "b48d471a49d375ab518f07c80f8d5ef140926fd4e88089118a78caa905d15f7f",
+      "original_size": 7975,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/015-core-tests.log.gz",
+      "gzip_sha256": "170a0942859e4d7a6b6c5188556e7e6b4ee702d64ba7e63bfb876c9e3781dc27"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-complete-author/fmt.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_size": 0,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/016-fmt.log.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-complete-author/go-build.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_size": 0,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/017-go-build.log.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-complete-author/metadata-failure-retention.json",
+      "original_sha256": "a30fc15719aa2b67c93b13092027f08a95809e3b2016afdd4b2f38f30f633cc0",
+      "original_size": 1894,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/018-metadata-failure-retention.json.gz",
+      "gzip_sha256": "d1ca6d00caa6506d76f858a6be48e28faa82d4d8534172f3e0bb41b9ec763761"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-complete-author/process.log",
+      "original_sha256": "8fb0e6ee931314cc3e1da1bb7a4745ccec18ca3c57b614d7dc98a2c748dbbbd8",
+      "original_size": 517,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/019-process.log.gz",
+      "gzip_sha256": "bdb8c30dbb8cbba8f9606382dd2b372ccd5ef536e810321ac815ccd792ef2074"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-complete-author/strict-clippy.log",
+      "original_sha256": "9ae36bb22d8f0f810a77044760863f70b81405396a32cce477ec08eecd4e6d59",
+      "original_size": 60,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/020-strict-clippy.log.gz",
+      "gzip_sha256": "392520128b188de33aed6030fb06b45e111efbbc9440c6fcd4f3b6df1ade93c7"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-vcs-author/clone.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_size": 0,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/021-clone.log.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-vcs-author/control-flag-input.json",
+      "original_sha256": "05bdb7defb3a5f728c04a5e3d6756e095924ab5d5d693bedb8ac9e26e2b891a9",
+      "original_size": 51085,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/022-control-flag-input.json.gz",
+      "gzip_sha256": "d76a3528cd35bac89ef31544a233494f74f804c96c4cd74dbe857e7c24aeff6e"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-vcs-author/control-flag-input.log",
+      "original_sha256": "b6fd3fba83d0c413166e85f06cf936196327b6728c3e80b067defb4fad78ecc6",
+      "original_size": 107,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/023-control-flag-input.log.gz",
+      "gzip_sha256": "eb95c6d8dc6cca2440a8b6cbed17cd788ddf47a03798942f1feef4368e675c33"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-vcs-author/control-normalization.json",
+      "original_sha256": "f266bf21d508806a1fa9c24032525410d2ff9eddade964980eedb9aa81fce89b",
+      "original_size": 51064,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/024-control-normalization.json.gz",
+      "gzip_sha256": "1cffb020e16fd63590562148fbbc76d14bfe8a721d7c2edbcb48a70bdc11119f"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-vcs-author/control-normalization.log",
+      "original_sha256": "b6fd3fba83d0c413166e85f06cf936196327b6728c3e80b067defb4fad78ecc6",
+      "original_size": 107,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/025-control-normalization.log.gz",
+      "gzip_sha256": "eb95c6d8dc6cca2440a8b6cbed17cd788ddf47a03798942f1feef4368e675c33"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-vcs-author/control-quoted-value.json",
+      "original_sha256": "9890751f3726375ff78a5ba89bfaa7bd30d6b6f40dfc0e2b887ec8cf4741ac7f",
+      "original_size": 50851,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/026-control-quoted-value.json.gz",
+      "gzip_sha256": "4b608bb7c012882f34be3e707b3fe4622ef402cb67b71e8710963999d293d49a"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-vcs-author/control-quoted-value.log",
+      "original_sha256": "b6fd3fba83d0c413166e85f06cf936196327b6728c3e80b067defb4fad78ecc6",
+      "original_size": 107,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/027-control-quoted-value.log.gz",
+      "gzip_sha256": "eb95c6d8dc6cca2440a8b6cbed17cd788ddf47a03798942f1feef4368e675c33"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-vcs-author/go-build-info.log",
+      "original_sha256": "35c0e32718a5c02423462e2eed36d6f09669204e5abcd9f2b4162dd8f32925ba",
+      "original_size": 1838,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/028-go-build-info.log.gz",
+      "gzip_sha256": "a955672ea761f060bac5530c18ebc806e552c573e30381bae947caadb5d5be8f"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-vcs-author/go-build.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_size": 0,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/029-go-build.log.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-vcs-author/process.json",
+      "original_sha256": "3beebd61edfb133ff38a02d11371782546ffc3c2cf7afe6342c70f4d36f6ee90",
+      "original_size": 1053698,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/030-process.json.gz",
+      "gzip_sha256": "870f36854d44b496f8b034bfdbcc0e9e7b7154859daa4aed6aa6a62026d3595b"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-vcs-author/process.log",
+      "original_sha256": "fa6982c57811f024e69f73955e9dc661daa47c6cbc114d3b5c6e4f17d09ab9fa",
+      "original_size": 42,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/031-process.log.gz",
+      "gzip_sha256": "1de42130c38e7c2a162258477b8ad875f4b143e34f243dea6ade497d3e552b51"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-runtime-51e42-novel-author/receipt.json",
+      "original_sha256": "8ecd31920e258e1f8f39cd9fe5d8e885db85ad4663b979121765e9df00380174",
+      "original_size": 1569592,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/032-receipt.json.gz",
+      "gzip_sha256": "2897654c4549f902265083209d2301c0b5939390dd60d3ecb9f5867b389170b0"
+    },
+    {
+      "original": "/tmp/symaira-skills794-53711-checkout-mode-correction.json",
+      "original_sha256": "ecdf3e2d1a19fc570b9c5a456eb86e753d89de451d1b199ba6d28b69d6f1f08f",
+      "original_size": 501003,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/033-symaira-skills794-53711-checkout-mode-correction.json.gz",
+      "gzip_sha256": "b9943095ef62d2f0a2072bc88068105c359c12fafc98a34f69db3f8b986d0275"
+    },
+    {
+      "original": "/tmp/symaira-skills794-51e42-source-validation.json",
+      "original_sha256": "6995d970acbb6cc89b3c0a4d83fe136fb9f6781105dba140d14f37cef70d08ab",
+      "original_size": 2016,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/034-symaira-skills794-51e42-source-validation.json.gz",
+      "gzip_sha256": "5e7be3fe0b91b917351366d5ee1d4c54f509b412f7b9536cd8759a00fc11bb1d"
+    },
+    {
+      "original": "/tmp/symaira-skills794-51e42-original-route-maps.json",
+      "original_sha256": "2191b99cf3e1f7a27eab2f7f050278228fb83bd2bd2ad8b5c4a4de5c1571f169",
+      "original_size": 956,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/035-symaira-skills794-51e42-original-route-maps.json.gz",
+      "gzip_sha256": "c6a40b9d0faa6fdb595bc64048ac38b1f4ee9a289a5a7684eaa318935d7c2bbc"
+    },
+    {
+      "original": "/tmp/symaira-skills794-51e42-original-full-rust-map.json",
+      "original_sha256": "81c86697d8be72e3baaeb495066f8de2de15d1c8608d0aa1b50a199ca857e5e4",
+      "original_size": 117087,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/036-symaira-skills794-51e42-original-full-rust-map.json.gz",
+      "gzip_sha256": "79c5a55bf6ca9f3d38f2ba82a3102cdeb30b88f3fbfd766de07b39bf985620e6"
+    },
+    {
+      "original": "/tmp/symaira-skills794-51e42-go-full-source-map.json",
+      "original_sha256": "9580565be4f9cf5a2866ca6aab9c9d91e8359866997ebd2a7a5d0adf97b76326",
+      "original_size": 713218,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/037-symaira-skills794-51e42-go-full-source-map.json.gz",
+      "gzip_sha256": "bb6f9bf9297f1b3545a28db767d149f480d9aa0bb6f30aeab291b4be7917bec9"
+    },
+    {
+      "original": "/tmp/symaira-skills794-51e42-vcs-diagnosis.json",
+      "original_sha256": "23311aa7aa01c7f239c268443e681df6ef9b2f48a5c42d07852c45829be1c76c",
+      "original_size": 729,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/038-symaira-skills794-51e42-vcs-diagnosis.json.gz",
+      "gzip_sha256": "f5641c247a58f2e432457be09571729a7724b1e8c0f7712be47f9ae2d95ad6b1"
+    },
+    {
+      "original": "/tmp/symaira-skills794-51e42-vcs-dryrun.log",
+      "original_sha256": "719edbf2a5bc07615fa10510c5469a11795f948276a50f34a4781bf8fcb0e4aa",
+      "original_size": 163799,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/039-symaira-skills794-51e42-vcs-dryrun.log.gz",
+      "gzip_sha256": "17ad2ca184ff1341429f9bf70ada4752ce9364407c2e684ac9874644ac4db834"
+    },
+    {
+      "original": "/tmp/symaira-skills794-51e42-novel-author.py",
+      "original_sha256": "1d1c127bda61eb9655827ce20879bc085b0f69842801eb96b461e0176f8ba08a",
+      "original_size": 5887,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/040-symaira-skills794-51e42-novel-author.py.gz",
+      "gzip_sha256": "98503cda985c6f1fafa8e68334e95b7ec2223a05f092d0587fb6a4eb3d282b4a"
+    },
+    {
+      "original": "/tmp/symaira-skills794-51e42-novel-author.log",
+      "original_sha256": "91433f5990468a12267d3e3bc75918eb867aeafa2efb5aa806af9d87d133d6b9",
+      "original_size": 216,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/041-symaira-skills794-51e42-novel-author.log.gz",
+      "gzip_sha256": "1d71703e9df46ff68a872c7728f2e3a8da11158b6a12d7a5576b88092d8282b1"
+    },
+    {
+      "original": "/tmp/symaira-skills794-51e42-owned-go-build.sh",
+      "original_sha256": "fc31d7654ce7ec7b207c04991dec1793cc62c9abcaa7b97de0db9ff3dabccdb4",
+      "original_size": 1353,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/042-symaira-skills794-51e42-owned-go-build.sh.gz",
+      "gzip_sha256": "ee668abaee32775d47063fb34cda0765ce401e41bfe52b850113c5ae9fb7fcab"
+    },
+    {
+      "original": "/tmp/symaira-skills794-53711-initial-preserve.py",
+      "original_sha256": "2d0ec77cf665cd02e3a51928660001c228b5e42180f162bf859607ac92ed5b22",
+      "original_size": 2654,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/043-symaira-skills794-53711-initial-preserve.py.gz",
+      "gzip_sha256": "f7b197055df19da141b0ad3287e2613f1446348c1d1e3bfac94e77280a877e9b"
+    },
+    {
+      "original": "/tmp/symaira-skills794-53711-initial-preserve.log",
+      "original_sha256": "d319708c625641fc43851960c063b21973ae7a45893b528bbd8519c708a7b4b7",
+      "original_size": 194,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/044-symaira-skills794-53711-initial-preserve.log.gz",
+      "gzip_sha256": "af2779072e8c58ed415d904cb0b3b6f691c9811ab1e3ff80d3961c5ee075ce2d"
+    },
+    {
+      "original": "/tmp/symaira-skills794-53711-modes-preserve.py",
+      "original_sha256": "4920e015054c5c433a712e3a03b262275b7e43f76907aa1bc09f711a5b942ce3",
+      "original_size": 2819,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/045-symaira-skills794-53711-modes-preserve.py.gz",
+      "gzip_sha256": "736726af23f6faf309d697d2f5757f233394f0dd1965d92a2b586852d5a6b58c"
+    },
+    {
+      "original": "/tmp/symaira-skills794-53711-modes-preserve.log",
+      "original_sha256": "d74652414236f2751bf4fb2cbe3bbf6b77925344ac4b2abba782e8c126039f76",
+      "original_size": 194,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/046-symaira-skills794-53711-modes-preserve.log.gz",
+      "gzip_sha256": "24a1b6392992d947ae0eb05430f46072281dbb8938c1df7d7b54d521fda7dd8b"
+    },
+    {
+      "original": "/tmp/symaira-skills794-51e42-preflight-preserve.py",
+      "original_sha256": "723d5b828945a2e3e577cd96d3e9153fc2691d63b3187fb74ea7d2341be34a94",
+      "original_size": 2910,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/047-symaira-skills794-51e42-preflight-preserve.py.gz",
+      "gzip_sha256": "afac2a1a98b4167801bdbdef7de6e1b3c4ae393bc920bda4712912e287ba5328"
+    },
+    {
+      "original": "/tmp/symaira-skills794-51e42-preflight-preserve.log",
+      "original_sha256": "1ed111a3ac370ee3874472746a762e8d1583c3434686e725cae445293b6451de",
+      "original_size": 194,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/048-symaira-skills794-51e42-preflight-preserve.log.gz",
+      "gzip_sha256": "5a9faf36433521ca6fcee4707cc75d818287c666f4cc81ec0596f397e6aaa42d"
+    },
+    {
+      "original": "/tmp/symaira-skills794-51e42-final-preserve.py",
+      "original_sha256": "7ed820c4c639fee393e14608c401dc128d5f58f86ac58c586fea65656bae5bfc",
+      "original_size": 3611,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/049-symaira-skills794-51e42-final-preserve.py.gz",
+      "gzip_sha256": "7961b7b3cf7a5c4ce2ca635657c2b778bc893b59cb42431cc9e30a99af84e66f"
+    },
+    {
+      "original": "/tmp/symaira-skills794-51e42-final-preserve.log",
+      "original_sha256": "bb1092f1b3d13b0df0fc69b03305275404ca155a93f60f573b1d292960aa351b",
+      "original_size": 169,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/050-symaira-skills794-51e42-final-preserve.log.gz",
+      "gzip_sha256": "6bc77d2f5a81d31dbbe5d78c599e2cf0fcd40156dfcb22cc8d62b076db5ef3d1"
+    },
+    {
+      "original": "/tmp/symaira-memory803-to-skills794-cache-transfer.json",
+      "original_sha256": "c7bd2890da5ec2548831143858dbb3d5c5523999798e3aa099928bb30bc621f5",
+      "original_size": 987,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/051-symaira-memory803-to-skills794-cache-transfer.json.gz",
+      "gzip_sha256": "1cd03b09ad55fcaa5ab6208750e694f8393f6e482f45d7ab08e2804b0cddc9a2"
+    },
+    {
+      "original": "/tmp/symaira-memory803-to-skills794-cache-transfer.py",
+      "original_sha256": "b392b8cffdc852a93a982301ea926306df11bebf468f1237e8bc15592dd7d5d5",
+      "original_size": 2479,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/052-symaira-memory803-to-skills794-cache-transfer.py.gz",
+      "gzip_sha256": "0a01a14e7f13e2bcc4393efb4628ee9b3274a1cabc4bb0d755ff62d77fe5926e"
+    },
+    {
+      "original": "/tmp/symaira-memory803-to-skills794-cache-transfer.log",
+      "original_sha256": "e9a07c005fdf66cb91f9b76a07b0a822ac0587f3a04c235060f991b18200f995",
+      "original_size": 953,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/053-symaira-memory803-to-skills794-cache-transfer.log.gz",
+      "gzip_sha256": "89a2ca8e87c16db4d09590ce0133deae917ac218ab9724e1153e3c3422d15678"
+    },
+    {
+      "original": "/tmp/symaira-shared-go-cache-retirement.json",
+      "original_sha256": "fd94e7eadff5ddda047ec65aabb10aeb370a1e775320ad1e318406ae32fbe37f",
+      "original_size": 816,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/054-symaira-shared-go-cache-retirement.json.gz",
+      "gzip_sha256": "07ff2a8eab6af8d840e0f3ae48e77a4bb8619a77e3278fc88c4b90e5ed1c03ef"
+    },
+    {
+      "original": "/tmp/symaira-shared-go-cache-retire.py",
+      "original_sha256": "558b797af47c702266be3a14ebc3fa6789eb64c6c77c405898730784d50a2f9f",
+      "original_size": 2484,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/055-symaira-shared-go-cache-retire.py.gz",
+      "gzip_sha256": "47dcb1c5b083f71bf502889f022cedafa0ac1f3b79f4074d96c5eb36d0cfbcaf"
+    },
+    {
+      "original": "/tmp/symaira-shared-go-cache-retire.log",
+      "original_sha256": "a678a789c177b2e5b010a164da3cefa085a91f3626497e4155f0b709f48b6b2f",
+      "original_size": 772,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/056-symaira-shared-go-cache-retire.log.gz",
+      "gzip_sha256": "c015478a197ce3d9510e53dc7d94e14de6e06b1d2f6f44b1b77c33243ed66f2d"
+    },
+    {
+      "original": "/tmp/symaira-shared-go-cache-inventory.json",
+      "original_sha256": "6a0658c2e7f674b349dca1dc67c5e1ceb8bedd8b5c2c547a3b86ed91fe1e8911",
+      "original_size": 140,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/057-symaira-shared-go-cache-inventory.json.gz",
+      "gzip_sha256": "039850ba9439a24b835941bf33e7015c5d287882c2ec54f673c072c675fbc889"
+    },
+    {
+      "original": "/tmp/symaira-shared-go-cache-clean.stdout",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_size": 0,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/058-symaira-shared-go-cache-clean.stdout.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-shared-go-cache-clean.stderr",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_size": 0,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/059-symaira-shared-go-cache-clean.stderr.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-skills794-51e42-retain-proofs.py",
+      "original_sha256": "84905ff88382e6d4c280c18e4c3abd275f6ad5c84882ffc70d7fe2fbb3fc0233",
+      "original_size": 3205,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/060-symaira-skills794-51e42-retain-proofs.py.gz",
+      "gzip_sha256": "6b854b825f4e8aa29113ab456db4d06191c98affdb6e20ab555d50f9dbf19bc4"
+    },
+    {
+      "original": "/workspace/oracles/symaira-skills794-53711-initial-binaries/receipt.json",
+      "original_sha256": "773d910da0ebdb907e438980df02caf68a4d248cc11760f6505913f414f61501",
+      "original_size": 1060596,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/061-receipt.json.gz",
+      "gzip_sha256": "df8d6b705a860aca4eb7ceef43d5a23ccdecbe4256ff3ce4e63fbf0e772312ca"
+    },
+    {
+      "original": "/workspace/oracles/symaira-skills794-53711-modes-binaries/receipt.json",
+      "original_sha256": "7e94c97ce14389bde567329bfa6e2055cc8fe055c6dd38478abbc91a0ff4d567",
+      "original_size": 1063210,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/062-receipt.json.gz",
+      "gzip_sha256": "cd113f07dfd7b14082fffed814b3aec2d8ba451fe6dc60b69bd7d1bb1ff4a819"
+    },
+    {
+      "original": "/workspace/oracles/symaira-skills794-51e42-preflight-binaries/receipt.json",
+      "original_sha256": "e0d6f46fae226cfb258f8ec67796c006e927c2341e5b56d0c43d56667987e219",
+      "original_size": 1063466,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/063-receipt.json.gz",
+      "gzip_sha256": "6f523c1328ce33a18dc19d85cb381427856baddbcb7b9e6154e959981d0685d9"
+    },
+    {
+      "original": "/workspace/oracles/symaira-skills794-51e42-final-binaries/receipt.json",
+      "original_sha256": "25f200b869ad8a0270c73bd811ec010314070754e4681fff2d7b9b19345e73e2",
+      "original_size": 408940,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/064-receipt.json.gz",
+      "gzip_sha256": "9d15a093b01178f0e7499ef3a897f5cc8427ded8c86e6a334905acd0385e7952"
+    },
+    {
+      "original": "/workspace/oracles/symaira-memory803-root-2fe-binaries/receipt.json",
+      "original_sha256": "28beb5898536fd4ddb3a0d3dc2e81e65db2fba3682d16906502b36752682c7a6",
+      "original_size": 461436,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/065-receipt.json.gz",
+      "gzip_sha256": "70745a5c4e8a17e445d573c5da591e364492e03d7cc6f0edfc37dc4257db8bcd"
+    },
+    {
+      "original": "/workspace/oracles/symaira-pr794-faa8f12f6c77-idle-binaries/receipt.json",
+      "original_sha256": "26bbeec4d0262656497379f5ffea487f99941f65dab81d23e95ec122dd1a6892",
+      "original_size": 80727,
+      "retained": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/066-receipt.json.gz",
+      "gzip_sha256": "4c9e490e936be889a5ab4c5fc233cf7df0395ff62ef7727dce9d14067c7a3130"
+    }
+  ]
+}

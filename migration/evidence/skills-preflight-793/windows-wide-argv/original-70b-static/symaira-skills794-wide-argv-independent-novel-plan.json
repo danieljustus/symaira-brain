@@ -1,0 +1,1322 @@
+{
+  "source": "70b76390f372c6f05983f01f5a2b8147356ca39e",
+  "prepared_only": true,
+  "no_process_or_compiler_run": true,
+  "novel_cases": [
+    {
+      "id": "high-quoted-commandline",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00620061006400200000d822005c007400610069006c00"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-quoted-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00200000d88500"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-quoted-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d00850000d82820"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-normalization-once",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00740061007200670065007400",
+        "2d002d002d0000d8"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-bool-before-validation",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00620061006400",
+        "2d002d006400720079002d00720075006e003d0000d8"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-target-before-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d0000d8",
+        "2d002d007400610072006700650074003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-override-bad-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d0000d8",
+        "2d002d007400610072006700650074003d006f00700065006e0063006f0064006500",
+        "2d002d00730063006f00700065003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-end-quoted-commandline",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d006200610064002000ffdb22005c007400610069006c00"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-end-quoted-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d002000ffdb8500"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-end-quoted-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d008500ffdb2820"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-end-normalization-once",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00740061007200670065007400",
+        "2d002d002d00ffdb"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-end-bool-before-validation",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00620061006400",
+        "2d002d006400720079002d00720075006e003d00ffdb"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-end-target-before-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d00ffdb",
+        "2d002d007400610072006700650074003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-end-override-bad-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00ffdb",
+        "2d002d007400610072006700650074003d006f00700065006e0063006f0064006500",
+        "2d002d00730063006f00700065003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-quoted-commandline",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00620061006400200000dc22005c007400610069006c00"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-quoted-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00200000dc8500"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-quoted-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d00850000dc2820"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-normalization-once",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00740061007200670065007400",
+        "2d002d002d0000dc"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-bool-before-validation",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00620061006400",
+        "2d002d006400720079002d00720075006e003d0000dc"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-target-before-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d0000dc",
+        "2d002d007400610072006700650074003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-override-bad-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d0000dc",
+        "2d002d007400610072006700650074003d006f00700065006e0063006f0064006500",
+        "2d002d00730063006f00700065003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-end-quoted-commandline",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d006200610064002000ffdf22005c007400610069006c00"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-end-quoted-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d002000ffdf8500"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-end-quoted-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d008500ffdf2820"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-end-normalization-once",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00740061007200670065007400",
+        "2d002d002d00ffdf"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-end-bool-before-validation",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00620061006400",
+        "2d002d006400720079002d00720075006e003d00ffdf"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-end-target-before-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d00ffdf",
+        "2d002d007400610072006700650074003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-end-override-bad-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00ffdf",
+        "2d002d007400610072006700650074003d006f00700065006e0063006f0064006500",
+        "2d002d00730063006f00700065003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-quoted-commandline",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00620061006400200000d800dc22005c007400610069006c00"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-quoted-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00200000d800dc8500"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-quoted-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d00850000d800dc2820"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-normalization-once",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00740061007200670065007400",
+        "2d002d002d0000d800dc"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-bool-before-validation",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00620061006400",
+        "2d002d006400720079002d00720075006e003d0000d800dc"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-target-before-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d0000d800dc",
+        "2d002d007400610072006700650074003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-override-bad-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d0000d800dc",
+        "2d002d007400610072006700650074003d006f00700065006e0063006f0064006500",
+        "2d002d00730063006f00700065003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-max-quoted-commandline",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d006200610064002000ffdbffdf22005c007400610069006c00"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-max-quoted-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d002000ffdbffdf8500"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-max-quoted-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d008500ffdbffdf2820"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-max-normalization-once",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00740061007200670065007400",
+        "2d002d002d00ffdbffdf"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-max-bool-before-validation",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00620061006400",
+        "2d002d006400720079002d00720075006e003d00ffdbffdf"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-max-target-before-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d00ffdbffdf",
+        "2d002d007400610072006700650074003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-max-override-bad-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00ffdbffdf",
+        "2d002d007400610072006700650074003d006f00700065006e0063006f0064006500",
+        "2d002d00730063006f00700065003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-high-low-quoted-commandline",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00620061006400200000d800d800dc22005c007400610069006c00"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-high-low-quoted-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00200000d800d800dc8500"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-high-low-quoted-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d00850000d800d800dc2820"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-high-low-normalization-once",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00740061007200670065007400",
+        "2d002d002d0000d800d800dc"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-high-low-bool-before-validation",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00620061006400",
+        "2d002d006400720079002d00720075006e003d0000d800d800dc"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-high-low-target-before-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d0000d800d800dc",
+        "2d002d007400610072006700650074003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-high-low-override-bad-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d0000d800d800dc",
+        "2d002d007400610072006700650074003d006f00700065006e0063006f0064006500",
+        "2d002d00730063006f00700065003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-high-low-quoted-commandline",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00620061006400200000dc00d800dc22005c007400610069006c00"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-high-low-quoted-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00200000dc00d800dc8500"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-high-low-quoted-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d00850000dc00d800dc2820"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-high-low-normalization-once",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00740061007200670065007400",
+        "2d002d002d0000dc00d800dc"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-high-low-bool-before-validation",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00620061006400",
+        "2d002d006400720079002d00720075006e003d0000dc00d800dc"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-high-low-target-before-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d0000dc00d800dc",
+        "2d002d007400610072006700650074003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "low-high-low-override-bad-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d0000dc00d800dc",
+        "2d002d007400610072006700650074003d006f00700065006e0063006f0064006500",
+        "2d002d00730063006f00700065003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-high-quoted-commandline",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00620061006400200000d800dcffdb22005c007400610069006c00"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-high-quoted-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00200000d800dcffdb8500"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-high-quoted-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d00850000d800dcffdb2820"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-high-normalization-once",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00740061007200670065007400",
+        "2d002d002d0000d800dcffdb"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-high-bool-before-validation",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00620061006400",
+        "2d002d006400720079002d00720075006e003d0000d800dcffdb"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-high-target-before-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d0000d800dcffdb",
+        "2d002d007400610072006700650074003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "pair-high-override-bad-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d0000d800dcffdb",
+        "2d002d007400610072006700650074003d006f00700065006e0063006f0064006500",
+        "2d002d00730063006f00700065003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-ascii-low-quoted-commandline",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00620061006400200000d8780000dc22005c007400610069006c00"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-ascii-low-quoted-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00200000d8780000dc8500"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-ascii-low-quoted-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d00850000d8780000dc2820"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-ascii-low-normalization-once",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00740061007200670065007400",
+        "2d002d002d0000d8780000dc"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-ascii-low-bool-before-validation",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00620061006400",
+        "2d002d006400720079002d00720075006e003d0000d8780000dc"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-ascii-low-target-before-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d0000d8780000dc",
+        "2d002d007400610072006700650074003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-ascii-low-override-bad-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d0000d8780000dc",
+        "2d002d007400610072006700650074003d006f00700065006e0063006f0064006500",
+        "2d002d00730063006f00700065003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-quote-low-quoted-commandline",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00620061006400200000d8220000dc22005c007400610069006c00"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-quote-low-quoted-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00200000d8220000dc8500"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-quote-low-quoted-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d00850000d8220000dc2820"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-quote-low-normalization-once",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00740061007200670065007400",
+        "2d002d002d0000d8220000dc"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-quote-low-bool-before-validation",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00620061006400",
+        "2d002d006400720079002d00720075006e003d0000d8220000dc"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-quote-low-target-before-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d0000d8220000dc",
+        "2d002d007400610072006700650074003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-quote-low-override-bad-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d0000d8220000dc",
+        "2d002d007400610072006700650074003d006f00700065006e0063006f0064006500",
+        "2d002d00730063006f00700065003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-slash-low-quoted-commandline",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00620061006400200000d85c0000dc22005c007400610069006c00"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-slash-low-quoted-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00200000d85c0000dc8500"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-slash-low-quoted-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d00850000d85c0000dc2820"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-slash-low-normalization-once",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00740061007200670065007400",
+        "2d002d002d0000d85c0000dc"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-slash-low-bool-before-validation",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00620061006400",
+        "2d002d006400720079002d00720075006e003d0000d85c0000dc"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-slash-low-target-before-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d0000d85c0000dc",
+        "2d002d007400610072006700650074003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "high-slash-low-override-bad-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d0000d85c0000dc",
+        "2d002d007400610072006700650074003d006f00700065006e0063006f0064006500",
+        "2d002d00730063006f00700065003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "replacement-quoted-commandline",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d006200610064002000fdff22005c007400610069006c00"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "replacement-quoted-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d002000fdff8500"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "replacement-quoted-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d008500fdff2820"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "replacement-normalization-once",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00740061007200670065007400",
+        "2d002d002d00fdff"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "replacement-bool-before-validation",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00620061006400",
+        "2d002d006400720079002d00720075006e003d00fdff"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "replacement-target-before-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d00fdff",
+        "2d002d007400610072006700650074003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "replacement-override-bad-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00fdff",
+        "2d002d007400610072006700650074003d006f00700065006e0063006f0064006500",
+        "2d002d00730063006f00700065003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "noncharacter-quoted-commandline",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d006200610064002000ffff22005c007400610069006c00"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "noncharacter-quoted-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d002000ffff8500"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "noncharacter-quoted-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d008500ffff2820"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "noncharacter-normalization-once",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00740061007200670065007400",
+        "2d002d002d00ffff"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "noncharacter-bool-before-validation",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00620061006400",
+        "2d002d006400720079002d00720075006e003d00ffff"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "noncharacter-target-before-scope",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d00730063006f00700065003d00ffff",
+        "2d002d007400610072006700650074003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "noncharacter-override-bad-target",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00ffff",
+        "2d002d007400610072006700650074003d006f00700065006e0063006f0064006500",
+        "2d002d00730063006f00700065003d00620061006400"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-wtf-high-flag",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d626164eda0803d76616c7565"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-wtf-high-target",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d7461726765743dc2a0eda080e280a8"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-wtf-high-scope",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d73636f70653de280a8eda080c2a0"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-wtf-high-bool",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d6472792d72756e3deda080"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-wtf-high-normalization",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d746172676574",
+        "2d2d2deda080"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-wtf-low-flag",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d626164edbfbf3d76616c7565"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-wtf-low-target",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d7461726765743dc2a0edbfbfe280a8"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-wtf-low-scope",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d73636f70653de280a8edbfbfc2a0"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-wtf-low-bool",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d6472792d72756e3dedbfbf"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-wtf-low-normalization",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d746172676574",
+        "2d2d2dedbfbf"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-partial-two-flag",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d626164c23d76616c7565"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-partial-two-target",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d7461726765743dc2a0c2e280a8"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-partial-two-scope",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d73636f70653de280a8c2c2a0"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-partial-two-bool",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d6472792d72756e3dc2"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-partial-two-normalization",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d746172676574",
+        "2d2d2dc2"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-partial-three-flag",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d626164e2823d76616c7565"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-partial-three-target",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d7461726765743dc2a0e282e280a8"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-partial-three-scope",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d73636f70653de280a8e282c2a0"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-partial-three-bool",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d6472792d72756e3de282"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-partial-three-normalization",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d746172676574",
+        "2d2d2de282"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-bad-continuation-flag",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d626164803d76616c7565"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-bad-continuation-target",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d7461726765743dc2a080e280a8"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-bad-continuation-scope",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d73636f70653de280a880c2a0"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-bad-continuation-bool",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d6472792d72756e3d80"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-bad-continuation-normalization",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d746172676574",
+        "2d2d2d80"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-mixed-flag",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d62616461ffc3a93d76616c7565"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-mixed-target",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d7461726765743dc2a061ffc3a9e280a8"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-mixed-scope",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d73636f70653de280a861ffc3a9c2a0"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-mixed-bool",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d6472792d72756e3d61ffc3a9"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-mixed-normalization",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d746172676574",
+        "2d2d2d61ffc3a9"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-quote-flag",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d626164ff225c3d76616c7565"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-quote-target",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d7461726765743dc2a0ff225ce280a8"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-quote-scope",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d73636f70653de280a8ff225cc2a0"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-quote-bool",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d6472792d72756e3dff225c"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-quote-normalization",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d746172676574",
+        "2d2d2dff225c"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-newline-flag",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d626164ff0a093d76616c7565"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-newline-target",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d7461726765743dc2a0ff0a09e280a8"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-newline-scope",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d73636f70653de280a8ff0a09c2a0"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-newline-bool",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d6472792d72756e3dff0a09"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "unix-newline-normalization",
+      "platform": "native-Unix",
+      "args_bytes_hex": [
+        "2d2d746172676574",
+        "2d2d2dff0a09"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "portable-repeated-valid-target",
+      "platform": "all-native",
+      "args": [
+        "--target=bad",
+        "--target=opencode",
+        "--scope=bad"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "portable-repeated-empty-target",
+      "platform": "all-native",
+      "args": [
+        "--target=bad",
+        "--target=",
+        "--scope=bad"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "portable-bool-before-target",
+      "platform": "all-native",
+      "args": [
+        "--target=bad",
+        "--dry-run=maybe"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "portable-help-after-target",
+      "platform": "all-native",
+      "args": [
+        "--target=bad",
+        "--help"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "portable-scope-vs-target",
+      "platform": "all-native",
+      "args": [
+        "--scope=bad",
+        "--target=bad"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "portable-stop-bare-dash",
+      "platform": "all-native",
+      "args": [
+        "--target=bad",
+        "-",
+        "--help"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "portable-stop-terminator",
+      "platform": "all-native",
+      "args": [
+        "--target=bad",
+        "--",
+        "--help"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "portable-stop-positional",
+      "platform": "all-native",
+      "args": [
+        "--target=bad",
+        "positional",
+        "--help"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "portable-global-before",
+      "platform": "all-native",
+      "args": [
+        "--json",
+        "--target=bad"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "portable-global-between",
+      "platform": "all-native",
+      "args": [
+        "--target=bad",
+        "--json"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "portable-global-after-terminator",
+      "platform": "all-native",
+      "args": [
+        "--target=bad",
+        "--",
+        "--json"
+      ],
+      "expect": "exact Go/native preflight reports and full unchanged state"
+    },
+    {
+      "id": "inherited-global-output-invalid-wide",
+      "platform": "native-Windows",
+      "args_utf16le_hex": [
+        "2d002d006f00750074007000750074003d0000d8"
+      ],
+      "expect": "separate current-vs-archived-parent inheritance proof, no new Go parity claim"
+    },
+    {
+      "id": "inherited-global-output-missing",
+      "platform": "all-native",
+      "args_utf16le_hex": [
+        "2d002d006f0075007400700075007400"
+      ],
+      "expect": "separate current-vs-archived-parent inheritance proof, no new Go parity claim"
+    },
+    {
+      "id": "inherited-global-output-both-bad",
+      "platform": "all-native",
+      "args_utf16le_hex": [
+        "2d002d007400610072006700650074003d00620061006400",
+        "2d002d006f00750074007000750074003d00620061006400"
+      ],
+      "expect": "separate current-vs-archived-parent inheritance proof, no new Go parity claim"
+    }
+  ],
+  "full_state_includes_mode_hash_size_mtime_and_symlink_targets": true,
+  "seeded_invalid_config_library_and_marker_readonly_preflight_cases": true,
+  "global_output_gaps_separately_classified": true
+}
