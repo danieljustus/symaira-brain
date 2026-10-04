@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -36,16 +37,24 @@ def main():
             run('certificate',['go','run',str(root/'certificate.go'),str(root)],env)
             # Retain only the public trust certificates, never an operator secret.
             shutil.copyfile(root/'ca.pem',evidence/'ca.pem');shutil.copyfile(root/'leaf.pem',evidence/'leaf.pem')
-            run('go-canned',['go','-C',str(source),'test','./internal/usage','-run','^TestRemainingDeviceBaseline768$','-count=1'],env)
+            suffix='.exe'if os.name=='nt'else''
+            go_tests=evidence/('go-provider-tests'+suffix)
+            run('go-tests-build',['go','-C',str(source),'test','-c','-trimpath','-o',str(go_tests),'./internal/usage'],env)
+            run('go-canned',[str(go_tests),'-test.run','^TestRemainingDeviceBaseline768$','-test.count=1'],env)
             bounds=[dict(id=f'transport-bound-{status}-{kind}',responses=[status],kind='transport-bound',length=1048576+(kind=='over'))for status in [200,401]for kind in ['exact','over']]
             peer=Peer(root,cases+statuses+bounds,(evidence/'api.json').read_bytes(),(evidence/'web.json').read_bytes())
             peer.fixtures={row['fixture']:(source/'internal/usage/testdata'/row['fixture']).read_bytes()for row in statuses}
             env.update(USAGE_DEVICE_PEER=peer.address,USAGE_DEVICE_CA=str(root/'ca.pem'),USAGE_REMAINING_OUTPUT=str(evidence/'go-wire.json'))
-            run('go-tls',['go','-C',str(source),'test','./internal/usage','-run','^TestRemainingDeviceBaseline768$','-count=1'],env)
+            run('go-tls',[str(go_tests),'-test.run','^TestRemainingDeviceBaseline768$','-test.count=1'],env)
             env.update(USAGE_STATUS_ROOT=str(root/'status-homes'),USAGE_STATUS_INPUT=str(evidence/'status-input.json'),USAGE_STATUS_GO=str(evidence/'status-go.json'),USAGE_STATUS_HOSTS='|api.kimi.com||www.kimi.com||api.anthropic.com||chatgpt.com||api.github.com||cursor.com||api.moonshot.ai||portal.nousresearch.com||opencode.ai||openrouter.ai|')
-            run('go-status-tls',['go','-C',str(source),'test','./internal/usage','-run','^TestUsageStatusTLS768$','-count=1'],env)
+            run('go-status-tls',[str(go_tests),'-test.run','^TestUsageStatusTLS768$','-test.count=1'],env)
             peer.phase='rust';env.update(USAGE_DEVICE_GO=str(evidence/'go.json'),USAGE_DEVICE_WIRE_GO=str(evidence/'go-wire.json'),USAGE_DEVICE_API=str(evidence/'api.json'),USAGE_DEVICE_WEB=str(evidence/'web.json'),USAGE_DEVICE_NATIVE=str(evidence/'native.json'),USAGE_STATUS_NATIVE=str(evidence/'status-native.json'))
             run('native',['cargo','test','--locked','-p','symbrain-usage','--lib','device_oracle_matches_fresh_go','--','--ignored','--nocapture'],env)
+            matches=re.findall(r'Running unittests [^\n]*\(([^)]+)\)',(evidence/'native.log').read_text());assert len(matches)==1
+            native_test_path=Path(matches[0]);native_test_path=native_test_path if native_test_path.is_absolute()else repo/native_test_path
+            target=Path(env.get('CARGO_TARGET_DIR',repo/'target')).resolve();assert native_test_path.resolve().is_relative_to(target)
+            native_tests=evidence/('native-provider-tests'+suffix);shutil.copy2(native_test_path,native_tests)
+            provider_binaries={kind:dict(path=str(path),bytes=path.stat().st_size,sha256=sha(path))for kind,path in [('go',go_tests),('native',native_tests)]}
             main_wire=list(peer.rows)
             controls=[]
             for kind,field,message in [('missing-device-case','go.json','left: 63'),('device-header-bytes','go.json','complete request/raw header bytes'),('remote-status-diagnostic','status-go.json','actual remote full status/report')]:
@@ -98,7 +107,7 @@ def main():
             paths=[p for p in paths if p.is_file()];source_hashes={str(p.relative_to(repo)):sha(p)for p in paths}
             if not dirty:
                 for p in paths:assert p.read_bytes()==subprocess.check_output(['git','show',head+':'+str(p.relative_to(repo))],cwd=repo)
-            receipt=dict(candidate_head=head,candidate_dirty=dirty,oracle_commit=FROZEN,frozen_source_sha256=frozen,source_sha256=source_hashes,cases=64,original_device_cases=39,exhaustive_trim_cases=25,full_native_reports=57,retained_gates=7,remote_status_strategy_cases=84,negative_controls=controls,argv=argv,argv_controls=argv_controls,cli_build=cli_build,native=native,wire_observations=observations,evidence_sha256={str(p.name):sha(p)for p in evidence.iterdir()if p.is_file()},go_sdk=subprocess.check_output(['go','version'],text=True).strip(),rust_sdk=subprocess.check_output(['rustc','-Vv'],text=True),native_platforms='Linux author proof only; fresh native macOS/Windows required',clock_policy='All actual Go/native snapshot fetched_at retained and bounded by invocation; canonicalization uses the invocation clock plus exact OpenCode3600/86400 second reset offsets relative to actual fetched_at. No fixed/runtime equality claim.',wire_policy='Exact provider-added header bytes except inherited OpenCode X-Server-Instance runtime/fixed identity, request line/body and response compared. All full raw wire requests retained; inherited transport default/header serialization differences are explicit, not exact wire parity.',private_seam='Test-only trust root and resolver/dial pin original HTTPS public hostnames to owned loopback TLS peer, certificate hostname verified; no provider/operator network. Production execute/parser unchanged. Fast TLS proof does not establish deadline/cancel parity.')
+            receipt=dict(candidate_head=head,candidate_dirty=dirty,oracle_commit=FROZEN,frozen_source_sha256=frozen,source_sha256=source_hashes,cases=64,original_device_cases=39,exhaustive_trim_cases=25,full_native_reports=57,retained_gates=7,remote_status_strategy_cases=84,provider_test_binaries=provider_binaries,negative_controls=controls,argv=argv,argv_controls=argv_controls,cli_build=cli_build,native=native,wire_observations=observations,evidence_sha256={str(p.name):sha(p)for p in evidence.iterdir()if p.is_file()},go_sdk=subprocess.check_output(['go','version'],text=True).strip(),rust_sdk=subprocess.check_output(['rustc','-Vv'],text=True),native_platforms='Linux author proof only; fresh native macOS/Windows required',clock_policy='All actual Go/native snapshot fetched_at retained and bounded by invocation; canonicalization uses the invocation clock plus exact OpenCode3600/86400 second reset offsets relative to actual fetched_at. No fixed/runtime equality claim.',wire_policy='Exact provider-added header bytes except inherited OpenCode X-Server-Instance runtime/fixed identity, request line/body and response compared. All full raw wire requests retained; inherited transport default/header serialization differences are explicit, not exact wire parity.',private_seam='Test-only trust root and resolver/dial pin original HTTPS public hostnames to owned loopback TLS peer, certificate hostname verified; no provider/operator network. Production execute/parser unchanged. Fast TLS proof does not establish deadline/cancel parity.')
             output.write_text(json.dumps(receipt,indent=2)+'\n');print('PASS64/57 full native,7 gated; owned TLS comparisons',len(observations))
         finally:
             if peer:
