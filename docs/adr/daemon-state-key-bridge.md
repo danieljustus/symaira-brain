@@ -318,3 +318,14 @@ no assertion, normalization, control, timeout or production behavior. The progre
 journal correctly retained the last completed frame before the failure. All full
 gates must be freshly rerun for the corrected source; old330 executions are not
 presented as its runtime validation.
+
+The complete046 rerun executed all1020 Registry CLI observations and retained
+2178 progress events, then exposed another extraction mistake: the moved
+comparator uses `json` but omitted its import. Its raw observations, failure,
+passed gates and actual ELF receipts remain in `failed-046-registry-json`.
+Restoring the comparator import leaves every function body and assertion
+unchanged. Before fresh successor execution, the corrected comparator and all
+eight controls are also checked against those untouched046 observations; that
+supplemental check is attributed to the original process source, not to new
+process executions. A static global-name audit checks the extracted modules.
+Fresh complete successor gates and independent review remain mandatory.
