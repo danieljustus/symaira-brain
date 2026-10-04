@@ -84,3 +84,13 @@ HEAD/source manifests and actual binary/build-source bindings for the CLI,
 loader probes, child fixture and wrappers. SDK1.26.7, frozen Go sources, native3
 execution and independent review remain required. These are future commands,
 not accepted compiled evidence or a #765/#769 cutover.
+
+The four-finding successor adds `startup_final_cases.py` (94 Unix /82 Windows
+source plans), `startup_final_preparation.py` and `--final-corrections` without
+changing the previous81/69 input prefix. The exact Darwin raw fixture may be
+UNEXECUTED only after its actual owned creation returns errno92; unavailable is
+reported separately from executed/equal and never counts as a control result.
+ASCII/Unicode blocker criteria remain mandatory. The two additional actual
+selector/key controls and all compiled/native acceptance are PREPARED only.
+See `docs/adr/brain-memory-startup-final-source-corrections-765.md` for ownership,
+source-complexity rationale, preserved failures and complete remaining gates.

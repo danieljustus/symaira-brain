@@ -15,6 +15,15 @@ use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 pub use value::{Audit, BrainConfig, Gateway, Modules, Patterns, Servers, UpdateCheck};
 
+/// Parses the byte-valued TOML admission shared by separately typed loaders.
+/// This does not apply Brain defaults, fields or environment precedence.
+///
+/// # Errors
+/// Returns the ordered TOML byte/syntax error without repairing input bytes.
+pub fn parse_document(bytes: &[u8]) -> Result<toml_edit::DocumentMut, GoText> {
+    document::parse(bytes)
+}
+
 /// Returns `CoreKit` `DefaultPath` even without a usable HOME.
 #[must_use]
 pub fn default_path() -> PathBuf {

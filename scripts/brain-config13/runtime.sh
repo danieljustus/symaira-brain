@@ -74,6 +74,10 @@ PY
 startup=(python3 scripts/brain-config13/startup_replay.py --go "$out/go-cli" --native "$out/bin/cli" --sdk "$out/startup-sdk" --secret-peer "$out/bin/brain_config13_secret_peer" --root "$root" --head "$head")
 stage memory-startup "${startup[@]}" --out "$out/memory-startup" || true
 stage memory-startup-corrections "${startup[@]}" --corrections --fixture-sdk "$out/startup-fixture-sdk" --out "$out/memory-startup-corrections" || true
+stage memory-startup-final-corrections "${startup[@]}" --final-corrections --fixture-sdk "$out/startup-fixture-sdk" --out "$out/memory-startup-final-corrections" || true
+for mode in memory-config-database memory-config-key; do
+  stage "memory-startup-control-$mode" "${startup[@]}" --final-corrections --fixture-sdk "$out/startup-fixture-sdk" --control "$mode" --out "$out/memory-startup-control-$mode" || true
+done
 for mode in input-key schema mode missing-key; do
   stage "memory-startup-control-$mode" "${startup[@]}" --control "$mode" --out "$out/memory-startup-control-$mode" || true
 done

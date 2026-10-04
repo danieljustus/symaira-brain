@@ -80,7 +80,8 @@ def fixture(root, case):
         paths['rotation']=str(root/'project/blocked/new/jwt.secrets')
     if case.get('raw_secret_blocker'):
         block = root/'project'/os.fsdecode(b'blocked-\xff\xe2\x82')
-        block.write_bytes(b'owned immutable raw blocker')
+        from startup_fixture_admission import create_raw_blocker
+        create_raw_blocker(block)
         config = root/'config/symmemory/config.toml'
         config.write_bytes(b'[jwt]\nsecret_path="unused"\n')
         case.setdefault('env', {})['SYMMEMORY_JWT_SECRET_PATH'] = str(block/'new/jwt.secret')

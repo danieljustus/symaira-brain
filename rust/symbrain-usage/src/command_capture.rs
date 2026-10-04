@@ -121,4 +121,3 @@ fn terminate_child(child: &mut std::process::Child) {
     let _ = child.kill();
     let _ = child.wait();
 }
-

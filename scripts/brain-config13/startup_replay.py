@@ -3,6 +3,7 @@ from pathlib import Path
 import argparse,base64,copy,gzip,hashlib,json,os,re,shutil,subprocess,time,sys
 import startup_cases as fixtures
 import startup_state as state
+from startup_fixture_admission import UnavailableRawFixture
 
 
 def primary(case,paths):
@@ -73,28 +74,45 @@ def main():
     p.add_argument('--head',required=True)
     p.add_argument('--case')
     p.add_argument('--corrections',action='store_true')
+    p.add_argument('--final-corrections',action='store_true')
     p.add_argument('--fixture-sdk',type=Path)
-    p.add_argument('--control',choices=['input-key','schema','mode','missing-key','missing-trigger','changed-trigger','added-view','changed-view'])
+    p.add_argument('--control',choices=['input-key','schema','mode','missing-key','missing-trigger','changed-trigger','added-view','changed-view','memory-config-database','memory-config-key'])
     a=p.parse_args();a.out.mkdir(exist_ok=False)
     assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=a.root,text=True).strip()==a.head
     assert not subprocess.check_output(['git','status','--porcelain'],cwd=a.root)
     assert shutil.disk_usage(a.out).free>=700*1024*1024
     rows=[];keys=[];salts=[];report=dict(source_head=a.head,go_sha256=state.sha(a.go.read_bytes()),native_sha256=state.sha(a.native.read_bytes()),sdk_sha256=state.sha(a.sdk.read_bytes()),secret_peer_sha256=state.sha(a.secret_peer.read_bytes()),runner_sha256=state.sha(Path(__file__).read_bytes()),actual_platform=os.name,rows=rows,control=a.control,scope='Owned Memory live constructors; every raw byte retained. Only generated key/engine role entropy and interval-bound schema_migrations.applied_at have explicit local observation contracts; original strict102 snapshots untouched.')
     def persist():
-        report.update(total=len(rows),equal=sum(not r.get('differences',['pending'])for r in rows),generated_key_repetition_unique=len(keys)==len(set(keys)),rotation_salt_nonce_repetition_unique=len(salts)==len(set(salts)))
+        report.update(total=len(rows),executed=sum('differences' in r for r in rows),unavailable=sum(r.get('status')=='UNEXECUTED' for r in rows),equal=sum('differences' in r and not r['differences'] for r in rows),generated_key_repetition_unique=len(keys)==len(set(keys)),rotation_salt_nonce_repetition_unique=len(salts)==len(set(salts)))
         (a.out/'report.json').write_text(json.dumps(report,indent=2)+'\n')
-    if a.corrections:
+    if a.corrections or a.final_corrections:
         import startup_correction_cases
-        planned=startup_correction_cases
+        if a.final_corrections:
+            import startup_final_cases
+            planned=startup_final_cases
+        else:planned=startup_correction_cases
         assert a.fixture_sdk and a.fixture_sdk.is_file()
         report['fixture_sdk_sha256']=state.sha(a.fixture_sdk.read_bytes())
     else:planned=fixtures
     for case in planned.cases():
         if a.case and case['id']!=a.case:continue
-        if a.control and case['id']!=('legacy-rotation-valid'if a.control=='input-key'else'generated-default'):continue
+        selected_control_case = ('final-memory-marker-global-fffe' if a.control in ('memory-config-database','memory-config-key') else 'legacy-rotation-valid' if a.control=='input-key' else 'generated-default')
+        if a.control and case['id'] != selected_control_case: continue
         root=a.out/'owned-live';row=dict(case=json.loads(json.dumps(case,default=lambda value: {'bytes_base64':state.b64(value)})),observations={});rows.append(row)
         for label,binary in [('go',a.go),('native',a.native)]:
-            assert not root.exists();paths=planned.fixture(root,case)
+            assert not root.exists()
+            try: paths=planned.fixture(root,case)
+            except UnavailableRawFixture as error:
+                assert not a.control and not row['observations'], 'control/partly executed fixture is not unavailable'
+                assert case['id'] == 'corrected-secret-nested-raw-blocker'
+                row.update(status='UNEXECUTED', fixture_admission=error.observation,
+                    fixture_state_before_cleanup=state.snapshot(root,a.out))
+                shutil.rmtree(root)
+                assert not root.exists()
+                row['fixture_cleanup_complete']=True
+                persist()
+                break
+
             if 'encrypted_plaintext'in case:
                 data=json.dumps(dict(Primary=state.b64(primary(case,paths)),Plaintext=state.b64(case['encrypted_plaintext']))).encode()
                 built=subprocess.run([str(a.fixture_sdk.resolve())],input=data,capture_output=True,timeout=10)
@@ -129,6 +147,8 @@ def main():
                     executable.write_bytes(source);executable.chmod(0o755)
                     row.setdefault('signal_provider_source',{})[label]=state.retain(source,a.out)
             if label=='native'and a.control=='input-key':base['JWT_SECRET_KEY']='owned-mutated-key'
+            if label=='native'and a.control=='memory-config-database':base['SYMMEMORY_DATABASE_PATH']='owned-mutated.db'
+            if label=='native'and a.control=='memory-config-key':base['SYMMEMORY_JWT_SECRET']='owned-mutated-key'
             before=state.snapshot(root,a.out);start=time.time()
             actual=subprocess.run([str(binary.resolve()),'mcp','--profile-file',str(root/'profile.toml')],cwd=root/'project',env=base,input=b'',capture_output=True,timeout=20);end=time.time()
             if label=='native'and a.control=='schema':
@@ -173,6 +193,7 @@ def main():
                 obs['crypto']['unchanged_authenticated_fixture']=bool(unchanged_fixture)
                 if result.returncode==0 and not unchanged_fixture:salts.append(payload[:28])
             row['observations'][label]=obs;persist();shutil.rmtree(root)
+        if row.get('status') == 'UNEXECUTED': continue
         go,native=row['observations']['go'],row['observations']['native']
         # Retain raw entropy in each record while comparing only its format;
         # equality of generated random bytes is neither required nor fabricated.
@@ -182,15 +203,17 @@ def main():
         row['differences']=compare(go,native,case,paths,root)
         persist()
     persist()
-    assert rows and all('differences'in row for row in rows)
+    assert rows and all('differences'in row or row.get('status')=='UNEXECUTED' for row in rows)
     if a.control:
         assert len(rows)==1 and rows[0]['differences'],'actual owner/input/state mutant escaped'
+        if a.control=='memory-config-database':assert 'complete-file-set' in rows[0]['differences']
+        if a.control=='memory-config-key':assert 'stderr_base64' in rows[0]['differences']
         if a.control in ('missing-trigger','changed-trigger','added-view','changed-view'):
             assert 'full-SQL-facts/defaults/appRows/FTS'in rows[0]['differences']
             left,right=[state.program_inventory(rows[0]['observations'][label]['sql']['raw_schema']) for label in ('go','native')]
             assert left!=right,'intended schema-program mutation absent'
     else:
-        assert all(not row['differences']for row in rows),[(row['case']['id'],row['differences'])for row in rows if row['differences']]
+        assert all(not row.get('differences',[])for row in rows),[(row['case']['id'],row['differences'])for row in rows if row.get('differences')]
         assert report['generated_key_repetition_unique']and report['rotation_salt_nonce_repetition_unique']
 
 if __name__=='__main__':main()

@@ -22,9 +22,26 @@ def save(path, record):
 def source(root, out):
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root).decode().strip()
     assert not subprocess.check_output(["git", "status", "--porcelain"], cwd=root)
+    final_path = root / "migration/evidence/brain-config13/startup-four-final-corrections/source-updates.json"
+    final = json.loads(final_path.read_bytes()) if final_path.exists() else {}
+    changes = final.get("changes", {})
+    if final:
+        subprocess.run(["git", "merge-base", "--is-ancestor", final["parent"], head], cwd=root, check=True)
+        for name, record in changes.items():
+            original = subprocess.check_output(["git", "show", final["parent"] + ":" + name], cwd=root)
+            assert sha(original) == record["parent_sha256"], name
+            assert sha((root / name).read_bytes()) == record["current_sha256"], name
+        for name, expected in final.get("added_source_sha256", {}).items():
+            assert sha((root / name).read_bytes()) == expected, name
+    def current_hash(name, expected):
+        if name in changes:
+            assert changes[name]["parent_sha256"] == expected, (name, "historical source phase differs")
+            return changes[name]["current_sha256"]
+        return expected
     review = root / "migration/evidence/brain-config13/startup-review-corrections"
     current = json.loads((review / "checkpoint.json").read_bytes())
     for name, expected in current["candidate_source_sha256"].items():
+        expected = current_hash(name, expected)
         actual = (root / name).read_bytes()
         assert sha(actual) == expected, name
         immutable = subprocess.check_output(["git", "show", "HEAD:" + name], cwd=root)
@@ -45,6 +62,7 @@ def source(root, out):
         if name in updates:
             assert updates[name]["original_sha256"] == expected, name
             expected = updates[name]["current_sha256"]
+        expected = current_hash(name, expected)
         assert sha((root / name).read_bytes()) == expected, name
     for name, expected in checkpoint["pinned_source_sha256"].items():
         assert sha(Path(name).read_bytes()) == expected, name
@@ -64,7 +82,7 @@ def source(root, out):
     save(out / "source.json", dict(head=head, source={name: sha((root/name).read_bytes()) for name in files},
          validated_checkpoint_entries=len(checkpoint["candidate_source_sha256"]),
          pinned_references=len(references), all_frozen_go_files=len(independent["frozen_source"]),
-         references=references, explicit_source_updates=updates, clean=True))
+         references=references, explicit_source_updates=updates, final_source_updates=final, clean=True))
 
 
 def binaries(root, out, target):

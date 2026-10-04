@@ -80,12 +80,16 @@ fn load_checked() -> Option<Config> {
 }
 
 fn merge(config: &mut Config, path: &std::path::Path) -> Option<()> {
-    let content = match std::fs::read_to_string(path) {
+    let content = match std::fs::read(path) {
         Ok(content) => content,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Some(()),
         Err(_) => return None,
     };
-    let document = content.parse::<toml_edit::DocumentMut>().ok()?;
+    merge_bytes(config, &content)
+}
+
+fn merge_bytes(config: &mut Config, content: &[u8]) -> Option<()> {
+    let document = symbrain_core::config::resolved::parse_document(content).ok()?;
     for &(path, kind) in FIELDS {
         let mut item = document.as_item();
         for segment in path.split('.') {
@@ -141,3 +145,7 @@ fn apply(config: &mut Config, path: &str, value: &str) {
         _ => {}
     }
 }
+
+#[cfg(test)]
+#[path = "config_document_tests.rs"]
+mod document_tests;
