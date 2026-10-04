@@ -1,10 +1,13 @@
 //! Validate native skills sync flags before any filesystem work.
 
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsString;
 use std::io::Write;
 
-use symbrain_core::config::format_go_quoted;
+use symbrain_core::config::format_go_quoted_bytes as format_go_quoted;
 use symbrain_core::exit;
+
+#[path = "skills_sync_bytes.rs"]
+mod bytes;
 
 const USAGE: &str = "Usage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n";
 
@@ -16,14 +19,14 @@ pub(super) struct Flags {
 
 pub(super) fn parse(args: &[OsString], stderr: &mut dyn Write) -> Result<Flags, u8> {
     // Go normalizes the entire vector, including separated flag values, once.
-    let args = crate::normalize_flags(args);
+    let args = bytes::normalize(args);
     let mut dry_run = false;
-    let mut target = OsString::new();
-    let mut scope = OsString::from("user");
+    let mut target = Vec::new();
+    let mut scope = b"user".to_vec();
     let mut index = 0;
     while index < args.len() {
         let raw = &args[index];
-        let arg = raw.as_encoded_bytes();
+        let arg = raw.as_slice();
         if arg == b"--" || arg == b"-" || !arg.starts_with(b"-") {
             break;
         }
@@ -37,13 +40,13 @@ pub(super) fn parse(args: &[OsString], stderr: &mut dyn Write) -> Result<Flags, 
             .position(|byte| *byte == b'=')
             .unwrap_or(arg.len());
         let name = &arg[name_start..name_end];
-        let inline = (name_end < arg.len()).then(|| suffix(raw, name_end + 1));
+        let inline = (name_end < arg.len()).then(|| raw[name_end + 1..].to_vec());
         match name {
             b"h" | b"help" => return flag_error(stderr, None),
             b"dry-run" => {
-                dry_run = match inline.as_deref().map(OsStr::to_str) {
-                    None | Some(Some("1" | "t" | "T" | "true" | "TRUE" | "True")) => true,
-                    Some(Some("0" | "f" | "F" | "false" | "FALSE" | "False")) => false,
+                dry_run = match inline.as_deref().map(std::str::from_utf8) {
+                    None | Some(Ok("1" | "t" | "T" | "true" | "TRUE" | "True")) => true,
+                    Some(Ok("0" | "f" | "F" | "false" | "FALSE" | "False")) => false,
                     _ => {
                         return flag_error(
                             stderr,
@@ -81,7 +84,7 @@ pub(super) fn parse(args: &[OsString], stderr: &mut dyn Write) -> Result<Flags, 
                 return raw_flag_error(
                     stderr,
                     "flag provided but not defined: -",
-                    &span(raw, name_start, name_end),
+                    &raw[name_start..name_end],
                 );
             }
         }
@@ -92,17 +95,17 @@ pub(super) fn parse(args: &[OsString], stderr: &mut dyn Write) -> Result<Flags, 
 
 fn validate(
     dry_run: bool,
-    raw_target: &OsStr,
-    raw_scope: &OsStr,
+    raw_target: &[u8],
+    raw_scope: &[u8],
     stderr: &mut dyn Write,
 ) -> Result<Flags, u8> {
-    let raw_target = trim_target(raw_target);
-    let target = raw_target.to_str();
+    let raw_target = bytes::trim_target(raw_target);
+    let target = std::str::from_utf8(raw_target).ok();
     let known = symbrain_skills::default_targets();
     if !target.is_some_and(|value| value.is_empty() || known.iter().any(|name| name == value)) {
         let quote = target.map_or_else(
             || format_go_quoted(raw_target),
-            |value| format_go_quoted(OsStr::new(value)),
+            |value| format_go_quoted(value.as_bytes()),
         );
         let _ = writeln!(
             stderr,
@@ -111,7 +114,7 @@ fn validate(
         );
         return Err(exit::USAGE);
     }
-    let scope = match raw_scope.to_str().map(str::trim) {
+    let scope = match std::str::from_utf8(raw_scope).ok().map(str::trim) {
         Some("" | "user") => "user",
         Some("project") => "project",
         _ => {
@@ -130,62 +133,10 @@ fn validate(
     })
 }
 
-fn trim_target(value: &OsStr) -> &OsStr {
-    #[cfg(unix)]
-    {
-        use std::os::unix::ffi::OsStrExt;
-        // Go TrimSpace stops at invalid UTF-8. Decode only boundary runes so
-        // invalid interior bytes survive unchanged in the diagnostic.
-        let whitespace = |bytes: &[u8]| {
-            std::str::from_utf8(bytes).is_ok_and(|text| {
-                let mut chars = text.chars();
-                chars.next().is_some_and(char::is_whitespace) && chars.next().is_none()
-            })
-        };
-        let mut bytes = value.as_bytes();
-        while let Some(width) = (1..=bytes.len().min(4)).find(|&n| whitespace(&bytes[..n])) {
-            bytes = &bytes[width..];
-        }
-        while let Some(width) =
-            (1..=bytes.len().min(4)).find(|&n| whitespace(&bytes[bytes.len() - n..]))
-        {
-            bytes = &bytes[..bytes.len() - width];
-        }
-        OsStr::from_bytes(bytes)
-    }
-    #[cfg(not(unix))]
-    {
-        value.to_str().map_or(value, |text| OsStr::new(text.trim()))
-    }
-}
-
-fn suffix(arg: &OsStr, offset: usize) -> OsString {
-    span(arg, offset, arg.as_encoded_bytes().len())
-}
-
-fn span(arg: &OsStr, start: usize, end: usize) -> OsString {
-    #[cfg(unix)]
-    {
-        use std::os::unix::ffi::{OsStrExt, OsStringExt};
-        OsString::from_vec(arg.as_bytes()[start..end].to_vec())
-    }
-    #[cfg(not(unix))]
-    {
-        OsString::from(&arg.to_string_lossy()[start..end])
-    }
-}
-
-fn raw_flag_error(stderr: &mut dyn Write, prefix: &str, operand: &OsStr) -> Result<Flags, u8> {
+fn raw_flag_error(stderr: &mut dyn Write, prefix: &str, operand: &[u8]) -> Result<Flags, u8> {
     let _ = stderr.write_all(prefix.as_bytes());
-    // Go writes unquoted flag operands. Unix argv bytes must remain distinct
-    // from a valid U+FFFD; Windows argv undergoes UTF-16 replacement in Go.
-    #[cfg(unix)]
-    {
-        use std::os::unix::ffi::OsStrExt;
-        let _ = stderr.write_all(operand.as_bytes());
-    }
-    #[cfg(not(unix))]
-    let _ = stderr.write_all(operand.to_string_lossy().as_bytes());
+    // Go emits unquoted operands: Unix raw argv or Windows lossless WTF-8.
+    let _ = stderr.write_all(operand);
     let _ = stderr.write_all(b"\n");
     flag_error(stderr, None)
 }

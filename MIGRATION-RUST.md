@@ -291,3 +291,14 @@ for example `make GO_ORACLE_REF=<commit> rust-check parity-smoke`.
 
 The SwiftUI applications remain Swift. Their CLI JSON contracts are migration
 inputs, not candidates for translation to Rust.
+
+### Skills sync Windows raw argv follow-up (#793 / #794)
+
+Source preparation corrects the earlier Windows replacement assumption: pinned
+Go 1.26.7 preserves unpaired UTF-16 surrogates as WTF-8. Skills sync now keeps
+its normalized argv as raw Go byte vectors and uses the existing byte quote
+formatter. The original 315 cases, 459-test checkpoint and native CI proofs
+remain historical acceptance of their exact source. New native Windows wide
+CreateProcessW comparisons, unchanged Unix315 regression, affected tests/strict
+checks and independent review are pending; copied SDK source is no Windows
+runtime evidence. This does not complete broader Skills/Rust cutover.
