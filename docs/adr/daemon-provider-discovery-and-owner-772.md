@@ -49,7 +49,8 @@ PATHEXT only, Go converts its Windows WTF-8 environment string through
 strings.ToLower: invalid UTF-8 consumes one byte per replacement, and simple
 Unicode15 case mappings do not use Rust's different full/newer expansions.
 The small187-range lowercase data is extracted from the pinned SDK with source
-SHA receipt. It affects only this Windows extension field. Raw unpaired PATH
+SHA receipt and the SDK's complete Go BSD notice retained beside the data. It
+affects only this Windows extension field. Raw unpaired PATH
 units, raw PATHEXT units and Lstat hardlink/symlink controls are required native
 observations, not source-only proof.
 
