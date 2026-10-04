@@ -41,6 +41,10 @@ def build_probe(root):
 
 
 def configure(case, root, env, probe):
+    if case.escaping_home:
+        home = root / case.escaping_home
+        home.mkdir()
+        env["HOME"] = str(home)
     if case.raw_home:
         env["HOME"] = str(root / os.fsdecode(b"home\xff\xe2\x82"))
     if case.home_lexical:
@@ -51,7 +55,7 @@ def configure(case, root, env, probe):
         elif case.home_lexical=="symlink-parent":
             (root/"owner/nested").mkdir(parents=True)
             (root/"link").symlink_to("owner/nested",target_is_directory=True)
-            home=str(root/"link")+"/../home"
+            home=str(root/"link")+"/../"+Path(env["HOME"]).name
         env["HOME"]=home
         if os.name=="nt":env["USERPROFILE"]=home
     legacy.setup_release_fixture(root, env)

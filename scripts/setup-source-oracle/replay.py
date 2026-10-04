@@ -113,6 +113,13 @@ def cases():
     for lexical in ("dot","parent","slash"):
         add("managed-home-"+lexical,home_lexical=lexical)
     if os.name!="nt":add("managed-home-symlink-parent",home_lexical="symlink-parent")
+    if os.name != "nt":
+        escaped = os.fsdecode(b"home\xff\xef\xbf\xbd\xe2\x82&<>\xe2\x80\xa8\xe2\x80\xa9")
+        for json_out in (False, True):
+            for fault in (False, True):
+                args = ["setup", "--from-source", "<source>", "--modules", "browse"] + (["--json"] if json_out else [])
+                add(f"escaped-home-source-json-{json_out}-ancestor-{fault}", args,
+                    raw_home=escaped, home_lexical="parent", escaped_ancestor=fault)
     return result
 
 
@@ -207,6 +214,8 @@ def configure(case,root,go,tool):
             home=str(root/"link")+"/../home"
         env["HOME"]=home
         if os.name=="nt":env["USERPROFILE"]=home
+    if case.get("escaped_ancestor"):
+        (root / case["raw_home"] / ".symaira").write_bytes(b"owned ancestor obstruction")
     if case.get("remove_browse"):shutil.rmtree(source/"browse")
     if case.get("root")=="missing":source=source/"missing"
     if case.get("root")=="file":source=source/"file";source.write_text("owned root file")

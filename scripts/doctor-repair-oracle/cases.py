@@ -22,6 +22,7 @@ class Case:
     home_fallback: bool = False
     home_lexical: str | None = None
     bin_fault: str | None = None
+    escaping_home: str | None = None
 
 
 def cases():
@@ -155,4 +156,10 @@ def cases():
              provenance=b'{"source":"brain-source","receiver_commit":"kept until explicit force"}',verifier=True),
         Case("verified-force-corrupt",args=("doctor","--fix","--force-release"),version=b'{"version":"0.0.0"}',
              provenance=b'{bad',verifier=True)))
+    if __import__('os').name != 'nt':
+        escaped = __import__('os').fsdecode(b"home\xff\xef\xbf\xbd\xe2\x82&<>\xe2\x80\xa8\xe2\x80\xa9")
+        for lexical, fault in (("parent", None), ("symlink-parent", None), ("parent", "parent")):
+            result.append(Case(f"escaped-home-doctor-{lexical}-fault-{fault}",
+                args=("doctor", "--fix", "--force-release"), verifier=True,
+                escaping_home=escaped, home_lexical=lexical, bin_fault=fault))
     return result

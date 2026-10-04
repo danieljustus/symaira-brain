@@ -13,6 +13,7 @@ mod activity_cli;
 mod audit_cli;
 mod config_cli;
 mod doctor_cli;
+mod go_json_escape;
 pub mod guard_cli;
 mod harness_cli;
 mod health_probe;

@@ -53,6 +53,29 @@ def managed_boundary(lexical=None, raw=False, fault=None):
     return setup
 
 
+def escaping_fixture(raw=False, lexical=False, fault=None):
+    def setup(root, env):
+        # Preserve the original review bytes on Unix. Windows filenames cannot
+        # contain <>; its valid owner still exercises &, U+2028 and U+2029.
+        name = "home&" + ("<>" if os.name != "nt" else "") + "\u2028\u2029"
+        if raw:
+            name = os.fsdecode(b"home\xff\xef\xbf\xbd\xe2\x82&<>\xe2\x80\xa8\xe2\x80\xa9")
+        home = root / name
+        home.mkdir()
+        env["HOME"] = str(home) + ("/../" + name + "/./" if lexical else "")
+        if os.name == "nt":
+            env["USERPROFILE"] = env["HOME"]
+        legacy.setup_release_fixture(root, env)
+        if fault:
+            parent = home / ".symaira"
+            if fault == "bin":
+                parent.mkdir()
+                (parent / "bin").write_bytes(b"owned leaf obstruction")
+            else:
+                parent.write_bytes(b"owned ancestor obstruction")
+    return setup
+
+
 def cases():
     result = [case for case in legacy.CASES if case.name.startswith("setup_")]
     payloads = [
@@ -135,6 +158,13 @@ def cases():
             for lexical in (None,"symlink-parent"):
                 result.append(legacy.Case(f"managed-owner-{lexical}-{json_out}",args,
                               setup=managed_boundary(raw=lexical is None,lexical=lexical),mutating=True))
+    for raw in ((False, True) if os.name != "nt" else (False,)):
+        for fix in (False, True):
+            for json_out in (False, True):
+                args = ("setup",) + (("--fix",) if fix else ()) + ("--allow-unsigned",) + (("--json",) if json_out else ())
+                for fault, lexical in ((None, False), (None, True), ("bin", True), ("parent", True)):
+                    result.append(legacy.Case(f"json-escape-raw-{raw}-fix-{fix}-fault-{fault}-lexical-{lexical}-json-{json_out}", args,
+                        setup=escaping_fixture(raw, lexical, fault), mutating=True))
     return result
 
 
@@ -225,6 +255,8 @@ def main():
         'rust/symbrain-cli/src/setup_config.rs', 'rust/symbrain-cli/src/vault_config.rs',
         'rust/symbrain-managed/src/provenance.rs', 'rust/symbrain-managed/src/provenance_json.rs',
         'rust/symbrain-managed/src/install.rs', 'rust/symbrain-managed/src/version_probe.rs',
+        'rust/symbrain-cli/src/go_json_escape.rs', 'rust/symbrain-managed/src/lib.rs',
+        'rust/symbrain-core/src/go_text.rs', 'rust/symbrain-core/src/json_string.rs',
         'scripts/setup-repair-oracle/replay.py', 'scripts/rust-differential.py')}
     Path(report).write_text(json.dumps(data, indent=2) + "\n")
     return code

@@ -357,8 +357,9 @@ fn finish(
     stderr: &mut dyn Write,
 ) -> u8 {
     if json
-        && serde_json::to_writer(&mut *stdout, report)
-            .and_then(|()| writeln!(stdout).map_err(serde_json::Error::io))
+        && serde_json::to_string(report)
+            .map(|text| crate::go_json_escape::escape(&text))
+            .and_then(|text| writeln!(stdout, "{text}").map_err(serde_json::Error::io))
             .is_err()
     {
         let _ = writeln!(stderr, "{prefix}: encode JSON");
@@ -370,3 +371,7 @@ fn finish(
         exit::GENERIC
     }
 }
+
+#[cfg(test)]
+#[path = "setup_json_tests.rs"]
+mod json_tests;

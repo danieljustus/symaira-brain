@@ -234,7 +234,7 @@ pub(super) fn run(
         report.results.push(result);
     }
     if json {
-        let bytes = serde_json::to_string(&report).map(|text| go_html_escape(&text));
+        let bytes = serde_json::to_string(&report).map(|text| crate::go_json_escape::escape(&text));
         if let Err(error) = bytes
             .map_err(std::io::Error::other)
             .and_then(|text| writeln!(stdout, "{text}"))
@@ -312,12 +312,4 @@ fn failed(stderr: &mut dyn Write, error: impl AsRef<[u8]>, code: u8) -> u8 {
     let _ = stderr.write_all(error.as_ref());
     let _ = stderr.write_all(b"\n");
     code
-}
-
-fn go_html_escape(text: &str) -> String {
-    text.replace('&', "\\u0026")
-        .replace('<', "\\u003c")
-        .replace('>', "\\u003e")
-        .replace('\u{2028}', "\\u2028")
-        .replace('\u{2029}', "\\u2029")
 }
