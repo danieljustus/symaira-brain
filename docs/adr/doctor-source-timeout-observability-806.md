@@ -72,3 +72,25 @@ upgrade, Go production mutation or test projection is justified by this review.
 Root independently executes all111 original Source pairs at clean7ea3cfb. All111 exact observations match; the journal retains893 events and111 complete pairs, including successful actual native descendant cleanup. Actual wrong-exit and wrong-source children are rejected on exactly their intended fields. A separate real controlled Python child reaches the unchanged25-second watchdog (25.07s): NUL/FF stdout/stderr and all256 marker bytes survive in a failed journal before owned fixture teardown. This establishes diagnostic losslessness, not a new production timeout or a Windows cause.
 
 All288 current-source/four frozen-Go bindings and300 production files identical to fully compiled58fe50 are checked. The exact independently reviewed Rust executable is restored from its archive, while Go CLI9337009 was freshly compiled earlier; no fresh Rust compilation is claimed for this diagnostic-only successor. The Windows ignored test and external watchdog remain source-only; actual current-head Windows/macOS execution is required. Complete Root raw proofs are retained in migration/evidence/doctor-source-progress-806/independent-7ea. The original9fa API failure, complete original CI timeout and original c672 process-proof lineage remain immutable.
+
+
+At current8359, Linux job111372955009 reaches all four release setup output
+pairs, then fails before source output comparison with `ModuleNotFoundError:
+progress`. Direct replay starts with its own script directory on sys.path;
+source-output, pipe, human-pipe and embedded probes import it from another
+directory. Bind the sibling progress module by its resolved file path, with
+a specific module name, so invocation directory and unrelated Python modules
+cannot choose the logger. Keep every replay function AST, observation, case,
+writer contract, timeout and control unchanged.
+
+Root reproduces the original import failure with isolated Python from /tmp and
+loads the repaired module successfully. The whole actual Linux output suite
+passes with the archived exact58 native CLI/embedded writer and frozen Go CLI:
+all original output, source, pipe, human-pipe and embedded comparisons, plus
+all four actual control groups rejecting15 intended differences and preserving
+three partial-human controls. No fresh Rust build or native Windows pass is
+claimed. Full original provider log, ZIP/member hashes, raw reports and source
+are retained in import-boundary-8359. The actual Windows journal now narrows
+the first explicit-browse-json timeout to after captured Go-version output and
+before the build invocation; polling versus cleanup still needs native phase
+evidence. Keep the25-second budget and execute the owned diagnostic watchdog.
