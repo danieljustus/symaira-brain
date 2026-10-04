@@ -131,3 +131,19 @@ correction. Its complete retained Linux observations use the unchanged archived
 production executables, not a new Rust build or a Windows result. The independent
 review and isolated Python import/foreign-module control are retained separately
 in `import74dd-independent`; every replay function/class AST is unchanged.
+
+
+Root independently approves e7541a33 solely to run the owned nativeWindows
+diagnostic. All2166 protected Rust/Go/Cargo/child-source paths remain exact
+against8359 except the intentionally prepared ignored test. All35 complete
+Windows-original and Root Linux import archives roundtrip and ten original
+source mappings bind the actual failed head. All eight replay function/class
+ASTs and its25-second watchdog are unchanged. Workspace formatting/actionlint
+pass. This review adds no new Rust compiler/product/nativeWindows execution.
+The diagnostic builds one exact source-bound Windows test artifact, preserves
+entry/result phases, complete raw streams and owned forced cleanup under its
+separate12-second watchdog. Its report explicitly keeps production acceptance
+and proof of the original CLI timeout cause false. Inspect its real Windows
+result together with the unchanged first-case Source journal before changing
+production cleanup. Full current-head native-three-OS/protected checks remain
+required for merging; previous Linux acceptance never substitutes for them.
