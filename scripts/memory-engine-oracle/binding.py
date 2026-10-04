@@ -3,14 +3,17 @@ import hashlib
 import json
 from pathlib import Path
 import platform
-import subprocess
+import reader
+import owner
+import dependencies
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 GO_REF = "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
 HELPER = "internal/memory/contextassembler/zz_native_engine_oracle_test.go"
 PROOF_FILES = {"scripts/memory-engine-oracle/" + name for name in (
-    "binding.py", "build.py", "replay.py", "trusted.json", "cases.json", "oracle_test.go.txt")}
+    "binding.py", "build.py", "replay.py", "trusted.json", "cases.json", "oracle_test.go.txt",
+    "owner.py", "dependencies.py", "reader.py", "dependency-inputs.json")}
 
 
 def digest(path):
@@ -18,7 +21,7 @@ def digest(path):
 
 
 def git(checkout, *arguments):
-    return subprocess.check_output(["git", *arguments], cwd=checkout, text=True).strip()
+    return reader.query(checkout, *arguments, text=True).strip()
 
 
 def trusted():
@@ -43,10 +46,9 @@ def source_map(checkout, role):
     selected = [p for p in names if
                 (role == "go" and (p.endswith(".go") or p.endswith("/go.mod") or
                                     p.endswith("/go.sum") or p in ("go.mod", "go.sum"))) or
-                (role == "rust" and (p.endswith(".rs") or p.endswith("Cargo.toml") or
-                                      p == "Cargo.lock" or p in PROOF_FILES))]
+                role in ("rust", "owned")]
     requests = "".join("HEAD:" + name + "\n" for name in selected).encode()
-    packed = subprocess.check_output(["git", "cat-file", "--batch"], cwd=checkout, input=requests)
+    packed = reader.query(checkout, "cat-file", "--batch", input=requests)
     position, result = 0, {}
     for name in selected:
         end = packed.index(b"\n", position)
@@ -75,8 +77,10 @@ def sources(go_source, rust_source):
         raise ValueError("oracle is not immutable dcddcef0")
     if rust_source.resolve() != ROOT.resolve():
         raise ValueError("native source must own this reviewed runner")
-    if git(rust_source, "status", "--porcelain", "--untracked-files=no"):
+    if git(rust_source, "status", "--porcelain", "--untracked-files=all"):
         raise ValueError("native checkout changed")
+    if git(rust_source, "ls-files", "--others", "--ignored", "--exclude-standard"):
+        raise ValueError("native checkout has ignored unbound inputs")
     original = source_map(go_source, "go")
     if original != plan["frozen_go_sources"]:
         raise ValueError("oracle source/dependency map differs from independent frozen map")
@@ -89,7 +93,13 @@ def sources(go_source, rust_source):
         raise ValueError("materialized helper differs from immutable original helper")
     if digest(HERE / "oracle_test.go.txt") != plan["go_helper_sha256"]:
         raise ValueError("original Go helper changed")
-    return {"go": original, "rust": source_map(rust_source, "rust"),
+    native = source_map(rust_source, "rust")
+    owned_go = source_map(go_source, "owned")
+    owned_go[HELPER] = plan["go_helper_sha256"]
+    owner.configurations(rust_source)
+    owner.physical(rust_source, native, "rust")
+    owner.physical(go_source, owned_go, "go")
+    return {"go": original, "rust": native, "owned_go": owned_go,
             "go_commit": GO_REF, "rust_commit": git(rust_source, "rev-parse", "HEAD")}
 
 
@@ -118,19 +128,26 @@ def snapshot(go_source, rust_source, go_sdk, rust_sdk, binaries):
 
 
 def verify_receipt(receipt, observed, receipt_path):
-    if receipt.get("kind") != "actual-memory760-build-v1" or receipt.get("snapshot") != observed:
+    if receipt.get("kind") != "actual-memory760-build-v2" or receipt.get("snapshot") != observed:
         raise ValueError("actual source/SDK/input/executable build binding required")
     steps = receipt.get("steps", [])
     if len(steps) != 2 or [x.get("role") for x in steps] != ["go", "rust"]:
         raise ValueError("both actual builds required")
     expected = {
         "go": [str(Path(observed["SDK_roots"]["go"]) / "bin/go"), "test", "-p=2", "-mod=readonly", "-c", "-o", observed["binary_paths"]["go"], "./internal/memory/contextassembler"],
-        "rust": [str(Path(observed["SDK_roots"]["rust"]) / "bin/cargo"), "build", "--locked", "--offline", "-p", "symbrain-memory", "--example", "engine_probe"],
+        "rust": [str(Path(observed["SDK_roots"]["rust"]) / "bin/cargo"), "build", "--locked", "--offline", "-p", "symbrain-memory", "--example", "engine_probe", "--message-format=json"],
     }
     for step in steps:
         role = step["role"]
-        if step.get("argv") != expected[role] or str(Path(step["cwd"]).resolve()) != observed["checkouts"][role]:
+        owned = Path(receipt["owned_checkouts"][role]).resolve()
+        if step.get("argv") != expected[role] or str(Path(step["cwd"]).resolve()) != str(owned):
             raise ValueError("actual build command/source owner changed")
+        names = observed["sources"]["owned_go" if role == "go" else "rust"]
+        for name, expected_hash in names.items():
+            if digest(owned / name) != expected_hash:
+                raise ValueError("actual owned build source changed")
+        owner.configurations(owned)
+        owner.physical(owned, names, role)
         for stream in ("stdout", "stderr"):
             if digest(receipt_path.parent / (role + ".build." + stream)) != step.get(stream + "_sha256"):
                 raise ValueError("actual build log changed")
@@ -138,3 +155,20 @@ def verify_receipt(receipt, observed, receipt_path):
             raise ValueError("failed or incomplete actual build")
     if receipt.get("builder_sha256") != digest(HERE / "build.py"):
         raise ValueError("actual builder source changed")
+    if (receipt_path.parent / "empty-git-config").read_bytes() != b"":
+        raise ValueError("owned Git configuration changed")
+    env = owner.environment(receipt_path.parent, Path(observed["SDK_roots"]["go"]),
+                            Path(observed["SDK_roots"]["rust"]), Path(receipt["target"]))
+    if receipt.get("environment") != env:
+        raise ValueError("actual hermetic build environment changed")
+    cache_roots = receipt["dependency_roots"]
+    inputs = dependencies.admit(Path(observed["checkouts"]["go"]), Path(observed["checkouts"]["rust"]),
+                                Path(cache_roots["go"]), Path(cache_roots["rust"]))
+    if inputs != receipt.get("dependency_inputs"):
+        raise ValueError("dependency source bodies changed")
+    for role, folder in (("go", "go-modcache"), ("rust", "cargo-home")):
+        dependencies.staged(receipt_path.parent / folder, inputs[role])
+    artifact = owner.artifact((receipt_path.parent / "rust.build.stdout").read_bytes(),
+                              Path(receipt["target"]), Path(receipt["owned_checkouts"]["rust"]) / "rust/symbrain-memory/Cargo.toml")
+    if str(artifact) != observed["binary_paths"]["rust"]:
+        raise ValueError("native executable is not actual Cargo artifact")

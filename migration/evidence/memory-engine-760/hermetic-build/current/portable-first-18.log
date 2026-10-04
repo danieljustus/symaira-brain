@@ -1,0 +1,23 @@
+test_arbitrary_sdk_labels_and_empty_builds_are_rejected (test_binding.Admission.test_arbitrary_sdk_labels_and_empty_builds_are_rejected) ... ok
+test_caller_selected_oracle_hash_map_is_rejected (test_binding.Admission.test_caller_selected_oracle_hash_map_is_rejected) ... ok
+test_caller_selected_oracle_identity_is_rejected (test_binding.Admission.test_caller_selected_oracle_identity_is_rejected) ... ok
+test_changed_executable_cannot_reuse_actual_build_receipt (test_binding.Admission.test_changed_executable_cannot_reuse_actual_build_receipt) ... ok
+test_missing_platform_cannot_become_native_acceptance (test_binding.Admission.test_missing_platform_cannot_become_native_acceptance) ... ok
+test_omitted_reordered_and_changed_case_are_rejected (test_binding.Admission.test_omitted_reordered_and_changed_case_are_rejected) ... ok
+test_original_full60_and_three_controls_are_retained (test_binding.Admission.test_original_full60_and_three_controls_are_retained) ... ok
+test_wrong_sdk_bytes_are_rejected (test_binding.Admission.test_wrong_sdk_bytes_are_rejected) ... ok
+test_broken_config_and_source_symlinks_are_rejected (test_ownership.Ownership.test_broken_config_and_source_symlinks_are_rejected) ... ok
+test_cargo_archive_git_database_and_metadata_have_body_checks (test_ownership.Ownership.test_cargo_archive_git_database_and_metadata_have_body_checks) ... ok
+test_current_and_ancestor_cargo_config_are_rejected (test_ownership.Ownership.test_current_and_ancestor_cargo_config_are_rejected) ... ok
+test_duplicate_and_traversal_go_archive_are_rejected (test_ownership.Ownership.test_duplicate_and_traversal_go_archive_are_rejected) ... ok
+test_extra_build_script_and_ignored_source_are_rejected (test_ownership.Ownership.test_extra_build_script_and_ignored_source_are_rejected) ... ok
+test_go_archive_source_and_mod_body_are_checked (test_ownership.Ownership.test_go_archive_source_and_mod_body_are_checked) ... ok
+test_only_observed_current_owned_cargo_artifact_is_accepted (test_ownership.Ownership.test_only_observed_current_owned_cargo_artifact_is_accepted) ... ok
+test_operator_flags_wrappers_and_workspace_are_not_inherited (test_ownership.Ownership.test_operator_flags_wrappers_and_workspace_are_not_inherited) ... ok
+test_private_cache_never_copies_config_or_extracted_foreign_source (test_ownership.Ownership.test_private_cache_never_copies_config_or_extracted_foreign_source) ... ok
+test_tracked_assets_stage_exactly_and_extra_assets_do_not (test_ownership.Ownership.test_tracked_assets_stage_exactly_and_extra_assets_do_not) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 0.060s
+
+OK

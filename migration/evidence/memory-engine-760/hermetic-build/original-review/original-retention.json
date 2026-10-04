@@ -1,0 +1,124 @@
+{
+  "source": "c5e8a4db8e9159fbaecd88c791f1486b496fc755",
+  "files": [
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/full-scope-verification.json",
+      "size": 4958,
+      "sha256": "c99d7fc1fa5f20f83dade80e2e44b80db191ba12f9b3b89fa98f5edfde9b4cf0",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/000-full-scope-verification.json.gz",
+      "archive_sha256": "a66eace80e9084ff9086d66a690498a97cfcfbba7e3a09d957bb6790b185f412"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/independent-review.md",
+      "size": 11669,
+      "sha256": "92d24b8240d4323e29fe64078decce942ab17e7c8d5e6a31cd749ab79c2fce61",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/001-independent-review.md.gz",
+      "archive_sha256": "b742cf1aca3b2b7e11601b84436edde9e2fcc777a36146b0a512432bc81f5536"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/native-input-projection.json",
+      "size": 1365,
+      "sha256": "8dd47eec9b78cb8b8d1a2c2e6eecd47a0819f42967bace37e1b653b972ec6338",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/002-native-input-projection.json.gz",
+      "archive_sha256": "e0e806f8d76782ec711dcad682fcd1365ab412fc3ee38d5e153650cc1d500033"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/native-input-projection.log",
+      "size": 1365,
+      "sha256": "8dd47eec9b78cb8b8d1a2c2e6eecd47a0819f42967bace37e1b653b972ec6338",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/003-native-input-projection.log.gz",
+      "archive_sha256": "e0e806f8d76782ec711dcad682fcd1365ab412fc3ee38d5e153650cc1d500033"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/native-input-projection.py",
+      "size": 2093,
+      "sha256": "c69d9a23667e6bec686cd3f16a45a5f8da74fc8bb90e10074b0a357a3fd121dc",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/004-native-input-projection.py.gz",
+      "archive_sha256": "97670c7859ea84b11a79a2b682c912be22ad094a627fb7e5534e4911c6c2727b"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/native-source-projection/.cargo/config.toml",
+      "size": 61,
+      "sha256": "5bf53d1356a116678967b4b5cde72c00b249517452b1b3ae1d4f2d8f57ff52e1",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/005-config.toml.gz",
+      "archive_sha256": "1dc15730bc7c6402b7d65ffb4de0fab7e320b729b8230d6af4c550b12b5accec"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/native-source-projection/Cargo.lock",
+      "size": 65682,
+      "sha256": "95657aeeba4f12cde301afa9aaf6b01b021b0d7892ed4cad6907a1db390785c0",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/006-Cargo.lock.gz",
+      "archive_sha256": "dec159f30e634396f5390fdd70293196e64a67bec35b0c72710763ad8b3e9765"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/native-source-projection/Cargo.toml",
+      "size": 2785,
+      "sha256": "982fdf67af364bb689371f888d79e4662bcbd2d7088dec0d7a2aa85f308a0155",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/007-Cargo.toml.gz",
+      "archive_sha256": "8f04632cf3129938206afdb1c2296f5a56973610edcf8bd45f730a0980909fea"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/native-source-projection/rust/symbrain-memory/Cargo.toml",
+      "size": 743,
+      "sha256": "418e282e1fc9ab7ebac4d7324ee8e39b2242acdd4ecf7193fd9477753cfe0a0d",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/008-Cargo.toml.gz",
+      "archive_sha256": "7a5b025dcc83f4ae0e85a414c70a2c829e066ea2ca36013bd45d1b895d69446d"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/native-source-projection/rust/symbrain-memory/build.rs",
+      "size": 70,
+      "sha256": "137d99c08d1e7f06752dbb2f9611c60e91e4648bf39d80177fb75127f74b01f7",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/009-build.rs.gz",
+      "archive_sha256": "c2bf5d823da296b783dc3ff47200fafc36a97e32ff6300e592fc0479350ae357"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/native-source-projection/rust/symbrain-memory/src/lib.rs",
+      "size": 1138,
+      "sha256": "58bcff7259c7325cca460b9e2757b563aaefd6e485a0e10a706f601913a57e8e",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/010-lib.rs.gz",
+      "archive_sha256": "3730cd2c73bac217e5c7542f2f1236f10d8366dd0a158862f5313239a2197be1"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/portable-tests.stderr",
+      "size": 106,
+      "sha256": "b7daee1dd6b93b470651c1d1c37682587bf0709c0b1d5aeb367d88677fc6475e",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/011-portable-tests.stderr.gz",
+      "archive_sha256": "dcb398ed4575c625994456f4caa1bc7167d589a33ad092648e19dc35d154895f"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/portable-tests.stdout",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/012-portable-tests.stdout.gz",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/reviewer-protected-expectation-correction.json",
+      "size": 313,
+      "sha256": "b7b1d036e7dea47d5613aacf717d93dfe745c1988a58e03d227a43e30b6b54b8",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/013-reviewer-protected-expectation-correction.json.gz",
+      "archive_sha256": "ee82d29b98bbefc1690c9ced5149f3a3069d0ba5c4c632cb8f11ea966fc894ec"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/sdk-bytes-verification.json",
+      "size": 2035329,
+      "sha256": "95928fc5775d5237d91808aa957b69d3a30b11267b0a68fbbf0e4a0e56d543e9",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/014-sdk-bytes-verification.json.gz",
+      "archive_sha256": "53d6df152596638daf00592e35dba5a51747e4850d67afe375ed8c92789cd0ee"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/verification.json",
+      "size": 36725,
+      "sha256": "939a7d47fc897e679d14141830c2c8ec14581508db61987ee793a142fc0beda0",
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/015-verification.json.gz",
+      "archive_sha256": "d8f00f4d5b81884e9432e734d7591fb876b2ecd69339989ee4d7ffde0c1a821a"
+    },
+    {
+      "path": "/workspace/review-artifacts/memory760-c5e-review-794/review-receipt.json",
+      "sha256": "28c0b2da209eb859874e24b54805cebd5648adfc587749949fdf4dc29fa6c75d",
+      "size": 4475,
+      "archive": "/workspace/review-proof/memory760-hermetic-preparation/016-review-receipt.json.gz",
+      "archive_sha256": "383b895f604f7ce56af1872acdb7759b5113fdd62444926057eb4d4672902899"
+    }
+  ]
+}

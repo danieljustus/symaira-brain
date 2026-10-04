@@ -34,7 +34,7 @@ class Admission(unittest.TestCase):
             proof.sources(Path("unused"), proof.ROOT)
 
     def test_caller_selected_oracle_hash_map_is_rejected(self):
-        with patch.object(proof, "git", side_effect=[proof.GO_REF, ""]), patch.object(proof, "source_map", return_value={"altered.go": "invented"}), self.assertRaisesRegex(ValueError, "independent frozen map"):
+        with patch.object(proof, "git", side_effect=[proof.GO_REF, "", ""]), patch.object(proof, "source_map", return_value={"altered.go": "invented"}), self.assertRaisesRegex(ValueError, "independent frozen map"):
             proof.sources(Path("unused"), proof.ROOT)
 
     def test_wrong_sdk_bytes_are_rejected(self):
@@ -47,7 +47,7 @@ class Admission(unittest.TestCase):
 
     def test_changed_executable_cannot_reuse_actual_build_receipt(self):
         before = {"binaries": {"go": "original", "rust": "original"}}
-        receipt = {"kind": "actual-memory760-build-v1", "snapshot": copy.deepcopy(before)}
+        receipt = {"kind": "actual-memory760-build-v2", "snapshot": copy.deepcopy(before)}
         before["binaries"]["go"] = "changed-after-process"
         with self.assertRaisesRegex(ValueError, "executable build binding"):
             proof.verify_receipt(receipt, before, Path("unused"))
@@ -56,7 +56,7 @@ class Admission(unittest.TestCase):
         with self.assertRaises(ValueError):
             proof.verify_receipt({"go_sdk": "not-an-actual-SDK-receipt"}, {}, Path("unused"))
         with self.assertRaisesRegex(ValueError, "both actual builds"):
-            proof.verify_receipt({"kind": "actual-memory760-build-v1", "snapshot": {}, "steps": []}, {}, Path("unused"))
+            proof.verify_receipt({"kind": "actual-memory760-build-v2", "snapshot": {}, "steps": []}, {}, Path("unused"))
 
 
 if __name__ == "__main__":

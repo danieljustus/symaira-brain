@@ -9,6 +9,7 @@ from pathlib import Path
 import subprocess
 import sys
 import tempfile
+sys.dont_write_bytecode = True
 
 import binding as proof
 
@@ -61,12 +62,20 @@ def main():
     args.output = args.output.resolve()
     args.output.mkdir(parents=True, exist_ok=False)
     here = Path(__file__).resolve().parent
-    cases = proof.cases()
-    binding = json.loads(args.binding.read_bytes())
-    binaries = {"go": args.go_test.resolve(strict=True),
-                "rust": args.rust_probe.resolve(strict=True)}
-    before = proof.snapshot(args.go_source, args.rust_source, args.go_sdk, args.rust_sdk, binaries)
-    proof.verify_receipt(binding, before, args.binding)
+    args.binding = args.binding.resolve()
+    try:
+        cases = proof.cases()
+        binding = json.loads(args.binding.read_bytes())
+        binaries = {"go": args.go_test.resolve(strict=True),
+                    "rust": args.rust_probe.resolve(strict=True)}
+        before = proof.snapshot(args.go_source, args.rust_source, args.go_sdk, args.rust_sdk, binaries)
+        proof.verify_receipt(binding, before, args.binding)
+    except (ValueError, OSError, subprocess.CalledProcessError) as error:
+        rejection = {"status": "FAIL", "admission_error": str(error),
+                     "runner_sha256": digest(Path(__file__)), "product_processes": 0}
+        (args.output / "receipt.json").write_text(json.dumps(rejection, indent=2) + "\n")
+        print(json.dumps(rejection))
+        return 1
     result = {"status": "FAIL", "cases": len(cases), "control": args.control,
               "cases_sha256": digest(here / "cases.json"),
               "runner_sha256": digest(Path(__file__)),
@@ -122,6 +131,7 @@ def main():
         result["status"] = "PASS" if not failures else "FAIL"
     try:
         result["after"] = proof.snapshot(args.go_source, args.rust_source, args.go_sdk, args.rust_sdk, binaries)
+        proof.verify_receipt(binding, result["after"], args.binding)
         if result["after"] != before or result.get("executable_change_between_runs"):
             failures.append("source/input/SDK/executable identity changed during actual processes")
     except (ValueError, OSError, subprocess.CalledProcessError) as error:
