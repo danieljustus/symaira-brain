@@ -44,7 +44,16 @@ pub(super) fn lookup(
                 .ok_or_else(|| ProbeError::Failed("startup provider argument is not UTF-8".into()))
         })
         .collect::<Result<Vec<_>, _>>()?;
-    let output = run_owned_command(owner, &strings, None, timeout, Ownership::Supervisor)?;
+    let output = run_owned_command(owner, &strings, None, timeout, Ownership::Supervisor).map_err(
+        |error| match error {
+            // Only the explicitly running supervisor may report a missing
+            // provider. A missing owner is a failed ownership boundary.
+            ProbeError::Missing(_) => {
+                ProbeError::Failed("startup provider supervisor unavailable".into())
+            }
+            error => error,
+        },
+    )?;
     if !output.status.success() {
         return Err(ProbeError::Failed(
             "startup provider supervisor failed".into(),

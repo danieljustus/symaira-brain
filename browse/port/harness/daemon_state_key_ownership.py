@@ -211,10 +211,56 @@ def refusals(binary: Path, provider: Path) -> list[dict]:
     return rows
 
 
+def source_boundaries(probe: Path, binary: Path, provider: Path, go: str) -> dict:
+    with tempfile.TemporaryDirectory(prefix="bk-owner-api-", dir=key.registry.process.private_temporary_parent()) as directory:
+        root = Path(directory); env = key.registry.environment(root)
+        executable = root / ("symvault.exe" if os.name == "nt" else "symvault")
+        security = root / "security"
+        for path in (executable, security): shutil.copyfile(provider, path); path.chmod(0o700)
+        control_source = root / "owner-control.go"
+        shutil.copyfile(key.HERE / "state_key_control.go.in", control_source)
+        control = root / ("owner-control.exe" if os.name == "nt" else "owner-control")
+        subprocess.run([go, "build", "-o", str(control), str(control_source)],
+                       env=dict(os.environ, CGO_ENABLED="0", GOTOOLCHAIN="local", GO111MODULE="off"),
+                       capture_output=True, check=True, timeout=120)
+        ledger = root / "queries.jsonl"
+        env.update(PATH=str(root), SYMBROWSE_KEY_PROBE_MODE="4", SYMBROWSE_KEYCHAIN_PROBE_MODE="44",
+                   SYMBROWSE_KEY_PROBE_LEDGER=str(ledger), SYMBROWSE_ENCRYPTION_KEY=key.KEY)
+        rows = []
+        for name, owner, marker, mode in (("missing-supervisor", root / "missing-owner", "", "4"),
+                    ("malformed-supervisor", control, "malformed", "4"),
+                    ("honest-denied-provider", binary, "", "4"),
+                    ("legitimate-provider-absence", binary, "", "3"),
+                    ("false-absence-control", control, "unavailable", "4")):
+            ledger.unlink(missing_ok=True)
+            actual_env = dict(env, SYMBROWSE_STARTUP_OWNER_CONTROL=marker, SYMBROWSE_KEY_PROBE_MODE=mode)
+            result = subprocess.run([str(probe), str(executable), str(owner)], env=actual_env,
+                                    cwd=root, capture_output=True, timeout=5)
+            assert result.returncode == 0 and not result.stderr
+            observation = json.loads(result.stdout)
+            recorded = [json.loads(line) for line in ledger.read_text().splitlines()] if ledger.exists() else []
+            if name == "missing-supervisor":
+                assert observation == {"configured": False, "key_source": "", "error": 'symvault entry "symbrowse/encryption-key": startup provider supervisor unavailable'} and not recorded
+            elif name == "malformed-supervisor":
+                assert observation == {"configured": False, "key_source": "", "error": 'symvault entry "symbrowse/encryption-key": invalid startup provider result'} and not recorded
+            elif name == "honest-denied-provider":
+                assert observation == {"configured": False, "key_source": "", "error": 'symvault entry "symbrowse/encryption-key": exit status 4'} and len(recorded) == 1
+            else:
+                assert observation == {"configured": True, "key_source": "environment", "error": ""}
+                if name == "legitimate-provider-absence": assert len(recorded) == (2 if platform.system() == "Darwin" else 1)
+                else: assert not recorded
+            rows.append({"name": name, "arguments": result.args, "exit": result.returncode,
+                         "stdout": result.stdout.decode(), "stderr": result.stderr.decode(), "queries": recorded,
+                         "control_rejected": name == "false-absence-control" and observation["configured"]})
+        return {"probe_binary_sha256": key.registry.process.digest(probe),
+                "control_binary_sha256": key.registry.process.digest(control), "root": str(root), "cases": rows}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--rust", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument("--rust-source-probe", type=Path, required=True)
     parser.add_argument("--go-tool", default="go")
     args = parser.parse_args(); binary = args.rust.resolve()
     rows = []
@@ -222,6 +268,7 @@ def main() -> int:
         provider = key.key_test_environment.build_provider(Path(root), args.go_tool)
         provider_sha = key.registry.process.digest(provider)
         refusal_rows = refusals(binary, provider)
+        boundaries = source_boundaries(args.rust_source_probe.resolve(), binary, provider, args.go_tool)
         for mode, trigger in (("ab", "normal"), ("4", "normal"), ("descendant", "closed-writer"),
                               ("pipe-holder", "closed-writer"), ("descendant", "helper-deadline"),
                               ("descendant", "daemon-signal"), ("descendant", "client-deadline"),
@@ -234,7 +281,7 @@ def main() -> int:
               "platform": platform.platform(), "rust_binary_sha256": key.registry.process.digest(binary),
               "provider_binary_sha256": provider_sha, "provider_source_sha256": key.registry.process.digest(key.HERE / "state_key_fixture.go.in"),
               "candidate_source_sha256": {name: key.registry.process.digest(ROOT / name) for name in sources},
-              "cases": rows, "refusals": refusal_rows, "unavailable": unavailable(binary), "matches": True,
+              "cases": rows, "source_boundaries": boundaries, "refusals": refusal_rows, "unavailable": unavailable(binary), "matches": True,
               "scope": "explicit Browse CLI startup only; same-name sibling survives; no operator providers; native host evidence only"}
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(report, indent=2) + "\n")

@@ -29,7 +29,7 @@ retained with the original evidence; the original Brain target stays untouched.
 Resolve existing Core `KeyResolver<SystemKeySources>` once during runtime
 construction, before creating an IPC listener. Vault precedes macOS keychain,
 then environment, then absence. Missing vault, missing/uninitialized entry,
-empty provider result and legitimate security exit44 can fall through. Denial,
+empty provider result and legitimate security exit 44 can fall through. Denial,
 malformed keys and bounded provider failure stop startup; they cannot silently
 save plaintext. The existing Core runner owns the fifteen-second bound, output
 limit and child-tree cleanup. The daemon adapts fixed public error contexts and
@@ -211,3 +211,26 @@ The separate inherited root-prefix spelling observation is also retained:
 while actual Go accepts it. This ownership correction does not disguise that
 pre-existing parser gap or claim full #772, native or release acceptance. It needs a
 separate explicit parser contract and actual compatibility correction.
+
+
+### Missing owner is a failed ownership boundary
+
+The otherwise green immutable 407 candidate still classified a missing explicit
+supervisor as a missing vault. An actual Core resolver probe with an owned
+exit 4 provider and public environment key selected environment without querying
+the provider. Its original statically linked executable, source and exact result
+are retained with all 407 gates and executable archives. Treat supervisor spawn
+absence as Failed; only a successfully running supervisor may report genuine
+provider absence. This changes no ordinary Vault or provisioning fallback.
+
+The real Core API probe now tests missing supervisor, malformed result with an
+unknown field, honest denied provider and legitimate provider absence. Missing
+and malformed owners must leave the provider unqueried and return an error;
+denial must return the observed exit 4 failure. Genuine absence still permits
+environment fallback. An actual owned executable control falsely reports vault
+absence and demonstrates rejection of the resulting wrong environment selection;
+on Darwin it separately reports the legitimate owned security-exit 44 absence.
+No real keychain or credentials are queried. The probe resolves only, so it never
+constructs a Store or writes state data. These five cases supplement, rather than
+replace, the eight lifetime cases and all original startup comparisons. All six
+native receipts and independent full review remain required.

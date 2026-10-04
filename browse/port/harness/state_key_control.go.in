@@ -3,12 +3,28 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
 func main() {
+	switch os.Getenv("SYMBROWSE_STARTUP_OWNER_CONTROL") {
+	case "malformed":
+		fmt.Fprint(os.Stderr, `{"result":"Exited","status":0,"unexpected":"field"}`)
+		return
+	case "unavailable":
+		if len(os.Args) > 2 && filepath.Base(os.Args[2]) == "security" {
+			// Darwin's owned absence fixture returns actual security exit44.
+			// This mutant lies only about the denied vault, not the keychain.
+			fmt.Fprint(os.Stderr, `{"result":"Exited","status":11264}`)
+		} else {
+			fmt.Fprint(os.Stderr, `{"result":"Unavailable"}`)
+		}
+		return
+	}
 	if len(os.Args) < 4 {
 		os.Exit(99)
 	}

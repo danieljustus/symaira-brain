@@ -48,7 +48,7 @@ jobs:
         run: |
           set -euo pipefail
           cargo build -p symbrowse-cli --bin symbrowse --release --locked
-          cargo build -p symbrowse-core --example state_key_store_probe --release --locked
+          cargo build -p symbrowse-core --example state_key_store_probe --example startup_key_source_probe --release --locked
 
       - name: Verify native daemon and workspace lint
         run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
@@ -97,7 +97,12 @@ jobs:
             --rust-store-probe "$store_probe" --go-source "$oracle" \
             --out "$RUNNER_TEMP/browse-daemon-state-key.json" \
             2>&1 | tee "$RUNNER_TEMP/browse-daemon-state-key.log"
+          source_probe="$GITHUB_WORKSPACE/browse/target/release/examples/startup_key_source_probe"
+          if [ "${OS:-}" = Windows_NT ]; then
+            source_probe="$(cygpath -m "$source_probe.exe")"
+          fi
           python3 port/harness/daemon_state_key_ownership.py --rust "$rust_binary" \
+            --rust-source-probe "$source_probe" \
             --out "$RUNNER_TEMP/browse-daemon-state-key-ownership.json" \
             2>&1 | tee "$RUNNER_TEMP/browse-daemon-state-key-ownership.log"
           fixture_binary="$RUNNER_TEMP/symbrowse-mcp-go-v0.8.0"
