@@ -1911,6 +1911,7 @@ Go remains the production enforcement path until the full Guard-specific matrix 
 ### Task 10.7: Port memory CLI, MCP tools, sync, and HTTP server
 - Port list/search/set/delete/rules/query-log/sync/serve and all memory MCP schemas.
 - Preserve JWT/secret resolution (`symvault://`, deprecated `vault://`, env fallback), loopback binding, request limits, and encrypted relay compatibility.
+- #762 source checkpoint: existing Memory Store owns cursor/oplog/LWW and transport-independent plain/relay orchestration under `sync/`; full wire model avoids lite-field loss. No compile/runtime acceptance: concrete HTTP/ordered JSON/crypto, actual frozen process comparisons and native three-OS CI remain pending. Real sync and HTTP refusals remain gated; unrelated shared fallback predicates are not removed. See [decision](../docs/adr/memory-native-sync-owner-762.md) and [source contract](../scripts/memory-sync-oracle/CONTRACT.md).
 
 ### Task 10.8: Preserve reachable Memory interfaces
 - Port the embedded web interface with the native HTTP server and preserve its auth/API behavior (#759/#762/#763).

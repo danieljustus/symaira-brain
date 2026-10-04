@@ -1,0 +1,3055 @@
+{
+  "schema": 1,
+  "status": "prepared_not_executed",
+  "frozen_go": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "native_cli_admitted": false,
+  "runtime_count": 0,
+  "families": {
+    "cli": 34,
+    "url": 24,
+    "wire": 40,
+    "store": 49,
+    "runner": 34,
+    "crypto": 30,
+    "http_owner": 19
+  },
+  "cases": [
+    {
+      "id": "CLI-001",
+      "family": "cli",
+      "name": "bare_help",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-002",
+      "family": "cli",
+      "name": "unknown_flag",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-003",
+      "family": "cli",
+      "name": "unknown_format",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-004",
+      "family": "cli",
+      "name": "first_positional",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-005",
+      "family": "cli",
+      "name": "required_remote",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-006",
+      "family": "cli",
+      "name": "relay_passphrase_before_url",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-007",
+      "family": "cli",
+      "name": "token_environment_empty_flag",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-008",
+      "family": "cli",
+      "name": "token_flag_wins",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-009",
+      "family": "cli",
+      "name": "passphrase_environment_empty_flag",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-010",
+      "family": "cli",
+      "name": "passphrase_flag_wins",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-011",
+      "family": "cli",
+      "name": "both_flags_true",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-012",
+      "family": "cli",
+      "name": "both_flags_false_default",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-013",
+      "family": "cli",
+      "name": "pull_false_default",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-014",
+      "family": "cli",
+      "name": "push_false_default",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-015",
+      "family": "cli",
+      "name": "timeout_zero_outer_expired",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-016",
+      "family": "cli",
+      "name": "timeout_negative_outer_expired",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-017",
+      "family": "cli",
+      "name": "timeout_nanosecond",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-018",
+      "family": "cli",
+      "name": "malformed_duration",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-019",
+      "family": "cli",
+      "name": "bad_config_defaults",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-020",
+      "family": "cli",
+      "name": "explicit_db_override",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-021",
+      "family": "cli",
+      "name": "raw_bytes_remote",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-022",
+      "family": "cli",
+      "name": "raw_bytes_token",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-023",
+      "family": "cli",
+      "name": "wide_surrogate_argument",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-024",
+      "family": "cli",
+      "name": "output_closed_pipe",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-025",
+      "family": "cli",
+      "name": "output_embedded_writer",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-026",
+      "family": "cli",
+      "name": "insecure_warning_https",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-027",
+      "family": "cli",
+      "name": "insecure_warning_http",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-028",
+      "family": "cli",
+      "name": "duplicate_remote",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-029",
+      "family": "cli",
+      "name": "normalize_flags_global",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-030",
+      "family": "cli",
+      "name": "literal_double_dash",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-031",
+      "family": "cli",
+      "name": "db_open_error_precedes_request",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-032",
+      "family": "cli",
+      "name": "no_remote_no_store",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-033",
+      "family": "cli",
+      "name": "relay_no_passphrase_no_store",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CLI-034",
+      "family": "cli",
+      "name": "warning_before_db_error",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-001",
+      "family": "url",
+      "name": "https_normal",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-002",
+      "family": "url",
+      "name": "https_uppercase",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-003",
+      "family": "url",
+      "name": "https_path",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-004",
+      "family": "url",
+      "name": "https_opaque",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-005",
+      "family": "url",
+      "name": "https_no_host",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-006",
+      "family": "url",
+      "name": "https_userinfo",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-007",
+      "family": "url",
+      "name": "http_localhost",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-008",
+      "family": "url",
+      "name": "http_mixed_case_localhost",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-009",
+      "family": "url",
+      "name": "http_127_second_address",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-010",
+      "family": "url",
+      "name": "http_ipv6_loopback",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-011",
+      "family": "url",
+      "name": "http_mapped_loopback",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-012",
+      "family": "url",
+      "name": "http_foreign_rejected",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-013",
+      "family": "url",
+      "name": "http_foreign_override",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-014",
+      "family": "url",
+      "name": "http_empty_host",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-015",
+      "family": "url",
+      "name": "http_localhost_suffix",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-016",
+      "family": "url",
+      "name": "http_localhost_trailing_dot",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-017",
+      "family": "url",
+      "name": "malformed_escape",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-018",
+      "family": "url",
+      "name": "invalid_port",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-019",
+      "family": "url",
+      "name": "missing_scheme",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-020",
+      "family": "url",
+      "name": "unsupported_scheme",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-021",
+      "family": "url",
+      "name": "newline_remote",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-022",
+      "family": "url",
+      "name": "fragment_remote",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-023",
+      "family": "url",
+      "name": "raw_query_remote",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "URL-024",
+      "family": "url",
+      "name": "encoded_host",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-001",
+      "family": "wire",
+      "name": "first_object_trailing_json",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-002",
+      "family": "wire",
+      "name": "first_object_trailing_garbage",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-003",
+      "family": "wire",
+      "name": "body_exact_10mib",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-004",
+      "family": "wire",
+      "name": "body_one_over_10mib",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-005",
+      "family": "wire",
+      "name": "error_exact_64k",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-006",
+      "family": "wire",
+      "name": "error_one_over_64k",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-007",
+      "family": "wire",
+      "name": "success_199",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-008",
+      "family": "wire",
+      "name": "error_200",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-009",
+      "family": "wire",
+      "name": "success_299",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-010",
+      "family": "wire",
+      "name": "success_300",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-011",
+      "family": "wire",
+      "name": "error_301",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-012",
+      "family": "wire",
+      "name": "error_401",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-013",
+      "family": "wire",
+      "name": "error_500",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-014",
+      "family": "wire",
+      "name": "error_partial_typed_fields",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-015",
+      "family": "wire",
+      "name": "snake_null_beats_alias",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-016",
+      "family": "wire",
+      "name": "snake_bad_beats_alias",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-017",
+      "family": "wire",
+      "name": "duplicate_snake_last",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-018",
+      "family": "wire",
+      "name": "duplicate_struct_merge",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-019",
+      "family": "wire",
+      "name": "folded_field_names",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-020",
+      "family": "wire",
+      "name": "null_retains_scalar",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-021",
+      "family": "wire",
+      "name": "null_resets_map",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-022",
+      "family": "wire",
+      "name": "null_resets_slice",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-023",
+      "family": "wire",
+      "name": "shrink_regrow_slice",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-024",
+      "family": "wire",
+      "name": "ignored_depth_10000",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-025",
+      "family": "wire",
+      "name": "ignored_depth_10001",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-026",
+      "family": "wire",
+      "name": "invalid_utf8",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-027",
+      "family": "wire",
+      "name": "surrogate_pair",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-028",
+      "family": "wire",
+      "name": "lone_surrogate",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-029",
+      "family": "wire",
+      "name": "bom",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-030",
+      "family": "wire",
+      "name": "integer_overflow",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-031",
+      "family": "wire",
+      "name": "float32_rounding",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-032",
+      "family": "wire",
+      "name": "negative_zero",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-033",
+      "family": "wire",
+      "name": "exponent_boundary",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-034",
+      "family": "wire",
+      "name": "metadata_sorted_html",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-035",
+      "family": "wire",
+      "name": "nil_vs_empty_payload",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-036",
+      "family": "wire",
+      "name": "nullable_memory_pointer",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-037",
+      "family": "wire",
+      "name": "missing_time_zero",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-038",
+      "family": "wire",
+      "name": "fixed_offset_time",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-039",
+      "family": "wire",
+      "name": "go_time_invalid_year",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "WIRE-040",
+      "family": "wire",
+      "name": "base64_blob_newline",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-001",
+      "family": "store",
+      "name": "missing_cursor_zero",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-002",
+      "family": "store",
+      "name": "literal_remote_distinct",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-003",
+      "family": "store",
+      "name": "trailing_slash_remote_distinct",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-004",
+      "family": "store",
+      "name": "cursor_persist_failure",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-005",
+      "family": "store",
+      "name": "cursor_clock_regression",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-006",
+      "family": "store",
+      "name": "cursor_empty_reset",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-007",
+      "family": "store",
+      "name": "new_row_defaults",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-008",
+      "family": "store",
+      "name": "newer_update_preserves_creation",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-009",
+      "family": "store",
+      "name": "newer_update_preserves_validity",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-010",
+      "family": "store",
+      "name": "equal_upsert_skipped",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-011",
+      "family": "store",
+      "name": "older_upsert_skipped",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-012",
+      "family": "store",
+      "name": "equal_delete_wins",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-013",
+      "family": "store",
+      "name": "older_delete_skipped",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-014",
+      "family": "store",
+      "name": "missing_delete_false",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-015",
+      "family": "store",
+      "name": "tombstone_blocks_equal",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-016",
+      "family": "store",
+      "name": "tombstone_allows_newer",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-017",
+      "family": "store",
+      "name": "latest_upsert_hides_delete",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-018",
+      "family": "store",
+      "name": "sync_exclude_literal_string",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-019",
+      "family": "store",
+      "name": "sync_exclude_boolean",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-020",
+      "family": "store",
+      "name": "sync_exclude_other_case",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-021",
+      "family": "store",
+      "name": "staged_included",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-022",
+      "family": "store",
+      "name": "archived_included",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-023",
+      "family": "store",
+      "name": "retired_included",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-024",
+      "family": "store",
+      "name": "expired_working_included",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-025",
+      "family": "store",
+      "name": "entities_not_hydrated",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-026",
+      "family": "store",
+      "name": "evidence_not_hydrated",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-027",
+      "family": "store",
+      "name": "incoming_arrays_not_persisted",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-028",
+      "family": "store",
+      "name": "embedding_dim_zero",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-029",
+      "family": "store",
+      "name": "embedding_dim_wrong",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-030",
+      "family": "store",
+      "name": "embedding_dim_768",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-031",
+      "family": "store",
+      "name": "embedding_binary_signs",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-032",
+      "family": "store",
+      "name": "hash_empty_computed",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-033",
+      "family": "store",
+      "name": "hash_present_preserved",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-034",
+      "family": "store",
+      "name": "audit_insert_failure_ignored",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-035",
+      "family": "store",
+      "name": "audit_update_failure_ignored",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-036",
+      "family": "store",
+      "name": "audit_delete_failure_ignored",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-037",
+      "family": "store",
+      "name": "delete_no_access_feedback",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-038",
+      "family": "store",
+      "name": "malformed_metadata_read_error",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-039",
+      "family": "store",
+      "name": "malformed_timestamp_read_error",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-040",
+      "family": "store",
+      "name": "sqlite_null_type_error",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-041",
+      "family": "store",
+      "name": "memory_keyset_ties",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-042",
+      "family": "store",
+      "name": "delete_keyset_ties",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-043",
+      "family": "store",
+      "name": "delete_continuation_latest_upsert",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-044",
+      "family": "store",
+      "name": "partial_insert_trigger_failure",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-045",
+      "family": "store",
+      "name": "concurrent_row_removed_before_update",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-046",
+      "family": "store",
+      "name": "fts_integrity",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-047",
+      "family": "store",
+      "name": "evidence_cascade",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-048",
+      "family": "store",
+      "name": "entity_rows_survive",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "STORE-049",
+      "family": "store",
+      "name": "no_second_store",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-001",
+      "family": "runner",
+      "name": "plain_both",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-002",
+      "family": "runner",
+      "name": "plain_pull",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-003",
+      "family": "runner",
+      "name": "plain_push",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-004",
+      "family": "runner",
+      "name": "pull_next_cursor_wins",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-005",
+      "family": "runner",
+      "name": "opaque_cursor_form_escape",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-006",
+      "family": "runner",
+      "name": "pull_memories_before_deletes",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-007",
+      "family": "runner",
+      "name": "skipped_row_clock_observed",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-008",
+      "family": "runner",
+      "name": "skipped_delete_clock_observed",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-009",
+      "family": "runner",
+      "name": "batch_199",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-010",
+      "family": "runner",
+      "name": "batch_200",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-011",
+      "family": "runner",
+      "name": "batch_201",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-012",
+      "family": "runner",
+      "name": "mixed_200_and_200",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-013",
+      "family": "runner",
+      "name": "independent_keysets",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-014",
+      "family": "runner",
+      "name": "memory_empty_delete_only",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-015",
+      "family": "runner",
+      "name": "delete_empty_memory_only",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-016",
+      "family": "runner",
+      "name": "no_empty_request",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-017",
+      "family": "runner",
+      "name": "second_page_failure_preserves_first",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-018",
+      "family": "runner",
+      "name": "second_batch_failure_preserves_cursor",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-019",
+      "family": "runner",
+      "name": "rerun_lww_idempotent",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-020",
+      "family": "runner",
+      "name": "persist_failure_preserves_mutations",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-021",
+      "family": "runner",
+      "name": "expiry_no_request_can_succeed",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-022",
+      "family": "runner",
+      "name": "request_deadline_error",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-023",
+      "family": "runner",
+      "name": "caller_deadline_shorter_than_options",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-024",
+      "family": "runner",
+      "name": "no_added_auto_retry",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-025",
+      "family": "runner",
+      "name": "no_added_transaction",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-026",
+      "family": "runner",
+      "name": "relay_push_only_pulls",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-027",
+      "family": "runner",
+      "name": "relay_empty_payload_ignored",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-028",
+      "family": "runner",
+      "name": "relay_skipped_counts_fetched",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-029",
+      "family": "runner",
+      "name": "relay_delete_precedence",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-030",
+      "family": "runner",
+      "name": "relay_outer_inner_identity_unbound",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-031",
+      "family": "runner",
+      "name": "relay_equal_clock_boundary",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-032",
+      "family": "runner",
+      "name": "relay_timestamp_not_keyset",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-033",
+      "family": "runner",
+      "name": "relay_full_page_followup",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "RUNNER-034",
+      "family": "runner",
+      "name": "relay_mutation_before_decrypt_failure",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-001",
+      "family": "crypto",
+      "name": "v1_go_encrypt_native_decrypt",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-002",
+      "family": "crypto",
+      "name": "v1_native_encrypt_go_decrypt",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-003",
+      "family": "crypto",
+      "name": "legacy_go_native",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-004",
+      "family": "crypto",
+      "name": "legacy_native_go",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-005",
+      "family": "crypto",
+      "name": "version_byte_legacy_collision",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-006",
+      "family": "crypto",
+      "name": "v1_bad_auth_legacy_fallback",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-007",
+      "family": "crypto",
+      "name": "wrong_passphrase",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-008",
+      "family": "crypto",
+      "name": "truncated_35",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-009",
+      "family": "crypto",
+      "name": "truncated_36",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-010",
+      "family": "crypto",
+      "name": "truncated_44",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-011",
+      "family": "crypto",
+      "name": "truncated_45",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-012",
+      "family": "crypto",
+      "name": "corrupted_salt",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-013",
+      "family": "crypto",
+      "name": "corrupted_nonce",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-014",
+      "family": "crypto",
+      "name": "corrupted_ciphertext",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-015",
+      "family": "crypto",
+      "name": "corrupted_tag",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-016",
+      "family": "crypto",
+      "name": "ciphertext_tamper",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-017",
+      "family": "crypto",
+      "name": "empty_plaintext",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-018",
+      "family": "crypto",
+      "name": "unicode_passphrase",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-019",
+      "family": "crypto",
+      "name": "raw_utf8_passphrase",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-020",
+      "family": "crypto",
+      "name": "salt_cached_in_batch",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-021",
+      "family": "crypto",
+      "name": "nonce_unique_in_batch",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-022",
+      "family": "crypto",
+      "name": "passphrase_change_rotates_salt",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-023",
+      "family": "crypto",
+      "name": "separate_pull_push_engines",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-024",
+      "family": "crypto",
+      "name": "randomness_failure_cache_key",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-025",
+      "family": "crypto",
+      "name": "randomness_failure_salt",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-026",
+      "family": "crypto",
+      "name": "randomness_failure_nonce",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-027",
+      "family": "crypto",
+      "name": "pbkdf2_exact_600000",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-028",
+      "family": "crypto",
+      "name": "secret_not_in_result",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-029",
+      "family": "crypto",
+      "name": "secret_not_in_normal_stderr",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "CRYPTO-030",
+      "family": "crypto",
+      "name": "secret_not_in_database",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-001",
+      "family": "http_owner",
+      "name": "changes_unauthenticated",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-002",
+      "family": "http_owner",
+      "name": "apply_unauthenticated",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-003",
+      "family": "http_owner",
+      "name": "relay_unauthenticated",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-004",
+      "family": "http_owner",
+      "name": "changes_read_token",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-005",
+      "family": "http_owner",
+      "name": "apply_read_token_denied",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-006",
+      "family": "http_owner",
+      "name": "relay_read_token_denied",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-007",
+      "family": "http_owner",
+      "name": "host_rejected",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-008",
+      "family": "http_owner",
+      "name": "origin_foreign_rejected",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-009",
+      "family": "http_owner",
+      "name": "loopback_binding",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-010",
+      "family": "http_owner",
+      "name": "retained_body_limit",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-011",
+      "family": "http_owner",
+      "name": "apply_uuid_invalid",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-012",
+      "family": "http_owner",
+      "name": "apply_scope_invalid",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-013",
+      "family": "http_owner",
+      "name": "apply_method_invalid",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-014",
+      "family": "http_owner",
+      "name": "changes_policy_filter",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-015",
+      "family": "http_owner",
+      "name": "changes_redaction",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-016",
+      "family": "http_owner",
+      "name": "apply_sync_audit",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-017",
+      "family": "http_owner",
+      "name": "relay_ciphertext_opaque",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-018",
+      "family": "http_owner",
+      "name": "relay_blob_lww",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    },
+    {
+      "id": "HTTP_OWNER-019",
+      "family": "http_owner",
+      "name": "existing_501_not_opened",
+      "status": "prepared_not_executed",
+      "required_observations": [
+        "actual_frozen_owner",
+        "source_bound_native_owner",
+        "raw_process_or_http_transcript",
+        "full_owned_state"
+      ],
+      "expected_source_contract": "CONTRACT.md and frozen owner; runtime expectation must be recorded from actual Go, not inferred acceptance"
+    }
+  ],
+  "controls": [
+    {
+      "id": "CONTROL-CURSOR",
+      "mutation": "Modify only native owned sync_state after a failed second page; require original full-state/report comparison to reject advanced cursor."
+    },
+    {
+      "id": "CONTROL-PARTIAL",
+      "mutation": "Delete only native first-page committed row before the same full-state comparison; require retained original input and rejection."
+    },
+    {
+      "id": "CONTROL-AUTH",
+      "mutation": "Actual native process wrapper alters only its synthetic bearer input; fake server records different raw Authorization and returns401. Require header/report comparison rejection, not bootstrap failure."
+    },
+    {
+      "id": "CONTROL-TOMBSTONE",
+      "mutation": "Remove one native-only tombstone from the actual second push transcript via owned server mutation; require full raw request/state comparison rejection."
+    }
+  ],
+  "controls_passed": 0,
+  "raw_prepared_examples": [
+    {
+      "name": "badcanonicalbeatsalias",
+      "response_bytes_utf8": "{\"skipped_invalid_scope\":null,\"skippedInvalidScope\":17,\"applied\":-2}"
+    },
+    {
+      "name": "firstobject",
+      "response_bytes_utf8": "{\"memories\":null,\"deleted\":null,\"server_time\":\"0001-01-01T00:00:00Z\"} {\"unread\":true}"
+    },
+    {
+      "name": "status300",
+      "status": 300,
+      "response_bytes_utf8": "{\"applied\":1,\"deleted\":0}"
+    },
+    {
+      "name": "fixed_offset",
+      "response_bytes_utf8": "{\"server_time\":\"2026-01-01T12:00:00.1234+02:00\"}"
+    },
+    {
+      "name": "nullable_pointer",
+      "response_bytes_utf8": "{\"memories\":[null]}"
+    },
+    {
+      "name": "raw_error",
+      "status": 401,
+      "response_bytes_utf8": "{\"code\":\"owned_denied\",\"error\":\"synthetic denial\"} ignored"
+    }
+  ]
+}

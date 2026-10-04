@@ -1,0 +1,74 @@
+{
+  "issue": {
+    "status": "fulfilled",
+    "value": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Action completed."
+        }
+      ],
+      "structuredContent": {
+        "issue": {
+          "url": "https://github.com/danieljustus/symaira-brain/issues/762",
+          "title": "memory: port `memory sync` and the sync client",
+          "issue_number": 762,
+          "body": "## Context\nAny `memory sync <remote>` invocation goes to Go (`cmd/symbrain/cmd_memory_sync.go`, `internal/memory/syncclient`). See `MEMORY-SYNC-MIGRATION.md`.\n\n## Scope\n- Port the sync protocol client with transcripts from a local fake sync server; conflict and retry behaviour identical to Go.\n\n## Acceptance\n- Sync differential passes on native three-OS CI; `memory_cli::requires_go_fallback` is removed entirely.\n\n**Blocked by:** #758\n\n---\n**Part of:** #731\n**Agent notes:** work in an isolated worktree off current `main`; read `AGENTS.md` and the migration ledger first. Until Go is removed, parity evidence must come from real Go-oracle fixtures generated in disposable HOME/XDG roots (no operator credentials). Update the ledger/contract-matrix rows touched by this issue in the same PR. Skipped, zero-case or cross-compiled-only runs are not evidence.\n",
+          "state": "open",
+          "user": {
+            "login": "danieljustus",
+            "name": "danieljustus",
+            "email": null,
+            "avatar_url": "https://avatars.githubusercontent.com/u/88160656?v=4",
+            "id": 88160656
+          },
+          "assignees": null,
+          "labels": [
+            {
+              "name": "priority: medium",
+              "color": "fbca04",
+              "description": "Planning priority"
+            },
+            {
+              "name": "group: rust-migration",
+              "color": "0E8A16",
+              "description": "Go→Rust migration and cutover"
+            }
+          ],
+          "milestone": null,
+          "state_reason": null,
+          "comments": 0,
+          "created_at": "2026-10-02T06:54:34Z",
+          "updated_at": "2026-10-02T06:54:34Z",
+          "closed_at": null,
+          "display_url": "https://github.com/danieljustus/symaira-brain/issues/762",
+          "display_title": "memory: port `memory sync` and the sync client"
+        },
+        "url": "https://github.com/danieljustus/symaira-brain/issues/762",
+        "title": "memory: port `memory sync` and the sync client",
+        "display_url": "https://github.com/danieljustus/symaira-brain/issues/762",
+        "display_title": "memory: port `memory sync` and the sync client"
+      },
+      "isError": false
+    }
+  },
+  "comments": {
+    "status": "fulfilled",
+    "value": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Action completed."
+        }
+      ],
+      "structuredContent": {
+        "comments": [],
+        "url": "https://github.com/danieljustus/symaira-brain/issues/762",
+        "title": "danieljustus/symaira-brain Issue #762 comments",
+        "display_url": "https://github.com/danieljustus/symaira-brain/issues/762",
+        "display_title": "danieljustus/symaira-brain Issue #762 comments"
+      },
+      "isError": false
+    }
+  }
+}
