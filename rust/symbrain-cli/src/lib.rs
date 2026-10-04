@@ -11,7 +11,11 @@ use symbrain_core::version::{self, VersionInfo};
 
 mod activity_cli;
 mod audit_cli;
+mod cli_flags;
 mod config_cli;
+
+use cli_flags::has_go_owned_flag;
+pub use cli_flags::normalize_flags;
 mod doctor_cli;
 mod go_json_escape;
 pub mod guard_cli;
@@ -104,6 +108,18 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
     run_with_executor(args, stdout, stderr, &InheritedProcessExecutor)
 }
 
+/// Runs the CLI on its actual process standard streams.
+///
+/// Only native Memory Set completion uses this stdout identity to retain Go's
+/// Unix broken-pipe termination. Embedded writers keep ordinary errors.
+#[must_use]
+pub fn run_stdio(args: &[OsString]) -> u8 {
+    let mut stdout = io::stdout();
+    let mut stderr = io::stderr();
+    run_native(args, &mut stdout, &mut stderr, true)
+        .unwrap_or_else(|| InheritedProcessExecutor.execute(args, &mut stderr))
+}
+
 /// Runs `symbrain` with an explicit fallback executor strategy.
 pub fn run_with_executor<E: FallbackExecutor>(
     args: &[OsString],
@@ -127,6 +143,15 @@ pub fn run_in_process(
     args: &[OsString],
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
+) -> Option<u8> {
+    run_native(args, stdout, stderr, false)
+}
+
+fn run_native(
+    args: &[OsString],
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write,
+    process_stdout: bool,
 ) -> Option<u8> {
     let peeked = peek_command(args);
     let (format, normalized) = if is_output_command(&peeked) {
@@ -172,6 +197,9 @@ pub fn run_in_process(
         "sync" if sync_cli::requires_go_fallback(rest) => None,
         "sync" => Some(sync_cli::run(rest, stdout, stderr, format)),
         "memory" if memory_cli::requires_go_fallback(rest) => None,
+        "memory" if process_stdout => Some(memory_cli::run_with_stdout(
+            rest, stdout, stderr, format, true,
+        )),
         "memory" => Some(memory_cli::run(rest, stdout, stderr, format)),
         "skills" => skills_cli::run(rest, stdout, stderr, format),
         "activity" => Some(activity_cli::run(rest, stdout, stderr, format)),

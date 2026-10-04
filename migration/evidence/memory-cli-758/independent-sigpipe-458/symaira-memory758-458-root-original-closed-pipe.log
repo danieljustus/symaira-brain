@@ -1,0 +1,1 @@
+[{"name": "new-metadata-json-output-closed-pipe", "go_exit": -13, "rust_exit": -13, "go_stderr": "", "rust_stderr": "", "go_fts": true, "rust_fts": true}, {"name": "new-metadata-table-output-closed-pipe", "go_exit": -13, "rust_exit": -13, "go_stderr": "", "rust_stderr": "", "go_fts": true, "rust_fts": true}]

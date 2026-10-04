@@ -1,0 +1,7 @@
+usage: write_gate.py [-h] [--go GO] [--rust RUST] --report-dir REPORT_DIR
+
+options:
+  -h, --help            show this help message and exit
+  --go GO
+  --rust RUST
+  --report-dir REPORT_DIR

@@ -1,0 +1,20 @@
+   Compiling symbrain-cli v0.12.1 (/workspace/symaira-memory758-cli-fixes/rust/symbrain-cli)
+    Finished `test` profile [unoptimized] target(s) in 3.34s
+     Running unittests src/lib.rs (target/debug/deps/symbrain_cli-9b8d2c092400099e)
+
+running 12 tests
+test memory_cli::tests::json_output_escapes_what_the_shipped_encoder_escapes ... ok
+test memory_cli::tests::memory_sync_with_arguments_stays_on_go ... ok
+test memory_cli::tests::hand_written_usage_shapes_stay_native ... ok
+test memory_cli::tests::query_log_rejects_positionals_and_unknown_flags ... ok
+test memory_cli::tests::query_log_json_matches_go_fixture ... ok
+test memory_cli::tests::search_flag_parser_rejects_unsupported_query_shapes ... ok
+test memory_cli::tests::search_flags_consume_their_values ... ok
+test memory_cli::tests::search_prints_the_shipped_usage_for_help ... ok
+test memory_cli::tests::search_refuses_a_missing_query_with_the_shipped_message ... ok
+test memory_cli::tests::query_log_table_and_actor_filter_match_go_shape ... ok
+test memory_cli::tests::query_log_table_sanitizes_multiline_query_text ... ok
+test memory_cli::tests::query_log_normalizes_schema_default_timestamp ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 105 filtered out; finished in 0.03s
+

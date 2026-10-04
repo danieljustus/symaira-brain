@@ -10,3 +10,7 @@ fuzz/corpus/** binary
 # exact bytes and SHA across checkout instead of applying text normalization.
 migration/evidence/doctor-windows-765/original-windows-1288/windows-process.json binary
 migration/evidence/guard-raw-paths-770/independent-806/*.log binary
+# Preserve exact original native failure log bytes.
+migration/evidence/memory-cli-758/windows-cleanup-9c-job-111297047149.log binary
+
+migration/evidence/memory-cli-758/independent-sigpipe-458/*.log binary

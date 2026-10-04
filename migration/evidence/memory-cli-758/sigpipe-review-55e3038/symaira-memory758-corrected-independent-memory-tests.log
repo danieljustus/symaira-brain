@@ -1,0 +1,38 @@
+
+running 33 tests
+test cli_delete_admission::tests::malformed_hydration_refuses_delete_before_any_mutation ... ok
+test db_oracle_tests::constraint_cases_are_rejected_like_go ... ok
+test db_oracle_tests::indexes_match_the_go_schema ... ok
+test db_oracle_tests::lock_pragmas_match_the_go_facts ... ok
+test db_oracle_tests::memories_columns_match_the_go_schema ... ok
+test db_oracle_tests::ordering_cases_match_the_go_facts ... ok
+test cli_write::tests::governance_callbacks_stop_without_reverting_committed_steps ... ok
+test db_oracle_tests::tables_match_the_go_schema ... ok
+test embedding::tests::hash_fallback_is_normalized_and_deterministic ... ok
+test embedding::tests::shared_llm_client_keeps_ollama_openai_request_contract ... ok
+test db_oracle_tests::triggers_and_views_match_the_go_schema ... ok
+test embedding::tests::shared_llm_client_rejects_extra_embedding_items_like_go_llmkit ... ok
+test embedding::tests::shared_llm_client_rejects_wrong_dimension_and_http_errors ... ok
+test embedding::tests::stop_words_and_punctuation_do_not_change_the_direction ... ok
+test evidence_store::tests::grounded_only_persistence_and_cascade_match_go ... ok
+test evidence_store::tests::missing_memory_rejects_grounded_evidence_and_skips_invalid ... ok
+test evidence_store::tests::rollback_and_reparent_keep_memory_and_evidence_atomic ... ok
+test gorand::tests::the_normal_stream_matches_go ... ok
+test gorand::tests::the_projection_rows_match_go ... ok
+test gotime::tests::parses_every_known_rendering ... ok
+test gotime::tests::renders_the_shipped_form ... ok
+test lsh::tests::a_dimension_mismatch_is_rejected_instead_of_truncated ... ok
+test lsh::tests::neighbors_cover_every_bucket_within_two_flips ... ok
+test lsh::tests::the_hash_is_deterministic_and_covers_the_bucket_range ... ok
+test lsh::tests::the_hash_matches_the_shipped_store ... ok
+test migration::tests::concurrent_public_opens_and_writes_preserve_data_without_snapshot_upgrade ... ok
+test migration::tests::later_ddl_failure_rolls_back_columns_and_migration_entries ... ok
+test migration::tests::repairs_the_five_649_columns_despite_all_migrations_claimed ... ok
+test retrieval::tests::cosine_is_one_for_identical_directions ... ok
+test retrieval::tests::placeholders_match_the_shipped_clause ... ok
+test retrieval::tests::the_score_weights_the_three_default_terms ... ok
+test store::tests::sync_oplog_tracks_memory_lifecycle_and_excludes_marked_rows ... ok
+test embedding::tests::shared_llm_client_times_out_to_hash_fallback ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.39s
+
