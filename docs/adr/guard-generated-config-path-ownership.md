@@ -67,6 +67,12 @@ relative and symlink owners, raw Unix path bytes, explicit override semantics,
 semantic errors, and typed/discovery delegation without partial native output.
 A genuine process mutant canonicalizes the generated base, reads the physical
 owner, and must be rejected by the unchanged full report/state comparator.
+The first additional before-fix driver compared two relative paths containing
+different private side names. Its full receipt/log remain unchanged, and a
+separate scope correction records those two confounded comparisons. The future
+relative-parent case uses the same `../discard/../<leaf>` spelling on both
+sides; this is a harness correction, not a new production difference or a
+rewrite of the immutable independent review's owner proofs.
 The CI runner retains these reports plus the Windows source-reference report
 and actual probe executable bytes on all three native jobs.
 

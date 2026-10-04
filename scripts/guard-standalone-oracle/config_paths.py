@@ -76,7 +76,7 @@ def observe(binary, case, root, native):
     spelling = case['spelling']
     base = {'plain': str(lexical_base), 'dot': str(root)+'/./'+leaf,
             'dotdot': str(root)+'/discard/../'+leaf, 'relative': '../'+leaf,
-            'relative-parent': '../../'+root.name+'/'+leaf,
+            'relative-parent': '../discard/../'+leaf,
             'symlink-dotdot': str(root)+'/link/../'+leaf}[spelling]
     if case['family'] == 'xdg': env['XDG_CONFIG_HOME'] = base
     else:
@@ -101,6 +101,7 @@ def observe(binary, case, root, native):
                 normalized_stdout_hex=replay.normalized_stream(process.stdout, root, ['doctor'], native, True).hex(),
                 normalized_stderr_hex=replay.normalized_stream(process.stderr, root, ['doctor'], native, False).hex(),
                 files=replay.state_files(root, began, ended, False), readonly=True,
+                input_state_metadata=before,
                 config_environment_bytes={key:os.fsencode(value).hex() for key,value in env.items()
                     if key in ['HOME','USERPROFILE','XDG_CONFIG_HOME','SYMGUARD_CONFIG']},
                 lexical_input_hex=data.hex(), physical_input_hex=b'physical_owner=1\n'.hex())
