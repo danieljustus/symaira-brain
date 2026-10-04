@@ -53,7 +53,7 @@ def main():
            'foo:bar','foo:bar/','foo:bar/a/..','foo:bar\\a\\..\\','foo:bar/a/../b','foo:bar\\a\\..\\b','foo:','c:','c:.','c:foo','c:foo/../../bar','c:/',r'C:\a\..',
            '/',r'\a\..\??',r'\??\C:\a\..',r'\\host\share',r'\\host\share\foo\..\..',
            r'\\?\C:\a\..',r'\\?\UNC\host\share\a\..',r'\\.\UNC\host\share\..',
-           r'\\.\C:\a\..',r'\\i\..\c$',r'\\',r'\\abc\\','///abc','雪/../cfg','a\ufffd/../cfg','a/../\ud800','\ud800:','雪:','\udc00:/a/..','C:/\ud800/a/../b']
+           r'\\.\C:\a\..',r'\\i\..\c$',r'\\',r'\\abc\\','///abc','雪/../cfg','a\ufffd/../cfg','foo:/a/../../雪a','foo:/a/../../éa','雪a:/a/../../abcd','a/../\ud800','\ud800:','雪:','\udc00:/a/..','C:/\ud800/a/../b']
     # Full pinned Go own Windows Clean examples, including their literal raw paths.
     import re
     own=source[FILES[3]].decode().split('var wincleantests = []PathTest{',1)[1].split('\n}',1)[0]
