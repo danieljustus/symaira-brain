@@ -68,3 +68,13 @@ any assertions. Diagnostics retain the literal Guard error. Completed source
 checks are not reused as current-source full-gate passes; the corrected graph
 requires fresh verification. The failure and its mixed pass/fail diagnostic
 observations remain immutable.
+
+The first actual WindowsGNU strict cross-target gate at df16 retained a
+manual_ignore_case_cmp lint in the raw UTF16 UNC prefix helper. Replace the
+manual ASCII uppercase equality with u8.eq_ignore_ascii_case, keeping the
+<=127 guard and raw-unit ownership unchanged. No lint waiver or lowercasing of
+whole paths is introduced. Original source/full logs/ELF inventory remain
+retained. This is a source/type-check obligation, never native Windows proof.
+Failure archives may reuse explicitly supplied old immutable payload maps,
+only after checking compressed SHA and decompressed SHA/length against the
+current bytes; target role attribution remains separate.

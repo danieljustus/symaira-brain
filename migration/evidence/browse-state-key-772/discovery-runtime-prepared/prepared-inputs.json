@@ -1,8 +1,8 @@
 {
-  "status": "corrected_fixture_prepared_fresh_runtime_required",
+  "status": "cross_lint_equivalent_fix_requires_fresh_runtime",
   "upstream": "7e5c4561c82803403b579d011fb687bbe254d32a",
   "files_sha256": {
-    "migration/evidence/browse-state-key-772/discovery-runtime-prepared/README.md": "487d2ba37e5711244f99710a21f7d169ee06b9055c25519b79573ab23a6921fc",
+    "migration/evidence/browse-state-key-772/discovery-runtime-prepared/README.md": "728bc6d86d9dba6c6906a2ac02977a10615abbe858f6d22e9d1438f8c78b6415",
     "migration/evidence/browse-state-key-772/discovery-runtime-prepared/original-driver/retained-provider.go.in": "743e0dea17126b89565c35878609e3c0f52abc9da9a881b7ab83ffe2e924117b",
     "migration/evidence/browse-state-key-772/discovery-runtime-prepared/original-driver/root-ccc-full-gates.sh": "de76d357d8f5b87712ccd3fc5f103c789c5274adf2095bbd96177754f4ed4651",
     "migration/evidence/browse-state-key-772/discovery-runtime-prepared/original-review/symaira-discovery-mask-final-handoff.json": "2a29cebc7d26340fcc91d66d057e4c2e7921b7ececb5f670bac609422837f744",
@@ -20,10 +20,10 @@
     "migration/evidence/browse-state-key-772/discovery-runtime-prepared/original-review/symaira-discovery-mask-independent-review.md": "23a151f51e702a07d19522d707f2f1dfbbece6109d1ff4963bcc65a0b89357fe",
     "migration/evidence/browse-state-key-772/discovery-runtime-prepared/original-review/symaira-discovery-mask-independent-static-first-precheck.log": "c109e62aa5d834eb2b8484606a8a98b4fb48d6a0af8fda61e3e60e4fae87f1be",
     "migration/evidence/browse-state-key-772/discovery-runtime-prepared/retention.json": "a0e6d1f48463933375bd9e87b629a764df832dd29c7b0aea43293e39150ab81a",
-    "migration/evidence/browse-state-key-772/discovery-runtime-prepared/run.py": "1dccc9fd9a814ffc571673f5de18ccb7bb7d3d05e6523b465e2275e451a8f68c",
-    "docs/adr/daemon-discovery-runtime-validation-772.md": "5d8077eac6e75067b1a29f5f81d7370d7b3b215fa32e2dd8636c204b22338748"
+    "migration/evidence/browse-state-key-772/discovery-runtime-prepared/run.py": "8e13421f44e84df48e5a647623f97e1ddf29ab572ca5c21a43b373856250d1f6",
+    "docs/adr/daemon-discovery-runtime-validation-772.md": "a33f1879b9f0b30674d68b489fbec568780db76f5539cb336481e940ec5fe377"
   },
-  "original_b17_and_a147_retained": true,
-  "production_changed": false,
+  "old_b17_a147_df16_retained": true,
+  "Windows_ASCII_guard_unchanged": true,
   "fixture_assertions_or_timeouts_changed": false
 }

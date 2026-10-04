@@ -29,6 +29,7 @@ def main():
     parser.add_argument('--allocation-receipt', type=Path, required=True)
     parser.add_argument('--port-release-receipt', type=Path)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--archive-reuse-receipt', type=Path)
     args = parser.parse_args()
     allocation = json.loads(args.allocation_receipt.read_text())
     assert allocation['target'] == str(TARGET) and allocation['exclusive_owner'] == 'memory758_port'
@@ -48,6 +49,10 @@ def main():
     args.out.mkdir(parents=True, exist_ok=False)
     state = {'phase': args.phase, 'source': source, 'upstream': UPSTREAM,
              'allocation_receipt_sha256': digest(args.allocation_receipt), 'stages': [], 'complete': False}
+    archive_reuse = {}
+    if args.archive_reuse_receipt is not None:
+        archive_reuse = json.loads(args.archive_reuse_receipt.read_text())['unique']
+        state['archive_reuse_receipt_sha256'] = digest(args.archive_reuse_receipt)
     state['owned_execution_environment'] = {name: os.environ.get(name) for name in
         ['HOME', 'USERPROFILE', 'GOCACHE', 'GOMODCACHE', 'GOENV', 'GOTOOLCHAIN', 'GOPROXY', 'CGO_ENABLED',
          'CARGO_TARGET_DIR', 'CARGO_HOME', 'RUSTUP_HOME', 'CARGO_BUILD_JOBS', 'CARGO_INCREMENTAL',
@@ -64,14 +69,20 @@ def main():
             if magic != b'\x7fELF': continue
             h = digest(path)
             if h not in unique:
-                archive = archives / (h + '.gz')
-                with path.open('rb') as src, archive.open('wb') as raw:
-                    with gzip.GzipFile(fileobj=raw, mode='wb', mtime=0) as dst: shutil.copyfileobj(src, dst)
-                restored = hashlib.sha256()
+                if h in archive_reuse:
+                    prior = archive_reuse[h]; archive = Path(prior['archive'])
+                    assert digest(archive) == prior['gzip_sha256']
+                else:
+                    archive = archives / (h + '.gz')
+                    with path.open('rb') as src, archive.open('wb') as raw:
+                        with gzip.GzipFile(fileobj=raw, mode='wb', mtime=0) as dst: shutil.copyfileobj(src, dst)
+                restored = hashlib.sha256(); restored_bytes = 0
                 with gzip.open(archive, 'rb') as f:
-                    while c := f.read(1024 * 1024): restored.update(c)
-                assert restored.hexdigest() == h
-                unique[h] = {'archive': str(archive), 'gzip_sha256': digest(archive)}
+                    while c := f.read(1024 * 1024):
+                        restored.update(c); restored_bytes += len(c)
+                assert restored.hexdigest() == h and restored_bytes == path.stat().st_size
+                unique[h] = {'archive': str(archive), 'gzip_sha256': digest(archive),
+                             'reused_prior_verified_payload': h in archive_reuse}
             rows.append({'path': str(path), 'sha256': h, 'bytes': path.stat().st_size})
         state['failed_target_ELF_inventory'] = {'observed_source': source, 'paths': rows, 'unique': unique,
                                               'cached_or_transferred_roles_are_not_execution': True}

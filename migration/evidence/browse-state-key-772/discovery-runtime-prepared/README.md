@@ -35,3 +35,7 @@ literal gate logs. The complete CLI/state/owner/discovery/MCP drivers preserve
 raw observations, not only totals. Three historical ignored tests need explicit
 role attribution; no new blanket ignore or skip is introduced. Native6 and
 unsupported Stack/reporting discovery are still open.
+
+Optional --archive-reuse-receipt accepts an explicitly owned immutable
+`unique` payload map. Every reused gzip is checked again for compressed SHA,
+raw SHA and length; a cached executable is never counted as executed.

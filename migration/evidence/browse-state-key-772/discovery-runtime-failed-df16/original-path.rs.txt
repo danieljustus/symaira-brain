@@ -214,7 +214,7 @@ fn prefix(input: &[u16], prefix: &[u8]) -> bool {
             if separator(u16::from(*byte)) {
                 separator(*unit)
             } else {
-                *unit <= 127 && (*unit as u8).eq_ignore_ascii_case(byte)
+                *unit <= 127 && (*unit as u8).to_ascii_uppercase() == byte.to_ascii_uppercase()
             }
         })
         && (input.len() == prefix.len() || separator(input[prefix.len()]))
