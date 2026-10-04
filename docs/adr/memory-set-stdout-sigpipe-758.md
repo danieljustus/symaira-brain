@@ -77,3 +77,8 @@ match quiet SIGPIPE and complete committed state/FTS. Verify163 current and
 current/original executables. Complete independent report/raw receipts/logs
 are retained under `independent-sigpipe-458/`; native current-head Windows and
 macOS checks remain required. Existing delegated/full758 gates remain open.
+
+
+## Main documentation integration, 2026-10-04
+
+Main2b6d49f is normally integrated. Only documentation and retained historical evidence change; production, tests, workflows, dependencies and the contract matrix remain byte-identical to reviewed27001b1. Retain the full independent320-test/read/write/state/FTS proof and existing native runtime receipts, while requiring protected and Memory CLI/Evidence three-platform checks at the new published head. This avoids rebuilding unchanged code for a documentation merge without loosening acceptance. Full758/649 and MCP/UI/legacy ownership remain open.
