@@ -525,7 +525,7 @@ jobs:
 
       - name: Fetch the immutable native Skills comparison parent
         shell: bash
-        run: git fetch --no-tags --depth=1 origin 01f41906e2e021db3c693ec97617bb701e4dad8a
+        run: git fetch --no-tags origin 01f41906e2e021db3c693ec97617bb701e4dad8a
 
       - name: Frozen Go and native Windows wide Skills argv acceptance
         shell: bash

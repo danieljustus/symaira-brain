@@ -1,0 +1,2046 @@
+{
+  "source": "cc3f4e62dcb133b616c6b58c135463ad81058801",
+  "files": [
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/actionlint.stderr",
+      "member": "000-actionlint.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441843707898
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/actionlint.stdout",
+      "member": "001-actionlint.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441843707898
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/ci-current.yml",
+      "member": "002-ci-current.yml",
+      "sha256": "03fdb562d5d8a3c37bdb4b54f594d0ade3e5530f59d2fae5b5d4844efbe520b4",
+      "bytes": 75647,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441842959041
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/diffcheck.stderr",
+      "member": "003-diffcheck.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441879709019
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/diffcheck.stdout",
+      "member": "004-diffcheck.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441879709019
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/exact-initial-full-verification.json",
+      "member": "005-exact-initial-full-verification.json",
+      "sha256": "c5d90d66db1f3b671c2c5370473f2f8074af0a6bbaf25b75751ce671c92de8fe",
+      "bytes": 10027,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589410521020
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/exact-initial-full.py",
+      "member": "006-exact-initial-full.py",
+      "sha256": "5b35d4a02083e18680b35ab9d997063bf7bc477e81f7d4c39fc87da9c68a16fd",
+      "bytes": 3932,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589096261934
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/exact-initial-full.stderr",
+      "member": "007-exact-initial-full.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589302708879
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/exact-initial-full.stdout",
+      "member": "008-exact-initial-full.stdout",
+      "sha256": "ae94bf78001af41e47e689afcefc988cbc808b480d2c4822891b1995ea4e3c90",
+      "bytes": 147,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589410521020
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-after-pin-still-missing.stderr",
+      "member": "009-full-after-pin-still-missing.stderr",
+      "sha256": "93051ef5e7bf1424b70ed514d3f012953c936894eec9c3018251c6cfb674dd83",
+      "bytes": 47,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589377416666
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-after-pin-still-missing.stdout",
+      "member": "010-full-after-pin-still-missing.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589375948066
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-after-pinned-checkout-fails.stderr",
+      "member": "011-full-after-pinned-checkout-fails.stderr",
+      "sha256": "1d8f2950f47ab708879ecdb069e5e8c0d113db128f31894253c96828e58b5abd",
+      "bytes": 70,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589379025378
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-after-pinned-checkout-fails.stdout",
+      "member": "012-full-after-pinned-checkout-fails.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589377416666
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-after-shared-clone.stderr",
+      "member": "013-full-after-shared-clone.stderr",
+      "sha256": "81adf9a712a7014fe46c53072f1019af666f50aea6b954e20530e5f340e0b3ea",
+      "bytes": 109,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589375948066
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-after-shared-clone.stdout",
+      "member": "014-full-after-shared-clone.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589375613005
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-before-pinned-checkout.stderr",
+      "member": "015-full-before-pinned-checkout.stderr",
+      "sha256": "1d8f2950f47ab708879ecdb069e5e8c0d113db128f31894253c96828e58b5abd",
+      "bytes": 70,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589351285654
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-before-pinned-checkout.stdout",
+      "member": "016-full-before-pinned-checkout.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589349749371
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-before-shared-clone.stderr",
+      "member": "017-full-before-shared-clone.stderr",
+      "sha256": "972b6b661e1400532a8c39f69d6c2c0e84ddfdef0ae3ff0256ae97c28fbd4dcc",
+      "bytes": 116,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589349749371
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-before-shared-clone.stdout",
+      "member": "018-full-before-shared-clone.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589349375882
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-control-exact-pinned-fetch.stderr",
+      "member": "019-full-control-exact-pinned-fetch.stderr",
+      "sha256": "5ba9295fd1736019a78880e4309816bd7b09a085a4bc219c373013de86808f39",
+      "bytes": 162,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589399571398
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-control-exact-pinned-fetch.stdout",
+      "member": "020-full-control-exact-pinned-fetch.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589396271204
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-control-full-clone.stderr",
+      "member": "021-full-control-full-clone.stderr",
+      "sha256": "de15f1fedf684d1aec4f32b79f4fe353796c3c6d9212d6f46b4086012b7f05ee",
+      "bytes": 113,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589390226641
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-control-full-clone.stdout",
+      "member": "022-full-control-full-clone.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589389961416
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-control-pinned-checkout-passes.stderr",
+      "member": "023-full-control-pinned-checkout-passes.stderr",
+      "sha256": "33c7764b0db3b808c1d78edbc83cec83196af7f72655216adf763450f414b8ef",
+      "bytes": 37,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589409200614
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-control-pinned-checkout-passes.stdout",
+      "member": "024-full-control-pinned-checkout-passes.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589408989150
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-control-shared-clone.stderr",
+      "member": "025-full-control-shared-clone.stderr",
+      "sha256": "c04ba1e5884e16615439b899f515de9a9e38ddc077deeec5e7340e07aa468d28",
+      "bytes": 118,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589406928760
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-control-shared-clone.stdout",
+      "member": "026-full-control-shared-clone.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589406540939
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-control-stays-full.stderr",
+      "member": "027-full-control-stays-full.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589400739053
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-control-stays-full.stdout",
+      "member": "028-full-control-stays-full.stdout",
+      "sha256": "2ed27c1421e6928dbe13dbfdb5c59e1045b30341fe7ebe05700006bc5ac572c0",
+      "bytes": 6,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589400739053
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-depth1-pinned-fetch.stderr",
+      "member": "029-full-depth1-pinned-fetch.stderr",
+      "sha256": "5ba9295fd1736019a78880e4309816bd7b09a085a4bc219c373013de86808f39",
+      "bytes": 162,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589361747008
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-depth1-pinned-fetch.stdout",
+      "member": "030-full-depth1-pinned-fetch.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589356269968
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-initial-full-clone.stderr",
+      "member": "031-full-initial-full-clone.stderr",
+      "sha256": "9b1177e52b27dc33629e98ba22dca7d329d75a7d83200e413fce5c8aa3528c49",
+      "bytes": 118,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589341044262
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-initial-full-clone.stdout",
+      "member": "032-full-initial-full-clone.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589340672064
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-initial-not-shallow.stderr",
+      "member": "033-full-initial-not-shallow.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589342404508
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-initial-not-shallow.stdout",
+      "member": "034-full-initial-not-shallow.stdout",
+      "sha256": "2ed27c1421e6928dbe13dbfdb5c59e1045b30341fe7ebe05700006bc5ac572c0",
+      "bytes": 6,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589342404508
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-initial-pin-missing.stderr",
+      "member": "035-full-initial-pin-missing.stderr",
+      "sha256": "93051ef5e7bf1424b70ed514d3f012953c936894eec9c3018251c6cfb674dd83",
+      "bytes": 47,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589343751915
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-initial-pin-missing.stdout",
+      "member": "036-full-initial-pin-missing.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589342404508
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-source-now-shallow.stderr",
+      "member": "037-full-source-now-shallow.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589364536054
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-source-now-shallow.stdout",
+      "member": "038-full-source-now-shallow.stdout",
+      "sha256": "a17fcf0a2f50e2d495e4f90ce263410edc183add6c62699a2facbccf60410f74",
+      "bytes": 5,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589364536054
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-source-pin-present.stderr",
+      "member": "039-full-source-pin-present.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589363154651
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/full-source-pin-present.stdout",
+      "member": "040-full-source-pin-present.stdout",
+      "sha256": "50836eee574ecff79dea3b4fd40673d7d000f7a5f177d8a6a3000b59c78383b8",
+      "bytes": 7,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589363154651
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/independent-review.md",
+      "member": "041-independent-review.md",
+      "sha256": "c604b80edd02cc0a08cd48e16cef87eea498ffc23164e9c70bc107d1eed5257f",
+      "bytes": 8689,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118798934731217
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-depth1-missing-object-verifier.py",
+      "member": "042-initial-depth1-missing-object-verifier.py",
+      "sha256": "12e1e42b9e7b77971d9b510d51f0d25dd4acef82a37820bc91171b21d422507c",
+      "bytes": 9227,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589301602827
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-depth1-missing-object.stderr",
+      "member": "043-initial-depth1-missing-object.stderr",
+      "sha256": "9448207cbe7bbdda03493a36520e8a4e9592b46eea365401609610d44a63c8bc",
+      "bytes": 527,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589302708879
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/.git/FETCH_HEAD",
+      "member": "044-FETCH_HEAD",
+      "sha256": "42bb6c23a61bdd04624e322f03c1426b4866dbf48bdd36d0440dd44d218ea2e4",
+      "bytes": 169,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589356269968
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/.git/HEAD",
+      "member": "045-HEAD",
+      "sha256": "0b1990cee00877bf022181afcf7c47367689ab9ad12338c9c6d9b4d5daecbd56",
+      "bytes": 24,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589339476587
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/.git/config",
+      "member": "046-config",
+      "sha256": "f0afa42c9419c1508b8013d6f50c860d9be0296fcf7c37adf20b02c03d87e11a",
+      "bytes": 319,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589340134311
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/.git/index",
+      "member": "047-index",
+      "sha256": "15afa74837a3b619c19f731a4d57bd5107afff6bdcf5087c334e8d4e808f6f9a",
+      "bytes": 137,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589340444590
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/.git/logs/HEAD",
+      "member": "048-HEAD",
+      "sha256": "36ee51aa74066ca58ff5b848bcc916a91311a03178b6d750dbd72efd7b4f81d4",
+      "bytes": 226,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589339697451
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/.git/logs/refs/heads/current",
+      "member": "049-current",
+      "sha256": "36ee51aa74066ca58ff5b848bcc916a91311a03178b6d750dbd72efd7b4f81d4",
+      "bytes": 226,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589340134311
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/.git/objects/98/bb8143428c530bf19e60b699140758cb5fc919",
+      "member": "050-bb8143428c530bf19e60b699140758cb5fc919",
+      "sha256": "fff8fdc18f3cf33f9d58352c76d7cff9be273a3d80d866f6464954b543e4628a",
+      "bytes": 142,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589356269968
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/.git/objects/9f/8733c8777a321629b92a804e66e17c2d2d6acf",
+      "member": "051-8733c8777a321629b92a804e66e17c2d2d6acf",
+      "sha256": "905c63b9cfe64a58fa5e47cabe9d9db396153bfb3222d1ff3d0cacbef6acb737",
+      "bytes": 37,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589356269968
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/.git/objects/db/be04aee37301ce6d4a77e88b42988aa8c50893",
+      "member": "052-be04aee37301ce6d4a77e88b42988aa8c50893",
+      "sha256": "4857e251b4911415bd263afc76d6081110add0b83e999da6d828395cb8c68457",
+      "bytes": 48,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589356269968
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.idx",
+      "member": "053-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.idx",
+      "sha256": "05037a16e13d52ceeacc58e96cc239e82f3e53a2f71c5e020808b6082f2ece66",
+      "bytes": 1156,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589335987227
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.pack",
+      "member": "054-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.pack",
+      "sha256": "4b998643d480df8b0c9766505985f17a03a479cc5cda0058d70237fc82d8c07a",
+      "bytes": 260,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589333657370
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.rev",
+      "member": "055-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.rev",
+      "sha256": "aa51b90d00cb7b1166a61b722f040ae7cb2a9c3eb2be3997490adc16741108fd",
+      "bytes": 64,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589335987227
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/.git/packed-refs",
+      "member": "056-packed-refs",
+      "sha256": "a905cabddcc046003a0d109c4d5523572d4b9b58d57851242315bf3279d3baca",
+      "bytes": 115,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589339434964
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/.git/refs/heads/current",
+      "member": "057-current",
+      "sha256": "5a9b51bd1d4e1779bb61b3a7a1843b12b6c3849380871f2aae03fa21a5148330",
+      "bytes": 41,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589339561475
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/.git/shallow",
+      "member": "058-shallow",
+      "sha256": "6a46501d77847dd0bbf9c3865505d9ca02b8115a761de77a5300a357fb904e1b",
+      "bytes": 41,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589352269845
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/full-history-checkout/file",
+      "member": "059-file",
+      "sha256": "dfc7e4e4e0943aaca0ca45b09c759529ef6b29c8eb5699dec53a7017be0bb078",
+      "bytes": 34,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589340444590
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-control/.git/FETCH_HEAD",
+      "member": "060-FETCH_HEAD",
+      "sha256": "42bb6c23a61bdd04624e322f03c1426b4866dbf48bdd36d0440dd44d218ea2e4",
+      "bytes": 169,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589392271080
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-control/.git/HEAD",
+      "member": "061-HEAD",
+      "sha256": "0b1990cee00877bf022181afcf7c47367689ab9ad12338c9c6d9b4d5daecbd56",
+      "bytes": 24,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589388818127
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-control/.git/config",
+      "member": "062-config",
+      "sha256": "f0afa42c9419c1508b8013d6f50c860d9be0296fcf7c37adf20b02c03d87e11a",
+      "bytes": 319,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589389427398
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-control/.git/index",
+      "member": "063-index",
+      "sha256": "b20c2d0a92c1e329ee03b325ace327509f743e6804b918379aea0a313bbc583e",
+      "bytes": 137,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589389740261
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-control/.git/logs/HEAD",
+      "member": "064-HEAD",
+      "sha256": "36ee51aa74066ca58ff5b848bcc916a91311a03178b6d750dbd72efd7b4f81d4",
+      "bytes": 226,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589389069307
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-control/.git/logs/refs/heads/current",
+      "member": "065-current",
+      "sha256": "36ee51aa74066ca58ff5b848bcc916a91311a03178b6d750dbd72efd7b4f81d4",
+      "bytes": 226,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589389427398
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-control/.git/objects/98/bb8143428c530bf19e60b699140758cb5fc919",
+      "member": "066-bb8143428c530bf19e60b699140758cb5fc919",
+      "sha256": "fff8fdc18f3cf33f9d58352c76d7cff9be273a3d80d866f6464954b543e4628a",
+      "bytes": 142,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589392271080
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-control/.git/objects/9f/8733c8777a321629b92a804e66e17c2d2d6acf",
+      "member": "067-8733c8777a321629b92a804e66e17c2d2d6acf",
+      "sha256": "905c63b9cfe64a58fa5e47cabe9d9db396153bfb3222d1ff3d0cacbef6acb737",
+      "bytes": 37,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589392271080
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-control/.git/objects/db/be04aee37301ce6d4a77e88b42988aa8c50893",
+      "member": "068-be04aee37301ce6d4a77e88b42988aa8c50893",
+      "sha256": "4857e251b4911415bd263afc76d6081110add0b83e999da6d828395cb8c68457",
+      "bytes": 48,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589392271080
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-control/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.idx",
+      "member": "069-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.idx",
+      "sha256": "05037a16e13d52ceeacc58e96cc239e82f3e53a2f71c5e020808b6082f2ece66",
+      "bytes": 1156,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589386002150
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-control/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.pack",
+      "member": "070-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.pack",
+      "sha256": "4b998643d480df8b0c9766505985f17a03a479cc5cda0058d70237fc82d8c07a",
+      "bytes": 260,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589383647240
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-control/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.rev",
+      "member": "071-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.rev",
+      "sha256": "aa51b90d00cb7b1166a61b722f040ae7cb2a9c3eb2be3997490adc16741108fd",
+      "bytes": 64,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589386002150
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-control/.git/packed-refs",
+      "member": "072-packed-refs",
+      "sha256": "a905cabddcc046003a0d109c4d5523572d4b9b58d57851242315bf3279d3baca",
+      "bytes": 115,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589388778037
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-control/.git/refs/heads/current",
+      "member": "073-current",
+      "sha256": "5a9b51bd1d4e1779bb61b3a7a1843b12b6c3849380871f2aae03fa21a5148330",
+      "bytes": 41,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589388903316
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-control/file",
+      "member": "074-file",
+      "sha256": "dfc7e4e4e0943aaca0ca45b09c759529ef6b29c8eb5699dec53a7017be0bb078",
+      "bytes": 34,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589389740261
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-shared/.git/HEAD",
+      "member": "075-HEAD",
+      "sha256": "6a46501d77847dd0bbf9c3865505d9ca02b8115a761de77a5300a357fb904e1b",
+      "bytes": 41,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589408497276
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-shared/.git/config",
+      "member": "076-config",
+      "sha256": "0bc5b4a1ca8020d1a7bd1e1ffafd82b1d6f3373b96c5300abb49bb4af5593614",
+      "bytes": 321,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589406333145
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-shared/.git/index",
+      "member": "077-index",
+      "sha256": "434a7d5b2b65db2256a9b0d1a03d62cc82aed85041c7e263e84b660e8225940e",
+      "bytes": 137,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589406928760
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-shared/.git/logs/HEAD",
+      "member": "078-HEAD",
+      "sha256": "3df1356a268213299fe086ead080280edd8966aad75fa181d355adbc83b94d73",
+      "bytes": 447,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589408497276
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-shared/.git/logs/refs/heads/current",
+      "member": "079-current",
+      "sha256": "941c0bd6a838c1c01cacfeb3ee42968c2c7966d75edc5c69c42e9d239ea86e2d",
+      "bytes": 240,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589406070027
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-shared/.git/logs/refs/remotes/origin/HEAD",
+      "member": "080-HEAD",
+      "sha256": "941c0bd6a838c1c01cacfeb3ee42968c2c7966d75edc5c69c42e9d239ea86e2d",
+      "bytes": 240,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589405623813
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-shared/.git/objects/info/alternates",
+      "member": "081-alternates",
+      "sha256": "14d38f03c275e82be1108ebea7aa1ab7bb79574e7fe47b03cbe1e0ca11f8170d",
+      "bytes": 108,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589405288255
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-shared/.git/packed-refs",
+      "member": "082-packed-refs",
+      "sha256": "a905cabddcc046003a0d109c4d5523572d4b9b58d57851242315bf3279d3baca",
+      "bytes": 115,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589405542349
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-shared/.git/refs/heads/current",
+      "member": "083-current",
+      "sha256": "5a9b51bd1d4e1779bb61b3a7a1843b12b6c3849380871f2aae03fa21a5148330",
+      "bytes": 41,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589406070027
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-shared/.git/refs/remotes/origin/HEAD",
+      "member": "084-HEAD",
+      "sha256": "2bbabf8d6d6d22c549bb649574cb88a8b012025218def2bf3c7a40266055c6a0",
+      "bytes": 33,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589405623813
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/no-depth-shared/file",
+      "member": "085-file",
+      "sha256": "cbc436af895248745cad48c658e5e5c1f22d7ef1edf8552c15f9a7245c81eb2b",
+      "bytes": 21,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589406928760
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-after/.git/HEAD",
+      "member": "086-HEAD",
+      "sha256": "0b1990cee00877bf022181afcf7c47367689ab9ad12338c9c6d9b4d5daecbd56",
+      "bytes": 24,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589375049613
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-after/.git/config",
+      "member": "087-config",
+      "sha256": "82b2137b81f20785d8ae519e35489876676c3ed2c3371c0ca51275ab45a29462",
+      "bytes": 326,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589375392672
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-after/.git/logs/HEAD",
+      "member": "088-HEAD",
+      "sha256": "087ff07029769d6590be8063f23456dc9c56d8f79994e0d1f1803c898441bd46",
+      "bytes": 245,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589375127922
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-after/.git/logs/refs/heads/current",
+      "member": "089-current",
+      "sha256": "087ff07029769d6590be8063f23456dc9c56d8f79994e0d1f1803c898441bd46",
+      "bytes": 245,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589375127922
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-after/.git/logs/refs/remotes/origin/HEAD",
+      "member": "090-HEAD",
+      "sha256": "087ff07029769d6590be8063f23456dc9c56d8f79994e0d1f1803c898441bd46",
+      "bytes": 245,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589374486933
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-after/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.idx",
+      "member": "091-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.idx",
+      "sha256": "05037a16e13d52ceeacc58e96cc239e82f3e53a2f71c5e020808b6082f2ece66",
+      "bytes": 1156,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589371428739
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-after/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.pack",
+      "member": "092-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.pack",
+      "sha256": "4b998643d480df8b0c9766505985f17a03a479cc5cda0058d70237fc82d8c07a",
+      "bytes": 260,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589368974018
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-after/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.rev",
+      "member": "093-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.rev",
+      "sha256": "aa51b90d00cb7b1166a61b722f040ae7cb2a9c3eb2be3997490adc16741108fd",
+      "bytes": 64,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589371428739
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-after/.git/packed-refs",
+      "member": "094-packed-refs",
+      "sha256": "a905cabddcc046003a0d109c4d5523572d4b9b58d57851242315bf3279d3baca",
+      "bytes": 115,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589374403657
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-after/.git/refs/heads/current",
+      "member": "095-current",
+      "sha256": "5a9b51bd1d4e1779bb61b3a7a1843b12b6c3849380871f2aae03fa21a5148330",
+      "bytes": 41,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589375127922
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-after/.git/refs/remotes/origin/HEAD",
+      "member": "096-HEAD",
+      "sha256": "2bbabf8d6d6d22c549bb649574cb88a8b012025218def2bf3c7a40266055c6a0",
+      "bytes": 33,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589374486933
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-before/.git/HEAD",
+      "member": "097-HEAD",
+      "sha256": "0b1990cee00877bf022181afcf7c47367689ab9ad12338c9c6d9b4d5daecbd56",
+      "bytes": 24,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589348868595
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-before/.git/config",
+      "member": "098-config",
+      "sha256": "82b2137b81f20785d8ae519e35489876676c3ed2c3371c0ca51275ab45a29462",
+      "bytes": 326,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589349149460
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-before/.git/logs/HEAD",
+      "member": "099-HEAD",
+      "sha256": "087ff07029769d6590be8063f23456dc9c56d8f79994e0d1f1803c898441bd46",
+      "bytes": 245,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589348944139
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-before/.git/logs/refs/heads/current",
+      "member": "100-current",
+      "sha256": "087ff07029769d6590be8063f23456dc9c56d8f79994e0d1f1803c898441bd46",
+      "bytes": 245,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589348944139
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-before/.git/logs/refs/remotes/origin/HEAD",
+      "member": "101-HEAD",
+      "sha256": "087ff07029769d6590be8063f23456dc9c56d8f79994e0d1f1803c898441bd46",
+      "bytes": 245,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589348473037
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-before/.git/objects/info/alternates",
+      "member": "102-alternates",
+      "sha256": "801394d0a2997b6ba0387cadf8c4af053a9ce3a05388fb558fc69365c5392dc6",
+      "bytes": 113,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589348130579
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-before/.git/packed-refs",
+      "member": "103-packed-refs",
+      "sha256": "a905cabddcc046003a0d109c4d5523572d4b9b58d57851242315bf3279d3baca",
+      "bytes": 115,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589348385675
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-before/.git/refs/heads/current",
+      "member": "104-current",
+      "sha256": "5a9b51bd1d4e1779bb61b3a7a1843b12b6c3849380871f2aae03fa21a5148330",
+      "bytes": 41,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589348944139
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-full-fixture/shared-before/.git/refs/remotes/origin/HEAD",
+      "member": "105-HEAD",
+      "sha256": "2bbabf8d6d6d22c549bb649574cb88a8b012025218def2bf3c7a40266055c6a0",
+      "bytes": 33,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118589348473037
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-log-reader.py",
+      "member": "106-initial-log-reader.py",
+      "sha256": "26b7fb48338e083e95472101f65bea4c3b7ab48b55781c795b1ac566b38919b1",
+      "bytes": 8807,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118353160849011
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-log-reader.stderr",
+      "member": "107-initial-log-reader.stderr",
+      "sha256": "7340681f8b4864d916fa1ed1644aaafb56e9b79cb8e62bdd2fb029fc043752a7",
+      "bytes": 258,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118353162240460
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-log-reader.stdout",
+      "member": "108-initial-log-reader.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118353162240460
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-pin-log-reader.py",
+      "member": "109-initial-pin-log-reader.py",
+      "sha256": "6dd917b86c5f1498853a8d5a164116d28c90616d3a0871ed0c3cf1bc1da42559",
+      "bytes": 9194,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118430372340927
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-pin-log-reader.stderr",
+      "member": "110-initial-pin-log-reader.stderr",
+      "sha256": "468c9868dc0aa8181a5ca19218328659977edf3c130b2e2fdb21289fa494bf92",
+      "bytes": 279,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118430373549419
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/initial-prior-receipt-reader.stderr",
+      "member": "111-initial-prior-receipt-reader.stderr",
+      "sha256": "433cb26721e658e1e65cab35b07f04847c97186c34cb5322c165b7fcb3e369bd",
+      "bytes": 92,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118799510748820
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-add-current.stderr",
+      "member": "112-mini-add-current.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441895334986
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-add-current.stdout",
+      "member": "113-mini-add-current.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441895334986
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-add-parent.stderr",
+      "member": "114-mini-add-parent.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441886795795
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-add-parent.stdout",
+      "member": "115-mini-add-parent.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441886795795
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-commit-current.stderr",
+      "member": "116-mini-commit-current.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441897655685
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-commit-current.stdout",
+      "member": "117-mini-commit-current.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441897655685
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-commit-parent.stderr",
+      "member": "118-mini-commit-parent.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441888975235
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-commit-parent.stdout",
+      "member": "119-mini-commit-parent.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441888975235
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-corrected-checkout.stderr",
+      "member": "120-mini-corrected-checkout.stderr",
+      "sha256": "1d8f2950f47ab708879ecdb069e5e8c0d113db128f31894253c96828e58b5abd",
+      "bytes": 70,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441947445130
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-corrected-checkout.stdout",
+      "member": "121-mini-corrected-checkout.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441945975799
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-depth1-checkout.stderr",
+      "member": "122-mini-depth1-checkout.stderr",
+      "sha256": "1da670d99275670a244095a2f26d85fbfe145643b7ca492e6ddfee7d9db5af3f",
+      "bytes": 94,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441911606463
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-depth1-checkout.stdout",
+      "member": "123-mini-depth1-checkout.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441911365138
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-exact-depth1-fetch.stderr",
+      "member": "124-mini-exact-depth1-fetch.stderr",
+      "sha256": "5ba9295fd1736019a78880e4309816bd7b09a085a4bc219c373013de86808f39",
+      "bytes": 162,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441934850397
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-exact-depth1-fetch.stdout",
+      "member": "125-mini-exact-depth1-fetch.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441931710639
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-init.stderr",
+      "member": "126-mini-init.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441884810583
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-init.stdout",
+      "member": "127-mini-init.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441884810583
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-original-checkout-fails.stderr",
+      "member": "128-mini-original-checkout-fails.stderr",
+      "sha256": "1d8f2950f47ab708879ecdb069e5e8c0d113db128f31894253c96828e58b5abd",
+      "bytes": 70,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441924366977
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-original-checkout-fails.stdout",
+      "member": "129-mini-original-checkout-fails.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441922788070
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-orphan-current.stderr",
+      "member": "130-mini-orphan-current.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441893655286
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-orphan-current.stdout",
+      "member": "131-mini-orphan-current.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441893655286
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-parent-head.stderr",
+      "member": "132-mini-parent-head.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441892046339
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-parent-head.stdout",
+      "member": "133-mini-parent-head.stdout",
+      "sha256": "6a46501d77847dd0bbf9c3865505d9ca02b8115a761de77a5300a357fb904e1b",
+      "bytes": 41,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441892046339
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-shared-after.stderr",
+      "member": "134-mini-shared-after.stderr",
+      "sha256": "0dda197cbc5336ee1ff7c1813fae5f331125388ff28dd3ff38ac622fadcc8d34",
+      "bytes": 98,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441945975799
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-shared-after.stdout",
+      "member": "135-mini-shared-after.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441945691138
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-shared-before.stderr",
+      "member": "136-mini-shared-before.stderr",
+      "sha256": "85a82990f1e96c07b8189b3131f9f98c93b125d59c770d8bb160cd7c74b1908e",
+      "bytes": 99,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441922788070
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/mini-shared-before.stdout",
+      "member": "137-mini-shared-before.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441922433148
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/.git/FETCH_HEAD",
+      "member": "138-FETCH_HEAD",
+      "sha256": "42bb6c23a61bdd04624e322f03c1426b4866dbf48bdd36d0440dd44d218ea2e4",
+      "bytes": 169,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441927710515
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/.git/HEAD",
+      "member": "139-HEAD",
+      "sha256": "0b1990cee00877bf022181afcf7c47367689ab9ad12338c9c6d9b4d5daecbd56",
+      "bytes": 24,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441910200938
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/.git/config",
+      "member": "140-config",
+      "sha256": "f0afa42c9419c1508b8013d6f50c860d9be0296fcf7c37adf20b02c03d87e11a",
+      "bytes": 319,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441910850861
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/.git/index",
+      "member": "141-index",
+      "sha256": "b4e0405f43e8b2756ead8d92b172ca4abac740bf00dd5e8115753203536ce91c",
+      "bytes": 137,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441911121220
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/.git/logs/HEAD",
+      "member": "142-HEAD",
+      "sha256": "a3717235024004cc0f9a862ac728042e15255fd84e2a0ee9fbe319832f34f3c8",
+      "bytes": 226,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441910448202
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/.git/logs/refs/heads/current",
+      "member": "143-current",
+      "sha256": "a3717235024004cc0f9a862ac728042e15255fd84e2a0ee9fbe319832f34f3c8",
+      "bytes": 226,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441910850861
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/.git/objects/98/bb8143428c530bf19e60b699140758cb5fc919",
+      "member": "144-bb8143428c530bf19e60b699140758cb5fc919",
+      "sha256": "fff8fdc18f3cf33f9d58352c76d7cff9be273a3d80d866f6464954b543e4628a",
+      "bytes": 142,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441927710515
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/.git/objects/9f/8733c8777a321629b92a804e66e17c2d2d6acf",
+      "member": "145-8733c8777a321629b92a804e66e17c2d2d6acf",
+      "sha256": "905c63b9cfe64a58fa5e47cabe9d9db396153bfb3222d1ff3d0cacbef6acb737",
+      "bytes": 37,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441927710515
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/.git/objects/db/be04aee37301ce6d4a77e88b42988aa8c50893",
+      "member": "146-be04aee37301ce6d4a77e88b42988aa8c50893",
+      "sha256": "4857e251b4911415bd263afc76d6081110add0b83e999da6d828395cb8c68457",
+      "bytes": 48,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441927710515
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.idx",
+      "member": "147-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.idx",
+      "sha256": "05037a16e13d52ceeacc58e96cc239e82f3e53a2f71c5e020808b6082f2ece66",
+      "bytes": 1156,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441903709768
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.pack",
+      "member": "148-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.pack",
+      "sha256": "4b998643d480df8b0c9766505985f17a03a479cc5cda0058d70237fc82d8c07a",
+      "bytes": 260,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441903554319
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.rev",
+      "member": "149-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.rev",
+      "sha256": "aa51b90d00cb7b1166a61b722f040ae7cb2a9c3eb2be3997490adc16741108fd",
+      "bytes": 64,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441903709768
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/.git/packed-refs",
+      "member": "150-packed-refs",
+      "sha256": "a905cabddcc046003a0d109c4d5523572d4b9b58d57851242315bf3279d3baca",
+      "bytes": 115,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441910137021
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/.git/refs/heads/current",
+      "member": "151-current",
+      "sha256": "5a9b51bd1d4e1779bb61b3a7a1843b12b6c3849380871f2aae03fa21a5148330",
+      "bytes": 41,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441910284805
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/.git/shallow",
+      "member": "152-shallow",
+      "sha256": "d832685eb0429d5862ac31b9d8b47e5fde9c0472597f5d8234da94d936473aba",
+      "bytes": 82,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441924366977
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/checkout/file",
+      "member": "153-file",
+      "sha256": "dfc7e4e4e0943aaca0ca45b09c759529ef6b29c8eb5699dec53a7017be0bb078",
+      "bytes": 34,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441911121220
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/.git/COMMIT_EDITMSG",
+      "member": "154-COMMIT_EDITMSG",
+      "sha256": "25a63a398f8ec337d773b8c88ec811e4932e7ec22a55dd4762091ab2a0041ade",
+      "bytes": 15,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441897134787
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/.git/HEAD",
+      "member": "155-HEAD",
+      "sha256": "0b1990cee00877bf022181afcf7c47367689ab9ad12338c9c6d9b4d5daecbd56",
+      "bytes": 24,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441893541965
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/.git/config",
+      "member": "156-config",
+      "sha256": "cfe7ba1238c9a78be7535d7c63bcaf5a4d5011d46b07c9b45d3bbf7d6c312dfe",
+      "bytes": 92,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441884211308
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/.git/index",
+      "member": "157-index",
+      "sha256": "b7c5422faeeec41f216ada85e439bcb2a7c47de7e41a17c07d28a1eb1c4a392b",
+      "bytes": 137,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441896691617
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/.git/logs/HEAD",
+      "member": "158-HEAD",
+      "sha256": "9d0c8a41e0ccf6f2ba6f10dc4e37cb3d4a28c336cf4bdb0100126fa89e274e00",
+      "bytes": 367,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441897134787
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/.git/logs/refs/heads/current",
+      "member": "159-current",
+      "sha256": "751216ff86da6ff320274db1d0d019c172deb7f36f765103bb9bf473d27a529d",
+      "bytes": 184,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441897134787
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/.git/logs/refs/heads/master",
+      "member": "160-master",
+      "sha256": "23279b679d7224889e745fb0107221d3ce15b04934254ab204b61506ecc3786e",
+      "bytes": 183,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441888908505
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/.git/objects/71/47bb728422026d1e48fd5ac366b8a69f152b18",
+      "member": "161-47bb728422026d1e48fd5ac366b8a69f152b18",
+      "sha256": "04f745356d9b0eec9a3eae434c51c401a363e00f621caf05f4b14f0c837c4e6f",
+      "bytes": 49,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441896691617
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/.git/objects/8d/ab38529c454166e3e0c71a1936bf061a10e86b",
+      "member": "162-ab38529c454166e3e0c71a1936bf061a10e86b",
+      "sha256": "64f78fce7c9aed44cdc53127cd5eb192a66970d3b977947827e268a71ed7e995",
+      "bytes": 145,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441897134787
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/.git/objects/98/bb8143428c530bf19e60b699140758cb5fc919",
+      "member": "163-bb8143428c530bf19e60b699140758cb5fc919",
+      "sha256": "fff8fdc18f3cf33f9d58352c76d7cff9be273a3d80d866f6464954b543e4628a",
+      "bytes": 142,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441888569782
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/.git/objects/9f/8733c8777a321629b92a804e66e17c2d2d6acf",
+      "member": "164-8733c8777a321629b92a804e66e17c2d2d6acf",
+      "sha256": "905c63b9cfe64a58fa5e47cabe9d9db396153bfb3222d1ff3d0cacbef6acb737",
+      "bytes": 37,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441885150543
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/.git/objects/d7/a9ce24879b709a92737404e2a40f9497d894ba",
+      "member": "165-a9ce24879b709a92737404e2a40f9497d894ba",
+      "sha256": "7b9f069f2dbd3545f43e8aef67dc0672b8ab975d4a90bbba85ca8d361233aa1b",
+      "bytes": 50,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441893891369
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/.git/objects/db/be04aee37301ce6d4a77e88b42988aa8c50893",
+      "member": "166-be04aee37301ce6d4a77e88b42988aa8c50893",
+      "sha256": "4857e251b4911415bd263afc76d6081110add0b83e999da6d828395cb8c68457",
+      "bytes": 48,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441888189227
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/.git/refs/heads/current",
+      "member": "167-current",
+      "sha256": "5a9b51bd1d4e1779bb61b3a7a1843b12b6c3849380871f2aae03fa21a5148330",
+      "bytes": 41,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441897134787
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/.git/refs/heads/master",
+      "member": "168-master",
+      "sha256": "6a46501d77847dd0bbf9c3865505d9ca02b8115a761de77a5300a357fb904e1b",
+      "bytes": 41,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441888569782
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/remote/file",
+      "member": "169-file",
+      "sha256": "dfc7e4e4e0943aaca0ca45b09c759529ef6b29c8eb5699dec53a7017be0bb078",
+      "bytes": 34,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441893891369
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-after/.git/HEAD",
+      "member": "170-HEAD",
+      "sha256": "0b1990cee00877bf022181afcf7c47367689ab9ad12338c9c6d9b4d5daecbd56",
+      "bytes": 24,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441945148708
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-after/.git/config",
+      "member": "171-config",
+      "sha256": "59f7974e0e6c1aeb730f088d3ed1db65e08072def3fc6bed6f10e879dbcc2a05",
+      "bytes": 302,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441945482172
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-after/.git/logs/HEAD",
+      "member": "172-HEAD",
+      "sha256": "49506a339072fbbef13c30c93117384413dffcc6c6af3678356d77fe159081f0",
+      "bytes": 221,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441945228178
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-after/.git/logs/refs/heads/current",
+      "member": "173-current",
+      "sha256": "49506a339072fbbef13c30c93117384413dffcc6c6af3678356d77fe159081f0",
+      "bytes": 221,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441945228178
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-after/.git/logs/refs/remotes/origin/HEAD",
+      "member": "174-HEAD",
+      "sha256": "49506a339072fbbef13c30c93117384413dffcc6c6af3678356d77fe159081f0",
+      "bytes": 221,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441944713720
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-after/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.idx",
+      "member": "175-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.idx",
+      "sha256": "05037a16e13d52ceeacc58e96cc239e82f3e53a2f71c5e020808b6082f2ece66",
+      "bytes": 1156,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441941780505
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-after/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.pack",
+      "member": "176-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.pack",
+      "sha256": "4b998643d480df8b0c9766505985f17a03a479cc5cda0058d70237fc82d8c07a",
+      "bytes": 260,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441939589262
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-after/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.rev",
+      "member": "177-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.rev",
+      "sha256": "aa51b90d00cb7b1166a61b722f040ae7cb2a9c3eb2be3997490adc16741108fd",
+      "bytes": 64,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441941780505
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-after/.git/packed-refs",
+      "member": "178-packed-refs",
+      "sha256": "a905cabddcc046003a0d109c4d5523572d4b9b58d57851242315bf3279d3baca",
+      "bytes": 115,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441944622182
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-after/.git/refs/heads/current",
+      "member": "179-current",
+      "sha256": "5a9b51bd1d4e1779bb61b3a7a1843b12b6c3849380871f2aae03fa21a5148330",
+      "bytes": 41,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441945228178
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-after/.git/refs/remotes/origin/HEAD",
+      "member": "180-HEAD",
+      "sha256": "2bbabf8d6d6d22c549bb649574cb88a8b012025218def2bf3c7a40266055c6a0",
+      "bytes": 33,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441944713720
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-after/.git/shallow",
+      "member": "181-shallow",
+      "sha256": "5a9b51bd1d4e1779bb61b3a7a1843b12b6c3849380871f2aae03fa21a5148330",
+      "bytes": 41,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441941780505
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-before/.git/HEAD",
+      "member": "182-HEAD",
+      "sha256": "0b1990cee00877bf022181afcf7c47367689ab9ad12338c9c6d9b4d5daecbd56",
+      "bytes": 24,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441921638226
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-before/.git/config",
+      "member": "183-config",
+      "sha256": "59f7974e0e6c1aeb730f088d3ed1db65e08072def3fc6bed6f10e879dbcc2a05",
+      "bytes": 302,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441922014775
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-before/.git/logs/HEAD",
+      "member": "184-HEAD",
+      "sha256": "49506a339072fbbef13c30c93117384413dffcc6c6af3678356d77fe159081f0",
+      "bytes": 221,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441921805269
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-before/.git/logs/refs/heads/current",
+      "member": "185-current",
+      "sha256": "49506a339072fbbef13c30c93117384413dffcc6c6af3678356d77fe159081f0",
+      "bytes": 221,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441921805269
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-before/.git/logs/refs/remotes/origin/HEAD",
+      "member": "186-HEAD",
+      "sha256": "49506a339072fbbef13c30c93117384413dffcc6c6af3678356d77fe159081f0",
+      "bytes": 221,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441921189277
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-before/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.idx",
+      "member": "187-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.idx",
+      "sha256": "05037a16e13d52ceeacc58e96cc239e82f3e53a2f71c5e020808b6082f2ece66",
+      "bytes": 1156,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441918393255
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-before/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.pack",
+      "member": "188-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.pack",
+      "sha256": "4b998643d480df8b0c9766505985f17a03a479cc5cda0058d70237fc82d8c07a",
+      "bytes": 260,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441915958879
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-before/.git/objects/pack/pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.rev",
+      "member": "189-pack-3e73fbc9e62c0c4b7267ae1018e56ad04d0082c8.rev",
+      "sha256": "aa51b90d00cb7b1166a61b722f040ae7cb2a9c3eb2be3997490adc16741108fd",
+      "bytes": 64,
+      "mode": 292,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441918393255
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-before/.git/packed-refs",
+      "member": "190-packed-refs",
+      "sha256": "a905cabddcc046003a0d109c4d5523572d4b9b58d57851242315bf3279d3baca",
+      "bytes": 115,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441921098059
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-before/.git/refs/heads/current",
+      "member": "191-current",
+      "sha256": "5a9b51bd1d4e1779bb61b3a7a1843b12b6c3849380871f2aae03fa21a5148330",
+      "bytes": 41,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441921805269
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-before/.git/refs/remotes/origin/HEAD",
+      "member": "192-HEAD",
+      "sha256": "2bbabf8d6d6d22c549bb649574cb88a8b012025218def2bf3c7a40266055c6a0",
+      "bytes": 33,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441921189277
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/miniature/shared-before/.git/shallow",
+      "member": "193-shallow",
+      "sha256": "5a9b51bd1d4e1779bb61b3a7a1843b12b6c3849380871f2aae03fa21a5148330",
+      "bytes": 41,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441918393255
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/original-actual-CI-source-attribution.json",
+      "member": "194-original-actual-CI-source-attribution.json",
+      "sha256": "7e542e1cdba33fb7383e1451034265a8b265cbf9a059f4ef1cf26f42b0c3484a",
+      "bytes": 362,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118744941493164
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/original-job.log",
+      "member": "195-original-job.log",
+      "sha256": "a164916daac5de474d0e24c8dc93b36d00d98619024ef54fab4eaf2826180e29",
+      "bytes": 375691,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441409593205
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/original-parent-build.json",
+      "member": "196-original-parent-build.json",
+      "sha256": "bf074bc29f113aba12eceb3a3e7e32233b6ad8513711e2fe3dd7f5e8067df704",
+      "bytes": 3206,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441725071068
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/prior-e605-review-bindings.json",
+      "member": "197-prior-e605-review-bindings.json",
+      "sha256": "c7d147ba3412861cbc76222d8fba604f00e3b0d71f16e4ca84f01f5635814880",
+      "bytes": 13935,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118799756666509
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/retention-verification.json",
+      "member": "198-retention-verification.json",
+      "sha256": "aab18ef5554a3f7191a84e09b535e39613272da7185aa4881da4f6ce92dae26d",
+      "bytes": 7640,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441840065095
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/verification.stderr",
+      "member": "199-verification.stderr",
+      "sha256": "9448207cbe7bbdda03493a36520e8a4e9592b46eea365401609610d44a63c8bc",
+      "bytes": 527,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118441947445130
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/verification.stdout",
+      "member": "200-verification.stdout",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118431351382074
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/verify.py",
+      "member": "201-verify.py",
+      "sha256": "12e1e42b9e7b77971d9b510d51f0d25dd4acef82a37820bc91171b21d422507c",
+      "bytes": 9227,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118431147375725
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/whole-unchanged-parent-bindings.json",
+      "member": "202-whole-unchanged-parent-bindings.json",
+      "sha256": "877256a3c45ffe44904930308f538938f7475cc320bd4a8f4cb1cbb4d8267e33",
+      "bytes": 722002,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118440951221381
+    },
+    {
+      "path": "/workspace/review-proof/skills797-cc3-independent-source/independent-review-receipt.json",
+      "member": "203-independent-review-receipt.json",
+      "sha256": "1c1aef79b3251b64f6db765894f1d57826aa490dcdfb4695c8216b3a7a7f6673",
+      "bytes": 68980,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791118799767353040
+    }
+  ],
+  "archive_sha256": "6a812a65671d4e40a15208c320f05b38d144e9274f6d910dcf665ce1ec6fa39d"
+}
