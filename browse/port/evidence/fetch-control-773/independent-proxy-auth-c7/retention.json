@@ -1,0 +1,290 @@
+{
+  "source": "c7beb3a7a39dbc10f7e84769fccea5cf20e7f09e",
+  "reviewed_head": "5b94a66159db34d335bc32b98bbcd2cb1dfbe5d9",
+  "disposition": "APPROVED bounded correction; no actionable findings",
+  "correction": "Original receipt snapshotted its own completion log before the final208B output; unchanged original plus independent supplement retained.43of44 evidence bytes unchanged.",
+  "artifacts": {
+    "/tmp/symaira-fetch773-proxy-auth-independent-actionlint.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-actionlint.log.gz",
+      "original_bytes": 0,
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stored_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-auth-extra.json": {
+      "file": "symaira-fetch773-proxy-auth-independent-auth-extra.json.gz",
+      "original_bytes": 56394,
+      "original_sha256": "444385c398ae3aec8bc9a1ba6d62a044a6cf8d3c4b1365100d5e63e66d0b82f4",
+      "stored_sha256": "88cfeeb3a33a1bfbf5714c6d083617551ef9e8fb1084283dddf2dc43f5f3e0a0"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-auth-extra.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-auth-extra.log.gz",
+      "original_bytes": 4975,
+      "original_sha256": "3482fbfbf80708fcbec2974723fbb40a97bef8247873dcbf88b65fd9b1af0ec2",
+      "stored_sha256": "8e99338b954e2f543825707e66fe7fad1296c0b361510b129584c792eb1f9ca6"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-auth-extra.py": {
+      "file": "symaira-fetch773-proxy-auth-independent-auth-extra.py",
+      "original_bytes": 1947,
+      "original_sha256": "3212e35088cf84270b5f9cd3ae757490e6b9b49af6c9b06769b20f4041d1a672",
+      "stored_sha256": "3212e35088cf84270b5f9cd3ae757490e6b9b49af6c9b06769b20f4041d1a672"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-auth-required.json": {
+      "file": "symaira-fetch773-proxy-auth-independent-auth-required.json.gz",
+      "original_bytes": 8400,
+      "original_sha256": "6d8dabc916b724ea2b81aa37ecc02ff36ea6f6eb55709c52473f5dc31c72a506",
+      "stored_sha256": "51d907e1df51f87c341fc63a2c421dc26911aab5d64357229aa8ffb1aaa0301b"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-auth-required.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-auth-required.log.gz",
+      "original_bytes": 488,
+      "original_sha256": "d2070be09e59863733aefbfc21a9646246d4f884ab451d7e38501e98252a88aa",
+      "stored_sha256": "f823b923d74ac602758827f16c8efbc33fc97ae4ebf70a153f6826060956c8e2"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-auth-required.py": {
+      "file": "symaira-fetch773-proxy-auth-independent-auth-required.py",
+      "original_bytes": 2362,
+      "original_sha256": "0ab030ca56b532edd4040dc9871fd7d3d01925172d7f226e28949248b967590b",
+      "stored_sha256": "0ab030ca56b532edd4040dc9871fd7d3d01925172d7f226e28949248b967590b"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-benchmark-tests.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-benchmark-tests.log.gz",
+      "original_bytes": 117,
+      "original_sha256": "47baa57d9ef921d6d13a757a7ed7b990fb7e725480a1c7b295edf8b0b0ceccd8",
+      "stored_sha256": "dbecbbe6564621e788a84c1353928ba95890e02591d19a34baa4117114d981c0"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-boundaries-rerun.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-boundaries-rerun.log.gz",
+      "original_bytes": 128,
+      "original_sha256": "41e591481b7321079fae6007279a9ba5fbc6704c3ea3d43e03dc74dfdb080aab",
+      "stored_sha256": "38e9c6bb3806db7992d0c228cb4be85511ea3cc612c9686c97a21c0c7e754ff6"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-boundaries.json": {
+      "file": "symaira-fetch773-proxy-auth-independent-boundaries.json.gz",
+      "original_bytes": 247891,
+      "original_sha256": "3ad4728d2d0fe197a94034c03d0446013301f48cde892a1bab8af7b80c18247a",
+      "stored_sha256": "9e335846808094ba2e178bc10ddc75dc48167db28fa87eb1985147932f495879"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-boundaries.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-boundaries.log.gz",
+      "original_bytes": 853,
+      "original_sha256": "3bf505b18d8d9854d33890599f442b792bdf29a62d7e7761c90deccf70166295",
+      "stored_sha256": "76b2d3049a2dea2f8582021b8e2bab283bea43244d5e86dbebdb14ea6fcda5fa"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-boundaries.py": {
+      "file": "symaira-fetch773-proxy-auth-independent-boundaries.py",
+      "original_bytes": 3335,
+      "original_sha256": "088507e0262ee2fd1cee7fdba0ed16b810c8dd56a955a65c6bafc5523b056f13",
+      "stored_sha256": "088507e0262ee2fd1cee7fdba0ed16b810c8dd56a955a65c6bafc5523b056f13"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-clippy.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-clippy.log.gz",
+      "original_bytes": 60,
+      "original_sha256": "9ae36bb22d8f0f810a77044760863f70b81405396a32cce477ec08eecd4e6d59",
+      "stored_sha256": "392520128b188de33aed6030fb06b45e111efbbc9440c6fcd4f3b6df1ade93c7"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-control-fixtures.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-control-fixtures.log.gz",
+      "original_bytes": 302,
+      "original_sha256": "43d0528d578ec186154e8d033d0d6dc45d1e8669a225ee751cab0496759eeb67",
+      "stored_sha256": "3d7fa55654bb82df22fbdb84dfed2a0d4a35b27d6ddb72a711c772023d22633c"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-fixtures.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-fixtures.log.gz",
+      "original_bytes": 126,
+      "original_sha256": "45e16839335e4ae9f587acd85de835f7febe3dee466975a740d0ab0256dec5bd",
+      "stored_sha256": "aafe102d56c7ba0d8bcdaf18f12e21a94130d616c73a7931fcba47ae38388057"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-fmt.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-fmt.log.gz",
+      "original_bytes": 0,
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stored_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-go-tests.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-go-tests.log.gz",
+      "original_bytes": 735,
+      "original_sha256": "e115a8a266e22a2a9d11e55d587aa6208f7e9d09ac739d31c6ed825c69cd7047",
+      "stored_sha256": "c9c8a9aab47b512ab0b76b607b200b468315dc876b17dbb60cc502ad87e5f572"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-identity.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-identity.log.gz",
+      "original_bytes": 102,
+      "original_sha256": "feabb4add9e2ca3374e538560634d1ec97dc4f4ce89aab12f3d726e36ea9b2f6",
+      "stored_sha256": "afb0c18ce705a80d383e5722055824326e76e969998f728affd36806203c8011"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-matrix.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-matrix.log.gz",
+      "original_bytes": 58,
+      "original_sha256": "f5bfa3059aad5fdddb33c5356c9bfa859a33d90f12f51ff8393cf106c56421b4",
+      "stored_sha256": "2c98c42e1497e68dd9753169cb3f9b3bc4c22789b2c9d3ae7368e19260d73f07"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-original5.json": {
+      "file": "symaira-fetch773-proxy-auth-independent-original5.json.gz",
+      "original_bytes": 5951,
+      "original_sha256": "b4f8836530511075a43bd4de3a944e69636f474f46f0da106c48021f8cea4227",
+      "stored_sha256": "497c52492fc1bbb65a59f480598baa6121f24ad2a49141c322e4e5a449c978f0"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-original5.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-original5.log.gz",
+      "original_bytes": 965,
+      "original_sha256": "93d91eef7811cb26d6178dca1f0b0955acd3c463f189c040cc7cb6d9bc359ce3",
+      "stored_sha256": "2ecb887adb04a088baada45528431d3c5cb54aaf519598c6e0906f912d333327"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-original5.py": {
+      "file": "symaira-fetch773-proxy-auth-independent-original5.py",
+      "original_bytes": 1825,
+      "original_sha256": "88eed4a54bdabf2abb86339730641f37d6513d0e19b594847c548412e6c667f0",
+      "stored_sha256": "88eed4a54bdabf2abb86339730641f37d6513d0e19b594847c548412e6c667f0"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-original8.json": {
+      "file": "symaira-fetch773-proxy-auth-independent-original8.json.gz",
+      "original_bytes": 13898,
+      "original_sha256": "09b8281aae6f0c820210e906995ddb5a80fb88d5b2fbffbc3f01f6575f4dcd69",
+      "stored_sha256": "481597bb80b109075cccd5b0bd9e250e99fb981d56c428fddcd98f8631ffa4d4"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-original8.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-original8.log.gz",
+      "original_bytes": 1649,
+      "original_sha256": "97101d4f7ee833e7c5c60e3625d780c5ab4c85879d0f9f846a4d3cb12ca6bfb5",
+      "stored_sha256": "b5929e5abfe1d0b33ddd6a61271fa086de36f4afbb78adf350cd0b69e71fe70d"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-original8.py": {
+      "file": "symaira-fetch773-proxy-auth-independent-original8.py",
+      "original_bytes": 2532,
+      "original_sha256": "3bbb4674c77df0bcf45c7f1158117a4ede42c743e1d0512f7541d357eb3e6879",
+      "stored_sha256": "3bbb4674c77df0bcf45c7f1158117a4ede42c743e1d0512f7541d357eb3e6879"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-process-controls.json": {
+      "file": "symaira-fetch773-proxy-auth-independent-process-controls.json.gz",
+      "original_bytes": 4418,
+      "original_sha256": "42737129a1aa97653a103c8957423320cc35e4c4052ba3c688f5db633a653041",
+      "stored_sha256": "cee392c0f4fcbbc350f1a38d4ba82af1d1d2fe643e54e8e3a4ca321f79a3de03"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-process-proxy-auth-controls.json": {
+      "file": "symaira-fetch773-proxy-auth-independent-process-proxy-auth-controls.json.gz",
+      "original_bytes": 5893,
+      "original_sha256": "80f3ff324f82c667830a98b5bd0646d36e216c4b71f8520d8bd3e3994a1008be",
+      "stored_sha256": "7d078fbe78a69db658ecb62518d2f51f0fd1fa09488b8209e5d05f1e0fb40928"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-process-proxy-auth.json": {
+      "file": "symaira-fetch773-proxy-auth-independent-process-proxy-auth.json.gz",
+      "original_bytes": 185696,
+      "original_sha256": "28198cc918c2dee968298e81b918d055f125f16ac1d763175e895096e83fd6ef",
+      "stored_sha256": "6bc9ad23905fbdeba3a08150f31cbbe85d3213e4a8464cf2b4d07dea0cdb6fe6"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-process-raw-proxy-controls.json": {
+      "file": "symaira-fetch773-proxy-auth-independent-process-raw-proxy-controls.json.gz",
+      "original_bytes": 13363,
+      "original_sha256": "fd2e9b32d80b02ee8328ad4cc9cb1750db1e11bd7cd7c5634ca2f1c1994dc998",
+      "stored_sha256": "8f671b8f60989a031e14fda7decf636827f99fd3dd62ec58d3d7916557e3ae90"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-process-raw-proxy.json": {
+      "file": "symaira-fetch773-proxy-auth-independent-process-raw-proxy.json.gz",
+      "original_bytes": 64616,
+      "original_sha256": "c6a0705c21114f634532c2f420087902dc994173ce0f96cd22ebbbd671c1e633",
+      "stored_sha256": "6db449e85a655a77d98a5fa74c2b9eb855d014df1e559332f0c1b816f4750468"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-process.json": {
+      "file": "symaira-fetch773-proxy-auth-independent-process.json.gz",
+      "original_bytes": 265939,
+      "original_sha256": "c88d9c8abb579431c589bfa97e8a1b7ba6f7be73693d0b7b4607234e00044aa0",
+      "stored_sha256": "6b2c315703a8e2d5432f2b4c64842f8eab214269b7904a62cda02c4c4e82feaf"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-process.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-process.log.gz",
+      "original_bytes": 452,
+      "original_sha256": "2e5b81418db779dfcc1cb09ed8246c1bc05323692400d5e1bc0eec58adbb517f",
+      "stored_sha256": "0c8782c7d8ac04b60b2db937c53683c8867e19b3d862eaa6a1e294efad874130"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-provenance-final.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-provenance-final.log.gz",
+      "original_bytes": 391,
+      "original_sha256": "8ead756f8f7f9582b04f2e2bc0502efea4987068a1164f1aa8ee8c72c39330ac",
+      "stored_sha256": "2541d741f9702c79357b87c9b61fb28a4b5e383117f17c0e2e2d92ea555813db"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-provenance.json": {
+      "file": "symaira-fetch773-proxy-auth-independent-provenance.json.gz",
+      "original_bytes": 1542,
+      "original_sha256": "3fe723b9700f362ccfad69354f9cba6ad3b6cc2714d5b7a2c908d5226a6cf39d",
+      "stored_sha256": "d2ca85f4054e50623a34475d5b618a040530f0e569bc2d49be0171ce32658da1"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-provenance.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-provenance.log.gz",
+      "original_bytes": 391,
+      "original_sha256": "8ead756f8f7f9582b04f2e2bc0502efea4987068a1164f1aa8ee8c72c39330ac",
+      "stored_sha256": "2541d741f9702c79357b87c9b61fb28a4b5e383117f17c0e2e2d92ea555813db"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-provenance.py": {
+      "file": "symaira-fetch773-proxy-auth-independent-provenance.py",
+      "original_bytes": 2986,
+      "original_sha256": "f38d7a023d871b33ad86c88b0fd840e6d744b7a8916c5fbc5e00f56cb8bfcd83",
+      "stored_sha256": "f38d7a023d871b33ad86c88b0fd840e6d744b7a8916c5fbc5e00f56cb8bfcd83"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-receipt.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-receipt.log.gz",
+      "original_bytes": 208,
+      "original_sha256": "0732be2eccbe268904223cf84b866d4ab656695760b7c659c114267a3050fb2f",
+      "stored_sha256": "69c813d561d0902c33414749b1b35354ee8006c9e50474cf9771696f1f3496b2"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-receipt.py": {
+      "file": "symaira-fetch773-proxy-auth-independent-receipt.py",
+      "original_bytes": 3922,
+      "original_sha256": "09c48d6c1b44e6230bf4a90a052525259fd68632d9e76d7b27e1f0d276bf2d23",
+      "stored_sha256": "09c48d6c1b44e6230bf4a90a052525259fd68632d9e76d7b27e1f0d276bf2d23"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-review.md": {
+      "file": "symaira-fetch773-proxy-auth-independent-review.md",
+      "original_bytes": 8612,
+      "original_sha256": "a13dcc673b2639122993fafdb05be9ba93acef60d364fe646277b115b75e777e",
+      "stored_sha256": "a13dcc673b2639122993fafdb05be9ba93acef60d364fe646277b115b75e777e"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-tests.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-tests.log.gz",
+      "original_bytes": 14765,
+      "original_sha256": "971c7b6325ec164897d54e0b62d8040d80478966ae7621613cc01e8e06506c7b",
+      "stored_sha256": "80958aae012412a002fc40111e22349d57b75373d9136c6c06d532453068f432"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-value-final.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-value-final.log.gz",
+      "original_bytes": 3042,
+      "original_sha256": "6587a8455a18408b26d0624210729b70b773a2a9859fb388a3ee6481faf04fa0",
+      "stored_sha256": "bdc5f330d40e697f461fd232386f15d5999d282f1c671f8294946963032dbd9c"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-value.json": {
+      "file": "symaira-fetch773-proxy-auth-independent-value.json.gz",
+      "original_bytes": 3042,
+      "original_sha256": "6587a8455a18408b26d0624210729b70b773a2a9859fb388a3ee6481faf04fa0",
+      "stored_sha256": "bdc5f330d40e697f461fd232386f15d5999d282f1c671f8294946963032dbd9c"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-value.log": {
+      "file": "symaira-fetch773-proxy-auth-independent-value.log.gz",
+      "original_bytes": 3042,
+      "original_sha256": "6587a8455a18408b26d0624210729b70b773a2a9859fb388a3ee6481faf04fa0",
+      "stored_sha256": "bdc5f330d40e697f461fd232386f15d5999d282f1c671f8294946963032dbd9c"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-value.py": {
+      "file": "symaira-fetch773-proxy-auth-independent-value.py",
+      "original_bytes": 3973,
+      "original_sha256": "73e62cb961e69fcc0b9d31fd42042c24375eb49d1a5108da931ca8e4e9116b1f",
+      "stored_sha256": "73e62cb961e69fcc0b9d31fd42042c24375eb49d1a5108da931ca8e4e9116b1f"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-review-receipt.json": {
+      "file": "symaira-fetch773-proxy-auth-independent-review-receipt.json.gz",
+      "original_bytes": 15018,
+      "original_sha256": "7a4ce80e77773ea1988224dc8a53d08dd684ba1fb442e49318a7257188ba4103",
+      "stored_sha256": "99e986970048902a8a8646a5cd37fe8c8b2e613369c020148c81e2e90225fed7"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-retention-correction.json": {
+      "file": "symaira-fetch773-proxy-auth-independent-retention-correction.json.gz",
+      "original_bytes": 17538,
+      "original_sha256": "a212341d50dd718fb1256cf4540308323d9fae0eb1bb918c621e1bc80ada4018",
+      "stored_sha256": "bf3ecc0adbcf94366bc16d684fd0505507e7b7f6ac1237484638e88134d6a5cc"
+    },
+    "/tmp/symaira-fetch773-proxy-auth-independent-retention-correction.py": {
+      "file": "symaira-fetch773-proxy-auth-independent-retention-correction.py",
+      "original_bytes": 2303,
+      "original_sha256": "4bb19ba405256f69fa7f8442cf1d19ae11e4631234b10ea1d53823d1e0c2c54f",
+      "stored_sha256": "4bb19ba405256f69fa7f8442cf1d19ae11e4631234b10ea1d53823d1e0c2c54f"
+    }
+  }
+}
