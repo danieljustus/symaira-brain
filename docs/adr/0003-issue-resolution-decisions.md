@@ -291,13 +291,17 @@ ACL-/Sharing-Verhalten und native UTF16-Pfade erhalten eigene explizite Gates;
 es gibt keine pauschale SDK-Ausnahme oder Annahme aus Cross-Compilation.
 Standalone-Runner und ursprüngliche57 Rohbelege bleiben unverändert.
 
-## Aktueller Integrationsstand am 2026-10-04
+## Integrationsstand am 2026-10-04
 
 PR807 wurde nach vier aktuellen geschützten Checks und echtem macOS-Vertragslauf
 regulär nach main5e232700bb9031fc34d4995465a4037837540abb gemerged. Das beweist
 keinen echten signierten Release. Noch11 PRs und33 Issues bleiben offen.
-PR805 ist normal auf diese Basis integriert (a114f9a), ohne Änderung der
-unabhängig geprüften Guard-Bytes; neue genaue Head-Checks bleiben erforderlich.
+PR805 war lokal auf diese Basis integriert (a114f9a), nicht jedoch in GitHub-main.
+Am 2026-10-05 wurde PR805 regulär nach main
+f6cfc25bb6059c68cd65b448fb3bcccb046b2e07 gemerged. Der genaue Candidate
+d9e211849b30225e6ce4ed375ee64627f333eddc bestand die unabhängige Guard-Prüfung,
+die nativen Linux/macOS/Windows-Gates und den lokalen strengen Rust-Workspace-Check.
+Das schließt weder die vollständige Guard-Migration noch einen Release ab.
 PR803 muss vor seinen Memory-MCP/HTTP-/Schema-Nachfolgern integriert werden.
 
 Die nächste kompilierte Prüfgruppe behandelt Skills-Argumente; historische
