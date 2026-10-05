@@ -67,7 +67,7 @@ pub(super) fn lookup(tool: &str) -> Result<PathBuf, String> {
     };
     #[cfg(windows)]
     if allow_relative && let Some(implicit) = &implicit {
-        return Ok(implicit.clone());
+        return super::absolute(implicit.as_os_str());
     }
     // Go filepath.SplitList("") has no entries, while Rust yields one empty
     // entry. Nonempty Unix lists still permit explicit empty CWD entries.
@@ -149,18 +149,22 @@ pub(super) fn run(
     let resolved = if executable.is_absolute() {
         None
     } else {
-        cwd.map(|directory| directory.join(executable))
+        cwd.map(|directory| super::absolute(directory.join(executable).as_os_str()))
+            .transpose()?
     };
     #[cfg(windows)]
     if let Some(resolved) = &resolved {
         // Go resolves relative executable names against Cmd.Dir on Windows;
         // CreateProcess alone would instead search the parent's directory.
         if !resolved.is_file() {
-            return Err(format!(
-                "exec: {}: executable file not found in %PATH%",
-                symbrain_core::config::format_go_quoted(executable.as_os_str())
-            )
-            .into());
+            let error = fs::metadata(resolved)
+                .err()
+                .unwrap_or_else(|| std::io::Error::from_raw_os_error(3));
+            let quoted = symbrain_core::config::format_go_quoted(resolved.as_os_str());
+            let mut message = GoText::from(format!("exec: {quoted}: GetFileAttributesEx "));
+            message.push(&symbrain_core::config::os_bytes(resolved.as_os_str()));
+            message.push(format!(": {}", format_io_error(&error)).as_bytes());
+            return Err(message);
         }
     }
     #[cfg(windows)]

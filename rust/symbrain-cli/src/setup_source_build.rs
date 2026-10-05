@@ -169,11 +169,7 @@ fn swift(
         message.push(&symbrain_core::config::os_bytes(built.as_os_str()));
         message.with_suffix(format!(": {}", format_io_error(&error)).as_bytes())
     })?;
-    let bytes = std::fs::read(&built).map_err(|error| {
-        let mut message = GoText::path("read built binary ", &built, ": open ");
-        message.push(&symbrain_core::config::os_bytes(built.as_os_str()));
-        message.with_suffix(format!(": {}", format_io_error(&error)).as_bytes())
-    })?;
+    let bytes = read_built_binary(&built)?;
     let target = dest.join(spec.binary);
     std::fs::write(&target, bytes).map_err(|error| {
         GoText::path(
@@ -189,6 +185,24 @@ fn swift(
             .map_err(|error| error.to_string())?;
     }
     Ok((target, builder))
+}
+
+fn read_built_binary(built: &Path) -> Result<Vec<u8>, GoText> {
+    std::fs::read(built).map_err(|error| {
+        let is_directory = error.kind() == std::io::ErrorKind::IsADirectory
+            || std::fs::metadata(built).is_ok_and(|metadata| metadata.is_dir());
+        let operation = if is_directory { "read" } else { "open" };
+        // Windows reports AccessDenied for Rust's directory read, while Go's
+        // os.ReadFile surfaces ERROR_INVALID_FUNCTION for the same payload.
+        let detail = if cfg!(windows) && is_directory {
+            format_io_error(&std::io::Error::from_raw_os_error(1))
+        } else {
+            format_io_error(&error)
+        };
+        let mut message = GoText::path("read built binary ", built, &format!(": {operation} "));
+        message.push(&symbrain_core::config::os_bytes(built.as_os_str()));
+        message.with_suffix(format!(": {detail}").as_bytes())
+    })
 }
 
 #[allow(clippy::too_many_arguments)] // Mirrors the owned process inputs.

@@ -1,6 +1,7 @@
 """Doctor fixtures; no historical Go production source or fixture is changed."""
 from dataclasses import dataclass
 import json
+import sys
 
 @dataclass(frozen=True)
 class Case:
@@ -32,6 +33,8 @@ def cases():
                    provenance=b'{"source":"brain-source"}'),
               Case("timeout", probe_wait=10000, provenance=b'{"source":"brain-source"}'),
               Case("provenance-directory", version=b'{"version":"0.0.0"}', provenance="directory")]
+    # APFS cannot create invalid-UTF-8 path components; Linux still exercises them.
+    raw_filesystem_paths = sys.platform == "linux"
     if __import__('os').name != 'nt':
         result.append(Case("nonexecutable", nonexecutable=True, provenance=b'{"source":"brain-source"}'))
         for signal in ("TERM", "INT", "KILL"):
@@ -44,7 +47,7 @@ def cases():
         result.append(Case("home-before-config-"+mode,all_missing=True,home_mode=mode,config="[bad config"))
         if __import__('os').name=='nt':
             result.append(Case("userprofile-fallback-refused-"+mode,all_missing=True,home_mode=mode,home_fallback=True))
-    if __import__('os').name!='nt':
+    if raw_filesystem_paths:
         result.extend((
             Case("raw-home-correct",raw_home=True),
             Case("raw-home-source",raw_home=True,version=b'{"version":"0.0.0"}',provenance=b'{"source":"brain-source"}'),
@@ -58,7 +61,7 @@ def cases():
     for fault in ("bin", "parent"):
         result.append(Case("managed-file-"+fault,bin_fault=fault,
                            args=("doctor","--fix","--force-release"),verifier=True))
-        if __import__('os').name!='nt':
+        if raw_filesystem_paths:
             result.append(Case("raw-managed-file-"+fault,bin_fault=fault,raw_home=True,
                                args=("doctor","--fix","--force-release"),verifier=True))
     if __import__('os').name!='nt':
@@ -156,7 +159,7 @@ def cases():
              provenance=b'{"source":"brain-source","receiver_commit":"kept until explicit force"}',verifier=True),
         Case("verified-force-corrupt",args=("doctor","--fix","--force-release"),version=b'{"version":"0.0.0"}',
              provenance=b'{bad',verifier=True)))
-    if __import__('os').name != 'nt':
+    if raw_filesystem_paths:
         escaped = __import__('os').fsdecode(b"home\xff\xef\xbf\xbd\xe2\x82&<>\xe2\x80\xa8\xe2\x80\xa9")
         for lexical, fault in (("parent", None), ("symlink-parent", None), ("parent", "parent")):
             result.append(Case(f"escaped-home-doctor-{lexical}-fault-{fault}",

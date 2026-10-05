@@ -266,16 +266,21 @@ fn install(
     let (binary, builder) =
         build::build(root, spec, temp.path(), context).map_err(|error| (error, true))?;
     let data = std::fs::read(&binary).map_err(|error| {
-        let operation = if error.kind() == std::io::ErrorKind::IsADirectory {
-            "read"
+        let is_directory = error.kind() == std::io::ErrorKind::IsADirectory
+            || std::fs::metadata(&binary).is_ok_and(|metadata| metadata.is_dir());
+        let operation = if is_directory { "read" } else { "open" };
+        // Windows reports AccessDenied for Rust's directory read, while Go's
+        // os.ReadFile surfaces ERROR_INVALID_FUNCTION for the same payload.
+        let detail = if cfg!(windows) && is_directory {
+            format_io_error(&std::io::Error::from_raw_os_error(1))
         } else {
-            "open"
+            format_io_error(&error)
         };
         (
             symbrain_managed::GoText::path(
                 &format!("{operation} "),
                 &binary,
-                &format!(": {}", format_io_error(&error)),
+                &format!(": {detail}"),
             ),
             false,
         )

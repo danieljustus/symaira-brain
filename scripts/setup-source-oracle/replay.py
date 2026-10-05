@@ -66,20 +66,23 @@ def cases():
         add("flag-grammar-"+str(len(result)),args)
     for fault in ("missing","file"):add("tmp-root-"+fault,tmp_fault=fault)
     for fault in ("missing","file","valid"):add("relative-tmp-root-"+fault,relative_tmp=fault)
+    raw_filesystem_paths = sys.platform == "linux"
     if os.name!="nt":
         raw=os.fsdecode(b"bad\xff\xe2\x82")
         add("raw-module-separate",modules=raw)
         add("raw-module-inline",["setup","--from-source","<source>","--modules="+raw,"--json"])
         add("raw-module-unicode-space",modules="\u2003 "+raw+" \u00a0")
-        add("raw-missing-root",["setup","--from-source","<source>/"+raw,"--modules","browse","--json"])
+        if raw_filesystem_paths:
+            add("raw-missing-root",["setup","--from-source","<source>/"+raw,"--modules","browse","--json"])
         add("raw-unknown-flag",["setup","--from-source","<source>","--"+raw])
         add("raw-boolean",["setup","--from-source","<source>","--json="+raw])
-        for json_out in (True,False):
-            args=["setup","--from-source","<source>","--modules","browse"]+(["--json"] if json_out else [])
-            add("raw-existing-root-"+str(json_out),args,raw_root=os.fsdecode(b"owned\xff\xe2\x82"))
-            add("raw-home-"+str(json_out),args,raw_home=os.fsdecode(b"owned\xff\xe2\x82"))
+        if raw_filesystem_paths:
+            for json_out in (True,False):
+                args=["setup","--from-source","<source>","--modules","browse"]+(["--json"] if json_out else [])
+                add("raw-existing-root-"+str(json_out),args,raw_root=os.fsdecode(b"owned\xff\xe2\x82"))
+                add("raw-home-"+str(json_out),args,raw_home=os.fsdecode(b"owned\xff\xe2\x82"))
         add("literal-replacement-root",raw_root="owned\ufffd")
-    if os.name!="nt":
+    if raw_filesystem_paths:
         for fault in ("missing","file","valid","missing-payload"):
             add("raw-worker-tmp-"+fault,raw_tmp=fault)
         add("raw-home-obstructed",raw_home_fault=True)
@@ -121,7 +124,7 @@ def cases():
     for lexical in ("dot","parent","slash"):
         add("managed-home-"+lexical,home_lexical=lexical)
     if os.name!="nt":add("managed-home-symlink-parent",home_lexical="symlink-parent")
-    if os.name != "nt":
+    if raw_filesystem_paths:
         escaped = os.fsdecode(b"home\xff\xef\xbf\xbd\xe2\x82&<>\xe2\x80\xa8\xe2\x80\xa9")
         for json_out in (False, True):
             for fault in (False, True):
@@ -247,9 +250,13 @@ def configure(case,root,go,tool):
         shutil.copyfile(tool_path,tools/"go");(tools/"go").chmod(0o755)
         env.update(GOROOT=subprocess.check_output([str(tool_path),"env","GOROOT"],text=True).strip(),
                    GOCACHE=os.environ["SOURCE_REAL_GO_CACHE"],GOTOOLCHAIN="local",GO111MODULE="on",GOTELEMETRY="off")
-        telemetry=root/"config/go/telemetry";telemetry.mkdir(parents=True)
+        if sys.platform == "darwin":
+            telemetry = Path(env["HOME"]) / "Library" / "Application Support" / "go" / "telemetry"
+        else:
+            telemetry = root / "config" / "go" / "telemetry"
+        telemetry.mkdir(parents=True)
         (telemetry/"mode").write_text("off\n")
-        env["GOTELEMETRYDIR"]=str(telemetry)
+        env["GOTELEMETRYDIR"] = str(telemetry)
         (source/"browse/go.mod").write_text("module fixture.example/nativeworker\n\ngo 1.26\n")
         cmd=source/"browse/cmd/symbrowse";cmd.mkdir(parents=True)
         (cmd/"main.go").write_text('package main\nimport "fmt"\nfunc main(){fmt.Print(`{"version":"0.765.0-real"}`)}\n')

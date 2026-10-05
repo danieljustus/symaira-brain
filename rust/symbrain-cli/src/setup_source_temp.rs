@@ -73,9 +73,20 @@ pub(super) fn stage(parent: &Path) -> Result<Stage, GoText> {
                     detail = Some(if error.kind() == std::io::ErrorKind::NotFound {
                         match std::fs::metadata(parent) {
                             Err(stat) if stat.kind() == std::io::ErrorKind::NotFound => {
+                                let display_parent = if cfg!(windows) {
+                                    super::absolute(parent.as_os_str())
+                                        .unwrap_or_else(|_| parent.to_path_buf())
+                                } else {
+                                    parent.to_path_buf()
+                                };
+                                let operation = if cfg!(windows) {
+                                    "GetFileAttributesEx "
+                                } else {
+                                    "stat "
+                                };
                                 GoText::path(
-                                    "stat ",
-                                    parent,
+                                    operation,
+                                    &display_parent,
                                     &format!(": {}", format_io_error(&stat)),
                                 )
                             }
