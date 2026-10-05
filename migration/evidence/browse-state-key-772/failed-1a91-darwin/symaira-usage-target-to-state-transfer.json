@@ -1,0 +1,13 @@
+{
+  "previous_owner": "Usage immutable5e",
+  "next_owner": "State author797",
+  "old_target": "/workspace/symaira-usage768-remaining/target",
+  "new_target": "/workspace/symaira-daemon772-state-key-osargs/target",
+  "source_state": "1a91f972a784ef1be6f2b2e47e8589fda947a4ae",
+  "original_usage_archive": "/workspace/oracles/symaira-usage768-retry-original-review/receipt.json",
+  "current_ELF_paths_verified": 562,
+  "unique": 494,
+  "users": [],
+  "roundtrip_verified": true,
+  "action": "Move only verified idle ignored cache for resource reuse; preserve all source, raw proof, archive and actual identity receipts unchanged; compiler held until allocation"
+}

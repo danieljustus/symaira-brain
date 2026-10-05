@@ -1,0 +1,17 @@
+{
+  "candidate_head": "c7ad0b5f98365d64139f0f139f936a1ecd08cdef",
+  "synthetic_checkout": "4dfd76e7527add6dfdbf038bf1798bac55022629",
+  "run_id": 37141304343,
+  "job_id": 111256140254,
+  "platform": "macOS ARM",
+  "conclusion": "failure",
+  "artifact_id": 11281790592,
+  "artifact_sha256": "e4ce7561fdd4132da7dc0b8c91532a1e28dc1d2aa0bdadac182a5f7756bfe6e0",
+  "failure_context": [
+    "failed daemon: settings={}; exit=-15; stdout=b''; stderr=b''",
+    "connection.connect(str(socket_path))",
+    "OSError: AF_UNIX path too long"
+  ],
+  "correction": "Use a short owned /tmp parent for private daemon HOME on Darwin CI only. Original daemon endpoint and external-volume policy remain unchanged.",
+  "fresh_native_ci_required": true
+}

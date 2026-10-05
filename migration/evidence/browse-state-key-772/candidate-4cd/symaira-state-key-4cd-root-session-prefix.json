@@ -1,0 +1,42 @@
+{
+  "cases": [
+    {
+      "kind": "go",
+      "source": "4cd56e3e47338aef30e5d83ea554227ace70fe71",
+      "binary_sha256": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8",
+      "root": "/tmp/bk-parent-ph78vfok",
+      "arguments": [
+        "/tmp/symaira-pr801-go-1.26.7",
+        "--session",
+        "pt2211722",
+        "state",
+        "list",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout": "{\"success\":false,\"error\":{\"code\":\"daemon_unavailable\",\"message\":\"daemon did not become ready for session \\\"pt2211722\\\"\",\"hint\":\"start daemon with 'symbrowse daemon --session pt2211722'; see daemon log at /tmp/bk-parent-ph78vfok/state/symbrowse/daemon.log\",\"details\":{\"session\":\"pt2211722\",\"socket_path\":\"/tmp/bk-parent-ph78vfok/run/symbrowse/pt2211722.sock\"}}}\n",
+      "stderr": "",
+      "elapsed": 5.01590589999978,
+      "queries": [
+        {
+          "arguments": [
+            "get",
+            "symbrowse/encryption-key"
+          ],
+          "name": "symvault",
+          "pid": 2211777
+        }
+      ],
+      "provider_after_cli": {
+        "pid": 2211777,
+        "state": "S",
+        "parent": 2211767,
+        "executable": "/tmp/bk-parent-ph78vfok/bin/symvault"
+      },
+      "provider_after_16_5_seconds": {
+        "pid": 2211777,
+        "state": "gone"
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{"candidate_head": "5ed6f1733f3bdaf86ef88eddb3616cece5431d8e", "go_sha256": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8", "rust_sha256": "b513cf31821d77af6248f70f76d8fcbbb0b53219672cb7106093cb7c21c6ac2b", "cases": 6, "passed": 2, "failed": 4, "no_files_created": true}
+arguments ['session', '--help'] match False first_go_line Inspect browser sessions first_rust_line Inspect daemon-owned sessions
+arguments ['session'] match False first_go_line Inspect browser sessions first_rust_line Inspect daemon-owned sessions
+arguments ['session', 'list', '--help'] match False first_go_line List sessions first_rust_line List daemon-owned sessions
+arguments ['session', 'info', '--help'] match True first_go_line Show session information first_rust_line Show session information
+arguments ['help', 'session', 'list'] match False first_go_line List sessions first_rust_line List daemon-owned sessions
+arguments ['help', 'session', 'info'] match True first_go_line Show session information first_rust_line Show session information

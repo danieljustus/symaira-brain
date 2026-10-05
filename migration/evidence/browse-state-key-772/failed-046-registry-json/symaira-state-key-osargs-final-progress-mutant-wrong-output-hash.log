@@ -1,0 +1,16 @@
+F
+======================================================================
+FAIL: test_real_nonutf8_output_and_failure_are_hashed_without_projection (__main__.ProgressTests.test_real_nonutf8_output_and_failure_are_hashed_without_projection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/bk-progress-mutants-hibnamig/wrong-output-hash/test_registry_progress.py", line 53, in test_real_nonutf8_output_and_failure_are_hashed_without_projection
+    self.assertEqual(complete["stdout_sha256"], hashlib.sha256(b"\xff").hexdigest())
+AssertionError: '0000000000000000000000000000000000000000000000000000000000000000' != 'a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89'
+- 0000000000000000000000000000000000000000000000000000000000000000
++ a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.011s
+
+FAILED (failures=1)

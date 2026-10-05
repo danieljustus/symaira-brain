@@ -1,0 +1,182 @@
+{
+  "comparison_source": "ccc5c87eb3bf69cf4adbf054b60d5e5342af3891",
+  "comparison_source_dirty": false,
+  "original_process_source": "046bf9088a21371f30a0c2ccea829ff93ab78f56",
+  "original_process_cli_sha256": "55fe14d5c477c1835c9d9cbc5ceb32fd298fe799fa1adb7d202cb7179f627d58",
+  "original_raw_receipt": "/tmp/symaira-state-key-osargs-final-registry.raw.json",
+  "original_raw_sha256": "ca82e570815c89b081e12c3dfa65afb3948718520b705633d8ae2ed4d597a421",
+  "matches": true,
+  "negative_controls": [
+    {
+      "name": "foreign-owner",
+      "rejected": true
+    },
+    {
+      "name": "previous-owner-after-restart",
+      "rejected": true
+    },
+    {
+      "name": "missing-error-detail",
+      "rejected": true
+    },
+    {
+      "name": "invalid-timestamp",
+      "rejected": true
+    },
+    {
+      "name": "invalid-cli-exit",
+      "rejected": true
+    },
+    {
+      "name": "invalid-cli-protocol-code",
+      "rejected": true
+    },
+    {
+      "name": "raw-cli-byte-loss",
+      "rejected": true
+    },
+    {
+      "name": "help-description",
+      "rejected": true
+    }
+  ],
+  "global_audit": {
+    "registry_compare.py": {
+      "sha256": "20553f89e15d23e46bf126897b5f90abf25e16e8f6f5ddc207c2ee294f7e8f33",
+      "unresolved_globals": [],
+      "referenced_globals": [
+        "AssertionError",
+        "all",
+        "base64",
+        "bool",
+        "cli_edges",
+        "compare",
+        "copy",
+        "datetime",
+        "dict",
+        "float",
+        "int",
+        "isinstance",
+        "json",
+        "len",
+        "list",
+        "normalize",
+        "os",
+        "re",
+        "str"
+      ]
+    },
+    "daemon_registry.py": {
+      "sha256": "dec3df34057fff678c59f9c6d04d45b9ee6ec9f368669264d1a08f2ee5d012e0",
+      "unresolved_globals": [],
+      "referenced_globals": [
+        "AssertionError",
+        "CLI_SPEC",
+        "Exception",
+        "HERE",
+        "OSError",
+        "Path",
+        "Progress",
+        "SPEC",
+        "SystemExit",
+        "__file__",
+        "__name__",
+        "argparse",
+        "bool",
+        "bytes",
+        "cli",
+        "cli_edges",
+        "compare",
+        "concurrent",
+        "controls",
+        "datetime",
+        "dict",
+        "environment",
+        "event",
+        "harness",
+        "importlib",
+        "json",
+        "len",
+        "list",
+        "main",
+        "next",
+        "normalize",
+        "observe",
+        "oracle_api",
+        "os",
+        "platform",
+        "print",
+        "process",
+        "range",
+        "request",
+        "sorted",
+        "start",
+        "stop",
+        "str",
+        "subprocess",
+        "sys",
+        "tempfile",
+        "time"
+      ]
+    },
+    "registry_progress.py": {
+      "sha256": "f54c52ff0b6f097195fef045310b5bb4d37631ad9205f92819e2f8f6eeb36b03",
+      "unresolved_globals": [],
+      "referenced_globals": [
+        "MAX_EVENTS",
+        "MAX_EVENT_BYTES",
+        "RuntimeError",
+        "base64",
+        "bytes",
+        "hashlib",
+        "isinstance",
+        "json",
+        "len",
+        "os",
+        "str",
+        "threading",
+        "time"
+      ]
+    },
+    "daemon_registry_cli.py": {
+      "sha256": "e1cffd996bc74819bd01fbb4d61e0a3ca02f8cbbe102a22b7f1cd527e50ce283",
+      "unresolved_globals": [],
+      "referenced_globals": [
+        "COMMANDS",
+        "FORMATS",
+        "UNSUPPORTED_ID_ROW",
+        "all",
+        "base64",
+        "comparable_help",
+        "copy",
+        "execute",
+        "len",
+        "os",
+        "sorted",
+        "str",
+        "subprocess"
+      ]
+    },
+    "startup_key_paths.py": {
+      "sha256": "e1fdb81f10f43e6ef4e4c2e950849fc90289cadc3a40b3450ed0445ff26bcf44",
+      "unresolved_globals": [],
+      "referenced_globals": [
+        "Path",
+        "base64",
+        "dict",
+        "encode",
+        "json",
+        "key",
+        "len",
+        "os",
+        "queries",
+        "shutil",
+        "str",
+        "streams",
+        "subprocess",
+        "tempfile"
+      ]
+    }
+  },
+  "scope": "Supplemental corrected comparator execution over untouched original046 actual process observations; no new-source CLI executions."
+}

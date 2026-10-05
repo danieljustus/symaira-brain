@@ -1,0 +1,87 @@
+{
+  "cases": [
+    {
+      "kind": "go",
+      "candidate_source": "3db69a655e43ef8cffa3776ad00a823d947ff31b",
+      "original_failing_source": "4cd56e3e47338aef30e5d83ea554227ace70fe71",
+      "provider_binary_sha256": "e231f7b6707a4cff1714057f00c67ec454d5e2aa696dee9a217c2e7ece9062d1",
+      "provider_retained_path": "/workspace/oracles/symaira-state-key-4cd-owned-provider",
+      "binary_sha256": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8",
+      "root": "/tmp/bk-parent-db6yw3lu",
+      "arguments": [
+        "/tmp/symaira-pr801-go-1.26.7",
+        "state",
+        "list",
+        "--session",
+        "pt2556281",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout": "{\"success\":false,\"error\":{\"code\":\"daemon_unavailable\",\"message\":\"daemon did not become ready for session \\\"pt2556281\\\"\",\"hint\":\"start daemon with 'symbrowse daemon --session pt2556281'; see daemon log at /tmp/bk-parent-db6yw3lu/state/symbrowse/daemon.log\",\"details\":{\"session\":\"pt2556281\",\"socket_path\":\"/tmp/bk-parent-db6yw3lu/run/symbrowse/pt2556281.sock\"}}}\n",
+      "stderr": "",
+      "elapsed": 5.030697125002916,
+      "queries": [
+        {
+          "arguments": [
+            "get",
+            "symbrowse/encryption-key"
+          ],
+          "name": "symvault",
+          "pid": 2556297
+        }
+      ],
+      "provider_after_cli": {
+        "pid": 2556297,
+        "state": "S",
+        "parent": 2556288,
+        "executable": "/tmp/bk-parent-db6yw3lu/bin/symvault"
+      },
+      "provider_after_16_5_seconds": {
+        "pid": 2556297,
+        "state": "gone"
+      }
+    },
+    {
+      "kind": "rust",
+      "candidate_source": "3db69a655e43ef8cffa3776ad00a823d947ff31b",
+      "original_failing_source": "4cd56e3e47338aef30e5d83ea554227ace70fe71",
+      "provider_binary_sha256": "e231f7b6707a4cff1714057f00c67ec454d5e2aa696dee9a217c2e7ece9062d1",
+      "provider_retained_path": "/workspace/oracles/symaira-state-key-4cd-owned-provider",
+      "binary_sha256": "ecb9bcefb4fa1c8bf208ab5a08f8ea64c513b28be0a16c83533806e186f69707",
+      "root": "/tmp/bk-parent-8fwqfpcy",
+      "arguments": [
+        "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+        "state",
+        "list",
+        "--session",
+        "pt2556281",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout": "{\"success\":false,\"error\":{\"code\":\"daemon_unavailable\",\"message\":\"daemon did not become ready for session \\\"pt2556281\\\"\",\"hint\":\"start daemon with 'symbrowse daemon --session pt2556281'; see daemon log at /tmp/bk-parent-8fwqfpcy/state/symbrowse/daemon.log\",\"details\":{\"session\":\"pt2556281\",\"socket_path\":\"/tmp/bk-parent-8fwqfpcy/run/symbrowse/pt2556281.sock\"}}}\n",
+      "stderr": "",
+      "elapsed": 5.0154960450017825,
+      "queries": [
+        {
+          "arguments": [
+            "get",
+            "symbrowse/encryption-key"
+          ],
+          "name": "symvault",
+          "pid": 2561138
+        }
+      ],
+      "provider_after_cli": {
+        "pid": 2561138,
+        "state": "S",
+        "parent": 2561134,
+        "executable": "/tmp/bk-parent-8fwqfpcy/bin/symvault"
+      },
+      "provider_after_16_5_seconds": {
+        "pid": 2561138,
+        "state": "gone"
+      }
+    }
+  ],
+  "scope": "owned Linux fixture processes only; no Windows/Darwin runtime claim; targeted extra observation, candidate unmodified; same original owned provider executable; both provider processes gone at16.5s"
+}

@@ -1,0 +1,33 @@
+import hashlib,json,os,pathlib,shutil,subprocess,tarfile
+os.umask(0o022)
+O=pathlib.Path(__file__).parent;R=pathlib.Path('/workspace/symaira-daemon801-autostart-cleanup');E=R/'migration/evidence/daemon-registry-autostart-lifetime-801'
+sha=lambda b:hashlib.sha256(b).hexdigest(); git=lambda *a:subprocess.check_output(['git',*a],cwd=R)
+source='50ed5d372a77dfb964ce1f73b4ba780400d9bcd1';original='8a95b40e854724384b4a551f316215662d7b5815'
+assert git('rev-parse','HEAD').decode().strip()==source and not git('status','--porcelain')
+v=json.loads((O/'validation.json').read_bytes());assert v['source']==source and len(v['full_unchanged_originals'])==3699
+ret=json.loads((O/'before-edit-retention.json').read_bytes())
+with tarfile.open(O/'complete-before-edit.tar.gz','r:gz') as t:
+ members=t.getmembers();assert len(members)==209
+ for m,row in zip(members,ret['members']):
+  assert m.name==row['name'];b=t.extractfile(m).read();assert sha(b)==row['sha256'] and len(b)==row['bytes']
+logs=sorted(p for p in (O/'clean-source-tests').rglob('*') if p.is_file())
+for n in ['validate.stdout','validate.stderr','lifetime-tests.stdout','lifetime-tests.stderr','preserve.stdout','preserve.stderr']:logs.append(O/n)
+archive=O/'fresh-pure-machinery.tar.gz';ledger=[]
+with tarfile.open(archive,'w:gz',compresslevel=9) as t:
+ for p in logs:
+  b=p.read_bytes();st=p.stat();name=str(p.relative_to(O));t.add(p,arcname=name,recursive=False);ledger.append(dict(name=name,bytes=len(b),sha256=sha(b),native_mode=st.st_mode,uid=st.st_uid,gid=st.st_gid,mtime_ns=st.st_mtime_ns,atime_ns=st.st_atime_ns))
+with tarfile.open(archive,'r:gz') as t:
+ for m,row in zip(t.getmembers(),ledger):
+  b=t.extractfile(m).read();assert m.name==row['name'] and len(b)==row['bytes'] and sha(b)==row['sha256']
+(O/'fresh-pure-machinery-manifest.json').write_text(json.dumps(dict(source=source,archive_sha256=sha(archive.read_bytes()),archive_bytes=archive.stat().st_size,members=ledger,actual_sdk_product_native=False),indent=2)+'\n')
+files=[]
+for line in git('diff','--name-only',original,source).decode().splitlines():
+ if line.startswith('migration/evidence/'):continue
+ b=git('show',source+':'+line);mode=git('ls-tree',source,'--',line).split()[0].decode();files.append(dict(path=line,bytes=len(b),sha256=sha(b),git_mode=mode))
+for n in ['validation.json','fresh-pure-machinery.tar.gz','fresh-pure-machinery-manifest.json','validate.stdout','validate.stderr','seal.py']:shutil.copyfile(O/n,E/n)
+h=dict(schema='source-only-autostart-lifetime-handoff-v1',source=source,original=original,worktree=str(R),branch=git('branch','--show-current').decode().strip(),source_body_bindings=files,unchanged_original_files=3699,original_whole_files=3701,original_archive=dict(path=str(E/'complete-before-edit.tar.gz'),sha256=ret['archive_sha256'],members=209,prior193_complete=True),native_originals=dict(full_ledger=ret['native_original_ledger'],sha256=ret['native_original_ledger_sha256'],archives=ret['all9762native_payloads'],members=9762),tests=dict(progress=5,capture=4,ownership_api_mocks=13,source_mock_controls=4,controls_intended_assertions=True),unchanged_real_registry_controls=8,actual_current=dict(compiler=0,SDK=0,product=0,native_Windows=0,Target=0,ports=0),pending='Root different-author review and exact-source full six-native registry/cleanup identities; no overall current Windows acceptance',limitations=['Original journal does not identify remaining PID; WinError32 alone is not that identity','Actual unit fixtures mock Windows API; no current native Windows process-handle/API proof','Original preceding 35 pairs and three controls do not constitute full registry/job acceptance'],validation=dict(path=str(E/'validation.json'),sha256=sha((O/'validation.json').read_bytes())),fresh_pure_archive=dict(path=str(E/archive.name),sha256=sha(archive.read_bytes()),members=len(ledger)),resources='No Target/cache/SDK/port leases held or mutated; Python-only child fixtures completed/reaped')
+(O/'handoff.json').write_text(json.dumps(h,indent=2)+'\n');shutil.copyfile(O/'handoff.json',E/'handoff.json')
+md=f'''# Daemon801 retained autostart ownership successor\n\nSource `{source}` from immutable `{original}` in `{R}`. This is an authored source-only handoff awaiting different-author Root review, not self-approval or native acceptance.\n\nThe only existing-body changes are `daemon_registry.py` autostart ownership/finally and the native workflow's new unit/log. The new Windows ownership helper pins a kernel process handle after private-endpoint PID/image verification and confirms existing status/session.info PID agreement. It waits normal exit before owned temporary-directory teardown, and forces only that retained confirmed object on a failed stop/timeout. Forced cleanup always remains a gate failure. Budgets stay CLI15s/cleanup2s; no directory retries or cleanup suppression, numeric-PID/name force, production/SDK changes or comparison changes.\n\nAll 3,699 other original files retain body/Git mode. Original 193 proofs plus complete native logs/source form a verified 209-member before-edit archive. All four original native ZIPs and all 9,762 members have full payload, CRC and mode/date verification against Root's ledger. Original final Rust journal has no process wait; its remaining PID is unknown.\n\nFresh source-bound checks passed: original five progress tests, original four process-capture tests, thirteen API/ownership mock tests, four actual in-memory Python source-mutants (intended assertion failures), actionlint and diff-check. All eight original registry controls are unchanged, not freshly executed against any product. The 20-member raw pure-test archive and validation/full-map JSON preserve exact outputs and test/control attribution.\n\nCurrent SDK/compiler/product/native/Target/port executions: zero. The actual Python child machinery is bounded, file-backed and reaped under a subreaper. Root must review the full helper/finally/dependency path and obtain actual six-runner cleanup/identity reports before native acceptance. Old 35/3 Windows successes precede the failed registry; no overall current Windows job claim.\n\nComplete bindings: [handoff.json](handoff.json), [validation.json](validation.json), [before-edit-retention.json](before-edit-retention.json), [fresh-pure-machinery-manifest.json](fresh-pure-machinery-manifest.json). Source decision: [ADR](../../../docs/adr/daemon-registry-autostart-lifetime-801.md).\n'''
+assert len(ledger)==20
+(O/'handoff.md').write_text(md);shutil.copyfile(O/'handoff.md',E/'handoff.md')
+print(json.dumps(dict(source=source,original_archive_members=209,fresh_archive_members=len(ledger),all_original_native_members=9762,source_bindings=len(files))))

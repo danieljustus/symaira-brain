@@ -1,0 +1,299 @@
+{
+  "candidate_head": "cf959b72515f7679ecc3cc5142e89918c30cb405",
+  "records": [
+    {
+      "args": [
+        "--json",
+        "--output",
+        "invalid",
+        "session",
+        "list",
+        "--session",
+        "bad session"
+      ],
+      "go": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "native": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "match": true,
+      "go_original_bytes_match": true,
+      "no_files_created": true
+    },
+    {
+      "args": [
+        "session",
+        "list",
+        "--session",
+        "bad session",
+        "--json",
+        "--output",
+        "invalid"
+      ],
+      "go": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "native": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "match": true,
+      "go_original_bytes_match": true,
+      "no_files_created": true
+    },
+    {
+      "args": [
+        "session",
+        "list",
+        "--session",
+        "bad session",
+        "--output",
+        "invalid",
+        "--json"
+      ],
+      "go": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "native": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "match": true,
+      "go_original_bytes_match": true,
+      "no_files_created": true
+    },
+    {
+      "args": [
+        "--json",
+        "--output",
+        "invalid",
+        "session",
+        "info",
+        "--session",
+        "bad session"
+      ],
+      "go": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "native": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "match": true,
+      "go_original_bytes_match": true,
+      "no_files_created": true
+    },
+    {
+      "args": [
+        "session",
+        "info",
+        "--session",
+        "bad session",
+        "--json",
+        "--output",
+        "invalid"
+      ],
+      "go": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "native": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "match": true,
+      "go_original_bytes_match": true,
+      "no_files_created": true
+    },
+    {
+      "args": [
+        "session",
+        "info",
+        "--session",
+        "bad session",
+        "--output",
+        "invalid",
+        "--json"
+      ],
+      "go": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "native": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "match": true,
+      "go_original_bytes_match": true,
+      "no_files_created": true
+    },
+    {
+      "args": [
+        "--json",
+        "--output",
+        "invalid",
+        "daemon",
+        "status",
+        "--session",
+        "bad session"
+      ],
+      "go": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "native": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "match": true,
+      "go_original_bytes_match": true,
+      "no_files_created": true
+    },
+    {
+      "args": [
+        "daemon",
+        "status",
+        "--session",
+        "bad session",
+        "--json",
+        "--output",
+        "invalid"
+      ],
+      "go": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "native": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "match": true,
+      "go_original_bytes_match": true,
+      "no_files_created": true
+    },
+    {
+      "args": [
+        "daemon",
+        "status",
+        "--session",
+        "bad session",
+        "--output",
+        "invalid",
+        "--json"
+      ],
+      "go": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "native": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "match": true,
+      "go_original_bytes_match": true,
+      "no_files_created": true
+    },
+    {
+      "args": [
+        "--json",
+        "--output",
+        "invalid",
+        "state",
+        "list",
+        "--session",
+        "bad session"
+      ],
+      "go": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "native": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "match": true,
+      "go_original_bytes_match": true,
+      "no_files_created": true
+    },
+    {
+      "args": [
+        "state",
+        "list",
+        "--session",
+        "bad session",
+        "--json",
+        "--output",
+        "invalid"
+      ],
+      "go": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "native": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "match": true,
+      "go_original_bytes_match": true,
+      "no_files_created": true
+    },
+    {
+      "args": [
+        "state",
+        "list",
+        "--session",
+        "bad session",
+        "--output",
+        "invalid",
+        "--json"
+      ],
+      "go": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "native": {
+        "exit": 1,
+        "stdout_base64": "eyJzdWNjZXNzIjpmYWxzZSwiZXJyb3IiOnsiY29kZSI6ImludGVybmFsIiwibWVzc2FnZSI6ImludmFsaWQgc2Vzc2lvbiBcImJhZCBzZXNzaW9uXCI6IHVzZSAxLTY0IGxldHRlcnMsIGRpZ2l0cywgJy4nLCAnXycgb3IgJy0nIn19Cg==",
+        "stderr_base64": ""
+      },
+      "match": true,
+      "go_original_bytes_match": true,
+      "no_files_created": true
+    }
+  ],
+  "matches": 12,
+  "binary_sha256": {
+    "/tmp/symaira-registry94-root-go-bin": "2cbc8fce7e28183e85bf55ea2748f26b1a074c39632a8ab69c9d2f3fd66a3228",
+    "/workspace/symaira-daemon772-registry/target/debug/symbrowse": "628e82032435bb324d192b125d487831cfa9c751f68403fdb3792f5cde24f24d"
+  },
+  "original_rejection_sha256": "508b6ea57b87fb672048719910e82f1a2a0575cdc72fd495b0b6382081d78488"
+}

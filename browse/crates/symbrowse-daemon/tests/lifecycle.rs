@@ -92,6 +92,7 @@ mod unix {
     }
 
     #[test]
+    #[allow(clippy::result_large_err)]
     fn unix_listener_shutdown_runs_runtime_cleanup_hook() {
         let root = root("shutdown-hook");
         let socket = root.join("default.sock");
@@ -283,9 +284,10 @@ mod unix {
             ..Default::default()
         })
         .unwrap();
+        let result = replacement.listen_and_serve();
         assert!(
-            replacement.listen_and_serve().is_ok(),
-            "released endpoint was not recoverable"
+            result.is_ok(),
+            "released endpoint was not recoverable: {result:?}"
         );
         fs::remove_dir_all(root).unwrap();
     }

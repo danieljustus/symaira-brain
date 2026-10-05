@@ -1,0 +1,9 @@
+# Preserved source finding before correction
+
+The immutable authored591248a89f56c7b810daf9fa1a036ec20061aaec and normally integratedc91938d445593e66ca47d613ed1d2c60c15ba060 use native OsStr only in the new Windows client. Unchanged server creation and wake convert the same public PathBuf through to_string_lossy. A lone UTF16 surrogate therefore selects a different client endpoint from its server owner. ASCII, literal U+FFFD and a valid surrogate pair do not have this split. The receipt's typed vectors are synthetic source projections, not executed Windows or Go results.
+
+The same public non-Unicode Path can enter existing serde_json::json error contexts. Pinned serde_core1.0.229 Serialize for Path rejects non-UTF8; pinned serde_json1.0.151 json_internal calls to_value(...).unwrap(). This is an inherited diagnostic limitation. No native runtime proof is claimed, and this deadline correction does not silently modify the error contract or certify raw-Go-Windows parity.
+
+Root decision,2026-10-04: “Engen Deadlinefix mit alter gemeinsamer client/server/wake to_string_lossy Relation beibehalten. NativeOsStr-Clientallein erzeugt neue öffentlicheEndpointSplitregression, während vollständige dreiOwner/WTF16/GoSDK-Protokollportierung eigenerbelegterCutover ist.” Restore the exact prior lossy spelling before Tokio open while keeping busy retries, deadlines, frames and error contexts unchanged. Prepare actual Windows endpoint pair/control scenarios; retain all four original scenarios. RawWTF16 support needs all three endpoint owners, diagnostic paths and actual Go/Windows SDK proof in a separate cutover.
+
+All324 original raw/source members and25 original ZIP members remain unchanged in the original archive; this additive archive preserves11 pre-correction source/reference members with full SHA roundtrips. Source references and projections are not compilation or runtime approval.

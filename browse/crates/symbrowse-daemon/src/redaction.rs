@@ -47,6 +47,16 @@ impl Redactor {
 
 #[must_use]
 pub fn redact_str(input: &str) -> String {
+    // This complete fixed diagnostic contains an identifier, never its value.
+    // Do not let generic assignment scrubbing turn the word "key" into a
+    // fake secret. Every actual value-bearing surface still takes the scrubber.
+    const KEY_FORMAT_ERROR: &str =
+        "SYMBROWSE_ENCRYPTION_KEY: key must be a 64-character hex string (32 bytes)";
+    if input == KEY_FORMAT_ERROR
+        || input == format!("resolve state encryption key: {KEY_FORMAT_ERROR}")
+    {
+        return input.to_owned();
+    }
     let mut output = input.to_owned();
     for key in SECRET_KEYS {
         for separator in ["=", ":", " "] {
@@ -212,6 +222,26 @@ pub(crate) fn redact_error(mut error: crate::DaemonError) -> crate::DaemonError 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn encryption_key_label_is_visible_only_in_the_complete_fixed_diagnostic() {
+        let diagnostic = "resolve state encryption key: SYMBROWSE_ENCRYPTION_KEY: key must be a 64-character hex string (32 bytes)";
+        assert_eq!(redact_str(diagnostic), diagnostic);
+        let value = "ab".repeat(32);
+        for text in [
+            format!("SYMBROWSE_ENCRYPTION_KEY: {value}"),
+            format!("SYMBROWSE_ENCRYPTION_KEY={value}"),
+        ] {
+            assert!(!redact_str(&text).contains(&value));
+        }
+        assert!(
+            !format!(
+                "{:?}",
+                redact_env(&[("SYMBROWSE_ENCRYPTION_KEY".into(), value.clone())])
+            )
+            .contains(&value)
+        );
+    }
+
     #[test]
     fn corpus_secrets_do_not_survive_any_surface() {
         let text = "password=topsecret token: bearer-secret https://user:pw@example.com/x";

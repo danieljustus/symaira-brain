@@ -1,0 +1,33 @@
+// Typed SDK-only observation. No provider, candidate, owner or stack identity.
+package main
+
+import (
+	"./bisect"
+	"encoding/json"
+	"os"
+)
+
+func main() {
+	var patterns []string
+	if err := json.NewDecoder(os.Stdin).Decode(&patterns); err != nil {
+		panic(err)
+	}
+	ids := []uint64{0, 1, 2, 3, 15, 16, 255, 256, 1 << 63, ^uint64(0)}
+	rows := make([]map[string]any, 0, len(patterns))
+	for _, pattern := range patterns {
+		matcher, err := bisect.New(pattern)
+		row := map[string]any{"pattern": pattern, "nil_matcher": matcher == nil, "parse_error": ""}
+		if err != nil {
+			row["parse_error"] = err.Error()
+		}
+		values := make([]map[string]any, 0, len(ids))
+		for _, id := range ids {
+			values = append(values, map[string]any{"id": id, "enabled": matcher.ShouldEnable(id), "print": matcher.ShouldPrint(id)})
+		}
+		row["typed_ids"] = values
+		rows = append(rows, row)
+	}
+	if err := json.NewEncoder(os.Stdout).Encode(rows); err != nil {
+		panic(err)
+	}
+}

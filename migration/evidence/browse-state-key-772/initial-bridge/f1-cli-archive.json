@@ -1,0 +1,7 @@
+{
+  "source": "f1abdf24193c3e440153e2f0e69371cd3d570f4c",
+  "cli_sha256": "8b47ec96091cb56d275aab83969390558cb974deba87e067f68354f575702892",
+  "archive": "/workspace/oracles/symaira-state-key-f1-cli.gz",
+  "archive_sha256": "2a609a8b181917a536c2f0ed36c97ac7a7661f14d4a55ed9c310ba6346fabc86",
+  "roundtrip_verified": true
+}

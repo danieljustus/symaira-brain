@@ -1,0 +1,14 @@
+{
+  "source": "a147cedb6fd003f257cc491fcb94c45db4291400",
+  "binary": "/workspace/symaira-daemon772-discovery-runtime/target/debug/deps/policy_guard-12661e3eaa035ad6",
+  "binary_sha256": "62794b711e1c203087fc5a37046a2a7c2dfe0fa3154559fdeccebfa3d5f62348",
+  "bounded_diagnostic_original_same_assertion": true,
+  "attempts": [
+    {
+      "attempt": 1,
+      "exit": 101,
+      "stdout_sha256": "dc2175c25aa6795dee13cffc2382c680e64aa3a55c2ee8978ef517ff16064def",
+      "stderr_sha256": "9dba57e52a3f4ec31fb249e6e708813d09dc4060d36fd2b8b9c50cd3e83d06bb"
+    }
+  ]
+}
