@@ -17,6 +17,7 @@ import tempfile
 import threading
 
 import cases
+import corrupt_reads
 import path_cases
 
 ORACLE = "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
@@ -232,7 +233,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--go", type=Path, help="optional prebuilt immutable oracle; SHA recorded")
     parser.add_argument("--rust", type=Path)
-    parser.add_argument("--family", choices=("all", "arguments", "configuration", "seeded_reads", "configured_search", "database_paths"), default="all")
+    parser.add_argument("--family", choices=("all", "arguments", "configuration", "seeded_reads", "configured_search", "database_paths", "corrupt_reads"), default="all")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
     repo = Path(__file__).resolve().parents[2]
@@ -273,6 +274,8 @@ def main():
             configured_search(go, rust, records)
         if args.family in ("all", "database_paths"):
             records.extend(path_cases.run(go, rust, output, snapshot, isolated_env))
+        if args.family in ("all", "corrupt_reads"):
+            records.extend(corrupt_reads.run(go, rust, output, snapshot, isolated_env))
         candidate_files = set(run(["git", "ls-files", "--cached", "--others", "--exclude-standard",
                                    "rust/symbrain-cli", "rust/symbrain-memory", "Cargo.toml", "Cargo.lock",
                                    "scripts/memory-cli-oracle", ".github/workflows/memory-cli-native.yml"], repo)
@@ -288,7 +291,8 @@ def main():
             candidate_revision=run(["git", "rev-parse", "HEAD"], repo).stdout.decode().strip(),
             candidate_dirty=bool(run(["git", "status", "--porcelain"], repo).stdout),
             go_version=run(["go", "version"], repo).stdout.decode().strip(),
-            operator_home_used=False, fallback_available=False,
+            operator_home_used=False,
+            fallback_available=any(record.get("fallback_available", False) for record in records),
             cases=len(records), passed=sum(record["match"] for record in records), records=records)
         if args.report:
             args.report.write_text(json.dumps(report, indent=2) + "\n")

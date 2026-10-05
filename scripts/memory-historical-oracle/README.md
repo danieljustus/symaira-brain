@@ -1,8 +1,9 @@
 # Historical Store repair gate (#649)
 
 This prepared gate runs real frozen Go and native CLI processes against 37
-independently copied historical databases. No Go source or frozen fixture is
-edited. The original 314-file census, including the first rejected 20-pair
+generated migration-prefix databases with synthetic rows, not captured
+historical installations. Each process receives an independent copy. No Go
+source or frozen fixture is edited. The original 314-file census, including the first rejected 20-pair
 recipe, is retained under `migration/evidence/memory-historical-649/census-6ae`.
 
 Run only after the coordinator allocates the existing exclusive target and

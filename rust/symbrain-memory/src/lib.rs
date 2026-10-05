@@ -4,6 +4,7 @@
 mod activity;
 mod cli_delete_admission;
 mod cli_entity;
+mod cli_read_admission;
 mod cli_write;
 mod direct_admission;
 mod embedding;
@@ -32,6 +33,7 @@ mod db_oracle_tests;
 pub use activity::{ActivityItem, ActivityPage, ActivitySearch, ActivityStatus, Provenance};
 pub use cli_delete_admission::direct_delete_supported;
 pub use cli_entity::direct_entities_supported;
+pub use cli_read_admission::direct_reads_supported;
 pub use cli_write::{DirectWrite, direct_project_supported};
 pub use direct_admission::{direct_content_supported, direct_text_supported};
 pub use embedding::{EmbeddingGenerator, GeneratedEmbedding};
