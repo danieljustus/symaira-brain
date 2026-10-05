@@ -1,11 +1,41 @@
 """Malformed stored JSON retains the exact Go error, never an empty native success."""
 from contextlib import closing
+import base64
 import http.server
 import json
 from pathlib import Path
 import sqlite3
 import tempfile
 import threading
+
+
+def diagnostic_contract(go, without_go, verb, field, value, root):
+    errors = {
+        "broken": "invalid character 'b' looking for beginning of value",
+        "": "unexpected end of JSON input",
+        "[]": "json: cannot unmarshal array into Go value of type map[string]string",
+        '{"n":1}': "json: cannot unmarshal number into Go value of type string",
+        '{"n":1,"n":"later"}': "json: cannot unmarshal number into Go value of type string",
+        "{}": "json: cannot unmarshal object into Go value of type []float32",
+        '["x"]': "json: cannot unmarshal string into Go value of type float32",
+        "[1e39]": "json: cannot unmarshal number 1e39 into Go value of type float32",
+    }
+    if value in ("null", '{"n":null}', "[null]", '{"n":"value"}'):
+        expected = b""
+    else:
+        error = ("json: cannot unmarshal bool into Go value of type " +
+                 ("map[string]string" if field == "metadata" else "[]float32")) if value == "false" else errors[value]
+        operation = {"list": "list memories", "rules": "list rules", "search": "search memories"}[verb]
+        expected = f"symbrain memory {verb}: {operation}: {error}\n".encode()
+    go_matches = (go["exit"] == (1 if expected else 0)
+                  and base64.b64decode(go["stderr"]) == expected)
+    if value == '{"n":"value"}':
+        return go_matches, without_go == go
+    stderr = base64.b64decode(without_go["stderr"])
+    absent = (without_go["exit"] == 1 and not base64.b64decode(without_go["stdout"])
+              and stderr.startswith(f"symbrain: start Go fallback {root / 'absent-go'}: ".encode())
+              and stderr.endswith(b"(os error 2)\n"))
+    return go_matches, absent
 
 
 def run(go, rust, output, snapshot, isolated_env):
@@ -105,9 +135,8 @@ def run(go, rust, output, snapshot, isolated_env):
                 trigger_definitions_unchanged = before_triggers == after_triggers
                 # Go also accepts null string-map/vector values. Their exact
                 # representation is deliberately retained on Go in this slice.
-                expected_error = value not in ("null", '{"n":null}', "[null]") and not valid
-                go_contract = first["exit"] == (1 if expected_error else 0)
-                unavailable_fails = native_only["exit"] != 0 if not valid else native_only == first
+                go_contract, unavailable_fails = diagnostic_contract(
+                    first, native_only, verb, field, value, root)
                 records.append(dict(family="corrupt_reads", index=index, verb=verb,
                                     field=field, stored_json=value, go=first, rust=second,
                                     rust_without_go=native_only, fallback_available=not valid,

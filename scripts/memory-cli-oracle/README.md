@@ -47,12 +47,22 @@ inherited provider credentials. The 29 unsupported cases explicitly allow the
 immutable Go binary for error/representation parity and additionally require
 failure with Go absent; the two valid string-map controls require native success
 with Go absent. These fallback cases are not evidence of Go-independent reads.
+The Go decoder diagnostic must match the independently specified expected bytes;
+an unrelated transport/database error cannot satisfy a corrupt-row case. No-Go
+observations require the owned absent-binary diagnostic with OS error 2, empty
+stdout and exit 1, rather than merely any failure. Focused unit controls reject
+generic error substitution and wrong failure causes without counting those units
+as additional real process cases.
 
 The CLI's read-only stored-JSON admission is conservative across the entire
 relevant table. An unsupported unselected row can retain Go for the whole
 command; missing historical columns/tables still reach native transactional
 migration. Shared native row decoders now propagate JSON failures instead of
 returning empty success. Exact Go diagnostics for unsupported JSON remain on Go.
+Admission and native hydration use separate connections. Concurrent external
+rewrites can invalidate admission before hydration; malformed JSON still errors,
+but exact Go diagnostics and null/type semantics are not an atomic concurrent
+mutation guarantee in this slice.
 
 This increment proves parser/config and seeded read behavior. It does not certify
 governed writes, missing/corrupt/unwritable database error strings, database file
