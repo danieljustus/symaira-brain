@@ -67,6 +67,15 @@ def install(provider: Path, target: Path, *, permission: int = 0o700):
     shutil.copyfile(provider, target); target.chmod(permission)
 
 
+def owned_executable_relative(executable: Path, root: Path, provider: Path) -> str:
+    """Validate canonical ownership while leaving raw observations untouched."""
+    owned_root = root.resolve(strict=True)
+    owned_executable = executable.resolve(strict=True)
+    assert owned_executable.is_relative_to(owned_root) and owned_executable.is_file()
+    assert key.registry.process.digest(owned_executable) == key.registry.process.digest(provider)
+    return str(owned_executable.relative_to(owned_root))
+
+
 def observe(binary: Path, actual_binary: Path, provider: Path, case: str, *, evidence: RawEvidence, metadata: bool, control: bool = False, control_mode: str = "cwd") -> dict:
     with tempfile.TemporaryDirectory(prefix="bd-", dir=key.registry.process.private_temporary_parent()) as folder:
         root = Path(folder); env = key.registry.environment(root)
@@ -175,12 +184,11 @@ def observe(binary: Path, actual_binary: Path, provider: Path, case: str, *, evi
             vault = []
             for query in queries:
                 executable = Path(os.fsdecode(base64.b64decode(query["executable_base64"])))
-                assert executable.is_relative_to(root) and executable.is_file()
-                assert key.registry.process.digest(executable) == key.registry.process.digest(provider)
+                relative = owned_executable_relative(executable, root, provider)
                 assert isinstance(query["pid"], int) and query["pid"] > 0
                 if executable.name == "security": continue
                 assert query["arguments"] == ["get", "symbrowse/encryption-key"]
-                vault.append(query); vectors.append({**query, "owned_executable_relative": str(executable.relative_to(root))})
+                vault.append(query); vectors.append({**query, "owned_executable_relative": relative})
         else:
             for query in vault:
                 assert query["arguments"] == ["get", "symbrowse/encryption-key"] and query["pid"] > 0
