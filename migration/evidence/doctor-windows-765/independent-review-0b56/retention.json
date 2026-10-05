@@ -1,0 +1,146 @@
+{
+  "source": "0b56d4edc7f9e6728fdbf955df89c06e2a1689d2",
+  "publication": "f1623bfb5aaac143d6783f7683ce70e5443822ae",
+  "original_files": {
+    "symaira-doctor-source-independent-review.md": {
+      "sha256": "f0ccec92b8297ecf05bafb5db15d6baf1667f989e6100366566d582b1b8957c0",
+      "bytes": 11119
+    },
+    "symaira-doctor-source-independent-review-receipt.json": {
+      "sha256": "3966515ed29df366b42fbd748dcd0be82815224d0291a592ff81398f0c8e73a7",
+      "bytes": 15711
+    },
+    "symaira-doctor-source-independent-verify-second.log": {
+      "sha256": "b01e29962ef699cd38c21c28bcd970b07b0f007d47c9e54760103a9a32b3e74c",
+      "bytes": 617
+    },
+    "symaira-doctor-source-independent-verify.log": {
+      "sha256": "f30c05c70baaddfac6394c6992514214fdd4511826e55725a3987503021c6e02",
+      "bytes": 466
+    },
+    "symaira-doctor-source-independent-verify.py": {
+      "sha256": "090f487e15489a75fac30ed9bb2f7b0d00a3af00bbf7df1d42099888d751998c",
+      "bytes": 6847
+    },
+    "symaira-doctor-source-independent-home.json": {
+      "sha256": "9cf7af4e5a09a3d3577f841b0fee183c0bdcfd7808832b06797e85ef792c34ae",
+      "bytes": 8820
+    },
+    "symaira-doctor-source-independent-home.log": {
+      "sha256": "ea935ef254ccb0303611e42db125f64a39fd2904a8f56658221622e249cd4280",
+      "bytes": 67
+    },
+    "symaira-doctor-source-independent-home.py": {
+      "sha256": "e45dbf57ed26f2b7fde5a3175791c664f6cf4093a2a4aa2146ba4ccf23953c42",
+      "bytes": 1772
+    },
+    "symaira-doctor-source-independent-original-lookup.json": {
+      "sha256": "2dd9c3a66810923c623a418b5610514e103a469bfdc9704c793d56d6574ee69a",
+      "bytes": 31126
+    },
+    "symaira-doctor-source-independent-original-lookup.log": {
+      "sha256": "7e3500bddfde8fcf2baf7b8de43539a9b6536c950372fc23df20420011fa8463",
+      "bytes": 67
+    },
+    "symaira-doctor-source-independent-original-findings.json": {
+      "sha256": "e376260b45bd6bd5072a456f1c9e15924a8f8134c29016f024f696cfe41ac397",
+      "bytes": 173553
+    },
+    "symaira-doctor-source-independent-original-findings.log": {
+      "sha256": "453b5f4fe955e3e7fc5b53e28c4baf4918023be616d86b8c22908d27c363335a",
+      "bytes": 312
+    },
+    "symaira-doctor-source-independent-original-raw-signals.json": {
+      "sha256": "6e41cfb6730c61ca2a973016ad201d7d28159c593c5491e220acd599b6c38215",
+      "bytes": 66449
+    },
+    "symaira-doctor-source-independent-original-raw-signals.log": {
+      "sha256": "e5194bbb6f8a11456f57e66acde83b8c151fa2c2e3923551a0007c9f2a4eb3f1",
+      "bytes": 220
+    },
+    "symaira-doctor-source-independent-original-lookup.py": {
+      "sha256": "ad0d1f2a2455ae6d930065381aefe4afd03eaf657ac53a8d2d3cc54f34adea05",
+      "bytes": 2137
+    },
+    "symaira-doctor-source-independent-original-findings.py": {
+      "sha256": "4c20d4d4ea4feedd56e9c388a65f13e273cd240741a12db97caa33bda6da4700",
+      "bytes": 3253
+    },
+    "symaira-doctor-source-independent-original-raw-signals.py": {
+      "sha256": "7ebc441d5f648fe126a17c189d4044a8fbd2398f411be1c1777cb0b0e1f225cf",
+      "bytes": 4785
+    },
+    "symaira-doctor-source-independent-extra.json": {
+      "sha256": "5113b87659a3a3f8b75fb32cf6607e1d3da5ed5007150091a1ceb3157509789e",
+      "bytes": 101883
+    },
+    "symaira-doctor-source-independent-extra.log": {
+      "sha256": "118892c50626e8dff770d8542f141136f7109b6f7b5a3bf646b43fc6cffd8c6c",
+      "bytes": 262
+    },
+    "symaira-doctor-source-independent-extra.py": {
+      "sha256": "2c94527fe08126997e6e12554a46017a848121354480197da5cfaeaa7bd74380",
+      "bytes": 3178
+    },
+    "symaira-doctor-source-independent-setup.json": {
+      "sha256": "bdbd3634fa02bbb891998fb0272e6cccfcf41e5dab312f1aa91db77fdff35927",
+      "bytes": 1422702
+    },
+    "symaira-doctor-source-independent-setup.log": {
+      "sha256": "f89616618aec630ca7a805fd0258d0086285f4f8360d57a23270c48a28c22d21",
+      "bytes": 11966
+    },
+    "symaira-doctor-source-independent-doctor.json.missing-core-event.json": {
+      "sha256": "43b4383cbe172aaceba95aaa88a67fb4d15a2b38d0d6e92b2721e216dbdfde52",
+      "bytes": 36587
+    },
+    "symaira-doctor-source-independent-doctor.json.missing-header.json": {
+      "sha256": "c5b09ac7d20b7a8d111c73f50ee9d129f5d3fa66c966adcea94645952818a3cb",
+      "bytes": 36768
+    },
+    "symaira-doctor-source-independent-doctor.json.wrong-exit.json": {
+      "sha256": "a531ad767914dcc79b5d8d33b884fb30db72ba6e3e0ca77d4f2e921481a8affe",
+      "bytes": 36815
+    },
+    "symaira-doctor-source-independent-doctor.json": {
+      "sha256": "25487257fa669fce2f6571a5ee9386eb07e71e66881cd3b8e444c57caeb4fd8c",
+      "bytes": 5210511
+    },
+    "symaira-doctor-source-independent-doctor.log": {
+      "sha256": "4cc0f27d82f05f9405b597731f63a0ba14bd39c8e18a8a862f7052a85328d83a",
+      "bytes": 295
+    },
+    "symaira-doctor-source-independent-source.json.wrong-source.json": {
+      "sha256": "5324e58a0bf528e87023c8ded8c4486de9e8024d84ecea4fe87cdd2cb310cec5",
+      "bytes": 31507
+    },
+    "symaira-doctor-source-independent-source.json.wrong-exit.json": {
+      "sha256": "8d7530ec8228e7804b86c6b52f07b24175f1da0f1ea735c6eb66f0ede7c376e3",
+      "bytes": 31510
+    },
+    "symaira-doctor-source-independent-source.json": {
+      "sha256": "7a48aecd1119b60fdb52e7cd160cf921f96bd77f365cba9c0c9a5a41df14312e",
+      "bytes": 1212569
+    },
+    "symaira-doctor-source-independent-source.log": {
+      "sha256": "ff65da2cef61fdcab2c1abe77e2815b43badfb661f034bd0998002041329b865",
+      "bytes": 221
+    },
+    "symaira-doctor-source-independent-actionlint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "symaira-doctor-source-independent-fmt.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "symaira-doctor-source-independent-clippy.log": {
+      "sha256": "60752725ea6f194f20ebc7150276eef9d351f09c52a8c6e784e05f6a10ca45df",
+      "bytes": 60
+    },
+    "symaira-doctor-source-independent-tests.log": {
+      "sha256": "4bdd5e06b5aadb0eb6613775d5baf0b99e3942ec1df65e72de1cf09e0fd55d2e",
+      "bytes": 37476
+    }
+  }
+}

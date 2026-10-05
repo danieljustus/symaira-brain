@@ -1,0 +1,110 @@
+name: Memory CLI native parity
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'rust/symbrain-cli/**'
+      - 'rust/symbrain-memory/**'
+      - 'scripts/memory-cli-oracle/**'
+      - '.github/workflows/memory-cli-native.yml'
+      - 'Cargo.lock'
+      - 'Cargo.toml'
+  push:
+    branches: [main]
+    paths:
+      - 'rust/symbrain-cli/**'
+      - 'rust/symbrain-memory/**'
+      - 'scripts/memory-cli-oracle/**'
+      - '.github/workflows/memory-cli-native.yml'
+      - 'Cargo.lock'
+      - 'Cargo.toml'
+
+permissions:
+  contents: read
+
+jobs:
+  cli:
+    name: memory CLI (${{ matrix.runner }})
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, macos-15, windows-2025]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      CARGO_INCREMENTAL: '0'
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.7'
+      - name: Build and verify native CLI
+        env:
+          CLIPPY_LOG: ${{ runner.temp }}/memory-cli-clippy.log
+        run: |
+          set -euo pipefail
+          umask 022
+          cargo fmt --all -- --check
+          cargo build -p symbrain-cli --locked
+          cargo clippy -p symbrain-cli --all-targets --all-features --locked -- -D warnings 2>&1 | tee "$CLIPPY_LOG"
+      - name: Verify native memory component contracts
+        env:
+          TEST_LOG: ${{ runner.temp }}/memory-cli-rust-tests.log
+        run: |
+          set -euo pipefail
+          umask 022
+          cargo test -p symbrain-cli --lib --all-features --locked memory_cli:: 2>&1 | tee "$TEST_LOG"
+          cargo test -p symbrain-cli --test memory_set_sigpipe --all-features --locked 2>&1 | tee -a "$TEST_LOG"
+          cargo test -p symbrain-memory --all-targets --all-features --locked 2>&1 | tee -a "$TEST_LOG"
+      - name: Execute immutable Go subprocess parity
+        env:
+          REPORT: ${{ runner.temp }}/memory-cli-process.json
+          PROCESS_LOG: ${{ runner.temp }}/memory-cli-process.log
+        run: |
+          set -euo pipefail
+          umask 022
+          python3 scripts/memory-cli-oracle/replay.py --report "$REPORT" 2>&1 | tee "$PROCESS_LOG"
+      - name: Verify governed direct writes and delete state
+        env:
+          REPORT_DIR: ${{ runner.temp }}/memory-cli-writes
+        run: |
+          set -euo pipefail
+          umask 022
+          python3 scripts/memory-cli-oracle/write_gate.py --report-dir "$REPORT_DIR"
+      - name: Require actual replay failure controls
+        env:
+          REPORT: ${{ runner.temp }}/memory-cli-controls.json
+        run: |
+          set -euo pipefail
+          umask 022
+          python3 scripts/memory-cli-oracle/controls.py --report "$REPORT"
+      - name: Record native SDK and exact head
+        if: always()
+        env:
+          RECEIPT: ${{ runner.temp }}/memory-cli-native.txt
+        run: |
+          set -euo pipefail
+          umask 022
+          {
+            echo "source_revision=$GITHUB_SHA"
+            echo "runner=${{ matrix.runner }}"
+            rustc -Vv
+            cargo -V
+            go version
+          } > "$RECEIPT"
+      - name: Retain acceptance receipts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: memory-cli-${{ matrix.runner }}-${{ github.sha }}
+          path: ${{ runner.temp }}/memory-cli-*
+          if-no-files-found: error
+          retention-days: 14

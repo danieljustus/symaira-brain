@@ -1,0 +1,38 @@
+{
+  "source_head": "26c16944df51eaf944a06087584a32f5629af445",
+  "rust_binary_sha256": "7ca8d802a59dc218bd6e7271eb588c3d037aec89fa67d47b1c6cda3a0cb3abd5",
+  "preserved_actual_cli": "/tmp/symaira-setup765-source-26c169-cli",
+  "tests": {
+    "passed": 397,
+    "failed": 0,
+    "ignored": 0,
+    "summaries": 39
+  },
+  "baseline": {
+    "source": 90,
+    "doctor": 255,
+    "setup": 151,
+    "source_negative_controls": 2,
+    "doctor_negative_controls": 3,
+    "six_original_raw_probes_match": true,
+    "actual_SIGINT_SIGTERM_cleanup": true
+  },
+  "candidate_clean_during_all_process_runs": true,
+  "artifacts": {
+    "linux-process.json": "5ddedf7456f9b9c2fadb78fe0267698f6d63456e1d66b09d9edb83f1c8490d08",
+    "linux-process-wrong-exit.json": "3d205ddc398ae33fb901b521d9679a70ec3c0d74b0c9b7af711ab37877cfee16",
+    "linux-process-wrong-source.json": "0a00ee9464d36775154ffdb64af794645100681656f887abfec9e814d7889818",
+    "linux-doctor.json": "a19332aa2e31105fa67441f6352a8611048cd04e155469afcb76a751c3715e48",
+    "linux-doctor-missing-core-event.json": "62fdd08c51e315f2e2bc3842bc613cca0e96a5658cfce97cf2118c765c929433",
+    "linux-doctor-missing-header.json": "b49505584a6c7e8fa42a000e6e6ce19b7af883603bd6c2152a80ea34fa3d1b19",
+    "linux-doctor-wrong-exit.json": "35b439f34c54ad552cbc074756125346b808d7372926e8ba896f072ba2003d8e",
+    "linux-setup.json": "39e96dcde828a680132fbf9a47a4d7b15800462c8678ef980690e210ed5ae69f",
+    "logs.json": "e8566d1856f2dcd39e743bf061a7db7c4660d12e9763a89ce541356afc5030c9",
+    "symaira-setup765-source-26c169-author-recheck-extra.json": "6e0c0220b75d872c72519214d03d5ec829ec9c180bc5091e1187cfc937d771c8",
+    "symaira-setup765-source-26c169-author-recheck-extra.py": "c1078c99b6726b2b2081eb1bb285e10581d6fb7c5e1ce277ca4d60217b723110",
+    "symaira-setup765-source-26c169-author-recheck-extra.log.json": "60d7e0df956a06c3325f123b86463d1af5be2bc8053520d4f9570782096e6d81"
+  },
+  "disposition": "Functional Linux proof is green. Subsequent Windows-target signature-stub Clippy identifies two equivalent-source collapsible_if lints; follow-up uses let chains before native strict CI. This is static lint evidence, not full CLI compilation or native Windows runtime. All source, process and original failure receipts remain immutable. Native three-OS CI and independent full re-review remain required.",
+  "worker_ownership": "Historical Go Browse and Swift Operate/Scope remain transitional; #765/#783 open.",
+  "environment": "subreaper; umask022; Go1.26.7 PATH; rustc/cargo1.98; exclusive worktree target; incremental0; dev/test debug0"
+}

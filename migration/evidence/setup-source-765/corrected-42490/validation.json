@@ -1,0 +1,50 @@
+{
+  "source_head": "42490d2163899e46abd41dde398daac4199651a3",
+  "integrated_main": "31de72294521701fc4b1a0bce39f03cc34d72e7e",
+  "integrated_published_doctor": "1288b7a43d937ba35de08a0b9ddb82391375528b",
+  "rust_binary_sha256": "a120ff899704b899e7c1b4a12cbbaac6caffd746006c34c6c4186ee9559d389c",
+  "preserved_actual_cli": "/tmp/symaira-setup765-source-42490-cli",
+  "tests": {
+    "passed": 397,
+    "failed": 0,
+    "ignored": 0,
+    "summaries": 39
+  },
+  "baseline": {
+    "source": 87,
+    "doctor": 255,
+    "setup": 151,
+    "source_negative_controls": 2,
+    "doctor_negative_controls": 3,
+    "actual_native_successful_descendant_cleanup": true
+  },
+  "candidate_clean_during_all_process_runs": true,
+  "artifacts": {
+    "linux-process.json": "f1769c9f7aa360e56963d8ace474494bdd8b8635111cc150668bb586b7fbbe5e",
+    "linux-process-wrong-exit.json": "abd8b5c7ff6190b3fb72415d480eef91996522bca0c032f1032218079ab5a256",
+    "linux-process-wrong-source.json": "7a6a1926fdbdcb2aae536550d9d61f3e498e10a3014ed07ba419866f402cc2cd",
+    "linux-doctor.json": "1095154cdbd9f25de26241d3923cf49c5d43c495c0f83fe9db73c55ce5e7305c",
+    "linux-doctor-missing-core-event.json": "2051ffba064d9393ab11a99d57a6d0684030a32e188542e2aac5d1451e98c19e",
+    "linux-doctor-missing-header.json": "44e616d352e5b40e2acf6ee4bb0b8c65d1495463d77a6ad24ebfcba1bfbb40f0",
+    "linux-doctor-wrong-exit.json": "8117a01ce8ef23950cb5177d21b4cfa9696f99a2edaf1e0ef4a9ed494afa28f2",
+    "linux-setup.json": "1ca4d189ed95b41df997c4ba706022da036bfbfeab098e08aa80a5972df1388b",
+    "logs.json": "5d8e0012d90dcd4f1c3a73ce2d431fc62a606aae36ebb9dc6f2eb461788b88bc",
+    "symaira-setup765-source-author-relative-temp.json": "5b9bc979e75afa3bd9043a478d90abeeb3a9c8e27ab2cc83210239a436ca26e8",
+    "symaira-setup765-source-author-relative-temp.py": "b21e6cc677b45800f6823235ce3fbf409dcdae6cbab531c045fcf4e8a8707064",
+    "symaira-setup765-source-author-relative-temp.log.json": "41f5f462fcd21fa65fc22d021db3ed485792d449a20e0d649eb16f7f76fa90df",
+    "signature-stub-harness.json": "3a3e5aeab3c5be8b3696a662e94eb0549ba34064f4fa7b3e7a92dcac2b7f1b0f"
+  },
+  "disposition": "Not final acceptance: three subsequent actual author relative-temp probes demonstrate unresolved edges of the temp-boundary finding. This immutable checkpoint and its original failures are retained; correction must preserve Go relative worker argv/path behavior and resolve only private control capture roots. Native three-OS CI and independent full re-review still required.",
+  "worker_ownership": "Historical Go Browse and Swift Operate/Scope remain transitional; #765/#783 open.",
+  "environment": "subreaper; umask022; Go1.26.7 PATH; rustc/cargo1.98; exclusive worktree target; incremental0; dev/test debug0",
+  "commands": [
+    "cargo test -p symbrain-cli -p symbrain-managed -p symbrain-core --all-features --locked",
+    "cargo fmt --all -- --check",
+    "cargo clippy -p symbrain-cli -p symbrain-managed -p symbrain-core --all-targets --all-features --locked -- -D warnings",
+    "actionlint .github/workflows/ci.yml",
+    "scripts/setup-source-oracle/run.sh",
+    "scripts/doctor-repair-oracle/run.sh",
+    "scripts/setup-repair-oracle/run.sh",
+    "git diff --check"
+  ]
+}

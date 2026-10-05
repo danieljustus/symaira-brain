@@ -1,0 +1,141 @@
+{
+  "base_head": "8359c0bda1b7a0bfc14d2b8e69e1479fec9d182f",
+  "actual_journal_merge_head": "d38421bbf06ddd3122f38861e1b4ba75cfc2ecc6",
+  "actual_source_maps": {
+    "scripts/setup-source-oracle/replay.py": "7688e0d185e5257ed1a45c61659e36234ac1660e623b0e442fc016a15b91f17a",
+    "scripts/setup-source-oracle/progress.py": "015bce6d0ede65d8f5d087c302b4294d44e94e719e18a3eb874b91a271c95b4b",
+    "scripts/setup-source-oracle/tool_fixture.go.txt": "e92419134baa8712ed06a31b65226e5d0a0dd8b99604718349e7f85347e15bf2",
+    "scripts/setup-source-oracle/windows_job_probe.py": "2a126793f177d72e7297feac03bd0aa9381a9384a21135661ddc34989779b3ec",
+    "rust/symbrain-cli/tests/source_job_notifications.rs": "4cb2a621011f987be6941d185650f5f3d845a9030d3af7e582401c9cd221ce5d",
+    "rust/symbrain-cli/src/setup_source_process.rs": "86699b00d9858f75bfb5b41c6c6c7424287b95661d4275afc55541acaabc2967",
+    "rust/symbrain-cli/src/setup_source_build.rs": "f27c67ee5204f53ea409afb4fc10ddd5eaafdb7f72b341ec1e453937c6494c09",
+    "rust/symbrain-cli/src/setup_source_layout.rs": "31bc8732323d14f56e2a5710da0815841bbe30a868a76dbcf7dd1ce51cef07b0",
+    "rust/symbrain-cli/src/setup_source_temp.rs": "74308950b5059447b53b00b855e20eee00673a4223c791b172856208dc9f9b85",
+    "Cargo.lock": "b3dfc50eeffd441de466592bbf204840b65d16940f8639dacad56a7f1153594f"
+  },
+  "actual_go_binary_sha256": "639b9d27c263184ca227f7e553d8731e397fecad40265c0402721219c4e11bf0",
+  "actual_rust_binary_sha256": "58d0de9b15adea58a4a3164e01d163d2035a234d05cfebc47a9a6864171de722",
+  "actual_tool_sha256": "b0186fd39454bf3164587e2a1c4ba0b55ec17104586398d633b5a8d83ce09c62",
+  "actual_binary_payloads_in_downloaded_artifact": false,
+  "original_files": [
+    {
+      "original": "/tmp/symaira-current-ci-job-111372954990.log",
+      "bytes": 475812,
+      "sha256": "b418e29e43050f8ff16d1f0e1cc196ab5cafa1194e0fb8fd8ab2239d22355d88",
+      "retained": "symaira-current-ci-job-111372954990.log.gz",
+      "gzip_sha256": "3e54aa4d1c148161554004c5b4feaebc678094be56a467a4e21eb4b6aafeb3b5"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-current-native-artifacts/11296265049/setup-source-parity.json.progress.json",
+      "bytes": 29248,
+      "sha256": "e7dea732a33f29ee3f4e027cca727caabf37d88711f27fa38a28b8576c5a58d6",
+      "retained": "setup-source-parity.json.progress.json.gz",
+      "gzip_sha256": "9d7af24e5b9446215f69de2cb5f6551f52c9e31657aa62ef7e4ecd4f606a1c1d"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-current-native-artifacts/receipt.json",
+      "bytes": 1607,
+      "sha256": "f8728c47d1f3f5074cf237ad1a12e7b575722aac01996a8d5117173cb9f05fc1",
+      "retained": "receipt.json.gz",
+      "gzip_sha256": "81593daf1d29e9896a2cf59039c625ba4ebc217756d7b49b6ec9bd0322d733c3"
+    },
+    {
+      "original": "/workspace/attachments/83dad4c1-3252-4400-be38-1987c3f24e25/github-actions-artifact-11296265049.zip",
+      "bytes": 5429,
+      "sha256": "cf5d3960092d6b0475a733159601d16f36c03aa270c1bc2c6ceeaf79cd00c293",
+      "retained": "github-actions-artifact-11296265049.zip.gz",
+      "gzip_sha256": "1c6925c74e7409fae588d6b59f2b82bef1fdd65b0efaf1dec042365fdb3a2a57"
+    },
+    {
+      "original": "/workspace/symaira-doctor765/scripts/setup-source-oracle/replay.py",
+      "bytes": 26463,
+      "sha256": "7688e0d185e5257ed1a45c61659e36234ac1660e623b0e442fc016a15b91f17a",
+      "retained": "source-scripts__setup-source-oracle__replay.py.gz",
+      "gzip_sha256": "67b0e6f9a7828fa64a974a30775e529754a7d7550ffa06add6b56d55faa83ed2"
+    },
+    {
+      "original": "/workspace/symaira-doctor765/scripts/setup-source-oracle/progress.py",
+      "bytes": 5047,
+      "sha256": "015bce6d0ede65d8f5d087c302b4294d44e94e719e18a3eb874b91a271c95b4b",
+      "retained": "source-scripts__setup-source-oracle__progress.py.gz",
+      "gzip_sha256": "38ac2104fa9168748748bd10549497b4262c1fe26dbbfdde5766e84368c48506"
+    },
+    {
+      "original": "/workspace/symaira-doctor765/scripts/setup-source-oracle/tool_fixture.go.txt",
+      "bytes": 3790,
+      "sha256": "e92419134baa8712ed06a31b65226e5d0a0dd8b99604718349e7f85347e15bf2",
+      "retained": "source-scripts__setup-source-oracle__tool_fixture.go.txt.gz",
+      "gzip_sha256": "ec701866ab265418bc1fa1b975a2c1d5ea3b8e0f71115c30128df113519a0656"
+    },
+    {
+      "original": "/workspace/symaira-doctor765/scripts/setup-source-oracle/windows_job_probe.py",
+      "bytes": 6666,
+      "sha256": "2a126793f177d72e7297feac03bd0aa9381a9384a21135661ddc34989779b3ec",
+      "retained": "source-scripts__setup-source-oracle__windows_job_probe.py.gz",
+      "gzip_sha256": "7c60b00f5f94fda9e6a0fca68dd554b1a49cf4ba52300959936bdcd7e7d3a1e7"
+    },
+    {
+      "original": "/workspace/symaira-doctor765/rust/symbrain-cli/tests/source_job_notifications.rs",
+      "bytes": 4390,
+      "sha256": "4cb2a621011f987be6941d185650f5f3d845a9030d3af7e582401c9cd221ce5d",
+      "retained": "source-rust__symbrain-cli__tests__source_job_notifications.rs.gz",
+      "gzip_sha256": "ef33150d89fcfe6a40b61b3f28a62c8d75f26027030006254661fe91be1bb406"
+    },
+    {
+      "original": "/workspace/symaira-doctor765/rust/symbrain-cli/src/setup_source_process.rs",
+      "bytes": 11069,
+      "sha256": "86699b00d9858f75bfb5b41c6c6c7424287b95661d4275afc55541acaabc2967",
+      "retained": "source-rust__symbrain-cli__src__setup_source_process.rs.gz",
+      "gzip_sha256": "be6c930689382dcc186733cacd2a22a63bb0b9407e8c8e90b0362ec3412a74c4"
+    },
+    {
+      "original": "/workspace/symaira-doctor765/rust/symbrain-cli/src/setup_source_build.rs",
+      "bytes": 6736,
+      "sha256": "f27c67ee5204f53ea409afb4fc10ddd5eaafdb7f72b341ec1e453937c6494c09",
+      "retained": "source-rust__symbrain-cli__src__setup_source_build.rs.gz",
+      "gzip_sha256": "7a76525a8422d44bf57ededeeae1a2662cc1d00dbb87c2db12a454e91c98d799"
+    },
+    {
+      "original": "/workspace/symaira-doctor765/rust/symbrain-cli/src/setup_source_layout.rs",
+      "bytes": 5664,
+      "sha256": "31bc8732323d14f56e2a5710da0815841bbe30a868a76dbcf7dd1ce51cef07b0",
+      "retained": "source-rust__symbrain-cli__src__setup_source_layout.rs.gz",
+      "gzip_sha256": "db2838b7728a7e8e505580af4b316dfa76d4cbebf3c9d28a3710cc23723f228f"
+    },
+    {
+      "original": "/workspace/symaira-doctor765/rust/symbrain-cli/src/setup_source_temp.rs",
+      "bytes": 3782,
+      "sha256": "74308950b5059447b53b00b855e20eee00673a4223c791b172856208dc9f9b85",
+      "retained": "source-rust__symbrain-cli__src__setup_source_temp.rs.gz",
+      "gzip_sha256": "b48a6e5118d1afa8d2bacc993517c1a3d9aab3bd3f9dd7502f8bc701b26d579c"
+    },
+    {
+      "original": "/workspace/symaira-doctor765/Cargo.lock",
+      "bytes": 67744,
+      "sha256": "b3dfc50eeffd441de466592bbf204840b65d16940f8639dacad56a7f1153594f",
+      "retained": "source-Cargo.lock.gz",
+      "gzip_sha256": "69dcc5eccaed379a9060e8b0747c805409c790f4609fdb2466a904a9e1e440f7"
+    },
+    {
+      "original": "/workspace/symaira-doctor765/.github/workflows/ci.yml",
+      "bytes": 77362,
+      "sha256": "85849b1a322d2c4cad8d8bfec5853616446924a2dc669a89dbcefe4ffb05e03f",
+      "retained": "source-.github__workflows__ci.yml.gz",
+      "gzip_sha256": "1f9547101406f2fd64e3432ee243d873c2da448aa43dae034765292af8e3d371"
+    },
+    {
+      "original": "/workspace/symaira-doctor765/docs/adr/doctor-source-timeout-observability-806.md",
+      "bytes": 6070,
+      "sha256": "2bbef15149418ad40f83a55cf412e3d6d7b70e6f395a6a65efe992839186b8c7",
+      "retained": "source-docs__adr__doctor-source-timeout-observability-806.md.gz",
+      "gzip_sha256": "3541f84bd9572def75304ccabdb5affb9934e17c4a0aee63ec29097d515857af"
+    }
+  ],
+  "actual_case": "explicit-browse-json",
+  "completed_pairs": 0,
+  "outer_timeout_seconds": 25,
+  "bounded_actual_phase": "native git and go-version invoked; exact version capture present; no go-build or publication. try_wait versus drop still unproved.",
+  "tool_ledger_sha256": "cffbe24b86e1a446b4580623d33242353356ae719746da87f7152d89a818a8d5",
+  "version_capture_sha256": "af34a1dcbe6692b229954633dd6cbc077b7be9a47b3fba2c30395485e790b507",
+  "no_local_compiler_or_product_runtime": true
+}

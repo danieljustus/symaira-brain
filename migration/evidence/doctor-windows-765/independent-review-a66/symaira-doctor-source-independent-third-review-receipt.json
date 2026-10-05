@@ -1,0 +1,458 @@
+{
+  "head": "34394496b44d0f95581080885d89d4ed5f43bbd5",
+  "validated_source": "a66b4818f74943812315509a3ba2545b2b6b2ea1",
+  "normal_main": "e3dbda6cbb95429237d15a9b176209b7d107792c",
+  "target_unchanged": true,
+  "target_released": true,
+  "target_users": [],
+  "gates": {
+    "source": {
+      "total": 107,
+      "path": "/tmp/symaira-doctor-source-independent-third-source.json",
+      "sha256": "e5aa32f430da2d094c824cbbc771ffaa21c99ef2ce7b8df63dcd7925da1fa9e5"
+    },
+    "doctor": {
+      "total": 282,
+      "path": "/tmp/symaira-doctor-source-independent-third-doctor.json",
+      "sha256": "5b7d8adf188acc8ecc616b45500277d7ff528f06019a7c3e7885f20f6e66bb51"
+    },
+    "setup": {
+      "total": 169,
+      "path": "/tmp/symaira-doctor-source-independent-third-setup.json",
+      "sha256": "0cb64c3a875ee578428d3a2b63cadefce551e0bb7344e1b562ddd5487b93c2d9"
+    }
+  },
+  "controls": [
+    {
+      "family": "source",
+      "mode": "wrong-exit",
+      "intended_failure": [
+        {
+          "case": "explicit-browse-json",
+          "fields": [
+            "exit"
+          ]
+        }
+      ],
+      "path": "/tmp/symaira-doctor-source-independent-third-source.json.wrong-exit.json",
+      "sha256": "25bb2f8f557230927cf41dffeaa2490012896a38fcd572e82a9d370451ead687"
+    },
+    {
+      "family": "source",
+      "mode": "wrong-source",
+      "intended_failure": [
+        {
+          "case": "explicit-browse-json",
+          "fields": [
+            "stdout_base64"
+          ]
+        }
+      ],
+      "path": "/tmp/symaira-doctor-source-independent-third-source.json.wrong-source.json",
+      "sha256": "fcb5f8f3da043b0becc91cfea36f6cfb77baba0b6100c194a9c1dbd030030991"
+    },
+    {
+      "family": "doctor",
+      "mode": "wrong-exit",
+      "intended_failure": [
+        {
+          "case": "correct",
+          "fields": [
+            "exit"
+          ]
+        }
+      ],
+      "path": "/tmp/symaira-doctor-source-independent-third-doctor.json.wrong-exit.json",
+      "sha256": "6e8ec3fab531dda3e4f7a881e5ef9e04b6e43326f17d5a0bb42145f77f44a1b4"
+    },
+    {
+      "family": "doctor",
+      "mode": "missing-header",
+      "intended_failure": [
+        {
+          "case": "correct",
+          "fields": [
+            "stdout_base64"
+          ]
+        }
+      ],
+      "path": "/tmp/symaira-doctor-source-independent-third-doctor.json.missing-header.json",
+      "sha256": "7abc080707bf5dc679914240f869a1538372c55dfecda6c79e237882c9498a10"
+    },
+    {
+      "family": "doctor",
+      "mode": "missing-core-event",
+      "intended_failure": [
+        {
+          "case": "correct",
+          "fields": [
+            "logs"
+          ]
+        }
+      ],
+      "path": "/tmp/symaira-doctor-source-independent-third-doctor.json.missing-core-event.json",
+      "sha256": "8393bdf11e3cca65e5400052b8fd1340d45ac0efa57568206bab12c81f2829d9"
+    }
+  ],
+  "manifest_counts": {
+    "source": {
+      "candidate_source_sha256": 145,
+      "go_source_sha256": 4
+    },
+    "doctor": {
+      "candidate_source_sha256": 59,
+      "go_source_sha256": 108
+    },
+    "setup": {
+      "candidate_source_sha256": 10,
+      "go_source_sha256": 108
+    }
+  },
+  "fresh_tests": {
+    "passed": 402,
+    "failed": 0,
+    "ignored": 0,
+    "complete_summaries": 40
+  },
+  "binary_sha256": {
+    "/workspace/symaira-setup765-source/target/debug/deps/symbrain_cli-7d819870330de0a0": "89ae8035e48be42fb4003db5ee539afe45f919923911195190cf9b53a9e21d6f",
+    "/workspace/symaira-setup765-source/target/debug/deps/symbrain-c77dd97b8d78f9e3": "d958ddc4781719b33d7153ff250a848ff82bc05d69b6f1bbed77b94ea482b6c6",
+    "/workspace/symaira-setup765-source/target/debug/deps/activity_cli_oracle_tests-aea310cac2f0d908": "36f576fa50d655270da841dacd4c86f4db3c9d26a9e7544b9444102a6d06b8ea",
+    "/workspace/symaira-setup765-source/target/debug/deps/activity_validation_tests-87c272678c3eb497": "13473a6d84250fda53b4778b18cf79795b3806f075cf7145d96c066476fba9e3",
+    "/workspace/symaira-setup765-source/target/debug/deps/cli_tree_tests-a162df49c11bf67a": "325a388f482d760e9db03fb165e7e06e2a6b7caa52e8008edc92ef4819a1c1f3",
+    "/workspace/symaira-setup765-source/target/debug/deps/doctor_fix_native-9c1636973295aeee": "e0e989538c96d026291d26a1a8e12848a43d6463b8a16dfa4a46108c4835259c",
+    "/workspace/symaira-setup765-source/target/debug/deps/doctor_modules-7aab49492321394c": "8225c975223a06eae8357ab9c50932819da6ae65a57496dfa2de50337ef58668",
+    "/workspace/symaira-setup765-source/target/debug/deps/doctor_native-df32230cdac73b8c": "5d22d3049145c22a8a68b3b82b71b774cee04717942eb4bd006a45b6bcc552e8",
+    "/workspace/symaira-setup765-source/target/debug/deps/guard_decide_adapter-7ed42fa86ff310e4": "a4fb989f1bca232f9f7718a7efab3fdcade86d73fe3495a583b5314cf5b8b335",
+    "/workspace/symaira-setup765-source/target/debug/deps/guard_decide_raw_bytes-09108ea26a3966a2": "aa73211b4e15a17ab52aa73009267ec9d47ae37244a7a3e183a8c9b48ff6d2a5",
+    "/workspace/symaira-setup765-source/target/debug/deps/guard_doctor_oracle_tests-63a9762859d3b2cc": "5b348b41200a57d3a066d1a13e1c51b50e28784c0dad46ef9e9ca777fac3f57b",
+    "/workspace/symaira-setup765-source/target/debug/deps/guard_grants_native-3a286beb08535d86": "f14461ad832039618e759007c01f2e9119a5756225a83cf915f78973d76eb628",
+    "/workspace/symaira-setup765-source/target/debug/deps/guard_oracle_grants-b65199d294b234cd": "ce4fd65bc75b10f08baa6915b426d12119928930ba85337a6342d0155782df76",
+    "/workspace/symaira-setup765-source/target/debug/deps/harness_health_tests-23a6b4426f512608": "4c10664328ccf229002069d20956b14856a40ffb7ff31e27c1482f60e76cb93b",
+    "/workspace/symaira-setup765-source/target/debug/deps/harness_list_tests-712e7c746ed04fbe": "e0b6e6508af326269a132ec9f8c14bdb7d6fb9bef14378a0f3e74175de6e973a",
+    "/workspace/symaira-setup765-source/target/debug/deps/init_cli_tests-a571323ff7fcf3e1": "a8fe17286d7f4c87d56e0bc9ab0f856fbbfa2bbd0a1f2df64f0f7335682a7cd8",
+    "/workspace/symaira-setup765-source/target/debug/deps/install_oracle_tests-9e31b0e41b0ad8ff": "c652cc51c935295ff396420c482ddf66a114f2a9c38c8f32861fcb9c08e028ce",
+    "/workspace/symaira-setup765-source/target/debug/deps/mcp_cli_tests-ba1264341ab7d289": "8a7904b6cca2769ba653b0fd679996c9355c83bcdb32956208ea08d282bedc10",
+    "/workspace/symaira-setup765-source/target/debug/deps/profile_cli_tests-23ac87e97ca32bf4": "1951fb8dcb64ffe40a496284045318f5ee37777f55f82408d79a706a257751b4",
+    "/workspace/symaira-setup765-source/target/debug/deps/setup_fix_native-69b4c1364282d8a0": "6787c674bafa6af49c0a53019f4c4bc5a9d366768b166a97bf4211be19214b26",
+    "/workspace/symaira-setup765-source/target/debug/deps/setup_repair_native-5a871bf54ea00877": "7862bf0ccd1a7af3e85b0f0ad4b54ec7b4667e791df8f57ca745e554a7e5a904",
+    "/workspace/symaira-setup765-source/target/debug/deps/skills_doctor_native-5621f06e22e9ed57": "9be35a9788bb6b670f740d8264d9a942ad819dc12b48a2de43323159ab6fb67d",
+    "/workspace/symaira-setup765-source/target/debug/deps/skills_list_native-a27d94eabfc57542": "2ca5d33478bc479872123c243136aff135742d870f6304a6faaefa39282a4a63",
+    "/workspace/symaira-setup765-source/target/debug/deps/skills_log_native-49aff62ee0ab02e3": "d494ad85f4b05cbdaaecf292b532f8542ae85d4e12baa816abc2fd60a24cf5e1",
+    "/workspace/symaira-setup765-source/target/debug/deps/skills_status_opencode_tests-421beceba59ff56b": "28c9632021d39b29216b78318c80a1529faa832b82569efb82a87930d3dc6aa1",
+    "/workspace/symaira-setup765-source/target/debug/deps/skills_sync_legacy_roots-cf0dbbe404019e98": "2fbdac483e5908fe35bbeaaf163208121be7f5f632e0630c65f3961085bc122c",
+    "/workspace/symaira-setup765-source/target/debug/deps/skills_targets_native-37860e4f00da1587": "4d345e0def9f66503e6d43506c52d29d8b8b9044abb26745ffcc295f88675a3e",
+    "/workspace/symaira-setup765-source/target/debug/deps/sync_native-e9b68c73c1f96d1f": "cd262517fbc5b5c474eeebede524085e23cd8b7715df3657ec93402c56ec11ab",
+    "/workspace/symaira-setup765-source/target/debug/deps/vault_admin_native-6307ea2a0689be73": "91b0cdfbeb3b62f6953ef8cddd1bef371163a8112676388950019692db7025e0",
+    "/workspace/symaira-setup765-source/target/debug/deps/symbrain_core-f91149cf0195d110": "33fc75d43f0b02885eed8683c549e2099bb3947e1ef626e89e5c2b61b3fde649",
+    "/workspace/symaira-setup765-source/target/debug/deps/xdg_paths_tests-f88ef145186c5bdb": "b509b4fc8e63b2d83b15aa145c1a26c6f9a450944fcc3551fdf6793e73821978",
+    "/workspace/symaira-setup765-source/target/debug/deps/symbrain_managed-79c6a7de10fd1869": "3cf0ae3b9283f4e7c3ac4c3a65f7eae09e471238c07617dc67c92e303513f03a",
+    "/workspace/symaira-setup765-source/target/debug/deps/install_tests-8103cf39730c6e26": "323c8b84e368b2a694b261f51a26130ba61ce90139a2f6e9196048d860949086",
+    "/workspace/symaira-setup765-source/target/debug/deps/oracle_differential_tests-3212371d91dbdf97": "6f3e4a2043c26a51247df0a2939d61a9f1136d33ba90b5fccc5f77209b5ae093",
+    "/workspace/symaira-setup765-source/target/debug/deps/provenance_windows-624f14dfa6a4bb25": "b6521810beb4edd82806a6c52decabbced316031597f92522c6339d9f9908063",
+    "/workspace/symaira-setup765-source/target/debug/deps/source_local-7156e74b2ea6f575": "7420380f122ec14e455511aa9814337bf7a9d9e3f313a7aef2e2c24870ea84c1",
+    "/workspace/symaira-setup765-source/target/debug/deps/version_probe_windows-34d8acab5e449442": "ba7df314422ad935246a3e32786c386a88a283bf7bfef4e1f639ef8565c9d52d",
+    "/workspace/symaira-setup765-source/target/debug/symbrain": "a2f9be69dbf324e12a20b5ed3e573f06bb9c66750fec2c3a2a16bd4716bdfc52"
+  },
+  "strict_clippy": true,
+  "fmt": true,
+  "actionlint_all_workflows": true,
+  "original_35_pairs_match": true,
+  "actual_SIGINT_SIGTERM_match": true,
+  "original_two_P2_groups_closed": true,
+  "extra_current_setup_pairs": 16,
+  "extra_setup_json_mismatches": 8,
+  "extra_setup_human_matches": 8,
+  "extra_source_doctor_pairs_match": 7,
+  "extra_setup_pair_details": [
+    {
+      "family": "consumers",
+      "case": "raw-install-None-lexical-False-json-False",
+      "go_exit": 0,
+      "rust_exit": 0,
+      "stdout_match": true,
+      "stderr_and_full_state_match": true
+    },
+    {
+      "family": "consumers",
+      "case": "raw-install-None-lexical-True-json-False",
+      "go_exit": 0,
+      "rust_exit": 0,
+      "stdout_match": true,
+      "stderr_and_full_state_match": true
+    },
+    {
+      "family": "consumers",
+      "case": "raw-install-bin-lexical-True-json-False",
+      "go_exit": 1,
+      "rust_exit": 1,
+      "stdout_match": true,
+      "stderr_and_full_state_match": true
+    },
+    {
+      "family": "consumers",
+      "case": "raw-install-parent-lexical-True-json-False",
+      "go_exit": 1,
+      "rust_exit": 1,
+      "stdout_match": true,
+      "stderr_and_full_state_match": true
+    },
+    {
+      "family": "consumers",
+      "case": "raw-install-None-lexical-False-json-True",
+      "go_exit": 0,
+      "rust_exit": 0,
+      "stdout_match": false,
+      "stderr_and_full_state_match": true
+    },
+    {
+      "family": "consumers",
+      "case": "raw-install-None-lexical-True-json-True",
+      "go_exit": 0,
+      "rust_exit": 0,
+      "stdout_match": false,
+      "stderr_and_full_state_match": true
+    },
+    {
+      "family": "consumers",
+      "case": "raw-install-bin-lexical-True-json-True",
+      "go_exit": 1,
+      "rust_exit": 1,
+      "stdout_match": false,
+      "stderr_and_full_state_match": true
+    },
+    {
+      "family": "consumers",
+      "case": "raw-install-parent-lexical-True-json-True",
+      "go_exit": 1,
+      "rust_exit": 1,
+      "stdout_match": false,
+      "stderr_and_full_state_match": true
+    },
+    {
+      "family": "fix-consumers",
+      "case": "raw-install-None-lexical-False-json-False",
+      "go_exit": 0,
+      "rust_exit": 0,
+      "stdout_match": true,
+      "stderr_and_full_state_match": true
+    },
+    {
+      "family": "fix-consumers",
+      "case": "raw-install-None-lexical-True-json-False",
+      "go_exit": 0,
+      "rust_exit": 0,
+      "stdout_match": true,
+      "stderr_and_full_state_match": true
+    },
+    {
+      "family": "fix-consumers",
+      "case": "raw-install-bin-lexical-True-json-False",
+      "go_exit": 1,
+      "rust_exit": 1,
+      "stdout_match": true,
+      "stderr_and_full_state_match": true
+    },
+    {
+      "family": "fix-consumers",
+      "case": "raw-install-parent-lexical-True-json-False",
+      "go_exit": 1,
+      "rust_exit": 1,
+      "stdout_match": true,
+      "stderr_and_full_state_match": true
+    },
+    {
+      "family": "fix-consumers",
+      "case": "raw-install-None-lexical-False-json-True",
+      "go_exit": 0,
+      "rust_exit": 0,
+      "stdout_match": false,
+      "stderr_and_full_state_match": true
+    },
+    {
+      "family": "fix-consumers",
+      "case": "raw-install-None-lexical-True-json-True",
+      "go_exit": 0,
+      "rust_exit": 0,
+      "stdout_match": false,
+      "stderr_and_full_state_match": true
+    },
+    {
+      "family": "fix-consumers",
+      "case": "raw-install-bin-lexical-True-json-True",
+      "go_exit": 1,
+      "rust_exit": 1,
+      "stdout_match": false,
+      "stderr_and_full_state_match": true
+    },
+    {
+      "family": "fix-consumers",
+      "case": "raw-install-parent-lexical-True-json-True",
+      "go_exit": 1,
+      "rust_exit": 1,
+      "stdout_match": false,
+      "stderr_and_full_state_match": true
+    }
+  ],
+  "inherited_setup_html_omission_confirmed_with_actual_a301_cli": true,
+  "windows_sdk_generic_clean_exploratory_mismatches": 101,
+  "actual_windows_managed_join_admitted_nonempty_HOME_values": 189678,
+  "actual_windows_managed_join_admitted_mismatches": 0,
+  "windows_excluded_empty_HOME_precondition_verified": true,
+  "native_windows_macos_runtime_verified": false,
+  "provenance": {
+    "head": "34394496b44d0f95581080885d89d4ed5f43bbd5",
+    "source": "a66b4818f74943812315509a3ba2545b2b6b2ea1",
+    "author_actual_artifacts_verified": 26,
+    "author_encoded_raw_logs_verified": 21,
+    "author_current_actual_binaries_verified": 38,
+    "old_review_file_counts": {
+      "/workspace/symaira-doctor765-windows/migration/evidence/doctor-windows-765/independent-review-a301": 46,
+      "/workspace/symaira-doctor765-windows/migration/evidence/doctor-windows-765/independent-review-0b56": 35,
+      "/workspace/symaira-doctor765-windows/migration/evidence/setup-source-765/independent-review-86ea": 24
+    },
+    "previous_executable_archive_counts": {
+      "a301": 38,
+      "0b56": 41
+    },
+    "original_windows_zip_and_all_five_failures_verified": true,
+    "original_windows_process_sha256": "b54b2702c66b6281e44f217fdcf2a05f2ddf5816a383a2ceb073971beab0037e",
+    "named_case_retention": {
+      "source": {
+        "original": 103,
+        "new": 107,
+        "retained": true
+      },
+      "doctor": {
+        "original": 274,
+        "new": 282,
+        "retained": true
+      },
+      "setup": {
+        "original": 151,
+        "new": 169,
+        "retained": true
+      }
+    },
+    "author_manifest_counts": {
+      "source": {
+        "candidate_source_sha256": 145,
+        "go_source_sha256": 4
+      },
+      "doctor": {
+        "candidate_source_sha256": 59,
+        "go_source_sha256": 108
+      },
+      "setup": {
+        "candidate_source_sha256": 10,
+        "go_source_sha256": 108
+      }
+    },
+    "sdk_source_inputs_verified": 5,
+    "typed_stub_source_hashes_verified": true,
+    "native_windows_macos_runtime_verified": false,
+    "rust_sha256": "a2f9be69dbf324e12a20b5ed3e573f06bb9c66750fec2c3a2a16bd4716bdfc52"
+  },
+  "inputs": {
+    ".github/workflows/ci.yml": "e40e80096dbf644eb9daed203061006aa5b2b4fb6e827cdbd5f1113cf5859701",
+    "docs/adr/2026-10-03-managed-owner-clean-and-mkdir.md": "2c545f062bb665202429695d481b9f87c29a75b49d3f89d164d3879cb4e5ad43",
+    "migration/contract-matrix.csv": "b5504ecadebe71d347c97d6fe9191afb77e400cf6d9dcccaa2f5e2dede1e6603",
+    "rust/symbrain-cli/src/doctor_fix.rs": "9224cb915eadd102cef67d222ce2a59e7aff2321a2478eb111e86db1705c1934",
+    "rust/symbrain-cli/src/lib.rs": "dcd054935fdbb733fabcb82943e2263c4aa22af98fac19de738dae831a04b2d5",
+    "rust/symbrain-cli/src/managed_home.rs": "31efa0ba58dd2686aa383f628461a5844ce1d9af7bb864b30c18ba52d33b3be3",
+    "rust/symbrain-cli/src/setup_cli.rs": "96f2222e3356473f02785a1c22813148bdfe1c80a4318649583325647f598381",
+    "rust/symbrain-managed/src/install.rs": "6cc511e6ebbbdd0db840c4321465d1d180d506038c91822f34e2b50e34f7f2c2",
+    "rust/symbrain-managed/src/lib.rs": "65ba1b861e41efdf94489951bd16a1a1e7c810cb204a0074bae845c4635d5d5e",
+    "rust/symbrain-managed/src/local_install.rs": "723f62b8981a883a2e2ebdaa8d042d9590cb62b170994a2d7169597520b19041",
+    "rust/symbrain-managed/src/mkdir.rs": "c37b3c7572395ba604717bdadca1686730d106cc520df6069d04698ad42ba7dd",
+    "rust/symbrain-policy/Cargo.toml": "8f5ec941b85722894f19d595313b2d4107d2fd6de384faf54ee3282952af3de1",
+    "rust/symbrain-policy/src/profile/create.rs": "4a761f474339671ec6888c3b6fcbbc689d864a11ee193813d5b8a8aa441df8e2",
+    "rust/symbrain-policy/tests/profile_create_races.rs": "3f1d568d6723ff8e2e7bc09e6f6634f948eea87c55e30c646d334b04876c1309",
+    "scripts/doctor-repair-oracle/README.md": "ee7008b981e93743b563831a98c9e34b70ca18679a5a4403fde9c152fa095ca5",
+    "scripts/doctor-repair-oracle/cases.py": "5f43de7c551c3d7086373a3a0fe4684c987a9a3846964eeb39af3a342ce9b2b5",
+    "scripts/doctor-repair-oracle/replay.py": "ca525d2c55798137a1c77c9e1a3993a8e2349254721ec635ded9d312b6ddc633",
+    "scripts/setup-repair-oracle/README.md": "9df2fc1fefae6f1050036f800da4a6410eced6a6bcc4fc3493522be91feef6e3",
+    "scripts/setup-repair-oracle/replay.py": "af2fe7bfae407eee440cedfc821d64761b9e54cd3a5b9919c9347b945c304a4f",
+    "scripts/setup-source-oracle/README.md": "fefb2819abb0390287e5ee17d0b959780732a61b2cd14b0c9bf0348c45c0b587",
+    "scripts/setup-source-oracle/replay.py": "ff4542d6d630d50b3aa7d313bbd25acb4d16e1fb3ec00313d4fa4f159e25a13d"
+  },
+  "artifacts": {
+    "/tmp/symaira-doctor-source-independent-third-actionlint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/symaira-doctor-source-independent-third-baseline-consumers-setup.json": "a342965941b015fbb954bf7f46822216ea8ec783aa73c1338cfae88ab967644b",
+    "/tmp/symaira-doctor-source-independent-third-baseline-consumers.log": "7684f0389c547189ea7734d24be69e91b25add5c1ea12ccb230b5113a8e6a30f",
+    "/tmp/symaira-doctor-source-independent-third-baseline-consumers.py": "4e1793d57ba50bd9f7f43660584ce68d6ec3867ae3441dccb4dceee0e8843e20",
+    "/tmp/symaira-doctor-source-independent-third-boundaries.json": "238c0c1dc827d33379044df268acd2f3654df1efc9e573465c12b001ce34f605",
+    "/tmp/symaira-doctor-source-independent-third-boundaries.log": "4959c845f18e7c4825f4b89e952c866f811bbff9919f8e85c75cf69cb9bce3e6",
+    "/tmp/symaira-doctor-source-independent-third-boundaries.py": "519596fb437095ec4d87d0f850e73f818e0a301a7a8ad51d2fdf2fe9f69187a3",
+    "/tmp/symaira-doctor-source-independent-third-build.log": "1094a36867300c1838cdc4ee40efe961d83bac574665f8ee57a40d5b1e88698c",
+    "/tmp/symaira-doctor-source-independent-third-clippy.log": "40108eb5c2e432741fc7f36afdf5c793ec02b19e7b1ce5e51bdd2ba377bd26cb",
+    "/tmp/symaira-doctor-source-independent-third-consumers-continuation.json": "dcdc49ac98cfe5a1cba3a5e07b744ae104f71d50b61f6dd657da70703f1cda19",
+    "/tmp/symaira-doctor-source-independent-third-consumers-continue.log": "3c3e7ae303a11765c4e79d760670fbd5caf97197d9587b63835a737d374e876f",
+    "/tmp/symaira-doctor-source-independent-third-consumers-continue.py": "4ac9934642fba53bb73d280fc1d2c254c0f78ce8b9e049e2a241a474f4bb1ff4",
+    "/tmp/symaira-doctor-source-independent-third-consumers-doctor.json": "47c22405bcd0e29973bae8574b45aa7cf14dd9d69f02554c8fe55603a00d2201",
+    "/tmp/symaira-doctor-source-independent-third-consumers-setup.json": "8f1ff821d7dd0f7c6cdc8599760ed256664c0ccc42d422db1a470d3cb49effc4",
+    "/tmp/symaira-doctor-source-independent-third-consumers-source.json": "32ce4acdf5eaa3fe3b5d19c8119d7db9d90e58c3e5fd7e0c382297e46f307c48",
+    "/tmp/symaira-doctor-source-independent-third-consumers.log": "75d47eedaabea5116b2b98877d7f8bd6aeded771f553e89d847d1668e71fd793",
+    "/tmp/symaira-doctor-source-independent-third-consumers.py": "e37db24e799b43c69cbbc534994b8e30f1f81596814764a20be5b86d5cc6a79c",
+    "/tmp/symaira-doctor-source-independent-third-doctor.json": "5b7d8adf188acc8ecc616b45500277d7ff528f06019a7c3e7885f20f6e66bb51",
+    "/tmp/symaira-doctor-source-independent-third-doctor.json.missing-core-event.json": "8393bdf11e3cca65e5400052b8fd1340d45ac0efa57568206bab12c81f2829d9",
+    "/tmp/symaira-doctor-source-independent-third-doctor.json.missing-header.json": "7abc080707bf5dc679914240f869a1538372c55dfecda6c79e237882c9498a10",
+    "/tmp/symaira-doctor-source-independent-third-doctor.json.wrong-exit.json": "6e8ec3fab531dda3e4f7a881e5ef9e04b6e43326f17d5a0bb42145f77f44a1b4",
+    "/tmp/symaira-doctor-source-independent-third-doctor.log": "4d83b7cf1d78f7b66d3a972481063932aadeeac819671fd96651eda17465e57a",
+    "/tmp/symaira-doctor-source-independent-third-escaping-inputs.json": "7207e83c24c143cb9bc3545ae76c6753879f69aab414bf6bc5afe7bcbead05c3",
+    "/tmp/symaira-doctor-source-independent-third-extra.json": "9ea1e9a873241d3460b1151c413d823c29840e3a33da31718731c4f6f2cffe92",
+    "/tmp/symaira-doctor-source-independent-third-extra.log": "68a857023756e6395539ed3c2e9bcd90ccfd2ab57b278ddbdd93dba5bd3477e2",
+    "/tmp/symaira-doctor-source-independent-third-extra.py": "28606c859ffe21f41da591fe53e14bfa23a9727a7dc6a81a628ce3ef0bc8e17f",
+    "/tmp/symaira-doctor-source-independent-third-fetch-hold.json": "177e21b66324ad5ad41b216476ea13c2f836db06da7b3c5621bd34d5af97401d",
+    "/tmp/symaira-doctor-source-independent-third-fix-consumers-setup.json": "05b145d0f83d2dd64a54033747511a1772b575399b47f1d1f46a130814b083ff",
+    "/tmp/symaira-doctor-source-independent-third-fix-consumers.log": "a37bbed9d31f83b18bcf1c1124253514916eef2e5397ad7989f2b06543b255cf",
+    "/tmp/symaira-doctor-source-independent-third-fix-consumers.py": "5b436cb165b4179e81a15b214c5df193c03b04a5cc1e315a71128a82ecd5bd69",
+    "/tmp/symaira-doctor-source-independent-third-fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/symaira-doctor-source-independent-third-home.json": "c6d1da2f7fb59b3fc92bbad6f0f0d8a308acc2abe60bfc6b90c3eb7bc718e183",
+    "/tmp/symaira-doctor-source-independent-third-home.log": "dce1bcdb4ef76ae6edd74bea035972224be1dbb9779bf5467ca1714bfc192b2a",
+    "/tmp/symaira-doctor-source-independent-third-home.py": "9091bb546833561754f986fe2b64f99b2d35cb178fdccaabca1192f4ec3dcd47",
+    "/tmp/symaira-doctor-source-independent-third-original-findings.json": "c83fd62fe4866a6dde0ca6759719244180ff27a001f8c8ad73f6565f10751266",
+    "/tmp/symaira-doctor-source-independent-third-original-findings.log": "453b5f4fe955e3e7fc5b53e28c4baf4918023be616d86b8c22908d27c363335a",
+    "/tmp/symaira-doctor-source-independent-third-original-findings.py": "a3bc15be36e84b5164017c2542069b7a70998a98d1514be7fd465dcfd4346dde",
+    "/tmp/symaira-doctor-source-independent-third-original-inputs.json": "c8ba2e06ed913d1ec733902da7cf4aac5a4e7dac36f68da0a552d2a9cb54155b",
+    "/tmp/symaira-doctor-source-independent-third-original-lookup.json": "fe3e47674f8ec7cc442293f4ef34bea31fe5506aa7474431f82a32100172bc1a",
+    "/tmp/symaira-doctor-source-independent-third-original-lookup.log": "7e3500bddfde8fcf2baf7b8de43539a9b6536c950372fc23df20420011fa8463",
+    "/tmp/symaira-doctor-source-independent-third-original-lookup.py": "fa87bb24f660deaa5a926b8c3c81d522b8b3f58fe5fe340e45dd542238174229",
+    "/tmp/symaira-doctor-source-independent-third-original-raw-signals.json": "be1751fd5e5301c37f61283c095bcbc90de7b21c62542cf8a2681053a30c5df2",
+    "/tmp/symaira-doctor-source-independent-third-original-raw-signals.log": "e5194bbb6f8a11456f57e66acde83b8c151fa2c2e3923551a0007c9f2a4eb3f1",
+    "/tmp/symaira-doctor-source-independent-third-original-raw-signals.py": "c80ee4c3102c75661d6a04a0054fe775e356cca38e636c253d2aeeaf1952bf2e",
+    "/tmp/symaira-doctor-source-independent-third-provenance.json": "a7cc5cb2752960d94756a39dd0b2aba2c29893350583f40130c113a2aa414b18",
+    "/tmp/symaira-doctor-source-independent-third-provenance.log": "a7cc5cb2752960d94756a39dd0b2aba2c29893350583f40130c113a2aa414b18",
+    "/tmp/symaira-doctor-source-independent-third-provenance.py": "2a07cfb5c0ac2b1b34761482b2eb3cc096950b515df344c99e77c4aae4ff28d6",
+    "/tmp/symaira-doctor-source-independent-third-setup.json": "0cb64c3a875ee578428d3a2b63cadefce551e0bb7344e1b562ddd5487b93c2d9",
+    "/tmp/symaira-doctor-source-independent-third-setup.log": "3080d28c96b7f78fc01b25c300b326d1d1dfdc2ca512cc4855c7652ca2d105e5",
+    "/tmp/symaira-doctor-source-independent-third-source.json": "e5aa32f430da2d094c824cbbc771ffaa21c99ef2ce7b8df63dcd7925da1fa9e5",
+    "/tmp/symaira-doctor-source-independent-third-source.json.wrong-exit.json": "25bb2f8f557230927cf41dffeaa2490012896a38fcd572e82a9d370451ead687",
+    "/tmp/symaira-doctor-source-independent-third-source.json.wrong-source.json": "fcb5f8f3da043b0becc91cfea36f6cfb77baba0b6100c194a9c1dbd030030991",
+    "/tmp/symaira-doctor-source-independent-third-source.log": "b10ab0438ca74153fef5b48f7d88771c72be5a9a77fe2ed57229d38f09174aa0",
+    "/tmp/symaira-doctor-source-independent-third-static.json": "9aaa5847524977377125048276244e6b3b4a515304546dd1e23c121d2c2855d3",
+    "/tmp/symaira-doctor-source-independent-third-symlink.json": "2201cc062579bfb3ec7395907ffd14d5e4e2cce3fd62fafbbc2eaf7c33744700",
+    "/tmp/symaira-doctor-source-independent-third-symlink.log": "541244f6874fc75a5f19cdb16931ba416030d9911fe51b879872e3a707cd4044",
+    "/tmp/symaira-doctor-source-independent-third-symlink.py": "78cb82ef1c8b9ab8e5fb8ac658ea8251c326e94ac26595804e3a78b7e2f05d99",
+    "/tmp/symaira-doctor-source-independent-third-tests.log": "aa97d11c384bfd3f88c1e08df061d4a87c9e89d4ba07e31cf401129ec68f191b",
+    "/tmp/symaira-doctor-source-independent-third-verify.py": "6bf25f626010f7e1ed2be821ea273cae24e67187c3d65d2056e4a6191ac06cc2",
+    "/tmp/symaira-doctor-source-independent-third-whitespace.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/symaira-doctor-source-independent-third-windows-lexical.json": "3817f4a1d8a92381052e49c33275377defc9f292a3cb7eda681a1560649d4937",
+    "/tmp/symaira-doctor-source-independent-third-windows-lexical.log": "6c74aba394dd8f70af4f4149b66500b4d42f807e1965406fc4f15f22b65b1f77",
+    "/tmp/symaira-doctor-source-independent-third-windows-lexical.py": "442f24dd776665b3e661650ff21dd97c7b2c5395e7bf32ecc930e06f467a9acf",
+    "/tmp/symaira-doctor-source-independent-third-windows-managed-join.json": "eb9f7ed8684fffe0f23ce45da8a389f3d2232a49dbb692450fce23375652402e",
+    "/tmp/symaira-doctor-source-independent-third-windows-managed-join.log": "c7e8e23551687e450732ca74b9e7074bb236d5060e39dbbb71050cd3438315ff",
+    "/tmp/symaira-doctor-source-independent-third-windows-managed-join.py": "6763134124dd0c395c31c721c457f27efae6c679222708504e26e6764a132f99"
+  },
+  "disposition": "REQUEST CHANGES: one remaining P2 shared Setup JSON report escaping omission; original owner-selection and raw MkdirAll findings closed.",
+  "reviewer_notes": [
+    "Fetch quiet hold paused only outer sequencing shell. Already admitted Source/Doctor gates finished unchanged; next commands resumed only after root release. Hold receipt records initial process-read race explicitly.",
+    "Additional Setup consumer gate correctly failed four JSON pairs, preserving raw output/full state. Source/Doctor sections were executed separately unchanged afterward; no failed observation rewritten or hidden.",
+    "Exploratory standalone generic Clean differs for101 inputs through SDK lazybuf/postClean behavior. Exact actual managed_path assembly +SDK Join comparison admits189678 nonempty HOME values and all match; one empty HOME difference is excluded by actual bin_dir filter before managed_path. Both failed exploratory probes and all outputs/source digests retained. Pure Linux algorithm execution is not native Windows runtime evidence.",
+    "Actual archived a301 baseline proves HTML/separator omission inherited in Setup finish; this review does not mislabel it as a regression from lexical/mkdir correction. It remains a literal Go contract gap in the modified Setup report consumer."
+  ],
+  "report_path": "/tmp/symaira-doctor-source-independent-third-review.md",
+  "report_sha256": "af3367538c467be61ff1a13146c7973619370a31d398a9f1ecf0d42aeec881a6",
+  "verification_log_sha256": "19e1b640578f87a3940a91656e3d9ba43c9da9be890e517bdf944fa3e9f36b2d",
+  "final_released_at": "2026-10-03T23:53:57.363724+00:00"
+}

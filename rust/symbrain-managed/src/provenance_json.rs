@@ -1,7 +1,24 @@
 //! Go encoding/json string replacement and time.Time validation for sidecars.
 
-pub(super) fn replace_invalid_strings(bytes: &[u8]) -> Vec<u8> {
-    let text = String::from_utf8_lossy(bytes);
+pub(crate) fn replace_invalid_strings(bytes: &[u8]) -> Vec<u8> {
+    // encoding/json advances by one byte for malformed UTF-8, rather than
+    // replacing an entire incomplete sequence as from_utf8_lossy does.
+    let mut text = String::new();
+    let mut remaining = bytes;
+    while !remaining.is_empty() {
+        match std::str::from_utf8(remaining) {
+            Ok(valid) => {
+                text.push_str(valid);
+                break;
+            }
+            Err(error) => {
+                let prefix = error.valid_up_to();
+                text.push_str(std::str::from_utf8(&remaining[..prefix]).expect("valid prefix"));
+                text.push('\u{fffd}');
+                remaining = &remaining[prefix + 1..];
+            }
+        }
+    }
     let bytes = text.as_bytes();
     let mut result = Vec::with_capacity(bytes.len());
     let mut index = 0;

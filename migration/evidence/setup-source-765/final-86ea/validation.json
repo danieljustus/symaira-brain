@@ -1,0 +1,73 @@
+{
+  "source_head": "86ea7bfbeecbbe0877a5da3e6832fcfa5e1d9737",
+  "integrated_main": "31de72294521701fc4b1a0bce39f03cc34d72e7e",
+  "integrated_published_doctor": "1288b7a43d937ba35de08a0b9ddb82391375528b",
+  "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "rust_binary_sha256": "386422be2c58414f17f7ed02caeff801e4af318ca64f2b7bbce01882db2cf7ca",
+  "native_cli_path": "/workspace/symaira-setup765-source/target/debug/symbrain",
+  "preserved_actual_cli": "/tmp/symaira-setup765-source-86ea-cli",
+  "tests": {
+    "passed": 397,
+    "failed": 0,
+    "ignored": 0,
+    "summaries": 39
+  },
+  "process_proof": {
+    "source_complete_matches": 90,
+    "doctor_complete_matches": 255,
+    "setup_complete_matches": 151,
+    "source_negative_controls": 2,
+    "doctor_negative_controls": 3,
+    "six_original_raw_probes_match": true,
+    "actual_SIGINT_SIGTERM_cleanup": true,
+    "actual_successful_descendant_cleanup": true
+  },
+  "candidate_clean_before_after_and_during_all_process_runs": true,
+  "artifacts": {
+    "linux-process.json": "af6f8740868fd7328e38b75ef855a3d7113ed6275159d024d3662a69295ea1ee",
+    "linux-process-wrong-exit.json": "d0afb3a24f925375166d1c3a19743cf8df68b1237acdaf3f2434367818870a09",
+    "linux-process-wrong-source.json": "2ce5c0a9064619840d6a84cb665408aa2b854f7ac530ab2f0cee09aa223ff37a",
+    "linux-doctor.json": "b412d3779f7ec8514d21d4a824274deefa49a6d02ae468a4682f81867864a1f8",
+    "linux-doctor-missing-core-event.json": "e401f94f33ba4efb640604c3b9e06820df01f0cfbb4a2c33d4c61d10d3d98272",
+    "linux-doctor-missing-header.json": "08c4e21c48a7b804386b70e336c6ed35a1f9f452fd5777581bc011715cfa3bba",
+    "linux-doctor-wrong-exit.json": "755cfe32eee9672eaf786e6cb6994ae8fdd0da213669ff59d047a062cff09779",
+    "linux-setup.json": "c385e3075a344bd4ddb27457e72c9109fe0ce59311b87558134842bda154f3bc",
+    "logs.json": "b307336d6859cfff4240f5f4fd0abf8eaa995d8ee6fbdb0ce786daea077f7c7f",
+    "symaira-setup765-source-86ea-author-recheck-extra.json": "3144c370eaf93b47fd8aa2cf1d954b1dd5d8955d7194dc544e59885d36cb5c9a",
+    "symaira-setup765-source-86ea-author-recheck-extra.py": "1da96b868c732254ed664d6b74e43fb091102eba15978f608b4f1a93f8ad0cce",
+    "symaira-setup765-source-86ea-author-recheck-extra.log.json": "60d7e0df956a06c3325f123b86463d1af5be2bc8053520d4f9570782096e6d81",
+    "signature-stub-harness.json": "bab6ab99a70fd4be1092c253ef2105a238cc86ceab5b3027a0d8ce154b649060"
+  },
+  "rust_sdk": "rustc1.98.0 (88d9e12ae 2026-08-18), cargo1.98.0 (797e8a9bc 2026-08-05)",
+  "go_sdk": "go1.26.7 linux/amd64",
+  "actionlint": "1.7.12",
+  "environment": {
+    "process_parent": "python3 /tmp/symaira-subreaper.py bash -c",
+    "shell": "set -euo pipefail",
+    "umask": "022",
+    "rust_env": "/home/agent/.cargo/env",
+    "PATH_prefix": "/workspace/toolchains/go1.26.7/bin",
+    "CARGO_TARGET_DIR": "/workspace/symaira-setup765-source/target",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0"
+  },
+  "commands": [
+    "cargo test -p symbrain-cli -p symbrain-managed -p symbrain-core --all-features --locked",
+    "cargo fmt --all -- --check",
+    "cargo clippy -p symbrain-cli -p symbrain-managed -p symbrain-core --all-targets --all-features --locked -- -D warnings",
+    "/workspace/toolchains/bin/actionlint .github/workflows/ci.yml",
+    "scripts/setup-source-oracle/run.sh /tmp/symaira-setup765-source-86ea-final-clean-process.json",
+    "scripts/doctor-repair-oracle/run.sh /tmp/symaira-setup765-source-86ea-final-clean-doctor.json",
+    "scripts/setup-repair-oracle/run.sh /tmp/symaira-setup765-source-86ea-final-clean-setup.json",
+    "python3 /tmp/symaira-setup765-source-86ea-author-recheck-extra.py",
+    "git diff --check"
+  ],
+  "disposition": "Ready for independent full-layer re-review. Source remains immutable; final publication/evidence HEAD is a separate evidence-only descendant. Source26 functional receipts are not substituted for this exact86 source/binary proof. No push, PR, merge or issue closure performed.",
+  "platform_scope": {
+    "linux": "Actual complete CLI, owned fixture SDK tools and real Go-built fixture worker, payload/provenance identity, complete output/filesystem and real negative process controls; real successful return/deadline/SIGINT/SIGTERM descendant cleanup.",
+    "windows": "Native full CLI CI required; source-helper signature-stub type/lint checks only. Initial full Windows CLI cross-check remains honestly failed for missing MinGW, retained in original validation logs; it was not relabeled as a new-source green build.",
+    "macos": "Native full CLI CI required; Darwin source-helper signature-stub type/lint checks only; no real Swift worker/volume/hardware/signing proof."
+  },
+  "worker_ownership": "Historical Go Browse and Swift Operate/Scope remain transitional, not Go-independent source installation. Full invalid-config diagnostics remain Go-owned; #765/#783 stay open. Inherited Doctor report remaining_scope description predates the new explicitly documented source orchestration scope."
+}

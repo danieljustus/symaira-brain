@@ -1,0 +1,2479 @@
+{
+  "candidate_head": "5a57f36e55d4237da50163243667b4850c6a347f",
+  "go_binary_sha256": "0654376cf8fc33c3be0b03bd394b665842d04e6659b3dfd67c0d6786d2f136e2",
+  "rust_binary_sha256": "3a2a0bc07633848c901e9710befb857147703aff50aa9a30fb8ef28bd0e76f2a",
+  "tool_binary_sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a",
+  "observations": [
+    {
+      "case": "config-extra-0",
+      "config": "[MODULES]\nBROWSE = true\n",
+      "go": {
+        "started": 1791058573.7537327,
+        "ended": 1791058573.895952,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain/config.toml": {
+            "type": "file",
+            "mode": 420,
+            "size": 24,
+            "sha256": "8c3c13ba285a81b6162119b88265a475aaa1fd8f581b72c107a6fa9e5f2b179c",
+            "content_base64": "W01PRFVMRVNdCkJST1dTRSA9IHRydWUK"
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain/config.toml": {
+              "type": "file",
+              "mode": 420,
+              "size": 24,
+              "sha256": "8c3c13ba285a81b6162119b88265a475aaa1fd8f581b72c107a6fa9e5f2b179c",
+              "content_base64": "W01PRFVMRVNdCkJST1dTRSA9IHRydWUK"
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791058574.0030544,
+        "ended": 1791058574.1123729,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain/config.toml": {
+            "type": "file",
+            "mode": 420,
+            "size": 24,
+            "sha256": "8c3c13ba285a81b6162119b88265a475aaa1fd8f581b72c107a6fa9e5f2b179c",
+            "content_base64": "W01PRFVMRVNdCkJST1dTRSA9IHRydWUK"
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain/config.toml": {
+              "type": "file",
+              "mode": 420,
+              "size": 24,
+              "sha256": "8c3c13ba285a81b6162119b88265a475aaa1fd8f581b72c107a6fa9e5f2b179c",
+              "content_base64": "W01PRFVMRVNdCkJST1dTRSA9IHRydWUK"
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "mismatched_fields": []
+    },
+    {
+      "case": "config-extra-1",
+      "config": "[modules]\nBrowse = true\n",
+      "go": {
+        "started": 1791058574.221935,
+        "ended": 1791058574.3292255,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain/config.toml": {
+            "type": "file",
+            "mode": 420,
+            "size": 24,
+            "sha256": "229ad8278cfe971df8b865d4f622403656bf0e63d518eb719f77d8133c4aafea",
+            "content_base64": "W21vZHVsZXNdCkJyb3dzZSA9IHRydWUK"
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain/config.toml": {
+              "type": "file",
+              "mode": 420,
+              "size": 24,
+              "sha256": "229ad8278cfe971df8b865d4f622403656bf0e63d518eb719f77d8133c4aafea",
+              "content_base64": "W21vZHVsZXNdCkJyb3dzZSA9IHRydWUK"
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791058574.4360445,
+        "ended": 1791058574.5427344,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain/config.toml": {
+            "type": "file",
+            "mode": 420,
+            "size": 24,
+            "sha256": "229ad8278cfe971df8b865d4f622403656bf0e63d518eb719f77d8133c4aafea",
+            "content_base64": "W21vZHVsZXNdCkJyb3dzZSA9IHRydWUK"
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain/config.toml": {
+              "type": "file",
+              "mode": 420,
+              "size": 24,
+              "sha256": "229ad8278cfe971df8b865d4f622403656bf0e63d518eb719f77d8133c4aafea",
+              "content_base64": "W21vZHVsZXNdCkJyb3dzZSA9IHRydWUK"
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "mismatched_fields": []
+    },
+    {
+      "case": "config-extra-2",
+      "config": "[Modules]\nbrowse = true\n",
+      "go": {
+        "started": 1791058574.6493773,
+        "ended": 1791058574.7552292,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain/config.toml": {
+            "type": "file",
+            "mode": 420,
+            "size": 24,
+            "sha256": "a64ec3d9c3c472658b368328448666a612f176eaddce5608eda1bec7d67f27e8",
+            "content_base64": "W01vZHVsZXNdCmJyb3dzZSA9IHRydWUK"
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain/config.toml": {
+              "type": "file",
+              "mode": 420,
+              "size": 24,
+              "sha256": "a64ec3d9c3c472658b368328448666a612f176eaddce5608eda1bec7d67f27e8",
+              "content_base64": "W01vZHVsZXNdCmJyb3dzZSA9IHRydWUK"
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791058574.8615015,
+        "ended": 1791058574.9669578,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain/config.toml": {
+            "type": "file",
+            "mode": 420,
+            "size": 24,
+            "sha256": "a64ec3d9c3c472658b368328448666a612f176eaddce5608eda1bec7d67f27e8",
+            "content_base64": "W01vZHVsZXNdCmJyb3dzZSA9IHRydWUK"
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain/config.toml": {
+              "type": "file",
+              "mode": 420,
+              "size": 24,
+              "sha256": "a64ec3d9c3c472658b368328448666a612f176eaddce5608eda1bec7d67f27e8",
+              "content_base64": "W01vZHVsZXNdCmJyb3dzZSA9IHRydWUK"
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "mismatched_fields": []
+    },
+    {
+      "case": "config-extra-3",
+      "config": "[modules]\nbrowse = \"true\"\n",
+      "go": {
+        "started": 1791058575.0730321,
+        "ended": 1791058575.1913254,
+        "actual_exit": 0,
+        "raw_stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zb3VyY2U3NjUtY29uZmlnLWNhc2UtdndrZjJicXgvaG9tZS8uc3ltYWlyYS9iaW4iLCJyb290IjoiL3RtcC9zb3VyY2U3NjUtY29uZmlnLWNhc2UtdndrZjJicXgvcmVjZWl2aW5nIHNvdXJjZXMiLCJyZXN1bHRzIjpbeyJtb2R1bGUiOiJicm93c2UiLCJiaW5hcnkiOiJzeW1icm93c2UiLCJ2ZXJzaW9uIjoiMC43NjUuMC1sb2NhbCIsInN0YXR1cyI6Imluc3RhbGxlZCIsInNvdXJjZSI6ImJyYWluLXNvdXJjZSIsInJlY2VpdmVyX2NvbW1pdCI6Ijc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsImJpbmFyeV9zaGEyNTYiOiI4NDJiYWRlMTY5MTYyMDQ0YmM4ZWRlN2FmMWJkMjc1MjMxYjY0OTM4NmQ3OGZmZmZlM2Q4ZTk1YmFmYmFhYjJhIn1dfQo=",
+        "raw_stderr_base64": "",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain/config.toml": {
+            "type": "file",
+            "mode": 420,
+            "size": 26,
+            "sha256": "3c08b5d37b9d716d8c7580bdfd67ad3583dd6462a6cdc9126f0b4e138ed93632",
+            "content_base64": "W21vZHVsZXNdCmJyb3dzZSA9ICJ0cnVlIgo="
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 0,
+          "stdout_base64": "eyJiaW5fZGlyIjoiPHJvb3Q+L2hvbWUvLnN5bWFpcmEvYmluIiwicm9vdCI6Ijxyb290Pi9yZWNlaXZpbmcgc291cmNlcyIsInJlc3VsdHMiOlt7Im1vZHVsZSI6ImJyb3dzZSIsImJpbmFyeSI6InN5bWJyb3dzZSIsInZlcnNpb24iOiIwLjc2NS4wLWxvY2FsIiwic3RhdHVzIjoiaW5zdGFsbGVkIiwic291cmNlIjoiYnJhaW4tc291cmNlIiwicmVjZWl2ZXJfY29tbWl0IjoiNzY1MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2IiwiYmluYXJ5X3NoYTI1NiI6Ijg0MmJhZGUxNjkxNjIwNDRiYzhlZGU3YWYxYmQyNzUyMzFiNjQ5Mzg2ZDc4ZmZmZmUzZDhlOTViYWZiYWFiMmEifV19Cg==",
+          "stderr_base64": "",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain/config.toml": {
+              "type": "file",
+              "mode": 420,
+              "size": 26,
+              "sha256": "3c08b5d37b9d716d8c7580bdfd67ad3583dd6462a6cdc9126f0b4e138ed93632",
+              "content_base64": "W21vZHVsZXNdCmJyb3dzZSA9ICJ0cnVlIgo="
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin/symbrowse": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "home/.symaira/bin/symbrowse.provenance.json": {
+              "type": "file",
+              "mode": 420,
+              "size": 352,
+              "sha256": "352cfe7ea35e241d9e20aebfeb9ac58569845d282a1a93bd86844e10097dbd2d",
+              "content_base64": "ewogICJiaW5hcnkiOiAic3ltYnJvd3NlIiwKICAic291cmNlIjogImJyYWluLXNvdXJjZSIsCiAgInZlcnNpb24iOiAiIiwKICAicmVjZWl2ZXJfY29tbWl0IjogIjc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsCiAgIm1vZHVsZV9kaXIiOiAiYnJvd3NlIiwKICAiYnVpbGRlciI6ICJnbyB2ZXJzaW9uIGdvMS4yNi43IGZpeHR1cmUvZml4dHVyZSIsCiAgImJ1aWx0X2F0IjogIjx2YWxpZGF0ZWQtaW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICI4NDJiYWRlMTY5MTYyMDQ0YmM4ZWRlN2FmMWJkMjc1MjMxYjY0OTM4NmQ3OGZmZmZlM2Q4ZTk1YmFmYmFhYjJhIgp9Cg=="
+            },
+            "invocations.jsonl": {
+              "type": "file",
+              "mode": 420,
+              "size": 342,
+              "sha256": "7f6d3420b228e7404c7d5f6c76d4f8854a585969453b1e07786508a831fb0d16",
+              "content_base64": "eyJhcmdzIjpbIi1DIiwiPHJvb3Q+L3JlY2VpdmluZyBzb3VyY2VzIiwicmV2LXBhcnNlIiwiSEVBRCJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnaXQifQp7ImFyZ3MiOlsidmVyc2lvbiJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnbyJ9CnsiYXJncyI6WyJidWlsZCIsIi10cmltcGF0aCIsIi1vIiwiPHJvb3Q+L3RtcC9zeW1icmFpbi1zb3VyY2UtYnVpbGQtPHVuaXF1ZT4vc3ltYnJvd3NlIiwiLi9jbWQvc3ltYnJvd3NlIl0sImNnbyI6IjAiLCJjd2QiOiI8cm9vdD4vcmVjZWl2aW5nIHNvdXJjZXMvYnJvd3NlIiwidG9vbCI6ImdvIn0K"
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791058575.3361409,
+        "ended": 1791058575.5950644,
+        "actual_exit": 0,
+        "raw_stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zb3VyY2U3NjUtY29uZmlnLWNhc2UtY3FsZmYzaGwvaG9tZS8uc3ltYWlyYS9iaW4iLCJyb290IjoiL3RtcC9zb3VyY2U3NjUtY29uZmlnLWNhc2UtY3FsZmYzaGwvcmVjZWl2aW5nIHNvdXJjZXMiLCJyZXN1bHRzIjpbeyJtb2R1bGUiOiJicm93c2UiLCJiaW5hcnkiOiJzeW1icm93c2UiLCJ2ZXJzaW9uIjoiMC43NjUuMC1sb2NhbCIsInN0YXR1cyI6Imluc3RhbGxlZCIsInNvdXJjZSI6ImJyYWluLXNvdXJjZSIsInJlY2VpdmVyX2NvbW1pdCI6Ijc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsImJpbmFyeV9zaGEyNTYiOiI4NDJiYWRlMTY5MTYyMDQ0YmM4ZWRlN2FmMWJkMjc1MjMxYjY0OTM4NmQ3OGZmZmZlM2Q4ZTk1YmFmYmFhYjJhIn1dfQo=",
+        "raw_stderr_base64": "",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain/config.toml": {
+            "type": "file",
+            "mode": 420,
+            "size": 26,
+            "sha256": "3c08b5d37b9d716d8c7580bdfd67ad3583dd6462a6cdc9126f0b4e138ed93632",
+            "content_base64": "W21vZHVsZXNdCmJyb3dzZSA9ICJ0cnVlIgo="
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 0,
+          "stdout_base64": "eyJiaW5fZGlyIjoiPHJvb3Q+L2hvbWUvLnN5bWFpcmEvYmluIiwicm9vdCI6Ijxyb290Pi9yZWNlaXZpbmcgc291cmNlcyIsInJlc3VsdHMiOlt7Im1vZHVsZSI6ImJyb3dzZSIsImJpbmFyeSI6InN5bWJyb3dzZSIsInZlcnNpb24iOiIwLjc2NS4wLWxvY2FsIiwic3RhdHVzIjoiaW5zdGFsbGVkIiwic291cmNlIjoiYnJhaW4tc291cmNlIiwicmVjZWl2ZXJfY29tbWl0IjoiNzY1MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2IiwiYmluYXJ5X3NoYTI1NiI6Ijg0MmJhZGUxNjkxNjIwNDRiYzhlZGU3YWYxYmQyNzUyMzFiNjQ5Mzg2ZDc4ZmZmZmUzZDhlOTViYWZiYWFiMmEifV19Cg==",
+          "stderr_base64": "",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain/config.toml": {
+              "type": "file",
+              "mode": 420,
+              "size": 26,
+              "sha256": "3c08b5d37b9d716d8c7580bdfd67ad3583dd6462a6cdc9126f0b4e138ed93632",
+              "content_base64": "W21vZHVsZXNdCmJyb3dzZSA9ICJ0cnVlIgo="
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin/symbrowse": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "home/.symaira/bin/symbrowse.provenance.json": {
+              "type": "file",
+              "mode": 420,
+              "size": 352,
+              "sha256": "352cfe7ea35e241d9e20aebfeb9ac58569845d282a1a93bd86844e10097dbd2d",
+              "content_base64": "ewogICJiaW5hcnkiOiAic3ltYnJvd3NlIiwKICAic291cmNlIjogImJyYWluLXNvdXJjZSIsCiAgInZlcnNpb24iOiAiIiwKICAicmVjZWl2ZXJfY29tbWl0IjogIjc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsCiAgIm1vZHVsZV9kaXIiOiAiYnJvd3NlIiwKICAiYnVpbGRlciI6ICJnbyB2ZXJzaW9uIGdvMS4yNi43IGZpeHR1cmUvZml4dHVyZSIsCiAgImJ1aWx0X2F0IjogIjx2YWxpZGF0ZWQtaW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICI4NDJiYWRlMTY5MTYyMDQ0YmM4ZWRlN2FmMWJkMjc1MjMxYjY0OTM4NmQ3OGZmZmZlM2Q4ZTk1YmFmYmFhYjJhIgp9Cg=="
+            },
+            "invocations.jsonl": {
+              "type": "file",
+              "mode": 420,
+              "size": 342,
+              "sha256": "7f6d3420b228e7404c7d5f6c76d4f8854a585969453b1e07786508a831fb0d16",
+              "content_base64": "eyJhcmdzIjpbIi1DIiwiPHJvb3Q+L3JlY2VpdmluZyBzb3VyY2VzIiwicmV2LXBhcnNlIiwiSEVBRCJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnaXQifQp7ImFyZ3MiOlsidmVyc2lvbiJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnbyJ9CnsiYXJncyI6WyJidWlsZCIsIi10cmltcGF0aCIsIi1vIiwiPHJvb3Q+L3RtcC9zeW1icmFpbi1zb3VyY2UtYnVpbGQtPHVuaXF1ZT4vc3ltYnJvd3NlIiwiLi9jbWQvc3ltYnJvd3NlIl0sImNnbyI6IjAiLCJjd2QiOiI8cm9vdD4vcmVjZWl2aW5nIHNvdXJjZXMvYnJvd3NlIiwidG9vbCI6ImdvIn0K"
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "mismatched_fields": []
+    },
+    {
+      "case": "config-extra-4",
+      "config": "[modules]\nbrowse = 0.0\n",
+      "go": {
+        "started": 1791058575.7384307,
+        "ended": 1791058575.8446312,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain/config.toml": {
+            "type": "file",
+            "mode": 420,
+            "size": 23,
+            "sha256": "b416b530e59d1643fe24773243c6109cb7109246ba727516f06f2ceb2ca51fd7",
+            "content_base64": "W21vZHVsZXNdCmJyb3dzZSA9IDAuMAo="
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain/config.toml": {
+              "type": "file",
+              "mode": 420,
+              "size": 23,
+              "sha256": "b416b530e59d1643fe24773243c6109cb7109246ba727516f06f2ceb2ca51fd7",
+              "content_base64": "W21vZHVsZXNdCmJyb3dzZSA9IDAuMAo="
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791058575.9515636,
+        "ended": 1791058576.0575652,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain/config.toml": {
+            "type": "file",
+            "mode": 420,
+            "size": 23,
+            "sha256": "b416b530e59d1643fe24773243c6109cb7109246ba727516f06f2ceb2ca51fd7",
+            "content_base64": "W21vZHVsZXNdCmJyb3dzZSA9IDAuMAo="
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain/config.toml": {
+              "type": "file",
+              "mode": 420,
+              "size": 23,
+              "sha256": "b416b530e59d1643fe24773243c6109cb7109246ba727516f06f2ceb2ca51fd7",
+              "content_base64": "W21vZHVsZXNdCmJyb3dzZSA9IDAuMAo="
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "mismatched_fields": []
+    },
+    {
+      "case": "config-extra-5",
+      "config": "[modules]\nbrowse = \"\"\n",
+      "go": {
+        "started": 1791058576.1648495,
+        "ended": 1791058576.2705872,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain/config.toml": {
+            "type": "file",
+            "mode": 420,
+            "size": 22,
+            "sha256": "0389e21a448a937d10f0ae3dedae5566fe615df26b91764c7662e367e18a7389",
+            "content_base64": "W21vZHVsZXNdCmJyb3dzZSA9ICIiCg=="
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain/config.toml": {
+              "type": "file",
+              "mode": 420,
+              "size": 22,
+              "sha256": "0389e21a448a937d10f0ae3dedae5566fe615df26b91764c7662e367e18a7389",
+              "content_base64": "W21vZHVsZXNdCmJyb3dzZSA9ICIiCg=="
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791058576.3758888,
+        "ended": 1791058576.4812338,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain/config.toml": {
+            "type": "file",
+            "mode": 420,
+            "size": 22,
+            "sha256": "0389e21a448a937d10f0ae3dedae5566fe615df26b91764c7662e367e18a7389",
+            "content_base64": "W21vZHVsZXNdCmJyb3dzZSA9ICIiCg=="
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain/config.toml": {
+              "type": "file",
+              "mode": 420,
+              "size": 22,
+              "sha256": "0389e21a448a937d10f0ae3dedae5566fe615df26b91764c7662e367e18a7389",
+              "content_base64": "W21vZHVsZXNdCmJyb3dzZSA9ICIiCg=="
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "mismatched_fields": []
+    },
+    {
+      "case": "config-extra-6",
+      "config": "[modules]\nBROWSE=true\nbrowse=false\n",
+      "go": {
+        "started": 1791058576.589166,
+        "ended": 1791058576.6969137,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain/config.toml": {
+            "type": "file",
+            "mode": 420,
+            "size": 35,
+            "sha256": "b5ce6363bbbcd15ec872b2ea312d54aeb7eb6bd708757a5c2e048bba1872b3cd",
+            "content_base64": "W21vZHVsZXNdCkJST1dTRT10cnVlCmJyb3dzZT1mYWxzZQo="
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain/config.toml": {
+              "type": "file",
+              "mode": 420,
+              "size": 35,
+              "sha256": "b5ce6363bbbcd15ec872b2ea312d54aeb7eb6bd708757a5c2e048bba1872b3cd",
+              "content_base64": "W21vZHVsZXNdCkJST1dTRT10cnVlCmJyb3dzZT1mYWxzZQo="
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791058576.8050804,
+        "ended": 1791058576.911551,
+        "actual_exit": 2,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config/symbrain/config.toml": {
+            "type": "file",
+            "mode": 420,
+            "size": 35,
+            "sha256": "b5ce6363bbbcd15ec872b2ea312d54aeb7eb6bd708757a5c2e048bba1872b3cd",
+            "content_base64": "W21vZHVsZXNdCkJST1dTRT10cnVlCmJyb3dzZT1mYWxzZQo="
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261534,
+            "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+          }
+        },
+        "contract": {
+          "exit": 2,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogbm8gbW9kdWxlcyBzZWxlY3RlZDogZW5hYmxlIG1vZHVsZXMgaW4gY29uZmlnIChbbW9kdWxlc10gYnJvd3NlL29wZXJhdGUvc2NvcGUpIG9yIHBhc3MgLS1tb2R1bGVzIGJyb3dzZSxvcGVyYXRlLHNjb3BlCg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config/symbrain/config.toml": {
+              "type": "file",
+              "mode": 420,
+              "size": 35,
+              "sha256": "b5ce6363bbbcd15ec872b2ea312d54aeb7eb6bd708757a5c2e048bba1872b3cd",
+              "content_base64": "W21vZHVsZXNdCkJST1dTRT10cnVlCmJyb3dzZT1mYWxzZQo="
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261534,
+              "sha256": "842bade169162044bc8ede7af1bd275231b649386d78ffffe3d8e95bafbaab2a"
+            }
+          }
+        }
+      },
+      "mismatched_fields": []
+    }
+  ]
+}
