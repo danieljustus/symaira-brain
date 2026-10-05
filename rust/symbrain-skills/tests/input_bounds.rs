@@ -200,7 +200,7 @@ fn library_rejections_and_normal_order_are_stable() {
     }
     let (entries, issues) = symbrain_skills::library::list_library(temp.path());
     assert!(issues.is_empty());
-    assert!(entries[0].path.ends_with('a'));
+    assert!(entries[0].path.ends_with("a"));
     let root = temp.path().join("a");
     fs::write(
         root.join("SKILL.md"),

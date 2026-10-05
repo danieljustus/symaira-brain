@@ -1,0 +1,191 @@
+{
+  "source_only": true,
+  "frozen_files_unchanged": true,
+  "files": [
+    {
+      "path": "cmd/symbrain/cmd_skills.go",
+      "sha256": "bd2a49918aa8f6a0929cba201631d8795403f5da6fefafee9c3c2b2b1f02dd1c",
+      "bytes": 17540
+    },
+    {
+      "path": "internal/gateway/server.go",
+      "sha256": "f3c86d0c883c284b0153cac6ec93006ed61071097020350eac8f91341455676a",
+      "bytes": 11398
+    },
+    {
+      "path": "internal/skills/config/capabilities_test.go",
+      "sha256": "16e3a49d4dc1755f126ccbe5daf6c5666601025a47c346e577ede8b5c9aded07",
+      "bytes": 2134
+    },
+    {
+      "path": "internal/skills/config/config.go",
+      "sha256": "020b1def72a7d737d35401cf600cd2a2103ccd5f3c3d954359d1fa6961386423",
+      "bytes": 8459
+    },
+    {
+      "path": "internal/skills/config/config_targets_test.go",
+      "sha256": "fb3ca1c849107990865dc6fa429f33fb6acec30b7c28b7945f96cb246f61dc20",
+      "bytes": 3162
+    },
+    {
+      "path": "internal/skills/config/config_test.go",
+      "sha256": "0b3c2a4f6accba5bc75723899b03ecea559fab377552071c2456096bab102b88",
+      "bytes": 10619
+    },
+    {
+      "path": "internal/skills/config/vcs_test.go",
+      "sha256": "8409effd7d2679cbcfaa0419f5e33cefac13fb33161a1ea0333b1fe85aa74627",
+      "bytes": 399
+    },
+    {
+      "path": "internal/skills/discover/discover.go",
+      "sha256": "7e73c77e7066dd88c0d981abc9625e9a69b1846596d7b2d5f3c7475af6a9b536",
+      "bytes": 6234
+    },
+    {
+      "path": "internal/skills/discover/discover_test.go",
+      "sha256": "a9ba828ae8835a45b7b0c95e04b6a200747fdd8a6f698122ceb6e53c3312524e",
+      "bytes": 3310
+    },
+    {
+      "path": "internal/skills/mcptools/history_test.go",
+      "sha256": "cbfda174742d3c4d14985190b680ba513b1e4993d9a911646496168e8a9d8f13",
+      "bytes": 13657
+    },
+    {
+      "path": "internal/skills/mcptools/mcptools.go",
+      "sha256": "18d79b05da9d4d419713d370ceda80137fdc851ae934e360a1010831e9a3f07f",
+      "bytes": 3750
+    },
+    {
+      "path": "internal/skills/mcptools/mcptools_context.go",
+      "sha256": "1fd1dfc93f0b8391fc4e637adf6c6809939e0ef114abf175c2bec3844d886d7e",
+      "bytes": 3746
+    },
+    {
+      "path": "internal/skills/mcptools/mcptools_errorpath_test.go",
+      "sha256": "dedbb37a64bfe0601116d01ac2ba4e6dc31ff109e09ee5a73578c7d13b98b60a",
+      "bytes": 7408
+    },
+    {
+      "path": "internal/skills/mcptools/mcptools_library.go",
+      "sha256": "c0df2ad47bd3a694822df90fe3426903365128a248d1f96a4f1bbecac710ec47",
+      "bytes": 3931
+    },
+    {
+      "path": "internal/skills/mcptools/mcptools_profiles.go",
+      "sha256": "0e54b02475682eb98cfcb7ebc98fcbf64bc55e154f11b06a85c5fb18c98802c9",
+      "bytes": 1970
+    },
+    {
+      "path": "internal/skills/mcptools/mcptools_render.go",
+      "sha256": "17110f4d817ffc71fb04e6a6d945f1e98fcce9a264c31e3f2037691d4285e05b",
+      "bytes": 11393
+    },
+    {
+      "path": "internal/skills/mcptools/mcptools_status.go",
+      "sha256": "7e8813407adad7de3c237fde0ff7eb780e6c61ac781709636b9152bcfe62fe12",
+      "bytes": 1421
+    },
+    {
+      "path": "internal/skills/mcptools/mcptools_test.go",
+      "sha256": "a6094300ef63deb963384d8ff8da4995920242f838eafd8810cd559bd49886c3",
+      "bytes": 49255
+    },
+    {
+      "path": "internal/skills/mcptools/mcptools_versioning.go",
+      "sha256": "dd142660e107d51180be1ae2937f594254b95cf4de0659fc635977041b5b3e4c",
+      "bytes": 11420
+    },
+    {
+      "path": "internal/skills/mcptools/serve_test.go",
+      "sha256": "baf9b82b98d24e4c2cb0b3c8e105e4417e5b79eca24af86539320d348a7c3b70",
+      "bytes": 769
+    },
+    {
+      "path": "internal/skills/metadata/atime_darwin.go",
+      "sha256": "73651c6a7669c84736662bf022a11a9333a693fdd2bb9b6636f40cb8b9a3d6e4",
+      "bytes": 314
+    },
+    {
+      "path": "internal/skills/metadata/atime_linux.go",
+      "sha256": "952eabdef8bd7319b010deb5c71a84e04a464715ec8bb5d0752869a2cebf6df4",
+      "bytes": 303
+    },
+    {
+      "path": "internal/skills/metadata/atime_other.go",
+      "sha256": "67a0794c95856be9d6df06810c823762f48c142fc43c5e101f803a12cc1da649",
+      "bytes": 285
+    },
+    {
+      "path": "internal/skills/metadata/metadata.go",
+      "sha256": "844ec48ed2dcf21fe1ecbbb76ed46d8f4318e76ebde53db838ce96c60e663de9",
+      "bytes": 12620
+    },
+    {
+      "path": "internal/skills/metadata/metadata_test.go",
+      "sha256": "b9f97446ffb4cf2c1f08fee3386e157df9ac914791094867c09b8f895c6b6702",
+      "bytes": 9834
+    },
+    {
+      "path": "internal/skills/profile/profile.go",
+      "sha256": "db029ad9bb598a5edf0a109945fe28774d53189c4bbac2b9274fb5950869d84f",
+      "bytes": 6600
+    },
+    {
+      "path": "internal/skills/profile/profile_test.go",
+      "sha256": "83b46a40e04f7a70a681343ae322813c147e4cb4208bfd254a3d8c437cae2d0b",
+      "bytes": 6269
+    },
+    {
+      "path": "internal/skills/profile/resolve.go",
+      "sha256": "31a7b631123479251d12cfc3e6baa161dafc3593c8a4c2bee450d3d071b349d9",
+      "bytes": 6848
+    },
+    {
+      "path": "internal/skills/profile/resolve_test.go",
+      "sha256": "4ccb95d6861c3631a6bd9d45e2d8cc73d314b37f78dc6629dc53f54a7dbb443d",
+      "bytes": 6148
+    },
+    {
+      "path": "internal/skills/profile/workflow_test.go",
+      "sha256": "b39f5983a76a6f37913435061b1e32240b414aeed4fd81ccea1f9f1e15529838",
+      "bytes": 6199
+    },
+    {
+      "path": "internal/skills/vcs/extract.go",
+      "sha256": "d2e1e1b689f812ed8b52eff1349ceef486e7f8271e1a02b11b0904c38c594328",
+      "bytes": 2901
+    },
+    {
+      "path": "internal/skills/vcs/gitenv_test.go",
+      "sha256": "5cd8e15c7a3b151c27610142ce8dffcfedef5c17727b15e711621562e60a8040",
+      "bytes": 2066
+    },
+    {
+      "path": "internal/skills/vcs/history_test.go",
+      "sha256": "6b291d9354cb64e6cf8beb9d72245ff0e8d21d1f6978e0e209e98fc16e12025c",
+      "bytes": 10920
+    },
+    {
+      "path": "internal/skills/vcs/restore.go",
+      "sha256": "48fab01f80e57d20765465b40538e74b1c66bf9e89ab8b161d51cff7df49741a",
+      "bytes": 1050
+    },
+    {
+      "path": "internal/skills/vcs/vcs.go",
+      "sha256": "ab95e8285ea2fd2ea19102969bfda3c8bd55370774570c9cf58852312314d65f",
+      "bytes": 9974
+    },
+    {
+      "path": "internal/skills/vcs/vcs_errorpath_test.go",
+      "sha256": "3bce084befac57cc016f0c8de6e3dab0c2b15fc41134107e4f3bb70464d4ab47",
+      "bytes": 7235
+    },
+    {
+      "path": "internal/skills/vcs/vcs_test.go",
+      "sha256": "edfa9757a69a98ce88bc590f904db0e9cee8d8c4adada52de450cc4b9cb49c3a",
+      "bytes": 6004
+    }
+  ]
+}

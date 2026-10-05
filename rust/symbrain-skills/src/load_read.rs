@@ -18,17 +18,12 @@ fn open_read_with(
     if nofollow {
         options.follow(FollowSymlinks::No);
     }
-    root.open_with(relative, &options)
-        .map_err(|error| SkillError(format!("read {name}: {}", go_io_error(&error))))
-}
-
-fn go_io_error(error: &std::io::Error) -> String {
-    let message = error.to_string();
-    #[cfg(windows)]
-    if let Some(context) = message.strip_suffix(": no such file or directory") {
-        return format!("{context}: The system cannot find the file specified.");
-    }
-    message
+    root.open_with(relative, &options).map_err(|error| {
+        SkillError(format!(
+            "read {name}: {}",
+            crate::io_contract::path_error("openat", relative, &error)
+        ))
+    })
 }
 
 #[derive(Debug)]
@@ -82,6 +77,17 @@ impl From<InputReadError> for SkillError {
     }
 }
 
+// Metadata-only capability resolution. Linux uses O_PATH/fstat; other Unix
+// backends resolve components then statat the final entry, never opening its
+// body. Only an ordinary confined target permits retaining the ORIGINAL
+// failed nofollow PathError. This probe never turns the control read into success.
+fn verified_control_link(root: &Dir, relative: &Path) -> bool {
+    cfg!(unix)
+        && root
+            .metadata(relative)
+            .is_ok_and(|metadata| metadata.is_file())
+}
+
 fn read_control(root: &Dir, name: &str, budget: &mut ReadBudget) -> Result<Vec<u8>, SkillError> {
     let symlink = root
         .symlink_metadata(name)
@@ -94,10 +100,13 @@ fn read_control(root: &Dir, name: &str, budget: &mut ReadBudget) -> Result<Vec<u
         None,
         Some(budget),
         None,
-        false,
+        cfg!(unix),
     )
     .map_err(|error| {
-        if symlink && matches!(error, InputReadError::Read(_)) {
+        if symlink
+            && matches!(error, InputReadError::Read(_))
+            && !verified_control_link(root, Path::new(name))
+        {
             SkillError(format!(
                 "{name} escapes skill root or is not a regular file"
             ))
@@ -124,10 +133,13 @@ pub(crate) fn read_skill_document(
         None,
         budget,
         Some(crate::model::MAX_FRONTMATTER_SIZE),
-        false,
+        cfg!(unix),
     )
     .map_err(|error| {
-        if symlink && matches!(error, InputReadError::Read(_)) {
+        if symlink
+            && matches!(error, InputReadError::Read(_))
+            && !verified_control_link(root, relative)
+        {
             InputReadError::Rejected(SkillError(format!(
                 "{name} escapes skill root or is not a regular file"
             )))
@@ -162,6 +174,23 @@ fn read_limited_expected(
         limit,
         Some(expected_size),
         budget,
+        None,
+        false,
+    )
+    .map_err(Into::into)
+}
+
+// Discovery hashes raw control bytes even when the loader refuses its final
+// Unix symlink. Follow only inside this retained capability, through the same
+// bounded regular-file reader; never add an ambient read to obtain identity.
+pub(crate) fn read_discovery_identity(root: &Dir) -> Result<Vec<u8>, SkillError> {
+    read_limited_inner(
+        root,
+        Path::new("SKILL.md"),
+        "discovered skill",
+        MAX_INPUT_SIZE,
+        None,
+        None,
         None,
         false,
     )

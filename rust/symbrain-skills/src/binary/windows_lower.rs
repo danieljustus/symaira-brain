@@ -1,0 +1,237 @@
+// Copyright 2009 The Go Authors.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met:
+//
+//    * Redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer.
+//    * Redistributions in binary form must reproduce the above
+// copyright notice, this list of conditions and the following disclaimer
+// in the documentation and/or other materials provided with the
+// distribution.
+//    * Neither the name of Google LLC nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+//! Pinned Go1.26.7 Unicode15 simple lower-case data, ONLY for PATHEXT.
+//! Generated from unicode/tables.go CaseRanges lower-case column. Keep the
+//! SDK/source SHA receipt; Rust full Unicode case expansions are different.
+pub(super) fn lower(value: char) -> char {
+    let code = value as u32;
+    let index = LOWER.partition_point(|(low, _, _)| *low <= code);
+    if index == 0 {
+        return value;
+    }
+    let (low, high, delta) = LOWER[index - 1];
+    if code > high {
+        return value;
+    }
+    let mapped = if delta == 0x110000 {
+        low + ((code - low) | 1)
+    } else {
+        (i64::from(code) + i64::from(delta)) as u32
+    };
+    char::from_u32(mapped).unwrap_or(value)
+}
+const LOWER: &[(u32, u32, i32)] = &[
+    (0x41, 0x5A, 32),
+    (0xC0, 0xD6, 32),
+    (0xD8, 0xDE, 32),
+    (0x100, 0x12F, 1114112),
+    (0x130, 0x130, -199),
+    (0x132, 0x137, 1114112),
+    (0x139, 0x148, 1114112),
+    (0x14A, 0x177, 1114112),
+    (0x178, 0x178, -121),
+    (0x179, 0x17E, 1114112),
+    (0x181, 0x181, 210),
+    (0x182, 0x185, 1114112),
+    (0x186, 0x186, 206),
+    (0x187, 0x188, 1114112),
+    (0x189, 0x18A, 205),
+    (0x18B, 0x18C, 1114112),
+    (0x18E, 0x18E, 79),
+    (0x18F, 0x18F, 202),
+    (0x190, 0x190, 203),
+    (0x191, 0x192, 1114112),
+    (0x193, 0x193, 205),
+    (0x194, 0x194, 207),
+    (0x196, 0x196, 211),
+    (0x197, 0x197, 209),
+    (0x198, 0x199, 1114112),
+    (0x19C, 0x19C, 211),
+    (0x19D, 0x19D, 213),
+    (0x19F, 0x19F, 214),
+    (0x1A0, 0x1A5, 1114112),
+    (0x1A6, 0x1A6, 218),
+    (0x1A7, 0x1A8, 1114112),
+    (0x1A9, 0x1A9, 218),
+    (0x1AC, 0x1AD, 1114112),
+    (0x1AE, 0x1AE, 218),
+    (0x1AF, 0x1B0, 1114112),
+    (0x1B1, 0x1B2, 217),
+    (0x1B3, 0x1B6, 1114112),
+    (0x1B7, 0x1B7, 219),
+    (0x1B8, 0x1B9, 1114112),
+    (0x1BC, 0x1BD, 1114112),
+    (0x1C4, 0x1C4, 2),
+    (0x1C5, 0x1C5, 1),
+    (0x1C7, 0x1C7, 2),
+    (0x1C8, 0x1C8, 1),
+    (0x1CA, 0x1CA, 2),
+    (0x1CB, 0x1CB, 1),
+    (0x1CD, 0x1DC, 1114112),
+    (0x1DE, 0x1EF, 1114112),
+    (0x1F1, 0x1F1, 2),
+    (0x1F2, 0x1F2, 1),
+    (0x1F4, 0x1F5, 1114112),
+    (0x1F6, 0x1F6, -97),
+    (0x1F7, 0x1F7, -56),
+    (0x1F8, 0x21F, 1114112),
+    (0x220, 0x220, -130),
+    (0x222, 0x233, 1114112),
+    (0x23A, 0x23A, 10795),
+    (0x23B, 0x23C, 1114112),
+    (0x23D, 0x23D, -163),
+    (0x23E, 0x23E, 10792),
+    (0x241, 0x242, 1114112),
+    (0x243, 0x243, -195),
+    (0x244, 0x244, 69),
+    (0x245, 0x245, 71),
+    (0x246, 0x24F, 1114112),
+    (0x370, 0x373, 1114112),
+    (0x376, 0x377, 1114112),
+    (0x37F, 0x37F, 116),
+    (0x386, 0x386, 38),
+    (0x388, 0x38A, 37),
+    (0x38C, 0x38C, 64),
+    (0x38E, 0x38F, 63),
+    (0x391, 0x3A1, 32),
+    (0x3A3, 0x3AB, 32),
+    (0x3CF, 0x3CF, 8),
+    (0x3D8, 0x3EF, 1114112),
+    (0x3F4, 0x3F4, -60),
+    (0x3F7, 0x3F8, 1114112),
+    (0x3F9, 0x3F9, -7),
+    (0x3FA, 0x3FB, 1114112),
+    (0x3FD, 0x3FF, -130),
+    (0x400, 0x40F, 80),
+    (0x410, 0x42F, 32),
+    (0x460, 0x481, 1114112),
+    (0x48A, 0x4BF, 1114112),
+    (0x4C0, 0x4C0, 15),
+    (0x4C1, 0x4CE, 1114112),
+    (0x4D0, 0x52F, 1114112),
+    (0x531, 0x556, 48),
+    (0x10A0, 0x10C5, 7264),
+    (0x10C7, 0x10C7, 7264),
+    (0x10CD, 0x10CD, 7264),
+    (0x13A0, 0x13EF, 38864),
+    (0x13F0, 0x13F5, 8),
+    (0x1C90, 0x1CBA, -3008),
+    (0x1CBD, 0x1CBF, -3008),
+    (0x1E00, 0x1E95, 1114112),
+    (0x1E9E, 0x1E9E, -7615),
+    (0x1EA0, 0x1EFF, 1114112),
+    (0x1F08, 0x1F0F, -8),
+    (0x1F18, 0x1F1D, -8),
+    (0x1F28, 0x1F2F, -8),
+    (0x1F38, 0x1F3F, -8),
+    (0x1F48, 0x1F4D, -8),
+    (0x1F59, 0x1F59, -8),
+    (0x1F5B, 0x1F5B, -8),
+    (0x1F5D, 0x1F5D, -8),
+    (0x1F5F, 0x1F5F, -8),
+    (0x1F68, 0x1F6F, -8),
+    (0x1F88, 0x1F8F, -8),
+    (0x1F98, 0x1F9F, -8),
+    (0x1FA8, 0x1FAF, -8),
+    (0x1FB8, 0x1FB9, -8),
+    (0x1FBA, 0x1FBB, -74),
+    (0x1FBC, 0x1FBC, -9),
+    (0x1FC8, 0x1FCB, -86),
+    (0x1FCC, 0x1FCC, -9),
+    (0x1FD8, 0x1FD9, -8),
+    (0x1FDA, 0x1FDB, -100),
+    (0x1FE8, 0x1FE9, -8),
+    (0x1FEA, 0x1FEB, -112),
+    (0x1FEC, 0x1FEC, -7),
+    (0x1FF8, 0x1FF9, -128),
+    (0x1FFA, 0x1FFB, -126),
+    (0x1FFC, 0x1FFC, -9),
+    (0x2126, 0x2126, -7517),
+    (0x212A, 0x212A, -8383),
+    (0x212B, 0x212B, -8262),
+    (0x2132, 0x2132, 28),
+    (0x2160, 0x216F, 16),
+    (0x2183, 0x2184, 1114112),
+    (0x24B6, 0x24CF, 26),
+    (0x2C00, 0x2C2F, 48),
+    (0x2C60, 0x2C61, 1114112),
+    (0x2C62, 0x2C62, -10743),
+    (0x2C63, 0x2C63, -3814),
+    (0x2C64, 0x2C64, -10727),
+    (0x2C67, 0x2C6C, 1114112),
+    (0x2C6D, 0x2C6D, -10780),
+    (0x2C6E, 0x2C6E, -10749),
+    (0x2C6F, 0x2C6F, -10783),
+    (0x2C70, 0x2C70, -10782),
+    (0x2C72, 0x2C73, 1114112),
+    (0x2C75, 0x2C76, 1114112),
+    (0x2C7E, 0x2C7F, -10815),
+    (0x2C80, 0x2CE3, 1114112),
+    (0x2CEB, 0x2CEE, 1114112),
+    (0x2CF2, 0x2CF3, 1114112),
+    (0xA640, 0xA66D, 1114112),
+    (0xA680, 0xA69B, 1114112),
+    (0xA722, 0xA72F, 1114112),
+    (0xA732, 0xA76F, 1114112),
+    (0xA779, 0xA77C, 1114112),
+    (0xA77D, 0xA77D, -35332),
+    (0xA77E, 0xA787, 1114112),
+    (0xA78B, 0xA78C, 1114112),
+    (0xA78D, 0xA78D, -42280),
+    (0xA790, 0xA793, 1114112),
+    (0xA796, 0xA7A9, 1114112),
+    (0xA7AA, 0xA7AA, -42308),
+    (0xA7AB, 0xA7AB, -42319),
+    (0xA7AC, 0xA7AC, -42315),
+    (0xA7AD, 0xA7AD, -42305),
+    (0xA7AE, 0xA7AE, -42308),
+    (0xA7B0, 0xA7B0, -42258),
+    (0xA7B1, 0xA7B1, -42282),
+    (0xA7B2, 0xA7B2, -42261),
+    (0xA7B3, 0xA7B3, 928),
+    (0xA7B4, 0xA7C3, 1114112),
+    (0xA7C4, 0xA7C4, -48),
+    (0xA7C5, 0xA7C5, -42307),
+    (0xA7C6, 0xA7C6, -35384),
+    (0xA7C7, 0xA7CA, 1114112),
+    (0xA7D0, 0xA7D1, 1114112),
+    (0xA7D6, 0xA7D9, 1114112),
+    (0xA7F5, 0xA7F6, 1114112),
+    (0xFF21, 0xFF3A, 32),
+    (0x10400, 0x10427, 40),
+    (0x104B0, 0x104D3, 40),
+    (0x10570, 0x1057A, 39),
+    (0x1057C, 0x1058A, 39),
+    (0x1058C, 0x10592, 39),
+    (0x10594, 0x10595, 39),
+    (0x10C80, 0x10CB2, 64),
+    (0x118A0, 0x118BF, 32),
+    (0x16E40, 0x16E5F, 32),
+    (0x1E900, 0x1E921, 34),
+];

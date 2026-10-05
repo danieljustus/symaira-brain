@@ -91,10 +91,26 @@ impl<R: BufRead> Decoder<R> {
         let Some(first) = self.read_non_empty_line()? else {
             return Ok(None);
         };
-        if first.starts_with('{') || !first.contains(':') {
-            return parse_request(first.as_bytes(), Mode::Line).map(Some);
+        let trimmed = std::str::from_utf8(&first).map_or_else(
+            |_| crate::raw_skills::trim_go_space(&first),
+            |text| text.trim().as_bytes(),
+        );
+        if trimmed.starts_with(b"{") || !trimmed.contains(&b':') {
+            if let Some(request) = crate::raw_skills::transport_request(trimmed) {
+                return request
+                    .map(|request| Some((request, Mode::Line)))
+                    .map_err(|message| FrameError::Parse {
+                        mode: Mode::Line,
+                        message,
+                    });
+            }
+            // Other line owners retain the original whole-line UTF-8 error,
+            // including its byte offset before whitespace trimming.
+            let line = decode_header(first)?;
+            return parse_request(line.trim().as_bytes(), Mode::Line).map(Some);
         }
 
+        let first = decode_header(first)?.trim().to_owned();
         let mut content_length = parse_content_length_header(&first)?;
         let mut header_bytes = first.len();
         let mut header_lines = 1;
@@ -116,6 +132,7 @@ impl<R: BufRead> Decoder<R> {
             if header_lines > MAX_HEADER_LINES {
                 return Err(FrameError::TooManyHeaders);
             }
+            let line = decode_header(line)?;
             let line = line.trim_end_matches(['\r', '\n']);
             if line.is_empty() {
                 break;
@@ -142,19 +159,22 @@ impl<R: BufRead> Decoder<R> {
         parse_request(&body, Mode::Framed).map(Some)
     }
 
-    fn read_non_empty_line(&mut self) -> Result<Option<String>, FrameError> {
+    fn read_non_empty_line(&mut self) -> Result<Option<Vec<u8>>, FrameError> {
         loop {
             let Some(line) = self.read_line_limited()? else {
                 return Ok(None);
             };
-            let trimmed = line.trim().to_string();
+            let trimmed = std::str::from_utf8(&line).map_or_else(
+                |_| line.trim_ascii().to_vec(),
+                |text| text.trim().as_bytes().to_vec(),
+            );
             if !trimmed.is_empty() {
-                return Ok(Some(trimmed));
+                return Ok(Some(line));
             }
         }
     }
 
-    fn read_line_limited(&mut self) -> Result<Option<String>, FrameError> {
+    fn read_line_limited(&mut self) -> Result<Option<Vec<u8>>, FrameError> {
         let mut bytes = Vec::new();
         let read = self
             .reader
@@ -167,13 +187,15 @@ impl<R: BufRead> Decoder<R> {
         if bytes.len() > MAX_MESSAGE_BYTES {
             return Err(FrameError::LineTooLong);
         }
-        String::from_utf8(bytes)
-            .map(Some)
-            .map_err(|error| FrameError::Parse {
-                mode: Mode::Line,
-                message: error.to_string(),
-            })
+        Ok(Some(bytes))
     }
+}
+
+fn decode_header(bytes: Vec<u8>) -> Result<String, FrameError> {
+    String::from_utf8(bytes).map_err(|error| FrameError::Parse {
+        mode: Mode::Line,
+        message: error.to_string(),
+    })
 }
 
 fn parse_content_length_header(line: &str) -> Result<Option<i64>, FrameError> {
@@ -188,6 +210,14 @@ fn parse_content_length_header(line: &str) -> Result<Option<i64>, FrameError> {
 }
 
 fn parse_request(bytes: &[u8], mode: Mode) -> Result<(Request, Mode), FrameError> {
+    // RawMessage arguments must reach the Skills decoder before Value rejects
+    // ignored large numbers or lone surrogates. Every other route keeps the
+    // original recursive Value validation below, including its error mapping.
+    if let Some(request) = crate::raw_skills::transport_request(bytes) {
+        return request
+            .map(|request| (request, mode))
+            .map_err(|message| FrameError::Parse { mode, message });
+    }
     let value: serde_json::Value =
         serde_json::from_slice(bytes).map_err(|error| FrameError::Parse {
             mode,
@@ -258,6 +288,42 @@ mod tests {
             body.len()
         )));
         assert_eq!(framed.read_request().unwrap().unwrap().1, Mode::Framed);
+    }
+
+    #[test]
+    fn raw_skills_are_admitted_in_both_transports_without_widening_other_routes() {
+        for arguments in [
+            r#"{"name":"\ud800"}"#,
+            r#"{"ignored":1e9999}"#,
+            r#"{"\ud800":1e9999}"#,
+        ] {
+            let body = format!(
+                r#"{{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{{"name":"skills_history","arguments":{arguments}}}}}"#
+            );
+            for mode in [Mode::Line, Mode::Framed] {
+                let incoming = if mode == Mode::Line {
+                    format!("{body}\n")
+                } else {
+                    format!("Content-Length: {}\r\n\r\n{body}", body.len())
+                };
+                let request = Decoder::new(Cursor::new(incoming))
+                    .read_request()
+                    .unwrap()
+                    .unwrap();
+                assert_eq!(request.1, mode);
+                assert!(request.0.params.unwrap().get().contains(arguments));
+            }
+            let ordinary = body.replace("skills_history", "memory_get");
+            assert!(matches!(
+                parse_request(ordinary.as_bytes(), Mode::Line),
+                Err(FrameError::Parse { .. })
+            ));
+        }
+        let malformed = br#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"skills_list","arguments":{}}"#;
+        assert!(matches!(
+            parse_request(malformed, Mode::Line),
+            Err(FrameError::Parse { .. })
+        ));
     }
 
     #[test]

@@ -1,0 +1,10 @@
+Initial source-check preparation (no candidate/product/SDK run):
+Traceback (most recent call last):
+  File "<stdin>", line 33, in <module>
+AssertionError
+
+Cause: journal ordering inspected every function in run.py and included the
+actual_control helper definition's baseline matched() call, before main's pair
+append in file order. The corrected check restricts its AST walk to main;
+it retains every comparator behavior and assertion. This is an author source
+validation-tool error, not a candidate process observation or false parity pass.

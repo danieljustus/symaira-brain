@@ -372,3 +372,7 @@ include!("load_helpers.rs");
 #[cfg(test)]
 #[path = "load_tests.rs"]
 mod tests;
+
+#[cfg(all(test, unix))]
+#[path = "load_control_tests.rs"]
+mod control_tests;

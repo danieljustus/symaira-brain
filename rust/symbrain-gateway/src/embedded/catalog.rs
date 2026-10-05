@@ -1,3 +1,5 @@
+#[path = "skills_catalog.rs"]
+mod skills_catalog;
 use crate::Gateway;
 use crate::response::{ListedTool, ToolAnnotations};
 use symbrain_policy::Profile;
@@ -17,14 +19,7 @@ pub(crate) const MEMORY_TOOLS: &[&str] = &[
     "query_log",
 ];
 pub(crate) const ACTIVITY_TOOLS: &[&str] = &["activity_get", "activity_search", "activity_status"];
-pub(crate) const SKILLS_TOOLS: &[&str] = &[
-    "skills_list",
-    "skills_inspect",
-    "skills_validate",
-    "skills_render_plan",
-    "skills_install",
-    "skills_targets_status",
-];
+pub(crate) use symbrain_mcp::SKILLS_TOOL_NAMES as SKILLS_TOOLS;
 
 fn schema(name: &str) -> Box<serde_json::value::RawValue> {
     let text = match name {
@@ -75,6 +70,9 @@ fn schema(name: &str) -> Box<serde_json::value::RawValue> {
 }
 
 fn listed(name: &str) -> ListedTool {
+    if SKILLS_TOOLS.contains(&name) {
+        return skills_catalog::listed(name);
+    }
     let read = !matches!(
         name,
         "memory_set"

@@ -219,3 +219,11 @@ fn remove_file_at(path: &Path) -> Result<(), SkillError> {
         Err(error) => Err(SkillError(format!("remove tombstone: {error}"))),
     }
 }
+
+pub(crate) fn base_project(options: &InstallOptions) -> Option<&Path> {
+    if options.legacy_project_base {
+        None
+    } else {
+        options.project_dir.as_deref()
+    }
+}

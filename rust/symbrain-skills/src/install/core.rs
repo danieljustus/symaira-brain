@@ -21,12 +21,18 @@ use crate::model::{Bundle, SkillError, validate_skill_name};
 use crate::render::Rendered;
 
 /// Options for installing a rendered skill at any registered target and scope.
+// These independent flags retain the public installer and Go adapter inputs.
+#[allow(clippy::struct_excessive_bools)]
 #[derive(Debug, Clone, Default)]
 pub struct InstallOptions {
     /// User home used to resolve global harness skill roots.
     pub home_dir: PathBuf,
     /// Project root used for project-scope installs.
     pub project_dir: Option<PathBuf>,
+    /// Retain the historical project base without identity when an adapter's
+    /// Go Options omitted ProjectDir and only the destination defaults to cwd.
+    /// Other callers keep project identities; this never alters their defaults.
+    pub legacy_project_base: bool,
     /// Optional replacement for the default base snapshot root.
     pub base_dir: Option<PathBuf>,
     /// Render root the installed symlink must point into.
@@ -62,6 +68,7 @@ pub struct InstallResult {
     /// Installed skill name.
     pub name: String,
     /// Absolute destination path.
+    #[serde(serialize_with = "crate::text::serialize_path")]
     pub path: PathBuf,
     /// `copy` or `symlink`.
     pub mode: String,
@@ -69,6 +76,7 @@ pub struct InstallResult {
     pub mode_changes: Vec<ModeChange>,
     /// Backup created when force adopts an unmanaged directory.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(serialize_with = "crate::text::serialize_optional_path")]
     pub backup_path: Option<PathBuf>,
 }
 

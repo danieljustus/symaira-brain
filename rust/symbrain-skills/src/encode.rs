@@ -42,7 +42,7 @@ fn metadata_is_empty(value: &Value) -> bool {
 
 pub(crate) fn encode_skill_md(
     frontmatter: &Frontmatter,
-    body: &str,
+    body: &[u8],
 ) -> Result<Vec<u8>, SkillError> {
     let output = FrontmatterOutput {
         name: &frontmatter.name,
@@ -82,5 +82,7 @@ pub(crate) fn encode_skill_md(
         })
         .collect::<Vec<_>>()
         .join("\n");
-    Ok(format!("---\n{yaml}\n---\n\n{body}").into_bytes())
+    let mut bytes = format!("---\n{yaml}\n---\n\n").into_bytes();
+    bytes.extend_from_slice(body);
+    Ok(bytes)
 }

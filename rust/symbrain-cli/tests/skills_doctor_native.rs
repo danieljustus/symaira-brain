@@ -1,4 +1,4 @@
-//! Native `symbrain skills doctor` default contract and fallback boundary.
+//! Native `symbrain skills doctor` default and configured native contracts.
 
 #![cfg(unix)]
 #![deny(unsafe_code)]
@@ -53,10 +53,10 @@ fn fallback(root: &TempDir) -> PathBuf {
     path
 }
 
-fn assert_fake_fallback(output: &Output) {
-    assert_eq!(output.status.code(), Some(23));
-    assert_eq!(output.stdout, b"fallback-stdout\n");
-    assert_eq!(output.stderr, b"fallback-stderr\n");
+fn assert_native(output: &Output) {
+    assert!(output.status.success(), "{:?}", output.stderr);
+    assert!(!output.stdout.is_empty());
+    assert!(output.stderr.is_empty());
 }
 
 #[test]
@@ -103,7 +103,7 @@ fn default_doctor_matches_go_schema_and_formats() {
 }
 
 #[test]
-fn doctor_flags_and_dynamic_inputs_fallback_before_stdout() {
+fn doctor_flags_and_dynamic_inputs_are_native() {
     for (name, args, env_name) in [
         (
             "target flag",
@@ -127,12 +127,12 @@ fn doctor_flags_and_dynamic_inputs_fallback_before_stdout() {
         if let Some(env_name) = env_name {
             command.env(env_name, "/different/library");
         }
-        assert_fake_fallback(&command.output().unwrap());
+        assert_native(&command.output().unwrap());
     }
 }
 
 #[test]
-fn global_config_falls_back_before_stdout() {
+fn global_config_is_native() {
     let root = TempDir::new().unwrap();
     let config = root.path().join("config/symskills");
     fs::create_dir_all(&config).unwrap();
@@ -142,5 +142,5 @@ fn global_config_falls_back_before_stdout() {
         .env("SYMBRAIN_GO_BINARY", fallback(&root))
         .output()
         .unwrap();
-    assert_fake_fallback(&output);
+    assert_native(&output);
 }

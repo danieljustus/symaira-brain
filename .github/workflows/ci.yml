@@ -694,6 +694,19 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Native skills render drift and frozen Go baseline
+        shell: bash
+        run: scripts/skills-render-drift/run.sh "$RUNNER_TEMP/skills-render-drift.json"
+
+      - name: Upload native skills render drift evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: skills-render-drift-${{ runner.os }}
+          path: ${{ runner.temp }}/skills-render-drift.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Go/Rust native setup repair process parity
         shell: bash
         run: scripts/setup-repair-oracle/run.sh "$RUNNER_TEMP/setup-repair-parity.json"

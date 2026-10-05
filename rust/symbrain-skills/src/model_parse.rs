@@ -6,12 +6,12 @@ use super::{
     BTreeMap, Frontmatter, Manifest, ParsedSkill, SkillError, TargetConfig, normalize_category,
 };
 
-/// Parses a UTF-8 SKILL.md, normalizing CRLF as the Go implementation does.
+/// Parses SKILL.md frontmatter text and byte-owned Markdown, normalizing CRLF as the Go implementation does.
 /// The returned body retains all content and trailing bytes after the closing fence.
 ///
 /// # Errors
 ///
-/// Returns an error when the bytes are not UTF-8 or the frontmatter is malformed.
+/// Returns an error when the header is not UTF-8 or the frontmatter is malformed.
 pub fn parse_skill_md(raw: &[u8]) -> Result<ParsedSkill, SkillError> {
     if raw.len() as u64 > crate::model::MAX_INPUT_SIZE {
         return Err(SkillError(format!(
@@ -20,42 +20,47 @@ pub fn parse_skill_md(raw: &[u8]) -> Result<ParsedSkill, SkillError> {
         )));
     }
     frontmatter_scan(raw)?;
-    let raw_text = std::str::from_utf8(raw)
-        .map_err(|error| SkillError(format!("parse SKILL.md as UTF-8: {error}")))?;
-    let mut text = String::with_capacity(raw_text.len());
-    let mut characters = raw_text.chars().peekable();
-    while let Some(character) = characters.next() {
-        if character == '\r' && characters.peek() == Some(&'\n') {
-            continue;
+    // Go normalizes CRLF as bytes and sends only the YAML header to a text
+    // decoder. The Markdown body retains every remaining byte.
+    let mut text = Vec::with_capacity(raw.len());
+    let mut index = 0;
+    while index < raw.len() {
+        if raw[index] == b'\r' && raw.get(index + 1) == Some(&b'\n') {
+            index += 1;
         }
-        text.push(character);
+        text.push(raw[index]);
+        index += 1;
     }
-    if !text.starts_with("---\n") {
+    if !text.starts_with(b"---\n") {
         return Err(SkillError(
             "SKILL.md must start with YAML frontmatter".into(),
         ));
     }
-    let rest = &text[4..];
-    let end = rest
-        .find("\n---")
+    let end = text[4..]
+        .windows(4)
+        .position(|bytes| bytes == b"\n---")
         .ok_or_else(|| SkillError("SKILL.md frontmatter is not closed".into()))?;
-    let header = &rest[..end];
+    let header = std::str::from_utf8(&text[4..4 + end])
+        .map_err(|error| SkillError(format!("parse SKILL.md frontmatter as UTF-8: {error}")))?;
     if header.len() > crate::model::MAX_FRONTMATTER_SIZE {
-        return Err(SkillError(format!(
-            "SKILL.md frontmatter exceeds maximum size of {} bytes",
-            crate::model::MAX_FRONTMATTER_SIZE
-        )));
+        return Err(frontmatter_size_error());
     }
     let mut body_start = 4 + end + 4;
-    while text.as_bytes().get(body_start) == Some(&b'\n') {
+    while text.get(body_start) == Some(&b'\n') {
         body_start += 1;
     }
+
     let frontmatter = parse_frontmatter(header)?;
-    let body_line_offset = text[..body_start].matches('\n').count();
-    text.drain(..body_start);
+    // Bounded byte scan keeps newline identity without a new dependency.
+    #[allow(clippy::naive_bytecount)]
+    let body_line_offset = text[..body_start]
+        .iter()
+        .filter(|byte| **byte == b'\n')
+        .count();
+    let body = crate::GoText::from_bytes(&text[body_start..]);
     Ok(ParsedSkill {
         frontmatter,
-        body: text,
+        body,
         body_line_offset,
     })
 }

@@ -14,6 +14,33 @@ impl Gateway {
         context: DispatchContext<'_>,
     ) -> Result<GatewayResponse, GatewayError> {
         let started = Instant::now();
+        if let Some(call) = symbrain_mcp::raw_skills_params(params) {
+            let (name, raw_arguments) = match call {
+                Ok(call) => call,
+                Err(message) => return Ok(self.invalid_call(id, started, message)),
+            };
+            if self.skills_tool_names.iter().any(|tool| tool == &name) {
+                // The transport already checked envelope syntax and limits.
+                // Retain RawMessage structure through the Skills owner/audit;
+                // transport repaired invalid string bytes per Go decoding,
+                // but an intermediate Value would change numeric admission.
+                let fields = serde_json::Map::new();
+                return self.handle_embedded_call(
+                    id,
+                    &name,
+                    &fields,
+                    raw_arguments.as_deref(),
+                    context,
+                    started,
+                );
+            }
+            return self.handle_routed_call(id, &name, raw_arguments.as_deref(), context, started);
+        }
+        let raw_arguments = params.and_then(|raw| {
+            serde_json::from_str::<std::collections::BTreeMap<String, Box<RawValue>>>(raw.get())
+                .ok()
+                .and_then(|mut fields| fields.remove("arguments"))
+        });
         let params = match decode_params(params) {
             Ok(params) => params,
             Err(message) => return Ok(self.invalid_call(id, started, message)),
@@ -34,7 +61,14 @@ impl Gateway {
             || self.activity_tool_names.iter().any(|tool| tool == name)
             || self.skills_tool_names.iter().any(|tool| tool == name)
         {
-            return self.handle_embedded_call(id, name, &params, context, started);
+            return self.handle_embedded_call(
+                id,
+                name,
+                &params,
+                raw_arguments.as_deref(),
+                context,
+                started,
+            );
         }
         self.handle_routed_call(id, name, arguments.as_deref(), context, started)
     }
@@ -128,14 +162,20 @@ impl Gateway {
         id: Value,
         name: &str,
         params: &serde_json::Map<String, Value>,
+        raw_arguments: Option<&RawValue>,
         context: DispatchContext<'_>,
         started: Instant,
     ) -> Result<GatewayResponse, GatewayError> {
-        let response =
-            match self.handle_embedded(id.clone(), name, params.get("arguments"), context) {
-                Ok(response) => response,
-                Err(error) => GatewayResponse::success(id, tool_result(error.to_string(), true))?,
-            };
+        let response = match self.handle_embedded(
+            id.clone(),
+            name,
+            params.get("arguments"),
+            raw_arguments,
+            context,
+        ) {
+            Ok(response) => response,
+            Err(error) => GatewayResponse::success(id, tool_result(error.to_string(), true))?,
+        };
         let failed = response.error.is_some()
             || response
                 .result
@@ -148,9 +188,18 @@ impl Gateway {
             category: "tool".to_string(),
             retryable: false,
         };
-        let audit_args = params
-            .get("arguments")
-            .map_or_else(Vec::new, |value| value.to_string().into_bytes());
+        let audit_args = if symbrain_mcp::SKILLS_TOOL_NAMES.contains(&name) {
+            // Go's audit map decoder repairs strings independently of the
+            // handler. Repair only string tokens; its shared numeric/overflow
+            // and recursive redaction policy still owns audit admission.
+            raw_arguments.map_or_else(Vec::new, |raw| {
+                symbrain_skills::wire::repair_argument_strings(raw.get().as_bytes()).into_bytes()
+            })
+        } else {
+            params
+                .get("arguments")
+                .map_or_else(Vec::new, |value| value.to_string().into_bytes())
+        };
         self.audit_write(
             &server,
             &tool,

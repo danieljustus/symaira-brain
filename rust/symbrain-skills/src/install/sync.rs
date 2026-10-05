@@ -151,6 +151,7 @@ pub struct SyncResult {
     /// Skill name.
     pub name: String,
     /// Installed path.
+    #[serde(serialize_with = "crate::text::serialize_path")]
     pub path: PathBuf,
     /// `planned`, `installed`, `skipped`, or `failed`.
     pub action: String,
@@ -194,8 +195,25 @@ pub fn sync(options: &SyncOptions) -> Result<Vec<SyncResult>, SkillError> {
         },
         &loader,
     )?;
+    sync_selected(options, &statuses)
+}
+
+/// Synchronizes the already selected, read-only status rows without rescanning.
+/// This preserves callers' selection and stop order (notably restore sync).
+/// # Errors
+/// Returns invalid scope or installation errors as result rows.
+pub fn sync_selected(
+    options: &SyncOptions,
+    statuses: &[super::InstallStatus],
+) -> Result<Vec<SyncResult>, SkillError> {
+    let scope = if options.scope.is_empty() {
+        "user"
+    } else {
+        options.scope.as_str()
+    };
+    let loader = BundleLoader::default();
     let mut results = Vec::new();
-    for status in statuses {
+    for status in statuses.iter().cloned() {
         if status.status == super::StatusKind::HarnessChanged {
             results.push(skipped(&status, "harness changed; use symskills pull"));
             continue;
@@ -233,7 +251,7 @@ pub fn sync(options: &SyncOptions) -> Result<Vec<SyncResult>, SkillError> {
             });
             continue;
         }
-        results.push(reinstall(&status, options, &scope, mode, &loader));
+        results.push(reinstall(&status, options, scope, mode, &loader));
     }
     Ok(results)
 }
@@ -317,79 +335,5 @@ fn failed(status: &super::InstallStatus, error: String) -> SyncResult {
 }
 
 #[cfg(all(test, unix))]
-mod tests {
-    use super::*;
-    use crate::install::{InstallStatus, StatusKind};
-    use cap_std::ambient_authority;
-    use tempfile::tempdir;
-
-    #[test]
-    fn sync_dir_fsyncs_capability_directory_and_propagates_open_errors() {
-        let temp = tempdir().expect("temporary directory");
-        let root = Dir::open_ambient_dir(temp.path(), ambient_authority()).expect("open root");
-        root.create_dir("nested").expect("create nested directory");
-
-        sync_dir(&root, Path::new("nested"), None).expect("directory fsync");
-
-        std::fs::write(temp.path().join("not-a-directory"), b"x").expect("write fixture");
-        let error = sync_dir(&root, Path::new("not-a-directory"), None)
-            .expect_err("non-directory must not be treated as synced");
-        assert!(error.0.contains("open directory for sync"));
-    }
-
-    #[test]
-    fn reinstall_locks_resolved_render_name() {
-        let library = tempdir().expect("library");
-        let home = tempdir().expect("home");
-        let source = library.path().join("source");
-        std::fs::create_dir_all(&source).expect("source");
-        std::fs::write(
-            source.join("SKILL.md"),
-            "---\nname: source\ndescription: test\n---\nbody\n",
-        )
-        .expect("skill");
-        std::fs::write(
-            source.join("symskills.toml"),
-            "[targets.opencode]\nenabled = true\nalias = \"resolved\"\n",
-        )
-        .expect("manifest");
-        let lock = super::super::sync_lock::pull_lock_path(home.path(), "opencode", "resolved")
-            .expect("lock path");
-        std::fs::create_dir_all(lock.parent().expect("lock parent")).expect("lock parent");
-        std::fs::write(&lock, b"{\"pid\":1}\n").expect("held lock");
-
-        let status = InstallStatus {
-            target: "opencode".to_owned(),
-            name: "source".to_owned(),
-            path: home.path().join(".config/opencode/skills/source"),
-            status: StatusKind::Stale,
-            mode: Some("copy".to_owned()),
-            installed_at: None,
-            source_hash: None,
-            allow_executable: None,
-            error: None,
-            drift: Vec::new(),
-            render_status: None,
-            render_drift: Vec::new(),
-            render_error: None,
-        };
-        let options = SyncOptions {
-            library_dir: library.path().to_path_buf(),
-            home_dir: home.path().to_path_buf(),
-            ..Default::default()
-        };
-        let result = reinstall(
-            &status,
-            &options,
-            "user",
-            "copy".to_owned(),
-            &BundleLoader::default(),
-        );
-        assert_eq!(result.action, "skipped", "{result:?}");
-        assert!(
-            result
-                .error
-                .contains("pull lock held for opencode/resolved")
-        );
-    }
-}
+#[path = "sync_tests.rs"]
+mod tests;

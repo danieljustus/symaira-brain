@@ -7,7 +7,6 @@ use std::path::{Path, PathBuf};
 use cap_std::fs::Dir;
 
 use super::base::{manifest_hashes, read_manifest_for};
-use super::destination::read_link_at;
 use super::drift::{DriftKind, DriftSummary, classify_drift, file_hashes, summarize};
 use super::marker::MarkerState;
 use super::replace::open_trusted_dir;
@@ -163,7 +162,9 @@ pub(super) fn go_json_error(error: String) -> String {
 }
 
 pub(super) fn resolve_link(path: &Path) -> Option<PathBuf> {
-    read_link_at(path).ok()
+    // Canonicalization follows the OS-bounded link chain; subsequent marker
+    // and tree reads still use retained, no-follow directory capabilities.
+    std::fs::canonicalize(path).ok()
 }
 
 /// Reports whether an already-resolved symlink target can hold a marker.
@@ -171,7 +172,7 @@ pub(super) fn resolve_link(path: &Path) -> Option<PathBuf> {
 /// Go reads `<resolved>/.symskills.json` through the link, so a target that is
 /// missing or is not a directory carries no marker and the entry stays
 /// unmanaged. The check must not create anything (a status scan is read-only)
-/// and must not follow a second link, which the native scan refuses by design.
+/// and receives the canonical, OS-bounded chain result before capability opens.
 pub(super) fn resolves_to_directory(path: &Path) -> Result<bool, SkillError> {
     Ok(super::destination::entry_metadata(path)?.is_some_and(|metadata| metadata.is_dir()))
 }
