@@ -1,5 +1,57 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Guard generated configuration ownership repair — 2026-10-04
+
+Immutable 4d78/fb2844 independent review requested one P2: generated XDG/HOME
+paths must clean lexically before the OS resolves symlink/.. pairs and before
+warning filenames are rendered. Explicit SYMGUARD_CONFIG retains raw OS
+semantics. The isolated successor normally integrates main2b and shares a small
+Guard-only lexical helper with scan. Windows volume/device/postClean and raw
+UTF16 rules are pinned to actual Go SDK source, with a portable source-reference
+gate distinct from native runtime acceptance. Windows config text that cannot
+be emitted exactly remains delegated. Original92 proofs/180 raw-state paths and
+69/46 ELF byte mappings remain retained; all inherited gates remain required.
+[ADR](../docs/adr/guard-generated-config-path-ownership.md). New path process/
+mutation cases pass on clean source5bb: 177 ordinary tests and an overlapping
+41-test kernel graph, strict/fmt/actionlint, 124/63/78/54/25 actual process cases,
+386 portable Windows SDK comparisons, all13 inherited controls plus the actual
+wrong-owner mutant. The original25 before-fix inputs, 20+10 owner-history pairs,
+80/94 original inputs, prior parent/raw/ordered gates and nine original Scan
+fixtures are explicitly accounted for. Failures and exact executable bytes
+remain retained. SDK source-reference is not Windows runtime proof; independent
+review and native3 protected checks remain pending. Full770/769 remain open.
+
+## Guard Doctor ordered warning slice — 2026-10-04
+
+The successor normally includes approved PR805 publication1c04 and ports the
+fourteen healthy unknown-key configurations observed against actual frozen Go.
+It reuses immutable TOML source spans and Core GoText/Go quoting; warnings are
+buffered after typed decode and emitted once only after full native admission.
+The new54-case Linux gate requires46 complete comparisons and8 explicit
+remaining typed/alias/discovery/map-order refusals, ten Go warning repeats and
+five real mutations. The three specifically proved original unknown-key inputs
+now require equality, yielding122/124 and67/78 comparisons with the remaining
+original refusals unchanged. All prior raw/kernel/process controls and the
+original50/two invalid-default Go reports remain mandatory and unchanged.
+[ADR](../docs/adr/guard-doctor-ordered-config-warnings.md) explains output and
+ownership. Independent review/native3/protected checks are pending; full770/769
+and the other Brain configuration consumers remain open.
+
+## Guard doctor equivalent config/Unicode slice — 2026-10-04
+
+The successor to approved PR805 admits nine baseline healthy Go-only TOML
+representations and five healthy anchor Unicode/key forms, using the existing
+TableLike and Guard Go JSON primitive. The additive78 actual process cases
+retain65 full comparisons and13 explicit TOML gates; baseline and final clean-
+source receipts under `migration/evidence/guard-doctor-boundaries-770` bind the
+implementation. All previous exact process/raw/state/kernel tests remain
+required. Three original selected TOML gates, broad discovery/filesystem/output
+boundaries and native macOS/Windows acceptance remain open. The50 actual Go
+runs with two different invalid-default reports stay evidence, not an exception.
+See the linked [ADR](../docs/adr/guard-doctor-equivalent-config-and-anchor-unicode.md)
+and [remaining inventory](guard-doctor-boundary-inventory-770.md). This does not
+close #770/#769 or claim full standalone/Brain cutover.
+
 ## Additional native init, Swift and fuzz evidence — 2026-09-29
 
 Candidate `f1263bea237e99ff9a297fe3146170ce5f2ad4a4` passes the exact

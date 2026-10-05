@@ -1,0 +1,68 @@
+{
+  "oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "candidate_head": "e8c7f7990ab61967db0a3cbadaf6e485b4a33d99",
+  "candidate_dirty": true,
+  "attempt_total": 80,
+  "attempt_matches": 74,
+  "binaries_sha256": {
+    "go": "172b9f3e6437ad04bf0709d0d16ce2666d48d86ed83b37091282d0790de65291",
+    "rust": "e40db62c5f8c288bac49df460b45eb24704662723eb18bea8e973505357f9b96"
+  },
+  "supplemental_go_entry_sha256": "011384ce4b11b6e40250cfabf80f15f75caa43933d49a24e00351984c87618a6",
+  "note": "Actual initial prototype process observations before the shared version JSON correction. Rust source hashes were not captured in that attempt; do not treat it as clean-head acceptance.",
+  "failures": [
+    {
+      "id": "version-json",
+      "args": [
+        "version",
+        "--json"
+      ],
+      "state": "empty",
+      "contract": "parity",
+      "disposition": "failed: stdout/stderr/exit/state differs",
+      "go": {
+        "exit_code": 0,
+        "stdout_hex": "7b22746f6f6c223a2273796d6775617264222c2276657273696f6e223a22646576222c22736368656d615f76657273696f6e223a317d0a0a",
+        "stderr_hex": "",
+        "normalized_stdout_hex": "7b22746f6f6c223a2273796d6775617264222c2276657273696f6e223a22646576222c22736368656d615f76657273696f6e223a317d0a0a",
+        "normalized_stderr_hex": "",
+        "files": {}
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout_hex": "7b0a202022746f6f6c223a202273796d6775617264222c0a20202276657273696f6e223a2022646576222c0a202022736368656d615f76657273696f6e223a20310a7d0a",
+        "stderr_hex": "",
+        "normalized_stdout_hex": "7b0a202022746f6f6c223a202273796d6775617264222c0a20202276657273696f6e223a2022646576222c0a202022736368656d615f76657273696f6e223a20310a7d0a",
+        "normalized_stderr_hex": "",
+        "files": {}
+      }
+    },
+    {
+      "id": "version-json-after-stop",
+      "args": [
+        "version",
+        "--",
+        "--json"
+      ],
+      "state": "empty",
+      "contract": "parity",
+      "disposition": "failed: stdout/stderr/exit/state differs",
+      "go": {
+        "exit_code": 0,
+        "stdout_hex": "7b22746f6f6c223a2273796d6775617264222c2276657273696f6e223a22646576222c22736368656d615f76657273696f6e223a317d0a0a",
+        "stderr_hex": "",
+        "normalized_stdout_hex": "7b22746f6f6c223a2273796d6775617264222c2276657273696f6e223a22646576222c22736368656d615f76657273696f6e223a317d0a0a",
+        "normalized_stderr_hex": "",
+        "files": {}
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout_hex": "7b0a202022746f6f6c223a202273796d6775617264222c0a20202276657273696f6e223a2022646576222c0a202022736368656d615f76657273696f6e223a20310a7d0a",
+        "stderr_hex": "",
+        "normalized_stdout_hex": "7b0a202022746f6f6c223a202273796d6775617264222c0a20202276657273696f6e223a2022646576222c0a202022736368656d615f76657273696f6e223a20310a7d0a",
+        "normalized_stderr_hex": "",
+        "files": {}
+      }
+    }
+  ]
+}

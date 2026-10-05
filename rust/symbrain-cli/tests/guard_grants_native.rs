@@ -1,8 +1,6 @@
 #![deny(unsafe_code)]
 
-#[allow(dead_code)]
-#[path = "../src/guard_grants.rs"]
-mod guard_grants;
+use symguard_cli::guard_grants;
 
 #[test]
 fn native_grants_module_compiles_and_handles_empty_store() {

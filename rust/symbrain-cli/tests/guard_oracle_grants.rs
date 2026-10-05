@@ -13,9 +13,7 @@ use std::path::Path;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-#[allow(dead_code)]
-#[path = "../src/guard_grants.rs"]
-mod guard_grants;
+use symguard_cli::guard_grants;
 
 const FIXTURE: &str =
     include_str!("../../symbrain-guard-core/tests/fixtures/oracle_expectations.json");
