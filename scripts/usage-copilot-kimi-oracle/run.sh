@@ -83,17 +83,15 @@ run_stage cli python3 "$repo_root/scripts/usage-copilot-kimi-oracle/cli.py" "$sc
 run_stage owner-cli python3 "$repo_root/scripts/usage-copilot-kimi-oracle/cli.py" "$scratch/owner.json" "$scratch/go-usage$executable_suffix" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix" "$scratch/owner-cli.json" --owner
 run_stage controls python3 "$repo_root/scripts/usage-copilot-kimi-oracle/controls.py" "$scratch" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix"
 # The frozen parent predates shared workspace API changes in the merge base.
-# Archive the CLI package between variants, then rebuild the candidate cleanly.
+# Archive and clean shared workspace packages between variants, not the full target.
 git -C "$repo_root" worktree add --quiet --detach "$parent_root" "$parent_commit"
 run_stage argv-parent-clean python3 "$repo_root/scripts/usage-copilot-kimi-oracle/clean_cli.py" "$target_root" "$repo_root" "$evidence_dir/argv-parent-clean.json" --with-usage
-run_stage argv-parent-target-clean cargo clean --locked --target-dir "$target_root"
 run_stage argv-parent-build cargo build --locked -p symbrain-cli --manifest-path "$parent_root/Cargo.toml" --target-dir "$target_root"
 python3 - "$target_root/debug/symbrain$executable_suffix" "$scratch/argv-parent$executable_suffix" <<'PYCOPY'
 import shutil,sys
 shutil.copyfile(sys.argv[1],sys.argv[2]);shutil.copymode(sys.argv[1],sys.argv[2])
 PYCOPY
 run_stage argv-candidate-clean python3 "$repo_root/scripts/usage-copilot-kimi-oracle/clean_cli.py" "$target_root" "$repo_root" "$evidence_dir/argv-candidate-clean.json" --with-usage
-run_stage argv-candidate-target-clean cargo clean --locked --target-dir "$target_root"
 run_stage argv-candidate-build cargo build --locked -p symbrain-cli --target-dir "$target_root"
 python3 - "$parent_root" "$parent_commit" "$scratch/argv-parent$executable_suffix" "$target_root/debug/symbrain$executable_suffix" "$scratch/argv-build.json" "$scratch/argv-candidate-initial$executable_suffix" "$repo_root" <<'PYBUILD'
 import hashlib,json,pathlib,subprocess,sys
