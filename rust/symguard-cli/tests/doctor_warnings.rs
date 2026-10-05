@@ -80,8 +80,8 @@ fn brain_doctor_warning_admission() {
                     root,
                     &config,
                     raw_fixture_admission::Operation::ConfigWrite,
-                    error,
-                    before_entries,
+                    &error,
+                    &before_entries,
                     raw_fixture_admission::Coverage {
                         requested: ROLES,
                         executed: &executed_roles,

@@ -8,8 +8,12 @@ import sys
 import tempfile
 import time
 import replay
+import kernel_admission
 
 UNSUPPORTED = b'symguard doctor: unsupported native diagnostic state; no legacy fallback is available\n'
+CONTROL_CASES = [('drop-warning', 'unknown-root-array'), ('reorder-warnings', 'unknown-all-order'),
+                 ('deduplicate-warnings', 'unknown-root-array'), ('leak-type-warning', 'type-error-after-warning'),
+                 ('double-delegation-warning', 'warning-discovery-delegation')]
 
 
 def cases():
@@ -131,10 +135,7 @@ def compare(case, go, native):
 
 def controls(go, native, root, selected):
     rows = []
-    modes = [('drop-warning', 'unknown-root-array'), ('reorder-warnings', 'unknown-all-order'),
-             ('deduplicate-warnings', 'unknown-root-array'), ('leak-type-warning', 'type-error-after-warning'),
-             ('double-delegation-warning', 'warning-discovery-delegation')]
-    for index, (mode, ident) in enumerate(modes):
+    for index, (mode, ident) in enumerate(CONTROL_CASES):
         base = root/('control-'+str(index)); base.mkdir()
         wrapper = base/'mutant.py'
         wrapper.write_text("""import subprocess,sys
@@ -183,9 +184,17 @@ def main():
     go, native = go.resolve(strict=True), native.resolve(strict=True)
     selected = cases(); assert len({c['id'] for c in selected}) == len(selected)
     rows = []
+    unexecuted = []
+    admissions = []
     with tempfile.TemporaryDirectory(prefix='guard770-warning-process-') as raw:
         root = Path(raw)
         for index, case in enumerate(selected):
+            if 'path_bytes' in case:
+                admission = kernel_admission.probe(case['path_bytes'], root)
+                admissions.append(admission)
+                if not admission['admitted']:
+                    unexecuted.append(kernel_admission.unavailable(case['id'], admission))
+                    continue
             left = observe(go, case, root/str(index)/'go', False)
             right = observe(native, case, root/str(index)/'native', True)
             try: disposition = compare(case, left, right)
@@ -196,17 +205,23 @@ def main():
         repeated = [observe(go, chosen['unknown-all-order'], root/'repeat'/str(i), False) for i in range(10)]
         assert len({row['normalized_stderr_hex'] for row in repeated}) == 1, 'Go warnings reordered across runs'
         mutants = controls(go, native, root, chosen)
+        requested = [case['id'] for case in selected]
+        control_ids = [ident for ident, _ in CONTROL_CASES]
+        ledger = kernel_admission.accounting(requested, rows, unexecuted, control_ids, mutants, [])
+        account_control = kernel_admission.accounting_control(requested, rows, unexecuted, control_ids, mutants, [])
     output = dict(candidate_head=subprocess.check_output(['git','rev-parse','HEAD'], cwd=replay.ROOT, text=True).strip(),
                   candidate_dirty=bool(subprocess.check_output(['git','status','--porcelain'], cwd=replay.ROOT)),
                   total=len(rows), matched=sum(r['disposition']=='matched' for r in rows),
                   gated=sum(r['disposition'].startswith('native-fail-closed') for r in rows), results=rows,
+                  requested_total=len(selected), kernel_admissions=admissions,
+                  unavailable_results=unexecuted, accounting=ledger, accounting_control=account_control,
                   repeated_go_runs=repeated, repeated_distinct_stderr=1, controls=mutants,
                   unix_raw_paths_skipped=os.name == 'nt',
                   inapplicable_raw_cases=['raw-path-0', 'raw-path-1'] if os.name == 'nt' else [],
                   original14_input_sha256={c['id']:replay.digest(c['data']) for c in selected if c.get('original')},
                   binaries_sha256=dict(go=replay.digest(go.read_bytes()), native=replay.digest(native.read_bytes())),
                   source_sha256={str(p.relative_to(replay.ROOT)):replay.digest(p.read_bytes()) for p in [
-                      Path(__file__), replay.ROOT/'rust/symguard-cli/src/doctor/config_warnings.rs',
+                      Path(__file__), Path(__file__).with_name('kernel_admission.py'), replay.ROOT/'rust/symguard-cli/src/doctor/config_warnings.rs',
                       replay.ROOT/'rust/symguard-cli/src/doctor/config.rs', replay.ROOT/'rust/symguard-cli/src/doctor/config_decode.rs',
                       replay.ROOT/'rust/symguard-cli/src/guard_doctor.rs', replay.ROOT/'rust/symguard-cli/src/lib.rs']},
                   limits=['typed/case-fold/malformed-discovery/map-order states stay delegated without native warnings',

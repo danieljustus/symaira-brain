@@ -10,6 +10,17 @@ use brain_adapter::run_at_path;
 #[path = "support/raw_fixture_admission.rs"]
 mod raw_fixture_admission;
 
+const REQUESTED: &[&str] = &[
+    "help",
+    "low",
+    "medium",
+    "high",
+    "critical",
+    "unknown",
+    "invalid-json",
+];
+const AUDIT_CASES: &[&str] = &["low", "medium", "high"];
+
 #[test]
 fn raw_audit_path_denies_allow_and_confirm_without_overwriting_existing_denials() {
     let root = tempfile::tempdir().unwrap();
@@ -33,18 +44,10 @@ fn raw_audit_path_denies_allow_and_confirm_without_overwriting_existing_denials(
             root,
             &path,
             raw_fixture_admission::Operation::AuditDirectory,
-            creation_error.unwrap(),
-            before,
+            &creation_error.unwrap(),
+            &before,
             raw_fixture_admission::Coverage {
-                requested: &[
-                    "help",
-                    "low",
-                    "medium",
-                    "high",
-                    "critical",
-                    "unknown",
-                    "invalid-json",
-                ],
+                requested: REQUESTED,
                 executed: &["help"],
                 unavailable: &[
                     "low",
@@ -99,20 +102,12 @@ fn raw_audit_path_denies_allow_and_confirm_without_overwriting_existing_denials(
             root,
             &reported_path,
             raw_fixture_admission::Operation::AuditDirectory,
-            error,
-            before,
+            &error,
+            &before,
             raw_fixture_admission::Coverage {
-                requested: &[
-                    "help",
-                    "low",
-                    "medium",
-                    "high",
-                    "critical",
-                    "unknown",
-                    "invalid-json",
-                ],
+                requested: REQUESTED,
                 executed: &["help", "critical", "unknown", "invalid-json"],
-                unavailable: &["low", "medium", "high"],
+                unavailable: AUDIT_CASES,
             },
         );
     }

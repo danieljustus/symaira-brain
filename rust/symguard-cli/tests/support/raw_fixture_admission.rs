@@ -1,4 +1,5 @@
 //! Account for an exact kernel-unavailable owned fixture without claiming parity.
+use std::fmt::Write as _;
 use std::{fs, io, io::Write, os::unix::ffi::OsStrExt, path::Path};
 
 pub const COMPONENT: &[u8] = b"owned-\xe2\x82<&>";
@@ -31,7 +32,10 @@ pub fn exact_raw_kernel_failure(path: &Path, error: &io::Error) -> bool {
 }
 
 fn hex(bytes: &[u8]) -> String {
-    bytes.iter().map(|value| format!("{value:02x}")).collect()
+    bytes.iter().fold(String::new(), |mut output, value| {
+        write!(output, "{value:02x}").unwrap();
+        output
+    })
 }
 
 pub fn entries(parent: &Path) -> Vec<String> {
@@ -43,6 +47,7 @@ pub fn entries(parent: &Path) -> Vec<String> {
     entries
 }
 
+#[derive(Clone, Copy)]
 pub struct Coverage<'a> {
     pub requested: &'a [&'a str],
     pub executed: &'a [&'a str],
@@ -54,15 +59,15 @@ pub fn record_failed_creation(
     root: tempfile::TempDir,
     path: &Path,
     operation: Operation,
-    error: io::Error,
-    before: Vec<String>,
+    error: &io::Error,
+    before: &[String],
     coverage: Coverage<'_>,
 ) {
     let component = path.file_name().unwrap().as_bytes();
     assert_eq!(component, COMPONENT, "unrecognized raw fixture component");
     assert!(path.starts_with(root.path()), "foreign fixture root");
     let after = entries(path.parent().unwrap());
-    let allowed = exact_raw_kernel_failure(path, &error);
+    let allowed = exact_raw_kernel_failure(path, error);
     let owned_root = root.path().to_owned();
     let attempted_path_hex = hex(path.as_os_str().as_bytes());
     let component_hex = hex(component);
