@@ -33,7 +33,16 @@ class Symbol:
 class AdmissionFixture:
     def __init__(self, root, *, address=101, version=provider.VERSION,
                  source_id=provider.SOURCE_ID):
-        self.root = root
+        # Force the provider's resolved-prefix boundary even when the host's
+        # temporary directory has no symlinked ancestors. Without canonicalizing
+        # this fixture first, its loader callback compares a `nested/..` path
+        # against the provider's resolved extension path and fails on native OSes.
+        root = Path(root)
+        nested = root / 'unresolved-input'
+        nested.mkdir()
+        root = nested / '..'
+        self.root = root.resolve()
+        root = self.root
         self.trace = []
         self.loader_calls = []
         self.library = root / 'libsqlite3.so.0'

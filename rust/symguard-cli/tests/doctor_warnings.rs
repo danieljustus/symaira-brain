@@ -1,5 +1,8 @@
 //! The actual Brain compatibility adapter must buffer warnings before fallback.
 use std::{fs, process::Command};
+#[cfg(unix)]
+#[path = "support/raw_fixture_admission.rs"]
+mod raw_fixture_admission;
 #[cfg(windows)]
 #[path = "support/windows_discovery.rs"]
 mod windows_discovery;
@@ -52,6 +55,9 @@ fn brain_doctor_warning_admission() {
         }
         return;
     }
+    let mut executed_roles = Vec::new();
+    #[cfg(unix)]
+    let mut unavailable_roles = Vec::new();
     for &role in ROLES {
         let root = tempfile::tempdir().unwrap();
         let home = root.path().join("home");
@@ -65,7 +71,28 @@ fn brain_doctor_warning_admission() {
             "type" => "owned=1\nsequence={enabled=\"bad\"}\n",
             _ => "owned=1\n",
         };
-        fs::write(&config, text).unwrap();
+        #[cfg(unix)]
+        let before_entries = raw_fixture_admission::entries(&directory);
+        if let Err(error) = fs::write(&config, text) {
+            #[cfg(unix)]
+            if role == "raw" {
+                raw_fixture_admission::record_failed_creation(
+                    root,
+                    &config,
+                    raw_fixture_admission::Operation::ConfigWrite,
+                    &error,
+                    &before_entries,
+                    raw_fixture_admission::Coverage {
+                        requested: ROLES,
+                        executed: &executed_roles,
+                        unavailable: &["raw"],
+                    },
+                );
+                unavailable_roles.push(role);
+                continue;
+            }
+            panic!("owned config write failed: {error:?}");
+        }
         if role == "discovery" {
             fs::create_dir_all(home.join(".cursor")).unwrap();
             fs::write(home.join(".cursor/mcp.json"), "{bad").unwrap();
@@ -96,5 +123,10 @@ fn brain_doctor_warning_admission() {
             fs::metadata(&config).unwrap().modified().unwrap(),
             before.modified().unwrap()
         );
+        executed_roles.push(role);
     }
+    #[cfg(unix)]
+    raw_fixture_admission::assert_accounting(ROLES, &executed_roles, &unavailable_roles);
+    #[cfg(not(unix))]
+    assert_eq!(executed_roles, ROLES);
 }
