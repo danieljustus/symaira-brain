@@ -1,0 +1,12 @@
+{
+  "original_receipt": "/workspace/oracles/symaira-usage768-argv-eea73b7478e6-idle-binaries/receipt.json",
+  "original_receipt_sha256": "0cbdbb889dbb95030e4774208e1c0a9c6f27d1bcdb52e2fd7d14fbc292461748",
+  "old_target": "/workspace/symaira-usage768-argv/target",
+  "new_target": "/workspace/symaira-usage768-remaining/target",
+  "original121_paths83_unique_roundtrip_verified": true,
+  "proc_users_before": [],
+  "no_second_target": true,
+  "permission": "Root explicit exclusive target handoff after full independent bounded approval; preserve actual original39/38 and all original archives",
+  "operation": "rename existing owned ignored target, no deletion/source changes",
+  "head_before_successor": "60d904be90b7bd6df73364b8312c1a2076ecf3d9"
+}

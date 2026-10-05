@@ -1,0 +1,264 @@
+{
+  "source": "ae2eeb9cb1600e5dc463301385a441613e40a5e4",
+  "initial": {
+    "path": "/workspace/symaira-usage768-remaining/target/debug/symbrain",
+    "sha256": "df339eeb2cc57b69d51b913a6e9f8b2828ad7e34f5943a2690ea21c4639096db",
+    "bytes": 38010184
+  },
+  "final": {
+    "path": "/workspace/symaira-usage768-remaining/target/debug/symbrain",
+    "bytes": 38009648,
+    "sha256": "80a7e9c9631bf245db88d3147fd4cad04da3563cef38af247dec900827d6527d",
+    "gzip": "/workspace/oracles/symaira-usage768-next-variant-failure-binaries/final-candidate-cli.gz"
+  },
+  "original_artifacts": [
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/symaira-usage768-next-clean-local.log.gz",
+      "bytes": 2925,
+      "sha256": "ed2e5b1fb0e3a156a76e1d1f9480a377dbc5f6f28321e061d3c7ba9285d0f3d5"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/path-native.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/path-native.json.gz",
+      "bytes": 73,
+      "sha256": "de7bbf9a5c03cf071975edf7ce1a95f4351b8db9c5174361cd906e1a335fa919"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/path.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/path.json.gz",
+      "bytes": 3052,
+      "sha256": "f2458cc7f1d019e96e41d9cdffa2a6b7351b24c845f8546d7297057d2ea464e5"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/owner-controls.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/owner-controls.json.gz",
+      "bytes": 1992,
+      "sha256": "dcfa63ef5ee67fdcb3d7c8689ed8ac73b738ccfcb34bd419d042cf80de2ef3de"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/owner-cli.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/owner-cli.json.gz",
+      "bytes": 34187,
+      "sha256": "046f9fca0c9f992290dd56de9f41983247b2f4740a192bc26e5d64f35f45990f"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/owner-native.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/owner-native.json.gz",
+      "bytes": 89,
+      "sha256": "e5fc1d5b90f642ad53bcde292bed175a929ca1d3512d54b11a33d0b832d20cef"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/owner.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/owner.json.gz",
+      "bytes": 43375,
+      "sha256": "93a1e850c0b8cc2a8c500a4138a8e7b05bbce9c96979861b9e4568226a061ad7"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/baseline-native.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/baseline-native.json.gz",
+      "bytes": 9798,
+      "sha256": "58b2467f45096975a3cf982c1d84d36c07c675cffb8912d9fd771c31d05cd67d"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/baseline-go.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/baseline-go.json.gz",
+      "bytes": 192271,
+      "sha256": "2b47a3f9b42deea4cec6928bdb28d19a66e9e2455cc9f154d3e6664fae7d3b6d"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/baseline-input.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/baseline-input.json.gz",
+      "bytes": 161191,
+      "sha256": "52613525f1c0ca38395603e00ac00cc0fdcc42c9bab14aaeb70e0aa2a2da76dc"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/controls.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/controls.json.gz",
+      "bytes": 11063,
+      "sha256": "344b5ec05fe4d5ceefe41ea0b288d6047f412dae7d58488482c62cb9b6a7acc8"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/cli.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/cli.json.gz",
+      "bytes": 310251,
+      "sha256": "fa98f9731aebf348285f5eaac853fa88a6cb93666eb1abf1a6198acea1535b2a"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/input.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/input.json.gz",
+      "bytes": 847535,
+      "sha256": "da686a9861b2a39590dc300336dc3fd67ef20ec95a0b7bb8158e3a5f253ced77"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/native.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/native.json.gz",
+      "bytes": 84,
+      "sha256": "2a28be80b57e5ebe4acd3cf3112d2bbbff2773220a8db39cf9993a6a48efae4d"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/go.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/go.json.gz",
+      "bytes": 176141,
+      "sha256": "d2af8774d4ed32209189e63c885aedbe09e3d5f1e27b6e163553a43c898b95b1"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-candidate-build.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-candidate-build.log.gz",
+      "bytes": 152,
+      "sha256": "8a532f42d2ba351a82c384121f580590032b725b5a21e1813087115b51525ce7"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-candidate-clean.clean.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-candidate-clean.clean.log.gz",
+      "bytes": 37,
+      "sha256": "8152eede556f25ce409c6491e0a1aab4fef4e34c459ee432e7b444757095820b"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-candidate-clean.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-candidate-clean.json.gz",
+      "bytes": 6191,
+      "sha256": "f5ba56fddd051e75b30517f184db4a4b631a644927e9b3f395bd66bb60ff7b0b"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-candidate-clean.tar.gz",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-candidate-clean.tar.gz.gz",
+      "bytes": 11572673,
+      "sha256": "6e22397449919bd540dec70df17bcba15980c5a70305ffe07524fa9a7e5801e7"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-candidate-clean.dry-run.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-candidate-clean.dry-run.log.gz",
+      "bytes": 3128,
+      "sha256": "4d6b62b55fbcf068b3b4dc48b82d5f4c8c54a8722f78e99ed36d61fff6fb96a7"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-candidate-clean.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-candidate-clean.log.gz",
+      "bytes": 75,
+      "sha256": "a0f4ba8e5769b3d102815cd804a8cc39fbf65ab2089c7af639a4bb5abe30e50c"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-parent-build.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-parent-build.log.gz",
+      "bytes": 2184,
+      "sha256": "54bbeb4e5b74d37405620d597a33f86872a2ec742ff6c26149d0c43c2befb8bc"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-parent-clean.clean.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-parent-clean.clean.log.gz",
+      "bytes": 37,
+      "sha256": "4f8b97c4263220feff2d08bebff0ac74c1713ccd5464ba0b49e5d5866a37f641"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-parent-clean.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-parent-clean.json.gz",
+      "bytes": 6188,
+      "sha256": "6a51b20a904a6148640300759596db1cd646423f041e8d4d71b0c61702cfb0a4"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-parent-clean.tar.gz",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-parent-clean.tar.gz.gz",
+      "bytes": 11573145,
+      "sha256": "7c43697045c14f4793bb4bb6dc8de48de26296c6f486aba2835354d0576628ff"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-parent-clean.dry-run.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-parent-clean.dry-run.log.gz",
+      "bytes": 3128,
+      "sha256": "10ed580376afe4cb0fe66a7dc12acff4f9570142a981b2410e43621fa59b3c7e"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-parent-clean.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-parent-clean.log.gz",
+      "bytes": 75,
+      "sha256": "a0f4ba8e5769b3d102815cd804a8cc39fbf65ab2089c7af639a4bb5abe30e50c"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/controls.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/controls.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/owner-cli.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/owner-cli.log.gz",
+      "bytes": 46,
+      "sha256": "cb7ff35f6ef5169d325eb8fb8a10f30b3a6bb90b93483bb8ea200d97108b84c9"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/cli.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/cli.log.gz",
+      "bytes": 47,
+      "sha256": "65f94424f6db58b33d8ed3d27e14686be570368563dfcec314a4ff5759365490"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/native-build.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/native-build.log.gz",
+      "bytes": 152,
+      "sha256": "e320e6b71b0910ed34c2c4870a5c652fe17c2f34593e20802c3a0d21c52b8d33"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-initial-clean.clean.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-initial-clean.clean.log.gz",
+      "bytes": 39,
+      "sha256": "fd79db602f5380f430a9ba9c5beab2e594679cc0a1ba49a0ba64587e52226e9f"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-initial-clean.json",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-initial-clean.json.gz",
+      "bytes": 70456,
+      "sha256": "cef7bc0e51c5c2fec6e3fd934c787d85546a88dd219eef443f09da4a380e0759"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-initial-clean.tar.gz",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-initial-clean.tar.gz.gz",
+      "bytes": 11850196,
+      "sha256": "ab7cd13c33f40da616ce1ce8fbf57467665d29934d4fde74b541e99fc986adfa"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-initial-clean.dry-run.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-initial-clean.dry-run.log.gz",
+      "bytes": 40776,
+      "sha256": "2bb19705ba17941ffd2c0c2564dcf7ebe53a864b36c54d3e95a93285776c84b0"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/argv-initial-clean.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/argv-initial-clean.log.gz",
+      "bytes": 77,
+      "sha256": "2d388dc47a37c5f7502a0c761a415bb60f6c9cf4a883fc502420e9fc61b46303"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/native-constructors.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/native-constructors.log.gz",
+      "bytes": 460,
+      "sha256": "d665f95eeb267f798dd02ae1640c68dbcd6209723a9f3e380d3dea70477468f8"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/go-owners.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/go-owners.log.gz",
+      "bytes": 65,
+      "sha256": "15d583cef2904be9d19c26885b4c4c868d4cb205d433800e5c6d2d9a41988ecf"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/go-original-baseline.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/go-original-baseline.log.gz",
+      "bytes": 65,
+      "sha256": "823754fc6495a9a2a7c5a929b50cb6c22326f63bff0f8cd57a03613ce716c727"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/go-constructors.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/go-constructors.log.gz",
+      "bytes": 65,
+      "sha256": "3edbf5e9fda29d0e9614f0908721b0e741cea65229dc4d8c5e3bf6b33409f3ea"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-clean-local.evidence/go-build.log",
+      "retained": "migration/evidence/usage-next-768/clean-variant-original-failure/go-build.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "accepted": false,
+  "scope": "Rejected clean replay: CLI-only package isolation did not restore candidate byte-identically once dependency production changed. Both actual copies plus complete original stage records/archives preserved; no equality assertions weakened."
+}

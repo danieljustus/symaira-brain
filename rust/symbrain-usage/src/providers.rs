@@ -2,6 +2,7 @@ use crate::parser::parse_snapshot;
 use crate::transport::{Cancellation, Request, Transport};
 use crate::{AuthStatus, UsageSnapshot};
 use chrono::Utc;
+#[cfg(test)]
 use serde_json::Value;
 use std::sync::Arc;
 

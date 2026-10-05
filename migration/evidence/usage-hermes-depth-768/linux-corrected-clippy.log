@@ -1,0 +1,4 @@
+    Checking symbrain-usage v0.12.1 (/workspace/symaira-usage768-files/rust/symbrain-usage)
+    Checking symbrain-gateway v0.12.1 (/workspace/symaira-usage768-files/rust/symbrain-gateway)
+    Checking symbrain-cli v0.12.1 (/workspace/symaira-usage768-files/rust/symbrain-cli)
+    Finished `dev` profile [unoptimized] target(s) in 2.94s

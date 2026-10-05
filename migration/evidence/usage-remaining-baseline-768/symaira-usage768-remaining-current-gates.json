@@ -1,0 +1,2199 @@
+{
+  "source": "8803847278546f3161eaaa84d2e65bc2eec594a2",
+  "head": "eea73b7478e62f1bb174d456bbbecccc1de94034",
+  "cases": 59,
+  "requires_go": 44,
+  "native": 15,
+  "records": [
+    {
+      "id": "empty-portable",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {},
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": false
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "device-e8aebee5a487",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d",
+        ".kimi-code/device_id": "e8aebee5a487"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMS9hYnNlbnQtZ286IE5vIHN1Y2ggZmlsZSBvciBkaXJlY3RvcnkgKG9zIGVycm9yIDIpCg=="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "e1506406a5bd8f0225fbb27b4349faf7a8af6090960908c3b2b32b1275e38bc9"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-6f776e65642d636166c3a9",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d",
+        ".kimi-code/device_id": "6f776e65642d636166c3a9"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMi9hYnNlbnQtZ286IE5vIHN1Y2ggZmlsZSBvciBkaXJlY3RvcnkgKG9zIGVycm9yIDIpCg=="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "485a5ebff8c9af5853c18897c2f5063d44cdce0e6421bd34b4557bd536d064a1"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-c2a0e8aebee5a487e38080",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d",
+        ".kimi-code/device_id": "c2a0e8aebee5a487e38080"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMy9hYnNlbnQtZ286IE5vIHN1Y2ggZmlsZSBvciBkaXJlY3RvcnkgKG9zIGVycm9yIDIpCg=="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "0c022f6341f76288e52f5d73c2d7a795465bd9a2c205bb04e1e167c108966faf"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-c285e8aebee5a487e280a8",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d",
+        ".kimi-code/device_id": "c285e8aebee5a487e280a8"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvNC9hYnNlbnQtZ286IE5vIHN1Y2ggZmlsZSBvciBkaXJlY3RvcnkgKG9zIGVycm9yIDIpCg=="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "0451a655c1e3dc5fb41f79b7aa537c5d49db89246dc953ddaa1d681b22a89e20"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-6f776e6564c285696e73696465",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d",
+        ".kimi-code/device_id": "6f776e6564c285696e73696465"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvNS9hYnNlbnQtZ286IE5vIHN1Y2ggZmlsZSBvciBkaXJlY3RvcnkgKG9zIGVycm9yIDIpCg=="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "a76cd115b2e0b6721679d4b2e1b861b1be12f0dfb67305778b846904d2eb21f1"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-6f776e6564e280a8696e73696465",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d",
+        ".kimi-code/device_id": "6f776e6564e280a8696e73696465"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvNi9hYnNlbnQtZ286IE5vIHN1Y2ggZmlsZSBvciBkaXJlY3RvcnkgKG9zIGVycm9yIDIpCg=="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "9d326da5eead9f46560f7d44b92ca47e9d623893f6e145cc84f9d5d1f4c19b32"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-6f776e6564e2808b696e73696465",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d",
+        ".kimi-code/device_id": "6f776e6564e2808b696e73696465"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvNy9hYnNlbnQtZ286IE5vIHN1Y2ggZmlsZSBvciBkaXJlY3RvcnkgKG9zIGVycm9yIDIpCg=="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "2770e3a172850fba0a8e42bb2ad64c918cfe7afa20ed7cbb6fc932ee0bc271dc"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-6f776e65645f6173636969",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d",
+        ".kimi-code/device_id": "6f776e65645f6173636969"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": false
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "5a7b8d238ea1f43751eb028cb42e5590bf0d61e519acaddce22fb638094814ec"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-e380806f776e65645f6173636969e38080",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d",
+        ".kimi-code/device_id": "e380806f776e65645f6173636969e38080"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": false
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "0a44a3ceba7f5d1eaa436856eca28f5fb994eeabcbc226a66d0527d853c11bb8"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-c2a0e38080",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d",
+        ".kimi-code/device_id": "c2a0e38080"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": false
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "7e4d8173a797852bb4d811a6674dbaaef2618bc9885e0f12487248950f2909e0"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-control-ff",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d",
+        ".kimi-code/device_id": "ff"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMTEvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-control-e282",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d",
+        ".kimi-code/device_id": "e282"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMTIvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "eed0eb1f664e53388c1f00a4a9ba9b8da60fe792af9eb5f6f4b5ee852a91f03f"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-control-lf",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d",
+        ".kimi-code/device_id": "6f776e65640a646576696365"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMTMvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "6dc5e3cdbd4bb09b02f32dd26fd81940ff22d98d8c8b2e0f6841a2a203c4bccb"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-control-tab",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d",
+        ".kimi-code/device_id": "6f776e656409646576696365"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMTQvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "2cdf5b6a33a1e8c775d048b19b2cde06aff5fe7512966bc54584bec48345e8c9"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-control-del",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d",
+        ".kimi-code/device_id": "6f776e65647f646576696365"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMTUvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "a56a734785a394617cb90ca452756a901dbf932243aa9787c6faf31c184d102c"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-source-symlink",
+      "provider": "kimi",
+      "kind": "symlink",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMTYvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        "owned-peer": {
+          "kind": "file",
+          "sha256": "62c94ada65159243bd4c1ce739fad3d2efff8e802fc34f7160cbdf7e5aba42d0"
+        },
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "link",
+          "target": "/tmp/usage768-remaining-current-owned-vvh4v82w/16/owned-peer"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-source-directory",
+      "provider": "kimi",
+      "kind": "directory",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMTcvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-source-fifo",
+      "provider": "kimi",
+      "kind": "fifo",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65642d636c69227d"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned-cli"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMTgvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "other",
+          "mode": 4480
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "56897bb5644d1621ef64f2b40fdefc7098ad59c6da70fc35840d93a2816f3b3f"
+        }
+      }
+    },
+    {
+      "id": "device-irrelevant-api",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b7d",
+        ".kimi-code/device_id": "e8aebee5a487"
+      },
+      "env": {
+        "KIMI_CODE_API_KEY": "owned-api"
+      },
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "env",
+        "headers": [
+          "Bearer owned-api"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMTkvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/device_id": {
+          "kind": "file",
+          "sha256": "e1506406a5bd8f0225fbb27b4349faf7a8af6090960908c3b2b32b1275e38bc9"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+        }
+      }
+    },
+    {
+      "id": "kimi-token-control",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {
+        ".kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a226f776e65645c6e746f6b656e227d"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer owned\ntoken"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMjAvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "file",
+          "sha256": "438c9ae78ac670edb319aadbf8a912b2049371f65e3bfa8e79c8cd2b24944f2d"
+        }
+      }
+    },
+    {
+      "id": "kimi-source-symlink",
+      "provider": "kimi",
+      "kind": "credential-symlink",
+      "file_hex": {},
+      "env": {},
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMjEvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        "owned-peer": {
+          "kind": "file",
+          "sha256": "62c94ada65159243bd4c1ce739fad3d2efff8e802fc34f7160cbdf7e5aba42d0"
+        },
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "link",
+          "target": "/tmp/usage768-remaining-current-owned-vvh4v82w/21/owned-peer"
+        }
+      }
+    },
+    {
+      "id": "kimi-source-directory",
+      "provider": "kimi",
+      "kind": "credential-directory",
+      "file_hex": {},
+      "env": {},
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMjIvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "dir"
+        }
+      }
+    },
+    {
+      "id": "kimi-source-fifo",
+      "provider": "kimi",
+      "kind": "credential-fifo",
+      "file_hex": {},
+      "env": {},
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMjMvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".kimi-code": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials": {
+          "kind": "dir"
+        },
+        ".kimi-code/credentials/kimi-code.json": {
+          "kind": "other",
+          "mode": 4480
+        }
+      }
+    },
+    {
+      "id": "claude-distinct-nondefault",
+      "provider": "claude",
+      "kind": "regular",
+      "file_hex": {
+        ".claude/.credentials.json": "7b226f617574684163636f756e74223a7b2261223a7b22616363657373546f6b656e223a226f776e65642d61227d2c2262223a7b22616363657373546f6b656e223a226f776e65642d62227d7d7d"
+      },
+      "env": {
+        "ANTHROPIC_OAUTH_TOKEN": ""
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMjQvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".claude": {
+          "kind": "dir"
+        },
+        ".claude/.credentials.json": {
+          "kind": "file",
+          "sha256": "f64f315aa56b599fe94eb6fc9e68636a97f848d5efb223be335aa8afd22ce7aa"
+        }
+      }
+    },
+    {
+      "id": "claude-distinct-but-env-wins",
+      "provider": "claude",
+      "kind": "regular",
+      "file_hex": {
+        ".claude/.credentials.json": "7b226f617574684163636f756e74223a7b2261223a7b22616363657373546f6b656e223a226f776e65642d61227d2c2262223a7b22616363657373546f6b656e223a226f776e65642d62227d7d7d"
+      },
+      "env": {
+        "ANTHROPIC_OAUTH_TOKEN": "owned-env"
+      },
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "env",
+        "headers": [
+          "Bearer owned-env"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMjUvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".claude": {
+          "kind": "dir"
+        },
+        ".claude/.credentials.json": {
+          "kind": "file",
+          "sha256": "f64f315aa56b599fe94eb6fc9e68636a97f848d5efb223be335aa8afd22ce7aa"
+        }
+      }
+    },
+    {
+      "id": "claude-default-preempts-distinct",
+      "provider": "claude",
+      "kind": "regular",
+      "file_hex": {
+        ".claude/.credentials.json": "7b226f617574684163636f756e74223a7b2264656661756c74223a7b22616363657373546f6b656e223a226f776e65642d64656661756c74227d2c2261223a7b22616363657373546f6b656e223a2261227d2c2262223a7b22616363657373546f6b656e223a2262227d7d7d"
+      },
+      "env": {
+        "ANTHROPIC_OAUTH_TOKEN": ""
+      },
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "file",
+        "headers": [
+          "Bearer owned-default"
+        ],
+        "needs_go": false
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "read_only": true,
+      "state": {
+        ".claude": {
+          "kind": "dir"
+        },
+        ".claude/.credentials.json": {
+          "kind": "file",
+          "sha256": "153500c6246c3115917237a15fe192845393731afa303dd5b0a84312d59e0173"
+        }
+      }
+    },
+    {
+      "id": "claude-identical-nondefault",
+      "provider": "claude",
+      "kind": "regular",
+      "file_hex": {
+        ".claude/.credentials.json": "7b226f617574684163636f756e74223a7b2261223a7b22616363657373546f6b656e223a226f776e6564227d2c2262223a7b22616363657373546f6b656e223a226f776e6564227d7d7d"
+      },
+      "env": {
+        "ANTHROPIC_OAUTH_TOKEN": ""
+      },
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "file",
+        "headers": [
+          "Bearer owned"
+        ],
+        "needs_go": false
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "read_only": true,
+      "state": {
+        ".claude": {
+          "kind": "dir"
+        },
+        ".claude/.credentials.json": {
+          "kind": "file",
+          "sha256": "0b12dbb049d2728f45b9c3d6e23c5533afc60871230bc2fb98382a78a4eaf19f"
+        }
+      }
+    },
+    {
+      "id": "copilot-distinct-prefix",
+      "provider": "copilot",
+      "kind": "regular",
+      "file_hex": {
+        ".config/github-copilot/apps.json": "7b226769746875622e636f6d3a61223a7b226f617574685f746f6b656e223a2261227d2c226769746875622e636f6d3a62223a7b226f617574685f746f6b656e223a2262227d7d"
+      },
+      "env": {},
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMjgvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".config": {
+          "kind": "dir"
+        },
+        ".config/github-copilot": {
+          "kind": "dir"
+        },
+        ".config/github-copilot/apps.json": {
+          "kind": "file",
+          "sha256": "8ae5eaba1c5e0cf58cef5ad0606a165b37d2fe4e603958dc45d78c20ad028031"
+        }
+      }
+    },
+    {
+      "id": "copilot-distinct-but-env-wins",
+      "provider": "copilot",
+      "kind": "regular",
+      "file_hex": {
+        ".config/github-copilot/apps.json": "7b226769746875622e636f6d3a61223a7b226f617574685f746f6b656e223a2261227d2c226769746875622e636f6d3a62223a7b226f617574685f746f6b656e223a2262227d7d"
+      },
+      "env": {
+        "COPILOT_ACCESS_TOKEN": "owned-env"
+      },
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "env",
+        "headers": [
+          "Bearer owned-env"
+        ],
+        "needs_go": false
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "read_only": true,
+      "state": {
+        ".config": {
+          "kind": "dir"
+        },
+        ".config/github-copilot": {
+          "kind": "dir"
+        },
+        ".config/github-copilot/apps.json": {
+          "kind": "file",
+          "sha256": "8ae5eaba1c5e0cf58cef5ad0606a165b37d2fe4e603958dc45d78c20ad028031"
+        }
+      }
+    },
+    {
+      "id": "copilot-control-token",
+      "provider": "copilot",
+      "kind": "regular",
+      "file_hex": {
+        ".config/github-copilot/apps.json": "7b226769746875622e636f6d3a61223a7b226f617574685f746f6b656e223a226f776e65645c6e746f6b656e227d7d"
+      },
+      "env": {},
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "file",
+        "headers": [
+          "Bearer owned\ntoken"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMzAvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".config": {
+          "kind": "dir"
+        },
+        ".config/github-copilot": {
+          "kind": "dir"
+        },
+        ".config/github-copilot/apps.json": {
+          "kind": "file",
+          "sha256": "d08c655423b747ef24967c7634f9aec3f194c75cd2b5e852331601a3f1f5f6e3"
+        }
+      }
+    },
+    {
+      "id": "copilot-source-symlink",
+      "provider": "copilot",
+      "kind": "copilot-symlink",
+      "file_hex": {},
+      "env": {},
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMzEvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        "owned-peer": {
+          "kind": "file",
+          "sha256": "62c94ada65159243bd4c1ce739fad3d2efff8e802fc34f7160cbdf7e5aba42d0"
+        },
+        ".config": {
+          "kind": "dir"
+        },
+        ".config/github-copilot": {
+          "kind": "dir"
+        },
+        ".config/github-copilot/apps.json": {
+          "kind": "link",
+          "target": "/tmp/usage768-remaining-current-owned-vvh4v82w/31/owned-peer"
+        }
+      }
+    },
+    {
+      "id": "copilot-source-directory",
+      "provider": "copilot",
+      "kind": "copilot-directory",
+      "file_hex": {},
+      "env": {},
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMzIvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".config": {
+          "kind": "dir"
+        },
+        ".config/github-copilot": {
+          "kind": "dir"
+        },
+        ".config/github-copilot/apps.json": {
+          "kind": "dir"
+        }
+      }
+    },
+    {
+      "id": "copilot-source-fifo",
+      "provider": "copilot",
+      "kind": "copilot-fifo",
+      "file_hex": {},
+      "env": {},
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMzMvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".config": {
+          "kind": "dir"
+        },
+        ".config/github-copilot": {
+          "kind": "dir"
+        },
+        ".config/github-copilot/apps.json": {
+          "kind": "other",
+          "mode": 4480
+        }
+      }
+    },
+    {
+      "id": "nous-jwt-out-of-range",
+      "provider": "nous",
+      "kind": "regular",
+      "file_hex": {
+        ".hermes/auth.json": "7b2270726f766964657273223a205b7b226964223a20226e6f7573222c2022696e766f6b655f6a7774223a20226533302e65794a6c654841694f6a466c4d7a42392e63326c6e227d5d7d"
+      },
+      "env": {},
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMzQvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".hermes": {
+          "kind": "dir"
+        },
+        ".hermes/auth.json": {
+          "kind": "file",
+          "sha256": "db9e48c82219a6b92c87d3335836c7012fc40f8c02de768afcd39cb3fd388395"
+        }
+      }
+    },
+    {
+      "id": "nous-jwt-but-env-wins",
+      "provider": "nous",
+      "kind": "regular",
+      "file_hex": {
+        ".hermes/auth.json": "7b2270726f766964657273223a205b7b226964223a20226e6f7573222c2022696e766f6b655f6a7774223a20226533302e65794a6c654841694f6a466c4d7a42392e63326c6e227d5d7d"
+      },
+      "env": {
+        "NOUS_PORTAL_ACCESS_TOKEN": "owned-env"
+      },
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "env",
+        "headers": [
+          "Bearer owned-env"
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMzUvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {
+        ".hermes": {
+          "kind": "dir"
+        },
+        ".hermes/auth.json": {
+          "kind": "file",
+          "sha256": "db9e48c82219a6b92c87d3335836c7012fc40f8c02de768afcd39cb3fd388395"
+        }
+      }
+    },
+    {
+      "id": "KIMI_CODE_BASE_URL-http",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "KIMI_CODE_BASE_URL": "http://example.com"
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMzYvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "KIMI_CODE_BASE_URL-explicit-port",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "KIMI_CODE_BASE_URL": "https://example.com:443"
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMzcvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "KIMI_CODE_BASE_URL-upper-host",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "KIMI_CODE_BASE_URL": "https://EXAMPLE.com"
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMzgvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "KIMI_CODE_BASE_URL-percent-path",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "KIMI_CODE_BASE_URL": "https://example.com/a%20b"
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvMzkvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "KIMI_CODE_BASE_URL-simple-accepted",
+      "provider": "kimi",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "KIMI_CODE_BASE_URL": "https://example.com/a_b"
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": false
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "HERMES_PORTAL_BASE_URL-http",
+      "provider": "nous",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "HERMES_PORTAL_BASE_URL": "http://example.com"
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvNDEvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "HERMES_PORTAL_BASE_URL-explicit-port",
+      "provider": "nous",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "HERMES_PORTAL_BASE_URL": "https://example.com:443"
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvNDIvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "HERMES_PORTAL_BASE_URL-upper-host",
+      "provider": "nous",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "HERMES_PORTAL_BASE_URL": "https://EXAMPLE.com"
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvNDMvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "HERMES_PORTAL_BASE_URL-percent-path",
+      "provider": "nous",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "HERMES_PORTAL_BASE_URL": "https://example.com/a%20b"
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvNDQvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "HERMES_PORTAL_BASE_URL-simple-accepted",
+      "provider": "nous",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "HERMES_PORTAL_BASE_URL": "https://example.com/a_b"
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": false
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "OPENROUTER_API_URL-http",
+      "provider": "openrouter",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "OPENROUTER_API_URL": "http://example.com"
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvNDYvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "OPENROUTER_API_URL-explicit-port",
+      "provider": "openrouter",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "OPENROUTER_API_URL": "https://example.com:443"
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvNDcvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "OPENROUTER_API_URL-upper-host",
+      "provider": "openrouter",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "OPENROUTER_API_URL": "https://EXAMPLE.com"
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvNDgvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "OPENROUTER_API_URL-percent-path",
+      "provider": "openrouter",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "OPENROUTER_API_URL": "https://example.com/a%20b"
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvNDkvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "OPENROUTER_API_URL-simple-accepted",
+      "provider": "openrouter",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "OPENROUTER_API_URL": "https://example.com/a_b"
+      },
+      "current": {
+        "configured": false,
+        "status": "missing",
+        "source": "",
+        "headers": [],
+        "needs_go": false
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "workspace-cookie-wrk_good123",
+      "provider": "opencode",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "OPENCODE_COOKIE": "owned-cookie",
+        "OPENCODE_WORKSPACE_ID": "wrk_good123"
+      },
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "env",
+        "headers": [
+          ""
+        ],
+        "needs_go": false
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "workspace-no-cookie-wrk_good123",
+      "provider": "opencode",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "OPENCODE_WORKSPACE_ID": "wrk_good123"
+      },
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "env",
+        "headers": [],
+        "needs_go": false
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "workspace-cookie-https://opencode.ai/workspace/wrk_good123",
+      "provider": "opencode",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "OPENCODE_COOKIE": "owned-cookie",
+        "OPENCODE_WORKSPACE_ID": "https://opencode.ai/workspace/wrk_good123"
+      },
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "env",
+        "headers": [
+          ""
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvNTMvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "workspace-no-cookie-https://opencode.ai/workspace/wrk_good123",
+      "provider": "opencode",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "OPENCODE_WORKSPACE_ID": "https://opencode.ai/workspace/wrk_good123"
+      },
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "env",
+        "headers": [],
+        "needs_go": false
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "workspace-cookie- wrk_good123 ",
+      "provider": "opencode",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "OPENCODE_COOKIE": "owned-cookie",
+        "OPENCODE_WORKSPACE_ID": " wrk_good123 "
+      },
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "env",
+        "headers": [
+          ""
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvNTUvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "workspace-no-cookie- wrk_good123 ",
+      "provider": "opencode",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "OPENCODE_WORKSPACE_ID": " wrk_good123 "
+      },
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "env",
+        "headers": [],
+        "needs_go": false
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "workspace-cookie-wrk_a-b",
+      "provider": "opencode",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "OPENCODE_COOKIE": "owned-cookie",
+        "OPENCODE_WORKSPACE_ID": "wrk_a-b"
+      },
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "env",
+        "headers": [
+          ""
+        ],
+        "needs_go": true
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 1,
+        "stdout_b64": "",
+        "stderr_b64": "c3ltYnJhaW46IHN0YXJ0IEdvIGZhbGxiYWNrIC90bXAvdXNhZ2U3NjgtcmVtYWluaW5nLWN1cnJlbnQtb3duZWQtdnZoNHY4MncvNTcvYWJzZW50LWdvOiBObyBzdWNoIGZpbGUgb3IgZGlyZWN0b3J5IChvcyBlcnJvciAyKQo="
+      },
+      "read_only": true,
+      "state": {}
+    },
+    {
+      "id": "workspace-no-cookie-wrk_a-b",
+      "provider": "opencode",
+      "kind": "regular",
+      "file_hex": {},
+      "env": {
+        "OPENCODE_WORKSPACE_ID": "wrk_a-b"
+      },
+      "current": {
+        "configured": true,
+        "status": "available",
+        "source": "env",
+        "headers": [],
+        "needs_go": false
+      },
+      "go_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "current_cli": {
+        "exit": 2,
+        "stdout_b64": "",
+        "stderr_b64": "ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1vd25lZC1yZW1haW5pbmctcHJvYmUKc3ltYnJhaW4gdXNhZ2Ug4oCUIEFJIHN1YnNjcmlwdGlvbi90b2tlbiB1c2FnZSBwZXIgcHJvdmlkZXIKClVzYWdlOgogIHN5bWJyYWluIHVzYWdlCgpUaGUgZ2xvYmFsIC0tb3V0cHV0IHRhYmxlfGpzb24gZmxhZyAob3IgLS1qc29uKSBzZWxlY3RzIHRoZSBvdXRwdXQgZm9ybWF0LgoKUHJvdmlkZXJzOiBDbGF1ZGUsIENvZGV4LCBDb3BpbG90LCBDdXJzb3IsIEtpbWksIE1vb25zaG90LCBOb3VzIFBvcnRhbCwKT3BlbkNvZGUsIE9wZW5Sb3V0ZXIsIEFudGlncmF2aXR5LiBDcmVkZW50aWFsIHJlc29sdXRpb246IGFuIGV4cGxpY2l0IGVudgp2YXIgcGVyIHByb3ZpZGVyLCB3aG9zZSB2YWx1ZSBtYXkgYmUgYSBzeW12YXVsdDovLzxwYXRoPiBVUkkgcmVzb2x2ZWQKdGhyb3VnaCB0aGUgc2VjcmV0IHN0b3JlOyBwcm92aWRlcnMgd2l0aCBhIG5hdGl2ZSBDTEkgY3JlZGVudGlhbCBmaWxlCmZhbGwgYmFjayB0byBpdCByZWFkLW9ubHkgd2hlbiB0aGUgZW52IHZhciBpcyB1bnNldC4gU2VlIGVhY2ggcHJvdmlkZXIncwpkb2MgY29tbWVudCBpbiBpbnRlcm5hbC91c2FnZSBmb3IgdGhlIG1hY09TLUtleWNoYWluIC8gbG9jYWwtZGF0YWJhc2UKc3RyYXRlZ2llcyBub3QgcG9ydGVkIGZyb20gdGhlIFN3aWZ0IG9yaWdpbmFsLgo="
+      },
+      "read_only": true,
+      "state": {}
+    }
+  ],
+  "binary_sha256": {
+    "/workspace/oracles/symaira-usage768-argv-880-binaries/candidate-usage": "f657a231ac1bae1472718e10c9ae30418d7589286b2300f882eb4b51b7b04743",
+    "/workspace/oracles/symaira-usage768-argv-880-binaries/go-usage": "0654376cf8fc33c3be0b03bd394b665842d04e6659b3dfd67c0d6786d2f136e2",
+    "/tmp/symaira-usage768-argv-final2-public-probe": "c45a2de66b2cce708b36a5f98570f367e7dc57ffe1986f29dc6684c6e78590c0"
+  },
+  "scope": "Copied immutable actual CLI/public constructor probe; native public configured/status/source/Authorization with canned401 only. Actual Go/native invalidargv reveals current admission before parsing; full native200/wire parity not claimed. Owned regular/symlink/directory/FIFO inputs stay unchanged, native rejects FIFO nonblocking; no Go credential FIFO read, operator credentials or paid/public provider network. Linux only; Windows-home/macKeychain static inventory only."
+}

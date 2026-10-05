@@ -1,0 +1,16 @@
+{
+  "parent_source": "abf20713bacdab562644256e27616a9dd7acb81e",
+  "parent_source_clean": true,
+  "parent_source_sha256": {
+    "Cargo.toml": "982fdf67af364bb689371f888d79e4662bcbd2d7088dec0d7a2aa85f308a0155",
+    "Cargo.lock": "7b6541463f92ea7795f2490202a8588d86af46e03264ca22ba1f9f9eaf4ce678",
+    "rust/symbrain-cli/src/usage_cli.rs": "30bed9c9ec09fbf87ce33148db627fa2718a5fce9647149de6399cc61c73b203",
+    "rust/symbrain-cli/src/lib.rs": "decf6229c8fd9295893c456ca15dc8ab20ab79390988de051591bc80f21aa9ca"
+  },
+  "binaries_sha256": {
+    "parent": "91e25046826107a456fdbe9308b60193312edd2c51a222f355b02bb1fdff2d97",
+    "rust": "91e25046826107a456fdbe9308b60193312edd2c51a222f355b02bb1fdff2d97"
+  },
+  "rust_sdk": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.0\nLLVM version: 22.1.8\n",
+  "scope": "Successful sequential parent/candidate builds in the same exclusive target; actual parent copied before candidate rebuild, no duplicate target"
+}

@@ -1,0 +1,13 @@
+22 10 12
+copilot b'----help' True b'bad flag syntax: ---help' b'flag provided but not defined: -help'
+copilot b'----json' True b'bad flag syntax: ---json' b'flag provided but not defined: -json'
+copilot b'----not-a-usage-flag' True b'bad flag syntax: ---not-a-usage-flag' b'flag provided but not defined: -not-a-usage-flag'
+copilot b'--owned-\xff' True b'flag provided but not defined: -owned-\xff' b'flag provided but not defined: -owned-\xef\xbf\xbd'
+copilot b'--owned-\xe2\x82' True b'flag provided but not defined: -owned-\xe2\x82' b'flag provided but not defined: -owned-\xef\xbf\xbd'
+copilot b'owned-\xff' True b'symbrain usage: unexpected argument "owned-\\xff"' b'symbrain usage: unexpected argument "owned-\\xFF"'
+kimi b'----help' True b'bad flag syntax: ---help' b'flag provided but not defined: -help'
+kimi b'----json' True b'bad flag syntax: ---json' b'flag provided but not defined: -json'
+kimi b'----not-a-usage-flag' True b'bad flag syntax: ---not-a-usage-flag' b'flag provided but not defined: -not-a-usage-flag'
+kimi b'--owned-\xff' True b'flag provided but not defined: -owned-\xff' b'flag provided but not defined: -owned-\xef\xbf\xbd'
+kimi b'--owned-\xe2\x82' True b'flag provided but not defined: -owned-\xe2\x82' b'flag provided but not defined: -owned-\xef\xbf\xbd'
+kimi b'owned-\xff' True b'symbrain usage: unexpected argument "owned-\\xff"' b'symbrain usage: unexpected argument "owned-\\xFF"'

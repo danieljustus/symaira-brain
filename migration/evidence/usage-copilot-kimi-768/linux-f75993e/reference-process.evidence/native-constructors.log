@@ -1,0 +1,9 @@
+   Compiling symbrain-usage v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-usage)
+    Finished `test` profile [unoptimized] target(s) in 0.35s
+     Running tests/credential_reference_tests.rs (target/debug/deps/credential_reference_tests-3947d25183938a37)
+
+running 1 test
+test usage_credential_768_matches_fresh_go_constructors_and_requests ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+

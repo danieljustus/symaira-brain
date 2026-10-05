@@ -1,0 +1,250 @@
+[
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "kimi-base-public-prefix",
+    "needs_go_fallback": false,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "kimi",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "kimi-base-uppercase-host",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "kimi",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "kimi-base-query-fragment",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "kimi",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "kimi-base-escaped-path",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "kimi",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "kimi-base-unicode-path",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "kimi",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "kimi-base-http-rejected",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "kimi",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "kimi-base-userinfo-rejected",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "kimi",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "nous-base-public-prefix",
+    "needs_go_fallback": false,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "nous",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "nous-base-uppercase-host",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "nous",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "nous-base-query-fragment",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "nous",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "nous-base-escaped-path",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "nous",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "nous-base-unicode-path",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "nous",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "nous-base-http-rejected",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "nous",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "nous-base-userinfo-rejected",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "nous",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "openrouter-base-public-prefix",
+    "needs_go_fallback": false,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "openrouter",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "openrouter-base-uppercase-host",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "openrouter",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "openrouter-base-query-fragment",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "openrouter",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "openrouter-base-escaped-path",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "openrouter",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "openrouter-base-unicode-path",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "openrouter",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "openrouter-base-http-rejected",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "openrouter",
+    "read_only": true
+  },
+  {
+    "family": "custom base: existing bounded URL contract",
+    "id": "openrouter-base-userinfo-rejected",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "openrouter",
+    "read_only": true
+  },
+  {
+    "family": "workspace: existing cookie-dependent contract",
+    "id": "opencode-workspace-canonical",
+    "needs_go_fallback": false,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "opencode",
+    "read_only": true
+  },
+  {
+    "family": "workspace: existing cookie-dependent contract",
+    "id": "opencode-workspace-hyphen",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "opencode",
+    "read_only": true
+  },
+  {
+    "family": "workspace: existing cookie-dependent contract",
+    "id": "opencode-workspace-unicode",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "opencode",
+    "read_only": true
+  },
+  {
+    "family": "workspace: existing cookie-dependent contract",
+    "id": "opencode-workspace-slash",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "opencode",
+    "read_only": true
+  },
+  {
+    "family": "workspace: existing cookie-dependent contract",
+    "id": "opencode-workspace-without-cookie",
+    "needs_go_fallback": false,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "opencode",
+    "read_only": true
+  },
+  {
+    "family": "JWT expiry: existing architecture gate or missing/expired credential",
+    "id": "nous-jwt-overflow-positive",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "nous",
+    "read_only": true
+  },
+  {
+    "family": "JWT expiry: existing architecture gate or missing/expired credential",
+    "id": "nous-jwt-overflow-negative",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "nous",
+    "read_only": true
+  },
+  {
+    "family": "JWT expiry: existing architecture gate or missing/expired credential",
+    "id": "nous-jwt-upper-i64-boundary",
+    "needs_go_fallback": true,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "nous",
+    "read_only": true
+  },
+  {
+    "family": "JWT expiry: existing architecture gate or missing/expired credential",
+    "id": "nous-jwt-lower-i64-boundary",
+    "needs_go_fallback": false,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "nous",
+    "read_only": true
+  },
+  {
+    "family": "JWT expiry: existing architecture gate or missing/expired credential",
+    "id": "nous-jwt-numeric-json-overflow",
+    "needs_go_fallback": false,
+    "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+    "provider": "nous",
+    "read_only": true
+  }
+]
