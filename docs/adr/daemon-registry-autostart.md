@@ -22,11 +22,14 @@ no permission change is applied to preexisting parent directories.
 Ordinary CLI clients make one operation request. Adding a mandatory preliminary
 status round trip changed the default CLI contract and could reject an otherwise
 working request. Explicit engine/policy clients still verify before dispatch,
-including requests that prohibit autostart; incompatible owners are stopped
-before mutation. The existing MCP proxy's stronger status verification stays
-intact. Missing-daemon inspection does not start a daemon. Real autostart uses
-the resolved config's timeout/log path, the daemon argv and bounded readiness
-retry; fatal startup failures terminate and reap the child the client owns.
+including requests that prohibit autostart. A status session must be present and
+match the requested session; a missing or mismatched identity is `invalid_session`
+and never authorizes stop or autostart. Only a same-session engine/policy mismatch
+may request a stop, and restart follows only a positive `stopping` acknowledgment.
+The existing MCP proxy's stronger status verification stays intact. Missing-daemon
+inspection does not start a daemon. Real autostart uses the resolved config's
+timeout/log path, the daemon argv and bounded readiness retry; fatal startup
+failures terminate and reap the child the client owns.
 
 Session/state inspection renders the original error code, message, hint and
 details in JSON/YAML and the Go CLI message/exit classification in text.

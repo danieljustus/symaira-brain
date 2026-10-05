@@ -280,7 +280,7 @@ fn clean_root(path: &Path) -> PathBuf {
     result
 }
 
-fn create_directory(path: &Path) -> io::Result<()> {
+pub(crate) fn create_directory(path: &Path) -> io::Result<()> {
     let mut builder = fs::DirBuilder::new();
     builder.recursive(true);
     #[cfg(unix)]

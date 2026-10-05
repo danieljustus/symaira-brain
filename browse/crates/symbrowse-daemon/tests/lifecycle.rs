@@ -399,6 +399,117 @@ mod unix {
         fs::remove_dir_all(root).unwrap();
     }
 
+    #[test]
+    #[allow(clippy::result_large_err)]
+    fn caller_parent_mode_and_wrong_owner_stop_preserve_the_live_server() {
+        use symbrowse_daemon::{SessionRegistry, SessionRegistryOptions};
+
+        let root = std::env::temp_dir().join(format!(
+            "sb{}-{}",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        let caller = root.join("caller");
+        fs::create_dir_all(&caller).unwrap();
+        fs::set_permissions(&caller, fs::Permissions::from_mode(0o755)).unwrap();
+        let owner = format!("owner-{}", std::process::id());
+        let victim = format!("victim-{}", std::process::id());
+        let endpoint = caller.join("direct.sock");
+        let registry = Arc::new(SessionRegistry::new(SessionRegistryOptions {
+            user_data_root: root.join("profiles"),
+            ..Default::default()
+        }));
+        let server = Arc::new(
+            Server::new(ServerOptions {
+                socket_path: endpoint.clone(),
+                session: owner.clone(),
+                idle_timeout: None,
+                registry: Some(registry.clone()),
+                ..Default::default()
+            })
+            .unwrap(),
+        );
+        let running = server.clone();
+        let thread = thread::spawn(move || running.listen_and_serve());
+        wait_for_socket(&endpoint);
+        let caller_mode = fs::metadata(&caller).unwrap().permissions().mode() & 0o777;
+
+        let wrong_owner = Client::new(ClientOptions {
+            socket_path: endpoint.clone(),
+            session: victim,
+            autostart: false,
+            ..Default::default()
+        });
+        let stop = wrong_owner
+            .request_without_autostart(Frame {
+                cmd: "daemon.stop".into(),
+                ..Default::default()
+            })
+            .unwrap();
+        let owner_client = Client::new(ClientOptions {
+            socket_path: endpoint,
+            session: owner,
+            autostart: false,
+            ..Default::default()
+        });
+        let owner_alive = owner_client
+            .request_without_autostart(Frame {
+                cmd: "daemon.status".into(),
+                ..Default::default()
+            })
+            .is_ok();
+        let sessions_after_wrong_stop = registry.list().len();
+        if owner_alive {
+            owner_client
+                .request_without_autostart(Frame {
+                    cmd: "daemon.stop".into(),
+                    ..Default::default()
+                })
+                .unwrap();
+        }
+        assert!(thread.join().unwrap().is_ok());
+
+        let nested = caller.join("owned");
+        let nested_endpoint = nested.join("nested.sock");
+        let nested_server = Arc::new(
+            Server::new(ServerOptions {
+                socket_path: nested_endpoint.clone(),
+                session: format!("nested-{}", std::process::id()),
+                idle_timeout: None,
+                ..Default::default()
+            })
+            .unwrap(),
+        );
+        let running = nested_server.clone();
+        let nested_thread = thread::spawn(move || running.listen_and_serve());
+        wait_for_socket(&nested_endpoint);
+        let caller_mode_with_owned = fs::metadata(&caller).unwrap().permissions().mode() & 0o777;
+        let owned_mode = fs::metadata(&nested).unwrap().permissions().mode() & 0o777;
+        let socket_mode = fs::symlink_metadata(&nested_endpoint)
+            .unwrap()
+            .permissions()
+            .mode()
+            & 0o777;
+        nested_server.stop();
+        assert!(nested_thread.join().unwrap().is_ok());
+        fs::remove_dir_all(root).unwrap();
+
+        assert!(!stop.success);
+        assert_eq!(
+            stop.error.unwrap().code,
+            symbrowse_daemon::codes::INVALID_SESSION
+        );
+        assert_eq!(sessions_after_wrong_stop, 1);
+        assert!(
+            owner_alive,
+            "wrong-owner stop terminated the running daemon"
+        );
+        assert_eq!(caller_mode, 0o755, "listener changed a caller-owned parent");
+        assert_eq!(caller_mode_with_owned, 0o755);
+        assert_eq!(owned_mode, 0o700, "new owned directory is not private");
+        assert_eq!(socket_mode, 0o600, "Unix socket is not private");
+    }
+
     fn wait_for_socket(path: &Path) {
         let deadline = Instant::now() + Duration::from_secs(2);
         while Instant::now() < deadline {

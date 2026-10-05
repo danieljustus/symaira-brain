@@ -79,6 +79,23 @@ pub(super) fn serve_connection_parts<S>(
             }
             continue;
         }
+        if frame.cmd == "daemon.stop" && frame.session != options.session {
+            if write_response(
+                reader.get_mut(),
+                error_response(
+                    codes::INVALID_SESSION,
+                    format!(
+                        "daemon stop session {} does not match server owner",
+                        crate::session_quote::quote(&crate::redact_str(&frame.session))
+                    ),
+                ),
+            )
+            .is_err()
+            {
+                return;
+            }
+            continue;
+        }
         if frame.cmd == "session.list" {
             let _ = registry.touch(&frame.session);
             if write_response(

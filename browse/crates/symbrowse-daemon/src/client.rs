@@ -202,10 +202,14 @@ impl Client {
             })));
         }
         let data = status.data.unwrap_or(Value::Null);
-        let session_ok = data
-            .get("session")
-            .and_then(Value::as_str)
-            .is_none_or(|session| session == self.options.session);
+        if data.get("session").and_then(Value::as_str) != Some(self.options.session.as_str()) {
+            return Err(ClientError::Transport(DaemonError {
+                code: codes::INVALID_SESSION.into(),
+                message: "daemon status session identity is missing or does not match".into(),
+                retryable: Some(false),
+                ..Default::default()
+            }));
+        }
         let engine_ok = self
             .options
             .expected_engine
@@ -222,14 +226,34 @@ impl Client {
                     .ok()
                     .is_some_and(|value| data.get("policy") == Some(&value))
             });
-        if session_ok && engine_ok && policy_ok {
+        if engine_ok && policy_ok {
             return Ok(());
         }
-        let _ = self.request_once(&Frame {
-            cmd: "daemon.stop".into(),
-            session: self.options.session.clone(),
-            ..Frame::default()
-        });
+        let stop_acknowledged = self
+            .request_once(&Frame {
+                cmd: "daemon.stop".into(),
+                session: self.options.session.clone(),
+                ..Frame::default()
+            })
+            .is_ok_and(|response| {
+                response.success
+                    && response
+                        .data
+                        .as_ref()
+                        .and_then(|data| data.get("stopping"))
+                        .and_then(Value::as_bool)
+                        == Some(true)
+            });
+        if !stop_acknowledged {
+            return Err(ClientError::Transport(DaemonError {
+                code: codes::OPERATION_FAILED.into(),
+                message: "incompatible daemon did not acknowledge shutdown; refusing restart"
+                    .into(),
+                hint: "stop the existing daemon manually before retrying".into(),
+                retryable: Some(false),
+                ..Default::default()
+            }));
+        }
         Err(ClientError::Transport(DaemonError {
             code: codes::DAEMON_UNAVAILABLE.into(),
             message: "existing daemon configuration is incompatible; it was stopped".into(),

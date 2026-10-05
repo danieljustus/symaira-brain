@@ -3,25 +3,17 @@
 use std::{
     fs,
     path::PathBuf,
-    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
+    time::{Duration, Instant},
 };
 use symbrowse_daemon::{Client, ClientError, ClientOptions, Frame, StartOptions};
 
+static NEXT_ROOT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+
 fn root() -> PathBuf {
-    // Native macOS AF_UNIX endpoints must fit even on hosted runners with a
-    // deeply nested TMPDIR. The fixture owns and removes this unique directory.
-    let parent = if cfg!(target_os = "macos") {
-        PathBuf::from("/tmp")
-    } else {
-        std::env::temp_dir()
-    };
-    parent.join(format!(
-        "br-client-{}-{}",
+    std::env::temp_dir().join(format!(
+        "bc{}-{}",
         std::process::id(),
-        SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_nanos()
+        NEXT_ROOT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
     ))
 }
 
@@ -250,6 +242,118 @@ fn config_owned_child() {
         symbrowse_daemon::default_log_path(),
         PathBuf::from(std::env::var_os("SYMBROWSE_CLIENT_TEST_EXPECTED_LOG").unwrap())
     );
+}
+
+#[cfg(unix)]
+fn client_status_fixture(
+    status_data: serde_json::Value,
+    stop_response: serde_json::Value,
+) -> (Vec<String>, Result<symbrowse_daemon::Response, ClientError>) {
+    use std::{
+        io::{BufRead, BufReader, Write},
+        os::unix::net::UnixListener,
+        thread,
+    };
+
+    let root = root();
+    fs::create_dir_all(&root).unwrap();
+    let endpoint = root.join("d.sock");
+    let listener = UnixListener::bind(&endpoint).expect("bind status fixture");
+    listener.set_nonblocking(true).unwrap();
+    let server = thread::spawn(move || {
+        let mut commands = Vec::new();
+        let deadline = Instant::now() + Duration::from_millis(250);
+        while Instant::now() < deadline {
+            match listener.accept() {
+                Ok((stream, _)) => {
+                    let mut reader = BufReader::new(stream);
+                    let mut line = String::new();
+                    reader.read_line(&mut line).unwrap();
+                    let frame: serde_json::Value = serde_json::from_str(&line).unwrap();
+                    let command = frame["cmd"].as_str().unwrap().to_owned();
+                    commands.push(command.clone());
+                    let response = if command == "daemon.status" {
+                        serde_json::json!({"success": true, "data": status_data})
+                    } else if command == "daemon.stop" {
+                        stop_response.clone()
+                    } else {
+                        serde_json::json!({"success": true, "data": {"dispatched": true}})
+                    };
+                    let mut stream = reader.into_inner();
+                    stream
+                        .write_all(&serde_json::to_vec(&response).unwrap())
+                        .unwrap();
+                    stream.write_all(b"\n").unwrap();
+                }
+                Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {
+                    thread::sleep(Duration::from_millis(1));
+                }
+                Err(error) => panic!("status fixture accept failed: {error}"),
+            }
+        }
+        commands
+    });
+    let client = Client::new(ClientOptions {
+        socket_path: endpoint,
+        session: "test".into(),
+        autostart: true,
+        startup_timeout: Duration::from_millis(100),
+        start: Some(StartOptions {
+            executable: root.join("missing-daemon"),
+            log_path: root.join("daemon.log"),
+            args: vec!["daemon".into()],
+        }),
+        expected_engine: Some("chrome".into()),
+        ..Default::default()
+    });
+    let result = client.request(Frame {
+        cmd: "state.clear".into(),
+        session: "test".into(),
+        ..Default::default()
+    });
+    let commands = server.join().unwrap();
+    fs::remove_dir_all(root).unwrap();
+    (commands, result)
+}
+
+#[cfg(unix)]
+#[test]
+fn status_identity_must_be_present_and_match_before_autostart_or_dispatch() {
+    for status in [
+        serde_json::json!({"engine":"chrome"}),
+        serde_json::json!({"session":"other","engine":"chrome"}),
+    ] {
+        let (commands, result) = client_status_fixture(
+            status,
+            serde_json::json!({"success":true,"data":{"stopping":true}}),
+        );
+        let error = result.expect_err("missing or mismatched status session must fail");
+        assert!(
+            matches!(error, ClientError::Transport(ref error) if error.code == "invalid_session")
+        );
+        assert_eq!(commands, ["daemon.status"]);
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn incompatible_owner_stop_requires_a_success_acknowledgment() {
+    let (commands, result) = client_status_fixture(
+        serde_json::json!({"session":"test","engine":"firefox"}),
+        serde_json::json!({"success":true,"data":{"stopping":false}}),
+    );
+    let error = result.expect_err("unacknowledged stop must not trigger restart");
+    assert!(matches!(error, ClientError::Transport(ref error) if error.code == "operation_failed"));
+    assert_eq!(commands, ["daemon.status", "daemon.stop"]);
+
+    let (commands, result) = client_status_fixture(
+        serde_json::json!({"session":"test","engine":"firefox"}),
+        serde_json::json!({"success":true,"data":{"stopping":true}}),
+    );
+    let error = result.expect_err("same-owner mismatch should enter the restart path");
+    assert!(matches!(error, ClientError::Transport(ref error)
+        if error.code == "daemon_unavailable" && error.message.contains("failed to start daemon")));
+    assert_eq!(commands, ["daemon.status", "daemon.stop"]);
 }
 
 #[test]

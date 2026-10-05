@@ -465,10 +465,14 @@ impl DaemonProxy {
             return Err(CheckedRequestError::Fatal(status.into_tool_error()));
         }
         let data = status.data.unwrap_or(Value::Null);
-        let session_ok = data
-            .get("session")
-            .and_then(Value::as_str)
-            .is_none_or(|session| session == frame.session.as_str());
+        if data.get("session").and_then(Value::as_str) != Some(frame.session.as_str()) {
+            return Err(CheckedRequestError::Fatal(ToolError::transport(
+                "invalid_session",
+                "daemon status session identity is missing or does not match",
+                &frame.session,
+                endpoint,
+            )));
+        }
         let engine_ok = self.options.engine.as_ref().is_none_or(|expected| {
             data.get("engine").and_then(Value::as_str) == Some(expected.as_str())
         });
@@ -477,18 +481,36 @@ impl DaemonProxy {
             .and_then(|policy| policy.get("allow_private"))
             .and_then(Value::as_bool)
             == Some(self.options.allow_private);
-        if !(session_ok && engine_ok && policy_ok) {
-            let _ = self.request(
-                endpoint,
-                &DaemonFrame {
-                    cmd: "daemon.stop".to_owned(),
-                    args: None,
-                    session: frame.session.clone(),
-                    request_id: request_id(),
-                    max_tokens: None,
-                    retrieval_surface: Some("mcp".to_owned()),
-                },
-            );
+        if !(engine_ok && policy_ok) {
+            let stop_acknowledged = self
+                .request(
+                    endpoint,
+                    &DaemonFrame {
+                        cmd: "daemon.stop".to_owned(),
+                        args: None,
+                        session: frame.session.clone(),
+                        request_id: request_id(),
+                        max_tokens: None,
+                        retrieval_surface: Some("mcp".to_owned()),
+                    },
+                )
+                .is_ok_and(|response| {
+                    response.success
+                        && response
+                            .data
+                            .as_ref()
+                            .and_then(|data| data.get("stopping"))
+                            .and_then(Value::as_bool)
+                            == Some(true)
+                });
+            if !stop_acknowledged {
+                return Err(CheckedRequestError::Fatal(ToolError::transport(
+                    "operation_failed",
+                    "incompatible daemon did not acknowledge shutdown; refusing restart",
+                    &frame.session,
+                    endpoint,
+                )));
+            }
             return Err(CheckedRequestError::Autostart(ToolError {
                 code: "daemon_unavailable".to_owned(),
                 message: "existing daemon configuration is incompatible; it was stopped".to_owned(),
@@ -1309,6 +1331,121 @@ mod tests {
         assert!(!rendered.contains("topsecret"));
         assert!(!rendered.contains("secret@example"));
         assert!(rendered.contains("[REDACTED]"));
+    }
+
+    #[cfg(unix)]
+    fn proxy_status_fixture(
+        status_data: Value,
+        stop_response: Value,
+    ) -> (Vec<String>, Result<Value, Box<ToolError>>) {
+        use std::{
+            io::{BufRead, BufReader, Write},
+            os::unix::net::UnixListener,
+            time::{Duration, Instant},
+        };
+
+        static NEXT_ROOT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+        let root = std::env::temp_dir().join(format!(
+            "sm{}-{}",
+            std::process::id(),
+            NEXT_ROOT.fetch_add(1, std::sync::atomic::Ordering::Relaxed)
+        ));
+        std::fs::create_dir_all(&root).unwrap();
+        let path = root.join("d.sock");
+        let listener = UnixListener::bind(&path).expect("bind proxy status fixture");
+        listener.set_nonblocking(true).unwrap();
+        let server = thread::spawn(move || {
+            let mut commands = Vec::new();
+            let deadline = Instant::now() + Duration::from_millis(250);
+            while Instant::now() < deadline {
+                match listener.accept() {
+                    Ok((stream, _)) => {
+                        let mut reader = BufReader::new(stream);
+                        let mut line = String::new();
+                        reader.read_line(&mut line).unwrap();
+                        let frame: Value = serde_json::from_str(&line).unwrap();
+                        let command = frame["cmd"].as_str().unwrap().to_owned();
+                        commands.push(command.clone());
+                        let response = if command == "daemon.status" {
+                            json!({"success":true,"data":status_data.clone()})
+                        } else if command == "daemon.stop" {
+                            stop_response.clone()
+                        } else {
+                            json!({"success":true,"data":{"dispatched":true}})
+                        };
+                        let mut stream = reader.into_inner();
+                        stream
+                            .write_all(&serde_json::to_vec(&response).unwrap())
+                            .unwrap();
+                        stream.write_all(b"\n").unwrap();
+                    }
+                    Err(error) if error.kind() == io::ErrorKind::WouldBlock => {
+                        thread::sleep(Duration::from_millis(1));
+                    }
+                    Err(error) => panic!("proxy fixture accept failed: {error}"),
+                }
+            }
+            commands
+        });
+        let mut proxy = DaemonProxy::new(DaemonProxyOptions {
+            session: "test".to_owned(),
+            executable: root.join("missing-daemon").to_string_lossy().into_owned(),
+            engine: Some("chrome".to_owned()),
+            endpoint: Some(path.to_string_lossy().into_owned()),
+            daemon_log_path: Some(root.join("daemon.log").to_string_lossy().into_owned()),
+            read_timeout: Duration::from_millis(100),
+            startup_timeout: Duration::from_millis(100),
+            ..DaemonProxyOptions::default()
+        });
+        let spec = ToolSpec {
+            name: "open",
+            canonical: "open",
+            command: "open",
+            profile: "core",
+        };
+        let result = proxy.call(
+            &spec,
+            &json!({"url":"https://example.com", "session":"test"}),
+        );
+        let commands = server.join().unwrap();
+        std::fs::remove_dir_all(root).unwrap();
+        (commands, result)
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn status_identity_must_be_present_and_match_without_stop_dispatch_or_autostart() {
+        for status in [
+            json!({"engine":"chrome","policy":{"allow_private":false}}),
+            json!({"session":"other","engine":"chrome","policy":{"allow_private":false}}),
+        ] {
+            let (commands, result) =
+                proxy_status_fixture(status, json!({"success":true,"data":{"stopping":true}}));
+            let error = result.expect_err("missing or mismatched status session must fail");
+            assert_eq!(error.code, "invalid_session");
+            assert_eq!(commands, ["daemon.status"]);
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn incompatible_owner_requires_stop_ack_but_same_owner_remains_restartable() {
+        let (commands, result) = proxy_status_fixture(
+            json!({"session":"test","engine":"firefox","policy":{"allow_private":false}}),
+            json!({"success":true,"data":{"stopping":false}}),
+        );
+        let error = result.expect_err("unacknowledged stop must not autostart");
+        assert_eq!(error.code, "operation_failed");
+        assert_eq!(commands, ["daemon.status", "daemon.stop"]);
+
+        let (commands, result) = proxy_status_fixture(
+            json!({"session":"test","engine":"firefox","policy":{"allow_private":false}}),
+            json!({"success":true,"data":{"stopping":true}}),
+        );
+        let error = result.expect_err("fixture's restart executable is intentionally missing");
+        assert_eq!(error.code, "daemon_unavailable");
+        assert!(error.message.contains("failed to start daemon"));
+        assert_eq!(commands, ["daemon.status", "daemon.stop"]);
     }
 
     #[cfg(unix)]
