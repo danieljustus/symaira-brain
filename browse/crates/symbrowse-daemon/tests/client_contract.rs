@@ -321,6 +321,8 @@ fn client_status_fixture(
 fn status_identity_must_be_present_and_match_before_autostart_or_dispatch() {
     for status in [
         serde_json::json!({"engine":"chrome"}),
+        serde_json::json!({"session":null,"engine":"chrome"}),
+        serde_json::json!({"session":42,"engine":"chrome"}),
         serde_json::json!({"session":"other","engine":"chrome"}),
     ] {
         let (commands, result) = client_status_fixture(

@@ -1417,6 +1417,8 @@ mod tests {
     fn status_identity_must_be_present_and_match_without_stop_dispatch_or_autostart() {
         for status in [
             json!({"engine":"chrome","policy":{"allow_private":false}}),
+            json!({"session":null,"engine":"chrome","policy":{"allow_private":false}}),
+            json!({"session":42,"engine":"chrome","policy":{"allow_private":false}}),
             json!({"session":"other","engine":"chrome","policy":{"allow_private":false}}),
         ] {
             let (commands, result) =
