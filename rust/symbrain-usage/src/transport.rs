@@ -1,5 +1,6 @@
 use crate::providers::trusted_https_url;
 use std::collections::BTreeMap;
+use std::fmt;
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
@@ -53,7 +54,7 @@ impl Cancellation {
 }
 
 /// Provider request passed to an injectable transport.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Request {
     pub provider_id: String,
     pub method: String,
@@ -62,12 +63,34 @@ pub struct Request {
     pub body: Option<Vec<u8>>,
 }
 
+impl fmt::Debug for Request {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Request")
+            .field("provider_id", &self.provider_id)
+            .field("method", &self.method)
+            .field("url", &"[REDACTED]")
+            .field("headers", &"[REDACTED]")
+            .field("body", &"[REDACTED]")
+            .finish_non_exhaustive()
+    }
+}
+
 /// Minimal response needed by provider parsers.
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Response {
     pub status: u16,
     pub body: Vec<u8>,
     pub headers: BTreeMap<String, String>,
+}
+
+impl fmt::Debug for Response {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Response")
+            .field("status", &self.status)
+            .field("body", &"[REDACTED]")
+            .field("headers", &"[REDACTED]")
+            .finish_non_exhaustive()
+    }
 }
 
 /// Side-effect boundary for provider reads. Implementations should check the
@@ -93,11 +116,17 @@ pub trait Transport: Send + Sync {
 }
 
 /// Deterministic provider-keyed transport for tests and oracle fixtures.
-#[derive(Debug, Clone, Default)]
+#[derive(Clone, Default)]
 pub struct FixtureTransport {
     responses: Arc<BTreeMap<String, Result<Response, String>>>,
     sequences: Arc<BTreeMap<String, Vec<Result<Response, String>>>>,
     requests: Arc<Mutex<Vec<Request>>>,
+}
+
+impl fmt::Debug for FixtureTransport {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("FixtureTransport").finish_non_exhaustive()
+    }
 }
 
 impl FixtureTransport {
