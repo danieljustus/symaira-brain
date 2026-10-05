@@ -26,6 +26,35 @@ def target_users(target):
     return users
 
 
+CLI_PACKAGES = ('symbrain-cli',)
+USAGE_TRANSITION_PACKAGES = (
+    'symbrain-activity',
+    'symbrain-adapter',
+    'symbrain-audit',
+    'symbrain-broker',
+    'symbrain-catalog',
+    'symbrain-cli',
+    'symbrain-core',
+    'symbrain-gateway',
+    'symbrain-guard-core',
+    'symbrain-harness',
+    'symbrain-instructions',
+    'symbrain-managed',
+    'symbrain-mcp',
+    'symbrain-memory',
+    'symbrain-patterns',
+    'symbrain-policy',
+    'symbrain-skills',
+    'symbrain-usage',
+)
+
+
+def package_list(with_usage):
+    # The accepted parent overwrites these shared CLI-closure artifacts; archive
+    # and clean them before rebuilding the candidate. symguard-cli is candidate-only.
+    return list(USAGE_TRANSITION_PACKAGES if with_usage else CLI_PACKAGES)
+
+
 def main():
     target = Path(sys.argv[1]).resolve()
     root = Path(sys.argv[2]).resolve()
@@ -37,7 +66,7 @@ def main():
     assert target != root and target not in root.parents and target.is_dir()
     users = target_users(target)
     assert len(sys.argv) in (4,5) and (len(sys.argv)==4 or sys.argv[4]=='--with-usage')
-    packages=['symbrain-cli','symbrain-usage'] if len(sys.argv)==5 else ['symbrain-cli']
+    packages=package_list(len(sys.argv)==5)
     command=['cargo','clean','--locked']
     for package in packages:command += ['-p',package]
     command += ['--target-dir',str(target)]
