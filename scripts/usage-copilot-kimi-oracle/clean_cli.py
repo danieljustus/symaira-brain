@@ -30,6 +30,10 @@ def main():
     target = Path(sys.argv[1]).resolve()
     root = Path(sys.argv[2]).resolve()
     output = Path(sys.argv[3]).resolve()
+    configured_target = Path(os.environ.get('CARGO_TARGET_DIR', root / 'target'))
+    if not configured_target.is_absolute():
+        configured_target = root / configured_target
+    assert target == configured_target.resolve(), (target, configured_target.resolve())
     assert target != root and target not in root.parents and target.is_dir()
     users = target_users(target)
     assert len(sys.argv) in (4,5) and (len(sys.argv)==4 or sys.argv[4]=='--with-usage')
@@ -37,8 +41,19 @@ def main():
     command=['cargo','clean','--locked']
     for package in packages:command += ['-p',package]
     command += ['--target-dir',str(target)]
-    dry = subprocess.run(command + ['--dry-run', '--verbose'], cwd=root, capture_output=True, check=True)
+    # Cargo refuses clean without its cache ownership marker, even for the
+    # dedicated per-worktree target established by run-external-env.sh.
+    signature = b'Signature: 8a477f597d28d172789f06886806bc55\n'
+    marker = target / 'CACHEDIR.TAG'
+    if marker.exists():
+        assert marker.read_bytes().startswith(signature), marker
+    else:
+        marker.write_bytes(signature)
+    dry = subprocess.run(command + ['--dry-run', '--verbose'], cwd=root, capture_output=True)
     output.with_suffix('.dry-run.log').write_bytes(dry.stdout + dry.stderr)
+    if dry.returncode:
+        sys.stderr.buffer.write(dry.stderr)
+        raise subprocess.CalledProcessError(dry.returncode, dry.args)
     files = []
     for line in (dry.stdout + dry.stderr).decode(errors='strict').splitlines():
         path = Path(line)

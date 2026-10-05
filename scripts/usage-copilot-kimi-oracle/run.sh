@@ -14,6 +14,7 @@ fi
 scratch=$(mktemp -d "$temporary_root/symbrain-copilot-kimi-768.XXXXXX")
 source_root="$scratch/source"
 parent_root="$scratch/argv-parent-source"
+# Match the immutable Go oracle's pre-native-Usage parent source.
 parent_commit=abf20713bacdab562644256e27616a9dd7acb81e
 evidence_dir="${output%.json}.evidence"
 mkdir -p "$evidence_dir"
@@ -69,6 +70,8 @@ git -C "$source_root" diff --exit-code --quiet
 run_stage go-original-baseline go -C "$source_root" test ./internal/usage -run '^TestUsageLocalFilesBaseline768$' -count=1
 run_stage go-owners go -C "$source_root" test ./internal/usage -run '^TestUsageCredential(Owner|Path)768$' -count=1
 run_stage native-constructors cargo test --locked -p symbrain-usage --lib copilot_kimi_oracle_matches_fresh_go -- --ignored --nocapture
+# Stable parent/candidate binary hashes must not include incremental debug metadata.
+export CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0
 target_root=$(python3 -c 'import os; print(os.path.abspath(os.environ.get("CARGO_TARGET_DIR","target")))')
 run_stage argv-initial-clean python3 "$repo_root/scripts/usage-copilot-kimi-oracle/clean_cli.py" "$target_root" "$repo_root" "$evidence_dir/argv-initial-clean.json" --with-usage
 run_stage native-build cargo build --locked -p symbrain-cli
@@ -79,16 +82,18 @@ PYCOPY
 run_stage cli python3 "$repo_root/scripts/usage-copilot-kimi-oracle/cli.py" "$scratch/go.json" "$scratch/go-usage$executable_suffix" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix" "$scratch/cli.json"
 run_stage owner-cli python3 "$repo_root/scripts/usage-copilot-kimi-oracle/cli.py" "$scratch/owner.json" "$scratch/go-usage$executable_suffix" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix" "$scratch/owner-cli.json" --owner
 run_stage controls python3 "$repo_root/scripts/usage-copilot-kimi-oracle/controls.py" "$scratch" "${CARGO_TARGET_DIR:-target}/debug/symbrain$executable_suffix"
-# Parent and candidate variants share only dependencies in one exclusive target.
-# Archive and clean the CLI package between variants, then verify restoration.
+# The frozen parent predates shared workspace API changes in the merge base.
+# Archive the CLI package between variants, then rebuild the candidate cleanly.
 git -C "$repo_root" worktree add --quiet --detach "$parent_root" "$parent_commit"
 run_stage argv-parent-clean python3 "$repo_root/scripts/usage-copilot-kimi-oracle/clean_cli.py" "$target_root" "$repo_root" "$evidence_dir/argv-parent-clean.json" --with-usage
+run_stage argv-parent-target-clean cargo clean --locked --target-dir "$target_root"
 run_stage argv-parent-build cargo build --locked -p symbrain-cli --manifest-path "$parent_root/Cargo.toml" --target-dir "$target_root"
 python3 - "$target_root/debug/symbrain$executable_suffix" "$scratch/argv-parent$executable_suffix" <<'PYCOPY'
 import shutil,sys
 shutil.copyfile(sys.argv[1],sys.argv[2]);shutil.copymode(sys.argv[1],sys.argv[2])
 PYCOPY
 run_stage argv-candidate-clean python3 "$repo_root/scripts/usage-copilot-kimi-oracle/clean_cli.py" "$target_root" "$repo_root" "$evidence_dir/argv-candidate-clean.json" --with-usage
+run_stage argv-candidate-target-clean cargo clean --locked --target-dir "$target_root"
 run_stage argv-candidate-build cargo build --locked -p symbrain-cli --target-dir "$target_root"
 python3 - "$parent_root" "$parent_commit" "$scratch/argv-parent$executable_suffix" "$target_root/debug/symbrain$executable_suffix" "$scratch/argv-build.json" "$scratch/argv-candidate-initial$executable_suffix" "$repo_root" <<'PYBUILD'
 import hashlib,json,pathlib,subprocess,sys
