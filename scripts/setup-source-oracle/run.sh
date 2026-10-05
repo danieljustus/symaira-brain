@@ -11,6 +11,7 @@ if [ "${OS:-}" = Windows_NT ]; then
   rust_binary="$(cygpath -m "${CARGO_TARGET_DIR:-target}/debug/symbrain.exe")"
 fi
 report="${1:?usage: scripts/setup-source-oracle/run.sh OUTPUT_JSON}"
+python3 -B scripts/test_rust_differential.py
 ./scripts/run-go-oracle.sh "$oracle_ref" build -o "$go_binary" ./cmd/symbrain
 cargo build -p symbrain-cli --bin symbrain --locked
 if [ "${OS:-}" = Windows_NT ]; then

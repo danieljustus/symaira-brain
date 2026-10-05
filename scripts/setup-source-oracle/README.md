@@ -39,6 +39,11 @@ by discarding any generated files or telemetry mismatches from the comparison.
 
 Only fixture roots, the observed unique source staging and atomic rename suffixes,
 and new UTC sidecar timestamps validated within the actual process window normalize.
+Known owned roots are bound in literal, JSON-escaped and nested quoted-error
+JSON spellings. The shared normalizer never binds unrelated paths or other error
+tokens; the launcher's focused regression requires distinct owned Windows roots
+to agree and a changed error cause or wrong root to remain unequal. This unit
+does not count as native Windows execution or an additional process case.
 All sidecar bytes, payload hashes, file modes/types, stdout, stderr, exit and tool
 calls are compared. Installation failures retain partial effects exactly as Go.
 An additional actual Rust source setup spawns an owned build descendant and must
