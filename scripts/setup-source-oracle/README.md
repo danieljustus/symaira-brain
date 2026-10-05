@@ -8,7 +8,7 @@ scripts/setup-source-oracle/run.sh /tmp/setup-source-parity.json
 
 The launcher builds the full frozen production Go CLI at `dcddcef0` using the
 existing immutable oracle launcher and the candidate Rust CLI with `--locked`.
-It runs 107 real Go/Rust CLI cases on Linux/macOS (95 on Windows) and two separate deliberately failing native
+It runs 111 real Go/Rust CLI cases on Linux and 95 each on macOS and Windows, plus two separate deliberately failing native
 process controls (`wrong-exit`, `wrong-source`). These controls execute the actual
 Rust CLI and must produce exactly their intended observable disagreement.
 The report binds runtime, native SDK, binary and source hashes, clean/dirty HEAD,
@@ -82,8 +82,8 @@ notifications, terminate the whole job and wait through its wrapper. They must
 return successfully without watchdog cleanup and leave the recorded descendant
 inactive. The original historical failure remains an observed negative control;
 the original two parent-only-wait comparisons remain diagnostic comparisons.
-Source's full native95Windows/111Unix cases and original controls still determine
-acceptance, with the unchanged25second per-process limit.
+Source's full native cases (111 Linux, 95 macOS, 95 Windows) and original controls
+still determine acceptance, with the unchanged 25-second per-process limit.
 
 On native Windows, the wrappers also retain actual Source Go/current CLI and
 executed diagnostic test PE bytes and SHA/size/machine manifests outside the

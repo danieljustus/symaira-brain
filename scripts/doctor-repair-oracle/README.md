@@ -1,7 +1,7 @@
 `run.sh OUTPUT_JSON` builds the complete frozen production Go CLI from
 `dcddcef0df5789123c7c9a7ebe6e01f10e941f2c`, builds the candidate Rust CLI,
 and compares real `doctor --fix` subprocesses with an absent Go fallback.
-It replays 282 cases on Linux/macOS and 269 on Windows (Unix signals/permissions
+It replays 285 cases on Linux, 274 on macOS and 269 on Windows (Unix signals/permissions
 and Windows large exitcodes have separate native fixtures). A supplemental native
 Go fixture supplies version responses; it never changes the oracle, production Go or frozen cases.
 
