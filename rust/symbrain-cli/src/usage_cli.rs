@@ -47,6 +47,21 @@ pub(crate) fn classify(args: &[OsString]) -> Invocation {
     })
 }
 
+// Free-function entry points keep `lib.rs` byte-identical to the inherited
+// global-output owner pinned by the Skills argv oracle (novel.py).
+pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
+    classify(args).requires_go_fallback()
+}
+
+pub fn run(
+    args: &[OsString],
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write,
+    format: OutputFormat,
+) -> u8 {
+    classify(args).run(stdout, stderr, format)
+}
+
 impl Invocation {
     pub(crate) fn requires_go_fallback(&self) -> bool {
         matches!(self, Self::Report) && symbrain_usage::needs_go_fallback()

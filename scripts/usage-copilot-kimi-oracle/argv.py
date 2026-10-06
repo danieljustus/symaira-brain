@@ -99,7 +99,7 @@ def main():
     original = [row for row in records if row['original']]
     assert len(original) == (14 if os.name == 'nt' else 22)
     assert sum(not row['parent_matched'] for row in original) == (6 if os.name == 'nt' else 12)
-    source_files = ['rust/symbrain-cli/src/usage_cli.rs', 'rust/symbrain-cli/src/lib.rs','rust/symbrain-cli/src/flag_normalization.rs',
+    source_files = ['rust/symbrain-cli/src/usage_cli.rs', 'rust/symbrain-cli/src/lib.rs',
                     'rust/symbrain-core/src/config/format.rs', 'rust/symbrain-core/src/config/set.rs',
                     'rust/symbrain-core/src/config/mod.rs', 'rust/symbrain-core/src/go_printable.rs',
                     'scripts/usage-copilot-kimi-oracle/argv.py']

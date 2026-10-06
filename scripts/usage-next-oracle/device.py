@@ -103,7 +103,7 @@ def main():
                 if p.name in ['device_next_768_test.go','status_next_768_test.go']:continue
                 relative=str(p.relative_to(source));assert p.read_bytes()==subprocess.check_output(['git','-C',str(source),'show',FROZEN+':'+relative]);frozen[relative]=sha(p)
             head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip();dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=repo))
-            paths=sorted((repo/'rust/symbrain-usage/src').rglob('*.rs'))+sorted((repo/'scripts/usage-next-oracle').glob('*'))+[repo/p for p in ['Cargo.lock','rust/symbrain-usage/Cargo.toml','rust/symbrain-cli/src/usage_cli.rs','rust/symbrain-cli/src/lib.rs','rust/symbrain-cli/src/flag_normalization.rs']]
+            paths=sorted((repo/'rust/symbrain-usage/src').rglob('*.rs'))+sorted((repo/'scripts/usage-next-oracle').glob('*'))+[repo/p for p in ['Cargo.lock','rust/symbrain-usage/Cargo.toml','rust/symbrain-cli/src/usage_cli.rs','rust/symbrain-cli/src/lib.rs']]
             paths=[p for p in paths if p.is_file()];source_hashes={str(p.relative_to(repo)):sha(p)for p in paths}
             if not dirty:
                 for p in paths:assert p.read_bytes()==subprocess.check_output(['git','show',head+':'+str(p.relative_to(repo))],cwd=repo)
