@@ -100,7 +100,8 @@ fn current_executable() -> PathBuf {
     std::env::current_exe().unwrap_or_else(|_| PathBuf::from("symbrowse"))
 }
 
-fn detach_command(command: &mut Command) {
+/// Detach a daemon launch from the caller's process group and stdio.
+pub fn detach_command(command: &mut Command) {
     #[cfg(unix)]
     {
         command.process_group(0);
@@ -110,5 +111,30 @@ fn detach_command(command: &mut Command) {
         const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
         const DETACHED_PROCESS: u32 = 0x0000_0008;
         command.creation_flags(CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS);
+        disinherit_caller_stdio();
+    }
+}
+
+/// Rust std spawns with `bInheritHandles = TRUE` and no handle list, unlike
+/// Go's `PROC_THREAD_ATTRIBUTE_HANDLE_LIST`. Without this, a detached daemon
+/// keeps the caller's stdio pipes open, so whoever reads this CLI's output
+/// (a shell pipeline, an MCP client, a test harness) waits for daemon exit.
+/// `Stdio::inherit` stays intact: std duplicates an inheritable copy per spawn.
+#[cfg(windows)]
+#[allow(unsafe_code)]
+fn disinherit_caller_stdio() {
+    use std::os::windows::io::AsRawHandle;
+    use windows_sys::Win32::Foundation::{HANDLE_FLAG_INHERIT, SetHandleInformation};
+    for handle in [
+        io::stdin().as_raw_handle(),
+        io::stdout().as_raw_handle(),
+        io::stderr().as_raw_handle(),
+    ] {
+        if !handle.is_null() {
+            // SAFETY: a live process std handle; this clears only its inherit
+            // flag and neither closes nor takes ownership of it. Failure (for
+            // example a console pseudo-handle) leaves nothing to leak.
+            unsafe { SetHandleInformation(handle, HANDLE_FLAG_INHERIT, 0) };
+        }
     }
 }

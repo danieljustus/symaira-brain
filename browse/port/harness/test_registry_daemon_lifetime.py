@@ -222,6 +222,31 @@ class JobTests(unittest.TestCase):
         self.assertEqual(api.calls, [("create",), ("assign", api.job, 0x300000009), ("resume", 0x300000009)])
         self.assertEqual(job.SUSPENDED, 0x4)
 
+    def test_resume_failure_raises_and_leaves_child_for_capture_cleanup(self):
+        api = JobAPI([0])
+        def failed(process):
+            api.calls.append(("resume", process))
+            raise OSError("NtResumeProcess failed")
+        api.resume = failed
+        job = lifetime.WindowsJob(api=api)
+        with self.assertRaisesRegex(OSError, "NtResumeProcess failed"):
+            job.adopt(type("Child", (), {"_handle": 9})())
+        self.assertEqual(api.calls[-2:], [("assign", api.job, 9), ("resume", 9)])
+
+    def test_native_resume_checks_ntstatus_with_handle_argument(self):
+        api = lifetime.WindowsAPI.__new__(lifetime.WindowsAPI)
+        seen = []
+        def resume(handle):
+            seen.append(handle)
+            return status
+        api.resume_process = resume
+        status = 0
+        api.resume(0x300000009)
+        status = -1073741816  # STATUS_INVALID_HANDLE as a signed NTSTATUS.
+        with self.assertRaisesRegex(OSError, "0xc0000008"):
+            api.resume(0x300000009)
+        self.assertEqual(seen, [0x300000009, 0x300000009])
+
     def test_cwd_is_released_only_after_lost_autostart_daemons_exit(self):
         api = JobAPI([2, 1, 0])
         job = lifetime.WindowsJob(api=api)

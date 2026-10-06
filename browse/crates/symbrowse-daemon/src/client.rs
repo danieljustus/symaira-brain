@@ -10,6 +10,7 @@ use connect::connect_error;
 #[cfg(unix)]
 pub use connect::connect_unix;
 use errors::{lifecycle_error, map_io_error, should_autostart, unavailable};
+pub use process::detach_command;
 use process::terminate_child;
 
 use crate::{

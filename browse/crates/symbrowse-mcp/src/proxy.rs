@@ -11,11 +11,6 @@ use std::{
 };
 
 #[cfg(unix)]
-use std::os::unix::process::CommandExt;
-#[cfg(windows)]
-use std::os::windows::process::CommandExt;
-
-#[cfg(unix)]
 use std::io::{BufRead, BufReader, Write};
 
 use serde_json::{Map, Value, json};
@@ -576,7 +571,7 @@ impl DaemonProxy {
             command.arg("--allow-private");
         }
         command.stdout(Stdio::from(log)).stderr(Stdio::from(stderr));
-        detach_command(&mut command);
+        symbrowse_daemon::detach_command(&mut command);
         command
             .spawn()
             .map_err(|error| ToolError::unavailable(format!("failed to start daemon: {error}")))
@@ -942,19 +937,6 @@ fn terminate_child(child: &mut Child) {
     // platform process cannot be killed. The final try_wait preserves
     // best-effort reaping without an unbounded join.
     let _ = child.try_wait();
-}
-
-fn detach_command(command: &mut Command) {
-    #[cfg(unix)]
-    {
-        command.process_group(0);
-    }
-    #[cfg(windows)]
-    {
-        const CREATE_NEW_PROCESS_GROUP: u32 = 0x0000_0200;
-        const DETACHED_PROCESS: u32 = 0x0000_0008;
-        command.creation_flags(CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS);
-    }
 }
 
 fn current_executable() -> String {

@@ -12,6 +12,7 @@ import tempfile
 import time
 import daemon_state_key as key
 from daemon_state_key_ownership import Lease
+from registry_cli_process import capture
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
@@ -149,7 +150,9 @@ def observe(binary: Path, actual_binary: Path, provider: Path, case: str, *, evi
         command = [str(binary), "state", "list", "--session", session, "--json"]
         result = None; run_error = cleanup_error = None; cleanup = None
         try:
-            result = subprocess.run(command, env=env, cwd=root, capture_output=True, timeout=12)
+            # File-backed and bounded: on Windows, subprocess.run's post-timeout
+            # communicate() is unbounded while any descendant holds its pipes.
+            result = capture(binary, root, env, command[1:])
         except Exception as error:
             run_error = error
         finally:
