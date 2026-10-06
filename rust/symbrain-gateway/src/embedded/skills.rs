@@ -12,6 +12,7 @@ mod render;
 #[path = "skills_versioning.rs"]
 mod versioning;
 
+#[derive(Debug)]
 pub(super) struct Error {
     message: String,
     code: Option<&'static str>,

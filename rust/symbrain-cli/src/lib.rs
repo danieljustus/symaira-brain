@@ -142,6 +142,7 @@ fn has_go_owned_flag(
 }
 
 /// Runs the actual executable's standard streams, with scoped Skills fd1 ownership.
+#[must_use]
 pub fn run_stdio(args: &[OsString]) -> u8 {
     let mut stderr = io::stderr();
     if peek_command(args) == "skills" {
@@ -229,7 +230,7 @@ pub fn run_in_process(
         "sync" => Some(sync_cli::run(rest, stdout, stderr, format)),
         "memory" if memory_cli::requires_go_fallback(rest) => None,
         "memory" => Some(memory_cli::run(rest, stdout, stderr, format)),
-        "skills" => skills_cli::run(rest, stdout, stderr, format),
+        "skills" => Some(skills_cli::run(rest, stdout, stderr, format)),
         "activity" => Some(activity_cli::run(rest, stdout, stderr, format)),
         "vault" => Some(vault_admin::run(args, stdout, stderr)),
         "guard" => guard_cli::run(rest, stdout, stderr),

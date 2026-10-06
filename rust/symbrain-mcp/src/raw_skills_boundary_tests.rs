@@ -37,7 +37,7 @@ fn ignored_arguments_and_envelope_keep_full_go_depth_without_value128_fallback()
             );
         });
         // Ignored envelope member instead of an argument: total depth count+1.
-        let raw = body("{}", "").replacen("{", &format!(r#"{{"ignored":{nested},"#), 1);
+        let raw = body("{}", "").replacen('{', &format!(r#"{{"ignored":{nested},"#), 1);
         each_transport(raw.as_bytes(), |found| {
             assert!(found.is_ok());
         });

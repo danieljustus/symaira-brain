@@ -9,7 +9,7 @@ mod strings;
 #[path = "raw_skills_syntax.rs"]
 mod syntax;
 
-/// Original CoreKit registration order; also scopes raw transport admission.
+/// Original `CoreKit` registration order; also scopes raw transport admission.
 pub const SKILLS_TOOL_NAMES: &[&str] = &[
     "skills_list",
     "skills_inspect",
@@ -96,7 +96,8 @@ fn validate_any(raw: &str) -> Option<String> {
 /// Known Skills name and its separately decoded raw handler arguments.
 pub type RawSkillsCall = (String, Option<Box<RawValue>>);
 
-/// Validates Go's Name string / Arguments RawMessage / Meta map[string]any.
+/// Validates Go's `Name` string, `Arguments` `RawMessage`, and `Meta`
+/// `map[string]any`.
 /// A recognized call retains its first outer error and must never execute.
 /// None leaves syntactically valid other RPC owners on their original path.
 /// Complete syntax errors precede owner matching and typed field decoding.
@@ -189,8 +190,8 @@ pub(crate) fn transport_request(bytes: &[u8]) -> Option<Result<crate::Request, S
         || {
             Ok(crate::Request {
                 jsonrpc,
-                method,
                 id,
+                method,
                 params,
                 has_id,
             })

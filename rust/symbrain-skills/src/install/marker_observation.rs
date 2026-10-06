@@ -14,6 +14,12 @@ pub(super) fn read(root: &Dir) -> Result<Option<Observation>, SkillError> {
     match root.symlink_metadata(MARKER_FILE) {
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
         Err(error) => return Err(SkillError(error.to_string())),
+        Ok(metadata) if metadata.file_type().is_symlink() => {
+            return Ok(Some(Observation {
+                marker: empty(),
+                error: Some("marker is a symlink".to_owned()),
+            }));
+        }
         Ok(_) => {}
     }
     let bytes = crate::load::read_limited_nofollow(

@@ -75,7 +75,7 @@ fn incomplete_containers_and_ordinary_strings_keep_generic_eof() {
         b"[",
         br#"{"k""#,
         br#"{"k":"#,
-        br#"[1,"#,
+        br"[1,",
         br#""abc"#,
         br#""\u1234"#,
         br#"{"k":1"#,

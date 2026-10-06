@@ -1,9 +1,8 @@
 //! The remaining skills flag sets retain Go's raw argv and positional stop.
+use super::sync_bytes as bytes;
 use std::ffi::OsString;
 use std::io::Write;
 use symbrain_core::{config::format_go_quoted_bytes as quote, exit};
-#[path = "skills_sync_bytes.rs"]
-mod bytes;
 
 #[derive(Default)]
 pub(super) struct Flags {
@@ -104,13 +103,13 @@ pub(super) fn parse(verb: &str, args: &[OsString], stderr: &mut dyn Write) -> Re
             usage(verb, stderr);
             return Err(exit::USAGE);
         }
-        if !matches!(name, b"target" | b"scope")
-            && !(verb == "log" && matches!(name, b"skill" | b"limit" | b"l"))
+        if !(matches!(name, b"target" | b"scope")
+            || verb == "log" && matches!(name, b"skill" | b"limit" | b"l"))
         {
             return error(verb, stderr, b"flag provided but not defined: -", name);
         }
         let value = if end < raw.len() {
-            raw[end + 1..].clone()
+            raw[end + 1..].to_vec()
         } else {
             index += 1;
             let Some(value) = args.get(index) else {

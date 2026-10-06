@@ -106,26 +106,7 @@ pub(super) fn restore(value: &Value) -> Result<String, Error> {
     let restored = tmp.path().join(&name);
     vcs::extract(&dir, &resolved, &restored)
         .map_err(|error| Error::internal("extract revision", error))?;
-    let bundle = symbrain_skills::load_bundle(&restored).map_err(|error| {
-        Error::validation(
-            "restore skill",
-            format!("refusing restore to {resolved}: restored state is not a valid skill: {error}"),
-        )
-    })?;
-    let errors: Vec<_> = symbrain_skills::validate(&bundle)
-        .into_iter()
-        .filter(|issue| issue.severity == "error")
-        .map(|issue| issue.message.to_string())
-        .collect();
-    if !errors.is_empty() {
-        return Err(Error::validation(
-            "restore skill",
-            format!(
-                "refusing restore to {resolved}: restored state fails validation: {}",
-                errors.join("; ")
-            ),
-        ));
-    }
+    validate_restored_skill(&restored, &resolved)?;
     let changed = vcs::changed(&dir, &resolved)
         .map_err(|error| Error::internal("compare revision", error))?;
     let mut notes = vec![
@@ -155,59 +136,94 @@ pub(super) fn restore(value: &Value) -> Result<String, Error> {
     result["action"] = json!("restored");
     result["head"] = json!(head);
     if sync {
-        let statuses = symbrain_skills::install::status(&symbrain_skills::install::StatusOptions {
-            home_dir: config::home_dir(),
-            library_dir: cfg.library_dir.clone(),
-            base_dir: Some(cfg.base_dir.clone()),
-            ..Default::default()
-        })
-        .map_err(|error| Error::internal("post-restore status", error))?;
-        let stale = statuses
-            .iter()
-            .filter(|row| {
-                row.name == name
-                    && matches!(
-                        row.status,
-                        symbrain_skills::install::StatusKind::Stale
-                            | symbrain_skills::install::StatusKind::HarnessChanged
-                    )
-            })
-            .cloned()
-            .collect::<Vec<_>>();
-        let rows = if stale.is_empty() {
-            Value::Null
-        } else {
-            json!(
-                symbrain_skills::install::sync_selected(
-                    &symbrain_skills::install::SyncOptions {
-                        home_dir: config::home_dir(),
-                        library_dir: cfg.library_dir,
-                        base_dir: Some(cfg.base_dir),
-                        render_dir: Some(cfg.render_dir),
-                        skills: vec![name],
-                        ..Default::default()
-                    },
-                    &stale
-                )
-                .map_err(|error| Error::internal("sync restored skill", error))?
-                .into_iter()
-                .map(|row| {
-                    let mut out = json!({"target":row.target,"name":row.name,"action":row.action});
-                    if !row.error.is_empty() {
-                        out["error"] = json!(row.error);
-                    }
-                    if !row.path.as_os_str().is_empty() {
-                        out["path"] = json!(symbrain_skills::GoText::from_path(&row.path));
-                    }
-                    out
-                })
-                .collect::<Vec<_>>()
-            )
-        };
-        result["synced"] = rows;
+        result["synced"] = sync_restored(name, cfg.library_dir, cfg.base_dir, cfg.render_dir)?;
     }
     compact(&result)
 }
+
+fn validate_restored_skill(restored: &std::path::Path, resolved: &str) -> Result<(), Error> {
+    let bundle = symbrain_skills::load_bundle(restored).map_err(|error| {
+        Error::validation(
+            "restore skill",
+            format!("refusing restore to {resolved}: restored state is not a valid skill: {error}"),
+        )
+    })?;
+    let errors: Vec<_> = symbrain_skills::validate(&bundle)
+        .into_iter()
+        .filter(|issue| issue.severity == "error")
+        .map(|issue| issue.message.to_string())
+        .collect();
+    if errors.is_empty() {
+        Ok(())
+    } else {
+        Err(Error::validation(
+            "restore skill",
+            format!(
+                "refusing restore to {resolved}: restored state fails validation: {}",
+                errors.join("; ")
+            ),
+        ))
+    }
+}
+
+fn sync_restored(
+    name: String,
+    library_dir: std::path::PathBuf,
+    base_dir: std::path::PathBuf,
+    render_dir: std::path::PathBuf,
+) -> Result<Value, Error> {
+    let statuses = symbrain_skills::install::status(&symbrain_skills::install::StatusOptions {
+        home_dir: config::home_dir(),
+        library_dir: library_dir.clone(),
+        base_dir: Some(base_dir.clone()),
+        ..Default::default()
+    })
+    .map_err(|error| Error::internal("post-restore status", error))?;
+    let stale = statuses
+        .iter()
+        .filter(|row| {
+            row.name == name
+                && matches!(
+                    row.status,
+                    symbrain_skills::install::StatusKind::Stale
+                        | symbrain_skills::install::StatusKind::HarnessChanged
+                )
+        })
+        .cloned()
+        .collect::<Vec<_>>();
+    let rows = if stale.is_empty() {
+        Value::Null
+    } else {
+        json!(
+            symbrain_skills::install::sync_selected(
+                &symbrain_skills::install::SyncOptions {
+                    home_dir: config::home_dir(),
+                    library_dir,
+                    base_dir: Some(base_dir),
+                    render_dir: Some(render_dir),
+                    skills: vec![name],
+                    ..Default::default()
+                },
+                &stale
+            )
+            .map_err(|error| Error::internal("sync restored skill", error))?
+            .into_iter()
+            .map(|row| {
+                let mut out = json!({"target":row.target,"name":row.name,"action":row.action});
+                if !row.error.is_empty() {
+                    out["error"] = json!(row.error);
+                }
+                if !row.path.as_os_str().is_empty() {
+                    out["path"] = json!(symbrain_skills::GoText::from_path(&row.path));
+                }
+                out
+            })
+            .collect::<Vec<_>>()
+        )
+    };
+    Ok(rows)
+}
+
 fn temp_directory() -> Result<tempfile::TempDir, Error> {
     tempfile::Builder::new()
         .prefix("symskills-restore-")

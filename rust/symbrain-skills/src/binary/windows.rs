@@ -1,6 +1,8 @@
-//! Native Windows Go LookPath: extensions, implicit cwd and Lstat identity.
+//! Native Windows Go `LookPath`: extensions, implicit cwd and `Lstat` identity.
 use super::{Executable, godebug, path};
 use crate::SkillError;
+#[cfg(windows)]
+use std::os::windows::ffi::OsStrExt;
 use std::{
     ffi::{OsStr, OsString},
     fs,
@@ -57,8 +59,10 @@ fn absolute(candidate: PathBuf) -> Option<Executable> {
 fn extensions() -> Vec<OsString> {
     let text = std::env::var_os("PATHEXT")
         .filter(|value| !value.is_empty())
-        .map(|value| go_lower(value.as_encoded_bytes()))
-        .unwrap_or_else(|| ".com;.exe;.bat;.cmd".into());
+        .map_or_else(
+            || ".com;.exe;.bat;.cmd".to_owned(),
+            |value| go_lower(value.as_encoded_bytes()),
+        );
     text.split(';')
         .filter(|part| !part.is_empty())
         .map(|part| {
@@ -110,7 +114,6 @@ fn find(program: &Path, extensions: &[OsString]) -> Option<PathBuf> {
     }
     // The provider is a basename here. A dot starts an extension, including
     // a leading dot; don't inspect or normalize its native encoding.
-    use std::os::windows::ffi::OsStrExt;
     let has_extension = program.file_name()?.encode_wide().any(|unit| unit == 46);
     if has_extension && present(program) {
         return Some(program.to_owned());

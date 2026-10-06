@@ -11,6 +11,8 @@ mod list;
 mod misc;
 #[path = "skills_cli_status.rs"]
 mod status;
+#[path = "skills_sync_bytes.rs"]
+mod sync_bytes;
 #[path = "skills_sync_flags.rs"]
 mod sync_flags;
 const SKILLS_USAGE: &str = r"symbrain skills — embedded skill library operations
@@ -36,16 +38,16 @@ pub fn run(
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
-) -> Option<u8> {
+) -> u8 {
     if args.is_empty() {
         let _ = write!(stderr, "{SKILLS_USAGE}");
-        return Some(exit::USAGE);
+        return exit::USAGE;
     }
 
     let verb = args[0].to_string_lossy();
     let rest = &args[1..];
 
-    Some(match verb.as_ref() {
+    match verb.as_ref() {
         "-h" | "--help" => {
             let _ = write!(stdout, "{SKILLS_USAGE}");
             exit::OK
@@ -65,7 +67,7 @@ pub fn run(
             let _ = write!(stderr, "{SKILLS_USAGE}");
             exit::USAGE
         }
-    })
+    }
 }
 
 pub(crate) fn resolve_skills_dirs() -> (PathBuf, PathBuf, PathBuf) {

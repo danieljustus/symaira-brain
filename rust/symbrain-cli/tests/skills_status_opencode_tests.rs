@@ -249,9 +249,25 @@ fn opencode_user_status_marker_states_are_native() {
             "stale"
         }));
         if name == "wrongtype" {
-            assert!(table.contains(
-                "json: cannot unmarshal number into Go struct field Marker.installed of type string"
-            ));
+            // Go's status table omits diagnostics; assert the typed error via JSON.
+            let json_output = run(
+                &root,
+                &["skills", "status", "--target", "opencode", "--json"],
+            );
+            assert!(
+                json_output.status.success(),
+                "{name}: {:?}",
+                json_output.stderr
+            );
+            assert!(json_output.stderr.is_empty());
+            let report: serde_json::Value = serde_json::from_slice(&json_output.stdout).unwrap();
+            let error = report["installs"][0]["error"].as_str().unwrap();
+            assert!(
+                error.contains(
+                    "json: cannot unmarshal number into Go struct field Marker.installed of type string"
+                ),
+                "{name}: {error}"
+            );
         }
         if name == "schema" {
             assert!(table.contains("copy"));

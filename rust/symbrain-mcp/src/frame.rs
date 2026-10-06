@@ -314,10 +314,21 @@ mod tests {
                 assert!(request.0.params.unwrap().get().contains(arguments));
             }
             let ordinary = body.replace("skills_history", "memory_get");
-            assert!(matches!(
-                parse_request(ordinary.as_bytes(), Mode::Line),
-                Err(FrameError::Parse { .. })
-            ));
+            assert!(crate::raw_skills::transport_request(ordinary.as_bytes()).is_none());
+            // Workspace dependencies can enable serde_json's arbitrary_precision.
+            // Other owners must retain the pre-Skills Value validation in either build.
+            let original = serde_json::from_slice::<Value>(ordinary.as_bytes());
+            for mode in [Mode::Line, Mode::Framed] {
+                let decoded = parse_request(ordinary.as_bytes(), mode);
+                match &original {
+                    Ok(_) => assert!(decoded.is_ok(), "arguments={arguments}: {decoded:?}"),
+                    Err(error) => assert!(
+                        matches!(decoded, Err(FrameError::Parse { message, .. })
+                            if message == error.to_string()),
+                        "arguments={arguments}"
+                    ),
+                }
+            }
         }
         let malformed = br#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"skills_list","arguments":{}}"#;
         assert!(matches!(

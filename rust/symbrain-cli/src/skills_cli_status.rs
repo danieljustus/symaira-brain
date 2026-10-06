@@ -1,6 +1,6 @@
 //! Fleet status and repair share the existing install policy.
+use super::current_project_dir;
 use super::sync_flags;
-use super::{current_project_dir, or_dash};
 use crate::go_json;
 use serde::Serialize;
 use std::ffi::OsString;

@@ -59,7 +59,14 @@ pub(crate) fn join(directory: &Path, program: &Path) -> PathBuf {
         }
     }
     path.extend(next);
-    native(clean(&path))
+    #[cfg(unix)]
+    {
+        native(clean(&path))
+    }
+    #[cfg(windows)]
+    {
+        native(&clean(&path))
+    }
 }
 
 pub(super) fn is_absolute(path: &Path) -> bool {
@@ -101,9 +108,9 @@ fn native(input: Vec<u16>) -> PathBuf {
     .into()
 }
 #[cfg(windows)]
-fn native(input: Vec<u16>) -> PathBuf {
+fn native(input: &[u16]) -> PathBuf {
     use std::os::windows::ffi::OsStringExt;
-    std::ffi::OsString::from_wide(&input).into()
+    std::ffi::OsString::from_wide(input).into()
 }
 fn separator(unit: u16) -> bool {
     #[cfg(unix)]
@@ -220,7 +227,9 @@ fn prefix(input: &[u16], prefix: &[u8]) -> bool {
             if separator(u16::from(*byte)) {
                 separator(*unit)
             } else {
-                *unit <= 127 && (*unit as u8).to_ascii_uppercase() == byte.to_ascii_uppercase()
+                u8::try_from(*unit).is_ok_and(|candidate| {
+                    candidate.is_ascii() && candidate.eq_ignore_ascii_case(byte)
+                })
             }
         })
         && (input.len() == prefix.len() || separator(input[prefix.len()]))
@@ -239,6 +248,8 @@ fn unc_len(input: &[u16], start: usize) -> usize {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(windows)]
+    use std::os::windows::ffi::OsStringExt;
     #[cfg(unix)]
     #[test]
     fn unix_candidates_clean_lexically_without_losing_bytes() {
@@ -288,7 +299,14 @@ mod tests {
                 "{directory}"
             );
         }
-        use std::os::windows::ffi::OsStringExt;
+        assert!(prefix(
+            &[92, 92, 46, 92, 117, 110, 99, 92],
+            &[92, 92, 46, 92, 85, 78, 67]
+        ));
+        assert!(!prefix(
+            &[92, 92, 46, 92, 0x0130, 78, 67, 92],
+            &[92, 92, 46, 92, 85, 78, 67]
+        ));
         let raw = std::ffi::OsString::from_wide(&[67, 58, 92, 0xd800, 92, 46, 46, 92, 0xd801]);
         assert_eq!(
             units(&join(Path::new(&raw), Path::new("symvault"))),

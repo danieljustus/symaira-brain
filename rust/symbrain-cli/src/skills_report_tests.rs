@@ -25,10 +25,7 @@ fn owned_writer_child() {
     };
     let mut stderr = Vec::new();
     let args = vec![OsString::from(verb)];
-    assert_eq!(
-        super::run(&args, &mut FailedWriter, &mut stderr, format),
-        Some(1)
-    );
+    assert_eq!(super::run(&args, &mut FailedWriter, &mut stderr, format), 1);
     assert_eq!(
         stderr,
         format!("symbrain skills {verb}: format output: owned report writer failed\n").as_bytes()

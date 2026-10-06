@@ -6,8 +6,7 @@ use std::io::Write;
 use symbrain_core::config::format_go_quoted_bytes as format_go_quoted;
 use symbrain_core::exit;
 
-#[path = "skills_sync_bytes.rs"]
-mod bytes;
+use super::sync_bytes as bytes;
 
 const USAGE: &str = "Usage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n";
 
