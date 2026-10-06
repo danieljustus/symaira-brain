@@ -1,9 +1,13 @@
 //! Lexical credential joins and bounded credential JSON admission.
+#[cfg(unix)]
+use super::credential_join;
 use super::{
-    CredentialFields, MAX_CREDENTIAL_FILE_BYTES, credential_join, go_json_credential_limits,
+    CredentialFields, MAX_CREDENTIAL_FILE_BYTES, go_json_credential_limits,
     read_provider_credentials,
 };
-use std::path::{Path, PathBuf};
+use std::path::Path;
+#[cfg(unix)]
+use std::path::PathBuf;
 
 #[cfg(unix)]
 #[test]
