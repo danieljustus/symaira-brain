@@ -3007,10 +3007,13 @@ def go_reports_install_atime(goos: str) -> bool:
 
 
 def normalize_fixture_root(data: bytes, root: Path) -> bytes:
-    """Replace only the supplied fixture root in plain or JSON-escaped output."""
+    """Bind the supplied root in plain, JSON and quoted-error JSON output."""
     raw_root = str(root).encode()
-    json_root = json.dumps(str(root), ensure_ascii=True)[1:-1].encode("ascii")
-    return data.replace(json_root, b"<root>").replace(raw_root, b"<root>")
+    json_text = json.dumps(str(root), ensure_ascii=True)[1:-1]
+    json_root = json_text.encode("ascii")
+    # Go's quoted executable path is itself escaped by the outer JSON string.
+    quoted_json_root = json.dumps(json_text, ensure_ascii=True)[1:-1].encode("ascii")
+    return data.replace(quoted_json_root, b"<root>").replace(json_root, b"<root>").replace(raw_root, b"<root>")
 
 
 def normalize_atomic_tempfile(data: bytes) -> bytes:

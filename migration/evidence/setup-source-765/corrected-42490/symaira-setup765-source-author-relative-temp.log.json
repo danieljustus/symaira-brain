@@ -1,0 +1,4 @@
+{
+  "sha256": "4fda8a88e7cfab92237ab94a017f3c3d183d0588c5f748faea8ccc620e5bff3b",
+  "text": "[('relative-temp-missing', ['stdout_base64', 'stderr_base64', 'filesystem']), ('relative-temp-file', ['stdout_base64', 'stderr_base64', 'filesystem']), ('relative-temp-valid', ['exit', 'stdout_base64', 'filesystem'])]\n"
+}

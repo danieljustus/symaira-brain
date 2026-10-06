@@ -1,0 +1,1029 @@
+{
+  "tested_source": "7b10ff20027407ca9bc32f3d72e28d07003fce77",
+  "archive_sha256": "2baa981fa69798f208d6932a02f7818d66640cef032a2079c0b53b98fff1def2",
+  "files": [
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/031afbedd3b2e8ee58d890b8ff3df3df67f5556ff174768ec17e9fe31d44ae40.gz",
+      "archive_member": "runtime/blobs/031afbedd3b2e8ee58d890b8ff3df3df67f5556ff174768ec17e9fe31d44ae40.gz",
+      "sha256": "dc24ef31c400d428eba747d471a80137058849234854102bae49f4a9cd4529cc",
+      "bytes": 4756,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368899065073
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/06db35984042016079d7cb5fa2e953189b1fddc227094e1011d9b939d13c6968.gz",
+      "archive_member": "runtime/blobs/06db35984042016079d7cb5fa2e953189b1fddc227094e1011d9b939d13c6968.gz",
+      "sha256": "890ee00571723198ebde7fde6b29cc40390dfdab3bf02b074d35d8bfcc669d5c",
+      "bytes": 2208,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368900011353
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/0962955bc8346f16a7d326c60000a77972b039370b8169766d4afd4867b8c550.gz",
+      "archive_member": "runtime/blobs/0962955bc8346f16a7d326c60000a77972b039370b8169766d4afd4867b8c550.gz",
+      "sha256": "89383d3a3cc3db389c13c58b5fdb9fdd395a6effefc4390af04815ae4236a2ca",
+      "bytes": 250,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168984350558
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/0a1da9221a44d1232e50b4da30f511d9ed25bbc96000305d466209508ea13342.gz",
+      "archive_member": "runtime/blobs/0a1da9221a44d1232e50b4da30f511d9ed25bbc96000305d466209508ea13342.gz",
+      "sha256": "f367c786a9f4f423c07a64472e2b814f3f900567706668b42f29b653dc8d3e24",
+      "bytes": 325,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168985007551
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/0bbfd988045f66e78e7416a1a0d47016ea966c65323d2c6ca7a18cdf4b7b5df0.gz",
+      "archive_member": "runtime/blobs/0bbfd988045f66e78e7416a1a0d47016ea966c65323d2c6ca7a18cdf4b7b5df0.gz",
+      "sha256": "a7d31149740f964ded9542a2b1705684c03e9fc2dd2a03ee1bbdf98b6599267b",
+      "bytes": 17246,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368896766438
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/1ba1731cd707a07d7e6764356de04d57f7f488ab23b564ace07a69c53b274d86.gz",
+      "archive_member": "runtime/blobs/1ba1731cd707a07d7e6764356de04d57f7f488ab23b564ace07a69c53b274d86.gz",
+      "sha256": "68e559483af751671e343dcd902a91d0762e56af6c26c438a1dde010c753c08e",
+      "bytes": 1345,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368899234138
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3.gz",
+      "archive_member": "runtime/blobs/23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3.gz",
+      "sha256": "7265257a5925590f14fe9cf5f4f89890501661fa4482383b50c43993195bf792",
+      "bytes": 625,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368899616186
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/2698c68a7f9a546c4f5605621edd5d7d63c33512e1f817056946bc68a7fce312.gz",
+      "archive_member": "runtime/blobs/2698c68a7f9a546c4f5605621edd5d7d63c33512e1f817056946bc68a7fce312.gz",
+      "sha256": "9c27d47b39854827c11ba1934337643745bee89b0b9b6780bdd8d8e32fcab7fe",
+      "bytes": 443,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168985101303
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/30970cd447378a6e045c396ae07f91573f8d4ac5307fd21a952f354500e2265e.gz",
+      "archive_member": "runtime/blobs/30970cd447378a6e045c396ae07f91573f8d4ac5307fd21a952f354500e2265e.gz",
+      "sha256": "06136cb954880143bc72da7b3179a126bbd155d9fab4389e6fffc34e19b89dbb",
+      "bytes": 5140,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168992484324
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/34e7799cbb369b8e614ea9d02b9e09ef59b720452e47ad45a8541bd10196dd0d.gz",
+      "archive_member": "runtime/blobs/34e7799cbb369b8e614ea9d02b9e09ef59b720452e47ad45a8541bd10196dd0d.gz",
+      "sha256": "8f89f8bb792ad1e66c4b1d5b1f27c121a30a208999f5358e386f16553b656bb1",
+      "bytes": 451,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168985189867
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/3945d328a9072e4f5970b7d4bc0eb834eec29fd22889a1ed9f3fb76ad41c3274.gz",
+      "archive_member": "runtime/blobs/3945d328a9072e4f5970b7d4bc0eb834eec29fd22889a1ed9f3fb76ad41c3274.gz",
+      "sha256": "88146a3b9a2c6afb8571246cbbd5f0959f3a5bbcd9ec08dc160947fa1fa0cb77",
+      "bytes": 7959,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368896113661
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/3d27d6ec42a0c4833e243d93e5cfde4279c902690e041d8c908fab01908d1240.gz",
+      "archive_member": "runtime/blobs/3d27d6ec42a0c4833e243d93e5cfde4279c902690e041d8c908fab01908d1240.gz",
+      "sha256": "96e125b440c420eaca7b9ea902f05ad167ef3e76c45d725f2b68c0aa1fea8928",
+      "bytes": 6069,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368898201678
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/4b53e43462f34976b8a5a3663d40ed9b832afb825b2d3db36f5252bb329ab9d0.gz",
+      "archive_member": "runtime/blobs/4b53e43462f34976b8a5a3663d40ed9b832afb825b2d3db36f5252bb329ab9d0.gz",
+      "sha256": "f45d794297c60a438b5e60c6ba666859cd6004d7c6871931aeb69f3c2a7e4ece",
+      "bytes": 452,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168985277018
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/4dad44c91df77ddb06a062cbd03fb1ef2719d4e3b16f918748dd21f7263226cb.gz",
+      "archive_member": "runtime/blobs/4dad44c91df77ddb06a062cbd03fb1ef2719d4e3b16f918748dd21f7263226cb.gz",
+      "sha256": "0f312e3e6b4d83c16381bbeedfbc10ed2612eb51e16aec9e16e4f0fe99e54905",
+      "bytes": 328,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168985389599
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/57f9028ac13e80d2106dc60649b0101b540957729a1dc9f775211aea6bd9a624.gz",
+      "archive_member": "runtime/blobs/57f9028ac13e80d2106dc60649b0101b540957729a1dc9f775211aea6bd9a624.gz",
+      "sha256": "2caf96a6daee6d237e8d1e828a9269c4a2ef81f2870c39ff239502247a9c379c",
+      "bytes": 1862,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368897742874
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/5aa9567f66e2170d34f1a14bbc9c08061d825cd4006a3ee60134c25934e12013.gz",
+      "archive_member": "runtime/blobs/5aa9567f66e2170d34f1a14bbc9c08061d825cd4006a3ee60134c25934e12013.gz",
+      "sha256": "721f4e6e0e3a51d0968a9bc2cba0e1477f7bd6929d3e5e2eb03edb3a8416fdb8",
+      "bytes": 452,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168985474717
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/5bdc2eca24955c1580ab2966dc25102363852f3f8a78a2ecab24f1799e8dbf6e.gz",
+      "archive_member": "runtime/blobs/5bdc2eca24955c1580ab2966dc25102363852f3f8a78a2ecab24f1799e8dbf6e.gz",
+      "sha256": "08ee65286c527fdaf28927b46d44fbbdc96266f182383ccaa8135653fe1d45a7",
+      "bytes": 2501,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368900433081
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/5ee781400e1f04ffea869496f161555f31d1af0ca521fb77ef16f54522808746.gz",
+      "archive_member": "runtime/blobs/5ee781400e1f04ffea869496f161555f31d1af0ca521fb77ef16f54522808746.gz",
+      "sha256": "034c51c56ce90caccecf23b7d5b4c37913c5b45d380be7030bc29a36237e5bc5",
+      "bytes": 1056,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368897382199
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "archive_member": "runtime/blobs/62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a.gz",
+      "sha256": "3d2014eeaf84f203eb3df32e1425c04891c9462e76618f272c6634a59bea5864",
+      "bytes": 3948,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368899476915
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/6bfd788cee539d0b34786baf1e01f79bb610be7e5a8bbf157ccc91b64c4eee77.gz",
+      "archive_member": "runtime/blobs/6bfd788cee539d0b34786baf1e01f79bb610be7e5a8bbf157ccc91b64c4eee77.gz",
+      "sha256": "795d2710c3ba6dfdfb38945bd19b391b81399bc0c4ec67d9534cbabb5ab65274",
+      "bytes": 12977,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368895544421
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/6d327142b5b9df0dc066a7a3ed6a8f218867f7313d97061f5199a9f6e7003317.gz",
+      "archive_member": "runtime/blobs/6d327142b5b9df0dc066a7a3ed6a8f218867f7313d97061f5199a9f6e7003317.gz",
+      "sha256": "b38d4a99937e800e3782eb7d61ae3ebc3977c2c1ce3a4bd7e0effae5a9ea379f",
+      "bytes": 385,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168983843831
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/76214e10c89af6589af8fc9c2ae1d4c319596a07b2a2945afbc4a23b1d52a2b9.gz",
+      "archive_member": "runtime/blobs/76214e10c89af6589af8fc9c2ae1d4c319596a07b2a2945afbc4a23b1d52a2b9.gz",
+      "sha256": "03476ca66b396191462b9869117a2dd85d55526c6d63cdd21256362b6e8cc4c2",
+      "bytes": 2906,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368900609237
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/7a3c8f10605e5ea468538b1833b04ddf609bff84999b037839ef23d99afc50c4.gz",
+      "archive_member": "runtime/blobs/7a3c8f10605e5ea468538b1833b04ddf609bff84999b037839ef23d99afc50c4.gz",
+      "sha256": "69103d982c307adc5b698faab930f38952b296e2f71f54a0a0a0a406f4cf311c",
+      "bytes": 2009,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368897896566
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/80afb409cd15363f10cb23f73b4735eb2efab5cdd283249e88f466c2e08114ea.gz",
+      "archive_member": "runtime/blobs/80afb409cd15363f10cb23f73b4735eb2efab5cdd283249e88f466c2e08114ea.gz",
+      "sha256": "66356dfab315a7d9ea27f7e5500b39be217e597d29702c331a0593e12788f65e",
+      "bytes": 386,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168984751884
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/89f723ad27054a2ccc7c22f2a974886f3077f64623a231297fcea2e74a73a782.gz",
+      "archive_member": "runtime/blobs/89f723ad27054a2ccc7c22f2a974886f3077f64623a231297fcea2e74a73a782.gz",
+      "sha256": "05a11f7edaa9717ff1937b4f1e9bbf67418785cb09996ae3a8d351fe39bdf646",
+      "bytes": 55,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368894422224
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/8cd51cf4e08274448b91a756e9aba9d9c37491a7760ce1401f8d7964a86fe0c9.gz",
+      "archive_member": "runtime/blobs/8cd51cf4e08274448b91a756e9aba9d9c37491a7760ce1401f8d7964a86fe0c9.gz",
+      "sha256": "81e556b7ebc1e976955091207c08b820d5cf0c6bc0560e6e8bed91edc01bc532",
+      "bytes": 11327,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168983543327
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad.gz",
+      "archive_member": "runtime/blobs/911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad.gz",
+      "sha256": "dc7ac43d86022407b6794e6e8b6e2680be45e285059db5cceb821d558d70d227",
+      "bytes": 793,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368894135421
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/9431bc4aa4cb65ad8f009706bf4887234a9e991297436d0517dd65025f24c761.gz",
+      "archive_member": "runtime/blobs/9431bc4aa4cb65ad8f009706bf4887234a9e991297436d0517dd65025f24c761.gz",
+      "sha256": "74234e6dea3d8b2585553359e64dc1cd54b1e4946b51b23fe9e366c3074c0689",
+      "bytes": 600,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168984627767
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/96c1af1caace59a146241f5a48a700a142f2e5520f932fb2fc6376ce5a94ed81.gz",
+      "archive_member": "runtime/blobs/96c1af1caace59a146241f5a48a700a142f2e5520f932fb2fc6376ce5a94ed81.gz",
+      "sha256": "6e25694de50ba908ad3b33cc548b0c574084d913775e3ed562b9240cad4e0d1c",
+      "bytes": 1578,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368898846482
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/a570fd076b8345a48ef72a964e70ad3dd50fad10117f1d65915a67930c764d88.gz",
+      "archive_member": "runtime/blobs/a570fd076b8345a48ef72a964e70ad3dd50fad10117f1d65915a67930c764d88.gz",
+      "sha256": "faf6eea61f3049a0f93a779b92499efb65b0968fad09adbc2e859547494cac26",
+      "bytes": 147,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168983007808
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/acdfd37ad65457f7dd93b32ac758c7ed2e8f8d94a9b93501aa8b9fcc1a04d36e.gz",
+      "archive_member": "runtime/blobs/acdfd37ad65457f7dd93b32ac758c7ed2e8f8d94a9b93501aa8b9fcc1a04d36e.gz",
+      "sha256": "9c1d0a858cf7d12f2857a747cd977cf5ea051bedf2426ecf7c0037efce751732",
+      "bytes": 342,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168985557132
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/ad313fae9fd1e150df082ad7f43c34b0830ce79433d0eef89c7724fdb07d06bb.gz",
+      "archive_member": "runtime/blobs/ad313fae9fd1e150df082ad7f43c34b0830ce79433d0eef89c7724fdb07d06bb.gz",
+      "sha256": "beb3d591473a6614b90361c1ef0231d09a54cb3918d25c2232dd2f5ac9cda16b",
+      "bytes": 3618,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368894955430
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/b3c5f20bb17ee4276bad3ee7ce928a2b8385582b0a4fb681de124cb2a02a289d.gz",
+      "archive_member": "runtime/blobs/b3c5f20bb17ee4276bad3ee7ce928a2b8385582b0a4fb681de124cb2a02a289d.gz",
+      "sha256": "9edf9770879f16b69fcd222b502bab019c548b82928271a0c19dbc6b27fb21ef",
+      "bytes": 535,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168971725081
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/b43699d7c9c5fa2cfe82edb55be04b509619232ad514a34a11c481d43290a6fd.gz",
+      "archive_member": "runtime/blobs/b43699d7c9c5fa2cfe82edb55be04b509619232ad514a34a11c481d43290a6fd.gz",
+      "sha256": "1d18633de60c9ef56358e534af5860d91d7b1b76432785046a13102c79f908c9",
+      "bytes": 2469,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368897561860
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/bae05beda5427bb8124d5179892c57cb09332e8948c85dc7e0e02eb902d4ddbc.gz",
+      "archive_member": "runtime/blobs/bae05beda5427bb8124d5179892c57cb09332e8948c85dc7e0e02eb902d4ddbc.gz",
+      "sha256": "f7d0a1828ba5a793aceb16d5b26b78375a99068bec8ae1e837cd7b4a9228dfd1",
+      "bytes": 447,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168985641149
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/bc12f1809a643d4a5603ff3536ffbe25e5c8adbb95b571fc071aa9be9345de2d.gz",
+      "archive_member": "runtime/blobs/bc12f1809a643d4a5603ff3536ffbe25e5c8adbb95b571fc071aa9be9345de2d.gz",
+      "sha256": "2ea7030f2b0e65637c2fdd2aae9641bc794ed2e5705f4de56b34fd9132bafee9",
+      "bytes": 2849,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168991918869
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/c121266e89fba7fdfadc1cba64c1446f3a24d7ff25ac1b368f9306de08123725.gz",
+      "archive_member": "runtime/blobs/c121266e89fba7fdfadc1cba64c1446f3a24d7ff25ac1b368f9306de08123725.gz",
+      "sha256": "d5e4de91454e6f8009f0a09c9e6557f1db4f91d996df48abac72b56a51c1cbc1",
+      "bytes": 559,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168887850764
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/c23981c0da706e921492f4032181ca86fecd3531d12e2282c1180eaff8fcf932.gz",
+      "archive_member": "runtime/blobs/c23981c0da706e921492f4032181ca86fecd3531d12e2282c1180eaff8fcf932.gz",
+      "sha256": "e8a0fb71f9a8d305dea54205106dfe5ff615f30be26e58a3938af9f3a1413821",
+      "bytes": 4167,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368900219067
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/cda165c90fe45b3ea2ac4b67a4039cab87c8ec97dd654e4d36c345e55413f5d9.gz",
+      "archive_member": "runtime/blobs/cda165c90fe45b3ea2ac4b67a4039cab87c8ec97dd654e4d36c345e55413f5d9.gz",
+      "sha256": "0bf49b8b57813627fd9e3d4ec32875bb05fae79e9a6939ae8b7e37bad2df1d06",
+      "bytes": 246,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168983967518
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/d413a4a626a4bb4533a7171e42a1884f4dc6e02f24691e3a1f17193250ecab09.gz",
+      "archive_member": "runtime/blobs/d413a4a626a4bb4533a7171e42a1884f4dc6e02f24691e3a1f17193250ecab09.gz",
+      "sha256": "f513b6a6621b5c70a3c527f40a8997b8a074452b76e743f43a85ef65b2280dd5",
+      "bytes": 441,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168985721580
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/d660730d93d7e0bf09c98d76a7744cdd768936867252c2793a16a69c1008c847.gz",
+      "archive_member": "runtime/blobs/d660730d93d7e0bf09c98d76a7744cdd768936867252c2793a16a69c1008c847.gz",
+      "sha256": "e0f8cb654e0e073834a2e8dd2e5ed19f11238dbff75c2cade8b8e6b59306bcad",
+      "bytes": 1135,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168985903856
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/d71b3fddc3624cc6b8ad5c297afe4deb95a47f883b86391d6f53afdb09f9606e.gz",
+      "archive_member": "runtime/blobs/d71b3fddc3624cc6b8ad5c297afe4deb95a47f883b86391d6f53afdb09f9606e.gz",
+      "sha256": "7cc6874a559f36f4f6937bd73985ff80beed259e005132ac51c58eaa851591a9",
+      "bytes": 343,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168985800530
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/dd1a0138328d6353d089d6ba8e04905d9e951bedfef1b85913c64de2ca2fd223.gz",
+      "archive_member": "runtime/blobs/dd1a0138328d6353d089d6ba8e04905d9e951bedfef1b85913c64de2ca2fd223.gz",
+      "sha256": "b776a67b1d1899e9167110e8d48aaa71532d4d7aaa663a315d99e4ce0b66024a",
+      "bytes": 2339,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368894600003
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/e3af6c2af08c92039ddd20a9fe13d658b927717560be6583af176f5138403d04.gz",
+      "archive_member": "runtime/blobs/e3af6c2af08c92039ddd20a9fe13d658b927717560be6583af176f5138403d04.gz",
+      "sha256": "37f2d9f7bbf91ba623e730f42dfd76384251216cff0bebb4c41edb2663b36a07",
+      "bytes": 3301,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168992118030
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/e5ed0d0714bafc648f0fe497e4b2eb5682adfd8c31ba4c74a7ed2d13f6e7dfc5.gz",
+      "archive_member": "runtime/blobs/e5ed0d0714bafc648f0fe497e4b2eb5682adfd8c31ba4c74a7ed2d13f6e7dfc5.gz",
+      "sha256": "338024516a531ffbeb23d824bc25301e71aeb4f2aec02166530e02c8147033d3",
+      "bytes": 4877,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368899826985
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/eb7d1ddb99b53810f008faf096d15cdcb28ae04c66024345fcfcd0b08397d93a.gz",
+      "archive_member": "runtime/blobs/eb7d1ddb99b53810f008faf096d15cdcb28ae04c66024345fcfcd0b08397d93a.gz",
+      "sha256": "93c1bfa18ae5ccaf31ffc15f11d54620b365c52a75b1a58053904b49e3fd7a2b",
+      "bytes": 5904,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368898632549
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/blobs/efe0223b0593ed472ab08e7e103dc608e4875073ccd6e8d531cfd57b19a6eaa1.gz",
+      "archive_member": "runtime/blobs/efe0223b0593ed472ab08e7e103dc608e4875073ccd6e8d531cfd57b19a6eaa1.gz",
+      "sha256": "7031fcde9482001221a4d9a8d6d39d7ec8726fa011f0691d5272e22a78f16636",
+      "bytes": 499,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112168984494345
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/receipt.json",
+      "archive_member": "runtime/receipt.json",
+      "sha256": "cd0697c2f6cb943401e0f72f9514b60cdded9232d6fd73b509f9b56731db4ca3",
+      "bytes": 9372051,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112182264525971
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/release.json",
+      "archive_member": "runtime/release.json",
+      "sha256": "bf18d7d1bff8a344d037e5f35c988d480824c671256630b917b6c2ec3d9405db",
+      "bytes": 905,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368939507390
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/review.md",
+      "archive_member": "runtime/review.md",
+      "sha256": "5ac1dfc2a4117c5c3befbe24764593c4aba8333ce16bf87b1539448857df6e99",
+      "bytes": 9646,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112318836899987
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/sdk-payload-retention.json",
+      "archive_member": "runtime/sdk-payload-retention.json",
+      "sha256": "5292158406359c44b438e411f5c7341c5d339cfac2b757753b934a07880cb369",
+      "bytes": 11377,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368900860697
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/source-projection.json",
+      "archive_member": "runtime/source-projection.json",
+      "sha256": "8cf2ceaa923cc7b24598d176a8abe65ada2f6ee9d5d305af43f6120dc1a4d264",
+      "bytes": 12665,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112318898704846
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/cache-body-verification.json",
+      "archive_member": "independent/cache-body-verification.json",
+      "sha256": "412853e79b16957a4daa7e449c5a98a5c5a15d3dd5a441f6b16e79e98392863b",
+      "bytes": 925596,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112789729961138
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/final-binding-verification.json",
+      "archive_member": "independent/final-binding-verification.json",
+      "sha256": "c217a88edc4155efe6e58983eefc7963728432392d0a7dffc20b3c502aa8bfbd",
+      "bytes": 9029,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113778959073750
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/independent-review.md",
+      "archive_member": "independent/independent-review.md",
+      "sha256": "de1a76c0848e8bf2e9ce5cadab87d21847fc3554101c8acf810555c8a0bcb4b2",
+      "bytes": 11239,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113879142910168
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/initial-verifier-boundary-assumption.json",
+      "archive_member": "independent/initial-verifier-boundary-assumption.json",
+      "sha256": "8bb2c9c087f70949e9ac9d549cdc3dfe46384a842c5844e819a5acafab7005df",
+      "bytes": 1143,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113523766058814
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/initial-verifier-count-assumption.json",
+      "archive_member": "independent/initial-verifier-count-assumption.json",
+      "sha256": "835a755dbe3e926703716bb52450b6a805b0e49ace26e76dbb628bc29847cce2",
+      "bytes": 1043,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113141403985372
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/initial-verifier-evidence-Go-tests-shape.json",
+      "archive_member": "independent/initial-verifier-evidence-Go-tests-shape.json",
+      "sha256": "a9659cc0839d6fbcab4100ae12378f4f80413a63625e981b29229e6932a34480",
+      "bytes": 1001,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113642683197437
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/initial-verifier-evidence-reason-shape.json",
+      "archive_member": "independent/initial-verifier-evidence-reason-shape.json",
+      "sha256": "2f2b851dd728c27cdda45b9fdde85be6fff39fdcb4c7c18240a846fb583acfa7",
+      "bytes": 1045,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113660904330015
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/initial-verifier-evidence-shape.json",
+      "archive_member": "independent/initial-verifier-evidence-shape.json",
+      "sha256": "b594cf95dad8719cbf61222019a0c3ea422d758b114f9ef737f7eca2b8c2c988",
+      "bytes": 991,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113621661589179
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/initial-verifier-final-stage-root.json",
+      "archive_member": "independent/initial-verifier-final-stage-root.json",
+      "sha256": "a81ab260defaf16d5837933bd4ce9e97758268cbba7803b5a53b56e0d4469614",
+      "bytes": 988,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113232640171771
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/initial-verifier-gzip-assumption.json",
+      "archive_member": "independent/initial-verifier-gzip-assumption.json",
+      "sha256": "fe4e0391912d79d93b4f6966bdefd5760b28f34fd643dfebe3d1db41f1d9911b",
+      "bytes": 1008,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113173411920440
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/report-comparison-verification.json",
+      "archive_member": "independent/report-comparison-verification.json",
+      "sha256": "27b150a156c05c1c0ad152f035677e99edabd1464aadb16456f0b0b875dbc4ad",
+      "bytes": 9658,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113392950001464
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/reports.py",
+      "archive_member": "independent/reports.py",
+      "sha256": "ee641064f807c682acb9fdc8b669c64c72dc61a5612bc33b8551b5efce83dc3a",
+      "bytes": 6880,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113392315921721
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/reports.stderr",
+      "archive_member": "independent/reports.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113392519928022
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/reports.stdout",
+      "archive_member": "independent/reports.stdout",
+      "sha256": "5e7bb8ffd16c75e3af43f34e8cb49c9f2b022f72f03b999d672ac076be6cefe9",
+      "bytes": 1612,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113392950001464
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/retention-state-verification.json",
+      "archive_member": "independent/retention-state-verification.json",
+      "sha256": "5fbc0b1cde05f875bb746c72ca198fe6e91e0efbbeea1fd6a5e6737858b97830",
+      "bytes": 34203,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113537026682760
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/retention-state.stderr",
+      "archive_member": "independent/retention-state.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113536864384445
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/retention-state.stderr.initial-boundary-assumption.gz",
+      "archive_member": "independent/retention-state.stderr.initial-boundary-assumption.gz",
+      "sha256": "b518cad5dcb24e13129d1e82c4dd5997994f962b37fb7488fe0599f839a11010",
+      "bytes": 224,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113523765974767
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/retention-state.stdout",
+      "archive_member": "independent/retention-state.stdout",
+      "sha256": "47e99714259098227550cbfee199e0d9f89693350404139769dbc8977b3f0fb9",
+      "bytes": 53,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113537026682760
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/retention-state.stdout.initial-boundary-assumption.gz",
+      "archive_member": "independent/retention-state.stdout.initial-boundary-assumption.gz",
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 20,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113523765878462
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/retention_and_state.py",
+      "archive_member": "independent/retention_and_state.py",
+      "sha256": "86f18b112c84cef4794b53dfa8862b4ff46c9d8e9fcda53b6870d383ca12ddb7",
+      "bytes": 4155,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113536660378141
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/retention_and_state.py.initial-boundary-assumption.gz",
+      "archive_member": "independent/retention_and_state.py.initial-boundary-assumption.gz",
+      "sha256": "16a15aad9e21f4d5542a25d48cb1c584d26f37c2e4a1f8166b3cf9682884ba66",
+      "bytes": 1797,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113523765767734
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/roles-controls-verification.json",
+      "archive_member": "independent/roles-controls-verification.json",
+      "sha256": "0700d858c1788d60fda4a4eec272476b46275610f5677d8a547ae53a954c2c29",
+      "bytes": 838,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113662065402852
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/roles-controls.stderr",
+      "archive_member": "independent/roles-controls.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113661880242757
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/roles-controls.stderr.initial-evidence-Go-tests-shape.gz",
+      "archive_member": "independent/roles-controls.stderr.initial-evidence-Go-tests-shape.gz",
+      "sha256": "89a4f83328dd12831c924008d4d9b334633065fba3a88d75b71950d78066dfa2",
+      "bytes": 254,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113642683113360
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/roles-controls.stderr.initial-evidence-reason-shape.gz",
+      "archive_member": "independent/roles-controls.stderr.initial-evidence-reason-shape.gz",
+      "sha256": "3774a5c783b11649b2a4ac3bc34df8eccea45de714add4b5ad9794468cbc6d32",
+      "bytes": 251,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113660904218857
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/roles-controls.stderr.initial-evidence-shape.gz",
+      "archive_member": "independent/roles-controls.stderr.initial-evidence-shape.gz",
+      "sha256": "b877522f8e7549ccff55d8674b76648bfadfee3f2f5a66afb86004627ff3a0af",
+      "bytes": 277,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113621661477410
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/roles-controls.stdout",
+      "archive_member": "independent/roles-controls.stdout",
+      "sha256": "0700d858c1788d60fda4a4eec272476b46275610f5677d8a547ae53a954c2c29",
+      "bytes": 838,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113662065402852
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/roles-controls.stdout.initial-evidence-Go-tests-shape.gz",
+      "archive_member": "independent/roles-controls.stdout.initial-evidence-Go-tests-shape.gz",
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 20,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113642683018757
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/roles-controls.stdout.initial-evidence-reason-shape.gz",
+      "archive_member": "independent/roles-controls.stdout.initial-evidence-reason-shape.gz",
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 20,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113660904123363
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/roles-controls.stdout.initial-evidence-shape.gz",
+      "archive_member": "independent/roles-controls.stdout.initial-evidence-shape.gz",
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 20,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113621661381195
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/roles_and_controls.py",
+      "archive_member": "independent/roles_and_controls.py",
+      "sha256": "57d643a22bebdc5fbd257f9cc563e0b072588e928eaddf8018ffd768f388552d",
+      "bytes": 3180,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113661680236604
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/roles_and_controls.py.initial-evidence-Go-tests-shape.gz",
+      "archive_member": "independent/roles_and_controls.py.initial-evidence-Go-tests-shape.gz",
+      "sha256": "3dfc52188f5f54de8071bc5f33c833920c14ae4c9ca58b83f42ced0441168589",
+      "bytes": 1177,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113642682914790
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/roles_and_controls.py.initial-evidence-reason-shape.gz",
+      "archive_member": "independent/roles_and_controls.py.initial-evidence-reason-shape.gz",
+      "sha256": "b42b9efa914b83d6f19c1af3080dae0a90f3272c67ce6bad70de68654ddccfb3",
+      "bytes": 1257,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113660903964422
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/roles_and_controls.py.initial-evidence-shape.gz",
+      "archive_member": "independent/roles_and_controls.py.initial-evidence-shape.gz",
+      "sha256": "0fb3fa9f9b8fcb9597990ee34ba55b8f873f59b480901e3e296f388f8bec6a60",
+      "bytes": 1179,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113621661216816
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/verification.json",
+      "archive_member": "independent/verification.json",
+      "sha256": "6211d712685ad7dcb03696e5ae943e01286f35c17a830d2c7f2d07be3354db30",
+      "bytes": 13055,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113244564846935
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/verify.py",
+      "archive_member": "independent/verify.py",
+      "sha256": "6f709c9e65d0f465473a205d2031ff26a0dcbbc60b0bc54c1cfac8d742edea68",
+      "bytes": 6019,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113233427011198
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/verify.py.initial-count-assumption.gz",
+      "archive_member": "independent/verify.py.initial-count-assumption.gz",
+      "sha256": "7859ba0723062b979298fb0637b518fdbb4573f420c1e8a323c1b28289c5f7a3",
+      "bytes": 2154,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113141403707141
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/verify.py.initial-final-stage-root.gz",
+      "archive_member": "independent/verify.py.initial-final-stage-root.gz",
+      "sha256": "cf2d025322d89cc3c59a238fa821210d9a7297053d600329f558f704f2f102d7",
+      "bytes": 2212,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113232639882134
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/verify.py.initial-gzip-assumption.gz",
+      "archive_member": "independent/verify.py.initial-gzip-assumption.gz",
+      "sha256": "1a2a4cce0aaa2fcfe610e165ff77f6297fe14ce7117af706096603629785d0d9",
+      "bytes": 2180,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113173411633486
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/verify.stderr",
+      "archive_member": "independent/verify.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113233627017380
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/verify.stderr.initial-count-assumption.gz",
+      "archive_member": "independent/verify.stderr.initial-count-assumption.gz",
+      "sha256": "7937e6b522b52e509c0cfa8baede5ae1d92e47160c699ece3faf9355d4e10a35",
+      "bytes": 204,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113141403903688
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/verify.stderr.initial-final-stage-root.gz",
+      "archive_member": "independent/verify.stderr.initial-final-stage-root.gz",
+      "sha256": "e7c55071bc077221dec8bbef2c877728608607f5cf006353fb2cb2404b8230a1",
+      "bytes": 236,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113232640092522
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/verify.stderr.initial-gzip-assumption.gz",
+      "archive_member": "independent/verify.stderr.initial-gzip-assumption.gz",
+      "sha256": "f0aa7fa9b3a03ee4e087c2b7e9f99bb818a1ecac306278604ecfb8ea73b5a99f",
+      "bytes": 334,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113173411837294
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/verify.stdout",
+      "archive_member": "independent/verify.stdout",
+      "sha256": "5678d5590569b7c15240d19acb35178c24f23615848b01fe4bbb0a1b92d63fec",
+      "bytes": 1312,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113244564846935
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/verify.stdout.initial-count-assumption.gz",
+      "archive_member": "independent/verify.stdout.initial-count-assumption.gz",
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 20,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113141403819611
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/verify.stdout.initial-final-stage-root.gz",
+      "archive_member": "independent/verify.stdout.initial-final-stage-root.gz",
+      "sha256": "f797d039f230a47d735eebef9cab9d12393c5af9dc0558f6e6ef69472a21ee55",
+      "bytes": 134,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113232640004669
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/verify.stdout.initial-gzip-assumption.gz",
+      "archive_member": "independent/verify.stdout.initial-gzip-assumption.gz",
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 20,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113173411736732
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/manifest.json",
+      "archive_member": "receipts/0-manifest.json",
+      "sha256": "09ea52af51ebb50f4b6800e4c32c25b5598e6084f0fb3f934ddab2f787ba4a76",
+      "bytes": 13171,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368950358423
+    },
+    {
+      "path": "/workspace/symaira-source765-full-independent-runtime-review/handoff.json",
+      "archive_member": "receipts/2-handoff.json",
+      "sha256": "12da288df57e132334c17a4864633ea29466311c5becbc8a5245ff7bc689bcb6",
+      "bytes": 2677,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791112368956857087
+    },
+    {
+      "path": "/workspace/review-artifacts/source765-7b-runtime-proof-independent/independent-review-receipt.json",
+      "archive_member": "receipts/3-independent-review-receipt.json",
+      "sha256": "085fadbd567cd5ae7533974afa10d7f282a57b3933e3686a3bcee45d226ca6e0",
+      "bytes": 12460,
+      "mode": "0o100600",
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791113879371934464
+    }
+  ],
+  "all_members_roundtrip_verified": true,
+  "external_executable_archive_bytes_not_embedded": true,
+  "six_original_Go_CLI_payload_gaps_not_reconstructed": true
+}

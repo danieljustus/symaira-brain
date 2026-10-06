@@ -1,0 +1,60 @@
+// Supplemental reflection oracle; existing Go implementation stays frozen.
+package main
+
+import (
+	"encoding/json"
+	"os"
+	"reflect"
+
+	"github.com/danieljustus/symaira-brain/internal/memory/config"
+)
+
+type field struct {
+	Name string `json:"name"`
+	Kind string `json:"kind"`
+}
+
+func main() {
+	fields := make([]field, 0)
+	var walk func(reflect.Type, string)
+	walk = func(t reflect.Type, prefix string) {
+		for i := 0; i < t.NumField(); i++ {
+			f := t.Field(i)
+			name := prefix + f.Tag.Get("json")
+			if f.Type.Kind() == reflect.Struct {
+				walk(f.Type, name+".")
+				continue
+			}
+			var kind string
+			switch f.Type.Kind() {
+			case reflect.String:
+				kind = "String"
+			case reflect.Int, reflect.Int64:
+				kind = "Integer"
+			case reflect.Float64:
+				kind = "Float"
+			case reflect.Bool:
+				kind = "Bool"
+			case reflect.Ptr:
+				if f.Type.Elem().Kind() != reflect.Bool {
+					panic("unsupported pointer config field")
+				}
+				kind = "PointerBool"
+			case reflect.Slice:
+				if f.Type.Elem().Kind() != reflect.String {
+					panic("unsupported slice config field")
+				}
+				kind = "Strings"
+			case reflect.Map:
+				kind = "Map"
+			default:
+				panic("unsupported config field")
+			}
+			fields = append(fields, field{Name: name, Kind: kind})
+		}
+	}
+	walk(reflect.TypeOf(config.Config{}), "")
+	if err := json.NewEncoder(os.Stdout).Encode(fields); err != nil {
+		panic(err)
+	}
+}

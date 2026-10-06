@@ -1,0 +1,11 @@
+{
+  "candidate_head": "9705777b09bbfe600406ad60ba704d0fd8759e48",
+  "source": "a301969596358fb42e3bd93972c315bf89e79963",
+  "author_artifacts_verified": 21,
+  "author_log_bytes_verified": 18,
+  "current_actual_binaries_verified": 38,
+  "old_source86_files_verified": 24,
+  "original_windows_process_sha256": "b54b2702c66b6281e44f217fdcf2a05f2ddf5816a383a2ceb073971beab0037e",
+  "original_windows_zip_process_and_five_records_verified": true,
+  "current_native_windows_runtime_verified": false
+}

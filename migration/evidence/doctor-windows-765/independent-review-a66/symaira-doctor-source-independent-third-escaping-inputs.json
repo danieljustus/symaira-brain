@@ -1,0 +1,11 @@
+{
+  "baseline_actual_source": "a301969596358fb42e3bd93972c315bf89e79963",
+  "baseline_actual_publication": "9705777b09bbfe600406ad60ba704d0fd8759e48",
+  "baseline_actual_cli": "/tmp/symaira-doctor765-home-a301-cli",
+  "baseline_actual_cli_sha256": "44ffc3c6ecd498aa29aa82dd828abeeef161ca073f14990ed695b9fb9c681b80",
+  "baseline_shape": "Valid UTF-8 HOME with &<> and U+2028/2029 only, no malformed bytes; inspect inherited JSON escaping separately from corrected raw invalid-byte preservation",
+  "baseline_runner": "/tmp/symaira-doctor-source-independent-third-baseline-consumers.py",
+  "baseline_runner_sha256": "4e1793d57ba50bd9f7f43660584ce68d6ec3867ae3441dccb4dceee0e8843e20",
+  "fix_runner": "/tmp/symaira-doctor-source-independent-third-fix-consumers.py",
+  "fix_runner_sha256": "5b436cb165b4179e81a15b214c5df193c03b04a5cc1e315a71128a82ecd5bd69"
+}

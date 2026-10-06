@@ -1,0 +1,9 @@
+{
+  "source_revision": "initial uncommitted increment based on e8c7f7990ab61967db0a3cbadaf6e485b4a33d99",
+  "test": "in_flight_tools_call_cancellation_matches_go_oracle",
+  "observed_error": "build Go fake MCP child failed: Go: Unknown option: build",
+  "failed": 1,
+  "classification": "wrong executable selected from system PATH; no production defect",
+  "original_log_sha256": "59773ea463f227b101f76debbe4adb717f471d792027802e446f72ff8e6fc0b1",
+  "resolution": "explicit Go 1.26.7 PATH; all 332 affected Rust tests subsequently pass; original assertions retained"
+}

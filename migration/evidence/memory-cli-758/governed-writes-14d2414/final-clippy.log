@@ -1,0 +1,4 @@
+    Checking symbrain-memory v0.12.1 (/workspace/symaira-memory758-writes/rust/symbrain-memory)
+    Checking symbrain-gateway v0.12.1 (/workspace/symaira-memory758-writes/rust/symbrain-gateway)
+    Checking symbrain-cli v0.12.1 (/workspace/symaira-memory758-writes/rust/symbrain-cli)
+    Finished `dev` profile [unoptimized] target(s) in 3.66s

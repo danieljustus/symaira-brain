@@ -1,0 +1,54 @@
+{
+  "symaira-memory758-governed-writes-independent-review.md": {
+    "original_sha256": "8961f8176b3e081498f867516010d93332d96f2cbcdee702820f886d884f60c8",
+    "original_bytes": 11997,
+    "tracked": "migration/evidence/memory-cli-758/governed-write-review-28e8/symaira-memory758-governed-writes-independent-review.md",
+    "tracked_sha256": "8961f8176b3e081498f867516010d93332d96f2cbcdee702820f886d884f60c8"
+  },
+  "symaira-memory758-governed-writes-independent-review-receipt.json": {
+    "original_sha256": "7b07cf836accee08dfc1ba0267be644a6b85771f6271bac962f1f7e9fb8845e1",
+    "original_bytes": 18371,
+    "tracked": "migration/evidence/memory-cli-758/governed-write-review-28e8/symaira-memory758-governed-writes-independent-review-receipt.json.gz",
+    "tracked_sha256": "4854f4f12952046e246fb069b6f777077cecc5612e1a73c6a6fe25faa7ec47b1"
+  },
+  "symaira-memory758-governed-independent-extra.py": {
+    "original_sha256": "fc3f31e1324960f2b72d20374c591a475eb4e22efe151aa4480db3747ce5feb9",
+    "original_bytes": 4280,
+    "tracked": "migration/evidence/memory-cli-758/governed-write-review-28e8/symaira-memory758-governed-independent-extra.py",
+    "tracked_sha256": "fc3f31e1324960f2b72d20374c591a475eb4e22efe151aa4480db3747ce5feb9"
+  },
+  "symaira-memory758-governed-independent-extra.json": {
+    "original_sha256": "71d9141c250ffb77d55b6395596765bd9c00bca703f6c059e91cef4eed9038bd",
+    "original_bytes": 211019,
+    "tracked": "migration/evidence/memory-cli-758/governed-write-review-28e8/symaira-memory758-governed-independent-extra.json.gz",
+    "tracked_sha256": "85b3c1f4960b8cf796fa1459f5a8d1aff5966a55a9c94f6e6ca220de947fd29f"
+  },
+  "symaira-memory758-governed-independent-extra.log": {
+    "original_sha256": "deaee489dd5d06a25737bb638267f274b7fb1aafea9426a035bd169a64c5336c",
+    "original_bytes": 1531,
+    "tracked": "migration/evidence/memory-cli-758/governed-write-review-28e8/symaira-memory758-governed-independent-extra.log",
+    "tracked_sha256": "deaee489dd5d06a25737bb638267f274b7fb1aafea9426a035bd169a64c5336c"
+  },
+  "symaira-memory758-governed-independent-output-extra.py": {
+    "original_sha256": "ebe923949e49030c6531d30a83456260117af19c75e2789504031751cfc42f7e",
+    "original_bytes": 3791,
+    "tracked": "migration/evidence/memory-cli-758/governed-write-review-28e8/symaira-memory758-governed-independent-output-extra.py",
+    "tracked_sha256": "ebe923949e49030c6531d30a83456260117af19c75e2789504031751cfc42f7e"
+  },
+  "symaira-memory758-governed-independent-output-extra.json": {
+    "original_sha256": "a12644947c46e6e68973579e4b78f59d87f0d28ec42dcf84d0d6d60891605fdd",
+    "original_bytes": 71036,
+    "tracked": "migration/evidence/memory-cli-758/governed-write-review-28e8/symaira-memory758-governed-independent-output-extra.json.gz",
+    "tracked_sha256": "17f4063353539aa01c8012defd5d6717a7e08972c1934b3c70eeddb2295f731d"
+  },
+  "symaira-memory758-governed-independent-output-extra.log": {
+    "original_sha256": "7c85841b774383b9a272ef24e60539df298b7e84ee4e3d1c29e5915edc89349c",
+    "original_bytes": 448,
+    "tracked": "migration/evidence/memory-cli-758/governed-write-review-28e8/symaira-memory758-governed-independent-output-extra.log",
+    "tracked_sha256": "7c85841b774383b9a272ef24e60539df298b7e84ee4e3d1c29e5915edc89349c"
+  },
+  "reviewed-executable-archives.json": {
+    "original": "/workspace/oracles/symaira-memory758-14d-binaries/receipt.json",
+    "sha256": "c3ee22c55459c73f90a8ebc7bf0b4db65d0429a1fbf3a4bdfb573ae69c574106"
+  }
+}

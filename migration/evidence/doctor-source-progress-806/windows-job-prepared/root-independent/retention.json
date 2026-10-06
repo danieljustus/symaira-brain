@@ -1,0 +1,37 @@
+[
+  {
+    "original": "/tmp/symaira-doctor806-e754-root-static-review.json",
+    "bytes": 254594,
+    "sha256": "bbdbce611ea14483b667af32334159ad7fb9ba265a0cf78e97dc5fa9b27946b4",
+    "archive": "migration/evidence/doctor-source-progress-806/windows-job-prepared/root-independent/00-symaira-doctor806-e754-root-static-review.json.gz",
+    "gzip_sha256": "cba60f354a8f752e14d81b03d351af0c79abe357e853034ce52b75022c35b9c4"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-e754-root-fmt.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive": "migration/evidence/doctor-source-progress-806/windows-job-prepared/root-independent/01-symaira-doctor806-e754-root-fmt.log.gz",
+    "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-e754-root-actionlint.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "archive": "migration/evidence/doctor-source-progress-806/windows-job-prepared/root-independent/02-symaira-doctor806-e754-root-actionlint.log.gz",
+    "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-windows-job-final-handoff.md",
+    "bytes": 1848,
+    "sha256": "c3617a3288d543539e03afc980db099b34e88bcd6ed4c19fbfe809a8d2e08862",
+    "archive": "migration/evidence/doctor-source-progress-806/windows-job-prepared/root-independent/03-symaira-doctor806-windows-job-final-handoff.md.gz",
+    "gzip_sha256": "4c42d5d1e49f75c93063c8f0706cdc499fcb2004d5010c32847450991e6b2632"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-windows-job-final-handoff.json",
+    "bytes": 2883,
+    "sha256": "665594a7dc75ddec444cafe04028e1a8a215cede595c7c0a7a9bce131d79b0ef",
+    "archive": "migration/evidence/doctor-source-progress-806/windows-job-prepared/root-independent/04-symaira-doctor806-windows-job-final-handoff.json.gz",
+    "gzip_sha256": "267c15d6c7a816490fb434a1d7fe2ab959a2da8b9680bbdfa9b9d1b45f78b104"
+  }
+]

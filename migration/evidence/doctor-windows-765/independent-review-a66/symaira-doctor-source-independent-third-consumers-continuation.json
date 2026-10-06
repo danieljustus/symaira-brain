@@ -1,0 +1,8 @@
+{
+  "original_script": "/tmp/symaira-doctor-source-independent-third-consumers.py",
+  "original_sha256": "e37db24e799b43c69cbbc534994b8e30f1f81596814764a20be5b86d5cc6a79c",
+  "initial_failed_setup_pairs_retained": true,
+  "continuation_script": "/tmp/symaira-doctor-source-independent-third-consumers-continue.py",
+  "continuation_sha256": "4ac9934642fba53bb73d280fc1d2c254c0f78ce8b9e049e2a241a474f4bb1ff4",
+  "change": "Execute the not-yet-run Source/Doctor sections only; original Setup four JSON mismatches and all raw state/output bytes unchanged. No candidate source edits."
+}

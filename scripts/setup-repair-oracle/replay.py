@@ -7,7 +7,9 @@ from dataclasses import replace
 import hashlib
 import importlib.util
 import json
+import os
 import platform
+import shutil
 import stat
 import time
 from pathlib import Path
@@ -30,8 +32,54 @@ def source_fixture(payload: bytes):
     return setup
 
 
+def managed_boundary(lexical=None, raw=False, fault=None):
+    def setup(root, env):
+        home=env["HOME"]
+        if raw:home=str(root/os.fsdecode(b"home\xff\xe2\x82"))
+        if lexical=="dot":home+="/./"
+        elif lexical=="parent":home+="/../"+Path(home).name
+        elif lexical=="slash":home+="//"
+        elif lexical=="symlink-parent":
+            (root/"owner/nested").mkdir(parents=True)
+            (root/"link").symlink_to("owner/nested",target_is_directory=True)
+            home=str(root/"link")+"/../home"
+        env["HOME"]=home
+        if os.name=="nt":env["USERPROFILE"]=home
+        legacy.setup_correct_managed_binaries(root,env)
+        if fault:
+            binary_dir=Path(home)/".symaira/bin"
+            blocked=binary_dir if fault=="bin" else binary_dir.parent
+            shutil.rmtree(blocked);blocked.write_bytes(b"owned obstruction")
+    return setup
+
+
+def escaping_fixture(raw=False, lexical=False, fault=None):
+    def setup(root, env):
+        # Preserve the original review bytes on Unix. Windows filenames cannot
+        # contain <>; its valid owner still exercises &, U+2028 and U+2029.
+        name = "home&" + ("<>" if os.name != "nt" else "") + "\u2028\u2029"
+        if raw:
+            name = os.fsdecode(b"home\xff\xef\xbf\xbd\xe2\x82&<>\xe2\x80\xa8\xe2\x80\xa9")
+        home = root / name
+        home.mkdir()
+        env["HOME"] = str(home) + ("/../" + name + "/./" if lexical else "")
+        if os.name == "nt":
+            env["USERPROFILE"] = env["HOME"]
+        legacy.setup_release_fixture(root, env)
+        if fault:
+            parent = home / ".symaira"
+            if fault == "bin":
+                parent.mkdir()
+                (parent / "bin").write_bytes(b"owned leaf obstruction")
+            else:
+                parent.write_bytes(b"owned ancestor obstruction")
+    return setup
+
+
 def cases():
     result = [case for case in legacy.CASES if case.name.startswith("setup_")]
+    # APFS cannot create invalid-UTF-8 path components; Linux still exercises them.
+    raw_filesystem_paths = sys.platform == "linux"
     payloads = [
         b'{"source":"brain-source"}',
         b'{"SOURCE":"brain-source"}',
@@ -97,6 +145,28 @@ def cases():
             path.write_text(text)
         result.append(legacy.Case(f"repair-module-config-{index}",
             ("setup", "--fix", "--allow-unsigned", "--json"), setup=configured, mutating=True))
+    for json_out in (False,True):
+        args=("setup","--fix","--allow-unsigned")+(("--json",) if json_out else ())
+        for lexical in ("dot","parent","slash"):
+            result.append(legacy.Case(f"managed-home-{lexical}-{json_out}",args,
+                          setup=managed_boundary(lexical=lexical),mutating=True))
+        for fault in ("bin","parent"):
+            result.append(legacy.Case(f"managed-file-{fault}-{json_out}",args,
+                          setup=managed_boundary(fault=fault),mutating=True))
+            if raw_filesystem_paths:
+                result.append(legacy.Case(f"raw-managed-file-{fault}-{json_out}",args,
+                              setup=managed_boundary(raw=True,fault=fault),mutating=True))
+        if os.name!="nt":
+            for lexical in ((None,"symlink-parent") if raw_filesystem_paths else ("symlink-parent",)):
+                result.append(legacy.Case(f"managed-owner-{lexical}-{json_out}",args,
+                              setup=managed_boundary(raw=lexical is None,lexical=lexical),mutating=True))
+    for raw in ((False, True) if raw_filesystem_paths else (False,)):
+        for fix in (False, True):
+            for json_out in (False, True):
+                args = ("setup",) + (("--fix",) if fix else ()) + ("--allow-unsigned",) + (("--json",) if json_out else ())
+                for fault, lexical in ((None, False), (None, True), ("bin", True), ("parent", True)):
+                    result.append(legacy.Case(f"json-escape-raw-{raw}-fix-{fix}-fault-{fault}-lexical-{lexical}-json-{json_out}", args,
+                        setup=escaping_fixture(raw, lexical, fault), mutating=True))
     return result
 
 
@@ -145,7 +215,7 @@ def main():
             for name, entry in manifest.items()}
     actual_run = legacy.run
     def recorded_run(binary, args, env, stdin=None, pty=False):
-        fixture_root = Path(env["HOME"]).parent
+        fixture_root = Path(env["PROJECT"]).parent
         if Path(binary).resolve() in (Path(go).resolve(), Path(rust).resolve()):
             original_sidecars.update({str(path): legacy.normalize_fixture_root(path.read_bytes(), fixture_root)
                                      for path in fixture_root.rglob("*.provenance.json")})
@@ -157,7 +227,7 @@ def main():
             "binary": str(binary), "args": args, "exit": completed.returncode,
             "stdout_base64": base64.b64encode(completed.stdout).decode(),
             "stderr_base64": base64.b64encode(completed.stderr).decode(),
-            "fixture_root": str(Path(env["HOME"]).parent),
+            "fixture_root": str(fixture_root),
             "filesystem_before": before, "filesystem_after": summarized_files(fixture_root),
         })
         return completed
@@ -187,6 +257,8 @@ def main():
         'rust/symbrain-cli/src/setup_config.rs', 'rust/symbrain-cli/src/vault_config.rs',
         'rust/symbrain-managed/src/provenance.rs', 'rust/symbrain-managed/src/provenance_json.rs',
         'rust/symbrain-managed/src/install.rs', 'rust/symbrain-managed/src/version_probe.rs',
+        'rust/symbrain-cli/src/go_json_escape.rs', 'rust/symbrain-managed/src/lib.rs',
+        'rust/symbrain-core/src/go_text.rs', 'rust/symbrain-core/src/json_string.rs',
         'scripts/setup-repair-oracle/replay.py', 'scripts/rust-differential.py')}
     Path(report).write_text(json.dumps(data, indent=2) + "\n")
     return code

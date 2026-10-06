@@ -1,0 +1,69 @@
+package main
+
+import (
+ "bytes"
+ "crypto/sha256"
+ "encoding/hex"
+ "encoding/json"
+ "fmt"
+ "os"
+ "github.com/danieljustus/symaira-corekit/evidencekit"
+)
+
+type pair struct { Source string `json:"source"`; Evidence string `json:"evidence"` }
+type alignment struct {
+ pair
+ Span evidencekit.Span `json:"span"`
+ Status evidencekit.AlignmentStatus `json:"status"`
+ Exact *evidencekit.Span `json:"exact"`
+ Normalized *evidencekit.Span `json:"normalized"`
+ Fuzzy *evidencekit.Span `json:"fuzzy"`
+}
+type validation struct { Extraction evidencekit.Extraction `json:"extraction"`; Strict string `json:"strict"`; Fuzzy string `json:"fuzzy"` }
+func message(err error) string { if err != nil { return err.Error() }; return "" }
+func main() {
+ pairs := []pair{
+ {"", ""}, {"abc", ""}, {"", "abc"}, {"abc abc", "abc"},
+ {"prefix hello world suffix", "hello world"}, {"hello\t\nworld", "hello world"},
+ {" \t hello\n\nworld\u00a0end", " hello world "}, {"é  🐱\n世界", "🐱 世界"},
+ {"a\u0085b\u1680c\u2000d\u2028e\u2029f\u202fg\u205fh\u3000i", "a b c d e f g h i"},
+ {"a\u200bb", "a b"}, {"test", "test!"}, {"colour mode", "color mode"},
+ {"User prefers dark mode", "User prefers dark theme"}, {"αβγ δεζ", "αβγ δεζζ"},
+ {"cat dog cat dog", "cat dug"}, {"foo foo", "foe"}, {"a b c d", "a b c"},
+ {"hello there world", "hello world"}, {"one two three", "unrelated"},
+ {" a  b ", "a b"}, {"🐱 🐶 🐱 🐶", "🐱 🐷"}, {"你好世界", "你好世间"},
+ {"match\n\n match", "match "}, {"abc\r\ndef", "abc def"}, {"x\u000by\u000cz", "x y z"},
+ {"x\uFEFFy", "x y"}, {"red green blue", "red blue"}, {"x y", "x y z"},
+ {"UPPER lower", "upper lower"}, {"replacement � rune", "replacement � run"},
+ {"token token token", "taken"}, {"end whitespace   ", "whitespace "},
+ }
+ var alignments []alignment
+ for _, p := range pairs {
+  span,status := evidencekit.Align(p.Source,p.Evidence)
+  a := alignment{pair:p,Span:span,Status:status}
+  if s,ok := evidencekit.AlignExact(p.Source,p.Evidence); ok { a.Exact=&s }
+  if s,ok := evidencekit.AlignNormalized(p.Source,p.Evidence); ok { a.Normalized=&s }
+  if s,ok := evidencekit.AlignFuzzy(p.Source,p.Evidence); ok { a.Fuzzy=&s }
+  alignments=append(alignments,a)
+ }
+ var validations []validation
+ for _, status := range []evidencekit.AlignmentStatus{"exact","normalized","fuzzy","unmatched","", "future"} {
+  for _, bounds := range []evidencekit.Span{{Start:1,End:4},{Start:0,End:0},{Start:-1,End:2},{Start:4,End:1}} {
+   for _, text := range []string{"proof", ""} {
+    e:=evidencekit.Extraction{EvidenceText:text,Span:bounds,AlignmentStatus:status}
+    validations=append(validations,validation{e,message(evidencekit.Validate(e)),message(evidencekit.ValidateWithOptions(e,evidencekit.ValidateOptions{AcceptFuzzy:true}))})
+   }
+  }
+ }
+ extractions:=[]evidencekit.Extraction{
+  {},
+  {Source:evidencekit.SourceRef{ID:"é<&>",Kind:"activity_segment"},Text:"hello\u2028world\u2029",EvidenceText:"line\n\"quoted\"",Span:evidencekit.Span{Start:2,End:13},AlignmentStatus:evidencekit.AlignmentExact,Attributes:map[string]string{"z":"last","a":"<&>"}},
+  {Source:evidencekit.SourceRef{ID:"session"},Text:"🐱",EvidenceText:"🐱",Span:evidencekit.Span{End:4},AlignmentStatus:evidencekit.AlignmentNormalized,Attributes:map[string]string{}},
+ }
+ var encoded bytes.Buffer
+ if err:=evidencekit.EncodeJSONL(&encoded,extractions);err!=nil { panic(err) }
+ decoded,err:=evidencekit.DecodeJSONL(bytes.NewBufferString("\n \t\n"+encoded.String()+"\n"));if err!=nil {panic(err)}
+ hash:=sha256.Sum256(encoded.Bytes())
+ result:=map[string]any{"alignments":alignments,"validations":validations,"extractions":extractions,"jsonl":encoded.String(),"jsonl_sha256":hex.EncodeToString(hash[:]),"decoded":decoded}
+ enc:=json.NewEncoder(os.Stdout);enc.SetIndent("","  ");if err:=enc.Encode(result);err!=nil {fmt.Fprintln(os.Stderr,err);os.Exit(1)}
+}
