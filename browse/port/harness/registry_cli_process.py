@@ -12,7 +12,7 @@ CLI_TIMEOUT = 15
 CLEANUP_TIMEOUT = 2
 
 
-def capture(binary, root, env, arguments, progress=None):
+def capture(binary, root, env, arguments, progress=None, job=None):
     case = progress.begin_cli(binary, arguments) if progress is not None else None
     # The durable owner is adjacent to the report, outside the product's private
     # filesystem observation. Without a journal, keep the same file-backed wait
@@ -20,12 +20,12 @@ def capture(binary, root, env, arguments, progress=None):
     if progress is not None:
         folder = progress.path.with_suffix(".cli") / str(case)
         folder.mkdir(parents=True, exist_ok=False)
-        return _capture(binary, root, env, arguments, progress, case, folder)
+        return _capture(binary, root, env, arguments, progress, case, folder, job)
     with tempfile.TemporaryDirectory(prefix="br-cli-") as temporary:
-        return _capture(binary, root, env, arguments, None, None, Path(temporary))
+        return _capture(binary, root, env, arguments, None, None, Path(temporary), job)
 
 
-def _capture(binary, root, env, arguments, progress, case, folder):
+def _capture(binary, root, env, arguments, progress, case, folder, job=None):
     paths = [folder / "stdout.bin", folder / "stderr.bin"]
     argv = [str(binary), *arguments]
     began = time.monotonic()
@@ -37,7 +37,10 @@ def _capture(binary, root, env, arguments, progress, case, folder):
                                stdout_file=str(paths[0]), stderr_file=str(paths[1]),
                                timeout_seconds=CLI_TIMEOUT)
             child = subprocess.Popen(argv, cwd=root, env=env, stdin=subprocess.DEVNULL,
-                                     stdout=stdout, stderr=stderr)
+                                     stdout=stdout, stderr=stderr,
+                                     **({} if job is None else {"creationflags": job.SUSPENDED}))
+            if job is not None:
+                job.adopt(child)
             if progress is not None:
                 progress.event("cli.spawned", case=case, pid=child.pid, cwd=str(root),
                                stdout_file=str(paths[0]), stderr_file=str(paths[1]),

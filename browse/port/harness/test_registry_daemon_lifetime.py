@@ -173,8 +173,9 @@ class Tests(unittest.TestCase):
             pass
         dll = DLL()
         names = ["OpenProcess", "QueryFullProcessImageNameW", "WaitForSingleObject",
-                 "GetExitCodeProcess", "TerminateProcess", "CloseHandle"]
-        for name in names:
+                 "GetExitCodeProcess", "TerminateProcess", "CloseHandle",
+                 "AssignProcessToJobObject", "QueryInformationJobObject", "TerminateJobObject"]
+        for name in names + ["CreateJobObjectW", "NtResumeProcess"]:
             setattr(dll, name, Function())
         with patch.object(lifetime.ctypes, "WinDLL", return_value=dll, create=True):
             lifetime.WindowsAPI()
@@ -182,6 +183,66 @@ class Tests(unittest.TestCase):
         for name in names[1:]:
             self.assertIs(getattr(dll, name).argtypes[0], lifetime.wintypes.HANDLE)
         self.assertIs(dll.WaitForSingleObject.restype, lifetime.wintypes.DWORD)
+        self.assertIs(dll.CreateJobObjectW.restype, lifetime.wintypes.HANDLE)
+        self.assertEqual(dll.AssignProcessToJobObject.argtypes,
+                         [lifetime.wintypes.HANDLE, lifetime.wintypes.HANDLE])
+        self.assertEqual(dll.NtResumeProcess.argtypes, [lifetime.wintypes.HANDLE])
+
+
+class JobAPI:
+    def __init__(self, active):
+        self.active, self.calls, self.job = list(active), [], 0x200000007
+
+    def job_create(self):
+        self.calls.append(("create",))
+        return self.job
+
+    def job_assign(self, job, process):
+        self.calls.append(("assign", job, process))
+
+    def resume(self, process):
+        self.calls.append(("resume", process))
+
+    def job_active(self, job):
+        self.calls.append(("active", job))
+        return self.active.pop(0) if len(self.active) > 1 else self.active[0]
+
+    def job_terminate(self, job):
+        self.calls.append(("terminate", job))
+
+    def close(self, handle):
+        self.calls.append(("close", handle))
+
+
+class JobTests(unittest.TestCase):
+    def test_adopt_assigns_suspended_child_before_resuming_it(self):
+        api = JobAPI([0])
+        job = lifetime.WindowsJob(api=api)
+        job.adopt(type("Child", (), {"_handle": 0x300000009})())
+        self.assertEqual(api.calls, [("create",), ("assign", api.job, 0x300000009), ("resume", 0x300000009)])
+        self.assertEqual(job.SUSPENDED, 0x4)
+
+    def test_cwd_is_released_only_after_lost_autostart_daemons_exit(self):
+        api = JobAPI([2, 1, 0])
+        job = lifetime.WindowsJob(api=api)
+        job.finish()
+        self.assertEqual([call[0] for call in api.calls], ["create", "active", "active", "active", "close"])
+        self.assertIsNone(job.handle)
+
+    def test_outliving_descendant_is_terminated_by_job_and_fails_gate(self):
+        api = JobAPI([1, 0])
+        job = lifetime.WindowsJob(api=api)
+        with self.assertRaisesRegex(AssertionError, "1 owned descendant process"):
+            job.finish(timeout=0)
+        self.assertEqual([call[0] for call in api.calls], ["create", "active", "terminate", "active", "close"])
+
+    def test_survivor_of_job_termination_fails_and_still_closes(self):
+        api = JobAPI([1])
+        job = lifetime.WindowsJob(api=api)
+        with patch.object(lifetime, "CLEANUP_TIMEOUT", 0):
+            with self.assertRaisesRegex(AssertionError, "survived forced cleanup"):
+                job.finish(timeout=0)
+        self.assertEqual(api.calls[-1], ("close", api.job))
 
 
 if __name__ == "__main__":

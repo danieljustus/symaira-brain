@@ -17,7 +17,7 @@ import time
 from registry_progress import Progress, event
 from registry_compare import compare, controls, normalize
 from registry_cli_process import capture
-from registry_daemon_lifetime import WindowsOwner
+from registry_daemon_lifetime import WindowsJob, WindowsOwner
 
 HERE = Path(__file__).resolve().parent
 SPEC = importlib.util.spec_from_file_location("process", HERE / "daemon_process.py")
@@ -44,8 +44,8 @@ def environment(root: Path) -> dict:
     return env
 
 
-def cli(binary: Path, root: Path, env: dict, arguments: list[str], progress=None) -> dict:
-    result = capture(binary, root, env, arguments, progress)
+def cli(binary: Path, root: Path, env: dict, arguments: list[str], progress=None, job=None) -> dict:
+    result = capture(binary, root, env, arguments, progress, job)
     return {"arguments": arguments, "exit": result.returncode,
             "stdout": result.stdout.decode(), "stderr": result.stderr.decode()}
 
@@ -89,134 +89,144 @@ def stop(child, endpoint: Path, session: str, progress=None) -> dict:
 
 def observe(binary: Path, session: str, fixtures: dict[str, str], progress=None) -> dict:
     with tempfile.TemporaryDirectory(prefix="br-", dir=process.private_temporary_parent()) as temporary:
-        root = Path(temporary)
-        env = environment(root)
-        def run_cli(arguments):
-            return cli(binary, root, env, arguments, progress)
-        event(progress, "observe.begin", binary=str(binary), root=str(root), session=session)
-        began = time.time()
-        missing = []
-        # Inspection never starts a daemon, even when autostart is permitted.
-        for disabled in (False, True):
-            if disabled:
-                env["SYMBROWSE_NO_AUTOSTART"] = "1"
-            for command in ("session list", "session info", "daemon status", "daemon stop"):
-                for output in ([], ["--json"], ["--output", "yaml"]):
-                    missing.append(run_cli([*command.split(), "--session", session, *output]))
-        missing.append(run_cli(["state", "list", "--session", session, "--json"]))
-        env["SYMBROWSE_NO_AUTOSTART"] = "1"
-        before_invalid = sorted(p.relative_to(root).as_posix() for p in root.rglob("*"))
-        invalid_cli = [run_cli([*command.split(), "--session", name, *output])
-                       for command in ("session list", "session info", "daemon status", "state list")
-                       for name in ("bad session", "bad\x1bsession", "bad\u0301session", "bad\u00adsession")
-                       for output in ([], ["--json"], ["--output", "yaml"])]
-        assert sorted(p.relative_to(root).as_posix() for p in root.rglob("*")) == before_invalid, "invalid CLI created daemon/profile/state files"
-        event(progress, "cli.edges.begin")
-        extra_cli = cli_edges.observe(binary, root, env, progress)
-        event(progress, "cli.edges.end")
+        # Autostart CLIs may each spawn a detached daemon with this cwd; on
+        # Windows the root is removable only once every one of them has exited.
+        job = WindowsJob(progress) if os.name == "nt" else None
+        try:
+            return _observe(binary, session, fixtures, progress, Path(temporary), job)
+        finally:
+            if job is not None:
+                job.finish()
+
+
+def _observe(binary: Path, session: str, fixtures: dict[str, str], progress, root: Path, job) -> dict:
+    env = environment(root)
+    def run_cli(arguments):
+        return cli(binary, root, env, arguments, progress, job)
+    event(progress, "observe.begin", binary=str(binary), root=str(root), session=session)
+    began = time.time()
+    missing = []
+    # Inspection never starts a daemon, even when autostart is permitted.
+    for disabled in (False, True):
+        if disabled:
+            env["SYMBROWSE_NO_AUTOSTART"] = "1"
+        for command in ("session list", "session info", "daemon status", "daemon stop"):
+            for output in ([], ["--json"], ["--output", "yaml"]):
+                missing.append(run_cli([*command.split(), "--session", session, *output]))
+    missing.append(run_cli(["state", "list", "--session", session, "--json"]))
+    env["SYMBROWSE_NO_AUTOSTART"] = "1"
+    before_invalid = sorted(p.relative_to(root).as_posix() for p in root.rglob("*"))
+    invalid_cli = [run_cli([*command.split(), "--session", name, *output])
+                   for command in ("session list", "session info", "daemon status", "state list")
+                   for name in ("bad session", "bad\x1bsession", "bad\u0301session", "bad\u00adsession")
+                   for output in ([], ["--json"], ["--output", "yaml"])]
+    assert sorted(p.relative_to(root).as_posix() for p in root.rglob("*")) == before_invalid, "invalid CLI created daemon/profile/state files"
+    event(progress, "cli.edges.begin")
+    extra_cli = cli_edges.observe(binary, root, env, progress)
+    event(progress, "cli.edges.end")
+    child, endpoint = start(binary, root, env, session, progress)
+    frames = [{"cmd": "session.info"}, {"cmd": "session.info", "session": "unknown"}]
+    frames += [{"cmd": "daemon.ping", "session": name} for name in
+               ("zulu", "alpha", "a" * 64, "bad session!", "_invalid", "../escape", "é", "a" * 65,
+                "bad\0session", "bad\x1bsession", "bad\u0301session", "bad\u00adsession")]
+    frames += [{"cmd": "session.list", "session": "zulu"},
+               {"cmd": "session.list", "session": "alpha"},
+               {"cmd": "session.info", "session": "alpha"}]
+    records = []
+    profile = None
+    try:
+        for frame in frames:
+            time.sleep(.005)
+            records.append({"request": frame, "response": request(endpoint, frame, progress)})
+        listed = records[-2]["response"]["data"]["sessions"]
+        before_touch = next(s for s in records[-3]["response"]["data"]["sessions"] if s["name"] == "alpha")
+        after_touch = next(s for s in listed if s["name"] == "alpha")
+        assert datetime.fromisoformat(after_touch["last_activity"].replace("Z", "+00:00")) > datetime.fromisoformat(before_touch["last_activity"].replace("Z", "+00:00"))
+        assert [s["name"] for s in listed] == sorted([session, "zulu", "alpha", "a" * 64])
+        profile = Path(listed[0]["user_data_dir"])
+        for info in listed:
+            path = Path(info["user_data_dir"])
+            if not path.is_relative_to(root) or not path.is_dir():
+                raise AssertionError(f"profile escaped owned root: {path}")
+            if os.name == "posix" and path.stat().st_mode & 0o777 != 0o700:
+                raise AssertionError("session profile was not secured")
+        (profile / "retained").write_text("owned-profile-marker")
+        inspected = [run_cli(["session", command, "--session", session, *output])
+                     for command in ("list", "info")
+                     for output in ([], ["--json"], ["--output", "yaml"])]
+        first_pid = child.pid
+        first_stop = stop(child, endpoint, session, progress)
         child, endpoint = start(binary, root, env, session, progress)
-        frames = [{"cmd": "session.info"}, {"cmd": "session.info", "session": "unknown"}]
-        frames += [{"cmd": "daemon.ping", "session": name} for name in
-                   ("zulu", "alpha", "a" * 64, "bad session!", "_invalid", "../escape", "é", "a" * 65,
-                    "bad\0session", "bad\x1bsession", "bad\u0301session", "bad\u00adsession")]
-        frames += [{"cmd": "session.list", "session": "zulu"},
-                   {"cmd": "session.list", "session": "alpha"},
-                   {"cmd": "session.info", "session": "alpha"}]
-        records = []
-        profile = None
+        event(progress, "restart.frame.begin", session=session)
+        restarted = request(endpoint, {"cmd": "session.list", "session": session}, progress)
+        event(progress, "restart.frame.end", session=session)
+        assert [s["name"] for s in restarted["data"]["sessions"]] == [session]
+        assert (profile / "retained").read_text() == "owned-profile-marker"
+        restart_pid = child.pid
+        restart_stop = stop(child, endpoint, session, progress)
+    finally:
+        harness.kill_tree(child)
+    # Exercise real concurrent CLI children, configured logs and default argv.
+    config = root / "config/symbrowse"
+    config.mkdir(parents=True, mode=0o700)
+    state = root / "configured-state"
+    config.joinpath("config.toml").write_text(f"state_dir = {json.dumps(state.as_posix())}\nread_timeout = 7\n")
+    env.pop("SYMBROWSE_NO_AUTOSTART")
+    auto_session = session + "a"
+    auto_endpoint = harness.daemon_socket_path(Path(env["XDG_RUNTIME_DIR"]), auto_session)
+    auto_owner = None
+    try:
+        event(progress, "autostart.begin", session=auto_session)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
+            clients = list(pool.map(lambda _: run_cli(
+                ["state", "list", "--session", auto_session, "--json"]), range(8)))
+        event(progress, "autostart.owner.begin", session=auto_session)
+        owner = request(auto_endpoint, {"cmd": "daemon.status", "session": auto_session}, progress)
+        if os.name == "nt":
+            auto_owner = WindowsOwner(owner["data"]["pid"], binary, progress)
+        info = request(auto_endpoint, {"cmd": "session.info", "session": auto_session}, progress)
+        event(progress, "autostart.owner.end", session=auto_session)
+        assert owner["data"]["pid"] == info["data"]["pid"]
+        if auto_owner is not None:
+            auto_owner.confirm(owner["data"]["pid"], info["data"]["pid"])
+        log = state / "daemon.log"
+        assert log.is_file(), "autostart ignored the resolved configured state directory"
+        if os.name == "posix":
+            assert log.stat().st_mode & 0o777 == 0o600
+            assert state.stat().st_mode & 0o777 == 0o700
+        state_files = state / "states"
+        for name, raw in fixtures.items():
+            path = state_files / (name + ".json")
+            path.write_bytes(bytes.fromhex(raw))
+            path.chmod(0o600)
+        state_commands = []
+        for arguments in (["list"], ["show", "alpha"], ["show", "missing"],
+                          ["clear", "zulu"], ["clean"], ["clean", "--older-than", "1"], ["list"]):
+            for output in ([], ["--json"], ["--output", "yaml"]):
+                observed = run_cli(["state", *arguments, "--session", auto_session, *output])
+                if "private-owned-value" in observed["stdout"] + observed["stderr"]:
+                    raise AssertionError("metadata inspection leaked a state value")
+                state_commands.append(observed)
+        assert (state_files / "alpha.json").read_bytes().hex() == fixtures["alpha"], "metadata/clean rewrote retained migration data"
+        assert sorted(p.name for p in state_files.iterdir()) == ["alpha.json"], "clear/clean removed the wrong state files"
+    finally:
+        stop_error = None
         try:
-            for frame in frames:
-                time.sleep(.005)
-                records.append({"request": frame, "response": request(endpoint, frame, progress)})
-            listed = records[-2]["response"]["data"]["sessions"]
-            before_touch = next(s for s in records[-3]["response"]["data"]["sessions"] if s["name"] == "alpha")
-            after_touch = next(s for s in listed if s["name"] == "alpha")
-            assert datetime.fromisoformat(after_touch["last_activity"].replace("Z", "+00:00")) > datetime.fromisoformat(before_touch["last_activity"].replace("Z", "+00:00"))
-            assert [s["name"] for s in listed] == sorted([session, "zulu", "alpha", "a" * 64])
-            profile = Path(listed[0]["user_data_dir"])
-            for info in listed:
-                path = Path(info["user_data_dir"])
-                if not path.is_relative_to(root) or not path.is_dir():
-                    raise AssertionError(f"profile escaped owned root: {path}")
-                if os.name == "posix" and path.stat().st_mode & 0o777 != 0o700:
-                    raise AssertionError("session profile was not secured")
-            (profile / "retained").write_text("owned-profile-marker")
-            inspected = [run_cli(["session", command, "--session", session, *output])
-                         for command in ("list", "info")
-                         for output in ([], ["--json"], ["--output", "yaml"])]
-            first_pid = child.pid
-            first_stop = stop(child, endpoint, session, progress)
-            child, endpoint = start(binary, root, env, session, progress)
-            event(progress, "restart.frame.begin", session=session)
-            restarted = request(endpoint, {"cmd": "session.list", "session": session}, progress)
-            event(progress, "restart.frame.end", session=session)
-            assert [s["name"] for s in restarted["data"]["sessions"]] == [session]
-            assert (profile / "retained").read_text() == "owned-profile-marker"
-            restart_pid = child.pid
-            restart_stop = stop(child, endpoint, session, progress)
+            event(progress, "autostart.stop.begin", session=auto_session)
+            request(auto_endpoint, {"cmd": "daemon.stop", "session": auto_session}, progress)
+            event(progress, "autostart.stop.end", session=auto_session)
+        except OSError as error:
+            stop_error = error
         finally:
-            harness.kill_tree(child)
-        # Exercise real concurrent CLI children, configured logs and default argv.
-        config = root / "config/symbrowse"
-        config.mkdir(parents=True, mode=0o700)
-        state = root / "configured-state"
-        config.joinpath("config.toml").write_text(f"state_dir = {json.dumps(state.as_posix())}\nread_timeout = 7\n")
-        env.pop("SYMBROWSE_NO_AUTOSTART")
-        auto_session = session + "a"
-        auto_endpoint = harness.daemon_socket_path(Path(env["XDG_RUNTIME_DIR"]), auto_session)
-        auto_owner = None
-        try:
-            event(progress, "autostart.begin", session=auto_session)
-            with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
-                clients = list(pool.map(lambda _: run_cli(
-                    ["state", "list", "--session", auto_session, "--json"]), range(8)))
-            event(progress, "autostart.owner.begin", session=auto_session)
-            owner = request(auto_endpoint, {"cmd": "daemon.status", "session": auto_session}, progress)
-            if os.name == "nt":
-                auto_owner = WindowsOwner(owner["data"]["pid"], binary, progress)
-            info = request(auto_endpoint, {"cmd": "session.info", "session": auto_session}, progress)
-            event(progress, "autostart.owner.end", session=auto_session)
-            assert owner["data"]["pid"] == info["data"]["pid"]
             if auto_owner is not None:
-                auto_owner.confirm(owner["data"]["pid"], info["data"]["pid"])
-            log = state / "daemon.log"
-            assert log.is_file(), "autostart ignored the resolved configured state directory"
-            if os.name == "posix":
-                assert log.stat().st_mode & 0o777 == 0o600
-                assert state.stat().st_mode & 0o777 == 0o700
-            state_files = state / "states"
-            for name, raw in fixtures.items():
-                path = state_files / (name + ".json")
-                path.write_bytes(bytes.fromhex(raw))
-                path.chmod(0o600)
-            state_commands = []
-            for arguments in (["list"], ["show", "alpha"], ["show", "missing"],
-                              ["clear", "zulu"], ["clean"], ["clean", "--older-than", "1"], ["list"]):
-                for output in ([], ["--json"], ["--output", "yaml"]):
-                    observed = run_cli(["state", *arguments, "--session", auto_session, *output])
-                    if "private-owned-value" in observed["stdout"] + observed["stderr"]:
-                        raise AssertionError("metadata inspection leaked a state value")
-                    state_commands.append(observed)
-            assert (state_files / "alpha.json").read_bytes().hex() == fixtures["alpha"], "metadata/clean rewrote retained migration data"
-            assert sorted(p.name for p in state_files.iterdir()) == ["alpha.json"], "clear/clean removed the wrong state files"
-        finally:
-            stop_error = None
-            try:
-                event(progress, "autostart.stop.begin", session=auto_session)
-                request(auto_endpoint, {"cmd": "daemon.stop", "session": auto_session}, progress)
-                event(progress, "autostart.stop.end", session=auto_session)
-            except OSError as error:
-                stop_error = error
-            finally:
-                if auto_owner is not None:
-                    auto_owner.finish(stop_error)
-        event(progress, "observe.end", binary=str(binary), session=session)
-        return {"root": str(root), "session": session, "begin": began, "end": time.time(),
-                "pid": first_pid, "restart_pid": restart_pid, "missing": missing, "invalid_cli": invalid_cli,
-                "cli_edges": extra_cli,
-                "registry": records, "inspection": inspected, "first_stop": first_stop,
-                "restart_stop": restart_stop, "restart": restarted,
-                "autostart": clients, "owner": owner, "owner_info": info, "state_commands": state_commands}
+                auto_owner.finish(stop_error)
+    event(progress, "observe.end", binary=str(binary), session=session)
+    return {"root": str(root), "session": session, "begin": began, "end": time.time(),
+            "pid": first_pid, "restart_pid": restart_pid, "missing": missing, "invalid_cli": invalid_cli,
+            "cli_edges": extra_cli,
+            "registry": records, "inspection": inspected, "first_stop": first_stop,
+            "restart_stop": restart_stop, "restart": restarted,
+            "autostart": clients, "owner": owner, "owner_info": info, "state_commands": state_commands}
 
 
 def oracle_api(source: Path) -> dict:

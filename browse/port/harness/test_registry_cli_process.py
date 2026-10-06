@@ -77,6 +77,35 @@ class CaptureTests(unittest.TestCase):
             self.assertIsNotNone(record["exit"])
             self.assertIsNone(record["cleanup_error"])
 
+    def test_job_adopts_child_suspended_and_adoption_failure_reaps_it(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root, journal = self.setup_owned(folder)
+            real_spawn, spawned = subprocess.Popen, []
+            def spawn(*arguments, creationflags=0, **kwargs):
+                spawned.append(creationflags)
+                return real_spawn(*arguments, **kwargs)  # Portable stand-in.
+            class Job:
+                SUSPENDED = 0x4
+                def __init__(self, error=None):
+                    self.adopted, self.error = [], error
+                def adopt(self, child):
+                    self.adopted.append(child.pid)
+                    if self.error: raise self.error
+            job = Job()
+            with patch.object(capture.subprocess, "Popen", spawn):
+                result = capture.capture(Path(sys.executable), root, ENV, ["-c", "pass"], journal, job)
+            self.assertEqual((result.returncode, spawned), (0, [0x4]))
+            _, record = self.receipt(journal)
+            self.assertEqual(job.adopted, [record["pid"]])
+            failing = Job(OSError("assign failed"))
+            with patch.object(capture.subprocess, "Popen", spawn):
+                with self.assertRaisesRegex(OSError, "assign failed"):
+                    capture.capture(Path(sys.executable), root, ENV,
+                                    ["-c", "import time; time.sleep(30)"], journal, failing)
+            _, record = self.receipt(journal)
+            self.assertIsNotNone(record["exit"], "unadopted child must be killed and reaped")
+            self.assertIsNone(record["cleanup_error"])
+
     def test_launch_failure_retains_empty_captures_then_raises(self):
         with tempfile.TemporaryDirectory() as folder:
             root, journal = self.setup_owned(folder)
