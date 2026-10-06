@@ -23,7 +23,8 @@ jobs:
       matrix:
         runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-15-intel, macos-15, windows-2025, windows-11-arm]
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 30
+    # macos-15-intel needs ~34 min (slow release build + ~7 min MCP stage); stages themselves are bounded.
+    timeout-minutes: 45
     permissions:
       contents: read
     defaults:
