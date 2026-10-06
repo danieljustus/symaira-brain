@@ -60,6 +60,8 @@ jobs:
         run: |
           set -euo pipefail
           python3 port/harness/key_test_environment.py -- cargo test -p symbrowse-daemon --locked 2>&1 | tee "$RUNNER_TEMP/browse-daemon-unit.log"
+          # Native startup-provider discovery (Windows LookPath/PATHEXT tests are cfg(windows)).
+          cargo test -p symbrowse-core --lib --locked key_sources::startup_discovery 2>&1 | tee -a "$RUNNER_TEMP/browse-daemon-unit.log"
 
       - name: Require Windows client cancellation and eight-client contracts
         if: runner.os == 'Windows'

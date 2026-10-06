@@ -64,11 +64,13 @@ pub(super) fn run_owned_command(
     {
         return Err(ProbeError::Failed(error));
     }
-    let mut command = Command::new(
-        resolved
-            .as_ref()
-            .map_or(program, |path| path.owner.as_path()),
-    );
+    #[cfg(windows)]
+    let launch = resolved
+        .as_ref()
+        .map(|path| super::startup_discovery::launch_path(program, path));
+    #[cfg(not(windows))]
+    let launch = resolved.as_ref().map(|path| path.owner.clone());
+    let mut command = Command::new(launch.as_deref().unwrap_or(program));
     #[cfg(unix)]
     {
         use std::os::unix::process::CommandExt;

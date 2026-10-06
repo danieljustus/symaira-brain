@@ -55,7 +55,11 @@ fn absolute(candidate: PathBuf) -> Option<Executable> {
 }
 
 fn extensions() -> Vec<OsString> {
-    let text = std::env::var_os("PATHEXT")
+    extensions_from(std::env::var_os("PATHEXT"))
+}
+
+fn extensions_from(value: Option<OsString>) -> Vec<OsString> {
+    let text = value
         .filter(|value| !value.is_empty())
         .map(|value| go_lower(value.as_encoded_bytes()))
         .unwrap_or_else(|| ".com;.exe;.bat;.cmd".into());
@@ -173,6 +177,39 @@ mod tests {
         assert_eq!(go_lower(b"\xe2\x82"), "\u{fffd}\u{fffd}");
         // Unicode16 added this casing; pinned Go Unicode15 leaves it alone.
         assert_eq!(go_lower("\u{1c89}".as_bytes()), "\u{1c89}");
+    }
+    #[test]
+    fn empty_pathext_list_launches_extensionless_owner_not_exe_sibling() {
+        // Go: PATHEXT=";;" parses to no extensions, so LookPath selects the
+        // extensionless file and CreateProcess runs exactly that image.
+        assert!(extensions_from(Some(";;".into())).is_empty());
+        assert_eq!(extensions_from(None).len(), 4);
+        let root = Owned::new();
+        let system = PathBuf::from(std::env::var_os("SystemRoot").unwrap()).join("System32");
+        let owner = root.0.join("tool");
+        fs::copy(system.join("whoami.exe"), &owner).unwrap();
+        fs::copy(system.join("hostname.exe"), root.0.join("tool.exe")).unwrap();
+        assert_eq!(find(&owner, &[]), Some(owner.clone()));
+        let resolved = Executable {
+            owner: owner.clone(),
+            spelling: owner.clone(),
+        };
+        let launch = super::super::launch_path(Path::new("tool"), &resolved);
+        assert_eq!(launch.as_os_str(), root.0.join("tool.").as_os_str());
+        let run = |program: &Path| std::process::Command::new(program).output().unwrap().stdout;
+        assert_eq!(run(&launch), run(&system.join("whoami.exe")));
+        // Without the spelling, std would have run the `.exe` sibling.
+        assert_eq!(run(&owner), run(&system.join("hostname.exe")));
+        // Extension-bearing and explicit owners keep their exact path.
+        let exe = Executable {
+            owner: root.0.join("tool.exe"),
+            spelling: root.0.join("tool.exe"),
+        };
+        assert_eq!(
+            super::super::launch_path(Path::new("tool"), &exe),
+            root.0.join("tool.exe")
+        );
+        assert_eq!(super::super::launch_path(&owner, &resolved), owner);
     }
     #[test]
     fn lstat_identity_accepts_hardlink_but_not_distinct_file() {

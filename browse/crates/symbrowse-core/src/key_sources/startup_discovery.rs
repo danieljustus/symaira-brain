@@ -31,6 +31,22 @@ pub(super) fn executable(program: &Path) -> Result<Option<Executable>, ProbeErro
     return windows::lookup(program, &path);
 }
 
+/// The path handed to `Command` for a resolved owner. Rust std launches an
+/// extensionless path as `<path>.exe` when that file exists; Go launches the
+/// file LookPath chose (an empty PATHEXT list selects the extensionless one).
+/// A trailing period is the Win32 "no extension" spelling: std's probe of the
+/// absent `<path>..exe` fails, and CreateProcessW's path normalization drops
+/// the period, so the chosen file itself runs. Explicit paths are unchanged.
+#[cfg(windows)]
+pub(super) fn launch_path(program: &Path, resolved: &Executable) -> PathBuf {
+    if explicit(program) || resolved.owner.extension().is_some() {
+        return resolved.owner.clone();
+    }
+    let mut spelled = resolved.owner.as_os_str().to_owned();
+    spelled.push(".");
+    spelled.into()
+}
+
 fn explicit(program: &Path) -> bool {
     #[cfg(unix)]
     return program.as_os_str().as_encoded_bytes().contains(&b'/');
