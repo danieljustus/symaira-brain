@@ -160,7 +160,7 @@ def main():
     if subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT):
         raise ValueError("candidate source must be clean")
     binaries = {name: getattr(args, name).resolve() for name in ["go", "rust", "parent"]}
-    info = subprocess.check_output(["go", "version", "-m", binaries["go"]], text=True)
+    info = subprocess.check_output(["go", "version", "-m", binaries["go"]], text=True, encoding='utf-8')
     if (info.splitlines()[0].split()[-1] != "go1.26.7" or
             f"vcs.revision={GO_REF}" not in info or "vcs.modified=false" not in info):
         raise ValueError("pinned clean frozen Go metadata required")

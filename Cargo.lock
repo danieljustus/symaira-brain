@@ -1892,6 +1892,7 @@ dependencies = [
 name = "symbrain-usage"
 version = "0.12.1"
 dependencies = [
+ "cap-std",
  "chrono",
  "hostname",
  "libc",

@@ -1,0 +1,62 @@
+{
+  "auto_merge_exit": 1,
+  "conflict_paths": [
+    "migration/contract-matrix.csv"
+  ],
+  "bindings": [
+    {
+      "path": "migration/contract-matrix.csv",
+      "sha256": "34a99c39039ee69bb137c3a4ca907963ae31f2e49ce6f025aed5f30883f3ab17",
+      "bytes": 32906,
+      "archive": "/workspace/review-artifacts/usage768-retry-main935-source/migration_contract-matrix.csv.auto-merge.gz"
+    },
+    {
+      "revision": "3797d40fa34c57cf1314853438170e607cbd7875",
+      "path": "migration/contract-matrix.csv",
+      "sha256": "1d17f92db048621cc504a7fa4e049d5551b0f5620eeeedab0d35ec3075ea24f9",
+      "bytes": 31211,
+      "archive": "/workspace/review-artifacts/usage768-retry-main935-source/migration_contract-matrix.csv.3797d40f.gz"
+    },
+    {
+      "revision": "9353520a34c5819c7d0a6cd58d3bfaa2b22b045b",
+      "path": "migration/contract-matrix.csv",
+      "sha256": "3d128ba0bcfad3add7205c1ba258c6ed1912eb8970885d28526f6dea8ea17c1e",
+      "bytes": 28676,
+      "archive": "/workspace/review-artifacts/usage768-retry-main935-source/migration_contract-matrix.csv.9353520a.gz"
+    },
+    {
+      "revision": "5e232700bb9031fc34d4995465a4037837540abb",
+      "path": "migration/contract-matrix.csv",
+      "sha256": "49b38f4744cbbb261d9ea22bf0979dd255d4e00942e63348816711723c9bf3d7",
+      "bytes": 27051,
+      "archive": "/workspace/review-artifacts/usage768-retry-main935-source/migration_contract-matrix.csv.5e232700.gz"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "1e91ba307ae75ceb2f0147fdbf381861d1008eca08723a6d7dcdf1b77b66f698",
+      "bytes": 87082,
+      "archive": "/workspace/review-artifacts/usage768-retry-main935-source/.github_workflows_ci.yml.auto-merge.gz"
+    },
+    {
+      "revision": "3797d40fa34c57cf1314853438170e607cbd7875",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "3fc8c5dd6e7c7956558f1dd80a2cde08fae07c72dafcef50ac13f1a6822a3397",
+      "bytes": 84174,
+      "archive": "/workspace/review-artifacts/usage768-retry-main935-source/.github_workflows_ci.yml.3797d40f.gz"
+    },
+    {
+      "revision": "9353520a34c5819c7d0a6cd58d3bfaa2b22b045b",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "ff81d2e9b856003f882d2c9c4fa7d9bf3243a676ad3e02a8090dc097cc38fb84",
+      "bytes": 73876,
+      "archive": "/workspace/review-artifacts/usage768-retry-main935-source/.github_workflows_ci.yml.9353520a.gz"
+    },
+    {
+      "revision": "5e232700bb9031fc34d4995465a4037837540abb",
+      "path": ".github/workflows/ci.yml",
+      "sha256": "327e3ac86fac19ffdc43e8b39e0647d22ffee3a84a3026a2e327ddc8a47c244f",
+      "bytes": 70968,
+      "archive": "/workspace/review-artifacts/usage768-retry-main935-source/.github_workflows_ci.yml.5e232700.gz"
+    }
+  ]
+}

@@ -1,0 +1,54 @@
+// Owned callers only; frozen production parseRetryAfter/RateLimitedError unchanged.
+package usage
+
+import (
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"math"
+	"os"
+	"runtime"
+	"testing"
+)
+
+func TestUsageRetryAfterScalar768(t *testing.T) {
+	data, err := os.ReadFile(os.Getenv("USAGE_RETRY_INPUT"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var corpus struct {
+		Public []struct {
+			ID  string `json:"id"`
+			Hex string `json:"value_hex"`
+		} `json:"public"`
+	}
+	if err = json.Unmarshal(data, &corpus); err != nil {
+		t.Fatal(err)
+	}
+	if len(corpus.Public) != 1600 {
+		t.Fatal("complete1600 scalar corpus", len(corpus.Public))
+	}
+	records := []any{}
+	for _, row := range corpus.Public {
+		value, err := hex.DecodeString(row.Hex)
+		if err != nil {
+			t.Fatal(err)
+		}
+		seconds := parseRetryAfter(string(value))
+		var bits, integer any
+		if seconds != nil {
+			bits = fmt.Sprintf("%016x", math.Float64bits(*seconds))
+			integer = fmt.Sprint(int(*seconds))
+		}
+		diagnostic := (&RateLimitedError{ProviderID: "kimi", RetryAfterSeconds: seconds}).Error()
+		records = append(records, map[string]any{"id": row.ID, "value_hex": row.Hex, "bits": bits, "seconds": integer, "diagnostic": diagnostic})
+	}
+	data, err = json.MarshalIndent(map[string]any{"goos": runtime.GOOS, "goarch": runtime.GOARCH, "sdk": runtime.Version(), "int_bits": strconvIntSize768(), "records": records}, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(os.Getenv("USAGE_RETRY_GO"), append(data, '\n'), 0600); err != nil {
+		t.Fatal(err)
+	}
+}
+func strconvIntSize768() int { return 32 << (^uint(0) >> 63) }

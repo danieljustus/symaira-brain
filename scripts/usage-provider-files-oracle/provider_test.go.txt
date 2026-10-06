@@ -1,0 +1,106 @@
+// Supplemental replay using unchanged file readers and real provider constructors.
+package usage
+
+import (
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"io"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+	"time"
+)
+
+type fileCase768 struct {
+	ID          string `json:"id"`
+	Provider    string `json:"provider"`
+	DataHex     string `json:"data_hex"`
+	FilePresent bool   `json:"file_present"`
+	Override    string `json:"override"`
+	EnvToken    string `json:"env_token"`
+	Ambiguous   bool   `json:"ambiguous"`
+}
+type fileTransport768 struct{ Headers []string }
+
+func (r *fileTransport768) RoundTrip(req *http.Request) (*http.Response, error) {
+	r.Headers = append(r.Headers, req.Header.Get("Authorization"))
+	return &http.Response{StatusCode: 401, Body: io.NopCloser(strings.NewReader("{}")), Header: make(http.Header)}, nil
+}
+func TestUsageProviderFiles768(t *testing.T) {
+	data, err := os.ReadFile(os.Getenv("USAGE_FILES_INPUT"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cases []fileCase768
+	if err = json.Unmarshal(data, &cases); err != nil {
+		t.Fatal(err)
+	}
+	if len(cases) != 86 {
+		t.Fatal("complete provider file corpus required")
+	}
+	records := []any{}
+	for _, entry := range cases {
+		contents, err := hex.DecodeString(entry.DataHex)
+		if err != nil {
+			t.Fatal(err)
+		}
+		home := filepath.Join(os.Getenv("USAGE_FILES_ROOT"), entry.ID)
+		codexHome := filepath.Join(home, ".codex")
+		override := ""
+		if entry.Override == "explicit" {
+			codexHome = filepath.Join(home, "owned-codex")
+			override = codexHome
+		}
+		auth := filepath.Join(home, ".claude", ".credentials.json")
+		if entry.Provider == "codex" {
+			auth = filepath.Join(codexHome, "auth.json")
+		}
+		if err = os.MkdirAll(filepath.Dir(auth), 0755); err != nil {
+			t.Fatal(err)
+		}
+		if entry.FilePresent {
+			if err = os.WriteFile(auth, contents, 0600); err != nil {
+				t.Fatal(err)
+			}
+		}
+		for _, name := range []string{"ANTHROPIC_ADMIN_KEY", "ANTHROPIC_OAUTH_TOKEN", "CODEX_ACCESS_TOKEN", "USAGE_FILES_ABSENT"} {
+			t.Setenv(name, "")
+		}
+		t.Setenv("HOME", home)
+		t.Setenv("USERPROFILE", home)
+		t.Setenv("CODEX_HOME", override)
+		rt := &fileTransport768{Headers: []string{}}
+		client := &http.Client{Transport: rt}
+		calls := 0
+		var provider Provider
+		if entry.Provider == "claude" {
+			t.Setenv("ANTHROPIC_OAUTH_TOKEN", entry.EnvToken)
+			// The unchanged production constructor already injects this last-source
+			// adapter; never inventory or read operator Keychain credentials.
+			provider = newClaudeProvider(client, func() (string, *time.Time) { calls++; return "", nil })
+		} else {
+			t.Setenv("CODEX_ACCESS_TOKEN", entry.EnvToken)
+			provider = NewCodexProvider(client)
+		}
+		report := BuildReport(context.Background(), []Provider{provider})
+		if entry.FilePresent {
+			after, err := os.ReadFile(auth)
+			if err != nil || string(after) != string(contents) {
+				t.Fatal("Go constructor mutated credential file", err)
+			}
+		}
+		sum := sha256.Sum256(contents)
+		records = append(records, map[string]any{"id": entry.ID, "provider": entry.Provider, "home": home, "auth_path": auth, "codex_home_override": override, "env_token": entry.EnvToken, "ambiguous": entry.Ambiguous, "file_present": entry.FilePresent, "data_hex": entry.DataHex, "sha256": hex.EncodeToString(sum[:]), "report": report, "authorization": rt.Headers, "keychain_calls": calls})
+	}
+	data, err = json.MarshalIndent(records, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(os.Getenv("USAGE_FILES_ORACLE"), append(data, '\n'), 0600); err != nil {
+		t.Fatal(err)
+	}
+}

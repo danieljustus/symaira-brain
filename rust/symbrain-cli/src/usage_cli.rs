@@ -1,33 +1,56 @@
 use std::ffi::OsString;
 use std::io::Write;
 
+use symbrain_core::config::format_go_quoted;
 use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
 use symbrain_usage::{Report, Service, UsageMeter};
 
-const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credential resolution: an explicit env\nvar per provider, whose value may be a symvault://<path> URI resolved\nthrough the secret store; Claude, Codex, and Copilot accept narrowly proven\ndefault credential-file shapes read-only when the env var is unset. See each provider's\ndoc comment in internal/usage for the macOS-Keychain / local-database\nstrategies not ported from the Swift original.\n";
+const HELP: &str = "symbrain usage — AI subscription/token usage per provider\n\nUsage:\n  symbrain usage\n\nThe global --output table|json flag (or --json) selects the output format.\n\nProviders: Claude, Codex, Copilot, Cursor, Kimi, Moonshot, Nous Portal,\nOpenCode, OpenRouter, Antigravity. Credential resolution: an explicit env\nvar per provider, whose value may be a symvault://<path> URI resolved\nthrough the secret store; providers with a native CLI credential file\nfall back to it read-only when the env var is unset. See each provider's\ndoc comment in internal/usage for the macOS-Keychain / local-database\nstrategies not ported from the Swift original.\n";
 
-/// Reports whether `symbrain usage` has to stay on the Go implementation.
-///
-/// The native port reproduces each proven provider's credential state machine,
-/// request, snapshot, and error behavior. Several supported providers can run
-/// together. Native sources include direct credentials; the canonical default
-/// Copilot, Kimi CLI, Nous, Codex, and Claude files; Moonshot's supported `ai`
-/// and `cn` regions; constrained public HTTPS base overrides; and a canonical
-/// `OpenCode` workspace id. File sources with case aliases, duplicate or
-/// malformed fields, ambiguous provider selection, unsupported metadata,
-/// secret references, non-ASCII Kimi device ids, or other unproven shapes stay
-/// on Go. `CODEX_HOME`, `HERMES_HOME`, and `KIMI_CODE_HOME` use the same per-file
-/// eligibility checks as their default paths; differing Windows home roots,
-/// unsupported URL/workspace forms and Claude Keychain-only credentials also
-/// keep the report on Go. Antigravity's local probe runs natively. Source-bound Go
-/// oracles use synthetic credentials and canned transport; the user-invoked
-/// live report remains unchanged.
+/// A Usage invocation classified before any credential admission or reads.
+pub(crate) enum Invocation {
+    Report,
+    Help,
+    BadSyntax(Vec<u8>),
+    UndefinedFlag(Vec<u8>),
+    Unexpected(OsString),
+}
+
+pub(crate) fn classify(args: &[OsString]) -> Invocation {
+    let args = crate::normalize_flags(args);
+    // Usage has no local flags. Normalize once, then retain FlagSet's first
+    // positional/terminator/help precedence independently of credentials.
+    let positional = if let Some(arg) = args.first() {
+        let bytes = arg.as_encoded_bytes();
+        if bytes == b"--" {
+            args.get(1)
+        } else if bytes.len() < 2 || !bytes.starts_with(b"-") {
+            Some(arg)
+        } else {
+            let name = &bytes[if bytes[1] == b'-' { 2 } else { 1 }..];
+            if name.is_empty() || matches!(name[0], b'-' | b'=') {
+                return Invocation::BadSyntax(bytes.to_vec());
+            }
+            let name = name.split(|byte| *byte == b'=').next().unwrap_or_default();
+            return if matches!(name, b"h" | b"help") {
+                Invocation::Help
+            } else {
+                Invocation::UndefinedFlag(name.to_vec())
+            };
+        }
+    } else {
+        None
+    };
+    positional.map_or(Invocation::Report, |arg| {
+        Invocation::Unexpected(arg.clone())
+    })
+}
+
+// Free-function entry points keep `lib.rs` byte-identical to the inherited
+// global-output owner pinned by the Skills argv oracle (novel.py).
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
-    if args.len() == 1 && matches!(args[0].to_str(), Some("-h" | "--help")) {
-        return false;
-    }
-    symbrain_usage::needs_go_fallback()
+    classify(args).requires_go_fallback()
 }
 
 pub fn run(
@@ -36,41 +59,43 @@ pub fn run(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
-    let args = normalize_flags(args);
-    if let Some(arg) = args.iter().find(|arg| {
-        let value = arg.to_string_lossy();
-        value == "-h" || value == "-help" || value == "--help"
-    }) {
-        if args.len() == 1 {
-            let _ = write!(stderr, "{HELP}");
-            return exit::USAGE;
-        }
-        let _ = writeln!(
-            stderr,
-            "symbrain usage: unexpected argument {}",
-            debug_arg(arg)
-        );
-        return exit::USAGE;
-    }
-    if let Some(arg) = args
-        .iter()
-        .find(|arg| arg.to_string_lossy().starts_with('-'))
-    {
-        let name = arg.to_string_lossy();
-        let name = name.trim_start_matches('-').split('=').next().unwrap_or("");
-        let _ = writeln!(stderr, "flag provided but not defined: -{name}");
-        let _ = write!(stderr, "{HELP}");
-        return exit::USAGE;
-    }
-    if let Some(arg) = args.first() {
-        let _ = writeln!(
-            stderr,
-            "symbrain usage: unexpected argument {}",
-            debug_arg(arg)
-        );
-        return exit::USAGE;
+    classify(args).run(stdout, stderr, format)
+}
+
+impl Invocation {
+    pub(crate) fn requires_go_fallback(&self) -> bool {
+        matches!(self, Self::Report) && symbrain_usage::needs_go_fallback()
     }
 
+    pub(crate) fn run(
+        self,
+        stdout: &mut dyn Write,
+        stderr: &mut dyn Write,
+        format: OutputFormat,
+    ) -> u8 {
+        match self {
+            Self::Report => run_report(stdout, stderr, format),
+            Self::Help => {
+                let _ = stderr.write_all(HELP.as_bytes());
+                exit::USAGE
+            }
+            Self::BadSyntax(value) => flag_error(stderr, b"bad flag syntax: ", &value),
+            Self::UndefinedFlag(value) => {
+                flag_error(stderr, b"flag provided but not defined: -", &value)
+            }
+            Self::Unexpected(arg) => {
+                let _ = writeln!(
+                    stderr,
+                    "symbrain usage: unexpected argument {}",
+                    format_go_quoted(&arg)
+                );
+                exit::USAGE
+            }
+        }
+    }
+}
+
+fn run_report(stdout: &mut dyn Write, stderr: &mut dyn Write, format: OutputFormat) -> u8 {
     let report = Service::new().report();
     let result = output::render(stdout, format, &report, |writer| {
         render_report_table(writer, &report)
@@ -82,9 +107,12 @@ pub fn run(
     exit::OK
 }
 
-#[allow(clippy::unnecessary_debug_formatting)]
-fn debug_arg(arg: &OsString) -> String {
-    format!("{arg:?}")
+fn flag_error(stderr: &mut dyn Write, prefix: &[u8], value: &[u8]) -> u8 {
+    let _ = stderr.write_all(prefix);
+    let _ = stderr.write_all(value);
+    let _ = stderr.write_all(b"\n");
+    let _ = stderr.write_all(HELP.as_bytes());
+    exit::USAGE
 }
 
 fn render_report_table(writer: &mut dyn Write, report: &Report) -> std::io::Result<()> {
@@ -120,19 +148,6 @@ fn meter_value(meter: &UsageMeter) -> String {
         .map_or_else(|| used.to_owned(), |limit| format!("{used}/{limit}"))
 }
 
-fn normalize_flags(args: &[OsString]) -> Vec<OsString> {
-    args.iter()
-        .map(|arg| {
-            let value = arg.to_string_lossy();
-            if value.starts_with("--") && value.len() > 2 {
-                OsString::from(format!("-{}", &value[2..]))
-            } else {
-                arg.clone()
-            }
-        })
-        .collect()
-}
-
 // Keep table rendering testable without making the public usage report depend
 // on CLI concerns.
 #[cfg(test)]
@@ -146,10 +161,11 @@ mod tests {
     fn help_is_native_without_resolving_credentials() {
         for flag in ["-h", "--help"] {
             let args = [OsString::from(flag)];
-            assert!(!requires_go_fallback(&args));
+            let invocation = classify(&args);
+            assert!(!invocation.requires_go_fallback());
             let (mut stdout, mut stderr) = (Vec::new(), Vec::new());
             assert_eq!(
-                run(&args, &mut stdout, &mut stderr, OutputFormat::Table),
+                invocation.run(&mut stdout, &mut stderr, OutputFormat::Table),
                 exit::USAGE
             );
             assert!(stdout.is_empty());

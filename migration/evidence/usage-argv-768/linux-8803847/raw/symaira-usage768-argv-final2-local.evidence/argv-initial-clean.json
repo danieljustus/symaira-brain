@@ -1,0 +1,1358 @@
+{
+  "target": "/workspace/symaira-usage768-argv/target",
+  "package": "symbrain-cli",
+  "target_users": [],
+  "proc_check": true,
+  "records": [
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-022e054c7d15dc29/dep-test-lib-symbrain_cli",
+      "sha256": "6029305799df2bb8834567c4b1ce1717907945ffd83df9d60d6acd9ad181ecbc",
+      "bytes": 1542
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-022e054c7d15dc29/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-022e054c7d15dc29/test-lib-symbrain_cli",
+      "sha256": "ed75955b1a1a5849ee08fa639ca775f48b95c00f7dbc2f842e6d2d1cf2ca7c91",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-022e054c7d15dc29/test-lib-symbrain_cli.json",
+      "sha256": "0deaea599eb7421ad8449619b929081337649c56ccba11c2a5359c722fb12136",
+      "bytes": 2156
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-04802a5619f42420/dep-test-integration-test-harness_health_tests",
+      "sha256": "f17cbeef9a240f215e6b15c506f88fea957282448de6d89cb31f8d13504b0dfa",
+      "bytes": 142
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-04802a5619f42420/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-04802a5619f42420/test-integration-test-harness_health_tests",
+      "sha256": "37f69e44e35e3a63fc5aeb1ad69a9001bf8b4a5f66df9042ca8605a6a1d4a1b6",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-04802a5619f42420/test-integration-test-harness_health_tests.json",
+      "sha256": "24e5a75996f92d3d3bd5893b58007bc3114ef1e9c975a9f7148281de62ae3955",
+      "bytes": 2246
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-066ca67cc3d68141/dep-test-integration-test-skills_targets_native",
+      "sha256": "87fac10578e2b316a11ba90c61b444ed0f5a61fba5b5ac3ca13d753ff0b2f6c7",
+      "bytes": 143
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-066ca67cc3d68141/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-066ca67cc3d68141/test-integration-test-skills_targets_native",
+      "sha256": "1a7d9445ddc9476a822f03b40f897706d968b9227dde0a1046cdb5aee2767614",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-066ca67cc3d68141/test-integration-test-skills_targets_native.json",
+      "sha256": "d966f524f8c1a2543921c522ac34ae4a3a3d56c1bc8ddce5e8b49228959d6b4c",
+      "bytes": 2247
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-0670e3f092eff2cb/dep-test-integration-test-profile_cli_tests",
+      "sha256": "babe234116a03008b8c393e53b9a3c1a89d26e92b7b9562fd0464ea5f4e833db",
+      "bytes": 181
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-0670e3f092eff2cb/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-0670e3f092eff2cb/test-integration-test-profile_cli_tests",
+      "sha256": "6d6ed4504c132f70969520d42f402de39bf07f5f949960e8bd2c4e31c169ad27",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-0670e3f092eff2cb/test-integration-test-profile_cli_tests.json",
+      "sha256": "0405b548bbd4ef791b4b44a3527b563d4f93871b206b9107ca2de9cf1e9fb222",
+      "bytes": 2238
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-0844875af2cd8506/dep-test-integration-test-harness_health_tests",
+      "sha256": "a930f7e4c894fdb20cf0ffa205e7cdae3d3caa808a2818fca8759b3e629f8e3c",
+      "bytes": 277
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-0844875af2cd8506/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-0844875af2cd8506/test-integration-test-harness_health_tests",
+      "sha256": "8e27e614b4e172a85387283d897ba495d95d24084d0e1617f82ca8c842eb4d01",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-0844875af2cd8506/test-integration-test-harness_health_tests.json",
+      "sha256": "b60ee8b21f1b3edf18909e76e9c4cb60ae4a3a1705d874020cad53113ef2dcd2",
+      "bytes": 2242
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-1446769e16af9806/dep-test-integration-test-setup_repair_native",
+      "sha256": "5596be9b19e2bf5ffef9837ade129dd3d9747b522599c0764bc63583f5fdc75b",
+      "bytes": 183
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-1446769e16af9806/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-1446769e16af9806/test-integration-test-setup_repair_native",
+      "sha256": "9a56f374b355e9c0025a9c803df8804dec4545781a67d98f18c37ecfe202d849",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-1446769e16af9806/test-integration-test-setup_repair_native.json",
+      "sha256": "91f8f2fb93799ed1ba7999289436c2e966be1eccdaa689064b962caa18a176d9",
+      "bytes": 2242
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-19d7935a84882cfe/dep-test-integration-test-cli_tree_tests",
+      "sha256": "1f09aa5d340590cd7f80aead8440203e41db8529e7a1c34bd9b0218badaf03fe",
+      "bytes": 306
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-19d7935a84882cfe/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-19d7935a84882cfe/test-integration-test-cli_tree_tests",
+      "sha256": "7e4d9356770ae32a1bc24da7f36a07fd553331fba4bb2a20d622f72931d05d7c",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-19d7935a84882cfe/test-integration-test-cli_tree_tests.json",
+      "sha256": "3fb78a90ae8d94c0909c573259698cc16322a406ae4e589b1baa28fc1cf6e647",
+      "bytes": 2235
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-1c45f43d63d48d79/dep-test-integration-test-setup_fix_native",
+      "sha256": "677dbc418851a013068a7bd1d1a10f1a678d3d7dff786fc72cb6796fce4454fd",
+      "bytes": 180
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-1c45f43d63d48d79/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-1c45f43d63d48d79/test-integration-test-setup_fix_native",
+      "sha256": "6c4649c4b235118d63fc346984ce37c88e53671fd9ae5926986935f7c29e9391",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-1c45f43d63d48d79/test-integration-test-setup_fix_native.json",
+      "sha256": "41b0008885f9f645b1f159e34bfa1fda461458fa7580e75b29408e37276d7b9f",
+      "bytes": 2238
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-226ff7fe50e336e0/dep-test-lib-symbrain_cli",
+      "sha256": "b719bbd743dc3f2f40a8469fe367a734aba6d7e16d8c517e72543486e47da09f",
+      "bytes": 1407
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-226ff7fe50e336e0/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-226ff7fe50e336e0/test-lib-symbrain_cli",
+      "sha256": "15097736e9ac8703aba83940f416d4e08bc6350eac2715647e042e1fe4ed9714",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-226ff7fe50e336e0/test-lib-symbrain_cli.json",
+      "sha256": "f52421033a1f1b4e8194603814adf67e5d9f827966e64e4d2b7c53cbb5636ab1",
+      "bytes": 2161
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-2755aeef60e7abfb/dep-test-integration-test-mcp_cli_tests",
+      "sha256": "7d40b44fc4f937d596be778a6e86075e20b6f5fe90999085d98a2e3dd12e2485",
+      "bytes": 716
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-2755aeef60e7abfb/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-2755aeef60e7abfb/test-integration-test-mcp_cli_tests",
+      "sha256": "baab6c4c78eafcaa27217176f111122c51d05c8a42b07f1b6d8190f81e8c789f",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-2755aeef60e7abfb/test-integration-test-mcp_cli_tests.json",
+      "sha256": "e03a597f2c782eb0b1ace5789057406105e21ea0fdc7f1204a7f7e83a7d0e560",
+      "bytes": 2239
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-279626654f1f458b/dep-test-integration-test-skills_doctor_native",
+      "sha256": "4d11c36432ba5fdd3f5c8219910e936534c2e92f3a642984c3a44f590c4617e2",
+      "bytes": 277
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-279626654f1f458b/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-279626654f1f458b/test-integration-test-skills_doctor_native",
+      "sha256": "43b0579f86ebff222909ecce4becb3e623b6d52efa8fc073d651d94863365133",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-279626654f1f458b/test-integration-test-skills_doctor_native.json",
+      "sha256": "16d220c2787cd72c3932ed752907399559b719f4d4405eb3cae847711a3b5050",
+      "bytes": 2241
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-28e2a4fdeaa048da/dep-test-integration-test-guard_decide_raw_bytes",
+      "sha256": "6ce4143464459aeea423049b4d04f01740411b1806072b853d71633361cdbc80",
+      "bytes": 561
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-28e2a4fdeaa048da/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-28e2a4fdeaa048da/test-integration-test-guard_decide_raw_bytes",
+      "sha256": "5f90e0fec5078c34ad33519ec24d44b33abb7fb4de8be70ab49f2cfbae6ad66c",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-28e2a4fdeaa048da/test-integration-test-guard_decide_raw_bytes.json",
+      "sha256": "fdd7c2a9a5e72810c6692cf7d4f785f29fdb289f528c21a0a280d73f46a37021",
+      "bytes": 2247
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-29729099236c6b08/run-build-script-build-script-build",
+      "sha256": "593777629253ce330a5ca9e2f09b40e9bd131063d8d57ce7588d6cb7c7ddec70",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-29729099236c6b08/run-build-script-build-script-build.json",
+      "sha256": "85f5b836d0f03837846b9b4d1ec3e60dd05a0581f9ab7da316aec3d76c3cc64c",
+      "bytes": 289
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-2ee3cde93f268f62/dep-test-bin-symbrain",
+      "sha256": "dd32b16937730a9a92a8070aa73e4dbbc632703f88e1395eb2196a4f6b11a95a",
+      "bytes": 31
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-2ee3cde93f268f62/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-2ee3cde93f268f62/test-bin-symbrain",
+      "sha256": "28a289e0f96b118846961cf8d10177f12bad49c95bb190abc4935d2ba97283df",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-2ee3cde93f268f62/test-bin-symbrain.json",
+      "sha256": "45aa4fe230b78702927209532eff65fa8067212b086e7346142f7fb01dd26bcf",
+      "bytes": 2221
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-308439e84864e3f6/dep-test-integration-test-cli_tree_tests",
+      "sha256": "608f812f3d491dbde7d16d183edbd6e25f41d82fad580d7512eb4fcfefd97a63",
+      "bytes": 171
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-308439e84864e3f6/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-308439e84864e3f6/test-integration-test-cli_tree_tests",
+      "sha256": "1350eec8e1f8f320df0b27db13d71ac31d74ae54389e5cf9eabb64eee499765c",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-308439e84864e3f6/test-integration-test-cli_tree_tests.json",
+      "sha256": "15bada626a5e53a9f0811237d3a05ab1bfcdeb8452f7089414d0ab972efadd28",
+      "bytes": 2239
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-30abb581a8b58b77/dep-test-integration-test-doctor_modules",
+      "sha256": "682883a2a7ce1a0554909f9205e3c82a3a4edb47729b727cb256b9d3c5a995fa",
+      "bytes": 271
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-30abb581a8b58b77/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-30abb581a8b58b77/test-integration-test-doctor_modules",
+      "sha256": "5c37d128cca629cde446f24491f731d1d966f58756d15bba07bef16abee72db9",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-30abb581a8b58b77/test-integration-test-doctor_modules.json",
+      "sha256": "f088960863b0cf64d65cc39a1247db4f7752ce1a18bd20b9515a13443d0ee74d",
+      "bytes": 2236
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-34d0705f27e1023f/build-script-build-script-build",
+      "sha256": "53d2820d95131c510e5e6365ed2671e55b7ac78f52695509757c47b19a2645d2",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-34d0705f27e1023f/build-script-build-script-build.json",
+      "sha256": "9cf89a26e481e92778a3e34a3b2334e077738f3f37c35a2bb0189c0338ad796e",
+      "bytes": 373
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-34d0705f27e1023f/dep-build-script-build-script-build",
+      "sha256": "a71f952e7f3252ef5608298951fd55b25f3590c98bc0765ae4145e623604ee7d",
+      "bytes": 28
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-34d0705f27e1023f/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-3bd99f4836667d75/dep-lib-symbrain_cli",
+      "sha256": "545233a5a2aa95f4838ce9497ae7f8ea258c4a53d66a36ab98299fefeadc16a5",
+      "bytes": 1174
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-3bd99f4836667d75/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-3bd99f4836667d75/lib-symbrain_cli",
+      "sha256": "09fa02093a394588f74a159ab04a4667b996fe8b27debe54fcf6faa4cd5cbb8c",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-3bd99f4836667d75/lib-symbrain_cli.json",
+      "sha256": "cd989545cf1cfbd0aadd960b2a66f784368afb24f32161eafba400a0cd194d1c",
+      "bytes": 1986
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-3f114ef9cfdfee23/dep-lib-symbrain_cli",
+      "sha256": "272e4a57b966bd4c953c3f2f203026bf287ee607f229efd565eda446ee9bec60",
+      "bytes": 1309
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-3f114ef9cfdfee23/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-3f114ef9cfdfee23/lib-symbrain_cli",
+      "sha256": "e98955144cdbc176ea829646322ced1f22522b50f3f727b10a66b9e9e7efa395",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-3f114ef9cfdfee23/lib-symbrain_cli.json",
+      "sha256": "d2170c83e6e8c859f5df484025d3a04b530b4acb2b3538c9a9fc54fdc4f2212b",
+      "bytes": 1982
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-40c8a810b6e92d4d/dep-test-integration-test-install_oracle_tests",
+      "sha256": "ea8890da7c783094b29bdd2404792a93ed15412a7abb65417e92229ba3bb35b3",
+      "bytes": 142
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-40c8a810b6e92d4d/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-40c8a810b6e92d4d/test-integration-test-install_oracle_tests",
+      "sha256": "7b7cba59e89f78db27c41b468e18e024f4a60a453297ba26e1364e3a5a8e6df3",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-40c8a810b6e92d4d/test-integration-test-install_oracle_tests.json",
+      "sha256": "347ae3d544b53a5c613766b85b4f998dae7413956fea338a175a66f41d5433a9",
+      "bytes": 2246
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-461fa531e6ee22e0/bin-symbrain",
+      "sha256": "6a54537a0cb1efb34a784e612abd5de1c8b2a66de957a0ff63f8b82ba7364a62",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-461fa531e6ee22e0/bin-symbrain.json",
+      "sha256": "86398c278dcddbdd26c0e7bd898829a8103175f49f64d0868146cce80fc157cf",
+      "bytes": 2046
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-461fa531e6ee22e0/dep-bin-symbrain",
+      "sha256": "dd32b16937730a9a92a8070aa73e4dbbc632703f88e1395eb2196a4f6b11a95a",
+      "bytes": 31
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-461fa531e6ee22e0/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-4951bd66fe9c1fb0/dep-test-integration-test-skills_status_opencode_tests",
+      "sha256": "def659950c1f97f685aa31cdc4d77dd87c16365e110af107a59db9ac5621cfe8",
+      "bytes": 285
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-4951bd66fe9c1fb0/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-4951bd66fe9c1fb0/test-integration-test-skills_status_opencode_tests",
+      "sha256": "c3d9e4ed252c1cd0c25105e8748c74d727e4412d224601d20c42b49e0314e9fc",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-4951bd66fe9c1fb0/test-integration-test-skills_status_opencode_tests.json",
+      "sha256": "cbd7c3388e82be839473842a3c24f38c16745743aac9cedc8066295524dd7066",
+      "bytes": 2251
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-4d3effc2be7c6192/dep-test-integration-test-skills_sync_legacy_roots",
+      "sha256": "be944a641a531d56e338a60ba32a1771f1808e0c95df8ce975bad2a79b35012c",
+      "bytes": 281
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-4d3effc2be7c6192/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-4d3effc2be7c6192/test-integration-test-skills_sync_legacy_roots",
+      "sha256": "0dac849cee1cf08aff5cf71117ebba6cddb0536bf2a026d3cfd724ca163351ed",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-4d3effc2be7c6192/test-integration-test-skills_sync_legacy_roots.json",
+      "sha256": "f0cc223749bacb856fb50f00c58824d271f67eff740ff23b83d91fa363cc334e",
+      "bytes": 2244
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-5162ae6ba36f140a/dep-test-integration-test-skills_doctor_native",
+      "sha256": "44f5132126df1b5e5e868c678b1b7576915becff294fccadeffb94e908815e3c",
+      "bytes": 142
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-5162ae6ba36f140a/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-5162ae6ba36f140a/test-integration-test-skills_doctor_native",
+      "sha256": "1079fd6cf9030b62067f1d94fcbec74fd97c7c651d48c0fba44d0d88ed8349bc",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-5162ae6ba36f140a/test-integration-test-skills_doctor_native.json",
+      "sha256": "7c23af59b10fc20fda56829192f87c9c64098fc250aa2a128aaaa2559bd45c82",
+      "bytes": 2245
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-557ae9c2ec69d18f/dep-test-integration-test-init_cli_tests",
+      "sha256": "24467cf3069ced2616d7cf041744500c99f279a7857a6e2062a9efbd831d5d93",
+      "bytes": 440
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-557ae9c2ec69d18f/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-557ae9c2ec69d18f/test-integration-test-init_cli_tests",
+      "sha256": "9597eda36d92fc06f359755eeee5c2c1838a0e8483bb741ef4f2d28639ff0762",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-557ae9c2ec69d18f/test-integration-test-init_cli_tests.json",
+      "sha256": "9e81110226a6419e79113919fff188ab8a6664b78c9823af8145e8817cb3e3a6",
+      "bytes": 2235
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-595959e8b1b52346/dep-test-integration-test-guard_decide_adapter",
+      "sha256": "fd9a123841ef99fdfcf6df772650b0719fa3b1ecf8e8163660ed788e1ad34bd7",
+      "bytes": 49
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-595959e8b1b52346/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-595959e8b1b52346/test-integration-test-guard_decide_adapter",
+      "sha256": "a1978137c39196e4c1bc6cdd165c5266e207141a7ad99fdeaef73f71a386d127",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-595959e8b1b52346/test-integration-test-guard_decide_adapter.json",
+      "sha256": "20edd60498f69a56fc2e12de2fae88e50767976db3065dcfa6d04ab437392818",
+      "bytes": 2246
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-61ad92eb348422b5/dep-test-integration-test-guard_decide_raw_bytes",
+      "sha256": "0f4765bd7dca5491cb4992db021242aa55346f0fc89516511148e8210116f771",
+      "bytes": 696
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-61ad92eb348422b5/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-61ad92eb348422b5/test-integration-test-guard_decide_raw_bytes",
+      "sha256": "1ddf3c6b2f0088a68b38f679c140839ca03b11d8cd5c047634634ce1e185ff00",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-61ad92eb348422b5/test-integration-test-guard_decide_raw_bytes.json",
+      "sha256": "79ab993257a52b3f3f8ae0d9fde7f7219b999e4be156bccfbf0df24335908b4e",
+      "bytes": 2243
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-66785a6b80d774c9/dep-test-integration-test-activity_cli_oracle_tests",
+      "sha256": "fcdef7ea96affd470872ed99438295c9126aa3f2062414674e165b37d81f2537",
+      "bytes": 282
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-66785a6b80d774c9/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-66785a6b80d774c9/test-integration-test-activity_cli_oracle_tests",
+      "sha256": "4ed0bca6e8e97fd50dff59a555495ee5ed5a37873db7794e5ff2eda7043bf2ff",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-66785a6b80d774c9/test-integration-test-activity_cli_oracle_tests.json",
+      "sha256": "46a5a8ddd0488eeefc80a938b52463b928ba094f78f8cdb65d3ed5e14ba499b7",
+      "bytes": 2248
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-672d0be2b0d6e56d/run-build-script-build-script-build",
+      "sha256": "f8465264a966bc4908d1957a917a8e3565843ea3d20126bbdf5d35068b46ac03",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-672d0be2b0d6e56d/run-build-script-build-script-build.json",
+      "sha256": "44c19d4bf3b6913e8514ac5c324ceba3fd81d11048dd0f9faf52da5f45f6d5db",
+      "bytes": 289
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-68407b5cffdffe7b/dep-test-integration-test-skills_targets_native",
+      "sha256": "8f203768716689f600f9637bb565a1c8316544ef734f991cfb67945ccae89413",
+      "bytes": 278
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-68407b5cffdffe7b/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-68407b5cffdffe7b/test-integration-test-skills_targets_native",
+      "sha256": "88554a1e1f5a3f12759fe43950863d44d2417bc6d9aa5aa291fa90dff81128f7",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-68407b5cffdffe7b/test-integration-test-skills_targets_native.json",
+      "sha256": "1469c24d1274cff1b5e482f5db1d64b8f3df92088d7ad7224bae09ce1c33eeeb",
+      "bytes": 2243
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-6e74120dc12eb402/dep-test-bin-symbrain",
+      "sha256": "92d09a4912db31b56cd7720d3d5376c8930dd977d70dad1c770ce7abe440420d",
+      "bytes": 166
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-6e74120dc12eb402/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-6e74120dc12eb402/test-bin-symbrain",
+      "sha256": "c64abe29b3a89999c0ef0b02eba23e7e73b1eae6e8a8099ae05341b355f5f7c1",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-6e74120dc12eb402/test-bin-symbrain.json",
+      "sha256": "5c9c7769cd6cfe3f99e0f1635bdb5a7e3ee15c70ee7d27c039e75dcf9e71caab",
+      "bytes": 2217
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-786430835c1e41b3/dep-test-integration-test-setup_fix_native",
+      "sha256": "240b60e8bca851b7d30e5c51a4bef62b30940d90de73dd4873980c70bd602171",
+      "bytes": 45
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-786430835c1e41b3/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-786430835c1e41b3/test-integration-test-setup_fix_native",
+      "sha256": "2eb6252bbefb0a43503054fae66e3a44908f999a9235ea8929d9e3067bb4cdc3",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-786430835c1e41b3/test-integration-test-setup_fix_native.json",
+      "sha256": "c599dd9f3173b2c72c8a161018d6d33ad3edf2842f6fab6902dee7cef47e4eca",
+      "bytes": 2242
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-7aed4e504d969571/dep-test-integration-test-vault_admin_native",
+      "sha256": "3e040520258d9c14d2ba3bf74255f21ff857b0ad73b9fb52d756b3cfac2bc7fe",
+      "bytes": 129
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-7aed4e504d969571/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-7aed4e504d969571/test-integration-test-vault_admin_native",
+      "sha256": "dada72bde518b92805f580be1c7b7ac141dd7bc3a2d0cfe0b9378f2ab5e47461",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-7aed4e504d969571/test-integration-test-vault_admin_native.json",
+      "sha256": "ac1602c0e21a4f7712c90034c9ebb24d24a01b7d310fce29950b7d20f2d0baa4",
+      "bytes": 2243
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-7f49d78426d2207f/dep-test-integration-test-skills_list_native",
+      "sha256": "887929075207c60f79c99563548e6485cb9aec44d36e1be1915aff7b52c28d3d",
+      "bytes": 140
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-7f49d78426d2207f/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-7f49d78426d2207f/test-integration-test-skills_list_native",
+      "sha256": "8a03916c7924ddb6750558e4fc2cf90f38396af0914fcc239a7dcc28e3d1b2d7",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-7f49d78426d2207f/test-integration-test-skills_list_native.json",
+      "sha256": "e270439e08ca716d0a595429938369b74fbacb6fc16844b84664ff531f436615",
+      "bytes": 2243
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-81d1cea3e3befc78/bin-symbrain",
+      "sha256": "e99e93367cc895012fd4b0c307173c2d143e2cccaa6773ddb13012c874f5f500",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-81d1cea3e3befc78/bin-symbrain.json",
+      "sha256": "4303332422aa5aa41f3f587bc964a46f0ce4f53b93a49308536e9dcf1d1736c2",
+      "bytes": 2043
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-81d1cea3e3befc78/dep-bin-symbrain",
+      "sha256": "cb303b3e78e8601cd669a39f3abe9de0725dd781ade7c783f2ecc866202babbe",
+      "bytes": 166
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-81d1cea3e3befc78/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-86c6e9e6106b3442/dep-test-integration-test-doctor_native",
+      "sha256": "acee762371f88963dd662acb04e6b320073816d30f630f45fd08458ec4f35442",
+      "bytes": 270
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-86c6e9e6106b3442/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-86c6e9e6106b3442/test-integration-test-doctor_native",
+      "sha256": "64e4d87947978417a35e14fa7846763bcc57ecf653680c540ce9e550f9da9a2f",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-86c6e9e6106b3442/test-integration-test-doctor_native.json",
+      "sha256": "72666a60e111be306594bf7d2025ce4c5ded1826ceed0a4d929bdb1462aa917b",
+      "bytes": 2235
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-8cf5ef2da91ff36d/dep-test-integration-test-activity_validation_tests",
+      "sha256": "05d9f3af158bf8dad296fa309cd05db294285c0295ca92d145e7cb7e491382a9",
+      "bytes": 282
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-8cf5ef2da91ff36d/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-8cf5ef2da91ff36d/test-integration-test-activity_validation_tests",
+      "sha256": "b772e31d9e6253e49e3d36d007da9f4ea200aae246232d58c05ff6eca6e06997",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-8cf5ef2da91ff36d/test-integration-test-activity_validation_tests.json",
+      "sha256": "095ace855ffaa28bbae20ee3457e4593b041b2904c8794c11ebe862aa95d1185",
+      "bytes": 2246
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-8e5384da52136b7e/dep-test-integration-test-skills_sync_legacy_roots",
+      "sha256": "b5f645b1cc8ae86c9634e4193c4ad4373a678e708294b5a2b07e20c0bf585a51",
+      "bytes": 146
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-8e5384da52136b7e/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-8e5384da52136b7e/test-integration-test-skills_sync_legacy_roots",
+      "sha256": "dcbf41b740406874867897af325a86583dd6ea76f60858357ba9a786c4a563da",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-8e5384da52136b7e/test-integration-test-skills_sync_legacy_roots.json",
+      "sha256": "856fbc653616bb87046cb1c10f5ba479debe079f50bb0fb32259ec651c2240b9",
+      "bytes": 2248
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-91e00fb29e5818cd/dep-test-integration-test-guard_grants_native",
+      "sha256": "18221deb30d40c87a36bfe669e8826718a417f4a3cc9ef4f91b51c3fd22f07c9",
+      "bytes": 104
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-91e00fb29e5818cd/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-91e00fb29e5818cd/test-integration-test-guard_grants_native",
+      "sha256": "d473b5596386ab98a2ddc0a30053dfdcbcdf227b23aca8a942bb516d3d6b3aab",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-91e00fb29e5818cd/test-integration-test-guard_grants_native.json",
+      "sha256": "7c45d99e8a22878629659ac1b555ca62f979d53adb42a3f832e2406294c57cc8",
+      "bytes": 2245
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-936a430ef8dd8a51/dep-test-integration-test-harness_list_tests",
+      "sha256": "3a59899a966f0c8d6300e91d8fa48f0319c33839b2d9fc7a6979a87a391c5e02",
+      "bytes": 140
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-936a430ef8dd8a51/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-936a430ef8dd8a51/test-integration-test-harness_list_tests",
+      "sha256": "ce0bed2748fea7295bc9a9603b97b611ea6803b4710dda260c03e7642ebd01ca",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-936a430ef8dd8a51/test-integration-test-harness_list_tests.json",
+      "sha256": "2c6656afa0c062e0d6177b002243a1e5d2eaf2d0cf149621ce81d16d6d953e48",
+      "bytes": 2244
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-9df19240671cf3b0/dep-test-integration-test-sync_native",
+      "sha256": "402f95906e498355cdfea8660f9ef21b743d4167e2cd998a216f4234f3cd13e0",
+      "bytes": 268
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-9df19240671cf3b0/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-9df19240671cf3b0/test-integration-test-sync_native",
+      "sha256": "f741d4ba80c588cbae35a316d718b85b6b086552511617d0e9bbe2cf542c1032",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-9df19240671cf3b0/test-integration-test-sync_native.json",
+      "sha256": "253f80acbadf86916f2eb91587c28cc48363158659cef4f711f4b9a4f41a6d76",
+      "bytes": 2234
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-9e35167957294b9d/dep-test-integration-test-mcp_cli_tests",
+      "sha256": "64777665cf86228d835255b72074b5d79788e3e0a14ae559fe963c6c7e7f5f8e",
+      "bytes": 851
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-9e35167957294b9d/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-9e35167957294b9d/test-integration-test-mcp_cli_tests",
+      "sha256": "690d2c479cc76ca03c145be207afe074fcf8833795124675593afe3fb8d35440",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-9e35167957294b9d/test-integration-test-mcp_cli_tests.json",
+      "sha256": "f62d22613f292b3033ff7685289285567bf4ba0ad81c373f8f5812c67599b7c9",
+      "bytes": 2235
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-a7f1977838c08dab/dep-test-integration-test-skills_log_native",
+      "sha256": "affc5ffddef29250c32c1563f15ae2187251b55134482ee12f9360248ed20625",
+      "bytes": 139
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-a7f1977838c08dab/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-a7f1977838c08dab/test-integration-test-skills_log_native",
+      "sha256": "4da10d752d613859f1fcc21ea28ff134c7acc2ae8257ed9ec1219e134ac40bfb",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-a7f1977838c08dab/test-integration-test-skills_log_native.json",
+      "sha256": "4781189df4c1a09690e1c85c64a4208a231232134ee6bce5cc4496ed85370f7e",
+      "bytes": 2243
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-ae997435e8e9fc5c/dep-test-integration-test-init_cli_tests",
+      "sha256": "1774fe498bb8b66cd55a413b019a40d2f26fa06d3458a7cfa20f63b1a966490a",
+      "bytes": 305
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-ae997435e8e9fc5c/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-ae997435e8e9fc5c/test-integration-test-init_cli_tests",
+      "sha256": "da82d83e9fe8d95c386aaf58b827d7e346c746ae6c32730a16f0fa5938b2ea4f",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-ae997435e8e9fc5c/test-integration-test-init_cli_tests.json",
+      "sha256": "4b02fc71d4c2dcc357f472acf26dd39648930e1a93cd491b0ff08c0546a60f8a",
+      "bytes": 2239
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-bac2a37205a72171/dep-test-integration-test-guard_oracle_grants",
+      "sha256": "aa11bba559026a310b12b08eafa343037ca376b0eaabfdf4713eca57f1b803e7",
+      "bytes": 232
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-bac2a37205a72171/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-bac2a37205a72171/test-integration-test-guard_oracle_grants",
+      "sha256": "f564115b858000625b23530ed90da99bb4bb4e517dfa50aabf5ead85ba2afd52",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-bac2a37205a72171/test-integration-test-guard_oracle_grants.json",
+      "sha256": "95e9ee34635742fff41dc83a5c529e3598171cf0fa4b321d943430b0c919544c",
+      "bytes": 2246
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-be9bd7f5fa0a5e29/dep-test-integration-test-install_oracle_tests",
+      "sha256": "c45ca13abe5e86ec5061584eef3cf390acc05ae7751840f7a401f982d82fc10c",
+      "bytes": 277
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-be9bd7f5fa0a5e29/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-be9bd7f5fa0a5e29/test-integration-test-install_oracle_tests",
+      "sha256": "60798f98a7523c85e553c4fdbcc32169ede33704640fa5a53701e7bb0d3b80ac",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-be9bd7f5fa0a5e29/test-integration-test-install_oracle_tests.json",
+      "sha256": "dd69c94ca718efcd91986cf67413a450180a61673f63fe05069c46b1e0221323",
+      "bytes": 2242
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-c1044659f17659c5/dep-test-integration-test-guard_doctor_oracle_tests",
+      "sha256": "ce0f69722435b4736c8530b6603b8a2a5c1c606fa38a21f2a5a70db5837f5742",
+      "bytes": 317
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-c1044659f17659c5/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-c1044659f17659c5/test-integration-test-guard_doctor_oracle_tests",
+      "sha256": "e274b50e97dec36dcc85354576359a5734dd09680f838263aa7324a3c0a7a401",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-c1044659f17659c5/test-integration-test-guard_doctor_oracle_tests.json",
+      "sha256": "70e0c142b55675f7066ffa104ebaa78554b8e7a3b1fccb9a81371bc02eedfdcb",
+      "bytes": 2248
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-c177fdc85479a0f8/dep-test-integration-test-guard_decide_adapter",
+      "sha256": "6807daa08e1ac521cc66a3dd461ec918c9fac0d0cfc1c74e3ca49c90687fac95",
+      "bytes": 184
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-c177fdc85479a0f8/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-c177fdc85479a0f8/test-integration-test-guard_decide_adapter",
+      "sha256": "9b1770d792c8119d2664e15dabf0787e3a576e622beba12e4ed783aa4a421479",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-c177fdc85479a0f8/test-integration-test-guard_decide_adapter.json",
+      "sha256": "18261f931a676bd30c17ab774f16335d2ecebe933804405caafc4533408423b3",
+      "bytes": 2242
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-ce8c289d8a45877d/dep-test-integration-test-guard_grants_native",
+      "sha256": "b50bc0bb3dc3a3ef69acbc9e481226fbc0224856acfae2d576676ebe475f4c80",
+      "bytes": 239
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-ce8c289d8a45877d/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-ce8c289d8a45877d/test-integration-test-guard_grants_native",
+      "sha256": "320363be6b63e597278a94beb3c7c48315a8df6c52d724e0824e638ea397e139",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-ce8c289d8a45877d/test-integration-test-guard_grants_native.json",
+      "sha256": "bbbf06cc30e8c4646837d761a7324a241f1af5ad561222c863892c9c397595f3",
+      "bytes": 2241
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-cf481a375549e9d1/dep-test-integration-test-profile_cli_tests",
+      "sha256": "97b74ea3aeaf117a7949ed18bfd679870720f4524769da52789323a4338b7ebc",
+      "bytes": 46
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-cf481a375549e9d1/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-cf481a375549e9d1/test-integration-test-profile_cli_tests",
+      "sha256": "8864f4f65125a8c6300bf91b40c7ea1e2ded8ee5c10dd990746303935a70b1ad",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-cf481a375549e9d1/test-integration-test-profile_cli_tests.json",
+      "sha256": "537abf40bc1076fce154dbf34b584b553f74217bf199f10ba039730089cbe3a6",
+      "bytes": 2242
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-d010e92018bb4fc4/dep-test-integration-test-guard_doctor_oracle_tests",
+      "sha256": "2708810ef471bd78912e8d588159df8dd23608318619a41de73b33d9f9bbab0e",
+      "bytes": 182
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-d010e92018bb4fc4/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-d010e92018bb4fc4/test-integration-test-guard_doctor_oracle_tests",
+      "sha256": "512d9095eb6ea6562d2d8724d0abdcf74465b95d62bc2003b5b51798dc57a4ca",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-d010e92018bb4fc4/test-integration-test-guard_doctor_oracle_tests.json",
+      "sha256": "75ce865698c643190e3b0c03699e5472f81fd088066b0bfc24d3269c179f0d32",
+      "bytes": 2252
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-d1b702d3765ac70b/dep-test-integration-test-setup_repair_native",
+      "sha256": "fa966036cb036bc38e9178cbc2bb2abee08e3075c57b2191f9d4b2221eb6e377",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-d1b702d3765ac70b/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-d1b702d3765ac70b/test-integration-test-setup_repair_native",
+      "sha256": "c58c519bce44d229442df8d8b23d18b10decba84d9a10e16d8c629feb1262c1f",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-d1b702d3765ac70b/test-integration-test-setup_repair_native.json",
+      "sha256": "7770f753dd0afae276319c4b988269a3e184fc08389fd172c230173f42358103",
+      "bytes": 2246
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-d8e67f2315b063f7/dep-test-integration-test-vault_admin_native",
+      "sha256": "4a9cd9f89535c26d1bb55456e830c6ec4984ec0a64cc1b594ae6e743f3543747",
+      "bytes": 264
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-d8e67f2315b063f7/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-d8e67f2315b063f7/test-integration-test-vault_admin_native",
+      "sha256": "93202cb2c12c5cff5629763bb1be5162835d6a87c1055c4d24a29e2be3f11b37",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-d8e67f2315b063f7/test-integration-test-vault_admin_native.json",
+      "sha256": "d58302b87722c311cbd389aba2ba7ce97ff0eab4a62f9c3a03ac8fa0bb687ee4",
+      "bytes": 2239
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-dd0f2a2cb55b54b4/build-script-build-script-build",
+      "sha256": "827f0b3266c9141f0d3b20fea0bbc9a42dbeeebcd8ebf86bc67e1681cfc0db9b",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-dd0f2a2cb55b54b4/build-script-build-script-build.json",
+      "sha256": "177fe97da60c90f2432ac890a9d4e116a7a081c815716fa56d59a26878cf951b",
+      "bytes": 373
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-dd0f2a2cb55b54b4/dep-build-script-build-script-build",
+      "sha256": "6764b43a3923de4eab92eaef1f505064f309b8aae81e5f78874d66a59535a00f",
+      "bytes": 163
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-dd0f2a2cb55b54b4/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-de7aed6c9ea0b3fe/dep-test-integration-test-doctor_modules",
+      "sha256": "c590205c84b74c731cd85cba60d39522e9f79efcaf9f43be02068b21283c9f93",
+      "bytes": 136
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-de7aed6c9ea0b3fe/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-de7aed6c9ea0b3fe/test-integration-test-doctor_modules",
+      "sha256": "e777147c0b25e27a2cd94b998ad99b7aed87445d4d3fce51cee03c3ecca6c7d2",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-de7aed6c9ea0b3fe/test-integration-test-doctor_modules.json",
+      "sha256": "362f920a81b28bed52a9032d755625d3504b8da82a63cef8baea3bce7645dd86",
+      "bytes": 2240
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-df4522a1402c6a51/dep-test-integration-test-activity_cli_oracle_tests",
+      "sha256": "5e9cb10f4f0dac88e8bcbc84602e16fabfe249bcab5175027099badc5f386e52",
+      "bytes": 147
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-df4522a1402c6a51/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-df4522a1402c6a51/test-integration-test-activity_cli_oracle_tests",
+      "sha256": "9da5dc59752c9dd1d35fd60adc5228bd1b47cd5a0dbe21ebd0b994fc6a961156",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-df4522a1402c6a51/test-integration-test-activity_cli_oracle_tests.json",
+      "sha256": "7e1c66ea7deec753b57ab2732b7db0856d7e4a0dc1e5f69954ad731ceb7b646a",
+      "bytes": 2252
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e38f90539a3711a2/dep-test-integration-test-doctor_native",
+      "sha256": "abfb6175e217fb654a803566b4a07d8c0f2298174bbbb469d8395f7974887bbe",
+      "bytes": 135
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e38f90539a3711a2/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e38f90539a3711a2/test-integration-test-doctor_native",
+      "sha256": "29bff724787de886906b97a9c4843328f6a6892e4687834dbf3389e841ae84c1",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e38f90539a3711a2/test-integration-test-doctor_native.json",
+      "sha256": "d44660b41f7e1016615af0ed53c2a02098f41f3bb95957d7cf161e3bd7731d17",
+      "bytes": 2239
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e51096b2461340a9/dep-test-integration-test-activity_validation_tests",
+      "sha256": "eacedfe9df69afb05cc08e020e970ac449bf125fcfbafb186262d73752332111",
+      "bytes": 147
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e51096b2461340a9/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e51096b2461340a9/test-integration-test-activity_validation_tests",
+      "sha256": "addccdb9437aa586021d4f806eb14de20dcf78510f44217dd0cab3bc34dc9495",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e51096b2461340a9/test-integration-test-activity_validation_tests.json",
+      "sha256": "e1fe231b8d183079499441b540ce8ce5b953aa6d32fb822238603a81b236310b",
+      "bytes": 2250
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e721b210868496a0/dep-test-integration-test-skills_list_native",
+      "sha256": "e0e7a92429c2c4fc0c69eebbb309cf16e0a1013b4885e410c3f536984a7ce9f8",
+      "bytes": 275
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e721b210868496a0/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e721b210868496a0/test-integration-test-skills_list_native",
+      "sha256": "200d95b4b848496185390af77f9c476d92670f786ce28818a679dc3d91fbac3e",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e721b210868496a0/test-integration-test-skills_list_native.json",
+      "sha256": "97acbdc6cfde2baba91942b7cb2f8eda8460389b28122886e25b094f6eafff44",
+      "bytes": 2239
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e74c0f90f2044ac8/dep-test-integration-test-guard_oracle_grants",
+      "sha256": "282c990ad8f44050b1f43342b704f3e62e654f18bad20cfd6de8a38bb8054d13",
+      "bytes": 367
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e74c0f90f2044ac8/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e74c0f90f2044ac8/test-integration-test-guard_oracle_grants",
+      "sha256": "6fcb5752e09dd2b199f5e6bf14ff0e46a18a9b728093062c55061a52c692764e",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-e74c0f90f2044ac8/test-integration-test-guard_oracle_grants.json",
+      "sha256": "ff0fe5ab5f847c23a2ee712094920bfdf70df8f2e5a15aa8e3ed4fe921607aec",
+      "bytes": 2242
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-edee731ad89c85ff/dep-test-integration-test-skills_log_native",
+      "sha256": "8ef3fe06e6cfec671d0ac5f04b6fe90fa7da0032e833d130b29c3d8069bf4f96",
+      "bytes": 274
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-edee731ad89c85ff/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-edee731ad89c85ff/test-integration-test-skills_log_native",
+      "sha256": "990b01579273d7c2848e55f2e1f1e736eb7a99dc71ab14358aecd7c06bdab742",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-edee731ad89c85ff/test-integration-test-skills_log_native.json",
+      "sha256": "3dd6f1e93741394e07f2e9349be9466a1d142a4575d71aeab4ecb8428b727474",
+      "bytes": 2239
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-ef84105930ed80c2/dep-test-integration-test-skills_status_opencode_tests",
+      "sha256": "3adeb5a14fed022cfeeb6c14a6869a66c15dafd0d0dc11e738890817e4e99855",
+      "bytes": 150
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-ef84105930ed80c2/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-ef84105930ed80c2/test-integration-test-skills_status_opencode_tests",
+      "sha256": "cc95c97cf4d9fd8b0a3a170a4ff29fa24d2c3deb52caeb584e0fd1f0aef48533",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-ef84105930ed80c2/test-integration-test-skills_status_opencode_tests.json",
+      "sha256": "a9febb50638d319409364d9f85892a8189d35da3bd61e40fe17ce2fcc6bc663a",
+      "bytes": 2255
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-f2741431380267f0/dep-test-integration-test-sync_native",
+      "sha256": "2cbe5fe1c2ccb6a9f5837c67eded0d727b28f17c7dff191dbe97a5fc5376e0d6",
+      "bytes": 133
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-f2741431380267f0/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-f2741431380267f0/test-integration-test-sync_native",
+      "sha256": "0c04326ec58754603329975cd4acb64f571a11c2f104e0657c5bf32ceba7a8ef",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-f2741431380267f0/test-integration-test-sync_native.json",
+      "sha256": "ce4eb209485cdf784e30679af83b0ad57fa803d1c4dd310b2ce8272354fb2692",
+      "bytes": 2238
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-f7a921ed0cb5ce21/dep-test-integration-test-harness_list_tests",
+      "sha256": "164ac94fc9de62f941e32cec671603d551d808a17325d48a88ac1e7b106fa2d8",
+      "bytes": 275
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-f7a921ed0cb5ce21/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-f7a921ed0cb5ce21/test-integration-test-harness_list_tests",
+      "sha256": "0fc8494ada4bc403e69fc4a24f204bec4ac78fca2148e3539edacbb4a0597fa7",
+      "bytes": 16
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/.fingerprint/symbrain-cli-f7a921ed0cb5ce21/test-integration-test-harness_list_tests.json",
+      "sha256": "4c6259ae931e58e6c7f71960d76a0ac0036d951eb6dd2a35508ecd4ad531e2f3",
+      "bytes": 2240
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-29729099236c6b08/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-29729099236c6b08/output",
+      "sha256": "1c718843ad723cdedd190e0695c6d852607d60ee60b40ddb4d1092c854167d4a",
+      "bytes": 110
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-29729099236c6b08/root-output",
+      "sha256": "15f2304eed177ef4598a68a10129e260e6c69a7c4b185fec3ee1ad9bef0277bb",
+      "bytes": 85
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-29729099236c6b08/stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-34d0705f27e1023f/build-script-build",
+      "sha256": "4750a0dea9023c0cc5b171b562482d65014f61367ca0d8a699a9aedd4d48fdee",
+      "bytes": 575624
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-34d0705f27e1023f/build_script_build-34d0705f27e1023f",
+      "sha256": "4750a0dea9023c0cc5b171b562482d65014f61367ca0d8a699a9aedd4d48fdee",
+      "bytes": 575624
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-34d0705f27e1023f/build_script_build-34d0705f27e1023f.d",
+      "sha256": "bfa4b69641b4a3428bf8ec7f4d63bfeb5a57eb29c08856254877132d8b95ff5b",
+      "bytes": 324
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-672d0be2b0d6e56d/invoked.timestamp",
+      "sha256": "5a109e6643e8d3e88642e3f35e85d2a83e639d07523aa6e99166c48178e965c3",
+      "bytes": 48
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-672d0be2b0d6e56d/output",
+      "sha256": "1c718843ad723cdedd190e0695c6d852607d60ee60b40ddb4d1092c854167d4a",
+      "bytes": 110
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-672d0be2b0d6e56d/root-output",
+      "sha256": "9a39a98802ca2d5cabaa34765caa118f3fb9882fd20d273af13b3e60cc51d8d6",
+      "bytes": 85
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-672d0be2b0d6e56d/stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-dd0f2a2cb55b54b4/build-script-build",
+      "sha256": "6b285aea1eb3274e8c601f3f8d000914dd10e7a3a4c57abadade0710b3e3c6b8",
+      "bytes": 575912
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-dd0f2a2cb55b54b4/build_script_build-dd0f2a2cb55b54b4",
+      "sha256": "6b285aea1eb3274e8c601f3f8d000914dd10e7a3a4c57abadade0710b3e3c6b8",
+      "bytes": 575912
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/build/symbrain-cli-dd0f2a2cb55b54b4/build_script_build-dd0f2a2cb55b54b4.d",
+      "sha256": "3b103c557237c13f79e9248c16b7a04497bb9f6bff80377f82c7ef13e639ea5b",
+      "bytes": 454
+    },
+    {
+      "path": "/workspace/symaira-usage768-argv/target/debug/symbrain",
+      "sha256": "f657a231ac1bae1472718e10c9ae30418d7589286b2300f882eb4b51b7b04743",
+      "bytes": 38007480
+    }
+  ],
+  "unique_files": 199,
+  "archive": "/tmp/symaira-usage768-argv-final2-local.evidence/argv-initial-clean.tar.gz",
+  "archive_bytes": 11847179,
+  "archive_sha256": "0b377d29cc39dddb3ac32b635a97cde11cc2c87377ed68818e257fd9d3560797",
+  "roundtrip_verified": true,
+  "command": [
+    "cargo",
+    "clean",
+    "--locked",
+    "-p",
+    "symbrain-cli",
+    "--target-dir",
+    "/workspace/symaira-usage768-argv/target"
+  ],
+  "scope": "One runner-owned exclusive target, all cargo dry-run regular files losslessly retained before package-only clean; no other package/target cleaned. /proc check is Linux-only, not a Windows lifecycle proof."
+}

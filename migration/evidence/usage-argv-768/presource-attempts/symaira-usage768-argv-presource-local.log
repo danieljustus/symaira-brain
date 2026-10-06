@@ -1,0 +1,38 @@
+Go-only local/source baseline: 97 cases
+Copilot/Kimi source-bound cases: 89
+Go-only local/source baseline: 97 cases
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.021s
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.015s
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.005s
+   Compiling symbrain-usage v0.12.1 (/workspace/symaira-usage768-argv/rust/symbrain-usage)
+    Finished `test` profile [unoptimized] target(s) in 2.02s
+     Running unittests src/lib.rs (target/debug/deps/symbrain_usage-717883f361629f0c)
+
+running 1 test
+test providers::provider_config::copilot_kimi_oracle_tests::copilot_kimi_oracle_matches_fresh_go ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 66 filtered out; finished in 0.07s
+
+    Finished `dev` profile [unoptimized] target(s) in 0.15s
+Copilot/Kimi CLI oracle: 111 byte/exit matches
+Copilot/Kimi CLI oracle: 16 byte/exit matches
+   Compiling symbrain-memory v0.12.1 (/tmp/symbrain-copilot-kimi-768.ltJquJ/argv-parent-source/rust/symbrain-memory)
+   Compiling symbrain-catalog v0.12.1 (/tmp/symbrain-copilot-kimi-768.ltJquJ/argv-parent-source/rust/symbrain-catalog)
+   Compiling symbrain-audit v0.12.1 (/tmp/symbrain-copilot-kimi-768.ltJquJ/argv-parent-source/rust/symbrain-audit)
+   Compiling symbrain-broker v0.12.1 (/tmp/symbrain-copilot-kimi-768.ltJquJ/argv-parent-source/rust/symbrain-broker)
+   Compiling symbrain-instructions v0.12.1 (/tmp/symbrain-copilot-kimi-768.ltJquJ/argv-parent-source/rust/symbrain-instructions)
+   Compiling symbrain-patterns v0.12.1 (/tmp/symbrain-copilot-kimi-768.ltJquJ/argv-parent-source/rust/symbrain-patterns)
+   Compiling symbrain-cli v0.12.1 (/tmp/symbrain-copilot-kimi-768.ltJquJ/argv-parent-source/rust/symbrain-cli)
+   Compiling symbrain-gateway v0.12.1 (/tmp/symbrain-copilot-kimi-768.ltJquJ/argv-parent-source/rust/symbrain-gateway)
+   Compiling symbrain-adapter v0.12.1 (/tmp/symbrain-copilot-kimi-768.ltJquJ/argv-parent-source/rust/symbrain-adapter)
+   Compiling symbrain-guard-core v0.12.1 (/tmp/symbrain-copilot-kimi-768.ltJquJ/argv-parent-source/rust/symbrain-guard-core)
+   Compiling symbrain-managed v0.12.1 (/tmp/symbrain-copilot-kimi-768.ltJquJ/argv-parent-source/rust/symbrain-managed)
+    Finished `dev` profile [unoptimized] target(s) in 5.49s
+    Finished `dev` profile [unoptimized] target(s) in 0.11s
+Traceback (most recent call last):
+  File "/workspace/symaira-usage768-argv/scripts/usage-copilot-kimi-oracle/argv.py", line 110, in <module>
+    main()
+  File "/workspace/symaira-usage768-argv/scripts/usage-copilot-kimi-oracle/argv.py", line 87, in main
+    assert row['matched'], row
+           ~~~^^^^^^^^^^^
+AssertionError: {'id': 'copilot-original-2', 'provider': 'copilot', 'argv_hex': ['2d2d2d2d68656c70'], 'original': True, 'go': {'exit': 2, 'stdout_b64': '', 'stderr_b64': 'YmFkIGZsYWcgc3ludGF4OiAtLS1oZWxwCnN5bWJyYWluIHVzYWdlIOKAlCBBSSBzdWJzY3JpcHRpb24vdG9rZW4gdXNhZ2UgcGVyIHByb3ZpZGVyCgpVc2FnZToKICBzeW1icmFpbiB1c2FnZQoKVGhlIGdsb2JhbCAtLW91dHB1dCB0YWJsZXxqc29uIGZsYWcgKG9yIC0tanNvbikgc2VsZWN0cyB0aGUgb3V0cHV0IGZvcm1hdC4KClByb3ZpZGVyczogQ2xhdWRlLCBDb2RleCwgQ29waWxvdCwgQ3Vyc29yLCBLaW1pLCBNb29uc2hvdCwgTm91cyBQb3J0YWwsCk9wZW5Db2RlLCBPcGVuUm91dGVyLCBBbnRpZ3Jhdml0eS4gQ3JlZGVudGlhbCByZXNvbHV0aW9uOiBhbiBleHBsaWNpdCBlbnYKdmFyIHBlciBwcm92aWRlciwgd2hvc2UgdmFsdWUgbWF5IGJlIGEgc3ltdmF1bHQ6Ly88cGF0aD4gVVJJIHJlc29sdmVkCnRocm91Z2ggdGhlIHNlY3JldCBzdG9yZTsgcHJvdmlkZXJzIHdpdGggYSBuYXRpdmUgQ0xJIGNyZWRlbnRpYWwgZmlsZQpmYWxsIGJhY2sgdG8gaXQgcmVhZC1vbmx5IHdoZW4gdGhlIGVudiB2YXIgaXMgdW5zZXQuIFNlZSBlYWNoIHByb3ZpZGVyJ3MKZG9jIGNvbW1lbnQgaW4gaW50ZXJuYWwvdXNhZ2UgZm9yIHRoZSBtYWNPUy1LZXljaGFpbiAvIGxvY2FsLWRhdGFiYXNlCnN0cmF0ZWdpZXMgbm90IHBvcnRlZCBmcm9tIHRoZSBTd2lmdCBvcmlnaW5hbC4K'}, 'parent': {'exit': 2, 'stdout_b64': '', 'stderr_b64': 'ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1oZWxwCnN5bWJyYWluIHVzYWdlIOKAlCBBSSBzdWJzY3JpcHRpb24vdG9rZW4gdXNhZ2UgcGVyIHByb3ZpZGVyCgpVc2FnZToKICBzeW1icmFpbiB1c2FnZQoKVGhlIGdsb2JhbCAtLW91dHB1dCB0YWJsZXxqc29uIGZsYWcgKG9yIC0tanNvbikgc2VsZWN0cyB0aGUgb3V0cHV0IGZvcm1hdC4KClByb3ZpZGVyczogQ2xhdWRlLCBDb2RleCwgQ29waWxvdCwgQ3Vyc29yLCBLaW1pLCBNb29uc2hvdCwgTm91cyBQb3J0YWwsCk9wZW5Db2RlLCBPcGVuUm91dGVyLCBBbnRpZ3Jhdml0eS4gQ3JlZGVudGlhbCByZXNvbHV0aW9uOiBhbiBleHBsaWNpdCBlbnYKdmFyIHBlciBwcm92aWRlciwgd2hvc2UgdmFsdWUgbWF5IGJlIGEgc3ltdmF1bHQ6Ly88cGF0aD4gVVJJIHJlc29sdmVkCnRocm91Z2ggdGhlIHNlY3JldCBzdG9yZTsgcHJvdmlkZXJzIHdpdGggYSBuYXRpdmUgQ0xJIGNyZWRlbnRpYWwgZmlsZQpmYWxsIGJhY2sgdG8gaXQgcmVhZC1vbmx5IHdoZW4gdGhlIGVudiB2YXIgaXMgdW5zZXQuIFNlZSBlYWNoIHByb3ZpZGVyJ3MKZG9jIGNvbW1lbnQgaW4gaW50ZXJuYWwvdXNhZ2UgZm9yIHRoZSBtYWNPUy1LZXljaGFpbiAvIGxvY2FsLWRhdGFiYXNlCnN0cmF0ZWdpZXMgbm90IHBvcnRlZCBmcm9tIHRoZSBTd2lmdCBvcmlnaW5hbC4K'}, 'rust': {'exit': 2, 'stdout_b64': '', 'stderr_b64': 'ZmxhZyBwcm92aWRlZCBidXQgbm90IGRlZmluZWQ6IC1oZWxwCnN5bWJyYWluIHVzYWdlIOKAlCBBSSBzdWJzY3JpcHRpb24vdG9rZW4gdXNhZ2UgcGVyIHByb3ZpZGVyCgpVc2FnZToKICBzeW1icmFpbiB1c2FnZQoKVGhlIGdsb2JhbCAtLW91dHB1dCB0YWJsZXxqc29uIGZsYWcgKG9yIC0tanNvbikgc2VsZWN0cyB0aGUgb3V0cHV0IGZvcm1hdC4KClByb3ZpZGVyczogQ2xhdWRlLCBDb2RleCwgQ29waWxvdCwgQ3Vyc29yLCBLaW1pLCBNb29uc2hvdCwgTm91cyBQb3J0YWwsCk9wZW5Db2RlLCBPcGVuUm91dGVyLCBBbnRpZ3Jhdml0eS4gQ3JlZGVudGlhbCByZXNvbHV0aW9uOiBhbiBleHBsaWNpdCBlbnYKdmFyIHBlciBwcm92aWRlciwgd2hvc2UgdmFsdWUgbWF5IGJlIGEgc3ltdmF1bHQ6Ly88cGF0aD4gVVJJIHJlc29sdmVkCnRocm91Z2ggdGhlIHNlY3JldCBzdG9yZTsgcHJvdmlkZXJzIHdpdGggYSBuYXRpdmUgQ0xJIGNyZWRlbnRpYWwgZmlsZQpmYWxsIGJhY2sgdG8gaXQgcmVhZC1vbmx5IHdoZW4gdGhlIGVudiB2YXIgaXMgdW5zZXQuIFNlZSBlYWNoIHByb3ZpZGVyJ3MKZG9jIGNvbW1lbnQgaW4gaW50ZXJuYWwvdXNhZ2UgZm9yIHRoZSBtYWNPUy1LZXljaGFpbiAvIGxvY2FsLWRhdGFiYXNlCnN0cmF0ZWdpZXMgbm90IHBvcnRlZCBmcm9tIHRoZSBTd2lmdCBvcmlnaW5hbC4K'}, 'matched': False, 'parent_matched': False, 'file_sha256': 'a6f18366d858a5bae5072e51a547745b383982c3c2273214ab0c84e340aca4ca', 'read_only': True}
