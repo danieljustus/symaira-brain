@@ -72,6 +72,9 @@ run_stage go-owners go -C "$source_root" test ./internal/usage -run '^TestUsageC
 run_stage native-constructors cargo test --locked -p symbrain-usage --lib copilot_kimi_oracle_matches_fresh_go -- --ignored --nocapture
 # Stable parent/candidate binary hashes must not include incremental debug metadata.
 export CARGO_INCREMENTAL=0 CARGO_PROFILE_DEV_DEBUG=0
+# MSVC link.exe stamps wall-clock PE TimeDateStamp/PDB GUID; /Brepro makes the
+# rebuilt Windows candidate byte-comparable. Inert on other targets.
+export CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUSTFLAGS='-C link-arg=/Brepro'
 target_root=$(python3 -c 'import os; print(os.path.abspath(os.environ.get("CARGO_TARGET_DIR","target")))')
 run_stage argv-initial-clean python3 "$repo_root/scripts/usage-copilot-kimi-oracle/clean_cli.py" "$target_root" "$repo_root" "$evidence_dir/argv-initial-clean.json" --with-usage
 run_stage native-build cargo build --locked -p symbrain-cli

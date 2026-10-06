@@ -12,7 +12,10 @@ def build(repo,root,evidence,source,env,run):
     # Match the sibling argv oracle: keep incremental/debug metadata out of the
     # initial-versus-restored binary comparison.
     env = env.copy()
-    env.update(CARGO_INCREMENTAL='0', CARGO_PROFILE_DEV_DEBUG='0')
+    # MSVC link.exe stamps wall-clock PE TimeDateStamp/PDB GUID; /Brepro keeps
+    # the Windows rebuild byte-comparable. Inert on other targets.
+    env.update(CARGO_INCREMENTAL='0', CARGO_PROFILE_DEV_DEBUG='0',
+               CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_RUSTFLAGS='-C link-arg=/Brepro')
     suffix='.exe'if os.name=='nt'else'';target=Path(env.get('CARGO_TARGET_DIR',repo/'target')).resolve();live=target/'debug'/('symbrain'+suffix)
     run('go-cli-build',['go','-C',str(source),'build','-trimpath','-o',str(evidence/('go-usage'+suffix)),'./cmd/symbrain'],env)
     shutil.copyfile(repo/'scripts/usage-next-oracle/sentinel.go.txt',root/'sentinel.go')
