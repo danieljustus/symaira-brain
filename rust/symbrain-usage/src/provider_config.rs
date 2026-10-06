@@ -64,6 +64,10 @@ include!("provider_config/other_accounts.rs");
 mod tests;
 
 #[cfg(test)]
+#[path = "credential_path_json_tests.rs"]
+mod credential_path_json_tests;
+
+#[cfg(test)]
 #[path = "provider_file_oracle_tests.rs"]
 mod provider_file_oracle_tests;
 

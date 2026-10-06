@@ -7,6 +7,9 @@ use crate::{UsageError, UsageMeter, UsageSnapshot};
 mod parser_extra;
 #[path = "parser_opencode.rs"]
 mod parser_opencode;
+#[cfg(test)]
+#[path = "parser_unit_tests.rs"]
+mod unit_tests;
 
 pub(crate) fn parse_snapshot(
     id: &str,

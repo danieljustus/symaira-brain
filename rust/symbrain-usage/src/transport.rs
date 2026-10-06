@@ -382,4 +382,94 @@ mod tests {
         );
         drop(stalled_peer);
     }
+
+    fn request(provider: &str, url: &str, body: Option<Vec<u8>>) -> Request {
+        Request {
+            provider_id: provider.to_string(),
+            method: "POST".to_string(),
+            url: url.to_string(),
+            headers: BTreeMap::new(),
+            body,
+        }
+    }
+
+    #[test]
+    fn ureq_refuses_oversized_bodies_plain_http_and_cancelled_requests() {
+        let transport = UreqTransport::default();
+        let oversized = vec![b'x'; super::MAX_REQUEST_BODY_BYTES + 1];
+        assert_eq!(
+            transport
+                .request(request("codex", "https://127.0.0.1:9/", Some(oversized)))
+                .unwrap_err(),
+            "request body exceeds limit"
+        );
+        assert_eq!(
+            transport
+                .request(request("codex", "http://chatgpt.com/usage", None))
+                .unwrap_err(),
+            "provider URL must use HTTPS"
+        );
+        let cancelled = Cancellation::new();
+        cancelled.cancel();
+        assert!(cancelled.is_cancelled());
+        assert!(
+            cancelled
+                .remaining()
+                .is_some_and(|left| left <= Duration::from_millis(100))
+        );
+        assert_eq!(
+            transport
+                .request_with_cancel(request("codex", "https://127.0.0.1:9/", None), &cancelled)
+                .unwrap_err(),
+            "request cancelled"
+        );
+        let expired = Cancellation::with_deadline(Instant::now());
+        assert_eq!(
+            transport
+                .request_with_cancel(request("codex", "https://127.0.0.1:9/", None), &expired)
+                .unwrap_err(),
+            "request cancelled"
+        );
+    }
+
+    #[test]
+    fn fixture_transport_replays_sequences_and_reports_missing_providers() {
+        let ok = |status| {
+            Ok(super::Response {
+                status,
+                body: Vec::new(),
+                headers: BTreeMap::new(),
+            })
+        };
+        let transport = super::FixtureTransport::with_sequences(BTreeMap::from([
+            ("codex".to_string(), vec![ok(500), ok(200)]),
+            ("empty".to_string(), Vec::new()),
+        ]));
+        let status = |provider: &str| {
+            transport
+                .request(request(provider, "https://example.invalid/", None))
+                .map(|response| response.status)
+        };
+        assert_eq!(status("codex"), Ok(500));
+        assert_eq!(status("codex"), Ok(200));
+        // The last response repeats once a sequence is exhausted.
+        assert_eq!(status("codex"), Ok(200));
+        assert_eq!(
+            status("empty"),
+            Err("fixture sequence is empty".to_string())
+        );
+        assert_eq!(transport.requests().len(), 4);
+        let missing = super::FixtureTransport::new(BTreeMap::new())
+            .request(request("kimi", "https://example.invalid/", None))
+            .unwrap_err();
+        assert_eq!(missing, "fixture missing provider \"kimi\"");
+        let debug = format!(
+            "{:?}",
+            request("kimi", "https://secret.invalid/", Some(b"token".to_vec()))
+        );
+        assert!(
+            !debug.contains("secret") && !debug.contains("token"),
+            "{debug}"
+        );
+    }
 }

@@ -7,6 +7,8 @@ mod go_decimal_shift;
 #[cfg(test)]
 mod go_decimal_tests;
 mod go_float;
+#[cfg(test)]
+mod go_float_tests;
 mod model;
 mod parser;
 mod providers;
