@@ -1,0 +1,27 @@
+   Compiling symbrain-core v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-core)
+   Compiling symbrain-harness v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-harness)
+   Compiling symbrain-policy v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-policy)
+   Compiling symbrain-mcp v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-mcp)
+   Compiling symbrain-activity v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-activity)
+   Compiling symbrain-skills v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-skills)
+   Compiling symbrain-memory v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-memory)
+   Compiling symbrain-broker v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-broker)
+   Compiling symbrain-catalog v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-catalog)
+   Compiling symbrain-audit v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-audit)
+   Compiling symbrain-usage v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-usage)
+   Compiling symbrain-instructions v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-instructions)
+   Compiling symbrain-patterns v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-patterns)
+   Compiling symbrain-cli v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-cli)
+   Compiling symbrain-gateway v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-gateway)
+   Compiling symbrain-adapter v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-adapter)
+   Compiling symbrain-guard-core v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-guard-core)
+   Compiling symbrain-managed v0.12.1 (/workspace/symaira-memory758-sigpipe/rust/symbrain-managed)
+    Finished `test` profile [unoptimized] target(s) in 9.15s
+     Running unittests src/lib.rs (/workspace/symaira-memory758-writes/target/debug/deps/symbrain_cli-c1b003b5ea1ccc38)
+
+running 2 tests
+test memory_cli::write_output::tests::injected_broken_pipe_does_not_terminate_the_library_caller ... ok
+test memory_cli::write_output::tests::output_failure_reports_error_after_committed_set ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 117 filtered out; finished in 0.06s
+

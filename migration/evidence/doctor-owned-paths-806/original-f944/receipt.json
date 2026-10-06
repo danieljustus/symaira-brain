@@ -1,0 +1,71 @@
+{
+  "source": "f9447c5e01bd8c3d78df5115fd62636ac807cbd0",
+  "ci_run": 37174759809,
+  "linux_job": 111355025735,
+  "windows_job": 111355025851,
+  "files": {
+    "symaira-current-ci-job-111355025735.log": {
+      "original_path": "/tmp/symaira-current-ci-job-111355025735.log",
+      "sha256": "ddbeddec9c2b6dd1b7111e6d0d9bfdcbacffbf05f6cc76ecc11283c836482a55",
+      "bytes": 460874
+    },
+    "symaira-doctor806-f944-artifact-process.log": {
+      "original_path": "/tmp/symaira-doctor806-f944-artifact-process.log",
+      "sha256": "2788c477d621302543879ebebf6e92681385475fe4d3b31410167a153c397813",
+      "bytes": 740
+    },
+    "symaira-current-ci-job-111355025851.log": {
+      "original_path": "/tmp/symaira-current-ci-job-111355025851.log",
+      "sha256": "4097dc401d6d2bb380511c521de9705eb5a3a6dc40595957de3c89957780672c",
+      "bytes": 474450
+    },
+    "doctor806-f944-stdout-failure.zip": {
+      "original_path": "/workspace/attachments/8bf49aa7-3801-4811-a66f-8de5754e4608/doctor806-f944-stdout-failure.zip",
+      "sha256": "714e400e9f1a7f54ac23e4f8e1787fc101cc56b22511eec50139dd706ac0d758",
+      "bytes": 521
+    },
+    "original-fix.py": {
+      "original_path": "/workspace/symaira-doctor806-owned-paths/scripts/doctor-stdout-oracle/fix.py",
+      "sha256": "5734c5079b691e6dfe9e309088957697e0f668ecc71224347f49cecd121bc814",
+      "bytes": 3405
+    },
+    "original-embedded.py": {
+      "original_path": "/workspace/symaira-doctor806-owned-paths/scripts/doctor-stdout-oracle/embedded.py",
+      "sha256": "503cee859394192b7eda8fbb972f644eedb9050752f296980779483def697922",
+      "bytes": 4067
+    },
+    "original-controls.py": {
+      "original_path": "/workspace/symaira-doctor806-owned-paths/scripts/doctor-stdout-oracle/controls.py",
+      "sha256": "3a2152f02011ad1a711d1daf7ff25643a991ba52bdaeb2d28417495d2cd7ca2f",
+      "bytes": 3235
+    },
+    "original-README.md": {
+      "original_path": "/workspace/symaira-doctor806-owned-paths/scripts/doctor-stdout-oracle/README.md",
+      "sha256": "7fd4ca02f4e0747f3cacb71d6a57ae3e76d04aaea6e128465490f319e72d789f",
+      "bytes": 1643
+    },
+    "original-embedded.go.txt": {
+      "original_path": "/workspace/symaira-doctor806-owned-paths/scripts/doctor-stdout-oracle/embedded.go.txt",
+      "sha256": "f1ae116ab6a3fbf0aa9b1974782f8ca434cb3519975e09b61540e9b5685e5d90",
+      "bytes": 823
+    },
+    "original-identity.py": {
+      "original_path": "/workspace/symaira-doctor806-owned-paths/scripts/doctor-stdout-oracle/identity.py",
+      "sha256": "1d2d6b1cf77af957606fa3aa0b04d9db3b152dca5d88b5f16139b2c1b5046895",
+      "bytes": 1455
+    },
+    "original-process.py": {
+      "original_path": "/workspace/symaira-doctor806-owned-paths/scripts/doctor-stdout-oracle/process.py",
+      "sha256": "1e8184e4fcd818be4ae3d931f2558d69f2b5ed71e1de669963ca34ab243ebcd7",
+      "bytes": 3702
+    },
+    "original-run.sh": {
+      "original_path": "/workspace/symaira-doctor806-owned-paths/scripts/doctor-stdout-oracle/run.sh",
+      "sha256": "90fda52756fc02a0f26877ed5af2727e6add7f1ee848b3580a3a055f470d7f09",
+      "bytes": 938
+    }
+  },
+  "linux_actual": "FileNotFoundError target/debug/symbrain after subprocess cwd changed to owned PROJECT; artifact contains only process.log",
+  "windows_distinct_unresolved": "actual setup --from-source browse child exceeded25s; no causal conclusion or blanket timeout increase",
+  "scope": "full original job logs, exact artifact ZIP and extracted bytes before harness-only path correction; no new executable/target/runtime allocation"
+}

@@ -1,0 +1,1871 @@
+{
+  "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "candidate_head": "e6e96a227410a293d240f33f4fb6f88ccd829298",
+  "candidate_dirty": false,
+  "runtime": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "total": 8,
+  "exit": 0,
+  "matches": true,
+  "cases": [
+    "raw-install-None-lexical-False-json-False",
+    "raw-install-None-lexical-True-json-False",
+    "raw-install-bin-lexical-True-json-False",
+    "raw-install-parent-lexical-True-json-False",
+    "raw-install-None-lexical-False-json-True",
+    "raw-install-None-lexical-True-json-True",
+    "raw-install-bin-lexical-True-json-True",
+    "raw-install-parent-lexical-True-json-True"
+  ],
+  "observations": [
+    {
+      "binary": "/workspace/oracles/symbrain-go-dcddcef0",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned"
+      ],
+      "exit": 0,
+      "stdout_base64": "ICAtICBzeW1jb2NrcGl0IDAuNi4yICh1bnN1cHBvcnRlZCBwbGF0Zm9ybSkKICDinJMgIHN5bWRlc2sgdjAuMTIuMiAocmVwYWlyZWQpCiAg4pyTICBzeW12YXVsdCB2MC4yMi4xIChyZXBhaXJlZCkKCjIgZml4ZWQsIDEgYWxyZWFkeSBjb3JyZWN0Cg==",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCldBUk5JTkc6IHNraXBwaW5nIGNvc2lnbiB2ZXJpZmljYXRpb24gZm9yIHN5bXZhdWx0X2xpbnV4X2FtZDY0LnRhci5neiAoLS1hbGxvdy11bnNpZ25lZCk6IGNvc2lnbiBpcyBub3QgaW5zdGFsbGVkIG9uIFBBVEggKGV4ZWM6ICJjb3NpZ24iOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRIKSDigJQgdGhlIHB1Ymxpc2hlciB3YXMgTk9UIGF1dGhlbnRpY2F0ZWQK",
+      "fixture_root": "/tmp/symbrain-parity-3xkc58ve/go",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "d0657fefe27d35d6c82459f1feb85d9e1d66c684f97f01bd1e41973a7daaa05e",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4xMi4yIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "c3ea9417fd2edc855144ce3595dac1adfd3687c749535961716b7c75ac1716ea",
+          "size": 239,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltZGVzayIsCiAgInNvdXJjZSI6ICJyZWxlYXNlIiwKICAidmVyc2lvbiI6ICJ2MC4xMi4yIiwKICAicmVwbyI6ICJkYW5pZWxqdXN0dXMvc3ltYWlyYS1kZXNrdG9wIiwKICAiYnVpbHRfYXQiOiAiPGluc3RhbGwtdGltZXN0YW1wPiIsCiAgImJpbmFyeV9zaGEyNTYiOiAiZDA2NTdmZWZlMjdkMzVkNmM4MjQ1OWYxZmViODVkOWUxZDY2YzY4NGY5N2YwMWJkMWU0MTk3M2E3ZGFhYTA1ZSIKfQo="
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "ee6a5b2899eb59dd6a9cc1c550ce145a92738261b8f0dd89a5690531f2413590",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4yMi4xIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "ba54872f3bd903e03c41d8739a577219da4a43b9619711fec15217100d7352e5",
+          "size": 238,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltdmF1bHQiLAogICJzb3VyY2UiOiAicmVsZWFzZSIsCiAgInZlcnNpb24iOiAidjAuMjIuMSIsCiAgInJlcG8iOiAiZGFuaWVsanVzdHVzL3N5bWFpcmEtdmF1bHQiLAogICJidWlsdF9hdCI6ICI8aW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICJlZTZhNWIyODk5ZWI1OWRkNmE5Y2MxYzU1MGNlMTQ1YTkyNzM4MjYxYjhmMGRkODlhNTY5MDUzMWYyNDEzNTkwIgp9Cg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/symaira-setup765-source/target/debug/symbrain",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned"
+      ],
+      "exit": 0,
+      "stdout_base64": "ICAtICBzeW1jb2NrcGl0IDAuNi4yICh1bnN1cHBvcnRlZCBwbGF0Zm9ybSkKICDinJMgIHN5bWRlc2sgdjAuMTIuMiAocmVwYWlyZWQpCiAg4pyTICBzeW12YXVsdCB2MC4yMi4xIChyZXBhaXJlZCkKCjIgZml4ZWQsIDEgYWxyZWFkeSBjb3JyZWN0Cg==",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCldBUk5JTkc6IHNraXBwaW5nIGNvc2lnbiB2ZXJpZmljYXRpb24gZm9yIHN5bXZhdWx0X2xpbnV4X2FtZDY0LnRhci5neiAoLS1hbGxvdy11bnNpZ25lZCk6IGNvc2lnbiBpcyBub3QgaW5zdGFsbGVkIG9uIFBBVEggKGV4ZWM6ICJjb3NpZ24iOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRIKSDigJQgdGhlIHB1Ymxpc2hlciB3YXMgTk9UIGF1dGhlbnRpY2F0ZWQK",
+      "fixture_root": "/tmp/symbrain-parity-3xkc58ve/rust",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "d0657fefe27d35d6c82459f1feb85d9e1d66c684f97f01bd1e41973a7daaa05e",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4xMi4yIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "c3ea9417fd2edc855144ce3595dac1adfd3687c749535961716b7c75ac1716ea",
+          "size": 239,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltZGVzayIsCiAgInNvdXJjZSI6ICJyZWxlYXNlIiwKICAidmVyc2lvbiI6ICJ2MC4xMi4yIiwKICAicmVwbyI6ICJkYW5pZWxqdXN0dXMvc3ltYWlyYS1kZXNrdG9wIiwKICAiYnVpbHRfYXQiOiAiPGluc3RhbGwtdGltZXN0YW1wPiIsCiAgImJpbmFyeV9zaGEyNTYiOiAiZDA2NTdmZWZlMjdkMzVkNmM4MjQ1OWYxZmViODVkOWUxZDY2YzY4NGY5N2YwMWJkMWU0MTk3M2E3ZGFhYTA1ZSIKfQo="
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "ee6a5b2899eb59dd6a9cc1c550ce145a92738261b8f0dd89a5690531f2413590",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4yMi4xIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "ba54872f3bd903e03c41d8739a577219da4a43b9619711fec15217100d7352e5",
+          "size": 238,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltdmF1bHQiLAogICJzb3VyY2UiOiAicmVsZWFzZSIsCiAgInZlcnNpb24iOiAidjAuMjIuMSIsCiAgInJlcG8iOiAiZGFuaWVsanVzdHVzL3N5bWFpcmEtdmF1bHQiLAogICJidWlsdF9hdCI6ICI8aW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICJlZTZhNWIyODk5ZWI1OWRkNmE5Y2MxYzU1MGNlMTQ1YTkyNzM4MjYxYjhmMGRkODlhNTY5MDUzMWYyNDEzNTkwIgp9Cg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/oracles/symbrain-go-dcddcef0",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned"
+      ],
+      "exit": 0,
+      "stdout_base64": "ICAtICBzeW1jb2NrcGl0IDAuNi4yICh1bnN1cHBvcnRlZCBwbGF0Zm9ybSkKICDinJMgIHN5bWRlc2sgdjAuMTIuMiAocmVwYWlyZWQpCiAg4pyTICBzeW12YXVsdCB2MC4yMi4xIChyZXBhaXJlZCkKCjIgZml4ZWQsIDEgYWxyZWFkeSBjb3JyZWN0Cg==",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCldBUk5JTkc6IHNraXBwaW5nIGNvc2lnbiB2ZXJpZmljYXRpb24gZm9yIHN5bXZhdWx0X2xpbnV4X2FtZDY0LnRhci5neiAoLS1hbGxvdy11bnNpZ25lZCk6IGNvc2lnbiBpcyBub3QgaW5zdGFsbGVkIG9uIFBBVEggKGV4ZWM6ICJjb3NpZ24iOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRIKSDigJQgdGhlIHB1Ymxpc2hlciB3YXMgTk9UIGF1dGhlbnRpY2F0ZWQK",
+      "fixture_root": "/tmp/symbrain-parity-868ndy4r/go",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "d0657fefe27d35d6c82459f1feb85d9e1d66c684f97f01bd1e41973a7daaa05e",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4xMi4yIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "c3ea9417fd2edc855144ce3595dac1adfd3687c749535961716b7c75ac1716ea",
+          "size": 239,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltZGVzayIsCiAgInNvdXJjZSI6ICJyZWxlYXNlIiwKICAidmVyc2lvbiI6ICJ2MC4xMi4yIiwKICAicmVwbyI6ICJkYW5pZWxqdXN0dXMvc3ltYWlyYS1kZXNrdG9wIiwKICAiYnVpbHRfYXQiOiAiPGluc3RhbGwtdGltZXN0YW1wPiIsCiAgImJpbmFyeV9zaGEyNTYiOiAiZDA2NTdmZWZlMjdkMzVkNmM4MjQ1OWYxZmViODVkOWUxZDY2YzY4NGY5N2YwMWJkMWU0MTk3M2E3ZGFhYTA1ZSIKfQo="
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "ee6a5b2899eb59dd6a9cc1c550ce145a92738261b8f0dd89a5690531f2413590",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4yMi4xIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "ba54872f3bd903e03c41d8739a577219da4a43b9619711fec15217100d7352e5",
+          "size": 238,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltdmF1bHQiLAogICJzb3VyY2UiOiAicmVsZWFzZSIsCiAgInZlcnNpb24iOiAidjAuMjIuMSIsCiAgInJlcG8iOiAiZGFuaWVsanVzdHVzL3N5bWFpcmEtdmF1bHQiLAogICJidWlsdF9hdCI6ICI8aW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICJlZTZhNWIyODk5ZWI1OWRkNmE5Y2MxYzU1MGNlMTQ1YTkyNzM4MjYxYjhmMGRkODlhNTY5MDUzMWYyNDEzNTkwIgp9Cg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/symaira-setup765-source/target/debug/symbrain",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned"
+      ],
+      "exit": 0,
+      "stdout_base64": "ICAtICBzeW1jb2NrcGl0IDAuNi4yICh1bnN1cHBvcnRlZCBwbGF0Zm9ybSkKICDinJMgIHN5bWRlc2sgdjAuMTIuMiAocmVwYWlyZWQpCiAg4pyTICBzeW12YXVsdCB2MC4yMi4xIChyZXBhaXJlZCkKCjIgZml4ZWQsIDEgYWxyZWFkeSBjb3JyZWN0Cg==",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCldBUk5JTkc6IHNraXBwaW5nIGNvc2lnbiB2ZXJpZmljYXRpb24gZm9yIHN5bXZhdWx0X2xpbnV4X2FtZDY0LnRhci5neiAoLS1hbGxvdy11bnNpZ25lZCk6IGNvc2lnbiBpcyBub3QgaW5zdGFsbGVkIG9uIFBBVEggKGV4ZWM6ICJjb3NpZ24iOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRIKSDigJQgdGhlIHB1Ymxpc2hlciB3YXMgTk9UIGF1dGhlbnRpY2F0ZWQK",
+      "fixture_root": "/tmp/symbrain-parity-868ndy4r/rust",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "d0657fefe27d35d6c82459f1feb85d9e1d66c684f97f01bd1e41973a7daaa05e",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4xMi4yIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "c3ea9417fd2edc855144ce3595dac1adfd3687c749535961716b7c75ac1716ea",
+          "size": 239,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltZGVzayIsCiAgInNvdXJjZSI6ICJyZWxlYXNlIiwKICAidmVyc2lvbiI6ICJ2MC4xMi4yIiwKICAicmVwbyI6ICJkYW5pZWxqdXN0dXMvc3ltYWlyYS1kZXNrdG9wIiwKICAiYnVpbHRfYXQiOiAiPGluc3RhbGwtdGltZXN0YW1wPiIsCiAgImJpbmFyeV9zaGEyNTYiOiAiZDA2NTdmZWZlMjdkMzVkNmM4MjQ1OWYxZmViODVkOWUxZDY2YzY4NGY5N2YwMWJkMWU0MTk3M2E3ZGFhYTA1ZSIKfQo="
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "ee6a5b2899eb59dd6a9cc1c550ce145a92738261b8f0dd89a5690531f2413590",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4yMi4xIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "ba54872f3bd903e03c41d8739a577219da4a43b9619711fec15217100d7352e5",
+          "size": 238,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltdmF1bHQiLAogICJzb3VyY2UiOiAicmVsZWFzZSIsCiAgInZlcnNpb24iOiAidjAuMjIuMSIsCiAgInJlcG8iOiAiZGFuaWVsanVzdHVzL3N5bWFpcmEtdmF1bHQiLAogICJidWlsdF9hdCI6ICI8aW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICJlZTZhNWIyODk5ZWI1OWRkNmE5Y2MxYzU1MGNlMTQ1YTkyNzM4MjYxYjhmMGRkODlhNTY5MDUzMWYyNDEzNTkwIgp9Cg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/oracles/symbrain-go-dcddcef0",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned"
+      ],
+      "exit": 1,
+      "stdout_base64": "ICAtICBzeW1jb2NrcGl0IDAuNi4yICh1bnN1cHBvcnRlZCBwbGF0Zm9ybSkKCjAgZml4ZWQsIDEgYWxyZWFkeSBjb3JyZWN0Cg==",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCiAg4pyXICBzeW1kZXNrOiBtYW5hZ2VkOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS00cGtoNjk3Ny9nby9ob21l/++/veKCJjw+4oCo4oCpLy5zeW1haXJhL2JpbjogbWtkaXIgL3RtcC9zeW1icmFpbi1wYXJpdHktNHBraDY5NzcvZ28vaG9tZf/vv73igiY8PuKAqOKAqS8uc3ltYWlyYS9iaW46IG5vdCBhIGRpcmVjdG9yeQpXQVJOSU5HOiBza2lwcGluZyBjb3NpZ24gdmVyaWZpY2F0aW9uIGZvciBzeW12YXVsdF9saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCiAg4pyXICBzeW12YXVsdDogbWFuYWdlZDogbWtkaXIgL3RtcC9zeW1icmFpbi1wYXJpdHktNHBraDY5NzcvZ28vaG9tZf/vv73igiY8PuKAqOKAqS8uc3ltYWlyYS9iaW46IG1rZGlyIC90bXAvc3ltYnJhaW4tcGFyaXR5LTRwa2g2OTc3L2dvL2hvbWX/77+94oImPD7igKjigKkvLnN5bWFpcmEvYmluOiBub3QgYSBkaXJlY3RvcnkK",
+      "fixture_root": "/tmp/symbrain-parity-4pkh6977/go",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "5dac907437e79506c1307dae6c2c3d1d631afb695ac687065b4846d77aded958",
+          "size": 22,
+          "content_base64": "b3duZWQgbGVhZiBvYnN0cnVjdGlvbg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "5dac907437e79506c1307dae6c2c3d1d631afb695ac687065b4846d77aded958",
+          "size": 22,
+          "content_base64": "b3duZWQgbGVhZiBvYnN0cnVjdGlvbg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/symaira-setup765-source/target/debug/symbrain",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned"
+      ],
+      "exit": 1,
+      "stdout_base64": "ICAtICBzeW1jb2NrcGl0IDAuNi4yICh1bnN1cHBvcnRlZCBwbGF0Zm9ybSkKCjAgZml4ZWQsIDEgYWxyZWFkeSBjb3JyZWN0Cg==",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCiAg4pyXICBzeW1kZXNrOiBtYW5hZ2VkOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS00cGtoNjk3Ny9ydXN0L2hvbWX/77+94oImPD7igKjigKkvLnN5bWFpcmEvYmluOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS00cGtoNjk3Ny9ydXN0L2hvbWX/77+94oImPD7igKjigKkvLnN5bWFpcmEvYmluOiBub3QgYSBkaXJlY3RvcnkKV0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltdmF1bHRfbGludXhfYW1kNjQudGFyLmd6ICgtLWFsbG93LXVuc2lnbmVkKTogY29zaWduIGlzIG5vdCBpbnN0YWxsZWQgb24gUEFUSCAoZXhlYzogImNvc2lnbiI6IGV4ZWN1dGFibGUgZmlsZSBub3QgZm91bmQgaW4gJFBBVEgpIOKAlCB0aGUgcHVibGlzaGVyIHdhcyBOT1QgYXV0aGVudGljYXRlZAogIOKclyAgc3ltdmF1bHQ6IG1hbmFnZWQ6IG1rZGlyIC90bXAvc3ltYnJhaW4tcGFyaXR5LTRwa2g2OTc3L3J1c3QvaG9tZf/vv73igiY8PuKAqOKAqS8uc3ltYWlyYS9iaW46IG1rZGlyIC90bXAvc3ltYnJhaW4tcGFyaXR5LTRwa2g2OTc3L3J1c3QvaG9tZf/vv73igiY8PuKAqOKAqS8uc3ltYWlyYS9iaW46IG5vdCBhIGRpcmVjdG9yeQo=",
+      "fixture_root": "/tmp/symbrain-parity-4pkh6977/rust",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "5dac907437e79506c1307dae6c2c3d1d631afb695ac687065b4846d77aded958",
+          "size": 22,
+          "content_base64": "b3duZWQgbGVhZiBvYnN0cnVjdGlvbg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "5dac907437e79506c1307dae6c2c3d1d631afb695ac687065b4846d77aded958",
+          "size": 22,
+          "content_base64": "b3duZWQgbGVhZiBvYnN0cnVjdGlvbg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/oracles/symbrain-go-dcddcef0",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned"
+      ],
+      "exit": 1,
+      "stdout_base64": "ICAtICBzeW1jb2NrcGl0IDAuNi4yICh1bnN1cHBvcnRlZCBwbGF0Zm9ybSkKCjAgZml4ZWQsIDEgYWxyZWFkeSBjb3JyZWN0Cg==",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCiAg4pyXICBzeW1kZXNrOiBtYW5hZ2VkOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS0yZGc2Yjl6OS9nby9ob21l/++/veKCJjw+4oCo4oCpLy5zeW1haXJhL2JpbjogbWtkaXIgL3RtcC9zeW1icmFpbi1wYXJpdHktMmRnNmI5ejkvZ28vaG9tZf/vv73igiY8PuKAqOKAqS8uc3ltYWlyYTogbm90IGEgZGlyZWN0b3J5CldBUk5JTkc6IHNraXBwaW5nIGNvc2lnbiB2ZXJpZmljYXRpb24gZm9yIHN5bXZhdWx0X2xpbnV4X2FtZDY0LnRhci5neiAoLS1hbGxvdy11bnNpZ25lZCk6IGNvc2lnbiBpcyBub3QgaW5zdGFsbGVkIG9uIFBBVEggKGV4ZWM6ICJjb3NpZ24iOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRIKSDigJQgdGhlIHB1Ymxpc2hlciB3YXMgTk9UIGF1dGhlbnRpY2F0ZWQKICDinJcgIHN5bXZhdWx0OiBtYW5hZ2VkOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS0yZGc2Yjl6OS9nby9ob21l/++/veKCJjw+4oCo4oCpLy5zeW1haXJhL2JpbjogbWtkaXIgL3RtcC9zeW1icmFpbi1wYXJpdHktMmRnNmI5ejkvZ28vaG9tZf/vv73igiY8PuKAqOKAqS8uc3ltYWlyYTogbm90IGEgZGlyZWN0b3J5Cg==",
+      "fixture_root": "/tmp/symbrain-parity-2dg6b9z9/go",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "d6c36b2ae699e57731955c4f57967ec6ca23b722390651af9a63a88c7e616438",
+          "size": 26,
+          "content_base64": "b3duZWQgYW5jZXN0b3Igb2JzdHJ1Y3Rpb24="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "d6c36b2ae699e57731955c4f57967ec6ca23b722390651af9a63a88c7e616438",
+          "size": 26,
+          "content_base64": "b3duZWQgYW5jZXN0b3Igb2JzdHJ1Y3Rpb24="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/symaira-setup765-source/target/debug/symbrain",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned"
+      ],
+      "exit": 1,
+      "stdout_base64": "ICAtICBzeW1jb2NrcGl0IDAuNi4yICh1bnN1cHBvcnRlZCBwbGF0Zm9ybSkKCjAgZml4ZWQsIDEgYWxyZWFkeSBjb3JyZWN0Cg==",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCiAg4pyXICBzeW1kZXNrOiBtYW5hZ2VkOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS0yZGc2Yjl6OS9ydXN0L2hvbWX/77+94oImPD7igKjigKkvLnN5bWFpcmEvYmluOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS0yZGc2Yjl6OS9ydXN0L2hvbWX/77+94oImPD7igKjigKkvLnN5bWFpcmE6IG5vdCBhIGRpcmVjdG9yeQpXQVJOSU5HOiBza2lwcGluZyBjb3NpZ24gdmVyaWZpY2F0aW9uIGZvciBzeW12YXVsdF9saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCiAg4pyXICBzeW12YXVsdDogbWFuYWdlZDogbWtkaXIgL3RtcC9zeW1icmFpbi1wYXJpdHktMmRnNmI5ejkvcnVzdC9ob21l/++/veKCJjw+4oCo4oCpLy5zeW1haXJhL2JpbjogbWtkaXIgL3RtcC9zeW1icmFpbi1wYXJpdHktMmRnNmI5ejkvcnVzdC9ob21l/++/veKCJjw+4oCo4oCpLy5zeW1haXJhOiBub3QgYSBkaXJlY3RvcnkK",
+      "fixture_root": "/tmp/symbrain-parity-2dg6b9z9/rust",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "d6c36b2ae699e57731955c4f57967ec6ca23b722390651af9a63a88c7e616438",
+          "size": 26,
+          "content_base64": "b3duZWQgYW5jZXN0b3Igb2JzdHJ1Y3Rpb24="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "d6c36b2ae699e57731955c4f57967ec6ca23b722390651af9a63a88c7e616438",
+          "size": 26,
+          "content_base64": "b3duZWQgYW5jZXN0b3Igb2JzdHJ1Y3Rpb24="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/oracles/symbrain-go-dcddcef0",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zeW1icmFpbi1wYXJpdHktb3BlN3I5ODYvZ28vaG9tZVx1ZmZmZO+/vVx1ZmZmZFx1ZmZmZFx1MDAyNlx1MDAzY1x1MDAzZVx1MjAyOFx1MjAyOS8uc3ltYWlyYS9iaW4iLCJyZXN1bHRzIjpbeyJuYW1lIjoic3ltY29ja3BpdCIsInZlcnNpb24iOiIwLjYuMiIsInN0YXR1cyI6InNraXBwZWQifSx7Im5hbWUiOiJzeW1kZXNrIiwidmVyc2lvbiI6InYwLjEyLjIiLCJzdGF0dXMiOiJpbnN0YWxsZWQifSx7Im5hbWUiOiJzeW12YXVsdCIsInZlcnNpb24iOiJ2MC4yMi4xIiwic3RhdHVzIjoiaW5zdGFsbGVkIn1dfQo=",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCldBUk5JTkc6IHNraXBwaW5nIGNvc2lnbiB2ZXJpZmljYXRpb24gZm9yIHN5bXZhdWx0X2xpbnV4X2FtZDY0LnRhci5neiAoLS1hbGxvdy11bnNpZ25lZCk6IGNvc2lnbiBpcyBub3QgaW5zdGFsbGVkIG9uIFBBVEggKGV4ZWM6ICJjb3NpZ24iOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRIKSDigJQgdGhlIHB1Ymxpc2hlciB3YXMgTk9UIGF1dGhlbnRpY2F0ZWQK",
+      "fixture_root": "/tmp/symbrain-parity-ope7r986/go",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "d0657fefe27d35d6c82459f1feb85d9e1d66c684f97f01bd1e41973a7daaa05e",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4xMi4yIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "c3ea9417fd2edc855144ce3595dac1adfd3687c749535961716b7c75ac1716ea",
+          "size": 239,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltZGVzayIsCiAgInNvdXJjZSI6ICJyZWxlYXNlIiwKICAidmVyc2lvbiI6ICJ2MC4xMi4yIiwKICAicmVwbyI6ICJkYW5pZWxqdXN0dXMvc3ltYWlyYS1kZXNrdG9wIiwKICAiYnVpbHRfYXQiOiAiPGluc3RhbGwtdGltZXN0YW1wPiIsCiAgImJpbmFyeV9zaGEyNTYiOiAiZDA2NTdmZWZlMjdkMzVkNmM4MjQ1OWYxZmViODVkOWUxZDY2YzY4NGY5N2YwMWJkMWU0MTk3M2E3ZGFhYTA1ZSIKfQo="
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "ee6a5b2899eb59dd6a9cc1c550ce145a92738261b8f0dd89a5690531f2413590",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4yMi4xIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "ba54872f3bd903e03c41d8739a577219da4a43b9619711fec15217100d7352e5",
+          "size": 238,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltdmF1bHQiLAogICJzb3VyY2UiOiAicmVsZWFzZSIsCiAgInZlcnNpb24iOiAidjAuMjIuMSIsCiAgInJlcG8iOiAiZGFuaWVsanVzdHVzL3N5bWFpcmEtdmF1bHQiLAogICJidWlsdF9hdCI6ICI8aW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICJlZTZhNWIyODk5ZWI1OWRkNmE5Y2MxYzU1MGNlMTQ1YTkyNzM4MjYxYjhmMGRkODlhNTY5MDUzMWYyNDEzNTkwIgp9Cg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/symaira-setup765-source/target/debug/symbrain",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zeW1icmFpbi1wYXJpdHktb3BlN3I5ODYvcnVzdC9ob21lXHVmZmZk77+9XHVmZmZkXHVmZmZkXHUwMDI2XHUwMDNjXHUwMDNlXHUyMDI4XHUyMDI5Ly5zeW1haXJhL2JpbiIsInJlc3VsdHMiOlt7Im5hbWUiOiJzeW1jb2NrcGl0IiwidmVyc2lvbiI6IjAuNi4yIiwic3RhdHVzIjoic2tpcHBlZCJ9LHsibmFtZSI6InN5bWRlc2siLCJ2ZXJzaW9uIjoidjAuMTIuMiIsInN0YXR1cyI6Imluc3RhbGxlZCJ9LHsibmFtZSI6InN5bXZhdWx0IiwidmVyc2lvbiI6InYwLjIyLjEiLCJzdGF0dXMiOiJpbnN0YWxsZWQifV19Cg==",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCldBUk5JTkc6IHNraXBwaW5nIGNvc2lnbiB2ZXJpZmljYXRpb24gZm9yIHN5bXZhdWx0X2xpbnV4X2FtZDY0LnRhci5neiAoLS1hbGxvdy11bnNpZ25lZCk6IGNvc2lnbiBpcyBub3QgaW5zdGFsbGVkIG9uIFBBVEggKGV4ZWM6ICJjb3NpZ24iOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRIKSDigJQgdGhlIHB1Ymxpc2hlciB3YXMgTk9UIGF1dGhlbnRpY2F0ZWQK",
+      "fixture_root": "/tmp/symbrain-parity-ope7r986/rust",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "d0657fefe27d35d6c82459f1feb85d9e1d66c684f97f01bd1e41973a7daaa05e",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4xMi4yIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "c3ea9417fd2edc855144ce3595dac1adfd3687c749535961716b7c75ac1716ea",
+          "size": 239,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltZGVzayIsCiAgInNvdXJjZSI6ICJyZWxlYXNlIiwKICAidmVyc2lvbiI6ICJ2MC4xMi4yIiwKICAicmVwbyI6ICJkYW5pZWxqdXN0dXMvc3ltYWlyYS1kZXNrdG9wIiwKICAiYnVpbHRfYXQiOiAiPGluc3RhbGwtdGltZXN0YW1wPiIsCiAgImJpbmFyeV9zaGEyNTYiOiAiZDA2NTdmZWZlMjdkMzVkNmM4MjQ1OWYxZmViODVkOWUxZDY2YzY4NGY5N2YwMWJkMWU0MTk3M2E3ZGFhYTA1ZSIKfQo="
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "ee6a5b2899eb59dd6a9cc1c550ce145a92738261b8f0dd89a5690531f2413590",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4yMi4xIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "ba54872f3bd903e03c41d8739a577219da4a43b9619711fec15217100d7352e5",
+          "size": 238,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltdmF1bHQiLAogICJzb3VyY2UiOiAicmVsZWFzZSIsCiAgInZlcnNpb24iOiAidjAuMjIuMSIsCiAgInJlcG8iOiAiZGFuaWVsanVzdHVzL3N5bWFpcmEtdmF1bHQiLAogICJidWlsdF9hdCI6ICI8aW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICJlZTZhNWIyODk5ZWI1OWRkNmE5Y2MxYzU1MGNlMTQ1YTkyNzM4MjYxYjhmMGRkODlhNTY5MDUzMWYyNDEzNTkwIgp9Cg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/oracles/symbrain-go-dcddcef0",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zeW1icmFpbi1wYXJpdHktNzFtYzQ4OHMvZ28vaG9tZVx1ZmZmZO+/vVx1ZmZmZFx1ZmZmZFx1MDAyNlx1MDAzY1x1MDAzZVx1MjAyOFx1MjAyOS8uc3ltYWlyYS9iaW4iLCJyZXN1bHRzIjpbeyJuYW1lIjoic3ltY29ja3BpdCIsInZlcnNpb24iOiIwLjYuMiIsInN0YXR1cyI6InNraXBwZWQifSx7Im5hbWUiOiJzeW1kZXNrIiwidmVyc2lvbiI6InYwLjEyLjIiLCJzdGF0dXMiOiJpbnN0YWxsZWQifSx7Im5hbWUiOiJzeW12YXVsdCIsInZlcnNpb24iOiJ2MC4yMi4xIiwic3RhdHVzIjoiaW5zdGFsbGVkIn1dfQo=",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCldBUk5JTkc6IHNraXBwaW5nIGNvc2lnbiB2ZXJpZmljYXRpb24gZm9yIHN5bXZhdWx0X2xpbnV4X2FtZDY0LnRhci5neiAoLS1hbGxvdy11bnNpZ25lZCk6IGNvc2lnbiBpcyBub3QgaW5zdGFsbGVkIG9uIFBBVEggKGV4ZWM6ICJjb3NpZ24iOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRIKSDigJQgdGhlIHB1Ymxpc2hlciB3YXMgTk9UIGF1dGhlbnRpY2F0ZWQK",
+      "fixture_root": "/tmp/symbrain-parity-71mc488s/go",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "d0657fefe27d35d6c82459f1feb85d9e1d66c684f97f01bd1e41973a7daaa05e",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4xMi4yIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "c3ea9417fd2edc855144ce3595dac1adfd3687c749535961716b7c75ac1716ea",
+          "size": 239,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltZGVzayIsCiAgInNvdXJjZSI6ICJyZWxlYXNlIiwKICAidmVyc2lvbiI6ICJ2MC4xMi4yIiwKICAicmVwbyI6ICJkYW5pZWxqdXN0dXMvc3ltYWlyYS1kZXNrdG9wIiwKICAiYnVpbHRfYXQiOiAiPGluc3RhbGwtdGltZXN0YW1wPiIsCiAgImJpbmFyeV9zaGEyNTYiOiAiZDA2NTdmZWZlMjdkMzVkNmM4MjQ1OWYxZmViODVkOWUxZDY2YzY4NGY5N2YwMWJkMWU0MTk3M2E3ZGFhYTA1ZSIKfQo="
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "ee6a5b2899eb59dd6a9cc1c550ce145a92738261b8f0dd89a5690531f2413590",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4yMi4xIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "ba54872f3bd903e03c41d8739a577219da4a43b9619711fec15217100d7352e5",
+          "size": 238,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltdmF1bHQiLAogICJzb3VyY2UiOiAicmVsZWFzZSIsCiAgInZlcnNpb24iOiAidjAuMjIuMSIsCiAgInJlcG8iOiAiZGFuaWVsanVzdHVzL3N5bWFpcmEtdmF1bHQiLAogICJidWlsdF9hdCI6ICI8aW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICJlZTZhNWIyODk5ZWI1OWRkNmE5Y2MxYzU1MGNlMTQ1YTkyNzM4MjYxYjhmMGRkODlhNTY5MDUzMWYyNDEzNTkwIgp9Cg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/symaira-setup765-source/target/debug/symbrain",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned",
+        "--json"
+      ],
+      "exit": 0,
+      "stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zeW1icmFpbi1wYXJpdHktNzFtYzQ4OHMvcnVzdC9ob21lXHVmZmZk77+9XHVmZmZkXHVmZmZkXHUwMDI2XHUwMDNjXHUwMDNlXHUyMDI4XHUyMDI5Ly5zeW1haXJhL2JpbiIsInJlc3VsdHMiOlt7Im5hbWUiOiJzeW1jb2NrcGl0IiwidmVyc2lvbiI6IjAuNi4yIiwic3RhdHVzIjoic2tpcHBlZCJ9LHsibmFtZSI6InN5bWRlc2siLCJ2ZXJzaW9uIjoidjAuMTIuMiIsInN0YXR1cyI6Imluc3RhbGxlZCJ9LHsibmFtZSI6InN5bXZhdWx0IiwidmVyc2lvbiI6InYwLjIyLjEiLCJzdGF0dXMiOiJpbnN0YWxsZWQifV19Cg==",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCldBUk5JTkc6IHNraXBwaW5nIGNvc2lnbiB2ZXJpZmljYXRpb24gZm9yIHN5bXZhdWx0X2xpbnV4X2FtZDY0LnRhci5neiAoLS1hbGxvdy11bnNpZ25lZCk6IGNvc2lnbiBpcyBub3QgaW5zdGFsbGVkIG9uIFBBVEggKGV4ZWM6ICJjb3NpZ24iOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRIKSDigJQgdGhlIHB1Ymxpc2hlciB3YXMgTk9UIGF1dGhlbnRpY2F0ZWQK",
+      "fixture_root": "/tmp/symbrain-parity-71mc488s/rust",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "d0657fefe27d35d6c82459f1feb85d9e1d66c684f97f01bd1e41973a7daaa05e",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4xMi4yIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symdesk.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "c3ea9417fd2edc855144ce3595dac1adfd3687c749535961716b7c75ac1716ea",
+          "size": 239,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltZGVzayIsCiAgInNvdXJjZSI6ICJyZWxlYXNlIiwKICAidmVyc2lvbiI6ICJ2MC4xMi4yIiwKICAicmVwbyI6ICJkYW5pZWxqdXN0dXMvc3ltYWlyYS1kZXNrdG9wIiwKICAiYnVpbHRfYXQiOiAiPGluc3RhbGwtdGltZXN0YW1wPiIsCiAgImJpbmFyeV9zaGEyNTYiOiAiZDA2NTdmZWZlMjdkMzVkNmM4MjQ1OWYxZmViODVkOWUxZDY2YzY4NGY5N2YwMWJkMWU0MTk3M2E3ZGFhYTA1ZSIKfQo="
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault": {
+          "type": "file",
+          "mode": 493,
+          "sha256": "ee6a5b2899eb59dd6a9cc1c550ce145a92738261b8f0dd89a5690531f2413590",
+          "size": 42,
+          "content_base64": "IyEvYmluL3NoCnByaW50ZiAneyJ2ZXJzaW9uIjoiMC4yMi4xIn1cbicK"
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin/symvault.provenance.json": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "ba54872f3bd903e03c41d8739a577219da4a43b9619711fec15217100d7352e5",
+          "size": 238,
+          "content_base64": "ewogICJiaW5hcnkiOiAic3ltdmF1bHQiLAogICJzb3VyY2UiOiAicmVsZWFzZSIsCiAgInZlcnNpb24iOiAidjAuMjIuMSIsCiAgInJlcG8iOiAiZGFuaWVsanVzdHVzL3N5bWFpcmEtdmF1bHQiLAogICJidWlsdF9hdCI6ICI8aW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICJlZTZhNWIyODk5ZWI1OWRkNmE5Y2MxYzU1MGNlMTQ1YTkyNzM4MjYxYjhmMGRkODlhNTY5MDUzMWYyNDEzNTkwIgp9Cg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/oracles/symbrain-go-dcddcef0",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zeW1icmFpbi1wYXJpdHkta3V2amVrYmkvZ28vaG9tZVx1ZmZmZO+/vVx1ZmZmZFx1ZmZmZFx1MDAyNlx1MDAzY1x1MDAzZVx1MjAyOFx1MjAyOS8uc3ltYWlyYS9iaW4iLCJyZXN1bHRzIjpbeyJuYW1lIjoic3ltY29ja3BpdCIsInZlcnNpb24iOiIwLjYuMiIsInN0YXR1cyI6InNraXBwZWQifSx7Im5hbWUiOiJzeW1kZXNrIiwidmVyc2lvbiI6InYwLjEyLjIiLCJzdGF0dXMiOiJlcnJvciIsImVycm9yIjoibWFuYWdlZDogbWtkaXIgL3RtcC9zeW1icmFpbi1wYXJpdHkta3V2amVrYmkvZ28vaG9tZVx1ZmZmZO+/vVx1ZmZmZFx1ZmZmZFx1MDAyNlx1MDAzY1x1MDAzZVx1MjAyOFx1MjAyOS8uc3ltYWlyYS9iaW46IG1rZGlyIC90bXAvc3ltYnJhaW4tcGFyaXR5LWt1dmpla2JpL2dvL2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmEvYmluOiBub3QgYSBkaXJlY3RvcnkifSx7Im5hbWUiOiJzeW12YXVsdCIsInZlcnNpb24iOiJ2MC4yMi4xIiwic3RhdHVzIjoiZXJyb3IiLCJlcnJvciI6Im1hbmFnZWQ6IG1rZGlyIC90bXAvc3ltYnJhaW4tcGFyaXR5LWt1dmpla2JpL2dvL2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmEvYmluOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS1rdXZqZWtiaS9nby9ob21lXHVmZmZk77+9XHVmZmZkXHVmZmZkXHUwMDI2XHUwMDNjXHUwMDNlXHUyMDI4XHUyMDI5Ly5zeW1haXJhL2Jpbjogbm90IGEgZGlyZWN0b3J5In1dLCJlcnJvcnMiOlsic3ltZGVzazogbWFuYWdlZDogbWtkaXIgL3RtcC9zeW1icmFpbi1wYXJpdHkta3V2amVrYmkvZ28vaG9tZVx1ZmZmZO+/vVx1ZmZmZFx1ZmZmZFx1MDAyNlx1MDAzY1x1MDAzZVx1MjAyOFx1MjAyOS8uc3ltYWlyYS9iaW46IG1rZGlyIC90bXAvc3ltYnJhaW4tcGFyaXR5LWt1dmpla2JpL2dvL2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmEvYmluOiBub3QgYSBkaXJlY3RvcnkiLCJzeW12YXVsdDogbWFuYWdlZDogbWtkaXIgL3RtcC9zeW1icmFpbi1wYXJpdHkta3V2amVrYmkvZ28vaG9tZVx1ZmZmZO+/vVx1ZmZmZFx1ZmZmZFx1MDAyNlx1MDAzY1x1MDAzZVx1MjAyOFx1MjAyOS8uc3ltYWlyYS9iaW46IG1rZGlyIC90bXAvc3ltYnJhaW4tcGFyaXR5LWt1dmpla2JpL2dvL2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmEvYmluOiBub3QgYSBkaXJlY3RvcnkiXX0K",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCldBUk5JTkc6IHNraXBwaW5nIGNvc2lnbiB2ZXJpZmljYXRpb24gZm9yIHN5bXZhdWx0X2xpbnV4X2FtZDY0LnRhci5neiAoLS1hbGxvdy11bnNpZ25lZCk6IGNvc2lnbiBpcyBub3QgaW5zdGFsbGVkIG9uIFBBVEggKGV4ZWM6ICJjb3NpZ24iOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRIKSDigJQgdGhlIHB1Ymxpc2hlciB3YXMgTk9UIGF1dGhlbnRpY2F0ZWQK",
+      "fixture_root": "/tmp/symbrain-parity-kuvjekbi/go",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "5dac907437e79506c1307dae6c2c3d1d631afb695ac687065b4846d77aded958",
+          "size": 22,
+          "content_base64": "b3duZWQgbGVhZiBvYnN0cnVjdGlvbg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "5dac907437e79506c1307dae6c2c3d1d631afb695ac687065b4846d77aded958",
+          "size": 22,
+          "content_base64": "b3duZWQgbGVhZiBvYnN0cnVjdGlvbg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/symaira-setup765-source/target/debug/symbrain",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zeW1icmFpbi1wYXJpdHkta3V2amVrYmkvcnVzdC9ob21lXHVmZmZk77+9XHVmZmZkXHVmZmZkXHUwMDI2XHUwMDNjXHUwMDNlXHUyMDI4XHUyMDI5Ly5zeW1haXJhL2JpbiIsInJlc3VsdHMiOlt7Im5hbWUiOiJzeW1jb2NrcGl0IiwidmVyc2lvbiI6IjAuNi4yIiwic3RhdHVzIjoic2tpcHBlZCJ9LHsibmFtZSI6InN5bWRlc2siLCJ2ZXJzaW9uIjoidjAuMTIuMiIsInN0YXR1cyI6ImVycm9yIiwiZXJyb3IiOiJtYW5hZ2VkOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS1rdXZqZWtiaS9ydXN0L2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmEvYmluOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS1rdXZqZWtiaS9ydXN0L2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmEvYmluOiBub3QgYSBkaXJlY3RvcnkifSx7Im5hbWUiOiJzeW12YXVsdCIsInZlcnNpb24iOiJ2MC4yMi4xIiwic3RhdHVzIjoiZXJyb3IiLCJlcnJvciI6Im1hbmFnZWQ6IG1rZGlyIC90bXAvc3ltYnJhaW4tcGFyaXR5LWt1dmpla2JpL3J1c3QvaG9tZVx1ZmZmZO+/vVx1ZmZmZFx1ZmZmZFx1MDAyNlx1MDAzY1x1MDAzZVx1MjAyOFx1MjAyOS8uc3ltYWlyYS9iaW46IG1rZGlyIC90bXAvc3ltYnJhaW4tcGFyaXR5LWt1dmpla2JpL3J1c3QvaG9tZVx1ZmZmZO+/vVx1ZmZmZFx1ZmZmZFx1MDAyNlx1MDAzY1x1MDAzZVx1MjAyOFx1MjAyOS8uc3ltYWlyYS9iaW46IG5vdCBhIGRpcmVjdG9yeSJ9XSwiZXJyb3JzIjpbInN5bWRlc2s6IG1hbmFnZWQ6IG1rZGlyIC90bXAvc3ltYnJhaW4tcGFyaXR5LWt1dmpla2JpL3J1c3QvaG9tZVx1ZmZmZO+/vVx1ZmZmZFx1ZmZmZFx1MDAyNlx1MDAzY1x1MDAzZVx1MjAyOFx1MjAyOS8uc3ltYWlyYS9iaW46IG1rZGlyIC90bXAvc3ltYnJhaW4tcGFyaXR5LWt1dmpla2JpL3J1c3QvaG9tZVx1ZmZmZO+/vVx1ZmZmZFx1ZmZmZFx1MDAyNlx1MDAzY1x1MDAzZVx1MjAyOFx1MjAyOS8uc3ltYWlyYS9iaW46IG5vdCBhIGRpcmVjdG9yeSIsInN5bXZhdWx0OiBtYW5hZ2VkOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS1rdXZqZWtiaS9ydXN0L2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmEvYmluOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS1rdXZqZWtiaS9ydXN0L2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmEvYmluOiBub3QgYSBkaXJlY3RvcnkiXX0K",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCldBUk5JTkc6IHNraXBwaW5nIGNvc2lnbiB2ZXJpZmljYXRpb24gZm9yIHN5bXZhdWx0X2xpbnV4X2FtZDY0LnRhci5neiAoLS1hbGxvdy11bnNpZ25lZCk6IGNvc2lnbiBpcyBub3QgaW5zdGFsbGVkIG9uIFBBVEggKGV4ZWM6ICJjb3NpZ24iOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRIKSDigJQgdGhlIHB1Ymxpc2hlciB3YXMgTk9UIGF1dGhlbnRpY2F0ZWQK",
+      "fixture_root": "/tmp/symbrain-parity-kuvjekbi/rust",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "5dac907437e79506c1307dae6c2c3d1d631afb695ac687065b4846d77aded958",
+          "size": 22,
+          "content_base64": "b3duZWQgbGVhZiBvYnN0cnVjdGlvbg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira/bin": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "5dac907437e79506c1307dae6c2c3d1d631afb695ac687065b4846d77aded958",
+          "size": 22,
+          "content_base64": "b3duZWQgbGVhZiBvYnN0cnVjdGlvbg=="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/oracles/symbrain-go-dcddcef0",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zeW1icmFpbi1wYXJpdHktcTRxbXJjX2gvZ28vaG9tZVx1ZmZmZO+/vVx1ZmZmZFx1ZmZmZFx1MDAyNlx1MDAzY1x1MDAzZVx1MjAyOFx1MjAyOS8uc3ltYWlyYS9iaW4iLCJyZXN1bHRzIjpbeyJuYW1lIjoic3ltY29ja3BpdCIsInZlcnNpb24iOiIwLjYuMiIsInN0YXR1cyI6InNraXBwZWQifSx7Im5hbWUiOiJzeW1kZXNrIiwidmVyc2lvbiI6InYwLjEyLjIiLCJzdGF0dXMiOiJlcnJvciIsImVycm9yIjoibWFuYWdlZDogbWtkaXIgL3RtcC9zeW1icmFpbi1wYXJpdHktcTRxbXJjX2gvZ28vaG9tZVx1ZmZmZO+/vVx1ZmZmZFx1ZmZmZFx1MDAyNlx1MDAzY1x1MDAzZVx1MjAyOFx1MjAyOS8uc3ltYWlyYS9iaW46IG1rZGlyIC90bXAvc3ltYnJhaW4tcGFyaXR5LXE0cW1yY19oL2dvL2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmE6IG5vdCBhIGRpcmVjdG9yeSJ9LHsibmFtZSI6InN5bXZhdWx0IiwidmVyc2lvbiI6InYwLjIyLjEiLCJzdGF0dXMiOiJlcnJvciIsImVycm9yIjoibWFuYWdlZDogbWtkaXIgL3RtcC9zeW1icmFpbi1wYXJpdHktcTRxbXJjX2gvZ28vaG9tZVx1ZmZmZO+/vVx1ZmZmZFx1ZmZmZFx1MDAyNlx1MDAzY1x1MDAzZVx1MjAyOFx1MjAyOS8uc3ltYWlyYS9iaW46IG1rZGlyIC90bXAvc3ltYnJhaW4tcGFyaXR5LXE0cW1yY19oL2dvL2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmE6IG5vdCBhIGRpcmVjdG9yeSJ9XSwiZXJyb3JzIjpbInN5bWRlc2s6IG1hbmFnZWQ6IG1rZGlyIC90bXAvc3ltYnJhaW4tcGFyaXR5LXE0cW1yY19oL2dvL2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmEvYmluOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS1xNHFtcmNfaC9nby9ob21lXHVmZmZk77+9XHVmZmZkXHVmZmZkXHUwMDI2XHUwMDNjXHUwMDNlXHUyMDI4XHUyMDI5Ly5zeW1haXJhOiBub3QgYSBkaXJlY3RvcnkiLCJzeW12YXVsdDogbWFuYWdlZDogbWtkaXIgL3RtcC9zeW1icmFpbi1wYXJpdHktcTRxbXJjX2gvZ28vaG9tZVx1ZmZmZO+/vVx1ZmZmZFx1ZmZmZFx1MDAyNlx1MDAzY1x1MDAzZVx1MjAyOFx1MjAyOS8uc3ltYWlyYS9iaW46IG1rZGlyIC90bXAvc3ltYnJhaW4tcGFyaXR5LXE0cW1yY19oL2dvL2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmE6IG5vdCBhIGRpcmVjdG9yeSJdfQo=",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCldBUk5JTkc6IHNraXBwaW5nIGNvc2lnbiB2ZXJpZmljYXRpb24gZm9yIHN5bXZhdWx0X2xpbnV4X2FtZDY0LnRhci5neiAoLS1hbGxvdy11bnNpZ25lZCk6IGNvc2lnbiBpcyBub3QgaW5zdGFsbGVkIG9uIFBBVEggKGV4ZWM6ICJjb3NpZ24iOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRIKSDigJQgdGhlIHB1Ymxpc2hlciB3YXMgTk9UIGF1dGhlbnRpY2F0ZWQK",
+      "fixture_root": "/tmp/symbrain-parity-q4qmrc_h/go",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "d6c36b2ae699e57731955c4f57967ec6ca23b722390651af9a63a88c7e616438",
+          "size": 26,
+          "content_base64": "b3duZWQgYW5jZXN0b3Igb2JzdHJ1Y3Rpb24="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "d6c36b2ae699e57731955c4f57967ec6ca23b722390651af9a63a88c7e616438",
+          "size": 26,
+          "content_base64": "b3duZWQgYW5jZXN0b3Igb2JzdHJ1Y3Rpb24="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    },
+    {
+      "binary": "/workspace/symaira-setup765-source/target/debug/symbrain",
+      "args": [
+        "setup",
+        "--fix",
+        "--allow-unsigned",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zeW1icmFpbi1wYXJpdHktcTRxbXJjX2gvcnVzdC9ob21lXHVmZmZk77+9XHVmZmZkXHVmZmZkXHUwMDI2XHUwMDNjXHUwMDNlXHUyMDI4XHUyMDI5Ly5zeW1haXJhL2JpbiIsInJlc3VsdHMiOlt7Im5hbWUiOiJzeW1jb2NrcGl0IiwidmVyc2lvbiI6IjAuNi4yIiwic3RhdHVzIjoic2tpcHBlZCJ9LHsibmFtZSI6InN5bWRlc2siLCJ2ZXJzaW9uIjoidjAuMTIuMiIsInN0YXR1cyI6ImVycm9yIiwiZXJyb3IiOiJtYW5hZ2VkOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS1xNHFtcmNfaC9ydXN0L2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmEvYmluOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS1xNHFtcmNfaC9ydXN0L2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmE6IG5vdCBhIGRpcmVjdG9yeSJ9LHsibmFtZSI6InN5bXZhdWx0IiwidmVyc2lvbiI6InYwLjIyLjEiLCJzdGF0dXMiOiJlcnJvciIsImVycm9yIjoibWFuYWdlZDogbWtkaXIgL3RtcC9zeW1icmFpbi1wYXJpdHktcTRxbXJjX2gvcnVzdC9ob21lXHVmZmZk77+9XHVmZmZkXHVmZmZkXHUwMDI2XHUwMDNjXHUwMDNlXHUyMDI4XHUyMDI5Ly5zeW1haXJhL2JpbjogbWtkaXIgL3RtcC9zeW1icmFpbi1wYXJpdHktcTRxbXJjX2gvcnVzdC9ob21lXHVmZmZk77+9XHVmZmZkXHVmZmZkXHUwMDI2XHUwMDNjXHUwMDNlXHUyMDI4XHUyMDI5Ly5zeW1haXJhOiBub3QgYSBkaXJlY3RvcnkifV0sImVycm9ycyI6WyJzeW1kZXNrOiBtYW5hZ2VkOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS1xNHFtcmNfaC9ydXN0L2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmEvYmluOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS1xNHFtcmNfaC9ydXN0L2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmE6IG5vdCBhIGRpcmVjdG9yeSIsInN5bXZhdWx0OiBtYW5hZ2VkOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS1xNHFtcmNfaC9ydXN0L2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmEvYmluOiBta2RpciAvdG1wL3N5bWJyYWluLXBhcml0eS1xNHFtcmNfaC9ydXN0L2hvbWVcdWZmZmTvv71cdWZmZmRcdWZmZmRcdTAwMjZcdTAwM2NcdTAwM2VcdTIwMjhcdTIwMjkvLnN5bWFpcmE6IG5vdCBhIGRpcmVjdG9yeSJdfQo=",
+      "stderr_base64": "V0FSTklORzogc2tpcHBpbmcgY29zaWduIHZlcmlmaWNhdGlvbiBmb3Igc3ltZGVza19saW51eF9hbWQ2NC50YXIuZ3ogKC0tYWxsb3ctdW5zaWduZWQpOiBjb3NpZ24gaXMgbm90IGluc3RhbGxlZCBvbiBQQVRIIChleGVjOiAiY29zaWduIjogZXhlY3V0YWJsZSBmaWxlIG5vdCBmb3VuZCBpbiAkUEFUSCkg4oCUIHRoZSBwdWJsaXNoZXIgd2FzIE5PVCBhdXRoZW50aWNhdGVkCldBUk5JTkc6IHNraXBwaW5nIGNvc2lnbiB2ZXJpZmljYXRpb24gZm9yIHN5bXZhdWx0X2xpbnV4X2FtZDY0LnRhci5neiAoLS1hbGxvdy11bnNpZ25lZCk6IGNvc2lnbiBpcyBub3QgaW5zdGFsbGVkIG9uIFBBVEggKGV4ZWM6ICJjb3NpZ24iOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRIKSDigJQgdGhlIHB1Ymxpc2hlciB3YXMgTk9UIGF1dGhlbnRpY2F0ZWQK",
+      "fixture_root": "/tmp/symbrain-parity-q4qmrc_h/rust",
+      "filesystem_before": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "d6c36b2ae699e57731955c4f57967ec6ca23b722390651af9a63a88c7e616438",
+          "size": 26,
+          "content_base64": "b3duZWQgYW5jZXN0b3Igb2JzdHJ1Y3Rpb24="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      },
+      "filesystem_after": {
+        "cache": {
+          "type": "dir",
+          "mode": 493
+        },
+        "config": {
+          "type": "dir",
+          "mode": 493
+        },
+        "data": {
+          "type": "dir",
+          "mode": 493
+        },
+        "empty-path": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029": {
+          "type": "dir",
+          "mode": 493
+        },
+        "home\udcff\ufffd\udce2\udc82&<>\u2028\u2029/.symaira": {
+          "type": "file",
+          "mode": 420,
+          "sha256": "d6c36b2ae699e57731955c4f57967ec6ca23b722390651af9a63a88c7e616438",
+          "size": 26,
+          "content_base64": "b3duZWQgYW5jZXN0b3Igb2JzdHJ1Y3Rpb24="
+        },
+        "project": {
+          "type": "dir",
+          "mode": 493
+        },
+        "state": {
+          "type": "dir",
+          "mode": 493
+        }
+      }
+    }
+  ],
+  "go_binary_sha256": "a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41",
+  "rust_binary_sha256": "4581c82278857476063c536ef14a588385f2ff47a24536e6137b36b6afaad490",
+  "comparison": "stdout/stderr/exit and full fixture filesystem/modes; only fixture roots, release scratch names and newly written release timestamps (validated within this run) normalized; pre-existing source sidecars remain exact",
+  "fallback": "every Rust process has an absent SYMBRAIN_GO_BINARY; no Go fallback can produce matching successful repair",
+  "go_source_sha256": {
+    "cmd/symbrain/browse_integration_test.go": "c4e2ab70bee25096db7b37369c3511019658a2f3221408288d3c6afc170c6140",
+    "cmd/symbrain/cmd_activity.go": "0b23d53e303641e09e39129d18991a1800750ec824d7eeb4ce507896c6789658",
+    "cmd/symbrain/cmd_activity_backend_test.go": "3af36f6ea80d9f8cf8955fd994035b0b1bf4a37b74ee7aa3a2c5fac6028da1a6",
+    "cmd/symbrain/cmd_activity_edges_test.go": "1bb1dec0d7eb6c7c9c698e4b8501e8449864962d35783637e292ee9cbda1312a",
+    "cmd/symbrain/cmd_activity_table_test.go": "7ff4f9fcf23961a78e0db74076d80bda3c39130d258681557eaa1dbd5b380109",
+    "cmd/symbrain/cmd_activity_test.go": "14cd5c9fb303735fd41425fb2e509ed8934534a821270fda4260b9d00f79dcbc",
+    "cmd/symbrain/cmd_audit.go": "9db43f0f3a891d37aa159e4c0dd44646914968e12f2d94a9cafecaef26d2d08c",
+    "cmd/symbrain/cmd_config.go": "5f8a68e4226363ef29a7f3e840ff2853fa0858e21160d1bf7d67f440c1d33688",
+    "cmd/symbrain/cmd_config_test.go": "3b9ba2c840329f901bb3fc5333a14172e173ee6b25c8d54aec24d50f8297ea96",
+    "cmd/symbrain/cmd_coverage_test.go": "250a5bc39f7d00343143c9f8f31fe2217f1aca388fcd098a3799bbd8c4ba970b",
+    "cmd/symbrain/cmd_doctor.go": "cdcc85b76b970a67e795aa5ce04fb3347e6c3bc11363578a6fd3eb3c8079d2d2",
+    "cmd/symbrain/cmd_doctor_foreign.go": "8f0652461fe2de0fbc857b0115b36173c01e58ebd0f86dcd9f16e4a9d05168dd",
+    "cmd/symbrain/cmd_doctor_foreign_test.go": "0a5344b040c693dbf7e4aac27986b806e6109d0bec7100fb89a19bc07ce084e6",
+    "cmd/symbrain/cmd_doctor_handshake.go": "8a882bedcbc62eed48041a87c80f67a70543360d94c239aac735695b120fd22d",
+    "cmd/symbrain/cmd_doctor_links.go": "149633a41b51b3cafa5a00f3b2c851b8d03b25c8504d36b35a498513edc42810",
+    "cmd/symbrain/cmd_doctor_links_test.go": "a939c33f2eb57ef7306b38ec1a59b4b717b981db9ebd0c668199411259e15f63",
+    "cmd/symbrain/cmd_doctor_print.go": "7a913f40c6495f1256d171dbea3b813261ee0a4ee84487f46c1db5a77a3d7d0b",
+    "cmd/symbrain/cmd_doctor_test.go": "55ea836a2f114a1faf3d2a4c2e919d54b9482a5e675aae937fcefa0f66ce679c",
+    "cmd/symbrain/cmd_guard.go": "cb0b10ae03a69b3c5c1d6952b706710a488ac4219fc908218c254056f2432abc",
+    "cmd/symbrain/cmd_guard_test.go": "d98f3ded0d0af2c929f9bca1870966b19308fc2e064521e89187cde8c6219d58",
+    "cmd/symbrain/cmd_harness.go": "39c0177b3f9dc75dcaf890d9bcf8f1de7dea76675d6f0773f52bce061912629e",
+    "cmd/symbrain/cmd_harness_health.go": "e3b4aa060e434b4c8e83f4bf276bbf68475fae8f35e5642f866dae9d77fae94c",
+    "cmd/symbrain/cmd_harness_health_test.go": "56f75e5c4c2bfc1720b3deec2ebe68b671bed962e5704e782f64b929fa5ab24a",
+    "cmd/symbrain/cmd_harness_test.go": "394e457ecdc7cd9c5b791e2ab5121dfd55a81f346f08b0d537cd2f4cbfddd18a",
+    "cmd/symbrain/cmd_init.go": "17489c1959bea8dfe5c029537bcce97b02e2573e1a49b0558eaf93a06477ea5f",
+    "cmd/symbrain/cmd_init_test.go": "5a1dda688948637d232492f74c89904f4d985372a18849b720831935f6b0dd3b",
+    "cmd/symbrain/cmd_install.go": "5dacb736219aefb0db743fc93fba490adf54b58e6f500feb27c0c394f7cf770c",
+    "cmd/symbrain/cmd_install_migrate_test.go": "a01da090427b6c7bad9e63b74e90a5a3e4da5cd48a61ca7263c3e9f6675e37cc",
+    "cmd/symbrain/cmd_install_test.go": "cf0e349d952150b863f391f6fe9568a59b47e7caad53bff3cedbdeb3865d589a",
+    "cmd/symbrain/cmd_memory.go": "5a24474cf8407323441baab9cc40e5e909231b7eb0e8da0bcc74d42d2ac1528c",
+    "cmd/symbrain/cmd_memory_cli_test.go": "3305e384baa5391e04e1320b3c2b7d8696028f1dda4fafc4a8703926e222c6bb",
+    "cmd/symbrain/cmd_memory_log.go": "fc5065b32c42384002eec128aadf93201fe884b4739ad75bd86717922dc5acbc",
+    "cmd/symbrain/cmd_memory_read.go": "4df921c8bd982476ea1ef4eafd9d18d3f96c78b5ffaed6ece83971a777ba4ac8",
+    "cmd/symbrain/cmd_memory_read_edges_test.go": "3fce95ed3d1662393c5033d219753e94f1208b4cbf22d20ba1bdac498ef3d3cb",
+    "cmd/symbrain/cmd_memory_read_test.go": "3619f34ceeddfc75ea57ded6d694ddb08f6e287302608b67db606263166741ca",
+    "cmd/symbrain/cmd_memory_serve.go": "d2d8975835e2fe935738c9626fd132408459fdc5cc32131df64e84e603980144",
+    "cmd/symbrain/cmd_memory_serve_test.go": "5b36e9dd258171a49fa811a54847ffd0072e76a869d6e3323ea7507d771d2975",
+    "cmd/symbrain/cmd_memory_sync.go": "ae1da40efe11031b29d92bac94b6053ef385a04ac94d530a1e2a1ee7390c77ed",
+    "cmd/symbrain/cmd_memory_test.go": "8e28ff28ecddd0b79a4e5768f173c3df0dcf7d5e0bbea47f8c7dcb519357fb36",
+    "cmd/symbrain/cmd_memory_write.go": "4f7fa0560c003e058db06f82f949336a6071bd646d77f5cd3bcd7141ce897216",
+    "cmd/symbrain/cmd_memory_write_test.go": "0b1ce332e31365e35800e022c6531564bea71f83fedcaf5b19c238bb0118905e",
+    "cmd/symbrain/cmd_passthrough.go": "e550ea185a413f43d212d945e7a532d396110033aa8abfbe10ab9da668f3f0f4",
+    "cmd/symbrain/cmd_passthrough_test.go": "d624d2542ec15aba1380b9ffb6906871b3930f90bc346aaa984afb33ae574fd1",
+    "cmd/symbrain/cmd_profile.go": "a09401699e67d99cff01cfcd676f5c9ebe523b10ada3e0610f08ab5a47f509a9",
+    "cmd/symbrain/cmd_profile_add.go": "eeb735b898803c73f4e73db87c949644a14ebf4c9b1a2d575a564e515245251c",
+    "cmd/symbrain/cmd_profile_add_race_test.go": "10076384763861d9a7bcb26ce74b0b9e35bd4b957aa3b12af37523cd81516504",
+    "cmd/symbrain/cmd_profile_list.go": "4ef279efe698d861e72650c0461aebc7a3b595f7357fd95693e1add6b47ca692",
+    "cmd/symbrain/cmd_profile_print.go": "22919d26a3012df08885110efd5bfa6a21a235e368f48586a60373f26c18bbde",
+    "cmd/symbrain/cmd_profile_remove.go": "1f88a65863650c2be74578e327c22d780c5e0e149b0c85288999caf446c2a9ba",
+    "cmd/symbrain/cmd_profile_security_test.go": "2604941c64be54f9ba00054fd72aeeb7540e6697980118cd2b533c90fb8b46d3",
+    "cmd/symbrain/cmd_profile_show.go": "83c0faa9a28afd2b7ab00a7e1401347b740f07946c31037f52b6635f9a4578cf",
+    "cmd/symbrain/cmd_profile_test.go": "811a03ac1feef38c2ef1a2a3f8525a594a498452dd81e4e3eca2a722291e8859",
+    "cmd/symbrain/cmd_serve.go": "a972c45fc9b1b23b7cbad5846de47d0d7e0315ed00517b507c4aad7a7500558e",
+    "cmd/symbrain/cmd_serve_test.go": "46d87cbe4220d821055a01aab388a6b30c65905b85b80186c1fc737c5af6a3c4",
+    "cmd/symbrain/cmd_setup.go": "2efa90acdbc8d776bd2b88e6cf08e2992edb660c7a36230f8bad4c69dc3ec163",
+    "cmd/symbrain/cmd_setup_source.go": "1da7578d2af333e3676359941f769a2b4ec7bb1babc2c06bc58edacab7161492",
+    "cmd/symbrain/cmd_setup_source_test.go": "64fd8ebf2fc35ac94a9320234367b219d88361b91e2aad324e50a6c302422a1c",
+    "cmd/symbrain/cmd_setup_test.go": "ba49ec498313e4ae2c5346a2e0375f5a3ff10af4bf22c344255b99f83d88ab7b",
+    "cmd/symbrain/cmd_skills.go": "bd2a49918aa8f6a0929cba201631d8795403f5da6fefafee9c3c2b2b1f02dd1c",
+    "cmd/symbrain/cmd_skills_test.go": "4d0ecd0a11d7ac5743658a951096636cc8acf75c92f8a9e061b05ddd3dab6692",
+    "cmd/symbrain/cmd_sync.go": "0f089361e3b711fe0db2e9b9eb2da66114df1e503418a8d2ac67f206760bd83a",
+    "cmd/symbrain/cmd_sync_error_test.go": "583db10393d37d3cd6b286f35dc2bf65787e67168a0530f0a84418ff5397db3f",
+    "cmd/symbrain/cmd_uninstall.go": "b288855e6e69ea06d9cdbba5eec014b277f574e200717dbf8bb39c2e4af067b1",
+    "cmd/symbrain/cmd_uninstall_test.go": "3df94fb785aa4d28982431d95452d6f77aa4648760036a29190838b4ef7f378e",
+    "cmd/symbrain/cmd_usage.go": "9bb1b0ca99859d0b32c955f490494e8e2a61d51e6428d633e5bd4f5531cf3843",
+    "cmd/symbrain/cmd_usage_test.go": "4032ebdecef8be48ed1a86da0daa336518e8bee867a6ed368fccbd81ad5f5086",
+    "cmd/symbrain/cmd_vault_create.go": "3671612f20df30159a064ad1c196c2a758f911ec70d5d0c9315528fd815e7452",
+    "cmd/symbrain/cmd_vault_create_test.go": "f56a1a18a3e8bf9bec6b67aac500157f99c08e6ee5ec3268c6e2d443e41ff079",
+    "cmd/symbrain/cmd_vault_editdel.go": "57edb4e723a0fe07ea85796f05b5b83050013d43cf66349e3679675fbb53ede7",
+    "cmd/symbrain/cmd_vault_editdel_test.go": "7e8888a07810247371086eacf7fb84546d1e01644ff9730e064354a3cb8c7617",
+    "cmd/symbrain/cmd_version.go": "7d78bd4436ef61a26b514863a33b9c6a493ee2ab25cd5afd41b44d783d05fd46",
+    "cmd/symbrain/cmd_version_test.go": "875f17e7bf1e5c7840ece57cfb23fbaf1d08b1c923b19c5b5f2af9ab8ed5b515",
+    "cmd/symbrain/cmd_wrapper_prelude_test.go": "e52c8accf529897f1a9648c3e52124f67f4e36dcc110a24e2bbdbd629ff2e9c6",
+    "cmd/symbrain/doc_consistency_test.go": "122e5946507be7349c4758a7ee8c0368fbc26cd24fce26dee3218a504a7a7de4",
+    "cmd/symbrain/flags.go": "ea6f26ed29e884e84f0e45753dba3d8e424a6c55aaf03afb0f7b3b925920ecf3",
+    "cmd/symbrain/flags_test.go": "dad122298e27e0b12d70bb05bc518eb6586ff33602781c74ebc7662e58d44739",
+    "cmd/symbrain/harness_registry_test.go": "685b79823dbd0a1628c12d3eedf2b2183a16ac64ffa835c17ef018c49e8da957",
+    "cmd/symbrain/hygiene_test.go": "6affe77a810a64b18081c0ba78c3cef69f894aad0b852d3113e8e9e263111b4b",
+    "cmd/symbrain/lifecycle_hardening_test.go": "df1879cd73f60c20e11a3831ae864d82a1ff1e4599f1c79d0e8b05feb04eb03f",
+    "cmd/symbrain/main.go": "46a3245236f0104f34c7e0d0787fcb35c27a0eba6c6bba8d5a5098e1664c6e5b",
+    "cmd/symbrain/main_test.go": "37e6719f1c4a3a262db71a57de3c01948ca5c2defe3a42939166042fb7a4ce70",
+    "cmd/symbrain/optional_modules_test.go": "ac102d47213368c254e85dd1f065b14459a853aab2cb0f21b4b23e316433a74f",
+    "cmd/symbrain/test_helpers_test.go": "5e5564d4a83816669a9bcbc6f22cb85264e520054ff65b622d535b93a44f3c9a",
+    "go.mod": "cd360aeb19457381d88720aa1dd6b62e493c44ac5a4d0b5c5172561ecd4e9d0c",
+    "go.sum": "fb3ec3bc981beb60ae88833cab55335ce3880e68b70a8ad1e931cb02de955aab",
+    "internal/config/config.go": "64284546f2a6ddcbd3a5d23088545fde3f372507f89adaa2d44fb7a22e7c6b21",
+    "internal/config/config_test.go": "c11d0be99fb0610aa4bb9e9a7c23271a31175b6c26ecc1348d8724932fa2777f",
+    "internal/config/modules_test.go": "f37e8eaa76e43eb73deaea37f7fe86b08c6c25407a467973a886061f310058c5",
+    "internal/managed/archive_security_test.go": "749e62542cfdd93f297d9c6e2e8558965818036a666f8fc7706fd270fad89525",
+    "internal/managed/doc.go": "e784323b77ad74e817bfb29b085ee30c53783b0ef20570df4f9024856bc927e4",
+    "internal/managed/download.go": "5e8d85d1b402f7ae7a03710692f2da6c2b0cb40fe89f5c2a701bde786f18809b",
+    "internal/managed/download_test.go": "5970ce20e8d0fbcc7b668caa6eefebda0bf52d4d08c12945eb143b547267b8ba",
+    "internal/managed/drift.go": "5f72bb1b3929fb7c50d4d4aa7c656d18bbb76b58b1c2c743c29515343cdfd756",
+    "internal/managed/drift_test.go": "ed7db651092f11a7c1d4edfedff5553147d5c62afc406c19be7f5ea79450c52f",
+    "internal/managed/fix_provenance_test.go": "67e31ccdf51a52c4bcf703c4cf06abad804c98f73b40ecefdd4abaf5e554ba44",
+    "internal/managed/install.go": "97bb600cc2d6047696c8e77eb09e4abf6bf75cca956d2da4ddc2bcd24f91677d",
+    "internal/managed/install_local_test.go": "4fd6994694d476cc6808ac74bc99d4cbca407fba4ab6bfac3b68ed236ed456cd",
+    "internal/managed/install_test.go": "3d659bda8afffc027354ae6c74654c58041b2646272bcb2ce72b4fc426156d9f",
+    "internal/managed/managed.go": "ba3205862dd3970190f1bb8fbd0c3b33053f79b7553bb026e1cd54b58f485b63",
+    "internal/managed/managed_orchestration_test.go": "f1a093cc2013aba0fa80b0e62f39b429669a1e9fd487c7af95391fe49c11a0cc",
+    "internal/managed/managed_platform_test.go": "b5445f54329c553dd70ec13bc050c71c248cccafb0e166fe16b8559cf9edcbb5",
+    "internal/managed/managed_test.go": "d889d2a22e565bd7dcf998d958a0c3b816f5d719c810e02ce2d55cee07db85e7",
+    "internal/managed/manifest.go": "0dce3b72cc4e2ac38a60e761542d64a5a1adeea48a5139f61de70b7627a36cd4",
+    "internal/managed/provenance.go": "0956c9f2011aee75722c10ef1b769b2b3dcd2d04250af6e36e6dd40acf421d5d",
+    "internal/managed/provenance_test.go": "da9fa8161e4609ea95d787e7c97d3277fafa7f1699a987aa354d4a9226c1800f",
+    "internal/managed/rust_oracle_test.go": "a04bc5dd06f07b0bd91cd4cdefe15ce0f60f0eb0ef2fdd94a2f7dc8d8fca4639",
+    "internal/xdg/xdg.go": "78df3bb774afa38dba2a667ed25bf3ed0ba0e4920daa42ed6080708383bc6fc5",
+    "internal/xdg/xdg_test.go": "3a0e36d61fe474a6d666de912e34dfde22f2198b1187704a3f3fe2601349630d"
+  },
+  "candidate_source_sha256": {
+    "rust/symbrain-cli/src/setup_cli.rs": "fb0517cf7cffd63294b0359d6d0c0dfae489f3b400f8a4fd04e2ec9760e76521",
+    "rust/symbrain-cli/src/setup_args.rs": "84cb407b2d77a1c48a6235a05be31c7e3f5322cb0604df1ecc43db724a3300fe",
+    "rust/symbrain-cli/src/setup_config.rs": "cfc178d86002c3879de5e2ca635c9792b7389beece37b88ef2a9326d4a4d9287",
+    "rust/symbrain-cli/src/vault_config.rs": "1b1538509663c718b27bfbe7fde07bf89fa12e15ee933ac321e65ff0c50a175d",
+    "rust/symbrain-managed/src/provenance.rs": "ec9ecda3889248ec509ae055fcc5427fc5c60b2cfd94b750faad925406049ccf",
+    "rust/symbrain-managed/src/provenance_json.rs": "a324dd4944625e5f14200a78f43002504584c4217fa04744a1343834939bdb7e",
+    "rust/symbrain-managed/src/install.rs": "6cc511e6ebbbdd0db840c4321465d1d180d506038c91822f34e2b50e34f7f2c2",
+    "rust/symbrain-managed/src/version_probe.rs": "1abfa450226dde785ec1844521b77a035dff5e627a345fed68a4d66201db6e75",
+    "rust/symbrain-cli/src/go_json_escape.rs": "7511d75addcd480301d37c51459f29f8972c1b5122acdf861e503f453e723452",
+    "rust/symbrain-managed/src/lib.rs": "b46a659d3aadf33c347a4f3e78457f04ba8272fcbf93f5ed1d7d91995851f5d6",
+    "rust/symbrain-core/src/go_text.rs": "d92030cd11a4de6682eef7508e0a18959847ceb46f560cff2748239d517a08a6",
+    "rust/symbrain-core/src/json_string.rs": "9595500d2fcf5e125f070f8c69f1d98a19c593887c470ee8a04e84b9b11dcad4",
+    "scripts/setup-repair-oracle/replay.py": "6d7903343121fc0fde89277209ef276a00530a9eca7b475edb263923d1a1ff55",
+    "scripts/rust-differential.py": "5fe1ac2a3e4fde3295a3c39122f1adec0c9e151eb3aaaf25f4ccf3ab3ae76864"
+  }
+}

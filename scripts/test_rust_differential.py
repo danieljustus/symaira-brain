@@ -37,6 +37,24 @@ class FixtureRootNormalizationTests(unittest.TestCase):
             b'"<root>\\\\config\\\\file"',
         )
 
+    def test_binds_owned_roots_inside_quoted_json_errors_without_hiding_error_changes(self):
+        first_root = Path(r"C:\owned-fixture-a")
+        second_root = Path(r"C:\owned-fixture-b")
+
+        def error(root, token="The system cannot find the path specified."):
+            path = str(root) + r"\receiving sources\tools\go"
+            quoted = json.dumps(path)
+            return json.dumps({"error": f"exec: {quoted}: GetFileAttributesEx {path}: {token}",
+                               "unowned": r"D:\unrelated\tools\go"}).encode()
+
+        first = DIFFERENTIAL.normalize_fixture_root(error(first_root), first_root)
+        second = DIFFERENTIAL.normalize_fixture_root(error(second_root), second_root)
+        self.assertEqual(first, second)
+        self.assertIn(b'D:\\\\unrelated\\\\tools\\\\go', first)
+        self.assertNotEqual(first, DIFFERENTIAL.normalize_fixture_root(
+            error(second_root, "different error cause"), second_root))
+        self.assertNotEqual(first, DIFFERENTIAL.normalize_fixture_root(error(second_root), first_root))
+
     def test_normalizes_only_random_atomic_rename_source_suffix(self):
         go_error = b"rename C:\\config.toml.tmp-239445890 C:\\config.toml: Access is denied."
         rust_error = b"rename C:\\config.toml.tmp-r4nd0m C:\\config.toml: Access is denied."

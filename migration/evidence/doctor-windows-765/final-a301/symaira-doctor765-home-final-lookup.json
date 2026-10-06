@@ -1,0 +1,1053 @@
+{
+  "candidate_head": "a301969596358fb42e3bd93972c315bf89e79963",
+  "source_head": "a301969596358fb42e3bd93972c315bf89e79963",
+  "rust_sha256": "44ffc3c6ecd498aa29aa82dd828abeeef161ca073f14990ed695b9fb9c681b80",
+  "go_sha256": "0654376cf8fc33c3be0b03bd394b665842d04e6659b3dfd67c0d6786d2f136e2",
+  "tool_sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c",
+  "observations": [
+    {
+      "case": "empty-path",
+      "go": {
+        "started": 1791067348.670282,
+        "ended": 1791067348.8679934,
+        "actual_exit": 1,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogcmVzb2x2ZSByZWNlaXZlciBjb21taXQ6IGV4ZWM6ICJnaXQiOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRICg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "project/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          }
+        },
+        "contract": {
+          "exit": 1,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogcmVzb2x2ZSByZWNlaXZlciBjb21taXQ6IGV4ZWM6ICJnaXQiOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRICg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "project/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791067349.040843,
+        "ended": 1791067349.2171373,
+        "actual_exit": 1,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogcmVzb2x2ZSByZWNlaXZlciBjb21taXQ6IGV4ZWM6ICJnaXQiOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRICg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "project/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          }
+        },
+        "contract": {
+          "exit": 1,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogcmVzb2x2ZSByZWNlaXZlciBjb21taXQ6IGV4ZWM6ICJnaXQiOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRICg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "project/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            }
+          }
+        }
+      },
+      "mismatched_fields": []
+    },
+    {
+      "case": "unset-path",
+      "go": {
+        "started": 1791067349.388985,
+        "ended": 1791067349.5589154,
+        "actual_exit": 1,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogcmVzb2x2ZSByZWNlaXZlciBjb21taXQ6IGV4ZWM6ICJnaXQiOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRICg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "project/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          }
+        },
+        "contract": {
+          "exit": 1,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogcmVzb2x2ZSByZWNlaXZlciBjb21taXQ6IGV4ZWM6ICJnaXQiOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRICg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "project/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791067349.7317417,
+        "ended": 1791067349.9057834,
+        "actual_exit": 1,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogcmVzb2x2ZSByZWNlaXZlciBjb21taXQ6IGV4ZWM6ICJnaXQiOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRICg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "project/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          }
+        },
+        "contract": {
+          "exit": 1,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogcmVzb2x2ZSByZWNlaXZlciBjb21taXQ6IGV4ZWM6ICJnaXQiOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRICg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "project/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            }
+          }
+        }
+      },
+      "mismatched_fields": []
+    },
+    {
+      "case": "empty-path-optin",
+      "go": {
+        "started": 1791067350.0868602,
+        "ended": 1791067350.2737532,
+        "actual_exit": 1,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogcmVzb2x2ZSByZWNlaXZlciBjb21taXQ6IGV4ZWM6ICJnaXQiOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRICg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "project/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          }
+        },
+        "contract": {
+          "exit": 1,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogcmVzb2x2ZSByZWNlaXZlciBjb21taXQ6IGV4ZWM6ICJnaXQiOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRICg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "project/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791067350.4536617,
+        "ended": 1791067350.6315384,
+        "actual_exit": 1,
+        "raw_stdout_base64": "",
+        "raw_stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogcmVzb2x2ZSByZWNlaXZlciBjb21taXQ6IGV4ZWM6ICJnaXQiOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRICg==",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "project/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3261936,
+            "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+          }
+        },
+        "contract": {
+          "exit": 1,
+          "stdout_base64": "",
+          "stderr_base64": "c3ltYnJhaW4gc2V0dXAgLS1mcm9tLXNvdXJjZTogcmVzb2x2ZSByZWNlaXZlciBjb21taXQ6IGV4ZWM6ICJnaXQiOiBleGVjdXRhYmxlIGZpbGUgbm90IGZvdW5kIGluICRQQVRICg==",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "project/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "project/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3261936,
+              "sha256": "76fbf1a85ae07582bf3e18902f8205f2b36bb3518576d817cefed49d7e77746c"
+            }
+          }
+        }
+      },
+      "mismatched_fields": []
+    }
+  ]
+}

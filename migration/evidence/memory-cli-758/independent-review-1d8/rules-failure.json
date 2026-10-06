@@ -1,0 +1,18 @@
+{
+  "candidate_revision": "1d8a0904929157d7928cfcd31782c374aa98501a",
+  "candidate_dirty": false,
+  "go_sha256": "a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41",
+  "rust_sha256": "5b76d21337248d59f42b9f1f70c9296559e23ff03929c7f9d03c7323c44a650a",
+  "match": false,
+  "state_unchanged": true,
+  "go": {
+    "exit": 0,
+    "stdout": "W3siaWQiOiJyMSIsImNvbnRlbnQiOiJydWxlIFx1MDAzY3ByaXZhdGVcdTAwM2UgXHUwMDI2IFVuaWNvZGUgzrJcdTIwMjgiLCJzY29wZSI6Imdsb2JhbCIsIm1ldGFkYXRhIjp7fSwiY3JlYXRlZF9hdCI6IjIwMDAtMDEtMDFUMDA6MDA6MDBaIiwidXBkYXRlZF9hdCI6IjIwMDAtMDEtMDFUMDA6MDA6MDBaIn1dCg==",
+    "stderr": ""
+  },
+  "rust": {
+    "exit": 0,
+    "stdout": "W3siaWQiOiJyMSIsImNvbnRlbnQiOiJydWxlIDxwcml2YXRlPiAmIFVuaWNvZGUgzrLigKgiLCJzY29wZSI6Imdsb2JhbCIsIm1ldGFkYXRhIjp7fSwiY3JlYXRlZF9hdCI6IjIwMDAtMDEtMDFUMDA6MDA6MDBaIiwidXBkYXRlZF9hdCI6IjIwMDAtMDEtMDFUMDA6MDA6MDBaIn1dCg==",
+    "stderr": ""
+  }
+}
