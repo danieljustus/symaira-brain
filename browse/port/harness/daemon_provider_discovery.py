@@ -13,7 +13,7 @@ import time
 import daemon_state_key as key
 from daemon_state_key_ownership import Lease
 from registry_cli_process import capture
-from registry_daemon_lifetime import WindowsJob
+from registry_daemon_lifetime import WindowsJob, no_job_teardown
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
@@ -48,8 +48,16 @@ def build(directory: Path, tool: str, *, control: bool = False) -> Path:
     return binary
 
 
+# No endpoint (never published, already exited) or a pipe still busy after
+# the transport's bound: nothing to stop gracefully. The job drain owns it.
+UNREACHABLE = (FileNotFoundError, ConnectionRefusedError, TimeoutError)
+
+
 def stop_owned(endpoint: Path, session: str, actual_binary: Path) -> dict:
-    status = key.registry.harness.request(endpoint, {"cmd": "daemon.status", "session": session})
+    try:
+        status = key.registry.harness.request(endpoint, {"cmd": "daemon.status", "session": session})
+    except UNREACHABLE as error:
+        return {"reachable": False, "error": repr(error)}
     pid = status["data"]["pid"]
     lease = Lease(pid, actual_binary)
     try:
@@ -163,8 +171,9 @@ def observe(binary: Path, actual_binary: Path, provider: Path, case: str, *, evi
                 cleanup = stop_owned(endpoint, session, actual_binary)
             except Exception as error:
                 cleanup_error = error
+            teardown = None
             try:
-                if job is not None: job.finish()
+                teardown = job.finish() if job is not None else no_job_teardown()
             except Exception as error:
                 cleanup_error = cleanup_error or error
         # Capture process failures and cleanup failures before reading/parsing
@@ -179,7 +188,7 @@ def observe(binary: Path, actual_binary: Path, provider: Path, case: str, *, evi
                          "stdout_base64": base64.b64encode(result.stdout if result is not None else getattr(run_error, "stdout", None) or b"").decode(),
                          "stderr_base64": base64.b64encode(result.stderr if result is not None else getattr(run_error, "stderr", None) or b"").decode(),
                          "ledger_base64": base64.b64encode(ledger.read_bytes()).decode() if ledger.exists() else None,
-                         "cleanup": cleanup, "run_error": repr(run_error) if run_error else None,
+                         "cleanup": cleanup, "teardown": teardown, "run_error": repr(run_error) if run_error else None,
                          "cleanup_error": repr(cleanup_error) if cleanup_error else None})
         if run_error is not None: raise run_error
         if cleanup_error is not None: raise cleanup_error
@@ -205,6 +214,7 @@ def observe(binary: Path, actual_binary: Path, provider: Path, case: str, *, evi
         return {"case": case, "root": str(root), "actual_path": path, "arguments": command[1:], "exit": result.returncode,
                 "stdout_base64": base64.b64encode(result.stdout).decode(), "stderr_base64": base64.b64encode(result.stderr).decode(),
                 "queries": queries, "vault_query_count": len(vault), "vectors": vectors, "owner_paths": [v["owned_executable_relative"] for v in vectors], "cleanup": cleanup,
+                "teardown": teardown, "teardown_survivors": len(teardown["survivors"]),
                 "provider_sha256": key.registry.process.digest(provider), "binary_sha256": key.registry.process.digest(binary),
                 "discovery_environment_base64": {name: base64.b64encode(os.fsencode(env[name])).decode() for name in ("PATH", "PATHEXT", "GODEBUG", "NoDefaultCurrentDirectoryInExePath") if name in env},
                 "discovery_environment_utf16_base64": {name: base64.b64encode(env[name].encode("utf-16le", "surrogatepass")).decode() for name in ("PATH", "PATHEXT", "GODEBUG", "NoDefaultCurrentDirectoryInExePath") if name in env} if os.name == "nt" else None}
@@ -216,7 +226,9 @@ def pairs(go: Path, rust: Path, provider: Path, cases: list[str], *, evidence: R
         left = observe(go, go, provider, case, evidence=evidence, metadata=metadata)
         right = observe(rust, rust, provider, case, evidence=evidence, metadata=metadata)
         evidence.append({"phase": "pair.observed", "case": case, "metadata": metadata, "go": left, "rust": right})
-        fields = ["exit", "stdout_base64", "stderr_base64", "vault_query_count"] + (["owner_paths"] if metadata else [])
+        # Teardown survivors are compared, not judged: a process left behind
+        # by only one implementation is a contract difference.
+        fields = ["exit", "stdout_base64", "stderr_base64", "vault_query_count", "teardown_survivors"] + (["owner_paths"] if metadata else [])
         assert all(left[field] == right[field] for field in fields), (case, left, right)
         if metadata and os.name != "nt":
             assert [v["argv0_base64"] for v in left["vectors"]] == [v["argv0_base64"] for v in right["vectors"]]

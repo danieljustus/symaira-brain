@@ -3,6 +3,9 @@ from pathlib import Path
 import tempfile
 import unittest
 
+from unittest.mock import patch
+
+import daemon_provider_discovery as discovery
 from daemon_provider_discovery import owned_executable_relative
 
 
@@ -68,6 +71,27 @@ class OwnedExecutableTests(unittest.TestCase):
 
             with self.assertRaises(AssertionError):
                 owned_executable_relative(executable, root, provider)
+
+
+
+class StopOwnedTests(unittest.TestCase):
+    def test_unreachable_endpoint_is_a_teardown_fact_not_an_error(self):
+        # A CLI that never published (or a daemon already gone) leaves no
+        # pipe; the job drain, not the stop RPC, owns whatever remains.
+        for error in (FileNotFoundError(2, "missing pipe"), ConnectionRefusedError(),
+                      TimeoutError("Windows pipe remained busy before request")):
+            with self.subTest(error=type(error).__name__):
+                with patch.object(discovery.key.registry.harness, "request", side_effect=error) as request, \
+                     patch.object(discovery, "Lease") as lease:
+                    result = discovery.stop_owned(Path("owned-endpoint"), "owned", Path("owned-binary"))
+                self.assertEqual(result, {"reachable": False, "error": repr(error)})
+                self.assertEqual(request.call_count, 1)
+                lease.assert_not_called()
+
+    def test_other_transport_errors_still_fail(self):
+        with patch.object(discovery.key.registry.harness, "request", side_effect=PermissionError("denied")):
+            with self.assertRaises(PermissionError):
+                discovery.stop_owned(Path("owned-endpoint"), "owned", Path("owned-binary"))
 
 
 if __name__ == "__main__":

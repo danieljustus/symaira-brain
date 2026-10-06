@@ -202,6 +202,23 @@ impl fmt::Display for ConfigError {
 
 impl std::error::Error for ConfigError {}
 
+/// `std::env::vars` panics on the first non-Unicode variable, so a PATH entry
+/// holding a lone UTF-16 surrogate aborted every Windows CLI command before
+/// configuration was even consulted. Go keeps such values as raw strings;
+/// configuration only reads named SYMBROWSE_/XDG keys, so a lossy copy keeps
+/// every key present without letting an unrelated variable crash startup.
+fn process_env(
+    vars: impl Iterator<Item = (std::ffi::OsString, std::ffi::OsString)>,
+) -> HashMap<String, String> {
+    vars.map(|(key, value)| {
+        (
+            key.to_string_lossy().into_owned(),
+            value.to_string_lossy().into_owned(),
+        )
+    })
+    .collect()
+}
+
 impl LoadContext {
     /// Captures the process environment without reading configuration files.
     pub fn from_process(flags: FlagOverrides) -> std::result::Result<Self, ConfigError> {
@@ -216,7 +233,7 @@ impl LoadContext {
             xdg_config_home: std::env::var_os("XDG_CONFIG_HOME").map(PathBuf::from),
             xdg_cache_home: std::env::var_os("XDG_CACHE_HOME").map(PathBuf::from),
             xdg_state_home: std::env::var_os("XDG_STATE_HOME").map(PathBuf::from),
-            env: std::env::vars().collect(),
+            env: process_env(std::env::vars_os()),
             flags,
         })
     }
@@ -692,5 +709,37 @@ mod selection_tests {
                 .code,
             "invalid_browser_engine"
         );
+    }
+}
+
+#[cfg(test)]
+mod process_env_tests {
+    use super::process_env;
+    use std::ffi::OsString;
+
+    #[cfg(unix)]
+    fn invalid() -> OsString {
+        use std::os::unix::ffi::OsStringExt;
+        OsString::from_vec(b"/owned/raw-\xff".to_vec())
+    }
+    #[cfg(windows)]
+    fn invalid() -> OsString {
+        use std::os::windows::ffi::OsStringExt;
+        // The provider-discovery raw-wide-path PATH: a lone UTF-16 surrogate.
+        OsString::from_wide(&[0x72, 0x61, 0x77, 0x2d, 0xd800])
+    }
+
+    #[test]
+    fn non_unicode_variables_never_abort_and_keep_every_key() {
+        let env = process_env(
+            [
+                (OsString::from("PATH"), invalid()),
+                (OsString::from("SYMBROWSE_ENGINE"), OsString::from("static")),
+            ]
+            .into_iter(),
+        );
+        assert_eq!(env["SYMBROWSE_ENGINE"], "static");
+        assert!(env["PATH"].contains('\u{fffd}'));
+        assert_eq!(env.len(), 2);
     }
 }

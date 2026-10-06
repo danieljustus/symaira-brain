@@ -1,6 +1,7 @@
 """Registry parity assertions and negative controls; independent of progress logging."""
 import base64
 import copy
+from registry_daemon_lifetime import no_job_teardown
 from datetime import datetime
 import json
 import os
@@ -11,6 +12,9 @@ import daemon_registry_cli as cli_edges
 def normalize(record: dict, *, rust: bool) -> dict:
     value = copy.deepcopy(record)
     value.pop("cli_edges")  # compare() verifies literal bytes before this projection.
+    # Teardown facts carry PIDs; only how many owned processes outlived the
+    # bounded drain (and were terminated) is a Go/Rust contract property.
+    value["teardown_survivors"] = len(value.pop("teardown", no_job_teardown())["survivors"])
     root, begin, end = value.pop("root"), value.pop("begin"), value.pop("end")
     pids = {value["pid"], value["restart_pid"], value["owner"]["data"]["pid"]}
     assert all(isinstance(pid, int) and pid > 0 for pid in pids)
@@ -104,7 +108,7 @@ def compare(case: dict) -> bool:
 
 def controls(case: dict) -> list[dict]:
     rejected = []
-    for name in ("foreign-owner", "previous-owner-after-restart", "missing-error-detail", "invalid-timestamp", "invalid-cli-exit", "invalid-cli-protocol-code", "raw-cli-byte-loss", "help-description"):
+    for name in ("foreign-owner", "previous-owner-after-restart", "missing-error-detail", "invalid-timestamp", "invalid-cli-exit", "invalid-cli-protocol-code", "raw-cli-byte-loss", "help-description", "rust-only-teardown-survivor"):
         bad = copy.deepcopy(case)
         if name == "foreign-owner":
             bad["rust"]["owner_info"]["data"]["pid"] += 1
@@ -118,6 +122,10 @@ def controls(case: dict) -> list[dict]:
             response = json.loads(bad["rust"]["invalid_cli"][1]["stdout"])
             response["error"]["code"] = "invalid_session"
             bad["rust"]["invalid_cli"][1]["stdout"] = json.dumps(response)
+        elif name == "rust-only-teardown-survivor":
+            # A process left behind only by Rust is a contract difference.
+            bad["rust"]["teardown"] = dict(no_job_teardown(), terminated=True,
+                survivors=[{"pid": 4, "image": "owned-survivor"}])
         elif name in ("raw-cli-byte-loss", "help-description"):
             group = "invalid" if name == "raw-cli-byte-loss" else "help"
             record = bad["rust"]["cli_edges"][group][3 if group == "invalid" else 0]

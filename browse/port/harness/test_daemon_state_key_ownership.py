@@ -196,7 +196,9 @@ class Tests(unittest.TestCase):
                        and any("kill_tree(child)" in ast.unparse(n) for n in node.finalbody))
         self.assertEqual(ast.unparse(guarded.body[0]), "if job is not None:\n    job.adopt(child)")
         self.assertIn("lease.cleanup()", ast.unparse(guarded.finalbody[-2]))
-        self.assertEqual(ast.unparse(guarded.finalbody[-1]), "if job is not None:\n    job.finish()")
+        final = ast.unparse(guarded.finalbody[-1])
+        self.assertTrue(final.startswith("if job is not None:\n    teardown = job.finish()"), final)
+        self.assertIn("assert not teardown['survivors']", final)
 
 
 if __name__ == "__main__":

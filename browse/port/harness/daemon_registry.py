@@ -17,7 +17,7 @@ import time
 from registry_progress import Progress, event
 from registry_compare import compare, controls, normalize
 from registry_cli_process import capture
-from registry_daemon_lifetime import WindowsJob, WindowsOwner
+from registry_daemon_lifetime import WindowsJob, WindowsOwner, no_job_teardown
 
 HERE = Path(__file__).resolve().parent
 SPEC = importlib.util.spec_from_file_location("process", HERE / "daemon_process.py")
@@ -93,10 +93,13 @@ def observe(binary: Path, session: str, fixtures: dict[str, str], progress=None)
         # Windows the root is removable only once every one of them has exited.
         job = WindowsJob(progress) if os.name == "nt" else None
         try:
-            return _observe(binary, session, fixtures, progress, Path(temporary), job)
+            observed = _observe(binary, session, fixtures, progress, Path(temporary), job)
         finally:
-            if job is not None:
-                job.finish()
+            teardown = job.finish() if job is not None else no_job_teardown()
+        # Lost-race autostart daemons are part of the contract on both sides;
+        # compare() judges survivors symmetrically instead of failing here.
+        observed["teardown"] = teardown
+        return observed
 
 
 def _observe(binary: Path, session: str, fixtures: dict[str, str], progress, root: Path, job) -> dict:
@@ -320,7 +323,7 @@ def run_gate(args, source, progress, report):
             if left[key] != right[key]:
                 print(f"difference in {key}: Go={left[key]!r}; Rust={right[key]!r}")
     event(progress, "receipt.complete", matches=case["matches"])
-    print(f"{report['counts_per_binary']['cli_observations']} CLI observations (48 original invalid + {len(case['go']['cli_edges']['invalid'])} literal edge + 4 selected-output errors + 6 help) + 20 raw frames + 8 concurrent clients per binary: matches={case['matches']}; 8 controls rejected")
+    print(f"{report['counts_per_binary']['cli_observations']} CLI observations (48 original invalid + {len(case['go']['cli_edges']['invalid'])} literal edge + 4 selected-output errors + 6 help) + 20 raw frames + 8 concurrent clients per binary: matches={case['matches']}; {len(report['negative_controls'])} controls rejected")
     return 0 if case["matches"] else 1
 
 

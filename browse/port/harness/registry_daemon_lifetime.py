@@ -99,6 +99,29 @@ class WindowsAPI:
             raise ctypes.WinError(ctypes.get_last_error())
         return info.ActiveProcesses
 
+    def job_pids(self, job):
+        # JOBOBJECT_BASIC_PROCESS_ID_LIST (class 3): two DWORD counts, then
+        # ULONG_PTR ids. 64 slots far exceed one harness case's process tree.
+        class ProcessIds(ctypes.Structure):
+            _fields_ = [("assigned", wintypes.DWORD), ("listed", wintypes.DWORD),
+                        ("ids", ctypes.c_size_t * 64)]
+        info = ProcessIds()
+        if not self.dll.QueryInformationJobObject(job, 3, ctypes.byref(info), ctypes.sizeof(info), None):
+            raise ctypes.WinError(ctypes.get_last_error())
+        return [int(pid) for pid in info.ids[:info.listed]]
+
+    def process_image(self, pid):
+        """Best-effort evidence only: a survivor may exit while it is named."""
+        handle = self.dll.OpenProcess(0x1000, False, pid)
+        if not handle:
+            return None
+        try:
+            return self.image(handle)
+        except OSError:
+            return None
+        finally:
+            self.dll.CloseHandle(handle)
+
     def job_terminate(self, job):
         if not self.dll.TerminateJobObject(job, 1):
             raise ctypes.WinError(ctypes.get_last_error())
@@ -133,23 +156,40 @@ class WindowsJob:
             time.sleep(.02)
 
     def finish(self, timeout=CLI_TIMEOUT):
+        """Bounded teardown; returns facts for the evidence instead of judging.
+
+        1. drain: wait up to `timeout` for every owned process to exit;
+        2. name survivors (pid, image) and terminate the job object, never a
+           PID or image name. Callers decide whether survivors are a contract
+           difference; only processes outliving termination fail here.
+        """
         try:
             event(self.progress, "job.drain.begin", timeout_seconds=timeout)
             active = self._wait_empty(timeout)
+            facts = {"drain_seconds": timeout, "survivors": [], "terminated": False}
             if not active:
                 event(self.progress, "job.drain.end")
-                return
-            event(self.progress, "job.cleanup.begin", active=active, timeout_seconds=CLEANUP_TIMEOUT)
+                return facts
+            facts["survivors"] = [{"pid": pid, "image": self.api.process_image(pid)}
+                                  for pid in self.api.job_pids(self.handle)]
+            event(self.progress, "job.cleanup.begin", active=active, survivors=facts["survivors"],
+                  timeout_seconds=CLEANUP_TIMEOUT)
             self.api.job_terminate(self.handle)
+            facts["terminated"] = True
             remaining = self._wait_empty(CLEANUP_TIMEOUT)
             event(self.progress, "job.cleanup.end", active=remaining)
             if remaining:
-                raise AssertionError(f"{remaining} owned job process(es) survived forced cleanup")
-            raise AssertionError(f"{active} owned descendant process(es) outlived the case")
+                raise AssertionError(f"{remaining} owned job process(es) survived forced cleanup: {facts}")
+            return facts
         finally:
             if self.handle is not None:
                 self.api.close(self.handle)
                 self.handle = None
+
+
+def no_job_teardown():
+    """POSIX removes a busy cwd; the same facts shape keeps both sides comparable."""
+    return {"drain_seconds": 0, "survivors": [], "terminated": False}
 
 
 class WindowsOwner:

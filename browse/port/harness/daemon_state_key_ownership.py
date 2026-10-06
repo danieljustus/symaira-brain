@@ -238,7 +238,12 @@ def observe(binary: Path, provider: Path, mode: str, trigger: str) -> dict:
             key.registry.harness.kill_tree(child)
             if unrelated is not None: key.registry.harness.kill_tree(unrelated)
             for lease in leases: lease.cleanup()
-            if job is not None: job.finish()  # Bounded; fails if anything outlives.
+            if job is not None:
+                # Rust-only gate with no Go pair: its contract is that the
+                # startup owner leaves nothing behind, so survivors of the
+                # bounded drain fail here, named by pid and image.
+                teardown = job.finish()
+                assert not teardown["survivors"], f"owned startup tree outlived the case: {teardown}"
 
 
 def unavailable(binary: Path) -> dict:

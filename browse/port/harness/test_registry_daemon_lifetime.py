@@ -210,6 +210,14 @@ class JobAPI:
     def job_terminate(self, job):
         self.calls.append(("terminate", job))
 
+    def job_pids(self, job):
+        self.calls.append(("pids", job))
+        return [4242]
+
+    def process_image(self, pid):
+        self.calls.append(("image", pid))
+        return r"C:\owned\symbrowse.exe"
+
     def close(self, handle):
         self.calls.append(("close", handle))
 
@@ -250,16 +258,21 @@ class JobTests(unittest.TestCase):
     def test_cwd_is_released_only_after_lost_autostart_daemons_exit(self):
         api = JobAPI([2, 1, 0])
         job = lifetime.WindowsJob(api=api)
-        job.finish()
+        facts = job.finish()
+        self.assertEqual(facts, {"drain_seconds": 15, "survivors": [], "terminated": False})
+        self.assertEqual(facts, dict(lifetime.no_job_teardown(), drain_seconds=15))
         self.assertEqual([call[0] for call in api.calls], ["create", "active", "active", "active", "close"])
         self.assertIsNone(job.handle)
 
-    def test_outliving_descendant_is_terminated_by_job_and_fails_gate(self):
+    def test_survivor_is_named_then_terminated_and_reported_not_judged(self):
         api = JobAPI([1, 0])
         job = lifetime.WindowsJob(api=api)
-        with self.assertRaisesRegex(AssertionError, "1 owned descendant process"):
-            job.finish(timeout=0)
-        self.assertEqual([call[0] for call in api.calls], ["create", "active", "terminate", "active", "close"])
+        facts = job.finish(timeout=0)
+        self.assertEqual(facts["survivors"], [{"pid": 4242, "image": r"C:\owned\symbrowse.exe"}])
+        self.assertTrue(facts["terminated"])
+        # Survivors are named before the job object (never a PID) is terminated.
+        self.assertEqual([call[0] for call in api.calls],
+                         ["create", "active", "pids", "image", "terminate", "active", "close"])
 
     def test_survivor_of_job_termination_fails_and_still_closes(self):
         api = JobAPI([1])
@@ -268,7 +281,6 @@ class JobTests(unittest.TestCase):
             with self.assertRaisesRegex(AssertionError, "survived forced cleanup"):
                 job.finish(timeout=0)
         self.assertEqual(api.calls[-1], ("close", api.job))
-
 
 if __name__ == "__main__":
     unittest.main()
