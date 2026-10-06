@@ -1,0 +1,177 @@
+{
+  "review": {
+    "reviewer": "Root different author",
+    "source": "7ea3cfb9f816291abecc91eef453ec7f3cbc4492",
+    "result": "BOUNDED APPROVE diagnostic journal and portable API correction",
+    "actual_source_pairs": 111,
+    "complete_journal_events": 893,
+    "candidate_hashes_verified": 288,
+    "frozen_go_hashes_verified": 4,
+    "production_files_byte_identical_to_compiled58": 300,
+    "actual_controls": [
+      {
+        "mode": "wrong-exit",
+        "actual_rejected_fields": [
+          "exit"
+        ]
+      },
+      {
+        "mode": "wrong-source",
+        "actual_rejected_fields": [
+          "stdout_base64"
+        ]
+      }
+    ],
+    "actual_owned_python_timeout_control": {
+      "candidate_head": "7ea3cfb9f816291abecc91eef453ec7f3cbc4492",
+      "elapsed_seconds": 25.07051675899129,
+      "original_outer_timeout_seconds": 25,
+      "fixture_removed_after_checkpoint": true,
+      "journal_retained_after_teardown": true,
+      "raw_all256bytes_and_null_ff_streams_verified": true,
+      "no_production_child_or_native_windows_claim": true,
+      "complete_pairs": 0
+    },
+    "actual_go_binary_sha256": "933700975d043f76b019b9e7c922f58f735b66b4bb1f45ddb133f74b1e751f6e",
+    "actual_reused_rust_binary_sha256": "256e5efe3d05b9fe5c8afa41d9821a13ee2dee32de9719a4acd7e79364fde8ee",
+    "fresh_rust_compilation": false,
+    "prepared_windows_job_experiment": "source-only, neither compiled nor executed; original nativeWindows timeout exactcase/phase/cause still unknown",
+    "unchanged_contracts": "all111 cases, five core AST functions, actual binary,25s watchdog and complete streams/files/assertions unchanged",
+    "source_archive_scope": "temporary tool/source fixture binaries have exact hashes/source/raw observations; no retained payload claim"
+  },
+  "full_raw_files": [
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-fixed-full.json",
+      "retained": "symaira-doctor806-root-source-progress-fixed-full.json.gz",
+      "bytes": 1381754,
+      "sha256": "6cd2a42c5a99fd6aadf0b1421e6a485042ba6830c265dee2096b30a97efb5d15",
+      "gzip_sha256": "8d8ad6a3f5897fd2ec880004ba09ab190bc1c868cfed7aa735db61c58a527845"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-fixed-full.json.progress.json",
+      "retained": "symaira-doctor806-root-source-progress-fixed-full.json.progress.json.gz",
+      "bytes": 3678252,
+      "sha256": "027f488c2d7666de7c499df3f24b0f00a341c8f0453452e942eb0638e88058d5",
+      "gzip_sha256": "6507127145de16afdb544076496294be6706053c96c32ad707c38b375911e3d0"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-fixed-full.log",
+      "retained": "symaira-doctor806-root-source-progress-fixed-full.log.gz",
+      "bytes": 30,
+      "sha256": "15a6106475635cff664781e45eff8bbbeea02113532f1d64e88ecc87cf7cb0ed",
+      "gzip_sha256": "be1a0e84c2101bf9d999432fdfdf48bf521ff861f507b27e8865671e17ee1e30"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-review.json",
+      "retained": "symaira-doctor806-root-source-progress-review.json.gz",
+      "bytes": 1696,
+      "sha256": "eaaff7799f457876f8e174d5eddbfb108e5ee5336d50483f2d227a408232cfe3",
+      "gzip_sha256": "c26b43ca3fe24c840ffee7cdf642fa8fdd8a853925f4cbc2f22a0c011286f5e7"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-review.log",
+      "retained": "symaira-doctor806-root-source-progress-review.log.gz",
+      "bytes": 1268,
+      "sha256": "ac961a97cfd2641b825549139b22fbaa4e59d423e2800ae7b0837b0519cd935f",
+      "gzip_sha256": "017730cc68e03563e159f69a128b7415507b5e269cf95375b748a8ac35204689"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-review.py",
+      "retained": "symaira-doctor806-root-source-progress-review.py.gz",
+      "bytes": 4303,
+      "sha256": "aa13916a03eeeacc3da5138b925e063673085a03978a73ef03d5c5142f724b23",
+      "gzip_sha256": "f1f8fe93463dde825615d55786f9f1c75a96b9f2e98e06233b3b6a644f074d8d"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-timeout.json",
+      "retained": "symaira-doctor806-root-source-progress-timeout.json.gz",
+      "bytes": 368,
+      "sha256": "30031710bd27c05bfe7489229529c59e0575505c662bdbf6f5f45637fb1f781a",
+      "gzip_sha256": "942cff88e25cda87390fd4c7daa2337d22bcb52d7311592df918d52d11391f0c"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-timeout.json.progress.json",
+      "retained": "symaira-doctor806-root-source-progress-timeout.json.progress.json.gz",
+      "bytes": 12886,
+      "sha256": "284a8c9e6cf3fb162d006d1177e70eca132674dbd62f951b652bdadce5011f12",
+      "gzip_sha256": "88cde6e271faea700706926cdaf985ba12f00024eb60df75f34b137fe75e2ecd"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-timeout.log",
+      "retained": "symaira-doctor806-root-source-progress-timeout.log.gz",
+      "bytes": 369,
+      "sha256": "06ab512f70c8266cd5c0108af2b3da70376774b28958f4f0feceae53fa095c2c",
+      "gzip_sha256": "5684c309282973266a682813cbbe7da0d2b91a5d986e76be981033583679b20e"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-timeout.py",
+      "retained": "symaira-doctor806-root-source-progress-timeout.py.gz",
+      "bytes": 2519,
+      "sha256": "5b7fc249edb79dc70aa9857c552ed1549f2ab27fff91c6a9d94917bf76690be5",
+      "gzip_sha256": "61bda3294b2d0ac33673acbc510fc995d8d796cf7d9ae4dd8b7cc84932b7d25d"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-wrong-exit.json",
+      "retained": "symaira-doctor806-root-source-progress-wrong-exit.json.gz",
+      "bytes": 48975,
+      "sha256": "a441855e2099bf14a12275c95baf2e4e60e7e02f7721d0fb0660048acc173547",
+      "gzip_sha256": "341c1d8a12c6d7ea69c1849229335c1b86196fd690a21eb882399d96807e06b7"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-wrong-exit.json.progress.json",
+      "retained": "symaira-doctor806-root-source-progress-wrong-exit.json.progress.json.gz",
+      "bytes": 39357,
+      "sha256": "55d3bdd46e7e6b53e9d076cce7583b484ee4268f046be84c7f1c26ad15188a74",
+      "gzip_sha256": "0833bfece4cdd849a7f943c5b937d1c4fef7db412f5723cd77163387a1606d23"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-wrong-exit.json.stderr",
+      "retained": "symaira-doctor806-root-source-progress-wrong-exit.json.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-wrong-exit.json.stdout",
+      "retained": "symaira-doctor806-root-source-progress-wrong-exit.json.stdout.gz",
+      "bytes": 61,
+      "sha256": "7d75c166672c5d8f7fc60952db9fd798692d26ba9609fe801f5cf9daf2ecc6b8",
+      "gzip_sha256": "6daa73dedc223ac6fa8684e59a793f005c2f657464147b9ef87af4a0aa14f8c5"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-wrong-source.json",
+      "retained": "symaira-doctor806-root-source-progress-wrong-source.json.gz",
+      "bytes": 48970,
+      "sha256": "110fa6e68486f82fd77c106732f6037fb48230d4b0033411a9610bf1278fa819",
+      "gzip_sha256": "16d41c9735d9db77e2d66db9fdb1a2e881a707b5b9291b6726f6cfa3de7d446b"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-wrong-source.json.progress.json",
+      "retained": "symaira-doctor806-root-source-progress-wrong-source.json.progress.json.gz",
+      "bytes": 39314,
+      "sha256": "075483b9052fb3c6c6a080752796098025bef66e0fabfd91f36e0fb0176338a7",
+      "gzip_sha256": "6b40b03597a18471018d3923d17bce2d8fb0fdaf3f3cb639fd289fbba9e9d079"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-wrong-source.json.stderr",
+      "retained": "symaira-doctor806-root-source-progress-wrong-source.json.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-progress-wrong-source.json.stdout",
+      "retained": "symaira-doctor806-root-source-progress-wrong-source.json.stdout.gz",
+      "bytes": 70,
+      "sha256": "2159d1ff5172bb14664926fccf5c2a999588d0fa3a481a6a00e79d620f56ed96",
+      "gzip_sha256": "fcae62e0994fd93e360dc96b0869fd016314d2055a950405a62111b12bfaf02c"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-root-source-timeout-child.py",
+      "retained": "symaira-doctor806-root-source-timeout-child.py.gz",
+      "bytes": 225,
+      "sha256": "a29039eab4c2a182fcdfc28cdbad323775ccf483a70665ff717c0caeca209f8d",
+      "gzip_sha256": "ad1e59005a9c0a481c2a350209068aba8e3cb1b271c527c6a595c559e4c786f0"
+    }
+  ]
+}

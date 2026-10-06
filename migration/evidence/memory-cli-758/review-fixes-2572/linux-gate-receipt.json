@@ -1,0 +1,57 @@
+{
+  "source_revision": "2572f1bf28ac57c3af348245f1444aa6172ce997",
+  "merged_main_revision": "31de72294521701fc4b1a0bce39f03cc34d72e7e",
+  "focused_fix_revision": "af15a60",
+  "rejected_original_revision": "1d8a0904929157d7928cfcd31782c374aa98501a",
+  "process_cases_passed": 590,
+  "process_families": {
+    "arguments": 246,
+    "configuration": 302,
+    "seeded_reads": 32,
+    "configured_search": 3,
+    "database_paths": 7
+  },
+  "real_failure_controls_passed": 2,
+  "activity_actual_go_process_cases_passed": 265,
+  "rust_tests_passed": 119,
+  "rust_test_summaries": 3,
+  "rust_tests_failed": 0,
+  "rust_tests_ignored": 0,
+  "verified_test_binary_sha256": {
+    "target/debug/deps/symbrain_cli-9b8d2c092400099e": "ccd4d9c8b1c5d3108c625a566d2aa8f660c063e1ee0565308d9ad656948ae6c0",
+    "target/debug/deps/activity_cli_oracle_tests-700a98b0a8de7a49": "7c25ae9e41bae1b8719f05441d09f0bfca16609ae674088e83c4dcbb6d0c99fa",
+    "target/debug/deps/activity_validation_tests-7406bd09e3c3536c": "ac7ced39976df597a4c22a2961de2e8d9d33987432e1f55592436369e0428617"
+  },
+  "rust_binary_sha256": "71091ff9a963d5effdcb0f741085ff7c6f4723e83a0cd0a8b5a7d7f78c2d170e",
+  "source_manifest_sha256": "afbf7b643717c8ea4675e8f8ae67f6f8c2797ae12b77c1156ade7c2b90944b1a",
+  "source_manifest_files": 148,
+  "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)\nbinary: rustc\ncommit-hash: 88d9e12ae178fab0fb5cc050a94da85685d449ea\ncommit-date: 2026-08-18\nhost: x86_64-unknown-linux-gnu\nrelease: 1.98.0\nLLVM version: 22.1.8\n",
+  "cargo": "cargo 1.98.0 (797e8a9bc 2026-08-05)\n",
+  "cargo_profile_dev_debug": "0",
+  "cargo_profile_test_debug": "0",
+  "cargo_incremental": "0",
+  "cargo_build_jobs": "2",
+  "fmt": "passed",
+  "strict_clippy": "passed",
+  "actionlint": "passed",
+  "test_commands": [
+    "python3 /tmp/symaira-subreaper.py cargo test -p symbrain-cli --lib --all-features --locked",
+    "cargo test -p symbrain-cli --test activity_validation_tests --test activity_cli_oracle_tests --all-features --locked"
+  ],
+  "initial_unreaped_lib_attempt": {
+    "passed": 116,
+    "failed": 1,
+    "test": "doctor_cli::doctor_process::tests::retained_descendant_pipes_cannot_extend_timeout",
+    "explanation": "The initial broader lib test invocation omitted this environment's subreaper. The exact failed log is retained; the unchanged source passes all 117 lib tests with the required lifecycle wrapper."
+  },
+  "previous_333_test_receipt_scope": "Earlier source 2c9a420 only; not a fresh full-suite claim for these corrections.",
+  "native_three_os_acceptance": "pending",
+  "full_758_cutover": "pending",
+  "operator_home_used": false,
+  "evidence_file_sha256": {
+    "linux-exact-gate-logs.json": "172d2e40f9d11dc24ea9b732a4c2861ee38305031a48e2e02131064ef5365e1c",
+    "linux-source-bound-activity-process.json": "394c3f584f2aba25cdf5ec0dd563c2708fa7ec5b539aaf5eb7f929d91a9db1a1",
+    "linux-source-bound-controls.json": "dc039a42c1c3598bc3a0c8d45b239d63301eee2467904f141095414a3b487a29",
+    "linux-source-bound-process.json": "5b6da2c79b191331aa953b2e2398ffdc7ad9d60b7f6f7efc46ee960cbeaf875e"
+  }
+}

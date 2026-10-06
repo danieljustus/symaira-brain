@@ -1,0 +1,11 @@
+test_binary_streams_and_missing_streams_remain_distinct (test_progress.ProgressTests.test_binary_streams_and_missing_streams_remain_distinct) ... ok
+test_failure_retains_completed_pair_and_actual_exception (test_progress.ProgressTests.test_failure_retains_completed_pair_and_actual_exception) ... ok
+test_finish_retains_exact_comparison_exit_without_promoting_failure (test_progress.ProgressTests.test_finish_retains_exact_comparison_exit_without_promoting_failure) ... ok
+test_initial_real_write_and_atomic_replacement (test_progress.ProgressTests.test_initial_real_write_and_atomic_replacement) ... ok
+test_owned_failure_capture_preserves_full_binary_and_hash (test_progress.ProgressTests.test_owned_failure_capture_preserves_full_binary_and_hash) ... ok
+test_replace_failure_keeps_prior_document_and_removes_temporary (test_progress.ProgressTests.test_replace_failure_keeps_prior_document_and_removes_temporary) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.004s
+
+OK

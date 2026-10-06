@@ -1,0 +1,13 @@
+{
+  "time": "2026-10-03T23:34:51.990402+00:00",
+  "outer_sequence_pid": 2115284,
+  "action": "SIGSTOP outer sequencing bash only; already running Source107/control runner allowed to finish unchanged; no next build/replay can start until SIGCONT after root release",
+  "quiet_confirmed_at": "2026-10-03T23:36:24.651906+00:00",
+  "ongoing_gate_at_stop": "Doctor282 +three controls (Source completed immediately before stop)",
+  "source_pairs": 107,
+  "doctor_pairs": 282,
+  "controls": 5,
+  "target_users": [],
+  "root_release_at": "2026-10-03T23:38:25.915622+00:00",
+  "resume_action": "SIGCONT same outer shell; existing proof remains unchanged"
+}

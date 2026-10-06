@@ -1,0 +1,491 @@
+{
+  "source": "a66b4818f74943812315509a3ba2545b2b6b2ea1",
+  "publication": "34394496b44d0f95581080885d89d4ed5f43bbd5",
+  "original_files": {
+    "symaira-doctor-source-independent-third-actionlint.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-actionlint.log",
+      "retained": "symaira-doctor-source-independent-third-actionlint.log.json",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-baseline-consumers-setup.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-baseline-consumers-setup.json",
+      "retained": "symaira-doctor-source-independent-third-baseline-consumers-setup.json",
+      "sha256": "a342965941b015fbb954bf7f46822216ea8ec783aa73c1338cfae88ab967644b",
+      "bytes": 80543,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-baseline-consumers.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-baseline-consumers.log",
+      "retained": "symaira-doctor-source-independent-third-baseline-consumers.log.json",
+      "sha256": "7684f0389c547189ea7734d24be69e91b25add5c1ea12ccb230b5113a8e6a30f",
+      "bytes": 13919,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-baseline-consumers.py": {
+      "original": "/tmp/symaira-doctor-source-independent-third-baseline-consumers.py",
+      "retained": "symaira-doctor-source-independent-third-baseline-consumers.py",
+      "sha256": "4e1793d57ba50bd9f7f43660584ce68d6ec3867ae3441dccb4dceee0e8843e20",
+      "bytes": 1659,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-boundaries.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-boundaries.json",
+      "retained": "symaira-doctor-source-independent-third-boundaries.json",
+      "sha256": "238c0c1dc827d33379044df268acd2f3654df1efc9e573465c12b001ce34f605",
+      "bytes": 105147,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-boundaries.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-boundaries.log",
+      "retained": "symaira-doctor-source-independent-third-boundaries.log.json",
+      "sha256": "4959c845f18e7c4825f4b89e952c866f811bbff9919f8e85c75cf69cb9bce3e6",
+      "bytes": 143,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-boundaries.py": {
+      "original": "/tmp/symaira-doctor-source-independent-third-boundaries.py",
+      "retained": "symaira-doctor-source-independent-third-boundaries.py",
+      "sha256": "519596fb437095ec4d87d0f850e73f818e0a301a7a8ad51d2fdf2fe9f69187a3",
+      "bytes": 2787,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-build.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-build.log",
+      "retained": "symaira-doctor-source-independent-third-build.log.json",
+      "sha256": "1094a36867300c1838cdc4ee40efe961d83bac574665f8ee57a40d5b1e88698c",
+      "bytes": 60,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-clippy.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-clippy.log",
+      "retained": "symaira-doctor-source-independent-third-clippy.log.json",
+      "sha256": "40108eb5c2e432741fc7f36afdf5c793ec02b19e7b1ce5e51bdd2ba377bd26cb",
+      "bytes": 60,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-consumers-continuation.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-consumers-continuation.json",
+      "retained": "symaira-doctor-source-independent-third-consumers-continuation.json",
+      "sha256": "dcdc49ac98cfe5a1cba3a5e07b744ae104f71d50b61f6dd657da70703f1cda19",
+      "bytes": 582,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-consumers-continue.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-consumers-continue.log",
+      "retained": "symaira-doctor-source-independent-third-consumers-continue.log.json",
+      "sha256": "3c3e7ae303a11765c4e79d760670fbd5caf97197d9587b63835a737d374e876f",
+      "bytes": 322,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-consumers-continue.py": {
+      "original": "/tmp/symaira-doctor-source-independent-third-consumers-continue.py",
+      "retained": "symaira-doctor-source-independent-third-consumers-continue.py",
+      "sha256": "4ac9934642fba53bb73d280fc1d2c254c0f78ce8b9e049e2a241a474f4bb1ff4",
+      "bytes": 4852,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-consumers-doctor.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-consumers-doctor.json",
+      "retained": "symaira-doctor-source-independent-third-consumers-doctor.json",
+      "sha256": "47c22405bcd0e29973bae8574b45aa7cf14dd9d69f02554c8fe55603a00d2201",
+      "bytes": 64462,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-consumers-setup.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-consumers-setup.json",
+      "retained": "symaira-doctor-source-independent-third-consumers-setup.json",
+      "sha256": "8f1ff821d7dd0f7c6cdc8599760ed256664c0ccc42d422db1a470d3cb49effc4",
+      "bytes": 84935,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-consumers-source.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-consumers-source.json",
+      "retained": "symaira-doctor-source-independent-third-consumers-source.json",
+      "sha256": "32ce4acdf5eaa3fe3b5d19c8119d7db9d90e58c3e5fd7e0c382297e46f307c48",
+      "bytes": 54836,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-consumers.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-consumers.log",
+      "retained": "symaira-doctor-source-independent-third-consumers.log.json",
+      "sha256": "75d47eedaabea5116b2b98877d7f8bd6aeded771f553e89d847d1668e71fd793",
+      "bytes": 10493,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-consumers.py": {
+      "original": "/tmp/symaira-doctor-source-independent-third-consumers.py",
+      "retained": "symaira-doctor-source-independent-third-consumers.py",
+      "sha256": "e37db24e799b43c69cbbc534994b8e30f1f81596814764a20be5b86d5cc6a79c",
+      "bytes": 5928,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-doctor.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-doctor.json",
+      "retained": "symaira-doctor-source-independent-third-doctor.json",
+      "sha256": "5b7d8adf188acc8ecc616b45500277d7ff528f06019a7c3e7885f20f6e66bb51",
+      "bytes": 5500175,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-doctor.json.missing-core-event.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-doctor.json.missing-core-event.json",
+      "retained": "symaira-doctor-source-independent-third-doctor.json.missing-core-event.json",
+      "sha256": "8393bdf11e3cca65e5400052b8fd1340d45ac0efa57568206bab12c81f2829d9",
+      "bytes": 37354,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-doctor.json.missing-header.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-doctor.json.missing-header.json",
+      "retained": "symaira-doctor-source-independent-third-doctor.json.missing-header.json",
+      "sha256": "7abc080707bf5dc679914240f869a1538372c55dfecda6c79e237882c9498a10",
+      "bytes": 37536,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-doctor.json.wrong-exit.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-doctor.json.wrong-exit.json",
+      "retained": "symaira-doctor-source-independent-third-doctor.json.wrong-exit.json",
+      "sha256": "6e8ec3fab531dda3e4f7a881e5ef9e04b6e43326f17d5a0bb42145f77f44a1b4",
+      "bytes": 37581,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-doctor.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-doctor.log",
+      "retained": "symaira-doctor-source-independent-third-doctor.log.json",
+      "sha256": "4d83b7cf1d78f7b66d3a972481063932aadeeac819671fd96651eda17465e57a",
+      "bytes": 295,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-escaping-inputs.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-escaping-inputs.json",
+      "retained": "symaira-doctor-source-independent-third-escaping-inputs.json",
+      "sha256": "7207e83c24c143cb9bc3545ae76c6753879f69aab414bf6bc5afe7bcbead05c3",
+      "bytes": 855,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-extra.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-extra.json",
+      "retained": "symaira-doctor-source-independent-third-extra.json",
+      "sha256": "9ea1e9a873241d3460b1151c413d823c29840e3a33da31718731c4f6f2cffe92",
+      "bytes": 101725,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-extra.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-extra.log",
+      "retained": "symaira-doctor-source-independent-third-extra.log.json",
+      "sha256": "68a857023756e6395539ed3c2e9bcd90ccfd2ab57b278ddbdd93dba5bd3477e2",
+      "bytes": 197,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-extra.py": {
+      "original": "/tmp/symaira-doctor-source-independent-third-extra.py",
+      "retained": "symaira-doctor-source-independent-third-extra.py",
+      "sha256": "28606c859ffe21f41da591fe53e14bfa23a9727a7dc6a81a628ce3ef0bc8e17f",
+      "bytes": 3184,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-fetch-hold.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-fetch-hold.json",
+      "retained": "symaira-doctor-source-independent-third-fetch-hold.json",
+      "sha256": "177e21b66324ad5ad41b216476ea13c2f836db06da7b3c5621bd34d5af97401d",
+      "bytes": 648,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-fix-consumers-setup.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-fix-consumers-setup.json",
+      "retained": "symaira-doctor-source-independent-third-fix-consumers-setup.json",
+      "sha256": "05b145d0f83d2dd64a54033747511a1772b575399b47f1d1f46a130814b083ff",
+      "bytes": 84767,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-fix-consumers.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-fix-consumers.log",
+      "retained": "symaira-doctor-source-independent-third-fix-consumers.log.json",
+      "sha256": "a37bbed9d31f83b18bcf1c1124253514916eef2e5397ad7989f2b06543b255cf",
+      "bytes": 10303,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-fix-consumers.py": {
+      "original": "/tmp/symaira-doctor-source-independent-third-fix-consumers.py",
+      "retained": "symaira-doctor-source-independent-third-fix-consumers.py",
+      "sha256": "5b436cb165b4179e81a15b214c5df193c03b04a5cc1e315a71128a82ecd5bd69",
+      "bytes": 1706,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-fmt.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-fmt.log",
+      "retained": "symaira-doctor-source-independent-third-fmt.log.json",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-home.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-home.json",
+      "retained": "symaira-doctor-source-independent-third-home.json",
+      "sha256": "c6d1da2f7fb59b3fc92bbad6f0f0d8a308acc2abe60bfc6b90c3eb7bc718e183",
+      "bytes": 8950,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-home.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-home.log",
+      "retained": "symaira-doctor-source-independent-third-home.log.json",
+      "sha256": "dce1bcdb4ef76ae6edd74bea035972224be1dbb9779bf5467ca1714bfc192b2a",
+      "bytes": 55,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-home.py": {
+      "original": "/tmp/symaira-doctor-source-independent-third-home.py",
+      "retained": "symaira-doctor-source-independent-third-home.py",
+      "sha256": "9091bb546833561754f986fe2b64f99b2d35cb178fdccaabca1192f4ec3dcd47",
+      "bytes": 1778,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-original-findings.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-original-findings.json",
+      "retained": "symaira-doctor-source-independent-third-original-findings.json",
+      "sha256": "c83fd62fe4866a6dde0ca6759719244180ff27a001f8c8ad73f6565f10751266",
+      "bytes": 173574,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-original-findings.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-original-findings.log",
+      "retained": "symaira-doctor-source-independent-third-original-findings.log.json",
+      "sha256": "453b5f4fe955e3e7fc5b53e28c4baf4918023be616d86b8c22908d27c363335a",
+      "bytes": 312,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-original-findings.py": {
+      "original": "/tmp/symaira-doctor-source-independent-third-original-findings.py",
+      "retained": "symaira-doctor-source-independent-third-original-findings.py",
+      "sha256": "a3bc15be36e84b5164017c2542069b7a70998a98d1514be7fd465dcfd4346dde",
+      "bytes": 3272,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-original-inputs.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-original-inputs.json",
+      "retained": "symaira-doctor-source-independent-third-original-inputs.json",
+      "sha256": "c8ba2e06ed913d1ec733902da7cf4aac5a4e7dac36f68da0a552d2a9cb54155b",
+      "bytes": 2980,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-original-lookup.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-original-lookup.json",
+      "retained": "symaira-doctor-source-independent-third-original-lookup.json",
+      "sha256": "fe3e47674f8ec7cc442293f4ef34bea31fe5506aa7474431f82a32100172bc1a",
+      "bytes": 31126,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-original-lookup.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-original-lookup.log",
+      "retained": "symaira-doctor-source-independent-third-original-lookup.log.json",
+      "sha256": "7e3500bddfde8fcf2baf7b8de43539a9b6536c950372fc23df20420011fa8463",
+      "bytes": 67,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-original-lookup.py": {
+      "original": "/tmp/symaira-doctor-source-independent-third-original-lookup.py",
+      "retained": "symaira-doctor-source-independent-third-original-lookup.py",
+      "sha256": "fa87bb24f660deaa5a926b8c3c81d522b8b3f58fe5fe340e45dd542238174229",
+      "bytes": 2143,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-original-raw-signals.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-original-raw-signals.json",
+      "retained": "symaira-doctor-source-independent-third-original-raw-signals.json",
+      "sha256": "be1751fd5e5301c37f61283c095bcbc90de7b21c62542cf8a2681053a30c5df2",
+      "bytes": 66447,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-original-raw-signals.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-original-raw-signals.log",
+      "retained": "symaira-doctor-source-independent-third-original-raw-signals.log.json",
+      "sha256": "e5194bbb6f8a11456f57e66acde83b8c151fa2c2e3923551a0007c9f2a4eb3f1",
+      "bytes": 220,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-original-raw-signals.py": {
+      "original": "/tmp/symaira-doctor-source-independent-third-original-raw-signals.py",
+      "retained": "symaira-doctor-source-independent-third-original-raw-signals.py",
+      "sha256": "c80ee4c3102c75661d6a04a0054fe775e356cca38e636c253d2aeeaf1952bf2e",
+      "bytes": 4791,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-provenance.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-provenance.json",
+      "retained": "symaira-doctor-source-independent-third-provenance.json",
+      "sha256": "a7cc5cb2752960d94756a39dd0b2aba2c29893350583f40130c113a2aa414b18",
+      "bytes": 1663,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-provenance.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-provenance.log",
+      "retained": "symaira-doctor-source-independent-third-provenance.log.json",
+      "sha256": "a7cc5cb2752960d94756a39dd0b2aba2c29893350583f40130c113a2aa414b18",
+      "bytes": 1663,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-provenance.py": {
+      "original": "/tmp/symaira-doctor-source-independent-third-provenance.py",
+      "retained": "symaira-doctor-source-independent-third-provenance.py",
+      "sha256": "2a07cfb5c0ac2b1b34761482b2eb3cc096950b515df344c99e77c4aae4ff28d6",
+      "bytes": 6066,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-setup.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-setup.json",
+      "retained": "symaira-doctor-source-independent-third-setup.json",
+      "sha256": "0cb64c3a875ee578428d3a2b63cadefce551e0bb7344e1b562ddd5487b93c2d9",
+      "bytes": 1573795,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-setup.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-setup.log",
+      "retained": "symaira-doctor-source-independent-third-setup.log.json",
+      "sha256": "3080d28c96b7f78fc01b25c300b326d1d1dfdc2ca512cc4855c7652ca2d105e5",
+      "bytes": 13373,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-source.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-source.json",
+      "retained": "symaira-doctor-source-independent-third-source.json",
+      "sha256": "e5aa32f430da2d094c824cbbc771ffaa21c99ef2ce7b8df63dcd7925da1fa9e5",
+      "bytes": 1310795,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-source.json.wrong-exit.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-source.json.wrong-exit.json",
+      "retained": "symaira-doctor-source-independent-third-source.json.wrong-exit.json",
+      "sha256": "25bb2f8f557230927cf41dffeaa2490012896a38fcd572e82a9d370451ead687",
+      "bytes": 32471,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-source.json.wrong-source.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-source.json.wrong-source.json",
+      "retained": "symaira-doctor-source-independent-third-source.json.wrong-source.json",
+      "sha256": "fcb5f8f3da043b0becc91cfea36f6cfb77baba0b6100c194a9c1dbd030030991",
+      "bytes": 32467,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-source.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-source.log",
+      "retained": "symaira-doctor-source-independent-third-source.log.json",
+      "sha256": "b10ab0438ca74153fef5b48f7d88771c72be5a9a77fe2ed57229d38f09174aa0",
+      "bytes": 221,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-static.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-static.json",
+      "retained": "symaira-doctor-source-independent-third-static.json",
+      "sha256": "9aaa5847524977377125048276244e6b3b4a515304546dd1e23c121d2c2855d3",
+      "bytes": 1681,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-symlink.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-symlink.json",
+      "retained": "symaira-doctor-source-independent-third-symlink.json",
+      "sha256": "2201cc062579bfb3ec7395907ffd14d5e4e2cce3fd62fafbbc2eaf7c33744700",
+      "bytes": 26287,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-symlink.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-symlink.log",
+      "retained": "symaira-doctor-source-independent-third-symlink.log.json",
+      "sha256": "541244f6874fc75a5f19cdb16931ba416030d9911fe51b879872e3a707cd4044",
+      "bytes": 30,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-symlink.py": {
+      "original": "/tmp/symaira-doctor-source-independent-third-symlink.py",
+      "retained": "symaira-doctor-source-independent-third-symlink.py",
+      "sha256": "78cb82ef1c8b9ab8e5fb8ac658ea8251c326e94ac26595804e3a78b7e2f05d99",
+      "bytes": 2859,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-tests.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-tests.log",
+      "retained": "symaira-doctor-source-independent-third-tests.log.json",
+      "sha256": "aa97d11c384bfd3f88c1e08df061d4a87c9e89d4ba07e31cf401129ec68f191b",
+      "bytes": 37814,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-verify.py": {
+      "original": "/tmp/symaira-doctor-source-independent-third-verify.py",
+      "retained": "symaira-doctor-source-independent-third-verify.py",
+      "sha256": "6bf25f626010f7e1ed2be821ea273cae24e67187c3d65d2056e4a6191ac06cc2",
+      "bytes": 10443,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-whitespace.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-whitespace.log",
+      "retained": "symaira-doctor-source-independent-third-whitespace.log.json",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-windows-lexical.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-windows-lexical.json",
+      "retained": "symaira-doctor-source-independent-third-windows-lexical.json",
+      "sha256": "3817f4a1d8a92381052e49c33275377defc9f292a3cb7eda681a1560649d4937",
+      "bytes": 27373,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-windows-lexical.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-windows-lexical.log",
+      "retained": "symaira-doctor-source-independent-third-windows-lexical.log.json",
+      "sha256": "6c74aba394dd8f70af4f4149b66500b4d42f807e1965406fc4f15f22b65b1f77",
+      "bytes": 8879,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-windows-lexical.py": {
+      "original": "/tmp/symaira-doctor-source-independent-third-windows-lexical.py",
+      "retained": "symaira-doctor-source-independent-third-windows-lexical.py",
+      "sha256": "442f24dd776665b3e661650ff21dd97c7b2c5395e7bf32ecc930e06f467a9acf",
+      "bytes": 5052,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-windows-managed-join.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-windows-managed-join.json",
+      "retained": "symaira-doctor-source-independent-third-windows-managed-join.json",
+      "sha256": "eb9f7ed8684fffe0f23ce45da8a389f3d2232a49dbb692450fce23375652402e",
+      "bytes": 18900,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-windows-managed-join.log": {
+      "original": "/tmp/symaira-doctor-source-independent-third-windows-managed-join.log",
+      "retained": "symaira-doctor-source-independent-third-windows-managed-join.log.json",
+      "sha256": "c7e8e23551687e450732ca74b9e7074bb236d5060e39dbbb71050cd3438315ff",
+      "bytes": 742,
+      "encoding": "base64"
+    },
+    "symaira-doctor-source-independent-third-windows-managed-join.py": {
+      "original": "/tmp/symaira-doctor-source-independent-third-windows-managed-join.py",
+      "retained": "symaira-doctor-source-independent-third-windows-managed-join.py",
+      "sha256": "6763134124dd0c395c31c721c457f27efae6c679222708504e26e6764a132f99",
+      "bytes": 5588,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-review-receipt.json": {
+      "original": "/tmp/symaira-doctor-source-independent-third-review-receipt.json",
+      "retained": "symaira-doctor-source-independent-third-review-receipt.json",
+      "sha256": "bb49f169174b7fd40de15b487ce769b5be52e46189aea734d934ebc11e178a3e",
+      "bytes": 28583,
+      "encoding": "literal"
+    },
+    "symaira-doctor-source-independent-third-review.md": {
+      "original": "/tmp/symaira-doctor-source-independent-third-review.md",
+      "retained": "symaira-doctor-source-independent-third-review.md",
+      "sha256": "af3367538c467be61ff1a13146c7973619370a31d398a9f1ecf0d42aeec881a6",
+      "bytes": 9948,
+      "encoding": "literal"
+    }
+  },
+  "original_count": 66,
+  "original_extra_actual_pairs": 23,
+  "actual_windows_managed_join_admitted": 189678,
+  "actual_current_executables": 38,
+  "previous_raw_maps": {
+    "second46": true,
+    "first35": true,
+    "source86_24": true
+  }
+}

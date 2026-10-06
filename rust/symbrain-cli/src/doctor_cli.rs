@@ -1,9 +1,16 @@
 use std::ffi::OsString;
 use std::io::Write;
 
-use symbrain_core::{exit, output::OutputFormat};
+use symbrain_core::{
+    config::{format_go_quoted_bytes, os_bytes},
+    exit,
+    output::OutputFormat,
+};
 
 const DOCTOR_USAGE: &str = "Usage of doctor:\n  -fix\n    \trepair missing or version-mismatched managed binaries\n  -force-release\n    \twith --fix: allow replacing a brain-source build with the pinned release download\n  -json\n    \temit machine-readable JSON\n  -vault-agent string\n    \tvault agent name for MCP handshake probe (default \"claude-code\")\n";
+
+#[path = "doctor_output.rs"]
+mod doctor_output;
 
 #[path = "doctor_render.rs"]
 mod doctor_render;
@@ -21,13 +28,12 @@ pub(crate) mod doctor_process;
 #[path = "doctor_types.rs"]
 mod doctor_types;
 
-/// Whether this invocation requires Go lifecycle handling.
-///
-/// The Rust doctor implementation intentionally does not manage source-build
-/// provenance. Keep enabled `--fix` and `--force-release` in Go, where the
-/// managed installer owns that behavior.
+/// Config-load diagnostics remain Go-owned until the typed loader is ported.
 pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     parse_args(args, &mut Vec::new()).is_ok_and(|parsed| parsed.fix)
+        && doctor_fix::managed_bin_dir().is_some()
+        && (!crate::vault_config::valid_configuration()
+            || crate::setup_cli::enabled_cores().is_err())
 }
 
 pub fn run(
@@ -36,12 +42,27 @@ pub fn run(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> u8 {
+    run_with_stdout(args, stdout, stderr, format, false)
+}
+
+pub(crate) fn run_with_stdout(
+    args: &[OsString],
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write,
+    format: OutputFormat,
+    process_stdout: bool,
+) -> u8 {
+    let mut output = crate::stdio_output::Output::new(stdout, process_stdout);
     let parsed = match parse_args(args, stderr) {
         Ok(parsed) => parsed,
         Err(code) => return code,
     };
     if parsed.fix {
-        return doctor_fix::run_fix(stdout, stderr);
+        return doctor_fix::run_fix(
+            parsed.force_release,
+            &mut doctor_output::GoWriter::new(&mut output),
+            stderr,
+        );
     }
     let report = doctor_checks::run_checks(&parsed.vault_agent);
     let format = if parsed.json {
@@ -49,21 +70,33 @@ pub fn run(
     } else {
         format
     };
-    let result = match format {
-        OutputFormat::Json => writeln!(stdout, "{}", crate::go_json(&report)),
-        OutputFormat::Table => doctor_render::human(stdout, &report),
-    };
-    if result.is_err() {
-        let _ = writeln!(stderr, "symbrain doctor: format output");
-        exit::GENERIC
-    } else {
-        exit::OK
+    match format {
+        OutputFormat::Json => {
+            // json.Encoder submits the complete document and newline together.
+            let document = format!("{}\n", crate::go_json(&report));
+            if let Err(error) = output.write_all(document.as_bytes()) {
+                let _ = writeln!(
+                    stderr,
+                    "symbrain doctor: {}",
+                    crate::stdio_output::io_cause(&error)
+                );
+                return exit::GENERIC;
+            }
+        }
+        OutputFormat::Table => {
+            // Go ignores individual fmt failures and continues the next line.
+            // The outer Output still handles a real process-stdout EPIPE at
+            // the failing write, before this writer can ignore it.
+            let _ = doctor_render::human(&mut doctor_output::GoWriter::new(&mut output), &report);
+        }
     }
+    exit::OK
 }
 
 #[derive(Default)]
 struct DoctorArgs {
     fix: bool,
+    force_release: bool,
     json: bool,
     vault_agent: String,
 }
@@ -76,28 +109,37 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<DoctorArgs, u
     let normalized = crate::normalize_flags(args);
     let mut i = 0;
     while i < normalized.len() {
-        let arg = normalized[i].to_string_lossy();
-        if arg == "--" {
+        let arg = os_bytes(&normalized[i]);
+        if arg.as_ref() == b"--" {
             break;
         }
-        if !arg.starts_with('-') || arg == "-" {
+        if !arg.starts_with(b"-") || arg.as_ref() == b"-" {
             break;
         }
-        let flag = arg.trim_start_matches('-');
+        let flag = arg.strip_prefix(b"--").unwrap_or(&arg[1..]);
         let (name, inline) = flag
-            .split_once('=')
-            .map_or((flag, None), |(n, v)| (n, Some(v)));
+            .iter()
+            .position(|byte| *byte == b'=')
+            .map_or((flag, None), |at| (&flag[..at], Some(&flag[at + 1..])));
+        if name.is_empty() || name.starts_with(b"-") || name.starts_with(b"=") {
+            let _ = stderr.write_all(b"bad flag syntax: ");
+            let _ = stderr.write_all(&arg);
+            let _ = write!(stderr, "\n{DOCTOR_USAGE}");
+            return Err(exit::USAGE);
+        }
         match name {
-            "json" => parsed.json = parse_bool_flag(name, inline, stderr)?,
-            "force-release" => {
-                parse_bool_flag(name, inline, stderr)?;
+            b"json" => parsed.json = parse_bool_flag(name, inline, stderr)?,
+            b"force-release" => {
+                parsed.force_release = parse_bool_flag(name, inline, stderr)?;
             }
-            "fix" => parsed.fix = parse_bool_flag(name, inline, stderr)?,
-            "vault-agent" => {
-                let value = inline.map(str::to_owned).or_else(|| {
-                    i += 1;
-                    normalized.get(i).map(|v| v.to_string_lossy().into_owned())
-                });
+            b"fix" => parsed.fix = parse_bool_flag(name, inline, stderr)?,
+            b"vault-agent" => {
+                let value = inline
+                    .map(|bytes| String::from_utf8_lossy(bytes).into_owned())
+                    .or_else(|| {
+                        i += 1;
+                        normalized.get(i).map(|v| v.to_string_lossy().into_owned())
+                    });
                 let Some(value) = value else {
                     // Go's flag package prints the parse error and then the
                     // whole flag set usage for a missing value argument.
@@ -107,12 +149,14 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<DoctorArgs, u
                 };
                 parsed.vault_agent = value;
             }
-            "h" | "help" => {
+            b"h" | b"help" => {
                 let _ = write!(stderr, "{DOCTOR_USAGE}");
                 return Err(exit::USAGE);
             }
             _ => {
-                let _ = writeln!(stderr, "flag provided but not defined: -{name}");
+                let _ = stderr.write_all(b"flag provided but not defined: -");
+                let _ = stderr.write_all(name);
+                let _ = stderr.write_all(b"\n");
                 let _ = write!(stderr, "{DOCTOR_USAGE}");
                 return Err(exit::USAGE);
             }
@@ -122,16 +166,18 @@ fn parse_args(args: &[OsString], stderr: &mut dyn Write) -> Result<DoctorArgs, u
     Ok(parsed)
 }
 
-fn parse_bool_flag(name: &str, value: Option<&str>, stderr: &mut dyn Write) -> Result<bool, u8> {
+fn parse_bool_flag(name: &[u8], value: Option<&[u8]>, stderr: &mut dyn Write) -> Result<bool, u8> {
     let Some(value) = value else { return Ok(true) };
-    crate::setup_cli::parse_go_bool(value).map_err(|()| {
-        let _ = writeln!(
-            stderr,
-            "invalid boolean value {value:?} for -{name}: parse error"
-        );
-        let _ = write!(stderr, "{DOCTOR_USAGE}");
-        exit::USAGE
-    })
+    std::str::from_utf8(value)
+        .ok()
+        .and_then(|text| crate::setup_cli::parse_go_bool(text).ok())
+        .ok_or_else(|| {
+            let quoted = format_go_quoted_bytes(value);
+            let _ = write!(stderr, "invalid boolean value {quoted} for -");
+            let _ = stderr.write_all(name);
+            let _ = write!(stderr, ": parse error\n{DOCTOR_USAGE}");
+            exit::USAGE
+        })
 }
 
 #[cfg(test)]
@@ -240,17 +286,17 @@ args = ["mcp", "--profile", "default"]
     }
 
     #[test]
-    fn only_enabled_lifecycle_flags_require_go() {
+    fn valid_configuration_allows_native_repair_flag_forms() {
         let args = |rest: &[&str]| -> Vec<OsString> { rest.iter().map(OsString::from).collect() };
         assert!(!requires_go_fallback(&args(&["--vault-agent", "agent"])));
         assert!(!requires_go_fallback(&args(&["--vault-agent=agent"])));
         assert!(!requires_go_fallback(&args(&["--json"])));
         assert!(!requires_go_fallback(&args(&["--force-release"])));
         assert!(!requires_go_fallback(&args(&["--force-release=true"])));
-        assert!(requires_go_fallback(&args(&["--fix"])));
-        assert!(requires_go_fallback(&args(&["--fix=TRUE"])));
+        assert!(!requires_go_fallback(&args(&["--fix"])));
+        assert!(!requires_go_fallback(&args(&["--fix=TRUE"])));
         assert!(!requires_go_fallback(&args(&["--fix=0"])));
-        assert!(requires_go_fallback(&args(&["--force-release", "--fix"])));
+        assert!(!requires_go_fallback(&args(&["--force-release", "--fix"])));
         assert!(!requires_go_fallback(&args(&[
             "--fix=false",
             "--force-release=false"
@@ -259,7 +305,7 @@ args = ["mcp", "--profile", "default"]
     }
 
     #[test]
-    fn help_lists_the_go_owned_force_release_flag() {
+    fn help_lists_the_force_release_flag() {
         let mut stdout = Vec::new();
         let mut stderr = Vec::new();
         let code = run(

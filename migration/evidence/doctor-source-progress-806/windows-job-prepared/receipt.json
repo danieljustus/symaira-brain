@@ -1,0 +1,69 @@
+{
+  "scope": "Source-only Windows diagnostic preparation; no production acceptance",
+  "base": "8359c0bda1b7a0bfc14d2b8e69e1479fec9d182f",
+  "actual_original_source_maps_verified": 10,
+  "original_windows_full_maps": 16,
+  "root_import_full_maps": 19,
+  "replay_unchanged_ASTs": 8,
+  "compiler_artifact_selector_only": [
+    {
+      "case": "exact",
+      "accepted": true
+    },
+    {
+      "case": "duplicate",
+      "accepted": false
+    },
+    {
+      "case": "wrong-source",
+      "accepted": false
+    },
+    {
+      "case": "no-executable",
+      "accepted": false
+    }
+  ],
+  "checks": [
+    {
+      "check": "rustfmt",
+      "exit": 0,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "check": "bash",
+      "exit": 0,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "check": "actionlint",
+      "exit": 0,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    },
+    {
+      "check": "diff-check",
+      "exit": 0,
+      "stdout_hex": "",
+      "stderr_hex": ""
+    }
+  ],
+  "source_sha256": {
+    ".github/workflows/ci.yml": "8df913a557a88e3a66a599895aef3d4f507f825f466dc67b3e77f2b7513848e5",
+    "scripts/setup-source-oracle/windows_job_run.sh": "a1b4aa8b105270e671d53a2b581946d4b7f3ad1e7d00ffc57d15458b494e4b50",
+    "scripts/setup-source-oracle/windows_job_probe.py": "ed55b88583c88a0ffa9843d681bcf70d1b808baa87e563664096a697ee46833f",
+    "rust/symbrain-cli/tests/source_job_notifications.rs": "26b271aea333337d39dcaa47ef37846e1df13013816f9b2bff5246824075d990",
+    "scripts/setup-source-oracle/replay.py": "b3263f2f30769623c35ba1bca2d4e66a38a23807ab4af22638027e84a901115b",
+    "rust/symbrain-cli/src/setup_source_process.rs": "86699b00d9858f75bfb5b41c6c6c7424287b95661d4275afc55541acaabc2967",
+    "Cargo.lock": "b3dfc50eeffd441de466592bbf204840b65d16940f8639dacad56a7f1153594f",
+    "docs/adr/doctor-source-timeout-observability-806.md": "384cfe097c672545f754c59300d887f38d4c3012a5c998cffbdd284b0944bcfe"
+  },
+  "compiler_runs": 0,
+  "product_provider_runs": 0,
+  "ports": 0,
+  "native_windows_runs": 0,
+  "original_source_timeout_seconds": 25,
+  "diagnostic_watchdog_seconds": 12,
+  "limitations": "Actual Windows job diagnostics pending. Original polling-versus-cleanup cause remains unproved; no PE payloads in downloaded original artifact."
+}
