@@ -40,6 +40,9 @@ run_stage() {
   if "$@" >"$evidence_dir/$label.log" 2>&1; then tail -n 12 "$evidence_dir/$label.log"; else local code=$?; tail -n 100 "$evidence_dir/$label.log" >&2; return "$code"; fi
 }
 cd "$repo_root"
+# Pinned baseline generator bytes stay unchanged; force UTF-8 text I/O for it
+# (and every Python child) at the caller instead of editing the pinned script.
+export PYTHONUTF8=1
 python3 scripts/usage-copilot-kimi-oracle/cases.py "$scratch/input.json"
 python3 scripts/usage-local-files-baseline/cases.py "$scratch/baseline-input.json"
 mkdir -p "$scratch/home"
