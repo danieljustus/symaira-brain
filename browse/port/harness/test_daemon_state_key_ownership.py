@@ -21,7 +21,7 @@ class Function:
             return self.api.query_result
         if self.name == "WaitForSingleObject":
             self.api.error = 222  # Must not replace the image-query error.
-            return 0
+            return self.api.wait_status
         if self.name == "CloseHandle":
             self.api.error = 6
             return self.api.close_result
@@ -38,7 +38,7 @@ class Tests(unittest.TestCase):
                                       (1, "/foreign/symvault.exe", 1),
                                       (1, "/owned/symvault.exe", 1)]:
             with self.subTest(queried=queried, image=image, closed=closed):
-                api = SimpleNamespace(handle=0x100000005, error=31, calls=[],
+                api = SimpleNamespace(handle=0x100000005, error=5, calls=[], wait_status=258,
                                       query_result=queried, image=image, close_result=closed)
                 for name in ("OpenProcess", "QueryFullProcessImageNameW", "WaitForSingleObject",
                              "TerminateProcess", "CloseHandle"):
@@ -53,6 +53,7 @@ class Tests(unittest.TestCase):
                     owner.__init__(123, Path(image))
                     self.assertEqual(owner.handle, api.handle)
                     self.assertFalse(any(name == "CloseHandle" for name, _ in api.calls))
+                    api.wait_status = 0  # Confirmed provider has exited.
                     api.close_result = 0
                     with self.assertRaises(AssertionError) as failure:
                         owner.cleanup()
@@ -77,8 +78,8 @@ class Tests(unittest.TestCase):
                         self.assertIsNone(owner.handle)
                     if not queried:
                         self.assertEqual(error.args[0], {"api": "QueryFullProcessImageNameW",
-                            "pid": 123, "handle": api.handle, "result": 0, "winerror": 31,
-                            "wait_status": 0, "expected_executable": str(Path("/owned/symvault.exe"))})
+                            "pid": 123, "handle": api.handle, "result": 0, "winerror": 5,
+                            "wait_status": 258, "expected_executable": str(Path("/owned/symvault.exe"))})
                     self.assertEqual(api.calls[-1], ("CloseHandle", api.handle))
                 self.assertFalse(any(name == "TerminateProcess" for name, _ in api.calls))
                 from ctypes import wintypes
@@ -86,6 +87,27 @@ class Tests(unittest.TestCase):
                 self.assertIs(api.WaitForSingleObject.restype, wintypes.DWORD)
                 for name in ("QueryFullProcessImageNameW", "TerminateProcess", "CloseHandle"):
                     self.assertIs(getattr(api, name).restype, wintypes.BOOL)
+
+        with self.subTest(exited_before_image_query=True):
+            # An unreadable image whose process then exits is a dead lease:
+            # retained handle, never terminated, closed exactly once.
+            api = SimpleNamespace(handle=0x100000005, error=31, calls=[], wait_status=0,
+                                  query_result=0, image="", close_result=1)
+            for name in ("OpenProcess", "QueryFullProcessImageNameW", "WaitForSingleObject",
+                         "TerminateProcess", "CloseHandle"):
+                setattr(api, name, Function(name, api))
+            shim = SimpleNamespace(WinDLL=lambda *args, **kwargs: api,
+                get_last_error=lambda: api.error, POINTER=ctypes.POINTER,
+                create_unicode_buffer=ctypes.create_unicode_buffer, byref=ctypes.byref)
+            namespace = {"ctypes": shim, "os": SimpleNamespace(name="nt"), "Path": Path}
+            exec(compile(ast.Module(body=[lease], type_ignores=[]), str(source), "exec"), namespace)
+            owner = namespace["Lease"](123, Path("/owned/symvault.exe"))
+            self.assertEqual(owner.handle, api.handle)
+            self.assertFalse(owner.alive())
+            owner.cleanup()
+            self.assertIsNone(owner.handle)
+            self.assertEqual([name for name, _ in api.calls].count("CloseHandle"), 1)
+            self.assertFalse(any(name == "TerminateProcess" for name, _ in api.calls))
 
         for image in ("/owned/symvault", "/foreign/symvault"):
             with self.subTest(pidfd_image=image):

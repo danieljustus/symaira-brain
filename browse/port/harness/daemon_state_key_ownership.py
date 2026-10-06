@@ -49,7 +49,12 @@ class Lease:
                 result = self.api.QueryFullProcessImageNameW(self.handle, 0, name, ctypes.byref(size))
                 if not result:
                     error = ctypes.get_last_error()
-                    status = self.api.WaitForSingleObject(self.handle, 0)
+                    # A provider in exit rundown fails the image query (seen as
+                    # winerror 5 while still running, 31 once signaled). Bounded
+                    # wait: if it exits it is a dead lease, like the pidfd path;
+                    # alive() is then False so cleanup never terminates it.
+                    status = self.api.WaitForSingleObject(self.handle, 2000)
+                    if status == 0: return
                     raise AssertionError({"api": "QueryFullProcessImageNameW", "pid": pid,
                                           "handle": self.handle, "result": result,
                                           "winerror": error, "wait_status": status,

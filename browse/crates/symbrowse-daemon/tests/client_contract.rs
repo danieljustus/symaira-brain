@@ -266,6 +266,8 @@ fn client_status_fixture(
         while Instant::now() < deadline {
             match listener.accept() {
                 Ok((stream, _)) => {
+                    // BSD/macOS accepted sockets inherit the listener's O_NONBLOCK.
+                    stream.set_nonblocking(false).unwrap();
                     let mut reader = BufReader::new(stream);
                     let mut line = String::new();
                     reader.read_line(&mut line).unwrap();
