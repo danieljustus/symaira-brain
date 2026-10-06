@@ -15,6 +15,7 @@ import subprocess
 import tempfile
 import time
 import daemon_state_key as key
+from registry_daemon_lifetime import WindowsJob
 import startup_key_paths
 
 ROOT = key.ROOT
@@ -169,12 +170,18 @@ def observe(binary: Path, provider: Path, mode: str, trigger: str) -> dict:
         if trigger == "client-deadline": command = [str(binary), "state", "list", "--session", session, "--json"]
         elif trigger == "daemon-signal": command = [str(binary), "daemon", "--session", session, "--json"]
         else: command = [str(binary), INTERNAL, str(executable), "100" if trigger == "helper-deadline" else "15000", "get", "symbrowse/encryption-key"]
+        # The startup-key helper outlives its provider briefly (it reports after
+        # cancelling it) and holds this cwd; on Windows the root is removable
+        # only once the whole owned tree (daemon, helper, provider) has exited.
+        job = WindowsJob() if os.name == "nt" else None
         child = subprocess.Popen(command, cwd=root, env=env, stdin=subprocess.PIPE,
                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                                 start_new_session=(os.name == "posix"))
+                                 start_new_session=(os.name == "posix"),
+                                 creationflags=0 if job is None else job.SUSPENDED)
         leases = []; unrelated = None; held_writer_alive = []
         begin = time.monotonic()
         try:
+            if job is not None: job.adopt(child)
             rows = queries(ledger, count)
             for row in rows:
                 try:
@@ -231,6 +238,7 @@ def observe(binary: Path, provider: Path, mode: str, trigger: str) -> dict:
             key.registry.harness.kill_tree(child)
             if unrelated is not None: key.registry.harness.kill_tree(unrelated)
             for lease in leases: lease.cleanup()
+            if job is not None: job.finish()  # Bounded; fails if anything outlives.
 
 
 def unavailable(binary: Path) -> dict:

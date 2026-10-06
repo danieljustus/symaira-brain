@@ -13,6 +13,7 @@ import time
 import daemon_state_key as key
 from daemon_state_key_ownership import Lease
 from registry_cli_process import capture
+from registry_daemon_lifetime import WindowsJob
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
@@ -149,10 +150,12 @@ def observe(binary: Path, actual_binary: Path, provider: Path, case: str, *, evi
         endpoint = key.registry.harness.daemon_socket_path(Path(env["XDG_RUNTIME_DIR"]), session)
         command = [str(binary), "state", "list", "--session", session, "--json"]
         result = None; run_error = cleanup_error = None; cleanup = None
+        # Owns the autostarted daemon tree (cwd = root) beyond its PID lease.
+        job = WindowsJob() if os.name == "nt" else None
         try:
             # File-backed and bounded: on Windows, subprocess.run's post-timeout
             # communicate() is unbounded while any descendant holds its pipes.
-            result = capture(binary, root, env, command[1:])
+            result = capture(binary, root, env, command[1:], job=job)
         except Exception as error:
             run_error = error
         finally:
@@ -160,6 +163,10 @@ def observe(binary: Path, actual_binary: Path, provider: Path, case: str, *, evi
                 cleanup = stop_owned(endpoint, session, actual_binary)
             except Exception as error:
                 cleanup_error = error
+            try:
+                if job is not None: job.finish()
+            except Exception as error:
+                cleanup_error = cleanup_error or error
         # Capture process failures and cleanup failures before reading/parsing
         # provider output or asserting parity. The owned root is still present.
         evidence.append({"phase": "cli.completed", "case": case, "control": control,

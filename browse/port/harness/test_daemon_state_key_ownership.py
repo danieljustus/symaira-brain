@@ -182,5 +182,22 @@ class Tests(unittest.TestCase):
                         owner.alive()
 
 
+    def test_windows_job_owns_whole_tree_until_root_teardown(self):
+        # The startup-key helper exits just after its provider; only a job
+        # drained before TemporaryDirectory exit proves the cwd is released.
+        source = Path(__file__).with_name("daemon_state_key_ownership.py")
+        observe = next(node for node in ast.parse(source.read_bytes()).body
+                       if isinstance(node, ast.FunctionDef) and node.name == "observe")
+        popen = next(node for node in ast.walk(observe) if isinstance(node, ast.Call)
+                     and ast.unparse(node.func) == "subprocess.Popen")
+        flags = next(k.value for k in popen.keywords if k.arg == "creationflags")
+        self.assertEqual(ast.unparse(flags), "0 if job is None else job.SUSPENDED")
+        guarded = next(node for node in ast.walk(observe) if isinstance(node, ast.Try)
+                       and any("kill_tree(child)" in ast.unparse(n) for n in node.finalbody))
+        self.assertEqual(ast.unparse(guarded.body[0]), "if job is not None:\n    job.adopt(child)")
+        self.assertIn("lease.cleanup()", ast.unparse(guarded.finalbody[-2]))
+        self.assertEqual(ast.unparse(guarded.finalbody[-1]), "if job is not None:\n    job.finish()")
+
+
 if __name__ == "__main__":
     unittest.main()
