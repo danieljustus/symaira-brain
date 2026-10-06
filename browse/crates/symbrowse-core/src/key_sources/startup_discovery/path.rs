@@ -272,7 +272,10 @@ mod tests {
                 r"\\.\UNC\host\share\..\bin",
                 r"\\.\UNC\host\share\bin\symvault",
             ),
-            (r"a\..\c:", r".\c:\symvault"),
+            // Go Join never cleans elements first: `a\..\c:` ends in ':' so no
+            // separator is added, Clean gives `c:symvault`, and postClean
+            // prefixes `.\` because ':' precedes the first separator.
+            (r"a\..\c:", r".\c:symvault"),
             (r"\a\..\??\x", r"\.\??\x\symvault"),
             ("C:/owned//./bin/", r"C:\owned\bin\symvault"),
         ] {
