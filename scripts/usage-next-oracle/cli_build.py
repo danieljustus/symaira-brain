@@ -25,7 +25,7 @@ def build(repo,root,evidence,source,env,run):
     candidate=evidence/('native-usage'+suffix);shutil.copy2(live,candidate);before=sha(candidate)
     parent=root/'parent-source';run('parent-source',['git','worktree','add','--quiet','--detach',str(parent),PARENT])
     try:
-        assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=parent,text=True).strip()==PARENT
+        assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=parent,text=True, encoding='utf-8').strip()==PARENT
         assert not subprocess.check_output(['git','status','--porcelain'],cwd=parent)
         manifest={}
         for p in sorted((parent/'rust/symbrain-cli/src').rglob('*.rs'))+sorted((parent/'rust/symbrain-usage/src').rglob('*.rs'))+[parent/'Cargo.toml',parent/'Cargo.lock']:
@@ -35,6 +35,6 @@ def build(repo,root,evidence,source,env,run):
         clean('cli-candidate-clean');run('candidate-final-build',['cargo','build','--locked','-p','symbrain-cli','--target-dir',str(target)],env)
         assert sha(live)==before and live.read_bytes()==candidate.read_bytes(),'actual clean candidate restored byte-identically'
         result=dict(parent_source=PARENT,parent_clean=True,parent_source_sha256=manifest,candidate_restored_byte_identical=True,binaries={kind:dict(path=str(p),sha256=sha(p),bytes=p.stat().st_size)for kind,p in [('go',evidence/('go-usage'+suffix)),('parent',parent_binary),('rust',candidate),('sentinel',evidence/('sentinel'+suffix))]},scope='One exclusive target; each CLI and Usage dependency variant package-cleaned only after lossless roundtrip archives and zero users. Immutable actual accepted parent and restored candidate copied. Never a second Cargo target.')
-        (evidence/'cli-build.json').write_text(json.dumps(result,indent=2)+'\n')
+        (evidence/'cli-build.json').write_text(json.dumps(result,indent=2)+'\n', encoding='utf-8')
         return result
     finally:subprocess.run(['git','-C',str(repo),'worktree','remove','--force',str(parent)],check=True)

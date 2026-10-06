@@ -117,7 +117,7 @@ def main():
                    archive=str(archive), archive_bytes=archive.stat().st_size,
                    archive_sha256=hashlib.sha256(archive.read_bytes()).hexdigest(), roundtrip_verified=True,
                    command=command, scope='One runner-owned exclusive target, all cargo dry-run regular files losslessly retained before package-only clean; only explicitly declared packages cleaned; no other package/target cleaned. /proc check is Linux-only, not a Windows lifecycle proof.')
-    output.write_text(json.dumps(receipt, indent=2) + '\n')
+    output.write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
     assert not target_users(target)
     for row in records:
         assert hashlib.sha256(Path(row['path']).read_bytes()).hexdigest() == row['sha256'], row

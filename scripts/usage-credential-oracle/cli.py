@@ -48,7 +48,7 @@ if args.control == "missing-case":
     records.pop()
 expected = len(names) * len(variants)
 report = {"schema_version": 1, "cases": len(records), "expected_cases": expected, "passed": sum(record["matches"] for record in records), "failed": sum(not record["matches"] for record in records), "platform": sys.platform, "binary_sha256": {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in [("go", args.go_binary), ("rust", args.rust_binary)]}, "cases_detail": records}
-args.output.write_text(json.dumps(report, indent=2) + "\n")
+args.output.write_text(json.dumps(report, indent=2) + "\n", encoding='utf-8')
 if len(records) != expected:
     sys.exit("usage credential oracle: missing CLI case")
 if report["failed"]:

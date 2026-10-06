@@ -35,9 +35,9 @@ tail -n 12 "$evidence_dir/go-constructors.log"
 git -C "$source_root" diff --exit-code --quiet
 python3 - "$scratch/go.json" "$output" <<'PY'
 import hashlib,json,pathlib,subprocess,sys
-r=json.loads(pathlib.Path(sys.argv[1]).read_text());assert r['cases']==r['read_only_cases']==97 and len(r['records'])==len({x['id']for x in r['records']})==97
-r['candidate_head']=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip()
-r['candidate_dirty']=bool(subprocess.check_output(['git','status','--porcelain'],text=True).strip())
+r=json.loads(pathlib.Path(sys.argv[1]).read_text(encoding='utf-8'));assert r['cases']==r['read_only_cases']==97 and len(r['records'])==len({x['id']for x in r['records']})==97
+r['candidate_head']=subprocess.check_output(['git','rev-parse','HEAD'],text=True, encoding='utf-8').strip()
+r['candidate_dirty']=bool(subprocess.check_output(['git','status','--porcelain'],text=True, encoding='utf-8').strip())
 r['baseline_source_sha256']={str(p):hashlib.sha256(p.read_bytes()).hexdigest()for p in sorted(pathlib.Path('scripts/usage-local-files-baseline').glob('*'))if p.is_file()}
-pathlib.Path(sys.argv[2]).write_text(json.dumps(r,indent=2)+'\n')
+pathlib.Path(sys.argv[2]).write_text(json.dumps(r,indent=2)+'\n', encoding='utf-8')
 PY

@@ -26,7 +26,7 @@ cleanup() {
   if [[ $stage_exit != 0 ]]; then
     python3 - "$output" "$stage_exit" <<'PYFAIL'
 import json, pathlib, subprocess, sys
-pathlib.Path(sys.argv[1]).write_text(json.dumps({"schema_version":1,"gate_exit":int(sys.argv[2]),"candidate_head":subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),"accepted":False},indent=2)+"\n")
+pathlib.Path(sys.argv[1]).write_text(json.dumps({"schema_version":1,"gate_exit":int(sys.argv[2]),"candidate_head":subprocess.check_output(["git","rev-parse","HEAD"],text=True, encoding='utf-8').strip(),"accepted":False},indent=2)+"\n", encoding='utf-8')
 PYFAIL
   fi
   git -C "$repo_root" worktree remove --force "$source_root" >/dev/null 2>&1 || true
@@ -99,7 +99,7 @@ run_stage argv-candidate-build cargo build --locked -p symbrain-cli --target-dir
 python3 - "$parent_root" "$parent_commit" "$scratch/argv-parent$executable_suffix" "$target_root/debug/symbrain$executable_suffix" "$scratch/argv-build.json" "$scratch/argv-candidate-initial$executable_suffix" "$repo_root" <<'PYBUILD'
 import hashlib,json,pathlib,subprocess,sys
 root=pathlib.Path(sys.argv[1]);commit=sys.argv[2]
-assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()==commit
+assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True, encoding='utf-8').strip()==commit
 assert not subprocess.check_output(['git','status','--porcelain'],cwd=root)
 files=['Cargo.toml','Cargo.lock','rust/symbrain-cli/src/usage_cli.rs','rust/symbrain-cli/src/lib.rs']
 manifest={}
@@ -108,14 +108,14 @@ for name in files:
     assert data==subprocess.check_output(['git','show',commit+':'+name],cwd=root)
     manifest[name]=hashlib.sha256(data).hexdigest()
 assert pathlib.Path(sys.argv[4]).read_bytes()==pathlib.Path(sys.argv[6]).read_bytes(),'Actual candidate binary restored byte-identically after parent variant'
-candidate=pathlib.Path(sys.argv[7]);candidate_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=candidate,text=True).strip()
+candidate=pathlib.Path(sys.argv[7]);candidate_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=candidate,text=True, encoding='utf-8').strip()
 candidate_clean=not subprocess.check_output(['git','status','--porcelain'],cwd=candidate)
 candidate_manifest={name:hashlib.sha256((candidate/name).read_bytes()).hexdigest()for name in files}
 if candidate_clean:
     for name in files:assert (candidate/name).read_bytes()==subprocess.check_output(['git','show',candidate_head+':'+name],cwd=candidate)
 pathlib.Path(sys.argv[5]).write_text(json.dumps(dict(parent_source=commit,parent_source_clean=True,parent_source_sha256=manifest,candidate_source=candidate_head,candidate_source_clean=candidate_clean,candidate_source_sha256=candidate_manifest,candidate_restored_byte_identical=True,
     binaries_sha256={kind:hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()for kind,path in [('parent',sys.argv[3]),('rust',sys.argv[4])]},
-    rust_sdk=subprocess.check_output(['rustc','-Vv'],text=True),scope='One exclusive target; every CLI and Usage dependency variant package-cleaned after verified lossless artifact archive. Actual parent copied; candidate restored byte-identically to actual initial candidate. Clean candidate source checked against immutable Git, no duplicate target'),indent=2)+'\n')
+    rust_sdk=subprocess.check_output(['rustc','-Vv'],text=True, encoding='utf-8'),scope='One exclusive target; every CLI and Usage dependency variant package-cleaned after verified lossless artifact archive. Actual parent copied; candidate restored byte-identically to actual initial candidate. Clean candidate source checked against immutable Git, no duplicate target'),indent=2)+'\n', encoding='utf-8')
 PYBUILD
 run_stage argv python3 "$repo_root/scripts/usage-copilot-kimi-oracle/argv.py" --go "$scratch/go-usage$executable_suffix" --parent "$scratch/argv-parent$executable_suffix" --rust "$target_root/debug/symbrain$executable_suffix" --parent-source "$parent_commit" --output "$scratch/argv.json"
 run_stage argv-controls python3 "$repo_root/scripts/usage-copilot-kimi-oracle/argv_controls.py" --go "$scratch/go-usage$executable_suffix" --parent "$scratch/argv-parent$executable_suffix" --rust "$target_root/debug/symbrain$executable_suffix" --parent-source "$parent_commit" --output "$scratch/argv-controls.json"

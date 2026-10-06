@@ -23,7 +23,7 @@ cleanup() {
   if [[ $stage_exit != 0 ]]; then
     python3 - "$output" "$stage_exit" <<'PYFAIL'
 import json, pathlib, subprocess, sys
-pathlib.Path(sys.argv[1]).write_text(json.dumps({"schema_version":1,"gate_exit":int(sys.argv[2]),"candidate_head":subprocess.check_output(["git","rev-parse","HEAD"],text=True).strip(),"accepted":False},indent=2)+"\n")
+pathlib.Path(sys.argv[1]).write_text(json.dumps({"schema_version":1,"gate_exit":int(sys.argv[2]),"candidate_head":subprocess.check_output(["git","rev-parse","HEAD"],text=True, encoding='utf-8').strip(),"accepted":False},indent=2)+"\n", encoding='utf-8')
 PYFAIL
   fi
   git -C "$repo_root" worktree remove --force "$source_root" >/dev/null 2>&1 || true

@@ -23,10 +23,10 @@ def main():
     with tempfile.TemporaryDirectory(prefix='usage-next-owned-')as directory:
         root=Path(directory);source=root/'go-source';peer=None
         run('input',['python3',str(repo/'scripts/usage-next-oracle/device_cases.py'),str(evidence/'input.json')])
-        cases=json.loads((evidence/'input.json').read_text());assert len(cases)==64
-        original=json.loads((repo/'migration/evidence/usage-remaining-baseline-768/symaira-usage768-remaining-device-input.json').read_text());assert cases[:39]==original and len(original)==39
+        cases=json.loads((evidence/'input.json').read_text(encoding='utf-8'));assert len(cases)==64
+        original=json.loads((repo/'migration/evidence/usage-remaining-baseline-768/symaira-usage768-remaining-device-input.json').read_text(encoding='utf-8'));assert cases[:39]==original and len(original)==39
         run('status-input',['python3',str(repo/'scripts/usage-next-oracle/status_cases.py'),str(evidence/'status-input.json')])
-        statuses=json.loads((evidence/'status-input.json').read_text())
+        statuses=json.loads((evidence/'status-input.json').read_text(encoding='utf-8'))
         run('source',['git','worktree','add','--quiet','--detach',str(source),FROZEN])
         try:
             shutil.copyfile(repo/'scripts/usage-next-oracle/device_test.go.txt',source/'internal/usage/device_next_768_test.go')
@@ -50,7 +50,7 @@ def main():
             run('go-status-tls',[str(go_tests),'-test.run','^TestUsageStatusTLS768$','-test.count=1'],env,source/'internal/usage')
             peer.phase='rust';env.update(USAGE_DEVICE_GO=str(evidence/'go.json'),USAGE_DEVICE_WIRE_GO=str(evidence/'go-wire.json'),USAGE_DEVICE_API=str(evidence/'api.json'),USAGE_DEVICE_WEB=str(evidence/'web.json'),USAGE_DEVICE_NATIVE=str(evidence/'native.json'),USAGE_STATUS_NATIVE=str(evidence/'status-native.json'))
             run('native',['cargo','test','--locked','-p','symbrain-usage','--lib','device_oracle_matches_fresh_go','--','--ignored','--nocapture'],env)
-            matches=re.findall(r'Running unittests [^\n]*\(([^)]+)\)',(evidence/'native.log').read_text());assert len(matches)==1
+            matches=re.findall(r'Running unittests [^\n]*\(([^)]+)\)',(evidence/'native.log').read_text(encoding='utf-8'));assert len(matches)==1
             native_test_path=Path(matches[0]);native_test_path=native_test_path if native_test_path.is_absolute()else repo/native_test_path
             target=Path(env.get('CARGO_TARGET_DIR',repo/'target')).resolve();assert native_test_path.resolve().is_relative_to(target)
             native_tests=evidence/('native-provider-tests'+suffix);shutil.copy2(native_test_path,native_tests)
@@ -62,7 +62,7 @@ def main():
                 if kind=='missing-device-case':rows.pop()
                 elif kind=='device-header-bytes':rows[0]['requests'][0]['header_value_hex']['X-Msh-Device-Id']=['00']
                 else:rows[0]['report']['providers'][0]['error']='owned incorrect401 diagnostic'
-                path.write_text(json.dumps(rows));peer.phase='control-'+kind
+                path.write_text(json.dumps(rows), encoding='utf-8');peer.phase='control-'+kind
                 try:
                     command=['cargo','test','--locked','-p','symbrain-usage','--lib','device_oracle_matches_fresh_go','--','--ignored','--nocapture']
                     process=subprocess.run(command,cwd=repo,env=env,capture_output=True,timeout=120)
@@ -70,11 +70,11 @@ def main():
                     assert process.returncode==101 and message.encode()in raw and b'1 failed'in raw,(kind,process.returncode,raw[-8000:])
                     controls.append(dict(id=kind,exit=process.returncode,intended_assertion=message,rejected=True,mutated_input_sha256=sha(path)))
                 finally:path.write_bytes(original)
-            (evidence/'controls.json').write_text(json.dumps(controls,indent=2)+'\n')
-            peer.close();(evidence/'wire.json').write_text(json.dumps(main_wire,indent=2)+'\n');(evidence/'controls-wire.json').write_text(json.dumps(peer.rows[len(main_wire):],indent=2)+'\n');peer=None
-            go=json.loads((evidence/'go-wire.json').read_text());native=json.loads((evidence/'native.json').read_text());wire=json.loads((evidence/'wire.json').read_text());assert len(go)==native['wire']['cases']==57
+            (evidence/'controls.json').write_text(json.dumps(controls,indent=2)+'\n', encoding='utf-8')
+            peer.close();(evidence/'wire.json').write_text(json.dumps(main_wire,indent=2)+'\n', encoding='utf-8');(evidence/'controls-wire.json').write_text(json.dumps(peer.rows[len(main_wire):],indent=2)+'\n', encoding='utf-8');peer=None
+            go=json.loads((evidence/'go-wire.json').read_text(encoding='utf-8'));native=json.loads((evidence/'native.json').read_text(encoding='utf-8'));wire=json.loads((evidence/'wire.json').read_text(encoding='utf-8'));assert len(go)==native['wire']['cases']==57
             observations=[]
-            statuses_go=json.loads((evidence/'status-go.json').read_text());assert native['statuses']['cases']==len(statuses_go)==84
+            statuses_go=json.loads((evidence/'status-go.json').read_text(encoding='utf-8'));assert native['statuses']['cases']==len(statuses_go)==84
             for row in go+statuses_go:
                 for index,request in enumerate(row['requests']):
                     actual={phase:next(r for r in wire if r['phase']==phase and r['id']==row['id']and r['index']==index)for phase in ['go','rust']}
@@ -95,22 +95,22 @@ def main():
             run('early-argv',argv_command+['--output',str(evidence/'argv.json')],env)
             control_command=['python3',str(repo/'scripts/usage-next-oracle/argv_controls.py')]+argv_command[2:]
             run('early-argv-controls',control_command+['--output',str(evidence/'argv-controls.json')],env)
-            argv=json.loads((evidence/'argv.json').read_text());argv_controls=json.loads((evidence/'argv-controls.json').read_text())
+            argv=json.loads((evidence/'argv.json').read_text(encoding='utf-8'));argv_controls=json.loads((evidence/'argv-controls.json').read_text(encoding='utf-8'))
             assert argv['original_cases']==64 and argv['failed']==0 and len(argv['valid_gated_reports'])==15 and argv_controls['rejected']==2
             assert not subprocess.check_output(['git','-C',str(source),'diff','--name-only'])
             frozen={}
             for p in sorted((source/'internal/usage').glob('*.go'))+[source/'go.mod',source/'go.sum']:
                 if p.name in ['device_next_768_test.go','status_next_768_test.go']:continue
                 relative=p.relative_to(source).as_posix();assert p.read_bytes()==subprocess.check_output(['git','-C',str(source),'show',FROZEN+':'+relative]);frozen[relative]=sha(p)
-            head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True).strip();dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=repo))
+            head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=repo,text=True, encoding='utf-8').strip();dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=repo))
             paths=sorted((repo/'rust/symbrain-usage/src').rglob('*.rs'))+sorted((repo/'scripts/usage-next-oracle').glob('*'))+[repo/p for p in ['Cargo.lock','rust/symbrain-usage/Cargo.toml','rust/symbrain-cli/src/usage_cli.rs','rust/symbrain-cli/src/lib.rs']]
             paths=[p for p in paths if p.is_file()];source_hashes={str(p.relative_to(repo)):sha(p)for p in paths}
             if not dirty:
                 for p in paths:assert p.read_bytes()==subprocess.check_output(['git','show',head+':'+p.relative_to(repo).as_posix()],cwd=repo)
-            receipt=dict(candidate_head=head,candidate_dirty=dirty,oracle_commit=FROZEN,frozen_source_sha256=frozen,source_sha256=source_hashes,cases=64,original_device_cases=39,exhaustive_trim_cases=25,full_native_reports=57,retained_gates=7,remote_status_strategy_cases=84,provider_test_binaries=provider_binaries,negative_controls=controls,argv=argv,argv_controls=argv_controls,cli_build=cli_build,native=native,wire_observations=observations,evidence_sha256={str(p.name):sha(p)for p in evidence.iterdir()if p.is_file()},go_sdk=subprocess.check_output(['go','version'],text=True).strip(),rust_sdk=subprocess.check_output(['rustc','-Vv'],text=True),native_platforms='Linux author proof only; fresh native macOS/Windows required',clock_policy='All actual Go/native snapshot fetched_at retained and bounded by invocation; canonicalization uses the invocation clock plus exact OpenCode3600/86400 second reset offsets relative to actual fetched_at. No fixed/runtime equality claim.',wire_policy='Exact provider-added header bytes except inherited OpenCode X-Server-Instance runtime/fixed identity, request line/body and response compared. All full raw wire requests retained; inherited transport default/header serialization differences are explicit, not exact wire parity.',private_seam='Test-only trust root and resolver/dial pin original HTTPS public hostnames to owned loopback TLS peer, certificate hostname verified; no provider/operator network. Production execute/parser unchanged. Fast TLS proof does not establish deadline/cancel parity.')
-            output.write_text(json.dumps(receipt,indent=2)+'\n');print('PASS64/57 full native,7 gated; owned TLS comparisons',len(observations))
+            receipt=dict(candidate_head=head,candidate_dirty=dirty,oracle_commit=FROZEN,frozen_source_sha256=frozen,source_sha256=source_hashes,cases=64,original_device_cases=39,exhaustive_trim_cases=25,full_native_reports=57,retained_gates=7,remote_status_strategy_cases=84,provider_test_binaries=provider_binaries,negative_controls=controls,argv=argv,argv_controls=argv_controls,cli_build=cli_build,native=native,wire_observations=observations,evidence_sha256={str(p.name):sha(p)for p in evidence.iterdir()if p.is_file()},go_sdk=subprocess.check_output(['go','version'],text=True, encoding='utf-8').strip(),rust_sdk=subprocess.check_output(['rustc','-Vv'],text=True, encoding='utf-8'),native_platforms='Linux author proof only; fresh native macOS/Windows required',clock_policy='All actual Go/native snapshot fetched_at retained and bounded by invocation; canonicalization uses the invocation clock plus exact OpenCode3600/86400 second reset offsets relative to actual fetched_at. No fixed/runtime equality claim.',wire_policy='Exact provider-added header bytes except inherited OpenCode X-Server-Instance runtime/fixed identity, request line/body and response compared. All full raw wire requests retained; inherited transport default/header serialization differences are explicit, not exact wire parity.',private_seam='Test-only trust root and resolver/dial pin original HTTPS public hostnames to owned loopback TLS peer, certificate hostname verified; no provider/operator network. Production execute/parser unchanged. Fast TLS proof does not establish deadline/cancel parity.')
+            output.write_text(json.dumps(receipt,indent=2)+'\n', encoding='utf-8');print('PASS64/57 full native,7 gated; owned TLS comparisons',len(observations))
         finally:
             if peer:
-                (evidence/'wire-failed.json').write_text(json.dumps(dict(rows=peer.rows,errors=peer.errors),indent=2)+'\n');peer.close()
+                (evidence/'wire-failed.json').write_text(json.dumps(dict(rows=peer.rows,errors=peer.errors),indent=2)+'\n', encoding='utf-8');peer.close()
             subprocess.run(['git','-C',str(repo),'worktree','remove','--force',str(source)],check=True)
 if __name__=='__main__':main()

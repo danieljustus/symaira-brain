@@ -58,7 +58,7 @@ def main():
                     parent_native_help=vector==[b'--help']
                     expected_parent=2 if parent_native_help or mode=='present'else 1
                     assert observed['parent']['exit']==expected_parent,(variant,mode,index,'retained parent boundary',observed)
-                    calls=[json.loads(line)for line in log.read_text().splitlines()]if log.exists()else[]
+                    calls=[json.loads(line)for line in log.read_text(encoding='utf-8').splitlines()]if log.exists()else[]
                     if mode=='present'and not parent_native_help:assert calls[-1]==[v.hex()for v in [b'usage',*vector]],'parent preserves raw fallback argv'
                     assert state(home)==before
                     rows.append(dict(id=f'{variant}-{mode}-{index}',original=index<len(ORIGINAL),argv_hex=[v.hex()for v in vector],observed=observed,read_only=True,candidate_native=True,parent_fallback=mode=='present'and not parent_native_help,sentinel_calls=routed))
@@ -68,9 +68,9 @@ def main():
                 for index,vector in enumerate([[],[b'--'],[b'---'],[b'--json'],[b'--output',b'json']]):
                     log=root/f'{variant}-report-{index}.jsonl';env.update(SYMBRAIN_GO_BINARY=str(args.sentinel.resolve()),USAGE_NEXT_SENTINEL_LOG=str(log),USAGE_NEXT_SENTINEL_GO='')
                     value=process(args.rust,vector,env,home);assert value['exit']==77
-                    calls=[json.loads(line)for line in log.read_text().splitlines()];assert calls==[[v.hex()for v in [b'usage',*vector]]]
+                    calls=[json.loads(line)for line in log.read_text(encoding='utf-8').splitlines()];assert calls==[[v.hex()for v in [b'usage',*vector]]]
                     assert state(home)==before;valid.append(dict(id=f'{variant}-valid-{index}',argv_hex=[v.hex()for v in vector],observed=value,sentinel_calls=calls,read_only=True))
         assert sum(r['original']for r in rows)==64
-    args.output.write_text(json.dumps(dict(cases=len(rows),original_cases=64,passed=len(rows),failed=0,valid_gated_reports=valid,skipped=skipped,records=rows,binaries={str(p.resolve()):sha(p)for p in [args.go,args.parent,args.rust,args.sentinel]},scope='All original64 inherited admission inputs retained, candidate native exactGo errors/help/positionals regardless fallback presence, parent boundary retained; valid gated report argv byte-preserving owned sentinel, no public HTTP'),indent=2)+'\n')
+    args.output.write_text(json.dumps(dict(cases=len(rows),original_cases=64,passed=len(rows),failed=0,valid_gated_reports=valid,skipped=skipped,records=rows,binaries={str(p.resolve()):sha(p)for p in [args.go,args.parent,args.rust,args.sentinel]},scope='All original64 inherited admission inputs retained, candidate native exactGo errors/help/positionals regardless fallback presence, parent boundary retained; valid gated report argv byte-preserving owned sentinel, no public HTTP'),indent=2)+'\n', encoding='utf-8')
     print('PASS early argv',len(rows),'including original64; valid fallback',len(valid))
 if __name__=='__main__':main()

@@ -5,7 +5,7 @@ import pathlib
 import sys
 
 frozen = pathlib.Path("rust/symbrain-usage/tests/fixtures/nous_file_token_oracle.json")
-cases = [{"id": "frozen-" + case["id"], "data_hex": case.get("contents", "").encode().hex(), "file_present": case["file_present"]} for case in json.loads(frozen.read_text())["cases"]]
+cases = [{"id": "frozen-" + case["id"], "data_hex": case.get("contents", "").encode().hex(), "file_present": case["file_present"]} for case in json.loads(frozen.read_text(encoding='utf-8'))["cases"]]
 def add(name, value):
     data = value if isinstance(value, bytes) else value.encode()
     cases.append({"id": name, "data_hex": data.hex(), "file_present": True})
@@ -80,5 +80,5 @@ for arrays in (9999, 10000):
     payload = '{"exp":4102444800,"ignored":' + '[' * arrays + '0' + ']' * arrays + '}'
     add("jwt-total-depth-" + str(arrays + 1), json.dumps({"providers": [{"id": "nous", "invoke_jwt": token(payload)}]}, separators=(',', ':')))
 assert len({case['id'] for case in cases}) == len(cases)
-pathlib.Path(sys.argv[1]).write_text(json.dumps(cases, indent=2) + '\n')
+pathlib.Path(sys.argv[1]).write_text(json.dumps(cases, indent=2) + '\n', encoding='utf-8')
 print(f"Hermes source-bound cases: {len(cases)}")

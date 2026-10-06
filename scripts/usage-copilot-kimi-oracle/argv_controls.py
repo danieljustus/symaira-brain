@@ -29,7 +29,7 @@ def main():
             wrapper.write_text('import subprocess,sys\n'
                 f'p=subprocess.run([{str(args.rust.resolve())!r},*sys.argv[1:]],capture_output=True)\n'
                 'sys.stdout.buffer.write(p.stdout)\nerror=p.stderr\n' + change + '\n'
-                'sys.stderr.buffer.write(error)\nsys.exit(p.returncode)\n')
+                'sys.stderr.buffer.write(error)\nsys.exit(p.returncode)\n', encoding='utf-8')
             command = [sys.executable, str(Path(__file__).with_name('argv.py')),
                        '--go', str(args.go), '--parent', str(args.parent), '--rust', str(wrapper),
                        '--parent-source', args.parent_source, '--output', str(root / (name + '.json'))]
@@ -40,7 +40,7 @@ def main():
                                      stdout=result.stdout.decode(errors='replace'), stderr=error,
                                      wrapper_sha256=hashlib.sha256(wrapper.read_bytes()).hexdigest()))
     args.output.write_text(json.dumps(dict(rejected=len(observations), controls=observations,
-        binary_sha256={name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in [('go', args.go), ('parent', args.parent), ('rust', args.rust)]}), indent=2) + '\n')
+        binary_sha256={name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in [('go', args.go), ('parent', args.parent), ('rust', args.rust)]}), indent=2) + '\n', encoding='utf-8')
     print('Usage argv:', len(observations), 'actual native diagnostic mutations rejected')
 
 

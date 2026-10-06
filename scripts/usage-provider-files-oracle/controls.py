@@ -23,11 +23,11 @@ for control,diagnostic in [('missing-oracle','Go provider files evidence'),('mut
             records=json.loads(original)
             if control=='duplicate-case':records[0]['id']=records[1]['id']
             else:records[0]['report']['providers'][0]['auth_status']['detail']='intentional-provider-files-control'
-            fixture.write_text(json.dumps(records))
+            fixture.write_text(json.dumps(records), encoding='utf-8')
         result=subprocess.run(['cargo','test','--locked','-p','symbrain-usage','--lib','provider_files_oracle_matches_fresh_go','--','--ignored','--nocapture'],capture_output=True,check=False,timeout=120)
         output=result.stdout+result.stderr
         assert result.returncode==101 and diagnostic.encode()in output and b'1 failed'in output,(control,output.decode())
         controls.append({'id':control,'exit':result.returncode,'intended_diagnostic':diagnostic,'output':output.decode()})
     finally:fixture.write_bytes(original)
 assert len(controls)==5
-(scratch/'controls.json').write_text(json.dumps(controls,indent=2)+'\n')
+(scratch/'controls.json').write_text(json.dumps(controls,indent=2)+'\n', encoding='utf-8')

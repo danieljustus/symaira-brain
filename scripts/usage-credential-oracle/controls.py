@@ -27,12 +27,12 @@ for control, diagnostic in [("missing-oracle", "Go evidence"), ("mutated-report"
                 records[0]["id"] = records[1]["id"]
             else:
                 records[0]["report"]["providers"][0]["auth_status"]["detail"] = "intentional-768-control"
-            fixture.write_text(json.dumps(records))
+            fixture.write_text(json.dumps(records), encoding='utf-8')
         result = subprocess.run(["cargo", "test", "--locked", "-p", "symbrain-usage", "--test", "credential_reference_tests", "--", "--ignored", "--nocapture"], capture_output=True, timeout=120, check=False)
         output = result.stdout + result.stderr
         assert result.returncode == 101 and diagnostic.encode() in output and b"1 failed" in output, (control, output.decode())
         controls.append({"id": control, "exit": result.returncode, "intended_diagnostic": diagnostic, "output": output.decode()})
     finally:
         fixture.write_bytes(original)
-(scratch / "controls.json").write_text(json.dumps(controls, indent=2) + "\n")
+(scratch / "controls.json").write_text(json.dumps(controls, indent=2) + "\n", encoding='utf-8')
 assert len(controls) == 5

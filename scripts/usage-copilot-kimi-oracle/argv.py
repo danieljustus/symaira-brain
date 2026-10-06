@@ -53,7 +53,7 @@ def main():
     args = parser.parse_args()
     repo = Path(__file__).resolve().parents[2]
     original_receipt = repo / 'migration/evidence/usage-argv-768/original-abf-review/proof/symaira-usage768-abf-root-doctor-cli-extra.json'
-    historical = json.loads(original_receipt.read_text())
+    historical = json.loads(original_receipt.read_text(encoding='utf-8'))
     assert historical['cases'] == 22 and historical['passed'] == 10 and historical['failed'] == 12
     for provider in ['copilot', 'kimi']:
         assert [row['arg_hex'] for row in historical['rows'] if row['provider'] == provider] == [value.hex() for value in ORIGINAL]
@@ -103,11 +103,11 @@ def main():
                     'rust/symbrain-core/src/config/format.rs', 'rust/symbrain-core/src/config/set.rs',
                     'rust/symbrain-core/src/config/mod.rs', 'rust/symbrain-core/src/go_printable.rs',
                     'scripts/usage-copilot-kimi-oracle/argv.py']
-    go_root = Path(subprocess.check_output(['go', 'env', 'GOROOT'], text=True).strip())
+    go_root = Path(subprocess.check_output(['go', 'env', 'GOROOT'], text=True, encoding='utf-8').strip())
     sdk_files = ['src/flag/flag.go', 'src/strconv/quote.go']
     receipt = dict(original_review_sha256=hashlib.sha256(original_receipt.read_bytes()).hexdigest(),
                    go_sdk_source_sha256={name: hashlib.sha256((go_root / name).read_bytes()).hexdigest() for name in sdk_files},
-                   candidate_head=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=repo, text=True).strip(),
+                   candidate_head=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=repo, text=True, encoding='utf-8').strip(),
                    candidate_dirty=bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=repo)),
                    parent_source=args.parent_source, cases=len(records), passed=len(records), failed=0,
                    original22_inputs_sha256=hashlib.sha256(json.dumps([value.hex() for value in ORIGINAL]).encode()).hexdigest(),
@@ -116,7 +116,7 @@ def main():
                    source_sha256={name: hashlib.sha256((repo / name).read_bytes()).hexdigest() for name in source_files},
                    binary_sha256={name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in [('go', args.go), ('parent', args.parent), ('rust', args.rust)]},
                    scope='All executed arguments are invalid or help and return2 before service report/HTTP; owned literal files remain byte/tree read-only. All original22 inputs retained, Windows invalid Unix byte cases explicitly unexecuted.')
-    args.output.write_text(json.dumps(receipt, indent=2) + '\n')
+    args.output.write_text(json.dumps(receipt, indent=2) + '\n', encoding='utf-8')
     print('Usage argv:', len(records), 'exact candidate pairs;', len(original), 'original inputs;', receipt['original_parent_mismatches'], 'retained parent failures')
 
 

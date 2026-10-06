@@ -13,7 +13,7 @@ for name in ['fixture','go_binary','rust_binary','output']:parser.add_argument(n
 parser.add_argument('--control',choices=['exit','missing-case'])
 parser.add_argument('--owner',action='store_true')
 args=parser.parse_args()
-rows=json.loads(args.fixture.read_text())
+rows=json.loads(args.fixture.read_text(encoding='utf-8'))
 owner=args.owner
 expected=16 if owner else 89
 assert len(rows)==expected and len({row['id']for row in rows})==expected,'exact Copilot/Kimi corpus'
@@ -44,7 +44,7 @@ for row in rows:
     if owner:assert os.readlink(link)==target,'actual CLI owner symlink read-only'
 if args.control=='missing-case':records.pop()
 report={'schema_version':1,'cases':len(records),'expected_cases':expected,'route_cases':len(rows),'missing_file_report_cases':len(missing)*2,'passed':sum(row['matches']for row in records),'failed':sum(not row['matches']for row in records),'binary_sha256':{name:hashlib.sha256(path.read_bytes()).hexdigest()for name,path in [('go',args.go_binary),('rust',args.rust_binary)]},'records':records,'read_only_source_cases':len(rows),'operator_keychain_isolation':'both CLIs seed unresolved OAuth; selected Copilot/Kimi Go constructors never invoke Claude Keychain'}
-args.output.write_text(json.dumps(report,indent=2)+'\n')
+args.output.write_text(json.dumps(report,indent=2)+'\n', encoding='utf-8')
 if len(records)!=expected:sys.exit('Copilot/Kimi CLI oracle: missing CLI case')
 if report['failed']:sys.exit('Copilot/Kimi CLI oracle: byte/exit mismatch: '+', '.join(row['id']for row in records if not row['matches']))
 print('Copilot/Kimi CLI oracle:',expected,'byte/exit matches')

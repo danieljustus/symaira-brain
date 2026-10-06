@@ -33,4 +33,4 @@ cases.append(dict(id='device-absent', device_hex='', device_present=False, token
 cases.append(dict(id='device-unicode-no-cli-api', device_hex='设备'.encode().hex(), device_present=True,
                   token='', api='owned-api', web='', responses=[200], kind='irrelevant-device'))
 assert len(cases) == len({row['id'] for row in cases}) == 39
-Path(sys.argv[1]).write_text(json.dumps(cases, indent=2) + '\n')
+Path(sys.argv[1]).write_text(json.dumps(cases, indent=2) + '\n', encoding='utf-8')

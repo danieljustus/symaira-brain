@@ -33,5 +33,5 @@ for provider,source,env,fixture in variants:
  wire.append(dict(id=f'first-{provider}-{source}-invalid-byte',provider=provider,source=source,env=env,fixture=fixture,status=429,kind='retry',retry_after_values_hex=['ff33','3137'],responses=[429]*4))
 assert len(public)==len({r['id']for r in public})
 assert len(wire)==len({r['id']for r in wire})
-Path(sys.argv[1]).write_text(json.dumps(dict(public=public,wire=wire,grammar_values=values,whitespace=whitespace,public_cases=len(public),wire_cases=len(wire)),indent=2)+'\n')
+Path(sys.argv[1]).write_text(json.dumps(dict(public=public,wire=wire,grammar_values=values,whitespace=whitespace,public_cases=len(public),wire_cases=len(wire)),indent=2)+'\n', encoding='utf-8')
 print('RetryAfter corpus',len(public),'public scalars',len(wire),'full TLS constructor cases')

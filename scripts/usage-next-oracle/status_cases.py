@@ -8,4 +8,4 @@ for provider,source,env,fixture in variants:
     for kind,status in [('401',401),('403',403),('429',429),('500',500),('success',200),('malformed',200),('empty',200)]:
         rows.append(dict(id=f'status-{provider}-{source}-{kind}',provider=provider,source=source,env=env or '',fixture=fixture,status=status,kind=kind,responses=[status]*4))
 assert len(rows)==84
-Path(sys.argv[1]).write_text(json.dumps(rows,indent=2)+'\n')
+Path(sys.argv[1]).write_text(json.dumps(rows,indent=2)+'\n', encoding='utf-8')

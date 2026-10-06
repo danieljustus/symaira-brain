@@ -39,4 +39,4 @@ for point in whitespace:
     value=chr(point)+'owned-设备'+chr(point)
     cases.append(dict(id=f'device-trim-{point:04x}',device_hex=value.encode().hex(),device_present=True,token='owned-cli',api='',web='',responses=[200],kind='trim-exhaustive'))
 assert len(cases)==len({row['id']for row in cases})==64
-Path(sys.argv[1]).write_text(json.dumps(cases, indent=2) + '\n')
+Path(sys.argv[1]).write_text(json.dumps(cases, indent=2) + '\n', encoding='utf-8')

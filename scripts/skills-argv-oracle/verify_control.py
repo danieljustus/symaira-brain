@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import sys
 
-report = json.loads(Path(sys.argv[1]).read_text())
+report = json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
 assert report["negative_control"] == sys.argv[2]
 assert report["total"] == 1 and report["matched"] == 0
 assert report["readonly"] and not report["candidate_dirty"]

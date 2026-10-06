@@ -7,7 +7,7 @@ cases=[]
 def add(provider,name,value,present=True,override="default",env_token="",ambiguous=False):
     data=value if isinstance(value,bytes)else value.encode()
     cases.append(dict(id=provider+"-"+name,provider=provider,data_hex=data.hex(),file_present=present,override=override,env_token=env_token,ambiguous=ambiguous))
-for case in json.loads(pathlib.Path("rust/symbrain-usage/tests/fixtures/claude_file_token_oracle.json").read_text())["cases"]:
+for case in json.loads(pathlib.Path("rust/symbrain-usage/tests/fixtures/claude_file_token_oracle.json").read_text(encoding='utf-8'))["cases"]:
     add("claude","frozen-"+case["id"],case["contents"],ambiguous="possible_tokens"in case)
 for name,value in {
     "root-null":"null","root-array":"[]","root-string":'"bad"',"root-empty":"{}",
@@ -78,5 +78,5 @@ add("codex","missing-file","",present=False)
 add("codex","oversize","x"*65537)
 add("codex","boundary",codex+' '*(65536-len(codex)))
 assert len({row['id']for row in cases})==len(cases)
-pathlib.Path(sys.argv[1]).write_text(json.dumps(cases,indent=2)+'\n')
+pathlib.Path(sys.argv[1]).write_text(json.dumps(cases,indent=2)+'\n', encoding='utf-8')
 print('Provider file cases:',len(cases),'Claude:',sum(x['provider']=='claude'for x in cases),'Codex:',sum(x['provider']=='codex'for x in cases))

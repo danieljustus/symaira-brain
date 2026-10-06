@@ -8,7 +8,7 @@ import tempfile
 with tempfile.TemporaryDirectory() as scratch:
     path = pathlib.Path(scratch) / 'baseline.json'
     subprocess.run([sys.executable, 'scripts/usage-local-files-baseline/cases.py', str(path)], check=True)
-    cases = [row for row in json.loads(path.read_text()) if row['provider'] in ('copilot', 'kimi') and '-base-' not in row['id']]
+    cases = [row for row in json.loads(path.read_text(encoding='utf-8')) if row['provider'] in ('copilot', 'kimi') and '-base-' not in row['id']]
 assert len(cases) == 66
 for row in cases:
     row['gate'] = ''
@@ -59,5 +59,5 @@ add('kimi', 'newline-token', {kimi: json.dumps({'access_token':'owned\ntoken'})}
 add('kimi', 'newline-device', {kimi:'{"access_token":"owned"}', '.kimi-code/device_id':'owned\ndevice'})
 for row in cases[-3:]: row['gate'] = 'unproven HTTP control-bearing header value'
 assert len(cases) == len({row['id']for row in cases}) == 89
-pathlib.Path(sys.argv[1]).write_text(json.dumps(cases, indent=2)+'\n')
+pathlib.Path(sys.argv[1]).write_text(json.dumps(cases, indent=2)+'\n', encoding='utf-8')
 print('Copilot/Kimi source-bound cases:', len(cases))

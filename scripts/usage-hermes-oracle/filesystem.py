@@ -9,7 +9,7 @@ import tempfile
 
 output=pathlib.Path(sys.argv[3])
 if os.name!='posix':
-    output.write_text(json.dumps({'platform':sys.platform,'unix_only':True,'cases':[],'native_windows_capability_root':'requires native Windows constructor/CI proof'})+'\n')
+    output.write_text(json.dumps({'platform':sys.platform,'unix_only':True,'cases':[],'native_windows_capability_root':'requires native Windows constructor/CI proof'})+'\n', encoding='utf-8')
     sys.exit(0)
 records=[]
 with tempfile.TemporaryDirectory(prefix='hermes-filesystem-768-')as scratch:
@@ -23,7 +23,7 @@ with tempfile.TemporaryDirectory(prefix='hermes-filesystem-768-')as scratch:
         elif kind=='directory':auth.mkdir()
         else:
             target=(home/'outside.json')if kind=='symlink-outside'else(store/'inside.json')
-            target.write_text('{"providers":[{"id":"nous","access_token":"synthetic-owned-file"}]}')
+            target.write_text('{"providers":[{"id":"nous","access_token":"synthetic-owned-file"}]}', encoding='utf-8')
             auth.symlink_to(target)
         env={key:value for key,value in os.environ.items()if key in ['TMPDIR','TMP','TEMP']}
         env.update({'HOME':str(home),'USERPROFILE':str(home),'HERMES_HOME':str(store),'XDG_CONFIG_HOME':str(home/'config'),'XDG_DATA_HOME':str(home/'data'),'XDG_CACHE_HOME':str(home/'cache'),'PATH':'','ANTHROPIC_OAUTH_TOKEN':'env://USAGE_HERMES_ABSENT','SYMBRAIN_GO_BINARY':str(home/'absent-go')})
@@ -41,4 +41,4 @@ with tempfile.TemporaryDirectory(prefix='hermes-filesystem-768-')as scratch:
         if kind=='fifo':assert observations[0]['timed_out'],'immutable Go FIFO behavior changed; reassess native-only contract'
         else:assert observations[0]==native,(kind,observations)
         records.append({'id':kind,'go':observations[0],'rust':native,'native_only_safety_contract':kind=='fifo'})
-output.write_text(json.dumps({'platform':sys.platform,'unix_only':True,'cases':records},indent=2)+'\n')
+output.write_text(json.dumps({'platform':sys.platform,'unix_only':True,'cases':records},indent=2)+'\n', encoding='utf-8')

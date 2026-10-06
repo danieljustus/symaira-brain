@@ -8,7 +8,7 @@ cases=[]
 def add(provider,name,files=None,env=None,home_mode="same"):
     cases.append(dict(id=provider+'-'+name,provider=provider,files={key:(value if isinstance(value,bytes)else value.encode()).hex()for key,value in (files or {}).items()},env=env or {},home_mode=home_mode))
 copilot='.config/github-copilot/'
-for row in json.loads(pathlib.Path('rust/symbrain-usage/tests/fixtures/copilot_file_token_oracle.json').read_text())['cases']:
+for row in json.loads(pathlib.Path('rust/symbrain-usage/tests/fixtures/copilot_file_token_oracle.json').read_text(encoding='utf-8'))['cases']:
     files={copilot+name:row[key]for key,name in [('apps_json','apps.json'),('hosts_json','hosts.json')]if key in row}
     add('copilot','frozen-'+row['id'],files)
 for name,value in {
@@ -29,7 +29,7 @@ add('copilot','environment-preempts-ambiguous-files',{copilot+'apps.json':'{"a":
 add('copilot','environment-error-preempts-files',{copilot+'apps.json':'{"a":{"oauth_token":"file-token"}}'},env={'COPILOT_ACCESS_TOKEN':'env://USAGE_LOCAL_FILES_ABSENT'})
 for scheme in ['env://ABSENT','symvault://test/token','vault://test/token','keychain://test/account']:
     add('copilot','literal-'+scheme.split(':')[0],{copilot+'apps.json':json.dumps({'github.com:a':{'oauth_token':scheme}})})
-for row in json.loads(pathlib.Path('rust/symbrain-usage/tests/fixtures/kimi_file_token_oracle.json').read_text())['cases']:
+for row in json.loads(pathlib.Path('rust/symbrain-usage/tests/fixtures/kimi_file_token_oracle.json').read_text(encoding='utf-8'))['cases']:
     files={'.kimi-code/credentials/kimi-code.json':row['contents']}if row['file_present']else{}
     add('kimi','frozen-'+row['id'],files)
 for name,value in {
@@ -62,5 +62,5 @@ for name,payload in {'overflow-positive':'{"exp":1e19}','overflow-negative':'{"e
     jwt='header.'+base64.urlsafe_b64encode(payload.encode()).decode().rstrip('=')+'.signature'
     add('nous','jwt-'+name,{'hermes/auth.json':json.dumps({'providers':[{'id':'nous','invoke_jwt':jwt}]})},env={'HERMES_HOME':'$HOME/hermes'})
 assert len(cases)==len({row['id']for row in cases})
-pathlib.Path(sys.argv[1]).write_text(json.dumps(cases,indent=2)+'\n')
+pathlib.Path(sys.argv[1]).write_text(json.dumps(cases,indent=2)+'\n', encoding='utf-8')
 print('Go-only local/source baseline:',len(cases),'cases')
