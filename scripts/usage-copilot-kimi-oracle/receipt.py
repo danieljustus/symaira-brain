@@ -48,7 +48,7 @@ repo=pathlib.Path(subprocess.check_output(['git','rev-parse','--show-toplevel'],
 baseline_path=repo/'migration/evidence/usage-local-files-768/linux-go-baseline.json'
 historical=baseline_path.read_bytes()
 original_head='f6f548145ab4961e009ccea8e8242df9be7d2585'
-assert historical==subprocess.check_output(['git','show',original_head+':'+str(baseline_path.relative_to(repo))]),'unchanged original Go-only receipt'
+assert historical==subprocess.check_output(['git','show',original_head+':'+baseline_path.relative_to(repo).as_posix()]),'unchanged original Go-only receipt'
 for path,digest in json.loads(historical)['baseline_source_sha256'].items():
     assert hashlib.sha256((repo/path).read_bytes()).hexdigest()==digest,'unchanged original baseline source: '+path
 for path in ['rust/symbrain-usage/tests/fixtures/copilot_file_token_oracle.json','rust/symbrain-usage/tests/fixtures/kimi_file_token_oracle.json']:

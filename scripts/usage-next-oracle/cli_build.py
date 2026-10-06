@@ -29,7 +29,7 @@ def build(repo,root,evidence,source,env,run):
         assert not subprocess.check_output(['git','status','--porcelain'],cwd=parent)
         manifest={}
         for p in sorted((parent/'rust/symbrain-cli/src').rglob('*.rs'))+sorted((parent/'rust/symbrain-usage/src').rglob('*.rs'))+[parent/'Cargo.toml',parent/'Cargo.lock']:
-            name=str(p.relative_to(parent));assert p.read_bytes()==subprocess.check_output(['git','show',PARENT+':'+name],cwd=parent);manifest[name]=sha(p)
+            name=p.relative_to(parent).as_posix();assert p.read_bytes()==subprocess.check_output(['git','show',PARENT+':'+name],cwd=parent);manifest[name]=sha(p)
         clean('cli-parent-clean');run('parent-build',['cargo','build','--locked','-p','symbrain-cli','--manifest-path',str(parent/'Cargo.toml'),'--target-dir',str(target)],env)
         parent_binary=evidence/('parent-usage'+suffix);shutil.copy2(live,parent_binary)
         clean('cli-candidate-clean');run('candidate-final-build',['cargo','build','--locked','-p','symbrain-cli','--target-dir',str(target)],env)
