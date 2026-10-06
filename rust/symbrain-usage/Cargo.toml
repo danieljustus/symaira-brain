@@ -8,6 +8,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
+cap-std.workspace = true
 chrono.workspace = true
 libc.workspace = true
 serde.workspace = true

@@ -13,8 +13,8 @@ def sha(path):
 
 def main():
     oracle, native, output, go_commit, controls_path = sys.argv[1:]
-    expected = json.loads(Path(oracle).read_text())
-    actual = json.loads(Path(native).read_text())
+    expected = json.loads(Path(oracle).read_text(encoding='utf-8'))
+    actual = json.loads(Path(native).read_text(encoding='utf-8'))
     if len(expected) != 133 or len(actual) != 133:
         raise SystemExit("incomplete provider matrix")
     for go_case, rust_case in zip(expected, actual, strict=True):
@@ -24,13 +24,13 @@ def main():
             raise SystemExit(f"request mismatch: {go_case['id']}")
         if not go_case["json"] or not go_case["table"] or not go_case["requests"]:
             raise SystemExit(f"missing output/request proof: {go_case['id']}")
-    controls = json.loads(Path(controls_path).read_text())
+    controls = json.loads(Path(controls_path).read_text(encoding='utf-8'))
     if len(controls["results"]) != 4 or not controls["all_controls_failed_as_expected"]:
         raise SystemExit("negative controls incomplete")
     receipt = {
         "schema_version": 1,
-        "candidate_source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
-        "candidate_dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], text=True).strip()),
+        "candidate_source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True, encoding='utf-8').strip(),
+        "candidate_dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], text=True, encoding='utf-8').strip()),
         "go_source_commit": go_commit,
         "go_toolchain": "go1.26.7",
         "platform": platform.system(),
@@ -45,7 +45,7 @@ def main():
         "native_cases": actual,
         "cases": expected,
     }
-    Path(output).write_text(json.dumps(receipt, indent=2, ensure_ascii=True) + "\n")
+    Path(output).write_text(json.dumps(receipt, indent=2, ensure_ascii=True) + "\n", encoding='utf-8')
     print(f"usage #620: {len(actual)}/{len(actual)} reports, 266 JSON/table byte comparisons, complete request walks match")
 
 

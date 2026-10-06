@@ -1,0 +1,491 @@
+{
+  "records": [
+    {
+      "original": "/tmp/symaira-usage768-argv-expanded-controls-prototype.json",
+      "retained": "symaira-usage768-argv-expanded-controls-prototype.json",
+      "sha256": "b256599d7f8f6cdb5f7cd9e4674b181547c4ec97be6a5d01bad689db6e750853",
+      "bytes": 8945
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-expanded-controls-prototype.log",
+      "retained": "symaira-usage768-argv-expanded-controls-prototype.log",
+      "sha256": "4b562cab9a87dd7e8392b81a19cd94c3a272b263d11c8057e277aa2706e9d412",
+      "bytes": 58
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-expanded-prototype.json",
+      "retained": "symaira-usage768-argv-expanded-prototype.json",
+      "sha256": "72069835f6c6d87b98df2dadfa122bdf7d6bbe0f530f14086c19f1d68e28cc34",
+      "bytes": 185777
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-expanded-prototype.log",
+      "retained": "symaira-usage768-argv-expanded-prototype.log",
+      "sha256": "773bae48dbbed341fd93b67fb8316682d4a231a2d3e4027c16881723b2d9d924",
+      "bytes": 86
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-build.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-build.json",
+      "sha256": "18d39d8ce4febeb733f3ed90c24e93b7b625e2ee39a9b04bcf562da5baf0646e",
+      "bytes": 1765
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-candidate-build.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-candidate-build.log",
+      "sha256": "547f81663efc3b06aed064a56a15afeec476876bd8e347af17242efaaf920624",
+      "bytes": 147
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-candidate-clean.clean.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-candidate-clean.clean.log",
+      "sha256": "8152eede556f25ce409c6491e0a1aab4fef4e34c459ee432e7b444757095820b",
+      "bytes": 37
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-candidate-clean.dry-run.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-candidate-clean.dry-run.log",
+      "sha256": "d39e4c4c1dbef4b77b80ca8354aa8689d62eba6ac232efd483a106b26969b1d2",
+      "bytes": 2988
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-candidate-clean.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-candidate-clean.json",
+      "sha256": "c6277d16f1c40852165ce107ff2f1f56fcc1dbfa6bb2e16a0055f85839175fc1",
+      "bytes": 5883
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-candidate-clean.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-candidate-clean.log",
+      "sha256": "0d0ded93888c9818dca9c994eca8bf1e563c33e8f865e2c4eb9a1c7dedf7e95d",
+      "bytes": 75
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-controls.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-controls.json",
+      "sha256": "3052e52b8c5c4f52c762f068a3caf0f40515bef782114d167d471fd59a4806e7",
+      "bytes": 8945
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-controls.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-controls.log",
+      "sha256": "4b562cab9a87dd7e8392b81a19cd94c3a272b263d11c8057e277aa2706e9d412",
+      "bytes": 58
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-initial-clean.clean.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-initial-clean.clean.log",
+      "sha256": "296c72366c2e33b64039079a019778354a6d6bc61cf1260b4a32b17400fc4744",
+      "bytes": 39
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-initial-clean.dry-run.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-initial-clean.dry-run.log",
+      "sha256": "4a520f546bb37f50b393e7fccde0debaf10295205e5b0cc87416d4752ad31ad9",
+      "bytes": 74364
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-initial-clean.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-initial-clean.json",
+      "sha256": "df3dfa2b0f4483e6ce190a57fa37baf945a7f24d1c9d506885264dea07bb782d",
+      "bytes": 130709
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-initial-clean.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-initial-clean.log",
+      "sha256": "7c1d3113a7a644d4dc1a684c8ebc88651886d669ebb797fe40761f6284c5c742",
+      "bytes": 77
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-parent-build.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-parent-build.log",
+      "sha256": "e46300b67d87b97aa73868e2b6701cc7da1dd2721b54ad3b3efbb7a0a43e11de",
+      "bytes": 2184
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-parent-clean.clean.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-parent-clean.clean.log",
+      "sha256": "4f8b97c4263220feff2d08bebff0ac74c1713ccd5464ba0b49e5d5866a37f641",
+      "bytes": 37
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-parent-clean.dry-run.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-parent-clean.dry-run.log",
+      "sha256": "e13bfca9d7d7b5448a8ed67564131ac7e1f4ff2c01a71c1435da064ead49fb4c",
+      "bytes": 2988
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-parent-clean.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-parent-clean.json",
+      "sha256": "26ab562a648def6cf45ad6e683e961e090b9721c942662b0863b7e28c291cf80",
+      "bytes": 5880
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv-parent-clean.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv-parent-clean.log",
+      "sha256": "0d0ded93888c9818dca9c994eca8bf1e563c33e8f865e2c4eb9a1c7dedf7e95d",
+      "bytes": 75
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv.json",
+      "sha256": "602b3dba982b173af74c09164c5bc232fd8d005738eafc30a279904a71abb37f",
+      "bytes": 185777
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/argv.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/argv.log",
+      "sha256": "773bae48dbbed341fd93b67fb8316682d4a231a2d3e4027c16881723b2d9d924",
+      "bytes": 86
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/baseline-go.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/baseline-go.json",
+      "sha256": "bf8998104934c6daae18464f767b67e76f083f73d0748b9aa8e532ee57685153",
+      "bytes": 192271
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/baseline-input.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/baseline-input.json",
+      "sha256": "52613525f1c0ca38395603e00ac00cc0fdcc42c9bab14aaeb70e0aa2a2da76dc",
+      "bytes": 161191
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/baseline-native.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/baseline-native.json",
+      "sha256": "58b2467f45096975a3cf982c1d84d36c07c675cffb8912d9fd771c31d05cd67d",
+      "bytes": 9798
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/cli.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/cli.json",
+      "sha256": "1f295d493588760cd6be3cfb76eb5352fc83adce071f8af45d74b0fc93819f2b",
+      "bytes": 308149
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/cli.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/cli.log",
+      "sha256": "22a85b7d6fb4627e689cc08da4ab0bd0f19f5b3301017967b83515fdbac5f068",
+      "bytes": 47
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/controls.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/controls.json",
+      "sha256": "b30bf5628f6d88fd83251f99f23a5e7e3aae0ca8b7c40665c2afdee17fd1f9f5",
+      "bytes": 11063
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/controls.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/controls.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/go-build.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/go-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/go-constructors.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/go-constructors.log",
+      "sha256": "28ac6ed7e1f95f847cd463ad9d2900e34c5426a84723b62e35f5e119651d8e76",
+      "bytes": 65
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/go-original-baseline.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/go-original-baseline.log",
+      "sha256": "823754fc6495a9a2a7c5a929b50cb6c22326f63bff0f8cd57a03613ce716c727",
+      "bytes": 65
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/go-owners.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/go-owners.log",
+      "sha256": "2dec5aa8ab58ebae2b1f078e618bc969f3c016407828ddb2a7f4683d73fa3fb4",
+      "bytes": 65
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/go.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/go.json",
+      "sha256": "a65d3919b45ba84221e179474067131a8313fa6191ca98c516d5ba2b2614be01",
+      "bytes": 173471
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/input.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/input.json",
+      "sha256": "917a1f7a31e7db3c614531dc2b8c4a022fd4638194d5d9905f78ea802ba11ec8",
+      "bytes": 845556
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/native-build.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/native-build.log",
+      "sha256": "a968b9ed97394851ca4fe5cdefa514db519dafa70c57417230fbc61eea69f337",
+      "bytes": 147
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/native-constructors.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/native-constructors.log",
+      "sha256": "acdf7aa154bfac6930c92ceac407d292555e535e8e41d1c4dc6b52b8bf83fdb4",
+      "bytes": 364
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/native.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/native.json",
+      "sha256": "d7dd433962f1b471b743b9266628846378b9fcd786ee27d1110b3ef1586508ed",
+      "bytes": 84
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/owner-cli.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/owner-cli.json",
+      "sha256": "def14bd5b5eb7246473ce138323cc20b211a1c2740cc78cf1fd3f55436ce2977",
+      "bytes": 34187
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/owner-cli.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/owner-cli.log",
+      "sha256": "cb7ff35f6ef5169d325eb8fb8a10f30b3a6bb90b93483bb8ea200d97108b84c9",
+      "bytes": 46
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/owner-controls.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/owner-controls.json",
+      "sha256": "517da048de392b28a96d6c7aefb9d42922fbb35920c55c776890067c32d840c6",
+      "bytes": 1992
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/owner-native.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/owner-native.json",
+      "sha256": "e5fc1d5b90f642ad53bcde292bed175a929ca1d3512d54b11a33d0b832d20cef",
+      "bytes": 89
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/owner.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/owner.json",
+      "sha256": "8abed90809e50761dbd824ef9f0db3a03b662ea044db7c78e6820781f7155a4e",
+      "bytes": 43375
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/path-native.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/path-native.json",
+      "sha256": "de7bbf9a5c03cf071975edf7ce1a95f4351b8db9c5174361cd906e1a335fa919",
+      "bytes": 73
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.evidence/path.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.evidence/path.json",
+      "sha256": "f2458cc7f1d019e96e41d9cdffa2a6b7351b24c845f8546d7297057d2ea464e5",
+      "bytes": 3052
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.json",
+      "retained": "symaira-usage768-argv-presource-local-v2.json",
+      "sha256": "6b659c41bd86ff389f924632ee69b7bcfe25146a1f939aa1e91b68f978640b12",
+      "bytes": 839995
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local-v2.log",
+      "retained": "symaira-usage768-argv-presource-local-v2.log",
+      "sha256": "fbf2cc00fc47d79860c407bc9fe53b0a4ceb3faea389124409c12b16a317c7df",
+      "bytes": 2810
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/argv-build.json",
+      "retained": "symaira-usage768-argv-presource-local.evidence/argv-build.json",
+      "sha256": "3c585834e38a7fc4223578b5757fb62650130ea7914a7864fc8857886079e992",
+      "bytes": 1082
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/argv-candidate-build.log",
+      "retained": "symaira-usage768-argv-presource-local.evidence/argv-candidate-build.log",
+      "sha256": "1094a36867300c1838cdc4ee40efe961d83bac574665f8ee57a40d5b1e88698c",
+      "bytes": 60
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/argv-parent-build.log",
+      "retained": "symaira-usage768-argv-presource-local.evidence/argv-parent-build.log",
+      "sha256": "5fc3a0f7dea2dbc91a3b853bf51891f7baa7b8a7678d1253691ed26c8740e1ce",
+      "bytes": 2184
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/argv.log",
+      "retained": "symaira-usage768-argv-presource-local.evidence/argv.log",
+      "sha256": "ab2833d7aba467c7cfd64b944151188343115e7272d1f5e273863e22582b0c09",
+      "bytes": 3432
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/baseline-go.json",
+      "retained": "symaira-usage768-argv-presource-local.evidence/baseline-go.json",
+      "sha256": "e1fbc6977bf414daaba2156359ed6708f9669496840823e3b8dae68a38d044ff",
+      "bytes": 192271
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/baseline-input.json",
+      "retained": "symaira-usage768-argv-presource-local.evidence/baseline-input.json",
+      "sha256": "52613525f1c0ca38395603e00ac00cc0fdcc42c9bab14aaeb70e0aa2a2da76dc",
+      "bytes": 161191
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/baseline-native.json",
+      "retained": "symaira-usage768-argv-presource-local.evidence/baseline-native.json",
+      "sha256": "58b2467f45096975a3cf982c1d84d36c07c675cffb8912d9fd771c31d05cd67d",
+      "bytes": 9798
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/cli.json",
+      "retained": "symaira-usage768-argv-presource-local.evidence/cli.json",
+      "sha256": "1f295d493588760cd6be3cfb76eb5352fc83adce071f8af45d74b0fc93819f2b",
+      "bytes": 308149
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/cli.log",
+      "retained": "symaira-usage768-argv-presource-local.evidence/cli.log",
+      "sha256": "22a85b7d6fb4627e689cc08da4ab0bd0f19f5b3301017967b83515fdbac5f068",
+      "bytes": 47
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/controls.json",
+      "retained": "symaira-usage768-argv-presource-local.evidence/controls.json",
+      "sha256": "1b91c898e53929e2dfcea2bfacfed7d08da494018b4f796425d52ded666c640d",
+      "bytes": 11063
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/controls.log",
+      "retained": "symaira-usage768-argv-presource-local.evidence/controls.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/go-build.log",
+      "retained": "symaira-usage768-argv-presource-local.evidence/go-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/go-constructors.log",
+      "retained": "symaira-usage768-argv-presource-local.evidence/go-constructors.log",
+      "sha256": "324d0a1ea4548b6d4f2edf3523a0bcc68002f9e1fce20148954eaf69f7f3cb93",
+      "bytes": 65
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/go-original-baseline.log",
+      "retained": "symaira-usage768-argv-presource-local.evidence/go-original-baseline.log",
+      "sha256": "823754fc6495a9a2a7c5a929b50cb6c22326f63bff0f8cd57a03613ce716c727",
+      "bytes": 65
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/go-owners.log",
+      "retained": "symaira-usage768-argv-presource-local.evidence/go-owners.log",
+      "sha256": "2dec5aa8ab58ebae2b1f078e618bc969f3c016407828ddb2a7f4683d73fa3fb4",
+      "bytes": 65
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/go.json",
+      "retained": "symaira-usage768-argv-presource-local.evidence/go.json",
+      "sha256": "84faf127212593beedb7b1b138d31464b10dc9508560ea800ef39cd0aae36f58",
+      "bytes": 173471
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/input.json",
+      "retained": "symaira-usage768-argv-presource-local.evidence/input.json",
+      "sha256": "917a1f7a31e7db3c614531dc2b8c4a022fd4638194d5d9905f78ea802ba11ec8",
+      "bytes": 845556
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/native-build.log",
+      "retained": "symaira-usage768-argv-presource-local.evidence/native-build.log",
+      "sha256": "9ae36bb22d8f0f810a77044760863f70b81405396a32cce477ec08eecd4e6d59",
+      "bytes": 60
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/native-constructors.log",
+      "retained": "symaira-usage768-argv-presource-local.evidence/native-constructors.log",
+      "sha256": "4134e62d8433487cd75bbe858f36a98abea40f2305db7b2e0d1c6e0726889d6e",
+      "bytes": 455
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/native.json",
+      "retained": "symaira-usage768-argv-presource-local.evidence/native.json",
+      "sha256": "d7dd433962f1b471b743b9266628846378b9fcd786ee27d1110b3ef1586508ed",
+      "bytes": 84
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/owner-cli.json",
+      "retained": "symaira-usage768-argv-presource-local.evidence/owner-cli.json",
+      "sha256": "def14bd5b5eb7246473ce138323cc20b211a1c2740cc78cf1fd3f55436ce2977",
+      "bytes": 34187
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/owner-cli.log",
+      "retained": "symaira-usage768-argv-presource-local.evidence/owner-cli.log",
+      "sha256": "cb7ff35f6ef5169d325eb8fb8a10f30b3a6bb90b93483bb8ea200d97108b84c9",
+      "bytes": 46
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/owner-controls.json",
+      "retained": "symaira-usage768-argv-presource-local.evidence/owner-controls.json",
+      "sha256": "5e5b5ab940fef833cbbd5fe1d0876b21c5afc277c2aa13ace58dc29b809fc749",
+      "bytes": 1992
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/owner-native.json",
+      "retained": "symaira-usage768-argv-presource-local.evidence/owner-native.json",
+      "sha256": "e5fc1d5b90f642ad53bcde292bed175a929ca1d3512d54b11a33d0b832d20cef",
+      "bytes": 89
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/owner.json",
+      "retained": "symaira-usage768-argv-presource-local.evidence/owner.json",
+      "sha256": "c45d1397eddf9b78fb59204da27feed80f9d42d60c85b09e68ae00fb6994890a",
+      "bytes": 43375
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/path-native.json",
+      "retained": "symaira-usage768-argv-presource-local.evidence/path-native.json",
+      "sha256": "de7bbf9a5c03cf071975edf7ce1a95f4351b8db9c5174361cd906e1a335fa919",
+      "bytes": 73
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.evidence/path.json",
+      "retained": "symaira-usage768-argv-presource-local.evidence/path.json",
+      "sha256": "f2458cc7f1d019e96e41d9cdffa2a6b7351b24c845f8546d7297057d2ea464e5",
+      "bytes": 3052
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.json",
+      "retained": "symaira-usage768-argv-presource-local.json",
+      "sha256": "d46d321b9cda9c162f7fc17ad5fcc2b6b0983af58d62dd2124be7a52866f7c0f",
+      "bytes": 129
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-presource-local.log",
+      "retained": "symaira-usage768-argv-presource-local.log",
+      "sha256": "3c92a0b49c04dbad86b3c7795f695242138f0a4212ab949208afb74030a169a6",
+      "bytes": 5782
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-prototype-build.log",
+      "retained": "symaira-usage768-argv-prototype-build.log",
+      "sha256": "bf583b33feb52786c8f762d662bcdcdb77af794c742be5c2166c8258b90d6d14",
+      "bytes": 1752
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-prototype-cli-extra.json",
+      "retained": "symaira-usage768-argv-prototype-cli-extra.json",
+      "sha256": "2141b5c6128fb2cac5baf687f326eb119e9c76b2a8c6b79c4449a48eb74275ae",
+      "bytes": 61569
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-prototype22.log",
+      "retained": "symaira-usage768-argv-prototype22.log",
+      "sha256": "33f24ee9342d3642ea39dd679dc6fa8c882c5103b550f60cac65f1fe682333b6",
+      "bytes": 8
+    },
+    {
+      "original": "/tmp/symaira-usage768-argv-prototype22.py",
+      "retained": "symaira-usage768-argv-prototype22.py",
+      "sha256": "a569567be1e7d2144e9b6a313acc0168ee40baad9af76af319c46e8becc2cfc8",
+      "bytes": 2654
+    }
+  ],
+  "scope": "Dirty prototypes and original failed shared-target restoration attempt preserved separately from subsequent successful package-cleaned dirty gate. Archives named by clean receipts remain at original /tmp paths; source-clean acceptance will be separate."
+}

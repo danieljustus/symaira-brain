@@ -1,0 +1,39 @@
+{
+  "scope": "Actual Linux/amd64 Go1.26.7 SDK scalar/int only; no frozen-provider/current-native or cross-platform observation",
+  "entries": [
+    {
+      "original": "/tmp/symaira-usage768-decimal-sdk-proof-81/receipt.json",
+      "bytes": 1654,
+      "sha256": "f73804cda5812568893341792d71247953ca0960697da664177c68432d369e80",
+      "archive": "receipt.json.gz",
+      "archive_sha256": "a218e77b8961037753ea89e5eaf4d2f9b9ccfe7e8b87fe229b669a9679bb8dca",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-sdk-proof-81/stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "stderr.gz",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-sdk-proof-81/stdout.json",
+      "bytes": 1048041,
+      "sha256": "0a0e7a8196649cb0c3af04815d58b34032c2292c682a65c0bfd944a7aaa352b9",
+      "archive": "stdout.json.gz",
+      "archive_sha256": "390704f20f13c45d7d28a1f267a6b204ac99888703eab4bd6a076fca52884183",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-sdk-proof-81/input.json",
+      "bytes": 946184,
+      "sha256": "555c3e4ea593ccca9271867e5644c7c6846c653fd7443535a5c042d931264c73",
+      "archive": "input.json.gz",
+      "archive_sha256": "83a9e7e9b746a7692ad8f088efba788deea0fc3aa45c0b8ef9a6f6ada7fcfbb7",
+      "roundtrip": true
+    }
+  ],
+  "original71_archive": "migration/evidence/usage-retry-after-768/decimal-sdk-linux-amd64-71/retention.json",
+  "current_native_execution": false
+}

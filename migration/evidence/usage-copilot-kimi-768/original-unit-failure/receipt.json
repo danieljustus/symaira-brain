@@ -1,0 +1,7 @@
+{
+  "status": "original failed ordinary suite; retained historical evidence, not final validation",
+  "log_sha256": "ab8c680644f4330039ff2368a3d2edc1acb5e58e20f8f84783efcad4931c0f16",
+  "failed_test": "providers::provider_config::tests::copilot_token_prefers_the_github_host_entry",
+  "observed": "64 passed; 1 failed; 2 ignored",
+  "reason": "Bare github.com was incorrectly assumed to have priority; actual Go prioritizes literal github.com: prefix and otherwise iterates its fallback map in unspecified order."
+}

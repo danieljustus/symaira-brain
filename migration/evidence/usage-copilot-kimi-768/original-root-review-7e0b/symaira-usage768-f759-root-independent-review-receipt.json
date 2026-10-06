@@ -1,0 +1,966 @@
+{
+  "disposition": "REQUEST_CHANGES: one P2 wrong credential owner on lexically uncleaned symlink paths; inherited ordinary-token defect becomes newly reachable for literal reference tokens",
+  "head": "7e0b63359123f0df8a19176313930a24e0dc4c40",
+  "source": "f75993eb5155502a69a249c345c258b4277dece2",
+  "parent": "fdfea20421b77ddf76b9beb94827e3497537cf96",
+  "clean": true,
+  "binary_sha256": "4d0417cf0c33f6c664e5988402493c835a8fd1520b78bb76e4aa5e00d3a2b60c",
+  "reports": {
+    "local": {
+      "report_sha256": "2cb4ac0bb2d31fc0b447e367e32372922e2b843c93c0d0a8b9e6e553076f3026",
+      "case_count": 89,
+      "full_count": 81,
+      "cli_count": 111,
+      "controls": 5,
+      "manifest_count": 59,
+      "evidence_sha256": {
+        "/tmp/symaira-usage768-f759-root-local.evidence/baseline-native.json": "58b2467f45096975a3cf982c1d84d36c07c675cffb8912d9fd771c31d05cd67d",
+        "/tmp/symaira-usage768-f759-root-local.evidence/baseline-go.json": "56ffc981588a173ac6a833fa7fd3d38fbbb8ffb438dd6a8328dbaa396c100658",
+        "/tmp/symaira-usage768-f759-root-local.evidence/baseline-input.json": "52613525f1c0ca38395603e00ac00cc0fdcc42c9bab14aaeb70e0aa2a2da76dc",
+        "/tmp/symaira-usage768-f759-root-local.evidence/controls.json": "bd244d87baa5f8c18fbc0049ae390c76f1dfc21180f8816a566db6e829682b93",
+        "/tmp/symaira-usage768-f759-root-local.evidence/cli.json": "75a15b57f0cf7d209361e61eb170a0d95ce886c096853a2effbca4b247ab302a",
+        "/tmp/symaira-usage768-f759-root-local.evidence/input.json": "917a1f7a31e7db3c614531dc2b8c4a022fd4638194d5d9905f78ea802ba11ec8",
+        "/tmp/symaira-usage768-f759-root-local.evidence/native.json": "d7dd433962f1b471b743b9266628846378b9fcd786ee27d1110b3ef1586508ed",
+        "/tmp/symaira-usage768-f759-root-local.evidence/go.json": "9c0b24cf0185b26dc5c600bf9c59f616d0c8e97cb1b13c57a728dbdb900bad2b",
+        "/tmp/symaira-usage768-f759-root-local.evidence/controls.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "/tmp/symaira-usage768-f759-root-local.evidence/cli.log": "22a85b7d6fb4627e689cc08da4ab0bd0f19f5b3301017967b83515fdbac5f068",
+        "/tmp/symaira-usage768-f759-root-local.evidence/native-build.log": "1094a36867300c1838cdc4ee40efe961d83bac574665f8ee57a40d5b1e88698c",
+        "/tmp/symaira-usage768-f759-root-local.evidence/native-constructors.log": "03a37d819b6a7b937cbb5adedc5820cb27b5f7fb28d9148518e350e3ed0d9a40",
+        "/tmp/symaira-usage768-f759-root-local.evidence/go-original-baseline.log": "41a14c2e369fed6c5d8fda1bafefcfbd90281468f9bcb078d67d4283060330f0",
+        "/tmp/symaira-usage768-f759-root-local.evidence/go-constructors.log": "41a14c2e369fed6c5d8fda1bafefcfbd90281468f9bcb078d67d4283060330f0",
+        "/tmp/symaira-usage768-f759-root-local.evidence/go-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "files": {
+      "report_sha256": "1ba5b05ef481f6db9f4be6898a1886c905aad2d3aeeb7ce91146b4016b381deb",
+      "case_count": 86,
+      "full_count": 85,
+      "cli_count": 151,
+      "controls": 5,
+      "manifest_count": 55,
+      "evidence_sha256": {
+        "/tmp/symaira-usage768-f759-root-files.evidence/filesystem.json": "3acaaaca28c754ef3d884d70d43333c262b6c99e3be5b08442287614abe3c827",
+        "/tmp/symaira-usage768-f759-root-files.evidence/controls.json": "42c0fca35f4c13aa8d90438d2b600f2c18e05f26b67c2db98f60275c56a25d57",
+        "/tmp/symaira-usage768-f759-root-files.evidence/cli.json": "6e1136d360b5c9d5f8071af844f0d8b53765ddbbc33b6f42d108cf9ad82e0714",
+        "/tmp/symaira-usage768-f759-root-files.evidence/input.json": "24cfdacd09840a91900555d2a3e20dc70e86d427f3d0b0ed264f5a2fe551f9cc",
+        "/tmp/symaira-usage768-f759-root-files.evidence/native.json": "9a75a2e9f88a6a114263de58f57cf40ee57a834ef733ba399c785c0ee69290ec",
+        "/tmp/symaira-usage768-f759-root-files.evidence/go.json": "6c1d89770392d3e229df2348251179e773a071220adf4bef459eedd1acc657ed",
+        "/tmp/symaira-usage768-f759-root-files.evidence/controls.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "/tmp/symaira-usage768-f759-root-files.evidence/filesystem.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "/tmp/symaira-usage768-f759-root-files.evidence/cli.log": "70f9a5a40d08b92f72a27b1471c92180c50e0c8fab02ad60666302444babdc35",
+        "/tmp/symaira-usage768-f759-root-files.evidence/native-build.log": "1094a36867300c1838cdc4ee40efe961d83bac574665f8ee57a40d5b1e88698c",
+        "/tmp/symaira-usage768-f759-root-files.evidence/native-constructors.log": "440570ddcc59da6fbf3db1a4342dad33f5ab06d688e8866bb3395dae753686b9",
+        "/tmp/symaira-usage768-f759-root-files.evidence/go-constructors.log": "ca0c68ab61e2f53d9cfa64772bb385f58c98efa4e4f74c08f951f0398668681a",
+        "/tmp/symaira-usage768-f759-root-files.evidence/go-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "hermes": {
+      "report_sha256": "24dc40a84f92e0fd336e2b61cb6f7fb0c826bda15d94f9144c16e38a04c6aa4b",
+      "case_count": 96,
+      "full_count": 96,
+      "cli_count": 104,
+      "controls": 5,
+      "manifest_count": 53,
+      "evidence_sha256": {
+        "/tmp/symaira-usage768-f759-root-hermes.evidence/filesystem.json": "a7db210799e350f6f8d398156515e2be72d9762f9417ed366c5fb00ce95b1df1",
+        "/tmp/symaira-usage768-f759-root-hermes.evidence/controls.json": "0afff21cb2fda2a5d097c5590367abd3ac8d02606f657c78e481e3ed36836c47",
+        "/tmp/symaira-usage768-f759-root-hermes.evidence/cli.json": "c971e87c1cbd35194cf4d959524d1e70eb92449cd645367d628d84a4efeb04bc",
+        "/tmp/symaira-usage768-f759-root-hermes.evidence/input.json": "2b4ee1bf165f63c7bad553bceb9b299af6c536e0ebc3d00e4ae0b351d0f7963a",
+        "/tmp/symaira-usage768-f759-root-hermes.evidence/native.json": "c4acb2c86d137f27e5acaa385d8efebe5c6476d8fe93660bfc4a6a1b7a9b111e",
+        "/tmp/symaira-usage768-f759-root-hermes.evidence/go.json": "cb073de4ddb49ebf7097937c41d0c36a033dcd8f66d67f78eca45dc929d43674",
+        "/tmp/symaira-usage768-f759-root-hermes.evidence/controls.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "/tmp/symaira-usage768-f759-root-hermes.evidence/filesystem.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "/tmp/symaira-usage768-f759-root-hermes.evidence/cli.log": "5b5cffcf49a8cee3310b5765c3695d0b03ed05d74aebddfb346401a55d47ad32",
+        "/tmp/symaira-usage768-f759-root-hermes.evidence/native-build.log": "8a10254974bbd1a52574924f2ba6e2e78269a27b8d61c996e00c4498f15edb56",
+        "/tmp/symaira-usage768-f759-root-hermes.evidence/native-constructors.log": "be3d9344ea9c3be82507890452793ae412173df0e79c39a45df6564ff90df2fc",
+        "/tmp/symaira-usage768-f759-root-hermes.evidence/go-constructors.log": "3edbf5e9fda29d0e9614f0908721b0e741cea65229dc4d8c5e3bf6b33409f3ea",
+        "/tmp/symaira-usage768-f759-root-hermes.evidence/go-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    "reference": {
+      "report_sha256": "199b4340d9da1fd41e18b045269eab349b9ed2a4a87c21e1748e8eb89876023b",
+      "case_count": 44,
+      "full_count": 44,
+      "cli_count": 110,
+      "controls": 5,
+      "manifest_count": 49,
+      "evidence_sha256": {
+        "/tmp/symaira-usage768-f759-root-reference.evidence/controls.json": "36124edd30394bdf373d277c3d762bc3fd8d6278973fc9acee48df5efd2dcd7c",
+        "/tmp/symaira-usage768-f759-root-reference.evidence/cli.json": "b4262aa75bb6ea27c5f0a6c9702adfbfbd805e561d535b167e5bd5eb64f68581",
+        "/tmp/symaira-usage768-f759-root-reference.evidence/native.json": "bea03abfc4ad02564ef447d21b6b9757a6e07684d1c3e38b254816d9f85cbbd6",
+        "/tmp/symaira-usage768-f759-root-reference.evidence/go.json": "83400643a8c7405a7094552e2769d3f1c19eed704c1b030d724d35a1a68f8cb5",
+        "/tmp/symaira-usage768-f759-root-reference.evidence/controls.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "/tmp/symaira-usage768-f759-root-reference.evidence/cli.log": "19f63b9a5d3edda82fe5aefd0176889cec505f985da89187b7be4c1c5299cdea",
+        "/tmp/symaira-usage768-f759-root-reference.evidence/native-build.log": "4b395c9c76c7f7fb5221d30df7320c7a2387ff3842c426dbee6a59a54b5cffab",
+        "/tmp/symaira-usage768-f759-root-reference.evidence/native-constructors.log": "d73a922574260ada6df088e1a0b330fa011ab863c94207a3dac82ed317335a9d",
+        "/tmp/symaira-usage768-f759-root-reference.evidence/go-constructors.log": "83401a37946a4436a4c45702c63ae18ce80bad6ff68d1662ca072b885f7b5fcb",
+        "/tmp/symaira-usage768-f759-root-reference.evidence/go-build.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  },
+  "manifest_counts": [
+    59,
+    55,
+    53,
+    49
+  ],
+  "shared_entries": 46,
+  "retained_parent_evidence_files": 18,
+  "author_artifacts_verified": 61,
+  "author_actual_binaries_verified": 7,
+  "tests": {
+    "passed": 355,
+    "failed": 0,
+    "ignored": 4,
+    "summaries": 33,
+    "four_oracle_seams_explicitly_executed": true
+  },
+  "changed_source_sha256": {
+    ".gitattributes": "4fcbec3cd9ca58e8ddcd70f7e2bcd4b88d434e84d185b5026f05cac9459d92b5",
+    ".github/workflows/ci.yml": "080971f83e798c7d33d0e693e68e1ccc7beb917a55ab2e3bc2fadbf113125b73",
+    "docs/adr/usage-copilot-kimi-files-768.md": "df9bfb695b6867128468ec8c75b6060de3e2182f11e89fdfd4f651d9784b7c1d",
+    "docs/adr/usage-local-file-contracts-768.md": "677126f2e0c58e33d8014040fefc3c7407cad4658ea5b24f5d92667eca68867c",
+    "migration/contract-matrix.csv": "e0af532fe63421c93b109eb9b7936c0d86e4ee84ce64f0315e671ed8225cfe9b",
+    "migration/evidence/usage-copilot-kimi-768/original-unit-failure/original-tests.log": "ab8c680644f4330039ff2368a3d2edc1acb5e58e20f8f84783efcad4931c0f16",
+    "migration/evidence/usage-copilot-kimi-768/original-unit-failure/receipt.json": "d023e7ed27bf59536abecff223fa5fc3110684b7709e1e383707159afe39af66",
+    "migration/evidence/usage-local-files-768/README.md": "d4e74dcdee230970ac93369543ac8f5fcfe3dcd323b2b32a8cb6a27a47ec0744",
+    "migration/evidence/usage-local-files-768/linux-go-baseline.json": "dff2dde8fdbe7edd1e5af290d5928b707838113ac4009c404b9834808374dd7d",
+    "migration/implementation-plan.md": "b08513f6bd7a1ea8147ab50a0dbca31fb9c621b54144063f14ec4b9dc422d554",
+    "rust/symbrain-cli/tests/mcp_cli_tests.rs": "52bdea9ea8b8a68c6474ea638ff0763450edff1e8ae720a0edfef6dec0fbee66",
+    "rust/symbrain-usage/src/copilot_kimi_oracle_tests.rs": "73d6c64e3edcd2cf7e42bb9c03c04a68cd1a51e463af0339c193ffb53cac3964",
+    "rust/symbrain-usage/src/provider_config.rs": "704e98c0a3a46e2a9717fc40b53e2c8637582f9505301aca9e7f937a9fff8612",
+    "rust/symbrain-usage/src/provider_config/copilot_file.rs": "a031ddee830e323b0b4226e660f3814bc9cf4348b79eeff50dc387fa484e055f",
+    "rust/symbrain-usage/src/provider_config/files.rs": "a4bacd346e9379d8bf19c13c98bf5abf1f939bc9b937f4ffd8ca0454bc294847",
+    "rust/symbrain-usage/src/provider_config/kimi_nous.rs": "d9e1ae0484db827e95c80a71b1a4e9923222bae674e1f643e0345abd72b55d1b",
+    "rust/symbrain-usage/src/provider_config/routing.rs": "05a4a8e0630a64e2a693966e9276ce47b76396a77bc8ab8802a91764ad664194",
+    "rust/symbrain-usage/src/provider_config_tests.rs": "d21460f4c64e449a71201a75cede6c5f21182c64dae3eaab95c783c78a53f488",
+    "rust/symbrain-usage/src/providers.rs": "9108a20568bae0160698dba8eab1760d0bc332d7a8529212da3ab5e93b2d9a31",
+    "scripts/usage-copilot-kimi-oracle/README.md": "cd7706e17721f511cee7bb6d4272d3ce5f8566c6c307dee72f9f88c8ba9194cb",
+    "scripts/usage-copilot-kimi-oracle/cases.py": "c5cca4f7c474a586795fac34c9ffb47c5e073ec199b4e884d2729d3b97d7af1f",
+    "scripts/usage-copilot-kimi-oracle/cli.py": "c21bbfd60cbb69f559d610bfe611b39524ea89c7473b5d516fd202970e476c3e",
+    "scripts/usage-copilot-kimi-oracle/controls.py": "401c2e219e955849c436695983bf37a62eda73df25837c1ea8771625f69decfa",
+    "scripts/usage-copilot-kimi-oracle/provider_test.go.txt": "3b862ca0d66d251baf30d6bd77ca32c27316b6d401ab1ebd86679fd696b626c3",
+    "scripts/usage-copilot-kimi-oracle/receipt.py": "6b6271653f7a721bbc203a98268410df750693d8f1b2e7f15034ba6bbc801d6b",
+    "scripts/usage-copilot-kimi-oracle/run.sh": "cfa484746053e71517aaf48ff394eb4231b32cb7363097dd391d550a80cefcbb",
+    "scripts/usage-local-files-baseline/README.md": "5c17dc553fc53d15108ffba9545e19f71e03ad7e8452c81ec8d132296589408b",
+    "scripts/usage-local-files-baseline/cases.py": "293f4daf59a104268b3acd1d40c9f8fe8f9f729b8c77f1c5981484f831e13ddf",
+    "scripts/usage-local-files-baseline/provider_test.go.txt": "6e77ff76b2a140bd56b29cc8d3248b2994080daf48d0ee4a8e67252f35a72028",
+    "scripts/usage-local-files-baseline/run.sh": "3baddf2db484e6623e5a217b0be9ad3e44bab3fb5cc6761d2c7a2d8015cedc41"
+  },
+  "logs_sha256": {
+    "/tmp/symaira-usage768-f759-root-actionlint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/symaira-usage768-f759-root-fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/symaira-usage768-f759-root-clippy.log": "40108eb5c2e432741fc7f36afdf5c793ec02b19e7b1ce5e51bdd2ba377bd26cb",
+    "/tmp/symaira-usage768-f759-root-tests.log": "ea6d4015b62ad2a3cfb5b94d084bb0788fb00a9479f1934d5f7bdc3e4439347c",
+    "/tmp/symaira-usage768-f759-root-reference.log": "16861bc60ac407042ed91b582568059ba9690883da5140f79fd8f10eb6e4a02e",
+    "/tmp/symaira-usage768-f759-root-hermes.log": "be58de2fbc38d194f9de3c01b18470f88662e84a579f83b35f0e348424371c27",
+    "/tmp/symaira-usage768-f759-root-files.log": "40d977d5bccef3e8dbb1919ef3a954fee2ac9f80db2af3d93dac99fc88702db1",
+    "/tmp/symaira-usage768-f759-root-local.log": "7344668e7f3f57f944ab1bedfa726cbf91e17c4577aca4e92e4fd464cd5eb8e0"
+  },
+  "original97_accounting": {
+    "original_head": "f6f548145ab4961e009ccea8e8242df9be7d2585",
+    "historical_receipt_sha256": "dff2dde8fdbe7edd1e5af290d5928b707838113ac4009c404b9834808374dd7d",
+    "unchanged_baseline_source_sha256": {
+      "scripts/usage-local-files-baseline/README.md": "5c17dc553fc53d15108ffba9545e19f71e03ad7e8452c81ec8d132296589408b",
+      "scripts/usage-local-files-baseline/cases.py": "293f4daf59a104268b3acd1d40c9f8fe8f9f729b8c77f1c5981484f831e13ddf",
+      "scripts/usage-local-files-baseline/provider_test.go.txt": "6e77ff76b2a140bd56b29cc8d3248b2994080daf48d0ee4a8e67252f35a72028",
+      "scripts/usage-local-files-baseline/run.sh": "3baddf2db484e6623e5a217b0be9ad3e44bab3fb5cc6761d2c7a2d8015cedc41"
+    },
+    "original_inputs": 97,
+    "retained_inputs": 66,
+    "remaining_route_only": 31,
+    "input_sha256": "52613525f1c0ca38395603e00ac00cc0fdcc42c9bab14aaeb70e0aa2a2da76dc",
+    "fresh_go_sha256": "56ffc981588a173ac6a833fa7fd3d38fbbb8ffb438dd6a8328dbaa396c100658",
+    "native_routes_sha256": "58b2467f45096975a3cf982c1d84d36c07c675cffb8912d9fd771c31d05cd67d",
+    "cases": [
+      {
+        "id": "copilot-frozen-single-app-entry-prefers-github-prefix",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-frozen-apps-token-precedes-hosts-token",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-frozen-single-nongithub-app-entry-uses-fallback-pass",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-frozen-single-hosts-entry-when-apps-absent",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-frozen-duplicate-root-key-last-value",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-frozen-alternate-case-token-field-is-go-readable",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-frozen-duplicate-token-fields-use-go-decode-order",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-frozen-unknown-entry-metadata-is-go-readable",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-frozen-wrong-type-entry-is-skipped-before-hosts",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-frozen-malformed-apps-json-falls-through-to-hosts",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-frozen-empty-apps-token-falls-through-to-hosts",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-frozen-multiple-github-tokens-have-map-order-dependent-choice",
+        "provider": "copilot",
+        "proof": "retained eligibility gate",
+        "needs_go_fallback": true,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-frozen-multiple-fallback-tokens-have-map-order-dependent-choice",
+        "provider": "copilot",
+        "proof": "retained eligibility gate",
+        "needs_go_fallback": true,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-frozen-github-prefix-phase-precedes-other-hosts",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-frozen-single-reference-shaped-token-stays-on-go",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-frozen-missing-both-files-has-no-token",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-token-null-retained",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-entry-null-reset",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-unicode-fold",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-unknown-overflow",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-wrong-entry-skipped",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-prefix-priority",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-same-prefix-tokens",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-different-prefix-tokens",
+        "provider": "copilot",
+        "proof": "retained eligibility gate",
+        "needs_go_fallback": true,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-fallback-same-tokens",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-surrogate",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-invalid-utf8",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-deep-unknown",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-environment-preempts-ambiguous-files",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-environment-error-preempts-files",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-literal-env",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-literal-symvault",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-literal-vault",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "copilot-literal-keychain",
+        "provider": "copilot",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-frozen-canonical-with-ignored-refresh-token",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-frozen-case-insensitive-struct-field",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-frozen-canonical-then-case-alias",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-frozen-case-alias-then-canonical",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-frozen-unknown-field-with-token",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-frozen-duplicate-token-field",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-frozen-wrong-typed-token",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-frozen-secret-reference-token",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-frozen-missing-file",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-null-scalar-retained",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-wrong-before-correct",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-root-null",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-root-array",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-root-empty",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-unicode-fold",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-unknown-overflow",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-surrogate",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-invalid-utf8",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-deep-unknown",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-device-ascii",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-device-unicode-whitespace",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-device-unicode-value",
+        "provider": "kimi",
+        "proof": "retained eligibility gate",
+        "needs_go_fallback": true,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-device-invalid-utf8",
+        "provider": "kimi",
+        "proof": "retained eligibility gate",
+        "needs_go_fallback": true,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-device-oversize",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-current-precedes-legacy",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-empty-current-suppresses-legacy",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-legacy-only",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-explicit-home",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-empty-override",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-all-three-strategies",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-error-api-retains-cli",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "id": "kimi-home-userprofile-disagreement",
+        "provider": "kimi",
+        "proof": "full native constructor/report/request comparison",
+        "needs_go_fallback": false,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "kimi-base-public-prefix",
+        "needs_go_fallback": false,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "kimi",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "kimi-base-uppercase-host",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "kimi",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "kimi-base-query-fragment",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "kimi",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "kimi-base-escaped-path",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "kimi",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "kimi-base-unicode-path",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "kimi",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "kimi-base-http-rejected",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "kimi",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "kimi-base-userinfo-rejected",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "kimi",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "nous-base-public-prefix",
+        "needs_go_fallback": false,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "nous",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "nous-base-uppercase-host",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "nous",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "nous-base-query-fragment",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "nous",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "nous-base-escaped-path",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "nous",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "nous-base-unicode-path",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "nous",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "nous-base-http-rejected",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "nous",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "nous-base-userinfo-rejected",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "nous",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "openrouter-base-public-prefix",
+        "needs_go_fallback": false,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "openrouter",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "openrouter-base-uppercase-host",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "openrouter",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "openrouter-base-query-fragment",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "openrouter",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "openrouter-base-escaped-path",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "openrouter",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "openrouter-base-unicode-path",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "openrouter",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "openrouter-base-http-rejected",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "openrouter",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "custom base: existing bounded URL contract",
+        "id": "openrouter-base-userinfo-rejected",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "openrouter",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "workspace: existing cookie-dependent contract",
+        "id": "opencode-workspace-canonical",
+        "needs_go_fallback": false,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "opencode",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "workspace: existing cookie-dependent contract",
+        "id": "opencode-workspace-hyphen",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "opencode",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "workspace: existing cookie-dependent contract",
+        "id": "opencode-workspace-unicode",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "opencode",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "workspace: existing cookie-dependent contract",
+        "id": "opencode-workspace-slash",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "opencode",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "workspace: existing cookie-dependent contract",
+        "id": "opencode-workspace-without-cookie",
+        "needs_go_fallback": false,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "opencode",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "JWT expiry: existing architecture gate or missing/expired credential",
+        "id": "nous-jwt-overflow-positive",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "nous",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "JWT expiry: existing architecture gate or missing/expired credential",
+        "id": "nous-jwt-overflow-negative",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "nous",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "JWT expiry: existing architecture gate or missing/expired credential",
+        "id": "nous-jwt-upper-i64-boundary",
+        "needs_go_fallback": true,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "nous",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "JWT expiry: existing architecture gate or missing/expired credential",
+        "id": "nous-jwt-lower-i64-boundary",
+        "needs_go_fallback": false,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "nous",
+        "read_only": true,
+        "fresh_go_original": true
+      },
+      {
+        "family": "JWT expiry: existing architecture gate or missing/expired credential",
+        "id": "nous-jwt-numeric-json-overflow",
+        "needs_go_fallback": false,
+        "proof": "fresh original Go constructor plus native eligibility only; no full native report/request parity assertion",
+        "provider": "nous",
+        "read_only": true,
+        "fresh_go_original": true
+      }
+    ]
+  },
+  "extras": {
+    "malformed": {
+      "path": "/tmp/symaira-usage768-f759-root-malformed-extra.json",
+      "sha256": "24ebb99c2dc43e18e05f24696a2622d32fa5d4a3409dbab7000b6a5117831045",
+      "pairs": 10,
+      "matches": 10
+    },
+    "owner": {
+      "path": "/tmp/symaira-usage768-f759-root-owner-extra.json",
+      "sha256": "99b4b8ddaff381094d20d3e4e2bd4354f2b2916e4d9f8407003b6547b17f7125",
+      "pairs": 7,
+      "matches": 4,
+      "owner_mismatches": 3,
+      "read_only": true
+    },
+    "literal_owner": {
+      "path": "/tmp/symaira-usage768-f759-root-literal-owner-extra.json",
+      "sha256": "e3421e19cb100b979fd0ebac19bcefb1b9a205b59f6a92374bf12a497a175223",
+      "pairs": 5,
+      "matches": 2,
+      "newly_admitted_owner_mismatches": 3,
+      "actual_parent_route_exits": "Go2, archivedparent1 (retains Go with absent binary), current2"
+    },
+    "parent_route": {
+      "path": "/tmp/symaira-usage768-f759-root-parent-route-extra.json",
+      "sha256": "13d5001d5588d749cbf87d726501ee9f97c3af3d195ae6be269fb60cf5af10f7",
+      "pairs": 5,
+      "all_exits": [
+        2,
+        2,
+        2
+      ],
+      "classification": "ordinary-token owner defect inherited; no claim this is a new regression"
+    }
+  },
+  "operator_credentials_or_paid_endpoints": false,
+  "native_windows_macos": "still required",
+  "full768": "open",
+  "probe_sha256": {
+    "/tmp/symaira-usage768-f759-root-owner-extra.py": "ad04755b189428e7546c8ddb3787eeab8a80f9e7db933de46252f6280c068a91",
+    "/tmp/symaira-usage768-f759-root-owner-probe.rs": "7c5fae9921e941f4c5f5f39df0e717791740eb9cd2e44ebbbe410f3fda87fcee",
+    "/tmp/symaira-usage768-f759-root-owner-go.go": "dbbf378f90f26fec6a0f7020ad41939cdff68e5fc96d3c95cb06d799d4e928c5",
+    "target/debug/deps/libsymbrain_usage-bc5b4536881a808f.rlib": "756674bd6730e766f60371dc32c94a568e18d4cab44e3b0ea2d0ea41268a5107"
+  },
+  "tracked_go_production_and_modules_unchanged": true,
+  "parent_archived_actual_executables_verified": 112,
+  "parent_unique_archived_binaries_verified": 74
+}

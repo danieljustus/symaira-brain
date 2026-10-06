@@ -2046,3 +2046,156 @@ Both runtime Store call paths still omit the state key; a focused successor must
 reuse the existing core resolver and verify actual Go key precedence and encrypted
 migration files without silent loss. All six exact-head native gates and fresh
 independent review remain required; do not close #772 on this increment.
+## #768: native environment reference adapter
+
+The native usage environment credential path now shares the already bounded
+secret resolver instead of maintaining its lossy private adapter. Valid env,
+symvault, deprecated vault and platform-appropriate Keychain references no longer
+force Go solely because of their scheme. The decision and limits are recorded
+in `docs/adr/usage-credential-routing-768.md`.
+
+`scripts/usage-credential-oracle/run.sh` executes 44 fresh immutable-Go
+constructor/report/request cases, 110 actual CLI byte/exit cases and five actual
+failure controls using private synthetic credential executables. Native Linux,
+macOS and Windows CI retain receipts and partial failure logs for 14 days.
+USE-001 and #768 remain open for unproven file/JWT/host-Keychain and other routing
+gates; no frozen fixture or production Go source changed.
+
+## #768: native read-only Hermes files and JWT expiry
+
+The follow-on Hermes slice replaces permissive untyped JSON with ordered typed
+Go-compatible credential decoding and removes the broad malformed/expired-file
+fallback. Case/Unicode aliases, duplicates/nulls, reused provider arrays, ignored
+metadata, raw UTF-8 and JWT expiry/base64 behavior have fresh immutable-Go
+constructor/report/request evidence. Numeric expiry overflow retains a narrow
+architecture-sensitive routing gate.
+
+`scripts/usage-hermes-oracle/run.sh` requires 80 report/request/no-write cases,
+90 actual CLI table/JSON byte comparisons and five actual rejection controls.
+Unix filesystem probes separately record source-bound symlink/directory parity
+and the native nonblocking FIFO safety contract. All native operating-system
+jobs preserve partial failure evidence. The rationale and capability-rooted
+reader dependency are in `docs/adr/usage-hermes-file-jwt-768.md`.
+USE-001 and #768 remain open for numeric overflow and other credential families;
+this slice does not close broader host integration or Go-removal work.
+
+
+### #768: Hermes slice backing repair after independent review
+
+Immutable `273a93c0` failed an actual Go/native replay of nonempty duplicate
+`providers` array shrinkage followed by null-slot regrowth. Keep that original
+failure receipt and reviewed candidate intact. The focused correction retains
+visited backing slots separately from visible length, resets on null/empty
+arrays, and selects only visible entries. Twelve appended regressions expand the
+required fresh gate from 80 to 92 complete constructor/report/request/no-write
+cases and from 90 to 100 actual CLI table/JSON byte/exit comparisons. Five actual
+negative controls and the parent 44-constructor/110-CLI/five-control reference
+gate remain required. Native macOS/Windows execution and all other #768 gates
+remain open; Linux evidence alone does not establish those target contracts.
+The decision and pinned Go slice semantics are recorded in
+`docs/adr/usage-hermes-file-jwt-768.md`.
+
+
+## #768: native deterministic Claude/Codex credential files
+
+The isolated provider-files lane preserves its unvalidated checkpoint and merges
+`9b37c53` normally, including original Hermes failure evidence and all 92 repaired
+Hermes cases. Shared reader/ordered-field extraction is private and preserves
+that slice's visible-length/backing-slot distinction.
+
+Claude now follows typed ordered map merging, scalar-null behavior, aliases and
+ignored metadata; distinct nondefault tokens still route to Go. Codex follows
+exact-key generic map replacement, finite float64 validation throughout the file,
+10000-container depth, top-level preference and nested fallback. File reference
+schemes are literal request credentials. CODEX_HOME explicit/empty overrides and
+read-only 64 KiB boundaries are included in fresh actual Go contracts.
+
+Required new proof is 86 source cases (85 full constructor/report/header/no-write
+comparisons and one retained ambiguous gate), 151 real CLI byte/exit comparisons,
+five actual failed replay controls and owned Codex Unix filesystem observations.
+The private constructor injection proves last-source ordering without reading
+operator Keychain items; host inventory/ACL and other #768 gates remain unported.
+All three native CI jobs retain full/partial receipts for 14 days. Re-run the
+92/100/five-control Hermes gate and 44/110/five-control reference gate on the same
+clean source revision because the read-only helper is shared. Decisions and
+limits are recorded in `docs/adr/usage-provider-files-768.md`.
+
+## Usage #768 — inherited Hermes depth correction, 2026-10-03
+
+Independent full provider-files review of immutable `5111d8b6` reproduced one
+inherited P2 across outer Hermes JSON and decoded JWT claims: total depth10001
+was accepted natively while Go reported missing/no request. Both exact10000
+boundaries passed. Preserve that full review and all four original process
+replays under `migration/evidence/usage-hermes-depth-768/original-review-5111/`.
+The focused source correction calls the shared typed JSON limit for both entry
+points and appends four exact boundary inputs; original92 inputs are unchanged.
+The expanded Hermes gate requires96 reports,104 CLI comparisons and five real
+rejection controls. Run it with the entire86-input provider-files and44-report
+reference gates on the same clean source, plus355 ordinary tests/strict checks.
+See `docs/adr/usage-hermes-depth-limit-768.md`. These are required gates at this
+checkpoint, not claimed completed results. Native macOS/Windows, host Keychain,
+Copilot/Kimi and other residual USE-001/#768 requirements remain open.
+
+The focused correction's clean source `7bdde611` now passes all three complete
+process gates: Hermes96/104/five controls, provider-files86 (85 full reports and
+one retained ambiguity gate)/151/five controls, references44/110/five controls.
+All53/51/47 source manifests match and44 common entries agree. Exact10000
+outer/claims boundaries are configured;10001 inputs are missing/no request/native
+route. Ordinary355 tests pass (zero failures, three ignored process gates run
+explicitly), and strict all-targets/all-features Clippy/fmt/include-fragments/
+actionlint/diff checks pass. Separate corrected receipts preserve original50
+review files and all92 original input bytes. Final native targets and corrected
+independent review remain required; USE-001/#768 stays open.
+
+## Usage #768 — bounded Copilot/Kimi file successor, 2026-10-03
+
+Normal integration retains independently approved parent fdfea204 and the original
+97-case Go-only baseline. All112 native ELF paths/74 unique binaries were archived
+by hash before the released Files target was reused in this isolated lane.
+Copilot uses ordered root replacement/typed-entry semantics, apps-before-hosts
+and the literal `github.com:` pass; distinct eligible tokens remain Go-gated.
+Kimi follows typed access-token/null/error behavior and unchanged home/strategy
+precedence. File references stay literal. Both use the shared bounded reader and
+depth guard; unsafe/unreadable sources, unproven device/header values and existing
+platform/config/host gates remain.
+
+Clean source f75993e passes89 actual Go cases:81 full native reports/requests and
+eight explicit eligibility gates,111 CLI byte/exit comparisons and five rejected
+replay controls. Native Windows requires80 full comparisons/nine gates. Every
+original97 input is mapped:66 exactly retained,31 freshly replayed through the
+unchanged original Go helper and native routing/read-only checks. Those31 are
+not claimed as native full-report parity. Original baseline sources/receipt and
+frozen fixtures are verified unchanged. Original bare-GitHub unit failure is
+retained, and internal token/device newlines keep Go pending real HTTP evidence.
+
+The same clean source passes the complete parent Files86/151, Hermes96/104 and
+Reference44/110 gates with five real controls each. All59/55/53/49 source manifests
+and46 shared entries agree. The ordinary suite passes355 tests/zero failures/four
+ignored oracle seams, followed by strict all-target/all-feature Clippy, fmt and
+CI syntax checks. A prior run without the required subreaper produced a real
+unrelated descendant-cleanup failure; both raw logs remain in the evidence.
+Native macOS/Windows exact-candidate CI and independent full review are required.
+No full USE-001/#768 closure follows. See the ADR and tracked Linux f75993e evidence.
+
+
+## Usage #768 — credential owner path correction, 2026-10-03
+
+Independent immutable7e0b/f759 review requested changes for one P2: native
+Copilot/Kimi symlink-plus-parent paths selected the physical owner while frozen
+Go selected the lexical owner. Ordinary-token behavior was inherited; literal
+file-token routing was newly admitted. Preserve all73 original review artifacts
+and eleven archived executed binary/library entries, then normally integrate
+main e3dbda6c. A221-line Usage-local pure native-path helper now applies lexical
+Go joins to both probes and reads, retaining raw Unix bytes and native Windows
+volume/UTF16 rules without canonicalization or a CLI dependency.
+
+Clean source00bcc6f passes all four full process gates and original97 accounting,
+plus16 complete two-account token/device owner cases,16 owner CLI pairs,22 actual
+Go Unix path comparisons and one genuine wrong-owner request rejection. All12
+original reviewer owner inputs replay exactly against actual Go/public native
+constructors with correct lexical owners and no writes. Manifests62/57/55/51
+and48 shared hashes match;355 ordinary tests and strict checks pass. Original
+failures, source and fixtures stay unchanged. Native Windows requires its21
+actual path pairs and owned symlink proof; macOS/Windows and full independent
+review remain required. #768 stays open. See the owner-path ADR and full tracked
+Linux owner evidence; source00bcc6f replaces the rejected acceptance candidate.

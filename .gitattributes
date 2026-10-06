@@ -19,3 +19,13 @@ migration/evidence/browse-registry-772/windows-pipe-7f/*.log binary
 migration/evidence/guard-raw-paths-770/independent-806/*.log binary
 
 migration/evidence/guard-doctor-boundaries-770/final-9603/*.log binary
+
+# Preserve original native CI log bytes, including CRLF.
+migration/evidence/usage-files-windows-runner/*.log binary
+
+# Preserve the actual historical failed-suite log bytes.
+migration/evidence/usage-copilot-kimi-768/original-unit-failure/original-tests.log -text
+migration/evidence/usage-copilot-kimi-768/linux-f75993e/**/*.log -text
+migration/evidence/usage-copilot-kimi-768/linux-f75993e/*.log -text
+migration/evidence/usage-copilot-kimi-768/original-root-review-7e0b/** -text
+migration/evidence/usage-copilot-kimi-768/linux-owner-00bcc6f/** -text
