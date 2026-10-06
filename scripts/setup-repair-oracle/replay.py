@@ -78,6 +78,8 @@ def escaping_fixture(raw=False, lexical=False, fault=None):
 
 def cases():
     result = [case for case in legacy.CASES if case.name.startswith("setup_")]
+    # APFS cannot create invalid-UTF-8 path components; Linux still exercises them.
+    raw_filesystem_paths = sys.platform == "linux"
     payloads = [
         b'{"source":"brain-source"}',
         b'{"SOURCE":"brain-source"}',
@@ -151,14 +153,14 @@ def cases():
         for fault in ("bin","parent"):
             result.append(legacy.Case(f"managed-file-{fault}-{json_out}",args,
                           setup=managed_boundary(fault=fault),mutating=True))
-            if os.name!="nt":
+            if raw_filesystem_paths:
                 result.append(legacy.Case(f"raw-managed-file-{fault}-{json_out}",args,
                               setup=managed_boundary(raw=True,fault=fault),mutating=True))
         if os.name!="nt":
-            for lexical in (None,"symlink-parent"):
+            for lexical in ((None,"symlink-parent") if raw_filesystem_paths else ("symlink-parent",)):
                 result.append(legacy.Case(f"managed-owner-{lexical}-{json_out}",args,
                               setup=managed_boundary(raw=lexical is None,lexical=lexical),mutating=True))
-    for raw in ((False, True) if os.name != "nt" else (False,)):
+    for raw in ((False, True) if raw_filesystem_paths else (False,)):
         for fix in (False, True):
             for json_out in (False, True):
                 args = ("setup",) + (("--fix",) if fix else ()) + ("--allow-unsigned",) + (("--json",) if json_out else ())
