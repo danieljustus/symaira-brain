@@ -1209,7 +1209,8 @@ jobs:
 
   # Init is a production Rust path; run the genuine Go comparison on each OS.
   rust-init-native:
-    timeout-minutes: 20
+    # Windows already took ~18 min before #806; the grown workspace now exceeds 20.
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
