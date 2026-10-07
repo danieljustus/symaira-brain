@@ -112,7 +112,31 @@ pub fn detach_command(command: &mut Command) {
         const DETACHED_PROCESS: u32 = 0x0000_0008;
         command.creation_flags(CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS);
         disinherit_caller_stdio();
+        for (key, value) in std::env::vars_os() {
+            let (go_key, go_value) = (go_env_block_text(&key), go_env_block_text(&value));
+            if go_key != key || go_value != value {
+                command.env_remove(&key).env(go_key, go_value);
+            }
+        }
     }
+}
+
+/// Go autostarts its daemon through os/exec, whose syscall.createEnvBlock
+/// ranges over each WTF-8 environment string as UTF-8: the three bytes of an
+/// unpaired UTF-16 surrogate become three U+FFFD units in the daemon's block
+/// (a PATH entry `raw-<D800>` arrives as `raw-<FFFD><FFFD><FFFD>`). Only the
+/// launch hand-off is lossy in Go; a daemon started directly keeps raw units.
+#[cfg(windows)]
+pub(crate) fn go_env_block_text(text: &std::ffi::OsStr) -> std::ffi::OsString {
+    use std::os::windows::ffi::{OsStrExt, OsStringExt};
+    let mut units = Vec::new();
+    for decoded in char::decode_utf16(text.encode_wide()) {
+        match decoded {
+            Ok(character) => units.extend(character.encode_utf16(&mut [0; 2]).iter()),
+            Err(_) => units.extend([0xfffd; 3]),
+        }
+    }
+    std::ffi::OsString::from_wide(&units)
 }
 
 /// Rust std spawns with `bInheritHandles = TRUE` and no handle list, unlike
@@ -136,5 +160,37 @@ fn disinherit_caller_stdio() {
             // example a console pseudo-handle) leaves nothing to leak.
             unsafe { SetHandleInformation(handle, HANDLE_FLAG_INHERIT, 0) };
         }
+    }
+}
+
+#[cfg(all(test, windows))]
+mod go_env_block_tests {
+    use super::go_env_block_text;
+    use std::ffi::OsString;
+    use std::os::windows::ffi::{OsStrExt, OsStringExt};
+
+    fn wide(text: &std::ffi::OsStr) -> Vec<u16> {
+        text.encode_wide().collect()
+    }
+
+    #[test]
+    fn unpaired_surrogates_become_three_replacements_like_go_create_env_block() {
+        // provider-discovery raw-wide-path: PATH=<root>\raw-<D800>.
+        let raw = OsString::from_wide(&[0x72, 0x61, 0x77, 0x2d, 0xd800]);
+        assert_eq!(
+            wide(&go_env_block_text(&raw)),
+            [0x72, 0x61, 0x77, 0x2d, 0xfffd, 0xfffd, 0xfffd]
+        );
+        // raw-wide-pathext: PATHEXT=.E<D800>, and a trailing low surrogate.
+        let ext = OsString::from_wide(&[0x2e, 0x45, 0xd800, 0x3b, 0xdc00]);
+        assert_eq!(
+            wide(&go_env_block_text(&ext)),
+            [
+                0x2e, 0x45, 0xfffd, 0xfffd, 0xfffd, 0x3b, 0xfffd, 0xfffd, 0xfffd
+            ]
+        );
+        // Well-formed text, including a surrogate pair, is passed unchanged.
+        let valid = OsString::from_wide(&[0x43, 0x3a, 0xd83d, 0xde00, 0xfffd]);
+        assert_eq!(go_env_block_text(&valid), valid);
     }
 }
