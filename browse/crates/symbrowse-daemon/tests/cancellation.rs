@@ -138,6 +138,7 @@ mod unix {
             session: "default".into(),
             read_timeout: Duration::from_millis(100),
             autostart: false,
+            expected_engine: Some("chrome".into()),
             ..Default::default()
         });
         let error = client
@@ -156,7 +157,7 @@ mod unix {
         release.send(()).unwrap();
         thread.join().unwrap();
         let seen: Vec<_> = seen.try_iter().collect();
-        assert_eq!(seen, ["daemon.ping", "daemon.status"]);
+        assert_eq!(seen, ["daemon.status"]);
         fs::remove_dir_all(root).unwrap();
     }
 

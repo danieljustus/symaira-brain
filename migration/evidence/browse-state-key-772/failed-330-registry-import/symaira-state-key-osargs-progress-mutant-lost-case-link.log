@@ -1,0 +1,24 @@
+F
+======================================================================
+FAIL: test_concurrent_cases_keep_complete_lines_and_distinct_case_links (__main__.ProgressTests.test_concurrent_cases_keep_complete_lines_and_distinct_case_links)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/bk-progress-mutants-lpwtogxj/lost-case-link/test_registry_progress.py", line 66, in test_concurrent_cases_keep_complete_lines_and_distinct_case_links
+    self.assertEqual(len(starts), 8); self.assertEqual(starts, ends)
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Items in the first set but not the second:
+2
+3
+4
+5
+6
+7
+8
+9
+Items in the second set but not the first:
+0
+
+----------------------------------------------------------------------
+Ran 1 test in 0.031s
+
+FAILED (failures=1)

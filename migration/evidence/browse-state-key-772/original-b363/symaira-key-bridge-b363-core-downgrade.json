@@ -1,0 +1,11 @@
+{
+  "baseline_head": "b363762cb85b879630fecd3fd141cba1ae85f71c",
+  "core_library": "/workspace/symaira-daemon772-registry/target/debug/deps/libsymbrowse_core-0477f0ee3142c600.rlib",
+  "core_library_sha256": "2dd0568994d3a095b54bccaf2b763a53d18c16271a300074ca115f1ba4e2388c",
+  "probe_source_sha256": "fe820935c5209d8609d613432e515065baaf97bbafd0cfb4b6e86cf71cd4dbdb",
+  "probe_binary_sha256": "6288ba8ce0135b6ec6055ebf0ed998a3b3153bc34d91bc9fdc4549c0c0f2590b",
+  "exit": 0,
+  "stdout": "fresh_snapshot_save_success=true\nretained_bytes_unchanged=false\nresult_header={\"schema_version\":3,\"saved_at\":\"2026-10-03T20:49:02.576630076Z\",\"expires_at\":\"2026-11-02T20:49:02.576630076Z\",\"key_source\":\"none\"}\nno_key_load_success=true\n",
+  "stderr": "",
+  "purpose": "Actual original Core API observation against a new owned encrypted file and a fresh snapshot, not operator material. Review candidate target was read-only."
+}

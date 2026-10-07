@@ -1,0 +1,71 @@
+// Owned fixture providers only: never contact a real vault or OS keychain.
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strconv"
+	"strings"
+	"time"
+)
+
+func main() {
+	name := strings.TrimSuffix(filepath.Base(os.Args[0]), ".exe")
+	mode := os.Getenv("SYMBROWSE_KEY_PROBE_MODE")
+	if name == "security" {
+		mode = os.Getenv("SYMBROWSE_KEYCHAIN_PROBE_MODE")
+		if mode == "" {
+			mode = "44"
+		}
+	} else if mode == "" {
+		mode = "3"
+	}
+	if ledger := os.Getenv("SYMBROWSE_KEY_PROBE_LEDGER"); ledger != "" {
+		file, err := os.OpenFile(ledger, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+		if err != nil {
+			panic(err)
+		}
+		if err = json.NewEncoder(file).Encode(map[string]any{"name": name, "pid": os.Getpid(), "arguments": os.Args[1:]}); err != nil {
+			panic(err)
+		}
+		if err = file.Close(); err != nil {
+			panic(err)
+		}
+	}
+	if mode == "descendant" || mode == "pipe-holder" {
+		child := exec.Command(os.Args[0], "owned-descendant")
+		child.Env = append(os.Environ(), "SYMBROWSE_KEY_PROBE_MODE=timeout", "SYMBROWSE_KEYCHAIN_PROBE_MODE=timeout")
+		child.Stdout, child.Stderr = os.Stdout, os.Stderr
+		if err := child.Start(); err != nil {
+			panic(err)
+		}
+		if mode == "pipe-holder" {
+			os.Exit(3)
+		}
+		time.Sleep(30 * time.Second)
+		return
+	}
+	switch mode {
+	case "ab", "cd":
+		value := strings.Repeat(mode, 32)
+		if name == "security" {
+			fmt.Println(value)
+		} else {
+			fmt.Println(`{"value":"` + value + `"}`)
+		}
+	case "invalid":
+		fmt.Println("not-a-key")
+	case "empty":
+	case "timeout":
+		time.Sleep(30 * time.Second)
+	default:
+		code, err := strconv.Atoi(mode)
+		if err != nil {
+			panic(err)
+		}
+		os.Exit(code)
+	}
+}

@@ -202,6 +202,37 @@ impl fmt::Display for ConfigError {
 
 impl std::error::Error for ConfigError {}
 
+/// Copy the process environment for configuration lookups.
+///
+/// `std::env::vars` panics on the first non-Unicode variable, so a PATH entry
+/// holding a lone UTF-16 surrogate aborted every Windows CLI command before
+/// configuration was consulted. Variables configuration never reads (PATH,
+/// PATHEXT, ...) are copied lossily. Configuration reads only `SYMBROWSE_*`
+/// keys from this map (XDG_* homes are read raw via `var_os`). For those,
+/// Go's os.Getenv keeps the raw value (Unix bytes, Windows WTF-8) and uses
+/// it as a path; Rust configuration holds `String`s and cannot represent it,
+/// so a non-Unicode `SYMBROWSE_*` value fails closed with a typed error
+/// rather than silently becoming a different U+FFFD path.
+fn process_env(
+    vars: impl Iterator<Item = (std::ffi::OsString, std::ffi::OsString)>,
+) -> std::result::Result<HashMap<String, String>, ConfigError> {
+    let mut env = HashMap::new();
+    for (key, value) in vars {
+        let lossy_key = key.to_string_lossy();
+        if lossy_key.starts_with("SYMBROWSE_") {
+            let (Some(key), Some(value)) = (key.to_str(), value.to_str()) else {
+                return Err(ConfigError(format!(
+                    "environment variable {lossy_key} is not valid Unicode"
+                )));
+            };
+            env.insert(key.to_owned(), value.to_owned());
+        } else {
+            env.insert(lossy_key.into_owned(), value.to_string_lossy().into_owned());
+        }
+    }
+    Ok(env)
+}
+
 impl LoadContext {
     /// Captures the process environment without reading configuration files.
     pub fn from_process(flags: FlagOverrides) -> std::result::Result<Self, ConfigError> {
@@ -216,7 +247,7 @@ impl LoadContext {
             xdg_config_home: std::env::var_os("XDG_CONFIG_HOME").map(PathBuf::from),
             xdg_cache_home: std::env::var_os("XDG_CACHE_HOME").map(PathBuf::from),
             xdg_state_home: std::env::var_os("XDG_STATE_HOME").map(PathBuf::from),
-            env: std::env::vars().collect(),
+            env: process_env(std::env::vars_os())?,
             flags,
         })
     }
@@ -692,5 +723,55 @@ mod selection_tests {
                 .code,
             "invalid_browser_engine"
         );
+    }
+}
+
+#[cfg(test)]
+mod process_env_tests {
+    use super::process_env;
+    use std::ffi::OsString;
+
+    #[cfg(unix)]
+    fn invalid() -> OsString {
+        use std::os::unix::ffi::OsStringExt;
+        OsString::from_vec(b"/owned/raw-\xff".to_vec())
+    }
+    #[cfg(windows)]
+    fn invalid() -> OsString {
+        use std::os::windows::ffi::OsStringExt;
+        // The provider-discovery raw-wide-path PATH: a lone UTF-16 surrogate.
+        OsString::from_wide(&[0x72, 0x61, 0x77, 0x2d, 0xd800])
+    }
+
+    #[test]
+    fn unread_non_unicode_variables_are_lossy_and_never_abort() {
+        let env = process_env(
+            [
+                (OsString::from("PATH"), invalid()),
+                (OsString::from("SYMBROWSE_ENGINE"), OsString::from("static")),
+            ]
+            .into_iter(),
+        )
+        .unwrap();
+        assert_eq!(env["SYMBROWSE_ENGINE"], "static");
+        assert!(env["PATH"].contains('\u{fffd}'));
+        assert_eq!(env.len(), 2);
+    }
+
+    #[test]
+    fn read_symbrowse_paths_fail_closed_instead_of_changing_path() {
+        for key in [
+            "SYMBROWSE_STATE_DIR",
+            "SYMBROWSE_CONFIG_DIR",
+            "SYMBROWSE_CACHE_DIR",
+            "SYMBROWSE_DAEMON_LOG",
+            "SYMBROWSE_UPLOAD_DIRS",
+        ] {
+            let error = process_env([(OsString::from(key), invalid())].into_iter()).unwrap_err();
+            assert_eq!(
+                error.to_string(),
+                format!("environment variable {key} is not valid Unicode")
+            );
+        }
     }
 }

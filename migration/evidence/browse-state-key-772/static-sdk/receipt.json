@@ -1,0 +1,16 @@
+{
+  "sdk": "Go1.26.7",
+  "source_only_not_native_runtime": true,
+  "files": {
+    "src/os/path.go": {
+      "sdk_source_sha256": "a901784cb6abfb4817a379bdc909f42090b9cc5e49a6b2dac5c06ee6e844966a",
+      "excerpt_sha256": "7c38cd58453a64e0542e39a2c7919d2d47727a510ab684c7d0a90d2c6839cb7f",
+      "retained_excerpt_suffix": ".go.txt"
+    },
+    "src/syscall/zerrors_windows.go": {
+      "sdk_source_sha256": "627276cf400689ea253d13a2ee2c08cb066d0e019ef7ff3cca691d8ab7144992",
+      "excerpt_sha256": "4e021d05521e14cbae6f3724444aa30540d2f55d110c3daf52b27a38c4e2fa96",
+      "retained_excerpt_suffix": ".go.txt"
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "source": "df16b088c2d7057639383b2eac8d71c3fa328557",
+  "status": "ACTUAL_WINDOWS_GNU_LINT_FAILURE_RETAINED_BEFORE_EQUIVALENT_FIX",
+  "files": [
+    {
+      "original": "/tmp/symaira-discovery-runtime-df16-nonport/affected-all-targets.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-df16/affected-all-targets.log",
+      "sha256": "494ebe14d7803dc9327da87bf581721dff18cec57d020639b4a3ed867aefe9e9",
+      "bytes": 23339
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-df16-nonport/affected-original.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-df16/affected-original.log",
+      "sha256": "c79c6011e308773ffc1b4deb5b56b2191907bc7f491db6f774137cc3e119f280",
+      "bytes": 23461
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-df16-nonport/build-cli.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-df16/build-cli.log",
+      "sha256": "40108eb5c2e432741fc7f36afdf5c793ec02b19e7b1ce5e51bdd2ba377bd26cb",
+      "bytes": 60
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-df16-nonport/build-probes.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-df16/build-probes.log",
+      "sha256": "3725eb36c1a4aadc73348a3065d4f0efc8fd4f7afcc0114967193cb2661c3d3a",
+      "bytes": 173
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-df16-nonport/fmt.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-df16/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-df16-nonport/mcp-lib.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-df16/mcp-lib.log",
+      "sha256": "96f29f46ac8d22645bb9d0f41efceffe46ae5ba6afc6dd7e1f010d6670d558af",
+      "bytes": 2696
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-df16-nonport/strict.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-df16/strict.log",
+      "sha256": "26c7a64fd2bdb645fff5c8611f8e9e65e33c60ca5fc77437aa6efbe35189f6fc",
+      "bytes": 173
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-df16-nonport/windows-static.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-df16/windows-static.log",
+      "sha256": "075cc8d42b2e57568fac56fc4f9f882ae239e3b97f25895e8ff1877148f081b3",
+      "bytes": 4865
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-df16-nonport/validation.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-df16/validation.json",
+      "sha256": "bf140efd01fe256c7cefe1fa3d58dea4a7f26e4c3b83b22d33665cbd7dec4c27",
+      "bytes": 383326
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-df16-nonport-driver.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-df16/driver.log",
+      "sha256": "cc0f77529f024c447cdeb00dc86ee1e91c1dc1ce18eb37fb77c90eb900dda000",
+      "bytes": 260
+    }
+  ],
+  "original_path_sha256": "551c5493b4b63a8c19318d31f4966d0e293b12d9ba98108fe25efed61ef12321",
+  "target_ELF_paths": 617,
+  "unique_ELF_payloads": 564,
+  "all_archive_roundtrip_verified": true,
+  "historical_or_cached_target_roles_are_not_execution": true,
+  "native_Windows_runtime": false
+}

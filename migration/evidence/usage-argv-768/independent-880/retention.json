@@ -1,0 +1,679 @@
+{
+  "source": "8803847278546f3161eaaa84d2e65bc2eec594a2",
+  "reviewed_publication": "eea73b7478e62f1bb174d456bbbecccc1de94034",
+  "disposition": "APPROVE bounded source correction; exact-head protected/native3 acceptance still required",
+  "artifacts": {
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-final-handoff.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-final-handoff.json",
+      "original_sha256": "52c0ff7a996d2000923cfb9558af118b64df5c5c899e9a1d10263ce4b933bf07",
+      "original_bytes": 5010,
+      "tracked_sha256": "80bb595367756b6fb4cbc10b6cf687ee8b0e6516c9f2a402ee281cfcb7277042"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-final-handoff.md.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-final-handoff.md",
+      "original_sha256": "8b14c594f081fbbd16b61c1b8173221a02f0654c5f72626d8107b175f20bf947",
+      "original_bytes": 6143,
+      "tracked_sha256": "f200b77809814b019dcd7e3d520d549284bd0c085ccc73e63c06cfd1e6abe239"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-accepted-parent-fresh-cli-extra.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-accepted-parent-fresh-cli-extra.json",
+      "original_sha256": "24afe31b3a23c49a19bef51fabb7431ccaab87dd0e28fde9479e3cc1d95c6282",
+      "original_bytes": 61592,
+      "tracked_sha256": "79c086e05820656b532c360052b81c71df9329e5c01b542d3521c29ab885fdc9"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-accepted-parent-fresh.py.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-accepted-parent-fresh.py",
+      "original_sha256": "ddacb3a668f293f39e50a932b2c1219bdf6c11800fbed31df64cf62a590ad1e0",
+      "original_bytes": 2826,
+      "tracked_sha256": "89690a11b361952713ecbb09dfacdfeaee44ca347d00842c038e20c138319319"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-actionlint-corrected.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-actionlint-corrected.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "tracked_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-actionlint.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-actionlint.log",
+      "original_sha256": "3903252ff92b66c7e4c271ffea153b3baeb8ea403e802fc3feb893bdd78487dc",
+      "original_bytes": 44,
+      "tracked_sha256": "5764ab3339c0d59dfb919212155987af8976022426a8d9a8bd4afad7a2a6ac85"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-admission.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-admission.json",
+      "original_sha256": "b14a6b2a9b7ac36468ee91fe974b3b4a5b1ac644dc5c05653873350dddaaf10b",
+      "original_bytes": 175496,
+      "tracked_sha256": "101784dd9bd988a45a1d801f44eb11cd360f98b9b9bbf66865968dadc8b8dbed"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-admission.py.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-admission.py",
+      "original_sha256": "c2410770eebf162a7fe132cda0c587bfc9093a0c11afd5ce8caf512c2b1279ed",
+      "original_bytes": 4212,
+      "tracked_sha256": "4aa7e1a6b29276ef440a34a904cb55206ffddfb6cd118e5b5e781546d6d1c45a"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-clippy.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-clippy.log",
+      "original_sha256": "3b72cfc61048f2a2159ccfe7e5878488c0d447e4a762687e38f7af727f88d8ae",
+      "original_bytes": 147,
+      "tracked_sha256": "b3ddacc4265d00e12cd2c92e21508e1d089aae670fe760466b4ee1b58c74b255"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-extra-argv-corrected.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-extra-argv-corrected.json",
+      "original_sha256": "58aecf17b494676ee25a45117fff1bff8e2dd9912c71212d42a79ea090582ed6",
+      "original_bytes": 141610,
+      "tracked_sha256": "c0401c9240d4daec6118736ca44942ab7f7408e2f074a35a485f48ae1949424f"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-extra-argv-corrected.py.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-extra-argv-corrected.py",
+      "original_sha256": "972a6a9d320d8f54d2a98a3dfe3d5e746206db4329778b80b994f630c935b47a",
+      "original_bytes": 3566,
+      "tracked_sha256": "261976e6863261aa341dd94e82df73c35fd8d8bd3150494127a060c8da6edd21"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-extra-argv.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-extra-argv.json",
+      "original_sha256": "eeb356d621a767f59e8c1f86b209b46ae1a1d50838160d4924f9abd98a153f64",
+      "original_bytes": 158603,
+      "tracked_sha256": "26b1941d26fba4c2df1bde5fd40f408af6cd2e76562ae65a43c38a1df3bffb2c"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-extra-argv.py.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-extra-argv.py",
+      "original_sha256": "175151436040dbb1e8f3cbaad961d78b41500b4711c4bdd8f002ad1f6686089f",
+      "original_bytes": 3411,
+      "tracked_sha256": "48e23b4276fbefeacacc7541af0ed58af2b8c5f7ee97ae1cb262b7382f39f55b"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-extra.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-extra.json",
+      "original_sha256": "1c6adf830e20318a9995ec9d008083f1825208d821da639a215c4638b73d54cc",
+      "original_bytes": 144880,
+      "tracked_sha256": "720b23d8f44a6e9f38b0ac59a3349e08aca2e44804d767e1fef4903f484cb790"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-extra.py.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-extra.py",
+      "original_sha256": "6d3eb70b1402ed9274a7e31a60f57f47ccba91b97bc5580cd4eb3e9e2f28d19e",
+      "original_bytes": 5699,
+      "tracked_sha256": "f3726dbf9a729bf72f459af8fb7320f2174c2b4fbe6aced7de892891329bdc7c"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-files.evidence/cli.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-files.evidence/cli.json",
+      "original_sha256": "9251a60f095c6366c84cea3dc462027106502663dd46eb5096803a5a97a596a7",
+      "original_bytes": 474199,
+      "tracked_sha256": "1360035b70e22318ec746813c76e5f9036a4f49f4fbee5bd7ac00e958d0cc279"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-files.evidence/cli.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-files.evidence/cli.log",
+      "original_sha256": "70f9a5a40d08b92f72a27b1471c92180c50e0c8fab02ad60666302444babdc35",
+      "original_bytes": 48,
+      "tracked_sha256": "bf46f7dfaef28fe265a821e51d328b65ede543cf5b08cd351db4864dda5323cb"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-files.evidence/controls.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-files.evidence/controls.json",
+      "original_sha256": "567c4b33607658e0f57fd75a5ca46654bbc4fb5501c35ecdf14c0c4918a784ea",
+      "original_bytes": 9851,
+      "tracked_sha256": "522430298b428bb36dd39e1ebde2ad830f4743d6bcc54d5b2ac2f753b29faf09"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-files.evidence/controls.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-files.evidence/controls.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "tracked_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-files.evidence/filesystem.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-files.evidence/filesystem.json",
+      "original_sha256": "3acaaaca28c754ef3d884d70d43333c262b6c99e3be5b08442287614abe3c827",
+      "original_bytes": 20417,
+      "tracked_sha256": "7e64aa515306b05bc483ed6c04272dc63a743a2f25777d1476e75f2af85f6d55"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-files.evidence/filesystem.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-files.evidence/filesystem.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "tracked_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-files.evidence/go-build.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-files.evidence/go-build.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "tracked_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-files.evidence/go-constructors.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-files.evidence/go-constructors.log",
+      "original_sha256": "6aa776651691d354f9416b57a911319087a2888b435f74b0447638366ac4ae28",
+      "original_bytes": 65,
+      "tracked_sha256": "0418e5a2aafaa7a63b309c2ddcc990b8d500756ba5d7e728982b016ff43eeaf4"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-files.evidence/go.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-files.evidence/go.json",
+      "original_sha256": "9b3527e612f4888d43f80d420dbe2c2eb233bc347ee3dbfd77a5f1987f80528e",
+      "original_bytes": 779974,
+      "tracked_sha256": "af790aea8f39591a0bc807e530e443ad5aa3667a5b04378f5c2626186cb7a5ee"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-files.evidence/input.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-files.evidence/input.json",
+      "original_sha256": "24cfdacd09840a91900555d2a3e20dc70e86d427f3d0b0ed264f5a2fe551f9cc",
+      "original_bytes": 711033,
+      "tracked_sha256": "b13c26a5ff7478d076d3ecaf873c77f492e69da0296b786fe307fa5ffe362434"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-files.evidence/native-build.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-files.evidence/native-build.log",
+      "original_sha256": "4b395c9c76c7f7fb5221d30df7320c7a2387ff3842c426dbee6a59a54b5cffab",
+      "original_bytes": 60,
+      "tracked_sha256": "8135007ed9012844706878be7460c9a04ae3dd97316db2c0a6f69b7c288b580d"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-files.evidence/native-constructors.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-files.evidence/native-constructors.log",
+      "original_sha256": "d803926ef1319fddc1383d59aa623e652d7ceeb650a131ba4f7ec160ae762ba9",
+      "original_bytes": 367,
+      "tracked_sha256": "6d1379a763d80b9175a0151d938cf9ea37c7b734c6482ab2ba1155c337009dbd"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-files.evidence/native.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-files.evidence/native.json",
+      "original_sha256": "9a75a2e9f88a6a114263de58f57cf40ee57a834ef733ba399c785c0ee69290ec",
+      "original_bytes": 84,
+      "tracked_sha256": "6d9ce773233d4431f5061bd46bdb180cc9ca79fb835b2d6b29c45f5741676e38"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-files.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-files.json",
+      "original_sha256": "78269c39ade3f4b71b0102ec622b80dcebff0d823a248c7e7009ae2d668b1d71",
+      "original_bytes": 1302442,
+      "tracked_sha256": "657120f220e8e9a9599bde7d41b976f2bef39a9fed9051008d1264cb123c082a"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-fmt.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-fmt.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "tracked_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-four-gates.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-four-gates.log",
+      "original_sha256": "d4ccd0429d8878b1dbc0a17907b5ceab1c727a60c3abfc699c3a6070e433e7a7",
+      "original_bytes": 4478,
+      "tracked_sha256": "ecb227f82b68380333388d2a276ce8babd79c70192882624e25ae80a51802da7"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-fragments-fmt.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-fragments-fmt.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "tracked_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-hermes.evidence/cli.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-hermes.evidence/cli.json",
+      "original_sha256": "44620a7edcc0d1032fa806401665c02e4c2d4c41e9313cf6193e5da969d9f50a",
+      "original_bytes": 462077,
+      "tracked_sha256": "148e2e5e5b31bebdf0971da724f1055907ac48bbfb03fafa64e129f0ff5b2756"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-hermes.evidence/cli.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-hermes.evidence/cli.log",
+      "original_sha256": "5b5cffcf49a8cee3310b5765c3695d0b03ed05d74aebddfb346401a55d47ad32",
+      "original_bytes": 45,
+      "tracked_sha256": "94a6f5e0e847b885107e16b8ec1486400f84efb8dc35dd2ab473c90d689ba62d"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-hermes.evidence/controls.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-hermes.evidence/controls.json",
+      "original_sha256": "22821a2cddeb8fd1471153553ba17448c6d4ba8b5fbd550d1e6374558a492bf3",
+      "original_bytes": 10242,
+      "tracked_sha256": "655cf1c076997aa06f2e6649dfe5b2a06b514768b4d5fa9d83fd9a139b0e54cf"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-hermes.evidence/controls.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-hermes.evidence/controls.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "tracked_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-hermes.evidence/filesystem.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-hermes.evidence/filesystem.json",
+      "original_sha256": "a7db210799e350f6f8d398156515e2be72d9762f9417ed366c5fb00ce95b1df1",
+      "original_bytes": 20137,
+      "tracked_sha256": "895ae5665e9049868d5edf06cdab8c10e8b1548185204c99827f41ab0ca73635"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-hermes.evidence/filesystem.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-hermes.evidence/filesystem.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "tracked_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-hermes.evidence/go-build.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-hermes.evidence/go-build.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "tracked_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-hermes.evidence/go-constructors.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-hermes.evidence/go-constructors.log",
+      "original_sha256": "324d0a1ea4548b6d4f2edf3523a0bcc68002f9e1fce20148954eaf69f7f3cb93",
+      "original_bytes": 65,
+      "tracked_sha256": "664dc14586db1374a5d82f1641c4472f44a4d53f0953998a10b93029c95931f4"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-hermes.evidence/go.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-hermes.evidence/go.json",
+      "original_sha256": "2ed17b4ba6766fc38453c13f8dd632a3c6a1e245d154f569051470a469f7950b",
+      "original_bytes": 608908,
+      "tracked_sha256": "7a6e3e6d5a0c2c4b2cad07272f8e340492ecf3374b50c19b3c1d9ac8bbf65de4"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-hermes.evidence/input.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-hermes.evidence/input.json",
+      "original_sha256": "2b4ee1bf165f63c7bad553bceb9b299af6c536e0ebc3d00e4ae0b351d0f7963a",
+      "original_bytes": 474248,
+      "tracked_sha256": "c02fb01e8f237f109eb3e5d77663bad26e1c27808c22f4d5b3dc2b3f4282b2cd"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-hermes.evidence/native-build.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-hermes.evidence/native-build.log",
+      "original_sha256": "1094a36867300c1838cdc4ee40efe961d83bac574665f8ee57a40d5b1e88698c",
+      "original_bytes": 60,
+      "tracked_sha256": "23cf5f567b9510b9af06d267231f641a66db3d57349f7971ea5dad96ac877bee"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-hermes.evidence/native-constructors.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-hermes.evidence/native-constructors.log",
+      "original_sha256": "c9e88b296255ebe532f40f73bd0a0d87d96a9cec8e25ef8e213c3887f506bef1",
+      "original_bytes": 349,
+      "tracked_sha256": "f3efa030659e20bec04d332777bec29b8de6fd7c6acd76d1f843d21b9be23fc4"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-hermes.evidence/native.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-hermes.evidence/native.json",
+      "original_sha256": "c4acb2c86d137f27e5acaa385d8efebe5c6476d8fe93660bfc4a6a1b7a9b111e",
+      "original_bytes": 48,
+      "tracked_sha256": "03677a0a1ef25bc56fe05b73431e6f3712c7963d1cc0cffcfd8296f8d83c7b2f"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-hermes.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-hermes.json",
+      "original_sha256": "abbe4b5210a797a2ef270e759e44fea8498089af67040cea147c193aae5c986a",
+      "original_bytes": 1117500,
+      "tracked_sha256": "735311bb40b24709aad50439b0e93819960a9d8e22635c1483d23130ec645acf"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-build.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-build.json",
+      "original_sha256": "bf31c1a2bb8c03cd0f4d943d0a434bf1bd376cbbe834e1c42bc1eaa1d6350552",
+      "original_bytes": 1764,
+      "tracked_sha256": "a830eb4805633ece1ab75cd013f1e584d2f20e04906548379b7fc1d6bbae3178"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-candidate-build.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-candidate-build.log",
+      "original_sha256": "5e0cf72d1f084f09314f6336e33efbb9727995bd3f0eb498fd57a4c192d66b44",
+      "original_bytes": 147,
+      "tracked_sha256": "81e4b5c9ffc9e21b1ca63a8dfdd8311c3d88adfc42b966bb8df3b17fda8be0a1"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-candidate-clean.clean.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-candidate-clean.clean.log",
+      "original_sha256": "8152eede556f25ce409c6491e0a1aab4fef4e34c459ee432e7b444757095820b",
+      "original_bytes": 37,
+      "tracked_sha256": "cdcee2296ff68907c41f490adec0031311426456ac4e2814f3a3fdda431bde2e"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-candidate-clean.dry-run.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-candidate-clean.dry-run.log",
+      "original_sha256": "d39e4c4c1dbef4b77b80ca8354aa8689d62eba6ac232efd483a106b26969b1d2",
+      "original_bytes": 2988,
+      "tracked_sha256": "2fba376250975c3697dd30bdae949740e573db1fd1b8dbd635d8294559f2f12f"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-candidate-clean.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-candidate-clean.json",
+      "original_sha256": "6069de4aaefad9fb6fd1e9319562bfe07d87e7c468457a438547d910c4b1caa8",
+      "original_bytes": 6077,
+      "tracked_sha256": "3f2bc378ddfd3321e0091e815a21967d66093473ae5fb1aab85dc60cf8c14a4e"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-candidate-clean.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-candidate-clean.log",
+      "original_sha256": "a0f4ba8e5769b3d102815cd804a8cc39fbf65ab2089c7af639a4bb5abe30e50c",
+      "original_bytes": 75,
+      "tracked_sha256": "8f1f0442217b6540852a9e407298e2b009156e9394b75f518a7cee84d74f8d1d"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-candidate-clean.tar.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-candidate-clean.tar.gz",
+      "original_sha256": "785df99330ac372166a77a8d6f59c54cbbbd18f54e1237ff94d035804c23ed1e",
+      "original_bytes": 11572648,
+      "tracked_sha256": "785df99330ac372166a77a8d6f59c54cbbbd18f54e1237ff94d035804c23ed1e"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-controls.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-controls.json",
+      "original_sha256": "10d3adb1bc2afbaab3d9d1cdb4f80847d70cd77b7409189b70afb73ad77f76e6",
+      "original_bytes": 8945,
+      "tracked_sha256": "7fca378462a4227dfec613ea1c0d2bccdeb8505128fed0a0811f323b5dadd2dc"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-controls.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-controls.log",
+      "original_sha256": "4b562cab9a87dd7e8392b81a19cd94c3a272b263d11c8057e277aa2706e9d412",
+      "original_bytes": 58,
+      "tracked_sha256": "1c997efdf72bea998b76554e85c88015f2ffe7ebd1e9ef57f29edeb24e231e18"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-initial-clean.clean.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-initial-clean.clean.log",
+      "original_sha256": "fd79db602f5380f430a9ba9c5beab2e594679cc0a1ba49a0ba64587e52226e9f",
+      "original_bytes": 39,
+      "tracked_sha256": "46386511020e6cb8baefd81395bcff1ce80e7a0ef947e6d21eb87676c2a4c2f2"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-initial-clean.dry-run.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-initial-clean.dry-run.log",
+      "original_sha256": "3db2852ca0f5e0644f9e0430bb8ce22ad673a5468b6f4d686d7cfbaf8af3a5ca",
+      "original_bytes": 39096,
+      "tracked_sha256": "fd281448cf570b8ac31593c3e528846b43b3985b3e1130c057595e960523a8ef"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-initial-clean.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-initial-clean.json",
+      "original_sha256": "15ef6d360ab9c12c6c00ee0712edf0d66e9c166c86cfbd8819bcdab4a232aed0",
+      "original_bytes": 69117,
+      "tracked_sha256": "367a6f33f811eeabf282031309cb0a9986ad19e037047ef94dbb9567b3234ebb"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-initial-clean.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-initial-clean.log",
+      "original_sha256": "2d388dc47a37c5f7502a0c761a415bb60f6c9cf4a883fc502420e9fc61b46303",
+      "original_bytes": 77,
+      "tracked_sha256": "fc9c927394c6aa79798f2f7ca077b0c6eebb0699014b2ad2da39b44d74c37065"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-initial-clean.tar.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-initial-clean.tar.gz",
+      "original_sha256": "e6471901e7d95d2c0adf2af9f7468a44f46b9ed3a9438fec54c03bd76323eb65",
+      "original_bytes": 11847368,
+      "tracked_sha256": "e6471901e7d95d2c0adf2af9f7468a44f46b9ed3a9438fec54c03bd76323eb65"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-parent-build.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-parent-build.log",
+      "original_sha256": "4d558dc7b81a9681c7b8e8d5ad32cff22a78818de1cf0151a08b37f8ac8d8d0f",
+      "original_bytes": 2184,
+      "tracked_sha256": "23edada5e0460d6f3700a08fb230f08ad98454e8e0cfaf4d6712b93aa06872f2"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-parent-clean.clean.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-parent-clean.clean.log",
+      "original_sha256": "4f8b97c4263220feff2d08bebff0ac74c1713ccd5464ba0b49e5d5866a37f641",
+      "original_bytes": 37,
+      "tracked_sha256": "9a9697a4b2f7ca0b7d463f97d7b5fc3aed51087540f3df5b840e78edf57fe1f9"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-parent-clean.dry-run.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-parent-clean.dry-run.log",
+      "original_sha256": "e13bfca9d7d7b5448a8ed67564131ac7e1f4ff2c01a71c1435da064ead49fb4c",
+      "original_bytes": 2988,
+      "tracked_sha256": "24e1e1834864b90b15303509c845ed39a0ba03d9219c48051d10661657839945"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-parent-clean.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-parent-clean.json",
+      "original_sha256": "9c0816e89dbe906f288db2028300055ce1320944901795fe3b6b4878ffbd57b1",
+      "original_bytes": 6074,
+      "tracked_sha256": "042305a85bb32a5480bd0e117be613a9883445d429ee0e15180b48df06b8fc4b"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-parent-clean.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-parent-clean.log",
+      "original_sha256": "a0f4ba8e5769b3d102815cd804a8cc39fbf65ab2089c7af639a4bb5abe30e50c",
+      "original_bytes": 75,
+      "tracked_sha256": "8f1f0442217b6540852a9e407298e2b009156e9394b75f518a7cee84d74f8d1d"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv-parent-clean.tar.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv-parent-clean.tar.gz",
+      "original_sha256": "a785c4b27d2d594114aa8037f8af377529ed4e0cb436a15efff82eca685d686f",
+      "original_bytes": 11570462,
+      "tracked_sha256": "a785c4b27d2d594114aa8037f8af377529ed4e0cb436a15efff82eca685d686f"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv.json",
+      "original_sha256": "761f87a95c80159541190bfc80b24d3a6c86e1b59a4e5084bfb106f79e19c62a",
+      "original_bytes": 186094,
+      "tracked_sha256": "0779e94886c3256396d18e3dd45f788672fac6149dc9fabcab07cdcf39a48df0"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/argv.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/argv.log",
+      "original_sha256": "773bae48dbbed341fd93b67fb8316682d4a231a2d3e4027c16881723b2d9d924",
+      "original_bytes": 86,
+      "tracked_sha256": "f739cd4fe250327b1779dc6c46ec53c8a2f3df242ac3163c585d99968114ac0c"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/baseline-go.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/baseline-go.json",
+      "original_sha256": "27af39cc46bb215dcf85a4cd516591cb0978be4544111abaf09e816ff07eb6ac",
+      "original_bytes": 192271,
+      "tracked_sha256": "8f18cc31461ccedc720943a59bd26cdd8535d70a2b5d89cebe886712542a3b9d"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/baseline-input.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/baseline-input.json",
+      "original_sha256": "52613525f1c0ca38395603e00ac00cc0fdcc42c9bab14aaeb70e0aa2a2da76dc",
+      "original_bytes": 161191,
+      "tracked_sha256": "365924e11c62371610db6f34ac1a20331f7b87d406bd9f429f899ba415fd6c9e"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/baseline-native.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/baseline-native.json",
+      "original_sha256": "58b2467f45096975a3cf982c1d84d36c07c675cffb8912d9fd771c31d05cd67d",
+      "original_bytes": 9798,
+      "tracked_sha256": "e82234bc78b3f3bb94ac37b9c05ee81bb7d2f9ddebe1fd51bb984d979b945f82"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/cli.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/cli.json",
+      "original_sha256": "1f295d493588760cd6be3cfb76eb5352fc83adce071f8af45d74b0fc93819f2b",
+      "original_bytes": 308149,
+      "tracked_sha256": "e504c771d115f7862002219fc2edd7c0373531892d04d00f5dbf87b354f75c4a"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/cli.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/cli.log",
+      "original_sha256": "22a85b7d6fb4627e689cc08da4ab0bd0f19f5b3301017967b83515fdbac5f068",
+      "original_bytes": 47,
+      "tracked_sha256": "3d36bf61a9b359a654d6feb86608c9a9cfb1edf5731667557f5a9252101ee156"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/controls.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/controls.json",
+      "original_sha256": "041a0805bedd13b6fbd14bdfb9e803ad13f1c328fa7b1705c4e64b960dcf1c31",
+      "original_bytes": 11063,
+      "tracked_sha256": "bf895bcb702316cacd55baa056cef91a42415de91d593a516f2a63ed305852a2"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/controls.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/controls.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "tracked_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/go-build.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/go-build.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "tracked_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/go-constructors.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/go-constructors.log",
+      "original_sha256": "ca0c68ab61e2f53d9cfa64772bb385f58c98efa4e4f74c08f951f0398668681a",
+      "original_bytes": 65,
+      "tracked_sha256": "e811360dd9908697af8d2438c70db9ec245c2dd341a605a9386230f2d6953faa"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/go-original-baseline.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/go-original-baseline.log",
+      "original_sha256": "f0a475f0634a351ac3e0fda04645a479fcf564ea3fee94443312636729b783ad",
+      "original_bytes": 65,
+      "tracked_sha256": "317d53ff8fe46d1882d67e7d9bab45efcbccf61694392b9ca39ff7d3cbb6b84e"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/go-owners.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/go-owners.log",
+      "original_sha256": "2dec5aa8ab58ebae2b1f078e618bc969f3c016407828ddb2a7f4683d73fa3fb4",
+      "original_bytes": 65,
+      "tracked_sha256": "d9e17a7da60d9d9c7aff67fa6f29a1b7665810cbd193dff0996b16e0fab51cb7"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/go.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/go.json",
+      "original_sha256": "85cdb643d2ec0db3a4a0cd7971505b0a1b70095154a2272282ac067c8f20a07b",
+      "original_bytes": 173471,
+      "tracked_sha256": "cae9c8e28a80b06944ee0b7abe9b479f18ed0ce9abdc218ebd098e738053d505"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/input.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/input.json",
+      "original_sha256": "917a1f7a31e7db3c614531dc2b8c4a022fd4638194d5d9905f78ea802ba11ec8",
+      "original_bytes": 845556,
+      "tracked_sha256": "df0295eadfeeb92c1a6ae308e532ccfd43080ac354f9fc889f3a899ef14b0362"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/native-build.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/native-build.log",
+      "original_sha256": "6a754bab4c21d4b9330554c04cf09316979d23b388633dc06b23c5e4bfec6bb4",
+      "original_bytes": 147,
+      "tracked_sha256": "066520beeb2357e6a24f6fee760034bf5a68d8b6b6bbcf7ad2db93d277d66ffc"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/native-constructors.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/native-constructors.log",
+      "original_sha256": "3ce8e6672076885560a5510418b313b6d3c6d55f359e2c7ac71574de31e562fe",
+      "original_bytes": 364,
+      "tracked_sha256": "6edca94aa43fb499a1c2a1cce20ce1938aacddac53a8954d03fccf80ed4a1dcb"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/native.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/native.json",
+      "original_sha256": "d7dd433962f1b471b743b9266628846378b9fcd786ee27d1110b3ef1586508ed",
+      "original_bytes": 84,
+      "tracked_sha256": "6e805a6b7f3aa44fbb4606eb707eb1843f0a0fab31bd2c7a8cf063190cea1c8a"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/owner-cli.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/owner-cli.json",
+      "original_sha256": "def14bd5b5eb7246473ce138323cc20b211a1c2740cc78cf1fd3f55436ce2977",
+      "original_bytes": 34187,
+      "tracked_sha256": "4d5d38cdbffa1369bf0dee69fe734013341d23600ce46388eb8441fe458c9fa7"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/owner-cli.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/owner-cli.log",
+      "original_sha256": "cb7ff35f6ef5169d325eb8fb8a10f30b3a6bb90b93483bb8ea200d97108b84c9",
+      "original_bytes": 46,
+      "tracked_sha256": "148b3785b48c344a8dbae9c3378a759ee3ffdc0afed0955e98c95c4978f416cd"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/owner-controls.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/owner-controls.json",
+      "original_sha256": "791994e6965577516869181d6e179dcafef7e7fad1f45b34111628f25f95ff7e",
+      "original_bytes": 1992,
+      "tracked_sha256": "9865a000ffadbcf18a7c565c9d56802aab000ca082f7efc04c2686422ae428f8"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/owner-native.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/owner-native.json",
+      "original_sha256": "e5fc1d5b90f642ad53bcde292bed175a929ca1d3512d54b11a33d0b832d20cef",
+      "original_bytes": 89,
+      "tracked_sha256": "76a617ddc808739a09706732b4ec591133c94932f6630f182b61ce7611913d10"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/owner.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/owner.json",
+      "original_sha256": "d9b2e7bf385bf037d6fd117fd6ad94b9c03bd1e99c73ee774634559cc42210bc",
+      "original_bytes": 43375,
+      "tracked_sha256": "a65df8cd76b0f3bfc5da3da545ff1cef5cc08db0831f1f43974c33bed099a91a"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/path-native.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/path-native.json",
+      "original_sha256": "de7bbf9a5c03cf071975edf7ce1a95f4351b8db9c5174361cd906e1a335fa919",
+      "original_bytes": 73,
+      "tracked_sha256": "287a38c1cc4a51c9fbf3d1fbd2d1c2137da735b440fc2821328cb01255b80449"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.evidence/path.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.evidence/path.json",
+      "original_sha256": "f2458cc7f1d019e96e41d9cdffa2a6b7351b24c845f8546d7297057d2ea464e5",
+      "original_bytes": 3052,
+      "tracked_sha256": "25f1d29b96d0351770111f5678aa5b2c882c745349811f0f7f2b7dcfa5c8bbce"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-local.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-local.json",
+      "original_sha256": "1f2b70c041e8811711d461e10ca609388f1e0fe57ec799cd4333f684466f72a6",
+      "original_bytes": 840332,
+      "tracked_sha256": "4284dc794aa9e1de0188187e05ef406c8af5cc2798d85439e7b6f3a91243c763"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-original-owner-replay.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-original-owner-replay.json",
+      "original_sha256": "b0ca14258101fe15448d10c392c1bf2064237831a9ca2ac54faba556a5341057",
+      "original_bytes": 19898,
+      "tracked_sha256": "b1aa6a0dbbc51bc4c893050fdeadb3b9cc8143c4f06518ae449d99a519d7a856"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-original-owner-replay.py.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-original-owner-replay.py",
+      "original_sha256": "4d3cfe105740d4a1d753169bc8ab97f60c57613f46155b0fb551afd1a240e6fc",
+      "original_bytes": 3491,
+      "tracked_sha256": "6e5f1aeb4ed71967bd0565f5c6b188b76cda273278abf20a09e97d1c2932ba21"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-reference.evidence/cli.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-reference.evidence/cli.json",
+      "original_sha256": "b252540c44929dc7c9d92366cc52dd0c4595755496b7f370d65ae9577695dbf3",
+      "original_bytes": 662712,
+      "tracked_sha256": "31445fbd473e6f9c241be7316a931221d1c1b15a81ad539345d2178b2c91be81"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-reference.evidence/cli.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-reference.evidence/cli.log",
+      "original_sha256": "19f63b9a5d3edda82fe5aefd0176889cec505f985da89187b7be4c1c5299cdea",
+      "original_bytes": 55,
+      "tracked_sha256": "419295a1ae5fc73b18604a3a5383986ebd613a600aa1fc9f36dfbb0b82e0ae42"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-reference.evidence/controls.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-reference.evidence/controls.json",
+      "original_sha256": "fec218f0443657b32428ceededc4bd652512418f382bf153751bedb6bb93841f",
+      "original_bytes": 8223,
+      "tracked_sha256": "66d10d7921dbe641603f7ff4c036539951bcb36447b63b6247e544e933fdf8df"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-reference.evidence/controls.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-reference.evidence/controls.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "tracked_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-reference.evidence/go-build.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-reference.evidence/go-build.log",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "original_bytes": 0,
+      "tracked_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-reference.evidence/go-constructors.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-reference.evidence/go-constructors.log",
+      "original_sha256": "83401a37946a4436a4c45702c63ae18ce80bad6ff68d1662ca072b885f7b5fcb",
+      "original_bytes": 65,
+      "tracked_sha256": "7d655798873164052ff2612a8a5ed4ba5244d96a17c80adf9a8626f8b13c3df7"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-reference.evidence/go.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-reference.evidence/go.json",
+      "original_sha256": "93b1f4b9a48c82ff353811fe2a8191ea439a7dd88a84875e492e9f01b28c3569",
+      "original_bytes": 70389,
+      "tracked_sha256": "6933957c1f6470d3c0775c79ffc709213c5ba2c14098c556bd52421cf0242ae9"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-reference.evidence/native-build.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-reference.evidence/native-build.log",
+      "original_sha256": "fcce12e8e9a3743502ec98eb1888a43a32489c10219b715f931aa40675ed5311",
+      "original_bytes": 60,
+      "tracked_sha256": "17d379bf4c88a0217fa10b48ed79f1e44cc465b8be92ca655348cf711087d526"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-reference.evidence/native-constructors.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-reference.evidence/native-constructors.log",
+      "original_sha256": "3286e0bc0a8420befd24cbb996f7846490895bb169e34c30f1429ebed4527c9b",
+      "original_bytes": 362,
+      "tracked_sha256": "a8707553fce2975df580f7800d3a7c2a5c07f54e7b3b4ebee08a1cd8b53fbffa"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-reference.evidence/native.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-reference.evidence/native.json",
+      "original_sha256": "bea03abfc4ad02564ef447d21b6b9757a6e07684d1c3e38b254816d9f85cbbd6",
+      "original_bytes": 48,
+      "tracked_sha256": "7c6f6e04d328181267579d270ef17558f74f607a07027f5cf60c8aaa44ee1671"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-reference.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-reference.json",
+      "original_sha256": "1735f45419358703afd3e02b3fe8909742e65160fcdf0af6a5a123746748f1d9",
+      "original_bytes": 755147,
+      "tracked_sha256": "c66232bd7e8c6756a3be60a9b75caeb95df5f84d6c261af813533af61532d94b"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-review-receipt.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-review-receipt.json",
+      "original_sha256": "f1a61a49252e77b4469a0204398e8c728cfa7f45f9ec6e101304a8266d3ca5f0",
+      "original_bytes": 21197,
+      "tracked_sha256": "bd716a22b7779fe4c7e73305d0c6ade88dab775b5c2f595b2f36eaa67882f6e4"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-review.md.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-review.md",
+      "original_sha256": "22f6b0694997d98b53d2c8cf5088a179cba3348b1ffff37d6e3d5b5b0b16ded6",
+      "original_bytes": 10142,
+      "tracked_sha256": "9b1cb853aad837da79eb0f09c2720076ea9f992e2fa45438b572e8ba30ffb044"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-tests.log.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-tests.log",
+      "original_sha256": "36f05752642e0580626b90f02bca20530c4a469bb5fad0a43d5629b7f5e73ded",
+      "original_bytes": 35040,
+      "tracked_sha256": "221702bb66361110c2bf0ae2d89f99b917dcf0ef0a4ec9f5bda2445b43bc4166"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-verification-first-failure.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-verification-first-failure.json",
+      "original_sha256": "36b24f2afee9edfb53dfecf6ae06bc82eb10182895c3b3c97c508a93209f0208",
+      "original_bytes": 543,
+      "tracked_sha256": "d98a21b3d5d8c4be0b19aea5bbed670b45521d03434d286257a4a87f7a0959d8"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-verification.json.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-verification.json",
+      "original_sha256": "ac1a3177cb15b9b4179553f68d32f35854de9f15f21d79080bcf4af20d6825ee",
+      "original_bytes": 13569,
+      "tracked_sha256": "51648121e98b529ff4e33e273fe8d9e860a75bf5e7688e2380ef585053e22300"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-verify-first-attempt.py.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-verify-first-attempt.py",
+      "original_sha256": "7b5352d55b915b1ba7b626086249637168e085c5b9cdb3c061c68821ddd5a5d9",
+      "original_bytes": 5753,
+      "tracked_sha256": "54d5da5ba29e027871a0511a0c79ccf6d6b78a785aba756ba1c19825bc86c347"
+    },
+    "migration/evidence/usage-argv-768/independent-880/symaira-usage768-argv-independent-verify.py.gz": {
+      "original_path": "/tmp/symaira-usage768-argv-independent-verify.py",
+      "original_sha256": "3b6aa7e5ebd3f09fd566d5115f8812c748fa781bcf0851701f3c9d860908b2dd",
+      "original_bytes": 6370,
+      "tracked_sha256": "5f821db40320c19d05f4be370b2751c9dcb7908feae604b28541d3cef1a861b6"
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "source_head": "2454c461703fd2f79d727da76242d0f8be7ed7ef",
+  "base_head": "922d616143d3815dd61de329eaac3e5bf03c1f06",
+  "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "candidate_was_clean_before_and_after_all_runs": true,
+  "native_linux_binary_sha256": "3a2a0bc07633848c901e9710befb857147703aff50aa9a30fb8ef28bd0e76f2a",
+  "native_linux_binary_path": "/workspace/symaira-setup765-source/target/debug/symbrain",
+  "tests": {
+    "passed": 398,
+    "failed": 0,
+    "ignored": 0,
+    "summaries": 38
+  },
+  "rust_sdk": "rustc 1.98.0 (88d9e12ae 2026-08-18); cargo 1.98.0 (797e8a9bc 2026-08-05)",
+  "go_sdk": "go version go1.26.7 linux/amd64",
+  "actionlint": "1.7.12",
+  "environment": {
+    "umask": "022",
+    "PATH_prefix": "/workspace/toolchains/go1.26.7/bin",
+    "rust_env": "/home/agent/.cargo/env",
+    "CARGO_TARGET_DIR": "/workspace/symaira-setup765-source/target",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "process_parent": "python3 /tmp/symaira-subreaper.py bash -c, set -euo pipefail"
+  },
+  "commands": [
+    "cargo test -p symbrain-cli -p symbrain-managed -p symbrain-core --all-features --locked",
+    "cargo fmt --all -- --check",
+    "cargo clippy -p symbrain-cli -p symbrain-managed -p symbrain-core --all-targets --all-features --locked -- -D warnings",
+    "/workspace/toolchains/bin/actionlint .github/workflows/ci.yml",
+    "scripts/setup-source-oracle/run.sh /tmp/symaira-setup765-source-final-clean-process.json",
+    "scripts/doctor-repair-oracle/run.sh /tmp/symaira-setup765-source-final-clean-doctor.json",
+    "scripts/setup-repair-oracle/run.sh /tmp/symaira-setup765-source-final-clean-setup.json",
+    "git diff --check"
+  ],
+  "artifacts": {
+    "linux-process-report.json": {
+      "sha256": "21df2c3536a70bc2f623cfe0dacb6426e5374408b603e9aa3d16392ba80ac069",
+      "total": 69,
+      "exit": 0
+    },
+    "linux-doctor-regression.json": {
+      "sha256": "526780fbaf07d75136337db9ea5daa44b844f191953f0802a664bb4a3661ff48",
+      "total": 255,
+      "exit": 0
+    },
+    "linux-setup-regression.json": {
+      "sha256": "bf8c96e3e9730e2d3f6280a11cc722f318b0abbd086b75139a58c9d0c7f46d12",
+      "total": 151,
+      "exit": 0
+    },
+    "linux-process-control-wrong-exit.json": {
+      "sha256": "6b10addbd379dcdbe569a25abdf6ed989a04244c3d5ef65be6430f5800ba8bf4",
+      "expected_failure_field": "exit",
+      "complete_observations": 1
+    },
+    "linux-process-control-wrong-source.json": {
+      "sha256": "cd0578d62ee27112f092791302de5d1dba44eb90c2e3d515106606cac0173eac",
+      "expected_failure_field": "stdout_base64",
+      "complete_observations": 1
+    },
+    "linux-doctor-control-wrong-exit.json": {
+      "sha256": "21167fe87045c4058cf85a74d18e3058cc044d5f2ff3792117eecf01550813bb",
+      "expected_failure_field": "exit",
+      "complete_observations": 1
+    },
+    "linux-doctor-control-missing-header.json": {
+      "sha256": "40380a6879e9c0ba8f64ebad2b3c29d4c8c829e37005dffc4b42e1e5625a85dc",
+      "expected_failure_field": "stdout_base64",
+      "complete_observations": 1
+    },
+    "linux-doctor-control-missing-core-event.json": {
+      "sha256": "a6314d73bdbe85bf7f3d56d8bd8820413867e0057681ede6343955707c70d254",
+      "expected_failure_field": "logs",
+      "complete_observations": 1
+    },
+    "validation-logs.json": {
+      "sha256": "df72b77d6ac05fd1e163c3c38894a39c1aa46a2e10f1d3e5c2fc59a4331e4d6d"
+    },
+    "source-signature-stub-harness.json": {
+      "sha256": "d450243554817022247c1ea87b4b1d51b661cfae0a1ad0cf8ef47bb742292f14"
+    }
+  },
+  "platform_scope": {
+    "linux": "Actual native complete CLI processes and real Go fixture worker build.",
+    "windows": "Native CI pending; full CLI cross-check failed because aws-lc-sys could not find x86_64-w64-mingw32-gcc. Signature-stub typecheck only.",
+    "macos": "Native CI pending; Darwin signature-stub typecheck only. No real Swift worker, volume, hardware or signing claim."
+  },
+  "known_review_pending": "Independent review is in progress. Static Windows GODEBUG execerrdot=0 implicit-CWD lookup discrepancy reported after this source freeze; it requires a subsequent source fix and proof, not rewriting this checkpoint.",
+  "remaining_scope": "Historical Go Browse and Swift Operate/Scope workers remain transitional. Full typed invalid-config diagnostics remain Go-owned. #765 and #783 stay open. Inherited Doctor receipt remaining_scope string predates this source-orchestration increment; the new Source receipt and ADR define current scope."
+}

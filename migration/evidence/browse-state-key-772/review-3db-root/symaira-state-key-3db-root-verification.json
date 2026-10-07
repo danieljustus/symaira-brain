@@ -1,0 +1,693 @@
+{
+  "source": "3db69a655e43ef8cffa3776ad00a823d947ff31b",
+  "head": "3c2d731b2b113df81db3601b73f3036c8a558e5c",
+  "maps": [
+    {
+      "report": "key",
+      "map": "candidate_source_sha256",
+      "files": 192,
+      "verified": true
+    },
+    {
+      "report": "key",
+      "map": "go_source_sha256",
+      "files": 670,
+      "verified": true
+    },
+    {
+      "report": "ownership",
+      "map": "candidate_source_sha256",
+      "files": 192,
+      "verified": true
+    },
+    {
+      "report": "ownership",
+      "map": "go_source_sha256",
+      "files": 0,
+      "verified": true
+    },
+    {
+      "report": "process",
+      "map": "candidate_source_sha256",
+      "files": 192,
+      "verified": true
+    },
+    {
+      "report": "process",
+      "map": "go_source_sha256",
+      "files": 670,
+      "verified": true
+    },
+    {
+      "report": "registry",
+      "map": "candidate_source_sha256",
+      "files": 192,
+      "verified": true
+    },
+    {
+      "report": "registry",
+      "map": "go_source_sha256",
+      "files": 670,
+      "verified": true
+    }
+  ],
+  "changed_file_count": 190,
+  "author_evidence_files": 32,
+  "original_archive_paths": 149,
+  "current_elf_paths": 152,
+  "unique_archived": 118,
+  "new_archives": [
+    "994a83fcc9ec3b7d3d139a96a89c9623782dd7db4d2ec2c0dca4bda60fef0ead",
+    "61a5762101f1780405ee20dd70ae4dc0136e9e7778a9acb93c72fbab46fc0a4b",
+    "180c6bbc3779d75ef2d91ccc5b4010c79a928f2b2cde728fbad2f1a5095ad565"
+  ],
+  "current_binaries": [
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+      "sha256": "ecb9bcefb4fa1c8bf208ab5a08f8ea64c513b28be0a16c83533806e186f69707"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/symbrowse-cdp-spike",
+      "sha256": "c6701cf0d1ba8ea9696049a5a787426c1d1874dd04618086223ddd3fd5aa433f"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/flow_list-d6e96093c5be1461",
+      "sha256": "f5647bdcb7678f68b417998a0c219284b4337ff7a7f558ec3df96f9514ec52e7"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/help_oracle-de9b37a06e40131b",
+      "sha256": "2a02275ae5f441c768cb52a99c6b4d5b39b86852a7acf4b8f23f8db0efd2bc26"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/policy_guard-05956fbb44bd77be",
+      "sha256": "838edfeca4029507510748578aa63cf1b4905dfcbf492e2cb1de8e16bc8dc438"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/cancellation-839883b9b5ea5819",
+      "sha256": "bdad6f7c8d7823b62fa76503187362e46b28b2f8b81e2eecfbca80e88230168f"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libdisplaydoc-6c6768d3ecddb761.so",
+      "sha256": "28b47482e0c128b4ea7c364ec204216648b69e7fad6e9a59220c6d08445bab53"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/session_lifecycle-143d8196e4f76a29",
+      "sha256": "72d8c4622c8b05ada8a6c9dd58fc1e77ac5582ad473c2ed6e68ea3655ed0f4ee"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libzerofrom_derive-79252203437eed57.so",
+      "sha256": "2d42c0052c65304af9bebdaf7efa9de8ae88cc2f9463732257ce0f98604a4804"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libtracing_attributes-de8faa5ee62d3573.so",
+      "sha256": "41d042c33bada7331323371f7293964915533745c0b6ffc05813529bc0d6d892"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse_engine_chrome-026b77ba775e1807",
+      "sha256": "295f404c5a9b23cebca02eb21938ed166a00aaafefb1eaf45279d87af3261d40"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/registry_contract-5d8524760f346b5c",
+      "sha256": "0ed45389ef4c658966f39832eb0c09bc0fc4bba4bbba6b0263a7841d7817643a"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/raw_frames-590c3126aa722b45",
+      "sha256": "3d1484c8d7ae36eb9ed3ffd8951b0ffe0c97d5dba0a6fb05da4034d3ecf12be8"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/raw_frames-606fe2bbf063bbc3",
+      "sha256": "2a196de5fbebf7aee909ec3be0ca6f4eea4e95d11fd30b92750cf8a15ef52806"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libwindows_implement-f3c4ea5f031b998b.so",
+      "sha256": "1306dfcb8469ee31142910385fa4d1d6f260566850fb6ec9b671aebd7cff1463"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse_compat-599b85e5cc3a1f25",
+      "sha256": "dfd4f49da369ade61f8bd129c006ae24fb110accecc422a1ded43d4d983e43e0"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libyoke_derive-f1be791f3a4a15e1.so",
+      "sha256": "8ee2f60a0345a1960905f65863e1e9441b52eedf496e105af68724a0cde1ebdc"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/state_store-8943e420296c5e62",
+      "sha256": "6978fdb97d45771fecdd9c939b244e84eaa7644085e3725977a96db5144cb21c"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/files-e900e41f835f334b",
+      "sha256": "024fc619e73cdb193a54c1b81e6fafae448fada7f5c1e0b16dc970fd9e728a8c"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse_engine_firefox-19b42e2d1258aec5",
+      "sha256": "db321c10bdac03b4611b39f08db848979a6b768f6dfb99f5fef77225c675bd02"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libfutures_macro-50e5ccb384c8f66c.so",
+      "sha256": "5cf714d06ca241c07d87ddbb3915ffecbe99a1fcf66e92035f4bd36d59dd6402"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libopenssl_macros-1e84a3c26c3dba10.so",
+      "sha256": "cfa6cdb5bbee22f016a5c4c20df03b87ebf6d2b1c51f4f45afbb7ac48698d990"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/state_vectors-886f6661ded99b7a",
+      "sha256": "623ceab45a5c1cb38df415cdafd6c8462780dda091183efb23139cc51795c753"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse_daemon-8ba546e94571dad3",
+      "sha256": "79c14f8a9cf0cdc66b9f9694271909811ee96613a324875f2bc94ecd7b3a8daf"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse_firefox_spike-01b544b20484f9a7",
+      "sha256": "d72d3c4465d6a56be314695968b2be2ac92bad0842e2f118ecea322dfe39eb37"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/contract_fixture-36d97fa67374462f",
+      "sha256": "0290e4e19ab1803b784be0173a90798108e31c58134c47f474eee48845cd4b4b"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/workflows_contract-b30254717aa72b2e",
+      "sha256": "8bb56c8f4a22b2d1c38e0d5a7264b20bbebf75eb5071823234e4762f510bb4b3"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libserde_derive-28a78b73c7aa6e1d.so",
+      "sha256": "d110f25b57ba6835744ee5eba7538ee3a242ae3bf249b2a672bc90b6d0a917c2"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libwindows_interface-ebd43a5fe2b6e0ad.so",
+      "sha256": "018639c1bbd1ab9b233b72192dd05f2a62392b639b70a740abe1ab88765fe915"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/chrome_native-34ca40c1c3540e63",
+      "sha256": "923ac1193bed1e0f2925de1866769641ce5a7f005ab5e73f5c93ab263e9ad28f"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/spike-298ac5c7bc92d505",
+      "sha256": "a4a1ebffd01c9f8189ac9abda4bd24371bec00579cccbd6c2bf440ad6d190d11"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libyoke_derive-b6ba32d8ac2730d3.so",
+      "sha256": "d6a22b99628aeda17f48e35878ed1939c055de4586983defcdda47fb7e39960a"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/http-8bde67fa7b5cec73",
+      "sha256": "0031261df00c11d0faa5adbf01fcec973dc26566c9248bd3faae66d305d517ee"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libserde_derive-e9329cef06de6d98.so",
+      "sha256": "ffba0ec03ffc978aabfe67029d97fca2b9d8abb95031f8309ff268fd0ed69ab0"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/profiles-9a8f2d220d327cb8",
+      "sha256": "aec4757c73129668a7e6a8a389e827fbc9d0a89048e723108b7f9f925ab9a62e"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse_cdp_spike-cedcfea59ca4a511",
+      "sha256": "c6701cf0d1ba8ea9696049a5a787426c1d1874dd04618086223ddd3fd5aa433f"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libyoke_derive-be07d130dae8477e.so",
+      "sha256": "ee03867ce3d3a7e85338ecc4d6026de58241b3fa32a1a346bef3935b32d077a8"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/config_contract-6578313cd21a3788",
+      "sha256": "4f91ebb942144be70f6b8af561138b0c96b0859471251e30ca97050f45d1a84c"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libdocument_features-dbaaee733906dbee.so",
+      "sha256": "7f9f81b5e2a152f4296dc6bd4687f8de6578100c1d76d2efb9beb639367c2d81"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/robots-7d9694385454afb6",
+      "sha256": "a6f2d01924a21c955d89b8429065ab3897b9d4000a8a858b91d718b5e3ce1d3a"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/archive_http-8f8a8a08c0e8f435",
+      "sha256": "ab73885b2136397d134144c6e521c3c74f2d1d1bce970bb569e85b577e39a52f"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libzerovec_derive-b1ab65d580c6d614.so",
+      "sha256": "08448e18aa86a3f099bb74c12fd35a216fbc964348692e013df771ef899aa02e"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/static_controls-c64a93e9948e4a01",
+      "sha256": "a4805161ccff3f51511bc6524c8f15e34d0ef4d433ba1ed6cb7c6cf026ad66a9"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse-7f408b72c1a0568d",
+      "sha256": "ecb9bcefb4fa1c8bf208ab5a08f8ea64c513b28be0a16c83533806e186f69707"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse_protocol-3b21b23f3b5511c3",
+      "sha256": "8f8bd333e0ce72ddda537f4269797d56518732a5a7ec0859b267b903b2409ff8"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse_cdp_spike-48f79118a97b5ba9",
+      "sha256": "98b00f62769360b6812db3dfb9a0d46c8faca53c7bc5dfec74ad07b4eab1545e"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/pipeline_controls-702bc7d01e71b2a7",
+      "sha256": "2ce47471dd3ba21830b72123e94044e4b3c0c27cf5c46376300c9fad5efef15f"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse_fetch-38e1451ef4b7e50a",
+      "sha256": "28662f51dd09e29600f2cc01651da258134be245e202c3094c2f90c6b79b645d"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libdoctest_file-299425a01276dcbc.so",
+      "sha256": "3edf8eb5f8ef9a0fd9931e0fb5a8d87e5d9cd27ec8e9fea7d33d95bb4f3c26ab"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/bidi-71ab93631d109fe5",
+      "sha256": "55c620470e890200d6db236b47b0e092ef011d2bbd425da5bcaa9c9c91399c21"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/firefox_native-f718645d19729f0f",
+      "sha256": "258b58981ba17d7c79b0fee413d8717ca49c2cc58ea0c069c5488251403bc288"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libzerovec_derive-d4deca73499a36fb.so",
+      "sha256": "ae7478a4848c8a343a43999cc22e6be4b888d8a16075a212eff377ff3fd153e4"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/lifecycle-da975e8e1033ed55",
+      "sha256": "6a2b0b3d84f17c4b7045b424f44a836026bd6d1c393420d7507ee871fbd428e6"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse_engine-314a10ca05bd60ee",
+      "sha256": "54623ac1547e94faecb0090afdeb010373c6623575a07d8bc25e1ac9ef931f58"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libzerofrom_derive-b3440d74100a4cd5.so",
+      "sha256": "df8976c0236a4cfc2a459e9612afde0d6910aa7d8f2070dc685cf9bd0652256f"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/attach-6cce9bcc7c8fe26f",
+      "sha256": "3a3e65325768db3496b12440b700dee711216962da0cfc1f714adebeb076ef79"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/injection_contract-13bed7281fb507ef",
+      "sha256": "81719fe176882f758ad981c00d0f7a689407f64ba5358d5a169445e62de01683"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse-dc337014870bffd2",
+      "sha256": "431c729a7f9a779672ef2866dff8d2ca02c3d00301d7ea2cedab01f11e97007d"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libzerofrom_derive-02ea84dc86ea0158.so",
+      "sha256": "d8585e6bb5111472e0691f5bb55f0d5fa4abee174e2d2f9f664bfb9d36d91a9d"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/state_cleanup-0fe1b51f94c117cb",
+      "sha256": "1e0b698e2b4122ccf6f4bca5fc1024080b32dd4b7dcf5b217fc19f577742d1ca"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse_mcp-c508af2d8b49a810",
+      "sha256": "495339fcf64047d0cb27705546606e8b48df31c7a814e78d05d0d73e0cc33b35"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/full-c78af1ae30e353cf",
+      "sha256": "5d182dbd677c806580686a266ed7a118d6148c2db487aa473f7a3ee9ca9dfd67"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/retry-0139b5ad96e18e70",
+      "sha256": "3ef950d7008c9adb5d6cbf8f61dc20ad8c381251540a01cfa7564b4ff4b16004"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/output_budget_contract-6a70edef915b6d9c",
+      "sha256": "ced853d7d838b1ed4466c6920d67e3d8a75017897adbe2446d5c060f792ca3a3"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/policy_contract-4d14ff4b578382f3",
+      "sha256": "5cfd4081e1450f6e7ae2dde4592e949c62f76eb9770fdb6f4ad9658c001939ed"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/platform-1ac36df6fac8f513",
+      "sha256": "9f0d10870e3fcab82ec8f2e49efd414b53ef1d8517b1bbe2cc75beb4afeeab13"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/key_resolver-a48c82a870c384cd",
+      "sha256": "d3df025f2c54350e3dbddd06d111f1748d844bce8e9ac10321fd8ac20bb5cc07"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/protocol_fixture-4bfe1c4dcdad6eaf",
+      "sha256": "046ba0c36bfedc84115a46ee0886f4bbe801fba170675dfcbe3b555d5b563470"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libtime_macros-d2fe0fb092e1da59.so",
+      "sha256": "5950d9a7eae452e3673e19d355ec778d8f8282e0872aa8387ef6902bc1a0497d"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/control_contract-7f82b68873b09517",
+      "sha256": "7bf13d3b1097e6674a803a32607d7c5b6b8b584682f5038964325a14856e541b"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/contract_fixture-4c68e5e1035bcae6",
+      "sha256": "404abcb79147d98b9652da9e4fcf3e6b36722520b91ba23bca80303a87e6907f"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/version-bdf73ea90c390b72",
+      "sha256": "8d5ee3ce2829c00fae4bec978a7beaa0b96658e1ab8dc83963a8e13dd6fd97cf"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse_mcp-9b1edc6fc4342d44",
+      "sha256": "994a83fcc9ec3b7d3d139a96a89c9623782dd7db4d2ec2c0dca4bda60fef0ead"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/safari_native-527045a01121fc0d",
+      "sha256": "142ee974b374f4c78d4cab67330a68c50ab5f21148f2315e00b69ade69b65c2e"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/client_contract-9909de2299a8b997",
+      "sha256": "8dbd92dc8e50abd406b65751b2d169ee9b1ff1e3f357289bb87a72f6fec5c039"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse_engine_safari-2d2844b69f5c2254",
+      "sha256": "87a8dbff876ec9ba50724fba555c4ca014c3213ebf1d58d5c8c13b3b3ce9f1e9"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/hardening_properties-1dc14e829cb7012b",
+      "sha256": "86fb8ed4a596345d9668c4716d3ce8c517d78889f80a11ccbc8a7c02f8059f81"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/oracle_fixture-5610c451734b9be8",
+      "sha256": "ff3f1dd64ad09dd2422b7cf487be18065faa0b243211a4e08eaa0cc8d01a4b1b"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libdisplaydoc-e109b7b32002c8d0.so",
+      "sha256": "ebdc16ff70c8dc896f4a4b8e2171de5589c6697f7f9202bcea94547aaa8d80e1"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/upgrade_check_native-e393d1733d686da7",
+      "sha256": "7c96cdb877bcdf537ed28cb85f8a00d5a4215bf49503e17fa24d70641f62130c"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libthiserror_impl-cb6888054e25bdc6.so",
+      "sha256": "9327b5eaa8249dfc4dee6286b570caeaa3015954c90415a9d6cc48f9e327555a"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/render_corpus-76a55da5d07dc889",
+      "sha256": "9a97bdeae3aafa3127b96d75656e383d4cd1749d259c72da083b4afd6c4081b2"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse_core-7fffe76ab078e5e2",
+      "sha256": "22af39f9d09a136e9eded8aae8cca4fb6d8765e2f7589be836114bea950fd965"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/key_sources-cd4a38bb2ef19c19",
+      "sha256": "cadc8597e6725df54ba45895c8632cc535026645535b33037dd7cb0a1f0dd1e0"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/deps/libtokio_macros-8f1368bdeaf68738.so",
+      "sha256": "5c25fa0b169eb216f51991c52f8e1accf2c49cb75eaa0a25fb8e3998db02c949"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/examples/startup_key_source_probe-bcc803c24e549985",
+      "sha256": "9939df8439b94e2c73953d0d107d50779d9f9885165ffcbc8dce13641b72bb73"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/examples/startup_key_source_probe-635c23756d917c0f",
+      "sha256": "61a5762101f1780405ee20dd70ae4dc0136e9e7778a9acb93c72fbab46fc0a4b"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/examples/state_key_store_probe",
+      "sha256": "280b39534554df80717f7c406c3e0f9163d726f4e22a4f01d1b5ee850b268343"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/examples/startup_key_source_probe",
+      "sha256": "9939df8439b94e2c73953d0d107d50779d9f9885165ffcbc8dce13641b72bb73"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/examples/state_key_store_probe-d96e2162a3399a13",
+      "sha256": "280b39534554df80717f7c406c3e0f9163d726f4e22a4f01d1b5ee850b268343"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/examples/state_key_store_probe-8869d6a080a64370",
+      "sha256": "180c6bbc3779d75ef2d91ccc5b4010c79a928f2b2cde728fbad2f1a5095ad565"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/examples/state_key_store_probe-c174ef05cff35394",
+      "sha256": "3fe22e3947274c812f5cbc57d7bd0d39485f91c0c21ab0856c2bf399d513c5f8"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/parking_lot_core-d35f601f055cfa80/build-script-build",
+      "sha256": "899b84d27834fca24dc0103f805ab89771bd798b1630d7d07dc547d76053977e"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/parking_lot_core-d35f601f055cfa80/build_script_build-d35f601f055cfa80",
+      "sha256": "899b84d27834fca24dc0103f805ab89771bd798b1630d7d07dc547d76053977e"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/icu_normalizer_data-14b8881d75c5f2e6/build-script-build",
+      "sha256": "996e89334e6b66bcbecc4e8b202bf4879f6ab358960434fb0902f0b69526e525"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/icu_normalizer_data-14b8881d75c5f2e6/build_script_build-14b8881d75c5f2e6",
+      "sha256": "996e89334e6b66bcbecc4e8b202bf4879f6ab358960434fb0902f0b69526e525"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/httparse-e0b579ec46e29f81/build-script-build",
+      "sha256": "ce638fd4922834ad56a4f90a443ab2001f14ed7d61aba0caa62b89d4066af43a"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/httparse-e0b579ec46e29f81/build_script_build-e0b579ec46e29f81",
+      "sha256": "ce638fd4922834ad56a4f90a443ab2001f14ed7d61aba0caa62b89d4066af43a"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/libc-ead76aa36aab641f/build-script-build",
+      "sha256": "81ef769fbb73c7cdbb1d71edec082d69555f0afa5be2f5374f8a6419fdb729f2"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/libc-ead76aa36aab641f/build_script_build-ead76aa36aab641f",
+      "sha256": "81ef769fbb73c7cdbb1d71edec082d69555f0afa5be2f5374f8a6419fdb729f2"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/serde_core-584b45d1134645da/build-script-build",
+      "sha256": "4048709a298103b5e53224ab584c5d9bab6b148e2009d94557c5b281f7d8f08b"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/serde_core-584b45d1134645da/build_script_build-584b45d1134645da",
+      "sha256": "4048709a298103b5e53224ab584c5d9bab6b148e2009d94557c5b281f7d8f08b"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/quote-ec261db1962ef50a/build-script-build",
+      "sha256": "0bd4cb5b489e411339f42284d6c94c94fbaedbb734240d58884a5c6ff8238327"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/quote-ec261db1962ef50a/build_script_build-ec261db1962ef50a",
+      "sha256": "0bd4cb5b489e411339f42284d6c94c94fbaedbb734240d58884a5c6ff8238327"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/getrandom-fbeec61c26c94f73/build-script-build",
+      "sha256": "0ec13c446736d3cf2c9d3dd2a9b6c01ecb02c1632eea3cb4de522d7e75db7bdb"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/getrandom-fbeec61c26c94f73/build_script_build-fbeec61c26c94f73",
+      "sha256": "0ec13c446736d3cf2c9d3dd2a9b6c01ecb02c1632eea3cb4de522d7e75db7bdb"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/num-traits-7494dd218c6d830f/build-script-build",
+      "sha256": "68d1d7a76a1425c57df8fe3ad68fb1e0457cf5e370e7362fc40a4e04ddb9f999"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/num-traits-7494dd218c6d830f/build_script_build-7494dd218c6d830f",
+      "sha256": "68d1d7a76a1425c57df8fe3ad68fb1e0457cf5e370e7362fc40a4e04ddb9f999"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/nix-7be69841915cfa27/build-script-build",
+      "sha256": "46bd3c15b3a7f8373bafcc2d49f8991f8bbddd478621b98fb377a42ca2057867"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/nix-7be69841915cfa27/build_script_build-7be69841915cfa27",
+      "sha256": "46bd3c15b3a7f8373bafcc2d49f8991f8bbddd478621b98fb377a42ca2057867"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/getrandom-f82c60a5e011e97e/build-script-build",
+      "sha256": "15f9e132ae5ae3c49ef6bbd9b470fd28c92a2e7fd7a8df31f0c68b4386a12b87"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/getrandom-f82c60a5e011e97e/build_script_build-f82c60a5e011e97e",
+      "sha256": "15f9e132ae5ae3c49ef6bbd9b470fd28c92a2e7fd7a8df31f0c68b4386a12b87"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/libc-7d9b988e18205540/build-script-build",
+      "sha256": "e9fcd4605708a9a831a4baec9a0f6e318724d25d9d042bb8be090f22e467c855"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/libc-7d9b988e18205540/build_script_build-7d9b988e18205540",
+      "sha256": "e9fcd4605708a9a831a4baec9a0f6e318724d25d9d042bb8be090f22e467c855"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/thiserror-111dee3492ff363a/build-script-build",
+      "sha256": "2e3f2e47f5c16cf18b9e76dd0eebf9a7f103764e75ff95953033056354b72aa6"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/thiserror-111dee3492ff363a/build_script_build-111dee3492ff363a",
+      "sha256": "2e3f2e47f5c16cf18b9e76dd0eebf9a7f103764e75ff95953033056354b72aa6"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/cookie-1837248abd045e99/build-script-build",
+      "sha256": "3aaa3764fb091e8d8fba8fad56071edf05cd7093a5072cc4d641e1550a738e24"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/cookie-1837248abd045e99/build_script_build-1837248abd045e99",
+      "sha256": "3aaa3764fb091e8d8fba8fad56071edf05cd7093a5072cc4d641e1550a738e24"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/zerocopy-f4bb80fd8daef250/build-script-build",
+      "sha256": "25b5944962adec15ce3c4fb8be22e38170c5d35622f571f9106e491d0454c286"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/zerocopy-f4bb80fd8daef250/build_script_build-f4bb80fd8daef250",
+      "sha256": "25b5944962adec15ce3c4fb8be22e38170c5d35622f571f9106e491d0454c286"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/zmij-cb443593c4c8af30/build-script-build",
+      "sha256": "dc4373cce8dc3c534e5202545dca4a72a8fe5fd6e7beb92846ed336836d676cf"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/zmij-cb443593c4c8af30/build_script_build-cb443593c4c8af30",
+      "sha256": "dc4373cce8dc3c534e5202545dca4a72a8fe5fd6e7beb92846ed336836d676cf"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/serde_json-7ef9c48af95ae011/build-script-build",
+      "sha256": "f5f3653afeb3d8eea3d68f8fc4db4e1ffdcb08e9231729ca9793f26aebd3cc22"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/serde_json-7ef9c48af95ae011/build_script_build-7ef9c48af95ae011",
+      "sha256": "f5f3653afeb3d8eea3d68f8fc4db4e1ffdcb08e9231729ca9793f26aebd3cc22"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/generic-array-831cca7101b24b12/build-script-build",
+      "sha256": "9be4f3e8e28990560b4ff1ac34bd443d8a626b2a09bc758fabff64e7137694f0"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/generic-array-831cca7101b24b12/build_script_build-831cca7101b24b12",
+      "sha256": "9be4f3e8e28990560b4ff1ac34bd443d8a626b2a09bc758fabff64e7137694f0"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/serde-c86f2e34bc18a4fb/build-script-build",
+      "sha256": "250db9b77f18975e5f7db466e97b0017051d1d9efbf4b26979686eb420e00b45"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/serde-c86f2e34bc18a4fb/build_script_build-c86f2e34bc18a4fb",
+      "sha256": "250db9b77f18975e5f7db466e97b0017051d1d9efbf4b26979686eb420e00b45"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/openssl-e435489e04d53f00/build-script-build",
+      "sha256": "9056376ba150b6a6217de7962240cc3cb2f1cb703f897b537ae9fbb678b4c1f1"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/openssl-e435489e04d53f00/build_script_build-e435489e04d53f00",
+      "sha256": "9056376ba150b6a6217de7962240cc3cb2f1cb703f897b537ae9fbb678b4c1f1"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/crc32fast-067652e671c0e316/build-script-build",
+      "sha256": "c65f40aa789ea7239434856de997e4fcd9ca843a6c5e11c2d29f3d3b03141d83"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/crc32fast-067652e671c0e316/build_script_build-067652e671c0e316",
+      "sha256": "c65f40aa789ea7239434856de997e4fcd9ca843a6c5e11c2d29f3d3b03141d83"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/serde_json-9f3921049a5b606e/build-script-build",
+      "sha256": "7730787ebc18ddcc25beba8c442eb9afe7a78514d60f2c9bba3d40c109877646"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/serde_json-9f3921049a5b606e/build_script_build-9f3921049a5b606e",
+      "sha256": "7730787ebc18ddcc25beba8c442eb9afe7a78514d60f2c9bba3d40c109877646"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/winapi-x86_64-pc-windows-gnu-d9086bd55b83d028/build-script-build",
+      "sha256": "ca6b09ddd8dbef62e3b75b731afe4f7d3c5192686a60ab6c91a19677c2ca121f"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/winapi-x86_64-pc-windows-gnu-d9086bd55b83d028/build_script_build-d9086bd55b83d028",
+      "sha256": "ca6b09ddd8dbef62e3b75b731afe4f7d3c5192686a60ab6c91a19677c2ca121f"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/native-tls-bdf79eb6dc7d67e7/build_script_build-bdf79eb6dc7d67e7",
+      "sha256": "5a79df348bc3b01733a8de9e67746377451d814396f28075fc46b9642e929b7e"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/native-tls-bdf79eb6dc7d67e7/build-script-build",
+      "sha256": "5a79df348bc3b01733a8de9e67746377451d814396f28075fc46b9642e929b7e"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/proc-macro2-ec6f0b45cec5054a/build-script-build",
+      "sha256": "5ce543b164de94e4691cca9e66960e44ca37b98f146bc34c68acd72fe978e48d"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/proc-macro2-ec6f0b45cec5054a/build_script_build-ec6f0b45cec5054a",
+      "sha256": "5ce543b164de94e4691cca9e66960e44ca37b98f146bc34c68acd72fe978e48d"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/icu_properties_data-ad03ee1198f976d1/build-script-build",
+      "sha256": "ef5135fb4151923159ec96a356fe4bee3fd46d637254d798d5e658b4ae0e5c13"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/icu_properties_data-ad03ee1198f976d1/build_script_build-ad03ee1198f976d1",
+      "sha256": "ef5135fb4151923159ec96a356fe4bee3fd46d637254d798d5e658b4ae0e5c13"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/web_atoms-eb89fd821e898f18/build_script_build-eb89fd821e898f18",
+      "sha256": "ded3a11b91be6b962e820545d8a77dd836828b43535b1a2f4da91e3d79a4ebf9"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/web_atoms-eb89fd821e898f18/build-script-build",
+      "sha256": "ded3a11b91be6b962e820545d8a77dd836828b43535b1a2f4da91e3d79a4ebf9"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/memoffset-dbf036e9aa8876a6/build_script_build-dbf036e9aa8876a6",
+      "sha256": "149d54b0433bb8f6b33918e5a594ba19c42072f61cc3c88f159527f37b11a6d7"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/memoffset-dbf036e9aa8876a6/build-script-build",
+      "sha256": "149d54b0433bb8f6b33918e5a594ba19c42072f61cc3c88f159527f37b11a6d7"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/openssl-sys-4abbe44e6ab31a2e/build-script-main",
+      "sha256": "b56cd83ed0f77f706ce7655b626f94994a89341464524781aaf5f290cf66a0c2"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/openssl-sys-4abbe44e6ab31a2e/build_script_main-4abbe44e6ab31a2e",
+      "sha256": "b56cd83ed0f77f706ce7655b626f94994a89341464524781aaf5f290cf66a0c2"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/rustix-1243c2fa0889dfe6/build-script-build",
+      "sha256": "d6954c7e3dc8fab9cd0fef9382b1838e92581f91f893da9d5c6a1d73c86e9421"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/rustix-1243c2fa0889dfe6/build_script_build-1243c2fa0889dfe6",
+      "sha256": "d6954c7e3dc8fab9cd0fef9382b1838e92581f91f893da9d5c6a1d73c86e9421"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/winapi-681a56b21c190e3d/build-script-build",
+      "sha256": "661b711d8eadf99aa74ab9ce8721d4a665b9fb5b0fc4e640fff8d95576cf3067"
+    },
+    {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/build/winapi-681a56b21c190e3d/build_script_build-681a56b21c190e3d",
+      "sha256": "661b711d8eadf99aa74ab9ce8721d4a665b9fb5b0fc4e640fff8d95576cf3067"
+    }
+  ],
+  "roundtrip": true,
+  "users": [],
+  "tests": [
+    {
+      "path": "/tmp/symaira-state-key-3db-root-affected-pinned.log",
+      "passed": 224,
+      "failed": 0,
+      "ignored": 3,
+      "summaries": 34
+    },
+    {
+      "path": "/tmp/symaira-state-key-3db-root-mcp.json.tests.log",
+      "passed": 310,
+      "failed": 0,
+      "ignored": 3,
+      "summaries": 67
+    }
+  ],
+  "retired": true
+}

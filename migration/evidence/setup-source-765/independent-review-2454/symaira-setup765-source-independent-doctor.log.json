@@ -1,0 +1,4 @@
+{
+  "sha256": "b8fb393ba2d217a9e3bfeb79818d1f068938cff7d76c4d8b16554033b3429ca1",
+  "text": "    Finished `dev` profile [unoptimized] target(s) in 0.12s\nDoctor repair: 255/255 matched, 0 failures\nFAIL correct ['exit']\nDoctor repair: 0/1 matched, 1 failures\nFAIL correct ['stdout_base64']\nDoctor repair: 0/1 matched, 1 failures\nFAIL correct ['logs']\nDoctor repair: 0/1 matched, 1 failures\n"
+}

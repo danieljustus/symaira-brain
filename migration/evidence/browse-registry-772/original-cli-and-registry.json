@@ -1,0 +1,283 @@
+{
+  "go": {
+    "binary": "/tmp/symaira-pr801-go-1.26.7",
+    "sha256": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8",
+    "root": "/tmp/br-ndac3fjw",
+    "cases": [
+      {
+        "command": [
+          "session",
+          "list"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"daemon_unavailable\",\"message\":\"daemon is unavailable for session \\\"missing\\\"\",\"hint\":\"start daemon with 'symbrowse daemon --session missing' (autostart disabled via SYMBROWSE_NO_AUTOSTART); see daemon log at /tmp/br-ndac3fjw/state/symbrowse/daemon.log\",\"details\":{\"session\":\"missing\",\"socket_path\":\"/tmp/br-ndac3fjw/run/symbrowse/missing.sock\"}}}\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "session",
+          "info"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"daemon_unavailable\",\"message\":\"daemon is unavailable for session \\\"missing\\\"\",\"hint\":\"start daemon with 'symbrowse daemon --session missing' (autostart disabled via SYMBROWSE_NO_AUTOSTART); see daemon log at /tmp/br-ndac3fjw/state/symbrowse/daemon.log\",\"details\":{\"session\":\"missing\",\"socket_path\":\"/tmp/br-ndac3fjw/run/symbrowse/missing.sock\"}}}\n",
+        "stderr": ""
+      },
+      {
+        "command": [
+          "daemon",
+          "status"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"daemon_unavailable\",\"message\":\"daemon is unavailable for session \\\"missing\\\"\",\"hint\":\"start daemon with 'symbrowse daemon --session missing' (autostart disabled via SYMBROWSE_NO_AUTOSTART); see daemon log at /tmp/br-ndac3fjw/state/symbrowse/daemon.log\",\"details\":{\"session\":\"missing\",\"socket_path\":\"/tmp/br-ndac3fjw/run/symbrowse/missing.sock\"}}}\n",
+        "stderr": ""
+      },
+      {
+        "case": "registry",
+        "pid": 897196,
+        "responses": [
+          {
+            "frame": {
+              "cmd": "session.info",
+              "session": "unknown"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "session_not_found",
+                "message": "session not found: \"unknown\""
+              }
+            }
+          },
+          {
+            "frame": {
+              "cmd": "session.info",
+              "session": "registry"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "registry",
+                "pid": 897196,
+                "started_at": "2026-10-03T19:18:26.628490349Z",
+                "active_tabs": 0,
+                "last_activity": "2026-10-03T19:18:26.685919157Z",
+                "user_data_dir": "/tmp/br-ndac3fjw/cache/symbrowse/sessions/registry",
+                "browser_context_id": "context-registry",
+                "ref_count": 0,
+                "scope": "worktree",
+                "origin_path": "/tmp/br-ndac3fjw"
+              }
+            }
+          },
+          {
+            "frame": {
+              "cmd": "session.list",
+              "session": "registry"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 1,
+                "sessions": [
+                  {
+                    "name": "registry",
+                    "pid": 897196,
+                    "started_at": "2026-10-03T19:18:26.628490349Z",
+                    "active_tabs": 0,
+                    "last_activity": "2026-10-03T19:18:26.706400418Z",
+                    "user_data_dir": "/tmp/br-ndac3fjw/cache/symbrowse/sessions/registry",
+                    "browser_context_id": "context-registry",
+                    "ref_count": 0,
+                    "scope": "worktree",
+                    "origin_path": "/tmp/br-ndac3fjw"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "frame": {
+              "cmd": "session.info",
+              "session": "registry"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "registry",
+                "pid": 897196,
+                "started_at": "2026-10-03T19:18:26.628490349Z",
+                "active_tabs": 0,
+                "last_activity": "2026-10-03T19:18:26.726848393Z",
+                "user_data_dir": "/tmp/br-ndac3fjw/cache/symbrowse/sessions/registry",
+                "browser_context_id": "context-registry",
+                "ref_count": 0,
+                "scope": "worktree",
+                "origin_path": "/tmp/br-ndac3fjw"
+              }
+            }
+          },
+          {
+            "frame": {
+              "cmd": "daemon.ping",
+              "session": "bad session!"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "invalid_session",
+                "message": "invalid session \"bad session!\""
+              }
+            }
+          }
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "time=2026-10-03T19:18:26.628Z level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\n"
+      }
+    ]
+  },
+  "rust": {
+    "binary": "/workspace/symaira-daemon772/target/debug/symbrowse",
+    "sha256": "dbba68ebc3a979d2984f523ed452407f429d36f55455dd87dc6b862275bc4ac1",
+    "root": "/tmp/br-9am0umly",
+    "cases": [
+      {
+        "command": [
+          "session",
+          "list"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown command \"session\" for \"symbrowse\"\n"
+      },
+      {
+        "command": [
+          "session",
+          "info"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown command \"session\" for \"symbrowse\"\n"
+      },
+      {
+        "command": [
+          "daemon",
+          "status"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"daemon_unavailable\",\"message\":\"daemon is unavailable for session \\\"missing\\\"\"}}\n",
+        "stderr": ""
+      },
+      {
+        "case": "registry",
+        "pid": 897215,
+        "responses": [
+          {
+            "frame": {
+              "cmd": "session.info",
+              "session": "unknown"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "session_not_found",
+                "message": "unknown"
+              }
+            }
+          },
+          {
+            "frame": {
+              "cmd": "session.info",
+              "session": "registry"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "active_tabs": 0,
+                "browser_context_id": "context-registry",
+                "last_activity": "2026-10-03T19:18:26.85971353Z",
+                "name": "registry",
+                "origin_path": "/tmp/br-9am0umly",
+                "pid": 897215,
+                "ref_count": 0,
+                "scope": "worktree",
+                "started_at": "2026-10-03T19:18:26.802613444Z",
+                "user_data_dir": "/tmp/br-9am0umly/cache/symbrowse/sessions/registry"
+              }
+            }
+          },
+          {
+            "frame": {
+              "cmd": "session.list",
+              "session": "registry"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 1,
+                "sessions": [
+                  {
+                    "active_tabs": 0,
+                    "browser_context_id": "context-registry",
+                    "last_activity": "2026-10-03T19:18:26.85971353Z",
+                    "name": "registry",
+                    "origin_path": "/tmp/br-9am0umly",
+                    "pid": 897215,
+                    "ref_count": 0,
+                    "scope": "worktree",
+                    "started_at": "2026-10-03T19:18:26.802613444Z",
+                    "user_data_dir": "/tmp/br-9am0umly/cache/symbrowse/sessions/registry"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "frame": {
+              "cmd": "session.info",
+              "session": "registry"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "active_tabs": 0,
+                "browser_context_id": "context-registry",
+                "last_activity": "2026-10-03T19:18:26.900857119Z",
+                "name": "registry",
+                "origin_path": "/tmp/br-9am0umly",
+                "pid": 897215,
+                "ref_count": 0,
+                "scope": "worktree",
+                "started_at": "2026-10-03T19:18:26.802613444Z",
+                "user_data_dir": "/tmp/br-9am0umly/cache/symbrowse/sessions/registry"
+              }
+            }
+          },
+          {
+            "frame": {
+              "cmd": "daemon.ping",
+              "session": "bad session!"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "invalid_session",
+                "message": "invalid session bad session!"
+              }
+            }
+          }
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n"
+      },
+      {
+        "case": "state-success-status-failure",
+        "requests": [],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown command \"session\" for \"symbrowse\"\n"
+      }
+    ]
+  }
+}

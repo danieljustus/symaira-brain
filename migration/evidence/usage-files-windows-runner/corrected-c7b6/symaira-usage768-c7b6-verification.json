@@ -1,0 +1,61 @@
+{
+  "source_head": "c7b6c7711fb28bb1ed95b622b8c1d441ef8e169d",
+  "source_dirty": false,
+  "reports": {
+    "reference": {
+      "receipt_path": "/tmp/symaira-usage768-c7b6-reference-process.json",
+      "receipt_sha256": "6940e07d790195045ba575f06b0c0775db2fe6234ee8510dff921a6d1f364976",
+      "source_hashes": 47,
+      "passed": 44,
+      "failed": 0,
+      "CLI": 110,
+      "negative_control_exits": [
+        1,
+        1,
+        101,
+        101,
+        101
+      ],
+      "native_binary_sha256": "9aed2a28060fe84f945db937def4ed10c83f13b15a008d4720ebebf3cd853f38"
+    },
+    "hermes": {
+      "receipt_path": "/tmp/symaira-usage768-c7b6-hermes-process.json",
+      "receipt_sha256": "f27183262f5be47bb0f6c2a4c9990a3aef7579f4ed939f3e08e183527938d0e9",
+      "source_hashes": 51,
+      "passed": 96,
+      "failed": 0,
+      "CLI": 104,
+      "negative_control_exits": [
+        1,
+        1,
+        101,
+        101,
+        101
+      ],
+      "native_binary_sha256": "9aed2a28060fe84f945db937def4ed10c83f13b15a008d4720ebebf3cd853f38"
+    },
+    "files": {
+      "receipt_path": "/tmp/symaira-usage768-c7b6-files-process.json",
+      "receipt_sha256": "a05bb4af0f30db4ae1eda6f3a66dd6251fed3ff186f414848d4e6a3789f6dc3b",
+      "source_hashes": 53,
+      "passed": 86,
+      "failed": 0,
+      "CLI": 151,
+      "negative_control_exits": [
+        1,
+        1,
+        101,
+        101,
+        101
+      ],
+      "native_binary_sha256": "9aed2a28060fe84f945db937def4ed10c83f13b15a008d4720ebebf3cd853f38"
+    }
+  },
+  "all_source_hashes_current": true,
+  "common_source_hashes": 44,
+  "native_binary_sha256": "9aed2a28060fe84f945db937def4ed10c83f13b15a008d4720ebebf3cd853f38",
+  "owned_target_users": 0,
+  "native_windows_runtime": "not established by Linux gates",
+  "runner_copy_regression_path": "/tmp/symaira-usage768-windows-runner-copy.json",
+  "original_native_elf_archive": "/workspace/oracles/symaira-usage768-files-f241-binaries/archive-receipt.json"
+}

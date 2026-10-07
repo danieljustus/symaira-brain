@@ -1,0 +1,1642 @@
+{
+  "candidate_revision": "b363762cb85b879630fecd3fd141cba1ae85f71c",
+  "candidate_dirty": false,
+  "go_binary_sha256": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8",
+  "rust_binary_sha256": "91de2c212944e742e509bcc805136e90e98e2bda14c917e2bd553823a868a808",
+  "total": 48,
+  "matched": 0,
+  "records": [
+    {
+      "args": [
+        "session",
+        "list",
+        "--session",
+        "bad\u001bsession"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u001bsession"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\x1bsession\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u001bsession"
+        ],
+        "exit": 7,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\u{1b}session\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "list",
+        "--session",
+        "bad\u001bsession",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u001bsession",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\x1bsession\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u001bsession",
+          "--json"
+        ],
+        "exit": 7,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\u{1b}session\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "list",
+        "--session",
+        "bad\u001bsession",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u001bsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad\\x1bsession\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u001bsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 7,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: invalid session \"bad\\u{1b}session\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "list",
+        "--session",
+        "bad\u0301session"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u0301session"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad\u0301session\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u0301session"
+        ],
+        "exit": 7,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\u{301}session\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "list",
+        "--session",
+        "bad\u0301session",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u0301session",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\u0301session\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u0301session",
+          "--json"
+        ],
+        "exit": 7,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\u{301}session\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "list",
+        "--session",
+        "bad\u0301session",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u0301session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad\u0301session\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u0301session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 7,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: invalid session \"bad\\u{301}session\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "list",
+        "--session",
+        "bad\u00adsession"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u00adsession"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\u00adsession\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u00adsession"
+        ],
+        "exit": 7,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\u{ad}session\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "list",
+        "--session",
+        "bad\u00adsession",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u00adsession",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\u00adsession\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u00adsession",
+          "--json"
+        ],
+        "exit": 7,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\u{ad}session\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "list",
+        "--session",
+        "bad\u00adsession",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u00adsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad\\u00adsession\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad\u00adsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 7,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: invalid session \"bad\\u{ad}session\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "list",
+        "--session",
+        "bad session"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad session"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad session\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad session"
+        ],
+        "exit": 7,
+        "stdout": "",
+        "stderr": "invalid session \"bad session\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "list",
+        "--session",
+        "bad session",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad session",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad session\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad session",
+          "--json"
+        ],
+        "exit": 7,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad session\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "list",
+        "--session",
+        "bad session",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad session\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "list",
+          "--session",
+          "bad session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 7,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: invalid session \"bad session\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "info",
+        "--session",
+        "bad\u001bsession"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u001bsession"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\x1bsession\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u001bsession"
+        ],
+        "exit": 7,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\u{1b}session\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "info",
+        "--session",
+        "bad\u001bsession",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u001bsession",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\x1bsession\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u001bsession",
+          "--json"
+        ],
+        "exit": 7,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\u{1b}session\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "info",
+        "--session",
+        "bad\u001bsession",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u001bsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad\\x1bsession\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u001bsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 7,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: invalid session \"bad\\u{1b}session\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "info",
+        "--session",
+        "bad\u0301session"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u0301session"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad\u0301session\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u0301session"
+        ],
+        "exit": 7,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\u{301}session\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "info",
+        "--session",
+        "bad\u0301session",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u0301session",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\u0301session\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u0301session",
+          "--json"
+        ],
+        "exit": 7,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\u{301}session\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "info",
+        "--session",
+        "bad\u0301session",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u0301session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad\u0301session\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u0301session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 7,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: invalid session \"bad\\u{301}session\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "info",
+        "--session",
+        "bad\u00adsession"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u00adsession"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\u00adsession\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u00adsession"
+        ],
+        "exit": 7,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\u{ad}session\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "info",
+        "--session",
+        "bad\u00adsession",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u00adsession",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\u00adsession\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u00adsession",
+          "--json"
+        ],
+        "exit": 7,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\u{ad}session\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "info",
+        "--session",
+        "bad\u00adsession",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u00adsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad\\u00adsession\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad\u00adsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 7,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: invalid session \"bad\\u{ad}session\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "info",
+        "--session",
+        "bad session"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad session"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad session\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad session"
+        ],
+        "exit": 7,
+        "stdout": "",
+        "stderr": "invalid session \"bad session\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "info",
+        "--session",
+        "bad session",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad session",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad session\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad session",
+          "--json"
+        ],
+        "exit": 7,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad session\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "session",
+        "info",
+        "--session",
+        "bad session",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad session\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "session",
+          "info",
+          "--session",
+          "bad session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 7,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: invalid session \"bad session\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "daemon",
+        "status",
+        "--session",
+        "bad\u001bsession"
+      ],
+      "go": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u001bsession"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\x1bsession\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u001bsession"
+        ],
+        "exit": 7,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\u{1b}session\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "daemon",
+        "status",
+        "--session",
+        "bad\u001bsession",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u001bsession",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\x1bsession\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u001bsession",
+          "--json"
+        ],
+        "exit": 7,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\u{1b}session\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "daemon",
+        "status",
+        "--session",
+        "bad\u001bsession",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u001bsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad\\x1bsession\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u001bsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 7,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: invalid session \"bad\\u{1b}session\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "daemon",
+        "status",
+        "--session",
+        "bad\u0301session"
+      ],
+      "go": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u0301session"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad\u0301session\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u0301session"
+        ],
+        "exit": 7,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\u{301}session\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "daemon",
+        "status",
+        "--session",
+        "bad\u0301session",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u0301session",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\u0301session\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u0301session",
+          "--json"
+        ],
+        "exit": 7,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\u{301}session\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "daemon",
+        "status",
+        "--session",
+        "bad\u0301session",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u0301session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad\u0301session\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u0301session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 7,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: invalid session \"bad\\u{301}session\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "daemon",
+        "status",
+        "--session",
+        "bad\u00adsession"
+      ],
+      "go": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u00adsession"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\u00adsession\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u00adsession"
+        ],
+        "exit": 7,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\u{ad}session\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "daemon",
+        "status",
+        "--session",
+        "bad\u00adsession",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u00adsession",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\u00adsession\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u00adsession",
+          "--json"
+        ],
+        "exit": 7,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\u{ad}session\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "daemon",
+        "status",
+        "--session",
+        "bad\u00adsession",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u00adsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad\\u00adsession\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad\u00adsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 7,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: invalid session \"bad\\u{ad}session\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "daemon",
+        "status",
+        "--session",
+        "bad session"
+      ],
+      "go": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad session"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad session\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad session"
+        ],
+        "exit": 7,
+        "stdout": "",
+        "stderr": "invalid session \"bad session\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "daemon",
+        "status",
+        "--session",
+        "bad session",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad session",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad session\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad session",
+          "--json"
+        ],
+        "exit": 7,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad session\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "daemon",
+        "status",
+        "--session",
+        "bad session",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad session\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "daemon",
+          "status",
+          "--session",
+          "bad session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 7,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: invalid session \"bad session\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "state",
+        "list",
+        "--session",
+        "bad\u001bsession"
+      ],
+      "go": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u001bsession"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\x1bsession\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u001bsession"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\x1bsession\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "state",
+        "list",
+        "--session",
+        "bad\u001bsession",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u001bsession",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\x1bsession\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u001bsession",
+          "--json"
+        ],
+        "exit": 2,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"invalid_session\",\"message\":\"invalid session \\\"bad\\\\x1bsession\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "state",
+        "list",
+        "--session",
+        "bad\u001bsession",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u001bsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad\\x1bsession\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u001bsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 2,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: invalid_session\n    message: invalid session \"bad\\x1bsession\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "state",
+        "list",
+        "--session",
+        "bad\u0301session"
+      ],
+      "go": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u0301session"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad\u0301session\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u0301session"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "invalid session \"bad\u0301session\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "state",
+        "list",
+        "--session",
+        "bad\u0301session",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u0301session",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\u0301session\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u0301session",
+          "--json"
+        ],
+        "exit": 2,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"invalid_session\",\"message\":\"invalid session \\\"bad\u0301session\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "state",
+        "list",
+        "--session",
+        "bad\u0301session",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u0301session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad\u0301session\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u0301session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 2,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: invalid_session\n    message: invalid session \"bad\u0301session\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "state",
+        "list",
+        "--session",
+        "bad\u00adsession"
+      ],
+      "go": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u00adsession"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\u00adsession\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u00adsession"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "invalid session \"bad\\u00adsession\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "state",
+        "list",
+        "--session",
+        "bad\u00adsession",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u00adsession",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad\\\\u00adsession\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u00adsession",
+          "--json"
+        ],
+        "exit": 2,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"invalid_session\",\"message\":\"invalid session \\\"bad\\\\u00adsession\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "state",
+        "list",
+        "--session",
+        "bad\u00adsession",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u00adsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad\\u00adsession\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad\u00adsession",
+          "--output",
+          "yaml"
+        ],
+        "exit": 2,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: invalid_session\n    message: invalid session \"bad\\u00adsession\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "state",
+        "list",
+        "--session",
+        "bad session"
+      ],
+      "go": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad session"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "invalid session \"bad session\": use 1-64 letters, digits, '.', '_' or '-'\n"
+      },
+      "rust": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad session"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "invalid session \"bad session\"\n"
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "state",
+        "list",
+        "--session",
+        "bad session",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad session",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"invalid session \\\"bad session\\\": use 1-64 letters, digits, '.', '_' or '-'\"}}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad session",
+          "--json"
+        ],
+        "exit": 2,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"invalid_session\",\"message\":\"invalid session \\\"bad session\\\"\"}}\n",
+        "stderr": ""
+      },
+      "match": false
+    },
+    {
+      "args": [
+        "state",
+        "list",
+        "--session",
+        "bad session",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'invalid session \"bad session\": use 1-64 letters, digits, ''.'', ''_'' or ''-'''\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "rust": {
+        "arguments": [
+          "state",
+          "list",
+          "--session",
+          "bad session",
+          "--output",
+          "yaml"
+        ],
+        "exit": 2,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: invalid_session\n    message: invalid session \"bad session\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "match": false
+    }
+  ]
+}

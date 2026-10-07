@@ -1,0 +1,199 @@
+{
+  "base_main": "31de72294521701fc4b1a0bce39f03cc34d72e7e",
+  "original_source_base": "922d616143d3815dd61de329eaac3e5bf03c1f06",
+  "original_failed_source": "2454c461703fd2f79d727da76242d0f8be7ed7ef",
+  "original_failed_publication": "5a57f36e55d4237da50163243667b4850c6a347f",
+  "source_head": "86ea7bfbeecbbe0877a5da3e6832fcfa5e1d9737",
+  "publication_head": "0fa47514b076da6435b80194b3d1f447660cbf56",
+  "oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "go_sdk": "go1.26.7 linux/amd64",
+  "go_cli_sha256": "0654376cf8fc33c3be0b03bd394b665842d04e6659b3dfd67c0d6786d2f136e2",
+  "disposition": "request_changes",
+  "findings": [
+    {
+      "priority": 2,
+      "id": "doctor_flag_grammar",
+      "actual_cases": 4,
+      "matching_positive_control": 1,
+      "protected_fixture_replaced_on_bad_flag": true
+    },
+    {
+      "priority": 2,
+      "id": "source_error_path_raw_bytes",
+      "actual_failing_cases": 5,
+      "matching_raw_tmp_success_control": 1
+    },
+    {
+      "priority": 2,
+      "id": "source_lookup_policy",
+      "actual_linux_cases": 3,
+      "windows_continuation_source_backed_native_runtime_pending": true
+    }
+  ],
+  "independent_positive_reports": {
+    "process": {
+      "total": 90,
+      "exit": 0,
+      "matched": 90,
+      "observations": 90,
+      "sha256": "f8df8e8be3fd32b4ceb128aa977b5cef9d4ba9b9b3870160995155b4e48582e1"
+    },
+    "doctor": {
+      "total": 255,
+      "exit": 0,
+      "matched": 255,
+      "observations": 255,
+      "sha256": "d9f46dd367648fe1223d629ec6b9ca931b4d8cd62fa818c404508eb30ca3aac0"
+    },
+    "setup": {
+      "total": 151,
+      "exit": 0,
+      "matched": true,
+      "observations": 302,
+      "sha256": "5286290cd7b32a3d5717866f56dfc2c675be403df193d7eded96e4961d45c636"
+    }
+  },
+  "source_manifest_checks": {
+    "process": {
+      "candidate_files": 131,
+      "frozen_go_files": 4,
+      "current_and_source_commit_match": true
+    },
+    "doctor": {
+      "candidate_files": 48,
+      "frozen_go_files": 108,
+      "current_and_source_commit_match": true
+    },
+    "setup": {
+      "candidate_files": 10,
+      "frozen_go_files": 108,
+      "current_and_source_commit_match": true
+    }
+  },
+  "independent_negative_controls": 5,
+  "independent_tests": {
+    "summaries": 4,
+    "passed": 132,
+    "failed": 0,
+    "ignored": 0,
+    "scope": "existing source-bound CLI library, Managed library, source publication and install tests; source tool fixture compiles, no Cargo compilation or full397 rerun"
+  },
+  "author_fresh_tests": {
+    "passed": 397,
+    "failed": 0,
+    "ignored": 0,
+    "summaries": 39
+  },
+  "author_artifact_hashes_verified": true,
+  "original_independent_failures_unchanged_sha_verified": true,
+  "original_six_raw_and_real_two_signals_independently_replayed": true,
+  "source_to_publication_only_evidence": [
+    "migration/evidence/setup-source-765/final-86ea/linux-doctor-missing-core-event.json",
+    "migration/evidence/setup-source-765/final-86ea/linux-doctor-missing-header.json",
+    "migration/evidence/setup-source-765/final-86ea/linux-doctor-wrong-exit.json",
+    "migration/evidence/setup-source-765/final-86ea/linux-doctor.json",
+    "migration/evidence/setup-source-765/final-86ea/linux-process-wrong-exit.json",
+    "migration/evidence/setup-source-765/final-86ea/linux-process-wrong-source.json",
+    "migration/evidence/setup-source-765/final-86ea/linux-process.json",
+    "migration/evidence/setup-source-765/final-86ea/linux-setup.json",
+    "migration/evidence/setup-source-765/final-86ea/logs.json",
+    "migration/evidence/setup-source-765/final-86ea/signature-stub-harness.json",
+    "migration/evidence/setup-source-765/final-86ea/symaira-setup765-source-86ea-author-recheck-extra.json",
+    "migration/evidence/setup-source-765/final-86ea/symaira-setup765-source-86ea-author-recheck-extra.log.json",
+    "migration/evidence/setup-source-765/final-86ea/symaira-setup765-source-86ea-author-recheck-extra.py",
+    "migration/evidence/setup-source-765/final-86ea/validation.json"
+  ],
+  "native_platform_acceptance": "Linux local proof only; current macOS/Windows complete native CI required, static signature stubs are not native runtime",
+  "worker_ownership": "historical Go Browse and Swift Operate/Scope transitional; typed invalid configuration still Go-owned, full765/783 stay open",
+  "candidate_clean": true,
+  "all_changed_non_evidence_inputs_sha256": {
+    ".github/workflows/ci.yml": "e127e3de3ddec8246640c4237f545e0728719a5f06fb695ef3865d507a6d4bde",
+    "Cargo.lock": "b9c559a34f88865e86e2ff04a2d590bd2603d3a1d45252e3f3087a638a922173",
+    "docs/adr/2026-10-03-native-doctor-repair.md": "de1f7930a25f2dfd23ea21b5242d63aa6185eaaa50af7eabf4c05eefb0a5e164",
+    "docs/adr/2026-10-03-native-source-setup.md": "773fe27f517d26e80581fcac847e65ac2b611052f75cea55ea0206732898d2fa",
+    "migration/contract-matrix.csv": "96267a85dc7d8a47ada14f7e0625ea304a494c91fd629b901134925288e68c46",
+    "rust/symbrain-cli/Cargo.toml": "220ff759378dbb77a1b4bbe03c388e309d23b7d15dd4f1c1cd1dbe3d2ab9e179",
+    "rust/symbrain-cli/src/cli_tests.rs": "00a9e1abdd632f409faa2de3dd8c0a1dd24ae9e3c20ce866e818390fcf3bf64a",
+    "rust/symbrain-cli/src/doctor_cli.rs": "730ff4ecd216a4f6711b97dbaae27a90b2a33e348aec0377c8b7ed8ee4effec8",
+    "rust/symbrain-cli/src/doctor_fix.rs": "73594fd4cc8caabc9169ee225f2cbb2bfd7577f1dbc7e873081a9f7d4a379a0d",
+    "rust/symbrain-cli/src/doctor_fix_log.rs": "b07397b6e80de6a1edc8b4b274601068d4250f8a6eee4dab16eea4d18b5bbe9f",
+    "rust/symbrain-cli/src/lib.rs": "623eb33dee17547dbc6be0bf94eef8e479b9af0495c9b0baee4d885574d8110b",
+    "rust/symbrain-cli/src/setup_args.rs": "84cb407b2d77a1c48a6235a05be31c7e3f5322cb0604df1ecc43db724a3300fe",
+    "rust/symbrain-cli/src/setup_cli.rs": "9aba0979b699648acb68dad79ea778ce60d24e1757ad2f1e2c47d074b1a45a93",
+    "rust/symbrain-cli/src/setup_config.rs": "cfc178d86002c3879de5e2ca635c9792b7389beece37b88ef2a9326d4a4d9287",
+    "rust/symbrain-cli/src/setup_source.rs": "d5ebff486aff6ae550df543f9b9352cdf066c651660c9ce83febc973538412ee",
+    "rust/symbrain-cli/src/setup_source_build.rs": "cbd4e5a8d7fd9c4e482dada274d3efbabde1b7b3dfa94bbb385c080166b18cd1",
+    "rust/symbrain-cli/src/setup_source_layout.rs": "695e83de095338e7250fe4ab49d0d8ecf99d895b20bf5671de021223ff69e15b",
+    "rust/symbrain-cli/src/setup_source_process.rs": "bd68037764b8d39e43f86cf40b19f2f0514541c3c27ce0fa4298c570ea28eaa7",
+    "rust/symbrain-cli/src/setup_source_temp.rs": "2a065a3f4be0b48bfa16c78f35d25bd8758b74d24eb493ff3ff00972351a38d6",
+    "rust/symbrain-cli/src/setup_source_text.rs": "f28862b6f3f180c874ed54eafc74ad959be80764582d60398369dc84f10b0a10",
+    "rust/symbrain-cli/tests/doctor_fix_native.rs": "cbbb323ec3cc2c25d0e2b79780bddf46af8ed3ba370ec0784cb163e995deb7fe",
+    "rust/symbrain-core/src/config/format.rs": "1a31fc16a95b1fa213fcfef22bae64aa6e7bacb6e427ccf52efb5c6ef67dba49",
+    "rust/symbrain-core/src/config/mod.rs": "1979424ee5be5a373425b43d933b56e223f7144026590a76d40fa7ecf4cfec36",
+    "rust/symbrain-managed/Cargo.toml": "032a38a1c1d1d947a40916d31c12b0b406ff17352405f572dd42bef5ff4ec1a7",
+    "rust/symbrain-managed/src/archive.rs": "2e7409659d5741ff811894b0e978fcf7e9fa373e20ab6c9cc437526e8eb17866",
+    "rust/symbrain-managed/src/json_record.rs": "ccb87203b8dd23199d33041c06d72ff90790b000d08aed9ea66773f014140cb7",
+    "rust/symbrain-managed/src/json_string.rs": "be9b242499941114d70a6b215a1d46411533ba58731ba7820cd0a11a7876d865",
+    "rust/symbrain-managed/src/json_syntax.rs": "1e179f9956e8fb01a115ffdd6c412ea16d4152576a52998eb910479405fb7117",
+    "rust/symbrain-managed/src/lib.rs": "5f44597fbe5a5bb143eb0bfeb340012d9e399b4513f33db11a34c26840bfe92c",
+    "rust/symbrain-managed/src/local_install.rs": "c90cb14347b3e9426be44098c0fc4271bb501de49f36af845b5c20fe7e7372b9",
+    "rust/symbrain-managed/src/process_status.rs": "d8b981d6f096b8e078ab1ea5d9e0abc0ae3979f75c1b49240fa859f2d9af14ad",
+    "rust/symbrain-managed/src/provenance.rs": "16182dd903490f44c86d9587bbd1a512f0c431f0a6e8c2a59582b1f13168505f",
+    "rust/symbrain-managed/src/provenance_json.rs": "a324dd4944625e5f14200a78f43002504584c4217fa04744a1343834939bdb7e",
+    "rust/symbrain-managed/src/provenance_time.rs": "8ee51ef465143e1fa44600c0d3844fed64345d229694327e93618a418a29adb6",
+    "rust/symbrain-managed/src/version_probe.rs": "14637e8828102bee620bc7bdd059ab6fd3f149a1a7a09de2f2dcb65439cab293",
+    "rust/symbrain-managed/tests/install_tests.rs": "ca4ea17dd861f1730e056bac0013b1ff168f6821e09fc567fcc9282845f97260",
+    "rust/symbrain-managed/tests/source_local.rs": "c6ffdd0930a7bc5fb704910e9ae391cd5ece1c6ce449788e750b5de6bc7bdd30",
+    "scripts/doctor-repair-oracle/README.md": "f622a123fed6d10fba1e409f4b0db9ebb7a85e1df7aa97f656bba439eed6a3bd",
+    "scripts/doctor-repair-oracle/cases.py": "698d792150cd7e7a20e444fc1d54476a36b05b5b091e0300ade42c9e2c52b016",
+    "scripts/doctor-repair-oracle/probe_fixture.go.txt": "e44eefecda9b14de3fffa7e5db3903df50419c8349a59c1215b297ed7c430391",
+    "scripts/doctor-repair-oracle/replay.py": "1a132f629ceb2aa1e55518a0511ec6204ac40b217e9f50e2aef184d0272c92ce",
+    "scripts/doctor-repair-oracle/run.sh": "78bffd7f44248a91a64244f765af4bdc4fbf6472b82f04d219418b3ba879a676",
+    "scripts/setup-source-oracle/README.md": "0554f53cac3bbbcc4b7f49efaac2bc7f0a0df1ebb55d216a87a5215e9d03cbd6",
+    "scripts/setup-source-oracle/replay.py": "6af52f8384a67b73f7881c60e2e8c0ba10e69c509b8ac3bf3b986bcd9ea3df5c",
+    "scripts/setup-source-oracle/run.sh": "f4a22007724136b746bbfd4359e214c3c0c579b1b379125dd93ea6d5bdabdeaf",
+    "scripts/setup-source-oracle/tool_fixture.go.txt": "e92419134baa8712ed06a31b65226e5d0a0dd8b99604718349e7f85347e15bf2"
+  },
+  "executed_binaries_sha256": {
+    "target/debug/symbrain": "386422be2c58414f17f7ed02caeff801e4af318ca64f2b7bbce01882db2cf7ca",
+    "target/debug/deps/symbrain_cli-aa05cee561cde9b7": "54b95d685570fcd7d5583084731eb748b9c98824bf84c7bd95f30bb4c75fa3e8",
+    "target/debug/deps/symbrain_managed-79c6a7de10fd1869": "1a980f6a7d778605ec2badaf3f6c3b63b848bab8ca89a457c765479d97c86ac9",
+    "target/debug/deps/source_local-7156e74b2ea6f575": "ea581503464458352a56235d764703f560dc612eb14d43d18b8dbb5fd36d9eb0",
+    "target/debug/deps/install_tests-8103cf39730c6e26": "3cb9647ece5e08af26ada1aed7e4695b864d8fa9e5c8c5abc7e1e5ccaf68bf1e"
+  },
+  "proof_sha256": {
+    "/tmp/symaira-setup765-source-corrected-independent-tests.log": "339b6d3dc496fb843280957fd7e64a38ae8aedb2642aef3dcd6c6865c6f2472e",
+    "/tmp/symaira-setup765-source-corrected-independent-doctor.json.missing-core-event.json": "35ca996c78f8329181773047274540ca337132fc3195b1b9bf92dff19c71df5f",
+    "/tmp/symaira-setup765-source-corrected-independent-doctor.json.missing-header.json": "f3fc7a0ea649ffcd137fdcf79045e14b47f1a8c26eca442eba66fc08e983e1b5",
+    "/tmp/symaira-setup765-source-corrected-independent-doctor.json.wrong-exit.json": "93d96f8d1ebd287893dcefe034e686ffba55fab5f4f09afc4ca668b80f250c17",
+    "/tmp/symaira-setup765-source-corrected-independent-process.json.wrong-source.json": "588787158c0114d75f7dc75f659d26d621722257dc3b5883225fecf66e7afbfc",
+    "/tmp/symaira-setup765-source-corrected-independent-process.json.wrong-exit.json": "ee9d18ef5d75ac914f3b3ed4a5237e2f7dfb3e53f0eaddeaf023294514d74a7b",
+    "/tmp/symaira-setup765-source-corrected-independent-controls.log": "7e202cda8b3c03a06fc738542337dbdd6ad65edc7aaf85eedd6d2d83288e58cc",
+    "/tmp/symaira-setup765-source-corrected-independent-original-extra.json": "d3a4c156eae94f16628fa0f6e2c6fa7707ca7c9be1591eab6521fb064b9bf9e5",
+    "/tmp/symaira-setup765-source-corrected-independent-original-extra.log": "e5194bbb6f8a11456f57e66acde83b8c151fa2c2e3923551a0007c9f2a4eb3f1",
+    "/tmp/symaira-setup765-source-corrected-independent-new-extra.json": "d9b5a4f5c2d658792df13c286e37e26e5873de282c81c15d900b288bb3edf9eb",
+    "/tmp/symaira-setup765-source-corrected-independent-process.json": "f8df8e8be3fd32b4ceb128aa977b5cef9d4ba9b9b3870160995155b4e48582e1",
+    "/tmp/symaira-setup765-source-corrected-independent-new-extra.log": "b9e06954ce60c4d741acf7f1b66bc0f863e8e109e2582adc8edbb6f92bf79539",
+    "/tmp/symaira-setup765-source-corrected-independent-new-extra.py": "937ff90d5f6324e942cea335b84df2303ebcb82d20be68e3fc2adc7d6d1773d8",
+    "/tmp/symaira-setup765-source-corrected-independent-original-extra.py": "e1ded224e1d41b12a5e3c46f12694bc246d85b6ff8a83adc621d51d8805e9c82",
+    "/tmp/symaira-setup765-source-corrected-independent-setup.json": "5286290cd7b32a3d5717866f56dfc2c675be403df193d7eded96e4961d45c636",
+    "/tmp/symaira-setup765-source-corrected-independent-setup.log": "e319f05a5ceec6854703cd04d25782b084662373f44a8b54bf1110fa91df916b",
+    "/tmp/symaira-setup765-source-corrected-independent-doctor.json": "d9f46dd367648fe1223d629ec6b9ca931b4d8cd62fa818c404508eb30ca3aac0",
+    "/tmp/symaira-setup765-source-corrected-independent-doctor.log": "dd067694021ed566e3e296d2ec7bedaac56c9a57913896961aef4acb1ee24156",
+    "/tmp/symaira-setup765-source-corrected-independent-process.log": "edb19a729d35f36172bbb6f73c21698fe37954ccbadefb844e368efec93bb7d0",
+    "/tmp/symaira-setup765-source-corrected-independent-lookup-extra.json": "28c0034da08e3d0da05dd4a43ee641eb12c0f7cd56750f831cd6e2b9531a7a85",
+    "/tmp/symaira-setup765-source-corrected-independent-lookup-extra.log": "1ffc2e713fb28183f21f426a886f9ef77a1cb3ae7ff00f54982743657b46b77e",
+    "/tmp/symaira-setup765-source-corrected-independent-lookup-extra.py": "e6c49143e79251664d1a1b1b75b64ecee2b43b57935d2b658e24c511d143e27b"
+  },
+  "environment": {
+    "umask": "022",
+    "subprocess_parent": "/tmp/symaira-subreaper.py",
+    "owned_target": "/workspace/symaira-setup765-source/target",
+    "no_build_before_author_explicit_release": true
+  },
+  "review_report_sha256": "7b6fbfa8a55ac447685a6d35c4bb519f9d36eac3ccb172081709e68b2b5b4434",
+  "sdk_lookup_sha256": {
+    "lp_windows.go": "b43699d7c9c5fa2cfe82edb55be04b509619232ad514a34a11c481d43290a6fd",
+    "lp_unix.go": "5ee781400e1f04ffea869496f161555f31d1af0ca521fb77ef16f54522808746"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "candidate_head": "6c3bf1f93d2760b17f4f936076d26f0f4c00fe1d",
+  "candidate_dirty": false,
+  "unit_binary_sha256": "6953a8b3ee130883e9cfa4a5f9190e8c92f57e441d216575546b8a024a358a96",
+  "parent_cache_env_scenarios": 7,
+  "cases": [
+    {
+      "test": "spec::paths::tests::origin_identity_preserves_each_invalid_byte",
+      "exit": 0,
+      "stdout": "\nrunning 1 test\ntest spec::paths::tests::origin_identity_preserves_each_invalid_byte ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.00s\n\n",
+      "stderr": ""
+    },
+    {
+      "test": "spec::paths::tests::cache_environment_uses_go_platform_fallbacks_in_isolated_children",
+      "exit": 0,
+      "stdout": "\nrunning 1 test\ntest spec::paths::tests::cache_environment_uses_go_platform_fallbacks_in_isolated_children ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.02s\n\n",
+      "stderr": ""
+    },
+    {
+      "case": "empty-TMPDIR",
+      "exit": 0,
+      "stdout": "\nrunning 1 test\ntest spec::paths::tests::cache_environment_child ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.00s\n\n",
+      "stderr": ""
+    },
+    {
+      "case": "missing-TMPDIR",
+      "exit": 0,
+      "stdout": "\nrunning 1 test\ntest spec::paths::tests::cache_environment_child ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.00s\n\n",
+      "stderr": ""
+    }
+  ],
+  "no_filesystem_state_created": true
+}

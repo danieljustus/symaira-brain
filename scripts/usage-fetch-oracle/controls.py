@@ -12,7 +12,7 @@ import tempfile
 def main():
     original = Path(sys.argv[1])
     output = Path(sys.argv[2])
-    cases = json.loads(original.read_text())
+    cases = json.loads(original.read_text(encoding='utf-8'))
     header = copy.deepcopy(cases)
     kimi = next(case for case in header if case["id"] == "kimi-cli/success")
     kimi["requests"][0]["headers"]["x-msh-os-version"] = "mutated-identity"
@@ -29,7 +29,7 @@ def main():
         for name, payload, package, diagnostic in inputs:
             path = Path(scratch, name + ".json")
             if payload is not None:
-                path.write_text(json.dumps(payload))
+                path.write_text(json.dumps(payload), encoding='utf-8')
             env = dict(os.environ)
             env["USAGE_FETCH_ORACLE_620"] = str(path)
             env.pop("USAGE_FETCH_NATIVE_620", None)
@@ -48,13 +48,13 @@ def main():
                 "log_sha256": hashlib.sha256(transcript).hexdigest(),
             })
     receipt = {
-        "candidate_source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
+        "candidate_source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True, encoding='utf-8').strip(),
         "oracle_sha256": hashlib.sha256(original.read_bytes()).hexdigest(),
         "all_controls_failed_as_expected": True,
         "results": results,
     }
     output.parent.mkdir(parents=True, exist_ok=True)
-    output.write_text(json.dumps(receipt, indent=2) + "\n")
+    output.write_text(json.dumps(receipt, indent=2) + "\n", encoding='utf-8')
     print("usage #620: all four real negative controls failed with their expected diagnostics")
 
 

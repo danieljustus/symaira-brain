@@ -1,0 +1,23 @@
+from pathlib import Path
+import hashlib,json,os,shutil,subprocess,tempfile,time
+root=Path('/workspace/symaira-daemon772-state-key-osargs'); source=root/'browse/port/harness'
+head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()
+original=(source/'registry_progress.py').read_text()
+no_begin=original[:original.index('    def begin_cli(')]+'''    def begin_cli(self, binary, arguments) -> int:
+        return 0
+
+'''+original[original.index('    def end_cli('):]
+mutations=[('missing-begin',no_begin,'test_real_child_begin_is_readable_while_child_is_running','False is not true'),('wrong-output-hash',original.replace('hashlib.sha256(result.stdout).hexdigest()',repr('0'*64)),'test_real_nonutf8_output_and_failure_are_hashed_without_projection','00000000000000000000'),('lost-case-link',original.replace('case=case, exit=result.returncode','case=0, exit=result.returncode'),'test_concurrent_cases_keep_complete_lines_and_distinct_case_links','Items in the')]
+records=[]
+with tempfile.TemporaryDirectory(prefix='bk-progress-mutants-') as folder:
+ for name,changed,method,diagnostic in mutations:
+  owned=Path(folder)/name;owned.mkdir();
+  for file in ['daemon_registry_cli.py','test_registry_progress.py']:shutil.copyfile(source/file,owned/file)
+  (owned/'registry_progress.py').write_text(changed)
+  result=subprocess.run([os.sys.executable,str(owned/'test_registry_progress.py'),'ProgressTests.'+method],capture_output=True,timeout=15)
+  log=Path('/tmp/symaira-state-key-osargs-jsonfix-progress-mutant-'+name+'.log');log.write_bytes(result.stdout+result.stderr)
+  assert result.returncode!=0 and diagnostic.encode() in result.stderr,(name,result.returncode,result.stderr)
+  records.append({'name':name,'candidate_head':head,'real_test':method,'exit':result.returncode,'diagnostic':diagnostic,'rejected':True,'mutated_module_sha256':hashlib.sha256(changed.encode()).hexdigest(),'stdout':result.stdout.decode(),'stderr':result.stderr.decode(),'log':str(log)})
+  Path('/tmp/symaira-state-key-osargs-jsonfix-progress-mutant-'+name+'.py.txt').write_text(changed)
+Path('/tmp/symaira-state-key-osargs-jsonfix-progress-mutants.json').write_text(json.dumps({'candidate_head':head,'original_module_sha256':hashlib.sha256(original.encode()).hexdigest(),'test_module_sha256':hashlib.sha256((source/'test_registry_progress.py').read_bytes()).hexdigest(),'cases':records,'scope':'actual portable Python subprocess controls on current native host; temporary module copies only, candidate unchanged, no Windows/Darwin runtime claim'},indent=2)+'\n')
+print('3 actual progress mutants rejected')

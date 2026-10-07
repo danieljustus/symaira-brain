@@ -1,0 +1,78 @@
+{
+  "result": "APPROVE scoped source-only import correction",
+  "head": "74dd7aea5c7a1765dc36c2cbab2ca3fe6b6665d8",
+  "parent": "8359c0bda1b7a0bfc14d2b8e69e1479fec9d182f",
+  "changed_files": [
+    "docs/adr/doctor-source-timeout-observability-806.md",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/00-review.json.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/01-replay.py.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/02-controls.json.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/03-controls.log.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/04-embedded.json.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/05-embedded.log.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/06-human-pipe-probes.json.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/07-human-pipe-probes.log.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/08-pipe-probes.json.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/09-pipe-probes.log.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/10-output-probes.json.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/11-output-probes.log.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/12-source-output.json.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/13-source-output.log.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/14-symaira-current-ci-job-111372955009.log.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/15-receipt.json.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/16-source-output.log.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/17-output-probes.log.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/18-output-probes.json.gz",
+    "migration/evidence/doctor-source-progress-806/import-boundary-8359/retention.json",
+    "scripts/setup-source-oracle/replay.py"
+  ],
+  "production_rust_go_cargo_unchanged": true,
+  "replay_function_ASTs_unchanged": 8,
+  "replay_old_sha256": "7688e0d185e5257ed1a45c61659e36234ac1660e623b0e442fc016a15b91f17a",
+  "replay_new_sha256": "b3263f2f30769623c35ba1bca2d4e66a38a23807ab4af22638027e84a901115b",
+  "independent_isolated_python_imports": [
+    {
+      "path": "/workspace/symaira-doctor765/scripts/setup-source-oracle/replay.py",
+      "exit": 1,
+      "stdout_hex": "",
+      "stderr_hex": "54726163656261636b20286d6f737420726563656e742063616c6c206c617374293a0a202046696c6520223c737472696e673e222c206c696e6520322c20696e203c6d6f64756c653e0a202046696c6520223c66726f7a656e20696d706f72746c69622e5f626f6f7473747261705f65787465726e616c3e222c206c696e65203939392c20696e20657865635f6d6f64756c650a202046696c6520223c66726f7a656e20696d706f72746c69622e5f626f6f7473747261703e222c206c696e65203438382c20696e205f63616c6c5f776974685f6672616d65735f72656d6f7665640a202046696c6520222f776f726b73706163652f73796d616972612d646f63746f723736352f736372697074732f73657475702d736f757263652d6f7261636c652f7265706c61792e7079222c206c696e652031392c20696e203c6d6f64756c653e0a2020202066726f6d2070726f677265737320696d706f7274204a6f75726e616c2c20646961676e6f737469635f747265652c207261770a4d6f64756c654e6f74466f756e644572726f723a204e6f206d6f64756c65206e616d6564202770726f6772657373270a"
+    },
+    {
+      "path": "/workspace/symaira-doctor806-journal-import/scripts/setup-source-oracle/replay.py",
+      "exit": 0,
+      "stdout_hex": "3131312073657475705f736f757263655f70726f67726573730a",
+      "stderr_hex": ""
+    }
+  ],
+  "shadow_progress_module_exit": 0,
+  "full_original_gzip_raw_maps_reverified": 19,
+  "retained_actual_output_case_counts": {
+    "10-output-probes.json.gz": 4,
+    "12-source-output.json.gz": 2,
+    "08-pipe-probes.json.gz": 6,
+    "06-human-pipe-probes.json.gz": 6,
+    "04-embedded.json.gz": 24
+  },
+  "retained_actual_control_groups": 4,
+  "rejected_cases": 15,
+  "preserved_partial_human_cases": 3,
+  "retained_actual_binaries_sha256_verified": {
+    "setup_embedded_output": "8ada052d5c0240044fb8910e29fcc8952c2b5f3fb26205e4e3954bac2e804d55",
+    "symbrain-go": "933700975d043f76b019b9e7c922f58f735b66b4bb1f45ddb133f74b1e751f6e",
+    "symbrain": "256e5efe3d05b9fe5c8afa41d9821a13ee2dee32de9719a4acd7e79364fde8ee"
+  },
+  "no_new_compiler_cli_provider_target_port": true,
+  "limitations": "Prior actual Linux reports bind unchanged archived exact58 binaries and prepared source module; no fresh Cargo/new-head product run. Windows25s cause/diagnostic mechanism still unproved. Approval is only for narrow sibling import binding, not product/native acceptance.",
+  "original_provider_zips_and_members_verified": [
+    {
+      "artifact": 11296265049,
+      "zip_sha256": "cf5d3960092d6b0475a733159601d16f36c03aa270c1bc2c6ceeaf79cd00c293",
+      "members": 1
+    },
+    {
+      "artifact": 11295287138,
+      "zip_sha256": "a81927ec01b21ef558cffa8ad0f15d5d2c94bd323ebccb1ee6123c7f68a4ec28",
+      "members": 3
+    }
+  ]
+}

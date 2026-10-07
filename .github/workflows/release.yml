@@ -57,7 +57,8 @@ jobs:
           fmt_out="$fmt_tmp/gofmt.out"
           : >"$fmt_out"
 
-          if ! find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -print0 >"$files_tmp"; then
+          # Retained original evidence must keep its historical bytes.
+          if ! find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -not -path './migration/evidence/*' -print0 >"$files_tmp"; then
             echo "::error::find failed while collecting Go source files"
             exit 1
           fi

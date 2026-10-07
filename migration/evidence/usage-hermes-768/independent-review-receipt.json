@@ -1,0 +1,92 @@
+{
+  "base": "117e4f37f6ce1c669e9856bcb90e41d8611913ab",
+  "source_head": "1dad2f7bf25228eda67238fdbd544b85ebfbdf1d",
+  "evidence_head": "9b37c53f43681ee0d5ff90ec6a7f98f2f8279c3f",
+  "oracle_commit": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "candidate_clean": true,
+  "independent_reports": {
+    "process": {
+      "receipt_sha256": "916395115919f2659e6b7f0104f32e153e939ff7c6e8b445bc0adb0feabe780d",
+      "source_count": 47,
+      "go_sdk": "go version go1.26.7 linux/amd64",
+      "rust_sdk": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+      "cli_binary_sha256": {
+        "go": "0654376cf8fc33c3be0b03bd394b665842d04e6659b3dfd67c0d6786d2f136e2",
+        "rust": "362d13133c6244facc15211ae3f3dd1f6f7230719d3c87d811a595c5bc688e5c"
+      }
+    },
+    "parent-process": {
+      "receipt_sha256": "cc8ff411bbd7de0542406d5c7242328e33a5e3e897eadfad0fb99d789332f612",
+      "source_count": 43,
+      "go_sdk": "go version go1.26.7 linux/amd64",
+      "rust_sdk": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+      "cli_binary_sha256": {
+        "go": "0654376cf8fc33c3be0b03bd394b665842d04e6659b3dfd67c0d6786d2f136e2",
+        "rust": "362d13133c6244facc15211ae3f3dd1f6f7230719d3c87d811a595c5bc688e5c"
+      }
+    },
+    "regrowth-process": {
+      "receipt_sha256": "7994503fe9d935fa0eb1f0d351a646dd6d2f8be1bb775663b99aed5628acf038",
+      "source_count": 47,
+      "go_sdk": "go version go1.26.7 linux/amd64",
+      "rust_sdk": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+      "cli_binary_sha256": {
+        "go": "0654376cf8fc33c3be0b03bd394b665842d04e6659b3dfd67c0d6786d2f136e2",
+        "rust": "362d13133c6244facc15211ae3f3dd1f6f7230719d3c87d811a595c5bc688e5c"
+      }
+    }
+  },
+  "all_changed_inputs_sha256": {
+    ".github/workflows/ci.yml": "8e754b6c1cf95c0b690f8dd47e80683f72231ee3b84d0512bdc35e676bdcbaf4",
+    "Cargo.lock": "7b6541463f92ea7795f2490202a8588d86af46e03264ca22ba1f9f9eaf4ce678",
+    "README.md": "85748459cb5f11b0b3fb86838d5fee166224a39debd34f1ec1743d56354c35ae",
+    "docs/adr/usage-hermes-file-jwt-768.md": "68d6c32f28f8fc6c093be1cca2f18f84089f80eb27e85826f12c62381b61d0b5",
+    "migration/contract-matrix.csv": "abc71e10c6208808a3b0467c6ead7008c5d13b0f4fa8b71281910a6c9a6578ff",
+    "migration/evidence/usage-hermes-768/linux-parent-reference-report.json": "c899d1a25639f6c12625ab4f0f0da5443ff6721574f07e84192690a38ec83629",
+    "migration/evidence/usage-hermes-768/linux-process-report.json": "3fc366e9632f4e7e3ec28f96df530bf1d8a226e0621c180d3d7af0de021eeb74",
+    "migration/evidence/usage-hermes-768/linux-slice-regrowth-failure.json": "59b258224cc128e4d1215005f64ccf90402550be49a89e58ec2f7b42dcdd971c",
+    "migration/implementation-plan.md": "d75906ccb400a35dd75ef234faf3b3f1feaf8d0963f402dd5418841ac8397fd8",
+    "rust/symbrain-cli/src/usage_cli.rs": "9ad085bdfc6710271c90926b64c6140fab08ed4b2baf49134cbff6be1d506813",
+    "rust/symbrain-cli/tests/mcp_cli_tests.rs": "363cc7e0a412b5a4326bcb6daa93c4c466496be8c504bc40444669afb243e18a",
+    "rust/symbrain-usage/Cargo.toml": "2a4d0252ffd5e078984f7fd2c42f3b48dafaae7466f60d8797c064dc828e9f2b",
+    "rust/symbrain-usage/src/provider_config.rs": "89bccb56c9ad0dcfdbea34ac8fa5b9f6d09267531bcbfb38c350e787cafc3680",
+    "rust/symbrain-usage/src/provider_config/hermes.rs": "36c0c98da4ce15d74013f62edc0aaf3542fd4c0ce961f95ae20799a4e990baec",
+    "rust/symbrain-usage/src/provider_config/jwt.rs": "61fd6c6632fca835e5b3138d20656df9e68a3a233d23dbc357b6e19ef50e2b0e",
+    "rust/symbrain-usage/src/provider_config/kimi_nous.rs": "ee1c586c96246acc349df5ba9fa7dca63e4f2da690b3780961b7aee93d53fedf",
+    "rust/symbrain-usage/src/provider_config/routing.rs": "d1f98e276fadaac3fecd7c1863af9109a45f006bf247e6cdaf613ca0dc18e74c",
+    "rust/symbrain-usage/src/provider_config_tests.rs": "ae609e2820778f2c4e44119390875e6fd1c670be9592eda9802c8019eb6661c8",
+    "rust/symbrain-usage/tests/hermes_credential_tests.rs": "a45098b638a84d41f2fdc02a8278ea55c462340dd5be2f8968d8478a6399bf2e",
+    "scripts/usage-hermes-oracle/README.md": "d61a107a72f0587b69d7e2d443ff76a22407c880a5dc9bd9dc0de5ac817dda21",
+    "scripts/usage-hermes-oracle/cases.py": "c9d77774254fea1687643dcce700b7f15c70568febd185182129f9a0fa659bb0",
+    "scripts/usage-hermes-oracle/cli.py": "3489f81efbcbfe0e08ee7608271f3f76b2e4034d0bc86bd0d2ef799d239fc79f",
+    "scripts/usage-hermes-oracle/controls.py": "8e3e027b4c384fbd7d0b966bb53768d2a9e664f7f440641ab9d45de286451414",
+    "scripts/usage-hermes-oracle/filesystem.py": "86a600a1e693adbb91d3d92324b85871211bf20912b4409cd444a337ddb12d6b",
+    "scripts/usage-hermes-oracle/provider_test.go.txt": "b4d5473cfdc82a27de981ab2c7d198998d15305f19d8ba536161a0bad32fe4a9",
+    "scripts/usage-hermes-oracle/receipt.py": "633bbbcbb0f15400f68f2015e892b6edddf1b81cb95ab3a5877d1c10d9bb78f9",
+    "scripts/usage-hermes-oracle/run.sh": "f36d26e97e8d2effa8ed69f5adb3b159c1431c3665dc8268730ca719880ec1df"
+  },
+  "additional_probe_inputs_sha256": "2f7ef9b9604861dade32606265d611db02f1336b1a3815b6ca185fd54fdea093",
+  "additional_actual_variants": 13,
+  "original_80_inputs_unchanged": true,
+  "original_failure_proofs_unchanged": true,
+  "tracked_original_failure_go_record_verified": true,
+  "old_candidate_binaries_archived_and_verified": true,
+  "guarded_old_target_removal_verified": true,
+  "verification_logs_sha256": {
+    "/tmp/symaira-usage768-jwt-fix-independent-usage-tests.log": "dd72e36cdb124374ba4ae89c9cc87a59b3fc8f58554cf215ba46aeddb9f81daf",
+    "/tmp/symaira-usage768-jwt-fix-independent-cli-routing-tests.log": "df435df0031c5434702149516be09c8866733408714a4ca3cd7b9ab371d750b0",
+    "/tmp/symaira-usage768-jwt-fix-independent-clippy.log": "9ae36bb22d8f0f810a77044760863f70b81405396a32cce477ec08eecd4e6d59",
+    "/tmp/symaira-usage768-jwt-fix-independent-validation.log": "65cfbaacae0087fa4a9be5c2899a9f113b8e8130fae3a0a4b65796ab330746ab",
+    "/tmp/symaira-usage768-jwt-fix-independent-regrowth-inputs.json": "2f7ef9b9604861dade32606265d611db02f1336b1a3815b6ca185fd54fdea093"
+  },
+  "strict_checks": {
+    "clippy": true,
+    "format": true,
+    "actionlint": {
+      "passed": true,
+      "explicit_binary": "/workspace/toolchains/bin/actionlint",
+      "initial_bare_name_not_in_path": true
+    },
+    "bash_syntax": true
+  }
+}

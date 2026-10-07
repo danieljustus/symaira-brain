@@ -1,0 +1,148 @@
+{
+  "kind": "SOURCE_FINDING_AND_SYNTHETIC_UTF16_PROJECTION_NOT_RUNTIME",
+  "heads": [
+    "591248a89f56c7b810daf9fa1a036ec20061aaec",
+    "c91938d445593e66ca47d613ed1d2c60c15ba060"
+  ],
+  "archive": "pre-correction-source.tar.gz",
+  "archive_sha256": "d611eeff54a3c125513c96de6233d00d52de7430ac763425a751885f2b80e796",
+  "members": [
+    {
+      "member": "591248a89f56c7b810daf9fa1a036ec20061aaec/browse/crates/symbrowse-daemon/src/client/transport.rs",
+      "bytes": 7194,
+      "sha256": "835e443454d15daccba9f823e52a1365041369017620e41ebe91e57333f6d295",
+      "git_head": "591248a89f56c7b810daf9fa1a036ec20061aaec",
+      "path": "browse/crates/symbrowse-daemon/src/client/transport.rs"
+    },
+    {
+      "member": "591248a89f56c7b810daf9fa1a036ec20061aaec/browse/crates/symbrowse-daemon/src/client/errors.rs",
+      "bytes": 2804,
+      "sha256": "d0d013eeb201be3c79ccc79bf406961206dbcf3dfd9b207017c6924667af047d",
+      "git_head": "591248a89f56c7b810daf9fa1a036ec20061aaec",
+      "path": "browse/crates/symbrowse-daemon/src/client/errors.rs"
+    },
+    {
+      "member": "591248a89f56c7b810daf9fa1a036ec20061aaec/browse/crates/symbrowse-daemon/src/server/windows.rs",
+      "bytes": 12693,
+      "sha256": "70284004c47aee25bef42920b057b333eead1aa4d9af1c1a08c4797dcf9f1ee2",
+      "git_head": "591248a89f56c7b810daf9fa1a036ec20061aaec",
+      "path": "browse/crates/symbrowse-daemon/src/server/windows.rs"
+    },
+    {
+      "member": "591248a89f56c7b810daf9fa1a036ec20061aaec/browse/Cargo.lock",
+      "bytes": 73308,
+      "sha256": "a2a8e0c9ea2d5007dc80039f2c19f8975846cd130f380d47b5314c90031bb15d",
+      "git_head": "591248a89f56c7b810daf9fa1a036ec20061aaec",
+      "path": "browse/Cargo.lock"
+    },
+    {
+      "member": "c91938d445593e66ca47d613ed1d2c60c15ba060/browse/crates/symbrowse-daemon/src/client/transport.rs",
+      "bytes": 7194,
+      "sha256": "835e443454d15daccba9f823e52a1365041369017620e41ebe91e57333f6d295",
+      "git_head": "c91938d445593e66ca47d613ed1d2c60c15ba060",
+      "path": "browse/crates/symbrowse-daemon/src/client/transport.rs"
+    },
+    {
+      "member": "c91938d445593e66ca47d613ed1d2c60c15ba060/browse/crates/symbrowse-daemon/src/client/errors.rs",
+      "bytes": 2804,
+      "sha256": "d0d013eeb201be3c79ccc79bf406961206dbcf3dfd9b207017c6924667af047d",
+      "git_head": "c91938d445593e66ca47d613ed1d2c60c15ba060",
+      "path": "browse/crates/symbrowse-daemon/src/client/errors.rs"
+    },
+    {
+      "member": "c91938d445593e66ca47d613ed1d2c60c15ba060/browse/crates/symbrowse-daemon/src/server/windows.rs",
+      "bytes": 12693,
+      "sha256": "70284004c47aee25bef42920b057b333eead1aa4d9af1c1a08c4797dcf9f1ee2",
+      "git_head": "c91938d445593e66ca47d613ed1d2c60c15ba060",
+      "path": "browse/crates/symbrowse-daemon/src/server/windows.rs"
+    },
+    {
+      "member": "c91938d445593e66ca47d613ed1d2c60c15ba060/browse/Cargo.lock",
+      "bytes": 73308,
+      "sha256": "a2a8e0c9ea2d5007dc80039f2c19f8975846cd130f380d47b5314c90031bb15d",
+      "git_head": "c91938d445593e66ca47d613ed1d2c60c15ba060",
+      "path": "browse/Cargo.lock"
+    },
+    {
+      "member": "reference/serde_core-1.0.229/src/ser/impls.rs",
+      "bytes": 29535,
+      "sha256": "5ee7efc439345e8665da0bd79bc06c02a0506e5fd0f3a4cf11af0c7197eaa643",
+      "local_reference": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_core-1.0.229/src/ser/impls.rs"
+    },
+    {
+      "member": "reference/serde_json-1.0.151/src/macros.rs",
+      "bytes": 10361,
+      "sha256": "94dda91c847e819a95e64d655eb066dfa44ed69712064016c3fe862c34ef92e6",
+      "local_reference": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_json-1.0.151/src/macros.rs"
+    },
+    {
+      "member": "reference/interprocess-2.4.4/src/os/windows/path_conversion.rs",
+      "bytes": 5129,
+      "sha256": "7f8ba26a8a10257cfac0bbd8beff1d71354f37605c09fb5293655d1669c55dc3",
+      "local_reference": "/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/interprocess-2.4.4/src/os/windows/path_conversion.rs"
+    }
+  ],
+  "roundtrips": 11,
+  "vectors": [
+    {
+      "id": "ascii",
+      "native_code_units": [
+        65
+      ],
+      "legacy_lossy_code_units": [
+        65
+      ],
+      "OsStr_client_owner_matches_unchanged_server": true,
+      "restored_lossy_client_owner_matches_unchanged_server": true
+    },
+    {
+      "id": "valid_non_bmp_pair",
+      "native_code_units": [
+        55357,
+        56832
+      ],
+      "legacy_lossy_code_units": [
+        55357,
+        56832
+      ],
+      "OsStr_client_owner_matches_unchanged_server": true,
+      "restored_lossy_client_owner_matches_unchanged_server": true
+    },
+    {
+      "id": "lone_high",
+      "native_code_units": [
+        55296
+      ],
+      "legacy_lossy_code_units": [
+        65533
+      ],
+      "OsStr_client_owner_matches_unchanged_server": false,
+      "restored_lossy_client_owner_matches_unchanged_server": true
+    },
+    {
+      "id": "lone_low",
+      "native_code_units": [
+        56320
+      ],
+      "legacy_lossy_code_units": [
+        65533
+      ],
+      "OsStr_client_owner_matches_unchanged_server": false,
+      "restored_lossy_client_owner_matches_unchanged_server": true
+    },
+    {
+      "id": "literal_replacement",
+      "native_code_units": [
+        65533
+      ],
+      "legacy_lossy_code_units": [
+        65533
+      ],
+      "OsStr_client_owner_matches_unchanged_server": true,
+      "restored_lossy_client_owner_matches_unchanged_server": true
+    }
+  ],
+  "original_raw_archive_sha256": "07f40f5be16af310d851241fd1e25ae6a773860a3a848f75b662acdc87ca1b34",
+  "finding": "Direct OsStr client alone splits endpoint ownership from unchanged lossy server/wake. Invalid Path serialization is an inherited separate error-path limitation, not fixed here.",
+  "disposition": "Restore prior shared lossy relation for bounded deadline fix; whole-three-owner raw-WTF16 cutover remains open."
+}

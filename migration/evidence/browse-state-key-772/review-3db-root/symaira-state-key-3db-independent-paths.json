@@ -1,0 +1,66 @@
+{
+  "source": "3db69a655e43ef8cffa3776ad00a823d947ff31b",
+  "publication": "3c2d731b2b113df81db3601b73f3036c8a558e5c",
+  "binaries_sha256": {
+    "/workspace/symaira-daemon772-registry/target/debug/symbrowse": "ecb9bcefb4fa1c8bf208ab5a08f8ea64c513b28be0a16c83533806e186f69707",
+    "/workspace/symaira-daemon772-registry/target/debug/examples/startup_key_source_probe": "9939df8439b94e2c73953d0d107d50779d9f9885165ffcbc8dce13641b72bb73",
+    "/workspace/oracles/symaira-state-key-4cd-owned-provider": "e231f7b6707a4cff1714057f00c67ec454d5e2aa696dee9a217c2e7ece9062d1"
+  },
+  "records": [
+    {
+      "case": "YXNjaWk=",
+      "provider_arg_base64": "L3RtcC9zdGF0ZWtleS1yb290LXBhdGgtMng3M21kbjQvYXNjaWkvc3ltdmF1bHQ=",
+      "probe_exit": 0,
+      "probe_stdout_base64": "eyJjb25maWd1cmVkIjp0cnVlLCJrZXlfc291cmNlIjoic3ltdmF1bHQiLCJlcnJvciI6IiJ9",
+      "probe_stderr_base64": "",
+      "observation": {
+        "configured": true,
+        "key_source": "symvault",
+        "error": ""
+      },
+      "provider_invoked": true,
+      "direct_owned_route": {
+        "exit": 0,
+        "stdout_base64": "eyJ2YWx1ZSI6ImFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWIifQo=",
+        "stderr_base64": "eyJyZXN1bHQiOiJFeGl0ZWQiLCJzdGF0dXMiOjB9"
+      }
+    },
+    {
+      "case": "dW5pY29kZS3DpA==",
+      "provider_arg_base64": "L3RtcC9zdGF0ZWtleS1yb290LXBhdGgtMng3M21kbjQvdW5pY29kZS3DpC9zeW12YXVsdA==",
+      "probe_exit": 0,
+      "probe_stdout_base64": "eyJjb25maWd1cmVkIjp0cnVlLCJrZXlfc291cmNlIjoic3ltdmF1bHQiLCJlcnJvciI6IiJ9",
+      "probe_stderr_base64": "",
+      "observation": {
+        "configured": true,
+        "key_source": "symvault",
+        "error": ""
+      },
+      "provider_invoked": true,
+      "direct_owned_route": {
+        "exit": 0,
+        "stdout_base64": "eyJ2YWx1ZSI6ImFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWIifQo=",
+        "stderr_base64": "eyJyZXN1bHQiOiJFeGl0ZWQiLCJzdGF0dXMiOjB9"
+      }
+    },
+    {
+      "case": "cmF3Lf8=",
+      "provider_arg_base64": "L3RtcC9zdGF0ZWtleS1yb290LXBhdGgtMng3M21kbjQvcmF3Lf8vc3ltdmF1bHQ=",
+      "probe_exit": 0,
+      "probe_stdout_base64": "eyJjb25maWd1cmVkIjpmYWxzZSwia2V5X3NvdXJjZSI6IiIsImVycm9yIjoic3ltdmF1bHQgZW50cnkgXCJzeW1icm93c2UvZW5jcnlwdGlvbi1rZXlcIjogc3RhcnR1cCBwcm92aWRlciBhcmd1bWVudCBpcyBub3QgVVRGLTgifQ==",
+      "probe_stderr_base64": "",
+      "observation": {
+        "configured": false,
+        "key_source": "",
+        "error": "symvault entry \"symbrowse/encryption-key\": startup provider argument is not UTF-8"
+      },
+      "provider_invoked": false,
+      "direct_owned_route": {
+        "exit": 0,
+        "stdout_base64": "eyJ2YWx1ZSI6ImFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWIifQo=",
+        "stderr_base64": "eyJyZXN1bHQiOiJFeGl0ZWQiLCJzdGF0dXMiOjB9"
+      }
+    }
+  ],
+  "scope": "actual publicSystemKeySources with_programs+with_startup_owner vs same actual internal route; no GoCLI parity claim"
+}

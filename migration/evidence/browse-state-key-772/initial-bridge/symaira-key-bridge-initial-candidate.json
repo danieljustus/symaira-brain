@@ -1,0 +1,5127 @@
+{
+  "baseline_rust_head": "b363762cb85b879630fecd3fd141cba1ae85f71c",
+  "source_head": "a274b887232a6d9f41b4802c6f4f5028f79e60df",
+  "source_dirty": true,
+  "go_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "binaries_sha256": {
+    "go": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8",
+    "rust": "8dea63b55235028a35aad555ef2f544040d90a3396359358d397b02e30cc8361",
+    "owned_provider": "7b1c2f2c1cefed5a0e8915b0455277aeb1a721041e43f2d2d1f5b715f292930f"
+  },
+  "probe_sha256": "ab56fde7cebe2e57b35ed90b6b16bfb60154ad48e3f94b8c5e50a9e09287bd30",
+  "provider_source_sha256": "743e0dea17126b89565c35878609e3c0f52abc9da9a881b7ab83ffe2e924117b",
+  "go_version": "go version go1.26.7 linux/amd64",
+  "frozen_manifest_sha256": "5846310370a72660f7255af837a910956c8af914dc8bd8faced373f0ae78af5d",
+  "frozen_fixture_sha256": {
+    "plaintext-v1.state": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282",
+    "encrypted-v1.state": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+    "plaintext-v2.state": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+    "encrypted-v2.state": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+    "plaintext-v3.state": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+    "encrypted-v3.state": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a"
+  },
+  "cases": [
+    {
+      "input": {
+        "name": "no-key",
+        "key": null,
+        "vault": null
+      },
+      "go": {
+        "case": "no-key",
+        "root": "/tmp/bk-0t51pchc",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.02129263999813702,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "time=2026-10-03T23:15:28.931Z level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v1\": parse state payload: invalid character '\\x01' looking for beginning of value"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v2\": parse state payload: invalid character '\\x02' looking for beginning of value"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v3\": encrypted state requires a key provider"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "clean state \"encrypted-v1\": decode state \"encrypted-v1\": parse state payload: invalid character '\\x01' looking for beginning of value"
+              }
+            }
+          }
+        ],
+        "queries": [],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      },
+      "rust": {
+        "case": "no-key",
+        "root": "/tmp/bk-6ma_k60q",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.02492273800453404,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "plaintext-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v1\": parse state payload: invalid character '\\x01' looking for beginning of value"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v2\": parse state payload: invalid character '\\x02' looking for beginning of value"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v3\": encrypted state requires a key provider"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "clean state \"encrypted-v1\": decode state \"encrypted-v1\": parse state payload: invalid character '\\x01' looking for beginning of value"
+              }
+            }
+          }
+        ],
+        "queries": [],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "empty-key",
+        "key": "",
+        "vault": null
+      },
+      "go": {
+        "case": "empty-key",
+        "root": "/tmp/bk-b9f4tv53",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.020908243997837417,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "time=2026-10-03T23:15:29.015Z level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v1\": parse state payload: invalid character '\\x01' looking for beginning of value"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v2\": parse state payload: invalid character '\\x02' looking for beginning of value"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v3\": encrypted state requires a key provider"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "clean state \"encrypted-v1\": decode state \"encrypted-v1\": parse state payload: invalid character '\\x01' looking for beginning of value"
+              }
+            }
+          }
+        ],
+        "queries": [],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      },
+      "rust": {
+        "case": "empty-key",
+        "root": "/tmp/bk-pgolqic4",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.020915189998049755,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "plaintext-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v1\": parse state payload: invalid character '\\x01' looking for beginning of value"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v2\": parse state payload: invalid character '\\x02' looking for beginning of value"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v3\": encrypted state requires a key provider"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "clean state \"encrypted-v1\": decode state \"encrypted-v1\": parse state payload: invalid character '\\x01' looking for beginning of value"
+              }
+            }
+          }
+        ],
+        "queries": [],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "environment-ab",
+        "key": "abababababababababababababababababababababababababababababababab",
+        "vault": null
+      },
+      "go": {
+        "case": "environment-ab",
+        "root": "/tmp/bk-bch7dml6",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.02080725700216135,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "time=2026-10-03T23:15:29.093Z level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "clean state \"plaintext-v3\": authenticate state header: decrypt state file: cipher: message authentication failed"
+              }
+            }
+          }
+        ],
+        "queries": [],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b"
+        },
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      },
+      "rust": {
+        "case": "environment-ab",
+        "root": "/tmp/bk-a8w_k7rh",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.020863327001279686,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "plaintext-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "encrypted-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "name": "encrypted-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "name": "encrypted-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "removed": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          }
+        ],
+        "queries": [],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {},
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "environment-wrong-cd",
+        "key": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "vault": null
+      },
+      "go": {
+        "case": "environment-wrong-cd",
+        "root": "/tmp/bk-57j19s_n",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.020974915001716,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "time=2026-10-03T23:15:29.170Z level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v1\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v2\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v3\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "clean state \"encrypted-v1\": decode state \"encrypted-v1\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          }
+        ],
+        "queries": [],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      },
+      "rust": {
+        "case": "environment-wrong-cd",
+        "root": "/tmp/bk-ib9986lc",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.020870837004622445,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "plaintext-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v1\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v2\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v3\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "clean state \"encrypted-v1\": decode state \"encrypted-v1\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          }
+        ],
+        "queries": [],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "environment-trimmed-ab",
+        "key": " abababababababababababababababababababababababababababababababab \n",
+        "vault": null
+      },
+      "go": {
+        "case": "environment-trimmed-ab",
+        "root": "/tmp/bk-vqjd3bll",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.02094345699879341,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "time=2026-10-03T23:15:29.248Z level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "clean state \"plaintext-v3\": authenticate state header: decrypt state file: cipher: message authentication failed"
+              }
+            }
+          }
+        ],
+        "queries": [],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b"
+        },
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      },
+      "rust": {
+        "case": "environment-trimmed-ab",
+        "root": "/tmp/bk-u_7gsso0",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.020894182998745237,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "plaintext-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "encrypted-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "name": "encrypted-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "name": "encrypted-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "removed": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          }
+        ],
+        "queries": [],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {},
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "invalid-environment-text",
+        "key": "not-a-key",
+        "vault": null,
+        "output": []
+      },
+      "go": {
+        "case": "invalid-environment-text",
+        "root": "/tmp/bk-5zqexkih",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": false,
+        "startup_elapsed_seconds": 0.020402459995239042,
+        "exit": 1,
+        "stdout": "",
+        "stderr": "resolve state encryption key: SYMBROWSE_ENCRYPTION_KEY: key must be a 64-character hex string (32 bytes)\n",
+        "records": [],
+        "queries": [],
+        "retained_before": {},
+        "retained_after_inspection": {},
+        "retained_after_clean": {},
+        "stop": null
+      },
+      "rust": {
+        "case": "invalid-environment-text",
+        "root": "/tmp/bk-i10r0v_a",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": false,
+        "startup_elapsed_seconds": 0.020509691996267065,
+        "exit": 1,
+        "stdout": "",
+        "stderr": "resolve state encryption key: SYMBROWSE_ENCRYPTION_KEY: [REDACTED] must be a 64-character hex string (32 bytes)\n",
+        "records": [],
+        "queries": [],
+        "retained_before": {},
+        "retained_after_inspection": {},
+        "retained_after_clean": {},
+        "stop": null
+      }
+    },
+    {
+      "input": {
+        "name": "invalid-environment-json",
+        "key": "not-a-key",
+        "vault": null,
+        "output": [
+          "--json"
+        ]
+      },
+      "go": {
+        "case": "invalid-environment-json",
+        "root": "/tmp/bk-0r22j63r",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863",
+          "--json"
+        ],
+        "startup_ready": false,
+        "startup_elapsed_seconds": 0.020471073003136553,
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"resolve state encryption key: SYMBROWSE_ENCRYPTION_KEY: key must be a 64-character hex string (32 bytes)\"}}\n",
+        "stderr": "",
+        "records": [],
+        "queries": [],
+        "retained_before": {},
+        "retained_after_inspection": {},
+        "retained_after_clean": {},
+        "stop": null
+      },
+      "rust": {
+        "case": "invalid-environment-json",
+        "root": "/tmp/bk-yvkdxoz2",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863",
+          "--json"
+        ],
+        "startup_ready": false,
+        "startup_elapsed_seconds": 0.02046876999520464,
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"internal\",\"message\":\"resolve state encryption key: SYMBROWSE_ENCRYPTION_KEY: [REDACTED] must be a 64-character hex string (32 bytes)\"}}\n",
+        "stderr": "",
+        "records": [],
+        "queries": [],
+        "retained_before": {},
+        "retained_after_inspection": {},
+        "retained_after_clean": {},
+        "stop": null
+      }
+    },
+    {
+      "input": {
+        "name": "invalid-environment-yaml",
+        "key": "not-a-key",
+        "vault": null,
+        "output": [
+          "--output",
+          "yaml"
+        ]
+      },
+      "go": {
+        "case": "invalid-environment-yaml",
+        "root": "/tmp/bk-3xbwjia0",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863",
+          "--output",
+          "yaml"
+        ],
+        "startup_ready": false,
+        "startup_elapsed_seconds": 0.02040963999752421,
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: 'resolve state encryption key: SYMBROWSE_ENCRYPTION_KEY: key must be a 64-character hex string (32 bytes)'\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": "",
+        "records": [],
+        "queries": [],
+        "retained_before": {},
+        "retained_after_inspection": {},
+        "retained_after_clean": {},
+        "stop": null
+      },
+      "rust": {
+        "case": "invalid-environment-yaml",
+        "root": "/tmp/bk-sm23jpr8",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863",
+          "--output",
+          "yaml"
+        ],
+        "startup_ready": false,
+        "startup_elapsed_seconds": 0.02043767300347099,
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: internal\n    message: \"resolve state encryption key: SYMBROWSE_ENCRYPTION_KEY: [REDACTED] must be a 64-character hex string (32 bytes)\"\n    hint: \"\"\n    details: {}\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": "",
+        "records": [],
+        "queries": [],
+        "retained_before": {},
+        "retained_after_inspection": {},
+        "retained_after_clean": {},
+        "stop": null
+      }
+    },
+    {
+      "input": {
+        "name": "vault-ab-environment-ab",
+        "key": "cdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcdcd",
+        "vault": "ab"
+      },
+      "go": {
+        "case": "vault-ab-environment-ab",
+        "root": "/tmp/bk-ki5fyxbd",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.020853702000749763,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "time=2026-10-03T23:15:29.456Z level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "clean state \"plaintext-v3\": authenticate state header: decrypt state file: cipher: message authentication failed"
+              }
+            }
+          }
+        ],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1996247
+          }
+        ],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b"
+        },
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      },
+      "rust": {
+        "case": "vault-ab-environment-ab",
+        "root": "/tmp/bk-9icfn13d",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.020947814999090042,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "plaintext-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "encrypted-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "name": "encrypted-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "name": "encrypted-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "removed": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          }
+        ],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1996255
+          }
+        ],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {},
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "vault-cd-environment-ab",
+        "key": "abababababababababababababababababababababababababababababababab",
+        "vault": "cd"
+      },
+      "go": {
+        "case": "vault-cd-environment-ab",
+        "root": "/tmp/bk-w0wdwbyp",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.020851399000093807,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "time=2026-10-03T23:15:29.537Z level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v1\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v2\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v3\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "clean state \"encrypted-v1\": decode state \"encrypted-v1\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          }
+        ],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1996315
+          }
+        ],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      },
+      "rust": {
+        "case": "vault-cd-environment-ab",
+        "root": "/tmp/bk-f5fw5qkv",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.020733218996610958,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "plaintext-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v1\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v2\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "decode state \"encrypted-v3\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "clean state \"encrypted-v1\": decode state \"encrypted-v1\": decrypt state file: cipher: message authentication failed"
+              }
+            }
+          }
+        ],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1996323
+          }
+        ],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "vault-2-environment-ab",
+        "key": "abababababababababababababababababababababababababababababababab",
+        "vault": "2"
+      },
+      "go": {
+        "case": "vault-2-environment-ab",
+        "root": "/tmp/bk-2o_gd903",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.020882265002001077,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "time=2026-10-03T23:15:29.614Z level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "clean state \"plaintext-v3\": authenticate state header: decrypt state file: cipher: message authentication failed"
+              }
+            }
+          }
+        ],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1996382
+          }
+        ],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b"
+        },
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      },
+      "rust": {
+        "case": "vault-2-environment-ab",
+        "root": "/tmp/bk-mcoztc2w",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.020798729005036876,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "plaintext-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "encrypted-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "name": "encrypted-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "name": "encrypted-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "removed": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          }
+        ],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1996391
+          }
+        ],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {},
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "vault-3-environment-ab",
+        "key": "abababababababababababababababababababababababababababababababab",
+        "vault": "3"
+      },
+      "go": {
+        "case": "vault-3-environment-ab",
+        "root": "/tmp/bk-3wt77kix",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.020831478999753017,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "time=2026-10-03T23:15:29.694Z level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "clean state \"plaintext-v3\": authenticate state header: decrypt state file: cipher: message authentication failed"
+              }
+            }
+          }
+        ],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1996450
+          }
+        ],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b"
+        },
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      },
+      "rust": {
+        "case": "vault-3-environment-ab",
+        "root": "/tmp/bk-hi8r5aqd",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.020844105994910933,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "plaintext-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "encrypted-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "name": "encrypted-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "name": "encrypted-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "removed": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          }
+        ],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1996458
+          }
+        ],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {},
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "vault-4-environment-ab",
+        "key": "abababababababababababababababababababababababababababababababab",
+        "vault": "4"
+      },
+      "go": {
+        "case": "vault-4-environment-ab",
+        "root": "/tmp/bk-4a0o6qos",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": false,
+        "startup_elapsed_seconds": 0.020397596003022045,
+        "exit": 1,
+        "stdout": "",
+        "stderr": "resolve state encryption key: symvault entry \"symbrowse/encryption-key\": exit status 4\n",
+        "records": [],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1996517
+          }
+        ],
+        "retained_before": {},
+        "retained_after_inspection": {},
+        "retained_after_clean": {},
+        "stop": null
+      },
+      "rust": {
+        "case": "vault-4-environment-ab",
+        "root": "/tmp/bk-jkg3g0rr",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": false,
+        "startup_elapsed_seconds": 0.020472529999096878,
+        "exit": 1,
+        "stdout": "",
+        "stderr": "resolve state encryption key: symvault entry \"symbrowse/encryption-key\": exit status 4\n",
+        "records": [],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1996527
+          }
+        ],
+        "retained_before": {},
+        "retained_after_inspection": {},
+        "retained_after_clean": {},
+        "stop": null
+      }
+    },
+    {
+      "input": {
+        "name": "vault-invalid-environment-ab",
+        "key": "abababababababababababababababababababababababababababababababab",
+        "vault": "invalid"
+      },
+      "go": {
+        "case": "vault-invalid-environment-ab",
+        "root": "/tmp/bk-4w90w66b",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": false,
+        "startup_elapsed_seconds": 0.020394410996232182,
+        "exit": 1,
+        "stdout": "",
+        "stderr": "resolve state encryption key: symvault entry \"symbrowse/encryption-key\": key must be a 64-character hex string (32 bytes)\n",
+        "records": [],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1996543
+          }
+        ],
+        "retained_before": {},
+        "retained_after_inspection": {},
+        "retained_after_clean": {},
+        "stop": null
+      },
+      "rust": {
+        "case": "vault-invalid-environment-ab",
+        "root": "/tmp/bk-dj25v5u7",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": false,
+        "startup_elapsed_seconds": 0.0204295750008896,
+        "exit": 1,
+        "stdout": "",
+        "stderr": "resolve state encryption key: symvault entry \"symbrowse/encryption-key\": key must be a 64-character hex string (32 bytes)\n",
+        "records": [],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1996551
+          }
+        ],
+        "retained_before": {},
+        "retained_after_inspection": {},
+        "retained_after_clean": {},
+        "stop": null
+      }
+    },
+    {
+      "input": {
+        "name": "vault-empty-environment-ab",
+        "key": "abababababababababababababababababababababababababababababababab",
+        "vault": "empty"
+      },
+      "go": {
+        "case": "vault-empty-environment-ab",
+        "root": "/tmp/bk-77yxkl79",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.020757751000928693,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "time=2026-10-03T23:15:29.864Z level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v1",
+                "schema_version": 1,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v2",
+                "schema_version": 2,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "plaintext-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "name": "encrypted-v3",
+                "schema_version": 3,
+                "saved_at": "2026-08-25T14:00:00Z",
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "origins": [
+                  {
+                    "origin": "https://example.test",
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "session_storage_keys": 1
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": false,
+              "error": {
+                "code": "operation_failed",
+                "message": "clean state \"plaintext-v3\": authenticate state header: decrypt state file: cipher: message authentication failed"
+              }
+            }
+          }
+        ],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1996566
+          }
+        ],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b"
+        },
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      },
+      "rust": {
+        "case": "vault-empty-environment-ab",
+        "root": "/tmp/bk-af65ufmi",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": true,
+        "startup_elapsed_seconds": 0.021014918995206244,
+        "exit": 0,
+        "stdout": "",
+        "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n",
+        "records": [
+          {
+            "request": {
+              "cmd": "state.list",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "schema_version": 3,
+                "states": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "plaintext-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v1"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "name": "encrypted-v1",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 1
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v2"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "name": "encrypted-v2",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 2
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "plaintext-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "none",
+                "name": "plaintext-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.show",
+              "session": "key1995863",
+              "args": {
+                "name": "encrypted-v3"
+              }
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "expires_at": "2026-09-24T14:00:00Z",
+                "key_source": "environment",
+                "name": "encrypted-v3",
+                "origins": [
+                  {
+                    "cookie_count": 1,
+                    "local_storage_keys": 1,
+                    "origin": "https://example.test",
+                    "session_storage_keys": 1
+                  }
+                ],
+                "saved_at": "2026-08-25T14:00:00Z",
+                "schema_version": 3
+              }
+            }
+          },
+          {
+            "request": {
+              "cmd": "state.clean",
+              "session": "key1995863"
+            },
+            "response": {
+              "success": true,
+              "data": {
+                "removed": [
+                  "encrypted-v1",
+                  "encrypted-v2",
+                  "encrypted-v3",
+                  "plaintext-v1",
+                  "plaintext-v2",
+                  "plaintext-v3"
+                ]
+              }
+            }
+          }
+        ],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1996575
+          }
+        ],
+        "retained_before": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_inspection": {
+          "encrypted-v3.json": "f2abad6d683c6c9bcfc98a37221d0ca51ecfda96f3b5b67310bedf82e041e92a",
+          "plaintext-v3.json": "816f2b1beac747e7ac211477b5c488d87a2aadd6c843d39433644aac679d336b",
+          "encrypted-v2.json": "b5914e1ee0d2193ab4bc63ade7f434269d869cf407bdbe9e03c1847dc4a47aad",
+          "plaintext-v2.json": "536a16d8a1919972ddf762ae9580ecf5581a424bf889c5da2a707c17a8c37517",
+          "encrypted-v1.json": "1c9d0d0fb4522a466397e9f5957d9bfcd8fe43c432336c84f7c930fabf1ae035",
+          "plaintext-v1.json": "1a8d2b977bd5166b224a7dffa71b35b8dbc51ec6eeab21782229c44b49e84282"
+        },
+        "retained_after_clean": {},
+        "stop": {
+          "success": true,
+          "data": {
+            "stopping": true
+          }
+        }
+      }
+    },
+    {
+      "input": {
+        "name": "vault-timeout-environment-ab",
+        "key": "abababababababababababababababababababababababababababababababab",
+        "vault": "timeout"
+      },
+      "go": {
+        "case": "vault-timeout-environment-ab",
+        "root": "/tmp/bk-_2vajgl2",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": false,
+        "startup_elapsed_seconds": 15.034354613999312,
+        "exit": 1,
+        "stdout": "",
+        "stderr": "resolve state encryption key: context deadline exceeded\n",
+        "records": [],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1996634
+          }
+        ],
+        "retained_before": {},
+        "retained_after_inspection": {},
+        "retained_after_clean": {},
+        "stop": null
+      },
+      "rust": {
+        "case": "vault-timeout-environment-ab",
+        "root": "/tmp/bk-2f2hto5a",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": false,
+        "startup_elapsed_seconds": 15.033332777005853,
+        "exit": 1,
+        "stdout": "",
+        "stderr": "resolve state encryption key: context deadline exceeded\n",
+        "records": [],
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 1997412
+          }
+        ],
+        "retained_before": {},
+        "retained_after_inspection": {},
+        "retained_after_clean": {},
+        "stop": null
+      }
+    },
+    {
+      "input": {
+        "name": "state-directory-is-file",
+        "key": null,
+        "vault": null,
+        "store_file": true
+      },
+      "go": {
+        "case": "state-directory-is-file",
+        "root": "/tmp/bk-o41ld1ss",
+        "arguments": [
+          "/tmp/symaira-pr801-go-1.26.7",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": false,
+        "startup_elapsed_seconds": 0.024906942002417054,
+        "exit": 1,
+        "stdout": "",
+        "stderr": "create state directory: mkdir /tmp/bk-o41ld1ss/state/symbrowse/states: not a directory\n",
+        "records": [],
+        "queries": [],
+        "retained_before": {},
+        "retained_after_inspection": {},
+        "retained_after_clean": {},
+        "stop": null
+      },
+      "rust": {
+        "case": "state-directory-is-file",
+        "root": "/tmp/bk-4pqe1sfb",
+        "arguments": [
+          "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+          "daemon",
+          "--session",
+          "key1995863"
+        ],
+        "startup_ready": false,
+        "startup_elapsed_seconds": 0.02041705399460625,
+        "exit": 1,
+        "stdout": "",
+        "stderr": "create state directory: mkdir /tmp/bk-4pqe1sfb/state/symbrowse/states: not a directory\n",
+        "records": [],
+        "queries": [],
+        "retained_before": {},
+        "retained_after_inspection": {},
+        "retained_after_clean": {},
+        "stop": null
+      }
+    }
+  ],
+  "note": "Original failing observations, not approval. Inputs/keys are public disposable fixtures only. No production source/fixture writes. Both six persisted Go file sets are inspected without rewriting; explicit clean may remove expired owned copies."
+}
