@@ -14,6 +14,8 @@ mod middleware;
 mod read;
 mod routes;
 mod server;
+#[cfg(test)]
+mod tests;
 mod wire;
 mod write;
 
