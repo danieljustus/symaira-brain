@@ -1,0 +1,5 @@
+[ollama]
+url = "http://127.0.0.1:39623/api/embeddings"
+model = "synthetic-owned-768"
+[conflict]
+enabled = false

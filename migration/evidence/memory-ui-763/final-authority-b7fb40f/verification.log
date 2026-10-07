@@ -1,0 +1,1 @@
+{"status": "PASS", "validation_source": "b7fb40fda3ec68526ad5b4eb5e05b285d3f00935", "candidate_sources": 546, "frozen_source_files": 2438, "new_original_proofs": 148, "original_independent_files": 232, "original_author_files": 459, "original_ELF_paths": 526, "original_unique_ELF": 492, "current_actual_executable_bindings": 37, "current_unique_ELF": 37}

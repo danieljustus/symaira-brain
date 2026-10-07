@@ -1,0 +1,7 @@
+{
+  "cli": 13,
+  "http": 17,
+  "embedding_requests": 1,
+  "server_exit": 0,
+  "root": "/tmp/symaira-memory763-ui-oracle-complete"
+}
