@@ -16,7 +16,7 @@ import tempfile
 import time
 from registry_progress import Progress, event
 from registry_compare import compare, controls, normalize
-from registry_cli_process import capture
+from registry_cli_process import CLI_TIMEOUT, capture
 from registry_daemon_lifetime import WindowsJob, WindowsOwner, no_job_teardown
 
 HERE = Path(__file__).resolve().parent
@@ -223,13 +223,44 @@ def _observe(binary: Path, session: str, fixtures: dict[str, str], progress, roo
         finally:
             if auto_owner is not None:
                 auto_owner.finish(stop_error)
+        revived = stop_revived_owners(auto_endpoint, auto_session, job, progress)
     event(progress, "observe.end", binary=str(binary), session=session)
     return {"root": str(root), "session": session, "begin": began, "end": time.time(),
             "pid": first_pid, "restart_pid": restart_pid, "missing": missing, "invalid_cli": invalid_cli,
             "cli_edges": extra_cli,
             "registry": records, "inspection": inspected, "first_stop": first_stop,
             "restart_stop": restart_stop, "restart": restarted,
-            "autostart": clients, "owner": owner, "owner_info": info, "state_commands": state_commands}
+            "autostart": clients, "owner": owner, "owner_info": info, "state_commands": state_commands,
+            "revived_owners_stopped": revived}
+
+
+def stop_revived_owners(endpoint: Path, session: str, job, progress=None) -> int:
+    """Stop stragglers that bind the endpoint after the autostart owner stopped.
+
+    Concurrent autostart spawns one daemon per client. A loser still in
+    startup when the winner stops binds the freed endpoint and becomes a new
+    owner. Go and Rust both do this (a variable provider delay revives an
+    owner in 8/8 rounds for each), so it is contract behaviour, timing-
+    dependent and recorded, not compared. Bounded by CLI_TIMEOUT: ends once
+    the Windows job is empty, or on POSIX after 1s without an answer.
+    """
+    revived, deadline = 0, time.monotonic() + CLI_TIMEOUT
+    quiet_since = time.monotonic()
+    while time.monotonic() < deadline:
+        if job is not None and not job.active():
+            break
+        try:
+            harness.request(endpoint, {"cmd": "daemon.stop", "session": session})
+            revived += 1
+            quiet_since = time.monotonic()
+        # No endpoint, or a stopping owner that closes without a reply
+        # (run.request raises AssertionError for that): nobody answered.
+        except (OSError, AssertionError):
+            if job is None and time.monotonic() - quiet_since >= 1:
+                break
+        time.sleep(.05)
+    event(progress, "autostart.revived.stopped", session=session, count=revived)
+    return revived
 
 
 def oracle_api(source: Path) -> dict:

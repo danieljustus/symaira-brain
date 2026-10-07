@@ -147,6 +147,9 @@ class WindowsJob:
         self.api.job_assign(self.handle, process)
         self.api.resume(process)
 
+    def active(self):
+        return self.api.job_active(self.handle)
+
     def _wait_empty(self, seconds):
         deadline = time.monotonic() + seconds
         while True:

@@ -15,6 +15,9 @@ def normalize(record: dict, *, rust: bool) -> dict:
     # Teardown facts carry PIDs; only how many owned processes outlived the
     # bounded drain (and were terminated) is a Go/Rust contract property.
     value["teardown_survivors"] = len(value.pop("teardown", no_job_teardown())["survivors"])
+    # Stragglers that rebound the freed endpoint are stopped and counted in
+    # the evidence; their number depends on startup timing on both sides.
+    value.pop("revived_owners_stopped", None)
     root, begin, end = value.pop("root"), value.pop("begin"), value.pop("end")
     pids = {value["pid"], value["restart_pid"], value["owner"]["data"]["pid"]}
     assert all(isinstance(pid, int) and pid > 0 for pid in pids)

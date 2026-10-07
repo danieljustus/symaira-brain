@@ -282,5 +282,35 @@ class JobTests(unittest.TestCase):
                 job.finish(timeout=0)
         self.assertEqual(api.calls[-1], ("close", api.job))
 
+
+class RevivedOwnerTests(unittest.TestCase):
+    def test_windows_sweep_stops_each_rebound_owner_until_job_is_empty(self):
+        import daemon_registry as registry
+        # A straggler is still starting (no pipe), then binds and answers,
+        # then the job empties once it has stopped.
+        job = type("Job", (), {"states": [2, 2, 1, 0]})()
+        job.active = lambda: job.states.pop(0)
+        replies = [FileNotFoundError(2, "no pipe"), {"success": True, "data": {"stopping": True}},
+                   FileNotFoundError(2, "stopped straggler released the pipe")]
+        def request(endpoint, frame):
+            self.assertEqual(frame["cmd"], "daemon.stop")
+            reply = replies.pop(0)
+            if isinstance(reply, BaseException):
+                raise reply
+            return reply
+        with patch.object(registry.harness, "request", side_effect=request), \
+             patch.object(registry.time, "sleep"):
+            self.assertEqual(registry.stop_revived_owners(Path("owned"), "owned", job), 1)
+        self.assertEqual(job.states, [])
+
+    def test_posix_sweep_ends_after_quiet_second(self):
+        import daemon_registry as registry
+        clock = iter([0, 0, 0, 0.5, 0.5, 1.2, 1.2])
+        with patch.object(registry.harness, "request", side_effect=ConnectionRefusedError()), \
+             patch.object(registry.time, "monotonic", lambda: next(clock)), \
+             patch.object(registry.time, "sleep"):
+            self.assertEqual(registry.stop_revived_owners(Path("owned"), "owned", None), 0)
+
+
 if __name__ == "__main__":
     unittest.main()
