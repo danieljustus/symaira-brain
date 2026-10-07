@@ -245,3 +245,36 @@ Darwin EILSEQ92 rejection permits an explicitly unexecuted unavailable case, wit
 no parity claim. Linux still requires the positive raw-byte case. The Unicode
 path-corruption control must execute, and every requested input must be accounted
 for in the final receipt. No product lookup or byte-preserving contract is relaxed.
+
+## Batch providers: intended divergence from Go
+
+Decision, 2026-10-07 (PR #801): on Windows, Rust keeps refusing a `.bat` or
+`.cmd` startup-key provider found by the scoped bare-name lookup. This is an
+intended, documented divergence from Go, not a parity gap. The refusal and its
+text are unchanged: `symvault entry "symbrowse/encryption-key": fork/exec
+<resolved path>: <Windows error 193 text>`. Explicit provider paths and the
+standalone runner keep their existing behaviour.
+
+This supersedes the premise in "Scoped successor preparation" that Go's
+CreateProcess fails for a discovered batch provider. The first native run of
+the script-vector stage (windows-11-arm, run 37584912332, case bat/absolute)
+showed that the pinned Go SDK oracle discovers `bin\symvault.bat` and runs it.
+CreateProcess launches batch files through `cmd.exe`, so the oracle reported
+`lookup_error ""` and `invoke_error ""`, and the owned shell marker existed
+(`shell_executed true`). Rust refused the same script and executed no shell.
+
+Rationale: a provider is trusted with the state-encryption key lookup. Running
+it implicitly through `cmd.exe` hands its arguments to cmd's own parsing. That
+is the BatBadBut command-injection class (CVE-2024-24576 for Rust std), which
+is why Rust std hardens or rejects batch-file arguments. The scoped lookup
+therefore never adds an implicit `cmd.exe` owner, whatever Go does.
+
+Gate binding: `daemon_provider_discovery.py` records Go's actual outcome
+(lookup_error, invoke_error, shell executed) and asserts Rust's refusal with no
+shell. It accepts the difference only for the allow-list
+`ACCEPTED_SCRIPT_DIVERGENCE`: extensions `bat` and `cmd` by modes `absolute`,
+`relative-opt-in` and `raw-wide`, six cases. Any other case or shape still fails
+the gate: Rust configured or running a shell, Go failing lookup, a different
+Rust error, or a different script. When Go itself fails CreateProcess, Rust
+must still report the identical cause. Only bat/absolute has native evidence so
+far; the gate records the other five on its next Windows run.

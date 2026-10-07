@@ -94,5 +94,51 @@ class StopOwnedTests(unittest.TestCase):
                 discovery.stop_owned(Path("owned-endpoint"), "owned", Path("owned-binary"))
 
 
+
+# Verbatim outputs from windows-11-arm run 37584912332, case bat/absolute.
+GO_RAN = {"invoke_error": "", "lookup_error": "", "stdout_base64": "",
+          "path_base64": "QzpcVXNlcnNcUlVOTkVSfjFcQXBwRGF0YVxMb2NhbFxUZW1wXGJkLXNjcmlwdC1icHNpamJ3eVxiaW5cc3ltdmF1bHQuYmF0"}
+RUST_REFUSED = {"configured": False, "key_source": "", "error":
+    'symvault entry "symbrowse/encryption-key": fork/exec '
+    'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\bd-script-bpsijbwy\\bin\\symvault.bat: '
+    '%1 is not a valid Win32 application.'}
+
+
+class ScriptDivergenceTests(unittest.TestCase):
+    classify = staticmethod(discovery.classify_script_pair)
+
+    def test_observed_batch_refusal_is_the_documented_divergence(self):
+        self.assertEqual(self.classify("bat", "absolute", GO_RAN, RUST_REFUSED, True, False),
+                         "accepted-divergence")
+        self.assertEqual(len(discovery.ACCEPTED_SCRIPT_DIVERGENCE), 6)
+
+    def test_difference_outside_the_allow_list_still_fails(self):
+        for extension, mode in (("exe", "absolute"), ("bat", "implicit"), ("ps1", "raw-wide")):
+            with self.subTest(extension=extension, mode=mode):
+                rust = dict(RUST_REFUSED, error=RUST_REFUSED["error"].replace("symvault.bat", f"symvault.{extension}"))
+                with self.assertRaisesRegex(AssertionError, "undocumented script divergence"):
+                    self.classify(extension, mode, GO_RAN, rust, True, False)
+
+    def test_allow_listed_case_fails_on_any_other_shape(self):
+        cases = {
+            "rust shell": (GO_RAN, RUST_REFUSED, True, True),
+            "rust configured": (GO_RAN, dict(RUST_REFUSED, configured=True), True, False),
+            "go lookup failed": (dict(GO_RAN, lookup_error="exec: not found"), RUST_REFUSED, False, False),
+            "other rust error": (GO_RAN, dict(RUST_REFUSED, error="symvault entry: denied"), True, False),
+            "other script": (GO_RAN, dict(RUST_REFUSED, error=RUST_REFUSED["error"].replace(".bat", ".cmd")), True, False),
+        }
+        for name, (go, rust, go_shell, rust_shell) in cases.items():
+            with self.subTest(name):
+                with self.assertRaises(AssertionError):
+                    self.classify("bat", "absolute", go, rust, go_shell, rust_shell)
+
+    def test_go_failure_still_requires_identical_rust_cause(self):
+        failed = dict(GO_RAN, invoke_error="fork/exec C:\\x\\symvault.bat: %1 is not a valid Win32 application.")
+        same = dict(RUST_REFUSED, error=discovery.PROVIDER_ERROR + failed["invoke_error"])
+        self.assertEqual(self.classify("bat", "absolute", failed, same, False, False), "match")
+        with self.assertRaises(AssertionError):
+            self.classify("bat", "absolute", failed, RUST_REFUSED, False, False)
+
+
 if __name__ == "__main__":
     unittest.main()

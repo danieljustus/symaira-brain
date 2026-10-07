@@ -112,8 +112,12 @@ pub(super) fn batch_error(program: &Path, resolved: &Path) -> Option<String> {
     if !extension.eq_ignore_ascii_case(b"bat") && !extension.eq_ignore_ascii_case(b"cmd") {
         return None;
     }
-    // Go's CreateProcess path fails with ERROR_BAD_EXE_FORMAT. Rust Command
-    // would instead run cmd.exe; never add that implicit script owner here.
+    // Intended divergence from Go (docs/adr/daemon-provider-discovery-and-
+    // owner-772.md): Go's CreateProcess runs a discovered .bat/.cmd provider
+    // through cmd.exe (pinned SDK oracle: invoke_error "", script executed).
+    // A key provider must never gain an implicit cmd.exe owner whose argument
+    // parsing is the BatBadBut injection class, so the scoped lookup refuses
+    // it with the Windows ERROR_BAD_EXE_FORMAT (193) text.
     let error = std::io::Error::from_raw_os_error(193).to_string();
     let message = error.strip_suffix(" (os error 193)").unwrap_or(&error);
     Some(format!(

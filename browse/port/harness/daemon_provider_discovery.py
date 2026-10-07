@@ -238,6 +238,33 @@ def pairs(go: Path, rust: Path, provider: Path, cases: list[str], *, evidence: R
     return rows
 
 
+# Intended, documented divergence (docs/adr/daemon-provider-discovery-and-
+# owner-772.md, "Batch providers"): Go's CreateProcess runs a discovered
+# .bat/.cmd provider through cmd.exe; Rust refuses it (BatBadBut class). Only
+# these script-vector cases may differ, and only in exactly that shape.
+ACCEPTED_SCRIPT_DIVERGENCE = frozenset((extension, mode) for extension in ("bat", "cmd")
+                                       for mode in ("absolute", "relative-opt-in", "raw-wide"))
+PROVIDER_ERROR = 'symvault entry "symbrowse/encryption-key": '
+BATCH_REFUSAL = PROVIDER_ERROR + "fork/exec "
+
+
+def classify_script_pair(extension: str, mode: str, go: dict, rust: dict,
+                         go_shell: bool, rust_shell: bool) -> str:
+    """Return "match" or "accepted-divergence"; any other difference fails."""
+    assert not rust_shell, "Rust ran a batch provider through a shell"
+    assert not rust["configured"], ("Rust accepted a batch provider", extension, mode, rust)
+    assert not go["lookup_error"], ("Go did not discover the script provider", extension, mode, go)
+    if go["invoke_error"]:
+        # Go itself failed CreateProcess: Rust must report the identical cause.
+        assert not go_shell and rust["error"] == PROVIDER_ERROR + go["invoke_error"], (extension, mode, go, rust)
+        return "match"
+    assert (extension, mode) in ACCEPTED_SCRIPT_DIVERGENCE, ("undocumented script divergence", extension, mode, go, rust)
+    # Same discovered script; Go executed it, Rust refused it before any shell.
+    # (Go's raw-wide path is WTF-8; compare the refused script name, not bytes.)
+    assert rust["error"].startswith(BATCH_REFUSAL) and f"symvault.{extension}: " in rust["error"], (extension, mode, go, rust)
+    return "accepted-divergence"
+
+
 def script_vectors(probe: Path, owner: Path, tool: str, tools: Path, evidence: RawEvidence) -> list:
     if os.name != "nt": return []
     source = tools / "sdk-oracle.go"; shutil.copyfile(HERE / "discovery_sdk_oracle.go.in", source)
@@ -252,7 +279,9 @@ def script_vectors(probe: Path, owner: Path, tool: str, tools: Path, evidence: R
             env.update(PATH="bin" if mode == "relative-opt-in" else str(directory), PATHEXT="." + extension.upper(), NoDefaultCurrentDirectoryInExePath="1", DISCOVERY_MARKER=str(marker), SYMBROWSE_ENCRYPTION_KEY=key.KEY)
             if mode == "relative-opt-in": env["GODEBUG"] = "execerrdot=0"
             actual_go = subprocess.run([str(oracle)], env=env, cwd=root, capture_output=True, timeout=5)
+            go_shell = marker.exists(); marker.unlink(missing_ok=True)
             actual_rust = subprocess.run([str(probe), "symvault", str(owner)], env=env, cwd=root, capture_output=True, timeout=5)
+            rust_shell = marker.exists()
             evidence.append({"phase": "windows.script.observed", "extension": extension, "mode": mode,
                              "native_path_utf16_base64": base64.b64encode(env["PATH"].encode("utf-16le", "surrogatepass")).decode(),
                              "oracle_binary_sha256": key.registry.process.digest(oracle),
@@ -262,14 +291,14 @@ def script_vectors(probe: Path, owner: Path, tool: str, tools: Path, evidence: R
                              "go_stderr_base64": base64.b64encode(actual_go.stderr).decode(),
                              "rust_stdout_base64": base64.b64encode(actual_rust.stdout).decode(),
                              "rust_stderr_base64": base64.b64encode(actual_rust.stderr).decode(),
-                             "shell_executed": marker.exists()})
+                             "go_shell_executed": go_shell, "rust_shell_executed": rust_shell})
             assert actual_go.returncode == actual_rust.returncode == 0 and not actual_go.stderr and not actual_rust.stderr
             go_value, rust_value = json.loads(actual_go.stdout), json.loads(actual_rust.stdout)
-            assert not go_value["lookup_error"] and go_value["invoke_error"]
-            prefix = 'symvault entry "symbrowse/encryption-key": '
-            assert rust_value["error"] == prefix + go_value["invoke_error"] and not rust_value["configured"]
-            assert not marker.exists(), "native changed Go failed CreateProcess into shell execution"
-            rows.append({"extension": extension, "mode": mode, "native_path_utf16_base64": base64.b64encode(env["PATH"].encode("utf-16le", "surrogatepass")).decode(), "arguments": ["symvault", str(owner)], "go_stdout_base64": base64.b64encode(actual_go.stdout).decode(), "rust_stdout_base64": base64.b64encode(actual_rust.stdout).decode(), "go": go_value, "rust": rust_value, "shell_executed": False, "script_sha256": key.registry.process.digest(script), "oracle_binary_sha256": key.registry.process.digest(oracle), "matches": True})
+            outcome = classify_script_pair(extension, mode, go_value, rust_value, go_shell, rust_shell)
+            rows.append({"extension": extension, "mode": mode, "native_path_utf16_base64": base64.b64encode(env["PATH"].encode("utf-16le", "surrogatepass")).decode(), "arguments": ["symvault", str(owner)], "go_stdout_base64": base64.b64encode(actual_go.stdout).decode(), "rust_stdout_base64": base64.b64encode(actual_rust.stdout).decode(), "go": go_value, "rust": rust_value,
+                         "go_lookup_error": go_value["lookup_error"], "go_invoke_error": go_value["invoke_error"],
+                         "go_shell_executed": go_shell, "rust_shell_executed": False, "outcome": outcome,
+                         "script_sha256": key.registry.process.digest(script), "oracle_binary_sha256": key.registry.process.digest(oracle), "matches": outcome == "match"})
     return rows
 
 
@@ -374,6 +403,7 @@ def main() -> int:
                   "go_ref": key.registry.process.GO_REF, "go_version": subprocess.check_output([args.go_tool, "version"], text=True).strip(),
                   "go_binary_sha256": key.registry.process.digest(go), "rust_binary_sha256": key.registry.process.digest(rust),
                   "cases": rows, "original_retained_provider_pairs": original_rows, "windows_script_sdk_vectors": scripts,
+                  "accepted_script_divergences": [[r["extension"], r["mode"]] for r in scripts if r["outcome"] == "accepted-divergence"],
                   "typed_sdk_setting_vectors": settings, "unported_stack_report_patterns": [row["pattern"] for row in settings if row["expected_allow"] is None],
                   "source_probe_sha256": key.registry.process.digest(args.rust_source_probe), "supported_matches": True, "full_discovery_compatibility": False,
                   "negative_controls": controls,
