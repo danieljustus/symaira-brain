@@ -210,6 +210,62 @@ mod tests {
             root.0.join("tool.exe")
         );
         assert_eq!(super::super::launch_path(&owner, &resolved), owner);
+        // Any non-.exe owner: std would run `tool.com.exe` instead of `tool.com`.
+        let com = root.0.join("tool.com");
+        fs::copy(system.join("whoami.exe"), &com).unwrap();
+        fs::copy(system.join("hostname.exe"), root.0.join("tool.com.exe")).unwrap();
+        let com_owner = Executable {
+            owner: com.clone(),
+            spelling: com.clone(),
+        };
+        let launch = super::super::launch_path(Path::new("tool"), &com_owner);
+        assert_eq!(launch.as_os_str(), root.0.join("tool.com.").as_os_str());
+        assert_eq!(run(&launch), run(&system.join("whoami.exe")));
+        assert_eq!(run(&com), run(&system.join("hostname.exe")));
+        // Verbatim paths are not normalized; they are passed through unchanged.
+        let verbatim = PathBuf::from(r"\\?\C:\owned\tool");
+        let verbatim_owner = Executable {
+            owner: verbatim.clone(),
+            spelling: verbatim.clone(),
+        };
+        assert_eq!(
+            super::super::launch_path(Path::new("tool"), &verbatim_owner),
+            verbatim
+        );
+    }
+    #[test]
+    fn batch_refusal_uses_win32_trailing_dot_and_space_normalization() {
+        // PATHEXT ".BAT." or ".CMD " selects `symvault.bat.`/`symvault.cmd `,
+        // which Win32 opens as the batch file and CreateProcess runs via cmd.
+        for name in [
+            "symvault.bat",
+            "symvault.bat.",
+            "symvault.BAT..",
+            "symvault.cmd ",
+            "symvault.Cmd. .",
+        ] {
+            let resolved = PathBuf::from(r"C:\owned").join(name);
+            assert!(
+                super::super::batch_error(Path::new("symvault"), &resolved).is_some(),
+                "{name}"
+            );
+        }
+        for name in [
+            "symvault.exe",
+            "symvault.exe.",
+            "symvault.batx",
+            "symvault",
+            "symvault.",
+        ] {
+            let resolved = PathBuf::from(r"C:\owned").join(name);
+            assert!(
+                super::super::batch_error(Path::new("symvault"), &resolved).is_none(),
+                "{name}"
+            );
+        }
+        // Explicit paths keep their existing behaviour.
+        let explicit = PathBuf::from(r"C:\owned\symvault.bat.");
+        assert!(super::super::batch_error(&explicit, &explicit).is_none());
     }
     #[test]
     fn lstat_identity_accepts_hardlink_but_not_distinct_file() {

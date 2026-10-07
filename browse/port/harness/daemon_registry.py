@@ -221,6 +221,9 @@ def _observe(binary: Path, session: str, fixtures: dict[str, str], progress, roo
         except OSError as error:
             stop_error = error
         finally:
+            # Every autostart client finished before this acknowledgment; a
+            # genuine straggler's server therefore started before it.
+            stop_ack = time.time()
             if auto_owner is not None:
                 auto_owner.finish(stop_error)
         revived = stop_revived_owners(auto_endpoint, auto_session, job, progress)
@@ -231,27 +234,30 @@ def _observe(binary: Path, session: str, fixtures: dict[str, str], progress, roo
             "registry": records, "inspection": inspected, "first_stop": first_stop,
             "restart_stop": restart_stop, "restart": restarted,
             "autostart": clients, "owner": owner, "owner_info": info, "state_commands": state_commands,
-            "revived_owners_stopped": revived}
+            "autostart_stop_ack": stop_ack, "revived_owners": revived}
 
 
-def stop_revived_owners(endpoint: Path, session: str, job, progress=None) -> int:
-    """Stop stragglers that bind the endpoint after the autostart owner stopped.
+def stop_revived_owners(endpoint: Path, session: str, job, progress=None) -> list[dict]:
+    """Stop and record owners that bind the endpoint after the autostart stop.
 
     Concurrent autostart spawns one daemon per client. A loser still in
-    startup when the winner stops binds the freed endpoint and becomes a new
-    owner. Go and Rust both do this (a variable provider delay revives an
-    owner in 8/8 rounds for each), so it is contract behaviour, timing-
-    dependent and recorded, not compared. Bounded by CLI_TIMEOUT: ends once
-    the Windows job is empty, or on POSIX after 1s without an answer.
+    startup when the winner stops can bind the freed endpoint and become a
+    new owner. Go and Rust both do this (a variable provider delay revived an
+    owner in 8/8 macOS rounds for each), so stragglers are recorded per side
+    with their pid and server start time; registry_compare.revived_contract
+    judges them. Bounded by CLI_TIMEOUT: ends once the Windows job is empty,
+    or on POSIX after 1s without an answer.
     """
-    revived, deadline = 0, time.monotonic() + CLI_TIMEOUT
+    revived, deadline = [], time.monotonic() + CLI_TIMEOUT
     quiet_since = time.monotonic()
     while time.monotonic() < deadline:
         if job is not None and not job.active():
             break
         try:
+            status = harness.request(endpoint, {"cmd": "daemon.status", "session": session})
             harness.request(endpoint, {"cmd": "daemon.stop", "session": session})
-            revived += 1
+            data = status.get("data") or {}
+            revived.append({"pid": data.get("pid"), "started_at": data.get("started_at")})
             quiet_since = time.monotonic()
         # No endpoint, or a stopping owner that closes without a reply
         # (run.request raises AssertionError for that): nobody answered.
@@ -259,7 +265,7 @@ def stop_revived_owners(endpoint: Path, session: str, job, progress=None) -> int
             if job is None and time.monotonic() - quiet_since >= 1:
                 break
         time.sleep(.05)
-    event(progress, "autostart.revived.stopped", session=session, count=revived)
+    event(progress, "autostart.revived.stopped", session=session, count=len(revived), owners=revived)
     return revived
 
 
@@ -333,6 +339,7 @@ def run_gate(args, source, progress, report):
     args.out.with_suffix(".raw.json").write_text(json.dumps(case, indent=2) + "\n")
     event(progress, "comparison.begin")
     case["matches"] = compare(case)
+    case["revived_owner_counts"] = {side: len(case[side]["revived_owners"]) for side in ("go", "rust")}
     event(progress, "comparison.end", matches=case["matches"])
     root = HERE.parents[2]
     files = subprocess.check_output(["git", "-C", str(root), "ls-files", "browse/crates", "browse/port/harness"], text=True).splitlines()

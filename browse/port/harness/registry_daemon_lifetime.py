@@ -1,8 +1,13 @@
 """Windows detached-daemon ownership: retain an image-verified process handle.
 
 An IPC stop reply precedes process exit. The private cwd must outlive that exit;
-never remove its directory merely because the stop response arrived. Forced
-cleanup releases only the retained kernel object and always fails the gate.
+never remove its directory merely because the stop response arrived.
+WindowsOwner: forced cleanup terminates only the retained kernel object of
+the confirmed autostart owner, and that owner's failed stop still fails the
+gate. WindowsJob: survivors of the bounded drain are named and terminated
+by job object and returned as teardown facts; callers judge them (Go/Rust
+survivor parity, or the Rust-only ownership contract). Only processes that
+outlive job termination fail here.
 """
 import ctypes
 from ctypes import wintypes
@@ -132,8 +137,10 @@ class WindowsJob:
     daemons that lost the endpoint race and are never reported by PID.
 
     CLIs start suspended and join before running, so no descendant escapes.
-    The private cwd is removed only after the job is empty; forced cleanup
-    terminates the job object, never a PID or image name, and fails the gate.
+    The private cwd is removed only after the job is empty. finish() names
+    drain survivors and terminates the job object, never a PID or image
+    name, and reports them as facts; it raises only if processes outlive
+    that termination. Whether survivors fail a gate is the caller's call.
     """
     SUSPENDED = 0x4  # CREATE_SUSPENDED
 

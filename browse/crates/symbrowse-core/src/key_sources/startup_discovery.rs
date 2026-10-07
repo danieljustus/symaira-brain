@@ -31,20 +31,37 @@ pub(super) fn executable(program: &Path) -> Result<Option<Executable>, ProbeErro
     return windows::lookup(program, &path);
 }
 
-/// The path handed to `Command` for a resolved owner. Rust std launches an
-/// extensionless path as `<path>.exe` when that file exists; Go launches the
-/// file LookPath chose (an empty PATHEXT list selects the extensionless one).
-/// A trailing period is the Win32 "no extension" spelling: std's probe of the
-/// absent `<path>..exe` fails, and CreateProcessW's path normalization drops
-/// the period, so the chosen file itself runs. Explicit paths are unchanged.
+/// The path handed to `Command` for a resolved owner. Rust std launches any
+/// path not ending in `.exe` as `<path>.exe` when that file exists (an
+/// extensionless `symvault`, or `symvault.com` beside `symvault.com.exe`);
+/// Go launches exactly the file LookPath chose. A trailing period is the Win32
+/// "no extension" spelling: std's probe of the absent `<path>..exe` fails, and
+/// CreateProcessW's path normalization drops the period, so the chosen file
+/// runs. Explicit paths are unchanged. Verbatim `\\?\` paths skip Win32
+/// normalization, so the period would name a different file; they are passed
+/// unchanged and keep std's `.exe` probe (a known, documented limitation).
 #[cfg(windows)]
 pub(super) fn launch_path(program: &Path, resolved: &Executable) -> PathBuf {
-    if explicit(program) || resolved.owner.extension().is_some() {
+    let owner = resolved.owner.as_os_str().as_encoded_bytes();
+    let exe = owner.len() >= 4 && owner[owner.len() - 4..].eq_ignore_ascii_case(b".exe");
+    if explicit(program) || exe || owner.starts_with(br"\\?\") {
         return resolved.owner.clone();
     }
     let mut spelled = resolved.owner.as_os_str().to_owned();
     spelled.push(".");
     spelled.into()
+}
+
+/// The file name as Win32 opens it: trailing periods and spaces are removed by
+/// path normalization, so `symvault.bat.` and `symvault.bat ` are batch files.
+#[cfg(windows)]
+fn win32_extension(path: &Path) -> Option<&[u8]> {
+    let name = path.file_name()?.as_encoded_bytes();
+    let end = name.iter().rposition(|byte| !matches!(byte, b'.' | b' '))? + 1;
+    let name = &name[..end];
+    name.iter()
+        .rposition(|byte| *byte == b'.')
+        .map(|dot| &name[dot + 1..])
 }
 
 fn explicit(program: &Path) -> bool {
@@ -108,7 +125,7 @@ pub(super) fn batch_error(program: &Path, resolved: &Path) -> Option<String> {
     if explicit(program) {
         return None;
     }
-    let extension = resolved.extension()?.as_encoded_bytes();
+    let extension = win32_extension(resolved)?;
     if !extension.eq_ignore_ascii_case(b"bat") && !extension.eq_ignore_ascii_case(b"cmd") {
         return None;
     }

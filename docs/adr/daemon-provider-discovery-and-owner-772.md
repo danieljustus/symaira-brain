@@ -282,3 +282,27 @@ Native evidence (windows-2025, run 37596792546): bat/absolute and
 bat/relative-opt-in ran (invoke_error "", marker written); bat/raw-wide launched
 and exited 1 (invoke_error "exit status 1", no marker); Rust refused all three
 without a shell. The cmd cases are recorded by the next Windows run.
+
+Batch detection follows Win32 name normalization: trailing periods and spaces
+are stripped before the extension check, so `PATHEXT=.BAT.` (selecting
+`symvault.bat.`) or `.CMD ` is refused like `.bat`/`.cmd`. Without that,
+`Path::extension()` sees "" and std would hand the name to CreateProcess, which
+opens the batch file and runs it through cmd.exe.
+
+## Launch spelling and non-Unicode configuration
+
+Rust std launches any program path not ending in `.exe` as `<path>.exe` when
+that sibling exists; Go runs exactly the file LookPath chose. Every discovered
+owner not ending in `.exe` is therefore handed to std with a trailing period,
+the Win32 "no extension" spelling that CreateProcessW normalizes away.
+Explicit paths are unchanged. Verbatim `\\?\` owners skip Win32
+normalization, so they are passed unchanged and keep std's `.exe` probe: a
+known limitation for verbatim PATH entries.
+
+`std::env::vars` panicked on any non-Unicode variable (raw-wide-path). The
+configuration environment copy is now lossy only for variables configuration
+never reads. Go's os.Getenv keeps a raw `SYMBROWSE_*` value (Unix bytes,
+Windows WTF-8) and uses it as a path. Rust configuration stores `String`s, so
+a non-Unicode `SYMBROWSE_*` value (STATE_DIR, CONFIG_DIR, CACHE_DIR,
+DAEMON_LOG, UPLOAD_DIRS, ...) fails closed with a typed configuration error
+instead of resolving a different U+FFFD path. XDG_* homes are read raw.

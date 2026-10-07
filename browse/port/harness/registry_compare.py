@@ -2,7 +2,7 @@
 import base64
 import copy
 from registry_daemon_lifetime import no_job_teardown
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 import os
 import re
@@ -17,7 +17,8 @@ def normalize(record: dict, *, rust: bool) -> dict:
     value["teardown_survivors"] = len(value.pop("teardown", no_job_teardown())["survivors"])
     # Stragglers that rebound the freed endpoint are stopped and counted in
     # the evidence; their number depends on startup timing on both sides.
-    value.pop("revived_owners_stopped", None)
+    value.pop("revived_owners", None)
+    value.pop("autostart_stop_ack", None)
     root, begin, end = value.pop("root"), value.pop("begin"), value.pop("end")
     pids = {value["pid"], value["restart_pid"], value["owner"]["data"]["pid"]}
     assert all(isinstance(pid, int) and pid > 0 for pid in pids)
@@ -101,17 +102,44 @@ def normalize(record: dict, *, rust: bool) -> dict:
     return walk(value)
 
 
+AUTOSTART_CLIENTS = 8
+
+
+def started_epoch(text: str) -> float:
+    # Go uses RFC3339Nano and Rust RFC3339 with nanoseconds; keep microseconds.
+    text = re.sub(r"(\.\d{6})\d+", r"\1", text).replace("Z", "+00:00")
+    return datetime.fromisoformat(text).timestamp()
+
+
+def revived_contract(case: dict) -> None:
+    """Judge owners that rebound the endpoint after the autostart stop.
+
+    Raw counts are timing noise on both sides (both revive under load), so
+    they are recorded, not equated. What separates a straggler from a
+    respawn is its server start: every autostart client finished before the
+    stop acknowledgment, so a straggler's server started before it. A Rust
+    owner started after the acknowledgment is a respawn, never a straggler.
+    """
+    for side in ("go", "rust"):
+        owners = case[side].get("revived_owners", [])
+        assert len(owners) <= AUTOSTART_CLIENTS - 1, f"{side} revived {len(owners)} owners; at most {AUTOSTART_CLIENTS - 1} stragglers exist"
+    ack = case["rust"]["autostart_stop_ack"]
+    for owner in case["rust"].get("revived_owners", []):
+        assert started_epoch(owner["started_at"]) < ack, f"rust owner started after the stop acknowledgment (respawn, not straggler): {owner}"
+
+
 def compare(case: dict) -> bool:
     # These generic validation failures have no paths/PIDs/timestamps: preserve
     # literal arguments, exit, stdout and stderr without any projection.
     assert case["go"]["invalid_cli"] == case["rust"]["invalid_cli"], "invalid-session CLI bytes differ"
     cli_edges.compare(case["go"]["cli_edges"], case["rust"]["cli_edges"])
+    revived_contract(case)
     return normalize(case["go"], rust=False) == normalize(case["rust"], rust=True)
 
 
 def controls(case: dict) -> list[dict]:
     rejected = []
-    for name in ("foreign-owner", "previous-owner-after-restart", "missing-error-detail", "invalid-timestamp", "invalid-cli-exit", "invalid-cli-protocol-code", "raw-cli-byte-loss", "help-description", "rust-only-teardown-survivor"):
+    for name in ("foreign-owner", "previous-owner-after-restart", "missing-error-detail", "invalid-timestamp", "invalid-cli-exit", "invalid-cli-protocol-code", "raw-cli-byte-loss", "help-description", "rust-only-teardown-survivor", "rust-post-stop-respawn"):
         bad = copy.deepcopy(case)
         if name == "foreign-owner":
             bad["rust"]["owner_info"]["data"]["pid"] += 1
@@ -125,6 +153,10 @@ def controls(case: dict) -> list[dict]:
             response = json.loads(bad["rust"]["invalid_cli"][1]["stdout"])
             response["error"]["code"] = "invalid_session"
             bad["rust"]["invalid_cli"][1]["stdout"] = json.dumps(response)
+        elif name == "rust-post-stop-respawn":
+            # A Rust owner whose server started after the stop acknowledgment.
+            bad["rust"]["revived_owners"] = [{"pid": 4, "started_at": datetime.fromtimestamp(
+                bad["rust"]["autostart_stop_ack"] + 1, timezone.utc).isoformat().replace("+00:00", "Z")}]
         elif name == "rust-only-teardown-survivor":
             # A process left behind only by Rust is a contract difference.
             bad["rust"]["teardown"] = dict(no_job_teardown(), terminated=True,

@@ -284,23 +284,28 @@ class JobTests(unittest.TestCase):
 
 
 class RevivedOwnerTests(unittest.TestCase):
-    def test_windows_sweep_stops_each_rebound_owner_until_job_is_empty(self):
+    def test_windows_sweep_records_and_stops_each_rebound_owner_until_job_is_empty(self):
         import daemon_registry as registry
         # A straggler is still starting (no pipe), then binds and answers,
         # then the job empties once it has stopped.
         job = type("Job", (), {"states": [2, 2, 1, 0]})()
         job.active = lambda: job.states.pop(0)
-        replies = [FileNotFoundError(2, "no pipe"), {"success": True, "data": {"stopping": True}},
+        replies = [FileNotFoundError(2, "no pipe"),
+                   {"success": True, "data": {"pid": 77, "started_at": "2026-10-07T10:00:00.123456789Z"}},
+                   {"success": True, "data": {"stopping": True}},
                    FileNotFoundError(2, "stopped straggler released the pipe")]
+        commands = []
         def request(endpoint, frame):
-            self.assertEqual(frame["cmd"], "daemon.stop")
+            commands.append(frame["cmd"])
             reply = replies.pop(0)
             if isinstance(reply, BaseException):
                 raise reply
             return reply
         with patch.object(registry.harness, "request", side_effect=request), \
              patch.object(registry.time, "sleep"):
-            self.assertEqual(registry.stop_revived_owners(Path("owned"), "owned", job), 1)
+            owners = registry.stop_revived_owners(Path("owned"), "owned", job)
+        self.assertEqual(owners, [{"pid": 77, "started_at": "2026-10-07T10:00:00.123456789Z"}])
+        self.assertEqual(commands, ["daemon.status", "daemon.status", "daemon.stop", "daemon.status"])
         self.assertEqual(job.states, [])
 
     def test_posix_sweep_ends_after_quiet_second(self):
@@ -309,8 +314,43 @@ class RevivedOwnerTests(unittest.TestCase):
         with patch.object(registry.harness, "request", side_effect=ConnectionRefusedError()), \
              patch.object(registry.time, "monotonic", lambda: next(clock)), \
              patch.object(registry.time, "sleep"):
-            self.assertEqual(registry.stop_revived_owners(Path("owned"), "owned", None), 0)
+            self.assertEqual(registry.stop_revived_owners(Path("owned"), "owned", None), [])
 
+
+class RevivedContractTests(unittest.TestCase):
+    ACK = 1_791_367_200.0  # 2026-10-07T08:00:00Z
+
+    @staticmethod
+    def at(epoch):
+        from datetime import datetime, timezone
+        return datetime.fromtimestamp(epoch, timezone.utc).isoformat().replace("+00:00", "Z")
+
+    def case(self, go, rust):
+        return {"go": {"autostart_stop_ack": self.ACK, "revived_owners": go},
+                "rust": {"autostart_stop_ack": self.ACK, "revived_owners": rust}}
+
+    def test_observed_straggler_shape_passes_on_either_side(self):
+        import registry_compare
+        # Started during the autostart burst, before the stop acknowledgment;
+        # counts may differ between sides (timing), as both revive under load.
+        straggler = {"pid": 10904, "started_at": self.at(self.ACK - 1.33) [:-1] + "123Z"}
+        registry_compare.revived_contract(self.case([], [straggler]))
+        registry_compare.revived_contract(self.case([straggler, straggler], []))
+        self.assertLess(registry_compare.started_epoch("2026-10-07T07:59:58.670000123Z"), self.ACK)
+
+    def test_rust_only_post_stop_respawn_fails(self):
+        import registry_compare
+        respawn = {"pid": 4, "started_at": self.at(self.ACK + 0.5)}
+        with self.assertRaisesRegex(AssertionError, "respawn, not straggler"):
+            registry_compare.revived_contract(self.case([], [respawn]))
+
+    def test_more_revived_owners_than_losing_clients_fails(self):
+        import registry_compare
+        straggler = {"pid": 1, "started_at": self.at(self.ACK - 1)}
+        with self.assertRaisesRegex(AssertionError, "at most 7"):
+            registry_compare.revived_contract(self.case([], [straggler] * 8))
+        with self.assertRaisesRegex(AssertionError, "at most 7"):
+            registry_compare.revived_contract(self.case([straggler] * 8, []))
 
 if __name__ == "__main__":
     unittest.main()
