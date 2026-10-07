@@ -276,5 +276,9 @@ shell. It accepts the difference only for the allow-list
 `relative-opt-in` and `raw-wide`, six cases. Any other case or shape still fails
 the gate: Rust configured or running a shell, Go failing lookup, a different
 Rust error, or a different script. When Go itself fails CreateProcess, Rust
-must still report the identical cause. Only bat/absolute has native evidence so
-far; the gate records the other five on its next Windows run.
+must still report the identical cause. Go's `exit status N` is not a launch
+failure: it means CreateProcess succeeded and the script itself exited nonzero.
+Native evidence (windows-2025, run 37596792546): bat/absolute and
+bat/relative-opt-in ran (invoke_error "", marker written); bat/raw-wide launched
+and exited 1 (invoke_error "exit status 1", no marker); Rust refused all three
+without a shell. The cmd cases are recorded by the next Windows run.

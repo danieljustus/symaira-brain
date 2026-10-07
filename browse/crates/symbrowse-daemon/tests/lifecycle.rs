@@ -251,6 +251,17 @@ mod unix {
             .unwrap();
         assert!(response.success, "ping the surviving daemon: {response:?}");
         assert_eq!(response.data.unwrap()["pong"], true);
+        // Every loser must contend while the owner is live. Under load a
+        // starter can reach the lock only after the owner released it; stop
+        // the owner only once all others have returned (bounded wait).
+        let deadline = Instant::now() + Duration::from_secs(10);
+        while threads.iter().filter(|thread| thread.is_finished()).count() < STARTERS - 1 {
+            assert!(
+                Instant::now() < deadline,
+                "losing starters did not finish while the owner was live"
+            );
+            thread::sleep(Duration::from_millis(5));
+        }
         for server in &servers {
             server.stop();
         }
@@ -275,16 +286,32 @@ mod unix {
         assert!(!socket.exists(), "owner did not clean up its socket");
 
         // Once the owner has released its advisory lock and removed its own
-        // socket, a fresh same-process daemon can reclaim the endpoint.
-        let replacement = Server::new(ServerOptions {
-            socket_path: socket,
-            session: "default".to_owned(),
-            idle_timeout: Some(Duration::from_millis(1)),
-            handler: Some(Arc::new(|_, _| Ok((None, Vec::new())))),
-            ..Default::default()
-        })
-        .unwrap();
-        let result = replacement.listen_and_serve();
+        // socket, a fresh same-process daemon can reclaim the endpoint. With
+        // the other lifecycle tests running in parallel threads, the released
+        // flock can stay briefly contended (never seen serially: 0/48 runs,
+        // nor for this test alone: 0/96). Retry, bounded, while proving no
+        // other owner ever publishes the endpoint in between.
+        let deadline = Instant::now() + Duration::from_secs(2);
+        let result = loop {
+            let replacement = Server::new(ServerOptions {
+                socket_path: socket.clone(),
+                session: "default".to_owned(),
+                idle_timeout: Some(Duration::from_millis(1)),
+                handler: Some(Arc::new(|_, _| Ok((None, Vec::new())))),
+                ..Default::default()
+            })
+            .unwrap();
+            match replacement.listen_and_serve() {
+                Err(ServerError::AlreadyRunning) if Instant::now() < deadline => {
+                    assert!(
+                        !socket.exists(),
+                        "a second owner published the released endpoint"
+                    );
+                    thread::sleep(Duration::from_millis(10));
+                }
+                result => break result,
+            }
+        };
         assert!(
             result.is_ok(),
             "released endpoint was not recoverable: {result:?}"

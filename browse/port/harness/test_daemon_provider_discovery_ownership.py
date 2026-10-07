@@ -132,6 +132,25 @@ class ScriptDivergenceTests(unittest.TestCase):
                 with self.assertRaises(AssertionError):
                     self.classify("bat", "absolute", go, rust, go_shell, rust_shell)
 
+    def test_launched_script_with_nonzero_exit_is_the_documented_divergence(self):
+        # Verbatim windows-2025 run 37596792546, bat/raw-wide: Go launched the
+        # script through cmd.exe, which then exited 1; no marker was written.
+        go = {"invoke_error": "exit status 1", "lookup_error": "", "stdout_base64": "",
+              "path_base64": "QzpcVXNlcnNcUlVOTkVSfjFcQXBwRGF0YVxMb2NhbFxUZW1wXGJkLXNjcmlwdC1nb3NienJ1aVxyYXct7aCAXHN5bXZhdWx0LmJhdA=="}
+        rust = {"configured": False, "key_source": "", "error":
+            'symvault entry "symbrowse/encryption-key": fork/exec '
+            'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\bd-script-gosbzrui\\raw-\ufffd\ufffd\ufffd\\symvault.bat: '
+            '%1 is not a valid Win32 application.'}
+        self.assertTrue(discovery.go_launched(go))
+        self.assertEqual(self.classify("bat", "raw-wide", go, rust, False, False), "accepted-divergence")
+        # Outside the allow-list the same shape still fails.
+        with self.assertRaisesRegex(AssertionError, "undocumented script divergence"):
+            self.classify("bat", "implicit", go, rust, False, False)
+        # A launch error (not an exit status) still needs Rust's identical cause.
+        self.assertFalse(discovery.go_launched(dict(go, invoke_error="fork/exec x: access denied")))
+        with self.assertRaises(AssertionError):
+            self.classify("bat", "raw-wide", dict(go, invoke_error="fork/exec x: access denied"), rust, False, False)
+
     def test_go_failure_still_requires_identical_rust_cause(self):
         failed = dict(GO_RAN, invoke_error="fork/exec C:\\x\\symvault.bat: %1 is not a valid Win32 application.")
         same = dict(RUST_REFUSED, error=discovery.PROVIDER_ERROR + failed["invoke_error"])

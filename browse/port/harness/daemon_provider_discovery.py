@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import re
 import os
 from pathlib import Path
 import shutil
@@ -248,13 +249,19 @@ PROVIDER_ERROR = 'symvault entry "symbrowse/encryption-key": '
 BATCH_REFUSAL = PROVIDER_ERROR + "fork/exec "
 
 
+def go_launched(go: dict) -> bool:
+    """Go's exec.ExitError text means CreateProcess succeeded and the script
+    itself exited nonzero (cmd.exe ran it); anything else is a launch error."""
+    return not go["invoke_error"] or re.fullmatch(r"exit status -?\d+", go["invoke_error"]) is not None
+
+
 def classify_script_pair(extension: str, mode: str, go: dict, rust: dict,
                          go_shell: bool, rust_shell: bool) -> str:
     """Return "match" or "accepted-divergence"; any other difference fails."""
     assert not rust_shell, "Rust ran a batch provider through a shell"
     assert not rust["configured"], ("Rust accepted a batch provider", extension, mode, rust)
     assert not go["lookup_error"], ("Go did not discover the script provider", extension, mode, go)
-    if go["invoke_error"]:
+    if not go_launched(go):
         # Go itself failed CreateProcess: Rust must report the identical cause.
         assert not go_shell and rust["error"] == PROVIDER_ERROR + go["invoke_error"], (extension, mode, go, rust)
         return "match"
@@ -297,7 +304,8 @@ def script_vectors(probe: Path, owner: Path, tool: str, tools: Path, evidence: R
             outcome = classify_script_pair(extension, mode, go_value, rust_value, go_shell, rust_shell)
             rows.append({"extension": extension, "mode": mode, "native_path_utf16_base64": base64.b64encode(env["PATH"].encode("utf-16le", "surrogatepass")).decode(), "arguments": ["symvault", str(owner)], "go_stdout_base64": base64.b64encode(actual_go.stdout).decode(), "rust_stdout_base64": base64.b64encode(actual_rust.stdout).decode(), "go": go_value, "rust": rust_value,
                          "go_lookup_error": go_value["lookup_error"], "go_invoke_error": go_value["invoke_error"],
-                         "go_shell_executed": go_shell, "rust_shell_executed": False, "outcome": outcome,
+                         "go_launched": go_launched(go_value), "go_shell_executed": go_shell,
+                         "rust_shell_executed": False, "outcome": outcome,
                          "script_sha256": key.registry.process.digest(script), "oracle_binary_sha256": key.registry.process.digest(oracle), "matches": outcome == "match"})
     return rows
 
