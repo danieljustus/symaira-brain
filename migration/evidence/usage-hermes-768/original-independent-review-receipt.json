@@ -1,0 +1,57 @@
+{
+  "base": "117e4f37f6ce1c669e9856bcb90e41d8611913ab",
+  "source_head": "63e2527c5bbec48643495d4a169bbdd3d50b6a47",
+  "evidence_head": "273a93c03d0cc526d81d962ac137a5a6fb0d73e9",
+  "oracle_commit": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "disposition": "request_changes",
+  "candidate_clean": true,
+  "all_changed_inputs_sha256": {
+    ".github/workflows/ci.yml": "8e754b6c1cf95c0b690f8dd47e80683f72231ee3b84d0512bdc35e676bdcbaf4",
+    "Cargo.lock": "7b6541463f92ea7795f2490202a8588d86af46e03264ca22ba1f9f9eaf4ce678",
+    "docs/adr/usage-hermes-file-jwt-768.md": "36421dbee721a6318068157b459dc936cbdbefe896688ab537a5cb036d3724a5",
+    "migration/contract-matrix.csv": "eab05fe79cbb78f50940b3c916696ee2244916f0234df2bdfc778198c1bc3f1e",
+    "migration/evidence/usage-hermes-768/linux-parent-reference-report.json": "76ac3ad2fe47fd2fdbfe7cd618342225d1a3b6ba758cbe08b4c323d1070e78d1",
+    "migration/evidence/usage-hermes-768/linux-process-report.json": "5fe87f069b12d7fd226e0648fd6e0c48264dbb83751cbd0bf22ba7e14380e4f1",
+    "migration/implementation-plan.md": "80dbba731738323ccdc18d520ee5026dbe0f1cfd38f52d974f77cde1483aee3f",
+    "rust/symbrain-cli/src/usage_cli.rs": "9ad085bdfc6710271c90926b64c6140fab08ed4b2baf49134cbff6be1d506813",
+    "rust/symbrain-cli/tests/mcp_cli_tests.rs": "363cc7e0a412b5a4326bcb6daa93c4c466496be8c504bc40444669afb243e18a",
+    "rust/symbrain-usage/Cargo.toml": "2a4d0252ffd5e078984f7fd2c42f3b48dafaae7466f60d8797c064dc828e9f2b",
+    "rust/symbrain-usage/src/provider_config.rs": "89bccb56c9ad0dcfdbea34ac8fa5b9f6d09267531bcbfb38c350e787cafc3680",
+    "rust/symbrain-usage/src/provider_config/hermes.rs": "b4915cb268899c6a981b6077f19b36f266497a42a3fb8d265db55377b1fe8a84",
+    "rust/symbrain-usage/src/provider_config/jwt.rs": "61fd6c6632fca835e5b3138d20656df9e68a3a233d23dbc357b6e19ef50e2b0e",
+    "rust/symbrain-usage/src/provider_config/kimi_nous.rs": "ee1c586c96246acc349df5ba9fa7dca63e4f2da690b3780961b7aee93d53fedf",
+    "rust/symbrain-usage/src/provider_config/routing.rs": "d1f98e276fadaac3fecd7c1863af9109a45f006bf247e6cdaf613ca0dc18e74c",
+    "rust/symbrain-usage/src/provider_config_tests.rs": "ae609e2820778f2c4e44119390875e6fd1c670be9592eda9802c8019eb6661c8",
+    "rust/symbrain-usage/tests/hermes_credential_tests.rs": "e793c0a874bc517dd772eb2867ee00f8ad75570c47a2f7088cf3a473f4c57e44",
+    "scripts/usage-hermes-oracle/README.md": "7043353ec029079134555d973ce9e933b66e9b60f099d3a5372d60a1fab7ff36",
+    "scripts/usage-hermes-oracle/cases.py": "7b4b6768c93904d340c1d29e5ea1f7f76c32702a1a95b39ccf79c4b218e0adfd",
+    "scripts/usage-hermes-oracle/cli.py": "ed9582dd48d9786579cfe16a9cd5d00767dfea7aac5ebaf11031e2a22b0007b2",
+    "scripts/usage-hermes-oracle/controls.py": "8e3e027b4c384fbd7d0b966bb53768d2a9e664f7f440641ab9d45de286451414",
+    "scripts/usage-hermes-oracle/filesystem.py": "86a600a1e693adbb91d3d92324b85871211bf20912b4409cd444a337ddb12d6b",
+    "scripts/usage-hermes-oracle/provider_test.go.txt": "b4d5473cfdc82a27de981ab2c7d198998d15305f19d8ba536161a0bad32fe4a9",
+    "scripts/usage-hermes-oracle/receipt.py": "cd722ccbed3b22f466f4ef92490a861112fdfe2b5e3131e90bc129638f65565c",
+    "scripts/usage-hermes-oracle/run.sh": "f36d26e97e8d2effa8ed69f5adb3b159c1431c3665dc8268730ca719880ec1df"
+  },
+  "proof_sha256": {
+    "/tmp/symaira-usage768-jwt-independent-process.json": "626f18415ca7fe5178dfc4432705cf6052dbd82d94dfcd4829970c98fc3d8405",
+    "/tmp/symaira-usage768-jwt-independent-parent-process.json": "498ef18a02c62d7796e5db15a1c0de236318272f6708e3ef59837068420012a8",
+    "/tmp/symaira-usage768-jwt-independent-shrink-process.json": "ecaba3d9f24a7dca66aecc311f8227188ece0a82e068a9579e00dd988122f204",
+    "/tmp/symaira-usage768-jwt-independent-shrink-process.log": "6c9406498807087524b4181294be074124bc88deeb48dddaf6a17c2972f8f614",
+    "/tmp/symaira-usage768-jwt-independent-shrink-process.evidence/input.json": "7fdd1cec1dd6789c6b3b338df9c51dce2ff7acd9f6063bb010075d7a349cdb44",
+    "/tmp/symaira-usage768-jwt-independent-shrink-process.evidence/go.json": "75970dffcf5a2e24a0b19a9ff237e6ed9690f63a022252f05fbba39288508746",
+    "/tmp/symaira-usage768-jwt-independent-shrink-process.evidence/native-constructors.log": "bb643dc272010f83d86f083be1d3d7edf79619cd28e46ac110a11a560ea20f5b",
+    "/tmp/symaira-usage768-jwt-independent-usage-tests.log": "5091bb6a712e6117d9abe58369fa9d1fc30fad63368f2b3afacaf6a0840d32c8",
+    "/tmp/symaira-usage768-jwt-independent-cli-routing-tests.log": "f12952523be8e08cf9d3fdc2160458be34afa124f056194981c43dde15584c5b",
+    "/tmp/symaira-usage768-jwt-independent-clippy.log": "1f788b66ea062f199afb46076a789cb2520299b3af49e5c9c7f501bfacae9f7f"
+  },
+  "source_hashes_verified": {
+    "hermes": 45,
+    "parent": 43
+  },
+  "actual_cli_binary_sha256": {
+    "go": "0654376cf8fc33c3be0b03bd394b665842d04e6659b3dfd67c0d6786d2f136e2",
+    "rust": "1b67c99bb591b7e1fe6894ef542f87915254dfd9b447c80c69cee040015256fb"
+  },
+  "authored_and_independent_source_manifests_identical": true,
+  "finding_fixture_sha256": "4c6cf6f6953002c13ae94c63074198add507f8000eff24e37727abe937bdc59f"
+}

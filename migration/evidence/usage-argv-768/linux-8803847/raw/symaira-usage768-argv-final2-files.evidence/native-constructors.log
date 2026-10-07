@@ -1,0 +1,8 @@
+    Finished `test` profile [unoptimized] target(s) in 0.07s
+     Running unittests src/lib.rs (target/debug/deps/symbrain_usage-717883f361629f0c)
+
+running 1 test
+test providers::provider_config::provider_file_oracle_tests::provider_files_oracle_matches_fresh_go ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 66 filtered out; finished in 0.07s
+

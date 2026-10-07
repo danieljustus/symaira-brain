@@ -22,7 +22,7 @@ def digest(path):
 
 def cases():
     if os.name != "nt":
-        records = json.loads(RETAINED.read_text())["results"]
+        records = json.loads(RETAINED.read_text(encoding='utf-8'))["results"]
         assert len(records) == 315
         return [(f"retained-{i:03}", [bytes.fromhex(arg) for arg in row["raw_args_hex"]])
                 for i, row in enumerate(records)]
@@ -93,9 +93,9 @@ def main():
     parser.add_argument("--negative-control", choices=["flag-input", "quoted-value", "normalization"])
     args = parser.parse_args()
     assert not subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT).strip()
-    head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True, encoding='utf-8').strip()
     names = subprocess.check_output(["git", "ls-files", "rust", "Cargo.toml", "Cargo.lock"],
-                                    cwd=ROOT, text=True).splitlines()
+                                    cwd=ROOT, text=True, encoding='utf-8').splitlines()
     sources = {name: digest(ROOT / name) for name in names
                if name.endswith((".rs", ".toml")) or name == "Cargo.lock"}
     for name, sha in sources.items():
@@ -104,10 +104,10 @@ def main():
     binaries = {"go": args.go.resolve(), "rust": args.rust.resolve()}
     if args.parent:
         binaries["parent"] = args.parent.resolve()
-    go_build_info = subprocess.check_output(["go", "version", "-m", str(binaries["go"])], text=True)
+    go_build_info = subprocess.check_output(["go", "version", "-m", str(binaries["go"])], text=True, encoding='utf-8')
     assert "go1.26.7" in go_build_info
     assert f"vcs.revision={FROZEN}" in go_build_info and "vcs.modified=false" in go_build_info
-    historical = json.loads(RETAINED.read_text())["results"] if os.name != "nt" else []
+    historical = json.loads(RETAINED.read_text(encoding='utf-8'))["results"] if os.name != "nt" else []
     report = {"go_build_info": go_build_info, "candidate_head": head, "candidate_dirty": False,
               "candidate_sources_sha256": sources, "frozen_go_commit": FROZEN,
               "platform": platform.platform(), "native_windows": os.name == "nt",
@@ -151,7 +151,7 @@ def main():
     report["readonly"] = all(row["readonly"] for row in report["results"])
     report["historical_go_preserved"] = all(row["historical_go_preserved"] for row in report["results"])
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(report, indent=2, ensure_ascii=True) + "\n")
+    args.out.write_text(json.dumps(report, indent=2, ensure_ascii=True) + "\n", encoding='utf-8')
     print(f'{report["matched"]}/{report["total"]} exact actual pairs; readonly={report["readonly"]}')
     return 0 if report["matched"] == report["total"] and report["readonly"] and report["historical_go_preserved"] else 1
 

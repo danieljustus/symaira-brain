@@ -1,0 +1,40 @@
+// Owned fallback receipt only; never accesses credentials or network.
+package main
+
+import (
+	"encoding/hex"
+	"encoding/json"
+	"os"
+	"os/exec"
+)
+
+func main() {
+	args := []string{}
+	for _, arg := range os.Args[1:] {
+		args = append(args, hex.EncodeToString([]byte(arg)))
+	}
+	file, err := os.OpenFile(os.Getenv("USAGE_NEXT_SENTINEL_LOG"), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil {
+		panic(err)
+	}
+	if err = json.NewEncoder(file).Encode(args); err != nil {
+		panic(err)
+	}
+	if err = file.Close(); err != nil {
+		panic(err)
+	}
+	if binary := os.Getenv("USAGE_NEXT_SENTINEL_GO"); binary != "" {
+		command := exec.Command(binary, os.Args[1:]...)
+		command.Stdin = os.Stdin
+		command.Stdout = os.Stdout
+		command.Stderr = os.Stderr
+		if err := command.Run(); err != nil {
+			if exit, ok := err.(*exec.ExitError); ok {
+				os.Exit(exit.ExitCode())
+			}
+			panic(err)
+		}
+		return
+	}
+	os.Exit(77)
+}

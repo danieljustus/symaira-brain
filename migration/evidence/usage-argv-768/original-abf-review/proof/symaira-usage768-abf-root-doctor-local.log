@@ -1,0 +1,17 @@
+Go-only local/source baseline: 97 cases
+Copilot/Kimi source-bound cases: 89
+Go-only local/source baseline: 97 cases
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.023s
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.024s
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.006s
+    Finished `test` profile [unoptimized] target(s) in 0.11s
+     Running unittests src/lib.rs (target/debug/deps/symbrain_usage-717883f361629f0c)
+
+running 1 test
+test providers::provider_config::copilot_kimi_oracle_tests::copilot_kimi_oracle_matches_fresh_go ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 66 filtered out; finished in 0.08s
+
+    Finished `dev` profile [unoptimized] target(s) in 0.14s
+Copilot/Kimi CLI oracle: 111 byte/exit matches
+Copilot/Kimi CLI oracle: 16 byte/exit matches

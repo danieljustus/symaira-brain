@@ -59,18 +59,28 @@ func TestFmtCheckBatchesLargeFileSetAndRejectsDrift(t *testing.T) {
 		t.Fatalf("fixture manifest is only %d bytes; expected more than ARG_MAX=%d", inputBytes, argMax)
 	}
 
-	for _, excluded := range []string{"browse", ".git", ".worktrees/linked/browse"} {
+	excludedPaths := make([]string, 0, 4)
+	excludedBody := []byte("package p\n\nfunc f(){}\n")
+	for _, excluded := range []string{"browse", ".git", ".worktrees/linked/browse", "migration/evidence/retained-original"} {
 		dir := filepath.Join(fixtureRoot, excluded)
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			t.Fatalf("create excluded directory: %v", err)
 		}
-		if err := os.WriteFile(filepath.Join(dir, "unformatted.go"), []byte("package p\n\nfunc f(){}\n"), 0o644); err != nil {
+		path := filepath.Join(dir, "unformatted.go")
+		if err := os.WriteFile(path, excludedBody, 0o644); err != nil {
 			t.Fatalf("write excluded fixture: %v", err)
 		}
+		excludedPaths = append(excludedPaths, path)
 	}
 
 	if output, err := runFmtCheck(t, fixtureRoot, makefile); err != nil {
 		t.Fatalf("large formatted fixture failed fmt-check: %v\n%s", err, output)
+	}
+	for _, path := range excludedPaths {
+		body, err := os.ReadFile(path)
+		if err != nil || !bytes.Equal(body, excludedBody) {
+			t.Fatalf("fmt-check changed original excluded fixture %q: %v", path, err)
+		}
 	}
 
 	before, err := os.ReadFile(driftPath)
