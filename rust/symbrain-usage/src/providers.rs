@@ -2,6 +2,7 @@ use crate::parser::parse_snapshot;
 use crate::transport::{Cancellation, Request, Transport};
 use crate::{AuthStatus, UsageSnapshot};
 use chrono::Utc;
+#[cfg(test)]
 use serde_json::Value;
 use std::sync::Arc;
 
@@ -53,7 +54,7 @@ pub struct ProviderSpec {
     pub credential_sources: Vec<&'static str>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Provider {
     pub spec: ProviderSpec,
     pub id: String,
@@ -69,6 +70,21 @@ pub struct Provider {
     /// CLI strategy's requests.
     device_id: Option<String>,
     enterprise_host: Option<String>,
+}
+
+impl std::fmt::Debug for Provider {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Provider")
+            .field("id", &self.id)
+            .field("display_name", &self.display_name)
+            .field("configured", &self.configured)
+            .field("credential", &"[REDACTED]")
+            .field("credentials", &"[REDACTED]")
+            .field("base_url", &"[REDACTED]")
+            .field("device_id", &"[REDACTED]")
+            .field("enterprise_host", &"[REDACTED]")
+            .finish_non_exhaustive()
+    }
 }
 
 impl Provider {
@@ -335,3 +351,7 @@ mod opencode_discovery_tests;
 #[cfg(test)]
 #[path = "antigravity_tests.rs"]
 mod antigravity_tests;
+
+#[cfg(test)]
+#[path = "debug_redaction_tests.rs"]
+mod debug_redaction_tests;

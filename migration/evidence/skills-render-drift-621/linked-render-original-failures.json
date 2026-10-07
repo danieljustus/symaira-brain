@@ -1,0 +1,26 @@
+[
+  {
+    "kind": "clean",
+    "exit": 0,
+    "stdout": "{\"installs\":[{\"target\":\"opencode\",\"name\":\"demo\",\"path\":\"/tmp/review797-l0os93xy/home/.config/opencode/skills/demo\",\"status\":\"in-sync\",\"mode\":\"linked\",\"installed_at\":\"2026-01-02T03:04:05Z\",\"source_hash\":\"448dd4061bb4dfee776e3da33beace4d3f10177db1d83f3417046e5d6b9bb70a\",\"render_status\":\"in-sync\"}],\"summary\":{\"in_sync\":1,\"stale\":0,\"harness_changed\":0,\"conflict\":0,\"orphaned\":0,\"unmanaged\":0}}\n",
+    "stderr": ""
+  },
+  {
+    "kind": "fifo",
+    "exit": 0,
+    "stdout": "{\"installs\":[{\"target\":\"opencode\",\"name\":\"demo\",\"path\":\"/tmp/review797-eqqh_73x/home/.config/opencode/skills/demo\",\"status\":\"stale\",\"mode\":\"symlink\",\"installed_at\":\"2026-01-02T03:04:05Z\",\"source_hash\":\"448dd4061bb4dfee776e3da33beace4d3f10177db1d83f3417046e5d6b9bb70a\",\"error\":\"skill tree contains special file ./blocked\"}],\"summary\":{\"in_sync\":0,\"stale\":1,\"harness_changed\":0,\"conflict\":0,\"orphaned\":0,\"unmanaged\":0}}\n",
+    "stderr": ""
+  },
+  {
+    "kind": "nestedlink",
+    "exit": 0,
+    "stdout": "{\"installs\":[{\"target\":\"opencode\",\"name\":\"demo\",\"path\":\"/tmp/review797-s0a3b2io/home/.config/opencode/skills/demo\",\"status\":\"stale\",\"mode\":\"symlink\",\"installed_at\":\"2026-01-02T03:04:05Z\",\"source_hash\":\"448dd4061bb4dfee776e3da33beace4d3f10177db1d83f3417046e5d6b9bb70a\",\"error\":\"skill tree contains symlink ./outlink\"}],\"summary\":{\"in_sync\":0,\"stale\":1,\"harness_changed\":0,\"conflict\":0,\"orphaned\":0,\"unmanaged\":0}}\n",
+    "stderr": ""
+  },
+  {
+    "kind": "deep",
+    "exit": 0,
+    "stdout": "{\"installs\":[{\"target\":\"opencode\",\"name\":\"demo\",\"path\":\"/tmp/review797-cfsftb_d/home/.config/opencode/skills/demo\",\"status\":\"stale\",\"mode\":\"symlink\",\"installed_at\":\"2026-01-02T03:04:05Z\",\"source_hash\":\"448dd4061bb4dfee776e3da33beace4d3f10177db1d83f3417046e5d6b9bb70a\",\"error\":\"skill tree exceeds maximum directory depth\"}],\"summary\":{\"in_sync\":0,\"stale\":1,\"harness_changed\":0,\"conflict\":0,\"orphaned\":0,\"unmanaged\":0}}\n",
+    "stderr": ""
+  }
+]

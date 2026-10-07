@@ -1,0 +1,100 @@
+{
+  "records": [
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.log",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/tmp-symaira-usage768-next-device-dirty4.log.gz",
+      "sha256": "d813b9d8717d124a0d34b3ca4aba2c47a0f6d4fa159032786d39d7c2fa183998"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/wire-failed.json",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-wire-failed.json.gz",
+      "sha256": "052e35b2181c96cc0a9136736210bd66b9b6e4ab9e393e12cbd46245248dc669"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/native.log",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-native.log.gz",
+      "sha256": "9df11b18675877521b410128bec1fcddbca4cabb11ff4f08ce08fa4b7cb604b8"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/go-status-tls.log",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-go-status-tls.log.gz",
+      "sha256": "563b2242e0eca60677d95fb36cbc3a492e3f7dd0fcd69d7bf7152eb3238aa6b0"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/status-go.json",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-status-go.json.gz",
+      "sha256": "7c15f71818fe2e6f418d8987c6459e9825ba401acf79e804827069efc648ac9c"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/go-tls.log",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-go-tls.log.gz",
+      "sha256": "4d754ca56c316a52a8920146b54f86e579540054997915d516003a15479e0a23"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/go-wire.json",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-go-wire.json.gz",
+      "sha256": "9bb03f21e6f624ebba58f604222baf0bf94e507817edcd093d4e5ed4a6a14585"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/go-canned.log",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-go-canned.log.gz",
+      "sha256": "f5803cf40c96bf6e0dad3f49e54c6e2f3bd68dc8544c26b1b2ff3d80fd81504c"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/go.json",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-go.json.gz",
+      "sha256": "e38aed82fe422516f5c73804fdeb1279f073cb79fe67150463d7eb83ebbaaf7c"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/leaf.pem",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-leaf.pem.gz",
+      "sha256": "e506da151889d91a344f46b0b307f3548663cf29365b21a912ec9eba94a481b5"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/ca.pem",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-ca.pem.gz",
+      "sha256": "18e2d9f14a97c8109538344a340599eb04d94639978e33a7550bb90fbce811db"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/certificate.log",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-certificate.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/web.json",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-web.json.gz",
+      "sha256": "524e6cd7d43c1c566f98401e21b3551b9536f9076a50746db081ce944184393c"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/api.json",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-api.json.gz",
+      "sha256": "6f7aa1afda2388dd3a46ea01ba0dd5fd9d33a5f2979296f1423fb02c51d5a113"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/source.log",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-source.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/status-input.log",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-status-input.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/status-input.json",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-status-input.json.gz",
+      "sha256": "1fbed2ed72e9cd6a72ea8324d832a940f2d02615e4f188904ba718232b81daf8"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/input.log",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-input.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty4.evidence/input.json",
+      "retained": "migration/evidence/usage-next-768/opencode-runtime-clock-observation/symaira-usage768-next-device-dirty4.evidence-input.json.gz",
+      "sha256": "db267d96dbdc63ee0170a7cb95f24bb49176343ce5e06b31d191f5526891d850"
+    }
+  ],
+  "scope": "Actual runtime-derived OpenCode resets differ by separate invocation clock; all full originals retained. Comparison validates exact fixture3600/86400 second reset offset against each actual fetched_at; no invented fixed-time equality."
+}

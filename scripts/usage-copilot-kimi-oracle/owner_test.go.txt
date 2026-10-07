@@ -1,0 +1,153 @@
+// Owned symlink/parent-component constructor proof against unchanged Go.
+package usage
+
+import (
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"net/http"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
+	"testing"
+)
+
+func TestUsageCredentialOwner768(t *testing.T) {
+	records := []any{}
+	for _, provider := range []string{"copilot", "kimi"} {
+		variants := []string{"plain", "dotdot", "symlink-dotdot"}
+		if provider == "kimi" {
+			variants = append(variants, "explicit-dotdot", "explicit-symlink-dotdot")
+		}
+		for _, variant := range variants {
+			for _, literal := range []bool{false, true} {
+				id := provider + "-owner-" + variant
+				if literal {
+					id += "-literal"
+				}
+				root := filepath.Join(os.Getenv("USAGE_COPILOT_KIMI_ROOT"), id)
+				for _, directory := range []string{"home", "plain", "owner/nested", "owner/home"} {
+					if err := os.MkdirAll(filepath.Join(root, filepath.FromSlash(directory)), 0755); err != nil {
+						t.Fatal(err)
+					}
+				}
+				link := filepath.Join(root, "link")
+				if err := os.Symlink(filepath.Join(root, "owner", "nested"), link); err != nil {
+					t.Fatal("owned directory symlink proof required", err)
+				}
+				files := map[string][]byte{}
+				for _, owner := range []string{"lexical", "physical"} {
+					folder := "home"
+					if owner == "physical" {
+						folder = filepath.Join("owner", "home")
+					}
+					token := owner + "-owner"
+					if literal {
+						token = "env://" + strings.ToUpper(owner) + "_OWNER"
+					}
+					relative := filepath.Join(".config", "github-copilot", "apps.json")
+					value := map[string]any{"github.com:a": map[string]string{"oauth_token": token}}
+					if provider == "kimi" {
+						relative = filepath.Join(".kimi-code", "credentials", "kimi-code.json")
+						value = map[string]any{"access_token": token}
+					}
+					path := filepath.Join(root, folder, relative)
+					data, err := json.Marshal(value)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if err = os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+						t.Fatal(err)
+					}
+					if err = os.WriteFile(path, data, 0600); err != nil {
+						t.Fatal(err)
+					}
+					files[path] = data
+					if provider == "kimi" {
+						device := filepath.Join(root, folder, ".kimi-code", "device_id")
+						data = []byte(owner + "-device")
+						if err = os.WriteFile(device, data, 0600); err != nil {
+							t.Fatal(err)
+						}
+						files[device] = data
+					}
+				}
+				home := filepath.Join(root, "home")
+				environment := map[string]string{}
+				// Concatenate raw paths: filepath.Join would erase the test's .. already.
+				suffix := string(os.PathSeparator) + ".." + string(os.PathSeparator) + "home"
+				switch variant {
+				case "dotdot":
+					home = filepath.Join(root, "plain") + suffix
+				case "symlink-dotdot":
+					home = link + suffix
+				case "explicit-dotdot":
+					environment["KIMI_CODE_HOME"] = filepath.Join(root, "plain") + suffix + string(os.PathSeparator) + ".kimi-code"
+				case "explicit-symlink-dotdot":
+					environment["KIMI_CODE_HOME"] = link + suffix + string(os.PathSeparator) + ".kimi-code"
+				}
+				for _, name := range []string{"ANTHROPIC_ADMIN_KEY", "ANTHROPIC_OAUTH_TOKEN", "CODEX_ACCESS_TOKEN", "COPILOT_ACCESS_TOKEN", "CURSOR_COOKIE", "KIMI_CODE_API_KEY", "KIMI_AUTH_TOKEN", "MOONSHOT_API_KEY", "NOUS_PORTAL_ACCESS_TOKEN", "OPENCODE_COOKIE", "OPENROUTER_API_KEY", "KIMI_CODE_HOME", "HERMES_HOME", "CODEX_HOME", "KIMI_CODE_BASE_URL", "HERMES_PORTAL_BASE_URL", "OPENROUTER_API_URL", "OPENCODE_WORKSPACE_ID", "USAGE_LOCAL_FILES_ABSENT"} {
+					t.Setenv(name, "")
+				}
+				t.Setenv("HOME", home)
+				t.Setenv("USERPROFILE", home)
+				for name, value := range environment {
+					t.Setenv(name, value)
+				}
+				transport := &copilotKimiTransport768{Requests: []any{}}
+				client := &http.Client{Transport: transport}
+				var actual Provider
+				if provider == "copilot" {
+					actual = NewCopilotProvider(client)
+				} else {
+					actual = NewKimiProvider(client)
+				}
+				report := BuildReport(context.Background(), []Provider{actual})
+				hashes := map[string]string{}
+				for path, before := range files {
+					after, err := os.ReadFile(path)
+					if err != nil || !bytes.Equal(before, after) {
+						t.Fatal("Go owner source mutated", path, err)
+					}
+					sum := sha256.Sum256(before)
+					hashes[path] = hex.EncodeToString(sum[:])
+				}
+				records = append(records, map[string]any{"id": id, "provider": provider, "home": home, "userprofile": home, "env": environment, "file_sha256": hashes, "report": report, "requests": transport.Requests, "gated": false, "gate": "", "link": link, "link_target": filepath.Join(root, "owner", "nested")})
+			}
+		}
+	}
+	if len(records) != 16 {
+		t.Fatal("all16 owner cases required")
+	}
+	data, err := json.MarshalIndent(records, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(os.Getenv("USAGE_COPILOT_KIMI_OWNER"), append(data, '\n'), 0600); err != nil {
+		t.Fatal(err)
+	}
+}
+func TestUsageCredentialPath768(t *testing.T) {
+	bases := []string{"", ".", "a/./b/../c", "../../a/../b", "/../../a", "//a///b/..", "C:", `C:\a\..\b`, `\\host\share\dir\..`, `\\?\C:\a\..\b`, `\\.\UNC\host\share\a\..`, `\a\..\??\C:\`, "a/../c:", "π/../雪", `\??\C:\a\..\b`, "../a:"}
+	records := []any{}
+	for _, base := range bases {
+		records = append(records, map[string]string{"base_hex": hex.EncodeToString([]byte(base)), "child": "file", "clean_hex": hex.EncodeToString([]byte(filepath.Clean(base))), "join_hex": hex.EncodeToString([]byte(filepath.Join(base, "file")))})
+	}
+	for _, pair := range [][2]string{{"", ""}, {"/a", "/b"}, {`\`, `??\C:\x`}, {"C:", `\file`}, {"C:", ""}} {
+		records = append(records, map[string]string{"base_hex": hex.EncodeToString([]byte(pair[0])), "child": pair[1], "clean_hex": hex.EncodeToString([]byte(filepath.Clean(pair[0]))), "join_hex": hex.EncodeToString([]byte(filepath.Join(pair[0], pair[1])))})
+	}
+	if runtime.GOOS != "windows" {
+		base := "raw-\xff/../owner-\xfe"
+		records = append(records, map[string]string{"base_hex": hex.EncodeToString([]byte(base)), "child": "file", "clean_hex": hex.EncodeToString([]byte(filepath.Clean(base))), "join_hex": hex.EncodeToString([]byte(filepath.Join(base, "file")))})
+	}
+	data, err := json.MarshalIndent(records, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(os.Getenv("USAGE_COPILOT_KIMI_PATH"), append(data, '\n'), 0600); err != nil {
+		t.Fatal(err)
+	}
+}

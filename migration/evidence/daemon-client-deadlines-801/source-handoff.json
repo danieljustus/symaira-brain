@@ -1,0 +1,315 @@
+{
+  "kind": "SOURCE_ONLY_AUTHOR_HANDOFF_NOT_APPROVAL_NOT_RUNTIME",
+  "worktree": "/workspace/symaira-daemon801-client-deadlines",
+  "branch": "issue/801-native-client-deadlines",
+  "validated_source": "da70a613252b0e42f15db88ef482242899210e9a",
+  "original_immutable_source": "8e41529c86c0415c8ab71ce403a588079320ea61",
+  "original_native_run": 37194257690,
+  "original_synthetic_ci_merge": "a67f97c3346930abf1b99b175d7f5d767359f781",
+  "original_source_checkpoint": "591248a89f56c7b810daf9fa1a036ec20061aaec",
+  "normal_current_main": "9353520a34c5819c7d0a6cd58d3bfaa2b22b045b",
+  "normal_main_integration": "c91938d445593e66ca47d613ed1d2c60c15ba060",
+  "endpoint_finding_pre_edit_retention": "16f7c626",
+  "original_raw_source_roundtrips": 324,
+  "original_zip_members_verified": 25,
+  "locked_dependency_sources_verified_against_published_crates": 68,
+  "endpoint_relation_finding_roundtrips": 11,
+  "synthetic_typed_UTF16_vectors": 5,
+  "actual_checks": {
+    "Python_ASTs": 24,
+    "original_function_ASTs_unchanged": 14,
+    "synthetic_accounting_unit_tests": 4,
+    "Rustfmt": "PASS direct1.98.0 formatter only",
+    "actionlint": "PASS",
+    "diff_check": "PASS",
+    "protocol_error_server_wake_child_deadlines": "byte-identical",
+    "Unix_transport_and_Windows_IO_body": "byte-identical",
+    "registry_comparator": "byte-identical"
+  },
+  "prepared_tests": {
+    "owned_Python_capture_tests": 4,
+    "live_POSIX_kernel_test": 1,
+    "Windows_scenarios": [
+      "unread-request",
+      "full-request",
+      "busy-instance",
+      "eight-clients",
+      "endpoint-ascii",
+      "endpoint-unicode",
+      "endpoint-lossy"
+    ],
+    "Windows_endpoint_OsStr_only_mutant": "prepared, not run"
+  },
+  "candidate_executions": {
+    "Cargo": 0,
+    "Rust_product_or_test_binary": 0,
+    "Go_or_SDK": 0,
+    "provider": 0,
+    "kernel_admission": 0,
+    "native": 0
+  },
+  "ownership": {
+    "target": null,
+    "endpoint": null,
+    "port": null,
+    "compiler_lease": false,
+    "live_owned_processes": 0
+  },
+  "limitations": [
+    "Original Windows stalled native phase remains unknown; no original PE exists in retained artifacts.",
+    "Present endpoint relation is inherited lossy UTF16 across client/server/wake; rawWTF16 whole-owner and error-context cutover remains open.",
+    "Kernel-domain acceptance requires actual runner live proof; synthetic accounting tests are not kernel or parity evidence.",
+    "Both Windows architectures must run all seven owned scenarios; original four are retained.",
+    "No full #772/RUST006 completion, native approval, or cancellation-as-success claim."
+  ],
+  "required_next": [
+    "Different-author full immutable source review",
+    "Explicit allocated compiler: strict affected/workspace checks",
+    "Fresh source/executable-bound process63 Linux/platform-specific admission, registry510, key31, ownership/discovery, MCP13/workspace and original controls",
+    "Fresh native six-platform CI with actual Windows blocked-peer/eight-client/endpoint scenarios and Darwin live kernel receipts"
+  ],
+  "source_maps": [
+    {
+      "path": ".github/workflows/browse-daemon-native.yml",
+      "sha256": "620c49140d715a15d217a86146480da98f77ab717c83b69e24eb45e030b3e1aa",
+      "bytes": 8566
+    },
+    {
+      "path": "browse/crates/symbrowse-daemon/src/client/transport.rs",
+      "sha256": "639687e88c8cf3f13a242ee921fc5e1bab23533d6c03a515ee859abf307f2e5f",
+      "bytes": 7306
+    },
+    {
+      "path": "browse/crates/symbrowse-daemon/tests/support/windows_endpoint_relation.rs",
+      "sha256": "22f122d1cbe9bfc3f6916a64cce8f527acb27cefa7e38e74b4af83b001282346",
+      "bytes": 3869
+    },
+    {
+      "path": "browse/crates/symbrowse-daemon/tests/windows_client_deadlines.rs",
+      "sha256": "4a4078164a0dc4d18b005dd8c20e9b48939d8ccccdac5715778489e3dcaed18d",
+      "bytes": 10482
+    },
+    {
+      "path": "browse/port/harness/daemon_process.py",
+      "sha256": "e4ab4cb79c0d26fefe17de9a68a283140a39f001b65f36474e2b8c20ab1e5cd1",
+      "bytes": 14139
+    },
+    {
+      "path": "browse/port/harness/daemon_registry.py",
+      "sha256": "5243f45cdc1e65d8d708f36951fed09331ed8dc1002337adf65707611fd13d47",
+      "bytes": 18608
+    },
+    {
+      "path": "browse/port/harness/daemon_registry_cli.py",
+      "sha256": "88391525190120e4fe35ae4bae924bbc709d1ad0cf1615a90c06e555146cdd4f",
+      "bytes": 6105
+    },
+    {
+      "path": "browse/port/harness/raw_path_admission.py",
+      "sha256": "ec66c45954b8ba5f8779ad2f1a6568b4d74e9305aa5fc0ee80f39f68cfa55130",
+      "bytes": 7162
+    },
+    {
+      "path": "browse/port/harness/registry_cli_process.py",
+      "sha256": "f401efdd82bcaaef89ff2de4bf42216a5807c55612a62640b154592e5f089843",
+      "bytes": 4224
+    },
+    {
+      "path": "browse/port/harness/registry_progress.py",
+      "sha256": "498d859f1dd03024b9386f153abaf2631411a6ebb6bc215c6c0b241d84324e78",
+      "bytes": 2170
+    },
+    {
+      "path": "browse/port/harness/test_raw_path_admission.py",
+      "sha256": "111ce9549d139e3bf13cce2055c7d3f844825d98bc61ce3b3750f447d37a3714",
+      "bytes": 4838
+    },
+    {
+      "path": "browse/port/harness/test_registry_cli_process.py",
+      "sha256": "6148786ffc50188c8979d9fdb55330a3c6145552afe68e485af9491ee2d3b61d",
+      "bytes": 4722
+    },
+    {
+      "path": "docs/adr/native-client-deadlines-801.md",
+      "sha256": "16ed22fe0b58fff9e8cd389e48747cb8cfbdbb338f27ceb683c2d907cf73df2e",
+      "bytes": 9861
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/dependency-bindings/interprocess-2.4.4.crate",
+      "sha256": "6cb02ffbf25e8ef0f4a95bff054eef75f6d1bf16919474cf2caa63b21997478a",
+      "bytes": 149182
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/dependency-bindings/mio-1.2.3.crate",
+      "sha256": "4b18443e9c262bfe8fa82f51666e2642c53393f7e5c27b3e1aeab922cff5b9d8",
+      "bytes": 110455
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/dependency-bindings/receipt.json",
+      "sha256": "3674775a6725996743c54db443bb3ec3b41ef64adfd5b8eea00656454fbbb6cc",
+      "bytes": 5846
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/dependency-bindings/tokio-1.53.1.crate",
+      "sha256": "202caea871b69668250d242070849eb495be178ed697a3e98aebce5bc81a0bed",
+      "bytes": 920101
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/endpoint-relation-finding/decision.md",
+      "sha256": "830ed06cf1b09f988e97bc8ef6a1038dce4f650485659ce112a2a74d189c6c6c",
+      "bytes": 1906
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/endpoint-relation-finding/pre-correction-source.tar.gz",
+      "sha256": "d611eeff54a3c125513c96de6233d00d52de7430ac763425a751885f2b80e796",
+      "bytes": 57869
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/endpoint-relation-finding/preserve.py",
+      "sha256": "72b2ff890559e8cd15fcf79e2e88cc97435e992eb27912db3774455c956ed411",
+      "bytes": 3444
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/endpoint-relation-finding/receipt.json",
+      "sha256": "d0482b5f5115014cf2a69e8fe45150199a3f5495a453cbb0ed1a36af2b7d17b5",
+      "bytes": 5941
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/original-ci-diagnosis.json",
+      "sha256": "2711df3a5a48fadf8299548823614524b535b1300264f3ec4317dc3abeb35659",
+      "bytes": 48285
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/original/initial-empty-archive.tar.gz",
+      "sha256": "16372bbdcfd612e8c711d6b2aa30b7ab13feb1abd41879cbfe0076895c323dab",
+      "bytes": 39
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/original/initial-retention-tool-failure.txt",
+      "sha256": "50de3660bdd38e4f88f7aab09c81974a6ee9ebd6d7cf9bf16215b22c927612eb",
+      "bytes": 401
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/original/raw-and-source.tar.gz",
+      "sha256": "07f40f5be16af310d851241fd1e25ae6a773860a3a848f75b662acdc87ca1b34",
+      "bytes": 1060202
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/original/retention.json",
+      "sha256": "90d0f4ba93feea0b8fbfaca0bc131b86825d36440e0f1be3359cd9a456d8b6e8",
+      "bytes": 115897
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/prepared-native-plan.md",
+      "sha256": "ea1ddf3aadedc962f2da5516806a39e05f6a63b44ce89f2d332b6dd39dabc5ac",
+      "bytes": 2504
+    }
+  ],
+  "evidence_maps": [
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/dependency-bindings/interprocess-2.4.4.crate",
+      "bytes": 149182,
+      "sha256": "6cb02ffbf25e8ef0f4a95bff054eef75f6d1bf16919474cf2caa63b21997478a"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/dependency-bindings/mio-1.2.3.crate",
+      "bytes": 110455,
+      "sha256": "4b18443e9c262bfe8fa82f51666e2642c53393f7e5c27b3e1aeab922cff5b9d8"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/dependency-bindings/receipt.json",
+      "bytes": 5846,
+      "sha256": "3674775a6725996743c54db443bb3ec3b41ef64adfd5b8eea00656454fbbb6cc"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/dependency-bindings/tokio-1.53.1.crate",
+      "bytes": 920101,
+      "sha256": "202caea871b69668250d242070849eb495be178ed697a3e98aebce5bc81a0bed"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/endpoint-relation-finding/decision.md",
+      "bytes": 1906,
+      "sha256": "830ed06cf1b09f988e97bc8ef6a1038dce4f650485659ce112a2a74d189c6c6c"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/endpoint-relation-finding/pre-correction-source.tar.gz",
+      "bytes": 57869,
+      "sha256": "d611eeff54a3c125513c96de6233d00d52de7430ac763425a751885f2b80e796"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/endpoint-relation-finding/preserve.py",
+      "bytes": 3444,
+      "sha256": "72b2ff890559e8cd15fcf79e2e88cc97435e992eb27912db3774455c956ed411"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/endpoint-relation-finding/receipt.json",
+      "bytes": 5941,
+      "sha256": "d0482b5f5115014cf2a69e8fe45150199a3f5495a453cbb0ed1a36af2b7d17b5"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/original/initial-empty-archive.tar.gz",
+      "bytes": 39,
+      "sha256": "16372bbdcfd612e8c711d6b2aa30b7ab13feb1abd41879cbfe0076895c323dab"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/original/initial-retention-tool-failure.txt",
+      "bytes": 401,
+      "sha256": "50de3660bdd38e4f88f7aab09c81974a6ee9ebd6d7cf9bf16215b22c927612eb"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/original/raw-and-source.tar.gz",
+      "bytes": 1060202,
+      "sha256": "07f40f5be16af310d851241fd1e25ae6a773860a3a848f75b662acdc87ca1b34"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/original/retention.json",
+      "bytes": 115897,
+      "sha256": "90d0f4ba93feea0b8fbfaca0bc131b86825d36440e0f1be3359cd9a456d8b6e8"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/original-ci-diagnosis.json",
+      "bytes": 48285,
+      "sha256": "2711df3a5a48fadf8299548823614524b535b1300264f3ec4317dc3abeb35659"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/prepared-native-plan.md",
+      "bytes": 2504,
+      "sha256": "ea1ddf3aadedc962f2da5516806a39e05f6a63b44ce89f2d332b6dd39dabc5ac"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/source-checks/actionlint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/source-checks/check.log",
+      "bytes": 1373,
+      "sha256": "de19f275908d0b06f631a88fb993b96768d5b2592ff09b957b454e7c9dfed0f3"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/source-checks/check.py",
+      "bytes": 7698,
+      "sha256": "13db72e4c9e63ef8dcf6ef97153898f887eaa7b747a80a73dd58bde2aa7def9d"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/source-checks/checks.json",
+      "bytes": 7034,
+      "sha256": "1d79b21cea997e8e34e431b7f8d2a64bceef9e9c952444746046fba6ab9dce2e"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/source-checks/diff-check.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/source-checks/rustfmt.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "migration/evidence/daemon-client-deadlines-801/source-checks/synthetic-accounting.log",
+      "bytes": 686,
+      "sha256": "9a4e5c2fc8c93bd0d657e1dda1e96f0596fcb7a65877e6e0ab11e74db66a63a4"
+    }
+  ]
+}

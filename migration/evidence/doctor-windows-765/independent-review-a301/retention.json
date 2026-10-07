@@ -1,0 +1,190 @@
+{
+  "source": "a301969596358fb42e3bd93972c315bf89e79963",
+  "publication": "9705777b09bbfe600406ad60ba704d0fd8759e48",
+  "original_files": {
+    "symaira-doctor-source-independent-second-actionlint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "symaira-doctor-source-independent-second-archives.json": {
+      "sha256": "220d5e55aee4f9ae884096bdd9f94775e0d55284da140b014a2996160382afb8",
+      "bytes": 4175
+    },
+    "symaira-doctor-source-independent-second-boundaries.json": {
+      "sha256": "e6cba6b6bab4e053caff36acecf52e67ae7114369292e26bb099e13dc1feada0",
+      "bytes": 104787
+    },
+    "symaira-doctor-source-independent-second-boundaries.log": {
+      "sha256": "fa4b435721073d6d47ceee7c0e022635c2fffc7d4fe71bdc77191919ba8486da",
+      "bytes": 200
+    },
+    "symaira-doctor-source-independent-second-boundaries.py": {
+      "sha256": "99fb1db685198a710d4d20ca2b044b336b05bb3ce14eeeda5778c59f2be34165",
+      "bytes": 2788
+    },
+    "symaira-doctor-source-independent-second-clippy.log": {
+      "sha256": "1b06c206522a9ad6653edd56b1bb9e19254f4cd592480fbc8b10cbddc2b994e9",
+      "bytes": 60
+    },
+    "symaira-doctor-source-independent-second-doctor.json": {
+      "sha256": "7c58449ed3afcb04eac356f5343888e9be20188eee9bfc8c7f1c2c68f65ce5d1",
+      "bytes": 5361156
+    },
+    "symaira-doctor-source-independent-second-doctor.json.missing-core-event.json": {
+      "sha256": "00d91fe575b26c21564dbb4eec0e303b0f6cbea8a2ddbb823333b352ffefef0e",
+      "bytes": 36775
+    },
+    "symaira-doctor-source-independent-second-doctor.json.missing-header.json": {
+      "sha256": "7f3727ffbf3f0a795d45005e7eec87bc58d161482b10f935d8e1e62e5968d16d",
+      "bytes": 36959
+    },
+    "symaira-doctor-source-independent-second-doctor.json.wrong-exit.json": {
+      "sha256": "282c3f6c8d448d3491ba30e3da1e730daf922a22b6917358ae2831e967260472",
+      "bytes": 37005
+    },
+    "symaira-doctor-source-independent-second-doctor.log": {
+      "sha256": "3bcdf4d47333c265507a8cdf4404d17de08463f4d4f43040ec0bd261dc026d19",
+      "bytes": 295
+    },
+    "symaira-doctor-source-independent-second-extra.json": {
+      "sha256": "ad798c57066de59dfa26a9a9b8f6d345cf835a2198a484423c1f8246e9407ddf",
+      "bytes": 101731
+    },
+    "symaira-doctor-source-independent-second-extra.log": {
+      "sha256": "68a857023756e6395539ed3c2e9bcd90ccfd2ab57b278ddbdd93dba5bd3477e2",
+      "bytes": 197
+    },
+    "symaira-doctor-source-independent-second-extra.py": {
+      "sha256": "ea693c23f459aacf77c89849cdcee30173f03f6f29b4131657040cbb6eb81833",
+      "bytes": 3185
+    },
+    "symaira-doctor-source-independent-second-fmt.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "symaira-doctor-source-independent-second-home.json": {
+      "sha256": "ccbe76f8069d271d2293a7682127617ac8efb9998b76e30bb39950041189a710",
+      "bytes": 8953
+    },
+    "symaira-doctor-source-independent-second-home.log": {
+      "sha256": "dce1bcdb4ef76ae6edd74bea035972224be1dbb9779bf5467ca1714bfc192b2a",
+      "bytes": 55
+    },
+    "symaira-doctor-source-independent-second-home.py": {
+      "sha256": "21a203e04fa244a907cdd40f71e0d6389260d90b7c5b0556079e95eea9c7c756",
+      "bytes": 1779
+    },
+    "symaira-doctor-source-independent-second-inputs.json": {
+      "sha256": "2210cd819a1231368d80458e89c21a9eab551051936c3bf27d21d6a271537db6",
+      "bytes": 2072
+    },
+    "symaira-doctor-source-independent-second-original-findings.json": {
+      "sha256": "67cb673056daff2e65b59edef460ddaad3a5580292c13f4635291490db946710",
+      "bytes": 173574
+    },
+    "symaira-doctor-source-independent-second-original-findings.log": {
+      "sha256": "453b5f4fe955e3e7fc5b53e28c4baf4918023be616d86b8c22908d27c363335a",
+      "bytes": 312
+    },
+    "symaira-doctor-source-independent-second-original-findings.py": {
+      "sha256": "db1f500c50cd5ebb8e0919b6d258becd4579246336b32fd0e9adec132506acbf",
+      "bytes": 3273
+    },
+    "symaira-doctor-source-independent-second-original-lookup.json": {
+      "sha256": "1a9a5858b54e63b8b1dd84188b95ffd76bf7398c75f42744a0f610a0c6a17259",
+      "bytes": 31126
+    },
+    "symaira-doctor-source-independent-second-original-lookup.log": {
+      "sha256": "7e3500bddfde8fcf2baf7b8de43539a9b6536c950372fc23df20420011fa8463",
+      "bytes": 67
+    },
+    "symaira-doctor-source-independent-second-original-lookup.py": {
+      "sha256": "82f1b5578b0b5bc1318122e545be80ac95f893e1f0dfa8a82a30cd4cd1e45804",
+      "bytes": 2144
+    },
+    "symaira-doctor-source-independent-second-original-raw-signals.json": {
+      "sha256": "03cf704dc62bf5720906b119b40ee3819ea0d6e44f00ef1ab41666309fa15c32",
+      "bytes": 66446
+    },
+    "symaira-doctor-source-independent-second-original-raw-signals.log": {
+      "sha256": "e5194bbb6f8a11456f57e66acde83b8c151fa2c2e3923551a0007c9f2a4eb3f1",
+      "bytes": 220
+    },
+    "symaira-doctor-source-independent-second-original-raw-signals.py": {
+      "sha256": "7e53ebc9bd62e597c725722ff498c979b97c34f78d4e595d6c977358154d6d5f",
+      "bytes": 4792
+    },
+    "symaira-doctor-source-independent-second-provenance.json": {
+      "sha256": "eaf3a3d84525be56ddeadd2cda0bc3bb915022b268a6efd7f641dcbacd556c1f",
+      "bytes": 495
+    },
+    "symaira-doctor-source-independent-second-review-receipt.json": {
+      "sha256": "ab4d3f63275ab036f97d21836c01ada20ca89a218a0ea16a3d09acfed33cab8c",
+      "bytes": 17432
+    },
+    "symaira-doctor-source-independent-second-review.md": {
+      "sha256": "ee986fc6779b44f3c39c3411fbf21015595114df116b1e6960b9a4a644029955",
+      "bytes": 11022
+    },
+    "symaira-doctor-source-independent-second-setup-invalid-launcher.log": {
+      "sha256": "7373b218da2ebfea348d5059069bbf93257022167a6a14d76217c6c06a51026e",
+      "bytes": 61
+    },
+    "symaira-doctor-source-independent-second-setup.json": {
+      "sha256": "d30c20846c33a25d33b10e19c65989c006b32b24d490a7ff22bb638674d786c6",
+      "bytes": 1422698
+    },
+    "symaira-doctor-source-independent-second-setup.log": {
+      "sha256": "dfd0e26d312674c200506b24e2d7003676bbec92403f67b432c5bf91685018d9",
+      "bytes": 11966
+    },
+    "symaira-doctor-source-independent-second-source.json": {
+      "sha256": "0d0c5b4240cce562dcb5a7333e8f64944ba6f5cf7e2e3d4efb6cf57a6c4e258c",
+      "bytes": 1253780
+    },
+    "symaira-doctor-source-independent-second-source.json.wrong-exit.json": {
+      "sha256": "2079b9f7351e8414bd57e3f1e7e440a4d61fe536ab1322b8e8bc77cc879935b2",
+      "bytes": 31650
+    },
+    "symaira-doctor-source-independent-second-source.json.wrong-source.json": {
+      "sha256": "e39614aa0178595c5b0baa6b790f28672395c8f42437a92ec71c1b08022877e5",
+      "bytes": 31646
+    },
+    "symaira-doctor-source-independent-second-source.log": {
+      "sha256": "017ac25b15180be69fc398f8d51776207fcc228295e4b4b10bc982b9301a851c",
+      "bytes": 273
+    },
+    "symaira-doctor-source-independent-second-static.json": {
+      "sha256": "12d34595c756775a7287d141bfb600fb0380f67e2dc2df822a92cf8c92ce986f",
+      "bytes": 2806
+    },
+    "symaira-doctor-source-independent-second-symlink.json": {
+      "sha256": "5d3346b303eb40df64f715289ef07ff021753dc5da5f6c5560410d433a6597bd",
+      "bytes": 23691
+    },
+    "symaira-doctor-source-independent-second-symlink.log": {
+      "sha256": "2c7ccf67648682443e18d6871c1ee2cdd6a9213c361def6b7a6d62870882c796",
+      "bytes": 67
+    },
+    "symaira-doctor-source-independent-second-symlink.py": {
+      "sha256": "59a7cab76e652a39ead14ae1dbcea726dd97d6bb1b3e2652f09f537c67c77bb5",
+      "bytes": 2860
+    },
+    "symaira-doctor-source-independent-second-tests.log": {
+      "sha256": "5f132514ebb8faa601d045953fa03502ac3b1f935aae8501103e2464eec77680",
+      "bytes": 37552
+    },
+    "symaira-doctor-source-independent-second-verify.log": {
+      "sha256": "f6714ab4364852a1e131b61ba7b68e334784e9efd47c7744cfc2a5d461c57221",
+      "bytes": 518
+    },
+    "symaira-doctor-source-independent-second-verify.py": {
+      "sha256": "7f21477b0f93733ae975572940566e800fce13114627f98e3899ccfe870fac2c",
+      "bytes": 6625
+    },
+    "symaira-doctor-source-independent-second-whitespace.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  }
+}

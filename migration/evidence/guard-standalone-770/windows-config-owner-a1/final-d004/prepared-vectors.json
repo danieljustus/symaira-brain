@@ -1,0 +1,318 @@
+{
+  "nt": [
+    {
+      "id": "xdg-plain",
+      "family": "xdg",
+      "spelling": "plain",
+      "contract": "parity"
+    },
+    {
+      "id": "xdg-dot",
+      "family": "xdg",
+      "spelling": "dot",
+      "contract": "parity"
+    },
+    {
+      "id": "xdg-dotdot",
+      "family": "xdg",
+      "spelling": "dotdot",
+      "contract": "parity"
+    },
+    {
+      "id": "xdg-relative",
+      "family": "xdg",
+      "spelling": "relative",
+      "contract": "parity"
+    },
+    {
+      "id": "xdg-relative-parent",
+      "family": "xdg",
+      "spelling": "relative-parent",
+      "contract": "parity"
+    },
+    {
+      "id": "xdg-symlink-dotdot",
+      "family": "xdg",
+      "spelling": "symlink-dotdot",
+      "contract": "parity"
+    },
+    {
+      "id": "xdg-symlink-semantic",
+      "family": "xdg",
+      "spelling": "symlink-dotdot",
+      "state": "semantic",
+      "contract": "parity"
+    },
+    {
+      "id": "xdg-symlink-typed",
+      "family": "xdg",
+      "spelling": "symlink-dotdot",
+      "state": "typed",
+      "contract": "gated"
+    },
+    {
+      "id": "xdg-symlink-discovery",
+      "family": "xdg",
+      "spelling": "symlink-dotdot",
+      "state": "discovery",
+      "contract": "gated"
+    },
+    {
+      "id": "home-plain",
+      "family": "home",
+      "spelling": "plain",
+      "contract": "parity"
+    },
+    {
+      "id": "home-dot",
+      "family": "home",
+      "spelling": "dot",
+      "contract": "parity"
+    },
+    {
+      "id": "home-dotdot",
+      "family": "home",
+      "spelling": "dotdot",
+      "contract": "parity"
+    },
+    {
+      "id": "home-relative",
+      "family": "home",
+      "spelling": "relative",
+      "contract": "parity"
+    },
+    {
+      "id": "home-relative-parent",
+      "family": "home",
+      "spelling": "relative-parent",
+      "contract": "parity"
+    },
+    {
+      "id": "home-symlink-dotdot",
+      "family": "home",
+      "spelling": "symlink-dotdot",
+      "contract": "parity"
+    },
+    {
+      "id": "home-symlink-semantic",
+      "family": "home",
+      "spelling": "symlink-dotdot",
+      "state": "semantic",
+      "contract": "parity"
+    },
+    {
+      "id": "home-symlink-typed",
+      "family": "home",
+      "spelling": "symlink-dotdot",
+      "state": "typed",
+      "contract": "gated"
+    },
+    {
+      "id": "home-symlink-discovery",
+      "family": "home",
+      "spelling": "symlink-dotdot",
+      "state": "discovery",
+      "contract": "gated"
+    },
+    {
+      "id": "explicit-xdg",
+      "family": "xdg",
+      "spelling": "symlink-dotdot",
+      "explicit": true,
+      "contract": "parity"
+    },
+    {
+      "id": "explicit-home",
+      "family": "home",
+      "spelling": "symlink-dotdot",
+      "explicit": true,
+      "contract": "parity"
+    },
+    {
+      "id": "explicit-dotdot-filename",
+      "family": "xdg",
+      "spelling": "dotdot",
+      "explicit": true,
+      "contract": "parity"
+    },
+    {
+      "id": "explicit-relative-owner",
+      "family": "xdg",
+      "spelling": "relative",
+      "explicit": true,
+      "contract": "parity"
+    },
+    {
+      "id": "empty-xdg-home-fallback",
+      "family": "home",
+      "spelling": "dotdot",
+      "empty_xdg": true,
+      "contract": "parity"
+    }
+  ],
+  "posix": [
+    {
+      "id": "xdg-plain",
+      "family": "xdg",
+      "spelling": "plain",
+      "contract": "parity"
+    },
+    {
+      "id": "xdg-dot",
+      "family": "xdg",
+      "spelling": "dot",
+      "contract": "parity"
+    },
+    {
+      "id": "xdg-dotdot",
+      "family": "xdg",
+      "spelling": "dotdot",
+      "contract": "parity"
+    },
+    {
+      "id": "xdg-relative",
+      "family": "xdg",
+      "spelling": "relative",
+      "contract": "parity"
+    },
+    {
+      "id": "xdg-relative-parent",
+      "family": "xdg",
+      "spelling": "relative-parent",
+      "contract": "parity"
+    },
+    {
+      "id": "xdg-symlink-dotdot",
+      "family": "xdg",
+      "spelling": "symlink-dotdot",
+      "contract": "parity"
+    },
+    {
+      "id": "xdg-symlink-semantic",
+      "family": "xdg",
+      "spelling": "symlink-dotdot",
+      "state": "semantic",
+      "contract": "parity"
+    },
+    {
+      "id": "xdg-symlink-typed",
+      "family": "xdg",
+      "spelling": "symlink-dotdot",
+      "state": "typed",
+      "contract": "gated"
+    },
+    {
+      "id": "xdg-symlink-discovery",
+      "family": "xdg",
+      "spelling": "symlink-dotdot",
+      "state": "discovery",
+      "contract": "gated"
+    },
+    {
+      "id": "home-plain",
+      "family": "home",
+      "spelling": "plain",
+      "contract": "parity"
+    },
+    {
+      "id": "home-dot",
+      "family": "home",
+      "spelling": "dot",
+      "contract": "parity"
+    },
+    {
+      "id": "home-dotdot",
+      "family": "home",
+      "spelling": "dotdot",
+      "contract": "parity"
+    },
+    {
+      "id": "home-relative",
+      "family": "home",
+      "spelling": "relative",
+      "contract": "parity"
+    },
+    {
+      "id": "home-relative-parent",
+      "family": "home",
+      "spelling": "relative-parent",
+      "contract": "parity"
+    },
+    {
+      "id": "home-symlink-dotdot",
+      "family": "home",
+      "spelling": "symlink-dotdot",
+      "contract": "parity"
+    },
+    {
+      "id": "home-symlink-semantic",
+      "family": "home",
+      "spelling": "symlink-dotdot",
+      "state": "semantic",
+      "contract": "parity"
+    },
+    {
+      "id": "home-symlink-typed",
+      "family": "home",
+      "spelling": "symlink-dotdot",
+      "state": "typed",
+      "contract": "gated"
+    },
+    {
+      "id": "home-symlink-discovery",
+      "family": "home",
+      "spelling": "symlink-dotdot",
+      "state": "discovery",
+      "contract": "gated"
+    },
+    {
+      "id": "explicit-xdg",
+      "family": "xdg",
+      "spelling": "symlink-dotdot",
+      "explicit": true,
+      "contract": "parity"
+    },
+    {
+      "id": "explicit-home",
+      "family": "home",
+      "spelling": "symlink-dotdot",
+      "explicit": true,
+      "contract": "parity"
+    },
+    {
+      "id": "explicit-dotdot-filename",
+      "family": "xdg",
+      "spelling": "dotdot",
+      "explicit": true,
+      "contract": "parity"
+    },
+    {
+      "id": "explicit-relative-owner",
+      "family": "xdg",
+      "spelling": "relative",
+      "explicit": true,
+      "contract": "parity"
+    },
+    {
+      "id": "empty-xdg-home-fallback",
+      "family": "home",
+      "spelling": "dotdot",
+      "empty_xdg": true,
+      "contract": "parity"
+    },
+    {
+      "id": "xdg-raw-dotdot",
+      "family": "xdg",
+      "spelling": "symlink-dotdot",
+      "raw": true,
+      "contract": "parity"
+    },
+    {
+      "id": "home-raw-dotdot",
+      "family": "home",
+      "spelling": "symlink-dotdot",
+      "raw": true,
+      "contract": "parity"
+    }
+  ]
+}

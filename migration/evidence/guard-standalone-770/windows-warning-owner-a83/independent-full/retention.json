@@ -1,0 +1,41 @@
+{
+  "reviewed_source": "0701491b10d10c28759c1c5c2c97d00f01acb09d",
+  "disposition": "APPROVE bounded source publication; native Windows pending",
+  "files": [
+    {
+      "original": "/tmp/symaira-guard805-warning-owner-independent-checks.json",
+      "retained": "symaira-guard805-warning-owner-independent-checks.json.gz",
+      "bytes": 4045,
+      "sha256": "0d87928efbcfbfed2e1bc3cfbda7fe29d4b3f255a7573060c240582c008a8d46",
+      "gzip_sha256": "ad9e8cc5e27585e7dadf89080ef4e29d77f63c9604c47445ec1636cbb075eda3"
+    },
+    {
+      "original": "/tmp/symaira-guard805-warning-owner-independent-checks.log",
+      "retained": "symaira-guard805-warning-owner-independent-checks.log.gz",
+      "bytes": 170,
+      "sha256": "a17cb3622b78a74e7440c12004f1f3ca34c42f8f90713d0127bef4d849639904",
+      "gzip_sha256": "3a56df0527af350275798fc1943c7c4cf27842c0bbd468774bdc50315ffe9fd9"
+    },
+    {
+      "original": "/tmp/symaira-guard805-warning-owner-independent-checks.py",
+      "retained": "symaira-guard805-warning-owner-independent-checks.py.gz",
+      "bytes": 4825,
+      "sha256": "7b064b1759dd0b041e3dd4d54f97725bcbf55292cfbcfefba039b26982f9185d",
+      "gzip_sha256": "7a67135dfcb2e9e69f4ddc465f1eb9c5dae1d135c5cc8584f642adbff42af2c0"
+    },
+    {
+      "original": "/tmp/symaira-guard805-warning-owner-independent-review.json",
+      "retained": "symaira-guard805-warning-owner-independent-review.json.gz",
+      "bytes": 4313,
+      "sha256": "20060f64ea3f8daaf27e6004f1a0eda5149f947e7dd3480c07b36e3215817eef",
+      "gzip_sha256": "6ec5ceb647707d8f1cb488b39c3dde964de1dc544c40a430fe3b3c26807a568d"
+    },
+    {
+      "original": "/tmp/symaira-guard805-warning-owner-independent-review.md",
+      "retained": "symaira-guard805-warning-owner-independent-review.md.gz",
+      "bytes": 5421,
+      "sha256": "73e1c8f89d26696a60cf2fbe4a8f4397832d8c2b3e4ec464b94a79b7bf9ba47a",
+      "gzip_sha256": "6235e9704fe4bc8d23431cba03d9bcd6a9ed9fdeafdc6601de3bd520d2669387"
+    }
+  ]
+}

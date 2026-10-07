@@ -1,0 +1,4617 @@
+[
+  {
+    "path": ".github/workflows/browse-chrome-native-e2e.yml",
+    "bytes": 3090,
+    "sha256": "9c31845bee4d89551a52692fa5ba52691a2a995ccdaf742f3ba66d73b7d6c9a5"
+  },
+  {
+    "path": ".github/workflows/browse-daemon-native.yml",
+    "bytes": 2323,
+    "sha256": "ef1f1bd8ce89401479985e60d6cb84abdeffed67be5ce94010640d2ab3566249"
+  },
+  {
+    "path": ".github/workflows/browse-flow-list.yml",
+    "bytes": 1423,
+    "sha256": "545bed59e94d59abe8a0ba4471e5adad31490c99dad64e94e1f6886e5caff0e4"
+  },
+  {
+    "path": ".github/workflows/browse-perf003-real-chrome.yml",
+    "bytes": 9635,
+    "sha256": "8899569b46a914f405800aea0b588f6160af3310c3b690696cdd66e4d6861324"
+  },
+  {
+    "path": ".github/workflows/browse-profiles.yml",
+    "bytes": 1890,
+    "sha256": "38357e0ad694f0660ec6a60d749368d566ea1cba90374af9a4ef268816c4d349"
+  },
+  {
+    "path": ".github/workflows/bump-core.yml",
+    "bytes": 8064,
+    "sha256": "288e91377769d2e48a4553d122887b1c2e08d0f9f18017d6b4f9f45478515ffc"
+  },
+  {
+    "path": ".github/workflows/ci.yml",
+    "bytes": 73876,
+    "sha256": "ff81d2e9b856003f882d2c9c4fa7d9bf3243a676ad3e02a8090dc097cc38fb84"
+  },
+  {
+    "path": ".github/workflows/codeql.yml",
+    "bytes": 1333,
+    "sha256": "da61adae3ab9f339d16f017aee37448723b97f11c34cd2ac12885ef92684a956"
+  },
+  {
+    "path": ".github/workflows/guard-review-repair.yml",
+    "bytes": 1427,
+    "sha256": "46879b8f3724cab7f2ca0fc4ac976f24736ff1c3484482910dd14d40536f5868"
+  },
+  {
+    "path": ".github/workflows/manifest-drift.yml",
+    "bytes": 1053,
+    "sha256": "b828a1051ae35959b50fa6a668dfa38df9477c8e6bf0d44816a3b83489993f72"
+  },
+  {
+    "path": ".github/workflows/mutation.yml",
+    "bytes": 2430,
+    "sha256": "03ac4247e1022601529bb54e8a514c91b6fa17268133fd41d972c12a14553294"
+  },
+  {
+    "path": ".github/workflows/release.yml",
+    "bytes": 18201,
+    "sha256": "357c0b52debef48ee86b3d99eb177d995cde72b06e4d633f7caaa1ae96a68413"
+  },
+  {
+    "path": ".github/workflows/rust-coverage.yml",
+    "bytes": 2072,
+    "sha256": "a94fff5bb4498b7c0e7ee23b9d845cf95674be6ad04503857364007550bb250c"
+  },
+  {
+    "path": ".github/workflows/rust.yml",
+    "bytes": 7403,
+    "sha256": "186b4b564326318a572bb9b4a6070ead2a077090208277b89c260dbfbb695321"
+  },
+  {
+    "path": "Cargo.lock",
+    "bytes": 65682,
+    "sha256": "95657aeeba4f12cde301afa9aaf6b01b021b0d7892ed4cad6907a1db390785c0"
+  },
+  {
+    "path": "Cargo.toml",
+    "bytes": 2785,
+    "sha256": "982fdf67af364bb689371f888d79e4662bcbd2d7088dec0d7a2aa85f308a0155"
+  },
+  {
+    "path": "migration/cli-tree-inventory.md",
+    "bytes": 21669,
+    "sha256": "70a7ba166b05970f0395f1b08ad41de3bd677260fe36b42ceadfc11e95ce0d98"
+  },
+  {
+    "path": "migration/contract-matrix.csv",
+    "bytes": 28676,
+    "sha256": "3d128ba0bcfad3add7205c1ba258c6ed1912eb8970885d28526f6dea8ea17c1e"
+  },
+  {
+    "path": "migration/evidence/activity-validation-767/corrected-numeric-review-linux.json",
+    "bytes": 636780,
+    "sha256": "09e2e5ab213dac6516f17aeb012814aa308b14f43cc38155dae09395908753fd"
+  },
+  {
+    "path": "migration/evidence/activity-validation-767/corrected-parser-review.md",
+    "bytes": 1763,
+    "sha256": "ffb4a440390efcacba1a0133ddbdace8b2d4baeb51a315917919296d0ba15261"
+  },
+  {
+    "path": "migration/evidence/activity-validation-767/independent-numeric-precedence-36ccc6.json",
+    "bytes": 8922,
+    "sha256": "107fc0b6ae167d0def9cb6c7fa572a176b82eb5e76b5fa6543ee1d41105855bb"
+  },
+  {
+    "path": "migration/evidence/activity-validation-767/independent-review-36ccc6.md",
+    "bytes": 6159,
+    "sha256": "f8e63602f4ddb663fa06b58714a41dd11b6d8a5ddce162aac65255f7c91bda48"
+  },
+  {
+    "path": "migration/evidence/activity-validation-767/independent-time-probes-36ccc6.json",
+    "bytes": 15020,
+    "sha256": "48fed7fdedfc7dcca5c86d6a65fb758e278c27c617bb367731244c4b1340c554"
+  },
+  {
+    "path": "migration/evidence/activity-validation-767/initial-validation-mismatches.json",
+    "bytes": 12776,
+    "sha256": "650ac7261b64454458ddfd002f85f5a7e10f8ada75c4036747b8cf4398528db3"
+  },
+  {
+    "path": "migration/evidence/activity-validation-767/integer-precedence-fix-controls.json",
+    "bytes": 1658,
+    "sha256": "620b65152ac20f34027e1cc88d46e386bf948375dc7a4b2e9938c6b88272185f"
+  },
+  {
+    "path": "migration/evidence/activity-validation-767/integer-precedence-fix-verification.md",
+    "bytes": 1236,
+    "sha256": "6795a583fc06b6a1f0d60a98364aaf21fb5e30a6401eab712503b8b3f751d4c4"
+  },
+  {
+    "path": "migration/evidence/activity-validation-767/linux-process-report-before-byte-parser-fix.json",
+    "bytes": 210944,
+    "sha256": "6aba546fb8e219cfed8e4b0d4d6b2750899d29c2c7fcb685d3975580eb5fe9e2"
+  },
+  {
+    "path": "migration/evidence/activity-validation-767/linux-process-report.json",
+    "bytes": 339809,
+    "sha256": "bd18a92eb419832a9001b1a8057ade6f2e77e051f2f6f246f726d0082e9e1bc1"
+  },
+  {
+    "path": "migration/evidence/activity-validation-767/native-ci-initial-failures.json",
+    "bytes": 448221,
+    "sha256": "72e54c89ba10954d030ad2c64340145313ae29b260a8bb06ee29ad60b7079e28"
+  },
+  {
+    "path": "migration/evidence/coverage-682/go-oracle-statements.json",
+    "bytes": 2182,
+    "sha256": "017d0d656386837883b61f5dbdab5e4420b6aff05a2b98903dd0c5e83312faa2"
+  },
+  {
+    "path": "migration/evidence/coverage-682/linux-baseline.json",
+    "bytes": 226951,
+    "sha256": "177c007c2882f6a9cc179aea725614be132959b241ed258f70934456a499fb66"
+  },
+  {
+    "path": "migration/evidence/fetch-referer-policy-773/symaira-fetch773-second-fix-independent-extra-http.json",
+    "bytes": 13898,
+    "sha256": "f14e3c41bdccbc2e2975d08993cfb08119dd5a44eba29daf9bfe16675c7eabd1"
+  },
+  {
+    "path": "migration/evidence/fetch-referer-policy-773/symaira-fetch773-second-fix-independent-extra-http.log",
+    "bytes": 1649,
+    "sha256": "2fdb1f751744c0980936c4a53bd47635534e83c09bb716126b317cb1ad2fe300"
+  },
+  {
+    "path": "migration/evidence/fetch-referer-policy-773/symaira-fetch773-second-fix-independent-extra-http.py",
+    "bytes": 2495,
+    "sha256": "bb9e2abc3168e9311bb77188625177cd231e428f0797e1bfbc86dda2c0e66282"
+  },
+  {
+    "path": "migration/evidence/memory-ui-763/go-cli-dependencies.txt",
+    "bytes": 8814,
+    "sha256": "95974210f1bb0f9600aec8b1d23c9bd072815f9491b712bd82927a65ee0b1218"
+  },
+  {
+    "path": "migration/evidence/memory-ui-763/reachability.json",
+    "bytes": 50453,
+    "sha256": "0acf7633454f759ef71963e41d4902e55dbd92e4d8273391ccdca798c0fb756d"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/README.md",
+    "bytes": 1526,
+    "sha256": "c5a67bea2a555ac090cacd52564b9f4effae7d09b7973b7602bbdbe9feabdafa"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/independent-review/symaira-policy-create-race-independent-clippy.log",
+    "bytes": 60,
+    "sha256": "4b395c9c76c7f7fb5221d30df7320c7a2387ff3842c426dbee6a59a54b5cffab"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/independent-review/symaira-policy-create-race-independent-extra.json",
+    "bytes": 9585,
+    "sha256": "3e19d475f494864d24be5b4dcbdcc746937285b1e0fb994d71c3da89b9a02426"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/independent-review/symaira-policy-create-race-independent-extra.log",
+    "bytes": 188,
+    "sha256": "1a122fb8820084f04fe6eeb81531ebd37bc05bf2b26a67b2b5489468a76ce43f"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/independent-review/symaira-policy-create-race-independent-extra.py",
+    "bytes": 2955,
+    "sha256": "8e04695bd89c3649ac38bb12ff53704c15fa9f15608a8929ca06c7de50210316"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/independent-review/symaira-policy-create-race-independent-races.json",
+    "bytes": 27351,
+    "sha256": "63005f99638e5df194cab941cefe31cac9257c4a2e12e49ff5bd29a796d2d27d"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/independent-review/symaira-policy-create-race-independent-review-receipt.json",
+    "bytes": 6944,
+    "sha256": "de35260efc661bc973f90c90717ccf2f18d655fe665b3ca135ce289879aabd69"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/independent-review/symaira-policy-create-race-independent-review.md",
+    "bytes": 6476,
+    "sha256": "d4b86448e948453531283ed945dc4c005dd6cb12fceae7598f944064059d081e"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/independent-review/symaira-policy-create-race-independent-tests.log",
+    "bytes": 32057,
+    "sha256": "b6d335ff6a08b4bec37d694526bb2a786ac3d5ca1876fe24f5d3e8cd36845a96"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/linux-actionlint.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/linux-cli-contracts.log",
+    "bytes": 1852,
+    "sha256": "b84a83da5332041cd4bcae228f487449083a4633911c12f6c37efaf5324e9294"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/linux-clippy.log",
+    "bytes": 60,
+    "sha256": "9ae36bb22d8f0f810a77044760863f70b81405396a32cce477ec08eecd4e6d59"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/linux-fmt.log",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/linux-init-unit.log",
+    "bytes": 581,
+    "sha256": "64b4d0f63a11a2d52412ddaa30de0cb1a54327e9957a48c95cde3fbaf7e64a6a"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/linux-policy-tests.log",
+    "bytes": 31072,
+    "sha256": "6af69812e18ee28147df87fb6f39c1403baee48eec65959bca31dc314746553a"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/linux-verification.json",
+    "bytes": 30770,
+    "sha256": "64e31e3cc65246f44f2aada92c17662ba566dd9295fef907cd77eb5a8295197a"
+  },
+  {
+    "path": "migration/evidence/profile-create-race/original-windows-ci.log",
+    "bytes": 288445,
+    "sha256": "121c25df6b7f88ba5749ba2731734d367a5672eca342e02f161b1f41c7af9fa0"
+  },
+  {
+    "path": "migration/evidence/release-verification-730/independent-probes-e126669.json",
+    "bytes": 21522,
+    "sha256": "98b594c43e560703080e59fed53b6decdfc8e920e76872c0dec0d9f6ae31f9c3"
+  },
+  {
+    "path": "migration/evidence/release-verification-730/independent-review-e126669.md",
+    "bytes": 8352,
+    "sha256": "4fce1746e949e5643182cb4a064f03025fd5cda1c8086bcb3a2742d78ae379d5"
+  },
+  {
+    "path": "migration/evidence/release-verification-730/linux-orchestration-validation.json",
+    "bytes": 2265,
+    "sha256": "694c425fe5f6afe1901d419e8112b5ee7b75e02e13ebe6b545dd7021f7a605eb"
+  },
+  {
+    "path": "migration/evidence/release-verification-730/main2b-integration.json",
+    "bytes": 417,
+    "sha256": "78c53aa4cc72cd40b95088672b3628330340a1762762567c0e270268e1b9586f"
+  },
+  {
+    "path": "migration/evidence/release-verification-730/main31-integration.json",
+    "bytes": 2254,
+    "sha256": "fab68cc4220e3d2e5bf7512553bcd97d627f4e5fa0db9e87313d3dbebcf07c46"
+  },
+  {
+    "path": "migration/evidence/release-verification-730/maine3-integration.json",
+    "bytes": 2589,
+    "sha256": "540c150a7b0d1c426d0f739c3082a2e82ae999611a896909c7bc2fc6e6a0ebe1"
+  },
+  {
+    "path": "migration/evidence/setup-repair-765/initial-provenance-mismatch.json",
+    "bytes": 201261,
+    "sha256": "d6c53b3f41fe331747c956e3a8f73ab0de5dd161e9a03730010b6935df78ec30"
+  },
+  {
+    "path": "migration/evidence/setup-repair-765/linux-failure-controls.json",
+    "bytes": 613,
+    "sha256": "340df260da4be186c9bcbacc15ad96a126c18ae2fa12b33246babc641947cab0"
+  },
+  {
+    "path": "migration/evidence/setup-repair-765/linux-fallback-connection-mismatch.json",
+    "bytes": 6502,
+    "sha256": "d3a59adb76428d6a073f730bd22331116d4572879b37ed29067c2b697945fefc"
+  },
+  {
+    "path": "migration/evidence/setup-repair-765/linux-process-report.json",
+    "bytes": 1421988,
+    "sha256": "c8222fa3018067b11cc6452fa41df3093f5eaa092c0bf8a79684a6d25c3b83e5"
+  },
+  {
+    "path": "migration/evidence/setup-repair-765/windows-executable-resolution-failure.json",
+    "bytes": 8911,
+    "sha256": "46b789ff6b86c89f0da4ef24f31ace28de5a04c452eba3515b69c7491393d7c1"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/00-0.stderr.gz",
+    "bytes": 304,
+    "sha256": "ab86b25ebe49867ba056e750e4b5749931129dbfa5157675585c31822e134d62"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/01-0.stdout.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/02-1.stderr.gz",
+    "bytes": 228,
+    "sha256": "8a53b789184565846f616a35e6915312fc19a52ddb674f2fe2630029f85334e0"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/03-1.stdout.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/04-2.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/05-2.stdout.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/06-3.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/07-3.stdout.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/08-first-attempt.log.gz",
+    "bytes": 162,
+    "sha256": "09bf4b22ec5db3f5f8fde5b33631c3ad7945f6d413ea0bc28b4993210d431774"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/09-first-attempt.py.gz",
+    "bytes": 1742,
+    "sha256": "ddd80208fbc0bc1ce2b226173c41e16f39d9aa1798d21f9654aa845a49ae144b"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/10-receipt.json.gz",
+    "bytes": 84786,
+    "sha256": "ca7403477bbdfd67672141cfd2fb85e5c5ee531c522d274a1a70e4c782dde230"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/11-symaira-skills794-cache-root-review.py.gz",
+    "bytes": 1783,
+    "sha256": "1596702d4f2234370cca797d0244ed6bea6fefe29cfd8f1b30bee76109410f06"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/12-symaira-skills794-cache-root-review.log.gz",
+    "bytes": 69,
+    "sha256": "b796f6d4da7694c43f0b17a894ff7398090b1e62710b6ab32e1d37c33a65e68f"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/13-symaira-skills794-cache-preparation-final-handoff.md.gz",
+    "bytes": 1133,
+    "sha256": "910bcc06c7ad491b0c1e48ab32804c7cb8e370b22a86a9b2023767a3d3ab1e4a"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/14-symaira-skills794-cache-preparation-final-handoff.json.gz",
+    "bytes": 2060,
+    "sha256": "8f71a8f4605a882a8e067f346bfbf24be375ecbc77af9ffdef3a9f5db01a4df2"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/15-download.go.gz",
+    "bytes": 5169,
+    "sha256": "076b0dd63a3ebb97411a1095e0f45cfcba699e4b52b83fc63f061b2b54c6cb58"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/raw/16-verify.go.gz",
+    "bytes": 1610,
+    "sha256": "807990ac39fb941265912094b5268336106df9a29562d87853853fa38e97b1e6"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/receipt.json",
+    "bytes": 6377,
+    "sha256": "76590baae19ee77963ea026bae4588fc24803b7a506a4653ef5dcb002207e7a6"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/independent-root/review.md",
+    "bytes": 1902,
+    "sha256": "3eca5e7048212ca386003cfb51702aef02e41e15e6959ab402f30a9979df5d7d"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/artifacts-complete.json.gz",
+    "bytes": 1731,
+    "sha256": "088b51919f8a2d0e73cd4970ab2eba13f1aff8142caf7e21f957904aae43159e"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/head-commit.json.gz",
+    "bytes": 508,
+    "sha256": "d709dfa101c1980ba73d407488f8906914ac15d0dff3bedcafab4b3847539f58"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/jobs-initial.json.gz",
+    "bytes": 4163,
+    "sha256": "993677f1567a67d7c10c225b2838cbd17420577b6723f078a186ca52098b5bf5"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/jobs-third.json.gz",
+    "bytes": 4570,
+    "sha256": "1662a5afac7a347906538b62a8976d2fa718e10f22ce7c87f86a052b95b5edfe"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/linux-complete-job.json.gz",
+    "bytes": 980,
+    "sha256": "f7e95c08e60487eaa49fc82f809550247a36e14eca43f952dfd0e9435afdec60"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/linux-complete-job.logs.decoded.gz",
+    "bytes": 68788,
+    "sha256": "1fcbe8ade200c6618259ee123856e20d9e109b6f2ac21cb57c32dbe0d1532d17"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/linux-complete-job.logs.raw.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/linux-log-download-failure.json.gz",
+    "bytes": 382,
+    "sha256": "00e3e7872bd906809808f8f2ba39c9537e50e417f1acc75499f7841608387490"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/merge-commit.json.gz",
+    "bytes": 1252,
+    "sha256": "cfe1b4702e92d3625d6dcae97161632a6d43449eda3df68c97c30bd6f0d575e2"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/pr-initial.json.gz",
+    "bytes": 3703,
+    "sha256": "dd10fd0fbc7daae6735d0424edaea12924f83a52d6497e2989a23779fd592556"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/receipt.json",
+    "bytes": 20613,
+    "sha256": "21b43aca5e6b3aada06fa1090b17786b155e5310eb72b1fc1e9971dc099ff2d0"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/required-check-observation.json.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/required-check-observation.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/required-check-observation.txt.gz",
+    "bytes": 169,
+    "sha256": "fc8df3dde3263256f49ed25efab6ee32e217e3b36aa0a648a9b67505b7bd3e62"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/required-check-second.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/required-check-second.txt.gz",
+    "bytes": 169,
+    "sha256": "fc8df3dde3263256f49ed25efab6ee32e217e3b36aa0a648a9b67505b7bd3e62"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/required-checks.json.gz",
+    "bytes": 148,
+    "sha256": "690dfdeec532b247bd7e4ccd741b76556afcd52933513cc8b914ccd9d33e54f2"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/run-initial.json.gz",
+    "bytes": 1741,
+    "sha256": "a674454508d680f4355ca3d3b53369e3cdc71b2e07fc14265de6405ec13631dc"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/skills-artifact-manifest.json.gz",
+    "bytes": 200,
+    "sha256": "3daa841c3c609895d67f5ee1c6b3959f6182c0198c583ce6803e385204dade8b"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/skills-artifact/go-build.json.gz",
+    "bytes": 381794,
+    "sha256": "a7940c411f5f8da7eab172f009e7073701500fb871d7fba0821a55f73c791419"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/skills-wide-argv-Windows.zip.gz",
+    "bytes": 375281,
+    "sha256": "f38c3ff4e135c9a7ab91f0adfcf4f287dff6a1d164853069e14f482fbc3afeb8"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/source-binding.json.gz",
+    "bytes": 648,
+    "sha256": "9bcf2d92b2f7cba8e0ced4556c5961b9f6684d998b0522891e445c53538d886e"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/watch_windows-first.py.txt.gz",
+    "bytes": 700,
+    "sha256": "3c98036fbd9df463e639afe39a56485847db3d7ef3fd6c60278701e90d8b0b55"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/watch_windows.py.gz",
+    "bytes": 710,
+    "sha256": "791fdc3bedd6e4f9105df015a27b48931275df59f95efd4cd5ed2bd5ec16e2ba"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T075357Z.json.gz",
+    "bytes": 1073,
+    "sha256": "51e6a64bced09025584b816224c529afbfba00d2f3c5b45d5e89559fe043421f"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T075357Z.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T075458Z.json.gz",
+    "bytes": 1073,
+    "sha256": "51e6a64bced09025584b816224c529afbfba00d2f3c5b45d5e89559fe043421f"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T075458Z.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T075559Z.json.gz",
+    "bytes": 1073,
+    "sha256": "51e6a64bced09025584b816224c529afbfba00d2f3c5b45d5e89559fe043421f"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T075559Z.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T075659Z.json.gz",
+    "bytes": 115,
+    "sha256": "dc99dada891191d1d7e9a7d06388e12e9b73fbccd7b013353def641c8e562698"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T075659Z.stderr.gz",
+    "bytes": 51,
+    "sha256": "3ebe4502fc324df10d9744ed9f750ae9940d1d5d6840bcf158d96bd30610a51f"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T075740Z.json.gz",
+    "bytes": 1073,
+    "sha256": "51e6a64bced09025584b816224c529afbfba00d2f3c5b45d5e89559fe043421f"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T075740Z.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T075841Z.json.gz",
+    "bytes": 1073,
+    "sha256": "51e6a64bced09025584b816224c529afbfba00d2f3c5b45d5e89559fe043421f"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T075841Z.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T075941Z.json.gz",
+    "bytes": 1086,
+    "sha256": "cda6f78c6884f9b475b17277befb167c06c23dc147d52092d09d677ba06ce208"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T075941Z.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T080042Z.json.gz",
+    "bytes": 1086,
+    "sha256": "cda6f78c6884f9b475b17277befb167c06c23dc147d52092d09d677ba06ce208"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T080042Z.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T080142Z.json.gz",
+    "bytes": 1086,
+    "sha256": "cda6f78c6884f9b475b17277befb167c06c23dc147d52092d09d677ba06ce208"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T080142Z.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T080243Z.json.gz",
+    "bytes": 1099,
+    "sha256": "dfd746d82f969c315369821cd7dd093e9dc17d7ae37041fbfd96a939d842066f"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T080243Z.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T080344Z.json.gz",
+    "bytes": 1135,
+    "sha256": "fbe25aa2ed0f597fe8dad832132c3d20cd8fe84a49a641919c3ca9a6d0bc53a1"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-20261004T080344Z.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-after-api-error.json.gz",
+    "bytes": 1073,
+    "sha256": "51e6a64bced09025584b816224c529afbfba00d2f3c5b45d5e89559fe043421f"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-after-api-error.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-complete-job-log-command.json.gz",
+    "bytes": 1327,
+    "sha256": "5186e1ca338e09dd3e25a3a09cc82e2189926f891544c3f59199274e464e45e8"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-complete-job.logs.decoded.gz",
+    "bytes": 66649,
+    "sha256": "48d300ed66036e493046a9e461d3ff6b2a7d2d17aacff827f3bd0b45d6805456"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-complete-job.logs.raw.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-complete-job.logs.stderr.gz",
+    "bytes": 374,
+    "sha256": "aa269f651d5b97f9f996bf63012f2e93cf14125feb2de1fdf1f808b6ca1842dc"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-observation-2.json.gz",
+    "bytes": 1073,
+    "sha256": "51e6a64bced09025584b816224c529afbfba00d2f3c5b45d5e89559fe043421f"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-watch-first.log.gz",
+    "bytes": 343,
+    "sha256": "3cdb3c35a126a47db39d06b754f9a43c345a028b682cbaf0c4c328025268e9f1"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-watch-second.log.gz",
+    "bytes": 683,
+    "sha256": "73c3ee30f12867a39c478da68067f0f7ca692855405e546bfff4a7f2f8276ca3"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-watch-second.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-watch.log.gz",
+    "bytes": 343,
+    "sha256": "3cdb3c35a126a47db39d06b754f9a43c345a028b682cbaf0c4c328025268e9f1"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/original-cec81-windows/windows-watch.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/portable-preparation/receipt.json",
+    "bytes": 2764,
+    "sha256": "8babffb2db8c535413f42958219c4f901b6310a983e9b52cd94801c74ceeb120"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/portable-preparation/symaira-skills794-cache-preparation-actionlint.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/portable-preparation/symaira-skills794-cache-preparation-actionlint.stdout.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/portable-preparation/symaira-skills794-cache-preparation-novel-tests.stderr.gz",
+    "bytes": 228,
+    "sha256": "8a53b789184565846f616a35e6915312fc19a52ddb674f2fe2630029f85334e0"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/portable-preparation/symaira-skills794-cache-preparation-novel-tests.stdout.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/portable-preparation/symaira-skills794-cache-preparation-tests.stderr.gz",
+    "bytes": 303,
+    "sha256": "99487a22e38a0f5c9df7e24fe9580eeb92a0ca62f4f354953af2b7eccc77eb56"
+  },
+  {
+    "path": "migration/evidence/skills-cache-preparation-794/portable-preparation/symaira-skills794-cache-preparation-tests.stdout.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/ci-code-head.json",
+    "bytes": 4293,
+    "sha256": "5040abcfd86bd9bd6a64cb026a37797dffa24c8b7999032aaaa758e1d74ed3fc"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/independent-failures-d7d0acda.json",
+    "bytes": 150475,
+    "sha256": "6fa11ca5e4415e5613456be1092c0000958ddd13acf22e6e009b26a8e33ed005"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/independent-review-9ae16e7.md",
+    "bytes": 4369,
+    "sha256": "f7adf93be4947d60f4d61e69532483451c7c09a46077f5bde4d5b1ae92b5335b"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/independent-review-d7d0acda.md",
+    "bytes": 7880,
+    "sha256": "3fbf57c50986bf7226a518ffd8f9c827d245f55f41658ae6fbff592428fd20d3"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/inventory.json",
+    "bytes": 44044,
+    "sha256": "8b05b470adf7e0f53979229e5f074ef2ab67e6a9ea724b19526ceda98aa9a43d"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/known-padded-target-mismatch.json",
+    "bytes": 1269,
+    "sha256": "aa1fb427e2de73767a4b20b84bce2e5860f7c4c4efb57d1cdd73f63c7f079630"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/main2b-integration.json",
+    "bytes": 4321,
+    "sha256": "2448ad8e84310dd715d1daf963f57dd336d12dba47c08d2639e5de82d5033326"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/main31-clippy.log",
+    "bytes": 6714,
+    "sha256": "900fc24bfb55e01879d9a830a70f57a82400106bfe3d41e7a297697c5e871a29"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/main31-integration.json",
+    "bytes": 552,
+    "sha256": "00ca827ef0e82f3ce25b3571795ab34a9cdb251cdade550a1c1b5a23b4f5a10c"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/main31-process.json",
+    "bytes": 319454,
+    "sha256": "828120a99622eccb5adfe4af37d0459212c1c63732585cee939256361036bede"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/main31-rust-tests.log",
+    "bytes": 48523,
+    "sha256": "81d30664d0b8960194074884095b84694481ad0a6e5975fc3533701cb2a593fa"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-main31-raw-flag-process.json",
+    "bytes": 319581,
+    "sha256": "7adc21a0034b2c9240f90fd776a89828d36aedae13c39356cdd33e5bdc66e579"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-maine3-build.log",
+    "bytes": 728,
+    "sha256": "829c91fd1393d4cb05a5aca6535c19de0876bdfec5b332657e5c2130ef90ed4e"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-maine3-clippy.log",
+    "bytes": 655,
+    "sha256": "9a55c76105968622fb6286999a268608908fd14ba0f7229001717e0ecfd04c35"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-maine3-process.log",
+    "bytes": 90,
+    "sha256": "2605ec0527c701a831517114f78a07dbe05249bf0d3024b7256c1e095026ad0e"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/maine3-integration/symaira-pr794-maine3-tests.log",
+    "bytes": 44284,
+    "sha256": "b63153636ae15b9f9a082510a484a98edc1d3321cab0af97f493217fce3039cb"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/maine3-integration/verification.json",
+    "bytes": 1499,
+    "sha256": "7513deaf44a424f4ac10aed0a2cd422a4a51fb41ca32d16733a0b5d92fc4fd19"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/parity-30-cases.json",
+    "bytes": 16935,
+    "sha256": "d88f566da1d1ace8f1beadc04e8f706cf89f19cfd6909d83a7d9b3fd57acfcd1"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/preserved-checkpoints.json",
+    "bytes": 3618,
+    "sha256": "0eea4057e268942f6afad8af110a0489bb37c34fb6b9ba1116c153b190113250"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/raw-flag-repair-linux.json",
+    "bytes": 319425,
+    "sha256": "2cbfa13b5010743882ef5016e0986e544ea01a33245c0b29934b57d9f37dc915"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/raw-target-repair-linux.json",
+    "bytes": 145169,
+    "sha256": "9ec255596406776cd4c25843e5ab9f334d2ed7cbba168de10c09750596bc42d7"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/review-code-head.json",
+    "bytes": 2394,
+    "sha256": "4add4d6778226328b50ebcbb78b234b937cc9bf97973a6aaf31f41df4c4bd9c5"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/verification.json",
+    "bytes": 1499,
+    "sha256": "334ac40d417de945fc5bb48a8a8e6187afdadb6b76bf7c9fe39d7c1763d15299"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-unused-test-import-6fff605.json",
+    "bytes": 381,
+    "sha256": "3720c65b8272a0e31b07d17176f0f33076d9f4c9c130d5842adb8e29de5d673f"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/actionlint.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/actionlint.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/build_go.py.gz",
+    "bytes": 3954,
+    "sha256": "7ab545749c8afdea2cbeec1f267779310aadad344052c5d3e807163c510f32f0"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/build_parent.py.gz",
+    "bytes": 2677,
+    "sha256": "327e874cdc8fd6edfef943ea83ca3b93aecc12a04e87c34fe46aa204397e3131"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/compare.py.gz",
+    "bytes": 3052,
+    "sha256": "80bc718ec4b94fecec122aa1c49da4c13e055e5c48e2b19c86dc0929345f1580"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/diff-check.stderr",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/diff-check.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/initial-retention.json",
+    "bytes": 4005,
+    "sha256": "0bb73c861b86b8103a10a570b74eacb912e9be263e1c53522fa108046bd3d01b"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/novel.py.gz",
+    "bytes": 4231,
+    "sha256": "e187d8b2fe112adc5005f647cc8705d349364c3e975ff21d419a04055a0cc1ee"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/receipt.json.gz",
+    "bytes": 559,
+    "sha256": "38aeca719aa7e4c8eaa3ef881168ff30149773d5d91bbfc5f593642c7f4bfa33"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/source-preparation.json",
+    "bytes": 77031,
+    "sha256": "4526b6931624dbc2237e14fa21e21930735eef0a09eb94a3ff324d7551fba7d0"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/stderr.gz",
+    "bytes": 481,
+    "sha256": "01afb10dae70b012f4b5a7ebfd5884c50e6d6f204c0e6355f99248e65f892feb"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/stdout.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/test_build_go.py.gz",
+    "bytes": 1337,
+    "sha256": "c64e7516164208662d559cb62e8bda321615441d29a5da582f4172408144bd07"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/test_novel.py.gz",
+    "bytes": 1171,
+    "sha256": "4adc22dfacad77a5d154e46e01317c5041d756e9b145503705feb34b4ea482d0"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/unit.stderr",
+    "bytes": 662,
+    "sha256": "00061644fbda16ecfe15821c732ae06ef709f211495e0b2cb64f141d0b443a26"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/unit.stdout",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/verify_control.py.gz",
+    "bytes": 399,
+    "sha256": "219df3fbf78a3892a85201575d3372b766be79ff07c223503f78f91e03b9c80c"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/novel-runner-preparation/verify_novel_control.py.gz",
+    "bytes": 497,
+    "sha256": "4abdd3281760fcff732923e6fc9fbe484dcda9cce4e69acb026f7dfa6131894e"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-01f-source-and-evidence.json",
+    "bytes": 60695,
+    "sha256": "6d489c6a5ad34c9a5d333a99b06e0f30f2eed5fa56bc53cd00c83454b9df0f3b"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-70b-static/retention.json",
+    "bytes": 1888,
+    "sha256": "ce8184a680c102900ee3cc0f7fe75288e35c8e4261c7bfaf6e99fe5d8583ecdd"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-70b-static/symaira-skills794-wide-argv-independent-novel-plan.json",
+    "bytes": 43261,
+    "sha256": "5478c095a73d0332baa987dfae3dea6d3c3863104841be7b4d689edfba762bce"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-70b-static/symaira-skills794-wide-argv-independent-prepared312.json",
+    "bytes": 48784,
+    "sha256": "fa305cec4347862c5cc63a31b324f7728cb42a00ecbfbbc17b6a96ef09f9983e"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-70b-static/symaira-skills794-wide-argv-independent-static-handoff.json",
+    "bytes": 1156,
+    "sha256": "d9807cefb05b067b0c5bbe2e82ac3497c3688cf1a7470f74b60722698b7fbc93"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-70b-static/symaira-skills794-wide-argv-independent-static-provenance.json",
+    "bytes": 46942,
+    "sha256": "e8f793fa112c431f7d378e2b75c6fdf2d9c199c4cfe5b890bc8e72ca19e815e4"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-70b-static/symaira-skills794-wide-argv-independent-static-review.md",
+    "bytes": 8826,
+    "sha256": "b726418ed1424315b4dc142fe0814a37f67b763adfb5ccf905f600d5d05806d3"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/original-70b-static/symaira-skills794-wide-argv-precompile.json",
+    "bytes": 3940,
+    "sha256": "0ba10012e2e726646571b5b5eb091adfc0767790444e52ac81b51d1e9bf0b6c2"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/00-symaira-skills794-owned-go-source-tests.log.gz",
+    "bytes": 231,
+    "sha256": "d78f5c07b9feacbae87740e4fe188cf8ab388df72d16aa91a45a8171abd50745"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/01-symaira-skills794-owned-go-actionlint.log.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/02-build.json.gz",
+    "bytes": 760817,
+    "sha256": "25b04d8f3159249aae2470f9634b2ea57b14aaa857d9d57dfeeffa04d536d2e5"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/03-build.log.gz",
+    "bytes": 108,
+    "sha256": "458b0ea3844b80d05447bd31250c5a97e06c1cae9524d1c6dc1eba1a2210f718"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/04-receipt.json.gz",
+    "bytes": 2466,
+    "sha256": "003a9e86d4396571f0f28e7fdb999635b5336fbed91273d6dfdd222752159cc1"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/05-symaira-skills794-owned-go-linked-control.py.gz",
+    "bytes": 1488,
+    "sha256": "8d0c3b6f454f596af3199b2733542fddd2a1e0ab22914bddc9ab8bd41b722eb2"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/06-symaira-skills794-owned-go-linked-control.log.gz",
+    "bytes": 192,
+    "sha256": "955891aa53fbb0abe320e70c913f706e6bfa86d94639a315915c18e26f57ad97"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/07-receipt.json.gz",
+    "bytes": 560,
+    "sha256": "7cbe479ba71fb7a465960fd59088309b688b97072ef12bfc3d410e0f7b3e482c"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/08-symaira-skills794-owned-go-preserve.py.gz",
+    "bytes": 1479,
+    "sha256": "421a8c7d35010ac468f9030d42ee9ad7443f28cbffef41e04ee1f70aeca2445b"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/owned-go-builder/retention.json",
+    "bytes": 5550,
+    "sha256": "ac5bbf6d41bf7efb26cb10aceb2203f5b7fdc82c3392232c5b6b000e53de59b5"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/retention.json",
+    "bytes": 9147,
+    "sha256": "1be4c19c70fa3f3543e198ca53adf0f8b1751d9cc6b7d0f6ab98f15331cbb31f"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-Git-admission.stderr.gz",
+    "bytes": 232,
+    "sha256": "3b6df4f0e794322e2239bd3b60e133fecd53b5b4e344a238461c4e34a24d0441"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-Git-admission.stdout.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-actionlint.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-actionlint.stdout.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-archives-first-schema.log.gz",
+    "bytes": 167,
+    "sha256": "706109b64693df65c17ac888a8b9a8c5e446c538542141ddc5df914976a6bdd5"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-archives-first-schema.py.txt.gz",
+    "bytes": 818,
+    "sha256": "09a7e244a62f4ba4fda72366493c1c122adc52a0a35edfaf296669658446a58f"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-archives.json.gz",
+    "bytes": 62267,
+    "sha256": "4326b2620804543668cf91f5a20a478c614cd60968f6b2b4ed0c88e9aace5cae"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-archives.log.gz",
+    "bytes": 173,
+    "sha256": "9d999ec473787d3c2680869e343675e3d143f41850af224df08545c3fa3db261"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-archives.py.gz",
+    "bytes": 885,
+    "sha256": "809de11c8d44eb52e0ffbb7449f47e32112f91230613a25946bd9033640f989a"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-archives.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-existing-process.json.gz",
+    "bytes": 723,
+    "sha256": "731918edc0b8404c81ccaf109fb58341f275cd19a7a8d2253cd5240228526a33"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-existing-process.log.gz",
+    "bytes": 133,
+    "sha256": "20200bbeb5ef89040d29ec1502a84b83d152da1c3cc73638ed7b99e16b473c49"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-existing-process.py.gz",
+    "bytes": 1278,
+    "sha256": "cb4991b91761a2e93775bca87f8eb24b937ee98b68c2c5ee3cb2a9c3f16e7669"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-existing-process.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-plan.json.gz",
+    "bytes": 1269,
+    "sha256": "464e7def95c0c323802a5fefcb033d922b88c55d1423fed03703ed3b49362da5"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-plan.log.gz",
+    "bytes": 397,
+    "sha256": "dad3eb81dc1262ee7b52cc1430aa787629cc6d13206b5dbb0bc32db26bca9653"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-plan.py.gz",
+    "bytes": 1868,
+    "sha256": "859071c9ad25233f43e8a6af6f2ae6bfbc0ddd380319f2a585c1631bfcf524ce"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-plan.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-preparation.stderr.gz",
+    "bytes": 228,
+    "sha256": "10f8960adfc4e2cb55767b870972318be11d97b7e1846b7f1079f2236983d47c"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-preparation.stdout.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-provenance.json.gz",
+    "bytes": 28071,
+    "sha256": "05594e4f94604ac338512cd011cd340b6e84795b297771b778c743a842c8042b"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-provenance.log.gz",
+    "bytes": 324,
+    "sha256": "d8f267034a92b689143e3af0b03c11479fc958647928453201a3d129f1567b5a"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-provenance.py.gz",
+    "bytes": 2003,
+    "sha256": "084fa5d2da7ece838fe00da45520885ad0f2522098255331fa8d2f00be21c386"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-provenance.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/independent-full-source/symaira-skills794-novel-independent-review.md.gz",
+    "bytes": 5103,
+    "sha256": "2bbffcc7892e262f6df893833481ae73baaafabd2dff445e539bfa424626348f"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/000eee72d6f698d88f0d23b8fb88a29f8d957ec270f49e65b554aa897a2210da.gz",
+    "bytes": 20638,
+    "sha256": "9bfe0a21523169ce51e9d294b66be6415bcdc809fc2f8f4070ee99737a423ec3"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/00a0c5410327b5f7deff804c3ec587e9ea7dd45042a3e4593a338c05ca549e7c.gz",
+    "bytes": 24974,
+    "sha256": "fdaaaf2c01e7c65a1800a74b1579eedb55b63a58a5c051598d9ec2c440ea99bc"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/0baf00c0a2e4b43834c04e9925db4d70709e23a588a7a66af811ac93c81b7a4e.gz",
+    "bytes": 473,
+    "sha256": "5e030998e2e9d486bb8ee904082b8432af408b2c0da8df024ce61325b315bd5c"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/18afd78f0534d9cf20cab99af08e82d53d961023ff91960791fc89b3aefe57ac.gz",
+    "bytes": 20726,
+    "sha256": "c1182672f1626b1f419ce68fc7ca3dd38192cde0812658923b8d505e6b932ca8"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/18e44015c52e320a38e67f3f2ef245ed55f0bdd5a5743b83ed2f86d34d8da3f4.gz",
+    "bytes": 39,
+    "sha256": "d4252da5dd980c3d973b4baa858621ef71b4614122d6795afa1a0e18c3ef8a88"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/1a349155c27f7092ab218425cb270a788cf49121cb367403b34c1a9af1eb72d1.gz",
+    "bytes": 59278,
+    "sha256": "bc9ba457423482c540976be869fa5525c1b0bc628c8438ffb752534b570355fd"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/1b58b9704a51bcd64cdfc2fe00d75ce813d01eae57dabb263ada9f652111d661.gz",
+    "bytes": 2082,
+    "sha256": "a14b2ad891cf0b88286103f62daf94d9b03950920de8740585f7ecc835ab50ee"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/2578c23ecdd43766b856e44f0e0293b080798a9c430e9426b800fd43d2c8e66b.gz",
+    "bytes": 212,
+    "sha256": "b572a0c0bafbfc233de93ccde2eedf3c28d4c0ef75c29c1ab0f92de666cd6429"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/3988e94b0d7b6c05ed07af1fa5db82f3d2c8ee4393778da62f090c6b82f11c70.gz",
+    "bytes": 2450,
+    "sha256": "3a70dbe77a32e0ab37cbd7b6cedeccf8aa62b1b9486ea75d016ca53ec246d0f3"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/3b2a1281f0475604b51cfddc9e68a97c3becd95b5e3610af84080f8a65df44a4.gz",
+    "bytes": 760791,
+    "sha256": "49e4a4ba67df465799eebf200624fd57ff7149f5dcd847ff476a2caba2e5f7a6"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/4212f5fc39587766a581cfecac3bf523e7925fecac3915090b6cadeb4206f701.gz",
+    "bytes": 394,
+    "sha256": "4a7c1152ea2cad614dd2180afa2e3cc8b4dc8cb7cb33ec0e4aa15ada961d94ba"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/4795661b84d30d3697fbf4f9b20ee60a2fca093bee424b2f964f223e16cf40f1.gz",
+    "bytes": 26605,
+    "sha256": "0a9cc02cb1b8c5b90c20bcf19bdf4903e645308ac9d1c689bc95cf79e297b701"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/51b8194cee95bd167ed61808f29536bf66df6df71ee5ab1ef8b8f6dd0b4f9f89.gz",
+    "bytes": 70,
+    "sha256": "52c72973784f36778bcee852699dbe6131bba8bdc154ac9e4a47729b549a03cf"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/60752725ea6f194f20ebc7150276eef9d351f09c52a8c6e784e05f6a10ca45df.gz",
+    "bytes": 80,
+    "sha256": "b936f56a81e02450219ab2c94a49a9b5ce03ee4aa25afd56b6bbf40e790071fb"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/61d6a554d72368e8d33069f9fa56251b9dc2537be1d4bba0cda8b37405d3e21a.gz",
+    "bytes": 26477,
+    "sha256": "f6961a151d4d87cbb1b7128c41beb7e56b114ceb75392652882af5f2b90c9ee3"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/6d7194db84b6e46c48d94cb8f42fa46dec48c6cf4fc6e9bac7eaf02728b8bc9a.gz",
+    "bytes": 1363,
+    "sha256": "a2044f673837d05ea5c8cf030b9d1d371a7af5ab9c5ddd44423498a0c5d02690"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/7978e76af10783bc507fe5800edddc227379e9a33bbd6f1e7856f66b1f0fa15d.gz",
+    "bytes": 5103,
+    "sha256": "2bbffcc7892e262f6df893833481ae73baaafabd2dff445e539bfa424626348f"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/7e75c69d0aba63b0ea8181cbf7934cf022b14b0706cc966704f1e73a6277430a.gz",
+    "bytes": 1858,
+    "sha256": "d318f8cb32f2d494b1cfee6905a1523dc9e021d839201158b2c1d1eb4c03ca9e"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/86856ec34b8d80f80f79972a752b95e8dbac0548439a97422f693423f29be931.gz",
+    "bytes": 80,
+    "sha256": "bc2b3b73b3c4680591683ff3472d4480af531222fc3753c82d6715eaffcb918e"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/8779494d863a563f8f26a9e17b31344427b1669cdebfbba2d349d6b9daaa283a.gz",
+    "bytes": 109,
+    "sha256": "ca9001b3c634da04fb82e580c3b6ba6badf3516df011717446439bcc36979c57"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/88bac7d3cadb96b3a4a66b328e58ac40ecda8eb86b1fe1f813aadaa845a1eaa0.gz",
+    "bytes": 231,
+    "sha256": "6c6bf4049517317139818eb51a409dded1568c7e838b1e15c921cf6f4b431cda"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/8b7c91cac72afd46a50aaeb5ff84974784b0f7308a56c42b0825606120187ece.gz",
+    "bytes": 110697,
+    "sha256": "43987e342c6b6ee6d6c81ef8edb18c0fab958e16a3ba7c05ffe41c0ad14498d4"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/8d70c27c7cf8114a4007180455bfb8feae4d7b758ed65a96a2b58ba717b935ad.gz",
+    "bytes": 190,
+    "sha256": "e7b35332d4e510c9fed06528c84654038c0cc2ee450bb13d07287638d4936bd3"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/91433f5990468a12267d3e3bc75918eb867aeafa2efb5aa806af9d87d133d6b9.gz",
+    "bytes": 162,
+    "sha256": "1d71703e9df46ff68a872c7728f2e3a8da11158b6a12d7a5576b88092d8282b1"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/98eb5099c3657b35af05d27c2a04f7120436c92eb8de716f381345fc207c88ce.gz",
+    "bytes": 640,
+    "sha256": "d894229bbbed8ef6c3d14c9fc1be66c1429863066ddeb6a53e8f2f9a3abadd3a"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/ac9b919d342b3e7a38a2438dce0cbaf0f367ae0edbf15c1f86becedd333446ae.gz",
+    "bytes": 78,
+    "sha256": "491bbd10886dcce97f6ac7f6b1ded0b8e2a34bddad51fb77a519c7335a0f0a3a"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/b6fd3fba83d0c413166e85f06cf936196327b6728c3e80b067defb4fad78ecc6.gz",
+    "bytes": 110,
+    "sha256": "eb95c6d8dc6cca2440a8b6cbed17cd788ddf47a03798942f1feef4368e675c33"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/bc05325d894afd4c6fb3f3917e45e2eb0f03ea727a05728874f108fa954d96ec.gz",
+    "bytes": 78,
+    "sha256": "2ffac6f39ad80a16f5afe99a5de89b8679fdf6304e9c675f128880f508348c3e"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/daaf19f309d73466600f9062e7d4d344d3a0c7a4e0690f14ab51d1bb4d4cece6.gz",
+    "bytes": 1800,
+    "sha256": "b3899e101959c0be7d9fbe72d5a2d8c65d2009a74353d7a7d8d2a1b9a37f1bb9"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/e2107ecf631f4a2d1cfd2fcf83d35d9e9fe101198e7b4237254174b15f14b9e3.gz",
+    "bytes": 30801,
+    "sha256": "50fbf3140e5176c5cd63be5edb5f69a646dbcc2ed64480ee3ea2b3bf5d1ef0dd"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/ead8a0c8d745fa2ab517746af8cb357724354353a6d0ee2fa069913983c0dfcd.gz",
+    "bytes": 320,
+    "sha256": "59f200eb57aa3dad92260fc63e184dce4c7c696e24e46e82ed83a92b02d51347"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/efe36bc8261f41b50a623a4b57cd05f47dad1b51fb25c472fc74662865872daf.gz",
+    "bytes": 20657,
+    "sha256": "a5e7e8e142b0ba57b10cf30d90d24fb65d8fda7d8b05f0dcfb46188d15079ee0"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/f8243d15575a220e659f3edb79a9cb8beea41ef4915bef8bbfb9ec29d6e631c3.gz",
+    "bytes": 10715,
+    "sha256": "aefe4243837ad2c1671bfa56ca631e076ab971f176934f24a700442a814ed351"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/fa6982c57811f024e69f73955e9dc661daa47c6cbc114d3b5c6e4f17d09ab9fa.gz",
+    "bytes": 60,
+    "sha256": "1de42130c38e7c2a162258477b8ad875f4b143e34f243dea6ade497d3e552b51"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/raw/fe43f3eaf9f0bcfcee92148eeded6db8c43ac053e2de0b9ac64c548dbb1e1785.gz",
+    "bytes": 2104,
+    "sha256": "15dd6c60857ebce28ca8185863e91a660ceb56f69326ec6b76d9fcf765177b23"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/review.json",
+    "bytes": 133834,
+    "sha256": "536d82a3bd13e85928889d02087141c336ab14700d31a65034f4df97dcd0bd48"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/root-522-7559/review.md",
+    "bytes": 3262,
+    "sha256": "be5d951e9dc496f11ce30580ea7520f22da50feeb9cbf701b50e183e5d3e1757"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/000-affected-tests.log.gz",
+    "bytes": 10039,
+    "sha256": "02187d96c75756759589bc7556980eb6adf9168b0e16a157b4866ac49863ee7f"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/001-initial-driver.exit.gz",
+    "bytes": 24,
+    "sha256": "1667a2aa790d68a83c2352393cd402515dabeb53fcbee2a8d0ad98b774e14015"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/002-affected-tests.log.gz",
+    "bytes": 10446,
+    "sha256": "a2793e430ba0ef977914a451775807c2d9f8acf9582057fc0bebf6a63e9c3154"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/003-core-tests.log.gz",
+    "bytes": 2080,
+    "sha256": "aecfa86670bbdc95dbb7f2975c5ea1e81b2bf6201b2234cf369e7d1ea0cd24b6"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/004-modes-driver.exit.gz",
+    "bytes": 24,
+    "sha256": "1667a2aa790d68a83c2352393cd402515dabeb53fcbee2a8d0ad98b774e14015"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/005-strict-clippy.log.gz",
+    "bytes": 548,
+    "sha256": "2422e747ef5f200f73b2e4bc7b5165d836c0c4be551489016010b8faade5569f"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/006-actionlint.log.gz",
+    "bytes": 343,
+    "sha256": "4cdb8036c4959138c56b00dd0d9f2d5b2ff56e8755b9d89f88c974a6f525bd91"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/007-affected-tests.log.gz",
+    "bytes": 10578,
+    "sha256": "b8bc24ad01632c211f4485559ed2a18406fc75a964604dc71ded32055eb1f6c6"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/008-core-tests.log.gz",
+    "bytes": 2066,
+    "sha256": "87cbf697ac072beeb5e20e69f91857f20231b5dd25cc55aa1f603feb8cb9b851"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/009-fmt.log.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/010-preflight-driver.exit.gz",
+    "bytes": 22,
+    "sha256": "d381e5a9b7c1c71b5fb3fef202103bf4b6098ce288f148735de1ecf61d4e3b75"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/011-strict-clippy.log.gz",
+    "bytes": 315,
+    "sha256": "59e5b3deaba9c6316d32b3531ffdff89f458aa23d7854cf3d672a40f7b2959ca"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/012-actionlint.log.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/013-affected-tests.log.gz",
+    "bytes": 10441,
+    "sha256": "e68a135988673b2216622d22df1662e0418b0b5cbcb7f6f0bca34cddc4276e50"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/014-cli-build.log.gz",
+    "bytes": 80,
+    "sha256": "8ca31e088a4eb84fed38fd8f964fab4150d07ee1a265ed96bb39ea7ee01d0e28"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/015-core-tests.log.gz",
+    "bytes": 2014,
+    "sha256": "170a0942859e4d7a6b6c5188556e7e6b4ee702d64ba7e63bfb876c9e3781dc27"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/016-fmt.log.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/017-go-build.log.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/018-metadata-failure-retention.json.gz",
+    "bytes": 730,
+    "sha256": "d1ca6d00caa6506d76f858a6be48e28faa82d4d8534172f3e0bb41b9ec763761"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/019-process.log.gz",
+    "bytes": 254,
+    "sha256": "bdb8c30dbb8cbba8f9606382dd2b372ccd5ef536e810321ac815ccd792ef2074"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/020-strict-clippy.log.gz",
+    "bytes": 80,
+    "sha256": "392520128b188de33aed6030fb06b45e111efbbc9440c6fcd4f3b6df1ade93c7"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/021-clone.log.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/022-control-flag-input.json.gz",
+    "bytes": 20653,
+    "sha256": "d76a3528cd35bac89ef31544a233494f74f804c96c4cd74dbe857e7c24aeff6e"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/023-control-flag-input.log.gz",
+    "bytes": 110,
+    "sha256": "eb95c6d8dc6cca2440a8b6cbed17cd788ddf47a03798942f1feef4368e675c33"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/024-control-normalization.json.gz",
+    "bytes": 20670,
+    "sha256": "1cffb020e16fd63590562148fbbc76d14bfe8a721d7c2edbcb48a70bdc11119f"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/025-control-normalization.log.gz",
+    "bytes": 110,
+    "sha256": "eb95c6d8dc6cca2440a8b6cbed17cd788ddf47a03798942f1feef4368e675c33"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/026-control-quoted-value.json.gz",
+    "bytes": 20740,
+    "sha256": "4b608bb7c012882f34be3e707b3fe4622ef402cb67b71e8710963999d293d49a"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/027-control-quoted-value.log.gz",
+    "bytes": 110,
+    "sha256": "eb95c6d8dc6cca2440a8b6cbed17cd788ddf47a03798942f1feef4368e675c33"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/028-go-build-info.log.gz",
+    "bytes": 1127,
+    "sha256": "a955672ea761f060bac5530c18ebc806e552c573e30381bae947caadb5d5be8f"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/029-go-build.log.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/030-process.json.gz",
+    "bytes": 30816,
+    "sha256": "870f36854d44b496f8b034bfdbcc0e9e7b7154859daa4aed6aa6a62026d3595b"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/031-process.log.gz",
+    "bytes": 60,
+    "sha256": "1de42130c38e7c2a162258477b8ad875f4b143e34f243dea6ade497d3e552b51"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/032-receipt.json.gz",
+    "bytes": 24995,
+    "sha256": "2897654c4549f902265083209d2301c0b5939390dd60d3ecb9f5867b389170b0"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/033-symaira-skills794-53711-checkout-mode-correction.json.gz",
+    "bytes": 126027,
+    "sha256": "b9943095ef62d2f0a2072bc88068105c359c12fafc98a34f69db3f8b986d0275"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/034-symaira-skills794-51e42-source-validation.json.gz",
+    "bytes": 662,
+    "sha256": "5e7be3fe0b91b917351366d5ee1d4c54f509b412f7b9536cd8759a00fc11bb1d"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/035-symaira-skills794-51e42-original-route-maps.json.gz",
+    "bytes": 490,
+    "sha256": "c6a40b9d0faa6fdb595bc64048ac38b1f4ee9a289a5a7684eaa318935d7c2bbc"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/036-symaira-skills794-51e42-original-full-rust-map.json.gz",
+    "bytes": 24973,
+    "sha256": "79c5a55bf6ca9f3d38f2ba82a3102cdeb30b88f3fbfd766de07b39bf985620e6"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/037-symaira-skills794-51e42-go-full-source-map.json.gz",
+    "bytes": 192519,
+    "sha256": "bb6f9bf9297f1b3545a28db767d149f480d9aa0bb6f30aeab291b4be7917bec9"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/038-symaira-skills794-51e42-vcs-diagnosis.json.gz",
+    "bytes": 505,
+    "sha256": "f5641c247a58f2e432457be09571729a7724b1e8c0f7712be47f9ae2d95ad6b1"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/039-symaira-skills794-51e42-vcs-dryrun.log.gz",
+    "bytes": 25482,
+    "sha256": "17ad2ca184ff1341429f9bf70ada4752ce9364407c2e684ac9874644ac4db834"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/040-symaira-skills794-51e42-novel-author.py.gz",
+    "bytes": 2462,
+    "sha256": "98503cda985c6f1fafa8e68334e95b7ec2223a05f092d0587fb6a4eb3d282b4a"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/041-symaira-skills794-51e42-novel-author.log.gz",
+    "bytes": 162,
+    "sha256": "1d71703e9df46ff68a872c7728f2e3a8da11158b6a12d7a5576b88092d8282b1"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/042-symaira-skills794-51e42-owned-go-build.sh.gz",
+    "bytes": 634,
+    "sha256": "ee668abaee32775d47063fb34cda0765ce401e41bfe52b850113c5ae9fb7fcab"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/043-symaira-skills794-53711-initial-preserve.py.gz",
+    "bytes": 1217,
+    "sha256": "f7b197055df19da141b0ad3287e2613f1446348c1d1e3bfac94e77280a877e9b"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/044-symaira-skills794-53711-initial-preserve.log.gz",
+    "bytes": 170,
+    "sha256": "af2779072e8c58ed415d904cb0b3b6f691c9811ab1e3ff80d3961c5ee075ce2d"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/045-symaira-skills794-53711-modes-preserve.py.gz",
+    "bytes": 1263,
+    "sha256": "736726af23f6faf309d697d2f5757f233394f0dd1965d92a2b586852d5a6b58c"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/046-symaira-skills794-53711-modes-preserve.log.gz",
+    "bytes": 169,
+    "sha256": "24a1b6392992d947ae0eb05430f46072281dbb8938c1df7d7b54d521fda7dd8b"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/047-symaira-skills794-51e42-preflight-preserve.py.gz",
+    "bytes": 1270,
+    "sha256": "afac2a1a98b4167801bdbdef7de6e1b3c4ae393bc920bda4712912e287ba5328"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/048-symaira-skills794-51e42-preflight-preserve.log.gz",
+    "bytes": 170,
+    "sha256": "5a9faf36433521ca6fcee4707cc75d818287c666f4cc81ec0596f397e6aaa42d"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/049-symaira-skills794-51e42-final-preserve.py.gz",
+    "bytes": 1586,
+    "sha256": "7961b7b3cf7a5c4ce2ca635657c2b778bc893b59cb42431cc9e30a99af84e66f"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/050-symaira-skills794-51e42-final-preserve.log.gz",
+    "bytes": 159,
+    "sha256": "6bc77d2f5a81d31dbbe5d78c599e2cf0fcd40156dfcb22cc8d62b076db5ef3d1"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/051-symaira-memory803-to-skills794-cache-transfer.json.gz",
+    "bytes": 583,
+    "sha256": "1cd03b09ad55fcaa5ab6208750e694f8393f6e482f45d7ab08e2804b0cddc9a2"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/052-symaira-memory803-to-skills794-cache-transfer.py.gz",
+    "bytes": 1206,
+    "sha256": "0a01a14e7f13e2bcc4393efb4628ee9b3274a1cabc4bb0d755ff62d77fe5926e"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/053-symaira-memory803-to-skills794-cache-transfer.log.gz",
+    "bytes": 577,
+    "sha256": "89a2ca8e87c16db4d09590ce0133deae917ac218ab9724e1153e3c3422d15678"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/054-symaira-shared-go-cache-retirement.json.gz",
+    "bytes": 521,
+    "sha256": "07ff2a8eab6af8d840e0f3ae48e77a4bb8619a77e3278fc88c4b90e5ed1c03ef"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/055-symaira-shared-go-cache-retire.py.gz",
+    "bytes": 1198,
+    "sha256": "47dcb1c5b083f71bf502889f022cedafa0ac1f3b79f4074d96c5eb36d0cfbcaf"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/056-symaira-shared-go-cache-retire.log.gz",
+    "bytes": 509,
+    "sha256": "c015478a197ce3d9510e53dc7d94e14de6e06b1d2f6f44b1b77c33243ed66f2d"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/057-symaira-shared-go-cache-inventory.json.gz",
+    "bytes": 114,
+    "sha256": "039850ba9439a24b835941bf33e7015c5d287882c2ec54f673c072c675fbc889"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/058-symaira-shared-go-cache-clean.stdout.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/059-symaira-shared-go-cache-clean.stderr.gz",
+    "bytes": 20,
+    "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/060-symaira-skills794-51e42-retain-proofs.py.gz",
+    "bytes": 1147,
+    "sha256": "6b854b825f4e8aa29113ab456db4d06191c98affdb6e20ab555d50f9dbf19bc4"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/061-receipt.json.gz",
+    "bytes": 201352,
+    "sha256": "df8d6b705a860aca4eb7ceef43d5a23ccdecbe4256ff3ce4e63fbf0e772312ca"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/062-receipt.json.gz",
+    "bytes": 201995,
+    "sha256": "cd113f07dfd7b14082fffed814b3aec2d8ba451fe6dc60b69bd7d1bb1ff4a819"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/063-receipt.json.gz",
+    "bytes": 202115,
+    "sha256": "6f523c1328ce33a18dc19d85cb381427856baddbcb7b9e6154e959981d0685d9"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/064-receipt.json.gz",
+    "bytes": 66502,
+    "sha256": "9d15a093b01178f0e7499ef3a897f5cc8427ded8c86e6a334905acd0385e7952"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/065-receipt.json.gz",
+    "bytes": 102358,
+    "sha256": "70745a5c4e8a17e445d573c5da591e364492e03d7cc6f0edfc37dc4257db8bcd"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/066-receipt.json.gz",
+    "bytes": 15979,
+    "sha256": "4c9e490e936be889a5ab4c5fc233cf7df0395ff62ef7727dce9d14067c7a3130"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-51e42/retention.json",
+    "bytes": 30977,
+    "sha256": "92de9ce8046395c6e7b074db7d31a9d054496acc21b2bf14d403fea7d08fdf38"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/author-linux-result.json",
+    "bytes": 3664,
+    "sha256": "fa2e0052536c7307f0229a7e2337f14dcb6637c9e8a26fbd0eb0ea98318c2d55"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/original-author-runtime.sh",
+    "bytes": 3468,
+    "sha256": "d282086685be5c034d3aaf7d40d7ab38147eb9ee7dc259175f2adbcdc936f552"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/source-only.json",
+    "bytes": 8613,
+    "sha256": "33cd056d9de8c42299c220afed139dac914cf54d858d04b5df129c96063971db"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/runtime-integration/successor-author-runtime.sh",
+    "bytes": 3466,
+    "sha256": "59240d455812b43c4589057bb38f078e5238dd95acd1e890c24634de153ce3f0"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/sdk-reference/LICENSE",
+    "bytes": 1453,
+    "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/sdk-reference/VERSION",
+    "bytes": 35,
+    "sha256": "89f723ad27054a2ccc7c22f2a974886f3077f64623a231297fcea2e74a73a782"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/sdk-reference/src/os/exec_windows.go",
+    "bytes": 4789,
+    "sha256": "7a3c8f10605e5ea468538b1833b04ddf609bff84999b037839ef23d99afc50c4"
+  },
+  {
+    "path": "migration/evidence/skills-preflight-793/windows-wide-argv/sdk-reference/src/syscall/wtf8_windows.go",
+    "bytes": 2736,
+    "sha256": "df35fc932a3bf98375eb780c08091f6a0b4a927ba2918a977495fe0b15c77f99"
+  },
+  {
+    "path": "migration/evidence/usage-fetch-620/linux-process-report.json",
+    "bytes": 399649,
+    "sha256": "c82d53bfda9e2111f547d0acaa6a12981bbbc3a233ed7e650468a809755f1ea0"
+  },
+  {
+    "path": "migration/evidence/vault-admin-766/linux-process-parity.json",
+    "bytes": 199843,
+    "sha256": "85eca74946204e7639b79f32a3b023853cbfe1c303ae38bd49d9de7b58ad252a"
+  },
+  {
+    "path": "migration/evidence/vault-admin-766/unix-raw-path-mismatch.json",
+    "bytes": 3007,
+    "sha256": "faf93775ba1ecd1a52edcf1e3b1fec4253ba94a7497271ac621dde31c8582728"
+  },
+  {
+    "path": "migration/evidence/vault-admin-766/windows-root-normalization-failure.json",
+    "bytes": 176013,
+    "sha256": "e521f26dc4f77013204498c4428726e4f453846bb008d193e36d131fae63682f"
+  },
+  {
+    "path": "migration/implementation-plan.md",
+    "bytes": 160088,
+    "sha256": "1c8179f3211e6934f80a7094764089e020e5c24ac4b689099e4ccc63fb52f2bf"
+  },
+  {
+    "path": "migration/init-verification.md",
+    "bytes": 7235,
+    "sha256": "ba0462dd8b632641750e8800f93004170f1c2f94880a5b3f945129b231a07c01"
+  },
+  {
+    "path": "rust-toolchain.toml",
+    "bytes": 86,
+    "sha256": "c7bdffe5b4c71aeafb84939751c9a1690bc39d0e305d4a534ddf7ce9ce64c675"
+  },
+  {
+    "path": "rust/coverage-policy.json",
+    "bytes": 288,
+    "sha256": "03cbbb11d4128f0e1989a2abab327235d1980b9dfc83364cc007ef7efd70d9d1"
+  },
+  {
+    "path": "rust/symbrain-activity/Cargo.toml",
+    "bytes": 607,
+    "sha256": "108293987bfc56b3f878ad0addd37bd9eec269cf7e31f53743e248f31df816e7"
+  },
+  {
+    "path": "rust/symbrain-activity/src/lib.rs",
+    "bytes": 10793,
+    "sha256": "709f266eaf00b917eeea2d4da4e67d4fdbe0fdbacc4ddbe51ba6b76d731b1d82"
+  },
+  {
+    "path": "rust/symbrain-activity/tests/fixtures/oracle_expectations.json",
+    "bytes": 11249,
+    "sha256": "03c2c5b90e13db515bb0199f842ba13343fc69db2088de144a6d5de685cefeb0"
+  },
+  {
+    "path": "rust/symbrain-activity/tests/oracle_differential_tests.rs",
+    "bytes": 2863,
+    "sha256": "d4ec2e3f8d04ba92ee64f4467dbc99a11d1149e451430667dc5fcb7d258a0b2b"
+  },
+  {
+    "path": "rust/symbrain-adapter/Cargo.toml",
+    "bytes": 958,
+    "sha256": "dea5ac5455150b17f471425763ddba101c6fa24e5c82545406907bb4654229e5"
+  },
+  {
+    "path": "rust/symbrain-adapter/src/atomic.rs",
+    "bytes": 10994,
+    "sha256": "6c8fffe7185c00eccd17ca29cfb9f66b0f14010b64d6bcde0ec732bbebfbb025"
+  },
+  {
+    "path": "rust/symbrain-adapter/src/lib.rs",
+    "bytes": 504,
+    "sha256": "226a0a98b5379965c9211a34529bf01095aa0c779a0ede8dd7dc6b1452080e93"
+  },
+  {
+    "path": "rust/symbrain-adapter/src/metadata_unix.rs",
+    "bytes": 3140,
+    "sha256": "7524c36ea2368eb59afd893ad9cede72cd01eb988a5b19d5b2244ba25873e344"
+  },
+  {
+    "path": "rust/symbrain-adapter/src/metadata_windows.rs",
+    "bytes": 2850,
+    "sha256": "0d3741e743089a9af02f0d47082f8143ebf14f9305808a8ab63c4c4f2911cde3"
+  },
+  {
+    "path": "rust/symbrain-adapter/src/path.rs",
+    "bytes": 1459,
+    "sha256": "747f8e821e0b718957ebfe5491a6d2331da43b7c1f8977e2bcf85cb27d9a45c8"
+  },
+  {
+    "path": "rust/symbrain-adapter/src/target.rs",
+    "bytes": 8802,
+    "sha256": "4b4c23c1efd971a4c08fc3c11e3f55bba6bb1ed07fc89b01865750331cab675a"
+  },
+  {
+    "path": "rust/symbrain-adapter/tests/adapter_tests.rs",
+    "bytes": 12354,
+    "sha256": "130e46328bbce2599e5e0083124a887c4861294ad224babd0ba05fc4aac84962"
+  },
+  {
+    "path": "rust/symbrain-adapter/tests/confinement_tests.rs",
+    "bytes": 598,
+    "sha256": "cdbbf7ffa89ef0a0bf4c620df1e0e74d1a61bdf78890114d88f792692004b0a6"
+  },
+  {
+    "path": "rust/symbrain-adapter/tests/fixtures/oracle_expectations.json",
+    "bytes": 12620,
+    "sha256": "49695d9cb7e66750e78cc3b924823310b3f260e5b409d7e1bd13967dc2086b1c"
+  },
+  {
+    "path": "rust/symbrain-audit/Cargo.toml",
+    "bytes": 609,
+    "sha256": "315e0c0a628053ac7b8526f40dac0a13f1ea87730bf9795ddd477f16e8b9745a"
+  },
+  {
+    "path": "rust/symbrain-audit/src/lib.rs",
+    "bytes": 1471,
+    "sha256": "3eecae6a46dcdae73478729a1d79ee7fb7e61c76f26cdd6a739c2766f2dc0c22"
+  },
+  {
+    "path": "rust/symbrain-audit/src/logger.rs",
+    "bytes": 8833,
+    "sha256": "65ce1366e8fa4b09f0b447b25d498ceb3ce3ded6b014d357f96fd33fdbf9ad8d"
+  },
+  {
+    "path": "rust/symbrain-audit/src/model.rs",
+    "bytes": 2073,
+    "sha256": "74edfcbfec2cbc510a059c9b79b0dacadacb5b9d13494960e081fd0e95252564"
+  },
+  {
+    "path": "rust/symbrain-audit/src/raw.rs",
+    "bytes": 12034,
+    "sha256": "a78dad01de7a89ce8b3c2d5b05593ec4ea1e51ee3e926d9af93c651723a222fe"
+  },
+  {
+    "path": "rust/symbrain-audit/src/raw_unix.rs",
+    "bytes": 4273,
+    "sha256": "906266b42a6587155ad236d3dd2470656b104b947a86ee0fbe505579f93b7981"
+  },
+  {
+    "path": "rust/symbrain-audit/src/raw_windows.rs",
+    "bytes": 13788,
+    "sha256": "cb96db4fdd4ca8f3c3f0ff9345f4c832f2fea6560a0a4e973a05e82d97032949"
+  },
+  {
+    "path": "rust/symbrain-audit/src/redact.rs",
+    "bytes": 12785,
+    "sha256": "0f071038acd66c1995b025fddefab83b0cd100330d6d9b69cd5d71b01e4ec553"
+  },
+  {
+    "path": "rust/symbrain-audit/src/sink.rs",
+    "bytes": 22787,
+    "sha256": "c2ace5ff8c9a17aec89f7b7796c48436cb68dc6ff140b91a824f902bea7b45f2"
+  },
+  {
+    "path": "rust/symbrain-audit/src/tail.rs",
+    "bytes": 9317,
+    "sha256": "fb90e63d4bb05a5aeca832b062ba0e2f668182f1d6e5deafc84d13f2e5cb67d8"
+  },
+  {
+    "path": "rust/symbrain-audit/tests/fixtures/oracle_expectations.json",
+    "bytes": 3831,
+    "sha256": "1e9a3236ff860361c79edf76196bb1504f45c4a188230b32e6c4d3ee2e4c9d0e"
+  },
+  {
+    "path": "rust/symbrain-audit/tests/oracle_differential_tests.rs",
+    "bytes": 3887,
+    "sha256": "f65e55089ec39d8f13f5ea35ce29d889e0ee43d9488dc6d2c7321adab62851ba"
+  },
+  {
+    "path": "rust/symbrain-audit/tests/raw_windows_tests.rs",
+    "bytes": 7420,
+    "sha256": "2e31118c0439b335e2056f949a70cbde89a3a205dad12a83574614bc67e9fcd9"
+  },
+  {
+    "path": "rust/symbrain-broker/Cargo.toml",
+    "bytes": 644,
+    "sha256": "eac4c547ecbeec135b1aee23988f04e3b1eeba2c7a86e92f265f1499dce083f9"
+  },
+  {
+    "path": "rust/symbrain-broker/src/bin/fakemcp.rs",
+    "bytes": 7942,
+    "sha256": "22ace858c752adb709a904534cc5117dcc85ee301ae6b9fb6b27a46dcbfbe145"
+  },
+  {
+    "path": "rust/symbrain-broker/src/client.rs",
+    "bytes": 31351,
+    "sha256": "8dbbdbd2fa79a397ccd7d2f5ea5c730458c94f902c85b184818e0b6ae806b456"
+  },
+  {
+    "path": "rust/symbrain-broker/src/lib.rs",
+    "bytes": 317,
+    "sha256": "fbb3cd0920e0cc1d55090b082bfa6bde55dd418c66c2ce98924d628fd70dd25c"
+  },
+  {
+    "path": "rust/symbrain-broker/src/server.rs",
+    "bytes": 11932,
+    "sha256": "8f608db783772be11c7084c71da82c7065e253fa788d165c956da3a681af269a"
+  },
+  {
+    "path": "rust/symbrain-broker/tests/broker_tests.rs",
+    "bytes": 11003,
+    "sha256": "b2e81f34cda0f58940a119f26f019958363e728e1f9a8b2ab3d00f1c79bb2764"
+  },
+  {
+    "path": "rust/symbrain-broker/tests/fixtures/oracle_expectations.json",
+    "bytes": 359,
+    "sha256": "a58a905bc07c74dc7253b318434ce7a3766cb8ebba979553c13e663baf2d367e"
+  },
+  {
+    "path": "rust/symbrain-catalog/Cargo.toml",
+    "bytes": 477,
+    "sha256": "21d2d57e389b337b3fceae67c08aeb78441cdba0cbaa768c1f329d28daf930bc"
+  },
+  {
+    "path": "rust/symbrain-catalog/src/lib.rs",
+    "bytes": 11181,
+    "sha256": "57347a722cffe899cae0db9d5e1bea9c812fd9ed1e9072a3371058831cd78d0d"
+  },
+  {
+    "path": "rust/symbrain-catalog/tests/fixtures/oracle_expectations.json",
+    "bytes": 5672,
+    "sha256": "d46d00be41aa23c13294f553fa41cf3140abaf175ca2d8de222667ab139e3074"
+  },
+  {
+    "path": "rust/symbrain-catalog/tests/oracle_differential_tests.rs",
+    "bytes": 2225,
+    "sha256": "0a5400cb6256ce96236a0021380dcbae0dd4bf9733175aa143064e382b5d3d08"
+  },
+  {
+    "path": "rust/symbrain-cli/Cargo.toml",
+    "bytes": 1265,
+    "sha256": "264401fd592b03c30f3bc5f3b0f831607a50fe91fed4d955210978c777585cf5"
+  },
+  {
+    "path": "rust/symbrain-cli/build.rs",
+    "bytes": 442,
+    "sha256": "c7d6abd8014332091d999c1a72c5db224044694c1f4571c24572327c0da87267"
+  },
+  {
+    "path": "rust/symbrain-cli/src/activity_args.rs",
+    "bytes": 7320,
+    "sha256": "5bea6864075f6c2f26114e7c43b759d764da23e4bbbcdaa625a7835a7e02b6a7"
+  },
+  {
+    "path": "rust/symbrain-cli/src/activity_cli.rs",
+    "bytes": 11371,
+    "sha256": "3e332795d6aad6ef530b93edb73918d9438f50d56c41c5b4051977fcba452af6"
+  },
+  {
+    "path": "rust/symbrain-cli/src/activity_tests.rs",
+    "bytes": 3394,
+    "sha256": "e097bda5f45eec2ecdf038add15ea985da8c98612cc3f72428877c276aec0980"
+  },
+  {
+    "path": "rust/symbrain-cli/src/activity_time.rs",
+    "bytes": 4835,
+    "sha256": "ffe48f0f95f668a863b93af2f9085c230971a29dd91f3fc8ba872b66e2664404"
+  },
+  {
+    "path": "rust/symbrain-cli/src/audit_cli.rs",
+    "bytes": 7048,
+    "sha256": "5fdda55957e637715ef859af2c61ba40da659a7cdc32bb1230e8ba00ad2d3d1d"
+  },
+  {
+    "path": "rust/symbrain-cli/src/cli_tests.rs",
+    "bytes": 13993,
+    "sha256": "3a4734eead15924813493fda3e5d5939ebc2f3190969085578e3f12100352472"
+  },
+  {
+    "path": "rust/symbrain-cli/src/config_cli.rs",
+    "bytes": 4527,
+    "sha256": "11293458c72851b4911a24b32e65a90f59f0279197dd6a9ffe052be83b19b58a"
+  },
+  {
+    "path": "rust/symbrain-cli/src/doctor_checks.rs",
+    "bytes": 7049,
+    "sha256": "de08bb41f70b4ccf2b31562d8440106e4ef9d7c1170dd990eb0452a8c6f91908"
+  },
+  {
+    "path": "rust/symbrain-cli/src/doctor_cli.rs",
+    "bytes": 9551,
+    "sha256": "e5d980e72ffea8f2aae528416f32caee539fd24240365dbb709ec89093b65ac1"
+  },
+  {
+    "path": "rust/symbrain-cli/src/doctor_core.rs",
+    "bytes": 11083,
+    "sha256": "de5de8fc42fdb9df20034e4316e03d8dfa948d9aa1a4813fe00045585f07b1d9"
+  },
+  {
+    "path": "rust/symbrain-cli/src/doctor_fix.rs",
+    "bytes": 1996,
+    "sha256": "1fc27da32d6cc7866ac6d241611240e05869e2f1021257043d0c9e7309404774"
+  },
+  {
+    "path": "rust/symbrain-cli/src/doctor_links.rs",
+    "bytes": 13501,
+    "sha256": "f81fd8412d0101c1b2b7a9ff38550611a3373e47ef810f514b504de6c43c797d"
+  },
+  {
+    "path": "rust/symbrain-cli/src/doctor_process.rs",
+    "bytes": 11074,
+    "sha256": "35ddb638017ec617fd897bdd298c20e0688407365f886e9c62c70c55995c2ade"
+  },
+  {
+    "path": "rust/symbrain-cli/src/doctor_render.rs",
+    "bytes": 8785,
+    "sha256": "53016c1751eac5446cad88b1e6dafe5a6d902ce5246c667dc3140154e9fa9f4a"
+  },
+  {
+    "path": "rust/symbrain-cli/src/doctor_types.rs",
+    "bytes": 7635,
+    "sha256": "98d0d5c3cf815f4749227fc4a7173677b67417fe5e6b202d48db60ec518a5631"
+  },
+  {
+    "path": "rust/symbrain-cli/src/guard_cli.rs",
+    "bytes": 10111,
+    "sha256": "08b4a2c16b53c8202f9eb8b4b2bc82317d13c67b0bf392e34bc7344ef629ce21"
+  },
+  {
+    "path": "rust/symbrain-cli/src/guard_doctor.rs",
+    "bytes": 32151,
+    "sha256": "1b839af6029b11184d2d4afc348cd899df2fc1a268aa42d5b514d7934dbd3b8d"
+  },
+  {
+    "path": "rust/symbrain-cli/src/guard_grants.rs",
+    "bytes": 6386,
+    "sha256": "056d60b2b8b54a717fab673e8468aff5d60e19fdcae9a41753f76d9188414dc7"
+  },
+  {
+    "path": "rust/symbrain-cli/src/guard_grants_store.rs",
+    "bytes": 9814,
+    "sha256": "05daf2ce769bbe0ab6ef600eab15ef1a4d18ad595a34c026ee9e137a57b9db51"
+  },
+  {
+    "path": "rust/symbrain-cli/src/guard_scan.rs",
+    "bytes": 15783,
+    "sha256": "c124b318b89f7b260464dd75c4c6b6c378d0d672fef757ab2354e4f6b3573259"
+  },
+  {
+    "path": "rust/symbrain-cli/src/guard_scan_config.rs",
+    "bytes": 8512,
+    "sha256": "3f4403534bcba6ce3d0c994ba6b1120b7ea8a75ab9a1b50884d8d06c4c31a1e7"
+  },
+  {
+    "path": "rust/symbrain-cli/src/harness_cli.rs",
+    "bytes": 12656,
+    "sha256": "c023d4d97e11df1e32269cde6964c381c9e1e16713855e87ea529600d9a07b15"
+  },
+  {
+    "path": "rust/symbrain-cli/src/health_probe.rs",
+    "bytes": 34013,
+    "sha256": "b4387bd297383bcd7cd20e1233a59168260f96d1c446879cda6060e42e18a200"
+  },
+  {
+    "path": "rust/symbrain-cli/src/init_cli.rs",
+    "bytes": 9322,
+    "sha256": "f1bdc936cd4edd4d79f8de091b5cf5b22b94682362056169e35178c42ed17f8d"
+  },
+  {
+    "path": "rust/symbrain-cli/src/init_templates/.gitattributes",
+    "bytes": 83,
+    "sha256": "ac5e4ed351bc6152b3b66427a2887bbfe7eddc1c9774e35ac7cf76cf5b31e055"
+  },
+  {
+    "path": "rust/symbrain-cli/src/init_templates/default_config.toml",
+    "bytes": 1514,
+    "sha256": "42d528661b9266b3990a5a380be25e3562f86467ff34ae83efd32437d52ad605"
+  },
+  {
+    "path": "rust/symbrain-cli/src/init_templates/foreign-read-only.toml",
+    "bytes": 1474,
+    "sha256": "16607220063a636ee4c22d817ac138acce236fd6e61ce016f5f54a60bf1f7181"
+  },
+  {
+    "path": "rust/symbrain-cli/src/init_templates/personal.toml",
+    "bytes": 339,
+    "sha256": "686267ba7443a5342a785e397adf741d619b6d7bb95d59fbaa38cb6d5110054a"
+  },
+  {
+    "path": "rust/symbrain-cli/src/init_templates/restricted.toml",
+    "bytes": 382,
+    "sha256": "d71a5bcd132acfd41529e86800ff80612393dc4aaf734b46e1e7232f496c1bf9"
+  },
+  {
+    "path": "rust/symbrain-cli/src/install_cli.rs",
+    "bytes": 23071,
+    "sha256": "25474e4c87af3f78c69023b21b85472a2f20265cce0dd65d7f47f4c36f530975"
+  },
+  {
+    "path": "rust/symbrain-cli/src/lib.rs",
+    "bytes": 15619,
+    "sha256": "decf6229c8fd9295893c456ca15dc8ab20ab79390988de051591bc80f21aa9ca"
+  },
+  {
+    "path": "rust/symbrain-cli/src/main.rs",
+    "bytes": 325,
+    "sha256": "e6dd8093173873f5eddab3d213368e90aacad77092d03c37d5b5b1ff3426a7a6"
+  },
+  {
+    "path": "rust/symbrain-cli/src/mcp_cli.rs",
+    "bytes": 19339,
+    "sha256": "df13ab029d74d6b987c26139fd2b5d3679dd71ddad6a65190641e8c8ab1e6af4"
+  },
+  {
+    "path": "rust/symbrain-cli/src/memory_cli.rs",
+    "bytes": 57429,
+    "sha256": "78b664330aba0c79676e62000cfa9153a99831edd13d80ecc44bcaced3aabb95"
+  },
+  {
+    "path": "rust/symbrain-cli/src/passthrough.rs",
+    "bytes": 9377,
+    "sha256": "58eb151e105af40366dd6b24fb7105401f258c9dd24b67f9106fa046eeddf3e1"
+  },
+  {
+    "path": "rust/symbrain-cli/src/passthrough_tests.rs",
+    "bytes": 3952,
+    "sha256": "69f8d33d1bfad1682c9eb1439a41361526de0a19090c36e56df7afa1b9f9a811"
+  },
+  {
+    "path": "rust/symbrain-cli/src/profile_actions.rs",
+    "bytes": 10265,
+    "sha256": "347c0ba2fac9b24e6f308c91edcb042fcc39bb34e305a17522c0d533c620d3c9"
+  },
+  {
+    "path": "rust/symbrain-cli/src/profile_args.rs",
+    "bytes": 7833,
+    "sha256": "c46a25adc43643fc94d65fd2639cfe3304d64c9a65f533beda1530b9754a5b92"
+  },
+  {
+    "path": "rust/symbrain-cli/src/profile_cli.rs",
+    "bytes": 8959,
+    "sha256": "84ea453ddf1981992a2e8bb660f635f5de5a46c5c9cd3ccb5af4e64eb3e886d7"
+  },
+  {
+    "path": "rust/symbrain-cli/src/profile_render.rs",
+    "bytes": 3107,
+    "sha256": "cc348dce9a1f51a73c8b49957e6e1a0bc0682c000fbcb0fb370f88667638cf3c"
+  },
+  {
+    "path": "rust/symbrain-cli/src/setup_args.rs",
+    "bytes": 3989,
+    "sha256": "ef62c564e91b277958420101562632027980415374fc59dcc0c76bf94d526878"
+  },
+  {
+    "path": "rust/symbrain-cli/src/setup_cli.rs",
+    "bytes": 10105,
+    "sha256": "e068a23610485db4caa515f11048e960b5026d6237a0c266eb0a84e6b9c0557e"
+  },
+  {
+    "path": "rust/symbrain-cli/src/setup_config.rs",
+    "bytes": 5338,
+    "sha256": "a8338db6477d65e1bbfa9ed24556cd8b4f8f59f67d4036da1b66f04ca2d3caa0"
+  },
+  {
+    "path": "rust/symbrain-cli/src/skills_cli.rs",
+    "bytes": 43141,
+    "sha256": "a9bf440caeed05c012c6b192ed68c6e7c91abca748d3adf1bc9c073489bbd9b4"
+  },
+  {
+    "path": "rust/symbrain-cli/src/skills_sync_bytes.rs",
+    "bytes": 3498,
+    "sha256": "33bee3aea7b09167602fc1483a6dee6bdea81335b41a8d5a93e563ee19c70ac5"
+  },
+  {
+    "path": "rust/symbrain-cli/src/skills_sync_flags.rs",
+    "bytes": 5425,
+    "sha256": "ff7c39a6cb28abbfc4c4a92802c4c46bd71e8b094937e8cf316d33c8f7ea5b8b"
+  },
+  {
+    "path": "rust/symbrain-cli/src/sync_cli.rs",
+    "bytes": 15754,
+    "sha256": "6a2378e7e22b66d3463e48719f6345bf230980e85962fa661b6d9512c726e447"
+  },
+  {
+    "path": "rust/symbrain-cli/src/usage_cli.rs",
+    "bytes": 7325,
+    "sha256": "51f900ee73c2a3de0b47549d63c77e7228a4f2c249b4c942c35f075398eede0a"
+  },
+  {
+    "path": "rust/symbrain-cli/src/usage_fetch_output_tests.rs",
+    "bytes": 1856,
+    "sha256": "3ff61d31bbd27467edb8df5ea357ce12317e3df2374d3ed3e55b6728eb406482"
+  },
+  {
+    "path": "rust/symbrain-cli/src/vault_admin.rs",
+    "bytes": 10774,
+    "sha256": "85e8466e9e5d781368051f3f1c0a3066ff2c86eb16a9a5de3323ce9604c231da"
+  },
+  {
+    "path": "rust/symbrain-cli/src/vault_config.rs",
+    "bytes": 4981,
+    "sha256": "1b1538509663c718b27bfbe7fde07bf89fa12e15ee933ac321e65ff0c50a175d"
+  },
+  {
+    "path": "rust/symbrain-cli/src/vault_response.rs",
+    "bytes": 3201,
+    "sha256": "ad8a66f0a55f5d601c5b4da333a9253c93cf7d008aaf41fd6bd3a31430b6b65c"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/activity_cli_oracle_tests.rs",
+    "bytes": 4233,
+    "sha256": "09a446f9bb2bd75294a37e72f0fdd0cd80920e4b6082865de606add5af21bcf9"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/activity_validation_tests.rs",
+    "bytes": 4097,
+    "sha256": "b9a85ed7d37461379295b39a4554a9c8fd4fd29a3d644634e2987f435e89454a"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/cli_tree_tests.rs",
+    "bytes": 17614,
+    "sha256": "f4a9db302b39d8359150115c63b155022415dc6b08438de569dec3d2172bf85a"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/common/doctor_header.rs",
+    "bytes": 1491,
+    "sha256": "bbae58c3f13664fb7fb58c28f28b8f04f40ab331b55e4ccce0e10c57f55a116a"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/doctor_modules.rs",
+    "bytes": 8829,
+    "sha256": "222b24d10fb7e237661ebc58e0ddd4258a0f985e7045511584c9b0fb06e0bb98"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/doctor_native.rs",
+    "bytes": 9490,
+    "sha256": "dba6fea31b469e640ba7aa2c8ac5d9a63b81e3105c4a77ca83b68804e5f9afcb"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/fixtures/activity_cli_oracle.json",
+    "bytes": 3297,
+    "sha256": "35d22c82b110615ca1978d74249923052b9cdfcb3b2ba669690756c5619a8dd9"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/fixtures/activity_validation_767.json",
+    "bytes": 242535,
+    "sha256": "124052ee32653f7956b235a0afb543f9e895bf5caf7b2abf7ac39626726bfd12"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/fixtures/cli_tree_expectations.json",
+    "bytes": 49959,
+    "sha256": "4f13736e92bd88ffbbe26731ad9c88821d6ecd5cdc50a67431cb9c87f0c4d6d7"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/fixtures/profile_remove_oracle.json",
+    "bytes": 24474,
+    "sha256": "45dab9a4fb07afc7d26085e60970ba88a1d81ccc73cd708f660f46123b48877d"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/fixtures/profile_remove_oracle_darwin.json",
+    "bytes": 24474,
+    "sha256": "c4a0842ea3c0b0869eb40a39ca2a7f46f697c36027f02ed701534fe1deeb46dd"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/fixtures/profile_remove_oracle_linux.json",
+    "bytes": 24474,
+    "sha256": "9099e11a18e163301445d054d3d1ea49254568929203154c767d7c7bfcb8cfed"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/fixtures/vault_admin_go.json",
+    "bytes": 77940,
+    "sha256": "202a98c14ce7c35ecab1f33f3dc1100dfe35acd3e2d72b42b9b54fefe68329bb"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/fixtures/vault_unicode_go.json",
+    "bytes": 16343,
+    "sha256": "078a303a757ca31976f043be2960ae0651553d1d39921d4da8c4bc4b0a99642a"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/guard_decide_adapter.rs",
+    "bytes": 3415,
+    "sha256": "97fd3f4a1129840371ff4e8460244d985fd9134adede42183ccefbcad5ea5f61"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/guard_decide_raw_bytes.rs",
+    "bytes": 5470,
+    "sha256": "3ffbfde15363dd9d3b1e0ab45313905d459e29a07d1b75ded3c648b40f375847"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/guard_doctor_oracle_tests.rs",
+    "bytes": 8207,
+    "sha256": "cfa5c047bcba060578cc2623517bd5e794568871e7b9bdb10236fe4cdd8abeaf"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/guard_grants_native.rs",
+    "bytes": 9007,
+    "sha256": "52a344e1568f6e4b5a619542d1ae560ff2257dcc9acf394722b5b5b5ce3490ef"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/guard_oracle_grants.rs",
+    "bytes": 3331,
+    "sha256": "79583c621e333a2f3fc3630393fc58e262b74b69796a5b30471fb22fd2886962"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/harness_health_tests.rs",
+    "bytes": 14732,
+    "sha256": "19018400b15baa4447a22c42528262707e03879f490693e2d699fe5417d1b860"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/harness_list_tests.rs",
+    "bytes": 12432,
+    "sha256": "fb23c81397dbb6121970e7a1b145372ca7406a3b2dcc70313dd97fdb49de07ef"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/init_cli_tests.rs",
+    "bytes": 13192,
+    "sha256": "5cf56e33be68522d26aae3ff854cf59e9e38a92467e1577d042bdda49994ee18"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/install_oracle_tests.rs",
+    "bytes": 12403,
+    "sha256": "c0eae662a3a99dd467c35ff5f533ac15a2c6af3f9650006bc07bbc5c71a19955"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/mcp_cli_tests.rs",
+    "bytes": 40192,
+    "sha256": "859dcbfcf03910aaff2ffeccd42f6209ab411355725e7b06acabd169a9e9f0af"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/profile_cli_tests.rs",
+    "bytes": 18357,
+    "sha256": "e9fe05f8ef3cb1f691c06b07c7cb840d3e7627e474763eafe118e7a8cf6b3255"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/setup_fix_native.rs",
+    "bytes": 2061,
+    "sha256": "673427cb6351c4abc4c8a74a69c066e88853074e4b5789f4ecd1a0f10a0281a5"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/setup_repair_native.rs",
+    "bytes": 5781,
+    "sha256": "5032cf011006493cce3988b195cf8eb0b4b5a3618f30e8728239d33da765a0dd"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/skills_doctor_native.rs",
+    "bytes": 4979,
+    "sha256": "a4d60c07354e538c2100415a1910d45775bdbb3ff0c79ace783e65b4494b01a6"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/skills_list_native.rs",
+    "bytes": 10746,
+    "sha256": "b74522b32885b897f3eb91b854cb0ec18fd71cd492375309d23e36911fd391aa"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/skills_log_native.rs",
+    "bytes": 8969,
+    "sha256": "cb438b2da6161343e912366912a032f2fe691027d5f77bf6d67bad74ba1ec73b"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/skills_preflight_native.rs",
+    "bytes": 11573,
+    "sha256": "55f664bbde0f55319e07af28b4606e22683b6147e960c225708f688b9fe54783"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/skills_raw_flag_names.rs",
+    "bytes": 2382,
+    "sha256": "fa89831dd204f4c9dee18a2c420d26634e216570a7a6df3be59a31f8c4f7b058"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/skills_status_opencode_tests.rs",
+    "bytes": 15693,
+    "sha256": "88d022c8377d7d45557405e6578a97e0b230f526bcb48960bec65fbccfdcd5e3"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/skills_sync_legacy_roots.rs",
+    "bytes": 14474,
+    "sha256": "121fadf1140f25c27d90bf012b69cc8ea9b8bd66193a7afdff14a15083b288bc"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/skills_targets_native.rs",
+    "bytes": 8730,
+    "sha256": "0dc4a04903d10691d4ff7c636f9843f0e09a88a6d7c92ab945d735d33f6f00ae"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/skills_windows_wide_flags.rs",
+    "bytes": 3100,
+    "sha256": "9062f87010a80e5adb11b643ee447cfc68fa069b6b296a8d409418b1a55abd7f"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/support/mcp_lifecycle.py",
+    "bytes": 2619,
+    "sha256": "12f6314cf0b121850d02fb572d79e6849b03a5202ede183097eeee1e8e8464ba"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/support/mcp_lifecycle.rs",
+    "bytes": 12877,
+    "sha256": "489acd25237ef1465ae8c6f829983e2cda0eed17aa5f4198bd29f8e405d37172"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/support/setup_child.rs",
+    "bytes": 396,
+    "sha256": "e73cb2e3ef5ab3b9970a881a9e29d76ab352ca90e7a618c496d394b7f9483cd2"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/support/skills_preflight_process.rs",
+    "bytes": 2408,
+    "sha256": "018f4f11644d7edbd96966b065ff2e4a43b737cdafe4e9a670edb3f94b41c7e3"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/support/vault_child.rs",
+    "bytes": 1680,
+    "sha256": "e379a4f44f488389ddfb98fc9fd0ee773923955051b3c2888f1b394c7a0a2078"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/sync_native.rs",
+    "bytes": 5765,
+    "sha256": "70027d172da217c991613c23284b936a42467d7df53060d8cfedba735a31a049"
+  },
+  {
+    "path": "rust/symbrain-cli/tests/vault_admin_native.rs",
+    "bytes": 9108,
+    "sha256": "1e4a62b3d7c0d1d5ee0cbd327b7895cdc6bb99e5af9a1e42f6b382ffcdf23242"
+  },
+  {
+    "path": "rust/symbrain-core/Cargo.toml",
+    "bytes": 518,
+    "sha256": "9af57f0120c3787b74a037c714460ffa3bea39725489ceb13cc5b9385dd862af"
+  },
+  {
+    "path": "rust/symbrain-core/src/config/atomic.rs",
+    "bytes": 8448,
+    "sha256": "a933dcb9d86d7e704e31bcbffb80a0207f31e49e4a2440725b3d5421aef48621"
+  },
+  {
+    "path": "rust/symbrain-core/src/config/bytes_tests.rs",
+    "bytes": 3536,
+    "sha256": "8ec133484314484892e45ab059f127019ef1fc393220d08da21cc7c3b3446605"
+  },
+  {
+    "path": "rust/symbrain-core/src/config/encode.rs",
+    "bytes": 10815,
+    "sha256": "0f6feed0f98c83c061292db1ffb957044eddba0f230f17ece1b4c0d6f1e98aec"
+  },
+  {
+    "path": "rust/symbrain-core/src/config/format.rs",
+    "bytes": 8662,
+    "sha256": "f2360ccf0a4ade10ba622b5da09d40139139e0427d27aa1b7ee3846723b639ac"
+  },
+  {
+    "path": "rust/symbrain-core/src/config/format_tests.rs",
+    "bytes": 7491,
+    "sha256": "60bbfce6074e323b6288e60aa5a9590c2dac4be6b80e7595aabf59244a42edb8"
+  },
+  {
+    "path": "rust/symbrain-core/src/config/get.rs",
+    "bytes": 4017,
+    "sha256": "736bb2ad63e4c244281a0db8846d16518586e22484cfb71aab030f330467066b"
+  },
+  {
+    "path": "rust/symbrain-core/src/config/get_tests.rs",
+    "bytes": 5882,
+    "sha256": "b4009c3365fc20c9cea4a23708dab3b82e25b45d8808a10e93dd4771a5e59f45"
+  },
+  {
+    "path": "rust/symbrain-core/src/config/lossless.rs",
+    "bytes": 6478,
+    "sha256": "597878ad7289376f85baca09efda6ceedbf3474f48013e3064b590e2c453f45a"
+  },
+  {
+    "path": "rust/symbrain-core/src/config/mod.rs",
+    "bytes": 364,
+    "sha256": "f90494018160e6fa6f630b00d6a6046c31931ff207efcc09de5f7d58282be29c"
+  },
+  {
+    "path": "rust/symbrain-core/src/config/set.rs",
+    "bytes": 6338,
+    "sha256": "c76abd5ccd9e41f856c0abaaeade081f9d9113041928f13512ece10e5715fa2e"
+  },
+  {
+    "path": "rust/symbrain-core/src/config/set_fixtures_tests.rs",
+    "bytes": 8839,
+    "sha256": "f70c22fcf867709a36491acf365cf7e009994381fa73b45444fb95aef3f126b9"
+  },
+  {
+    "path": "rust/symbrain-core/src/config/set_flag_alias_tests.rs",
+    "bytes": 1363,
+    "sha256": "716069a7ab0e0ce01a5aa8cd68ea6ef3fb6ad976eb2dc8a6e05858d75e10a5fb"
+  },
+  {
+    "path": "rust/symbrain-core/src/config/set_tests.rs",
+    "bytes": 6978,
+    "sha256": "51f06844332c48bb33cad1a7c550a33580ab377720843405cd02fd48e93dd11f"
+  },
+  {
+    "path": "rust/symbrain-core/src/exit.rs",
+    "bytes": 906,
+    "sha256": "7f5efe594eb3bc7f5957a12bfd9642e07846fc71cff181647884d781ae66d2ea"
+  },
+  {
+    "path": "rust/symbrain-core/src/go_printable.rs",
+    "bytes": 17052,
+    "sha256": "f9c9e9fc24130e3d2ef59649ebedbb0586137d21fd5af2bcae232d812734de9a"
+  },
+  {
+    "path": "rust/symbrain-core/src/lib.rs",
+    "bytes": 215,
+    "sha256": "9e9e2d32f3cd59f939544e213a7cd05a585513d4ea8962016ca8b3cdb40d6cc4"
+  },
+  {
+    "path": "rust/symbrain-core/src/output.rs",
+    "bytes": 5953,
+    "sha256": "a8e01e7d19d7eadc8f71d1634166691294b0223959248b0a8fc50b1d8264856a"
+  },
+  {
+    "path": "rust/symbrain-core/src/output_tests.rs",
+    "bytes": 7254,
+    "sha256": "91a449506c9af3a50a6b402121b786da104ea8a39e338cde776224afb9ca10c8"
+  },
+  {
+    "path": "rust/symbrain-core/src/paths.rs",
+    "bytes": 13894,
+    "sha256": "db2a7633131b77577afa9e5aac6956c479e62ca6f27b3990298917ec03673c34"
+  },
+  {
+    "path": "rust/symbrain-core/src/version.rs",
+    "bytes": 5929,
+    "sha256": "3f8ce20ca4877e98f180d5da31a91f097ae0921804fb582ebd7e6c1bc2b87442"
+  },
+  {
+    "path": "rust/symbrain-core/src/xdg.rs",
+    "bytes": 18900,
+    "sha256": "41d4d4367d5c3ac7766f054ddb91a71b79547701997271f80347990ffabda201"
+  },
+  {
+    "path": "rust/symbrain-core/tests/fixtures/oracle_expectations.json",
+    "bytes": 171684,
+    "sha256": "f9abc8484502de0e2f2b5fa07ee9042ca5bf0a6130f2f589a73a734599120fb2"
+  },
+  {
+    "path": "rust/symbrain-core/tests/xdg_paths_tests.rs",
+    "bytes": 5022,
+    "sha256": "af07faabe7b9b003e2df4b0a1677a5376ff23693825512656caa8369c3e8457d"
+  },
+  {
+    "path": "rust/symbrain-gateway/Cargo.toml",
+    "bytes": 851,
+    "sha256": "a4b54f28815c364d6e2da31067bad5fa9c2b820c228413b94069938e547260aa"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/audit.rs",
+    "bytes": 8145,
+    "sha256": "ed08d7765fb941d0e68c6ea497c540a0189622b8f67095a0ead2cbf50ded5bf6"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/builtin.rs",
+    "bytes": 4149,
+    "sha256": "e36de48c65f4ea45759b19e53622c6bdb2226e5993541ee55001aa1cec8081c5"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/catalog.rs",
+    "bytes": 3987,
+    "sha256": "5b869163e2b4ca84a6077a4b8ac3dee4291eb978e7aa37e4a368b7fcce0d8753"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/dispatch.rs",
+    "bytes": 9013,
+    "sha256": "2f558e2c19ee3a51320e7f78183f858e57bb836a8bfcf283b6c2804d2f5d3afc"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/dispatcher_impl.rs",
+    "bytes": 631,
+    "sha256": "33f71856db53052c243d8acffb51ff6a7e761d5439999679dda7994ca41b9fe7"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/embedded.rs",
+    "bytes": 1591,
+    "sha256": "ee3cef46ec1257598f0e358caa732a80ac0b64c35e595c52de056a91736167e6"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/embedded/activity.rs",
+    "bytes": 4543,
+    "sha256": "b8dea6884698ab4d25219ade421aa4289343f1db3992c5c109f210d9a6d71e73"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/embedded/catalog.rs",
+    "bytes": 6950,
+    "sha256": "2d9b1ab3265af136cdbb3ba66e701f1a849523cd2ee00af7b947a1ccfeccd69d"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/embedded/common.rs",
+    "bytes": 1940,
+    "sha256": "985d2cb99a04a35851a9effd6bd57f68fede06c595b88e4b496b88978cd58dc5"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/embedded/memory.rs",
+    "bytes": 7793,
+    "sha256": "fe7b00a875ac70adcfb0fd8027621e0e7c30f7ee766e63068bf1e596f6b973f3"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/embedded/skills.rs",
+    "bytes": 8155,
+    "sha256": "9fc91a8f3aa888dbcbb573881a36b59894142d4a0abd14d8c1c985403fed5c32"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/embedded/skills_status.rs",
+    "bytes": 11371,
+    "sha256": "4e6e51b5fdf3437733fb08b5731eec29028dcdfe7908f895262024b0eae39cee"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/error.rs",
+    "bytes": 5939,
+    "sha256": "d36114a75c5ad4901b1f33ae4efc50206607a3a6cd531fdd2c53f080d724c13e"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/lib.rs",
+    "bytes": 11320,
+    "sha256": "9a2305fe7824f6a95624e9cf483bf205baec97d3bbeab533f48999f3111af0e7"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/response.rs",
+    "bytes": 7223,
+    "sha256": "09ec27a388d450fbde89fc6d6f1489224648ee49d3106e7779553c765e848909"
+  },
+  {
+    "path": "rust/symbrain-gateway/src/routing.rs",
+    "bytes": 5460,
+    "sha256": "5077b45857bcf3343711f9aa819561c163fe4c0c20c7560eb0b205bbb55bd371"
+  },
+  {
+    "path": "rust/symbrain-gateway/tests/fixtures/gateway_cases.json",
+    "bytes": 13849,
+    "sha256": "66bca50697e80e96b8720c25e0054d9c127315147519104e592189b2a3fdb4cb"
+  },
+  {
+    "path": "rust/symbrain-gateway/tests/gateway_tests.rs",
+    "bytes": 21756,
+    "sha256": "e39c5abcb69a16ded876ead431b2d9d844e2e8b5d006808fa499d4f0b2d4e330"
+  },
+  {
+    "path": "rust/symbrain-gateway/tests/usage_tests.rs",
+    "bytes": 12519,
+    "sha256": "6f67af7933c01e5a4514af3e56a0289ec9d06918c387997bfb2a21fb41d88ca1"
+  },
+  {
+    "path": "rust/symbrain-guard-core/CAPABILITY_CONTRACT.md",
+    "bytes": 5675,
+    "sha256": "029e9dbaca1ff9252366a28a84006f84a28b222cc0c0aa508342fa651c6b1b02"
+  },
+  {
+    "path": "rust/symbrain-guard-core/Cargo.toml",
+    "bytes": 653,
+    "sha256": "64ba7eec3b3c31e830f46e769e498f2643f72d12bff6899012b001a6a836fbd3"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/approval.rs",
+    "bytes": 3601,
+    "sha256": "3d02bd8625858023cbed9251354365e5392da75a072cd61eb75c2dcfb66473ac"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/audit.rs",
+    "bytes": 4817,
+    "sha256": "82b10af924ac2ca015d1b566f745b0387cfc266a8426fe83c07eac6e25e0bc7b"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/capability.rs",
+    "bytes": 7917,
+    "sha256": "d5fd61dba31b80f926c9f79a9a4fae1ef97d476ca14416c15fff2762505c3b42"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/capability_wire.rs",
+    "bytes": 7606,
+    "sha256": "eeee0bb77e5aa4c0bf8c39c69dc73b9beb87dd88c46cd7ded273336bc8052d27"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/external_deadline.rs",
+    "bytes": 5427,
+    "sha256": "8b533f31814da5d2de442405741f093a289a58f3ab6a5763ea23210b708c1f35"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/external_decision.rs",
+    "bytes": 12698,
+    "sha256": "00036f841a6a0afa5fba154b44404a04e041e64d6592f8f154a0b53965732224"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/external_decode.rs",
+    "bytes": 8639,
+    "sha256": "07597791456ed82e451bbb0e0268791b1cd8521a7f9e543a712a3b3fff8f62a4"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/external_json.rs",
+    "bytes": 7821,
+    "sha256": "98d431108b16547dc6f741ae6c928e82a844834ff2ba5364a00e5826bdcf4aea"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/go_json.rs",
+    "bytes": 4599,
+    "sha256": "f98fb8b3c4a77ff310c4d8a16725d3399c0d4a232bbbf2c5f60b5d1441f2399a"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/grant.rs",
+    "bytes": 5008,
+    "sha256": "7db0fc3ec825251b74e38862714716fd50dfda53e475e44cb49b8bc3061d94f9"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/key_storage.rs",
+    "bytes": 8977,
+    "sha256": "5cd9a9da06f29f5ee9f7199e8978d61616146a8af5db1b9cf9d9a3c4315e2364"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/lib.rs",
+    "bytes": 1493,
+    "sha256": "272d9c892047e4e5d4f44c0368c8a168262f7b5cfbfcd94fd37f7af58ed7d568"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/marginal.rs",
+    "bytes": 4507,
+    "sha256": "28a9bbf50d5e43a721090bdb9a37734d4f79517774f5806157b83660b5857f41"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/model.rs",
+    "bytes": 12007,
+    "sha256": "4d9649271162f9d9e1ec571df8126700d3d7575b91d765a5f1afc0e3d6912d66"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/model_validation.rs",
+    "bytes": 4890,
+    "sha256": "ff2801bad1c26b15946034aaf1dd9a5bf2323a5698b4f293e28fc2becec6ec7f"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/policy.rs",
+    "bytes": 15854,
+    "sha256": "819bb9cc479f484dc6dd7c2f6d42e2cf14d2b1b848cbae876c0e9a1ee573325b"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/scope.rs",
+    "bytes": 843,
+    "sha256": "cf412da982a5b4e0e66cc73e4ea513e0a8d1a963cf2b565408736eb6f12a5b4a"
+  },
+  {
+    "path": "rust/symbrain-guard-core/src/sequence.rs",
+    "bytes": 20233,
+    "sha256": "9d440ff6eb20decca4545616ba34c5d566af5281900e9f2a42c83c8ae37afb75"
+  },
+  {
+    "path": "rust/symbrain-guard-core/tests/capability_oracle_tests.rs",
+    "bytes": 5771,
+    "sha256": "a5b47b1629c43407d30996056fd6719e54362fbefef417024cf367d4b5c16ba8"
+  },
+  {
+    "path": "rust/symbrain-guard-core/tests/external_decision.rs",
+    "bytes": 13041,
+    "sha256": "4a6c5c1fe03d2393f5a630b891f61d32fab69fcac877e39aae9c1701bd079e66"
+  },
+  {
+    "path": "rust/symbrain-guard-core/tests/external_decision_review.rs",
+    "bytes": 3588,
+    "sha256": "1bdab7cd879f81cd2fe87c56f26ce276d8d3aff88054619b73d5ba5b52cfe1d8"
+  },
+  {
+    "path": "rust/symbrain-guard-core/tests/external_decision_serialization.rs",
+    "bytes": 2796,
+    "sha256": "3509df7b4b3c1bc574a0491959157be8e9a58b3b366b897bb21a3e3dd7407f7a"
+  },
+  {
+    "path": "rust/symbrain-guard-core/tests/external_repair.rs",
+    "bytes": 3872,
+    "sha256": "e145b95e84cac3dc939f1df8cf5eaf84e80e4a640ad160289f6c42fa3be4e858"
+  },
+  {
+    "path": "rust/symbrain-guard-core/tests/fixtures/capability_oracle.json",
+    "bytes": 104503,
+    "sha256": "a6d9e1b3e18ba22381af3f81dbf69f45fdd6a9dbbd562362ae907d5527987a9a"
+  },
+  {
+    "path": "rust/symbrain-guard-core/tests/fixtures/doctor_oracle.json",
+    "bytes": 6728,
+    "sha256": "7839dffcee9dafe63d3cfeb1caf2903bcc75311957b90896801bc6eaf3fb44f1"
+  },
+  {
+    "path": "rust/symbrain-guard-core/tests/fixtures/external_decision.json",
+    "bytes": 99260,
+    "sha256": "0f3f9f8726659a7dcde8b0c999a74363c95faa928cf9278173e45332db79057a"
+  },
+  {
+    "path": "rust/symbrain-guard-core/tests/fixtures/external_decision_review.json",
+    "bytes": 15513,
+    "sha256": "73057e5841975dafafd5c7ec40c43d459e766d6ca9567f277823569c76c8b09e"
+  },
+  {
+    "path": "rust/symbrain-guard-core/tests/fixtures/external_repair_oracle.json",
+    "bytes": 168370,
+    "sha256": "f4039e115827baeb6678a5b5fa3b838e2d553e7188b44a88743c10b9e820949b"
+  },
+  {
+    "path": "rust/symbrain-guard-core/tests/fixtures/external_repair_trust_anchor.rs",
+    "bytes": 1330,
+    "sha256": "6f975a886c0610e23258b19a58f7f658892f2e7802bb54bee3a77aabf24194d6"
+  },
+  {
+    "path": "rust/symbrain-guard-core/tests/fixtures/go_json_parity.json",
+    "bytes": 496,
+    "sha256": "59c871d82d15fec31a34a4594518d2850cc37c36ff8ece9a424a8c555162ea25"
+  },
+  {
+    "path": "rust/symbrain-guard-core/tests/fixtures/oracle_expectations.json",
+    "bytes": 163870,
+    "sha256": "4e5902347b72284cca5ea0242022de5e910427cbd3225d82870bb7a487a05cb7"
+  },
+  {
+    "path": "rust/symbrain-guard-core/tests/oracle_tests.rs",
+    "bytes": 18439,
+    "sha256": "b81ffd3b99019250e8c99e8c3307d5a83be7829066809cf5786682fa5f83ae63"
+  },
+  {
+    "path": "rust/symbrain-harness/Cargo.toml",
+    "bytes": 669,
+    "sha256": "cd1d06452abe41143ca9fdb549ac32a2d7653f247341bf3c5d0d4f5ba5ed7bac"
+  },
+  {
+    "path": "rust/symbrain-harness/src/backup.rs",
+    "bytes": 1531,
+    "sha256": "1328d4efdb97f024b0215c8a2f5ca9e8a8f746b01acf50643c1cddc6de92dfd1"
+  },
+  {
+    "path": "rust/symbrain-harness/src/diff.rs",
+    "bytes": 5348,
+    "sha256": "c6984b8240e6a7f3b26e1c635adc0644707db3c64dc0ffb7320ee1a043ffeca6"
+  },
+  {
+    "path": "rust/symbrain-harness/src/document.rs",
+    "bytes": 6327,
+    "sha256": "272d633a137dcf638b0a2164ec4af1cc0ef1e6ffc16e221bfc227a7f53fec172"
+  },
+  {
+    "path": "rust/symbrain-harness/src/entry.rs",
+    "bytes": 1836,
+    "sha256": "7b0fde06f765cf8ee96d7ca2de0893b7429ca94582317f2ee08282ba23ac6e4c"
+  },
+  {
+    "path": "rust/symbrain-harness/src/inventory.rs",
+    "bytes": 10198,
+    "sha256": "94f51a8a2317f373768fe89e045c6fda2a0ff6608e3c2518fd995e94a936e01d"
+  },
+  {
+    "path": "rust/symbrain-harness/src/inventory_read.rs",
+    "bytes": 4618,
+    "sha256": "781a65143ffcf8bd7de99a4bd0a361055d42f0d71d321a4bd9fc5ced03987646"
+  },
+  {
+    "path": "rust/symbrain-harness/src/json.rs",
+    "bytes": 5599,
+    "sha256": "9d3242c36eec63904c662aacbd9a70f5ec4e9fe970a9685aae8cca3a6a74a773"
+  },
+  {
+    "path": "rust/symbrain-harness/src/json_parser.rs",
+    "bytes": 9457,
+    "sha256": "0a7148acb407d99435ea49a77db507b69ef71904a4fcde4d3b5c12ab1b64d2d8"
+  },
+  {
+    "path": "rust/symbrain-harness/src/lib.rs",
+    "bytes": 8453,
+    "sha256": "e292d48b003bb400102a2c1eb55c5ae14313b0176fd64a31a014592dc7944e56"
+  },
+  {
+    "path": "rust/symbrain-harness/src/registry.rs",
+    "bytes": 12092,
+    "sha256": "c528d2648435eb7234c01d04a895505118fa7ef6b28d7f54b30ec61141cb5914"
+  },
+  {
+    "path": "rust/symbrain-harness/src/server_info.rs",
+    "bytes": 2349,
+    "sha256": "f4d2f9b248b9dc034c327f855434c341faec60ba181901cad26e5d495d0bb8aa"
+  },
+  {
+    "path": "rust/symbrain-harness/src/toml_backend.rs",
+    "bytes": 3137,
+    "sha256": "b3ea57269c0110eeb7ccd117202c6da24c7e6112cd5f5f04c0be05fc2f3992fd"
+  },
+  {
+    "path": "rust/symbrain-harness/src/write.rs",
+    "bytes": 382,
+    "sha256": "7dfe9efbab02792878c143c2a9288fabee998673f2273f0a09a54126245223b7"
+  },
+  {
+    "path": "rust/symbrain-harness/src/write/atomic.rs",
+    "bytes": 2691,
+    "sha256": "b763ba1607172b4fe2232b72778ffb83e5bd51da8fffdb52ce5f30e2554628c5"
+  },
+  {
+    "path": "rust/symbrain-harness/src/write/core.rs",
+    "bytes": 13191,
+    "sha256": "fd8a4f8f3caedaf07b08d076a693bd35c34cbeb0dd8c7c1e986b47097088fdf6"
+  },
+  {
+    "path": "rust/symbrain-harness/src/write/paths.rs",
+    "bytes": 4687,
+    "sha256": "71b6e024f4766e3fb8cb1d5755876786a22aa9f3609c70a088e2702f65236bd4"
+  },
+  {
+    "path": "rust/symbrain-harness/src/write/replace.rs",
+    "bytes": 5789,
+    "sha256": "723b379f432faf9dc443101bdecb950683e10c1223402611acbe0879df22da54"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/fixtures/golden/antigravity/after.json",
+    "bytes": 157,
+    "sha256": "2220443a65b3bf65122ced3cf1c065b05ef116c7628983213c09e710178d0120"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/fixtures/golden/antigravity/before.json",
+    "bytes": 3,
+    "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/fixtures/golden/claude-desktop/after.json",
+    "bytes": 179,
+    "sha256": "12d5892fa169def42992d0ab7db25f32ccbe7de18cff6b9a4b412e6b5447d529"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/fixtures/golden/claude-desktop/before.json",
+    "bytes": 22,
+    "sha256": "27dafb2742d0da69a49cc8d206fc9cc429feff09cc3738addcf590d9c4358f97"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/fixtures/golden/claude/after.json",
+    "bytes": 275,
+    "sha256": "d576ee2a14e9966e3929cf646d0344622515fa102bae1b54da4b3e0c3dfbd407"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/fixtures/golden/claude/before.json",
+    "bytes": 142,
+    "sha256": "6fb48454b8e9256e7857242bfe6556f75022a28bd725cc1495226f7702188500"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/fixtures/golden/codex/after.toml",
+    "bytes": 195,
+    "sha256": "ab90fdbc44169652f1fd69ae151d324ca8b9344c8480bc57935e947fafc7a414"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/fixtures/golden/codex/before.toml",
+    "bytes": 101,
+    "sha256": "212f82cab5f16659bf6c4f3a32cf65920457674874dd3959f3c214f1e93bd55e"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/fixtures/golden/cursor/after.json",
+    "bytes": 277,
+    "sha256": "f3c0f25ac08e22a5047483be6e42bd6208bff665cb3ae643e8b224a3181f7ad3"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/fixtures/golden/cursor/before.json",
+    "bytes": 144,
+    "sha256": "cf28d83d7fe4e5c7636bc5e4eaa0f8c99fdf620b813ca64d251483e08b83f951"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/fixtures/golden/opencode/after.json",
+    "bytes": 157,
+    "sha256": "2220443a65b3bf65122ced3cf1c065b05ef116c7628983213c09e710178d0120"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/fixtures/golden/opencode/before.json",
+    "bytes": 3,
+    "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/fixtures/install_oracle_darwin.json",
+    "bytes": 29730,
+    "sha256": "314785e956aaa756f1ff6fd6752e46232aee2eb0e946a18e3d4aaf681f15fe11"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/fixtures/install_oracle_linux.json",
+    "bytes": 29428,
+    "sha256": "0fac0e5faac2ae64134c0a6cdb62d8dc0f6fd0f1720c296e1c86ea2bc9da997e"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/fixtures/install_oracle_windows.json",
+    "bytes": 38252,
+    "sha256": "420fff18c01d25c15bfb302b6388e0061ac6720524f4ffedefb697be64c54bdb"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/harness_tests.rs",
+    "bytes": 13787,
+    "sha256": "edbe52f91efa417645082e7a34b0ad47e342815af67e3a581b754d7902bbb9e7"
+  },
+  {
+    "path": "rust/symbrain-harness/tests/path_safety.rs",
+    "bytes": 1360,
+    "sha256": "c80bd083b1e2c3ed1f693a3735291dadb8068bebe3cbadad69350b90bacda33a"
+  },
+  {
+    "path": "rust/symbrain-instructions/Cargo.toml",
+    "bytes": 843,
+    "sha256": "e2b76a396a7ef7ef9bc2593b00b1c65ee4d42636c39898cd1aa6be5da1273055"
+  },
+  {
+    "path": "rust/symbrain-instructions/src/block.rs",
+    "bytes": 3348,
+    "sha256": "9b0837ca49a53bad7e0ebb09ed37790166b3c2c2b0f4d434903c27bbfa2adc76"
+  },
+  {
+    "path": "rust/symbrain-instructions/src/lib.rs",
+    "bytes": 1626,
+    "sha256": "ff88ffa753b5a1966b7aab6a004079c1cb948a64e2da5faeec6e8d90f815221e"
+  },
+  {
+    "path": "rust/symbrain-instructions/src/paths.rs",
+    "bytes": 5645,
+    "sha256": "46737eb47e292b1dfbf5b1bb833b7b7d2606673c7d2a181c2c398b81f76d6960"
+  },
+  {
+    "path": "rust/symbrain-instructions/src/source.rs",
+    "bytes": 7396,
+    "sha256": "2c17bdf92209f6309901c73265f3c03019bb0b49d8bfd7c9b217b8a1e41b1eff"
+  },
+  {
+    "path": "rust/symbrain-instructions/tests/confinement_tests.rs",
+    "bytes": 2972,
+    "sha256": "7fb2831487b6f724f324f534195c2e72aa302bfdda58307fcf96fcf6e184d251"
+  },
+  {
+    "path": "rust/symbrain-instructions/tests/fixtures/oracle_expectations.json",
+    "bytes": 13715,
+    "sha256": "d525cce3191f39758514d1d1828ff2001b63073edd64743c3d5c9cbfd1c077bb"
+  },
+  {
+    "path": "rust/symbrain-instructions/tests/instruction_tests.rs",
+    "bytes": 17325,
+    "sha256": "02212f4bd7191d62b23e8647f9ed2e8c58e911c3967b9360ee5f4a49c6ad6ee9"
+  },
+  {
+    "path": "rust/symbrain-managed/Cargo.toml",
+    "bytes": 707,
+    "sha256": "7c7213ed3baa6a0e1917305b45ecd1e709beeb6c77f47718f16e9c0078d63030"
+  },
+  {
+    "path": "rust/symbrain-managed/assets/manifest.json",
+    "bytes": 2795,
+    "sha256": "77404c9f2ae559d1665e0cd4b8842e2f969cdfaa0215b8fd87848595fc83a9e8"
+  },
+  {
+    "path": "rust/symbrain-managed/src/archive.rs",
+    "bytes": 9253,
+    "sha256": "3d6cde3519bef5b10e8558764de16c1c7b7b0f16997f7dd95486d32a28b67021"
+  },
+  {
+    "path": "rust/symbrain-managed/src/install.rs",
+    "bytes": 12704,
+    "sha256": "9779dd895fdd02db5153fdedc625ffde80d98001b8e8bfbe8772e2b65870315f"
+  },
+  {
+    "path": "rust/symbrain-managed/src/lib.rs",
+    "bytes": 583,
+    "sha256": "3ce072c606fba6e48a25a6d31b76e81df22d1fb03f87b8ae894a75bc2436f624"
+  },
+  {
+    "path": "rust/symbrain-managed/src/manifest.rs",
+    "bytes": 8440,
+    "sha256": "9eb10b48253251e9d19c163482d363ea7d70c8b8684d32cdc23afa825def5980"
+  },
+  {
+    "path": "rust/symbrain-managed/src/provenance.rs",
+    "bytes": 7837,
+    "sha256": "3beee7a3a45f82c02a24ce69134921d9ede6f76dd7f7e5f4857f9dc0300e9d66"
+  },
+  {
+    "path": "rust/symbrain-managed/src/provenance_json.rs",
+    "bytes": 3675,
+    "sha256": "6667fc1d287dbfef9b5eaa4f2945118493fd2b0729a49615747997a581f1bfff"
+  },
+  {
+    "path": "rust/symbrain-managed/src/version_probe.rs",
+    "bytes": 7418,
+    "sha256": "bd5e00670e86afc87ef7631828fb6d9c68a09610f710c86b4947c6bbaf8bdbf3"
+  },
+  {
+    "path": "rust/symbrain-managed/tests/fixtures/oracle_expectations.json",
+    "bytes": 9179,
+    "sha256": "c1ecfd10220194f7729e271b166463f5aac12aa065302f8d0f481a36a7a22157"
+  },
+  {
+    "path": "rust/symbrain-managed/tests/install_tests.rs",
+    "bytes": 13213,
+    "sha256": "2a017b66116aae75404c2c46eca620a71bc78079093d01add029156cfb258372"
+  },
+  {
+    "path": "rust/symbrain-managed/tests/oracle_differential_tests.rs",
+    "bytes": 5285,
+    "sha256": "064503a56691f1782649cb096987c6978c09cfab423856823b0e7d5563d1d21f"
+  },
+  {
+    "path": "rust/symbrain-managed/tests/support/server.rs",
+    "bytes": 3835,
+    "sha256": "0b43e84b001fdb556ae886dc90339946c9052951e84ef7f67f8b1e9e9ece7e3a"
+  },
+  {
+    "path": "rust/symbrain-managed/tests/version_probe_windows.rs",
+    "bytes": 2670,
+    "sha256": "50987e6f0257c4fc26a0dd43fa3fafb7c4fdfa0cad9ef7635b565d2454db6111"
+  },
+  {
+    "path": "rust/symbrain-mcp/Cargo.toml",
+    "bytes": 433,
+    "sha256": "fbcf5b53060f43f659c93072d14588e6c01ccb47713558ed8a80009dff27955c"
+  },
+  {
+    "path": "rust/symbrain-mcp/src/frame.rs",
+    "bytes": 9165,
+    "sha256": "4e6050efeb0dc9e9f5eceea40ffe5a4703a670f1f060baecf22da9bdf1608b21"
+  },
+  {
+    "path": "rust/symbrain-mcp/src/lib.rs",
+    "bytes": 576,
+    "sha256": "a7238c07a9d03deee711370a78e121d6220a124419b20af4ac17c65986ecffa2"
+  },
+  {
+    "path": "rust/symbrain-mcp/src/loop_helpers.rs",
+    "bytes": 2050,
+    "sha256": "51b5345d66bc917ef360fe9a9b7c58607b1c65355dcf814087c45542764611bd"
+  },
+  {
+    "path": "rust/symbrain-mcp/src/model.rs",
+    "bytes": 5669,
+    "sha256": "ad821f55f2b9d69d681753f31856accfd19853aa1dab5c4e4cf4f4d27a043f7a"
+  },
+  {
+    "path": "rust/symbrain-mcp/src/server.rs",
+    "bytes": 13580,
+    "sha256": "d72daaaae2635bc38a5251e8e91357ac7689d225b588e0b4974051bb195e42be"
+  },
+  {
+    "path": "rust/symbrain-mcp/tests/fixtures/gateway_protocol_cases.json",
+    "bytes": 804,
+    "sha256": "8422e16fa1f2308b9b594a3d577462e72ddb0963070f722adb9221ddd4944607"
+  },
+  {
+    "path": "rust/symbrain-mcp/tests/fixtures/gateway_protocol_tests_part1.rs",
+    "bytes": 9789,
+    "sha256": "e4eb23a9e977f86f2ffe78a5c675225bec3869532148cd5dc49142657245cd10"
+  },
+  {
+    "path": "rust/symbrain-mcp/tests/fixtures/gateway_protocol_tests_part2.rs",
+    "bytes": 7465,
+    "sha256": "3f00c36cfee149f989948b377827a9903c0f410a1a41ea7f9b0e58ac9dbd4c22"
+  },
+  {
+    "path": "rust/symbrain-mcp/tests/fixtures/oracle_expectations.json",
+    "bytes": 3888,
+    "sha256": "ebac0b6aa59cca16b994943996e12e2cd47f63fa9aa1901210295a7b922599ce"
+  },
+  {
+    "path": "rust/symbrain-mcp/tests/gateway_protocol_tests.rs",
+    "bytes": 569,
+    "sha256": "8ce17c641cb01fd74a12ad85de7798265bbd0860f2c4ed9e013ae52cfec4537d"
+  },
+  {
+    "path": "rust/symbrain-mcp/tests/oracle_differential_tests.rs",
+    "bytes": 4215,
+    "sha256": "8e425f7d23d1b270498fe2f486e921e1f59f65c6f7444ef1060479540b751847"
+  },
+  {
+    "path": "rust/symbrain-memory/Cargo.toml",
+    "bytes": 743,
+    "sha256": "418e282e1fc9ab7ebac4d7324ee8e39b2242acdd4ecf7193fd9477753cfe0a0d"
+  },
+  {
+    "path": "rust/symbrain-memory/src/activity.rs",
+    "bytes": 6532,
+    "sha256": "89f8254f28dfcc92e7db9856535c31bf44d00967a4006e85fe1c73c82297b273"
+  },
+  {
+    "path": "rust/symbrain-memory/src/db_oracle_tests.rs",
+    "bytes": 12792,
+    "sha256": "583231e19b52afda08fb32472dc94d7b9f6df836bd207ce9f8a3e70a13ea7fc4"
+  },
+  {
+    "path": "rust/symbrain-memory/src/embedding.rs",
+    "bytes": 13271,
+    "sha256": "4f56b3056cf713935af32c772e0af041ea2c99036f3efd08965d68ae9721a3c4"
+  },
+  {
+    "path": "rust/symbrain-memory/src/entity.rs",
+    "bytes": 12431,
+    "sha256": "7f70dc3cf02bd71da6d256cbad1d1a8a1ffab4a5d3faaaaa2b54646ef2d98e6b"
+  },
+  {
+    "path": "rust/symbrain-memory/src/gojson.rs",
+    "bytes": 5227,
+    "sha256": "bc90cc505b4e09e7c461f4c1db947ff4b3fc1de6d5b32456246a41ceb56694a6"
+  },
+  {
+    "path": "rust/symbrain-memory/src/gorand.rs",
+    "bytes": 27134,
+    "sha256": "86a1c52d7a916091e7164babf1321d4282baa054d76207f662f5406628fe8c2b"
+  },
+  {
+    "path": "rust/symbrain-memory/src/gotime.rs",
+    "bytes": 3195,
+    "sha256": "2235f3731a0417acb2b1842d6db109db725118f77322bfeab69e5700381e59c2"
+  },
+  {
+    "path": "rust/symbrain-memory/src/lib.rs",
+    "bytes": 631,
+    "sha256": "ba516d99b4de8f9aeae9ef33459a27e065b569ab7f2b243ffc2934f2e6df12b5"
+  },
+  {
+    "path": "rust/symbrain-memory/src/list_rows.rs",
+    "bytes": 10779,
+    "sha256": "4c7b0328e69db23d2f1f2ed13886e8cca3d6572fc696dd1bf15985d9ae5b5771"
+  },
+  {
+    "path": "rust/symbrain-memory/src/lsh.rs",
+    "bytes": 4386,
+    "sha256": "fe482f424364baefc4bb50caae158db185a82c87bdb4538788712dcd572556a9"
+  },
+  {
+    "path": "rust/symbrain-memory/src/model.rs",
+    "bytes": 2037,
+    "sha256": "dfd905688801ad6b1faca9bcc6ea74b6892b3dfab775c7663b0d501d26b25659"
+  },
+  {
+    "path": "rust/symbrain-memory/src/retrieval.rs",
+    "bytes": 11069,
+    "sha256": "3f14cd8e48042735bb3399aa9edd53621cfcaee57a029fbf984fc0d9d8905eee"
+  },
+  {
+    "path": "rust/symbrain-memory/src/rows.rs",
+    "bytes": 1259,
+    "sha256": "df335ae17fce3f7221cc41ef9f8f511dd88ffd0c9235e5c6ec1ad84c6ba28dc3"
+  },
+  {
+    "path": "rust/symbrain-memory/src/schema.rs",
+    "bytes": 14622,
+    "sha256": "58f2e06a2cc0bea98761d5078783608698c0401794864d1a1e77b2cb3f0edf8b"
+  },
+  {
+    "path": "rust/symbrain-memory/src/search.rs",
+    "bytes": 6880,
+    "sha256": "25d8a6ff0325069c7950115b42fddfbd5038b15e6c3a81a05c74deabab406b7a"
+  },
+  {
+    "path": "rust/symbrain-memory/src/search_rows.rs",
+    "bytes": 10203,
+    "sha256": "79e7e36d6bb514b6f960d75886dac78485f63a68e1db3a35a502b1b9bc2b45a9"
+  },
+  {
+    "path": "rust/symbrain-memory/src/store.rs",
+    "bytes": 22516,
+    "sha256": "db267344dd284a3f8be187b40ed988a51d0c091e9c6be73cfb6647e7c2ab6c09"
+  },
+  {
+    "path": "rust/symbrain-memory/tests/fixtures/db_memory_oracle.json",
+    "bytes": 22891,
+    "sha256": "fdeb140b4e89ee366ceaa4c9b22a24fa251bcadc3719f7e12085560d048fa804"
+  },
+  {
+    "path": "rust/symbrain-memory/tests/fixtures/go_oracle.json",
+    "bytes": 669,
+    "sha256": "ea24b15b9bf6c6bdb3b27f1f4d69b1247f101add99d77eab844b4bbc2057e7c9"
+  },
+  {
+    "path": "rust/symbrain-memory/tests/fixtures/gorand-reference.txt",
+    "bytes": 2788,
+    "sha256": "9c007bb0c6215bb9130b9445041299a445dd5a33f5bb2fcdb54000d9992b8893"
+  },
+  {
+    "path": "rust/symbrain-memory/tests/store_contract_tests.rs",
+    "bytes": 9048,
+    "sha256": "7e08cb5bf0872468efc8d2b238ca86e5bbdac0df00e93129d08f6327fd3073d3"
+  },
+  {
+    "path": "rust/symbrain-patterns/Cargo.toml",
+    "bytes": 505,
+    "sha256": "4059b24117b8af53384a0284a5b222be47642f46e7a39240ec409c8c7fa09267"
+  },
+  {
+    "path": "rust/symbrain-patterns/src/lib.rs",
+    "bytes": 5769,
+    "sha256": "cd8132c46c110360bd1b0147c9bd3229764ae4bce710edaa0fac21821cab0391"
+  },
+  {
+    "path": "rust/symbrain-patterns/src/store.rs",
+    "bytes": 5457,
+    "sha256": "50076e4da3696021d1424a48946c9134cb22e351272dd3947a9516d3e2621d4d"
+  },
+  {
+    "path": "rust/symbrain-policy/Cargo.toml",
+    "bytes": 520,
+    "sha256": "8f5ec941b85722894f19d595313b2d4107d2fd6de384faf54ee3282952af3de1"
+  },
+  {
+    "path": "rust/symbrain-policy/src/constants.rs",
+    "bytes": 1253,
+    "sha256": "8e80dd5cd3c5118fa092c8e46c7f2acbd1f4c370dabdac8d3da0729aa53f2495"
+  },
+  {
+    "path": "rust/symbrain-policy/src/error.rs",
+    "bytes": 7065,
+    "sha256": "624e29fa5526e288b46d7d28bdf01d817033d1a3d75753de27b4667659726127"
+  },
+  {
+    "path": "rust/symbrain-policy/src/lib.rs",
+    "bytes": 937,
+    "sha256": "40b040170cabae01567522ac51eff95e281c1a46d1ff12d41706f2e55189c7f6"
+  },
+  {
+    "path": "rust/symbrain-policy/src/policy/eval.rs",
+    "bytes": 5379,
+    "sha256": "24c9967b85f72686d2dcd8addcbd4b0a480ee6be28f5094a73730119422864d4"
+  },
+  {
+    "path": "rust/symbrain-policy/src/policy/foreign.rs",
+    "bytes": 4296,
+    "sha256": "77138aed63596e0a19cb0ef2c92f538ea5e31ca99ccbdeb649f67cfe6277ce30"
+  },
+  {
+    "path": "rust/symbrain-policy/src/policy/identity.rs",
+    "bytes": 878,
+    "sha256": "4507053f1f1b61bf111e93b80cac4bebc7945fa906c17115c95bb7a977152d47"
+  },
+  {
+    "path": "rust/symbrain-policy/src/policy/mod.rs",
+    "bytes": 5395,
+    "sha256": "b4d411a95a97a5167455794e936652e1769d34357cce159f34923f745423d78a"
+  },
+  {
+    "path": "rust/symbrain-policy/src/policy/presets.rs",
+    "bytes": 3743,
+    "sha256": "cacf94c6663c9b467b8e9bdbf048b86e6c92d4e501ba1932aa265a2402ccb2e1"
+  },
+  {
+    "path": "rust/symbrain-policy/src/profile/create.rs",
+    "bytes": 10482,
+    "sha256": "4a761f474339671ec6888c3b6fcbbc689d864a11ee193813d5b8a8aa441df8e2"
+  },
+  {
+    "path": "rust/symbrain-policy/src/profile/fs.rs",
+    "bytes": 6029,
+    "sha256": "55d638f76bd35894cd8bcb25bc0c5d4bbaf238394664775edacdd77152325bb4"
+  },
+  {
+    "path": "rust/symbrain-policy/src/profile/mod.rs",
+    "bytes": 4301,
+    "sha256": "3fb855a0c96d496400ec3182ee137bf31372d479a663c44a74fa7c0aa8644599"
+  },
+  {
+    "path": "rust/symbrain-policy/src/profile/parse.rs",
+    "bytes": 12404,
+    "sha256": "73c7cfc21b07b8e34c1339fc9b8b27c333285447eb40b5710b88967891602fb9"
+  },
+  {
+    "path": "rust/symbrain-policy/src/profile/resolve.rs",
+    "bytes": 9095,
+    "sha256": "ed3ffa1443504450b13db93200f97ff898664ec0532163a30381cc9f848d8c24"
+  },
+  {
+    "path": "rust/symbrain-policy/src/profile/undecoded.rs",
+    "bytes": 2480,
+    "sha256": "a7f0699084741ca3a6d60cc191a79989961659c26c30840060a4948bc727ce6f"
+  },
+  {
+    "path": "rust/symbrain-policy/src/profile/validate.rs",
+    "bytes": 1597,
+    "sha256": "b8e7e49da050b668aad6073b9a36a7acd9aa0a66a546dcf3a46c7bc3c953dcbe"
+  },
+  {
+    "path": "rust/symbrain-policy/tests/activity_tests.rs",
+    "bytes": 1205,
+    "sha256": "b25567067bec9c8c4bce654179cd745745dc7f2d06988be44b86f84b573a23d9"
+  },
+  {
+    "path": "rust/symbrain-policy/tests/fixtures/oracle_expectations.json",
+    "bytes": 44050,
+    "sha256": "d659101b6577475e36581b5fe0dfaaa6cb6087571f3f6d5a96c0dbcf3eb6d496"
+  },
+  {
+    "path": "rust/symbrain-policy/tests/fixtures_tests.rs",
+    "bytes": 7467,
+    "sha256": "0face362c7eeafab2581bbf3bebc106bd50c61fd6f1e615c45790eddb2b6da57"
+  },
+  {
+    "path": "rust/symbrain-policy/tests/foreign_tests.rs",
+    "bytes": 6839,
+    "sha256": "515b6792dc8cd986dd14467a84b2ab15c5574fc5abd5cb16460b9e4783740915"
+  },
+  {
+    "path": "rust/symbrain-policy/tests/oracle_differential_tests.rs",
+    "bytes": 8974,
+    "sha256": "db3158b03b5a7ef34966478dcafafe38d3a4849130313ba160b47567422aa6fe"
+  },
+  {
+    "path": "rust/symbrain-policy/tests/policy_tests.rs",
+    "bytes": 13866,
+    "sha256": "1a7ea0b24e5765ac68679116a49dae450dfa5914c2c62a7c9eb4b0a375be1404"
+  },
+  {
+    "path": "rust/symbrain-policy/tests/profile_create_races.rs",
+    "bytes": 5404,
+    "sha256": "3f1d568d6723ff8e2e7bc09e6f6634f948eea87c55e30c646d334b04876c1309"
+  },
+  {
+    "path": "rust/symbrain-policy/tests/profile_fs_tests.rs",
+    "bytes": 6037,
+    "sha256": "0eaf1cd49987e3c1edf12c23a5e476665ea1363210bb18a33a96a34b8695d991"
+  },
+  {
+    "path": "rust/symbrain-policy/tests/profile_tests.rs",
+    "bytes": 7924,
+    "sha256": "e26b9ac210265116c58864b449d476833bc6ad14917227cfbc367c17970606fb"
+  },
+  {
+    "path": "rust/symbrain-policy/tests/profile_validation_tests.rs",
+    "bytes": 5131,
+    "sha256": "45223782bec237aa4ce1ba187fa0eae95be50ab20a63b31b7a0ebe00a7283931"
+  },
+  {
+    "path": "rust/symbrain-policy/tests/typed_decode_tests.rs",
+    "bytes": 5144,
+    "sha256": "c721f18836005dd669af7af4fb928ebcf2d585b3b84d9b877e233eb744df89d5"
+  },
+  {
+    "path": "rust/symbrain-skills/Cargo.toml",
+    "bytes": 862,
+    "sha256": "4d0fcb29f4fee6202896e535170f1767cec5752331106fd71190d08458b0d1bb"
+  },
+  {
+    "path": "rust/symbrain-skills/src/cap_root.rs",
+    "bytes": 3224,
+    "sha256": "110c59e06ddaca95c8501d1a771127b0c433ded25c030ad796e26074c4682da8"
+  },
+  {
+    "path": "rust/symbrain-skills/src/encode.rs",
+    "bytes": 3029,
+    "sha256": "cd239f90ed56bc1b666c185e066a264f7ca4c8b3787f4d414ce20c80f491b478"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/base.rs",
+    "bytes": 13276,
+    "sha256": "59f52f4710a011ed207d4191c8bc09f39cbece056aa106a860b85c29f10b30c9"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/cache.rs",
+    "bytes": 1059,
+    "sha256": "f66aca3ac02f9193caf6ead5cbcece03afa5a3b02ed3880adf3dad97a7bb6c80"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/core.rs",
+    "bytes": 8045,
+    "sha256": "9231d8b62bf382928f1b70abe86a6855d7f10624f0fba374ee4dbbf7ea2bae9f"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/destination.rs",
+    "bytes": 7043,
+    "sha256": "7f1d9154ca2398fa9f4d45cc8954e749db766ec1411121415f876f6050c67da7"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/drift.rs",
+    "bytes": 8193,
+    "sha256": "0db853e108bca0abb6769aa9b34cd759373906f97f3c240a8c999d59e7286ace"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/event.rs",
+    "bytes": 8357,
+    "sha256": "a7b626d3803ac47aa888a670d4a134ecfcbe87f095c55e85be63dd0ca8bb3905"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/lock.rs",
+    "bytes": 9798,
+    "sha256": "e27366e8df14c1a8582920f84b9a87cfc12d2240e520b247e5eadcc12e07768a"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/marker.rs",
+    "bytes": 7729,
+    "sha256": "ec89498ce6c4b387b944520e7af08d3458cadb7390a2a276601d7915ca90018a"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/mod.rs",
+    "bytes": 1264,
+    "sha256": "e1784d292f43757617a7051a6a8f1a2fb2b6223829d00f7ef8524b5e318617dd"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/modes.rs",
+    "bytes": 3701,
+    "sha256": "35f97ba22b8c24c27803a52c9c5f0d3a82d171b1350c8b0a68b307e4258e2347"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/ops.rs",
+    "bytes": 13211,
+    "sha256": "7868cf8ae78d4eab2ccbf20907d14d2356e32a557ceb5e8a41efe0e11e1d6503"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/replace.rs",
+    "bytes": 13903,
+    "sha256": "5773c467f1bd37f45e1beb2d785fd823f5e82244150da1b529f10e7ed4d1ccdf"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/replace_io.rs",
+    "bytes": 571,
+    "sha256": "6317c951bb417b84657b161a524ff685c045da8fe87dabd5fc8264ee24a8a0d6"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/status.rs",
+    "bytes": 10527,
+    "sha256": "2d5400f9d987ed8a5e0573eb4b051713cd2f660c1c8b46a5ff658a08c6f749f3"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/status_compare.rs",
+    "bytes": 7304,
+    "sha256": "3d485a1ebd323c239fa7bb202637d80ed3b7bc90774fa60554bad032276cd518"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/sync.rs",
+    "bytes": 13635,
+    "sha256": "35d0f0799ec58cafec380d312a4a6a0638b60fad05f9ca5c403f13f0b3d6bf70"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/sync_lock.rs",
+    "bytes": 4263,
+    "sha256": "17855156b7cff61d024093565e86de3ea2745eb8e934bf26788969b7545e4dfe"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/transaction.rs",
+    "bytes": 6848,
+    "sha256": "4a96e00c2c13d11b3faab613ba1321f903c9f3ba7db9d9aa4afd849f78f475c0"
+  },
+  {
+    "path": "rust/symbrain-skills/src/install/uninstall.rs",
+    "bytes": 6716,
+    "sha256": "65eae4b70f2463a62a6a92455da63ca6db28c5e93b356d5da7d0dacb3962d2a0"
+  },
+  {
+    "path": "rust/symbrain-skills/src/lib.rs",
+    "bytes": 1133,
+    "sha256": "a6b2e37669f58043cd39a1a50e9ec130742ed476a52f5d095b320618c5b3b4a9"
+  },
+  {
+    "path": "rust/symbrain-skills/src/library.rs",
+    "bytes": 7524,
+    "sha256": "4a6eeda82fe56290ad44dc018d213d45ead8e141229a47a301181d3b4bdbf529"
+  },
+  {
+    "path": "rust/symbrain-skills/src/load.rs",
+    "bytes": 12516,
+    "sha256": "21bdf4a05df347f1a26b811983b3c88828657075de2ade3c7f2cc7b77024e5b4"
+  },
+  {
+    "path": "rust/symbrain-skills/src/load_helpers.rs",
+    "bytes": 3867,
+    "sha256": "757160ccbe672c4fb7d361f08d14dcac84d5f7d275382a3e2a8c95d545a04ec5"
+  },
+  {
+    "path": "rust/symbrain-skills/src/load_paths.rs",
+    "bytes": 6527,
+    "sha256": "44f77965328900d6f236ff938e017baa3e457c92dc6e88c9fef46975f59a6283"
+  },
+  {
+    "path": "rust/symbrain-skills/src/load_read.rs",
+    "bytes": 9933,
+    "sha256": "4b9d1233ceb0ad0e8fb4cec530bf277e5663bfa3133b6afca4fc25590216f54c"
+  },
+  {
+    "path": "rust/symbrain-skills/src/load_tests.rs",
+    "bytes": 6611,
+    "sha256": "1743ae794decd2b873f36993cab88ed6f3748126f39727a7192eb8e0c61175fc"
+  },
+  {
+    "path": "rust/symbrain-skills/src/materialize.rs",
+    "bytes": 9175,
+    "sha256": "3eb65969139effabf94fa7e9d74be4d5db6bea96e52139012545a9b335dce450"
+  },
+  {
+    "path": "rust/symbrain-skills/src/materialize_fs.rs",
+    "bytes": 11090,
+    "sha256": "de8845e9682b5508e50034287ebf10c63d8773fc1ae5cc1107ebe3989e2264f9"
+  },
+  {
+    "path": "rust/symbrain-skills/src/materialize_manifest.rs",
+    "bytes": 6965,
+    "sha256": "ac7dd8e7563aaafea1e049a4aea9c0c3db0e65e9ce61c1622b62a19a946530b7"
+  },
+  {
+    "path": "rust/symbrain-skills/src/materialize_stage.rs",
+    "bytes": 4649,
+    "sha256": "873ac4792eca25369391de5fec548bdb55387cc8057c04022b5ad2bf492857f4"
+  },
+  {
+    "path": "rust/symbrain-skills/src/metadata.rs",
+    "bytes": 14714,
+    "sha256": "2ab997a45a20513e5e96d327206ee34b970dd6d8c7bab808fab2459ea5eca2b6"
+  },
+  {
+    "path": "rust/symbrain-skills/src/model.rs",
+    "bytes": 7630,
+    "sha256": "b0ea93f7b75913f7e44979f9ef9a9a397b8a0b8680e0c7a475299062c20889e1"
+  },
+  {
+    "path": "rust/symbrain-skills/src/model_parse.rs",
+    "bytes": 12743,
+    "sha256": "f895a7ce7c776cf3d05663bf57daa36ec5e8c2bae898a8427cccd4969c8a7bf8"
+  },
+  {
+    "path": "rust/symbrain-skills/src/render.rs",
+    "bytes": 13688,
+    "sha256": "b60ad4970858eb5ccfdd11163a53b9704ade8ca569a624c43e2e7573c46e81ec"
+  },
+  {
+    "path": "rust/symbrain-skills/src/render_variants.rs",
+    "bytes": 2644,
+    "sha256": "8fbeb3ed249e2a39f13d4dcf75624eedac1cd83311ea273e9891a4cd374dc147"
+  },
+  {
+    "path": "rust/symbrain-skills/src/runner.rs",
+    "bytes": 17023,
+    "sha256": "f864ff56536a9d07d67628e441c11176d575bc93c859afe6c403f1a67e3e73ea"
+  },
+  {
+    "path": "rust/symbrain-skills/src/target.rs",
+    "bytes": 6882,
+    "sha256": "0ecfa59c673b3354e68e02c3d4184066377d5661299504bc92f13deb99e9dc6b"
+  },
+  {
+    "path": "rust/symbrain-skills/src/targets_status.rs",
+    "bytes": 10819,
+    "sha256": "3bbbd3b4814ea945a9074ed8a9847ad469a0bfb31a34a84a0c65e03ed976e09f"
+  },
+  {
+    "path": "rust/symbrain-skills/src/validation.rs",
+    "bytes": 12520,
+    "sha256": "052c60098ccc0e9dff1ac3dd4e9c05c1f9aed34ad0540383307ba593176a2787"
+  },
+  {
+    "path": "rust/symbrain-skills/src/variant.rs",
+    "bytes": 10721,
+    "sha256": "3118358acf982f9891ec14687c4cd8094341592fb2f4aad0f80b1ee4a03d368e"
+  },
+  {
+    "path": "rust/symbrain-skills/src/variant_ops.rs",
+    "bytes": 10330,
+    "sha256": "944e7341a2eb67856a01f47ce938a024aaa1d51aa59db6c4ca86b3063436db16"
+  },
+  {
+    "path": "rust/symbrain-skills/src/variant_types.rs",
+    "bytes": 4093,
+    "sha256": "db873fbe1c2273af4c6cce03662c7a034d3a03a5cb0e21de7c8eb4ba5795d40a"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/all_target_scope_tests.rs",
+    "bytes": 7782,
+    "sha256": "6b421cb8edae604349dd4e6d27d3b5e284c155c42c8556801c1e8a378721ae1e"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/common/mod.rs",
+    "bytes": 805,
+    "sha256": "7c00acde1eddde40ee105a3a7c164a1b2d0c4ec266973fc20124c3f7835f036f"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/concurrent_installs.rs",
+    "bytes": 7842,
+    "sha256": "e8c85370cda2dee8f0cba48a3cb710073ed2292cafd3800ba58641057206834d"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/confined_symlink_render_tests.rs",
+    "bytes": 10114,
+    "sha256": "15cc37e5ee1b01fb89c0c3eeb3a0b04108e2b1339e9abd1f3094f1145290552e"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/event_tests.rs",
+    "bytes": 9512,
+    "sha256": "8770f14953c2d0b5893e63c9877e10da394bd737253521fd711635e486b54904"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/fixtures/install_status_oracle.json",
+    "bytes": 34094,
+    "sha256": "d4166ccc00d6dbb9ce7da55e3fa70527654526623a015421158010ff70bc7367"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/fixtures/oracle_expectations.json",
+    "bytes": 24537,
+    "sha256": "bc908f774253af1b3a0b099534d0f235060751b0b1aebfee358ed68bef5e27c1"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/fixtures/runner_oracle.json",
+    "bytes": 11627,
+    "sha256": "526111a705290097d5744ceff54011be59e5859bea2b07099e1c208ad38e102f"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/generated_artifact_tests.rs",
+    "bytes": 1517,
+    "sha256": "995a6fb39aba305538b55ca978cbc3b85b3ec43e0e0e0f09bbc3a5b4d2bfd888"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/input_bounds.rs",
+    "bytes": 7848,
+    "sha256": "1ff790a2445abb92e62e67bbb99ff7a2db1cebb6856e388d46583e11dc0c0307"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/install_oracle_tests.rs",
+    "bytes": 17376,
+    "sha256": "b2ca31dddb0a75975e8d22722ef008ca50cbd102713922672dec797ca153ffee"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/install_tests.rs",
+    "bytes": 9128,
+    "sha256": "b0edb617b61a90643de6ab5aeb3bbc3f18fbd0ce9d840ff13d34bda401d8798d"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/model_security_tests.rs",
+    "bytes": 9187,
+    "sha256": "9c0e428b0588e0b210797ea935478d747355bb9c81c4c47baab2e4757d0ea317"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/model_tests.rs",
+    "bytes": 8121,
+    "sha256": "cbc8d9024cd4b584defc5e34219a23b3e73517bb38a2c777c12393c0d7bf0ddc"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/project_identity_tests.rs",
+    "bytes": 4910,
+    "sha256": "1a8c3750d4f1c3cb6930dc992591ec2f6c10fc839630289984baa17681758ba7"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/recovery_uninstall_smoke.rs",
+    "bytes": 4847,
+    "sha256": "b00e93f543b8f59fd41d4e7a1bbd39effab52baa78075bb473c392a2fced2d28"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/relative_root_tests.rs",
+    "bytes": 1234,
+    "sha256": "93f831dbea77ca20731c97723de9be9f66856e29af61ebb377142b4664914298"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/render_materialize_tests.rs",
+    "bytes": 14227,
+    "sha256": "7b80e0e99fc9fff87dd838f4a1c7e3a2ced049a6cf20ccf9cfbd2403a2191fcb"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/render_tests.rs",
+    "bytes": 13016,
+    "sha256": "7e858d058ed58909959c7a64697b8550c4f0a373458ee43c8560ec096ae3e631"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/runner_env_tests.rs",
+    "bytes": 14937,
+    "sha256": "9235656c6739dbe7ed491a168591e618c2e147b5bc3d701fb4b16ebdbc7715b2"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/runner_tests.rs",
+    "bytes": 9905,
+    "sha256": "4e2dba0ab2b557f18b9c826868b99e84e73130507256cf337491e86cb9048eef"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/status_parity_tests.rs",
+    "bytes": 6115,
+    "sha256": "1624089ebb89f40df01fd12bd29b763611228715a609d54f90ebe86b965070bd"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/sync_policy_tests.rs",
+    "bytes": 12040,
+    "sha256": "dff599fc47f895ed61030ed1b465fa57b2a85169645616f600656ec415314bfb"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/variant_tests.rs",
+    "bytes": 12510,
+    "sha256": "86d9040aca24f19583caba4f4f17fb61f9297698a5f1664343e13bd71e3a6826"
+  },
+  {
+    "path": "rust/symbrain-skills/tests/windows_roots.rs",
+    "bytes": 6482,
+    "sha256": "14995ed7d61e2fc9e999b422726c2fc2ef50b253929d16ba1ff02f16bacb2659"
+  },
+  {
+    "path": "rust/symbrain-usage/Cargo.toml",
+    "bytes": 826,
+    "sha256": "6cac15132956d7fe2dd72b285688adc0a75d75cee126a986ab1ff49dda2cacd2"
+  },
+  {
+    "path": "rust/symbrain-usage/src/antigravity_tests.rs",
+    "bytes": 2067,
+    "sha256": "752779ebddfcfea39718880a825512be3474fce4bfb7debf5da81ffd00bdb5f0"
+  },
+  {
+    "path": "rust/symbrain-usage/src/lib.rs",
+    "bytes": 11308,
+    "sha256": "a70b47bff3e41a66198e52c1f1bb1d8b4277bf151b8489148c81854d05ee50ca"
+  },
+  {
+    "path": "rust/symbrain-usage/src/model.rs",
+    "bytes": 5678,
+    "sha256": "8c7e9d083cd01a2014b792a51c7e2411398eef7f426fde1644bfe11f5d6e7326"
+  },
+  {
+    "path": "rust/symbrain-usage/src/opencode_discovery_tests.rs",
+    "bytes": 12930,
+    "sha256": "6595e79878fde8fe457a0131b2f7f4d685e6fa99e70d964d12cec4d27c276acd"
+  },
+  {
+    "path": "rust/symbrain-usage/src/opencode_provenance_tests.rs",
+    "bytes": 2468,
+    "sha256": "e8a7a8c48c7db0fa8400a489cfae030fce1f28f185b0f9624508d852b1011fab"
+  },
+  {
+    "path": "rust/symbrain-usage/src/parser.rs",
+    "bytes": 11533,
+    "sha256": "dd6c72b85ef2af5b89916ef9aa2c930d0ece577e0ec50c0d5331beefe2743af5"
+  },
+  {
+    "path": "rust/symbrain-usage/src/parser_extra.rs",
+    "bytes": 9593,
+    "sha256": "155e2b2c3faf68f3347d988c879dec7e064dab2442237c352933d3e596ac2896"
+  },
+  {
+    "path": "rust/symbrain-usage/src/parser_opencode.rs",
+    "bytes": 4716,
+    "sha256": "e13d756161de06e3aeee8e8971fb74adbffb96adca68699d1f452c7f2969c736"
+  },
+  {
+    "path": "rust/symbrain-usage/src/provider_antigravity.rs",
+    "bytes": 6635,
+    "sha256": "2c6bbcd24894be5c35a28ff7253d973e10fe601f1349c5088a085c900066b4f4"
+  },
+  {
+    "path": "rust/symbrain-usage/src/provider_config.rs",
+    "bytes": 71990,
+    "sha256": "0eaa489559aa76da6a1d1d3fdb8856bf5a98ebbaa95383cf3841376b27e82095"
+  },
+  {
+    "path": "rust/symbrain-usage/src/provider_config_tests.rs",
+    "bytes": 33499,
+    "sha256": "13863f026bd079c611c6117276871675ae511085f3a764f46ef3cd2c6297de94"
+  },
+  {
+    "path": "rust/symbrain-usage/src/provider_errors.rs",
+    "bytes": 7360,
+    "sha256": "715da3aa0cef287e7e22e43b47955389a3f9ae911e229d15b2bc0eb7daee02b8"
+  },
+  {
+    "path": "rust/symbrain-usage/src/provider_fetch.rs",
+    "bytes": 1042,
+    "sha256": "14653a0601e122939c4b96bace879011ff4e05de3f325900495a47e04e0f1760"
+  },
+  {
+    "path": "rust/symbrain-usage/src/provider_identity.rs",
+    "bytes": 1988,
+    "sha256": "4d2a320bc2689bf0a1d31fbd737bebac3a7dcb6d511aab11dfcd4d0012a9b043"
+  },
+  {
+    "path": "rust/symbrain-usage/src/provider_opencode.rs",
+    "bytes": 5466,
+    "sha256": "887bddde334d4669495b40c995b1f65ec9f8f859ffe62ec8b704de6ee468c0e8"
+  },
+  {
+    "path": "rust/symbrain-usage/src/provider_opencode_workspace.rs",
+    "bytes": 6370,
+    "sha256": "2f8d47ff8bec9b414ea104c3e459a82f9e20c3293aa455ff007abfbaa88f11b4"
+  },
+  {
+    "path": "rust/symbrain-usage/src/provider_request_encoding.rs",
+    "bytes": 1406,
+    "sha256": "d4ac3370033bc0ffd5606b75e632bbe7745a38865beaf3237a9accb672b76a79"
+  },
+  {
+    "path": "rust/symbrain-usage/src/provider_requests.rs",
+    "bytes": 14648,
+    "sha256": "700af0f6be0bccbd97ecf0addbdc19a38d10f7f36d544755bf2b19d75d4f0ca9"
+  },
+  {
+    "path": "rust/symbrain-usage/src/provider_requests_tests.rs",
+    "bytes": 5220,
+    "sha256": "b2e79ff538c99488aa150010a66c27bec08a6c09ffe6a24955f3df417fc33aef"
+  },
+  {
+    "path": "rust/symbrain-usage/src/providers.rs",
+    "bytes": 11620,
+    "sha256": "5f6631bde7a1cc918469d9a7e1f0fbe26fb6c54c8d3921b98425d514f33966b0"
+  },
+  {
+    "path": "rust/symbrain-usage/src/request_oracle_opencode_tests.rs",
+    "bytes": 3631,
+    "sha256": "2312476f3f9ef407caaa8db54c3828a1b73a7956bcb38e09a530b0ff0108dabd"
+  },
+  {
+    "path": "rust/symbrain-usage/src/request_oracle_tests.rs",
+    "bytes": 83387,
+    "sha256": "5bc1e853e4f9f3a28e90a3930a84b1f7d662f482fdcbc37697b58f224f80e9ea"
+  },
+  {
+    "path": "rust/symbrain-usage/src/transport.rs",
+    "bytes": 11670,
+    "sha256": "30ef2ca4b90f3f568a8d98a68cffa511514742f58082522cd00e28e63234bc98"
+  },
+  {
+    "path": "rust/symbrain-usage/src/usage_fetch_oracle_tests.rs",
+    "bytes": 9153,
+    "sha256": "df38e903711a6502628e5d0a8fe91ae0b8c962db361561b6139c6b553481053f"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/antigravity_authenticated_report.json",
+    "bytes": 13822,
+    "sha256": "6e961da6f5602a6a02a2543ce5024bd6325c7d0b2ebc5c9a14cb1d106dda75d2"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/claude_admin_authenticated_report.json",
+    "bytes": 2941,
+    "sha256": "23fb2ff59322bd3f004fa659a770f8983ee6f86fb6086614af25f2647921388a"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/claude_file_token_oracle.json",
+    "bytes": 2346,
+    "sha256": "1d4f6fc3a267a98232d3bf9246be18796a36827a088fd4a3a1ffad6954ef564e"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/claude_keychain_authenticated_report.json",
+    "bytes": 4527,
+    "sha256": "05637e03a2f300ad5e5f276d0b085f0c1cb0615a6488e2948564d8b9003c292f"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/claude_keychain_token_oracle.json",
+    "bytes": 5755,
+    "sha256": "a48e2cb27d0fd86d383435cf6199d5a2c8b2ac62cb64c6f1af9efa19044f7915"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/claude_oauth_authenticated_report.json",
+    "bytes": 5419,
+    "sha256": "0ad5adc2e2f96efad135bb28cc1f1661707831b8f389f66238fb5027b5e25352"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/codex_authenticated_report.json",
+    "bytes": 3303,
+    "sha256": "9077c5f7e3f9f11eb22a017016e46b4c4b6c89f37c23d8e2305e37ff29fde825"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/codex_file_authenticated_report.json",
+    "bytes": 13516,
+    "sha256": "0a9f107fff6062e49bdb7ca72024e622f08fdc115c52942278c45b1c3fd1b9f8"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/combined_native_authenticated_report.json",
+    "bytes": 5250,
+    "sha256": "5801677d04e2aa24bbca4650d3ba7cedc848475a91b5a768839014d67b317c73"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/copilot_authenticated_report.json",
+    "bytes": 2932,
+    "sha256": "87eb616df02d1026be398451e498907e1cfd8cf385209af8e473a85d0059fc04"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/copilot_file_authenticated_report.json",
+    "bytes": 2542,
+    "sha256": "cca15cc349cd2dc59bd9521bf30f0d175233409fb46eb3e10377606fbd24c662"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/copilot_file_token_oracle.json",
+    "bytes": 4645,
+    "sha256": "a5539953f692bce220208b84edae44ded86c25b0d5bd44a11279df4fd596d24e"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/cursor_authenticated_report.json",
+    "bytes": 3436,
+    "sha256": "146713582f148c9e3a23cd21afad7e6d0b6fabc14689c2f132308c6551e1f65e"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/kimi_authenticated_report.json",
+    "bytes": 3114,
+    "sha256": "ed6e07ff9d9c58c39d3a5b6cf2981cdd43da6ece250359081e9548400c4f2cff"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/kimi_fallback_authenticated_report.json",
+    "bytes": 1905,
+    "sha256": "10c79b793d584a24d392dba64f5afad5ee05b16f069bb957da2b29fc4f1d0111"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/kimi_file_token_oracle.json",
+    "bytes": 1968,
+    "sha256": "b27f9cc0d9ea3ced3ba11904c08be43aefc103da079081add070ecd5c18c152a"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/moonshot_authenticated_report.json",
+    "bytes": 2998,
+    "sha256": "510fe47416245ac5efa58678dcd0e4141f2cfd56c576f33d13ddb2026f6e92b7"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/nous_authenticated_report.json",
+    "bytes": 3332,
+    "sha256": "26baa53559713c0cbf89afe974f26d70fac8a68bc2f039bc45333cb60208e180"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/nous_env_file_precedence_report.json",
+    "bytes": 1089,
+    "sha256": "346abef641b234629a5cd9994797352cbd2b8973bf76a3c9149450e178cdffeb"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/nous_file_authenticated_report.json",
+    "bytes": 2934,
+    "sha256": "406107302591a269fb24ef1cf1561f69f0084daf3809f00f5da150bf50eca0bf"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/nous_file_token_oracle.json",
+    "bytes": 6899,
+    "sha256": "1c835a43f24bb38b5723bcea7e70c060f390de4e9fc9470483ba41a1a0b6ce02"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/opencode_authenticated_report.json",
+    "bytes": 3059,
+    "sha256": "5ba40f66f966f1a1e635dd04111788dba0df500649c0a9932d17cbe123938cb1"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/opencode_discovery.json",
+    "bytes": 163472,
+    "sha256": "9a2547e73b1c660048b66b6f98736b019483c8df4d321bbbc3c8a506b1d06fdf"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/openrouter_authenticated_report.json",
+    "bytes": 3074,
+    "sha256": "21ab0808b7d7439951fe448be2eb46cb473ed291e04057499ca7636bdadb9277"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/provider_cases.json",
+    "bytes": 23962,
+    "sha256": "d3a7e6ef0c66ddc1e20cb474e7ae6e2d705944be41c84bf99d7794c82ce25f52"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/provider_graph.json",
+    "bytes": 747,
+    "sha256": "ad0899962bf4a9d98fc9cda499261e486bb8036fa223784da5da8da8a5186fc2"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/secret_oracle.json",
+    "bytes": 14354,
+    "sha256": "3339c48b0164f60f750ec6c27da7dd6ab0944a5c2c396394b6d0084696e6dc3b"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/usage_fetch_620.json",
+    "bytes": 236683,
+    "sha256": "7afe0b5cdcd2a5abb5cd5352b89c49dba5ccf8140c9302c07fe90084165617d6"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/fixtures/usage_requests.json",
+    "bytes": 15818,
+    "sha256": "f5498ed4212846fcef93f80d7238106d3cdc692b6b35ce9f5bbd5e8717a51e30"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/secret_oracle_tests.rs",
+    "bytes": 17621,
+    "sha256": "488df496183b581a66a8a6a4145bf65d75d5e58b83d6604fab2733e09aa6e607"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/support/fake_symvault.rs",
+    "bytes": 1663,
+    "sha256": "23456c139aa722fc57f6e4feb0aec06f02be83a26cc4a581ff66dc9c5aa54e89"
+  },
+  {
+    "path": "rust/symbrain-usage/tests/usage_tests.rs",
+    "bytes": 17304,
+    "sha256": "da13763f87e98c27e232fb8b6de4710ca05d7ded1229433ac7e0670affd51ab9"
+  },
+  {
+    "path": "rust/test-support/coverage.rs",
+    "bytes": 415,
+    "sha256": "1f61d27a35fb0ab797747350eafe335b090d59256a136d09c0363a2cb9f86dca"
+  },
+  {
+    "path": "scripts/activity-cli-oracle/main.go",
+    "bytes": 6516,
+    "sha256": "a3d20ca2c9c2c5407cbc35d52fe315076cb98ec29360e05db89e596c9876118b"
+  },
+  {
+    "path": "scripts/activity-validation-oracle/README.md",
+    "bytes": 1337,
+    "sha256": "3745366ee0714a6541c96e639994e8cfcaf78574c8f204ae2e357ad6fae35d70"
+  },
+  {
+    "path": "scripts/activity-validation-oracle/controls.py",
+    "bytes": 1770,
+    "sha256": "ac3843c82ddd40cf2cb8b62e3e01b2288cf65f5be213d9c175cdcdb622167e27"
+  },
+  {
+    "path": "scripts/activity-validation-oracle/replay.py",
+    "bytes": 9808,
+    "sha256": "7d099dd6612a5878281d3fe07d5c46f583ebeafe9ee4174112da29f93945ae56"
+  },
+  {
+    "path": "scripts/activity-validation-oracle/run.sh",
+    "bytes": 1275,
+    "sha256": "ea6c5ebe81338492eabdebd7f385ee23d465a72c487146825c6a1c8821216bfd"
+  },
+  {
+    "path": "scripts/adapters-oracle/main.go",
+    "bytes": 6746,
+    "sha256": "7e63e7505d465de70e9be89ca120226994faf7835ea069857bd5c008ceec306e"
+  },
+  {
+    "path": "scripts/audit-oracle/main.go",
+    "bytes": 6886,
+    "sha256": "a6fa78353f577cdf8c8415a378fa2cf2614f92ba054469c93462aa9952f19885"
+  },
+  {
+    "path": "scripts/ax-button-names.swift",
+    "bytes": 4546,
+    "sha256": "488c5f355119d88f651fbc65c7123777781a14859e84bdada6ea75c7aa294f07"
+  },
+  {
+    "path": "scripts/broker-oracle/main.go",
+    "bytes": 5007,
+    "sha256": "068fb1d949181aa211b5915bc82c365ec2b5a72bdc35979bdb0f4a8e3aaf952b"
+  },
+  {
+    "path": "scripts/browse-mcp-smoke.py",
+    "bytes": 8443,
+    "sha256": "bc3b50d6ee8c53a972ee5d02d7439ca9c1ffd35990447523d715aae65667d032"
+  },
+  {
+    "path": "scripts/build-module-packages.sh",
+    "bytes": 7236,
+    "sha256": "850c08e756e96e0cbe008e3faf69099b586b42d8f7c408923c3331c835a3aef6"
+  },
+  {
+    "path": "scripts/catalog-oracle/main.go",
+    "bytes": 4623,
+    "sha256": "8db498c849427636e3a1ff0b9afd6e1398c001b093d77951f5cf9648577a7fa0"
+  },
+  {
+    "path": "scripts/check-app-icons.sh",
+    "bytes": 8134,
+    "sha256": "a99918f686b962564b4512c08682bcfec0829845aea0e5067feba44be66868f1"
+  },
+  {
+    "path": "scripts/ci-go-test-shards.sh",
+    "bytes": 4860,
+    "sha256": "5906c648cf86f22201ca1e1c176486a51c848b825ba2af28ee966c8ef1d41280"
+  },
+  {
+    "path": "scripts/ci-go-test-weights.tsv",
+    "bytes": 6501,
+    "sha256": "2b1f34958d6b56e40baddd63f41041879a58fdfc4e0efd5fb255678df45f420e"
+  },
+  {
+    "path": "scripts/cli-oracle/README.md",
+    "bytes": 3078,
+    "sha256": "a911f6ebe6b141d5f21e292ede8d4567260572bbf9fa8b30d18d40655cb39d10"
+  },
+  {
+    "path": "scripts/cli-oracle/main.go",
+    "bytes": 23736,
+    "sha256": "3f39083f262cc4821911d59c638fa1dcf4c144b641c2c89d3ed7b411c7e76b98"
+  },
+  {
+    "path": "scripts/cli-oracle/main_test.go",
+    "bytes": 1591,
+    "sha256": "840a0e7f6f1291a724a05bb4b51ac9765fa52680c8d5d3b812a2098e190f471d"
+  },
+  {
+    "path": "scripts/create-symaira-dmg.sh",
+    "bytes": 3257,
+    "sha256": "7f034d18e157a29bfe2d626f5823738e63e39ec777a4fd45fb7783077d00d8ae"
+  },
+  {
+    "path": "scripts/db-memory-oracle/README.md",
+    "bytes": 2125,
+    "sha256": "23456d12138517e6f9cfe7aeb631e4d8e6a8852928867befaf117e2a47238a9b"
+  },
+  {
+    "path": "scripts/db-memory-oracle/main.go",
+    "bytes": 14114,
+    "sha256": "08f6a6c2d3e9e59440286d1c1950804dc84647dc8eaef53a17c1d482d53e4869"
+  },
+  {
+    "path": "scripts/dist-oracle/candidate.go",
+    "bytes": 10223,
+    "sha256": "3883eb70b58798aa75683efb93bd5eedc4d85c21143c651748bf59dbc7bd068d"
+  },
+  {
+    "path": "scripts/dist-oracle/candidate_test.go",
+    "bytes": 5315,
+    "sha256": "ad4b8e0c91224764ae868f006d69212382cadd700a31fb86e53497d33683239d"
+  },
+  {
+    "path": "scripts/dist-oracle/fixtures/manifest_v0.11.0.json",
+    "bytes": 9513,
+    "sha256": "e4f9495fbebf1b6afff34397593786fd408850d0b143c438996e7e3840a03365"
+  },
+  {
+    "path": "scripts/dist-oracle/fixtures/tap_v0.11.0.json",
+    "bytes": 480,
+    "sha256": "20bc0058c423566f8460c4c95c38dc90320e2a18e37b3285d7b32524970bb71b"
+  },
+  {
+    "path": "scripts/dist-oracle/main.go",
+    "bytes": 26950,
+    "sha256": "135d62840c6fc4317e23696ec838a7274a12e89e78dd1afa3e5b7d9364403ff0"
+  },
+  {
+    "path": "scripts/dist-oracle/smoke-hybrid-fallback.sh",
+    "bytes": 1944,
+    "sha256": "6bc00d6640a363d8f317226d6b8065bfb0aed7ebdb5f1cc604667f5de9bab999"
+  },
+  {
+    "path": "scripts/dist-oracle/test_verify_release.py",
+    "bytes": 4473,
+    "sha256": "8d59cfcd98c7f6bd329a512e034248d2510151398cdc434fb16bd5de387b6be3"
+  },
+  {
+    "path": "scripts/dist-oracle/verify-release.py",
+    "bytes": 10974,
+    "sha256": "45586d60add69d0f8bdf8575ca847cf0f0faecb600ae750cb5cfdc7bb8f06d5c"
+  },
+  {
+    "path": "scripts/external_env.py",
+    "bytes": 2344,
+    "sha256": "31a6568e16d812271cc7735746e8d572d882a2cb7e94759d2592515ecff0b596"
+  },
+  {
+    "path": "scripts/fmt_check_test.go",
+    "bytes": 3887,
+    "sha256": "e5de76169582af982be429b16bdeca165b9691bcf05e8993267bf9d13922daae"
+  },
+  {
+    "path": "scripts/gateway-oracle/main.go",
+    "bytes": 16977,
+    "sha256": "65421abf8d63da00cc9c6c297e6e124e4615461054e8d8dd6670388817da52be"
+  },
+  {
+    "path": "scripts/gen-gorand.py",
+    "bytes": 10082,
+    "sha256": "188c749f65f5820f581145ef941370da996386e39e4cb569277348485ae0e7ef"
+  },
+  {
+    "path": "scripts/generate-go-printable-table.go",
+    "bytes": 2551,
+    "sha256": "45f5c3eb5fccc023415c5dfb810b23f208323c424c613f42a8876db2d071013d"
+  },
+  {
+    "path": "scripts/gorand-dump/main.go",
+    "bytes": 2460,
+    "sha256": "d0f33649c014f6106bddd6394de11ea6738613f6dac71f5cbdb099586c97cca9"
+  },
+  {
+    "path": "scripts/harness_health_contract.py",
+    "bytes": 2729,
+    "sha256": "e33983804a688ba2c7e97df8e765081bc0142ecd05a3f40ce1ab1feccdca1add"
+  },
+  {
+    "path": "scripts/init-oracle/compare.py",
+    "bytes": 42342,
+    "sha256": "4c4ffe3972eccf4b12734824bbda752cee984ed1c355bc36a5a4d7b3740c5b87"
+  },
+  {
+    "path": "scripts/init-oracle/test_compare.py",
+    "bytes": 21617,
+    "sha256": "72cd56f590dd6f486d7b376696811963b2574b2cbc855feab6c41c5b0599bab2"
+  },
+  {
+    "path": "scripts/install-oracle/main.go",
+    "bytes": 16436,
+    "sha256": "cc0326a9e6811905804ee6298f95ff6ce23d9bc5465a92fe6abe58b0724ef8dc"
+  },
+  {
+    "path": "scripts/install-oracle/main_test.go",
+    "bytes": 1127,
+    "sha256": "4eca1588e8c64daa93787e9fd5374b0924cdca4ca7ab8b427057c427a04d3221"
+  },
+  {
+    "path": "scripts/instructions-oracle/main.go",
+    "bytes": 16762,
+    "sha256": "82748c2121067b40f6ca4c97889bcbda54d79d9a3b61a22ea0c2399fbe36c4b7"
+  },
+  {
+    "path": "scripts/mcp-differential.py",
+    "bytes": 16387,
+    "sha256": "88977d13a578e857d94906b9efa782540ca7aa2fe020cc2eac7b72af6204113e"
+  },
+  {
+    "path": "scripts/mcp-oracle/main.go",
+    "bytes": 5682,
+    "sha256": "cec402fded54955fa91bca32162ea74003fd2d6d7e0ca35b5627d30e51adf70d"
+  },
+  {
+    "path": "scripts/memory-activity-oracle/main.go",
+    "bytes": 4447,
+    "sha256": "0f7c0c05e4d69e5ee0756aad6c503dc8191565ae77e5470360a6a343b8a23a9c"
+  },
+  {
+    "path": "scripts/notarize-and-verify.sh",
+    "bytes": 2142,
+    "sha256": "2c0595b5feac8d2a7329e884efaef965b4e12d25d32969fe5fc0141edbe99164"
+  },
+  {
+    "path": "scripts/operate-mcp-smoke.py",
+    "bytes": 14086,
+    "sha256": "a96af6516d9f94190cd58dc5cf44b9f0417b43aeecc19f594fafc3423e692880"
+  },
+  {
+    "path": "scripts/patterns-activity-oracle/main.go",
+    "bytes": 7088,
+    "sha256": "db507627dbec00c6b03f8cf411272344262b11b38b2f2da0c98f1e5b50f931eb"
+  },
+  {
+    "path": "scripts/pb-module-runtime-acceptance.py",
+    "bytes": 21546,
+    "sha256": "39c8a15928d9a1be0ad813f4c3807c9339114cea727cb044712bb3aea8d31e89"
+  },
+  {
+    "path": "scripts/policy-oracle/cases.go",
+    "bytes": 5292,
+    "sha256": "424e579ee3bc3fe593d6f43d5bad7c4e813c86d63739b13d4ef70efa589e5a98"
+  },
+  {
+    "path": "scripts/policy-oracle/decode_cases.go",
+    "bytes": 4380,
+    "sha256": "16200ca87f4c60c5fc93031c3ccc3ec17ace872ffea7bbe299bceef0aceca375"
+  },
+  {
+    "path": "scripts/policy-oracle/main.go",
+    "bytes": 6174,
+    "sha256": "1b6ef2aa7ade2b9d69591a3938e1e7b81b3c00649abb765a88132bae4d552c60"
+  },
+  {
+    "path": "scripts/policy-oracle/policy_cases.go",
+    "bytes": 7287,
+    "sha256": "b3db24151f72db61036815e3a43de07ca557b57e8764462748178f16529d4026"
+  },
+  {
+    "path": "scripts/policy-oracle/types.go",
+    "bytes": 3348,
+    "sha256": "c421c1ce233b70fee2240d37989c29377e688c990f092c93dfb223057601180f"
+  },
+  {
+    "path": "scripts/profile-remove-oracle/main.go",
+    "bytes": 17475,
+    "sha256": "3598656ee956cf982cf8e0456ffda12796f89b71f3a1b1d173d3151a3cf0b2ff"
+  },
+  {
+    "path": "scripts/profile-remove-oracle/main_test.go",
+    "bytes": 2207,
+    "sha256": "96f93f9ecf11da0dbf0c57e3240a1ac2d6fda2129324b1e969aaeb7ba47c9d85"
+  },
+  {
+    "path": "scripts/release_fmt_check_test.go",
+    "bytes": 6389,
+    "sha256": "a6118ffb9b70883fb4817afd6548f42efe90883a84ca1ec8fb0b7e6c4af84b47"
+  },
+  {
+    "path": "scripts/run-external-env.sh",
+    "bytes": 4663,
+    "sha256": "ba8f29afba5913c70fda99d6f6e3aa78f142d25c5ebd5621630f0e16a62c072d"
+  },
+  {
+    "path": "scripts/run-go-oracle.sh",
+    "bytes": 1144,
+    "sha256": "01aa265389f54a0ba71e75bf015d9d0048cd3996729daa21960694690fa479fb"
+  },
+  {
+    "path": "scripts/rust-coverage/README.md",
+    "bytes": 3680,
+    "sha256": "715244de5d3752eeb551e12fd38ddd0b701966d6db92e48adf3f605853951b69"
+  },
+  {
+    "path": "scripts/rust-coverage/go_oracles.py",
+    "bytes": 6294,
+    "sha256": "b435cb49b7e7c6aa25db1fa7347a1dfa25913596e0bf5829b828fd71397ff65b"
+  },
+  {
+    "path": "scripts/rust-coverage/report.py",
+    "bytes": 4618,
+    "sha256": "b8a1d90ac2ff89169a693f96681ce8da64c271e4d0ca84d1b6f3e32046ad2960"
+  },
+  {
+    "path": "scripts/rust-coverage/run.sh",
+    "bytes": 962,
+    "sha256": "d32292c7b724cbec497de260e2bfde718643eb125a15e9a005e6ab033b9aa7cf"
+  },
+  {
+    "path": "scripts/rust-coverage/test_reports.py",
+    "bytes": 3657,
+    "sha256": "3ea6e77488f5e27f484b66eeed91626d0890e8449e4832857be4ca86c6d76c17"
+  },
+  {
+    "path": "scripts/rust-differential.py",
+    "bytes": 148423,
+    "sha256": "5fe1ac2a3e4fde3295a3c39122f1adec0c9e151eb3aaaf25f4ccf3ab3ae76864"
+  },
+  {
+    "path": "scripts/scope-mcp-smoke.py",
+    "bytes": 13424,
+    "sha256": "31a5596ba1c7662fb8965b23a4db66747932d2121bc15066306f38cb4d66d380"
+  },
+  {
+    "path": "scripts/secret-oracle/main.go",
+    "bytes": 22426,
+    "sha256": "4a1ee803c2d8ef31a50b951c1b72c37927b4368fdf17bb36bc97622182d8c2e6"
+  },
+  {
+    "path": "scripts/set-app-version.sh",
+    "bytes": 1030,
+    "sha256": "7bf6b2e1c0b048be3edbe93607780357ede4f696bc384c15ae26125686f16ed1"
+  },
+  {
+    "path": "scripts/setup-repair-oracle/README.md",
+    "bytes": 2275,
+    "sha256": "dd588197bd921c5de97fb2165b9c5499cbe0f36330a52b13efcbdecbaeb5f6d5"
+  },
+  {
+    "path": "scripts/setup-repair-oracle/replay.py",
+    "bytes": 10439,
+    "sha256": "a907d9aef16960939f078d23b5742f046461cac9067c179ee7f277f893c1afe1"
+  },
+  {
+    "path": "scripts/setup-repair-oracle/run.sh",
+    "bytes": 740,
+    "sha256": "7f370b5270f0545e959d809f3d2541728c281669c5ac8207fe4d8f9666cbc720"
+  },
+  {
+    "path": "scripts/skills-argv-oracle/README.md",
+    "bytes": 4249,
+    "sha256": "b2a1d915ce3b7df446480f6cc1527f01da31eba74ca7a5cecaa79b5ce455d388"
+  },
+  {
+    "path": "scripts/skills-argv-oracle/build_go.py",
+    "bytes": 12552,
+    "sha256": "c7a43b310a2cbd2bf906cb06741f3ce6705ca726f340bf41b211a5e01a20564f"
+  },
+  {
+    "path": "scripts/skills-argv-oracle/build_parent.py",
+    "bytes": 7865,
+    "sha256": "6a864a01aa8f3e9e74934ada473906d6cb27a339b6e57fe03bc8f606d4ea01bc"
+  },
+  {
+    "path": "scripts/skills-argv-oracle/compare.py",
+    "bytes": 8605,
+    "sha256": "7e61896f02c55012ab78754e09be848efb299c59961d19c7f2bea79ffff38d86"
+  },
+  {
+    "path": "scripts/skills-argv-oracle/novel.py",
+    "bytes": 12389,
+    "sha256": "a0f4a07f3e4cb22082f0b20c4ffb8750b5f22282d6586d8be2ba0852ac9baaee"
+  },
+  {
+    "path": "scripts/skills-argv-oracle/test_build_go.py",
+    "bytes": 5626,
+    "sha256": "d8b083d80720e873cfdd31451db46bb9e3404adf25697ea3b4369baa493fbc2f"
+  },
+  {
+    "path": "scripts/skills-argv-oracle/verify_control.py",
+    "bytes": 795,
+    "sha256": "205cec23997fdc1c517447ccadfa6160c761b92c06995134b087c985ed2fb55e"
+  },
+  {
+    "path": "scripts/skills-argv-oracle/verify_novel_control.py",
+    "bytes": 1062,
+    "sha256": "8ebce334025726e9af10552b89545467d204e8d161889beca52e22cc2d36beba"
+  },
+  {
+    "path": "scripts/skills-install-oracle/main.go",
+    "bytes": 11970,
+    "sha256": "1291c2fd4a988f494f128dcb9eb01972e4f9b38498f76a626bd7a9ad63cd35dc"
+  },
+  {
+    "path": "scripts/skills-oracle/fixtures/relative-root/SKILL.md",
+    "bytes": 185,
+    "sha256": "c58bae7287026cb4706e565092d3550c200c99e7aa9cdf558f46c0df98d84227"
+  },
+  {
+    "path": "scripts/skills-oracle/main.go",
+    "bytes": 20083,
+    "sha256": "90ae6169b805917ae05b4394ad243a8299cbd2ab05e82c18da2792d484e59b13"
+  },
+  {
+    "path": "scripts/skills-runner-oracle/main.go",
+    "bytes": 18799,
+    "sha256": "46bf8554e1f1bc1e4ebe9ae09f9dcd6a61bee49b2295389923a230d13e01d897"
+  },
+  {
+    "path": "scripts/templates/gorand-tests.rs",
+    "bytes": 2146,
+    "sha256": "8c4a2e2dd9ac12ad49d24ebcde702f7d3e63c3394695e47986fb76eb75c2d773"
+  },
+  {
+    "path": "scripts/test_external_env.py",
+    "bytes": 7987,
+    "sha256": "dac7b7b15495b992513ab07ca9eb0bc6bce0766e3d259957662958fa78b0252d"
+  },
+  {
+    "path": "scripts/test_macos_release_verification.py",
+    "bytes": 5642,
+    "sha256": "4fa2a75621326474f558e56925cbbe2721d0546a09a6ac7c333d25807a2b8363"
+  },
+  {
+    "path": "scripts/test_rust_differential.py",
+    "bytes": 2031,
+    "sha256": "224a94b941f7f916a097a007b5ac90555e1327e39ea98fc7c3fa9d4de31fea73"
+  },
+  {
+    "path": "scripts/usage-fetch-oracle/README.md",
+    "bytes": 3252,
+    "sha256": "a777b43cf45a014bbe9a362c2cb7be3cb50888eb8848cac2d3f32ceeec62ef2e"
+  },
+  {
+    "path": "scripts/usage-fetch-oracle/cli_test.go.txt",
+    "bytes": 1201,
+    "sha256": "38832812106d0b06fd19911ba427c6d204069dd7dd41a43347b18811ee28c676"
+  },
+  {
+    "path": "scripts/usage-fetch-oracle/controls.py",
+    "bytes": 2691,
+    "sha256": "ff58d823820971c2d3fc24981cbb53988a75d4b2a10404ed2c4edbbbf34e48a4"
+  },
+  {
+    "path": "scripts/usage-fetch-oracle/receipt.py",
+    "bytes": 2423,
+    "sha256": "07fd8d66baea9cbc4e849dfb79159e03bd87719f2d16cc0342c622a4b1fb5465"
+  },
+  {
+    "path": "scripts/usage-fetch-oracle/run.sh",
+    "bytes": 2151,
+    "sha256": "892dca49b8742f149416e83261697bfd4c037624e611254715f5073f1d6e6268"
+  },
+  {
+    "path": "scripts/usage-fetch-oracle/usage_test.go.txt",
+    "bytes": 7905,
+    "sha256": "5720d69efde9f4e9cd10a203915f9e59cf76ab5380e6aee28d328a8873404411"
+  },
+  {
+    "path": "scripts/usage-oracle/main.go",
+    "bytes": 55906,
+    "sha256": "e60779d28fe5e9864283f88c543c04fb434ca56328ea1f0b17b9df962e30b5cc"
+  },
+  {
+    "path": "scripts/usage-request-oracle/main.go",
+    "bytes": 10596,
+    "sha256": "34e4e5550133b36044c5cc0389ea3f436de0396e4fce9aa92a40a4d6dfb9232b"
+  },
+  {
+    "path": "scripts/usage-request-oracle/opencode/README.md",
+    "bytes": 3076,
+    "sha256": "5adae56af43eda74437bd85769abd0390fc15d8dc1aa9fa4b04037fad0195c25"
+  },
+  {
+    "path": "scripts/usage-request-oracle/opencode/cases.go",
+    "bytes": 9339,
+    "sha256": "125be7ed13f8bb868deccf63770bf923fcf5328f84d9da4198565ceb4be42544"
+  },
+  {
+    "path": "scripts/usage-request-oracle/opencode/main.go",
+    "bytes": 11545,
+    "sha256": "5e879a83151e491f6cb22506bd32e5211dadfc04ed3a8c417c06dad7c0f50f56"
+  },
+  {
+    "path": "scripts/usage-request-oracle/opencode/provenance.go",
+    "bytes": 2347,
+    "sha256": "86c9a2ed9225552a2a40da5d92168391fcc1f245ffc72a8eb9fd38328d1c2379"
+  },
+  {
+    "path": "scripts/usage-request-oracle/opencode/review_cases.go",
+    "bytes": 2561,
+    "sha256": "0c60f79cdf5a5c1ac610e4689575e9153d04bf8752baf69563454f3ba1f8a831"
+  },
+  {
+    "path": "scripts/vault-admin-oracle/README.md",
+    "bytes": 2297,
+    "sha256": "2f0d2ac080d28bf04ca3d94e040e52414fa2c6d79776e5fcad2dd5ce9023f5a0"
+  },
+  {
+    "path": "scripts/vault-admin-oracle/replay.py",
+    "bytes": 14614,
+    "sha256": "c95ca6eeaf737d9322d98aad619dcfb2c50d3e79adbf7c970709998e04219174"
+  },
+  {
+    "path": "scripts/vault-admin-oracle/test_replay.py",
+    "bytes": 1430,
+    "sha256": "4cd0bbdda6b329fc5aa08400e8d48cade277b4384fd653c4312405ad34411940"
+  },
+  {
+    "path": "scripts/verify-notary-receipt.py",
+    "bytes": 1229,
+    "sha256": "016a7c85094cdd7de65b08ede7b38ca86f3ef4b8e73c7461bdc737cd4dcdcb7a"
+  },
+  {
+    "path": "scripts/xdg-oracle/main.go",
+    "bytes": 6530,
+    "sha256": "dcfcbe10fdd3ca58f7555ff7cb176aee273be539751e9948f7d74896868c08fe"
+  }
+]

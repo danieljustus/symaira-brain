@@ -1,0 +1,32 @@
+   Compiling symbrowse-daemon v0.0.0 (/workspace/symaira-daemon772-registry/browse/crates/symbrowse-daemon)
+    Finished `test` profile [unoptimized] target(s) in 2.89s
+     Running tests/registry_contract.rs (/workspace/symaira-daemon772-registry/target/debug/deps/registry_contract-80b29ab145265858)
+
+running 3 tests
+test registry_normalizes_explicit_root_lexically ... FAILED
+test constructor_defaults_without_creating_profiles ... FAILED
+test isolation_errors_order_and_clear_preserve_private_profiles ... ok
+
+failures:
+
+---- registry_normalizes_explicit_root_lexically stdout ----
+
+thread 'registry_normalizes_explicit_root_lexically' (902443) panicked at crates/symbrowse-daemon/tests/registry_contract.rs:26:5:
+assertion `left == right` failed
+  left: "/tmp/br-registry-902440-1791055222898055788/unused/../."
+ right: "/tmp/br-registry-902440-1791055222898055788"
+
+---- constructor_defaults_without_creating_profiles stdout ----
+
+thread 'constructor_defaults_without_creating_profiles' (902441) panicked at crates/symbrowse-daemon/tests/registry_contract.rs:16:5:
+assertion failed: !registry.user_data_root().as_os_str().is_empty()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    constructor_defaults_without_creating_profiles
+    registry_normalizes_explicit_root_lexically
+
+test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p symbrowse-daemon --test registry_contract`

@@ -1,0 +1,16 @@
+{
+  "controls": {
+    "missing-oracle": {
+      "exit_code": 101,
+      "failure_reason": "live evidence requires the immutable Go binary",
+      "expected_failure": true
+    },
+    "mutated-status": {
+      "exit_code": 101,
+      "failure_reason": "existing Go report changed for",
+      "expected_failure": true
+    }
+  },
+  "go_source_modified": false,
+  "runtime": "Linux x86_64; native Rust CLI tests; immutable production Go dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
+}

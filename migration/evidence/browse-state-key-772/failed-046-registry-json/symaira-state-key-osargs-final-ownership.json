@@ -1,0 +1,863 @@
+{
+  "candidate_head": "046bf9088a21371f30a0c2ccea829ff93ab78f56",
+  "candidate_dirty": false,
+  "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "rust_binary_sha256": "55fe14d5c477c1835c9d9cbc5ceb32fd298fe799fa1adb7d202cb7179f627d58",
+  "provider_binary_sha256": "a5d3b46e22e70bcb6308d14c3581baeec8df20ea42ed3f74e5d74e58e74e3726",
+  "provider_source_sha256": "39db103ab6f719918b90a32f4c3ca353b8b1df2e4a7340f787fb6604c527dae3",
+  "candidate_source_sha256": {
+    "browse/crates/symbrowse-cli/Cargo.toml": "fc315e40f1247b0c39827ee357bd09f2646a453f7bb1a9075d6dcebd7f7e834c",
+    "browse/crates/symbrowse-cli/src/browser_profiles.rs": "6d0f93aa7c821bfd82e6f719e17c3abdac4c37a87242c521a7f6e72c8aae922e",
+    "browse/crates/symbrowse-cli/src/completion.rs": "b88b0e64eae2df3449cfe201cf1ba0ca54fd5635dd138b61851c435fce95f41d",
+    "browse/crates/symbrowse-cli/src/completion/bash.txt": "d8aebb6e8b7b8ff15197dfadec7802ac0b5d7e624ae87e7c767ba2e0d3b81240",
+    "browse/crates/symbrowse-cli/src/completion/fish.txt": "d8e10e9dca934eef57a548953c9bf7e428b23eb786ad2e764a9b1626928f10d8",
+    "browse/crates/symbrowse-cli/src/completion/powershell.txt": "c81fe9adbc6e5e4901b089e22b265737ad424aad258c68286f56ca57ce5cc0d3",
+    "browse/crates/symbrowse-cli/src/completion/zsh.txt": "17788f31f6b6703aca7bdeac9c904fec2f5cb510e047c19958b60df8f52b4359",
+    "browse/crates/symbrowse-cli/src/daemon_state.rs": "a1ae4a5b7b5885caa0ae87c51ac7efad5abf093a99615b12a601a0d72318f6b6",
+    "browse/crates/symbrowse-cli/src/help_catalog.rs": "c3b7209505ff04e629812523fa8a348cde840076bebbed9de62cd1e48792685f",
+    "browse/crates/symbrowse-cli/src/main.rs": "c78b6e99b3ff11ad50223ad5f538e1f1c38d4d93cf588843b053383f03417190",
+    "browse/crates/symbrowse-cli/src/upgrade.rs": "101a9d397ef6276eeee5c98adeabecbcde20f12d6195326342cd60c0f52aea4b",
+    "browse/crates/symbrowse-cli/src/upgrade/cache_dir.rs": "ad78490c644f5b5fef6b5967bebf37dcc9d0097ce5945bb43b0fd464585b96ea",
+    "browse/crates/symbrowse-cli/src/upgrade_tests.rs": "d77ca922adb69281174b830fa3814467535f1513ebd1e5ac9c7cca2a26c5649a",
+    "browse/crates/symbrowse-cli/tests/fixtures/latest-release.json": "64b89cfe8869f30cfab7a80d0912cac3962cfce998a587e883f6723c3404a683",
+    "browse/crates/symbrowse-cli/tests/fixtures/mcp-list-profiles.stdout": "4215b65f192bf3984273e90fa98cab6cdba85bce6171de8d498c08070db2a9e4",
+    "browse/crates/symbrowse-cli/tests/fixtures/update-cache.json": "ff7aececaaad4d6d679922e22ac7c19a939a9c96d76c3c3312b88d3d5ba2f4de",
+    "browse/crates/symbrowse-cli/tests/flow_list.rs": "4beb03a64e901d87aedbd6bde9b764247371834638d061b769f1253b1321b229",
+    "browse/crates/symbrowse-cli/tests/help_oracle.rs": "f95c033ca3ea1b3253405e35d2196bfc3d4fdeda584adccfe9123807a67516fa",
+    "browse/crates/symbrowse-cli/tests/profiles.rs": "3a9b9aba9e23fc16fe8579af327d9ce37276b636219ab1f5c7f78d49916b6f57",
+    "browse/crates/symbrowse-cli/tests/upgrade_check_native.rs": "4f4e73a1a6574d3c6b83cd10fdfba5fa2b7cd06dd0c1a7fbfc629cbb23cf1015",
+    "browse/crates/symbrowse-cli/tests/version.rs": "d4115d07400a3d3eed82341593ff0b5bf4543892240477d84b6df17c5a390243",
+    "browse/crates/symbrowse-compat/Cargo.toml": "6ed14b325c77e307a44694086e2b26c5b9572a720e3e38fa6335a19aad72a41e",
+    "browse/crates/symbrowse-compat/src/lib.rs": "8450f5c17cd71abd0a1b78cf69ddacebe710018a6fce311f3ced6c58a9b7741f",
+    "browse/crates/symbrowse-core/Cargo.toml": "837797326e4b08651ea496797dd5d71b5e37bcdc69df4a611684bacd99eca264",
+    "browse/crates/symbrowse-core/assets/injection-patterns.txt": "a06b5da389640f558c44cf590e27db2848d0a5f125d4f48153553437147e047c",
+    "browse/crates/symbrowse-core/examples/startup_key_source_probe.rs": "699cdd763b97274b2851670d66dfe317e00820b4b5fd6fd0dce4416ce8888fd2",
+    "browse/crates/symbrowse-core/examples/state_key_store_probe.rs": "0f0abbe037aa7cd746f4406378193e3151e2e81ff7d169c28ca5b2e02e5954f2",
+    "browse/crates/symbrowse-core/src/batch.rs": "ff6000b0f003b0beebbfe156a3b2d143d15d7ea352e1c2f8ac36edf5af7db84c",
+    "browse/crates/symbrowse-core/src/browser_state.rs": "b6e039a886357ae8abf0346eee158c750761318519231f0b6fd1df51f7bf38ea",
+    "browse/crates/symbrowse-core/src/budget.rs": "46b4ff9cb9b46f9735bce207d29f2659a26378a3cbdbfe7fd38f4b8773f40229",
+    "browse/crates/symbrowse-core/src/cache.rs": "296ad821195f166572d9196e2ac433712de547d0a9080b5d6ae759fb9f6c1f00",
+    "browse/crates/symbrowse-core/src/config.rs": "af6a927c22ee41cd15f13b2e64d75c4688e93bab1f05f06210f0b084993ed593",
+    "browse/crates/symbrowse-core/src/error.rs": "40616852bfaa678ecc31733221e84ba25ffaafcc6a3c4b6a4f43b6e4959d9fcd",
+    "browse/crates/symbrowse-core/src/flows.rs": "0dac4899f9dfeb9d2c2884f61e097a4775d2b9ba194dd5d87ecd7ff34eb597bf",
+    "browse/crates/symbrowse-core/src/go_print.rs": "a58145c514f6823cee16e1c7568a28ab0c26380a6834bea0968f69ff7cd59ea8",
+    "browse/crates/symbrowse-core/src/go_quote.rs": "0b452257264731c12e2f46c11413226b1c0aa351db3af74174f960c7ae696a76",
+    "browse/crates/symbrowse-core/src/injection.rs": "33db1397724e160106ce152858b7ce1bc50a3544a8893bf2800dc3689962c589",
+    "browse/crates/symbrowse-core/src/injection_boundary.rs": "63a4fa632453b3d66926a4e2997526cfe303d38852bef4b1b6c651dabf9d94ff",
+    "browse/crates/symbrowse-core/src/journal.rs": "8b88f6effd49bba3e97fb7bbcfa07477a02bf3b81db55e1737ca497beff3b97e",
+    "browse/crates/symbrowse-core/src/key_resolver.rs": "399fe930d363f1cd784d7dce8cac3b46164f816ac628bbc443be4c3fbe39134a",
+    "browse/crates/symbrowse-core/src/key_sources.rs": "94f59fdd618bd226277ae2ab3322b9b712460f8acf7f24222d17ba72d2dc7070",
+    "browse/crates/symbrowse-core/src/key_sources/command.rs": "2641185f8b4274f3d6ede8d8d815399bef5b09442b94bb4af90f44a344c14ca6",
+    "browse/crates/symbrowse-core/src/key_sources/command/owned_child.rs": "c7ad3736530625837eb7662c08694e841f4f98e276038571882be4f607ccd400",
+    "browse/crates/symbrowse-core/src/key_sources/command/standalone.rs": "28ace6936b05bf1d347feb1b442a94964663539bbfd5ce3738a45ac96d6af312",
+    "browse/crates/symbrowse-core/src/key_sources/startup_owner.rs": "4346aeedb2f3a03518420856de7d000b246c7b80299bf85f240c7a698ead88a6",
+    "browse/crates/symbrowse-core/src/lib.rs": "8113fbb13c2ced8f95bbed1cb0c71c68d685d67489491e5b31055c664000d318",
+    "browse/crates/symbrowse-core/src/oob.rs": "05b028419854eda7343b71d6f1c296d4048f837f63b9b8983ad932d2cc1070db",
+    "browse/crates/symbrowse-core/src/output.rs": "f5abd2e484fa2b1584c2ca62d5e38c5c67ca3238451fa7ff40e96598e83c454c",
+    "browse/crates/symbrowse-core/src/policy.rs": "94e3816342ba30b78ed02bff01d1357143a29a51ae2a47d9571db218186d129e",
+    "browse/crates/symbrowse-core/src/policy_guard.rs": "631fea056197a3fa517732cf54241cf15aba90b180a826d7b8a4f4d10a12b55d",
+    "browse/crates/symbrowse-core/src/profiles.rs": "0580fcc93bc1377f22d2029619fe4fa9b9fae1a17766f39896b0caecf877e47e",
+    "browse/crates/symbrowse-core/src/runner.rs": "9f647cb9b1876d0c7074c8b325499a6b4b59f5bfa9e9bae7a9f9991fb4adadc4",
+    "browse/crates/symbrowse-core/src/session.rs": "9c26d9418a9b14d3491e0bfd8665f47547ae03b8f76269a3586b074ba8935e93",
+    "browse/crates/symbrowse-core/src/settings.rs": "d0d06b009787f6857bc06f27bcd289b357148a31406110f19dbcd81ef1c753c2",
+    "browse/crates/symbrowse-core/src/state.rs": "866fcf4b75ddd5fb2e17505c8f80255c84d447ab4c58eaff99db331835683c42",
+    "browse/crates/symbrowse-core/src/state/json_diagnostics.rs": "8ad7e4dac2625fb4dd26a4f11faeccb8cf47d1ad673592042c3d0242e3587022",
+    "browse/crates/symbrowse-core/src/state/model.rs": "ef632a2d0e2fc7e00d698918220d6e6527860a2312948509fe9134525e7063df",
+    "browse/crates/symbrowse-core/src/state_store.rs": "fe0cc102cabafa77280790fb352e6b5b13c26cddf2346fed7ddf471d4761edf3",
+    "browse/crates/symbrowse-core/src/state_store/diagnostics.rs": "84213eab96a52207b65ee5014e5844f0b11696787ebe2c4ac80ead78a3ed6bb1",
+    "browse/crates/symbrowse-core/src/state_store/files.rs": "ab018fc9f278f69a3fcdc07ff9018680d403e7ab574ce15e5e21e33e1b1cfc9d",
+    "browse/crates/symbrowse-core/src/trace.rs": "e4687121bf9c3a13499a5d25e6a95498e4b366c42007f20aa8568ca9c6f21d80",
+    "browse/crates/symbrowse-core/tests/config_contract.rs": "92f5c0add4207265c5412ee70948eb781c79a27406b8a4b431e602c85bec1095",
+    "browse/crates/symbrowse-core/tests/hardening_properties.rs": "fe5a30d5ca5bdcf6edee23c3f80a91318137cbb6588cc47291fe058519fcbb70",
+    "browse/crates/symbrowse-core/tests/injection_contract.rs": "27dbb4d35243378b014c761ead7592ad4d4a51766746626ae2effca9b201d26d",
+    "browse/crates/symbrowse-core/tests/key_resolver.rs": "fae33ecfe2f0037670870e6f951ec636fdac3df6d609de0792697fd426e75e2e",
+    "browse/crates/symbrowse-core/tests/key_sources.rs": "01c6b2adc444ab03ceaad2f65942e7c3e5b58b2924b2cf2f8cad84bb88962b93",
+    "browse/crates/symbrowse-core/tests/output_budget_contract.rs": "da0f7e28decc94b9a899e3bc493494aeba13a1dc31f65b745c1d17262218cbea",
+    "browse/crates/symbrowse-core/tests/policy_contract.rs": "5d840e96e7080864237f8f403b6de2774844d4ada82f44f21e616d6c2e9206b3",
+    "browse/crates/symbrowse-core/tests/policy_guard.rs": "17a4a2a2b18e5e0fdb582f6d0e6f94116f28de5c3ba73c3a6a204e7748d2f6b2",
+    "browse/crates/symbrowse-core/tests/session_lifecycle.rs": "0e4774579e281df0201ea8668bf20f848f37ccdb78cfff94fdd98fd6da8d29a4",
+    "browse/crates/symbrowse-core/tests/state_cleanup.rs": "ac4f1610ba03c0fb4612f2432d06e2a116544f89893547d1be752e999e6f801b",
+    "browse/crates/symbrowse-core/tests/state_store.rs": "c67b5e99a29ebe7390780d88040a4171e48abf2270425e629b3cc10cda2c1a20",
+    "browse/crates/symbrowse-core/tests/state_vectors.rs": "ce866ff2819a277b94f9290ce9f4ed5aaf536b72f7437e4b6a7ea285c7ef8431",
+    "browse/crates/symbrowse-core/tests/workflows_contract.rs": "364d28d1b692efe31ab99326ff4c49a4a0cf195be3e53a608d52cc6141659d79",
+    "browse/crates/symbrowse-daemon/Cargo.toml": "86af249385cbfeda71422e0b58c0b7e703caa734e0618eb4bcd7abbf4644cf21",
+    "browse/crates/symbrowse-daemon/src/client.rs": "a043fc79d8d77ac5169ded39904bb37bb1daf94e1c60a6c3efaf3339dad93f59",
+    "browse/crates/symbrowse-daemon/src/client/connect.rs": "b41a4857220b4343d953138d994ba9528bda5963ee122033b4fd41b6884cbe3a",
+    "browse/crates/symbrowse-daemon/src/client/errors.rs": "d0d013eeb201be3c79ccc79bf406961206dbcf3dfd9b207017c6924667af047d",
+    "browse/crates/symbrowse-daemon/src/client/process.rs": "f59db9ebc3ecc3a61d2fea066cba636a4f50ed16da6e8f236be843fadb2376a2",
+    "browse/crates/symbrowse-daemon/src/client/tests.rs": "eaacf50753107a5cdc13888fa437ebfdbde4ba52066d6001fd8fae9171a97e3d",
+    "browse/crates/symbrowse-daemon/src/client/transport.rs": "6f1775b7cce6022a65197f4217d22d59778202a485dbc4db3c464fbc704f1c8c",
+    "browse/crates/symbrowse-daemon/src/lib.rs": "3be2f8e07cf76639bceaa08b8e9f48dfabf61ed9ec4d2ee4ad86d83895801b5c",
+    "browse/crates/symbrowse-daemon/src/protocol.rs": "77b9d6a780bdf6e52f2aa1d29b9227d2bd3260b8366a5b69e75a3810e97cb756",
+    "browse/crates/symbrowse-daemon/src/redaction.rs": "d76a27bb85a06582f15b4e65795cdaa0d70e05ae9de05c73fd2819134726522e",
+    "browse/crates/symbrowse-daemon/src/runtime.rs": "4bba8cbe80229bcd43af25bae622e7d53676eb29f15aa6554b2a2393c7ced263",
+    "browse/crates/symbrowse-daemon/src/runtime/state.rs": "08a87e435c82c7caa215302a1b776d75e3ee833a78974a5dfda94089abf1b5d2",
+    "browse/crates/symbrowse-daemon/src/runtime/state_key.rs": "d4ac9464ece04afd72cf550a84578df1d8d4f8baba99eee183a9cadb75357ac0",
+    "browse/crates/symbrowse-daemon/src/runtime/state_key_tests.rs": "6154cb82c9a2db6823d628421b30dce80b24249fb8b5cca8b878232bae5faa18",
+    "browse/crates/symbrowse-daemon/src/safari_runtime.rs": "9806bf97e2c1173f0ce29342d20960c9acbd01ed24f656e0d58fcd57e9e93553",
+    "browse/crates/symbrowse-daemon/src/server.rs": "d9873c9cd04ed310ea7009424d2328c12e9b061618a36c3f2d757a84dc05cbe1",
+    "browse/crates/symbrowse-daemon/src/server/connection.rs": "f918d5a576fcf86d79260f6edf2076866a1b18f9f697367a22e34a6270ff2d4e",
+    "browse/crates/symbrowse-daemon/src/server/helpers.rs": "f7bb96d67606d787013a62009ccad9540365ec8777415d180481d8ea25070ead",
+    "browse/crates/symbrowse-daemon/src/server/tests.rs": "657b94e60d7998f061d8a69c9d7a188732c9a234100325d97b498a0f99ea7b71",
+    "browse/crates/symbrowse-daemon/src/server/unix.rs": "3d542e6d4921a913b9ffb5716cdb8751c639d7db8af10ff712392739c1da9a7b",
+    "browse/crates/symbrowse-daemon/src/server/windows.rs": "70284004c47aee25bef42920b057b333eead1aa4d9af1c1a08c4797dcf9f1ee2",
+    "browse/crates/symbrowse-daemon/src/session.rs": "12155d73bbbd06c27f8e4c52bc4a6b041ed51198ca861622002dc69f299f4a09",
+    "browse/crates/symbrowse-daemon/src/session_quote.rs": "068d77d52dc14fbd8e7a173e193d879d2911addda53a65012a91fa68b7fa858c",
+    "browse/crates/symbrowse-daemon/src/spec.rs": "8f5eb7b13f9a5997fb57a8a88556c7afeef13866f2a803787183af2040569193",
+    "browse/crates/symbrowse-daemon/src/spec_paths.rs": "ed7200045c0714c5a0e82fd2a995ed9ba7d3d511e3a1b93806b572e49c60bffe",
+    "browse/crates/symbrowse-daemon/src/spec_paths_tests.rs": "618e5d506cde117fa6de8d374ef380c98187985d2fd361a68e33e6c1f32fe651",
+    "browse/crates/symbrowse-daemon/tests/cancellation.rs": "18e9c79f7488ac96fab6084b8cf30b118d818febbb661f89bf56499b96e56d5c",
+    "browse/crates/symbrowse-daemon/tests/chrome_native.rs": "4f9e43b5f67d8163cd11a41a22281988fd3c4a529884a4eba5611c76624b169b",
+    "browse/crates/symbrowse-daemon/tests/client_contract.rs": "ed06c9d1de3fc41f73d38cdb8b590dd507ffd0f5c377df59ef47788132830d91",
+    "browse/crates/symbrowse-daemon/tests/firefox_native.rs": "4781ec7a34979fd865cd5686fa41bcc6720096cca826d2b80198df4e6976171c",
+    "browse/crates/symbrowse-daemon/tests/lifecycle.rs": "b56c70e0c878192ee03470134398d1eed788d2a553521a994eaa7472439dae62",
+    "browse/crates/symbrowse-daemon/tests/platform.rs": "6f3354178f39da4a971ecd2ea9cfaecf721a2f9ba65a232aeb2be7f6f223b9ec",
+    "browse/crates/symbrowse-daemon/tests/protocol_fixture.rs": "d66cdd28196df79bd2db622fa9dd318c60ba136ceeaeab3b2fc5298ddaceac5b",
+    "browse/crates/symbrowse-daemon/tests/registry_contract.rs": "dcb6f84e78138504ae8a6d18b6d792e3a01bef29002bfdd4779e9aa67b9cd602",
+    "browse/crates/symbrowse-daemon/tests/safari_native.rs": "8e2c2ce1f59d2a1c8961148f077e635edfde83e3ad55f4057b488bbd89cfc464",
+    "browse/crates/symbrowse-engine-chrome/Cargo.toml": "cb70a79ab5fb6c501da7a07854009069a7509865bff9cf5892ba5f5ff69606e2",
+    "browse/crates/symbrowse-engine-chrome/src/bin/symbrowse-cdp-spike.rs": "89c27829d07eaab0e837a8a0afe0acbf6dc5632ab07a69b4b153e8e69148f021",
+    "browse/crates/symbrowse-engine-chrome/src/connection.rs": "be93f82d360217a8f117ca7ee9090b34dcd6f07955c1730bd29e866415e770f9",
+    "browse/crates/symbrowse-engine-chrome/src/events.rs": "9aec12f4d09f37f789c667e3e131445d6ca616895d0f7d1c97a083665ee688cf",
+    "browse/crates/symbrowse-engine-chrome/src/full.rs": "0927e9773a43e043316eddcc253b3b193f3aa76ecbb53f760cffe5e42b93bae0",
+    "browse/crates/symbrowse-engine-chrome/src/launch.rs": "02cae95bb22ae8dd668b7366ba886628b75841b8487ec256da2fe667fe069109",
+    "browse/crates/symbrowse-engine-chrome/src/lib.rs": "22df71eb6594d76fd6003d005d71fa21c81f488b52f313e96431766fb59533da",
+    "browse/crates/symbrowse-engine-chrome/tests/contract_fixture.rs": "0e9086c82c675779d909c0e05e12d28fbe8dfda565679e6d964aa05ee6dab20b",
+    "browse/crates/symbrowse-engine-chrome/tests/full.rs": "3a980206ba792ac51a0776837727bc9e808c02c3b0881b6c4abdd12dc90dc6a2",
+    "browse/crates/symbrowse-engine-chrome/tests/spike.rs": "a51435fe2ded9bbccbfd0d5dab5ff40ca387eefdfef7caeaba90618af2a58f3e",
+    "browse/crates/symbrowse-engine-firefox/Cargo.toml": "f2cb09f7031ead4263192f31b992dd7fd2a8f46add04b720221b6b1410f67b95",
+    "browse/crates/symbrowse-engine-firefox/src/bin/symbrowse-firefox-spike.rs": "f9e48dc098efcc31e00d6021f518a0decc833a4bbbfbd5dea95c5da4124ebf1d",
+    "browse/crates/symbrowse-engine-firefox/src/lib.rs": "d9e0a687e223d3b7932f8587d73786ed62ba1d85c90a57873c0bfccfbf631a41",
+    "browse/crates/symbrowse-engine-safari/Cargo.toml": "ee5681ecb4574beaca6f3c9b5e47d27c966a124ee68ff33c0a0c4200229971e7",
+    "browse/crates/symbrowse-engine-safari/src/attach.rs": "cad6806de9ade5405a2b408f8fd707deab17029ff9849ae25e8a5d121df14c7e",
+    "browse/crates/symbrowse-engine-safari/src/bidi.rs": "4733fb3865bc022851d181b66348ff47bcbc1579f635cfcc0055a721e4654fd1",
+    "browse/crates/symbrowse-engine-safari/src/lib.rs": "9a8eb457d3cd99aeb1a3a9cf45ddcffe939f764f28fca24db796d51270a88038",
+    "browse/crates/symbrowse-engine-safari/tests/attach.rs": "76427f9362ec5255634c23e107958a2f519d3c1504c735a31f5452865287094f",
+    "browse/crates/symbrowse-engine-safari/tests/bidi.rs": "78b0ef446aaa407561ee29cac7869de76e7efb33d8e5f54cd8a8244afba83d75",
+    "browse/crates/symbrowse-engine-safari/tests/contract_fixture.rs": "a202463b86bcdd373df7d49e32b4020bcfe699557ef75bec7824d0f822b035f6",
+    "browse/crates/symbrowse-engine/Cargo.toml": "d88634e7d784fba0bf15edf1039214a06fbba9bee6c35e6e7541b3c4ba1f026b",
+    "browse/crates/symbrowse-engine/src/capabilities.rs": "f6c300d1ecf0987ca31ab4444fbd65ebe8d1d1676550e01d3270076e8f12aab4",
+    "browse/crates/symbrowse-engine/src/diff.rs": "ef1c31f1f121781274ee07ee0c2903e509cbe7a2ce97c6d34b05177aa01ab40f",
+    "browse/crates/symbrowse-engine/src/files.rs": "9b3acc11f6c998b61a6b965e735c652cc28a0ee3e6e3bddd4f20f53b700eb152",
+    "browse/crates/symbrowse-engine/src/lib.rs": "6d7f839953394f0e54b8c202ccda1107b855060f1c488f393aeac96ac3a60803",
+    "browse/crates/symbrowse-engine/src/refs.rs": "4301a39cfcad22ad63a7354019a1c3be16a6e77ec717708b397c7f1e5bbdcbe0",
+    "browse/crates/symbrowse-engine/src/snapshot.rs": "5f536f89f890123a503786afaf33115e4063d1499a7136b42349703fbd74fb5a",
+    "browse/crates/symbrowse-engine/tests/files.rs": "1137ef91d3536c581b606f3ee6ecb3e20ac9f2bcd3528eb4ebe124e947972d77",
+    "browse/crates/symbrowse-engine/tests/oracle_fixture.rs": "5aa87901a5f5816688bc49bca9833bb0fa687094e67203078f3e944a44210472",
+    "browse/crates/symbrowse-fetch/Cargo.toml": "76806a7e0eb60c56e223489ac1505cf82834a107c73448868427094372756839",
+    "browse/crates/symbrowse-fetch/src/archive.rs": "873d2e6a4cff7a9e40e744f3f3ae4f9d6b5ece221c8c0059ef5e4ef2d61845cc",
+    "browse/crates/symbrowse-fetch/src/batch.rs": "e5ed01876f33a15b3dcf55233a9bed3e4cdb9dff1a6efcf8322e07a66dc21cab",
+    "browse/crates/symbrowse-fetch/src/cache.rs": "badfbd680535e07590d13fc0c8ba6b96cf8393ea925d9e52e0d948caef0f13e7",
+    "browse/crates/symbrowse-fetch/src/client.rs": "d1ba27ad029e04365940882bde5d5bfe54333b25a28827daaa2ca60a4cff4394",
+    "browse/crates/symbrowse-fetch/src/dom.rs": "86236866574ea3244d14d2a4c7748c1872edb169a98d052da6ce3a568dab96d8",
+    "browse/crates/symbrowse-fetch/src/honest.rs": "d520e4cde278a40c7ae128564c7e1298f5d883d33826592997e624973a0da075",
+    "browse/crates/symbrowse-fetch/src/lib.rs": "9bf74e56670da7d3c8bce8ee1ff4fe332745b14ac2b32327fb4a33f2d4606fb4",
+    "browse/crates/symbrowse-fetch/src/pipeline.rs": "f165cd45e6dbc01d5648a6f99ae32db2cf3a85fe9fd72f4ff7e9efc700732537",
+    "browse/crates/symbrowse-fetch/src/rate_limit.rs": "00dd7988806d57ad8c4506cb49825861f76809dba50ed18d025a135bfe712c5e",
+    "browse/crates/symbrowse-fetch/src/relevance.rs": "d839012ad237338f0c10812032dc95f07fe20f89862b1e649111b1053b9ea345",
+    "browse/crates/symbrowse-fetch/src/render.rs": "9682c521e74053cc228ef8d1a38d5b957f67541718b458a3ff1fe5461e319d8e",
+    "browse/crates/symbrowse-fetch/src/retry.rs": "37881585695ae7b54d8155880891c3dbc625c4408b483a8d9238e2bba9463c1f",
+    "browse/crates/symbrowse-fetch/src/robots.rs": "5c7e99cd5c8ec699156f5ced155ff6890f51063670f99911e39b21b23d3a855c",
+    "browse/crates/symbrowse-fetch/src/semantic.rs": "3075b95dcd29078ee74208e89b25f363551e6e429a47d21a74e4675b5e941857",
+    "browse/crates/symbrowse-fetch/tests/archive_http.rs": "28c6382d01b771a8493d57c1a7dc820b7fac0fabf860b5392299192392170e05",
+    "browse/crates/symbrowse-fetch/tests/control_contract.rs": "28e39cd0eaea537b376fe189f59fd595bf36399697e419b3e0a80b4bd91deea3",
+    "browse/crates/symbrowse-fetch/tests/http.rs": "b94d85fbed68f64ebba8de12e7dc9c57a118cb237ddb34cdcb9724674fedbb7d",
+    "browse/crates/symbrowse-fetch/tests/pipeline_controls.rs": "5b865449f2f3231e3764b0bff9587896930c3d38a3a7c9c9faf4308157a6cfd0",
+    "browse/crates/symbrowse-fetch/tests/render_corpus.rs": "552343cf4ff128f42279a61df138290fefa2f2b01c0fbc36a459edeb3eba368f",
+    "browse/crates/symbrowse-fetch/tests/retry.rs": "a2d2130caf06c2661da34b14d1683417b17b77b481e0588cdd18cd477b86d69e",
+    "browse/crates/symbrowse-fetch/tests/robots.rs": "bd580f54baab3a06706550b20903dd2411f0f4a4211a19666bab8d39e571c1c0",
+    "browse/crates/symbrowse-fetch/tests/static_controls.rs": "80977c24d9976e42a621239a8e2c1bed52d332736d43c1ed160ec1d470e475a6",
+    "browse/crates/symbrowse-mcp/Cargo.toml": "0473d7548a344e2d524855b7591447fb27b76d6fd088b337dd8953ba67dc3ebb",
+    "browse/crates/symbrowse-mcp/src/error.rs": "11c8c29a8eb32e1dfe2ef2d7622514f701221c3270636d71ddc9e19012eb4c59",
+    "browse/crates/symbrowse-mcp/src/generated_registry.rs": "05da854a7396b2076729dc887ba9ec2881ffee27817636b33c4b575856db5d0b",
+    "browse/crates/symbrowse-mcp/src/lib.rs": "67b36a8c5da4d1f3fd10d09feca2013d3fa3dd18deae4886cf9aa2115d1d0da3",
+    "browse/crates/symbrowse-mcp/src/proxy.rs": "b86c1ae68046041f7c36227f7eeee90fa9aa865c4c39201a1e58b2d617e0ad25",
+    "browse/crates/symbrowse-mcp/src/registry.rs": "95b01b03e629e24bf72c485b22a69bc9a086731149d2563b2e9c9e70031315e1",
+    "browse/crates/symbrowse-mcp/src/transport.rs": "be6fe8d6187763a52a9b69e74ebb1b2945d5fe474c438c642693c40b38da57cb",
+    "browse/crates/symbrowse-mcp/tests/raw_frames.rs": "418dc80fcb919d979270f4d45fa1de33030c7c890fe51cfdd864f1178ec46c37",
+    "browse/crates/symbrowse-protocol/Cargo.toml": "f86974551ddb6bc1f9243811468c868d8204d081b98a04be3a44d040dd578858",
+    "browse/crates/symbrowse-protocol/src/lib.rs": "7e8abf79d3bd9358e5ae1d560b23c3eab01211967e36e8a24146852321036cd7",
+    "browse/port/harness/cases/compat-sidecar.json": "3e12de8ae4d54bbc6647b02cb78e82a7ffa444b48f7854ef02023249457f412b",
+    "browse/port/harness/chrome_for_testing.py": "6c8f61893ff41d50546cada908c51cce0a1c6f12d0760fa4b2c03c1b8bc990f8",
+    "browse/port/harness/daemon_mcp.py": "1ddcc6ba36361ef92259926f36d6b82ebb1f8885c1c44a1e9a67133ed242d5f1",
+    "browse/port/harness/daemon_process.py": "a47f061825b5e326a1d2b4823900c065f6d79d532f56dc77bdc896440719f9db",
+    "browse/port/harness/daemon_registry.py": "dec3df34057fff678c59f9c6d04d45b9ee6ec9f368669264d1a08f2ee5d012e0",
+    "browse/port/harness/daemon_registry_cli.py": "e1cffd996bc74819bd01fbb4d61e0a3ca02f8cbbe102a22b7f1cd527e50ce283",
+    "browse/port/harness/daemon_state_key.py": "21afd3efefdc0a32c1955ad80e7f52ad93b5bb8c979adbac6e994e8553dcafdd",
+    "browse/port/harness/daemon_state_key_ownership.py": "685e4199922741a556c84019182326f391e9e536d61c2906f30e12f8c05f0946",
+    "browse/port/harness/fetch_fingerprints_validate.py": "42a5eba6bbfb16cdc1c6081a93c8f3cecf72b471493c831b335635e953c57741",
+    "browse/port/harness/key_test_environment.py": "aa145a7de272404afd9be47402100574924aa9a28485ee93dc80c15fbb8ea10e",
+    "browse/port/harness/registry_compare.py": "988a25956a91db3c6bd0d4e8d5db955ba1086c6dec42681946979160a6730db0",
+    "browse/port/harness/registry_oracle_test.go.in": "9b97e4849f51c44fdcc199a94ddc4d2579cbef3779efa024332d52cc00bbd23b",
+    "browse/port/harness/registry_progress.py": "f54c52ff0b6f097195fef045310b5bb4d37631ad9205f92819e2f8f6eeb36b03",
+    "browse/port/harness/run.py": "3586f3350e0954536ebc58fe56561e30acb963809eb1724bc58abd103dd9841e",
+    "browse/port/harness/run_fetch_fingerprints_capture.sh": "0e30499c28b4847eb4bdf515d6ce016505c40804635ef876b2f175bf52bd759f",
+    "browse/port/harness/startup_key_path_control.go.in": "fa92bc79cbfa1f73eec670982455ec4dd6bed198138ffa90e3e2c4870450b9b5",
+    "browse/port/harness/startup_key_paths.py": "e1fdb81f10f43e6ef4e4c2e950849fc90289cadc3a40b3450ed0445ff26bcf44",
+    "browse/port/harness/state_key_control.go.in": "df27ead8e8c179c6cdf36147d3809e80851d9716a3f9184dcf36b1619d1edaad",
+    "browse/port/harness/state_key_fixture.go.in": "39db103ab6f719918b90a32f4c3ca353b8b1df2e4a7340f787fb6604c527dae3",
+    "browse/port/harness/state_key_oracle_test.go.in": "bcb867574d4290c612ff8759ee03ce10bda05de0f6d6cd442a84e4110fb0ac6f",
+    "browse/port/harness/test_chrome_for_testing.py": "2590379af2f9b5f1d8eb5a832c3c17bba4daa088acebb5574dd492e6536874ac",
+    "browse/port/harness/test_fetch_fingerprints_validate.py": "9310371e616d50a87ad66b25500975ce0614b3ebe1c0db6d9aa6884563d6dd98",
+    "browse/port/harness/test_registry_progress.py": "3822e84bfcc43daebd5a8def6ab56e32690364e4000e367904728b204796f473",
+    "browse/port/harness/test_run.py": "8766f6062a1128e0e84e33c3bdd741c3331af602034a2fc3c3406fbc2912da60",
+    "browse/port/harness/test_windows_pipe.py": "303cb7ae6525f91e069c56dfaa295f7dadc35adf75bae1265b71299193d76d6e",
+    "browse/port/harness/windows_pipe.py": "b720d2aeef5d67d575ca16caf66e45eb795d2342f1a33087ebcc7e0f580e6bb0"
+  },
+  "cases": [
+    {
+      "mode": "ab",
+      "trigger": "normal",
+      "root": "/tmp/bk-own-yrm_2aam",
+      "arguments": [
+        "/workspace/symaira-daemon772-state-key-osargs/target/debug/symbrowse",
+        "--internal-startup-key-provider",
+        "/tmp/bk-own-yrm_2aam/providers/symvault",
+        "15000",
+        "get",
+        "symbrowse/encryption-key"
+      ],
+      "exit": 0,
+      "stdout": "{\"value\":\"abababababababababababababababababababababababababababababababab\"}\n",
+      "stderr": "{\"result\":\"Exited\",\"status\":0}",
+      "queries": [
+        {
+          "arguments": [
+            "get",
+            "symbrowse/encryption-key"
+          ],
+          "name": "symvault",
+          "pid": 3033657
+        }
+      ],
+      "initial_alive": [
+        false
+      ],
+      "provider_and_descendants_gone": true,
+      "elapsed_seconds": 0.010261622999678366,
+      "cleanup_seconds": 2.344007953070104e-06,
+      "unrelated_provider_survived": true,
+      "held_writer_alive": [],
+      "held_writer_control_rejected": false
+    },
+    {
+      "mode": "4",
+      "trigger": "normal",
+      "root": "/tmp/bk-own-yae4na2j",
+      "arguments": [
+        "/workspace/symaira-daemon772-state-key-osargs/target/debug/symbrowse",
+        "--internal-startup-key-provider",
+        "/tmp/bk-own-yae4na2j/providers/symvault",
+        "15000",
+        "get",
+        "symbrowse/encryption-key"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "{\"result\":\"Exited\",\"status\":1024}",
+      "queries": [
+        {
+          "arguments": [
+            "get",
+            "symbrowse/encryption-key"
+          ],
+          "name": "symvault",
+          "pid": 3033665
+        }
+      ],
+      "initial_alive": [
+        false
+      ],
+      "provider_and_descendants_gone": true,
+      "elapsed_seconds": 0.010234090994345024,
+      "cleanup_seconds": 2.344007953070104e-06,
+      "unrelated_provider_survived": true,
+      "held_writer_alive": [],
+      "held_writer_control_rejected": false
+    },
+    {
+      "mode": "descendant",
+      "trigger": "closed-writer",
+      "root": "/tmp/bk-own-03v7rvzw",
+      "arguments": [
+        "/workspace/symaira-daemon772-state-key-osargs/target/debug/symbrowse",
+        "--internal-startup-key-provider",
+        "/tmp/bk-own-03v7rvzw/providers/symvault",
+        "15000",
+        "get",
+        "symbrowse/encryption-key"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "{\"result\":\"Failed\",\"message\":\"command timed out after 16000ms\"}",
+      "queries": [
+        {
+          "arguments": [
+            "get",
+            "symbrowse/encryption-key"
+          ],
+          "name": "symvault",
+          "pid": 3033673
+        },
+        {
+          "arguments": [
+            "owned-descendant"
+          ],
+          "name": "symvault",
+          "pid": 3033680
+        }
+      ],
+      "initial_alive": [
+        true,
+        true
+      ],
+      "provider_and_descendants_gone": true,
+      "elapsed_seconds": 0.025815661996603012,
+      "cleanup_seconds": 9.393988875672221e-06,
+      "unrelated_provider_survived": true,
+      "held_writer_alive": [],
+      "held_writer_control_rejected": false
+    },
+    {
+      "mode": "pipe-holder",
+      "trigger": "closed-writer",
+      "root": "/tmp/bk-own-zdfac8zz",
+      "arguments": [
+        "/workspace/symaira-daemon772-state-key-osargs/target/debug/symbrowse",
+        "--internal-startup-key-provider",
+        "/tmp/bk-own-zdfac8zz/providers/symvault",
+        "15000",
+        "get",
+        "symbrowse/encryption-key"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "{\"result\":\"Failed\",\"message\":\"stdout pipe remained open after command exit\"}",
+      "queries": [
+        {
+          "arguments": [
+            "get",
+            "symbrowse/encryption-key"
+          ],
+          "name": "symvault",
+          "pid": 3033692
+        },
+        {
+          "arguments": [
+            "owned-descendant"
+          ],
+          "name": "symvault",
+          "pid": 3033699
+        }
+      ],
+      "initial_alive": [
+        false,
+        true
+      ],
+      "provider_and_descendants_gone": true,
+      "elapsed_seconds": 0.025877890002448112,
+      "cleanup_seconds": 6.89999433234334e-06,
+      "unrelated_provider_survived": true,
+      "held_writer_alive": [],
+      "held_writer_control_rejected": false
+    },
+    {
+      "mode": "descendant",
+      "trigger": "helper-deadline",
+      "root": "/tmp/bk-own-tbvs7sg6",
+      "arguments": [
+        "/workspace/symaira-daemon772-state-key-osargs/target/debug/symbrowse",
+        "--internal-startup-key-provider",
+        "/tmp/bk-own-tbvs7sg6/providers/symvault",
+        "100",
+        "get",
+        "symbrowse/encryption-key"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "{\"result\":\"Failed\",\"message\":\"command timed out after 1100ms\"}",
+      "queries": [
+        {
+          "arguments": [
+            "get",
+            "symbrowse/encryption-key"
+          ],
+          "name": "symvault",
+          "pid": 3033711
+        },
+        {
+          "arguments": [
+            "owned-descendant"
+          ],
+          "name": "symvault",
+          "pid": 3033718
+        }
+      ],
+      "initial_alive": [
+        true,
+        true
+      ],
+      "provider_and_descendants_gone": true,
+      "elapsed_seconds": 1.1268071339873131,
+      "cleanup_seconds": 1.585400605108589e-05,
+      "unrelated_provider_survived": true,
+      "held_writer_alive": [],
+      "held_writer_control_rejected": false
+    },
+    {
+      "mode": "descendant",
+      "trigger": "daemon-signal",
+      "root": "/tmp/bk-own-ppr53_1p",
+      "arguments": [
+        "/workspace/symaira-daemon772-state-key-osargs/target/debug/symbrowse",
+        "daemon",
+        "--session",
+        "own3033424",
+        "--json"
+      ],
+      "exit": -15,
+      "stdout": "",
+      "stderr": "",
+      "queries": [
+        {
+          "arguments": [
+            "get",
+            "symbrowse/encryption-key"
+          ],
+          "name": "symvault",
+          "pid": 3033729
+        },
+        {
+          "arguments": [
+            "owned-descendant"
+          ],
+          "name": "symvault",
+          "pid": 3033736
+        }
+      ],
+      "initial_alive": [
+        true,
+        true
+      ],
+      "provider_and_descendants_gone": true,
+      "elapsed_seconds": 0.011429017002228647,
+      "cleanup_seconds": 0.02017857499595266,
+      "unrelated_provider_survived": true,
+      "held_writer_alive": [],
+      "held_writer_control_rejected": false
+    },
+    {
+      "mode": "descendant",
+      "trigger": "client-deadline",
+      "root": "/tmp/bk-own-vwh1hkld",
+      "arguments": [
+        "/workspace/symaira-daemon772-state-key-osargs/target/debug/symbrowse",
+        "state",
+        "list",
+        "--session",
+        "own3033424",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout": "{\"success\":false,\"error\":{\"code\":\"daemon_unavailable\",\"message\":\"daemon did not become ready for session \\\"own3033424\\\"\",\"hint\":\"start daemon with 'symbrowse daemon --session own3033424'; see daemon log at /tmp/bk-own-vwh1hkld/state/symbrowse/daemon.log\",\"details\":{\"session\":\"own3033424\",\"socket_path\":\"/tmp/bk-own-vwh1hkld/run/symbrowse/own3033424.sock\"}}}\n",
+      "stderr": "",
+      "queries": [
+        {
+          "arguments": [
+            "get",
+            "symbrowse/encryption-key"
+          ],
+          "name": "symvault",
+          "pid": 3033748
+        },
+        {
+          "arguments": [
+            "owned-descendant"
+          ],
+          "name": "symvault",
+          "pid": 3033755
+        }
+      ],
+      "initial_alive": [
+        true,
+        true
+      ],
+      "provider_and_descendants_gone": true,
+      "elapsed_seconds": 5.0450284340040525,
+      "cleanup_seconds": 1.589399471413344e-05,
+      "unrelated_provider_survived": true,
+      "held_writer_alive": [],
+      "held_writer_control_rejected": false
+    },
+    {
+      "mode": "descendant",
+      "trigger": "held-writer",
+      "root": "/tmp/bk-own-br47j7fm",
+      "arguments": [
+        "/workspace/symaira-daemon772-state-key-osargs/target/debug/symbrowse",
+        "--internal-startup-key-provider",
+        "/tmp/bk-own-br47j7fm/providers/symvault",
+        "15000",
+        "get",
+        "symbrowse/encryption-key"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "{\"result\":\"Failed\",\"message\":\"command timed out after 16000ms\"}",
+      "queries": [
+        {
+          "arguments": [
+            "get",
+            "symbrowse/encryption-key"
+          ],
+          "name": "symvault",
+          "pid": 3033762
+        },
+        {
+          "arguments": [
+            "owned-descendant"
+          ],
+          "name": "symvault",
+          "pid": 3033769
+        }
+      ],
+      "initial_alive": [
+        true,
+        true
+      ],
+      "provider_and_descendants_gone": true,
+      "elapsed_seconds": 0.12601190801069606,
+      "cleanup_seconds": 9.283990948460996e-06,
+      "unrelated_provider_survived": true,
+      "held_writer_alive": [
+        true,
+        true
+      ],
+      "held_writer_control_rejected": true
+    }
+  ],
+  "source_boundaries": {
+    "probe_binary_sha256": "70903c5128147895865f7b1b2ff2db4db1eeb0f8b7bc87d0609d0022b320a36b",
+    "control_binary_sha256": "2e80c4f0463f677b45fe6e914814c2e54e0b928003373acbaf3e42bce475df20",
+    "root": "/tmp/bk-owner-api-nvc4ak16",
+    "cases": [
+      {
+        "name": "missing-supervisor",
+        "arguments": [
+          "/workspace/symaira-daemon772-state-key-osargs/target/debug/examples/startup_key_source_probe",
+          "/tmp/bk-owner-api-nvc4ak16/symvault",
+          "/tmp/bk-owner-api-nvc4ak16/missing-owner"
+        ],
+        "exit": 0,
+        "stdout": "{\"configured\":false,\"key_source\":\"\",\"error\":\"symvault entry \\\"symbrowse/encryption-key\\\": startup provider supervisor unavailable\"}",
+        "stderr": "",
+        "queries": [],
+        "control_rejected": false
+      },
+      {
+        "name": "malformed-supervisor",
+        "arguments": [
+          "/workspace/symaira-daemon772-state-key-osargs/target/debug/examples/startup_key_source_probe",
+          "/tmp/bk-owner-api-nvc4ak16/symvault",
+          "/tmp/bk-owner-api-nvc4ak16/owner-control"
+        ],
+        "exit": 0,
+        "stdout": "{\"configured\":false,\"key_source\":\"\",\"error\":\"symvault entry \\\"symbrowse/encryption-key\\\": invalid startup provider result\"}",
+        "stderr": "",
+        "queries": [],
+        "control_rejected": false
+      },
+      {
+        "name": "honest-denied-provider",
+        "arguments": [
+          "/workspace/symaira-daemon772-state-key-osargs/target/debug/examples/startup_key_source_probe",
+          "/tmp/bk-owner-api-nvc4ak16/symvault",
+          "/workspace/symaira-daemon772-state-key-osargs/target/debug/symbrowse"
+        ],
+        "exit": 0,
+        "stdout": "{\"configured\":false,\"key_source\":\"\",\"error\":\"symvault entry \\\"symbrowse/encryption-key\\\": exit status 4\"}",
+        "stderr": "",
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 3033522
+          }
+        ],
+        "control_rejected": false
+      },
+      {
+        "name": "legitimate-provider-absence",
+        "arguments": [
+          "/workspace/symaira-daemon772-state-key-osargs/target/debug/examples/startup_key_source_probe",
+          "/tmp/bk-owner-api-nvc4ak16/symvault",
+          "/workspace/symaira-daemon772-state-key-osargs/target/debug/symbrowse"
+        ],
+        "exit": 0,
+        "stdout": "{\"configured\":true,\"key_source\":\"environment\",\"error\":\"\"}",
+        "stderr": "",
+        "queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 3033533
+          }
+        ],
+        "control_rejected": false
+      },
+      {
+        "name": "false-absence-control",
+        "arguments": [
+          "/workspace/symaira-daemon772-state-key-osargs/target/debug/examples/startup_key_source_probe",
+          "/tmp/bk-owner-api-nvc4ak16/symvault",
+          "/tmp/bk-owner-api-nvc4ak16/owner-control"
+        ],
+        "exit": 0,
+        "stdout": "{\"configured\":true,\"key_source\":\"environment\",\"error\":\"\"}",
+        "stderr": "",
+        "queries": [],
+        "control_rejected": true
+      }
+    ]
+  },
+  "native_paths": {
+    "cases": [
+      {
+        "name_filesystem_base64": "YXNjaWk=",
+        "provider_path_filesystem_base64": "L3RtcC9iay1vd25lci1wYXRoLWQxZHY2a3d6L2FzY2lpL3N5bXZhdWx0",
+        "public": {
+          "exit": 0,
+          "stdout_base64": "eyJjb25maWd1cmVkIjp0cnVlLCJrZXlfc291cmNlIjoic3ltdmF1bHQiLCJlcnJvciI6IiJ9",
+          "stderr_base64": ""
+        },
+        "public_queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 3033589
+          }
+        ],
+        "internal": {
+          "exit": 0,
+          "stdout_base64": "eyJ2YWx1ZSI6ImFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWIifQo=",
+          "stderr_base64": "eyJyZXN1bHQiOiJFeGl0ZWQiLCJzdGF0dXMiOjB9"
+        },
+        "internal_queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 3033597
+          }
+        ],
+        "matches": true
+      },
+      {
+        "name_filesystem_base64": "dW5pY29kZS3DpA==",
+        "provider_path_filesystem_base64": "L3RtcC9iay1vd25lci1wYXRoLWQxZHY2a3d6L3VuaWNvZGUtw6Qvc3ltdmF1bHQ=",
+        "public": {
+          "exit": 0,
+          "stdout_base64": "eyJjb25maWd1cmVkIjp0cnVlLCJrZXlfc291cmNlIjoic3ltdmF1bHQiLCJlcnJvciI6IiJ9",
+          "stderr_base64": ""
+        },
+        "public_queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 3033608
+          }
+        ],
+        "internal": {
+          "exit": 0,
+          "stdout_base64": "eyJ2YWx1ZSI6ImFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWIifQo=",
+          "stderr_base64": "eyJyZXN1bHQiOiJFeGl0ZWQiLCJzdGF0dXMiOjB9"
+        },
+        "internal_queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 3033617
+          }
+        ],
+        "matches": true
+      },
+      {
+        "name_filesystem_base64": "cmF3Lf8=",
+        "provider_path_filesystem_base64": "L3RtcC9iay1vd25lci1wYXRoLWQxZHY2a3d6L3Jhdy3/L3N5bXZhdWx0",
+        "public": {
+          "exit": 0,
+          "stdout_base64": "eyJjb25maWd1cmVkIjp0cnVlLCJrZXlfc291cmNlIjoic3ltdmF1bHQiLCJlcnJvciI6IiJ9",
+          "stderr_base64": ""
+        },
+        "public_queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 3033641
+          }
+        ],
+        "internal": {
+          "exit": 0,
+          "stdout_base64": "eyJ2YWx1ZSI6ImFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWIifQo=",
+          "stderr_base64": "eyJyZXN1bHQiOiJFeGl0ZWQiLCJzdGF0dXMiOjB9"
+        },
+        "internal_queries": [
+          {
+            "arguments": [
+              "get",
+              "symbrowse/encryption-key"
+            ],
+            "name": "symvault",
+            "pid": 3033649
+          }
+        ],
+        "matches": true
+      }
+    ],
+    "negative_control": {
+      "streams": {
+        "exit": 0,
+        "stdout_base64": "eyJjb25maWd1cmVkIjp0cnVlLCJrZXlfc291cmNlIjoiZW52aXJvbm1lbnQiLCJlcnJvciI6IiJ9",
+        "stderr_base64": ""
+      },
+      "queries": [],
+      "rejected": true
+    },
+    "probe_binary_sha256": "70903c5128147895865f7b1b2ff2db4db1eeb0f8b7bc87d0609d0022b320a36b",
+    "control_binary_sha256": "7ad1a56d5ca7fd9276762d15c6abd80dfe9c47cb6be2749b6a5259427a6711ac",
+    "control_source_sha256": "fa92bc79cbfa1f73eec670982455ec4dd6bed198138ffa90e3e2c4870450b9b5",
+    "scope": "native ASCII/Unicode paths; additional byte-FF path only on Unix; real public API and internal route, no GoCLI regression claim"
+  },
+  "refusals": [
+    {
+      "arguments": [
+        "/tmp/bk-own-refusal-uo8rlp_h/symvault",
+        "0",
+        "get",
+        "symbrowse/encryption-key"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "",
+      "provider_not_queried": true
+    },
+    {
+      "arguments": [
+        "/tmp/bk-own-refusal-uo8rlp_h/symvault",
+        "60001",
+        "get",
+        "symbrowse/encryption-key"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "",
+      "provider_not_queried": true
+    },
+    {
+      "arguments": [
+        "/tmp/bk-own-refusal-uo8rlp_h/symvault",
+        "bad",
+        "get",
+        "symbrowse/encryption-key"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "",
+      "provider_not_queried": true
+    },
+    {
+      "arguments": [
+        "/tmp/bk-own-refusal-uo8rlp_h/symvault",
+        "1000",
+        "set",
+        "symbrowse/encryption-key"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "",
+      "provider_not_queried": true
+    },
+    {
+      "arguments": [
+        "/tmp/bk-own-refusal-uo8rlp_h/symvault",
+        "1000",
+        "get",
+        "other-entry"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "",
+      "provider_not_queried": true
+    },
+    {
+      "arguments": [
+        "/tmp/bk-own-refusal-uo8rlp_h/symvault",
+        "1000",
+        "get",
+        "symbrowse/encryption-key",
+        "--print"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "",
+      "provider_not_queried": true
+    },
+    {
+      "arguments": [
+        "/tmp/bk-own-refusal-uo8rlp_h/symvault",
+        "1000"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "",
+      "provider_not_queried": true
+    },
+    {
+      "arguments": [],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "",
+      "provider_not_queried": true
+    },
+    {
+      "name": "refuse-inherited-unix-group",
+      "exit": 1,
+      "provider_not_queried": true
+    }
+  ],
+  "unavailable": {
+    "arguments": [
+      "/workspace/symaira-daemon772-state-key-osargs/target/debug/symbrowse",
+      "--internal-startup-key-provider",
+      "/tmp/bk-own-missing-hdc8lu9w/symvault",
+      "1000",
+      "get",
+      "symbrowse/encryption-key"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "{\"result\":\"Unavailable\"}"
+  },
+  "matches": true,
+  "scope": "explicit Browse CLI startup only; same-name sibling survives; no operator providers; native host evidence only"
+}

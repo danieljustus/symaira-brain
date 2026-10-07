@@ -2,7 +2,7 @@
 
 use std::{
     env, fs,
-    io::{self, Write},
+    io::Write,
     path::{Path, PathBuf},
     process::ExitCode,
     sync::atomic::{AtomicU64, Ordering},
@@ -268,43 +268,8 @@ fn write_cache(path: &Path, entry: &CacheEntry) {
     let _ = fs::rename(temporary, path);
 }
 
-fn safe_cache_dir(path: &Path) -> io::Result<()> {
-    let absolute = if path.is_absolute() {
-        path.to_path_buf()
-    } else {
-        env::current_dir()?.join(path)
-    };
-    let mut current = PathBuf::new();
-    for component in absolute.components() {
-        current.push(component);
-        match fs::symlink_metadata(&current) {
-            Ok(metadata) if metadata.file_type().is_symlink() => {
-                #[cfg(unix)]
-                {
-                    use std::os::unix::fs::MetadataExt;
-                    if metadata.uid() == 0 {
-                        current = fs::canonicalize(&current)?;
-                        continue;
-                    }
-                }
-                return Err(io::Error::other("cache directory crosses a user symlink"));
-            }
-            Ok(metadata) if metadata.is_dir() => {}
-            Ok(_) => return Err(io::Error::other("cache parent is not a directory")),
-            Err(error) if error.kind() == io::ErrorKind::NotFound => {
-                let mut builder = fs::DirBuilder::new();
-                #[cfg(unix)]
-                {
-                    use std::os::unix::fs::DirBuilderExt;
-                    builder.mode(0o700);
-                }
-                builder.create(&current)?;
-            }
-            Err(error) => return Err(error),
-        }
-    }
-    Ok(())
-}
+mod cache_dir;
+use cache_dir::safe_cache_dir;
 
 async fn fetch_latest_release(current: &str, latest_url: &str) -> Result<Release, String> {
     let client = reqwest::Client::builder()

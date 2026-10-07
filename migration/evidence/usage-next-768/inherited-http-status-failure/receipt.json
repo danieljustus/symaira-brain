@@ -1,0 +1,130 @@
+{
+  "candidate_head": "60d904be90b7bd6df73364b8312c1a2076ecf3d9",
+  "candidate_dirty": true,
+  "records": [
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty.log",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/tmp-symaira-usage768-next-device-dirty.log.gz",
+      "sha256": "85fd727a826501f588e83dbc1b31d6b16d217dfbf484ba3c2f0b07ab18f0037b",
+      "bytes": 2710
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty.evidence/wire-failed.json",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/symaira-usage768-next-device-dirty.evidence-wire-failed.json.gz",
+      "sha256": "b0cfca4e806508f743e5f3bf5402061242df4a0e3566c616d4857aa46ea5562d",
+      "bytes": 435543
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty.evidence/native.log",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/symaira-usage768-next-device-dirty.evidence-native.log.gz",
+      "sha256": "04caded4d4ca34bc51e34ed3ecef7c31ec02668213aeb5d80b4857130ea32ceb",
+      "bytes": 1980
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty.evidence/go-tls.log",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/symaira-usage768-next-device-dirty.evidence-go-tls.log.gz",
+      "sha256": "e7425c81de821ff228dad0d57b7ed543b811fc041376e67a655b49589ad2d417",
+      "bytes": 65
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty.evidence/go-wire.json",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/symaira-usage768-next-device-dirty.evidence-go-wire.json.gz",
+      "sha256": "258c456d987e069b7e599062f943752486360a03a22129cb97a801338429ed74",
+      "bytes": 688140
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty.evidence/go-canned.log",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/symaira-usage768-next-device-dirty.evidence-go-canned.log.gz",
+      "sha256": "fd259278095d59785b886ac9fe95c425f3000a718cde4c7a207b5f65c6f7aa5e",
+      "bytes": 65
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty.evidence/go.json",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/symaira-usage768-next-device-dirty.evidence-go.json.gz",
+      "sha256": "31ac37bea474f53e4059e1bd75942edceead6fa7be3a99a76fca08c95ef79a91",
+      "bytes": 710286
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty.evidence/leaf.pem",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/symaira-usage768-next-device-dirty.evidence-leaf.pem.gz",
+      "sha256": "e46898bd7b21b77efb5f20fcf824cf5b5374b087e141f0e6f651748d80bb4f7a",
+      "bytes": 562
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty.evidence/ca.pem",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/symaira-usage768-next-device-dirty.evidence-ca.pem.gz",
+      "sha256": "430fc10a8a4fbfe64ddfca1f7e8c4b4bd0d806ff05dff0e81b34b42e59d390f5",
+      "bytes": 558
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty.evidence/certificate.log",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/symaira-usage768-next-device-dirty.evidence-certificate.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty.evidence/web.json",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/symaira-usage768-next-device-dirty.evidence-web.json.gz",
+      "sha256": "524e6cd7d43c1c566f98401e21b3551b9536f9076a50746db081ce944184393c",
+      "bytes": 522
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty.evidence/api.json",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/symaira-usage768-next-device-dirty.evidence-api.json.gz",
+      "sha256": "6f7aa1afda2388dd3a46ea01ba0dd5fd9d33a5f2979296f1423fb02c51d5a113",
+      "bytes": 390
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty.evidence/source.log",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/symaira-usage768-next-device-dirty.evidence-source.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty.evidence/input.log",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/symaira-usage768-next-device-dirty.evidence-input.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-dirty.evidence/input.json",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/symaira-usage768-next-device-dirty.evidence-input.json.gz",
+      "sha256": "db267d96dbdc63ee0170a7cb95f24bb49176343ce5e06b31d191f5526891d850",
+      "bytes": 270902
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-prototype.log",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/tmp-symaira-usage768-next-device-prototype.log.gz",
+      "sha256": "5cacb11b7c8280dc822a517a47576d82cb250e0be6d5dd035e99bc1d3c35264d",
+      "bytes": 981
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-prototype2.log",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/tmp-symaira-usage768-next-device-prototype2.log.gz",
+      "sha256": "07a4cb3b61e03226fb0dd2cbccbd0dd6765cd05345a463f056a4c46df8879906",
+      "bytes": 352
+    },
+    {
+      "original": "/tmp/symaira-usage768-next-device-prototype2.json",
+      "retained": "migration/evidence/usage-next-768/inherited-http-status-failure/tmp-symaira-usage768-next-device-prototype2.json.gz",
+      "sha256": "2b2172ad7afbb16be401017f6a0ecc83b7b9f2c5dfd54dd9f28ace8cb51d9b4b",
+      "bytes": 279110
+    }
+  ],
+  "actual_binary": {
+    "path": "/workspace/symaira-usage768-remaining/target/debug/deps/symbrain_usage-717883f361629f0c",
+    "sha256": "34dab467e0279918730d5f1bd785484c542df3f6c5fc01d64e562cea2166300f",
+    "bytes": 19242728,
+    "gzip": "/workspace/oracles/symaira-usage768-next-inherited-status-binaries/symbrain_usage-717883f361629f0c.gz",
+    "gzip_roundtrip": true
+  },
+  "source_sha256": {
+    "rust/symbrain-usage/src/transport.rs": "a7548c2c52a08b9a12dc4ce297e13fceb9ef6e302bafb9acc33f1fd314c45c4c",
+    "rust/symbrain-usage/src/device_oracle_tests.rs": "1a863a9b854774fd2b68409e755c5a7cd0c5c9018a7f888c356b7b0e6ee4b3d0",
+    "rust/symbrain-usage/src/device_oracle_wire_tests.rs": "22a355cc4537d6f4af786811ed6b8e7065680f5744a76e55d62fafc929c43d6d",
+    "scripts/usage-next-oracle/device_test.go.txt": "c8dba4528c4c3e07f511744bb454b9ae71f00036953c1d9a087fe4939d0286eb",
+    "scripts/usage-next-oracle/device.py": "0851a61b8dbc78510b9188c06bad0f60392453f288af1c85b2c4d32b6307f5c9",
+    "scripts/usage-next-oracle/peer.py": "dd45f795b48aa6165526a76bab8a345b24f4e57c12f955518a8e67f62c568113"
+  },
+  "scope": "Original dirty actual hostname-verified Go/nativeTLS failure; inherited ureq status-as-error behavior. Actual failed test binary retained before correction. Prototype missing fixture path failure and successful canned32/7 both preserved."
+}

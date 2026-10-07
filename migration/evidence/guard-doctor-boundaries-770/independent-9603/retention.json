@@ -1,0 +1,223 @@
+{
+  "source": "9603d24e6749ee67e5eac1b7ddda6900af022cd5",
+  "reviewed_head": "549e1c859e9ff8897d447e054ec3fa51b9ac151e",
+  "disposition": "APPROVE bounded slice; full770/769/native3/protected pending",
+  "artifacts": {
+    "/tmp/symaira-guard9603-root-actionlint.log": {
+      "file": "symaira-guard9603-root-actionlint.log.gz",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "stored_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "/tmp/symaira-guard9603-root-audit-filesystem.json": {
+      "file": "symaira-guard9603-root-audit-filesystem.json.gz",
+      "original_sha256": "e362e508954738f9752711ef3ed000ea670983da402338f66bf2419a441347ce",
+      "bytes": 12399,
+      "stored_sha256": "c39f7ef080b841d23eca514278a2b71fc62da1dbb8b013a975aa72ddd40518a8"
+    },
+    "/tmp/symaira-guard9603-root-audit6.log": {
+      "file": "symaira-guard9603-root-audit6.log.gz",
+      "original_sha256": "e0270fd81cdc038299e9fa18a4535c7e52cece725549fe19ec414edbb604e2a7",
+      "bytes": 206,
+      "stored_sha256": "94771a24810c2be8b349ba0933adac62461a1becbd9417cb8a8532e10294cf21"
+    },
+    "/tmp/symaira-guard9603-root-audit6.py": {
+      "file": "symaira-guard9603-root-audit6.py",
+      "original_sha256": "ca9282ed3285d818d15f774b2094ad69c84c57e986e0620806b0936a4a72f298",
+      "bytes": 2944,
+      "stored_sha256": "ca9282ed3285d818d15f774b2094ad69c84c57e986e0620806b0936a4a72f298"
+    },
+    "/tmp/symaira-guard9603-root-clippy.log": {
+      "file": "symaira-guard9603-root-clippy.log.gz",
+      "original_sha256": "3fe980a0f9709b0a2d093ea2a65202e1e589d4893ac71be4272c165923b9e527",
+      "bytes": 60,
+      "stored_sha256": "9ca1612589850ae82ee5bef4f39aec9900d6da576d5e5a6a9ac0ed12b3e6fb97"
+    },
+    "/tmp/symaira-guard9603-root-extra-mixed.json": {
+      "file": "symaira-guard9603-root-extra-mixed.json.gz",
+      "original_sha256": "4881b57fdea33ecbee57cb0eb366ee235f4e29cd733575cd679801a6f8aae7ed",
+      "bytes": 115054,
+      "stored_sha256": "8ace68903102dd8c77b63701d3ce48ee177766411ca1f18773d5a2a03cfa8d2f"
+    },
+    "/tmp/symaira-guard9603-root-fmt.log": {
+      "file": "symaira-guard9603-root-fmt.log.gz",
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "stored_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    "/tmp/symaira-guard9603-root-independent-review.md": {
+      "file": "symaira-guard9603-root-independent-review.md",
+      "original_sha256": "0d780cf8e73d4e4cd7082e4ab3848100aaa3012e26b97476b0bd1acf3722081b",
+      "bytes": 4555,
+      "stored_sha256": "0d780cf8e73d4e4cd7082e4ab3848100aaa3012e26b97476b0bd1acf3722081b"
+    },
+    "/tmp/symaira-guard9603-root-mixed35.log": {
+      "file": "symaira-guard9603-root-mixed35.log.gz",
+      "original_sha256": "9d5a04d1f3cc0efcd3d22a18b752601c90d6f2660b26bc6659434f14eec87c60",
+      "bytes": 90,
+      "stored_sha256": "cf09622d69970b00e94b235ef3ddc8a69b719adbd3672364aceb8c47722fb74a"
+    },
+    "/tmp/symaira-guard9603-root-mixed35.py": {
+      "file": "symaira-guard9603-root-mixed35.py",
+      "original_sha256": "487d973cdc384b19063591843f781ffab4acd82986250a0e70ef039a2715d6a8",
+      "bytes": 1541,
+      "stored_sha256": "487d973cdc384b19063591843f781ffab4acd82986250a0e70ef039a2715d6a8"
+    },
+    "/tmp/symaira-guard9603-root-new-boundaries.json": {
+      "file": "symaira-guard9603-root-new-boundaries.json.gz",
+      "original_sha256": "c512861b5f752bf87e44414df8e97ee03848d9bf6fb4be8eca7112a212107f77",
+      "bytes": 187611,
+      "stored_sha256": "1d5761ad3c9725991d82a60aac669ea095e71616a939e41b6b1bfa94c50c766a"
+    },
+    "/tmp/symaira-guard9603-root-new-boundaries.log": {
+      "file": "symaira-guard9603-root-new-boundaries.log.gz",
+      "original_sha256": "a3cadc56c357f3db221ef5cd2bd78306a727181a7a631c42be0fbe69c65edce8",
+      "bytes": 32,
+      "stored_sha256": "7c3a887222415d062b1fc3d0161875038b6877785ca0b90618d3022893120790"
+    },
+    "/tmp/symaira-guard9603-root-new-boundaries.py": {
+      "file": "symaira-guard9603-root-new-boundaries.py",
+      "original_sha256": "56dc00bbff449015066461f90d517bd52fec19077814c1d659963dba0d60f9b1",
+      "bytes": 4433,
+      "stored_sha256": "56dc00bbff449015066461f90d517bd52fec19077814c1d659963dba0d60f9b1"
+    },
+    "/tmp/symaira-guard9603-root-ordered31.json": {
+      "file": "symaira-guard9603-root-ordered31.json.gz",
+      "original_sha256": "ab56b2675b60799a1a48f348302dca72b3bd86080b3f28a6efc17beb8830e3ba",
+      "bytes": 184453,
+      "stored_sha256": "d5db5308a38ee4628369ce98c7777e027f22c5d728159802dde47f18388155c8"
+    },
+    "/tmp/symaira-guard9603-root-ordered31.log": {
+      "file": "symaira-guard9603-root-ordered31.log.gz",
+      "original_sha256": "0e599f200098f7f5302b5f5ad8548a4b421476c0858f3e888c879c57cb273cc3",
+      "bytes": 411,
+      "stored_sha256": "4af1071f3fdbf5c45ae50b0b8b0d1039f98a0e433dec4a705306109ac6b619ba"
+    },
+    "/tmp/symaira-guard9603-root-ordered31.py": {
+      "file": "symaira-guard9603-root-ordered31.py",
+      "original_sha256": "4f243791e0ecf709451d7e2ba0296455852ffcd291fcd6d2dd03cb62b809e3ca",
+      "bytes": 4466,
+      "stored_sha256": "4f243791e0ecf709451d7e2ba0296455852ffcd291fcd6d2dd03cb62b809e3ca"
+    },
+    "/tmp/symaira-guard9603-root-original80.json": {
+      "file": "symaira-guard9603-root-original80.json.gz",
+      "original_sha256": "97ee1c62199128e92af4e401fa7262e33565e095e026336aefd14a0de5760e60",
+      "bytes": 419253,
+      "stored_sha256": "d29c848b20af066b4bef5a52b9cdb26cc7befaa16c476306ecaa97ddc62da881"
+    },
+    "/tmp/symaira-guard9603-root-original94.json": {
+      "file": "symaira-guard9603-root-original94.json.gz",
+      "original_sha256": "fa1da2c7dda02afb541cac53cf6d99c3900b1f800b096b5cdaebc7c83c390559",
+      "bytes": 486356,
+      "stored_sha256": "155edd47d865603e92a4bfed3c649d98d489b3514591fb658654ff806c2aeafe"
+    },
+    "/tmp/symaira-guard9603-root-process-controls.json": {
+      "file": "symaira-guard9603-root-process-controls.json.gz",
+      "original_sha256": "2749716aaf85fa6e860e10e2cb311c7bcf1cfe0015cbf288a9398ca87b46d8da",
+      "bytes": 12170,
+      "stored_sha256": "0dd6168b6f22b9ae0672a99325bc9059e5147d2e7c34999715a81376c9465f4e"
+    },
+    "/tmp/symaira-guard9603-root-process-doctor-boundaries.json": {
+      "file": "symaira-guard9603-root-process-doctor-boundaries.json.gz",
+      "original_sha256": "ad608a85be271742e827658981261af4f4256ecbbfcd21f091b7a2d7b8d07e31",
+      "bytes": 415104,
+      "stored_sha256": "a6bd929af4069460d2689dc19e5dceb66b7bd858d07b9af35ab3a11153b57903"
+    },
+    "/tmp/symaira-guard9603-root-process-raw-paths.json": {
+      "file": "symaira-guard9603-root-process-raw-paths.json.gz",
+      "original_sha256": "da14c7aff4a4c503f932753b26001b2e0072f01e811c8ea6bade545ebe632558",
+      "bytes": 209090,
+      "stored_sha256": "4cbb5d9d816fa36a042b13fa5e016c19620bf4c085eeabe55a3ae14d9a01ee4f"
+    },
+    "/tmp/symaira-guard9603-root-process.json": {
+      "file": "symaira-guard9603-root-process.json.gz",
+      "original_sha256": "8739c4817d0f74cb415daebbf04f56bfa0e3eb664c3fa529252d3f2d615b9f34",
+      "bytes": 663435,
+      "stored_sha256": "84b3ab417eea524237617896a098dd97cb31952935d3ac6f63185dd9c96251a2"
+    },
+    "/tmp/symaira-guard9603-root-process.log": {
+      "file": "symaira-guard9603-root-process.log.gz",
+      "original_sha256": "7a7f2895e546a935190e4bca0e61b21b7f5b6148dab885efb19f7dec2a682f28",
+      "bytes": 392,
+      "stored_sha256": "80cb8905b18df321092908804b615653f19f5981e5e38fa5fc35e3e6ab71e35c"
+    },
+    "/tmp/symaira-guard9603-root-raw-paths-unicode.json": {
+      "file": "symaira-guard9603-root-raw-paths-unicode.json.gz",
+      "original_sha256": "6e8fd4ea255521bf90bc5928eab8d7628bc602fb34a2ae6facf315125a3269d4",
+      "bytes": 17650,
+      "stored_sha256": "2073b276b3fdecc6e1363aaad0f978cebed881085de9499dff555f20c0adc529"
+    },
+    "/tmp/symaira-guard9603-root-raw-paths.json": {
+      "file": "symaira-guard9603-root-raw-paths.json.gz",
+      "original_sha256": "54d88d2ead6df7139e4f0df5d2ece433d1dbd05a5bad7108c7e7c9f6c4c11f43",
+      "bytes": 17738,
+      "stored_sha256": "71b12c26c4304db96e89bd4acbf7562bc45a4d1b6fbfd873e162e59323d6d334"
+    },
+    "/tmp/symaira-guard9603-root-raw4.log": {
+      "file": "symaira-guard9603-root-raw4.log.gz",
+      "original_sha256": "43717172d76b940366dc7245920cd7647309a7eda09f1004bfd2303a5bf8087b",
+      "bytes": 3531,
+      "stored_sha256": "f093dfa07c4843ee7b7b5e6d407f104f64eda31167810f8cd0a127f6e1397116"
+    },
+    "/tmp/symaira-guard9603-root-raw4.py": {
+      "file": "symaira-guard9603-root-raw4.py",
+      "original_sha256": "f31a5668900b85c2b56f77ac24d988a9be9f8691e7855e9c2bc3e7eb14d25677",
+      "bytes": 2453,
+      "stored_sha256": "f31a5668900b85c2b56f77ac24d988a9be9f8691e7855e9c2bc3e7eb14d25677"
+    },
+    "/tmp/symaira-guard9603-root-retained-corpora.log": {
+      "file": "symaira-guard9603-root-retained-corpora.log.gz",
+      "original_sha256": "4eb34d2114ebe3341c9d3097c1f4ef3e1a22d3fac1a0b46bc8697652dd587a6e",
+      "bytes": 253,
+      "stored_sha256": "d2e6f9da93c914c5a45b26ae8b797d8b3ccb377b3b4455f7655c50e712b07f40"
+    },
+    "/tmp/symaira-guard9603-root-retained-corpora.py": {
+      "file": "symaira-guard9603-root-retained-corpora.py",
+      "original_sha256": "bf09a214d610acac4ce6232ad88be73878ff7a3b8bd7c352d9e41972dcb32781",
+      "bytes": 2774,
+      "stored_sha256": "bf09a214d610acac4ce6232ad88be73878ff7a3b8bd7c352d9e41972dcb32781"
+    },
+    "/tmp/symaira-guard9603-root-tests.log": {
+      "file": "symaira-guard9603-root-tests.log.gz",
+      "original_sha256": "d71ceb04b2ed25a1a603f9857c544c9acf9b66a32d1193ee159da0d1082c1be4",
+      "bytes": 15399,
+      "stored_sha256": "f2d61ce99d911f1e34bf77220bb56669e6d682920e86e81ae31fb2065e9b4996"
+    },
+    "/tmp/symaira-guard9603-root-unicode4.log": {
+      "file": "symaira-guard9603-root-unicode4.log.gz",
+      "original_sha256": "9044ceeb696197924c7e4a2d1a93c2821c7f87eb2c830432ead2aa4da565e53b",
+      "bytes": 3551,
+      "stored_sha256": "e177ec9183cd0e8bc64bee01214eb50923fc7a4592a3ed7a8bee7f4e5ef7d62e"
+    },
+    "/tmp/symaira-guard9603-root-unicode4.py": {
+      "file": "symaira-guard9603-root-unicode4.py",
+      "original_sha256": "fa980697ff1148311a9542e624fdf51d9e4c184f6c411b5dcc161c2240d26a53",
+      "bytes": 2469,
+      "stored_sha256": "fa980697ff1148311a9542e624fdf51d9e4c184f6c411b5dcc161c2240d26a53"
+    },
+    "/tmp/symaira-guard9603-root-verification.json": {
+      "file": "symaira-guard9603-root-verification.json.gz",
+      "original_sha256": "9df3f1ace52d21087d4ada50e4f2be4f7239b70fa6dc118e26a6b2ca08b9efd2",
+      "bytes": 335,
+      "stored_sha256": "4afb228aee59f907765515f0d9b9d5afc8a790b2a9b6fbd274ce70c420afa715"
+    },
+    "/tmp/symaira-guard9603-root-verification.log": {
+      "file": "symaira-guard9603-root-verification.log.gz",
+      "original_sha256": "fc310f407ae007b20d57bba061e6f90f13875dc7f0b7c43a9ff71f8d393b6cdf",
+      "bytes": 317,
+      "stored_sha256": "0da4ce07ac6549e74391919b25403c2d9f81a19af86556bfb2c347d1d02ff78e"
+    },
+    "/tmp/symaira-guard9603-root-verify.py": {
+      "file": "symaira-guard9603-root-verify.py",
+      "original_sha256": "e66ef7a71a04783ee1eec0ed28d068f2e384270a6b0a479c245bd642c849a173",
+      "bytes": 2271,
+      "stored_sha256": "e66ef7a71a04783ee1eec0ed28d068f2e384270a6b0a479c245bd642c849a173"
+    },
+    "/tmp/symaira-guard9603-root-independent-review-receipt.json": {
+      "file": "symaira-guard9603-root-independent-review-receipt.json.gz",
+      "original_sha256": "5f952efc8eb3fc9de277b54155a7c46f473c13c190cb2fdfd5ac67f130cad7ef",
+      "bytes": 7124,
+      "stored_sha256": "99ee29a4f310238595ac51bb2529054f6319744293f399c69f97b923f9e0b426"
+    }
+  }
+}

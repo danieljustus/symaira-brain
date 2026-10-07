@@ -9,6 +9,8 @@ pub mod cache;
 pub mod config;
 pub mod error;
 pub mod flows;
+mod go_print;
+pub mod go_quote;
 pub mod injection;
 pub mod injection_boundary;
 pub mod journal;

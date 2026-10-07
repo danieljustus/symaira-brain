@@ -1,0 +1,42 @@
+{
+  "validated_source": "4cd56e3e47338aef30e5d83ea554227ace70fe71",
+  "files_sha256": {
+    "binaries-receipt.json": "5ae572d2cad26f303824c7bfaa1d8a024405662c8770d335016e43fa6775c2d7",
+    "retired-target-copies.json": "370fe0072d850cac78963be8be2e9b6191e74fd2c787d22cc89087e6b8d1498c",
+    "symaira-state-key-4cd-autostart-timeout-retained.json": "1b9fbadcd1e690186c6e30046d006c37cd0057fe07742a28d76bbed12178d9bc",
+    "symaira-state-key-4cd-autostart-timeout-retained.log": "93bac8fb311ebf7b6b3a128c1a1e2ff2d0bd3ad383acc9d133aeb24f939431c5",
+    "symaira-state-key-4cd-autostart-timeout-retained.py": "7e588fbbf1b9a8b9ec5349e879ff47d05c6c253f6b4cc288c5dd46e2998ca7fe",
+    "symaira-state-key-4cd-autostart-timeout.json": "2e9632bb4b85501a92a6476d556769ff4c65ad2c86567ffdf59902461a93381f",
+    "symaira-state-key-4cd-autostart-timeout.log": "2955be08e680d949e48d6ed64aad7a3d22918903e4d3dbc9aac49c7c6d5a2821",
+    "symaira-state-key-4cd-autostart-timeout.py": "860f385db04412206dfad79a53f58a5770753ac60c9fe830ab140771ae2387d3",
+    "symaira-state-key-4cd-root-prefix-observations.json": "a20cf3d6a12bf4cbf9fee219a57e02a7595353b83a94258106ddcd715a813514",
+    "symaira-state-key-4cd-root-prefix-observations.log": "afdb301185f41a065c3ba3d7f51bf3685eae4660d4f71d1a09ca5cb16f649a5c",
+    "symaira-state-key-4cd-root-prefix-observations.py": "fcd9d0101e5998ef888c9b037255d21363706e8cdb63cf57f3774de0f881c0d7",
+    "symaira-state-key-4cd-root-session-prefix.json": "5697a490fc2879a0ade64c986ca842c8be8a085ca83b4a3f3c91e3fab2b9e4e4",
+    "symaira-state-key-4cd-root-session-prefix.log": "7f93d143cef5c49d16028b4297e6eac27a42d42e91bcd9221f574efb7774b834",
+    "symaira-state-key-4cd-root-session-prefix.py": "0a403a17bcec59fe25bbcc0d6e0485655fed5d1269cc4e1bf3453ebcd08259d6",
+    "symaira-state-key-final-actionlint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "symaira-state-key-final-affected.log": "62a9ded652a142ef78b3f53e8b914ec55eb925bc8103fef521c991c93176b83c",
+    "symaira-state-key-final-build.log": "4b395c9c76c7f7fb5221d30df7320c7a2387ff3842c426dbee6a59a54b5cffab",
+    "symaira-state-key-final-clippy.log": "bebfa99ec33243dd760d8abdeda8428b481196cccdfc1a0c60adde1778d88cd4",
+    "symaira-state-key-final-gate.json": "c7ce5f8a68e702b1f314ff94090eedd9197192df90e663837913b637999752c5",
+    "symaira-state-key-final-gate.log": "530a0ce4de8f0538b2d5dbbecac81db91b790f076639c92b99d9990942b4d859",
+    "symaira-state-key-final-gate.raw.json": "5670bab4c6b7cc69e7ba0d136372cdfac0e80f4037a73ea319a60828b38279a4",
+    "symaira-state-key-final-matrix.log": "f5bfa3059aad5fdddb33c5356c9bfa859a33d90f12f51ff8393cf106c56421b4",
+    "symaira-state-key-final-mcp.json": "ca6c4e128126b27050afceebf39f02a17dd9193a933f823162488dfa3c510fe1",
+    "symaira-state-key-final-mcp.json.tests.log": "0e362dd84a9e3b072325bff844ac0dc0896519640d1b31526c8924c9d6dbdb03",
+    "symaira-state-key-final-mcp.log": "5df69082fee5d7f320a2f97da92fb463fbef95eeab35aff1aa68dd13446f22b4",
+    "symaira-state-key-final-process.json": "a18c5b5e0edc4ad2de5ca18d285f501cecd8cf4cffc528fc94d9785c00c3764b",
+    "symaira-state-key-final-process.log": "bc05628be3eaeb347ddff73fbf2d1462a22dc0921a0ee8816656e5b257383c1c",
+    "symaira-state-key-final-registry.json": "18cef707412b891055abe1dc78c5bca92a535067c28370539d8cce82688a7b54",
+    "symaira-state-key-final-registry.log": "4fb2cb1baf8936dc49552c1d2aa21bf447d9378bef03c7f6085566b241cc8695",
+    "symaira-state-key-final-registry.raw.json": "1733994c8e524acb1693e3bd29df2b61b96dd902a70e85adc88a7c192e388655"
+  },
+  "new_finding": "owned provider survives daemon client cancellation at 5s, observed alive at 16.5s; original actual Go provider gone by 16.5s",
+  "provider_retention": {
+    "path": "/workspace/oracles/symaira-state-key-4cd-owned-provider",
+    "sha256": "e231f7b6707a4cff1714057f00c67ec454d5e2aa696dee9a217c2e7ece9062d1"
+  },
+  "scope": "Actual Linux; no Windows or Darwin runtime assertion; pre-existing b363 root-prefix spelling preserved separately",
+  "binary_archive_note": "All137 executable ELF paths (107 unique) gzip-retained before target reuse; provider from the repeat immutable4cd timeout probe retained separately. Original full-gate ephemeral provider/control files were deleted by its owned TemporaryDirectory; their SHA receipts remain, without claiming retained executable bytes."
+}

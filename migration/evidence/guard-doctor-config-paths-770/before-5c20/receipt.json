@@ -1,0 +1,31 @@
+{
+  "driver_source": "5c20fba04eb4b5ff527f9a2d788d1428bdc0584a",
+  "observed_native_source": "fb2844b02b7c03b7c34650c6d3aed693c47b2997",
+  "actual_native_binaries_sha256": {
+    "go": "13500aba1a47175268e163aec3b86571f450c451ff775f692b5818ba00761146",
+    "native": "c64e8406aa246123fc4d5b0fe9401c2bcf9b9855b9c190aea635b691b67c5be7"
+  },
+  "rows25": {
+    "equal": 8,
+    "preserved_gates": 2,
+    "actual_mismatches": 15
+  },
+  "readonly_all_cases": true,
+  "actual_canonicalized_owner_mutant_rejected": true,
+  "fix_has_not_been_built_or_validated": true,
+  "records": [
+    {
+      "original": "/tmp/symaira-guard770-config-paths-before-process.json",
+      "retained": "symaira-guard770-config-paths-before-process.json.gz",
+      "sha256": "7f18b8d722f7251f879885ae16bd8a645870a50f4f82da87071fa24163b86277",
+      "bytes": 187924
+    },
+    {
+      "original": "/tmp/symaira-guard770-config-paths-before-process.log",
+      "retained": "symaira-guard770-config-paths-before-process.log.gz",
+      "sha256": "8d736407f37dab2553c737cf335e4ddac349ce5bafc6e2517b18237ff188ab0a",
+      "bytes": 598
+    }
+  ],
+  "note": "Additional before-fix actual process evidence; original20/10 independent owner cases and historical immutable receipts remain unchanged."
+}

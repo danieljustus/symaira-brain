@@ -1,0 +1,20 @@
+{
+  "source_sha256": "4c4e3775cd24835f630da0668758bfdd22ebd42a17151e83e4ccf322071919a1",
+  "argv": [
+    "owned-COMSPEC",
+    "/c",
+    "mklink",
+    "/J",
+    "owned-link",
+    "owned-target"
+  ],
+  "kwargs": {
+    "capture_output": true,
+    "timeout": 5
+  },
+  "exception_type": "KeyError",
+  "exception_repr": "KeyError('env')",
+  "actual_Python_callback": true,
+  "actual_Windows_execution": false,
+  "product_execution": false
+}

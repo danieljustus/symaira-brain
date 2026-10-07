@@ -1,0 +1,265 @@
+{
+  "scope": "Fresh source-faithful original fixture recreations plus actual original252 CLI outcomes; original failed Rust-test tempDBs were removed by Drop and are not falsely claimed recovered. Exact generated IDs/timestamps are bound within each recreated case.",
+  "files": [
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/late-index/before.db",
+      "bytes": 290816,
+      "sha256": "98f49f4a04facda33e8a969e5229e9687cdd2c217670fec21a5692c707fd0d6c",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/98f49f4a04facda33e8a969e5229e9687cdd2c217670fec21a5692c707fd0d6c.gz",
+      "gzip_sha256": "a9ab402766985680fd17f86475a2de97b959608b3a84b39a28c99d0f8e2ab1d9"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/late-index/memory.db",
+      "bytes": 290816,
+      "sha256": "a4774f84c536fae5e601d31c3350563fed0f88209405050df6856661032e1843",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/a4774f84c536fae5e601d31c3350563fed0f88209405050df6856661032e1843.gz",
+      "gzip_sha256": "694d258433d5442cef5aab5a86f4b9a4a668078f679d690036601e9d2779b51d"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/late-index/recreated-fixture.sql",
+      "bytes": 11652,
+      "sha256": "ef6dff22b2e5ba9b17fd1ff5fdd6e1b142339ce7321919753b595e279bf44764",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/ef6dff22b2e5ba9b17fd1ff5fdd6e1b142339ce7321919753b595e279bf44764.gz",
+      "gzip_sha256": "0ae9aa3d5abdffbd677896c68b5a3c767162c9b428d7b253e5d43c690bb35e6e"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/late-index/result.json",
+      "bytes": 182658,
+      "sha256": "6f1f2e36f81167874faef27cc72b7b69223a3b100c110079db78d8a8ab74c907",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/6f1f2e36f81167874faef27cc72b7b69223a3b100c110079db78d8a8ab74c907.gz",
+      "gzip_sha256": "5059cf68fb0ea735094d410fd2af4673c92be7b2db77ec5adffa69e9d9cdee56"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/marker-ignore/before.db",
+      "bytes": 73728,
+      "sha256": "9fe08ca0056dd8ce921833dcec36f2f92213efc26a1debf240897b4d57048509",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/9fe08ca0056dd8ce921833dcec36f2f92213efc26a1debf240897b4d57048509.gz",
+      "gzip_sha256": "9a160e0361c87063166beb68d26f47ce33b76a77fd2326829280601fe06f2a87"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/marker-ignore/memory.db",
+      "bytes": 73728,
+      "sha256": "919f12c06a2a52a6261316053eb401683963a06cffd8fc95a8a100faa97e8217",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/919f12c06a2a52a6261316053eb401683963a06cffd8fc95a8a100faa97e8217.gz",
+      "gzip_sha256": "c7b8296bb6d3b28b24cae0dce86b62f871fe72bfb2829b51b674140351ec0b3e"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/marker-ignore/recreated-fixture.sql",
+      "bytes": 1832,
+      "sha256": "4a310117e87b79d955559ef6abd6d347f931c71ec7598b7072d2b261fd765e06",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/4a310117e87b79d955559ef6abd6d347f931c71ec7598b7072d2b261fd765e06.gz",
+      "gzip_sha256": "18ef88c6f737bdf3befcf328984d184f3c7d224ff5bebe2bb207386d3b8a29b1"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/marker-ignore/result.json",
+      "bytes": 38746,
+      "sha256": "66d53e4accdbc937833ed419bad8c0bf367edd2c1abeaa78be4c63b2c62e8337",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/66d53e4accdbc937833ed419bad8c0bf367edd2c1abeaa78be4c63b2c62e8337.gz",
+      "gzip_sha256": "b3227b5bfa6aff348eadd47c4b9a36ebb4e0d50c6ae15c549834717a20fffad1"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/oplog-missing-default/before.db",
+      "bytes": 315392,
+      "sha256": "2bc32066bbff17b56e243b1a21e1bbbe64fbab9202d11baa38e39185016681cc",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/2bc32066bbff17b56e243b1a21e1bbbe64fbab9202d11baa38e39185016681cc.gz",
+      "gzip_sha256": "d80c05c1e9f60100e49a76c5e71d44a0d6b2b060d693f7ffe83a19a7effd18d7"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/oplog-missing-default/memory.db",
+      "bytes": 315392,
+      "sha256": "59b53aa2c91f2ce809135c16709c7af9eb10471fd8aa86c09dc2311356f84eae",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/59b53aa2c91f2ce809135c16709c7af9eb10471fd8aa86c09dc2311356f84eae.gz",
+      "gzip_sha256": "9bc1260b41e93f81b85f340fb7df97d7aa4be0aa02ecc0dea463c5b5d0091922"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/oplog-missing-default/recreated-fixture.sql",
+      "bytes": 12768,
+      "sha256": "e25e78de6794cfe1ddef565a0c1eb774de6b68c0452687496cb8dd4053d28c0f",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/e25e78de6794cfe1ddef565a0c1eb774de6b68c0452687496cb8dd4053d28c0f.gz",
+      "gzip_sha256": "044d41d273831add299937ceb6760e013963fd1ff27ccc54b194af0e3f6f75ca"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/oplog-missing-default/result.json",
+      "bytes": 195143,
+      "sha256": "f4e89cbafb4603306a592108b5444640ee07092073c00ecffb1ba18198303f47",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/f4e89cbafb4603306a592108b5444640ee07092073c00ecffb1ba18198303f47.gz",
+      "gzip_sha256": "159b1c4bcdd1ca4136f03277f4e52769d62f90c7d0b3322bef617c0675e94ea1"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/oplog-wrong-default/before.db",
+      "bytes": 315392,
+      "sha256": "f76ca7e54e4baf2bebe7c64453ecbe53d18ed97d08f9fc1c6f5c293fced28b4b",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/f76ca7e54e4baf2bebe7c64453ecbe53d18ed97d08f9fc1c6f5c293fced28b4b.gz",
+      "gzip_sha256": "d04666b72c458924c1d56efc9cb057a943b856896f678871ebe974b48ed72aae"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/oplog-wrong-default/memory.db",
+      "bytes": 315392,
+      "sha256": "cdac01352e312572055f7bb86803ed919350bcaffcfd8d3005ebcd4af2486db6",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/cdac01352e312572055f7bb86803ed919350bcaffcfd8d3005ebcd4af2486db6.gz",
+      "gzip_sha256": "2e2458471ec9524d5e3b19c4a588a497bd2ed5777646b6b9db7a71dbe2d8dddc"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/oplog-wrong-default/recreated-fixture.sql",
+      "bytes": 12794,
+      "sha256": "a0e5048f37e5da16ff7e942fc9b872ace59dbe7056bb0266c397aa758c6c66e2",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/a0e5048f37e5da16ff7e942fc9b872ace59dbe7056bb0266c397aa758c6c66e2.gz",
+      "gzip_sha256": "97ba255fff733d0af709e057d4cd62d379e0f7957b8b2cfeecc4d4bcb090c6b0"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/oplog-wrong-default/result.json",
+      "bytes": 195258,
+      "sha256": "99908be7f9ac3a57b9d2a461a0661fd2ca0bc947b2e5d108be830ccd561ec704",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/99908be7f9ac3a57b9d2a461a0661fd2ca0bc947b2e5d108be830ccd561ec704.gz",
+      "gzip_sha256": "69fa3abb3bc0064a31f9d1e844e53e22132b4f396bd67cf10c01c42cbd08d28b"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/receipt.json",
+      "bytes": 17966,
+      "sha256": "7bd75f1619f231346bf1e411a2b3776c8e867fac78bb2de032419e9ed67b66e0",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/7bd75f1619f231346bf1e411a2b3776c8e867fac78bb2de032419e9ed67b66e0.gz",
+      "gzip_sha256": "e2035f5c239cfd2db024fda0d5fb4505b8b8488254cfeb2b9eaa12b87ac1f36c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/relation-abort/before.db",
+      "bytes": 286720,
+      "sha256": "84cd375a4f7d2a87bf26d1ca4aa5d327dc0ca9d343f271800fba8117d729df47",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/84cd375a4f7d2a87bf26d1ca4aa5d327dc0ca9d343f271800fba8117d729df47.gz",
+      "gzip_sha256": "b89042a4beb1e88bb616a5ffa7c1060cd796cbce6cfb26cfd6e2954632abf507"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/relation-abort/memory.db",
+      "bytes": 438272,
+      "sha256": "a1ec12760de7d8961f9d3c65e5ee191a3bb3bee011fd66181a3d2f2eced2a924",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/a1ec12760de7d8961f9d3c65e5ee191a3bb3bee011fd66181a3d2f2eced2a924.gz",
+      "gzip_sha256": "49eb28024e96b5821658070eafac9370959dbebddb6d309cd760cee8e787edb0"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/relation-abort/recreated-fixture.sql",
+      "bytes": 11722,
+      "sha256": "0538cd8e4c693c3c7957c0a61896a57338e6660593710c5c0221ce45a4fd498f",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/0538cd8e4c693c3c7957c0a61896a57338e6660593710c5c0221ce45a4fd498f.gz",
+      "gzip_sha256": "3efe139365e47ffb7b3e00b72b6047aa83c8f66b9b82571a3a8b49f409478b2a"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/relation-abort/result.json",
+      "bytes": 232426,
+      "sha256": "93e1e67916c40229ee0d968dc4eec448a4a225e73f0aab1ce0b8eb16205ae13c",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/93e1e67916c40229ee0d968dc4eec448a4a225e73f0aab1ce0b8eb16205ae13c.gz",
+      "gzip_sha256": "1ff3ad0bd196e13fd9eb6f73e269d6a429738f7c05ff49e5df8ce07c993dd9a5"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/relation-ignore/before.db",
+      "bytes": 286720,
+      "sha256": "6486d5204f3d126aab6182005c5abdeaf4905f9d71c59e9eac57a8684af1afeb",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/6486d5204f3d126aab6182005c5abdeaf4905f9d71c59e9eac57a8684af1afeb.gz",
+      "gzip_sha256": "4db71eb410e0d9e099dcabbf605cd67a1f23712dc6c4a3b05c565e13c3e6ddbe"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/relation-ignore/memory.db",
+      "bytes": 438272,
+      "sha256": "7815b0cfdc7cddc6ad166b13b3ca6eb0363d767b4b9241c7ec8dbcaec0ae33ea",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/7815b0cfdc7cddc6ad166b13b3ca6eb0363d767b4b9241c7ec8dbcaec0ae33ea.gz",
+      "gzip_sha256": "be2fd87dd539e86e60f5142451d6e80941df5bd6eb9763bcd8ddd6ec400600e8"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/relation-ignore/recreated-fixture.sql",
+      "bytes": 11698,
+      "sha256": "3f1e974bea7b79b9c50650215113123a36b51e8c4965bd88512b03497e9405c8",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/3f1e974bea7b79b9c50650215113123a36b51e8c4965bd88512b03497e9405c8.gz",
+      "gzip_sha256": "bef6477f59b42c188dbe448416b7848dc948b39db30a3928abce33cfc0de282e"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/relation-ignore/result.json",
+      "bytes": 232387,
+      "sha256": "16b5a72ff03485a62fb582cd26f376c4ac63fe7524db421094b1dbe67fe724e5",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/16b5a72ff03485a62fb582cd26f376c4ac63fe7524db421094b1dbe67fe724e5.gz",
+      "gzip_sha256": "88c3b9fe24f921343ff209ff99c11d1d0db120130c494d586d66a9717e295495"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/relation-time-ignore/before.db",
+      "bytes": 286720,
+      "sha256": "986a7ac0e28e971977e64c66279e77e8ef721e86bb6ee694809f1816cf7f6588",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/986a7ac0e28e971977e64c66279e77e8ef721e86bb6ee694809f1816cf7f6588.gz",
+      "gzip_sha256": "bd65e3d6ccafa457515860eb801b0b5788878f50b72cc27f8215d7431fa95b24"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/relation-time-ignore/memory.db",
+      "bytes": 438272,
+      "sha256": "f76fb8798102f61f8e80f8b7bf232e2af7140cbd5be5fa3fd078d832c6eaff23",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/f76fb8798102f61f8e80f8b7bf232e2af7140cbd5be5fa3fd078d832c6eaff23.gz",
+      "gzip_sha256": "e32de74c6d852fdccc930825fb80755ded1dadbea7577db09545257a04e545a6"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/relation-time-ignore/recreated-fixture.sql",
+      "bytes": 11717,
+      "sha256": "817e1f05420d1128eac6417a8f1501c7b7056bd45ad9385b4b27aed83acdb4a5",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/817e1f05420d1128eac6417a8f1501c7b7056bd45ad9385b4b27aed83acdb4a5.gz",
+      "gzip_sha256": "58aafead04c95fad7d29bf2ca2c4431abfa42409de340ea12965093aef4b77e9"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/relation-time-ignore/result.json",
+      "bytes": 232479,
+      "sha256": "10870c5149dad121dbd5d3e7ed6803ed0d5926d558e0bef53682ec89468e078a",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/10870c5149dad121dbd5d3e7ed6803ed0d5926d558e0bef53682ec89468e078a.gz",
+      "gzip_sha256": "a99488b98959495cb3625a1a9a4b37aa97fb053abfe2f63e78e2e77260841ba7"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/rule-abort/before.db",
+      "bytes": 73728,
+      "sha256": "24f2b1553014cd071e2777350ce79ab68788b094461579ce03a35694d2c2d53f",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/24f2b1553014cd071e2777350ce79ab68788b094461579ce03a35694d2c2d53f.gz",
+      "gzip_sha256": "98e2251bbc231838a4a06d94fd49c73fb9a6d290471e87cbeb20c821d1a0fa73"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/rule-abort/memory.db",
+      "bytes": 73728,
+      "sha256": "2f8c7c2481047a8b45dfb60076aee1ccb923056e6e5d8f4d16090a333d85ebe3",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/2f8c7c2481047a8b45dfb60076aee1ccb923056e6e5d8f4d16090a333d85ebe3.gz",
+      "gzip_sha256": "25074cb35bf81262f9fd4882e96b4690795c98450d3106d4d96be4606af853d1"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/rule-abort/recreated-fixture.sql",
+      "bytes": 1838,
+      "sha256": "3191f4ee94a54e240bd2c9d4ee41c9620afcfdc7aa73566e043e726888dd8d0c",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/3191f4ee94a54e240bd2c9d4ee41c9620afcfdc7aa73566e043e726888dd8d0c.gz",
+      "gzip_sha256": "c1e93a4ca703289cb5c75ab04b4541b0dbe73acfc744376dad1901d5937a5766"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/rule-abort/result.json",
+      "bytes": 38641,
+      "sha256": "cedde0d95ccfbea20c11b17684cee0b963eb8927484be9f4dc7447ea2247dfad",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/cedde0d95ccfbea20c11b17684cee0b963eb8927484be9f4dc7447ea2247dfad.gz",
+      "gzip_sha256": "008af1c254447904d056a147b546db184a66a1f3a2135556261384f83ecc4284"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/rule-ignore/before.db",
+      "bytes": 73728,
+      "sha256": "ae23e8f980f25ec06e6e6c139bfd42d1ddaaf2328c3e7ffde8020325159a9116",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/ae23e8f980f25ec06e6e6c139bfd42d1ddaaf2328c3e7ffde8020325159a9116.gz",
+      "gzip_sha256": "111c45fb2fffe2682e1ba757d91f55c7f3b2613407e6c6ec33775bb4d5571d8c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/rule-ignore/memory.db",
+      "bytes": 73728,
+      "sha256": "e9753fb118d7c6af664a702f461ebabf0d0cfaf699302b0eb362b19ff2331e31",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/e9753fb118d7c6af664a702f461ebabf0d0cfaf699302b0eb362b19ff2331e31.gz",
+      "gzip_sha256": "3af3953d8558530a502ea04425825ed410968def7beac5159c09e58a74c61321"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/rule-ignore/recreated-fixture.sql",
+      "bytes": 1818,
+      "sha256": "4fb2ec8c7aa341a8ee8d865859c1828dd8079c5a9e56a962a60e28a442ca2619",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/4fb2ec8c7aa341a8ee8d865859c1828dd8079c5a9e56a962a60e28a442ca2619.gz",
+      "gzip_sha256": "71c44da90deb95d48c9ed55c70819d57c9ebb8fbbc58b6965c8c47ec532d7b3e"
+    },
+    {
+      "original": "/tmp/symaira-memory649-original252-case-state/rule-ignore/result.json",
+      "bytes": 38655,
+      "sha256": "0e1e3e9309432567bddf3d02f91e79758c79b1103181ee030ec0fa55b65096d9",
+      "retained_gzip": "migration/evidence/memory-historical-649/runtime-25292fe-original-failure/case-state/retained/0e1e3e9309432567bddf3d02f91e79758c79b1103181ee030ec0fa55b65096d9.gz",
+      "gzip_sha256": "9ae77ae7182170fff07fa6e5fdbd299bd7724a68f4fcd2e902d09850a15942ca"
+    }
+  ],
+  "all_roundtrips_verified": true
+}

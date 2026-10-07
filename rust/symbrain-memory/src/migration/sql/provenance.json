@@ -1,0 +1,227 @@
+{
+  "frozen_revision": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "files": [
+    {
+      "version": "001_init",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/001_init.sql",
+      "sha256": "45d33bff4a5292a1a803655a07de8a79bec7512c51e7adc5c1ee088dffa0400f",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/001_init.sql"
+    },
+    {
+      "version": "002_vector_index",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/002_vector_index.sql",
+      "sha256": "d5cf25b6be542eecbbfabe16c9d6445244a454fff6f8ecbf71ccae47b857ec38",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/002_vector_index.sql"
+    },
+    {
+      "version": "003_jwt_revocations",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/003_jwt_revocations.sql",
+      "sha256": "7a32a5aacdb8f74ef3455ed67eca7a650d0dca51f2872f8452dd8b407c6cc16a",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/003_jwt_revocations.sql"
+    },
+    {
+      "version": "004_sync_state",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/004_sync_state.sql",
+      "sha256": "323f614cc1e7ee748a62eb64b151101289d6fb7877f923e6fdc633b7a8f4c32f",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/004_sync_state.sql"
+    },
+    {
+      "version": "005_indexes",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/005_indexes.sql",
+      "sha256": "453fe91a938022c6f0b80e93cc21cbd1ef4f52d5c54e6cbe04a56183eaa80eb8",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/005_indexes.sql"
+    },
+    {
+      "version": "006_provenance",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/006_provenance.sql",
+      "sha256": "178ae1664d2a22708382cac8afae4a385934b5aecb5fcd05757e0e33e3c559e1",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/006_provenance.sql"
+    },
+    {
+      "version": "007_profiles",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/007_profiles.sql",
+      "sha256": "659bdcf6a1e45ef2f31231d6d3fe2a13b511a62d6bd07ee098052c8e8a9dc566",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/007_profiles.sql"
+    },
+    {
+      "version": "008_entities",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/008_entities.sql",
+      "sha256": "b394f265d83ee5f73ebec019b1909f5fe7f22ce6e282fb0816a6c44e33cff25c",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/008_entities.sql"
+    },
+    {
+      "version": "009_consolidation",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/009_consolidation.sql",
+      "sha256": "15922f4447859b61b9caa00ba1063c85e6938dc27cf8dea9262cba075b7a389c",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/009_consolidation.sql"
+    },
+    {
+      "version": "010_import_state",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/010_import_state.sql",
+      "sha256": "ae109c2d328571ea7086ebdf34b7c2cf4f62d3dfb30f10945cb70eb3b4e7faa7",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/010_import_state.sql"
+    },
+    {
+      "version": "011_importance",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/011_importance.sql",
+      "sha256": "007cd7a162d1e0c75fd2ed39c8341d41bfcd4089a7f17df28825a2640d852dca",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/011_importance.sql"
+    },
+    {
+      "version": "012_audit_log",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/012_audit_log.sql",
+      "sha256": "2f0592d0ad22581ba369892c68985a318fe2cab6484df2f294053f8e64109ce8",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/012_audit_log.sql"
+    },
+    {
+      "version": "014_temporal_validity",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/014_temporal_validity.sql",
+      "sha256": "080d38389234ca656f2620ee91a7b16d59d686a4e393ae9aa049ac9c191951a9",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/014_temporal_validity.sql"
+    },
+    {
+      "version": "015_entities_aliases",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/015_entities_aliases.sql",
+      "sha256": "aecd973bbc5900b96237545bc200fd71d03f11496c3d7a29f0ba1d9a53d262f0",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/015_entities_aliases.sql"
+    },
+    {
+      "version": "016_fts5",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/016_fts5.sql",
+      "sha256": "2bf33cd2cf3adbac00254acfabac4ab755b4d28eecba686151baa1e951704ef1",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/016_fts5.sql"
+    },
+    {
+      "version": "017_embedding_source",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/017_embedding_source.sql",
+      "sha256": "9a63f841bf9173730cd8a37f6e5af3a9d86816b66a41dcdf86b5a125b2e85c61",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/017_embedding_source.sql"
+    },
+    {
+      "version": "018_content_hash",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/018_content_hash.sql",
+      "sha256": "5c060dedb780bc6430db4d1c068e485ff405610bd990e193e35b71eaac9b83fa",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/018_content_hash.sql"
+    },
+    {
+      "version": "019_memory_evidence",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/019_memory_evidence.sql",
+      "sha256": "2e655f1960cb0a830efe97d43b06fd877ae6752198db813883605de3bf27f270",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/019_memory_evidence.sql"
+    },
+    {
+      "version": "020_entity_relations",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/020_entity_relations.sql",
+      "sha256": "fed0d56de051b04a8f5ed39c8e4a494c61c19336b5070996778b52d19976a754",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/020_entity_relations.sql"
+    },
+    {
+      "version": "021_context_profiles",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/021_context_profiles.sql",
+      "sha256": "42cd13b082b333251d1f76a048c838a9e69d4d184d4c7a1973bce3672f7747b6",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/021_context_profiles.sql"
+    },
+    {
+      "version": "022_entity_relation_provenance",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/022_entity_relation_provenance.sql",
+      "sha256": "80d027d09f69d2b1eedf659c41b9caa35465a1c17e26a8aac62b3c82a0641b7c",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/022_entity_relation_provenance.sql"
+    },
+    {
+      "version": "023_sync_oplog",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/023_sync_oplog.sql",
+      "sha256": "a568a7f813162e24f6b6d69bf00de192b46710539941e9010fc6ab72c7088876",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/023_sync_oplog.sql"
+    },
+    {
+      "version": "024_working_memory_tier",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/024_working_memory_tier.sql",
+      "sha256": "b499953e63b36d0a253743f3576fa70ee888a3b90b2008dfb80649b18421959d",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/024_working_memory_tier.sql"
+    },
+    {
+      "version": "025_entity_relation_temporal",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/025_entity_relation_temporal.sql",
+      "sha256": "30af5d899d21848ae140ada81555360fce265cb0abb9d004c0087a4bf5b954a5",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/025_entity_relation_temporal.sql"
+    },
+    {
+      "version": "026_binary_embedding",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/026_binary_embedding.sql",
+      "sha256": "e4ff15a2f21d40e6220e32af54af3d050edde8855e7ceaa9a4e893ff6d831eaf",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/026_binary_embedding.sql"
+    },
+    {
+      "version": "027_access_count",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/027_access_count.sql",
+      "sha256": "98bc9f62b5bc8cf6f9d77ef4e63d56aecfee0ec24034663df5accb44b46b76c3",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/027_access_count.sql"
+    },
+    {
+      "version": "027_consolidation_runs",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/027_consolidation_runs.sql",
+      "sha256": "c0d2e803910c8f89c7ba58211893ba5771ff97950cec039c0f171b4c2454185b",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/027_consolidation_runs.sql"
+    },
+    {
+      "version": "027_fts5_porter",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/027_fts5_porter.sql",
+      "sha256": "620c94311571b8d00aa1fea9c46025423f2d117ef74d46e68a53afc18d07c55b",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/027_fts5_porter.sql"
+    },
+    {
+      "version": "027_query_log",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/027_query_log.sql",
+      "sha256": "c3c4336ee213ee6b8f55a9bded5bc2ac09f24034799b95c5cda5975c14cb2fda",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/027_query_log.sql"
+    },
+    {
+      "version": "027_retrieval_feedback",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/027_retrieval_feedback.sql",
+      "sha256": "6a0f7ced7db1f80921dba22e73a50f97db3a40a4b82a418a19b614b70d505160",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/027_retrieval_feedback.sql"
+    },
+    {
+      "version": "028_embedding_quantization",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/028_embedding_quantization.sql",
+      "sha256": "b426d82aa8d43101bdfddecb73a4300f64028eac69c72249ac9282161175e668",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/028_embedding_quantization.sql"
+    },
+    {
+      "version": "029_query_log_attribution",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/029_query_log_attribution.sql",
+      "sha256": "3a64b73feaa5249d6bca035a28161a96bd0bd53052e1740464f09a113fa7bb96",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/029_query_log_attribution.sql"
+    },
+    {
+      "version": "030_audit_target",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/030_audit_target.sql",
+      "sha256": "fb2129c0ca12086c7d035c344871d08af8c2cf3fb7b51d24accf88abf4cd84ec",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/030_audit_target.sql"
+    },
+    {
+      "version": "031_query_log_results",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/031_query_log_results.sql",
+      "sha256": "a93d756f00a2149457a946ee4e3a4574bed0c73cd27985cde2826bac52ca06bf",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/031_query_log_results.sql"
+    },
+    {
+      "version": "032_memory_governance",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/032_memory_governance.sql",
+      "sha256": "0434f558122ca9b0d219917ce83ef186adca45d08eb8d02dbba761c3e53f50b5",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/032_memory_governance.sql"
+    },
+    {
+      "version": "033_recall_quality",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/033_recall_quality.sql",
+      "sha256": "4360df7a4c06e3d96f5f88060483ecabd099b0d0af13a3ad1320b1da76edd5f1",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/033_recall_quality.sql"
+    },
+    {
+      "version": "034_activity_store",
+      "source": "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations/034_activity_store.sql",
+      "sha256": "0106af30f8e2a96c73962311935383d8222d8ade55db4117e495280447319f2b",
+      "rust_owned": "rust/symbrain-memory/src/migration/sql/034_activity_store.sql"
+    }
+  ]
+}

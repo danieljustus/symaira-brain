@@ -1,6 +1,10 @@
 # AGENTS.md — Symaira Guard (`guard/` module of `symaira-brain`)
 
-This file documents coding conventions, project standards, and Symaira-specific rules for AI agents and humans contributing to the guard module of `symaira-brain` (formerly the standalone `symaira-guard` repository; absorbed 2026-08-21, dissolved into the root module and the `symguard` binary retired per ADR 0001, D6).
+This file documents coding conventions, project standards, and Symaira-specific rules for AI agents and humans contributing to the guard module of `symaira-brain` (formerly the standalone `symaira-guard` repository; absorbed 2026-08-21, dissolved into the root module and the Go standalone `symguard` entrypoint retired per ADR 0001, D6).
+
+The scoped Rust restoration for #770 uses `rust/symguard-cli`, shared Guard-only
+handlers and a standalone binary (ADR 0011). It supersedes the Go retirement
+assumption for that entrypoint; pending diagnostics and acceptance remain explicit.
 
 **README:** [README.md](README.md)
 

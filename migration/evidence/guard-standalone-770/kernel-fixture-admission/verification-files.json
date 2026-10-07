@@ -1,0 +1,138 @@
+{
+  "base": "e13f4caa07a4aecff5ab54a4ab57e2e248374438",
+  "files": [
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/actionlint-final.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/actionlint-final.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/actual-linux-owned-kernel-probes.json",
+      "bytes": 16331,
+      "sha256": "a54f826654ec02d487c56f6915c214561abb643e77f741feaea3533a4d28b2af"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/broad-errno.stderr.gz",
+      "bytes": 589,
+      "sha256": "c5010ccd928832381de4fc57e4f50a05118e3197c56a07e23a3ba039dde968ca",
+      "raw_original_sha256": "6380c5d238eecc59c5670601f0fdc11bd679939bff3bf3dff53b4061bab36edd",
+      "raw_original_bytes": 3730
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/broad-errno.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/drop-accounting.stderr",
+      "bytes": 1752,
+      "sha256": "c7a5233df6f8f432ce83d7b2788b9fecafbe4ec24abb80e1f18a1f182e660c2a"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/drop-accounting.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/observer-test-original-e13.py.gz",
+      "bytes": 1641,
+      "sha256": "4731d8c3060df77fb5a9bffc3b794c4da245eab6b26369438717977264161b56"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/original-root-review-and-darwin.tar.gz",
+      "bytes": 65419,
+      "sha256": "d0d1acc252405b591cdaa164751f3da1459ba62d106f1976cf26b641b3e1f573"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/original-windows-api-mock-trace.json",
+      "bytes": 435,
+      "sha256": "cf3e2127b51285091801b02461f58e1dd5c7fb8e2dcd51c0471b88ef654deb05"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/original-windows-api-mock-trace.txt",
+      "bytes": 149,
+      "sha256": "d2167fef40a7c542143c213f34775dfdbc3e9484105b721440b15cff11d806af"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/originals.json",
+      "bytes": 6380,
+      "sha256": "c36bdb463c91275db7c8a06268912323479439658963f6bfd573c229e2c16b3f"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/portable-complete-raw.json",
+      "bytes": 6521,
+      "sha256": "e50dfa39136f1be879710421d6895476e098b4e9e04d81abc4cc53657f7310c5"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/portable-complete-raw.tar.gz",
+      "bytes": 158277,
+      "sha256": "1c3520d5ac2bef24c41c7548c96252c16a3d61f7d248b1515a4f70a91de80cec"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/portable-final21.stderr",
+      "bytes": 3693,
+      "sha256": "2eb1112d046066aa0a3412ac7586c26da5f76a9846292934304ef002a421fb98"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/portable-final21.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/portable-tests-final.stderr",
+      "bytes": 3495,
+      "sha256": "d99c41574874e08a83a8f940ecc7b796d768d809cf9f620c83ecc79f7329c8b9"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/portable-tests-final.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/portable-tests-rerun.stderr",
+      "bytes": 4865,
+      "sha256": "376868e668cf4d933279a85ed47992f62b9935a7b6301ca5af9d2f0e8b5bf4f0"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/portable-tests-rerun.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/portable-tests.stderr",
+      "bytes": 4865,
+      "sha256": "6f96f4c58255a363afa3f419a501b7ba708295b03013f12d4319b6db845d94c9"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/portable-tests.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/verification-final21.json",
+      "bytes": 226349,
+      "sha256": "fcb0a4aca7ebf3a121b06279d6a2482b785657ed541c805f375f14021972627c"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/verification.json",
+      "bytes": 226888,
+      "sha256": "33781624d49ce8fbd5ade7e9a6b8fe11976357e9dc83f26f66e72eff66256d5c"
+    },
+    {
+      "path": "migration/evidence/guard-standalone-770/kernel-fixture-admission/verify_source.py",
+      "bytes": 5744,
+      "sha256": "247bd1697edee0bfaeef26a94f18a969dc8f09523afc367c8e4fdb8ffc4d888e"
+    }
+  ],
+  "actual_Linux_portable_tests": 21,
+  "actual_Linux_owned_component_probes": 11,
+  "actual_fixture_machinery_mutants": 2,
+  "product_SDK_compiler_target_port_execution": false,
+  "Darwin_Windows_execution": false,
+  "historical_manifest_unchanged_at": "f23d01010e3321cc74d06b46009c8e90d94136a0"
+}

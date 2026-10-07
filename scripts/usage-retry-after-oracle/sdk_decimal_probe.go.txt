@@ -1,0 +1,49 @@
+// Owned SDK-only observations, not frozen Usage or current native execution.
+package main
+
+import (
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"math"
+	"os"
+	"runtime"
+	"strconv"
+	"strings"
+)
+
+func main() {
+	var input struct {
+		Public []struct {
+			ID  string `json:"id"`
+			Hex string `json:"value_hex"`
+		}
+	}
+	if err := json.NewDecoder(os.Stdin).Decode(&input); err != nil {
+		panic(err)
+	}
+	rows := []any{}
+	for _, row := range input.Public {
+		raw, err := hex.DecodeString(row.Hex)
+		if err != nil {
+			panic(err)
+		}
+		value, err := strconv.ParseFloat(strings.TrimSpace(string(raw)), 64)
+		var retryBits, integer any
+		if err == nil && (value >= 0 || math.IsNaN(value)) {
+			retryBits = fmt.Sprintf("%016x", math.Float64bits(value))
+			integer = fmt.Sprint(int(value))
+		}
+		rows = append(rows, map[string]any{"id": row.ID, "value_hex": row.Hex,
+			"float_bits": fmt.Sprintf("%016x", math.Float64bits(value)), "retry_bits": retryBits,
+			"seconds": integer, "error": fmt.Sprint(err)})
+	}
+	output := map[string]any{"scope": "SDK-only scalar/int output; no frozen provider/native execution",
+		"sdk": runtime.Version(), "goos": runtime.GOOS, "goarch": runtime.GOARCH,
+		"int_bits": 32 << (^uint(0) >> 63), "records": rows}
+	encoder := json.NewEncoder(os.Stdout)
+	encoder.SetIndent("", "  ")
+	if err := encoder.Encode(output); err != nil {
+		panic(err)
+	}
+}

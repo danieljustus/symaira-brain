@@ -41,6 +41,13 @@ jobs:
           fi
           echo "All actions are pinned to SHA."
 
+  macos-release-verification-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Prove notarization failures prevent publication
+        run: python3 -m unittest discover -s scripts -p test_macos_release_verification.py -v
+
   # golangci-lint has a known incompatibility with Go 1.26 in this
   # ecosystem (see symaira-scope). gofmt + go vet below are the lint gate
   # until golangci-lint ships a Go-1.26-compatible release — re-enable a
@@ -201,10 +208,75 @@ jobs:
       - name: Rust quality and Go parity gates
         run: make rust-check parity-smoke
 
+      - name: Go/Rust native doctor repair and negative process controls
+        shell: bash
+        run: scripts/doctor-repair-oracle/run.sh "$RUNNER_TEMP/doctor-repair-parity.json"
+
+      - name: Preserve doctor repair process parity evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: doctor-repair-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/doctor-repair-parity*.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Compare native source setup with frozen Go and process controls
+        shell: bash
+        run: scripts/setup-source-oracle/run.sh "$RUNNER_TEMP/setup-source-parity.json"
+
+      - name: Upload source setup parity and negative controls
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: setup-source-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/setup-source-parity*.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Compare actual Linux Setup output boundaries and embedded writers
+        shell: bash
+        run: scripts/setup-output-oracle/run.sh "$RUNNER_TEMP/setup-output-parity"
+
+      - name: Compare actual Linux Doctor stdout and embedded writer boundaries
+        shell: bash
+        run: scripts/doctor-stdout-oracle/run.sh "$RUNNER_TEMP/doctor-stdout-parity"
+
+      - name: Preserve complete Doctor stdout observations and negative controls
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: doctor-stdout-parity-${{ github.sha }}
+          path: ${{ runner.temp }}/doctor-stdout-parity/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Preserve complete Setup output observations and negative controls
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: setup-output-parity-${{ github.sha }}
+          path: ${{ runner.temp }}/setup-output-parity/
+          if-no-files-found: error
+          retention-days: 14
+
       # Keep the protocol subprocess contract visible and independently
       # executable. `rust-check` already covers this test, but a named gate
       # prevents stdout/lifecycle regressions from disappearing inside a
       # workspace-wide test log.
+      - name: Native skills render drift and frozen Go baseline
+        shell: bash
+        run: scripts/skills-render-drift/run.sh "$RUNNER_TEMP/skills-render-drift.json"
+
+      - name: Upload native skills render drift evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: skills-render-drift-${{ runner.os }}
+          path: ${{ runner.temp }}/skills-render-drift.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Rust MCP stdio and lifecycle gate
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
 
@@ -216,6 +288,29 @@ jobs:
           go build -o "$RUNNER_TEMP/symbrain-go-mcp" ./cmd/symbrain
           cargo build -p symbrain-cli --bin symbrain --locked
           python3 scripts/mcp-differential.py "$RUNNER_TEMP/symbrain-go-mcp" target/debug/symbrain
+
+      - name: Native standalone Guard process contracts
+        shell: bash
+        run: scripts/guard-standalone-oracle/run.sh "$RUNNER_TEMP/guard-standalone.json"
+
+      - name: Upload native standalone Guard evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: guard-standalone-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/guard-standalone.json
+            ${{ runner.temp }}/guard-standalone-controls.json
+            ${{ runner.temp }}/guard-standalone-raw-paths.json
+            ${{ runner.temp }}/guard-standalone-doctor-boundaries.json
+            ${{ runner.temp }}/guard-standalone-config-warnings.json
+            ${{ runner.temp }}/guard-standalone-config-paths.json
+            ${{ runner.temp }}/guard-standalone-config-paths.json.progress.json
+            ${{ runner.temp }}/guard-standalone-windows-path-reference.json
+            ${{ runner.temp }}/guard-standalone-windows-path-reference-artifacts/
+            ${{ runner.temp }}/guard-standalone-binaries/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Native Go/Rust activity validation acceptance
         shell: bash
@@ -256,6 +351,103 @@ jobs:
         with:
           name: usage-fetch-620-${{ runner.os }}
           path: ${{ runner.temp }}/usage-fetch-620.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native usage credential reference and CLI parity
+        shell: bash
+        run: scripts/usage-credential-oracle/run.sh "$RUNNER_TEMP/usage-credential-768.json"
+
+      - name: Preserve usage credential reference process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-credential-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-credential-768.json
+            ${{ runner.temp }}/usage-credential-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native Claude and Codex credential file process parity
+        shell: bash
+        run: bash scripts/usage-provider-files-oracle/run.sh "$RUNNER_TEMP/usage-provider-files-768.json"
+
+      - name: Preserve provider file and filesystem evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-provider-files-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-provider-files-768.json
+            ${{ runner.temp }}/usage-provider-files-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native read-only Copilot and Kimi file process parity
+        shell: bash
+        run: bash scripts/usage-copilot-kimi-oracle/run.sh "$RUNNER_TEMP/usage-copilot-kimi-768.json"
+      - name: Preserve Copilot and Kimi process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-copilot-kimi-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-copilot-kimi-768.json
+            ${{ runner.temp }}/usage-copilot-kimi-768.evidence
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Native Usage Retry-After SDK and full TLS constructor parity
+        shell: bash
+        run: bash scripts/usage-retry-after-oracle/run.sh "$RUNNER_TEMP/usage-retry-after-768.json"
+      - name: Preserve Retry-After SDK and full TLS process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-retry-after-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-retry-after-768.json
+            ${{ runner.temp }}/usage-retry-after-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+      - name: Native Usage additive long-decimal SDK and full TLS parity
+        shell: bash
+        run: bash scripts/usage-retry-after-oracle/run.sh "$RUNNER_TEMP/usage-retry-decimal-768.json" --decimal
+      - name: Preserve additive long-decimal SDK and TLS evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-retry-decimal-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-retry-decimal-768.json
+            ${{ runner.temp }}/usage-retry-decimal-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+      - name: Native Usage early-argv device and real TLS status parity
+        shell: bash
+        run: bash scripts/usage-next-oracle/run.sh "$RUNNER_TEMP/usage-next-768.json"
+      - name: Preserve Usage successor full process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-next-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-next-768.json
+            ${{ runner.temp }}/usage-next-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+      - name: Native read-only Hermes file and JWT process parity
+        shell: bash
+        run: scripts/usage-hermes-oracle/run.sh "$RUNNER_TEMP/usage-hermes-768.json"
+
+      - name: Preserve Hermes credential and filesystem evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-hermes-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-hermes-768.json
+            ${{ runner.temp }}/usage-hermes-768.evidence
           if-no-files-found: error
           retention-days: 14
 
@@ -358,8 +550,68 @@ jobs:
       - name: Rust quality and Go parity gates on macOS
         run: make rust-check parity-smoke
 
+      - name: Go/Rust native doctor repair and negative process controls
+        shell: bash
+        run: scripts/doctor-repair-oracle/run.sh "$RUNNER_TEMP/doctor-repair-parity.json"
+
+      - name: Preserve doctor repair process parity evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: doctor-repair-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/doctor-repair-parity*.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Compare native source setup with frozen Go and process controls
+        shell: bash
+        run: scripts/setup-source-oracle/run.sh "$RUNNER_TEMP/setup-source-parity.json"
+
+      - name: Upload source setup parity and negative controls
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: setup-source-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/setup-source-parity*.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native skills render drift and frozen Go baseline
+        shell: bash
+        run: scripts/skills-render-drift/run.sh "$RUNNER_TEMP/skills-render-drift.json"
+
+      - name: Upload native skills render drift evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: skills-render-drift-${{ runner.os }}
+          path: ${{ runner.temp }}/skills-render-drift.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Rust MCP stdio and lifecycle gate on macOS
         run: cargo test -p symbrain-cli --test mcp_cli_tests --locked
+
+      - name: Native standalone Guard process contracts
+        shell: bash
+        run: scripts/guard-standalone-oracle/run.sh "$RUNNER_TEMP/guard-standalone.json"
+
+      - name: Upload native standalone Guard evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: guard-standalone-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/guard-standalone.json
+            ${{ runner.temp }}/guard-standalone-controls.json
+            ${{ runner.temp }}/guard-standalone-raw-paths.json
+            ${{ runner.temp }}/guard-standalone-doctor-boundaries.json
+            ${{ runner.temp }}/guard-standalone-config-warnings.json
+            ${{ runner.temp }}/guard-standalone-config-paths.json
+            ${{ runner.temp }}/guard-standalone-config-paths.json.progress.json
+            ${{ runner.temp }}/guard-standalone-binaries/
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Native Go/Rust activity validation acceptance
         shell: bash
@@ -400,6 +652,103 @@ jobs:
         with:
           name: usage-fetch-620-${{ runner.os }}
           path: ${{ runner.temp }}/usage-fetch-620.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native usage credential reference and CLI parity
+        shell: bash
+        run: scripts/usage-credential-oracle/run.sh "$RUNNER_TEMP/usage-credential-768.json"
+
+      - name: Preserve usage credential reference process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-credential-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-credential-768.json
+            ${{ runner.temp }}/usage-credential-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native Claude and Codex credential file process parity
+        shell: bash
+        run: bash scripts/usage-provider-files-oracle/run.sh "$RUNNER_TEMP/usage-provider-files-768.json"
+
+      - name: Preserve provider file and filesystem evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-provider-files-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-provider-files-768.json
+            ${{ runner.temp }}/usage-provider-files-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native read-only Copilot and Kimi file process parity
+        shell: bash
+        run: bash scripts/usage-copilot-kimi-oracle/run.sh "$RUNNER_TEMP/usage-copilot-kimi-768.json"
+      - name: Preserve Copilot and Kimi process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-copilot-kimi-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-copilot-kimi-768.json
+            ${{ runner.temp }}/usage-copilot-kimi-768.evidence
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Native Usage Retry-After SDK and full TLS constructor parity
+        shell: bash
+        run: bash scripts/usage-retry-after-oracle/run.sh "$RUNNER_TEMP/usage-retry-after-768.json"
+      - name: Preserve Retry-After SDK and full TLS process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-retry-after-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-retry-after-768.json
+            ${{ runner.temp }}/usage-retry-after-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+      - name: Native Usage additive long-decimal SDK and full TLS parity
+        shell: bash
+        run: bash scripts/usage-retry-after-oracle/run.sh "$RUNNER_TEMP/usage-retry-decimal-768.json" --decimal
+      - name: Preserve additive long-decimal SDK and TLS evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-retry-decimal-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-retry-decimal-768.json
+            ${{ runner.temp }}/usage-retry-decimal-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+      - name: Native Usage early-argv device and real TLS status parity
+        shell: bash
+        run: bash scripts/usage-next-oracle/run.sh "$RUNNER_TEMP/usage-next-768.json"
+      - name: Preserve Usage successor full process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-next-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-next-768.json
+            ${{ runner.temp }}/usage-next-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+      - name: Native read-only Hermes file and JWT process parity
+        shell: bash
+        run: scripts/usage-hermes-oracle/run.sh "$RUNNER_TEMP/usage-hermes-768.json"
+
+      - name: Preserve Hermes credential and filesystem evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-hermes-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-hermes-768.json
+            ${{ runner.temp }}/usage-hermes-768.evidence
           if-no-files-found: error
           retention-days: 14
 
@@ -509,12 +858,173 @@ jobs:
 
       - name: Go/Rust executable parity on native Windows
         shell: bash
+        env:
+          SYMBRAIN_DIFFERENTIAL_JOURNAL: ${{ runner.temp }}/memory803-parity-journal
         run: |
           set -euo pipefail
           CGO_ENABLED=0 go build -ldflags "-X main.version=dev" -o "$RUNNER_TEMP/symbrain-go.exe" ./cmd/symbrain
           SYMBRAIN_VERSION=dev cargo build --workspace --locked
           ./guard/scripts/guard-scan-oracle/run.sh parity target/debug/symbrain.exe
           python3 scripts/rust-differential.py "$RUNNER_TEMP/symbrain-go.exe" target/debug/symbrain.exe
+
+      - name: Go/Rust native doctor repair and negative process controls
+        shell: bash
+        run: scripts/doctor-repair-oracle/run.sh "$RUNNER_TEMP/doctor-repair-parity.json"
+
+      - name: Preserve doctor repair process parity evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: doctor-repair-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/doctor-repair-parity*.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Compare native source setup with frozen Go and process controls
+        shell: bash
+        run: scripts/setup-source-oracle/run.sh "$RUNNER_TEMP/setup-source-parity.json"
+
+      - name: Upload source setup parity and negative controls
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: setup-source-parity-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/setup-source-parity*.json
+            ${{ runner.temp }}/setup-source-parity.json.binaries.json.files/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Diagnose owned Windows source JobObject polling and cleanup
+        if: always()
+        shell: bash
+        run: scripts/setup-source-oracle/windows_job_run.sh "$RUNNER_TEMP/source-job-diagnostic.json"
+
+      - name: Preserve complete native Windows source job diagnostic
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: source-job-diagnostic-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/source-job-diagnostic.json
+            ${{ runner.temp }}/source-job-diagnostic.json.cargo.jsonl
+            ${{ runner.temp }}/source-job-diagnostic.json.evidence/
+            ${{ runner.temp }}/source-job-diagnostic.json.binaries.json
+            ${{ runner.temp }}/source-job-diagnostic.json.binaries.json.files/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native standalone Guard process contracts
+        shell: bash
+        run: scripts/guard-standalone-oracle/run.sh "$RUNNER_TEMP/guard-standalone.json"
+
+      - name: Upload native standalone Guard evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: guard-standalone-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/guard-standalone.json
+            ${{ runner.temp }}/guard-standalone-controls.json
+            ${{ runner.temp }}/guard-standalone-raw-paths.json
+            ${{ runner.temp }}/guard-standalone-doctor-boundaries.json
+            ${{ runner.temp }}/guard-standalone-config-warnings.json
+            ${{ runner.temp }}/guard-standalone-config-paths.json
+            ${{ runner.temp }}/guard-standalone-config-paths.json.progress.json
+            ${{ runner.temp }}/guard-standalone-binaries/
+          if-no-files-found: error
+          retention-days: 14
+
+
+
+      - name: Native skills render drift and frozen Go baseline
+        shell: bash
+        run: scripts/skills-render-drift/run.sh "$RUNNER_TEMP/skills-render-drift.json"
+
+      - name: Upload native skills render drift evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: skills-render-drift-${{ runner.os }}
+          path: ${{ runner.temp }}/skills-render-drift.json
+          if-no-files-found: error
+          retention-days: 14
+
+
+      - name: Fetch the immutable native Skills comparison parent
+        shell: bash
+        run: git fetch --no-tags origin 01f41906e2e021db3c693ec97617bb701e4dad8a
+
+      - name: Frozen Go and native Windows wide Skills argv acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          owned_root="$RUNNER_TEMP"
+          if command -v cygpath >/dev/null 2>&1; then
+            owned_root="$(cygpath -u "$owned_root")"
+          fi
+          owned="$owned_root/skills-wide-argv"
+          mkdir -p "$owned"
+          go_binary="$owned/symbrain-go.exe"
+          python3 -m unittest discover -s scripts/skills-argv-oracle -p test_build_go.py -v
+          python3 scripts/skills-argv-oracle/build_go.py --prepare-module-cache --out "$go_binary" --receipt "$owned/go-build.json" --go-cache "$(go env GOCACHE)" --module-cache "$(go env GOMODCACHE)"
+          python3 scripts/skills-argv-oracle/compare.py --go "$go_binary" --rust target/debug/symbrain.exe --out "$owned/process.json"
+          for control in flag-input quoted-value normalization; do
+            if python3 scripts/skills-argv-oracle/compare.py --go "$go_binary" --rust target/debug/symbrain.exe --out "$owned/$control.json" --negative-control "$control"; then
+              echo "Skills argv input control unexpectedly passed: $control" >&2
+              exit 1
+            else
+              [[ "$?" == 1 ]]
+            fi
+            python3 scripts/skills-argv-oracle/verify_control.py "$owned/$control.json" "$control"
+          done
+          python3 -m unittest discover -s scripts/skills-argv-oracle -p test_novel.py -v
+          python3 scripts/skills-argv-oracle/build_parent.py --current target/debug/symbrain.exe --target target --saved-current "$owned/current.exe" --parent "$owned/parent-01f.exe" --receipt "$owned/parent-build.json"
+          python3 scripts/skills-argv-oracle/novel.py --go "$go_binary" --rust "$owned/current.exe" --parent "$owned/parent-01f.exe" --parent-proof "$owned/parent-build.json" --out "$owned/novel.json"
+          for control in flag-input parent-input; do
+            if python3 scripts/skills-argv-oracle/novel.py --go "$go_binary" --rust "$owned/current.exe" --parent "$owned/parent-01f.exe" --parent-proof "$owned/parent-build.json" --out "$owned/novel-$control.json" --negative-control "$control"; then
+              echo "Supplemental Skills input control unexpectedly passed: $control" >&2
+              exit 1
+            else
+              [[ "$?" == 1 ]]
+            fi
+            python3 scripts/skills-argv-oracle/verify_novel_control.py "$owned/novel-$control.json" "$control"
+          done
+
+      - name: Preserve actual native Windows Skills argv observations
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: skills-wide-argv-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/skills-wide-argv/*.json
+            ${{ runner.temp }}/skills-wide-argv/*.exe
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Diagnose owned Go MCP startup and native broker phases
+        if: ${{ !cancelled() }}
+        shell: pwsh
+        env:
+          SYMBRAIN_HEALTH_GO_DIAGNOSTIC_BINARY: ${{ runner.temp }}/symbrain-go.exe
+          SYMBRAIN_HEALTH_DIAGNOSTIC_OUTPUT: ${{ runner.temp }}/memory803-health-phases
+        run: |
+          if (!(Test-Path "$env:SYMBRAIN_HEALTH_GO_DIAGNOSTIC_BINARY")) { throw 'Existing actual Go parity binary is missing; diagnostic cannot run' }
+          Get-FileHash "$env:SYMBRAIN_HEALTH_GO_DIAGNOSTIC_BINARY" | Format-List | Out-File "$env:RUNNER_TEMP/memory803-health-binary.txt"
+          cargo test --locked -p symbrain-cli --test health_stdio_windows_diagnostic -- --ignored --nocapture 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP/memory803-health-console.log"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Preserve complete Windows parity and owned MCP phase diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: memory803-parity-diagnostics-general-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/memory803-parity-journal
+            ${{ runner.temp }}/memory803-health-phases
+            ${{ runner.temp }}/memory803-health-console.log
+            ${{ runner.temp }}/memory803-health-binary.txt
+          if-no-files-found: error
+          retention-days: 14
 
       - name: Native Go/Rust activity validation acceptance
         shell: bash
@@ -555,6 +1065,103 @@ jobs:
         with:
           name: usage-fetch-620-${{ runner.os }}
           path: ${{ runner.temp }}/usage-fetch-620.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native usage credential reference and CLI parity
+        shell: bash
+        run: scripts/usage-credential-oracle/run.sh "$RUNNER_TEMP/usage-credential-768.json"
+
+      - name: Preserve usage credential reference process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-credential-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-credential-768.json
+            ${{ runner.temp }}/usage-credential-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native Claude and Codex credential file process parity
+        shell: bash
+        run: bash scripts/usage-provider-files-oracle/run.sh "$RUNNER_TEMP/usage-provider-files-768.json"
+
+      - name: Preserve provider file and filesystem evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-provider-files-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-provider-files-768.json
+            ${{ runner.temp }}/usage-provider-files-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Native read-only Copilot and Kimi file process parity
+        shell: bash
+        run: bash scripts/usage-copilot-kimi-oracle/run.sh "$RUNNER_TEMP/usage-copilot-kimi-768.json"
+      - name: Preserve Copilot and Kimi process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-copilot-kimi-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-copilot-kimi-768.json
+            ${{ runner.temp }}/usage-copilot-kimi-768.evidence
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Native Usage Retry-After SDK and full TLS constructor parity
+        shell: bash
+        run: bash scripts/usage-retry-after-oracle/run.sh "$RUNNER_TEMP/usage-retry-after-768.json"
+      - name: Preserve Retry-After SDK and full TLS process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-retry-after-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-retry-after-768.json
+            ${{ runner.temp }}/usage-retry-after-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+      - name: Native Usage additive long-decimal SDK and full TLS parity
+        shell: bash
+        run: bash scripts/usage-retry-after-oracle/run.sh "$RUNNER_TEMP/usage-retry-decimal-768.json" --decimal
+      - name: Preserve additive long-decimal SDK and TLS evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-retry-decimal-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-retry-decimal-768.json
+            ${{ runner.temp }}/usage-retry-decimal-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+      - name: Native Usage early-argv device and real TLS status parity
+        shell: bash
+        run: bash scripts/usage-next-oracle/run.sh "$RUNNER_TEMP/usage-next-768.json"
+      - name: Preserve Usage successor full process evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-next-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-next-768.json
+            ${{ runner.temp }}/usage-next-768.evidence
+          if-no-files-found: error
+          retention-days: 14
+      - name: Native read-only Hermes file and JWT process parity
+        shell: bash
+        run: scripts/usage-hermes-oracle/run.sh "$RUNNER_TEMP/usage-hermes-768.json"
+
+      - name: Preserve Hermes credential and filesystem evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: usage-hermes-768-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/usage-hermes-768.json
+            ${{ runner.temp }}/usage-hermes-768.evidence
           if-no-files-found: error
           retention-days: 14
 
@@ -631,7 +1238,8 @@ jobs:
 
   # Init is a production Rust path; run the genuine Go comparison on each OS.
   rust-init-native:
-    timeout-minutes: 20
+    # Windows already took ~18 min before #806; the grown workspace now exceeds 20.
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
@@ -830,11 +1438,35 @@ jobs:
         shell: bash
         env:
           PYTHONUTF8: "1"
+          SYMBRAIN_DIFFERENTIAL_JOURNAL: ${{ runner.temp }}/memory803-parity-journal
         run: |
           set -euo pipefail
           go build -ldflags "-X main.version=dev" -o "$RUNNER_TEMP/symbrain-go.exe" ./cmd/symbrain
           cargo build -p symbrain-cli --locked
           python3 scripts/rust-differential.py "$RUNNER_TEMP/symbrain-go.exe" target/debug/symbrain.exe
+      - name: Diagnose owned Go MCP startup and native broker phases
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: pwsh
+        env:
+          SYMBRAIN_HEALTH_GO_DIAGNOSTIC_BINARY: ${{ runner.temp }}/symbrain-go.exe
+          SYMBRAIN_HEALTH_DIAGNOSTIC_OUTPUT: ${{ runner.temp }}/memory803-health-phases
+        run: |
+          if (!(Test-Path "$env:SYMBRAIN_HEALTH_GO_DIAGNOSTIC_BINARY")) { throw 'Existing actual Go parity binary is missing; diagnostic cannot run' }
+          Get-FileHash "$env:SYMBRAIN_HEALTH_GO_DIAGNOSTIC_BINARY" | Format-List | Out-File "$env:RUNNER_TEMP/memory803-health-binary.txt"
+          cargo test --locked -p symbrain-cli --test health_stdio_windows_diagnostic -- --ignored --nocapture 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP/memory803-health-console.log"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Preserve complete Windows parity and owned MCP phase diagnostics
+        if: ${{ always() && matrix.os == 'windows-2025' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: memory803-parity-diagnostics-init-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/memory803-parity-journal
+            ${{ runner.temp }}/memory803-health-phases
+            ${{ runner.temp }}/memory803-health-console.log
+            ${{ runner.temp }}/memory803-health-binary.txt
+          if-no-files-found: error
+          retention-days: 14
       - name: Capture native Windows install oracle
         if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
         shell: bash
@@ -857,6 +1489,20 @@ jobs:
           go run ./scripts/activity-cli-oracle -go-binary "$activity_cli_go_binary" -output "$activity_cli_fixture"
           export SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE="$activity_cli_fixture"
           cargo test --workspace --all-features --locked --no-fail-fast
+      - name: Guard Doctor empty-source and missing-parent boundaries on Windows
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: pwsh
+        run: |
+          cargo test --locked -p symguard-cli --test doctor_config_paths --test doctor_warnings -- --nocapture 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP/guard-doctor-windows-fixtures.log"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Retain native Windows Guard Doctor fixture diagnostics
+        if: ${{ always() && matrix.os == 'windows-2025' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: guard-doctor-windows-fixtures-${{ runner.os }}
+          path: ${{ runner.temp }}/guard-doctor-windows-fixtures.log
+          if-no-files-found: error
+          retention-days: 14
       - name: Retain native init observations
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -1293,14 +1939,6 @@ jobs:
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
-
-      # Same local-path-to-URL patch release.yml applies: harmless no-op
-      # while project.yml pins a URL + exactVersion, but keeps CI working
-      # if a local path ever gets committed by accident.
-      - name: Patch project.yml for CI (replace local path dependency with pinned URL)
-        if: steps.swift.outputs.changed == 'true'
-        run: |
-          perl -i'' -pe "s|path: ../symaira-appkit|url: https://github.com/danieljustus/symaira-appkit\\nexactVersion: 0.6.0|" project.yml
 
       - name: Install XcodeGen
         if: steps.swift.outputs.changed == 'true'

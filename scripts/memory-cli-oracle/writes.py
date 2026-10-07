@@ -10,6 +10,7 @@ from contextlib import closing
 import os
 from pathlib import Path
 import re
+import socket
 import sqlite3
 import subprocess
 import tempfile
@@ -215,9 +216,21 @@ def scenarios():
 def execute(go, rust, report):
     records = []
     # Own the shipped default endpoint before any invalid-config reset can use it.
-    default_server = http.server.HTTPServer(('127.0.0.1', 11434), Embeddings)
-    default_thread = threading.Thread(target=default_server.serve_forever, daemon=True)
-    default_thread.start()
+    class IPv6HTTPServer(http.server.HTTPServer):
+        address_family = socket.AF_INET6
+
+    default_servers = [http.server.HTTPServer(('127.0.0.1', 11434), Embeddings)]
+    try:
+        families = {family for family, *_ in socket.getaddrinfo('localhost', 11434, type=socket.SOCK_STREAM)}
+        if socket.AF_INET6 in families:
+            default_servers.append(IPv6HTTPServer(('::1', 11434), Embeddings))
+    except OSError:
+        for listener in default_servers:
+            listener.server_close()
+        raise
+    default_threads = [threading.Thread(target=listener.serve_forever, daemon=True) for listener in default_servers]
+    for thread in default_threads:
+        thread.start()
     server = http.server.HTTPServer(('127.0.0.1', 0), Embeddings)
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
@@ -289,7 +302,11 @@ def execute(go, rust, report):
                 records.append(dict(case=case, match=pair[0]['comparison']==pair[1]['comparison'], go=pair[0], rust=pair[1]))
     finally:
         server.shutdown(); server.server_close(); thread.join()
-        default_server.shutdown(); default_server.server_close(); default_thread.join()
+        for listener in default_servers:
+            listener.shutdown()
+            listener.server_close()
+        for default_thread in default_threads:
+            default_thread.join()
     document = dict(go_binary_sha256=replay.digest(go.read_bytes()),rust_binary_sha256=replay.digest(rust.read_bytes()), cases=records, passed=sum(row['match'] for row in records), total=len(records))
     save_json(report,document)
     assert document['passed']==document['total'], ('actual Go/native write state differs', [(row['case']['name'],row['match']) for row in records if not row['match']])

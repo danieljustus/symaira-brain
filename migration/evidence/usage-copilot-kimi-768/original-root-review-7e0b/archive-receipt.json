@@ -1,0 +1,72 @@
+{
+  "candidate": "7e0b63359123f0df8a19176313930a24e0dc4c40",
+  "source": "f75993eb5155502a69a249c345c258b4277dece2",
+  "records": [
+    {
+      "source": "/workspace/symaira-usage768-local-files/target/debug/symbrain",
+      "sha256": "4d0417cf0c33f6c664e5988402493c835a8fd1520b78bb76e4aa5e00d3a2b60c",
+      "bytes": 37971016,
+      "archive": "/workspace/oracles/symaira-usage768-local-files-7e0b-binaries/4d0417cf0c33f6c664e5988402493c835a8fd1520b78bb76e4aa5e00d3a2b60c"
+    },
+    {
+      "source": "/workspace/symaira-usage768-local-files/target/debug/deps/symbrain_usage-60919cbc90e243c5",
+      "sha256": "59162e54de03f1b50a1731919566c0640913a0f998d24da6cf217d546073f0ec",
+      "bytes": 18959304,
+      "archive": "/workspace/oracles/symaira-usage768-local-files-7e0b-binaries/59162e54de03f1b50a1731919566c0640913a0f998d24da6cf217d546073f0ec"
+    },
+    {
+      "source": "/workspace/symaira-usage768-local-files/target/debug/deps/symbrain_usage-717883f361629f0c",
+      "sha256": "72013ddbcdc82bbaaf6131bfc6333824fca7794e603962b38163698682b1af35",
+      "bytes": 18765608,
+      "archive": "/workspace/oracles/symaira-usage768-local-files-7e0b-binaries/72013ddbcdc82bbaaf6131bfc6333824fca7794e603962b38163698682b1af35"
+    },
+    {
+      "source": "/workspace/symaira-usage768-local-files/target/debug/deps/credential_reference_tests-2505874e6b9a4758",
+      "sha256": "9efa5ce24928f6a444bd10125a8d185e72e695a959e81829b70b08acb979b581",
+      "bytes": 9726592,
+      "archive": "/workspace/oracles/symaira-usage768-local-files-7e0b-binaries/9efa5ce24928f6a444bd10125a8d185e72e695a959e81829b70b08acb979b581"
+    },
+    {
+      "source": "/workspace/symaira-usage768-local-files/target/debug/deps/credential_reference_tests-3947d25183938a37",
+      "sha256": "0f86bb7bab2ec869960727f972f0da2daf6decaa55492fdb2f30fa4cc9d48946",
+      "bytes": 9564128,
+      "archive": "/workspace/oracles/symaira-usage768-local-files-7e0b-binaries/0f86bb7bab2ec869960727f972f0da2daf6decaa55492fdb2f30fa4cc9d48946"
+    },
+    {
+      "source": "/workspace/symaira-usage768-local-files/target/debug/deps/hermes_credential_tests-5d0f82459209639b",
+      "sha256": "a17d139a8baa261088782b726ff78bb5f2b531e21130e72581e5c2197869c2f3",
+      "bytes": 9774632,
+      "archive": "/workspace/oracles/symaira-usage768-local-files-7e0b-binaries/a17d139a8baa261088782b726ff78bb5f2b531e21130e72581e5c2197869c2f3"
+    },
+    {
+      "source": "/workspace/symaira-usage768-local-files/target/debug/deps/hermes_credential_tests-c837eb94e066b9af",
+      "sha256": "043286921bea43e2d6b10ba4555b0aea485482fbb08d5990a8c0dc0805dbd9f6",
+      "bytes": 9611568,
+      "archive": "/workspace/oracles/symaira-usage768-local-files-7e0b-binaries/043286921bea43e2d6b10ba4555b0aea485482fbb08d5990a8c0dc0805dbd9f6"
+    },
+    {
+      "source": "/tmp/symaira-usage768-f759-root-owner-go",
+      "sha256": "a999c43455b6e2dd4df84a05e93378a51f6a703e134df5a4280b46cfbfb72b89",
+      "bytes": 9472594,
+      "archive": "/workspace/oracles/symaira-usage768-local-files-7e0b-binaries/a999c43455b6e2dd4df84a05e93378a51f6a703e134df5a4280b46cfbfb72b89"
+    },
+    {
+      "source": "/tmp/symaira-usage768-f759-root-owner-probe",
+      "sha256": "c6bd36dde27753b08204eb8bd77547cd81f9d861679af2b4d163584b0248bc29",
+      "bytes": 13348792,
+      "archive": "/workspace/oracles/symaira-usage768-local-files-7e0b-binaries/c6bd36dde27753b08204eb8bd77547cd81f9d861679af2b4d163584b0248bc29"
+    },
+    {
+      "source": "/tmp/symaira-usage768-f759-root-parent-cli",
+      "sha256": "9aed2a28060fe84f945db937def4ed10c83f13b15a008d4720ebebf3cd853f38",
+      "bytes": 38031360,
+      "archive": "/workspace/oracles/symaira-usage768-local-files-7e0b-binaries/9aed2a28060fe84f945db937def4ed10c83f13b15a008d4720ebebf3cd853f38"
+    },
+    {
+      "source": "/workspace/symaira-usage768-local-files/target/debug/deps/libsymbrain_usage-bc5b4536881a808f.rlib",
+      "sha256": "756674bd6730e766f60371dc32c94a568e18d4cab44e3b0ea2d0ea41268a5107",
+      "bytes": 5068230,
+      "archive": "/workspace/oracles/symaira-usage768-local-files-7e0b-binaries/756674bd6730e766f60371dc32c94a568e18d4cab44e3b0ea2d0ea41268a5107"
+    }
+  ]
+}

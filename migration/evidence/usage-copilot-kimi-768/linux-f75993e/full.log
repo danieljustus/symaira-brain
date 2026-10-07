@@ -1,0 +1,56 @@
+Go-only local/source baseline: 97 cases
+Copilot/Kimi source-bound cases: 89
+Go-only local/source baseline: 97 cases
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.025s
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.018s
+   Compiling symbrain-usage v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-usage)
+    Finished `test` profile [unoptimized] target(s) in 2.08s
+     Running unittests src/lib.rs (target/debug/deps/symbrain_usage-717883f361629f0c)
+
+running 1 test
+test providers::provider_config::copilot_kimi_oracle_tests::copilot_kimi_oracle_matches_fresh_go ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 66 filtered out; finished in 0.06s
+
+   Compiling symbrain-usage v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-usage)
+   Compiling symbrain-gateway v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-gateway)
+   Compiling symbrain-cli v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-cli)
+    Finished `dev` profile [unoptimized] target(s) in 3.61s
+Copilot/Kimi CLI oracle: 111 byte/exit matches
+Provider file cases: 86 Claude: 46 Codex: 40
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.024s
+    Finished `test` profile [unoptimized] target(s) in 0.06s
+     Running unittests src/lib.rs (target/debug/deps/symbrain_usage-717883f361629f0c)
+
+running 1 test
+test providers::provider_config::provider_file_oracle_tests::provider_files_oracle_matches_fresh_go ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 66 filtered out; finished in 0.07s
+
+    Finished `dev` profile [unoptimized] target(s) in 0.11s
+Provider file CLI oracle: 151 byte/exit matches
+Hermes source-bound cases: 96
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.024s
+   Compiling symbrain-usage v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-usage)
+    Finished `test` profile [unoptimized] target(s) in 1.13s
+     Running tests/hermes_credential_tests.rs (target/debug/deps/hermes_credential_tests-c837eb94e066b9af)
+
+running 1 test
+test usage_hermes_768_matches_fresh_go_file_and_jwt_contracts ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+    Finished `dev` profile [unoptimized] target(s) in 0.12s
+Hermes CLI oracle: 104/104 byte/exit matches
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.028s
+   Compiling symbrain-usage v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-usage)
+    Finished `test` profile [unoptimized] target(s) in 0.35s
+     Running tests/credential_reference_tests.rs (target/debug/deps/credential_reference_tests-3947d25183938a37)
+
+running 1 test
+test usage_credential_768_matches_fresh_go_constructors_and_requests ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s
+
+    Finished `dev` profile [unoptimized] target(s) in 0.11s
+usage credential CLI oracle: 110/110 byte/exit matches

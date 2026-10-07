@@ -1,0 +1,14 @@
+{
+  "go_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "source_dirty": false,
+  "probe_sha256": "42600054a72f72c1bdd29bfa1e12a57af1d21a3c64fb0c9d865d89d5c0ab49bd",
+  "exit": 0,
+  "stdout": "=== RUN   TestPortProbeFreshSnapshotDowngrade\n2026/10/03 20:50:00 WARN re-saving encrypted state without an encryption key state=existing previous_key_source=environment\nDOWNGRADE_OBSERVATIONS={\"fresh_snapshot_save_success\":true,\"loaded_key_source\":\"none\",\"no_key_load_success\":true,\"retained_bytes_unchanged\":false}\n--- PASS: TestPortProbeFreshSnapshotDowngrade (0.00s)\nPASS\nok  \tgithub.com/danieljustus/symaira-browse/internal/state\t0.002s\n",
+  "stderr": "",
+  "observations": {
+    "fresh_snapshot_save_success": true,
+    "loaded_key_source": "none",
+    "no_key_load_success": true,
+    "retained_bytes_unchanged": false
+  }
+}

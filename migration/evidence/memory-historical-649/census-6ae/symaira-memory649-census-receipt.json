@@ -1,0 +1,2282 @@
+{
+  "canonical_current_store_source": "6ae73a7eef3442e2b4211a56043941339fb5a1d6",
+  "actual_constructor_binary_source": "7ca3bed0dfc93bbd8e2d7d4b920a4d01895804f1",
+  "combined_read_only_Doctor_source": "cd9cefa5a2014efe40679d411a3cbd491a9aca65",
+  "frozen_Go_revision": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "no_builds": true,
+  "no_target_access": true,
+  "no_operator_state": true,
+  "no_paid_endpoints": true,
+  "no_default_or_embedding_port_used": true,
+  "no_workspace_source_edits": true,
+  "actual_complete_prefix_pairs": 37,
+  "actual_Go_constructor_success": 37,
+  "actual_native_constructor_success": 35,
+  "actual_native_failure_prefixes": [
+    "020_entity_relations",
+    "021_context_profiles"
+  ],
+  "actual_original_partial_pairs": 20,
+  "original_failure": "Fixture insertion violated real post022 unique relation-ID constraint; original runner/traceback/results remain unchanged. Corrected separate complete recipe inserts valid IDs immediately after022.",
+  "actual_reopen_pairs": 4,
+  "actual_reopens": 8,
+  "actual_SQL_invariant_pairs": 2,
+  "SQL_query_engine": "Python sqlite3 3.53.1",
+  "constructor_SQL_engines": "Actual frozen Go modernc and archived native bundled SQLite; no compiled Go domain API parity claim for subsequent SQL probes.",
+  "native_Go_binary_bindings": {
+    "source": "7ca3bed0dfc93bbd8e2d7d4b920a4d01895804f1",
+    "receipt": "/workspace/oracles/symaira-memory758-cli-fixes-idle-binaries/receipt.json",
+    "receipt_sha256": "6b9c783333e565144cef45d63f97ce049a2c39f177f6d4b18a68b4e4a777b211",
+    "original_binding": {
+      "original_path": "/workspace/symaira-memory758-cli-fixes/target/debug/symbrain",
+      "sha256": "423191f6451a0f89a6f976e57c320dc3cf2ae6f7f7efcb8656189d1d3fd62203"
+    },
+    "archive": "/workspace/oracles/symaira-memory758-cli-fixes-idle-binaries/423191f6451a0f89a6f976e57c320dc3cf2ae6f7f7efcb8656189d1d3fd62203.gz",
+    "archive_sha256": "03c50d833ec2f67ba8c25f4657c00eebed57d2b160f3597f1f92381af2a1f11f",
+    "restored": "/tmp/symaira-memory649-census/rust-cli",
+    "restored_sha256": "423191f6451a0f89a6f976e57c320dc3cf2ae6f7f7efcb8656189d1d3fd62203"
+  },
+  "source_surfaces": {
+    "exact_constructor_source_identity": {
+      "rust/symbrain-memory/src/migration.rs": {
+        "6ae73a7eef3442e2b4211a56043941339fb5a1d6": "837e1bfb55d02d569bc708beea2b9d460e6d2e751a73236425d5624e5911f74c",
+        "7ca3bed0dfc93bbd8e2d7d4b920a4d01895804f1": "837e1bfb55d02d569bc708beea2b9d460e6d2e751a73236425d5624e5911f74c",
+        "cd9cefa5a2014efe40679d411a3cbd491a9aca65": "837e1bfb55d02d569bc708beea2b9d460e6d2e751a73236425d5624e5911f74c"
+      },
+      "rust/symbrain-memory/src/schema.rs": {
+        "6ae73a7eef3442e2b4211a56043941339fb5a1d6": "58f2e06a2cc0bea98761d5078783608698c0401794864d1a1e77b2cb3f0edf8b",
+        "7ca3bed0dfc93bbd8e2d7d4b920a4d01895804f1": "58f2e06a2cc0bea98761d5078783608698c0401794864d1a1e77b2cb3f0edf8b",
+        "cd9cefa5a2014efe40679d411a3cbd491a9aca65": "58f2e06a2cc0bea98761d5078783608698c0401794864d1a1e77b2cb3f0edf8b"
+      },
+      "rust/symbrain-memory/src/store.rs": {
+        "6ae73a7eef3442e2b4211a56043941339fb5a1d6": "97b6ca66ff514bce6c037e7330c083c69e92a887d15c53d391b1d6ac2a9a8fd7",
+        "7ca3bed0dfc93bbd8e2d7d4b920a4d01895804f1": "97b6ca66ff514bce6c037e7330c083c69e92a887d15c53d391b1d6ac2a9a8fd7",
+        "cd9cefa5a2014efe40679d411a3cbd491a9aca65": "97b6ca66ff514bce6c037e7330c083c69e92a887d15c53d391b1d6ac2a9a8fd7"
+      }
+    },
+    "actual_native_binary_source": "7ca3bed0dfc93bbd8e2d7d4b920a4d01895804f1",
+    "canonical_current_store_source": "6ae73a7eef3442e2b4211a56043941339fb5a1d6",
+    "combined_schema_inspector_source": "cd9cefa5a2014efe40679d411a3cbd491a9aca65",
+    "frozen_Go_revision": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+    "frozen_Go_and_corekit_paths_sha256": {
+      "/workspace/oracles/daemon772-go-source/internal/memory/db/db.go": "124f7bd8e6110f93a283a75d04bcd2a3ee91108235965d3740e0d3a6d30fae78",
+      "/workspace/oracles/daemon772-go-source/internal/memory/db/migrations.go": "57102648883b28cf7e7830ada870bbe103727e0361968cd5621341ed7e7a3298",
+      "/home/agent/go/pkg/mod/github.com/danieljustus/symaira-corekit@v0.17.0/sqlitekit/sqlitekit.go": "b54e235b355f24681b22344afc3fb1e2d3e0b6690d2f1d8bf3b576217873065d"
+    },
+    "read_only_inspector_diff_files": [
+      "rust/symbrain-memory/src/lib.rs",
+      "rust/symbrain-memory/src/schema_inspection.rs"
+    ],
+    "no_workspace_source_edits": true
+  },
+  "proposal": "/tmp/symaira-memory649-census-v2/historical-memory-repair-649-proposal.md",
+  "proposal_sha256": "71fcd7338418b5113a2789e91c63d1d4ced280e550c4ac7e117545c1a04607d9",
+  "retained_files": [
+    {
+      "original": "/tmp/symaira-memory649-census/binary.json",
+      "bytes": 810,
+      "sha256": "bb5db5366a8c1615f1c33a84b9f3c9a3eb3ea3f8f9cfa9db073081e98f832607",
+      "retained": "/tmp/symaira-memory649-census-retained/bb5db5366a8c1615f1c33a84b9f3c9a3eb3ea3f8f9cfa9db073081e98f832607.gz",
+      "retained_sha256": "5dffd9c02412785e6a58a28fa731d97d759132b5c8d98583e4e38523ea44b596"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/census.log",
+      "bytes": 658,
+      "sha256": "93e49840659594fa1213f73a8daaaaa8d1fcc44aae8d4dba90b00541a00bcb1b",
+      "retained": "/tmp/symaira-memory649-census-retained/93e49840659594fa1213f73a8daaaaa8d1fcc44aae8d4dba90b00541a00bcb1b.gz",
+      "retained_sha256": "8c9cfb8f9edad0d11fd97c574b4da58c11a866022acf4390d40d4fd2b589752c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/census.py",
+      "bytes": 6760,
+      "sha256": "dade4ef0c5e671a2a6fa652a20439817570f512457020763e9a8ce1c7be8bbcc",
+      "retained": "/tmp/symaira-memory649-census-retained/dade4ef0c5e671a2a6fa652a20439817570f512457020763e9a8ce1c7be8bbcc.gz",
+      "retained_sha256": "2d53310ec54b1f770bebc5a8de3ee58d8fdc1d338cbddba90a64618e87b0e324"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-001_init/go/memory.db",
+      "bytes": 434176,
+      "sha256": "78a91f494b25dab63a808efcf7040d7317d7b0a6de05e698536246d318036860",
+      "retained": "/tmp/symaira-memory649-census-retained/78a91f494b25dab63a808efcf7040d7317d7b0a6de05e698536246d318036860.gz",
+      "retained_sha256": "691f6efc383d0d18d43f77e1f36f86539da8fa0c965d13b8c71e0f7a9ea942fc"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-001_init/go/result.json",
+      "bytes": 83795,
+      "sha256": "a486a5e04a0b5846b5a9a2816884b27f7a91839dd344054aa9b74511d2e4ede0",
+      "retained": "/tmp/symaira-memory649-census-retained/a486a5e04a0b5846b5a9a2816884b27f7a91839dd344054aa9b74511d2e4ede0.gz",
+      "retained_sha256": "c7d2941ca88d5a756f895d08ea1b53f66ce6a42d67f142124cfd9b6018391e45"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-001_init/native/memory.db",
+      "bytes": 348160,
+      "sha256": "b4d257bcb58401c398d0433bfc1f2d50485f8125ee6270e7ad7b19af1ee349c8",
+      "retained": "/tmp/symaira-memory649-census-retained/b4d257bcb58401c398d0433bfc1f2d50485f8125ee6270e7ad7b19af1ee349c8.gz",
+      "retained_sha256": "e85a5cc4a3acce41d769486a04a3f8226b8935d9bb77ecb6c72bd48a583c2982"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-001_init/native/result.json",
+      "bytes": 75834,
+      "sha256": "a35bff4acdf1b53ac1b967c95d751a3b8819d7e9fb7ac9a3330bbbc30f445f06",
+      "retained": "/tmp/symaira-memory649-census-retained/a35bff4acdf1b53ac1b967c95d751a3b8819d7e9fb7ac9a3330bbbc30f445f06.gz",
+      "retained_sha256": "8ed2bbfff27a51d2f4b37918e4024342fc8506a1c4b3cdd836c270ca29c35ad8"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-001_init/seed.db",
+      "bytes": 40960,
+      "sha256": "9d62dad5c37bd5c5f29eab1e643fa1b8cf450c329c702ca42716474c52d8af37",
+      "retained": "/tmp/symaira-memory649-census-retained/9d62dad5c37bd5c5f29eab1e643fa1b8cf450c329c702ca42716474c52d8af37.gz",
+      "retained_sha256": "144e39391291b393420573e09c6c45725c7f0aad7eedc601a5fabdaf19f3ce63"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-002_vector_index/go/memory.db",
+      "bytes": 434176,
+      "sha256": "a4d67d53b4d4ba1f76076f27a8b618e911bd47d7945f7692ce3da5109805d7fc",
+      "retained": "/tmp/symaira-memory649-census-retained/a4d67d53b4d4ba1f76076f27a8b618e911bd47d7945f7692ce3da5109805d7fc.gz",
+      "retained_sha256": "b4512afe243a6c8c0a34a8d329e0165066609b61583fb118afb1db5ed0321d15"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-002_vector_index/go/result.json",
+      "bytes": 84622,
+      "sha256": "51d2edd557e98214e89421a27e85a501345bcb135be9996408af0a474c044ea7",
+      "retained": "/tmp/symaira-memory649-census-retained/51d2edd557e98214e89421a27e85a501345bcb135be9996408af0a474c044ea7.gz",
+      "retained_sha256": "78215816f529f72215c2142fe0a1b4dc015b65d56486fe527cf9d1ad2ee94eee"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-002_vector_index/native/memory.db",
+      "bytes": 348160,
+      "sha256": "a29b17038187bbbdaffb082e74e30308178439917f1e719d4cdcfd70d65926f7",
+      "retained": "/tmp/symaira-memory649-census-retained/a29b17038187bbbdaffb082e74e30308178439917f1e719d4cdcfd70d65926f7.gz",
+      "retained_sha256": "60a3d6e2b55f5e01489dad94adf82fcef42c883a8fb6196c1cd4ea5ae4681b95"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-002_vector_index/native/result.json",
+      "bytes": 76661,
+      "sha256": "c13b73f38b2b9d5848df126365d906ba767450c1ccf81633edf6dbd2f8111a1a",
+      "retained": "/tmp/symaira-memory649-census-retained/c13b73f38b2b9d5848df126365d906ba767450c1ccf81633edf6dbd2f8111a1a.gz",
+      "retained_sha256": "374662ecbb17f394df0435650e7799ea4a0da335fe622dde08984133f84df304"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-002_vector_index/seed.db",
+      "bytes": 45056,
+      "sha256": "7e79bb2002b6cee83047cc6898d09ec1e2f185811b9bc045607853662c029b78",
+      "retained": "/tmp/symaira-memory649-census-retained/7e79bb2002b6cee83047cc6898d09ec1e2f185811b9bc045607853662c029b78.gz",
+      "retained_sha256": "4962ffa6bfb02cf37fb7b7a5ff7ce799d0e6a51105a12b792071e6fcff7336e6"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-003_jwt_revocations/go/memory.db",
+      "bytes": 434176,
+      "sha256": "e9e1d9c077a9e0fbe18522c3bbecd2bf221a85d62e22fd0dc5074f7f202bff25",
+      "retained": "/tmp/symaira-memory649-census-retained/e9e1d9c077a9e0fbe18522c3bbecd2bf221a85d62e22fd0dc5074f7f202bff25.gz",
+      "retained_sha256": "fdbe44fff4dfd202638ac4bb529a1540068956ad648259ef82a23b08038a9740"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-003_jwt_revocations/go/result.json",
+      "bytes": 86034,
+      "sha256": "17ef3a3e21fb882f08898210e75b52f9d9409c293933de81c0aaab439b5ae560",
+      "retained": "/tmp/symaira-memory649-census-retained/17ef3a3e21fb882f08898210e75b52f9d9409c293933de81c0aaab439b5ae560.gz",
+      "retained_sha256": "67a978e1ff469c12595c63c9ea8c82ca8729cd55615e2209e8d604913deaa4b1"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-003_jwt_revocations/native/memory.db",
+      "bytes": 352256,
+      "sha256": "af7c63073430edbe1d9901a0c4ae3674e7409803d29c1446f86e72903e01bade",
+      "retained": "/tmp/symaira-memory649-census-retained/af7c63073430edbe1d9901a0c4ae3674e7409803d29c1446f86e72903e01bade.gz",
+      "retained_sha256": "4466fa5957456628b426edd03d02837d701c89e73dff199c61ebe28fe17f3c08"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-003_jwt_revocations/native/result.json",
+      "bytes": 78371,
+      "sha256": "b048a7a6d1dafcd2390ae7969da74be372fd7c38e65548909fbf8727310f01eb",
+      "retained": "/tmp/symaira-memory649-census-retained/b048a7a6d1dafcd2390ae7969da74be372fd7c38e65548909fbf8727310f01eb.gz",
+      "retained_sha256": "e97f8e190563596255cd50265fb4dd63d1feee7f9ff2440f9b550f71a56cd9a2"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-003_jwt_revocations/seed.db",
+      "bytes": 57344,
+      "sha256": "0cf42c6d282cb06f55bafd56d97a91fc59ff03b1b05003bb63722fefc22ab001",
+      "retained": "/tmp/symaira-memory649-census-retained/0cf42c6d282cb06f55bafd56d97a91fc59ff03b1b05003bb63722fefc22ab001.gz",
+      "retained_sha256": "8bd50f0a5ee261a65d70a6c732534354ee62b17ce520268c9369725754242b83"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-004_sync_state/go/memory.db",
+      "bytes": 434176,
+      "sha256": "69e30fa5a0de34cde0a71b455529f204efa6c59b1627d26cb096b89f21b1557f",
+      "retained": "/tmp/symaira-memory649-census-retained/69e30fa5a0de34cde0a71b455529f204efa6c59b1627d26cb096b89f21b1557f.gz",
+      "retained_sha256": "212ba182285611067452d645a6c7f9217bcd6752661b9af91d75bf17dae7b5c6"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-004_sync_state/go/result.json",
+      "bytes": 87074,
+      "sha256": "36a7f7fe35fcc79bb7bccb046ee2c06d46436b81b56924de8d9af9d585123ab8",
+      "retained": "/tmp/symaira-memory649-census-retained/36a7f7fe35fcc79bb7bccb046ee2c06d46436b81b56924de8d9af9d585123ab8.gz",
+      "retained_sha256": "ee710f1ef752d03d1bccd32e8a7ba6d7670b4032ce900b193fb6db0c2684a7c2"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-004_sync_state/native/memory.db",
+      "bytes": 352256,
+      "sha256": "35b868317be719985ed9df65a5a543338961f670b1b0eb6bfda15efa28423f34",
+      "retained": "/tmp/symaira-memory649-census-retained/35b868317be719985ed9df65a5a543338961f670b1b0eb6bfda15efa28423f34.gz",
+      "retained_sha256": "99e400b3ad3d88320082968abf6223054be29d2b887f281bea0417b82d354163"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-004_sync_state/native/result.json",
+      "bytes": 79417,
+      "sha256": "154cf91c5ca36f313268d635b564fd5e90ce195f3995871421e48a0f5ece09ac",
+      "retained": "/tmp/symaira-memory649-census-retained/154cf91c5ca36f313268d635b564fd5e90ce195f3995871421e48a0f5ece09ac.gz",
+      "retained_sha256": "9710578ac7a28091b6cc410e050c25acf21b80ebb38fa87dac2607180b9b5c6e"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-004_sync_state/seed.db",
+      "bytes": 65536,
+      "sha256": "ccb91bbe93865d4da1fa7662ac3fa5a035301b6244bbaa103a9efb7967aebc11",
+      "retained": "/tmp/symaira-memory649-census-retained/ccb91bbe93865d4da1fa7662ac3fa5a035301b6244bbaa103a9efb7967aebc11.gz",
+      "retained_sha256": "26375ffecc5776c41ad3cca6bad4406e5903c84711b37c3d03ce8366fa8257a7"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-005_indexes/go/memory.db",
+      "bytes": 434176,
+      "sha256": "5d94e7d7bfbcc5f81a3fa3723152bed0b4e727e40a63e224e400b6847a9135e8",
+      "retained": "/tmp/symaira-memory649-census-retained/5d94e7d7bfbcc5f81a3fa3723152bed0b4e727e40a63e224e400b6847a9135e8.gz",
+      "retained_sha256": "3259579fa4a658052e9e92133be3d7b3c3903fa888c3a68dc944154fac5994ac"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-005_indexes/go/result.json",
+      "bytes": 87727,
+      "sha256": "210e6a49ffec2021c985e8d8f3354a2a5948ae9aa39894b12c80704e5d7ba7dd",
+      "retained": "/tmp/symaira-memory649-census-retained/210e6a49ffec2021c985e8d8f3354a2a5948ae9aa39894b12c80704e5d7ba7dd.gz",
+      "retained_sha256": "a3a1f3a537c8453ff01649eb9c22951d6592712b0e1d726756dff90929da341a"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-005_indexes/native/memory.db",
+      "bytes": 352256,
+      "sha256": "e51dae02c072325e2128db152a6ce0c02f475985c0752d06b6d6cb0930ae90a6",
+      "retained": "/tmp/symaira-memory649-census-retained/e51dae02c072325e2128db152a6ce0c02f475985c0752d06b6d6cb0930ae90a6.gz",
+      "retained_sha256": "133eb876eccc7f8f155e183b3085a3ec9ce70bd6cef1fcd65e1fe8aa1de8cf00"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-005_indexes/native/result.json",
+      "bytes": 80070,
+      "sha256": "ce818ee4df0508e35cf098aced7ae83eab9a08a0bac3aac53d512b46b2407097",
+      "retained": "/tmp/symaira-memory649-census-retained/ce818ee4df0508e35cf098aced7ae83eab9a08a0bac3aac53d512b46b2407097.gz",
+      "retained_sha256": "5eac20fd281af2931c77be376966418f735398d3b552352839f0cc9489066ad9"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-005_indexes/seed.db",
+      "bytes": 73728,
+      "sha256": "9e86d9b525334d582f3f96f7937a5ec2766eeb3b690b79c3ab7ce1eaf9710dc1",
+      "retained": "/tmp/symaira-memory649-census-retained/9e86d9b525334d582f3f96f7937a5ec2766eeb3b690b79c3ab7ce1eaf9710dc1.gz",
+      "retained_sha256": "cec2de7871368e2c3b76347459ca259f9f43ad019033ab92b942e3fb5f7d98a8"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-006_provenance/go/memory.db",
+      "bytes": 434176,
+      "sha256": "40aba3873360b0a23d34e615b9b84873be535bf07651348a8114535ac41c39ec",
+      "retained": "/tmp/symaira-memory649-census-retained/40aba3873360b0a23d34e615b9b84873be535bf07651348a8114535ac41c39ec.gz",
+      "retained_sha256": "8b3b4afd7b17b5fb86bb37f2e4c642a0fb16a985fa86bb141b150c1d9c3ae1eb"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-006_provenance/go/result.json",
+      "bytes": 89641,
+      "sha256": "307b88e32747787546b429bf4fc787cd07014bd1e0f59ecde902e6509dec930e",
+      "retained": "/tmp/symaira-memory649-census-retained/307b88e32747787546b429bf4fc787cd07014bd1e0f59ecde902e6509dec930e.gz",
+      "retained_sha256": "27e75321fbc39aea38bb2f86462613333714707b1e478b7e152740c4513aa7b8"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-006_provenance/native/memory.db",
+      "bytes": 352256,
+      "sha256": "ff02c93a0380e953fad249e147b351be3498ec741ceebe0a93e3238e2c930215",
+      "retained": "/tmp/symaira-memory649-census-retained/ff02c93a0380e953fad249e147b351be3498ec741ceebe0a93e3238e2c930215.gz",
+      "retained_sha256": "19c8c3f76040bf0fe63dc9f41ea4ae4b8469895ab5d47da04413987c3c9e0ba4"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-006_provenance/native/result.json",
+      "bytes": 82038,
+      "sha256": "acdd48b17b358d75ae5c2cf7b26b0c2ba5437bf253c2f37f59b9054bedc2ed25",
+      "retained": "/tmp/symaira-memory649-census-retained/acdd48b17b358d75ae5c2cf7b26b0c2ba5437bf253c2f37f59b9054bedc2ed25.gz",
+      "retained_sha256": "aa97b7ff82bda7a4a61d2809abaf63561746ac4f24dea30cdba6fa3bcdcf2778"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-006_provenance/seed.db",
+      "bytes": 77824,
+      "sha256": "842ccb52b7115f4795d17952e414131914cd440c2a3599eca6662b1b92d71dd1",
+      "retained": "/tmp/symaira-memory649-census-retained/842ccb52b7115f4795d17952e414131914cd440c2a3599eca6662b1b92d71dd1.gz",
+      "retained_sha256": "6ff4d48deb28c37f1f7e15311b8337469093107d245a8851240b7ad9cd5ecba8"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-007_profiles/go/memory.db",
+      "bytes": 434176,
+      "sha256": "b36c869cbe0ba285246eb96327d2cf0f696f3d2956b2f41c7ad5d93772f6ce0d",
+      "retained": "/tmp/symaira-memory649-census-retained/b36c869cbe0ba285246eb96327d2cf0f696f3d2956b2f41c7ad5d93772f6ce0d.gz",
+      "retained_sha256": "68b4d6f580854f1a4feb7cc6b6385c4221a7f88e4fa993316f79a8ba3f233671"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-007_profiles/go/result.json",
+      "bytes": 92101,
+      "sha256": "78212d619deb18311becc38042eb5f34bc794f276cf8018648c2b05ed60bd61b",
+      "retained": "/tmp/symaira-memory649-census-retained/78212d619deb18311becc38042eb5f34bc794f276cf8018648c2b05ed60bd61b.gz",
+      "retained_sha256": "5ce46d11c7319fab660bcf54f23dbdf05eec9f226a2158f855bfa601c44dea87"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-007_profiles/native/memory.db",
+      "bytes": 352256,
+      "sha256": "f607ce0d619b9efd25214e1fe1c60af5d9a8efd0ee51bbdbb6d9c3f9a5e02613",
+      "retained": "/tmp/symaira-memory649-census-retained/f607ce0d619b9efd25214e1fe1c60af5d9a8efd0ee51bbdbb6d9c3f9a5e02613.gz",
+      "retained_sha256": "29d483c93074d29de28c6299a38f601d8e0b1cf38f9dc66d300f71459311a12b"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-007_profiles/native/result.json",
+      "bytes": 84576,
+      "sha256": "09e25f477ace37b1a555b650f60cd694f50709d881ce9d9ae298418a72382ce0",
+      "retained": "/tmp/symaira-memory649-census-retained/09e25f477ace37b1a555b650f60cd694f50709d881ce9d9ae298418a72382ce0.gz",
+      "retained_sha256": "e2d86eea3b2dc8474cc73162adeb4ecd98dc0baa650c725c34aa2f7b3e7ec912"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-007_profiles/seed.db",
+      "bytes": 90112,
+      "sha256": "e717d20293c55c29c14da62da01d04a24a8dd571e5ca14a610ddd3d38c271acf",
+      "retained": "/tmp/symaira-memory649-census-retained/e717d20293c55c29c14da62da01d04a24a8dd571e5ca14a610ddd3d38c271acf.gz",
+      "retained_sha256": "19a51d8fcdbff7dd3d1beea1df3f22dc4abebfc472146d1ffd691c8767e98123"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-008_entities/go/memory.db",
+      "bytes": 434176,
+      "sha256": "d3fee2e143900e5025b416000f681f60ca0d79c8456fd6fac7c473eed6b0475d",
+      "retained": "/tmp/symaira-memory649-census-retained/d3fee2e143900e5025b416000f681f60ca0d79c8456fd6fac7c473eed6b0475d.gz",
+      "retained_sha256": "be58cb25f7dcef23c019027f59e9d9c15edac376281035e729bd9946b1aeb00a"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-008_entities/go/result.json",
+      "bytes": 96794,
+      "sha256": "1c8a11fbe862cb9c2c810f3cb6dbdb8e0ab84d85e1ede80a903d72341eb26a2b",
+      "retained": "/tmp/symaira-memory649-census-retained/1c8a11fbe862cb9c2c810f3cb6dbdb8e0ab84d85e1ede80a903d72341eb26a2b.gz",
+      "retained_sha256": "e6466f6809b9d59bfe8f0163ec971b59003913e464149c7d518e362b8b348c11"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-008_entities/native/memory.db",
+      "bytes": 356352,
+      "sha256": "dc32e6b7932e5c9f6c81302a685cae903203f1a4e7db045118756b9d2ef81ecd",
+      "retained": "/tmp/symaira-memory649-census-retained/dc32e6b7932e5c9f6c81302a685cae903203f1a4e7db045118756b9d2ef81ecd.gz",
+      "retained_sha256": "143705a24cdba9c24460a135175030b0972b9ff426be08483b6152dfbf9079c2"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-008_entities/native/result.json",
+      "bytes": 89668,
+      "sha256": "94babbbe0ff70b5961cf76f7bc3ca8ff59b0ef79982e2fc9828c2aeded59107c",
+      "retained": "/tmp/symaira-memory649-census-retained/94babbbe0ff70b5961cf76f7bc3ca8ff59b0ef79982e2fc9828c2aeded59107c.gz",
+      "retained_sha256": "ea68897062da29b7d3c9ee4fec25bc5bbe726cded6b9b69d45d4e73d6a5c179b"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-008_entities/seed.db",
+      "bytes": 114688,
+      "sha256": "1e558e8c01a881697f8b1b05717829bc2b7f6e29a04f72e59de5d67a2fad68b5",
+      "retained": "/tmp/symaira-memory649-census-retained/1e558e8c01a881697f8b1b05717829bc2b7f6e29a04f72e59de5d67a2fad68b5.gz",
+      "retained_sha256": "d6d57ad4628f20ee17aa0ec62e3a001e0d14728565492f8bc5bbffa69166f57c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-009_consolidation/go/memory.db",
+      "bytes": 434176,
+      "sha256": "4061d88d42bf4f9584fe7685f9c70d7e007cbd9d8c625077f2e5544c73d90fd4",
+      "retained": "/tmp/symaira-memory649-census-retained/4061d88d42bf4f9584fe7685f9c70d7e007cbd9d8c625077f2e5544c73d90fd4.gz",
+      "retained_sha256": "58173405f2b4a24f14bde12ed843a689fc291c865d83abe13dcbc3a053da913f"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-009_consolidation/go/result.json",
+      "bytes": 98251,
+      "sha256": "5dc5b92dfd41123bfd34eb193a69f1791cc1606a816f03265778217587d7f314",
+      "retained": "/tmp/symaira-memory649-census-retained/5dc5b92dfd41123bfd34eb193a69f1791cc1606a816f03265778217587d7f314.gz",
+      "retained_sha256": "33c0fc7da88bf0370f68561cded1ca640cd85acb47bb908e176e4b13a4f06a07"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-009_consolidation/native/memory.db",
+      "bytes": 356352,
+      "sha256": "9e67991f52872d9cdf019f4f48cfd95ed4fbc7b31e8969501d91d5b2ccea1133",
+      "retained": "/tmp/symaira-memory649-census-retained/9e67991f52872d9cdf019f4f48cfd95ed4fbc7b31e8969501d91d5b2ccea1133.gz",
+      "retained_sha256": "2e61fe0b8dc624c20e0ddc6810f087cb95324837be35c2732b4324aca84a7529"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-009_consolidation/native/result.json",
+      "bytes": 91125,
+      "sha256": "87401d2b4f749588e824c4409d9dd55e1c838bde0ef743b6ab28710e7d373291",
+      "retained": "/tmp/symaira-memory649-census-retained/87401d2b4f749588e824c4409d9dd55e1c838bde0ef743b6ab28710e7d373291.gz",
+      "retained_sha256": "645b216c9765f0fa94ffe6da52ae8ceff7888604c11755c4f4d7b67ee3b2284f"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-009_consolidation/seed.db",
+      "bytes": 126976,
+      "sha256": "551af238a53cbb16407f98d77e94c91a6f5021c4c8c64531628beac954abcca2",
+      "retained": "/tmp/symaira-memory649-census-retained/551af238a53cbb16407f98d77e94c91a6f5021c4c8c64531628beac954abcca2.gz",
+      "retained_sha256": "01f6874269a47ae627b9cf96d50551654f5e6a912c708b5a4ecaa52dd4e15401"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-010_import_state/go/memory.db",
+      "bytes": 434176,
+      "sha256": "135a8aa2d5ad18c5c6152f40f1ed3ddd2ca71a3b5c4dfbf1c375c554059f9b53",
+      "retained": "/tmp/symaira-memory649-census-retained/135a8aa2d5ad18c5c6152f40f1ed3ddd2ca71a3b5c4dfbf1c375c554059f9b53.gz",
+      "retained_sha256": "824297d2a5775348daa644d48d2c23417c86bf8053269dc8720b0d4f78553981"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-010_import_state/go/result.json",
+      "bytes": 100330,
+      "sha256": "dd6734b0b86a977e4b7a70191769c800d729f96da84769f91647d2e700e20d5a",
+      "retained": "/tmp/symaira-memory649-census-retained/dd6734b0b86a977e4b7a70191769c800d729f96da84769f91647d2e700e20d5a.gz",
+      "retained_sha256": "79e5e67dc970bde97d18df0052dc53d8fbed0101794fe58d6504a38a343ff946"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-010_import_state/native/memory.db",
+      "bytes": 364544,
+      "sha256": "bc29e54feb975fc6a232431a8c381f9f8c007c24229baae95ec70e4bc04c0896",
+      "retained": "/tmp/symaira-memory649-census-retained/bc29e54feb975fc6a232431a8c381f9f8c007c24229baae95ec70e4bc04c0896.gz",
+      "retained_sha256": "cce285ddd2c3be37156681b365ed49653549a945ce7d562b40df2407a75f12f5"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-010_import_state/native/result.json",
+      "bytes": 93809,
+      "sha256": "271108e3f2d9422954e28edabfbb5db067a4a0beb6a8db45b4cb27e5086c60d6",
+      "retained": "/tmp/symaira-memory649-census-retained/271108e3f2d9422954e28edabfbb5db067a4a0beb6a8db45b4cb27e5086c60d6.gz",
+      "retained_sha256": "9279a1a72d35b506133b972d46b8be7fedf399498331538ace258ddf36687c3a"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-010_import_state/seed.db",
+      "bytes": 147456,
+      "sha256": "a5eb7c5a3592340d75346e299c303f74d98bef1e823b3dd2e4c2f47504b99882",
+      "retained": "/tmp/symaira-memory649-census-retained/a5eb7c5a3592340d75346e299c303f74d98bef1e823b3dd2e4c2f47504b99882.gz",
+      "retained_sha256": "a495d7ba3627e07c8eb2448e98ea65c3516006d4f23184a6ef273b5b256229e3"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-011_importance/go/memory.db",
+      "bytes": 434176,
+      "sha256": "3e1abf32e10ca610ea11bed08d8ecd6340f51a319f18fd507630c092f97766ca",
+      "retained": "/tmp/symaira-memory649-census-retained/3e1abf32e10ca610ea11bed08d8ecd6340f51a319f18fd507630c092f97766ca.gz",
+      "retained_sha256": "5a9359e333cc03f5ee884a927763136cf1a567f1e69a5aaf969de6690e0911dc"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-011_importance/go/result.json",
+      "bytes": 100938,
+      "sha256": "2182ca86ade67f451629d13d464af0afcf9665a3e43afc19d74aedc8ac4c9538",
+      "retained": "/tmp/symaira-memory649-census-retained/2182ca86ade67f451629d13d464af0afcf9665a3e43afc19d74aedc8ac4c9538.gz",
+      "retained_sha256": "4dfbbcecf87ee97534d0d72c5f1a3fa7a69b90c9f177fafb376ceef7b5ece871"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-011_importance/native/memory.db",
+      "bytes": 364544,
+      "sha256": "e9610b31d5fe6ce8e7dc5c8033d0b19a342d2860ff83ea3fc0eabb495fba6000",
+      "retained": "/tmp/symaira-memory649-census-retained/e9610b31d5fe6ce8e7dc5c8033d0b19a342d2860ff83ea3fc0eabb495fba6000.gz",
+      "retained_sha256": "04b5176b8f41aafc853d2611a3f86e953270faa214e6d68412a8a5015fd79607"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-011_importance/native/result.json",
+      "bytes": 94417,
+      "sha256": "f8f93cda7febaf713c8dcc70e23e0a421a27f99be5c9708c5670cc7ad0fb1494",
+      "retained": "/tmp/symaira-memory649-census-retained/f8f93cda7febaf713c8dcc70e23e0a421a27f99be5c9708c5670cc7ad0fb1494.gz",
+      "retained_sha256": "5c411c24432a734b1348b7a923509ebee883310f431939d03eab485816696276"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-011_importance/seed.db",
+      "bytes": 151552,
+      "sha256": "6a8d65804f7b821fce8cf4e0b53f1d45e49db83e7cbd4139710f07e4dfe33ee3",
+      "retained": "/tmp/symaira-memory649-census-retained/6a8d65804f7b821fce8cf4e0b53f1d45e49db83e7cbd4139710f07e4dfe33ee3.gz",
+      "retained_sha256": "11946c79f60959812be30310bdd0c7e46f4824cb1e0199089bcad29297408140"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-012_audit_log/go/memory.db",
+      "bytes": 434176,
+      "sha256": "ed6faefc2c658338eeaa7138549fd8c913654404de90534084389f5fa82ddc28",
+      "retained": "/tmp/symaira-memory649-census-retained/ed6faefc2c658338eeaa7138549fd8c913654404de90534084389f5fa82ddc28.gz",
+      "retained_sha256": "a89b65b2af01648a864404839afb57d0b07b1a05ea616ee22ee43b740a8a2fc4"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-012_audit_log/go/result.json",
+      "bytes": 104171,
+      "sha256": "9be8162a9fba856ea75df88e77160695c731f032695227591b464f57d90e502b",
+      "retained": "/tmp/symaira-memory649-census-retained/9be8162a9fba856ea75df88e77160695c731f032695227591b464f57d90e502b.gz",
+      "retained_sha256": "76e8a792bfe05bf8ea6cfc02be1d162144e867b9621ebe8ce75c7a300e3d03f4"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-012_audit_log/native/memory.db",
+      "bytes": 380928,
+      "sha256": "ca31456f563b289cda7ebca9c892556296524f8715d1e5c5b3548b25e74b90f0",
+      "retained": "/tmp/symaira-memory649-census-retained/ca31456f563b289cda7ebca9c892556296524f8715d1e5c5b3548b25e74b90f0.gz",
+      "retained_sha256": "1ff56fd603d2df980b694a68a4de7dd9379b74eb5e820de20a128eac8eec0b98"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-012_audit_log/native/result.json",
+      "bytes": 98477,
+      "sha256": "0823a15dd28154ec235434322474d015bb4ebbc3d580f2e0ae49be9d41ab06e8",
+      "retained": "/tmp/symaira-memory649-census-retained/0823a15dd28154ec235434322474d015bb4ebbc3d580f2e0ae49be9d41ab06e8.gz",
+      "retained_sha256": "7896fdb20aca1e7a0a111c624d2e56445cc34e1160443c280d3770f79f40e121"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-012_audit_log/seed.db",
+      "bytes": 172032,
+      "sha256": "16aa04d5de08bf3263dd0ca80460f3656637b0b2d69750680adbd04aaa881ab2",
+      "retained": "/tmp/symaira-memory649-census-retained/16aa04d5de08bf3263dd0ca80460f3656637b0b2d69750680adbd04aaa881ab2.gz",
+      "retained_sha256": "ec81f8a64d61415493057736f5cc1376b39fec891910725394f9090c7c71ebdb"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-014_temporal_validity/go/memory.db",
+      "bytes": 434176,
+      "sha256": "142d6452918bd8b9ea27208928261de87c234a87d7e9e4cc056098a5d43bf583",
+      "retained": "/tmp/symaira-memory649-census-retained/142d6452918bd8b9ea27208928261de87c234a87d7e9e4cc056098a5d43bf583.gz",
+      "retained_sha256": "30408fd894dfe32c0de0bd0bf93976e4e82c2035eadfc32d22cbdc5a58b43dc0"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-014_temporal_validity/go/result.json",
+      "bytes": 105746,
+      "sha256": "27dba57979cf5515d2cbd0d08f47d20fa82714d87742ae01aa32f4e85553200a",
+      "retained": "/tmp/symaira-memory649-census-retained/27dba57979cf5515d2cbd0d08f47d20fa82714d87742ae01aa32f4e85553200a.gz",
+      "retained_sha256": "5569f454587b0377534d3a5e1a5e0896fb6f494f7cc75a8c78b9908955103959"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-014_temporal_validity/native/memory.db",
+      "bytes": 380928,
+      "sha256": "cb4fca312c3fd48f23469fcebd737725a0236999650acafdfebf25848c7adde2",
+      "retained": "/tmp/symaira-memory649-census-retained/cb4fca312c3fd48f23469fcebd737725a0236999650acafdfebf25848c7adde2.gz",
+      "retained_sha256": "53592d7d226dc2e5dd9549b41866cef6f12ab324af29bd5967769f3681c29855"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-014_temporal_validity/native/result.json",
+      "bytes": 100052,
+      "sha256": "2b67c6485be11451e969f161453cf2ef89af491a8cc754c9b85df65e7dbe4284",
+      "retained": "/tmp/symaira-memory649-census-retained/2b67c6485be11451e969f161453cf2ef89af491a8cc754c9b85df65e7dbe4284.gz",
+      "retained_sha256": "6bc4a495658fc3502ebf12ffe296e9837cf8c5d276b409d2886d129544112f09"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-014_temporal_validity/seed.db",
+      "bytes": 184320,
+      "sha256": "61b498616d4245b8b75967df0503e861f63b2827f6d02042d6992f9bd64226f0",
+      "retained": "/tmp/symaira-memory649-census-retained/61b498616d4245b8b75967df0503e861f63b2827f6d02042d6992f9bd64226f0.gz",
+      "retained_sha256": "813a280ae167ea5db6a586055a303be66e3ac0d1c24cce099be19b89ab2b7b43"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-015_entities_aliases/go/memory.db",
+      "bytes": 434176,
+      "sha256": "12ca5fe8591c4f0231385a7999ef83ff95335c9ecac216b06da43b465b5c753b",
+      "retained": "/tmp/symaira-memory649-census-retained/12ca5fe8591c4f0231385a7999ef83ff95335c9ecac216b06da43b465b5c753b.gz",
+      "retained_sha256": "49328756055144765895b68240ac4d7eb960444ca3b3a15566fe5bd2296f45f6"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-015_entities_aliases/go/result.json",
+      "bytes": 107429,
+      "sha256": "6d6b645015e3deb368a4235f323f1e562ecb85309ca4cee139fae02443c14728",
+      "retained": "/tmp/symaira-memory649-census-retained/6d6b645015e3deb368a4235f323f1e562ecb85309ca4cee139fae02443c14728.gz",
+      "retained_sha256": "2bf8f9958ba7513826f75a477ed61f07c0e8f0d75b188c1280bb2fabe9ccb1f8"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-015_entities_aliases/native/memory.db",
+      "bytes": 385024,
+      "sha256": "382199a31e3081b4f23ff1e0530026ff6e1449930638842939703855430f3c48",
+      "retained": "/tmp/symaira-memory649-census-retained/382199a31e3081b4f23ff1e0530026ff6e1449930638842939703855430f3c48.gz",
+      "retained_sha256": "0c897c6b6b0af79433a321d37b0c9174e7421b1d5747723e109340c910df7036"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-015_entities_aliases/native/result.json",
+      "bytes": 102071,
+      "sha256": "68d151a987320694d0cac5aa52bdbd1c7be6c727695353b2e746b0277c79c296",
+      "retained": "/tmp/symaira-memory649-census-retained/68d151a987320694d0cac5aa52bdbd1c7be6c727695353b2e746b0277c79c296.gz",
+      "retained_sha256": "67f96e345ba80e0546224645ee8167383d2c160a36515c689cb78567a49ccb71"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-015_entities_aliases/seed.db",
+      "bytes": 196608,
+      "sha256": "87e2dc7c695b43b7e0d0e168070fd232707dfa1819192040f1a442c57f4b42a6",
+      "retained": "/tmp/symaira-memory649-census-retained/87e2dc7c695b43b7e0d0e168070fd232707dfa1819192040f1a442c57f4b42a6.gz",
+      "retained_sha256": "30ef5a588d0e7c75cb1d1895795eb8ee8dc5574ed38a641e41089ba7c2580fd1"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-016_fts5/go/memory.db",
+      "bytes": 434176,
+      "sha256": "62d10cd91ac44507ad8c19410436c272926f3fc6a87edadf1c6547ff3cc23b38",
+      "retained": "/tmp/symaira-memory649-census-retained/62d10cd91ac44507ad8c19410436c272926f3fc6a87edadf1c6547ff3cc23b38.gz",
+      "retained_sha256": "ea188097a5e330777002e8aed241541c5aed1adfc2c7f979c5d8005b01ea7352"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-016_fts5/go/result.json",
+      "bytes": 113370,
+      "sha256": "3ec85183cb0125943e69d8153ba0919ff081166599f65ff8c0b5d0fc2f32fab4",
+      "retained": "/tmp/symaira-memory649-census-retained/3ec85183cb0125943e69d8153ba0919ff081166599f65ff8c0b5d0fc2f32fab4.gz",
+      "retained_sha256": "454a037a9569bce39e0e86224287893e852bc590a22c4355feaa005bc6f1d925"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-016_fts5/native/memory.db",
+      "bytes": 385024,
+      "sha256": "96264ae26cb8264de993f0fe3f4016a03eebfd7c7d93fef53f554abef8415608",
+      "retained": "/tmp/symaira-memory649-census-retained/96264ae26cb8264de993f0fe3f4016a03eebfd7c7d93fef53f554abef8415608.gz",
+      "retained_sha256": "9f422e468994cfa42857ebe592dd6d77d8ffadbccb00eebb177cfd61b7f82d38"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-016_fts5/native/result.json",
+      "bytes": 108461,
+      "sha256": "9320bc5665d4fab3f9a90061abc1e1350a8248012d26939662a1c73e31886c6f",
+      "retained": "/tmp/symaira-memory649-census-retained/9320bc5665d4fab3f9a90061abc1e1350a8248012d26939662a1c73e31886c6f.gz",
+      "retained_sha256": "9a0ad1c166706c8df332fcbd7c8e7e9c6deeb5a39fb8edb4fe3e67ae2252d394"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-016_fts5/seed.db",
+      "bytes": 212992,
+      "sha256": "adc95ab0044c3ef9d15547f89eed48b8b7456aeeb529e96b0bd85e01e8f2b5e6",
+      "retained": "/tmp/symaira-memory649-census-retained/adc95ab0044c3ef9d15547f89eed48b8b7456aeeb529e96b0bd85e01e8f2b5e6.gz",
+      "retained_sha256": "3322b064576ce8d7b15572af87ceb33dc76597bcd5f72e800c9f646c163878c1"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-017_embedding_source/go/memory.db",
+      "bytes": 434176,
+      "sha256": "a7e28b4d3377fefb6f78c1eaec4d0eca42bf89b0e999f13f7157a1edd86eea67",
+      "retained": "/tmp/symaira-memory649-census-retained/a7e28b4d3377fefb6f78c1eaec4d0eca42bf89b0e999f13f7157a1edd86eea67.gz",
+      "retained_sha256": "e01de869945f785a47797d3abb277821a49914d813fd689ab183ca0f99207963"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-017_embedding_source/go/result.json",
+      "bytes": 114250,
+      "sha256": "242f9239c5d4baf289000ad8610e6bafc8c25e649acc187fc857e3f0bb671ac7",
+      "retained": "/tmp/symaira-memory649-census-retained/242f9239c5d4baf289000ad8610e6bafc8c25e649acc187fc857e3f0bb671ac7.gz",
+      "retained_sha256": "241f3fb4741f5e7c4c9a0edd6babb45daf808923f186ad9019167be2664ea617"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-017_embedding_source/native/memory.db",
+      "bytes": 385024,
+      "sha256": "962aa9a5f4c04369848246ac6ecb0249af38590a99fe07257a2a1a4f3375660e",
+      "retained": "/tmp/symaira-memory649-census-retained/962aa9a5f4c04369848246ac6ecb0249af38590a99fe07257a2a1a4f3375660e.gz",
+      "retained_sha256": "aaa3a9e1ee788fd1e41b1a9da9dbe78e2ba4e4e35b78765618612a805d26bc5c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-017_embedding_source/native/result.json",
+      "bytes": 109341,
+      "sha256": "d1937a9069cf741a444019361f5bb7e44e7d45ab50cf6e0d8679bc5d96614c18",
+      "retained": "/tmp/symaira-memory649-census-retained/d1937a9069cf741a444019361f5bb7e44e7d45ab50cf6e0d8679bc5d96614c18.gz",
+      "retained_sha256": "feeef374fdd130e21011840cb5f2664183c77c8356efaf1597554ce07b477471"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-017_embedding_source/seed.db",
+      "bytes": 221184,
+      "sha256": "d08417df0a28546e6ee487276086003d5f37b634b346fb5ec7c0a3eb83ae48d6",
+      "retained": "/tmp/symaira-memory649-census-retained/d08417df0a28546e6ee487276086003d5f37b634b346fb5ec7c0a3eb83ae48d6.gz",
+      "retained_sha256": "0e95b1c83bd334ca77a7c851541ab3c16e1586e5414642bbd620acb443b89043"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-018_content_hash/go/memory.db",
+      "bytes": 434176,
+      "sha256": "80a24b1c03cef691a40503fcc28006ec462476a9f119e79213e883d888a25ec3",
+      "retained": "/tmp/symaira-memory649-census-retained/80a24b1c03cef691a40503fcc28006ec462476a9f119e79213e883d888a25ec3.gz",
+      "retained_sha256": "3130e81481711431ffe1376fe971cd89cf7422411c4518922ae072265e5b303f"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-018_content_hash/go/result.json",
+      "bytes": 114863,
+      "sha256": "5d6f6cd7dc73f559c619dd86b8ddbc2ee4733860aa9d1761657ee448fd4dda23",
+      "retained": "/tmp/symaira-memory649-census-retained/5d6f6cd7dc73f559c619dd86b8ddbc2ee4733860aa9d1761657ee448fd4dda23.gz",
+      "retained_sha256": "57ab2dff9e062eba2e913473296e9d8f04885dc590acced6746b750ecc335cf6"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-018_content_hash/native/memory.db",
+      "bytes": 385024,
+      "sha256": "c3d2d846d1c102c17934e7372e6ba400309a144024a073f49cf2907b503a1c2a",
+      "retained": "/tmp/symaira-memory649-census-retained/c3d2d846d1c102c17934e7372e6ba400309a144024a073f49cf2907b503a1c2a.gz",
+      "retained_sha256": "0dc0c96416a51c8ac978c3e6dec7be6319bc01de17c348a2f546997a7d42a40d"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-018_content_hash/native/result.json",
+      "bytes": 109954,
+      "sha256": "592f9c44303ab5976c0cbec9ef207ba71436614d1d7b5f43373ea6f27a31ae62",
+      "retained": "/tmp/symaira-memory649-census-retained/592f9c44303ab5976c0cbec9ef207ba71436614d1d7b5f43373ea6f27a31ae62.gz",
+      "retained_sha256": "c2685536a7b7965e456aa1c291df1159d32da22ad2ae2a74c647a2faf3ca546c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-018_content_hash/seed.db",
+      "bytes": 225280,
+      "sha256": "69583df64748ab11dd1c836cd51a19db65c1289a3176fe34bf856c8cd994cfbd",
+      "retained": "/tmp/symaira-memory649-census-retained/69583df64748ab11dd1c836cd51a19db65c1289a3176fe34bf856c8cd994cfbd.gz",
+      "retained_sha256": "e7ded791b6ca71b77f725075cd38f965c2e9ef8a8f1d8e124763acadfc37549b"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-019_memory_evidence/go/memory.db",
+      "bytes": 434176,
+      "sha256": "9291963e4fdc3fd08c169eafa6715b7b37e3faf2957e686cfe21e8b01bcf8973",
+      "retained": "/tmp/symaira-memory649-census-retained/9291963e4fdc3fd08c169eafa6715b7b37e3faf2957e686cfe21e8b01bcf8973.gz",
+      "retained_sha256": "03a94c25ab621a929c1ec1b278932b6ebf204ed7858929675140ccbe4822501b"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-019_memory_evidence/go/result.json",
+      "bytes": 118043,
+      "sha256": "804a8f8d8f257aab5696312d9428de75a1c1ac13d783c88ac63a735e6d60d2a2",
+      "retained": "/tmp/symaira-memory649-census-retained/804a8f8d8f257aab5696312d9428de75a1c1ac13d783c88ac63a735e6d60d2a2.gz",
+      "retained_sha256": "29459cb799e7cdf3962059e8f6dd7d882d613d40f9b138d8e3685bc0eef0e3dd"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-019_memory_evidence/native/memory.db",
+      "bytes": 389120,
+      "sha256": "acae156fed02bc6a619ebdbb04e75cc080979bde78d7fd1bdd2f93d500a5580e",
+      "retained": "/tmp/symaira-memory649-census-retained/acae156fed02bc6a619ebdbb04e75cc080979bde78d7fd1bdd2f93d500a5580e.gz",
+      "retained_sha256": "ecee787ff5e42c062d74a4dadcb7b7da7533171a98cc105769490f4625d9a82b"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-019_memory_evidence/native/result.json",
+      "bytes": 113480,
+      "sha256": "0a9684536b6f95aa5650ca7d8f87e2679e25136d787ad9c57ebdba70a428a8d8",
+      "retained": "/tmp/symaira-memory649-census-retained/0a9684536b6f95aa5650ca7d8f87e2679e25136d787ad9c57ebdba70a428a8d8.gz",
+      "retained_sha256": "51e032bd22b7a5c21bb91f9b09d32b75bfd78f05f14a080f341ae381421c928d"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-019_memory_evidence/seed.db",
+      "bytes": 237568,
+      "sha256": "8395204127e6f68eef746dd98e3b939dcc0d5d064b5f4771941c9669e4f30942",
+      "retained": "/tmp/symaira-memory649-census-retained/8395204127e6f68eef746dd98e3b939dcc0d5d064b5f4771941c9669e4f30942.gz",
+      "retained_sha256": "51f79d271fde64b4065c4a902eef8504257b8a4dbd5441bed8bd89c21df46702"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-020_entity_relations/go/memory.db",
+      "bytes": 434176,
+      "sha256": "25d7bfed1b91fd7de92df8ba057a8c33a52b7e169a6845738180f23d6e574ae8",
+      "retained": "/tmp/symaira-memory649-census-retained/25d7bfed1b91fd7de92df8ba057a8c33a52b7e169a6845738180f23d6e574ae8.gz",
+      "retained_sha256": "c5b69296d2b884baba9624f58ae15b2c804a03cbe536b7b20d6249785e9483e2"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-020_entity_relations/go/result.json",
+      "bytes": 122246,
+      "sha256": "3bd625d3f29d6660b18f2d07dbf2d32ed2be82060f32af989d7855002c3ff160",
+      "retained": "/tmp/symaira-memory649-census-retained/3bd625d3f29d6660b18f2d07dbf2d32ed2be82060f32af989d7855002c3ff160.gz",
+      "retained_sha256": "382922cb1167890a0ad46ae202b47384481b2aabd44fbbecc8603c4d1932ff9c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-020_entity_relations/native/memory.db",
+      "bytes": 249856,
+      "sha256": "9ceb58ecaaf2cfd637b6a58497fb8fdd9ea4cf6ae7d75d1d6dffebacb43b3265",
+      "retained": "/tmp/symaira-memory649-census-retained/9ceb58ecaaf2cfd637b6a58497fb8fdd9ea4cf6ae7d75d1d6dffebacb43b3265.gz",
+      "retained_sha256": "9e1efb95d9dedb6927133b584864376d548c76a5fcc1e17a7c6b53933ec0bf72"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-020_entity_relations/native/result.json",
+      "bytes": 87333,
+      "sha256": "ac974228cdd0acf69f77266b20272066aa2f1c91cf5639b6f9b0954c65b95ecf",
+      "retained": "/tmp/symaira-memory649-census-retained/ac974228cdd0acf69f77266b20272066aa2f1c91cf5639b6f9b0954c65b95ecf.gz",
+      "retained_sha256": "1a0f008dc785fde16c383b9e57c0ede4ccdae78ed0e8ca6db589ff65d5b8478a"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-020_entity_relations/seed.db",
+      "bytes": 249856,
+      "sha256": "dbc99bebc8872dc8bc6a9b8ff5fbe84809511485d73321642b64cd2693d38ee2",
+      "retained": "/tmp/symaira-memory649-census-retained/dbc99bebc8872dc8bc6a9b8ff5fbe84809511485d73321642b64cd2693d38ee2.gz",
+      "retained_sha256": "434a11bfbed9df7fd4c410d58b7d23b0bf522aae8976833f17b40737ed1f2c52"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-021_context_profiles/go/memory.db",
+      "bytes": 434176,
+      "sha256": "cb6f2a2e87d506654e71e66236a541921a1e3d7a5c0f24098b9bbb6c77fd6772",
+      "retained": "/tmp/symaira-memory649-census-retained/cb6f2a2e87d506654e71e66236a541921a1e3d7a5c0f24098b9bbb6c77fd6772.gz",
+      "retained_sha256": "ddf37dd46e4ad67682a5a7eb76f1a9c64bca3c3ea6cb3ec67b660c48db04708e"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-021_context_profiles/go/result.json",
+      "bytes": 128167,
+      "sha256": "d448f7f73ed70cf1989855f76a19fe752a9ea76c10a3c1615dbf536954865233",
+      "retained": "/tmp/symaira-memory649-census-retained/d448f7f73ed70cf1989855f76a19fe752a9ea76c10a3c1615dbf536954865233.gz",
+      "retained_sha256": "3c938f9da1c45fdabcf5fdbc1110a0f0659f766068bfe0d7c6bce97b01a9c51c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-021_context_profiles/native/memory.db",
+      "bytes": 278528,
+      "sha256": "0e2bbcc82d10977350b1bac393aea9a703c853cb8a5840cf81ab3f87a23bd27e",
+      "retained": "/tmp/symaira-memory649-census-retained/0e2bbcc82d10977350b1bac393aea9a703c853cb8a5840cf81ab3f87a23bd27e.gz",
+      "retained_sha256": "04a10932ab4e1bc9350b1544aa05aa2d93f3d71029921bc2c304691e23abd529"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-021_context_profiles/native/result.json",
+      "bytes": 99155,
+      "sha256": "0edf91592ca7651614cfaa6370650fc0cb3d2e33b2b6fc99a985a13925226d2b",
+      "retained": "/tmp/symaira-memory649-census-retained/0edf91592ca7651614cfaa6370650fc0cb3d2e33b2b6fc99a985a13925226d2b.gz",
+      "retained_sha256": "6d10761b1fee050f399eacd054162f80b4fb5e654944459a19bb1db73d503a8f"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-021_context_profiles/seed.db",
+      "bytes": 278528,
+      "sha256": "aaf6969e619da8e36d7e2ac872923aebe919d97c25f214baeac62b6685b5a60b",
+      "retained": "/tmp/symaira-memory649-census-retained/aaf6969e619da8e36d7e2ac872923aebe919d97c25f214baeac62b6685b5a60b.gz",
+      "retained_sha256": "b8b1fedb2bf23fa7ceae3da24088b3f62275d79d2be9dc419f5fff664587b7ae"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/prefix-022_entity_relation_provenance/seed.db",
+      "bytes": 286720,
+      "sha256": "8efcc99e859c4dd436c2ae430ec7c95322e12dd9ecec7f6f8534ce3df4a94511",
+      "retained": "/tmp/symaira-memory649-census-retained/8efcc99e859c4dd436c2ae430ec7c95322e12dd9ecec7f6f8534ce3df4a94511.gz",
+      "retained_sha256": "0691da4d9da4740c1b7a1a49c228bfb6b4fc2974cc0681e067b60616260cc27d"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/progress.json",
+      "bytes": 28595,
+      "sha256": "eed46fde15d8d9bddca758612a108d2891fcf9911867bf695720614016b01a53",
+      "retained": "/tmp/symaira-memory649-census-retained/eed46fde15d8d9bddca758612a108d2891fcf9911867bf695720614016b01a53.gz",
+      "retained_sha256": "fabd62204790efe1e4e3f5eb87e46ad0eddb5b33c03058665f0c712526e9250f"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census/store-cli-binding.json",
+      "bytes": 798,
+      "sha256": "11886dac70958c2391c07fa2f009d66e859c0eb411d1a2b66e095a39c1fdfd4d",
+      "retained": "/tmp/symaira-memory649-census-retained/11886dac70958c2391c07fa2f009d66e859c0eb411d1a2b66e095a39c1fdfd4d.gz",
+      "retained_sha256": "89737cfa8ad7aa46cb865075d42ccfc0968ee80466bb8f227cc06b60c8330955"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/activity-exclusion-go.db",
+      "bytes": 434176,
+      "sha256": "c7366c210e47953b759e7660180aa445ed7de432962abaf07254983c51a09ee0",
+      "retained": "/tmp/symaira-memory649-census-retained/c7366c210e47953b759e7660180aa445ed7de432962abaf07254983c51a09ee0.gz",
+      "retained_sha256": "47767dc92d60763b734e79331b71dbeac52ae35d841c45c2673f32a5b0eaebf0"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/activity-exclusion-native.db",
+      "bytes": 405504,
+      "sha256": "24b55f244b4fc7bfa47d3caca7d396cd7e3346dc34fb3a66bc7c39bccd0ed476",
+      "retained": "/tmp/symaira-memory649-census-retained/24b55f244b4fc7bfa47d3caca7d396cd7e3346dc34fb3a66bc7c39bccd0ed476.gz",
+      "retained_sha256": "ca0f3076ede49bf7111a1345c4d01b5a72c69ad62a3e3659b7d450aa338f50dd"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/binary.json",
+      "bytes": 810,
+      "sha256": "bb5db5366a8c1615f1c33a84b9f3c9a3eb3ea3f8f9cfa9db073081e98f832607",
+      "retained": "/tmp/symaira-memory649-census-retained/bb5db5366a8c1615f1c33a84b9f3c9a3eb3ea3f8f9cfa9db073081e98f832607.gz",
+      "retained_sha256": "5dffd9c02412785e6a58a28fa731d97d759132b5c8d98583e4e38523ea44b596"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/census.json",
+      "bytes": 86221,
+      "sha256": "834c85b69e0bb53c9b0ef5fd7bebecdfb645b5f6eef2640fe14ce81abbf1396d",
+      "retained": "/tmp/symaira-memory649-census-retained/834c85b69e0bb53c9b0ef5fd7bebecdfb645b5f6eef2640fe14ce81abbf1396d.gz",
+      "retained_sha256": "3b7a216573e2246f1976004750b0a60d2f111952ca6fe1932b0330a2bbb6e601"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/census.log",
+      "bytes": 148,
+      "sha256": "e02d5592412839b8c812459b409794cfd923a2fde7125043b9ad2bae45fc12a9",
+      "retained": "/tmp/symaira-memory649-census-retained/e02d5592412839b8c812459b409794cfd923a2fde7125043b9ad2bae45fc12a9.gz",
+      "retained_sha256": "9f35f426b85920b9864a1e64e350edef1a4fcdca95c4bf30cf3095cf5c782618"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/census.py",
+      "bytes": 6874,
+      "sha256": "aebb430cab73c43a9a3bb44fcb05956742ba5149b6c2062515496fd858edb1e6",
+      "retained": "/tmp/symaira-memory649-census-retained/aebb430cab73c43a9a3bb44fcb05956742ba5149b6c2062515496fd858edb1e6.gz",
+      "retained_sha256": "4b9b0d92776d16a28fa7f48cc3703658a75443c4ac1719272f0e2eca762073e6"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/historical-memory-repair-649-proposal.md",
+      "bytes": 11399,
+      "sha256": "71fcd7338418b5113a2789e91c63d1d4ced280e550c4ac7e117545c1a04607d9",
+      "retained": "/tmp/symaira-memory649-census-retained/71fcd7338418b5113a2789e91c63d1d4ced280e550c4ac7e117545c1a04607d9.gz",
+      "retained_sha256": "60cc651db7d2ffee34f4b90c54183dcd0d4a6b9764705ea1bf40c198f1a901b4"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/historical-trigger-gaps.json",
+      "bytes": 22143,
+      "sha256": "e6ac02bb79b7d8dbfbaed702f04c4f310ed7ad58ad24f6cd2b1359ef132393a6",
+      "retained": "/tmp/symaira-memory649-census-retained/e6ac02bb79b7d8dbfbaed702f04c4f310ed7ad58ad24f6cd2b1359ef132393a6.gz",
+      "retained_sha256": "ed4fcfa389400dccea5f372f11f786790b0f32144a42b48a90cda13a219be46a"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/idempotence.json",
+      "bytes": 235963,
+      "sha256": "ef0666d4c0b97e365358c418ba3162c02e8373b552d7c6a7d55929aacd1f4e48",
+      "retained": "/tmp/symaira-memory649-census-retained/ef0666d4c0b97e365358c418ba3162c02e8373b552d7c6a7d55929aacd1f4e48.gz",
+      "retained_sha256": "d44e3fb91d7bba46882210a2760c1fed64f32d304a060613e65b3fdf79e9ac42"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/idempotence.log",
+      "bytes": 57,
+      "sha256": "5810a8559f5e82cea28759fdf884c2cebd6993d9d72f669e8926c6606647561d",
+      "retained": "/tmp/symaira-memory649-census-retained/5810a8559f5e82cea28759fdf884c2cebd6993d9d72f669e8926c6606647561d.gz",
+      "retained_sha256": "8a1c03f81a650271439e38c8890d14923b5f5842b6cf94e638602380d619eaef"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/idempotence.py",
+      "bytes": 1971,
+      "sha256": "8cbb79d2abe79b4e9059b6fbf9f4d8de7d927116a5092ea81909be2da995ea65",
+      "retained": "/tmp/symaira-memory649-census-retained/8cbb79d2abe79b4e9059b6fbf9f4d8de7d927116a5092ea81909be2da995ea65.gz",
+      "retained_sha256": "e95e4869b433b7328db12e4dd8f69dcedbc0236ef90b542cd6f834eda8e28b99"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/invariant-probes.json",
+      "bytes": 1064,
+      "sha256": "e0a4a85cb6d6017b3df1c63ccdc7daffd27f380af6d1623cfff591d70c8229ce",
+      "retained": "/tmp/symaira-memory649-census-retained/e0a4a85cb6d6017b3df1c63ccdc7daffd27f380af6d1623cfff591d70c8229ce.gz",
+      "retained_sha256": "3c44bd35bf1df0f777850596aa5c08993b2c3bcb1d7e1c9c4dd329eef535f656"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/invariant-probes.log",
+      "bytes": 83,
+      "sha256": "65cca1146e1fe7d4cb5ebbf96db3fbf0725b2fbd880974b43ccd19039cec9cbf",
+      "retained": "/tmp/symaira-memory649-census-retained/65cca1146e1fe7d4cb5ebbf96db3fbf0725b2fbd880974b43ccd19039cec9cbf.gz",
+      "retained_sha256": "5e63171f9a2387be439c7c2e303247a16f00ef06b7d3abd5a2e871f0c75eacd2"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/invariant-probes.py",
+      "bytes": 2373,
+      "sha256": "a98c4e8ffe97c93b4485055e4d43105f81ac36d199b5cb2b66c8017d893d5e30",
+      "retained": "/tmp/symaira-memory649-census-retained/a98c4e8ffe97c93b4485055e4d43105f81ac36d199b5cb2b66c8017d893d5e30.gz",
+      "retained_sha256": "8a2a4ffe2f10d35e62f7c5abe7362dbb1d1cc82bb55514bdd2b521df5562715e"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/migration-inventory.csv",
+      "bytes": 13258,
+      "sha256": "ea9bcc4866973bc22b63d76f3e16f76733e9474f894db5e3ac30734c556f8d34",
+      "retained": "/tmp/symaira-memory649-census-retained/ea9bcc4866973bc22b63d76f3e16f76733e9474f894db5e3ac30734c556f8d34.gz",
+      "retained_sha256": "1e9b2b20284e0bdc809ed79badb4ad106d4efd23e68e8bbe51f00c3a761d2f40"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/migration-inventory.json",
+      "bytes": 35742,
+      "sha256": "a2192e6b1ac3f4ea78c660463fc48c6c284024b4a185870dffdbbfa9261f670b",
+      "retained": "/tmp/symaira-memory649-census-retained/a2192e6b1ac3f4ea78c660463fc48c6c284024b4a185870dffdbbfa9261f670b.gz",
+      "retained_sha256": "2bc4c66a6000be7ee514f8a57428938785ef7d67b87bc7dc170d1824f7d194d4"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/post-open-mode-observation.json",
+      "bytes": 230,
+      "sha256": "6c1a0d9dc2cf06bb23da115134fc30fe692021a5590bbacd50deda52204653c7",
+      "retained": "/tmp/symaira-memory649-census-retained/6c1a0d9dc2cf06bb23da115134fc30fe692021a5590bbacd50deda52204653c7.gz",
+      "retained_sha256": "b5f35b13252ef7c64e25f5bc24258c5df54a09204174158c6ae290f8d0c1f5c1"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-001_init/go/memory.db",
+      "bytes": 434176,
+      "sha256": "12fd26677ad36b8650a903e5e5ed6675ef70bc76f913e6fa5b90217d5cc3b65c",
+      "retained": "/tmp/symaira-memory649-census-retained/12fd26677ad36b8650a903e5e5ed6675ef70bc76f913e6fa5b90217d5cc3b65c.gz",
+      "retained_sha256": "b41fe3d43feb9378b5861f2abdca68d0bdb900a4ed70b9664e3a59ef29479060"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-001_init/go/result.json",
+      "bytes": 83795,
+      "sha256": "4fa731ae1f3db68f6524676d6739fd00ca8b1c89c418fd180ab5324c8959aa55",
+      "retained": "/tmp/symaira-memory649-census-retained/4fa731ae1f3db68f6524676d6739fd00ca8b1c89c418fd180ab5324c8959aa55.gz",
+      "retained_sha256": "a789d15042ca9f4d29d387e188c405f0f4e0b5d01462f56a3aeaaeab4f245b04"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-001_init/native/memory.db",
+      "bytes": 348160,
+      "sha256": "08bf609f9aae9354fc61b0402397df9528cb0a6451907a50d0ce3a3f7d5f5d64",
+      "retained": "/tmp/symaira-memory649-census-retained/08bf609f9aae9354fc61b0402397df9528cb0a6451907a50d0ce3a3f7d5f5d64.gz",
+      "retained_sha256": "98df305dc27af7f024c03ce75fd456e023e3cc02d6a39805e883e0ac56bbffbb"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-001_init/native/result.json",
+      "bytes": 75834,
+      "sha256": "28f93530e2c112567ffe875a411fbf13c98dd740d04fda33f1d8ec4ca1dd615d",
+      "retained": "/tmp/symaira-memory649-census-retained/28f93530e2c112567ffe875a411fbf13c98dd740d04fda33f1d8ec4ca1dd615d.gz",
+      "retained_sha256": "c459c14fa82fbf214bdcd6e401e2dd9a3578b6d8f1c431df7ae0245fd43c6efd"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-001_init/seed.db",
+      "bytes": 40960,
+      "sha256": "9d62dad5c37bd5c5f29eab1e643fa1b8cf450c329c702ca42716474c52d8af37",
+      "retained": "/tmp/symaira-memory649-census-retained/9d62dad5c37bd5c5f29eab1e643fa1b8cf450c329c702ca42716474c52d8af37.gz",
+      "retained_sha256": "144e39391291b393420573e09c6c45725c7f0aad7eedc601a5fabdaf19f3ce63"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-002_vector_index/go/memory.db",
+      "bytes": 434176,
+      "sha256": "860e97a8e5873f80cd0fb38eb69d3c979089a4996948d14915c39dc90fd25bae",
+      "retained": "/tmp/symaira-memory649-census-retained/860e97a8e5873f80cd0fb38eb69d3c979089a4996948d14915c39dc90fd25bae.gz",
+      "retained_sha256": "c574f816c5c4b3f29766a672a20595e501f305b33a5dcbc3c98d3517283250a8"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-002_vector_index/go/result.json",
+      "bytes": 84622,
+      "sha256": "25354c603cbad542ce3204429cb2b22fa0d002110d434496f8c2c7373fdaffd0",
+      "retained": "/tmp/symaira-memory649-census-retained/25354c603cbad542ce3204429cb2b22fa0d002110d434496f8c2c7373fdaffd0.gz",
+      "retained_sha256": "f488b73eb0bed60f92190207c09b53d54c278a15d303e9d21519573a56fdeccb"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-002_vector_index/native/memory.db",
+      "bytes": 348160,
+      "sha256": "0d8c95a8828f7b44d1b8b198aa398d5f3cf4240c1dcfaed96cd78d57ba471af4",
+      "retained": "/tmp/symaira-memory649-census-retained/0d8c95a8828f7b44d1b8b198aa398d5f3cf4240c1dcfaed96cd78d57ba471af4.gz",
+      "retained_sha256": "53b406049786d0524bc995c0892267a35e9d7d4bb16d3ba57b1b586acbde450a"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-002_vector_index/native/result.json",
+      "bytes": 76661,
+      "sha256": "0ebdf5e9137a0719f71258e10ad897fa217a79b908bebc6f7e06612226a3f945",
+      "retained": "/tmp/symaira-memory649-census-retained/0ebdf5e9137a0719f71258e10ad897fa217a79b908bebc6f7e06612226a3f945.gz",
+      "retained_sha256": "4d25bf053080b6d7ff840d98caefec25cff4ecb52e1d7925dc6e4e3c6b756155"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-002_vector_index/seed.db",
+      "bytes": 45056,
+      "sha256": "7e79bb2002b6cee83047cc6898d09ec1e2f185811b9bc045607853662c029b78",
+      "retained": "/tmp/symaira-memory649-census-retained/7e79bb2002b6cee83047cc6898d09ec1e2f185811b9bc045607853662c029b78.gz",
+      "retained_sha256": "4962ffa6bfb02cf37fb7b7a5ff7ce799d0e6a51105a12b792071e6fcff7336e6"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-003_jwt_revocations/go/memory.db",
+      "bytes": 434176,
+      "sha256": "ef608b69c9faf68fc0dd8fc9a47f663002430f9f785f12ef09ac40f52d964093",
+      "retained": "/tmp/symaira-memory649-census-retained/ef608b69c9faf68fc0dd8fc9a47f663002430f9f785f12ef09ac40f52d964093.gz",
+      "retained_sha256": "5747d938e04ddb76611bb89f454ce85f9548f6ac9f1688b72a818381c7a1b76c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-003_jwt_revocations/go/result.json",
+      "bytes": 86034,
+      "sha256": "703249ccdea679537cb055b2e59e953709ce18a6a6c84ed887b61e9a9108b803",
+      "retained": "/tmp/symaira-memory649-census-retained/703249ccdea679537cb055b2e59e953709ce18a6a6c84ed887b61e9a9108b803.gz",
+      "retained_sha256": "a1204c4c4e2f57c1c0705ef50d8d84723fe3aa1e06f80c45df210e081e15196f"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-003_jwt_revocations/native/memory.db",
+      "bytes": 352256,
+      "sha256": "d506c57883f0efa7af1076eaa71b162fa80da4b5f746232e247bc8d901d862ea",
+      "retained": "/tmp/symaira-memory649-census-retained/d506c57883f0efa7af1076eaa71b162fa80da4b5f746232e247bc8d901d862ea.gz",
+      "retained_sha256": "ae3a6556a7aaf4e050aa44ce0f8273074c3503632a9ee9a8215e86390daf29e7"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-003_jwt_revocations/native/result.json",
+      "bytes": 78371,
+      "sha256": "96e3f100302c427e77b40d1e8fe83d371674b041127f8e23f7fad7142da8fa6a",
+      "retained": "/tmp/symaira-memory649-census-retained/96e3f100302c427e77b40d1e8fe83d371674b041127f8e23f7fad7142da8fa6a.gz",
+      "retained_sha256": "f0cb2de4df5e0f3cf29fc388936025235c61fd1bdb5171803ce22eeb7e62f1fd"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-003_jwt_revocations/seed.db",
+      "bytes": 57344,
+      "sha256": "0cf42c6d282cb06f55bafd56d97a91fc59ff03b1b05003bb63722fefc22ab001",
+      "retained": "/tmp/symaira-memory649-census-retained/0cf42c6d282cb06f55bafd56d97a91fc59ff03b1b05003bb63722fefc22ab001.gz",
+      "retained_sha256": "8bd50f0a5ee261a65d70a6c732534354ee62b17ce520268c9369725754242b83"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-004_sync_state/go/memory.db",
+      "bytes": 434176,
+      "sha256": "e00f36ec521dcae3732f10e2336a5036d30f04024bd2b4536759997cbcbf4eea",
+      "retained": "/tmp/symaira-memory649-census-retained/e00f36ec521dcae3732f10e2336a5036d30f04024bd2b4536759997cbcbf4eea.gz",
+      "retained_sha256": "66206e4cc84bb7cfcc5963056e82742942d04c0015d631ce8503eca962d2b504"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-004_sync_state/go/result.json",
+      "bytes": 87074,
+      "sha256": "813e94b261673301d544415b507b9732fd4c9af2beb1cd53e21834e42b2ea3da",
+      "retained": "/tmp/symaira-memory649-census-retained/813e94b261673301d544415b507b9732fd4c9af2beb1cd53e21834e42b2ea3da.gz",
+      "retained_sha256": "64e31b2cba786a881b1c96aaa151bede5982eceded07640f5439d3e859f90bcc"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-004_sync_state/native/memory.db",
+      "bytes": 352256,
+      "sha256": "0ba46579cd80769db8b0470541512053d6e1849b5bde44012caefc882b1d7fee",
+      "retained": "/tmp/symaira-memory649-census-retained/0ba46579cd80769db8b0470541512053d6e1849b5bde44012caefc882b1d7fee.gz",
+      "retained_sha256": "1f646180fc9abeadcf15ae404ff738faa5baad66a1532d8426982900814654a7"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-004_sync_state/native/result.json",
+      "bytes": 79417,
+      "sha256": "70fe262b8ccd4cc2d510d9cb0bb75d719b10d8bf90f893fcbac2d5e18eb9548a",
+      "retained": "/tmp/symaira-memory649-census-retained/70fe262b8ccd4cc2d510d9cb0bb75d719b10d8bf90f893fcbac2d5e18eb9548a.gz",
+      "retained_sha256": "3f57176bdc70d2c62915abca00c8aac3e6c48ef57752c8a074b03dffb8a38db6"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-004_sync_state/seed.db",
+      "bytes": 65536,
+      "sha256": "ccb91bbe93865d4da1fa7662ac3fa5a035301b6244bbaa103a9efb7967aebc11",
+      "retained": "/tmp/symaira-memory649-census-retained/ccb91bbe93865d4da1fa7662ac3fa5a035301b6244bbaa103a9efb7967aebc11.gz",
+      "retained_sha256": "26375ffecc5776c41ad3cca6bad4406e5903c84711b37c3d03ce8366fa8257a7"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-005_indexes/go/memory.db",
+      "bytes": 434176,
+      "sha256": "92b97266dca2c5c4993a336c1ba98a060f30b94c9117f29cd56df0e473c00d38",
+      "retained": "/tmp/symaira-memory649-census-retained/92b97266dca2c5c4993a336c1ba98a060f30b94c9117f29cd56df0e473c00d38.gz",
+      "retained_sha256": "97b8d8f320f8d8cbc2b7493a068e300b1ad8ff87a3a5f05567533ff7a2227028"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-005_indexes/go/result.json",
+      "bytes": 87727,
+      "sha256": "2564d5007ed37bbac969d7ff43a1021a9861e8d49f2431e784f8c1e0cc9d82f3",
+      "retained": "/tmp/symaira-memory649-census-retained/2564d5007ed37bbac969d7ff43a1021a9861e8d49f2431e784f8c1e0cc9d82f3.gz",
+      "retained_sha256": "c230558ef35fb0711fbd66c0496136ad17288f892e88e5bf7ab2d21da803652a"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-005_indexes/native/memory.db",
+      "bytes": 352256,
+      "sha256": "185bffae0c60d5754dae9d4e3969ac20f8d1f3303d0b4818d537fa5d04711fed",
+      "retained": "/tmp/symaira-memory649-census-retained/185bffae0c60d5754dae9d4e3969ac20f8d1f3303d0b4818d537fa5d04711fed.gz",
+      "retained_sha256": "4c3807df61b5cff2970833f27ad608242d46a16ff569e46dd9c91b925c514bff"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-005_indexes/native/result.json",
+      "bytes": 80070,
+      "sha256": "ee920e41d14f432261605fbfdb48a7b67b00d72f25c697ade424c56421a949cb",
+      "retained": "/tmp/symaira-memory649-census-retained/ee920e41d14f432261605fbfdb48a7b67b00d72f25c697ade424c56421a949cb.gz",
+      "retained_sha256": "80d4aaffe8becd6b9add6fd1104021a34c82aae923b69a3b726ac4eb711cd7de"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-005_indexes/seed.db",
+      "bytes": 73728,
+      "sha256": "9e86d9b525334d582f3f96f7937a5ec2766eeb3b690b79c3ab7ce1eaf9710dc1",
+      "retained": "/tmp/symaira-memory649-census-retained/9e86d9b525334d582f3f96f7937a5ec2766eeb3b690b79c3ab7ce1eaf9710dc1.gz",
+      "retained_sha256": "cec2de7871368e2c3b76347459ca259f9f43ad019033ab92b942e3fb5f7d98a8"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-006_provenance/go/memory.db",
+      "bytes": 434176,
+      "sha256": "8db0ac75231c8a1209a878593c04f3dcc4d78abf9972d410b9c991c100121c29",
+      "retained": "/tmp/symaira-memory649-census-retained/8db0ac75231c8a1209a878593c04f3dcc4d78abf9972d410b9c991c100121c29.gz",
+      "retained_sha256": "8bbfb49394a80c74a1a869843468d0f1dd3612f387b53490c1a7c929c332c687"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-006_provenance/go/result.json",
+      "bytes": 89641,
+      "sha256": "d877919513d3b727788349b365b5e61f4c7b859aed65af12a16d91ea7d593171",
+      "retained": "/tmp/symaira-memory649-census-retained/d877919513d3b727788349b365b5e61f4c7b859aed65af12a16d91ea7d593171.gz",
+      "retained_sha256": "2017b9a0ca03910148aef8786899882396052c82787025a2c1968e3f35a6f348"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-006_provenance/native/memory.db",
+      "bytes": 352256,
+      "sha256": "60e864af6f2f4c104ce2d52ea18b8b895f662324c06b9a439f1216099d24e7f9",
+      "retained": "/tmp/symaira-memory649-census-retained/60e864af6f2f4c104ce2d52ea18b8b895f662324c06b9a439f1216099d24e7f9.gz",
+      "retained_sha256": "c342202538dc0f31123f652195aabbf8c308a6d4a53ec7ddb6bcafc025052d9e"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-006_provenance/native/result.json",
+      "bytes": 82038,
+      "sha256": "2456343112b6fceff22ca80ca65e695fdf35e65a644c9843fb670965a03ff06d",
+      "retained": "/tmp/symaira-memory649-census-retained/2456343112b6fceff22ca80ca65e695fdf35e65a644c9843fb670965a03ff06d.gz",
+      "retained_sha256": "84f43ef4abe4cb0abb995b3803ddc96fce84ecc51314bcbfcf5e925721ea89e2"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-006_provenance/seed.db",
+      "bytes": 77824,
+      "sha256": "842ccb52b7115f4795d17952e414131914cd440c2a3599eca6662b1b92d71dd1",
+      "retained": "/tmp/symaira-memory649-census-retained/842ccb52b7115f4795d17952e414131914cd440c2a3599eca6662b1b92d71dd1.gz",
+      "retained_sha256": "6ff4d48deb28c37f1f7e15311b8337469093107d245a8851240b7ad9cd5ecba8"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-007_profiles/go/memory.db",
+      "bytes": 434176,
+      "sha256": "5003eb624ef08ad601b5e7404647a2ea341b1353120e1a699a9dba9ae218c96c",
+      "retained": "/tmp/symaira-memory649-census-retained/5003eb624ef08ad601b5e7404647a2ea341b1353120e1a699a9dba9ae218c96c.gz",
+      "retained_sha256": "389cfd2deaaa86b4432114f952b2e2138d0de3ac2a44181b864ebba765e61050"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-007_profiles/go/result.json",
+      "bytes": 92101,
+      "sha256": "576a4cc52e98fa946c3b993d3c3f00d590de23c915d5a21af341cc098a31c7c4",
+      "retained": "/tmp/symaira-memory649-census-retained/576a4cc52e98fa946c3b993d3c3f00d590de23c915d5a21af341cc098a31c7c4.gz",
+      "retained_sha256": "2ec10181487b3b59da1a17b81608a592b6e5822a602a44e32889df4a1bba5abe"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-007_profiles/native/memory.db",
+      "bytes": 352256,
+      "sha256": "27cf8790c9755c90ae94f1fadad7171e4306fd1dc9344af84fab4ab5c5946cbc",
+      "retained": "/tmp/symaira-memory649-census-retained/27cf8790c9755c90ae94f1fadad7171e4306fd1dc9344af84fab4ab5c5946cbc.gz",
+      "retained_sha256": "a52381b49ee0ebdb9acb7042ce9153c9bd52e326b75a26b2889c087a22150b64"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-007_profiles/native/result.json",
+      "bytes": 84576,
+      "sha256": "97817e0c34a04d29cedf959c6d2eb896bcd86716d76081f900ad261af0a633e7",
+      "retained": "/tmp/symaira-memory649-census-retained/97817e0c34a04d29cedf959c6d2eb896bcd86716d76081f900ad261af0a633e7.gz",
+      "retained_sha256": "4d2ba170d754739971830d427673d2de101eac63bbe6618096770ae46f7e7504"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-007_profiles/seed.db",
+      "bytes": 90112,
+      "sha256": "e717d20293c55c29c14da62da01d04a24a8dd571e5ca14a610ddd3d38c271acf",
+      "retained": "/tmp/symaira-memory649-census-retained/e717d20293c55c29c14da62da01d04a24a8dd571e5ca14a610ddd3d38c271acf.gz",
+      "retained_sha256": "19a51d8fcdbff7dd3d1beea1df3f22dc4abebfc472146d1ffd691c8767e98123"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-008_entities/go/memory.db",
+      "bytes": 434176,
+      "sha256": "bafa465d8b4161368fad6ed7b8c013b25ac3307dab96197843f5bcae272dfcc7",
+      "retained": "/tmp/symaira-memory649-census-retained/bafa465d8b4161368fad6ed7b8c013b25ac3307dab96197843f5bcae272dfcc7.gz",
+      "retained_sha256": "4f0c316112a92b04383c9032df9f60ab5283bc7967c165669ef03f8fb207db4f"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-008_entities/go/result.json",
+      "bytes": 96794,
+      "sha256": "f5aee628dbd081a39f1c1e91e0ad57571a6624190f8391cf6fbc6b9113a31567",
+      "retained": "/tmp/symaira-memory649-census-retained/f5aee628dbd081a39f1c1e91e0ad57571a6624190f8391cf6fbc6b9113a31567.gz",
+      "retained_sha256": "c8d7707f10e1c938ef956c4025e31b41ee36b14e75424c7a53cd02d5e4db4bad"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-008_entities/native/memory.db",
+      "bytes": 356352,
+      "sha256": "44475b0377b327a82ebb40e23bcf67353695e8434cbe2de3c310daeaac8ca66d",
+      "retained": "/tmp/symaira-memory649-census-retained/44475b0377b327a82ebb40e23bcf67353695e8434cbe2de3c310daeaac8ca66d.gz",
+      "retained_sha256": "03f15320fbe284afb3048094a95e0ad4b742f1987982628b8a7348217bc1516b"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-008_entities/native/result.json",
+      "bytes": 89668,
+      "sha256": "97911465fe3b760e2b40125370407d1361aff214e147b0b09bfa6b49b5d30aad",
+      "retained": "/tmp/symaira-memory649-census-retained/97911465fe3b760e2b40125370407d1361aff214e147b0b09bfa6b49b5d30aad.gz",
+      "retained_sha256": "9288a9a73023ce8756dcb41feed49dbe8707dd7fac036acc3826a1c1ee3f23ba"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-008_entities/seed.db",
+      "bytes": 114688,
+      "sha256": "1e558e8c01a881697f8b1b05717829bc2b7f6e29a04f72e59de5d67a2fad68b5",
+      "retained": "/tmp/symaira-memory649-census-retained/1e558e8c01a881697f8b1b05717829bc2b7f6e29a04f72e59de5d67a2fad68b5.gz",
+      "retained_sha256": "d6d57ad4628f20ee17aa0ec62e3a001e0d14728565492f8bc5bbffa69166f57c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-009_consolidation/go/memory.db",
+      "bytes": 434176,
+      "sha256": "bd19e227299a714b27e03be005aca48eec90475eef2cdd82f5edf4ad040498dc",
+      "retained": "/tmp/symaira-memory649-census-retained/bd19e227299a714b27e03be005aca48eec90475eef2cdd82f5edf4ad040498dc.gz",
+      "retained_sha256": "da2a976fe29dda735b1170e42cbfd4b1923b64c6cafb792a933711634892c05c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-009_consolidation/go/result.json",
+      "bytes": 98251,
+      "sha256": "d4196ee8177c5bfb32173e941e8ee2feed45f641e209694a74c2b9ff96caf431",
+      "retained": "/tmp/symaira-memory649-census-retained/d4196ee8177c5bfb32173e941e8ee2feed45f641e209694a74c2b9ff96caf431.gz",
+      "retained_sha256": "5e8c4d78114580ffdb8b1297156e2b05e1a947d5d584a84e8b41f9ec0a72c9dd"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-009_consolidation/native/memory.db",
+      "bytes": 356352,
+      "sha256": "f6a2dfbe742968c876624e95de795189599bdb25ca664e13106bc8dd7a92f3ad",
+      "retained": "/tmp/symaira-memory649-census-retained/f6a2dfbe742968c876624e95de795189599bdb25ca664e13106bc8dd7a92f3ad.gz",
+      "retained_sha256": "b1f76a65b873fa7cbca7983e82db874875a19b8ccbe60f93603ec425b91f42c3"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-009_consolidation/native/result.json",
+      "bytes": 91125,
+      "sha256": "47d9c7419ebddf00f8164f084c7d9276b7a6b969354cd32427033a0510247f49",
+      "retained": "/tmp/symaira-memory649-census-retained/47d9c7419ebddf00f8164f084c7d9276b7a6b969354cd32427033a0510247f49.gz",
+      "retained_sha256": "057317d89c2ddebe79e8b610c5626bf70231a005a8ebbb8e135373a6d5e9b22e"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-009_consolidation/seed.db",
+      "bytes": 126976,
+      "sha256": "551af238a53cbb16407f98d77e94c91a6f5021c4c8c64531628beac954abcca2",
+      "retained": "/tmp/symaira-memory649-census-retained/551af238a53cbb16407f98d77e94c91a6f5021c4c8c64531628beac954abcca2.gz",
+      "retained_sha256": "01f6874269a47ae627b9cf96d50551654f5e6a912c708b5a4ecaa52dd4e15401"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-010_import_state/go/memory.db",
+      "bytes": 434176,
+      "sha256": "7007ba4ac821397c62e3fa08b1831af4562adaefba1f1a602540e9deb4cc55af",
+      "retained": "/tmp/symaira-memory649-census-retained/7007ba4ac821397c62e3fa08b1831af4562adaefba1f1a602540e9deb4cc55af.gz",
+      "retained_sha256": "611f7ae07bf552877495334803d2929fa7e128ea6a11748b9c56c6c29af170ca"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-010_import_state/go/result.json",
+      "bytes": 100330,
+      "sha256": "cbd5a2a43c15bd5d1ef76db86bf93bebce2be275df90e3e0870c62732c4b80dd",
+      "retained": "/tmp/symaira-memory649-census-retained/cbd5a2a43c15bd5d1ef76db86bf93bebce2be275df90e3e0870c62732c4b80dd.gz",
+      "retained_sha256": "c588c272416a35e6072f6367a53c975a80ae4135562ee07b954fce4a13110283"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-010_import_state/native/memory.db",
+      "bytes": 364544,
+      "sha256": "164c51849c5fb3d72a995f0366839ebb6d34c0218dfb2df741edc66acf5bd6b6",
+      "retained": "/tmp/symaira-memory649-census-retained/164c51849c5fb3d72a995f0366839ebb6d34c0218dfb2df741edc66acf5bd6b6.gz",
+      "retained_sha256": "fae129a201c39804162aa774ec002be07d9c5cbeaf32637bcab2ec6b937a9494"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-010_import_state/native/result.json",
+      "bytes": 93809,
+      "sha256": "578c51ba990d93932d803e64a4acd05cc04d406c1ace93b6133a2e4685536dd9",
+      "retained": "/tmp/symaira-memory649-census-retained/578c51ba990d93932d803e64a4acd05cc04d406c1ace93b6133a2e4685536dd9.gz",
+      "retained_sha256": "b54837562127cf037354d3e36f0cbfb5aed46353575d38ff2cfc1a327e6b64ea"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-010_import_state/seed.db",
+      "bytes": 147456,
+      "sha256": "a5eb7c5a3592340d75346e299c303f74d98bef1e823b3dd2e4c2f47504b99882",
+      "retained": "/tmp/symaira-memory649-census-retained/a5eb7c5a3592340d75346e299c303f74d98bef1e823b3dd2e4c2f47504b99882.gz",
+      "retained_sha256": "a495d7ba3627e07c8eb2448e98ea65c3516006d4f23184a6ef273b5b256229e3"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-011_importance/go/memory.db",
+      "bytes": 434176,
+      "sha256": "091b09708fd0d85c5e6f16d3f823b0a629ab7d00f257df1937649df0e9858b62",
+      "retained": "/tmp/symaira-memory649-census-retained/091b09708fd0d85c5e6f16d3f823b0a629ab7d00f257df1937649df0e9858b62.gz",
+      "retained_sha256": "e7883e14142a08f44cd2ebf21506f1fe0c1fbed055c4a5b2c80995433adfcfad"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-011_importance/go/result.json",
+      "bytes": 100938,
+      "sha256": "0316293b8f5dd9e132d0f50e5bd2c3ed8d1646fa12c1adebf40563305704b520",
+      "retained": "/tmp/symaira-memory649-census-retained/0316293b8f5dd9e132d0f50e5bd2c3ed8d1646fa12c1adebf40563305704b520.gz",
+      "retained_sha256": "30ef708bd371f3608af575492ba027e28e95cb37c19679b877c70d9b74e99824"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-011_importance/native/memory.db",
+      "bytes": 364544,
+      "sha256": "f22ac0a550526692167ab0b109d8bb40ce20a458c5a29803f26ff95e8804570c",
+      "retained": "/tmp/symaira-memory649-census-retained/f22ac0a550526692167ab0b109d8bb40ce20a458c5a29803f26ff95e8804570c.gz",
+      "retained_sha256": "c3e9fd214155b8a712fff60039e2e97b116ba35632c9d861b921211e20819cef"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-011_importance/native/result.json",
+      "bytes": 94417,
+      "sha256": "580b0bd8f4516563b672d2d2847f2caf1029c1118b28e0552fccaf29071396dc",
+      "retained": "/tmp/symaira-memory649-census-retained/580b0bd8f4516563b672d2d2847f2caf1029c1118b28e0552fccaf29071396dc.gz",
+      "retained_sha256": "c8d989d0368ad6e4e7098fa8e9cd1d6ed4481f372ef6cbb67e3a191bc0bbe702"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-011_importance/seed.db",
+      "bytes": 151552,
+      "sha256": "6a8d65804f7b821fce8cf4e0b53f1d45e49db83e7cbd4139710f07e4dfe33ee3",
+      "retained": "/tmp/symaira-memory649-census-retained/6a8d65804f7b821fce8cf4e0b53f1d45e49db83e7cbd4139710f07e4dfe33ee3.gz",
+      "retained_sha256": "11946c79f60959812be30310bdd0c7e46f4824cb1e0199089bcad29297408140"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-012_audit_log/go/memory.db",
+      "bytes": 434176,
+      "sha256": "79f6db5eaf7b9df49de9e0b94dc09d65ad853e7724acd638c586233ab6a3ac6d",
+      "retained": "/tmp/symaira-memory649-census-retained/79f6db5eaf7b9df49de9e0b94dc09d65ad853e7724acd638c586233ab6a3ac6d.gz",
+      "retained_sha256": "536fd98897ab75af52d8b5c731e04b750e068eec9c8d848741e60cdef1b1f466"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-012_audit_log/go/result.json",
+      "bytes": 104171,
+      "sha256": "eec60a2d02d567774ea4212b88db0894e4636aded5b4f489f3464a0b02dccca5",
+      "retained": "/tmp/symaira-memory649-census-retained/eec60a2d02d567774ea4212b88db0894e4636aded5b4f489f3464a0b02dccca5.gz",
+      "retained_sha256": "e8306f7c3d55dcbc4266947fba44ea077d5c83aef7d368a50ba5b6823d9f4e69"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-012_audit_log/native/memory.db",
+      "bytes": 380928,
+      "sha256": "616e38ac3f57a90e60df5bbbc9e81025b16290a0251f3cba6eadc4af7106733a",
+      "retained": "/tmp/symaira-memory649-census-retained/616e38ac3f57a90e60df5bbbc9e81025b16290a0251f3cba6eadc4af7106733a.gz",
+      "retained_sha256": "da31c89922e8bf71254639a0cdc6b56ad532db866f88b23086a5ab0400f7b664"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-012_audit_log/native/result.json",
+      "bytes": 98477,
+      "sha256": "94d8038c5fd356a566921708d83c6f295c0aca9e64c15424400bcdde22afab71",
+      "retained": "/tmp/symaira-memory649-census-retained/94d8038c5fd356a566921708d83c6f295c0aca9e64c15424400bcdde22afab71.gz",
+      "retained_sha256": "43f065ca64d592f897697fe48d7f2a3d23c831dc2f224d95a17258c218dfd36b"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-012_audit_log/seed.db",
+      "bytes": 172032,
+      "sha256": "16aa04d5de08bf3263dd0ca80460f3656637b0b2d69750680adbd04aaa881ab2",
+      "retained": "/tmp/symaira-memory649-census-retained/16aa04d5de08bf3263dd0ca80460f3656637b0b2d69750680adbd04aaa881ab2.gz",
+      "retained_sha256": "ec81f8a64d61415493057736f5cc1376b39fec891910725394f9090c7c71ebdb"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-014_temporal_validity/go/memory.db",
+      "bytes": 434176,
+      "sha256": "7399ce399dab3c90bf0ac92b299f03bf4acb22419a31c4556f1d0e817e8cf265",
+      "retained": "/tmp/symaira-memory649-census-retained/7399ce399dab3c90bf0ac92b299f03bf4acb22419a31c4556f1d0e817e8cf265.gz",
+      "retained_sha256": "312f41d1c1f83f87537c68d5cc01cc41234fee550fd1eb2d9e9fe80f9ac6f927"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-014_temporal_validity/go/result.json",
+      "bytes": 105746,
+      "sha256": "6592b0e4be0f90f2c1d1bab303ebf021ed33876a3907dc50f50fc262d3905def",
+      "retained": "/tmp/symaira-memory649-census-retained/6592b0e4be0f90f2c1d1bab303ebf021ed33876a3907dc50f50fc262d3905def.gz",
+      "retained_sha256": "82d2637e33269708ba3107afc36dfba49e729d04a8efbb785c95e4918ac218bf"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-014_temporal_validity/native/memory.db",
+      "bytes": 380928,
+      "sha256": "a89547b6bddf96b2f569aa6a0f09d9e49efe9a015655e0db2453f6531ddd85ca",
+      "retained": "/tmp/symaira-memory649-census-retained/a89547b6bddf96b2f569aa6a0f09d9e49efe9a015655e0db2453f6531ddd85ca.gz",
+      "retained_sha256": "4d7dfc223d3390e10b32e4f68a367adffe059b825283af6f4f23d142f9cd6cf5"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-014_temporal_validity/native/result.json",
+      "bytes": 100052,
+      "sha256": "94f73ea7074f94674bb303a497bbaeb5bb95b4c2c2cc5eead8d7ed4733afc8dc",
+      "retained": "/tmp/symaira-memory649-census-retained/94f73ea7074f94674bb303a497bbaeb5bb95b4c2c2cc5eead8d7ed4733afc8dc.gz",
+      "retained_sha256": "3ce504d67146775a1b894d2a4d16624c1df0f5942d6f9fc6699bdad1d5ee702a"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-014_temporal_validity/seed.db",
+      "bytes": 184320,
+      "sha256": "61b498616d4245b8b75967df0503e861f63b2827f6d02042d6992f9bd64226f0",
+      "retained": "/tmp/symaira-memory649-census-retained/61b498616d4245b8b75967df0503e861f63b2827f6d02042d6992f9bd64226f0.gz",
+      "retained_sha256": "813a280ae167ea5db6a586055a303be66e3ac0d1c24cce099be19b89ab2b7b43"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-015_entities_aliases/go/memory.db",
+      "bytes": 434176,
+      "sha256": "96830288eaef789af871286e0b42466354d14df54af51be2f88a45381349324b",
+      "retained": "/tmp/symaira-memory649-census-retained/96830288eaef789af871286e0b42466354d14df54af51be2f88a45381349324b.gz",
+      "retained_sha256": "5fba1876e0162eef74d6dc53daa0838f9590cbfc57a348763868e4d10972d13f"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-015_entities_aliases/go/result.json",
+      "bytes": 107429,
+      "sha256": "50ae11ba79b1f832a1f91e39eeb3693f1b545b867482eb74cf0db47a0ea843ed",
+      "retained": "/tmp/symaira-memory649-census-retained/50ae11ba79b1f832a1f91e39eeb3693f1b545b867482eb74cf0db47a0ea843ed.gz",
+      "retained_sha256": "a754b7c9d6c12bc54bc149d3b77d549f25b6d5c34766f6c584d1261cd6258ff1"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-015_entities_aliases/native/memory.db",
+      "bytes": 385024,
+      "sha256": "b7db20fc188732d7d1a8ec798f7422d590d982d90f265b8aa900013220f04c57",
+      "retained": "/tmp/symaira-memory649-census-retained/b7db20fc188732d7d1a8ec798f7422d590d982d90f265b8aa900013220f04c57.gz",
+      "retained_sha256": "c2266cb1e742fe280dff50338cc2a76f83cac1a0e63c50884c57ad0609b93539"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-015_entities_aliases/native/result.json",
+      "bytes": 102071,
+      "sha256": "8c732a6ff19cd1451f989cc9a95d84494e6bcead3480654fe96d9513556b3f3f",
+      "retained": "/tmp/symaira-memory649-census-retained/8c732a6ff19cd1451f989cc9a95d84494e6bcead3480654fe96d9513556b3f3f.gz",
+      "retained_sha256": "0d90b2bffe3f299ba94d665cac27c424cd82146144387602647774c2c6631d28"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-015_entities_aliases/seed.db",
+      "bytes": 196608,
+      "sha256": "87e2dc7c695b43b7e0d0e168070fd232707dfa1819192040f1a442c57f4b42a6",
+      "retained": "/tmp/symaira-memory649-census-retained/87e2dc7c695b43b7e0d0e168070fd232707dfa1819192040f1a442c57f4b42a6.gz",
+      "retained_sha256": "30ef5a588d0e7c75cb1d1895795eb8ee8dc5574ed38a641e41089ba7c2580fd1"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-016_fts5/go/memory.db",
+      "bytes": 434176,
+      "sha256": "dbe1bcdf2aa3bb02f3eeac02528e4b037271c64c1697d1c7998f59e8d57e591b",
+      "retained": "/tmp/symaira-memory649-census-retained/dbe1bcdf2aa3bb02f3eeac02528e4b037271c64c1697d1c7998f59e8d57e591b.gz",
+      "retained_sha256": "9969cb958f60b7eaadcb3e01b1b2422e2b89086123cd46ad18e92f022363febf"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-016_fts5/go/result.json",
+      "bytes": 113370,
+      "sha256": "10247e3c07011b1a502519b8fa95ec2cdfaba800d609bbc0a42652d1f1662fcb",
+      "retained": "/tmp/symaira-memory649-census-retained/10247e3c07011b1a502519b8fa95ec2cdfaba800d609bbc0a42652d1f1662fcb.gz",
+      "retained_sha256": "00c17f24e79bd98ff45cd339a4fdb0f4056bd36ab81c8692418b74cd879d399b"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-016_fts5/native/memory.db",
+      "bytes": 385024,
+      "sha256": "b8067bad51192b03d28b51562b7bf88a4a17dd40a6405069aba1028115a58e23",
+      "retained": "/tmp/symaira-memory649-census-retained/b8067bad51192b03d28b51562b7bf88a4a17dd40a6405069aba1028115a58e23.gz",
+      "retained_sha256": "c01c11ba9ec82067302152ab201489cfab888502e2abb7d3eee58ea0bd7c4e10"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-016_fts5/native/result.json",
+      "bytes": 108461,
+      "sha256": "8395d7043dcc015a0cdaf2757892d857a1b7f54890f228f8531cab1571438726",
+      "retained": "/tmp/symaira-memory649-census-retained/8395d7043dcc015a0cdaf2757892d857a1b7f54890f228f8531cab1571438726.gz",
+      "retained_sha256": "4eb0af6373148989873534ca9a5436a297c8034b8cc295c0fcd14428e7e1bae6"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-016_fts5/seed.db",
+      "bytes": 212992,
+      "sha256": "adc95ab0044c3ef9d15547f89eed48b8b7456aeeb529e96b0bd85e01e8f2b5e6",
+      "retained": "/tmp/symaira-memory649-census-retained/adc95ab0044c3ef9d15547f89eed48b8b7456aeeb529e96b0bd85e01e8f2b5e6.gz",
+      "retained_sha256": "3322b064576ce8d7b15572af87ceb33dc76597bcd5f72e800c9f646c163878c1"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-017_embedding_source/go/memory.db",
+      "bytes": 434176,
+      "sha256": "9488a7b675699f4e5d65c2f03ce16f886a041479cf5c7ee207e55d32c90d004f",
+      "retained": "/tmp/symaira-memory649-census-retained/9488a7b675699f4e5d65c2f03ce16f886a041479cf5c7ee207e55d32c90d004f.gz",
+      "retained_sha256": "46d4f53fb2de9161b9141c89a19b028423174bfbb76529a288bbaf803e05f3eb"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-017_embedding_source/go/result.json",
+      "bytes": 114250,
+      "sha256": "a9678bdb25616ce4579c0fdc3323bdf71ff0888b9a4475d14b8af50abb6b7403",
+      "retained": "/tmp/symaira-memory649-census-retained/a9678bdb25616ce4579c0fdc3323bdf71ff0888b9a4475d14b8af50abb6b7403.gz",
+      "retained_sha256": "ad48850df1988a798a2c9f2ba7ae7687cf3cdd432568ad50ab6ca594becb0e15"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-017_embedding_source/native/memory.db",
+      "bytes": 385024,
+      "sha256": "8baef3e0ee5bb4c1df55f43caf0ac026c74be230a3311cb2716ac2e3e7f94c5c",
+      "retained": "/tmp/symaira-memory649-census-retained/8baef3e0ee5bb4c1df55f43caf0ac026c74be230a3311cb2716ac2e3e7f94c5c.gz",
+      "retained_sha256": "5390610158ad57284c4fc5ee0e065724c5e5a643b3388c1cd7d9d5fcee1af321"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-017_embedding_source/native/result.json",
+      "bytes": 109341,
+      "sha256": "6c610067d668b85269a9281b3f585212242928a07a924ce6c3c5768ecff6c064",
+      "retained": "/tmp/symaira-memory649-census-retained/6c610067d668b85269a9281b3f585212242928a07a924ce6c3c5768ecff6c064.gz",
+      "retained_sha256": "347ad10016b4bdc64485534bf2724f80acd1e1d621e8670f7c2e330557714360"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-017_embedding_source/seed.db",
+      "bytes": 221184,
+      "sha256": "d08417df0a28546e6ee487276086003d5f37b634b346fb5ec7c0a3eb83ae48d6",
+      "retained": "/tmp/symaira-memory649-census-retained/d08417df0a28546e6ee487276086003d5f37b634b346fb5ec7c0a3eb83ae48d6.gz",
+      "retained_sha256": "0e95b1c83bd334ca77a7c851541ab3c16e1586e5414642bbd620acb443b89043"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-018_content_hash/go/memory.db",
+      "bytes": 434176,
+      "sha256": "22f6aa3294d6280f601b1548d7e725bb555326c42911391a25d10147ddb62f53",
+      "retained": "/tmp/symaira-memory649-census-retained/22f6aa3294d6280f601b1548d7e725bb555326c42911391a25d10147ddb62f53.gz",
+      "retained_sha256": "a3daf443e45d99b9539c99cea66e7eae323de985607193ecf77df99b1421325b"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-018_content_hash/go/result.json",
+      "bytes": 114863,
+      "sha256": "e7ebd458f481bc9ae3dbea0a60e6daf6f5cf4737da3a7e9651caabe7e397db88",
+      "retained": "/tmp/symaira-memory649-census-retained/e7ebd458f481bc9ae3dbea0a60e6daf6f5cf4737da3a7e9651caabe7e397db88.gz",
+      "retained_sha256": "b96465e8d40ff31b198c3d98bf64dc367a291ceb2985b2b888438a9b55bf653d"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-018_content_hash/native/memory.db",
+      "bytes": 385024,
+      "sha256": "cc7ee6fe5b1b41af7567c8dd238ae51e936d3301ca4c356bcfba06c8d45f1af5",
+      "retained": "/tmp/symaira-memory649-census-retained/cc7ee6fe5b1b41af7567c8dd238ae51e936d3301ca4c356bcfba06c8d45f1af5.gz",
+      "retained_sha256": "749e8546f9fb31608a2d080b2f5e4903ed08157615422e27bed6c46cf2e62f0d"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-018_content_hash/native/result.json",
+      "bytes": 109954,
+      "sha256": "0f502ce472a94e7f132597d38f059852e8f406d49f27c0cb66be74ee06b973a9",
+      "retained": "/tmp/symaira-memory649-census-retained/0f502ce472a94e7f132597d38f059852e8f406d49f27c0cb66be74ee06b973a9.gz",
+      "retained_sha256": "4ffdba550e08b3e557f7945b4322a5a05a3e0ab8bdb111aac1103f5ea3c3ec53"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-018_content_hash/seed.db",
+      "bytes": 225280,
+      "sha256": "69583df64748ab11dd1c836cd51a19db65c1289a3176fe34bf856c8cd994cfbd",
+      "retained": "/tmp/symaira-memory649-census-retained/69583df64748ab11dd1c836cd51a19db65c1289a3176fe34bf856c8cd994cfbd.gz",
+      "retained_sha256": "e7ded791b6ca71b77f725075cd38f965c2e9ef8a8f1d8e124763acadfc37549b"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-019_memory_evidence/go/memory.db",
+      "bytes": 434176,
+      "sha256": "1ffa8693737f2e2386a857e6208f01f30c5b52fc4ea9ab6639e9a2405a9a1f02",
+      "retained": "/tmp/symaira-memory649-census-retained/1ffa8693737f2e2386a857e6208f01f30c5b52fc4ea9ab6639e9a2405a9a1f02.gz",
+      "retained_sha256": "127c0a1f4d1ae9440b1d5e5765b395f6d2cad04eb926e6a7ca143889f372e618"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-019_memory_evidence/go/result.json",
+      "bytes": 118043,
+      "sha256": "780e0fecf84614773b59ef2a6ef8f5a9d8022d0e0ab031ed37849fd6fe582cee",
+      "retained": "/tmp/symaira-memory649-census-retained/780e0fecf84614773b59ef2a6ef8f5a9d8022d0e0ab031ed37849fd6fe582cee.gz",
+      "retained_sha256": "56b8d84d67a5fd9c1524fe4b0cbbdd3f6aa7576c73c9c942d0b699c3b3d2c899"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-019_memory_evidence/native/memory.db",
+      "bytes": 389120,
+      "sha256": "82423f0ffa49564004457dcf4f496bf8c23241c5da9a7025ee459d0707889972",
+      "retained": "/tmp/symaira-memory649-census-retained/82423f0ffa49564004457dcf4f496bf8c23241c5da9a7025ee459d0707889972.gz",
+      "retained_sha256": "ae0d107c15e8b9d08ff384430a73295de06d300ce263034aea6faec8402b6346"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-019_memory_evidence/native/result.json",
+      "bytes": 113480,
+      "sha256": "01a0ffdc3a1f4652f7a9585481795f71b0e3c701e30acd0dcbec00e089a4b10f",
+      "retained": "/tmp/symaira-memory649-census-retained/01a0ffdc3a1f4652f7a9585481795f71b0e3c701e30acd0dcbec00e089a4b10f.gz",
+      "retained_sha256": "97ed90aa8cb6fe85a7f0d706eba82682199822dfc602515399679a204332aad0"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-019_memory_evidence/seed.db",
+      "bytes": 237568,
+      "sha256": "8395204127e6f68eef746dd98e3b939dcc0d5d064b5f4771941c9669e4f30942",
+      "retained": "/tmp/symaira-memory649-census-retained/8395204127e6f68eef746dd98e3b939dcc0d5d064b5f4771941c9669e4f30942.gz",
+      "retained_sha256": "51f79d271fde64b4065c4a902eef8504257b8a4dbd5441bed8bd89c21df46702"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-020_entity_relations/go/memory.db",
+      "bytes": 434176,
+      "sha256": "70ccd6bcc954a394b78bd8c745c60e93ee5f82aad6c75cf631cbf55da526ca49",
+      "retained": "/tmp/symaira-memory649-census-retained/70ccd6bcc954a394b78bd8c745c60e93ee5f82aad6c75cf631cbf55da526ca49.gz",
+      "retained_sha256": "97ea2c9d19cfb9f5ce66ef11ea9fda78ad251fb1b005433b82add4500d4981ea"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-020_entity_relations/go/result.json",
+      "bytes": 122246,
+      "sha256": "09a702e934013f743e10cc792b54d4f61461e778acb9a9eec109c233c1539667",
+      "retained": "/tmp/symaira-memory649-census-retained/09a702e934013f743e10cc792b54d4f61461e778acb9a9eec109c233c1539667.gz",
+      "retained_sha256": "f403276275474af450960a13f3e0b0b2fce479e355a69fdc7b9b5547ad759fee"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-020_entity_relations/native/memory.db",
+      "bytes": 249856,
+      "sha256": "9ceb58ecaaf2cfd637b6a58497fb8fdd9ea4cf6ae7d75d1d6dffebacb43b3265",
+      "retained": "/tmp/symaira-memory649-census-retained/9ceb58ecaaf2cfd637b6a58497fb8fdd9ea4cf6ae7d75d1d6dffebacb43b3265.gz",
+      "retained_sha256": "9e1efb95d9dedb6927133b584864376d548c76a5fcc1e17a7c6b53933ec0bf72"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-020_entity_relations/native/result.json",
+      "bytes": 87333,
+      "sha256": "ac974228cdd0acf69f77266b20272066aa2f1c91cf5639b6f9b0954c65b95ecf",
+      "retained": "/tmp/symaira-memory649-census-retained/ac974228cdd0acf69f77266b20272066aa2f1c91cf5639b6f9b0954c65b95ecf.gz",
+      "retained_sha256": "1a0f008dc785fde16c383b9e57c0ede4ccdae78ed0e8ca6db589ff65d5b8478a"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-020_entity_relations/seed.db",
+      "bytes": 249856,
+      "sha256": "dbc99bebc8872dc8bc6a9b8ff5fbe84809511485d73321642b64cd2693d38ee2",
+      "retained": "/tmp/symaira-memory649-census-retained/dbc99bebc8872dc8bc6a9b8ff5fbe84809511485d73321642b64cd2693d38ee2.gz",
+      "retained_sha256": "434a11bfbed9df7fd4c410d58b7d23b0bf522aae8976833f17b40737ed1f2c52"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-021_context_profiles/go/memory.db",
+      "bytes": 434176,
+      "sha256": "141fdf592b9bf349e1e1303691e087d6232a1ca1f740cbd6d486c6efc94b49f7",
+      "retained": "/tmp/symaira-memory649-census-retained/141fdf592b9bf349e1e1303691e087d6232a1ca1f740cbd6d486c6efc94b49f7.gz",
+      "retained_sha256": "415a50fdf0ed97aaae5552b6d9dbd9fa163102cde56226855a2be1b59dca7d28"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-021_context_profiles/go/result.json",
+      "bytes": 128167,
+      "sha256": "c97edd04c47ea49869eef7d85c1a31c9751f8c866e64b5fb1013d23d50c69ce4",
+      "retained": "/tmp/symaira-memory649-census-retained/c97edd04c47ea49869eef7d85c1a31c9751f8c866e64b5fb1013d23d50c69ce4.gz",
+      "retained_sha256": "19b05fcec3fd0723105c60e9cad40672ad64ef50ca66ec2135601e7d049a0d30"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-021_context_profiles/native/memory.db",
+      "bytes": 278528,
+      "sha256": "0e2bbcc82d10977350b1bac393aea9a703c853cb8a5840cf81ab3f87a23bd27e",
+      "retained": "/tmp/symaira-memory649-census-retained/0e2bbcc82d10977350b1bac393aea9a703c853cb8a5840cf81ab3f87a23bd27e.gz",
+      "retained_sha256": "04a10932ab4e1bc9350b1544aa05aa2d93f3d71029921bc2c304691e23abd529"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-021_context_profiles/native/result.json",
+      "bytes": 99155,
+      "sha256": "0edf91592ca7651614cfaa6370650fc0cb3d2e33b2b6fc99a985a13925226d2b",
+      "retained": "/tmp/symaira-memory649-census-retained/0edf91592ca7651614cfaa6370650fc0cb3d2e33b2b6fc99a985a13925226d2b.gz",
+      "retained_sha256": "6d10761b1fee050f399eacd054162f80b4fb5e654944459a19bb1db73d503a8f"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-021_context_profiles/seed.db",
+      "bytes": 278528,
+      "sha256": "aaf6969e619da8e36d7e2ac872923aebe919d97c25f214baeac62b6685b5a60b",
+      "retained": "/tmp/symaira-memory649-census-retained/aaf6969e619da8e36d7e2ac872923aebe919d97c25f214baeac62b6685b5a60b.gz",
+      "retained_sha256": "b8b1fedb2bf23fa7ceae3da24088b3f62275d79d2be9dc419f5fff664587b7ae"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-022_entity_relation_provenance/go/memory.db",
+      "bytes": 434176,
+      "sha256": "92e5bb381ce48471bfb2d8c3cffd49dc18ae438b2f98584c6b18bb7274232333",
+      "retained": "/tmp/symaira-memory649-census-retained/92e5bb381ce48471bfb2d8c3cffd49dc18ae438b2f98584c6b18bb7274232333.gz",
+      "retained_sha256": "a9a1b348cabed7133270b20922a882428340ba98beba7f74e16a60f900ebba5a"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-022_entity_relation_provenance/go/result.json",
+      "bytes": 130379,
+      "sha256": "45e6f1a184af12e6c99d313495938ba552cc650d1860a177c1a299689c211c7b",
+      "retained": "/tmp/symaira-memory649-census-retained/45e6f1a184af12e6c99d313495938ba552cc650d1860a177c1a299689c211c7b.gz",
+      "retained_sha256": "8200125ada345801e65bfe694f23713fb0a56ddd7718cf1af65a90980fa161de"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-022_entity_relation_provenance/native/memory.db",
+      "bytes": 405504,
+      "sha256": "a0fca2af7fb69167c07b34fda26b29aac55bb38c00253a2efceb0e63208cdeda",
+      "retained": "/tmp/symaira-memory649-census-retained/a0fca2af7fb69167c07b34fda26b29aac55bb38c00253a2efceb0e63208cdeda.gz",
+      "retained_sha256": "4d05125e81fef4396163d121f3c49ec183b388791e801a7585193996f04d69ec"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-022_entity_relation_provenance/native/result.json",
+      "bytes": 126213,
+      "sha256": "8c0e3f921844e4705b75ba6fadbce5ce8317bc69eb3bd6d325d2aace8eb52198",
+      "retained": "/tmp/symaira-memory649-census-retained/8c0e3f921844e4705b75ba6fadbce5ce8317bc69eb3bd6d325d2aace8eb52198.gz",
+      "retained_sha256": "010ac590f9fd6aa247967814511fbcc56d78f53771c237c01d87e50d2d614df3"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-022_entity_relation_provenance/seed.db",
+      "bytes": 286720,
+      "sha256": "24f6803609a0a4941b4ca1aa75a40f996398fbc8afa24b195718a9966c46a332",
+      "retained": "/tmp/symaira-memory649-census-retained/24f6803609a0a4941b4ca1aa75a40f996398fbc8afa24b195718a9966c46a332.gz",
+      "retained_sha256": "4d462d65f73b0dfdabf36d9c1a2acff679705f137db99bf9154a923730033b37"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-023_sync_oplog/go/memory.db",
+      "bytes": 434176,
+      "sha256": "d25790ea18a3d06ddfa42a791c9f6e411e82c8ef51fde2e3d839ae5e55d51180",
+      "retained": "/tmp/symaira-memory649-census-retained/d25790ea18a3d06ddfa42a791c9f6e411e82c8ef51fde2e3d839ae5e55d51180.gz",
+      "retained_sha256": "4ecda691bf9ae16182cc2ec321bf6e85ac15bbcb48e626c9ccdf1a87366330b4"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-023_sync_oplog/go/result.json",
+      "bytes": 134763,
+      "sha256": "a08d87e82dab1876f3b4ec4462085e3294a383757b04dc2409cf35980bce88d2",
+      "retained": "/tmp/symaira-memory649-census-retained/a08d87e82dab1876f3b4ec4462085e3294a383757b04dc2409cf35980bce88d2.gz",
+      "retained_sha256": "a745c90b0d158ef3a303b035caa7674e3ea15a87a6b08c0f2b50be75aa104eb6"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-023_sync_oplog/native/memory.db",
+      "bytes": 405504,
+      "sha256": "7603c2eeecb27f7790799c77628283e717f5ade1492a380689deb75735c13630",
+      "retained": "/tmp/symaira-memory649-census-retained/7603c2eeecb27f7790799c77628283e717f5ade1492a380689deb75735c13630.gz",
+      "retained_sha256": "ca13f52e41caa0d87871af9c9df4d95a2f7207d67c2c1cdee66cb497cbe35a4c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-023_sync_oplog/native/result.json",
+      "bytes": 130411,
+      "sha256": "63e830bb39f15532743963a35e30197f81d637751dd57020aafc747556ae098c",
+      "retained": "/tmp/symaira-memory649-census-retained/63e830bb39f15532743963a35e30197f81d637751dd57020aafc747556ae098c.gz",
+      "retained_sha256": "9049432f0f5351f1a71d5fde118cc9c92f0d8905bc6da5b0fdbc229a7a642517"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-023_sync_oplog/seed.db",
+      "bytes": 315392,
+      "sha256": "24678e0530ec59374c1087dd50a37836b47bb7a1bec04d5422e1b911a4ba28c9",
+      "retained": "/tmp/symaira-memory649-census-retained/24678e0530ec59374c1087dd50a37836b47bb7a1bec04d5422e1b911a4ba28c9.gz",
+      "retained_sha256": "28b43baddfc3580cd85ab0bbdced8f8d8686c6fcb9a8f68a3a2f1e7445d69e25"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-024_working_memory_tier/go/memory.db",
+      "bytes": 434176,
+      "sha256": "9725a5b59743ef80c7bf5e0e3cd801a824069587ebff008510ea84c1f012c4d7",
+      "retained": "/tmp/symaira-memory649-census-retained/9725a5b59743ef80c7bf5e0e3cd801a824069587ebff008510ea84c1f012c4d7.gz",
+      "retained_sha256": "804260363f008ff61a5441fd00b114e68a6e8ebd01c9a114b54fcdd18a680b36"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-024_working_memory_tier/go/result.json",
+      "bytes": 135850,
+      "sha256": "ee1287d9b29a0d81814f811c1bda89662e63c4b5486de134b57d00a643eb0bc6",
+      "retained": "/tmp/symaira-memory649-census-retained/ee1287d9b29a0d81814f811c1bda89662e63c4b5486de134b57d00a643eb0bc6.gz",
+      "retained_sha256": "28b8f5c88ddba4e7191a40d7af1144c5ffe404c1295b9f8d2ec7e4ee963f43fb"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-024_working_memory_tier/native/memory.db",
+      "bytes": 405504,
+      "sha256": "9c0d0eeba061a7d6001d3539c891fc194a8321ae8049720fb88e42532979c32c",
+      "retained": "/tmp/symaira-memory649-census-retained/9c0d0eeba061a7d6001d3539c891fc194a8321ae8049720fb88e42532979c32c.gz",
+      "retained_sha256": "c72036ac4162a82243cfd4866b6283716d6edc0b98337f684445c0f754a49c29"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-024_working_memory_tier/native/result.json",
+      "bytes": 131498,
+      "sha256": "b35bfdfab35b53bd900537aa20eb54f14f83c50e5e8e2b83f81c79415269ad57",
+      "retained": "/tmp/symaira-memory649-census-retained/b35bfdfab35b53bd900537aa20eb54f14f83c50e5e8e2b83f81c79415269ad57.gz",
+      "retained_sha256": "290f61a2cabf73b45cda41df21484a37c3192ab01bf6606407b92b0a4fa501d6"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-024_working_memory_tier/seed.db",
+      "bytes": 323584,
+      "sha256": "f263fb7f40551ae452228e6495ea92c16591c9fa6bb08eaa9a936a163d8acbaf",
+      "retained": "/tmp/symaira-memory649-census-retained/f263fb7f40551ae452228e6495ea92c16591c9fa6bb08eaa9a936a163d8acbaf.gz",
+      "retained_sha256": "76e9bf0304c07146ea01435eee9dc16b3a3f25e7caec64641da85678d95a0090"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-025_entity_relation_temporal/go/memory.db",
+      "bytes": 434176,
+      "sha256": "5a9b4c9431294bed9d2ae6d79ff059869aa19f3fab984863b64cd50337862140",
+      "retained": "/tmp/symaira-memory649-census-retained/5a9b4c9431294bed9d2ae6d79ff059869aa19f3fab984863b64cd50337862140.gz",
+      "retained_sha256": "84618c156faccd1c04481ab21f3617e867d2f6967717952f161ccb124affe7ed"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-025_entity_relation_temporal/go/result.json",
+      "bytes": 137068,
+      "sha256": "d4b5ae4fb417867346ed268e16160770f467cbc913dc85192a0459bf5a215ec8",
+      "retained": "/tmp/symaira-memory649-census-retained/d4b5ae4fb417867346ed268e16160770f467cbc913dc85192a0459bf5a215ec8.gz",
+      "retained_sha256": "506020f3f3909479fe790d801fbd870f32ffca2b4727b80108cdfeaa14ce4479"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-025_entity_relation_temporal/native/memory.db",
+      "bytes": 413696,
+      "sha256": "1867345ff96698664eaaf52baa1dd390e02c1a39256e1b4d376766947374e233",
+      "retained": "/tmp/symaira-memory649-census-retained/1867345ff96698664eaaf52baa1dd390e02c1a39256e1b4d376766947374e233.gz",
+      "retained_sha256": "752fdf704893bd9ca683ac3016407ae53151c8ec51e56cb44873544133a98192"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-025_entity_relation_temporal/native/result.json",
+      "bytes": 134402,
+      "sha256": "f97e4736fa4d4c5b59f39cae0e609a388f0d31c7fda9e0ddd4dc357ef758ae7e",
+      "retained": "/tmp/symaira-memory649-census-retained/f97e4736fa4d4c5b59f39cae0e609a388f0d31c7fda9e0ddd4dc357ef758ae7e.gz",
+      "retained_sha256": "67b308498571a12d46335d0159d46fc5903f07bba382b7a2352286a28b5846d3"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-025_entity_relation_temporal/seed.db",
+      "bytes": 331776,
+      "sha256": "31ca06b684cc9d3d099eb5f52a5503833fb2aa0197662f3d42de92c26ff0a7da",
+      "retained": "/tmp/symaira-memory649-census-retained/31ca06b684cc9d3d099eb5f52a5503833fb2aa0197662f3d42de92c26ff0a7da.gz",
+      "retained_sha256": "b1f907959d34f69885f217c605b11dea0dc316f6b0e89d2b14bbfca5ce32d978"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-026_binary_embedding/go/memory.db",
+      "bytes": 434176,
+      "sha256": "d7c88d93e88995ab4cb85bd3dbe7669c842056120df7d54e957427a97b251804",
+      "retained": "/tmp/symaira-memory649-census-retained/d7c88d93e88995ab4cb85bd3dbe7669c842056120df7d54e957427a97b251804.gz",
+      "retained_sha256": "604b63c088230c516ce7b1b5dfa1bb00aed629843ec9c8aa6b7bab25790507f8"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-026_binary_embedding/go/result.json",
+      "bytes": 137394,
+      "sha256": "a9bcee8c0e44821121ad7c524983cf58b0ae13d1282f1a3da4456e663602d4de",
+      "retained": "/tmp/symaira-memory649-census-retained/a9bcee8c0e44821121ad7c524983cf58b0ae13d1282f1a3da4456e663602d4de.gz",
+      "retained_sha256": "9a4db695fa319746cb387a8a1b3534b3ede28390e9ee35332a20bddb198bf6e8"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-026_binary_embedding/native/memory.db",
+      "bytes": 413696,
+      "sha256": "0af8a3acc9a883c3222bc411ea9c094c7b1152315b3f984dfe6ad765dcb60aec",
+      "retained": "/tmp/symaira-memory649-census-retained/0af8a3acc9a883c3222bc411ea9c094c7b1152315b3f984dfe6ad765dcb60aec.gz",
+      "retained_sha256": "b51e0b8651b4199f914bb396d5783b115e0654d3d099b33ec3fad969a5615288"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-026_binary_embedding/native/result.json",
+      "bytes": 134728,
+      "sha256": "2ddb49671c0bfadc41192932c53eb8247d6b0319d95cfc1eb95a2e3f1a548739",
+      "retained": "/tmp/symaira-memory649-census-retained/2ddb49671c0bfadc41192932c53eb8247d6b0319d95cfc1eb95a2e3f1a548739.gz",
+      "retained_sha256": "82b159d0696e918480f4a190f8366af13450b532dc89a5993fa98bd2175f46b6"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-026_binary_embedding/seed.db",
+      "bytes": 331776,
+      "sha256": "ddca1203257467db50a23d065056fed830b1feff68e920e408b0048b74e39d49",
+      "retained": "/tmp/symaira-memory649-census-retained/ddca1203257467db50a23d065056fed830b1feff68e920e408b0048b74e39d49.gz",
+      "retained_sha256": "cc1d012744bd0c15fc67c92fd8b86c97dd24a670016f29fce837e577b569eea5"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_access_count/go/memory.db",
+      "bytes": 434176,
+      "sha256": "7095729e2a3ffa6912b2e1021c56deb58358134e0d3a2c9dc0b177dec20b4cd7",
+      "retained": "/tmp/symaira-memory649-census-retained/7095729e2a3ffa6912b2e1021c56deb58358134e0d3a2c9dc0b177dec20b4cd7.gz",
+      "retained_sha256": "e66a711089fd05326e46319604c09ff8a3fc3183f621b09cb2401fb8435a04f2"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_access_count/go/result.json",
+      "bytes": 137725,
+      "sha256": "fd314c02bb85d509e3a900c83f0c24619a5a65e37ce1f1d2eb428e64f220d606",
+      "retained": "/tmp/symaira-memory649-census-retained/fd314c02bb85d509e3a900c83f0c24619a5a65e37ce1f1d2eb428e64f220d606.gz",
+      "retained_sha256": "b90245dc98803cf6f6fabe87d7aea49ff7bdb89c525a02383ae5b9d7d295a144"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_access_count/native/memory.db",
+      "bytes": 413696,
+      "sha256": "4391966e8f80b19b411a9657606abed5fab4cdf33c4958d83bba95fde9aae372",
+      "retained": "/tmp/symaira-memory649-census-retained/4391966e8f80b19b411a9657606abed5fab4cdf33c4958d83bba95fde9aae372.gz",
+      "retained_sha256": "09a49b823b3c1f7e8144b5a86bc360e2482e86b1beafe087863a409c0a86d41b"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_access_count/native/result.json",
+      "bytes": 135059,
+      "sha256": "1d4dfd868302b6db80ceffb62e8b3945edcdc073d1f2d78bc8d5e8f2ad1708c4",
+      "retained": "/tmp/symaira-memory649-census-retained/1d4dfd868302b6db80ceffb62e8b3945edcdc073d1f2d78bc8d5e8f2ad1708c4.gz",
+      "retained_sha256": "a1d9bdfa9fec79f08b2b11a9e443abafd5dbe9e0d05a3728537a4487bd4a7120"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_access_count/seed.db",
+      "bytes": 331776,
+      "sha256": "a70fe57ba8084a99cf7dc1285ed2e50ced5eab7a99326a29edda5489d6362461",
+      "retained": "/tmp/symaira-memory649-census-retained/a70fe57ba8084a99cf7dc1285ed2e50ced5eab7a99326a29edda5489d6362461.gz",
+      "retained_sha256": "a76c8e76645e726806737ddb05e529ac4c150ff48e4319264849596dee38c8eb"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_consolidation_runs/go/memory.db",
+      "bytes": 434176,
+      "sha256": "0ebc9ce25403a9475688420293e740deec1193245fce4e964561c3098ea84bb6",
+      "retained": "/tmp/symaira-memory649-census-retained/0ebc9ce25403a9475688420293e740deec1193245fce4e964561c3098ea84bb6.gz",
+      "retained_sha256": "d6618443d9c2c2b6cc8f81b2eb5ff9203cc89d56e3ca1eda5be8b75ddf12ca3e"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_consolidation_runs/go/result.json",
+      "bytes": 139730,
+      "sha256": "26a9f3a3366eaf17a9738491e41bcd59a19969503da5f9745f5f2ef057ff37b8",
+      "retained": "/tmp/symaira-memory649-census-retained/26a9f3a3366eaf17a9738491e41bcd59a19969503da5f9745f5f2ef057ff37b8.gz",
+      "retained_sha256": "f89227078ed939fba4b790f20ad73f77567dd779adbb4fb86c685710c2dfcd64"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_consolidation_runs/native/memory.db",
+      "bytes": 413696,
+      "sha256": "d2b13a40f2165abbabeb20ce3bc008734daa76e33c6142427b6b64a5bf6c2803",
+      "retained": "/tmp/symaira-memory649-census-retained/d2b13a40f2165abbabeb20ce3bc008734daa76e33c6142427b6b64a5bf6c2803.gz",
+      "retained_sha256": "61d475697ed810e5b700fc1f6d0c8a0fbd17b3b94f0b7842a1cc867802bea0e6"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_consolidation_runs/native/result.json",
+      "bytes": 137082,
+      "sha256": "f1984903802a09e50912ea9af6e1a1820f6d044e20dcb507e7bb5ac399145cf7",
+      "retained": "/tmp/symaira-memory649-census-retained/f1984903802a09e50912ea9af6e1a1820f6d044e20dcb507e7bb5ac399145cf7.gz",
+      "retained_sha256": "0db9ffe2ed30bddaee4b9bfd9f7aab5a51936ca80164616d757e4710671c5059"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_consolidation_runs/seed.db",
+      "bytes": 339968,
+      "sha256": "eb2fee05652cab243a55ef83a837f59ab6e90327a0f56bc0940fd21092b20208",
+      "retained": "/tmp/symaira-memory649-census-retained/eb2fee05652cab243a55ef83a837f59ab6e90327a0f56bc0940fd21092b20208.gz",
+      "retained_sha256": "5ba9a9c420309ff61c33d95866cb558a4634d8fd56eb28a634ecdf874438cb52"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_fts5_porter/go/memory.db",
+      "bytes": 434176,
+      "sha256": "9d0658c57b95bb171a1da1390dba537e9332f29d5045468aba7751c6fde38453",
+      "retained": "/tmp/symaira-memory649-census-retained/9d0658c57b95bb171a1da1390dba537e9332f29d5045468aba7751c6fde38453.gz",
+      "retained_sha256": "649e99105e3448a9b7677e05733030e399030b2617f976830d79dd75f16147c4"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_fts5_porter/go/result.json",
+      "bytes": 139856,
+      "sha256": "eec6ae830d68d3ed7c9f9c8a4384a9e21622c6c6ad60b8a051fd636c5bedcf48",
+      "retained": "/tmp/symaira-memory649-census-retained/eec6ae830d68d3ed7c9f9c8a4384a9e21622c6c6ad60b8a051fd636c5bedcf48.gz",
+      "retained_sha256": "e4ef01f8a1a72524392a98f49e2a3b763e01572c25b4420028cc20601409f82c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_fts5_porter/native/memory.db",
+      "bytes": 413696,
+      "sha256": "8347a1f18d3e7e40db22d84266c053f498da5629457d111e04fe55781c074de7",
+      "retained": "/tmp/symaira-memory649-census-retained/8347a1f18d3e7e40db22d84266c053f498da5629457d111e04fe55781c074de7.gz",
+      "retained_sha256": "0262de119bf3607840237cb57dba6b2cf4c4160099e73640f8f2b8e427df5f93"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_fts5_porter/native/result.json",
+      "bytes": 137285,
+      "sha256": "03f622a0c15cfd94ee4b4bccaacc8478326a938b78626068b2575cba7dede82c",
+      "retained": "/tmp/symaira-memory649-census-retained/03f622a0c15cfd94ee4b4bccaacc8478326a938b78626068b2575cba7dede82c.gz",
+      "retained_sha256": "a40928447169be9c55d6ccd3f33589bb456ba180ab12b2ca86bd8cf7a0bfd3d5"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_fts5_porter/seed.db",
+      "bytes": 339968,
+      "sha256": "c8534545a34063ace534dc3f88be4463def135ebdd93a2adb434a03a22097412",
+      "retained": "/tmp/symaira-memory649-census-retained/c8534545a34063ace534dc3f88be4463def135ebdd93a2adb434a03a22097412.gz",
+      "retained_sha256": "afa6d07ec230895f97d0657c930557ae8a2a62bdabf39271c8b9eb50269214eb"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_query_log/go/memory.db",
+      "bytes": 434176,
+      "sha256": "f31f94e51c708ac59ff5726f34d7c1bfbcac98f4352a5c43df45a3150e1303ba",
+      "retained": "/tmp/symaira-memory649-census-retained/f31f94e51c708ac59ff5726f34d7c1bfbcac98f4352a5c43df45a3150e1303ba.gz",
+      "retained_sha256": "5e44e8c1d129e2a6416574998076d4123565088ea7ff1fea055e77a7e0004939"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_query_log/go/result.json",
+      "bytes": 142400,
+      "sha256": "31ec794ac7bdf26f0f31bbff960eefb2597a0c41ff65b07dfc09fe1454a25ae8",
+      "retained": "/tmp/symaira-memory649-census-retained/31ec794ac7bdf26f0f31bbff960eefb2597a0c41ff65b07dfc09fe1454a25ae8.gz",
+      "retained_sha256": "bc78b8f30f66ec177a0e237c7fc73e82c6532fb7218541b3a5334ac28f16ae3c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_query_log/native/memory.db",
+      "bytes": 421888,
+      "sha256": "4322f11d9e43c230b18b4ca2cfebeca9eee34f29e49b8ee01137270e835c37ac",
+      "retained": "/tmp/symaira-memory649-census-retained/4322f11d9e43c230b18b4ca2cfebeca9eee34f29e49b8ee01137270e835c37ac.gz",
+      "retained_sha256": "89e2df0f9a1c95fa0779ecc20b55c6c860d51ceddf5def8dc7b7dacab2b2483e"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_query_log/native/result.json",
+      "bytes": 140138,
+      "sha256": "56aac467cc09c1bb7c0b44ad86fd18738ab072cf05f8e1ba00e45548457a8a1e",
+      "retained": "/tmp/symaira-memory649-census-retained/56aac467cc09c1bb7c0b44ad86fd18738ab072cf05f8e1ba00e45548457a8a1e.gz",
+      "retained_sha256": "94794cd364eb6be1219e97d98ecbb0e1b367c0e196f35158c1e260f9fc551d15"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_query_log/seed.db",
+      "bytes": 356352,
+      "sha256": "fe41e1fca524f571ecf586a4995ebc3d71037ecba19f5a8f58ca2f935b0a709d",
+      "retained": "/tmp/symaira-memory649-census-retained/fe41e1fca524f571ecf586a4995ebc3d71037ecba19f5a8f58ca2f935b0a709d.gz",
+      "retained_sha256": "6c65e7e411f99beebbe5f4a2f94ef92150209e6383f2289e15d8d3b3e9cdee14"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_retrieval_feedback/go/memory.db",
+      "bytes": 434176,
+      "sha256": "2ac3c0b7378895cb5ea1fdbda1d1eeeee66f2eff38fc3f32f4bc89e321605ef4",
+      "retained": "/tmp/symaira-memory649-census-retained/2ac3c0b7378895cb5ea1fdbda1d1eeeee66f2eff38fc3f32f4bc89e321605ef4.gz",
+      "retained_sha256": "5dca109e14add6793b23bde6f6fdfdfe926f87fd8906dd732ee9f1a54929e352"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_retrieval_feedback/go/result.json",
+      "bytes": 142721,
+      "sha256": "589dd319d8ee3f5372917d6a0322694729cd9c4881707abe289ca3469da88d6d",
+      "retained": "/tmp/symaira-memory649-census-retained/589dd319d8ee3f5372917d6a0322694729cd9c4881707abe289ca3469da88d6d.gz",
+      "retained_sha256": "47ccb8ea02192c82dcf34f53e84a1c7255597d519b06ed2bc2cf831474949f56"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_retrieval_feedback/native/memory.db",
+      "bytes": 421888,
+      "sha256": "8e7402a3e81cdbfc02c3663a20b94e04f6e216b9db9e29b0bbaa7de4850ba92b",
+      "retained": "/tmp/symaira-memory649-census-retained/8e7402a3e81cdbfc02c3663a20b94e04f6e216b9db9e29b0bbaa7de4850ba92b.gz",
+      "retained_sha256": "ebeb16ba1dcb464fa58a53cc70bfb6fda4536159398e7cfa5e50f26446aed257"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_retrieval_feedback/native/result.json",
+      "bytes": 140459,
+      "sha256": "58c431bf8c86daafffd1992b92c864ac732ae803db5279168f7a0c7a05bb973a",
+      "retained": "/tmp/symaira-memory649-census-retained/58c431bf8c86daafffd1992b92c864ac732ae803db5279168f7a0c7a05bb973a.gz",
+      "retained_sha256": "cc06a36b0dbecf026071d34fecdfc51558f32dfa9f756088bb9d94f1058f12e3"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-027_retrieval_feedback/seed.db",
+      "bytes": 356352,
+      "sha256": "79b05faffe9f377d9df4124061a82fc814c9f97267776196e96ed27133f1631c",
+      "retained": "/tmp/symaira-memory649-census-retained/79b05faffe9f377d9df4124061a82fc814c9f97267776196e96ed27133f1631c.gz",
+      "retained_sha256": "c8fc2fccd8eb9e6d837281e034cc062b2af264a0ae50ea2ef000d1bb205ea119"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-028_embedding_quantization/go/memory.db",
+      "bytes": 434176,
+      "sha256": "aa93cbe975e0d56db4af9dcfab65fb8731b897d5bda3d41f91ce4762a2eca635",
+      "retained": "/tmp/symaira-memory649-census-retained/aa93cbe975e0d56db4af9dcfab65fb8731b897d5bda3d41f91ce4762a2eca635.gz",
+      "retained_sha256": "06025252ff79c2d4df94839d685b6f53fb92278d891f888232ac5a9d60383528"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-028_embedding_quantization/go/result.json",
+      "bytes": 143089,
+      "sha256": "0c88173a345a2223fe6cd67fb725e47a0c50deb2211e81104c2039bb18d478b7",
+      "retained": "/tmp/symaira-memory649-census-retained/0c88173a345a2223fe6cd67fb725e47a0c50deb2211e81104c2039bb18d478b7.gz",
+      "retained_sha256": "fdf1ade2801530c6a2a590b823abe4e562a46c8e0c7a6502d7a2d18c3babf0f6"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-028_embedding_quantization/native/memory.db",
+      "bytes": 421888,
+      "sha256": "e558480ff3be6217144774794c851a25b7c4220a3e38b00921481d00bc10dd25",
+      "retained": "/tmp/symaira-memory649-census-retained/e558480ff3be6217144774794c851a25b7c4220a3e38b00921481d00bc10dd25.gz",
+      "retained_sha256": "8239dce3a50110578b38125a6a963a8f782cced6ae3c6e97bc1cd20a622a3993"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-028_embedding_quantization/native/result.json",
+      "bytes": 140827,
+      "sha256": "0d79c05999fc93ff90ddbc77495606e058384edca1f05d2940ba04ae180c9579",
+      "retained": "/tmp/symaira-memory649-census-retained/0d79c05999fc93ff90ddbc77495606e058384edca1f05d2940ba04ae180c9579.gz",
+      "retained_sha256": "e3a6b3972a23edc92ee48345d1ebf832fd3921ea61bed098eea330253f3bf869"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-028_embedding_quantization/seed.db",
+      "bytes": 356352,
+      "sha256": "89828fef6af8c745133b268ecc4fe0f9cf47a709dd3a1a49b8a2a35f626d9e91",
+      "retained": "/tmp/symaira-memory649-census-retained/89828fef6af8c745133b268ecc4fe0f9cf47a709dd3a1a49b8a2a35f626d9e91.gz",
+      "retained_sha256": "c5e37496fba440d7cfbbb1fc76cdc4d2d2f1366e3e48ecf3c1e57040357cbce6"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-029_query_log_attribution/go/memory.db",
+      "bytes": 434176,
+      "sha256": "33142a23be3d7e6ad1dbe5579fc666e1b84ee118e089a9c399526fbcf629ffc4",
+      "retained": "/tmp/symaira-memory649-census-retained/33142a23be3d7e6ad1dbe5579fc666e1b84ee118e089a9c399526fbcf629ffc4.gz",
+      "retained_sha256": "615890f6a76bd3bf8db7f24e18ccd76c1e52fab88a9388c13f315dafceb2df13"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-029_query_log_attribution/go/result.json",
+      "bytes": 143962,
+      "sha256": "ae54befdf23f3e95816dbc5e9c37fb871fd1eb2752f53138504e6f9da0e39adb",
+      "retained": "/tmp/symaira-memory649-census-retained/ae54befdf23f3e95816dbc5e9c37fb871fd1eb2752f53138504e6f9da0e39adb.gz",
+      "retained_sha256": "79e6df14653908c44d62ac12a07a71dea020b7583e16479e2d2c3863f3ee1263"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-029_query_log_attribution/native/memory.db",
+      "bytes": 425984,
+      "sha256": "988dc3e2a3f64939b0d3bd63d2921e9b5a568331e914e4b8be56cb0d3bae442b",
+      "retained": "/tmp/symaira-memory649-census-retained/988dc3e2a3f64939b0d3bd63d2921e9b5a568331e914e4b8be56cb0d3bae442b.gz",
+      "retained_sha256": "1464a45e6d3e5e4816918b150f915aa14e8b2b43574aab09d1df97c69fc604c0"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-029_query_log_attribution/native/result.json",
+      "bytes": 142453,
+      "sha256": "d8a40fc861d9aea34c1ca4ba1fd147c26e7e32b27d32de9e486e584015107afe",
+      "retained": "/tmp/symaira-memory649-census-retained/d8a40fc861d9aea34c1ca4ba1fd147c26e7e32b27d32de9e486e584015107afe.gz",
+      "retained_sha256": "2df026ab694b3078eb717f06b9b3d5b2b8a51fe05b57b2cde36bc2b7d4d28284"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-029_query_log_attribution/seed.db",
+      "bytes": 360448,
+      "sha256": "7fac3165b432fc93aaf2b9be8cb6f4e18bef680d4ee4f0a0d920a55da8760597",
+      "retained": "/tmp/symaira-memory649-census-retained/7fac3165b432fc93aaf2b9be8cb6f4e18bef680d4ee4f0a0d920a55da8760597.gz",
+      "retained_sha256": "07b6af93c5e56c07635aef4aa2925090f48f2289bbc9e6f5831edc2e2183dfab"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-030_audit_target/go/memory.db",
+      "bytes": 434176,
+      "sha256": "3bc9e95f1da6d72792a1b8f9ea7d53175237d98ca20b020fa9eb8a8be80c09a3",
+      "retained": "/tmp/symaira-memory649-census-retained/3bc9e95f1da6d72792a1b8f9ea7d53175237d98ca20b020fa9eb8a8be80c09a3.gz",
+      "retained_sha256": "61957fe2d7fea0a70e5c1fa2ef8f7f595249068c57b26e75cfff73b12bd15965"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-030_audit_target/go/result.json",
+      "bytes": 144711,
+      "sha256": "a24eb12e2c5693f4a36ba38b59cdfbb7a702c62c86040a0bcd7b9b8471f2bb89",
+      "retained": "/tmp/symaira-memory649-census-retained/a24eb12e2c5693f4a36ba38b59cdfbb7a702c62c86040a0bcd7b9b8471f2bb89.gz",
+      "retained_sha256": "cfd1b70e7c2b758c58844ea443915cc85f0c9abdee8387aa0f085d9782f3cd41"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-030_audit_target/native/memory.db",
+      "bytes": 430080,
+      "sha256": "e66f8c6c6bc641c77c5fabeb5d5347e99edea630b901ea985e02be421e4c825f",
+      "retained": "/tmp/symaira-memory649-census-retained/e66f8c6c6bc641c77c5fabeb5d5347e99edea630b901ea985e02be421e4c825f.gz",
+      "retained_sha256": "6ea3b53f2f4ea97b44189d268fe8ce6563adb658547100fe481ef5b566f31e0d"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-030_audit_target/native/result.json",
+      "bytes": 143840,
+      "sha256": "b33c34d12fd7c12640ba91d38e6754a9e948fd5821a2692148fdac4d31e4e96b",
+      "retained": "/tmp/symaira-memory649-census-retained/b33c34d12fd7c12640ba91d38e6754a9e948fd5821a2692148fdac4d31e4e96b.gz",
+      "retained_sha256": "226ecc88ac6ad61c2b936b994406c688ae4a3c6678a050ef136e19d6c5ac279c"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-030_audit_target/seed.db",
+      "bytes": 364544,
+      "sha256": "6e0c661ed84b7988bab11138302b2632940a866afcf1ae7c2c670556976d6b0d",
+      "retained": "/tmp/symaira-memory649-census-retained/6e0c661ed84b7988bab11138302b2632940a866afcf1ae7c2c670556976d6b0d.gz",
+      "retained_sha256": "44bae2e8e24ca9adad6483a886cb56a40367ce235bd3af2b83711221767bdad7"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-031_query_log_results/go/memory.db",
+      "bytes": 434176,
+      "sha256": "00de59e72a662ee3c251c5da17a22c0bdf20eead7b6c6a87b06d1320145cc34b",
+      "retained": "/tmp/symaira-memory649-census-retained/00de59e72a662ee3c251c5da17a22c0bdf20eead7b6c6a87b06d1320145cc34b.gz",
+      "retained_sha256": "7e15541d330317fb375c6786d61b57921beeb225265d43473ea63a7de3d8b9e4"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-031_query_log_results/go/result.json",
+      "bytes": 147055,
+      "sha256": "9088c72476e74d6f2b8708b6fe3fa23c9160d52b49b38ef41f43834a5e1b76f6",
+      "retained": "/tmp/symaira-memory649-census-retained/9088c72476e74d6f2b8708b6fe3fa23c9160d52b49b38ef41f43834a5e1b76f6.gz",
+      "retained_sha256": "7104e8680bcbaecb69258c9929a3bbd2c42cf6ed69c500a6919ac458d8e9a306"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-031_query_log_results/native/memory.db",
+      "bytes": 434176,
+      "sha256": "de82bd18e034d605c44a83e83582689628d94fb89fa465be5e9adc26c7293f50",
+      "retained": "/tmp/symaira-memory649-census-retained/de82bd18e034d605c44a83e83582689628d94fb89fa465be5e9adc26c7293f50.gz",
+      "retained_sha256": "d7e64ef79f02b4bf65983e45176d54d69f8635672cd5dfbc5c9bf4cfe9a94069"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-031_query_log_results/native/result.json",
+      "bytes": 146532,
+      "sha256": "c1a251b2675107cd8a08d7c9224651f9e2da4f286cf18759b515a47f7d37ab30",
+      "retained": "/tmp/symaira-memory649-census-retained/c1a251b2675107cd8a08d7c9224651f9e2da4f286cf18759b515a47f7d37ab30.gz",
+      "retained_sha256": "da786b5364162430dc5c97c836a3c60528a89336bb30bd9da0a1d1c8ce1d709a"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-031_query_log_results/seed.db",
+      "bytes": 376832,
+      "sha256": "530e8d5865d3db7dca6472a16cff50ca1e610f69bf5cd83dd4714e1f8a217497",
+      "retained": "/tmp/symaira-memory649-census-retained/530e8d5865d3db7dca6472a16cff50ca1e610f69bf5cd83dd4714e1f8a217497.gz",
+      "retained_sha256": "3531e552f2702a8c04b03816c130a48701c994a348b749f6e0b3563f7b72b717"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-032_memory_governance/go/memory.db",
+      "bytes": 434176,
+      "sha256": "123875e929e7c7853a3d6ea388415c794925e8f9ce47404fd3661a6f114d6301",
+      "retained": "/tmp/symaira-memory649-census-retained/123875e929e7c7853a3d6ea388415c794925e8f9ce47404fd3661a6f114d6301.gz",
+      "retained_sha256": "466bd029940d03e008f8660cef2186dff7e3623cac99311d5149ba0e72ef2523"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-032_memory_governance/go/result.json",
+      "bytes": 148589,
+      "sha256": "d7e4f59d150224e7ca304eadcb8bee6fda324c77bbb584cffea1fd04c3ebacfa",
+      "retained": "/tmp/symaira-memory649-census-retained/d7e4f59d150224e7ca304eadcb8bee6fda324c77bbb584cffea1fd04c3ebacfa.gz",
+      "retained_sha256": "aa92e53b63f0b9bccd65a917cc3b081d934df91299d4371ca45433c47ed08e05"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-032_memory_governance/native/memory.db",
+      "bytes": 434176,
+      "sha256": "73cde670be5882773f2ae5f9496ef83d227d998b50d3db4a933dfb0ebcde338e",
+      "retained": "/tmp/symaira-memory649-census-retained/73cde670be5882773f2ae5f9496ef83d227d998b50d3db4a933dfb0ebcde338e.gz",
+      "retained_sha256": "a41269954c716b4dd3ee843c6a507d12330c4df96b2c875ee39e7f95674fb707"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-032_memory_governance/native/result.json",
+      "bytes": 148066,
+      "sha256": "52c5429359a43661b4c0367ca9758f023aa272d6d4ff774137174525f01e43bc",
+      "retained": "/tmp/symaira-memory649-census-retained/52c5429359a43661b4c0367ca9758f023aa272d6d4ff774137174525f01e43bc.gz",
+      "retained_sha256": "c480796de7671ed89bf62666851c65e6fd2d27dd2a0d29c560b3f5dd3b736fd9"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-032_memory_governance/seed.db",
+      "bytes": 389120,
+      "sha256": "a73cd23ae51c5e0543c160298116fee257a31544e6070045aa4b7d0174000528",
+      "retained": "/tmp/symaira-memory649-census-retained/a73cd23ae51c5e0543c160298116fee257a31544e6070045aa4b7d0174000528.gz",
+      "retained_sha256": "da1c8001fd118eb98758d7dda4f107bccca16fd524e9891d7dccbf6d53a57b68"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-033_recall_quality/go/memory.db",
+      "bytes": 434176,
+      "sha256": "4d5d42e46e9a46c8741423498508828b5e90074751b58a835c0228ce5186be86",
+      "retained": "/tmp/symaira-memory649-census-retained/4d5d42e46e9a46c8741423498508828b5e90074751b58a835c0228ce5186be86.gz",
+      "retained_sha256": "3c1a968b1950f1b1a0eedd5c59f0f00c645742c92e77fcd221641bfd6e67e01d"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-033_recall_quality/go/result.json",
+      "bytes": 150717,
+      "sha256": "c4d31a50917a818565feb0dc21ccb5a37408d971db56668d06b473219110944e",
+      "retained": "/tmp/symaira-memory649-census-retained/c4d31a50917a818565feb0dc21ccb5a37408d971db56668d06b473219110944e.gz",
+      "retained_sha256": "05ed608bf998fd38f4ebc15a5576000c145c480e3edc53e441b7be0e6bbed731"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-033_recall_quality/native/memory.db",
+      "bytes": 438272,
+      "sha256": "5b170ddc7bde1f65bcc551a08eeb98478487c68647ff7dcca2e104edbc788429",
+      "retained": "/tmp/symaira-memory649-census-retained/5b170ddc7bde1f65bcc551a08eeb98478487c68647ff7dcca2e104edbc788429.gz",
+      "retained_sha256": "006faf6d2c3231790eb04af62320594cbfcb762d935d47f0d36a4f4c5fd1464d"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-033_recall_quality/native/result.json",
+      "bytes": 150535,
+      "sha256": "fd6bb2112b7b4ac047fbb43e8d7ff65f0ce8dac0200646205228985c0eae44c8",
+      "retained": "/tmp/symaira-memory649-census-retained/fd6bb2112b7b4ac047fbb43e8d7ff65f0ce8dac0200646205228985c0eae44c8.gz",
+      "retained_sha256": "d8304f5a4601bcc7d978dccb9e7eca42cfaa11f983803f53152d0c9be31298c5"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-033_recall_quality/seed.db",
+      "bytes": 397312,
+      "sha256": "ff4e58bf8f4833c8e4b3f7a00f7f2b25d522707e935a62ad8fc47d300489a484",
+      "retained": "/tmp/symaira-memory649-census-retained/ff4e58bf8f4833c8e4b3f7a00f7f2b25d522707e935a62ad8fc47d300489a484.gz",
+      "retained_sha256": "a3f140a7e8b7c0d54b0067734f8d71bd11742b3eef074d8d57b88bf0f7798bb8"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-034_activity_store/go/memory.db",
+      "bytes": 434176,
+      "sha256": "90d4ec4c8015d873b1a3d7943950e8e5ff56bf5991b465c6afe06d39c21a9544",
+      "retained": "/tmp/symaira-memory649-census-retained/90d4ec4c8015d873b1a3d7943950e8e5ff56bf5991b465c6afe06d39c21a9544.gz",
+      "retained_sha256": "0fe0f1c54d94fe824f89e016ba67f751d547bb392dd94f375ef2648ec80c019f"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-034_activity_store/go/result.json",
+      "bytes": 158025,
+      "sha256": "08da3daadc50b3540e876236ced50bfe833354f08ff0852390a0c94a0f081521",
+      "retained": "/tmp/symaira-memory649-census-retained/08da3daadc50b3540e876236ced50bfe833354f08ff0852390a0c94a0f081521.gz",
+      "retained_sha256": "de15ccd374728347bfa584f920f4c25494d0041f49d8d48e7dbc80d71cf55e39"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-034_activity_store/native/memory.db",
+      "bytes": 438272,
+      "sha256": "cfca6f9a09322d93c42e83ecb368f5c13c7d20ea89e2ac634b4d5359849a240f",
+      "retained": "/tmp/symaira-memory649-census-retained/cfca6f9a09322d93c42e83ecb368f5c13c7d20ea89e2ac634b4d5359849a240f.gz",
+      "retained_sha256": "04328a6e86943965c7bb62cb29347f814a63c03f7a9137430abdb2792259216e"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-034_activity_store/native/result.json",
+      "bytes": 158322,
+      "sha256": "66952ab82913d513e265514ac9dd39ba253bdd509fe048167df4f7d1c8c3220a",
+      "retained": "/tmp/symaira-memory649-census-retained/66952ab82913d513e265514ac9dd39ba253bdd509fe048167df4f7d1c8c3220a.gz",
+      "retained_sha256": "ca2fd8ea389d8738a5237317bca8e5841fc3d34d51d6a9f82ca577b0e8d47874"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/prefix-034_activity_store/seed.db",
+      "bytes": 434176,
+      "sha256": "f599d2c2d812a910f5652a4a1c8f374ccd2d48cfb4a0e7d5276911ff3407c278",
+      "retained": "/tmp/symaira-memory649-census-retained/f599d2c2d812a910f5652a4a1c8f374ccd2d48cfb4a0e7d5276911ff3407c278.gz",
+      "retained_sha256": "b43b6a028ac31b30cebe81e0d85c88c101225082a43649be26b966b5609a0298"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/progress.json",
+      "bytes": 74440,
+      "sha256": "ab79b991e857e1ff769300abb8276b71c60e66c394c1beeb8acc40c74cb66d24",
+      "retained": "/tmp/symaira-memory649-census-retained/ab79b991e857e1ff769300abb8276b71c60e66c394c1beeb8acc40c74cb66d24.gz",
+      "retained_sha256": "abcefe8b5ac49dda00fb2776755e81b860aee337bd4f7579411c8d12c3462be4"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/source-surfaces.json",
+      "bytes": 2241,
+      "sha256": "d40faf3720ef5dcc3497c7e513117d7fdca6e09c6a9e20cc21c1b73a67a9ae2b",
+      "retained": "/tmp/symaira-memory649-census-retained/d40faf3720ef5dcc3497c7e513117d7fdca6e09c6a9e20cc21c1b73a67a9ae2b.gz",
+      "retained_sha256": "41477b796f26e8fd8661d10519c96f58206c35579eb121a72c908aa53e6d3587"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/structural-gaps.json",
+      "bytes": 18377,
+      "sha256": "246e61ff65787a47f97a901164defc55ca97f446d8cd4396407e406d8c5f359d",
+      "retained": "/tmp/symaira-memory649-census-retained/246e61ff65787a47f97a901164defc55ca97f446d8cd4396407e406d8c5f359d.gz",
+      "retained_sha256": "b0d20997c656ec5310c9f7008b774cffa0f3190c99ec913f44a582b181cf37fa"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/successful-structural-gaps.json",
+      "bytes": 41395,
+      "sha256": "106ee9acea41ba2e783d7d1408f1775a22dd79ff6fd1c6daa5e75d6cb5ae3652",
+      "retained": "/tmp/symaira-memory649-census-retained/106ee9acea41ba2e783d7d1408f1775a22dd79ff6fd1c6daa5e75d6cb5ae3652.gz",
+      "retained_sha256": "17ab5d4e057591f6e77bf4aa0e782e0c8cef0876a0ee5e50dabc091a7ebecb2a"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/unique-relation-go.db",
+      "bytes": 434176,
+      "sha256": "241000c656a8068364618f7d9fd0efc761acf13fda3c8f98ecd9a7abad0e8e88",
+      "retained": "/tmp/symaira-memory649-census-retained/241000c656a8068364618f7d9fd0efc761acf13fda3c8f98ecd9a7abad0e8e88.gz",
+      "retained_sha256": "0359d8c189cca41d1480bdb785f575063ef0d68b62f83076d118b14e8b0ee16d"
+    },
+    {
+      "original": "/tmp/symaira-memory649-census-v2/unique-relation-native.db",
+      "bytes": 348160,
+      "sha256": "dec21cd0c43c107a0c5fe5c2d91dc4a4792de29d9cb7958a4211d2481e5696f4",
+      "retained": "/tmp/symaira-memory649-census-retained/dec21cd0c43c107a0c5fe5c2d91dc4a4792de29d9cb7958a4211d2481e5696f4.gz",
+      "retained_sha256": "aafcd63d4d5c3c018be7af5f7dc567707efb9813a80082ee1e14fde3559ca452"
+    }
+  ],
+  "retained_file_count": 314,
+  "originals_unchanged": true,
+  "limits": [
+    "Preparation, not implementation/approval or shipped repair.",
+    "Native macOS/Windows runtime and complete historical/current consumers remain pending.",
+    "Existing Go per-file commits versus approved Rust whole-repair rollback differ deliberately.",
+    "No UI/catalog eager JWT/config admission/source changes."
+  ]
+}

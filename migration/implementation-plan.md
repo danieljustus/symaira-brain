@@ -1,5 +1,6 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+
 ## Native memory evidence and atomic schema increment — 2026-10-03
 
 #758 now has a local grounded-evidence implementation and additive pinned-Go
@@ -12,6 +13,59 @@ Native Linux/macOS/Windows CI remains the acceptance gate. Full memory CLI/confi
 governed writes and JSONL decoding remain open; no memory Go fallback is removed.
 #649 requires the shipped repaired store and its Doctor diagnostic. See
 `docs/adr/758-native-memory-evidence.md` for the long-term ownership decision.
+
+
+## Guard generated configuration ownership repair — 2026-10-04
+
+Immutable 4d78/fb2844 independent review requested one P2: generated XDG/HOME
+paths must clean lexically before the OS resolves symlink/.. pairs and before
+warning filenames are rendered. Explicit SYMGUARD_CONFIG retains raw OS
+semantics. The isolated successor normally integrates main2b and shares a small
+Guard-only lexical helper with scan. Windows volume/device/postClean and raw
+UTF16 rules are pinned to actual Go SDK source, with a portable source-reference
+gate distinct from native runtime acceptance. Windows config text that cannot
+be emitted exactly remains delegated. Original92 proofs/180 raw-state paths and
+69/46 ELF byte mappings remain retained; all inherited gates remain required.
+[ADR](../docs/adr/guard-generated-config-path-ownership.md). New path process/
+mutation cases pass on clean source5bb: 177 ordinary tests and an overlapping
+41-test kernel graph, strict/fmt/actionlint, 124/63/78/54/25 actual process cases,
+386 portable Windows SDK comparisons, all13 inherited controls plus the actual
+wrong-owner mutant. The original25 before-fix inputs, 20+10 owner-history pairs,
+80/94 original inputs, prior parent/raw/ordered gates and nine original Scan
+fixtures are explicitly accounted for. Failures and exact executable bytes
+remain retained. SDK source-reference is not Windows runtime proof; independent
+review and native3 protected checks remain pending. Full770/769 remain open.
+
+## Guard Doctor ordered warning slice — 2026-10-04
+
+The successor normally includes approved PR805 publication1c04 and ports the
+fourteen healthy unknown-key configurations observed against actual frozen Go.
+It reuses immutable TOML source spans and Core GoText/Go quoting; warnings are
+buffered after typed decode and emitted once only after full native admission.
+The new54-case Linux gate requires46 complete comparisons and8 explicit
+remaining typed/alias/discovery/map-order refusals, ten Go warning repeats and
+five real mutations. The three specifically proved original unknown-key inputs
+now require equality, yielding122/124 and67/78 comparisons with the remaining
+original refusals unchanged. All prior raw/kernel/process controls and the
+original50/two invalid-default Go reports remain mandatory and unchanged.
+[ADR](../docs/adr/guard-doctor-ordered-config-warnings.md) explains output and
+ownership. Independent review/native3/protected checks are pending; full770/769
+and the other Brain configuration consumers remain open.
+
+## Guard doctor equivalent config/Unicode slice — 2026-10-04
+
+The successor to approved PR805 admits nine baseline healthy Go-only TOML
+representations and five healthy anchor Unicode/key forms, using the existing
+TableLike and Guard Go JSON primitive. The additive78 actual process cases
+retain65 full comparisons and13 explicit TOML gates; baseline and final clean-
+source receipts under `migration/evidence/guard-doctor-boundaries-770` bind the
+implementation. All previous exact process/raw/state/kernel tests remain
+required. Three original selected TOML gates, broad discovery/filesystem/output
+boundaries and native macOS/Windows acceptance remain open. The50 actual Go
+runs with two different invalid-default reports stay evidence, not an exception.
+See the linked [ADR](../docs/adr/guard-doctor-equivalent-config-and-anchor-unicode.md)
+and [remaining inventory](guard-doctor-boundary-inventory-770.md). This does not
+close #770/#769 or claim full standalone/Brain cutover.
 
 ## Additional native init, Swift and fuzz evidence — 2026-09-29
 
@@ -1974,3 +2028,189 @@ Go remains the production enforcement path until the full Guard-specific matrix 
 ### Completion definition
 
 The migration is complete only when every row in `migration/contract-matrix.csv` is green, no command invokes Go, the supported release matrix passes, Swift clients work unchanged at their public boundary, and the Rust release has a verified rollback to the last Go release.
+
+
+### 2026-10-03: independently corrected daemon acceptance (#772 / #801)
+
+Clean corrected source `a3c2bdbc3686bf1b67b6970b155f8fb53a6db4a9` preserves
+Go's OS cache selection, Unix missing/empty TMPDIR fallback and per-invalid-byte
+worktree JSON identity. Reviewed successor `6c3bf1f93d2760b17f4f936076d26f0f4c00fe1d`
+changes only the isolated parent-test expectation to that Go-compatible fallback.
+Fresh independent Linux proof executed 63 daemon requests, 13 actual MCP CLI byte
+pairs, 291 workspace tests and six rejecting controls. One isolated child-entry
+test is ordinarily ignored and actually executed by its seven-scenario parent.
+The original process receipts, findings and failing probes remain tracked.
+Hosted Darwin's original AF_UNIX length failure uses a short private HOME in
+new harness runs; original production endpoint rules and external-volume gates
+are preserved. ADR 0007 records these decisions. Six fresh native platform/arch
+gates remain required. Registry/autostart and complete #772 acceptance stay open.
+
+### 2026-10-03: registry/autostart ownership increment (#772)
+
+Restore DMN-007/008 registry and ordinary CLI contracts using actual immutable
+Go API overlays and native process observations. Add read-only session list/info,
+resolved client timeout/log defaults, stable failure metadata, bounded cleanup,
+pre-dispatch explicit engine/policy verification, restart/profile preservation,
+schema-v3/null state inspection and compatibility decoding for existing Go
+null-cookie files. Keep historical Go fixtures and original failing observations.
+See `docs/adr/daemon-registry-autostart.md` and
+`migration/evidence/browse-registry-772/README.md` for rationale and evidence.
+
+DMN-007/008 are fixture-ready, not native parity. RUST-006 stays in_progress.
+Both runtime Store call paths still omit the state key; a focused successor must
+reuse the existing core resolver and verify actual Go key precedence and encrypted
+migration files without silent loss. All six exact-head native gates and fresh
+independent review remain required; do not close #772 on this increment.
+## #768: native environment reference adapter
+
+The native usage environment credential path now shares the already bounded
+secret resolver instead of maintaining its lossy private adapter. Valid env,
+symvault, deprecated vault and platform-appropriate Keychain references no longer
+force Go solely because of their scheme. The decision and limits are recorded
+in `docs/adr/usage-credential-routing-768.md`.
+
+`scripts/usage-credential-oracle/run.sh` executes 44 fresh immutable-Go
+constructor/report/request cases, 110 actual CLI byte/exit cases and five actual
+failure controls using private synthetic credential executables. Native Linux,
+macOS and Windows CI retain receipts and partial failure logs for 14 days.
+USE-001 and #768 remain open for unproven file/JWT/host-Keychain and other routing
+gates; no frozen fixture or production Go source changed.
+
+## #768: native read-only Hermes files and JWT expiry
+
+The follow-on Hermes slice replaces permissive untyped JSON with ordered typed
+Go-compatible credential decoding and removes the broad malformed/expired-file
+fallback. Case/Unicode aliases, duplicates/nulls, reused provider arrays, ignored
+metadata, raw UTF-8 and JWT expiry/base64 behavior have fresh immutable-Go
+constructor/report/request evidence. Numeric expiry overflow retains a narrow
+architecture-sensitive routing gate.
+
+`scripts/usage-hermes-oracle/run.sh` requires 80 report/request/no-write cases,
+90 actual CLI table/JSON byte comparisons and five actual rejection controls.
+Unix filesystem probes separately record source-bound symlink/directory parity
+and the native nonblocking FIFO safety contract. All native operating-system
+jobs preserve partial failure evidence. The rationale and capability-rooted
+reader dependency are in `docs/adr/usage-hermes-file-jwt-768.md`.
+USE-001 and #768 remain open for numeric overflow and other credential families;
+this slice does not close broader host integration or Go-removal work.
+
+
+### #768: Hermes slice backing repair after independent review
+
+Immutable `273a93c0` failed an actual Go/native replay of nonempty duplicate
+`providers` array shrinkage followed by null-slot regrowth. Keep that original
+failure receipt and reviewed candidate intact. The focused correction retains
+visited backing slots separately from visible length, resets on null/empty
+arrays, and selects only visible entries. Twelve appended regressions expand the
+required fresh gate from 80 to 92 complete constructor/report/request/no-write
+cases and from 90 to 100 actual CLI table/JSON byte/exit comparisons. Five actual
+negative controls and the parent 44-constructor/110-CLI/five-control reference
+gate remain required. Native macOS/Windows execution and all other #768 gates
+remain open; Linux evidence alone does not establish those target contracts.
+The decision and pinned Go slice semantics are recorded in
+`docs/adr/usage-hermes-file-jwt-768.md`.
+
+
+## #768: native deterministic Claude/Codex credential files
+
+The isolated provider-files lane preserves its unvalidated checkpoint and merges
+`9b37c53` normally, including original Hermes failure evidence and all 92 repaired
+Hermes cases. Shared reader/ordered-field extraction is private and preserves
+that slice's visible-length/backing-slot distinction.
+
+Claude now follows typed ordered map merging, scalar-null behavior, aliases and
+ignored metadata; distinct nondefault tokens still route to Go. Codex follows
+exact-key generic map replacement, finite float64 validation throughout the file,
+10000-container depth, top-level preference and nested fallback. File reference
+schemes are literal request credentials. CODEX_HOME explicit/empty overrides and
+read-only 64 KiB boundaries are included in fresh actual Go contracts.
+
+Required new proof is 86 source cases (85 full constructor/report/header/no-write
+comparisons and one retained ambiguous gate), 151 real CLI byte/exit comparisons,
+five actual failed replay controls and owned Codex Unix filesystem observations.
+The private constructor injection proves last-source ordering without reading
+operator Keychain items; host inventory/ACL and other #768 gates remain unported.
+All three native CI jobs retain full/partial receipts for 14 days. Re-run the
+92/100/five-control Hermes gate and 44/110/five-control reference gate on the same
+clean source revision because the read-only helper is shared. Decisions and
+limits are recorded in `docs/adr/usage-provider-files-768.md`.
+
+## Usage #768 — inherited Hermes depth correction, 2026-10-03
+
+Independent full provider-files review of immutable `5111d8b6` reproduced one
+inherited P2 across outer Hermes JSON and decoded JWT claims: total depth10001
+was accepted natively while Go reported missing/no request. Both exact10000
+boundaries passed. Preserve that full review and all four original process
+replays under `migration/evidence/usage-hermes-depth-768/original-review-5111/`.
+The focused source correction calls the shared typed JSON limit for both entry
+points and appends four exact boundary inputs; original92 inputs are unchanged.
+The expanded Hermes gate requires96 reports,104 CLI comparisons and five real
+rejection controls. Run it with the entire86-input provider-files and44-report
+reference gates on the same clean source, plus355 ordinary tests/strict checks.
+See `docs/adr/usage-hermes-depth-limit-768.md`. These are required gates at this
+checkpoint, not claimed completed results. Native macOS/Windows, host Keychain,
+Copilot/Kimi and other residual USE-001/#768 requirements remain open.
+
+The focused correction's clean source `7bdde611` now passes all three complete
+process gates: Hermes96/104/five controls, provider-files86 (85 full reports and
+one retained ambiguity gate)/151/five controls, references44/110/five controls.
+All53/51/47 source manifests match and44 common entries agree. Exact10000
+outer/claims boundaries are configured;10001 inputs are missing/no request/native
+route. Ordinary355 tests pass (zero failures, three ignored process gates run
+explicitly), and strict all-targets/all-features Clippy/fmt/include-fragments/
+actionlint/diff checks pass. Separate corrected receipts preserve original50
+review files and all92 original input bytes. Final native targets and corrected
+independent review remain required; USE-001/#768 stays open.
+
+## Usage #768 — bounded Copilot/Kimi file successor, 2026-10-03
+
+Normal integration retains independently approved parent fdfea204 and the original
+97-case Go-only baseline. All112 native ELF paths/74 unique binaries were archived
+by hash before the released Files target was reused in this isolated lane.
+Copilot uses ordered root replacement/typed-entry semantics, apps-before-hosts
+and the literal `github.com:` pass; distinct eligible tokens remain Go-gated.
+Kimi follows typed access-token/null/error behavior and unchanged home/strategy
+precedence. File references stay literal. Both use the shared bounded reader and
+depth guard; unsafe/unreadable sources, unproven device/header values and existing
+platform/config/host gates remain.
+
+Clean source f75993e passes89 actual Go cases:81 full native reports/requests and
+eight explicit eligibility gates,111 CLI byte/exit comparisons and five rejected
+replay controls. Native Windows requires80 full comparisons/nine gates. Every
+original97 input is mapped:66 exactly retained,31 freshly replayed through the
+unchanged original Go helper and native routing/read-only checks. Those31 are
+not claimed as native full-report parity. Original baseline sources/receipt and
+frozen fixtures are verified unchanged. Original bare-GitHub unit failure is
+retained, and internal token/device newlines keep Go pending real HTTP evidence.
+
+The same clean source passes the complete parent Files86/151, Hermes96/104 and
+Reference44/110 gates with five real controls each. All59/55/53/49 source manifests
+and46 shared entries agree. The ordinary suite passes355 tests/zero failures/four
+ignored oracle seams, followed by strict all-target/all-feature Clippy, fmt and
+CI syntax checks. A prior run without the required subreaper produced a real
+unrelated descendant-cleanup failure; both raw logs remain in the evidence.
+Native macOS/Windows exact-candidate CI and independent full review are required.
+No full USE-001/#768 closure follows. See the ADR and tracked Linux f75993e evidence.
+
+
+## Usage #768 — credential owner path correction, 2026-10-03
+
+Independent immutable7e0b/f759 review requested changes for one P2: native
+Copilot/Kimi symlink-plus-parent paths selected the physical owner while frozen
+Go selected the lexical owner. Ordinary-token behavior was inherited; literal
+file-token routing was newly admitted. Preserve all73 original review artifacts
+and eleven archived executed binary/library entries, then normally integrate
+main e3dbda6c. A221-line Usage-local pure native-path helper now applies lexical
+Go joins to both probes and reads, retaining raw Unix bytes and native Windows
+volume/UTF16 rules without canonicalization or a CLI dependency.
+
+Clean source00bcc6f passes all four full process gates and original97 accounting,
+plus16 complete two-account token/device owner cases,16 owner CLI pairs,22 actual
+Go Unix path comparisons and one genuine wrong-owner request rejection. All12
+original reviewer owner inputs replay exactly against actual Go/public native
+constructors with correct lexical owners and no writes. Manifests62/57/55/51
+and48 shared hashes match;355 ordinary tests and strict checks pass. Original
+failures, source and fixtures stay unchanged. Native Windows requires its21
+actual path pairs and owned symlink proof; macOS/Windows and full independent
+review remain required. #768 stays open. See the owner-path ADR and full tracked
+Linux owner evidence; source00bcc6f replaces the rejected acceptance candidate.

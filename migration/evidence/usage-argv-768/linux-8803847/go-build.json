@@ -1,0 +1,16 @@
+{
+  "source": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "source_clean": true,
+  "command": [
+    "go",
+    "build",
+    "-trimpath",
+    "-o",
+    "/workspace/oracles/symaira-usage768-argv-880-binaries/go-usage",
+    "./cmd/symbrain"
+  ],
+  "binary": "/workspace/oracles/symaira-usage768-argv-880-binaries/go-usage",
+  "sha256": "0654376cf8fc33c3be0b03bd394b665842d04e6659b3dfd67c0d6786d2f136e2",
+  "sdk": "go version go1.26.7 linux/amd64",
+  "scope": "Fresh frozen-source production Go CLI retained; exact digest matches all four actually executed source-bound gate binaries. No fixture/test injection needed for CLI compilation; no operator state execution."
+}

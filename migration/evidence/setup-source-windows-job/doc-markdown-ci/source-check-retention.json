@@ -1,0 +1,63 @@
+{
+  "validated_source": "9fb91e95",
+  "records": [
+    {
+      "original": "/workspace/review-proof/source806-job-doc-markdown/check.log",
+      "archive": "migration/evidence/setup-source-windows-job/doc-markdown-ci/check.log.gz",
+      "sha256": "0eda4e983472573f010fca0a1bf088b1729375663cf5af0255c872851a7cdfc9",
+      "bytes": 618,
+      "gzip_sha256": "bd192509af46d2d97dff395a97dd31f8d533008c8dd008326602100a5508f887"
+    },
+    {
+      "original": "/workspace/review-proof/source806-job-doc-markdown/check.py",
+      "archive": "migration/evidence/setup-source-windows-job/doc-markdown-ci/check.py.gz",
+      "sha256": "3330313264c836660ad04af34914732cac58fe94be9b6c0dbb80d2a2f73b5005",
+      "bytes": 2529,
+      "gzip_sha256": "9a9a0905e7ca5aaedcdab7a851474fc70ca4f32c8b9c96420cbc3a8bf7313859"
+    },
+    {
+      "original": "/workspace/review-proof/source806-job-doc-markdown/checks.json",
+      "archive": "migration/evidence/setup-source-windows-job/doc-markdown-ci/checks.json.gz",
+      "sha256": "0eda4e983472573f010fca0a1bf088b1729375663cf5af0255c872851a7cdfc9",
+      "bytes": 618,
+      "gzip_sha256": "bd192509af46d2d97dff395a97dd31f8d533008c8dd008326602100a5508f887"
+    },
+    {
+      "original": "/workspace/review-proof/source806-job-doc-markdown/diff.stderr",
+      "archive": "migration/evidence/setup-source-windows-job/doc-markdown-ci/diff.stderr.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-proof/source806-job-doc-markdown/diff.stdout",
+      "archive": "migration/evidence/setup-source-windows-job/doc-markdown-ci/diff.stdout.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-proof/source806-job-doc-markdown/preserve.py",
+      "archive": "migration/evidence/setup-source-windows-job/doc-markdown-ci/preserve.py.gz",
+      "sha256": "2d8d75e42f9bd9094a8a7e5ce3b77f9de75523a53188e1ee8c617d1b9d4f7db0",
+      "bytes": 2920,
+      "gzip_sha256": "bdea2ffd55fcefca52d7b5031065f5498900c9d3d796e651fc91a0b63a9da6a9"
+    },
+    {
+      "original": "/workspace/review-proof/source806-job-doc-markdown/rustfmt.stderr",
+      "archive": "migration/evidence/setup-source-windows-job/doc-markdown-ci/rustfmt.stderr.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-proof/source806-job-doc-markdown/rustfmt.stdout",
+      "archive": "migration/evidence/setup-source-windows-job/doc-markdown-ci/rustfmt.stdout.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    }
+  ],
+  "all_roundtrips": true,
+  "runtime": 0
+}

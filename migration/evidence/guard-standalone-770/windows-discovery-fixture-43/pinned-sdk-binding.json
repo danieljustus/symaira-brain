@@ -1,0 +1,64 @@
+{
+  "SDK": "Go1.26.7",
+  "actual_source_only_copies": {
+    "VERSION": {
+      "raw_bytes": 35,
+      "raw_sha256": "89f723ad27054a2ccc7c22f2a974886f3077f64623a231297fcea2e74a73a782",
+      "retained": "pinned-sdk-source/VERSION.gz",
+      "compressed_sha256": "57d8f9a2c2837d8b77199162f3d03c255db5aa89f57d703878784ba0cc2cd0a3"
+    },
+    "LICENSE": {
+      "raw_bytes": 1453,
+      "raw_sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "retained": "pinned-sdk-source/LICENSE.gz",
+      "compressed_sha256": "02d83c094bd4b96c1a044b449e9b9bbf5a93438d3bdc6efd74b2cc65d74e2cb1"
+    },
+    "src/os/file_windows.go": {
+      "raw_bytes": 15155,
+      "raw_sha256": "3d27d6ec42a0c4833e243d93e5cfde4279c902690e041d8c908fab01908d1240",
+      "retained": "pinned-sdk-source/src/os/file_windows.go.gz",
+      "compressed_sha256": "c38634d47b5a304845ac5e0bf04316c6a242c11e17717d5a113c77cbecc724f2"
+    },
+    "src/os/path_windows.go": {
+      "raw_bytes": 6086,
+      "raw_sha256": "7256e7698c7aed7eba0c3e5e3dd441c7886dfbe21864734f3f8bd3a549cbff58",
+      "retained": "pinned-sdk-source/src/os/path_windows.go.gz",
+      "compressed_sha256": "f979424bb2797ad2c3b4fe6b49846e2783c6f00452c88d0189aab9b3979eea44"
+    },
+    "src/syscall/syscall_windows.go": {
+      "raw_bytes": 57661,
+      "raw_sha256": "f1b22dde6bb980cf036561cee7ece968daa260cb622f32c96cebd52477b7a346",
+      "retained": "pinned-sdk-source/src/syscall/syscall_windows.go.gz",
+      "compressed_sha256": "cce1971ac6e2323330187f490c8d3fa16db045b0da57d7553b2580b16fa12ece"
+    },
+    "src/internal/filepathlite/path.go": {
+      "raw_bytes": 5920,
+      "raw_sha256": "dd1a0138328d6353d089d6ba8e04905d9e951bedfef1b85913c64de2ca2fd223",
+      "retained": "pinned-sdk-source/src/internal/filepathlite/path.go.gz",
+      "compressed_sha256": "8c34cf4398e4aecb4c708515f2397dfbeecfa76f5a80ca2afd7a9d2b0f4e40e9"
+    },
+    "src/internal/filepathlite/path_windows.go": {
+      "raw_bytes": 8624,
+      "raw_sha256": "ad313fae9fd1e150df082ad7f43c34b0830ce79433d0eef89c7724fdb07d06bb",
+      "retained": "pinned-sdk-source/src/internal/filepathlite/path_windows.go.gz",
+      "compressed_sha256": "adf3c83dc6601885657602688c81ace136cd07ae53a413f58635baef68ed8168"
+    },
+    "src/path/filepath/path_windows.go": {
+      "raw_bytes": 3233,
+      "raw_sha256": "96c1af1caace59a146241f5a48a700a142f2e5520f932fb2fc6376ce5a94ed81",
+      "retained": "pinned-sdk-source/src/path/filepath/path_windows.go.gz",
+      "compressed_sha256": "843c96146d9cb768a87d92ef1f76c85e8d54253889b95aabf6fc515c02a4c7c3"
+    }
+  },
+  "SDK_compiler_or_reference_executed": false,
+  "native_Windows_proof": "only originalCIjob111405014212 Go/native fullprocess observations retained; successor CI pending",
+  "explicit_path_owner_observation": [
+    "explicit-xdg",
+    "explicit-home"
+  ],
+  "Windows_typed_filename_source_flow": [
+    "os.Open/openFileNolog -> fixLongPath -> syscall.Open -> UTF16/CreateFile",
+    "explicit Go paths retain caller spelling; Windows actual original owner lexical",
+    "Unix explicit paths preserve physical traversal; generated paths use filepath lexicaljoin"
+  ]
+}

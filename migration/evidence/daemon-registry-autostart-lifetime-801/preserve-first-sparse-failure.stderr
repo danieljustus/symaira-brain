@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/workspace/review-proof/review-pr800-daemon801-autostart-cleanup/preserve.py", line 15, in <module>
+    p=R/rel;b=p.read_bytes();assert b==git('show',H+':'+rel);files.append((p,'source/'+rel))
+              ^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1019, in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/symaira-daemon801-progress-observer/.github/workflows/browse-daemon-native.yml'

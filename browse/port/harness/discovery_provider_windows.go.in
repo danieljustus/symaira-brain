@@ -1,0 +1,20 @@
+// Owned native observation only; no product-side unsafe or argv rewriting.
+package main
+
+import (
+	"syscall"
+	"unsafe"
+)
+
+func commandLine() []uint16 {
+	start := syscall.GetCommandLine()
+	out := make([]uint16, 0)
+	for i := 0; i < 32768; i++ {
+		unit := *(*uint16)(unsafe.Add(unsafe.Pointer(start), uintptr(i)*2))
+		if unit == 0 {
+			return out
+		}
+		out = append(out, unit)
+	}
+	panic("owned command line exceeded Windows bound")
+}

@@ -1,0 +1,26 @@
+{
+  "head": "7f6ff3b8406b2d8861e4c90691919d6bdae77be6",
+  "files": {
+    "symaira-registry-7f-windows-job-111316551727.log": {
+      "bytes": 107610,
+      "sha256": "1693dd918d0874729717b83aefc1f3103f93d2d4e0ef50bd2a670055efef108d"
+    },
+    "symaira-registry-7f-windows-job-111316551668.log": {
+      "bytes": 114122,
+      "sha256": "2a76201a4de5314a98ef29e539f454ab1cdd4693d06a3da88dcc7ecbe8e2dce3"
+    },
+    "symaira-registry-7f-pipe-independent-original.json": {
+      "bytes": 2016,
+      "sha256": "3c61f6e6cb284b8aed76f055a7868e286537fddb17a23c98ce39b179678dfe2c"
+    },
+    "registry-7f-windows-failure.zip": {
+      "bytes": 4756,
+      "sha256": "6b8e50c09f39e7174c9290b5c9cd084c0eab5015eea1795e81e91c9b20f10a62"
+    }
+  },
+  "observations": [
+    "AMD64 CRT open raises errno22; post-kill exit is not original Go failure evidence",
+    "ARM64 actual35 request pairs pass before registry step; later job cancellation has no demonstrated root cause",
+    "native unit41pass+3owned ignores; lifecycle1x1 and races50x50 pass"
+  ]
+}

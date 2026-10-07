@@ -1,0 +1,34 @@
+{
+  "windows-process.json": {
+    "original_path": "/tmp/symaira-doctor765-windows1288-process.json",
+    "sha256": "b54b2702c66b6281e44f217fdcf2a05f2ddf5816a383a2ceb073971beab0037e",
+    "bytes": 6053591
+  },
+  "original-ci.log": {
+    "original_path": "/tmp/symaira-doctor765-windows1288-original.log",
+    "sha256": "a260db7e8c40bf110075c31bd8263f4ab8a2166c7f05e128bf6a4d6e024bd320",
+    "bytes": 433989,
+    "stored_path": "original-ci.log.json",
+    "stored_encoding": "base64 original bytes"
+  },
+  "doctor-windows-failure.zip": {
+    "original_path": "/workspace/attachments/4e96aef1-182d-43f0-b5bf-5b72252e1f8c/doctor-windows-1288-failure.zip",
+    "sha256": "05b5bfc92d2d003e8d3b75ed3d59bb1fbb9e35bb23893404513a4adae33c77ec",
+    "bytes": 221141
+  },
+  "artifact_json_equals_decoded_original": true,
+  "source_report_candidate_head": "0574ecea77b52274a55cb89503401df9567640e7",
+  "run": 37151653597,
+  "job": 111286659716,
+  "runtime": "Windows-2025Server-10.0.26100-SP0",
+  "total": 253,
+  "matched": 248,
+  "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "production_changed": false,
+  "native_windows_rerun": false,
+  "five-full-failure-records.json": {
+    "sha256": "a681ee9c1f3dadf186d880f08f55e9885b94a1e9fac688423de927b3caa24cde",
+    "bytes": 111297,
+    "kind": "derived exact complete records; original full report retained"
+  }
+}

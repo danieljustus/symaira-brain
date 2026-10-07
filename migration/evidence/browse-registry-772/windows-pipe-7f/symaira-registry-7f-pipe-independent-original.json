@@ -1,0 +1,51 @@
+{
+  "original_files": {
+    "/tmp/symaira-registry-7f-windows-job-111316551727.log": {
+      "sha256": "1693dd918d0874729717b83aefc1f3103f93d2d4e0ef50bd2a670055efef108d",
+      "bytes": 107610
+    },
+    "/tmp/symaira-registry-7f-windows-job-111316551668.log": {
+      "sha256": "2a76201a4de5314a98ef29e539f454ab1cdd4693d06a3da88dcc7ecbe8e2dce3",
+      "bytes": 114122
+    },
+    "/workspace/attachments/b0e83f50-3e28-424c-84f5-56c5bd109086/registry-7f-windows-failure.zip": {
+      "sha256": "6b8e50c09f39e7174c9290b5c9cd084c0eab5015eea1795e81e91c9b20f10a62",
+      "bytes": 4756
+    }
+  },
+  "zip_files": {
+    "browse-daemon-harness.log": {
+      "sha256": "f88caefd5dabbd61289f36f4a7cc1460f8861788415e714fad4735f07aa4f3c6",
+      "bytes": 105
+    },
+    "browse-daemon-windows-2025.txt": {
+      "sha256": "fef1773df1331d4ec0596b8366e49d94e65bcded6c749fa63b8e30f2e77b277c",
+      "bytes": 341
+    },
+    "browse-daemon-unit.log": {
+      "sha256": "1001a680e8a79208f9557b04c3a08c778d035aa9957ef11e701aa2ba216055f4",
+      "bytes": 12926
+    },
+    "browse-daemon-lifecycle.log": {
+      "sha256": "3627fa48e7a3f917fe5a1da07e73effdc065c508b523d56c27daf638fb0d7abe",
+      "bytes": 45
+    },
+    "browse-daemon-races.log": {
+      "sha256": "86b027d590d4232c301ecba1102c0e720cd20166f4a224dba6e9473b78f5b268",
+      "bytes": 47
+    }
+  },
+  "finding": {
+    "observed": "Python CRT open(named pipe, r+b, buffering=0) raised OSError errno22 with no winerror",
+    "process_status_limit": "daemon_process.observe calls kill_tree before process.communicate and prints process.returncode afterward; printed Go exit1 is not demonstrated pre-cleanup exit",
+    "runner_source": "b19ec439a74e5bdb91a29da1051f8bd25043cdb1",
+    "published_source": "7f6ff3b8406b2d8861e4c90691919d6bdae77be6",
+    "rust_test_results": {
+      "passed": 41,
+      "explicit_owned_child_ignored": 3
+    },
+    "rust_lifecycle": "1 round x 1 starter",
+    "rust_races": "50 rounds x 50 starters",
+    "native_go_baseline_complete": false
+  }
+}

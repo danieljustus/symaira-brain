@@ -1,0 +1,9 @@
+{
+  "bytes": 62850,
+  "sha256": "8a91e169353a565b4dd98cc88093b96f680b595566cfd143c8cfd43d67a44354",
+  "full_raw_members_roundtrip_verified": 25,
+  "original130_verified_beforefix": true,
+  "actual14_portable_mock_tests": true,
+  "actual2_source_mutant_rejections": true,
+  "actualSDK_SQL_child_C_Go_Rust_execution": false
+}
