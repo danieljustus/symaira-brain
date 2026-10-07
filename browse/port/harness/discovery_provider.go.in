@@ -1,0 +1,33 @@
+// Owned discovery fixture: public AB value, complete provider argv/owner vectors.
+package main
+
+import (
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+)
+
+func main() {
+	executable, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	row := map[string]any{"pid": os.Getpid(), "arguments": os.Args[1:], "argv0_base64": base64.StdEncoding.EncodeToString([]byte(os.Args[0])), "executable_base64": base64.StdEncoding.EncodeToString([]byte(executable)), "raw_command_line_utf16": commandLine()}
+	file, err := os.OpenFile(os.Getenv("SYMBROWSE_KEY_PROBE_LEDGER"), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil {
+		panic(err)
+	}
+	if err = json.NewEncoder(file).Encode(row); err != nil {
+		panic(err)
+	}
+	if err = file.Close(); err != nil {
+		panic(err)
+	}
+	if strings.TrimSuffix(strings.ToLower(filepath.Base(executable)), ".exe") == "security" {
+		os.Exit(44)
+	}
+	fmt.Println(`{"value":"` + strings.Repeat("ab", 32) + `"}`)
+}

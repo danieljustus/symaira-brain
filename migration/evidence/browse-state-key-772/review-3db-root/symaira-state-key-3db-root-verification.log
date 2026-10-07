@@ -1,0 +1,83 @@
+{
+  "source": "3db69a655e43ef8cffa3776ad00a823d947ff31b",
+  "head": "3c2d731b2b113df81db3601b73f3036c8a558e5c",
+  "maps": [
+    {
+      "report": "key",
+      "map": "candidate_source_sha256",
+      "files": 192,
+      "verified": true
+    },
+    {
+      "report": "key",
+      "map": "go_source_sha256",
+      "files": 670,
+      "verified": true
+    },
+    {
+      "report": "ownership",
+      "map": "candidate_source_sha256",
+      "files": 192,
+      "verified": true
+    },
+    {
+      "report": "ownership",
+      "map": "go_source_sha256",
+      "files": 0,
+      "verified": true
+    },
+    {
+      "report": "process",
+      "map": "candidate_source_sha256",
+      "files": 192,
+      "verified": true
+    },
+    {
+      "report": "process",
+      "map": "go_source_sha256",
+      "files": 670,
+      "verified": true
+    },
+    {
+      "report": "registry",
+      "map": "candidate_source_sha256",
+      "files": 192,
+      "verified": true
+    },
+    {
+      "report": "registry",
+      "map": "go_source_sha256",
+      "files": 670,
+      "verified": true
+    }
+  ],
+  "changed_file_count": 190,
+  "author_evidence_files": 32,
+  "original_archive_paths": 149,
+  "current_elf_paths": 152,
+  "unique_archived": 118,
+  "new_archives": [
+    "994a83fcc9ec3b7d3d139a96a89c9623782dd7db4d2ec2c0dca4bda60fef0ead",
+    "61a5762101f1780405ee20dd70ae4dc0136e9e7778a9acb93c72fbab46fc0a4b",
+    "180c6bbc3779d75ef2d91ccc5b4010c79a928f2b2cde728fbad2f1a5095ad565"
+  ],
+  "roundtrip": true,
+  "users": [],
+  "tests": [
+    {
+      "path": "/tmp/symaira-state-key-3db-root-affected-pinned.log",
+      "passed": 224,
+      "failed": 0,
+      "ignored": 3,
+      "summaries": 34
+    },
+    {
+      "path": "/tmp/symaira-state-key-3db-root-mcp.json.tests.log",
+      "passed": 310,
+      "failed": 0,
+      "ignored": 3,
+      "summaries": 67
+    }
+  ],
+  "retired": true
+}

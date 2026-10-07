@@ -1,0 +1,28 @@
+// Real pinned-SDK lookup/invocation only, for owned native script/error vectors.
+package main
+
+import (
+	"encoding/base64"
+	"encoding/json"
+	"os"
+	"os/exec"
+)
+
+func main() {
+	path, lookup := exec.LookPath("symvault")
+	result := map[string]any{"path_base64": base64.StdEncoding.EncodeToString([]byte(path)), "lookup_error": ""}
+	if lookup != nil {
+		result["lookup_error"] = lookup.Error()
+	} else {
+		out, err := exec.Command("symvault", "get", "symbrowse/encryption-key").Output()
+		result["stdout_base64"] = base64.StdEncoding.EncodeToString(out)
+		if err != nil {
+			result["invoke_error"] = err.Error()
+		} else {
+			result["invoke_error"] = ""
+		}
+	}
+	if err := json.NewEncoder(os.Stdout).Encode(result); err != nil {
+		panic(err)
+	}
+}

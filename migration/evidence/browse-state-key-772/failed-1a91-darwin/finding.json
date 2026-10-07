@@ -1,0 +1,19 @@
+{
+  "source": "1a91f972a784ef1be6f2b2e47e8589fda947a4ae",
+  "actual_darwin_cross_exit": 101,
+  "finding": "cfg(unix) FIFO test imports rustix::fs::mkfifoat, pinned rustix1.1.4 excludes apple",
+  "source_file": "browse/crates/symbrowse-core/tests/state_cleanup.rs",
+  "affected_passed": 209,
+  "mcp_library_passed": 16,
+  "ignored": 3,
+  "windows_alltarget_strict_cross_clippy_passed": true,
+  "original_disk_guard_exit": 1,
+  "compiler_state": "idle before preservation",
+  "elf_paths": 218,
+  "elf_unique": 159,
+  "fresh_state_bound_paths": 35,
+  "new_compressed_bytes": 106760603,
+  "archive": "/workspace/oracles/symaira-state-key-osargs-1a91-before-fifo/receipt.json",
+  "pinned_rustix_source_sha256": "2758c9b1146d29da0fc94601b2b22776ec30bd00363aefd13a123ec513999f3c",
+  "no_native_darwin_runtime_claim": true
+}

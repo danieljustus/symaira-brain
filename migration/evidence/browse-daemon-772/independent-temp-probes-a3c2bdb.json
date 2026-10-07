@@ -1,0 +1,19 @@
+{
+  "candidate_head": "a3c2bdbc3686bf1b67b6970b155f8fb53a6db4a9",
+  "unit_binary_sha256": "2dafefc4a52a90182d27348991793a13481fb3bfccb974243e692bc036707681",
+  "purpose": "read-only constructors; no profile directories created",
+  "cases": [
+    {
+      "case": "empty-TMPDIR",
+      "exit": 0,
+      "stdout": "\nrunning 1 test\ntest spec::paths::tests::cache_environment_child ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.00s\n\n",
+      "stderr": ""
+    },
+    {
+      "case": "missing-TMPDIR",
+      "exit": 0,
+      "stdout": "\nrunning 1 test\ntest spec::paths::tests::cache_environment_child ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.00s\n\n",
+      "stderr": ""
+    }
+  ]
+}

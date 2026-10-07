@@ -1,0 +1,40 @@
+{
+  "source": "3db69a655e43ef8cffa3776ad00a823d947ff31b",
+  "maps": [
+    {
+      "report": "ownership",
+      "candidate_files": 192,
+      "frozen_go_files": 0,
+      "verified": true
+    },
+    {
+      "report": "gate",
+      "candidate_files": 192,
+      "frozen_go_files": 670,
+      "verified": true
+    },
+    {
+      "report": "process",
+      "candidate_files": 192,
+      "frozen_go_files": 670,
+      "verified": true
+    },
+    {
+      "report": "registry",
+      "candidate_files": 192,
+      "frozen_go_files": 670,
+      "verified": true
+    },
+    {
+      "report": "mcp",
+      "candidate_files": 0,
+      "frozen_go_files": 0,
+      "verified": true
+    }
+  ],
+  "workspace_test_totals": [
+    310,
+    0,
+    3
+  ]
+}

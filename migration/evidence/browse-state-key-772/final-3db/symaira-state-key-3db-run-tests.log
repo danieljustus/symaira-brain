@@ -1,0 +1,78 @@
+...EEE...
+======================================================================
+ERROR: test_direct_environment_routes_fetch_outputs_external (__main__.CargoTargetRootTests.test_direct_environment_routes_fetch_outputs_external)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/symaira-daemon772-state-key/browse/port/harness/run.py", line 48, in external_environment
+    mounted_root = EXTERNAL_RUNTIME_ROOT.resolve(strict=True)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1240, in resolve
+    s = self._flavour.realpath(self, strict=strict)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen posixpath>", line 424, in realpath
+  File "<frozen posixpath>", line 468, in _joinrealpath
+FileNotFoundError: [Errno 2] No such file or directory: '/Volumes'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workspace/symaira-daemon772-state-key/browse/port/harness/test_run.py", line 76, in test_direct_environment_routes_fetch_outputs_external
+    run.external_environment(env)
+  File "/workspace/symaira-daemon772-state-key/browse/port/harness/run.py", line 50, in external_environment
+    raise RuntimeError(f"required NVMe runtime volume is unavailable: {EXTERNAL_RUNTIME_ROOT}: {error}") from error
+RuntimeError: required NVMe runtime volume is unavailable: /Volumes/1TB_NVMe_SN850X: [Errno 2] No such file or directory: '/Volumes'
+
+======================================================================
+ERROR: test_direct_fetch_report_rejects_local_absolute_path (__main__.CargoTargetRootTests.test_direct_fetch_report_rejects_local_absolute_path)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/symaira-daemon772-state-key/browse/port/harness/run.py", line 48, in external_environment
+    mounted_root = EXTERNAL_RUNTIME_ROOT.resolve(strict=True)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1240, in resolve
+    s = self._flavour.realpath(self, strict=strict)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen posixpath>", line 424, in realpath
+  File "<frozen posixpath>", line 468, in _joinrealpath
+FileNotFoundError: [Errno 2] No such file or directory: '/Volumes'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workspace/symaira-daemon772-state-key/browse/port/harness/test_run.py", line 86, in test_direct_fetch_report_rejects_local_absolute_path
+    run.external_environment(env)
+  File "/workspace/symaira-daemon772-state-key/browse/port/harness/run.py", line 50, in external_environment
+    raise RuntimeError(f"required NVMe runtime volume is unavailable: {EXTERNAL_RUNTIME_ROOT}: {error}") from error
+RuntimeError: required NVMe runtime volume is unavailable: /Volumes/1TB_NVMe_SN850X: [Errno 2] No such file or directory: '/Volumes'
+
+======================================================================
+ERROR: test_direct_macos_default_target_is_external (__main__.CargoTargetRootTests.test_direct_macos_default_target_is_external)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/symaira-daemon772-state-key/browse/port/harness/run.py", line 48, in external_environment
+    mounted_root = EXTERNAL_RUNTIME_ROOT.resolve(strict=True)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1240, in resolve
+    s = self._flavour.realpath(self, strict=strict)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen posixpath>", line 424, in realpath
+  File "<frozen posixpath>", line 468, in _joinrealpath
+FileNotFoundError: [Errno 2] No such file or directory: '/Volumes'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workspace/symaira-daemon772-state-key/browse/port/harness/test_run.py", line 63, in test_direct_macos_default_target_is_external
+    target = run.cargo_target_root(root, env)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-daemon772-state-key/browse/port/harness/run.py", line 212, in cargo_target_root
+    return Path(external_environment(env)["CARGO_TARGET_DIR"])
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-daemon772-state-key/browse/port/harness/run.py", line 50, in external_environment
+    raise RuntimeError(f"required NVMe runtime volume is unavailable: {EXTERNAL_RUNTIME_ROOT}: {error}") from error
+RuntimeError: required NVMe runtime volume is unavailable: /Volumes/1TB_NVMe_SN850X: [Errno 2] No such file or directory: '/Volumes'
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.025s
+
+FAILED (errors=3)

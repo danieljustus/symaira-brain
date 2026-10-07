@@ -2,69 +2,23 @@
 
 //! Backward-compatible browser-state file codec.
 
-use std::{collections::BTreeMap, fmt, path::Path};
+use std::{fmt, path::Path};
 
 use aes_gcm::{
     Aes256Gcm, Nonce,
     aead::{Aead, Generate, KeyInit, Nonce as AeadNonce, Payload},
 };
-use serde::{Deserialize, Serialize, Serializer};
+mod model;
+use model::Header;
+pub(crate) use model::StateHeader;
+pub use model::{Cookie, OriginState, State};
+mod json_diagnostics;
+pub(crate) use json_diagnostics::invalid_first_byte;
 
 pub const SCHEMA_VERSION: u32 = 3;
 pub const FILE_MAGIC: &[u8] = b"SYMBROWSE-STATE\0";
 const NONCE_SIZE: usize = 12;
 const MAX_ENCRYPTED_PLAINTEXT_BYTES: usize = 64 << 20;
-
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct Cookie {
-    pub name: String,
-    pub value: String,
-    pub domain: String,
-    pub path: String,
-    #[serde(serialize_with = "serialize_go_float")]
-    pub expires: f64,
-    pub size: i64,
-    pub http_only: bool,
-    pub secure: bool,
-    pub session: bool,
-    #[serde(default, skip_serializing_if = "String::is_empty")]
-    pub same_site: String,
-}
-
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct OriginState {
-    pub cookies: Vec<Cookie>,
-    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-    pub local_storage: BTreeMap<String, String>,
-    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
-    pub session_storage: BTreeMap<String, String>,
-}
-
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct State {
-    #[serde(default)]
-    pub schema_version: u32,
-    pub name: String,
-    pub saved_at: String,
-    pub expires_at: String,
-    #[serde(default, skip_serializing_if = "String::is_empty")]
-    pub key_source: String,
-    pub origins: BTreeMap<String, OriginState>,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
-struct Header {
-    schema_version: u32,
-    saved_at: String,
-    expires_at: String,
-    #[serde(default)]
-    key_source: String,
-}
-
-pub(crate) struct StateHeader {
-    pub saved_at: String,
-    pub expires_at: String,
-}
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum StateError {
@@ -77,6 +31,7 @@ pub enum StateError {
     InvalidKeySource,
     Truncated,
     Decrypt,
+    HeaderAuthentication(Box<StateError>),
     MetadataMismatch,
     PlaintextTooLarge,
 }
@@ -95,6 +50,9 @@ impl fmt::Display for StateError {
             Self::InvalidKeySource => formatter.write_str("encrypted state key source is required"),
             Self::Truncated => formatter.write_str("encrypted state file is truncated"),
             Self::Decrypt => formatter.write_str("decrypt state file: aead::Error"),
+            Self::HeaderAuthentication(error) => {
+                write!(formatter, "authenticate state header: {error}")
+            }
             Self::MetadataMismatch => formatter
                 .write_str("decrypt state file: plaintext state metadata does not match header"),
             Self::PlaintextTooLarge => write!(
@@ -128,21 +86,6 @@ pub fn validate_name(name: &str) -> Result<(), StateError> {
         ));
     }
     Ok(())
-}
-
-fn serialize_go_float<S>(value: &f64, serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    if value.is_finite()
-        && value.fract() == 0.0
-        && *value >= i64::MIN as f64
-        && *value <= i64::MAX as f64
-    {
-        serializer.serialize_i64(*value as i64)
-    } else {
-        serializer.serialize_f64(*value)
-    }
 }
 
 pub fn decode(raw: &[u8], key: Option<&[u8]>) -> Result<State, StateError> {
@@ -188,11 +131,15 @@ pub(crate) fn read_header(raw: &[u8], key: Option<&[u8]>) -> Result<StateHeader,
         && let Ok(header) = serde_json::from_slice::<Header>(&data[..newline])
         && header.schema_version >= 2
     {
-        if header.schema_version >= 3
-            && !header.key_source.is_empty()
-            && header.key_source != "none"
-        {
-            let _ = decode_versioned(&header, &data[..newline], &data[newline + 1..], key)?;
+        if header.schema_version >= 3 {
+            if let Some(key) = key {
+                // Destructive timestamp decisions cannot trust key_source:
+                // it is itself unauthenticated until the AAD is verified.
+                let _ = decrypt(&data[newline + 1..], &data[..newline], key)
+                    .map_err(|error| StateError::HeaderAuthentication(Box::new(error)))?;
+            } else if !header.key_source.is_empty() && header.key_source != "none" {
+                return Err(StateError::KeyRequired);
+            }
         }
         return Ok(StateHeader {
             saved_at: header.saved_at,
@@ -225,7 +172,7 @@ fn decode_versioned(
         body.to_vec()
     };
     let mut state: State = serde_json::from_slice(&payload)
-        .map_err(|error| StateError::InvalidPayload(error.to_string()))?;
+        .map_err(|error| json_diagnostics::payload_error(&payload, error))?;
     if header.schema_version >= 3
         && header.key_source == "none"
         && (state.key_source != header.key_source
@@ -266,7 +213,7 @@ fn decode_legacy(data: &[u8], key: Option<&[u8]>) -> Result<State, StateError> {
 
 fn parse_legacy_payload(payload: Vec<u8>) -> Result<State, StateError> {
     let mut state: State = serde_json::from_slice(&payload)
-        .map_err(|error| StateError::InvalidPayload(error.to_string()))?;
+        .map_err(|error| json_diagnostics::payload_error(&payload, error))?;
     if state.schema_version == 0 {
         state.schema_version = 1;
     }
