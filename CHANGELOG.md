@@ -15,8 +15,6 @@ the [Unreleased] section is moved into a dated version section.
   does not expose (ADR0003/E010, #763). HTTP UI implementation remains tracked
   separately; this decision does not remove a currently reachable command.
 
-## [v0.12.1] - 2026-09-24
-
 ### Security
 - Confine versioned skill archive extraction to its destination root, including
   writes through pre-existing symlinks (#686).

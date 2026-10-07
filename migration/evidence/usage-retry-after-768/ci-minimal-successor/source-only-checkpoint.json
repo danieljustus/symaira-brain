@@ -1,0 +1,481 @@
+{
+  "status": "AUTHOR_SOURCE_ONLY_CHECKPOINT_REQUIRES_INDEPENDENT_REVIEW",
+  "original_source": "cb2e852ed55b95d5e9f62eecbcf3b3eb7a858cd2",
+  "tested_source": "c18c59918a2724b4c871260a0dc1b5389a9720d8",
+  "tested_tree": "00d8f7921787861ee5b5f4b1933fcf7720adfdc7",
+  "full_source_map": {
+    "path": "source-c18-full-map.json.gz",
+    "rows": 4732,
+    "raw_sha256": "cb13d53334b8d84d79605219101d4b34a1490937f701c71ae01e49543300aaf7"
+  },
+  "original_full_map_rows": 4652,
+  "original_selected_source_files": 114,
+  "original_prior_review_files": 47,
+  "original_actual_CI_logs": 4,
+  "originals_fresh_byte_and_native_verified": true,
+  "completion": [
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/retention.stdout",
+      "native": {
+        "st_mode": 33188,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1875952,
+        "st_nlink": 1,
+        "st_size": 94,
+        "st_mtime_ns": 1791125331640632279,
+        "st_ctime_ns": 1791125331640632279,
+        "st_blocks": 8
+      },
+      "bytes": 94,
+      "sha256": "8e6458c9543f7bb082c07372bcb020dd1d4c77a6cacc3b168b1e2fd8b1b09463",
+      "archive": "completion-retention.stdout.gz",
+      "compressed_sha256": "917c6f673fee8814b3e6b07681020deda9c09b042a8059d1f1974c45f5487266"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/retention.stderr",
+      "native": {
+        "st_mode": 33188,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1875951,
+        "st_nlink": 1,
+        "st_size": 0,
+        "st_mtime_ns": 1791125331248177041,
+        "st_ctime_ns": 1791125331248177041,
+        "st_blocks": 0
+      },
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "completion-retention.stderr.gz",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/check_source_final.py",
+      "native": {
+        "st_mode": 33152,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1874528,
+        "st_nlink": 1,
+        "st_size": 4934,
+        "st_mtime_ns": 1791125371498350209,
+        "st_ctime_ns": 1791125371498350209,
+        "st_blocks": 16
+      },
+      "bytes": 4934,
+      "sha256": "232a97e14cd130e97269d91dd36e0e876207e5c6bc766fa2498bcb62b145ac69",
+      "archive": "completion-check_source_final.py.gz",
+      "compressed_sha256": "aea0f12983f0794ba011257d171079e1f30250714d2d75aa5ead0a77c60fd501"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/final-source-check.stdout",
+      "native": {
+        "st_mode": 33152,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1874887,
+        "st_nlink": 1,
+        "st_size": 107,
+        "st_mtime_ns": 1791125381196863906,
+        "st_ctime_ns": 1791125381196863906,
+        "st_blocks": 8
+      },
+      "bytes": 107,
+      "sha256": "b7a7544489bd0094f057bc438033ee9c441203e44b36684fdb0643f8759883fa",
+      "archive": "completion-final-source-check.stdout.gz",
+      "compressed_sha256": "61cf484762cec2c24d13c97f2df0fbf1d937a15f600aac48a7adedcbe640a48b"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/final-source-check.stderr",
+      "native": {
+        "st_mode": 33152,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1874888,
+        "st_nlink": 1,
+        "st_size": 0,
+        "st_mtime_ns": 1791125371585427435,
+        "st_ctime_ns": 1791125371585427435,
+        "st_blocks": 0
+      },
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "completion-final-source-check.stderr.gz",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/final-source-checks.json",
+      "native": {
+        "st_mode": 33152,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1875950,
+        "st_nlink": 1,
+        "st_size": 10135,
+        "st_mtime_ns": 1791125380793246790,
+        "st_ctime_ns": 1791125380793246790,
+        "st_blocks": 24
+      },
+      "bytes": 10135,
+      "sha256": "878e22bf81b2a44557c73f889a65de555fb2b876a7b9684b7d43d26348cb93f3",
+      "archive": "completion-final-source-checks.json.gz",
+      "compressed_sha256": "d589e7a60df7312e8bef6cde8868a0c2d8fbdb9bcb449ddeda1ddbf00b06afaf"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/final-static-tools.json",
+      "native": {
+        "st_mode": 33152,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1875941,
+        "st_nlink": 1,
+        "st_size": 8026,
+        "st_mtime_ns": 1791125381196863906,
+        "st_ctime_ns": 1791125381196863906,
+        "st_blocks": 16
+      },
+      "bytes": 8026,
+      "sha256": "6ff40f9e54c011903889a6e714bc09be799014b1a087b99f760b3a91a00296ed",
+      "archive": "completion-final-static-tools.json.gz",
+      "compressed_sha256": "e687dd78f94e59299bd85543fd18da2b62750f5c0681712e8979b3606afbae09"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/finalize.py",
+      "native": {
+        "st_mode": 33152,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1873985,
+        "st_nlink": 1,
+        "st_size": 5758,
+        "st_mtime_ns": 1791125509225693804,
+        "st_ctime_ns": 1791125509225693804,
+        "st_blocks": 16
+      },
+      "bytes": 5758,
+      "sha256": "48346066bf9b8c80fd8adf4a1ea66228b4c30e58b4322706dbd209c09df5be66",
+      "archive": "completion-finalize.py.gz",
+      "compressed_sha256": "669e2f20298a28c5d655b881197164676f03ff79a6edb5307a9eeb2331db5e07"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/final-static-0.stderr",
+      "native": {
+        "st_mode": 33152,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1875948,
+        "st_nlink": 1,
+        "st_size": 0,
+        "st_mtime_ns": 1791125381173724465,
+        "st_ctime_ns": 1791125381173724465,
+        "st_blocks": 0
+      },
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "completion-final-static-0.stderr.gz",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/final-static-0.stdout",
+      "native": {
+        "st_mode": 33152,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1875949,
+        "st_nlink": 1,
+        "st_size": 0,
+        "st_mtime_ns": 1791125381173724465,
+        "st_ctime_ns": 1791125381173724465,
+        "st_blocks": 0
+      },
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "completion-final-static-0.stdout.gz",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/final-static-1.stderr",
+      "native": {
+        "st_mode": 33152,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1875946,
+        "st_nlink": 1,
+        "st_size": 0,
+        "st_mtime_ns": 1791125381185724836,
+        "st_ctime_ns": 1791125381185724836,
+        "st_blocks": 0
+      },
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "completion-final-static-1.stderr.gz",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/final-static-1.stdout",
+      "native": {
+        "st_mode": 33152,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1875947,
+        "st_nlink": 1,
+        "st_size": 0,
+        "st_mtime_ns": 1791125381185724836,
+        "st_ctime_ns": 1791125381185724836,
+        "st_blocks": 0
+      },
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "completion-final-static-1.stdout.gz",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/final-static-2.stderr",
+      "native": {
+        "st_mode": 33152,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1875944,
+        "st_nlink": 1,
+        "st_size": 0,
+        "st_mtime_ns": 1791125381189724960,
+        "st_ctime_ns": 1791125381189724960,
+        "st_blocks": 0
+      },
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "completion-final-static-2.stderr.gz",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/final-static-2.stdout",
+      "native": {
+        "st_mode": 33152,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1875945,
+        "st_nlink": 1,
+        "st_size": 0,
+        "st_mtime_ns": 1791125381189724960,
+        "st_ctime_ns": 1791125381189724960,
+        "st_blocks": 0
+      },
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "completion-final-static-2.stdout.gz",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/final-static-3.stderr",
+      "native": {
+        "st_mode": 33152,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1875942,
+        "st_nlink": 1,
+        "st_size": 0,
+        "st_mtime_ns": 1791125381193725084,
+        "st_ctime_ns": 1791125381193725084,
+        "st_blocks": 0
+      },
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "completion-final-static-3.stderr.gz",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/final-static-3.stdout",
+      "native": {
+        "st_mode": 33152,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1875943,
+        "st_nlink": 1,
+        "st_size": 0,
+        "st_mtime_ns": 1791125381193725084,
+        "st_ctime_ns": 1791125381193725084,
+        "st_blocks": 0
+      },
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "completion-final-static-3.stdout.gz",
+      "compressed_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "/workspace/review-proof/usage804-ci-minimal-successor/final-static-tools.json",
+      "native": {
+        "st_mode": 33152,
+        "st_uid": 1000,
+        "st_gid": 1000,
+        "st_dev": 27,
+        "st_ino": 1875941,
+        "st_nlink": 1,
+        "st_size": 8026,
+        "st_mtime_ns": 1791125381196863906,
+        "st_ctime_ns": 1791125381196863906,
+        "st_blocks": 16
+      },
+      "bytes": 8026,
+      "sha256": "6ff40f9e54c011903889a6e714bc09be799014b1a087b99f760b3a91a00296ed",
+      "archive": "completion-final-static-tools.json.gz",
+      "compressed_sha256": "e687dd78f94e59299bd85543fd18da2b62750f5c0681712e8979b3606afbae09"
+    }
+  ],
+  "tools": [
+    {
+      "command": [
+        "/home/agent/.cargo/bin/rustfmt",
+        "--edition",
+        "2024",
+        "--check",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/antigravity_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/copilot_kimi_oracle_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/copilot_kimi_owner_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/device_oracle_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/device_oracle_wire_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/go_decimal.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/go_decimal_fast/powers_negative.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/go_decimal_fast/powers_positive.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/go_decimal_fast.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/go_decimal_shift.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/go_decimal_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/go_float.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/lib.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/model.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/opencode_discovery_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/opencode_provenance_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/parser.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/parser_extra.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/parser_opencode.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_antigravity.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/accounts.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/claude_file.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/codex_file.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/commands.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/copilot_file.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/credential_json.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/credential_path.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/environment.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/files.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/hermes.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/jwt.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/keychain.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/kimi_nous.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/other_accounts.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/references.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/registry.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config/routing.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_config_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_errors.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_fetch.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_file_oracle_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_identity.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_opencode.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_opencode_workspace.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_request_encoding.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_requests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/provider_requests_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/providers.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/request_oracle_opencode_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/request_oracle_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/retry_after.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/retry_after_oracle_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/status_oracle_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/transport.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/transport_oracle_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/src/usage_fetch_oracle_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/tests/credential_reference_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/tests/hermes_credential_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/tests/secret_oracle_tests.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/tests/support/fake_symvault.rs",
+        "/workspace/symaira-usage768-retry-ci-fixes/rust/symbrain-usage/tests/usage_tests.rs"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "/workspace/toolchains/bin/actionlint",
+        "/workspace/symaira-usage768-retry-ci-fixes/.github/workflows/browse-chrome-native-e2e.yml",
+        "/workspace/symaira-usage768-retry-ci-fixes/.github/workflows/browse-daemon-native.yml",
+        "/workspace/symaira-usage768-retry-ci-fixes/.github/workflows/browse-flow-list.yml",
+        "/workspace/symaira-usage768-retry-ci-fixes/.github/workflows/browse-perf003-real-chrome.yml",
+        "/workspace/symaira-usage768-retry-ci-fixes/.github/workflows/browse-profiles.yml",
+        "/workspace/symaira-usage768-retry-ci-fixes/.github/workflows/bump-core.yml",
+        "/workspace/symaira-usage768-retry-ci-fixes/.github/workflows/ci.yml",
+        "/workspace/symaira-usage768-retry-ci-fixes/.github/workflows/codeql.yml",
+        "/workspace/symaira-usage768-retry-ci-fixes/.github/workflows/guard-review-repair.yml",
+        "/workspace/symaira-usage768-retry-ci-fixes/.github/workflows/manifest-drift.yml",
+        "/workspace/symaira-usage768-retry-ci-fixes/.github/workflows/mutation.yml",
+        "/workspace/symaira-usage768-retry-ci-fixes/.github/workflows/release.yml",
+        "/workspace/symaira-usage768-retry-ci-fixes/.github/workflows/rust-coverage.yml",
+        "/workspace/symaira-usage768-retry-ci-fixes/.github/workflows/rust.yml"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "bash",
+        "-n",
+        "/workspace/review-proof/usage804-ci-minimal-successor/scope-controls-attempt1/release-exact.sh"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "git",
+        "-C",
+        "/workspace/symaira-usage768-retry-ci-fixes",
+        "diff",
+        "--check"
+      ],
+      "exit": 0
+    }
+  ],
+  "current_actual_counts": {
+    "rustfmt_files": 62,
+    "actionlint_workflows": 14,
+    "extracted_Bash_syntax": 1,
+    "Git_diff_whitespace": 1,
+    "exact_numeric_algorithm_byte_projections": 3,
+    "owned_fake_formatter_controls": 9,
+    "rejected_scope_mutants": 2,
+    "compiled_Rust_tests": 0,
+    "actual_Go_formatter_tests": 0,
+    "actual_Clippy": 0,
+    "SDK_compiler_product_Cargo_target_ports": 0
+  },
+  "actual_command_order": "Commit c18, then check_source_final.py; source stayed clean during all four final checks.",
+  "pending": [
+    "Different-author full source review",
+    "Actual strict Clippy and Rust gates",
+    "Two real Go formatter regression tests and make lint",
+    "Original six Usage process gates",
+    "Retry1600/1164 and additive1681/1356 plus seven actual controls",
+    "Exact-source native Linux/macOS/Windows CI"
+  ],
+  "original_worktree_clean": true,
+  "new_target_absent": true,
+  "budget": {
+    "available_bytes": 3018100736,
+    "floor_bytes": 734003200
+  },
+  "publication": "No push, PR, merge, issue closure or runtime approval"
+}

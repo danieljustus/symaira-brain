@@ -11,11 +11,13 @@ mod runtime;
 mod safari_runtime;
 mod server;
 mod session;
+mod session_quote;
+pub use session_quote::invalid_session_message;
 mod spec;
 
 #[cfg(unix)]
 pub use client::connect_unix;
-pub use client::{Client, ClientError, ClientOptions, StartOptions};
+pub use client::{Client, ClientError, ClientOptions, StartOptions, detach_command};
 pub use protocol::codes;
 pub use protocol::{
     DaemonError, ErrorCode, Frame, Response, Warning, decode_frame, error_response,

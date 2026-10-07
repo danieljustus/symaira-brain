@@ -1,0 +1,37 @@
+Go-only local/source baseline: 97 cases
+Copilot/Kimi source-bound cases: 89
+Go-only local/source baseline: 97 cases
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.028s
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.015s
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.005s
+    Finished `test` profile [unoptimized] target(s) in 0.09s
+     Running unittests src/lib.rs (target/debug/deps/symbrain_usage-717883f361629f0c)
+
+running 1 test
+test providers::provider_config::copilot_kimi_oracle_tests::copilot_kimi_oracle_matches_fresh_go ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 66 filtered out; finished in 0.07s
+
+Preserved CLI package: 267 paths/ 199 unique files before package-only clean
+   Compiling symbrain-cli v0.12.1 (/workspace/symaira-usage768-argv/rust/symbrain-cli)
+    Finished `dev` profile [unoptimized] target(s) in 2.62s
+Copilot/Kimi CLI oracle: 111 byte/exit matches
+Copilot/Kimi CLI oracle: 16 byte/exit matches
+Preserved CLI package: 22 paths/ 18 unique files before package-only clean
+   Compiling symbrain-memory v0.12.1 (/tmp/symbrain-copilot-kimi-768.xVoBp8/argv-parent-source/rust/symbrain-memory)
+   Compiling symbrain-catalog v0.12.1 (/tmp/symbrain-copilot-kimi-768.xVoBp8/argv-parent-source/rust/symbrain-catalog)
+   Compiling symbrain-audit v0.12.1 (/tmp/symbrain-copilot-kimi-768.xVoBp8/argv-parent-source/rust/symbrain-audit)
+   Compiling symbrain-broker v0.12.1 (/tmp/symbrain-copilot-kimi-768.xVoBp8/argv-parent-source/rust/symbrain-broker)
+   Compiling symbrain-instructions v0.12.1 (/tmp/symbrain-copilot-kimi-768.xVoBp8/argv-parent-source/rust/symbrain-instructions)
+   Compiling symbrain-patterns v0.12.1 (/tmp/symbrain-copilot-kimi-768.xVoBp8/argv-parent-source/rust/symbrain-patterns)
+   Compiling symbrain-cli v0.12.1 (/tmp/symbrain-copilot-kimi-768.xVoBp8/argv-parent-source/rust/symbrain-cli)
+   Compiling symbrain-gateway v0.12.1 (/tmp/symbrain-copilot-kimi-768.xVoBp8/argv-parent-source/rust/symbrain-gateway)
+   Compiling symbrain-adapter v0.12.1 (/tmp/symbrain-copilot-kimi-768.xVoBp8/argv-parent-source/rust/symbrain-adapter)
+   Compiling symbrain-guard-core v0.12.1 (/tmp/symbrain-copilot-kimi-768.xVoBp8/argv-parent-source/rust/symbrain-guard-core)
+   Compiling symbrain-managed v0.12.1 (/tmp/symbrain-copilot-kimi-768.xVoBp8/argv-parent-source/rust/symbrain-managed)
+    Finished `dev` profile [unoptimized] target(s) in 5.48s
+Preserved CLI package: 22 paths/ 18 unique files before package-only clean
+   Compiling symbrain-cli v0.12.1 (/workspace/symaira-usage768-argv/rust/symbrain-cli)
+    Finished `dev` profile [unoptimized] target(s) in 2.71s
+Usage argv: 82 exact candidate pairs; 22 original inputs; 12 retained parent failures
+Usage argv: 3 actual native diagnostic mutations rejected

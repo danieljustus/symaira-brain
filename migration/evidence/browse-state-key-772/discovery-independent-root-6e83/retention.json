@@ -1,0 +1,147 @@
+{
+  "records": [
+    {
+      "original": "/workspace/review-artifacts/discovery772-6e83-review-doctor/comparisons-initial-reviewer-machinery-failure.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/different-author-comparisons-initial-reviewer-machinery-failure.log.gz",
+      "sha256": "812d600885d192c3a045acef8987c9084ed5a00f83826a0120eaefe5de6e9fdb",
+      "bytes": 1132,
+      "gzip_sha256": "d35525acbcab4535fd4d0e9d790e5bdcb643e41b05869598e219cbf69f79d1cf"
+    },
+    {
+      "original": "/workspace/review-artifacts/discovery772-6e83-review-doctor/comparisons-second-reviewer-machinery-failure.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/different-author-comparisons-second-reviewer-machinery-failure.log.gz",
+      "sha256": "2c3101ca62199108d42a6995e1f2a749bf16187d407114f1880872cfdc83a613",
+      "bytes": 352,
+      "gzip_sha256": "dbc42545b105c1c6f22f456c8526691b2d49f3a3ce8cbf53a5552a1a9b9ddc0c"
+    },
+    {
+      "original": "/workspace/review-artifacts/discovery772-6e83-review-doctor/comparisons.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/different-author-comparisons.json.gz",
+      "sha256": "45243fd6cf327df018ecb7c24691ab65af364ea9e5a7b72928fd604d859ef2f4",
+      "bytes": 1125,
+      "gzip_sha256": "e37450c2e97565bb69ff01a2953b1754feae70c423ddb158d46f8275aa02c618"
+    },
+    {
+      "original": "/workspace/review-artifacts/discovery772-6e83-review-doctor/comparisons.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/different-author-comparisons.log.gz",
+      "sha256": "50743616d7b26fbfaf4a1c7057dd4b16eec7afe1a616243b02d451d18f24d4ad",
+      "bytes": 781,
+      "gzip_sha256": "069eec7eb642a6fb691e0604ab1423f054c6145a1c97b2ac89e4891d8b62e5f8"
+    },
+    {
+      "original": "/workspace/review-artifacts/discovery772-6e83-review-doctor/comparisons.py",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/different-author-comparisons.py.gz",
+      "sha256": "3e7de0e93caf0184b64f5cf7dd3f15953be7e493f3911e43c88cbe2aca74c2cf",
+      "bytes": 6864,
+      "gzip_sha256": "be684f4fe24548fc4b8583aa185ae218fb5898534a4cbca6f29da5a2a41e4c99"
+    },
+    {
+      "original": "/workspace/review-artifacts/discovery772-6e83-review-doctor/independent-review-receipt.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/different-author-independent-review-receipt.json.gz",
+      "sha256": "f653cd9762111f89c5a57d8162cc0f90764b0ff81b08030b5938149d5cfd880f",
+      "bytes": 439965,
+      "gzip_sha256": "df3bec3689d839ca08e54fa76ce1deb656b089ca0b0ae5871e0dce261d6da762"
+    },
+    {
+      "original": "/workspace/review-artifacts/discovery772-6e83-review-doctor/independent-review.md",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/different-author-independent-review.md.gz",
+      "sha256": "81d21c1b9189eeb5b8eb7b505f1a47186b67a4e75f0f1a0f808b1e43f72304d7",
+      "bytes": 9857,
+      "gzip_sha256": "579303c6ea1adb482c0e588440e92245aed3f5f68fd360a3dc80338cca89ba6f"
+    },
+    {
+      "original": "/workspace/review-artifacts/discovery772-6e83-review-doctor/provenance.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/different-author-provenance.json.gz",
+      "sha256": "a9b0f75d990e2ee0a8d17066f37230bbc370155567d8e40dacd90e57bd68048e",
+      "bytes": 696553,
+      "gzip_sha256": "07be58d48feaa1404fa3bc0dd34945904e227be9df5fb99cb8d2ec38357bdca2"
+    },
+    {
+      "original": "/workspace/review-artifacts/discovery772-6e83-review-doctor/source-and-stage-identity.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/different-author-source-and-stage-identity.json.gz",
+      "sha256": "f8119d0060b2662ab78df826b7710e31323d9eff34d56e12a8328e6aa1908d19",
+      "bytes": 1212,
+      "gzip_sha256": "31039664eb0c1c0657de2deba768ded1b20cb89f271186e7e28da77ae4f2576b"
+    },
+    {
+      "original": "/workspace/review-artifacts/discovery772-6e83-review-doctor/verify.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/different-author-verify.log.gz",
+      "sha256": "3c7a73bcefa098a3b240b9482d8d3560ac475a80f323e27da0d220afe87cba21",
+      "bytes": 834,
+      "gzip_sha256": "a3be887f7ec9ac16335a1a13ca1a3a3972ea92f01227a9e4c075a98779d6e3f6"
+    },
+    {
+      "original": "/workspace/review-artifacts/discovery772-6e83-review-doctor/verify.py",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/different-author-verify.py.gz",
+      "sha256": "038f2b221a178e11d3ce0d1ca292f2cc03cc26a23fa0ef0635392f868b592898",
+      "bytes": 5662,
+      "gzip_sha256": "b50c471ce509b7a70f1df9f4663c14fbcd16ab1ea9a90410b4d1162aa9dcc885"
+    },
+    {
+      "original": "/workspace/review-proof/root-discovery772-6e83/comparisons.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/root-comparisons.json.gz",
+      "sha256": "45243fd6cf327df018ecb7c24691ab65af364ea9e5a7b72928fd604d859ef2f4",
+      "bytes": 1125,
+      "gzip_sha256": "e37450c2e97565bb69ff01a2953b1754feae70c423ddb158d46f8275aa02c618"
+    },
+    {
+      "original": "/workspace/review-proof/root-discovery772-6e83/initial-recorder-systemexit.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/root-initial-recorder-systemexit.log.gz",
+      "sha256": "50743616d7b26fbfaf4a1c7057dd4b16eec7afe1a616243b02d451d18f24d4ad",
+      "bytes": 781,
+      "gzip_sha256": "069eec7eb642a6fb691e0604ab1423f054c6145a1c97b2ac89e4891d8b62e5f8"
+    },
+    {
+      "original": "/workspace/review-proof/root-discovery772-6e83/pure-comparator-original.py",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/root-pure-comparator-original.py.gz",
+      "sha256": "3e7de0e93caf0184b64f5cf7dd3f15953be7e493f3911e43c88cbe2aca74c2cf",
+      "bytes": 6864,
+      "gzip_sha256": "be684f4fe24548fc4b8583aa185ae218fb5898534a4cbca6f29da5a2a41e4c99"
+    },
+    {
+      "original": "/workspace/review-proof/root-discovery772-6e83/verification.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/root-verification.json.gz",
+      "sha256": "f3ddb13dc52d610031d4e81949bbd5a0ccb34aff6100f59413057f07a94b0f80",
+      "bytes": 462,
+      "gzip_sha256": "d92fbb6d5c8d349f031157f3bc8b86cd926ffd3d9a0bb544fb09a1b10ce9ccd4"
+    },
+    {
+      "original": "/workspace/review-proof/root-discovery772-6e83/verify.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/root-verify.log.gz",
+      "sha256": "50743616d7b26fbfaf4a1c7057dd4b16eec7afe1a616243b02d451d18f24d4ad",
+      "bytes": 781,
+      "gzip_sha256": "069eec7eb642a6fb691e0604ab1423f054c6145a1c97b2ac89e4891d8b62e5f8"
+    },
+    {
+      "original": "/workspace/review-proof/root-discovery772-6e83/verify.py",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/root-verify.py.gz",
+      "sha256": "8e21565f38ae0d9fde8e49394105762534223d4a3bbd11ce550a00353d7c9f09",
+      "bytes": 3034,
+      "gzip_sha256": "9286f3cfb9cab77e806ad8ecb414b760c3e0e4a8dfb5ebcc3ba91dc1db229d9a"
+    },
+    {
+      "original": "/workspace/review-proof/root-discovery772-6e83/review.md",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/root-review.md.gz",
+      "sha256": "416a18bfe9c160ba68f295bbc7a286f4702f2746ab75900d9f827c4a7bebf383",
+      "bytes": 2538,
+      "gzip_sha256": "f6e65698b04f6165955b5ea3d55ce206639c617e5153519319c60d631b6643de"
+    },
+    {
+      "original": "/workspace/review-proof/root-discovery772-6e83/inherited-diff-check.stdout",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/root-inherited-diff-check.stdout.gz",
+      "sha256": "e62bca6d2f53bf4f0c351fc727729fe125921e937e0b138f7fbca6a79ebd8b58",
+      "bytes": 567,
+      "gzip_sha256": "db2e9cc29e12d0b348e902e3d0d35251fc97a23142483b3e985e09b36a4531e9"
+    },
+    {
+      "original": "/workspace/review-proof/root-discovery772-6e83/inherited-diff-check.stderr",
+      "retained": "migration/evidence/browse-state-key-772/discovery-independent-root-6e83/root-inherited-diff-check.stderr.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    }
+  ],
+  "reviewed_publication": "6e83b875afc31e4688b61371daf76e655c9082ec",
+  "native6_pending": true,
+  "full772_open": true
+}

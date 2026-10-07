@@ -1,0 +1,4 @@
+   Compiling symbrain-usage v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-usage)
+   Compiling symbrain-gateway v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-gateway)
+   Compiling symbrain-cli v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-cli)
+    Finished `dev` profile [unoptimized] target(s) in 3.61s

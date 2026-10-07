@@ -1,0 +1,46 @@
+from pathlib import Path
+import gzip,hashlib,json,os,re,shutil,subprocess
+root=Path('/workspace/symaira-daemon772-state-key-osargs');target=root/'target';head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip();assert head=='330037203853fef057892007c9f35c8226a35ea8';assert not subprocess.check_output(['git','status','--porcelain'],cwd=root)
+archive=Path('/workspace/oracles/symaira-state-key-osargs-330-before-import');assert not archive.exists();archive.mkdir(mode=0o700)
+sha=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+usage=Path('/workspace/oracles/symaira-usage768-retry-original-review/receipt.json');previous=json.loads(usage.read_text())['unique'];
+for digest,meta in json.loads(Path('/workspace/oracles/symaira-state-key-osargs-1a91-before-fifo/receipt.json').read_text())['unique'].items():
+ previous[digest]={'archive':meta['archive'],'compressed_sha256':meta['archive_sha256']}
+users=[]
+for p in Path('/proc').iterdir():
+ if not p.name.isdigit() or int(p.name)==os.getpid():continue
+ try:
+  values=[str((p/'exe').resolve()),(p/'maps').read_text()]
+  for fd in (p/'fd').iterdir():
+   try:values.append(os.readlink(fd))
+   except OSError:pass
+  if any(str(target)+'/' in value for value in values):users.append(p.name)
+ except OSError:pass
+assert not users,users
+executed=set()
+for name in ['affected','mcp-lib']:
+ log=Path('/tmp/symaira-state-key-osargs-330-'+name+'.log').read_text()
+ executed.update(re.findall(r'Running [^\n]* \((/workspace/symaira-daemon772-state-key-osargs/target/[^\n)]+)\)',log))
+executed.update(str(p) for p in [target/'debug/symbrowse',target/'debug/examples/state_key_store_probe',target/'debug/examples/startup_key_source_probe'])
+records=[];unique={};new_bytes=0
+for p in target.rglob('*'):
+ if p.is_symlink() or not p.is_file() or not p.stat().st_mode &0o111:continue
+ with p.open('rb') as f:
+  if f.read(4)!=b'\x7fELF':continue
+ digest=sha(p)
+ if digest not in unique:
+  old=previous.get(digest)
+  if old:
+   payload=Path(old['archive']); assert sha(payload)==old['compressed_sha256'];storage='verified inherited Usage archive reference'
+  else:
+   payload=archive/(digest+'.gz')
+   with p.open('rb') as f,payload.open('wb') as out:
+    with gzip.GzipFile(fileobj=out,mode='wb',mtime=0) as z:shutil.copyfileobj(f,z,1<<20)
+   new_bytes+=payload.stat().st_size;storage='new gzip payload'
+  with gzip.open(payload,'rb') as z:assert hashlib.file_digest(z,'sha256').hexdigest()==digest
+  unique[digest]={'archive':str(payload),'archive_sha256':sha(payload),'storage':storage,'bytes':p.stat().st_size}
+ records.append({'path':str(p),'sha256':digest,'bytes':p.stat().st_size,'fresh_state_executable_binding':str(p) in executed})
+assert executed <= {r['path'] for r in records},executed-{r['path'] for r in records}
+tracked=subprocess.check_output(['git','ls-files','browse/crates','browse/port/harness','.github/workflows/browse-daemon-native.yml','browse/Cargo.lock','docs/adr/daemon-state-key-bridge.md'],cwd=root,text=True).splitlines()
+receipt={'source':head,'target':str(target),'users':users,'records':records,'unique':unique,'actual_affected_or_build_bound_state_paths':sorted(executed),'candidate_source_sha256':{p:sha(root/p) for p in tracked},'usage_archive_reference':str(usage),'usage_archive_receipt_sha256':sha(usage),'transfer_receipt_sha256':sha('/tmp/symaira-usage-target-to-state-transfer.json'),'roundtrip_verified':True,'new_compressed_bytes':new_bytes,'target_deleted':False,'scope':'all current ELF paths retained; only actual Cargo run/build paths explicitly attributed to State. Other inherited/shared cache artifacts are not claimed to originate from candidate source. Original Registry NameError/progress journal retained; no native Darwin runtime claim.'}
+(archive/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n');print(len(records),'paths',len(unique),'unique',len(executed),'explicitState bindings',new_bytes,'new compressed bytes')

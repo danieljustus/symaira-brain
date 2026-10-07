@@ -1,0 +1,8 @@
+ab normal owned processes gone
+4 normal owned processes gone
+descendant closed-writer owned processes gone
+pipe-holder closed-writer owned processes gone
+descendant helper-deadline owned processes gone
+descendant daemon-signal owned processes gone
+descendant client-deadline owned processes gone
+descendant held-writer owned processes gone

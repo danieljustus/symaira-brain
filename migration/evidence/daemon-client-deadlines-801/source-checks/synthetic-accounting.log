@@ -1,0 +1,9 @@
+test_exact_original_domains_and_counts (test_raw_path_admission.AccountingTests.test_exact_original_domains_and_counts) ... ok
+test_exclusion_cannot_be_moved_to_linux (test_raw_path_admission.AccountingTests.test_exclusion_cannot_be_moved_to_linux) ... ok
+test_other_errno_raw_bytes_cleanup_and_parity_reject (test_raw_path_admission.AccountingTests.test_other_errno_raw_bytes_cleanup_and_parity_reject) ... ok
+test_removing_both_requested_and_excluded_cannot_certify_domain (test_raw_path_admission.AccountingTests.test_removing_both_requested_and_excluded_cannot_certify_domain) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.003s
+
+OK

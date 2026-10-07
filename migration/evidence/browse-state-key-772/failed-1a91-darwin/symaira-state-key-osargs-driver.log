@@ -1,0 +1,9 @@
+stage /tmp/symaira-state-key-osargs-fmt.log free_MiB 2504
+stage /tmp/symaira-state-key-osargs-clippy.log free_MiB 2504
+stage /tmp/symaira-state-key-osargs-affected.log free_MiB 2252
+stage /tmp/symaira-state-key-osargs-mcp-lib.log free_MiB 1273
+stage /tmp/symaira-state-key-osargs-build.log free_MiB 952
+stage /tmp/symaira-state-key-osargs-build.log free_MiB 952
+stage /tmp/symaira-state-key-osargs-windows-static.log free_MiB 825
+stage /tmp/symaira-state-key-osargs-darwin-static.log free_MiB 699
+insufficient free space before new stage

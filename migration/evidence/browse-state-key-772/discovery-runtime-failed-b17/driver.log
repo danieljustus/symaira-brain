@@ -1,0 +1,7 @@
+START fmt
+PASS fmt
+START strict
+PASS strict
+START affected-original
+PASS affected-original
+START affected-all-targets

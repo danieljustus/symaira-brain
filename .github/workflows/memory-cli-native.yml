@@ -7,6 +7,8 @@ on:
       - 'rust/symbrain-cli/**'
       - 'rust/symbrain-memory/**'
       - 'scripts/memory-cli-oracle/**'
+      - 'scripts/memory-historical-oracle/**'
+      - 'migration/evidence/memory-historical-649/sqlite-provider-f428/sqlite-amalgamation-3500400.zip'
       - '.github/workflows/memory-cli-native.yml'
       - 'Cargo.lock'
       - 'Cargo.toml'
@@ -16,6 +18,8 @@ on:
       - 'rust/symbrain-cli/**'
       - 'rust/symbrain-memory/**'
       - 'scripts/memory-cli-oracle/**'
+      - 'scripts/memory-historical-oracle/**'
+      - 'migration/evidence/memory-historical-649/sqlite-provider-f428/sqlite-amalgamation-3500400.zip'
       - '.github/workflows/memory-cli-native.yml'
       - 'Cargo.lock'
       - 'Cargo.toml'
@@ -31,7 +35,7 @@ jobs:
       matrix:
         runner: [ubuntu-24.04, macos-15, windows-2025]
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 30
+    timeout-minutes: 60
     defaults:
       run:
         shell: bash
@@ -43,6 +47,27 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+      - name: Set up the pinned SQLite checker interpreter
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.13.7'
+      - name: Verify portable checker provider preparation contracts
+        run: |
+          set -euo pipefail
+          umask 022
+          python3 -m unittest discover -s scripts/memory-historical-oracle -p 'test_provider*.py' -v
+          python3 -m unittest discover -s scripts/memory-cli-oracle -p 'test_corrupt_reads.py' -v
+      - name: Prepare the verified Linux SQLite checker library
+        if: runner.os == 'Linux'
+        env:
+          PROVIDER_DIR: ${{ runner.temp }}/memory-cli-checker-provider
+        run: |
+          set -euo pipefail
+          umask 022
+          python3 scripts/memory-historical-oracle/prepare_provider.py \
+            --archive migration/evidence/memory-historical-649/sqlite-provider-f428/sqlite-amalgamation-3500400.zip \
+            --output "$PROVIDER_DIR"
+          echo "MEMORY_SQLITE_CHECKER_PROVIDER=$PROVIDER_DIR" >> "$GITHUB_ENV"
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version: '1.26.7'
@@ -72,6 +97,22 @@ jobs:
           set -euo pipefail
           umask 022
           python3 scripts/memory-cli-oracle/replay.py --report "$REPORT" 2>&1 | tee "$PROCESS_LOG"
+      - name: Verify all historical Store migration effects
+        env:
+          REPORT_DIR: ${{ runner.temp }}/memory-cli-historical
+          HISTORICAL_LOG: ${{ runner.temp }}/memory-cli-historical.log
+        run: |
+          set -euo pipefail
+          umask 022
+          bash scripts/memory-historical-oracle/run.sh --output "$REPORT_DIR" 2>&1 | tee "$HISTORICAL_LOG"
+      - name: Bind owned original and additive default contracts
+        env:
+          REPORT_DIR: ${{ runner.temp }}/memory-cli-owned-defaults
+          DEFAULT_LOG: ${{ runner.temp }}/memory-cli-owned-defaults.log
+        run: |
+          set -euo pipefail
+          umask 022
+          python3 scripts/memory-historical-oracle/defaults_inventory.py --output "$REPORT_DIR" 2>&1 | tee "$DEFAULT_LOG"
       - name: Verify governed direct writes and delete state
         env:
           REPORT_DIR: ${{ runner.temp }}/memory-cli-writes
@@ -99,6 +140,9 @@ jobs:
             rustc -Vv
             cargo -V
             go version
+            python3 --version
+            python3 -c 'import sqlite3; print("sqlite_native_stdlib=" + sqlite3.sqlite_version)'
+            echo "historical_checker_provider=${MEMORY_SQLITE_CHECKER_PROVIDER:-native-stdlib}"
           } > "$RECEIPT"
       - name: Retain acceptance receipts
         if: always()

@@ -1,0 +1,57 @@
+{
+  "disposition": "REQUEST_CHANGES source-only independent review",
+  "source": "64a76183d0d556b4b979af9cdf31b5028c1e76bf",
+  "publication": "48fc3639e2265756f3bf8f9c4c914afa971ea5da",
+  "proofs": [
+    {
+      "path": "/tmp/symaira-state-key-discovery-independent-static-review.md",
+      "bytes": 9649,
+      "sha256": "0ecbfbf9fd7b1aeb8fa79bd700a6dcceffc300862a5529158d653afa8edf143d",
+      "retained": "symaira-state-key-discovery-independent-static-review.md.gz",
+      "gzip_sha256": "1d5b5b91ab958e44c827ebafcdee7607651de28c7cec4db695546876a53c1bb5"
+    },
+    {
+      "path": "/tmp/symaira-state-key-discovery-independent-static-provenance.json",
+      "bytes": 208644,
+      "sha256": "60a0a9acf28e0a29d3c0832cb3fd6cb1bef5962241a37c5acefbbd28c4d8fc49",
+      "retained": "symaira-state-key-discovery-independent-static-provenance.json.gz",
+      "gzip_sha256": "9b181b9dfc8b50355ad56828a31a8ecd4a2d771e1d2ef5b930d84a972020af81"
+    },
+    {
+      "path": "/tmp/symaira-state-key-discovery-independent-path-projection.py",
+      "bytes": 3669,
+      "sha256": "84d026e1f4138028c7b399be4c6bce86c11753da346256c51ee45e5a25f99a03",
+      "retained": "symaira-state-key-discovery-independent-path-projection.py.gz",
+      "gzip_sha256": "985fd64bcbfff2ec3438d274d6ca5674fe6a45038a21872b67be9dd7a177d869"
+    },
+    {
+      "path": "/tmp/symaira-state-key-discovery-independent-path-projection.log",
+      "bytes": 124,
+      "sha256": "fb376816397c41bd715b7c79e845d3c6f1fb7b3c5b4e41b0cccc5f4205dcba1b",
+      "retained": "symaira-state-key-discovery-independent-path-projection.log.gz",
+      "gzip_sha256": "5d35ec3784405b557fdb07980f49fbb2b364e83882d4ed701c89c95d667b50d7"
+    },
+    {
+      "path": "/tmp/symaira-state-key-discovery-independent-path-projection/receipt.json",
+      "bytes": 4665,
+      "sha256": "2f499b0fb97f1cfd0b4d01d9400ae25b173e5875b1055c671745e3b2962a6446",
+      "retained": "path-projection-receipt.json.gz",
+      "gzip_sha256": "bc612f32b485bcd91a39687ca4e5f4bcd87fa47c2bc32987282e3871713c9ae9"
+    },
+    {
+      "path": "/tmp/symaira-state-key-discovery-independent-actionlint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "symaira-state-key-discovery-independent-actionlint.log.gz",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "path": "/tmp/symaira-state-key-discovery-independent-static-review-receipt.json",
+      "sha256": "931820e89deab6fc7dc081a697aab0e3a8ea6488f33072d30906d4f3be91bc41",
+      "bytes": 2366,
+      "retained": "symaira-state-key-discovery-independent-static-review-receipt.json.gz",
+      "gzip_sha256": "e0a8926da1b5537e232c1f288ad36f8baae5270596463dde9b6fb59e9803075e"
+    }
+  ],
+  "no_product_runtime": true
+}

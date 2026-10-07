@@ -21,7 +21,7 @@ EXTERNAL_GO_ARTIFACT_ROOT := $(EXTERNAL_ARTIFACT_ROOT)/go
 EXTERNAL_CARGO_TARGET_DIR := $(SYMAIRA_EXTERNAL_BASE)/cargo-target/$(EXTERNAL_WORKTREE_KEY)
 endif
 endif
-EXTERNAL_RUN := SYMAIRA_EXTERNAL_BASE="$(SYMAIRA_EXTERNAL_BASE)" bash $(CURDIR)/scripts/run-external-env.sh
+EXTERNAL_RUN := SYMAIRA_EXTERNAL_BASE="$(SYMAIRA_EXTERNAL_BASE)" bash "$(CURDIR)/scripts/run-external-env.sh"
 
 .PHONY: rust-coverage build build-rust parity-smoke rust-go-printable-check usage-oracle-check activity-cli-oracle-check policy-oracle-check xdg-oracle-check catalog-oracle-check audit-oracle-check patterns-activity-oracle-check mcp-oracle-check gateway-oracle-check broker-oracle-check managed-oracle-check skills-oracle-check instructions-oracle-check adapters-oracle-check install-oracle-check profile-remove-oracle-check guard-oracle-check guard-doctor-oracle-check guard-scan-oracle-check guard-scan-oracle-test rust-guard-check rust-audit rust-deny rust-fast rust-check rust-fuzz-build rust-fuzz-smoke test test-race test-memory-large coverage lint fmt-check fmt vet clean
 
@@ -298,13 +298,14 @@ lint: vet fmt-check
 # Keep file discovery in find so its POSIX `-exec ... {} +` batching stays
 # below the platform's exec limit instead of expanding every path in make.
 # Linked checkouts are independent trees, not sources owned by this checkout.
-GOFMT_FIND := find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -not -path './.worktrees/*' -exec
+# Original evidence is immutable input data, not formatter-owned source.
+GOFMT_FIND := find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -not -path './.worktrees/*' -not -path './migration/evidence/*' -exec
 
-## fmt: Format all Go source files
+## fmt: Format owned Go source files
 fmt:
 	$(GOFMT_FIND) gofmt -w -s {} +
 
-## fmt-check: Fail if gofmt would change any file
+## fmt-check: Fail if gofmt would change any owned source file
 fmt-check:
 	@set -eu; \
 	tmp_dir="$$(mktemp -d)"; \

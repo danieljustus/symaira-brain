@@ -1,0 +1,81 @@
+# Memory MCP metadata stays with its embedded owner
+
+The frozen Go implementation exposes Memory tools through `symbrain mcp`
+(and its deprecated `serve` alias). `symbrain memory serve` owns the separate
+HTTP synchronization/Web Console listener. Issue759's shorthand must not move
+MCP into that HTTP owner or create a second Memory store.
+
+The existing Rust Gateway already uses the shared Memory store, generic MCP
+transport and profile policy. Actual baseline probes against frozen Go
+dcddcef0 and approved native Memory publication27001b1 found the same sets of
+tool names across six profiles, but different descriptions, titles, input
+schemas, annotation hints and array order. These complete protocol values
+matter to clients and to a separately installed Guard that pins schemas.
+Name-only comparisons are insufficient for this contract.
+
+We therefore retain the existing owners and port the eleven actually reachable
+Memory/Activity descriptors, including Go registration order. Versioned static
+metadata is compiled into the existing Gateway; it is not loaded from a user's
+filesystem or generated using Go at runtime. Typed private descriptors retain
+the complete ordered inputSchema as RawValue. Memory read tools do not acquire
+the idempotent hint used by Activity tools. Existing profile evaluation selects
+the names before serialization; allow/deny list order does not widen exposure.
+
+The four candidate/promotion/rejection/query-log descriptors are not exposed by
+the current Brain Memory policy universe even when explicitly requested. Their
+existing conservative implementation remains separate; this change does not
+silently enlarge the profile universe to expose them. Skills and foreign server
+catalogs remain with their current owners.
+
+The baseline raw streams, profile inputs, binaries' hashes and289 frozen Go
+source hashes are retained in
+`migration/evidence/memory-mcp-759/catalog-baseline`. An actual process gate
+compares full initialize/catalog streams, field values and order, framing,
+exit codes, diagnostics and profile exposure, including the deprecated alias.
+Real title/schema/order/exposure mutant processes must be rejected. A dedicated
+native Linux/macOS/Windows workflow retains its SDK and source receipts.
+
+This is a bounded catalog correction. It does not claim complete tools/call,
+legacy database, authorization, filesystem or HTTP parity, or close759/758.
+The original baseline also records Go-created JWT-secret and audit files that
+the native startup does not currently create; they are remaining lifecycle
+contracts, not normalization allowances. Full platform acceptance, independent
+review and protected checks remain required before merge.
+
+## Fresh clean-source result
+
+Source2f5a59d, normally based on approved Memory27001b1 and maine3dbda6c, passes32 complete actual Go/native process pairs across eight profiles, both framing modes and both command aliases. All five actual title/hint/schema/order/exposure mutant processes are rejected.316 gateway/MCP/CLI all-target/all-feature tests pass with zero failures or ignores (35 summaries); strict Clippy, formatting and Actionlint pass. The original MCP process suite, foreign-child routing, malformed frames and Unix SIGTERM behavior also pass.215 current source hashes and107 actual ELF paths/75 unique hashes were verified and retained before target release. First source855 Clippy failure and its passing32/4 process proof remain unchanged in the baseline evidence. Complete receipts are under `migration/evidence/memory-mcp-759/final-2f5a59`. Independent review and genuine native-three-OS acceptance are still pending; this is no closure or filesystem-parity claim.
+
+## Independent review and main integration
+
+The full different-author review approves the bounded catalog correction:316 tests,32 permanent full-wire pairs,72 additional profile pairs plus four control anchors, five real executable mutants, six nested observed-output controls, and the entire existing MCP regression suite pass. All eleven compiled descriptors preserve Go metadata, schema, hint omission and registration order after the existing exposure policy. Store, handlers, transport, CLI and Activity remain byte-identical to the approved Memory parent. Complete original and fresh proof is retained under `migration/evidence/memory-mcp-759/independent-2f5a59`.
+
+Main2b6d49f is normally integrated. Its change contains documentation and historical proof only; the tested catalog, harness, workflow, Cargo and other production bytes are unchanged. Documentation and preserved review evidence therefore require source/diff/actionlint verification, without repeating unchanged local execution. Current published-head protected and genuine native-three-OS checks remain required, and803 must merge first. No full759 closure follows from a catalog-only result.
+
+Build-cache retention is deliberate: exact independently executed binaries, all current ELF payloads, the original107 executable-path archive, and original failing preservation attempts have SHA and decompression checks before the exclusively owned853MB cache is retired. Original source snapshots, receipts and the pre-existing Brain target are preserved. This keeps the growing parallel migration reviewable within the shared workspace's capacity.
+
+
+## Windows archive shell path correction (#811)
+
+Actual Windows job `111341331634` checked out the PR merge containing
+`11f5777a91bd980f16a68fe187ef70f6b50fa9ff`. Its owner build completed, but GNU/MSYS
+Tar rejected the native `D:\a\_temp/memory-mcp-go-source` path passed to `-C`.
+The frozen Go build and subsequent MCP comparisons did not run. The original
+raw job log, decoded payload and immutable workflow are retained under
+`migration/evidence/memory-mcp-759/windows-archive-path-811/`. This failure is
+workflow bootstrap evidence, not a native catalog parity result.
+
+Normalize only `ORACLE_SOURCE` with `cygpath -u` before Bash `mkdir`, Tar and
+`cd`, using the existing portable Windows runner pattern. Keep `ORACLE_BIN`
+as the native runner-temp path for Go's output and Python/native process
+launch. The general `run-go-oracle.sh` uses a separate Git worktree lifecycle;
+replacing this archived oracle preparation would broaden the fix needlessly.
+The frozen Go revision, archive bytes, all MCP assertions, inputs, timeouts,
+matrices and upload policy remain unchanged. Local shell syntax and workflow
+lint can check this source-only correction; they do not prove Windows runtime.
+Fresh native Windows and all required exact-head checks remain mandatory.
+
+
+Root independent workflow correction review (2026-10-04): the exact Windows failure at source11f, job111341331634, came from GNU/MSYS Tar interpreting a native drive path. Successore49 converts only the owned archive/extraction shell directory with cygpath before mkdir/tar/cd. The frozen Go ref, native output path, production sources, dependency pins, complete MCP comparisons and actual controls remain unchanged. Root independently checked every changed path, all four shell blocks, actionlint and original CRLF log bytes. This proves the bounded static correction; fresh native Windows catalog execution remains required.
+
+A separate original Windows Memory CLI job111341331340 exposes SQLITE_BUSY5 during real concurrent Store::open. Its migration production bytes match PR803. Passing other executions does not dismiss that failure: bounded initialization repair, independent validation and current native acceptance gate the shared Store and dependent PRs before merge. No database assertion or timeout has been weakened.

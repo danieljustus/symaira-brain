@@ -1,0 +1,26 @@
+{
+  "parent": "27da5240a534a536525a601da92e43a4728be4b6",
+  "worktree": "/workspace/symaira-guard770-windows-fixtures",
+  "branch": "fix/guard805-windows-doctor-fixtures",
+  "scope": "Test/workflow/docs-only source candidate; no product/Go/build/runtime execution.",
+  "checks": {
+    "explicit_rustfmt_edition2024_style2024_skip_children": "passed; syntax/format only, no compilation",
+    "actionlint": "passed; scoped future Windows step syntax only",
+    "git_diff_check": "passed",
+    "compiled_candidate": "NOT RUN, no Cargo/target allocation",
+    "native_windows_control": "PREPARED only; errno2/healthy0, remove owned parent, errno3/issue1; complete child bytes retained by CI",
+    "native_three_os_and_protected": "REQUIRED pending",
+    "production_dependencies_harness_frozen_go": "byte unchanged from27da",
+    "original_assertions": "healthy0/semantic1/typed-discovery None/empty/warning/owner/readonly all preserved",
+    "original_native_failure_report_row": "not in original log; source diagnosis not a claimed observed Doctor row"
+  },
+  "source_sha256": {
+    "rust/symguard-cli/tests/doctor_config_paths.rs": "10d5b18b10e31f898d9eb0bc7fc00b1fd514d4a0bf46e8318c6cae0392d90268",
+    "rust/symguard-cli/tests/doctor_warnings.rs": "200fdd7440eb1564c15701f91cef6d7d89c720a71c9ae616fd154ed8f3df580e",
+    "rust/symguard-cli/tests/support/windows_discovery.rs": "0df615ca37b61fabbee3805fbb5386bcef7178820696f358dc7e335e56e22f11",
+    ".github/workflows/ci.yml": "a55be3ef67440abad3b8826409fef852093a74b7af486b3bdf645f8adc771848",
+    "docs/adr/guard-generated-config-path-ownership.md": "d0bd51c5dfae7fbb3d560c1c15ce7fda5a4d9b6ef8366648c37ba0a5ef8a5a52"
+  },
+  "originals_receipt_sha256": "3da7ed3ab47768a1a079358de6cf01ea949e75e5f3f1f625b0f827b947ae5e54",
+  "formatted_children_unchanged": true
+}

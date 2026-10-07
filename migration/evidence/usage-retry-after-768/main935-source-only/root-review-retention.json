@@ -1,0 +1,141 @@
+{
+  "historical_revision": "3797d40fa34c57cf1314853438170e607cbd7875",
+  "historical_production_revision": "79c834537ef5b8430f8189f32380016e629fed10",
+  "records": [
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-actionlint.log",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/00-symaira-usage768-decimal-independent-actionlint.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-gofmt.log",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/01-symaira-usage768-decimal-independent-gofmt.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-projection.json",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/02-symaira-usage768-decimal-independent-projection.json.gz",
+      "sha256": "1d0a1f87f2e4cf8754d483dfb5356ae9fad30db02b7b0473423b4431368681fc",
+      "bytes": 714824,
+      "archive_sha256": "d33c7cb94be9894d9ab954add31de74fd86bcb4ddbd6de98d56b442f3598f238"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-projection.log",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/03-symaira-usage768-decimal-independent-projection.log.gz",
+      "sha256": "5c7c2c954b958defc5ceede81a1ad6d599d5c469044596415031d69cc14cc65d",
+      "bytes": 309,
+      "archive_sha256": "00272ec932cfe6f9ce88651fd1db870e513b0d58b79329f4fc9cfc25c809dff3"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-projection.py",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/04-symaira-usage768-decimal-independent-projection.py.gz",
+      "sha256": "b2ab9cb48d4bfc18c122f43c304ff1ffa037abbbc2a8dfea662c115e18e616e8",
+      "bytes": 11117,
+      "archive_sha256": "0a264355b0d2c97051a56917d6b02db39ff44a62c70295ca92b45b442da7779d"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-provenance-initial.log",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/05-symaira-usage768-decimal-independent-provenance-initial.log.gz",
+      "sha256": "e41974910efa927807cc92309d54df4a14088bb7261e88b42141521e239c5a06",
+      "bytes": 693,
+      "archive_sha256": "16b5ad265f0bb9d3ca0427a7b905fc0b9072c26715117543f18072b59d42c672"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-provenance-initial.py",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/06-symaira-usage768-decimal-independent-provenance-initial.py.gz",
+      "sha256": "ed1b1d054d10a3ae6314d1c29f071ef689f73ee94066f67f52d1e92e06815d9a",
+      "bytes": 10020,
+      "archive_sha256": "84717eba9e39d336596f8728d7942239cb3e25752b425c9fc915d97786f9354d"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-provenance-prefix-original.log",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/07-symaira-usage768-decimal-independent-provenance-prefix-original.log.gz",
+      "sha256": "696df228566481655714164c0df1d9f6d12734392e59601196a6969f1b2632f9",
+      "bytes": 269,
+      "archive_sha256": "627826e0cfd7600d76da33d969a61e4314638dd96515106755d7e78155821529"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-provenance-prefix-original.py",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/08-symaira-usage768-decimal-independent-provenance-prefix-original.py.gz",
+      "sha256": "e7f0a88fb8908f0c5d3976bbf92ddd0ed355f5c61a5161060134937b05e510f8",
+      "bytes": 10026,
+      "archive_sha256": "b16ba883762025bd92e9a441d08c4f6ca8763f7ac64647472b8be59ebcebaff1"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-provenance-schema-original.log",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/09-symaira-usage768-decimal-independent-provenance-schema-original.log.gz",
+      "sha256": "ee5a499a06dd5db8d77c574393f69b0b0f4edc546e9e55fffd9157c2d0736f9e",
+      "bytes": 260,
+      "archive_sha256": "556b133b962a4b54f2a76efc01342e1e2e1aa3172243551fd2deaf28f9d275cf"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-provenance-schema-original.py",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/10-symaira-usage768-decimal-independent-provenance-schema-original.py.gz",
+      "sha256": "90011d44df8c223fd6bc0b48d8c3a84a914d06208e8bc341fe19a56b047a0d60",
+      "bytes": 10019,
+      "archive_sha256": "cf7a75e45fefc14043ddc2732bc4e08742d9edc03324d72a22fb1067389f3185"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-provenance.json",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/11-symaira-usage768-decimal-independent-provenance.json.gz",
+      "sha256": "01029d357f2fec9e962c591f7b687370edcb740c9f3de048bc6857835e47fafd",
+      "bytes": 293913,
+      "archive_sha256": "a8cb41afe9972c00f0d9ab29f2080aac998165a0ef06e549d9c42aaa1b48c5fe"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-provenance.log",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/12-symaira-usage768-decimal-independent-provenance.log.gz",
+      "sha256": "3d94e09a70547784a93adc597945fbcf3a44a8cd9f2e3430ca1d784ae6810268",
+      "bytes": 991,
+      "archive_sha256": "0b35f17a41c6d34ebaeb0d7365b379e80be0a7973547bb0eb56bce04058dc653"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-provenance.py",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/13-symaira-usage768-decimal-independent-provenance.py.gz",
+      "sha256": "3db6fb6da4da93bc8adaec7e2647296912dc4dc6e356ecb4bddbfd8459de97bb",
+      "bytes": 10108,
+      "archive_sha256": "1aaa0589e88d19f7a73d0287d708816fc121f15db47dcf2e971b57ff2d4f9a0a"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-rustfmt.log",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/14-symaira-usage768-decimal-independent-rustfmt.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-sdk-control-map.json",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/15-symaira-usage768-decimal-independent-sdk-control-map.json.gz",
+      "sha256": "ae65acf7951fc1e6fcf092b77f489b81921599f1d8412d9767c7dc767f2d689b",
+      "bytes": 36470,
+      "archive_sha256": "9959b11b437ab01aba9eed9cb554f87987f0394e5c0ec2c0af3b114b3eaab6e4"
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-independent-static-checks.json",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/16-symaira-usage768-decimal-independent-static-checks.json.gz",
+      "sha256": "15c5b9d6b4953886674f5c28c79cad920226f328d328985935504407a2af6c60",
+      "bytes": 390,
+      "archive_sha256": "31a4fd27372094b555ff31afb1602826a5d89ca1a645495d65a18c56aa552e22"
+    },
+    {
+      "original": "/tmp/symaira-usage768-retry-decimal-independent-static-review-receipt.json",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/17-symaira-usage768-retry-decimal-independent-static-review-receipt.json.gz",
+      "sha256": "b45f3ecdcc5ed3ce1625a4552738e442c8941a7184b9260a2e00f9cb0339c2c5",
+      "bytes": 5601,
+      "archive_sha256": "561c24d23ad23e76b247c6da9d4bc6620a47abe492fb05954d14bad76fb194f2"
+    },
+    {
+      "original": "/tmp/symaira-usage768-retry-decimal-independent-static-review.md",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/original-root-review-3797/18-symaira-usage768-retry-decimal-independent-static-review.md.gz",
+      "sha256": "b34f713aedb377cba8377f5f65fefb4f6e3512088845051311770269d821c9a9",
+      "bytes": 13475,
+      "archive_sha256": "3368ac77dbb7ec8d6824b8550ff95cc26169635a73bf7d8eb8c60f782624500f"
+    }
+  ],
+  "source_read_review_only": true,
+  "current_candidate_acceptance": false
+}

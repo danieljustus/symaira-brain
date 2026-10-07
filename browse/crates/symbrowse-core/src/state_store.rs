@@ -4,10 +4,7 @@
 
 use std::{
     fmt, fs,
-    fs::OpenOptions,
-    io::Write,
     path::{Path, PathBuf},
-    sync::atomic::{AtomicU64, Ordering},
 };
 
 use serde::Serialize;
@@ -20,7 +17,9 @@ use crate::state::{
 };
 
 const DEFAULT_EXPIRE_DAYS: i64 = 30;
-static NEXT_TEMP: AtomicU64 = AtomicU64::new(1);
+mod diagnostics;
+mod files;
+use files::{atomic_write, read_regular, secure_directory};
 
 #[derive(Clone)]
 pub struct KeyMaterial {
@@ -67,12 +66,14 @@ pub enum StoreError {
     NotFound(String),
     UnsafeFileType(PathBuf),
     InvalidTime(String),
+    Context(String),
 }
 
 impl fmt::Display for StoreError {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::State(error) => error.fmt(formatter),
+            Self::Context(message) => formatter.write_str(message),
             Self::Io(error) => error.fmt(formatter),
             Self::NotFound(name) => write!(formatter, "state {name:?} not found"),
             Self::UnsafeFileType(path) => {
@@ -149,6 +150,12 @@ impl Store {
         })
     }
 
+    /// Current provider label, without exposing key material.
+    #[must_use]
+    pub fn key_source(&self) -> &str {
+        self.key.as_ref().map_or("none", KeyMaterial::source)
+    }
+
     #[must_use]
     pub fn dir(&self) -> &Path {
         &self.dir
@@ -158,6 +165,17 @@ impl Store {
         validate_name(&state.name)?;
         if self.key.is_none() && !matches!(state.key_source.as_str(), "" | "none") {
             return Err(StoreError::State(StateError::KeyRequired));
+        }
+        // This is warning-only untrusted header metadata, never key material
+        // or permission to bypass the loaded-snapshot guard above.
+        if self.key.is_none()
+            && let Some(previous) = self.existing_encrypted_key_source(&state.name)
+        {
+            eprintln!(
+                "WARN re-saving encrypted state without an encryption key state={} previous_key_source={}",
+                crate::go_quote::quote(&state.name),
+                crate::go_quote::quote(&previous)
+            );
         }
         if state.schema_version < SCHEMA_VERSION {
             state.schema_version = SCHEMA_VERSION;
@@ -183,7 +201,8 @@ impl Store {
                 StoreError::Io(error)
             }
         })?;
-        let mut state = decode(&raw, self.key.as_ref().map(|key| key.key.as_slice()))?;
+        let mut state = decode(&raw, self.key.as_ref().map(|key| key.key.as_slice()))
+            .map_err(|error| diagnostics::decode_error(name, &raw, self.key.is_some(), error))?;
         state.name = name.to_owned();
         Ok(state)
     }
@@ -226,7 +245,12 @@ impl Store {
     pub fn expired_at(&self, now: OffsetDateTime) -> Result<Vec<String>, StoreError> {
         let mut expired = Vec::new();
         for name in self.list()? {
-            let header = self.read_header(&name)?;
+            let header = self.read_header(&name).map_err(|error| {
+                StoreError::Context(format!(
+                    "check expired state {}: {error}",
+                    crate::go_quote::quote(&name)
+                ))
+            })?;
             let Ok(expires) = parse_time(&header.expires_at) else {
                 continue;
             };
@@ -238,11 +262,28 @@ impl Store {
     }
 
     pub fn clean_at(&self, now: OffsetDateTime) -> Result<Vec<String>, StoreError> {
-        let expired = self.expired_at(now)?;
-        for name in &expired {
-            self.remove(name)?;
+        let mut removed = Vec::new();
+        for name in self.list()? {
+            let header = self.read_header(&name).map_err(|error| {
+                StoreError::Context(format!(
+                    "clean state {}: {error}",
+                    crate::go_quote::quote(&name)
+                ))
+            })?;
+            let Ok(expires) = parse_time(&header.expires_at) else {
+                continue;
+            };
+            if expires < now {
+                self.remove(&name).map_err(|error| {
+                    StoreError::Context(format!(
+                        "remove state {}: {error}",
+                        crate::go_quote::quote(&name)
+                    ))
+                })?;
+                removed.push(name);
+            }
         }
-        Ok(expired)
+        Ok(removed)
     }
 
     pub fn clean_older_than_at(
@@ -256,7 +297,12 @@ impl Store {
         let cutoff = now - age;
         let mut removed = Vec::new();
         for name in self.list()? {
-            let header = self.read_header(&name)?;
+            let header = self.read_header(&name).map_err(|error| {
+                StoreError::Context(format!(
+                    "clean state {}: {error}",
+                    crate::go_quote::quote(&name)
+                ))
+            })?;
             let Ok(saved) = parse_time(&header.saved_at) else {
                 continue;
             };
@@ -274,10 +320,8 @@ impl Store {
 
     fn read_header(&self, name: &str) -> Result<StateHeader, StoreError> {
         let raw = read_regular(&self.path(name))?;
-        Ok(read_header(
-            &raw,
-            self.key.as_ref().map(|key| key.key.as_slice()),
-        )?)
+        read_header(&raw, self.key.as_ref().map(|key| key.key.as_slice()))
+            .map_err(|error| diagnostics::header_error(name, &raw, self.key.is_some(), error))
     }
 }
 
@@ -321,105 +365,4 @@ fn format_time(value: OffsetDateTime) -> Result<String, StoreError> {
 
 fn parse_time(value: &str) -> Result<OffsetDateTime, StoreError> {
     OffsetDateTime::parse(value, &Rfc3339).map_err(|_| StoreError::InvalidTime(value.to_owned()))
-}
-
-#[cfg(unix)]
-fn read_regular(path: &Path) -> std::io::Result<Vec<u8>> {
-    use std::io::Read;
-
-    use rustix::fs::{Mode, OFlags, open};
-
-    let descriptor = open(
-        path,
-        OFlags::RDONLY | OFlags::CLOEXEC | OFlags::NOFOLLOW,
-        Mode::empty(),
-    )?;
-    let mut file = fs::File::from(descriptor);
-    if !file.metadata()?.is_file() {
-        return Err(std::io::Error::other("state path is not a regular file"));
-    }
-    let mut data = Vec::new();
-    file.read_to_end(&mut data)?;
-    Ok(data)
-}
-
-#[cfg(not(unix))]
-fn read_regular(path: &Path) -> std::io::Result<Vec<u8>> {
-    let metadata = fs::symlink_metadata(path)?;
-    if !metadata.is_file() || metadata.file_type().is_symlink() {
-        return Err(std::io::Error::other("state path is not a regular file"));
-    }
-    fs::read(path)
-}
-
-fn atomic_write(path: &Path, data: &[u8]) -> std::io::Result<()> {
-    if let Ok(metadata) = fs::symlink_metadata(path)
-        && (!metadata.is_file() || metadata.file_type().is_symlink())
-    {
-        return Err(std::io::Error::other("state target is not a regular file"));
-    }
-    let parent = path
-        .parent()
-        .ok_or_else(|| std::io::Error::other("state path has no parent"))?;
-    let (temporary, mut file) = (0..128)
-        .find_map(|_| {
-            let id = NEXT_TEMP.fetch_add(1, Ordering::Relaxed);
-            let temporary = parent.join(format!(".state-{}-{id}.tmp", std::process::id()));
-            let mut options = OpenOptions::new();
-            options.write(true).create_new(true);
-            secure_file_options(&mut options);
-            match options.open(&temporary) {
-                Ok(file) => Some(Ok((temporary, file))),
-                Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => None,
-                Err(error) => Some(Err(error)),
-            }
-        })
-        .unwrap_or_else(|| {
-            Err(std::io::Error::new(
-                std::io::ErrorKind::AlreadyExists,
-                "could not allocate a unique state temporary file",
-            ))
-        })?;
-    let result = (|| {
-        file.write_all(data)?;
-        file.sync_all()?;
-        drop(file);
-        fs::rename(&temporary, path)?;
-        sync_directory(parent)?;
-        Ok(())
-    })();
-    if result.is_err() {
-        let _ = fs::remove_file(&temporary);
-    }
-    result
-}
-
-#[cfg(unix)]
-fn secure_file_options(options: &mut OpenOptions) {
-    use std::os::unix::fs::OpenOptionsExt;
-    options.mode(0o600);
-}
-
-#[cfg(not(unix))]
-fn secure_file_options(_options: &mut OpenOptions) {}
-
-#[cfg(unix)]
-fn secure_directory(path: &Path) -> std::io::Result<()> {
-    use std::os::unix::fs::PermissionsExt;
-    fs::set_permissions(path, fs::Permissions::from_mode(0o700))
-}
-
-#[cfg(not(unix))]
-fn secure_directory(_path: &Path) -> std::io::Result<()> {
-    Ok(())
-}
-
-#[cfg(unix)]
-fn sync_directory(path: &Path) -> std::io::Result<()> {
-    fs::File::open(path)?.sync_all()
-}
-
-#[cfg(not(unix))]
-fn sync_directory(_path: &Path) -> std::io::Result<()> {
-    Ok(())
 }

@@ -1,0 +1,193 @@
+// Private frozen-Go constructors and verified loopback TLS status/report oracle.
+package usage
+
+import (
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"crypto/tls"
+	"crypto/x509"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net"
+	"net/http"
+	"os"
+	"path/filepath"
+	"reflect"
+	"strconv"
+	"strings"
+	"testing"
+	"time"
+)
+
+type statusCase768 struct {
+	ID       string `json:"id"`
+	Provider string `json:"provider"`
+	Source   string `json:"source"`
+	Env      string `json:"env"`
+	Status   int    `json:"status"`
+	Kind     string `json:"kind"`
+}
+type statusTransport768 struct {
+	inner    *http.Transport
+	id       string
+	requests []any
+}
+
+func (t *statusTransport768) RoundTrip(req *http.Request) (*http.Response, error) {
+	body := []byte{}
+	if req.Body != nil {
+		body, _ = io.ReadAll(req.Body)
+		req.Body = io.NopCloser(bytes.NewReader(body))
+	}
+	headers := map[string][]string{}
+	raw := map[string][]string{}
+	for name, values := range req.Header {
+		headers[name] = values
+		for _, value := range values {
+			raw[name] = append(raw[name], hex.EncodeToString([]byte(value)))
+		}
+	}
+	index := len(t.requests)
+	t.requests = append(t.requests, map[string]any{"method": req.Method, "url": req.URL.String(), "headers": headers, "header_value_hex": raw, "body_hex": hex.EncodeToString(body)})
+	clone := req.Clone(req.Context())
+	clone.Header = req.Header.Clone()
+	clone.Header.Set("X-Owned-Case", t.id)
+	clone.Header.Set("X-Owned-Index", fmt.Sprint(index))
+	return t.inner.RoundTrip(clone)
+}
+func TestUsageStatusTLS768(t *testing.T) {
+	data, err := os.ReadFile(os.Getenv("USAGE_STATUS_INPUT"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var cases []statusCase768
+	if err = json.Unmarshal(data, &cases); err != nil {
+		t.Fatal(err)
+	}
+	if len(cases) != 84 {
+		t.Fatal("complete84 status corpus")
+	}
+	ca, err := os.ReadFile(os.Getenv("USAGE_DEVICE_CA"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	roots := x509.NewCertPool()
+	if !roots.AppendCertsFromPEM(ca) {
+		t.Fatal("private CA")
+	}
+	output := []any{}
+	for _, entry := range cases {
+		home := filepath.Join(os.Getenv("USAGE_STATUS_ROOT"), entry.ID)
+		if err = os.MkdirAll(home, 0700); err != nil {
+			t.Fatal(err)
+		}
+		for _, name := range []string{"ANTHROPIC_ADMIN_KEY", "ANTHROPIC_OAUTH_TOKEN", "CODEX_ACCESS_TOKEN", "COPILOT_ACCESS_TOKEN", "CURSOR_COOKIE", "KIMI_CODE_API_KEY", "KIMI_AUTH_TOKEN", "MOONSHOT_API_KEY", "NOUS_PORTAL_ACCESS_TOKEN", "OPENCODE_COOKIE", "OPENROUTER_API_KEY", "CODEX_HOME", "KIMI_CODE_HOME", "HERMES_HOME", "KIMI_CODE_BASE_URL", "HERMES_PORTAL_BASE_URL", "OPENROUTER_API_URL", "OPENCODE_WORKSPACE_ID", "USAGE_STATUS_ABSENT"} {
+			t.Setenv(name, "")
+		}
+		t.Setenv("HOME", home)
+		t.Setenv("USERPROFILE", home)
+		t.Setenv("PATH", "")
+		t.Setenv("ANTHROPIC_OAUTH_TOKEN", "env://USAGE_STATUS_ABSENT")
+		if entry.Env != "" {
+			t.Setenv(entry.Env, "owned-status-token")
+		}
+		if entry.Provider == "opencode" {
+			t.Setenv("OPENCODE_WORKSPACE_ID", "wrk_owned")
+		}
+		if entry.Source == "cli" {
+			path := filepath.Join(home, ".kimi-code", "credentials", "kimi-code.json")
+			if err = os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+				t.Fatal(err)
+			}
+			if err = os.WriteFile(path, []byte(`{"access_token":"owned-status-token"}`), 0600); err != nil {
+				t.Fatal(err)
+			}
+		}
+		inner := &http.Transport{TLSClientConfig: &tls.Config{RootCAs: roots, MinVersion: tls.VersionTLS12}, DisableKeepAlives: true, DialContext: func(ctx context.Context, network, address string) (net.Conn, error) {
+			host, _, err := net.SplitHostPort(address)
+			if err != nil {
+				return nil, err
+			}
+			if !strings.Contains(os.Getenv("USAGE_STATUS_HOSTS"), "|"+host+"|") {
+				return nil, fmt.Errorf("unowned host: %s", host)
+			}
+			return (&net.Dialer{Timeout: 8 * time.Second}).DialContext(ctx, network, os.Getenv("USAGE_DEVICE_PEER"))
+		}}
+		transport := &statusTransport768{inner: inner, id: entry.ID, requests: []any{}}
+		client := &http.Client{Transport: transport}
+		var provider Provider
+		switch entry.Provider {
+		case "claude":
+			provider = NewClaudeProvider(client)
+		case "codex":
+			provider = NewCodexProvider(client)
+		case "copilot":
+			provider = NewCopilotProvider(client)
+		case "cursor":
+			provider = NewCursorProvider(client)
+		case "kimi":
+			provider = NewKimiProvider(client)
+		case "moonshot":
+			provider = NewMoonshotProvider(client)
+		case "nous":
+			provider = NewNousPortalProvider(client)
+		case "opencode":
+			provider = NewOpenCodeProvider(client)
+		case "openrouter":
+			provider = NewOpenRouterProvider(client)
+		default:
+			t.Fatal("unknown provider")
+		}
+		beforeState := ownedState768(home)
+		started := time.Now()
+		report := BuildReport(context.Background(), []Provider{provider})
+		finished := time.Now()
+		afterState := ownedState768(home)
+		if !reflect.DeepEqual(beforeState, afterState) {
+			t.Fatal(entry.ID, "owned state mutation")
+		}
+		inner.CloseIdleConnections()
+		if s := report.Providers[0].Snapshot; s != nil && (s.FetchedAt.Before(started) || s.FetchedAt.After(finished)) {
+			t.Fatal("actual clock")
+		}
+		output = append(output, map[string]any{"id": entry.ID, "provider": entry.Provider, "input": entry, "home": home, "cli_home": filepath.Join(home, ".kimi-code"), "filesystem": beforeState, "read_only": true, "started": started, "finished": finished, "report": report, "requests": transport.requests})
+	}
+	data, err = json.MarshalIndent(output, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = os.WriteFile(os.Getenv("USAGE_STATUS_GO"), append(data, '\n'), 0600); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func ownedState768(root string) map[string]any {
+	values := map[string]any{}
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		name, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+		hash := ""
+		if info.Mode().IsRegular() {
+			data, err := os.ReadFile(path)
+			if err != nil {
+				return err
+			}
+			sum := sha256.Sum256(data)
+			hash = hex.EncodeToString(sum[:])
+		}
+		values[name] = map[string]any{"mode": info.Mode().String(), "mtime_ns": strconv.FormatInt(info.ModTime().UnixNano(), 10), "size": info.Size(), "sha256": hash}
+		return nil
+	})
+	if err != nil {
+		panic(err)
+	}
+	return values
+}

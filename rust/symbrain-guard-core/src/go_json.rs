@@ -100,6 +100,16 @@ fn escape_go_json_bytes(bytes: &[u8]) -> Vec<u8> {
     escaped
 }
 
+/// Reproduce encoding/json's string Unicode replacement before typed decoding.
+///
+/// Validate the original JSON syntax first: replacement is for malformed UTF-8
+/// and unpaired UTF-16 surrogates inside strings, never a syntax-error recovery.
+/// Original numeric tokens, field order and duplicate members remain unchanged.
+#[must_use]
+pub fn repair_go_json_strings(input: &[u8]) -> String {
+    crate::capability_wire::repair_json_strings(input)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

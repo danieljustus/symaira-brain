@@ -1,0 +1,17 @@
+{"stage": "/tmp/symaira-state-key-osargs-final-fmt.log", "free_bytes": 1526317056, "minimum_bytes": 734003200, "unix_time": 1791087617.5317128}
+{"stage": "/tmp/symaira-state-key-osargs-final-clippy.log", "free_bytes": 1526317056, "minimum_bytes": 734003200, "unix_time": 1791087617.9695246}
+{"stage": "/tmp/symaira-state-key-osargs-final-affected.log", "free_bytes": 1526317056, "minimum_bytes": 734003200, "unix_time": 1791087618.2481282}
+{"stage": "/tmp/symaira-state-key-osargs-final-mcp-lib.log", "free_bytes": 1507606528, "minimum_bytes": 734003200, "unix_time": 1791087648.9989097}
+{"stage": "/tmp/symaira-state-key-osargs-final-build.log", "free_bytes": 1507520512, "minimum_bytes": 734003200, "unix_time": 1791087649.657177}
+{"stage": "/tmp/symaira-state-key-osargs-final-build.log", "free_bytes": 1507520512, "minimum_bytes": 734003200, "unix_time": 1791087649.8738446}
+{"stage": "/tmp/symaira-state-key-osargs-final-windows-static.log", "free_bytes": 1507520512, "minimum_bytes": 734003200, "unix_time": 1791087650.0133343}
+{"stage": "/tmp/symaira-state-key-osargs-final-darwin-static.log", "free_bytes": 1507520512, "minimum_bytes": 734003200, "unix_time": 1791087650.229943}
+{"stage": "/tmp/symaira-state-key-osargs-final-actionlint.log", "free_bytes": 1507520512, "minimum_bytes": 734003200, "unix_time": 1791087650.423683}
+{"stage": "/tmp/symaira-state-key-osargs-final-matrix.log", "free_bytes": 1507520512, "minimum_bytes": 734003200, "unix_time": 1791087650.4510937}
+{"stage": "/tmp/symaira-state-key-osargs-final-pipe-tests.log", "free_bytes": 1507520512, "minimum_bytes": 734003200, "unix_time": 1791087650.5007598}
+{"stage": "/tmp/symaira-state-key-osargs-final-progress-tests.log", "free_bytes": 1507520512, "minimum_bytes": 734003200, "unix_time": 1791087650.624147}
+{"stage": "/tmp/symaira-state-key-osargs-final-run-portable-tests.log", "free_bytes": 1507520512, "minimum_bytes": 734003200, "unix_time": 1791087651.0608566}
+{"stage": "/tmp/symaira-state-key-osargs-final-ownership.log", "free_bytes": 1507520512, "minimum_bytes": 734003200, "unix_time": 1791087651.2007184}
+{"stage": "/tmp/symaira-state-key-osargs-final-key.log", "free_bytes": 1507274752, "minimum_bytes": 734003200, "unix_time": 1791087658.4579775}
+{"stage": "/tmp/symaira-state-key-osargs-final-process.log", "free_bytes": 1507098624, "minimum_bytes": 734003200, "unix_time": 1791087691.3244476}
+{"stage": "/tmp/symaira-state-key-osargs-final-registry.log", "free_bytes": 1507098624, "minimum_bytes": 734003200, "unix_time": 1791087692.1805093}

@@ -82,7 +82,7 @@ def invoke(binary, args, root):
     config = home/'.config'
     profiles = config/'symbrain/profiles'
     profiles.mkdir(parents=True)
-    (profiles/'activity-oracle.toml').write_text(PROFILE)
+    (profiles/'activity-oracle.toml').write_text(PROFILE, encoding='utf-8')
     env = {key: os.environ[key] for key in ('SystemRoot', 'windir', 'ComSpec', 'PATHEXT') if key in os.environ}
     env.update(HOME=str(home), XDG_CONFIG_HOME=str(config), XDG_DATA_HOME=str(root/'data'), XDG_CACHE_HOME=str(root/'cache'), XDG_STATE_HOME=str(root/'state'), SYMBRAIN_GO_BINARY=str(root/'absent-go'))
     output = subprocess.run([str(binary), *args], env=env, capture_output=True, timeout=20)
@@ -111,10 +111,10 @@ def main():
             if left!=right:
                 print(f'FAIL {name}: real process output or exit mismatch', file=sys.stderr)
     source = ['rust/symbrain-cli/src/activity_cli.rs', 'rust/symbrain-cli/src/activity_args.rs', 'rust/symbrain-cli/src/activity_time.rs', 'rust/symbrain-cli/src/lib.rs', 'scripts/activity-validation-oracle/replay.py', 'scripts/activity-validation-oracle/controls.py', 'scripts/activity-validation-oracle/run.sh', 'rust/symbrain-activity/src/lib.rs', 'rust/symbrain-cli/tests/activity_validation_tests.rs']
-    data = dict(go_oracle_ref='dcddcef0df5789123c7c9a7ebe6e01f10e941f2c', candidate_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(), candidate_dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=ROOT)),runtime=platform.platform(), total=len(observations), matches=all(o['matches'] for o in observations), observations=observations, go_binary_sha256=hashlib.sha256(go.read_bytes()).hexdigest(), rust_binary_sha256=hashlib.sha256(rust.read_bytes()).hexdigest(), candidate_source_sha256={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in source})
+    data = dict(go_oracle_ref='dcddcef0df5789123c7c9a7ebe6e01f10e941f2c', candidate_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True, encoding='utf-8').strip(), candidate_dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=ROOT)),runtime=platform.platform(), total=len(observations), matches=all(o['matches'] for o in observations), observations=observations, go_binary_sha256=hashlib.sha256(go.read_bytes()).hexdigest(), rust_binary_sha256=hashlib.sha256(rust.read_bytes()).hexdigest(), candidate_source_sha256={p:hashlib.sha256((ROOT/p).read_bytes()).hexdigest() for p in source})
     report.parent.mkdir(parents=True, exist_ok=True)
-    report.write_text(json.dumps(data,indent=2)+'\n')
-    Path(str(report)+'.fixture.json').write_text(json.dumps(freeze(data),indent=2)+'\n')
+    report.write_text(json.dumps(data,indent=2)+'\n', encoding='utf-8')
+    Path(str(report)+'.fixture.json').write_text(json.dumps(freeze(data),indent=2)+'\n', encoding='utf-8')
     print(f"{sum(o['matches'] for o in observations)}/{len(observations)} real activity validation cases match")
     return 0 if data['matches'] else 1
 

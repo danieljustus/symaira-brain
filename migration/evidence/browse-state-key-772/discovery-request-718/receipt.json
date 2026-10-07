@@ -1,0 +1,120 @@
+{
+  "head": "381e324852e70fd7c647dce9bbffccb4c2731484",
+  "source": "718125743c58a8a6d6f1ab0f7444f2475342d39e",
+  "files": [
+    {
+      "original": "/tmp/symaira-discovery718-independent-provenance-original-reference.log",
+      "retained": "00-symaira-discovery718-independent-provenance-original-reference.log.gz",
+      "bytes": 361,
+      "sha256": "82badc7d9a1b48b65244fdcfca05b661faf5e023115f889373ed6acd8051510a",
+      "gzip_sha256": "3280de136cf5c194a51ca28ccf89b29fbc99097bcd45db64f7f545964deba0e5"
+    },
+    {
+      "original": "/tmp/symaira-discovery718-independent-provenance-original-syntax.py.txt",
+      "retained": "01-symaira-discovery718-independent-provenance-original-syntax.py.txt.gz",
+      "bytes": 6426,
+      "sha256": "4d8c7030a480455757d609bdb10b83de344e70f93d18f808e9945db65e3019be",
+      "gzip_sha256": "036b54a710452a1b15c5374f4555cb40a06b58bd31d4e6db157c4de531eb155b"
+    },
+    {
+      "original": "/tmp/symaira-discovery718-independent-provenance.json",
+      "retained": "02-symaira-discovery718-independent-provenance.json.gz",
+      "bytes": 302204,
+      "sha256": "733d925b3988f9bd595d84df90adfb6878767d596b86a1b9f410174dd586b782",
+      "gzip_sha256": "f26d286165e8e42c310e74dec5744fcdf9fdb74bca6ce26b9a2420f0fa0b3413"
+    },
+    {
+      "original": "/tmp/symaira-discovery718-independent-provenance.log",
+      "retained": "03-symaira-discovery718-independent-provenance.log.gz",
+      "bytes": 152,
+      "sha256": "c164882ac9e7cff721444bd17d7dd792621f28484eb83d58bde3f0ea6e87a42a",
+      "gzip_sha256": "2e9f6d755933c79d842baf1c39315b0c5f67f5cd18fc7cda6cf2af46021d6552"
+    },
+    {
+      "original": "/tmp/symaira-discovery718-independent-provenance.py",
+      "retained": "04-symaira-discovery718-independent-provenance.py.gz",
+      "bytes": 6390,
+      "sha256": "5523c4e321bd85f10c9dea8327be2fa3eb6dc304e1b195e4151edbc4105f24e5",
+      "gzip_sha256": "7ffcb678d528e279f75172072fd60ec279608b59d97d373202633efb0cd7405d"
+    },
+    {
+      "original": "/tmp/symaira-discovery718-independent-review-receipt.json",
+      "retained": "05-symaira-discovery718-independent-review-receipt.json.gz",
+      "bytes": 3310,
+      "sha256": "71197d88514b54012c6fbde2e336ebf350586d70ce88ba0b15a63589eae787b6",
+      "gzip_sha256": "85d4845ff9009f719aa972e41c95ff7442d8b63c892e9aab54db853d11300e82"
+    },
+    {
+      "original": "/tmp/symaira-discovery718-independent-review.md",
+      "retained": "06-symaira-discovery718-independent-review.md.gz",
+      "bytes": 8361,
+      "sha256": "4e4514baa6f9be6f9d6e55b1716e4b0d833cd0de7f95906751bec06372485a54",
+      "gzip_sha256": "185b3ccefd4305cb4963dc2698e775320042134af1e362cd6736acef22d541ac"
+    },
+    {
+      "original": "/tmp/symaira-discovery718-independent-sdk-projection.json",
+      "retained": "07-symaira-discovery718-independent-sdk-projection.json.gz",
+      "bytes": 12319,
+      "sha256": "6bc8325a3e32311b9a4e6d8f9223afa0010f63365b32272bcbcaf85b66be5e2f",
+      "gzip_sha256": "644ba917f6b4a3325a70837b7855b5a0fc9dd5f4d1cf6810d8f44b91d7958156"
+    },
+    {
+      "original": "/tmp/symaira-discovery718-independent-sdk-projection.log",
+      "retained": "08-symaira-discovery718-independent-sdk-projection.log.gz",
+      "bytes": 6722,
+      "sha256": "28452d1c372fd2453cf94f987524ba6a4f26aebc6ef81ef84d23bc3ca0943945",
+      "gzip_sha256": "28b5dcfb2e511d6fc980343887b9be262fae367f03ddec8fa064f58ce80988b5"
+    },
+    {
+      "original": "/tmp/symaira-discovery718-independent-sdk-projection.py",
+      "retained": "09-symaira-discovery718-independent-sdk-projection.py.gz",
+      "bytes": 5583,
+      "sha256": "ceee27c1d398a954d28ef9cf3194c9d54ecbe676f1a51a12fe6bdd9f83c06c67",
+      "gzip_sha256": "a19eda5751e984e4a01f839e01279728b15cb4747a82f87585d009352111552e"
+    },
+    {
+      "original": "/workspace/symaira-daemon772-state-key-discovery-mask/browse/crates/symbrowse-core/src/key_sources/startup_discovery/godebug.rs",
+      "retained": "10-godebug.rs.gz",
+      "bytes": 8129,
+      "sha256": "a9f5a2e1981803577f717ec989a8e473b69275d9da68594b6ecc314fbb889075",
+      "gzip_sha256": "2ca32368db6371b44a78ecda925d038e50074edfbbfe623b6cdc778ae4a1abe1"
+    },
+    {
+      "original": "/workspace/symaira-daemon772-state-key-discovery-mask/browse/port/harness/daemon_provider_discovery.py",
+      "retained": "11-daemon_provider_discovery.py.gz",
+      "bytes": 27393,
+      "sha256": "8af6015326e88701c11d93ba90bde13f7aed9c52c64abfe8c807c3b44863bd9f",
+      "gzip_sha256": "a79c24989fd987892575860e07bc79cefc28efd3b7b69a965202901a3c61ad29"
+    },
+    {
+      "original": "/workspace/symaira-daemon772-state-key-discovery-mask/browse/port/harness/discovery_owner_control.go.in",
+      "retained": "12-discovery_owner_control.go.in.gz",
+      "bytes": 1266,
+      "sha256": "150a14bce5a54c4c3313dd42660df8e1dc0b5d50f91977d3a14ad37cccfda15d",
+      "gzip_sha256": "92f1087cb76176f16b479a476644d3bba4671360c4a65829c9a2dd4a9274b6bd"
+    },
+    {
+      "original": "/workspace/toolchains/go1.26.7/LICENSE",
+      "retained": "13-LICENSE.gz",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "gzip_sha256": "02d83c094bd4b96c1a044b449e9b9bbf5a93438d3bdc6efd74b2cc65d74e2cb1"
+    },
+    {
+      "original": "/workspace/toolchains/go1.26.7/src/internal/bisect/bisect.go",
+      "retained": "14-bisect.go.gz",
+      "bytes": 23489,
+      "sha256": "978d518986ba6867f5f96356531f35bfa59b865fbb363b98eb9052e862a2160c",
+      "gzip_sha256": "7dfd631c86ea955083ca559549721f28266eb2de04322e431de9ad9eae4e4b1b"
+    },
+    {
+      "original": "/workspace/toolchains/go1.26.7/src/internal/godebug/godebug.go",
+      "retained": "15-godebug.go.gz",
+      "bytes": 9815,
+      "sha256": "cd492e76ae63872ac4310fc09b2e097229588dbf114d14d713be3f027b0233c8",
+      "gzip_sha256": "b08058cf808e167834e3d47564ed607a3f27fa5f5bad59ae1773880dea8e8129"
+    }
+  ],
+  "before_correction": true,
+  "original_runtime_archives": "Inherited original CCC/48fc/718 proof files unchanged; no runtime target or executable created."
+}

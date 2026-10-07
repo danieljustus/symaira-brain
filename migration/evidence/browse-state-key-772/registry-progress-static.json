@@ -1,0 +1,12 @@
+{
+  "source": "3c2d731b2b113df81db3601b73f3036c8a558e5c",
+  "assertion_functions": [
+    "normalize",
+    "compare",
+    "controls"
+  ],
+  "new_path": "browse/port/harness/registry_compare.py",
+  "functions_byte_identical": true,
+  "function_source_sha256": "2ff7c4b41c3610da4f7bc151d514af17f2a9d11a9e3b63d11ded08bbab93c80c",
+  "scope": "mechanical split only to keep registry runner below400lines; no projection/assertion/control changes"
+}

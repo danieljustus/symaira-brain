@@ -1,3 +1,8 @@
+#[path = "spec_paths.rs"]
+mod paths;
+pub(crate) use paths::json_path;
+pub(crate) use paths::{default_session_cache_root, worktree_origin};
+
 use std::{path::PathBuf, time::Duration};
 
 use symbrowse_core::config::{Config, resolve_selection};
@@ -108,7 +113,7 @@ impl SessionSpec {
 
     #[must_use]
     pub fn user_data_dir(&self) -> PathBuf {
-        self.state_dir.join("sessions").join(&self.session)
+        default_session_cache_root().join(&self.session)
     }
 
     #[must_use]
@@ -147,7 +152,15 @@ pub fn default_cache_dir() -> PathBuf {
 
 #[must_use]
 pub fn default_log_path() -> PathBuf {
+    use symbrowse_core::config::{FlagOverrides, LoadContext, load};
+    if let Some(config) = LoadContext::from_process(FlagOverrides::default())
+        .ok()
+        .and_then(|context| load(&context).ok())
+    {
+        return PathBuf::from(config.config.daemon_log);
+    }
     std::env::var_os("SYMBROWSE_DAEMON_LOG")
+        .filter(|value| !value.is_empty())
         .map(PathBuf::from)
         .unwrap_or_else(|| default_state_dir().join("daemon.log"))
 }

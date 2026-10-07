@@ -1,0 +1,43 @@
+// Generate a disposable test-only trust root and hostname-checked TLS leaf.
+package main
+
+import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
+	"math/big"
+	"net"
+	"os"
+	"path/filepath"
+	"time"
+)
+
+func main() {
+	dir := os.Args[1]
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		panic(err)
+	}
+	ca := &x509.Certificate{SerialNumber: big.NewInt(1), Subject: pkix.Name{CommonName: "Owned Usage test CA"}, NotBefore: time.Date(2020, 1, 1, 0, 0, 0, 0, time.UTC), NotAfter: time.Date(2090, 1, 1, 0, 0, 0, 0, time.UTC), IsCA: true, BasicConstraintsValid: true, KeyUsage: x509.KeyUsageCertSign | x509.KeyUsageDigitalSignature}
+	caDER, err := x509.CreateCertificate(rand.Reader, ca, ca, &key.PublicKey, key)
+	if err != nil {
+		panic(err)
+	}
+	leaf := &x509.Certificate{SerialNumber: big.NewInt(2), Subject: pkix.Name{CommonName: "api.kimi.com"}, IPAddresses: []net.IP{net.ParseIP("127.0.0.1")}, DNSNames: []string{"api.kimi.com", "www.kimi.com", "api.anthropic.com", "chatgpt.com", "api.github.com", "cursor.com", "api.moonshot.ai", "portal.nousresearch.com", "opencode.ai", "openrouter.ai"}, NotBefore: ca.NotBefore, NotAfter: ca.NotAfter, KeyUsage: x509.KeyUsageDigitalSignature, ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}}
+	leafDER, err := x509.CreateCertificate(rand.Reader, leaf, ca, &key.PublicKey, key)
+	if err != nil {
+		panic(err)
+	}
+	keyDER, err := x509.MarshalPKCS8PrivateKey(key)
+	if err != nil {
+		panic(err)
+	}
+	for name, block := range map[string]*pem.Block{"ca.pem": {Type: "CERTIFICATE", Bytes: caDER}, "leaf.pem": {Type: "CERTIFICATE", Bytes: leafDER}, "key.pem": {Type: "PRIVATE KEY", Bytes: keyDER}} {
+		if err = os.WriteFile(filepath.Join(dir, name), pem.EncodeToMemory(block), 0600); err != nil {
+			panic(err)
+		}
+	}
+}

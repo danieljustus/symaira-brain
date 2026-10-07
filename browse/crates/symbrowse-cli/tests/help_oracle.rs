@@ -50,10 +50,12 @@ fn filter_commands(help: &str, allowed: &BTreeMap<String, String>) -> String {
                 in_commands = false;
                 return true;
             }
-            if in_commands && line.starts_with("  ") && !trimmed.starts_with('-') {
-                if let Some(name) = trimmed.split_whitespace().next() {
-                    return allowed.contains_key(name);
-                }
+            if in_commands
+                && line.starts_with("  ")
+                && !trimmed.starts_with('-')
+                && let Some(name) = trimmed.split_whitespace().next()
+            {
+                return allowed.contains_key(name);
             }
             true
         })
@@ -175,7 +177,8 @@ fn rust_help_and_completion_follow_the_go_source_tree() {
         );
     }
 
-    for path in [&["completion", "--help"][..]] {
+    {
+        let path = &["completion", "--help"][..];
         let go_help = output(&go_binary, path);
         let rust_help = output(rust_binary, path);
         assert!(go_help.status.success(), "Go help failed for {path:?}");
@@ -288,9 +291,9 @@ fn rust_help_and_completion_follow_the_go_source_tree() {
         String::from_utf8_lossy(bytes)
             .lines()
             .filter(|line| !line.starts_with(':'))
-            .filter_map(|line| {
+            .map(|line| {
                 let (name, description) = line.split_once('\t').unwrap_or((line, ""));
-                Some((name.to_owned(), description.to_owned()))
+                (name.to_owned(), description.to_owned())
             })
             .collect::<BTreeMap<_, _>>()
     };

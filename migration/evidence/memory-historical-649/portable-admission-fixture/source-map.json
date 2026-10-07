@@ -1,0 +1,151 @@
+{
+  "Python_AST_files": 11,
+  "additive_mock_test_methods": 3,
+  "changed_parent_paths": [
+    "scripts/memory-historical-oracle/test_provider_admission.py"
+  ],
+  "compiler_target_cache_ports_GitHub": 0,
+  "dependencies_changed": false,
+  "full_index_paths": 4835,
+  "immutable_Git_records_verified": 225,
+  "materialized": [
+    {
+      "allocated_bytes": 16384,
+      "bytes": 15652,
+      "path": "AGENTS.md",
+      "sha256": "96501fab340de5969b201a1060581420f9085f923fbcf4c32d1394e4082189b6"
+    },
+    {
+      "allocated_bytes": 8192,
+      "bytes": 5993,
+      "path": ".github/workflows/memory-cli-native.yml",
+      "sha256": "4336882703da5095b5d4c03bff7d53725677996bef717bc2bbca48511e9ae27a"
+    },
+    {
+      "allocated_bytes": 176128,
+      "bytes": 175196,
+      "path": "migration/evidence/memory-historical-649/portable-admission-fixture/full-original-review.tar.gz",
+      "sha256": "49f2415bc428fbca50dd6726c5764ae6c769a0851325c7494ba4d9a272c7395f"
+    },
+    {
+      "allocated_bytes": 282624,
+      "bytes": 282445,
+      "path": "migration/evidence/memory-historical-649/portable-admission-fixture/original-retention.json",
+      "sha256": "73dc4847184bea49bbd209d1ef8e5788e40191fcff018e0bc18ec2c567c83824"
+    },
+    {
+      "allocated_bytes": 4096,
+      "bytes": 3403,
+      "path": "docs/adr/owned-sqlite-checker-provider-803.md",
+      "sha256": "e34b5c04ebe8d6c95c65e4ef7b8ede0ef93cb21f287e4aef705257ca8ab0ecf7"
+    },
+    {
+      "allocated_bytes": 20480,
+      "bytes": 17693,
+      "path": "docs/adr/0002-product-boundaries.md",
+      "sha256": "3fabcd1f0fd943ab750e170bacf7a6e7a5da69fdf04a594311976267ef66eb03"
+    },
+    {
+      "allocated_bytes": 4096,
+      "bytes": 3164,
+      "path": "docs/adr/portable-linux-admission-fixture-803.md",
+      "sha256": "4e57daac2e5b6596c24413a692f605613ae03bd14c6dd4f4f7b9bdc26f4ee68d"
+    },
+    {
+      "allocated_bytes": 4096,
+      "bytes": 3785,
+      "path": "scripts/memory-historical-oracle/prepare_provider.py",
+      "sha256": "c0cf4c21998b9ef2dd04b9a7225234aa0c28e4a818c166474700942660a68b5a"
+    },
+    {
+      "allocated_bytes": 4096,
+      "bytes": 3500,
+      "path": "scripts/memory-historical-oracle/checker.py",
+      "sha256": "ad795732bf943e134216d013caa80157494754e78a8428f861da1f61b866da86"
+    },
+    {
+      "allocated_bytes": 4096,
+      "bytes": 3264,
+      "path": "scripts/memory-historical-oracle/test_provider_platform.py",
+      "sha256": "5acbbb666703365cd0c994c0d61923b2c9984f18d909230c3ffd88eb0d80f842"
+    },
+    {
+      "allocated_bytes": 8192,
+      "bytes": 6687,
+      "path": "scripts/memory-historical-oracle/defaults_inventory.py",
+      "sha256": "0ec51e0e334133d118378651e479691d3b519eb0fb8fafee9a714a5ab6d0221e"
+    },
+    {
+      "allocated_bytes": 8192,
+      "bytes": 6221,
+      "path": "scripts/memory-historical-oracle/controls.py",
+      "sha256": "84cbe996024c5b78c2d558873751d1edcd110a054f5bf702b579518f73eaff77"
+    },
+    {
+      "allocated_bytes": 8192,
+      "bytes": 7453,
+      "path": "scripts/memory-historical-oracle/README.md",
+      "sha256": "f0e2f747dd49eef3bdfcd9e39a8be52cf23e07207612fd876bc318873ce8c74a"
+    },
+    {
+      "allocated_bytes": 16384,
+      "bytes": 14280,
+      "path": "scripts/memory-historical-oracle/replay.py",
+      "sha256": "15d4160efd0cb4415eb05133e2337df6be7fda66c2575a2afb9268b6efa7ee08"
+    },
+    {
+      "allocated_bytes": 8192,
+      "bytes": 6904,
+      "path": "scripts/memory-historical-oracle/verify_portable_admission_static.py",
+      "sha256": "2a030d8b5dc416d9b9264f867b6d7f4bee3308254ae2c3743df534dd55c4bb8c"
+    },
+    {
+      "allocated_bytes": 8192,
+      "bytes": 5506,
+      "path": "scripts/memory-historical-oracle/test_provider.py",
+      "sha256": "f2bef740e4ab87b7780d7e392662debe5566ced99246738f497ba445fdb86894"
+    },
+    {
+      "allocated_bytes": 4096,
+      "bytes": 1412,
+      "path": "scripts/memory-historical-oracle/run.sh",
+      "sha256": "67eca9c6f625e6c253cb5f589e43be639cbb741a12a2a8aa0d5e74ffb06ff892"
+    },
+    {
+      "allocated_bytes": 12288,
+      "bytes": 11115,
+      "path": "scripts/memory-historical-oracle/validate.py",
+      "sha256": "686bfcc5dc4f12fa624cfe9e8f94d906436bcd48a8b60c14541cdae206574475"
+    },
+    {
+      "allocated_bytes": 8192,
+      "bytes": 4318,
+      "path": "scripts/memory-historical-oracle/provider.py",
+      "sha256": "48f1d71a77ca0772265c24552a75e41a4858194d876ebe866b72ee342d109882"
+    },
+    {
+      "allocated_bytes": 12288,
+      "bytes": 8619,
+      "path": "scripts/memory-historical-oracle/test_provider_admission.py",
+      "sha256": "4fae3bb923e632e8707368b157dadba054fa7fea227cb15a14e88d18cc939d17"
+    }
+  ],
+  "materialized_allocated_bytes": 618496,
+  "mock_tests_executed": 0,
+  "native_or_SDK_behavior_executions": 0,
+  "native_three_OS": "pending",
+  "nested_missing_constant_suite_original_methods": 6,
+  "original37_SQL_and9_controls_unchanged": true,
+  "original_own_review_records": 58,
+  "original_prior_input_bindings": 422,
+  "original_receipt_extra_records": 1,
+  "original_test_method_ASTs_unchanged": 14,
+  "own_full_review_tar_members": 59,
+  "parent": "a5c65c706ac4cb271fde26d9063b0f4afff1b420",
+  "parent_paths_retained": 4829,
+  "parent_paths_unchanged": 4828,
+  "physical_native_metadata_records_verified": 256,
+  "production_and_workflow_changes": 0,
+  "self_map_excluded": "migration/evidence/memory-historical-649/portable-admission-fixture/source-map.json",
+  "status": "source-only-all-new-mocked-controls-prepared-not-executed"
+}

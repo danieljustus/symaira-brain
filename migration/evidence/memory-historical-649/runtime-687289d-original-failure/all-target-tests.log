@@ -1,0 +1,639 @@
+   Compiling symbrain-memory v0.12.1 (/workspace/symaira-memory649-integrated/rust/symbrain-memory)
+    Finished `test` profile [unoptimized] target(s) in 0.74s
+     Running unittests src/lib.rs (target/debug/deps/symbrain_cli-c1b003b5ea1ccc38)
+
+running 119 tests
+test audit_cli::tests::parses_tail_flags_and_ignores_positionals_after_first ... ok
+test activity_cli::tests::invalid_get_and_status_budgets_match_usage_before_opening_database ... ok
+test audit_cli::tests::formats_human_entry_like_go ... ok
+test config_cli::tests::no_subcommand_matches_go_usage ... ok
+test config_cli::tests::unknown_subcommand_matches_go_error ... ok
+test doctor_cli::doctor_process::executable_name_tests::windows_lookup_follows_pathext_order_and_ignores_extensionless_files ... ok
+test doctor_cli::doctor_process::tests::rejects_malformed_pid_before_kill_check ... ok
+test activity_cli::tests::db_override_is_used_by_each_activity_read_command ... ok
+test doctor_cli::doctor_process::tests::pid_checker_detects_live_child_before_dead ... ok
+test doctor_cli::tests::arbitrary_vault_stderr_is_not_exposed ... ok
+test doctor_cli::tests::doctor_argument_parser_accepts_go_flag_forms ... ok
+test doctor_cli::tests::help_lists_the_go_owned_force_release_flag ... ok
+test doctor_cli::tests::json_harness_entries_match_go_basename_and_profile_rules ... ok
+test doctor_cli::tests::nonzero_version_probe_cannot_be_accepted ... ok
+test doctor_cli::tests::only_enabled_lifecycle_flags_require_go ... ok
+test doctor_cli::tests::secret_reference_classification_is_compatible_with_go ... ok
+test doctor_cli::tests::toml_harness_entries_preserve_sorted_server_names ... ok
+test guard_cli::guard_doctor::tests::allowlist_is_deny_by_default_and_prefix_matched ... ok
+test guard_cli::guard_doctor::tests::audit_status_reports_all_three_states ... ok
+test guard_cli::guard_doctor::tests::config_parses_the_healthy_fixture_and_gates_on_invalid_toml ... ok
+test guard_cli::guard_doctor::tests::multiple_secret_keys_on_one_server_are_sorted ... ok
+test guard_cli::guard_doctor::tests::secret_heuristic_matches_go ... ok
+test guard_cli::guard_doctor::tests::unsupported_missing_equals_offenders_stay_gated ... ok
+test guard_cli::guard_scan::tests::empty_format_value_resolves_to_default ... ok
+test guard_cli::guard_scan::tests::json_typed_fields_fail_instead_of_being_dropped ... ok
+test guard_cli::guard_scan::tests::jsonc_preserves_urls_and_removes_comments ... ok
+test guard_cli::guard_scan::tests::missing_source_error_classification_matches_go_platform_behavior ... ok
+test guard_cli::guard_scan::tests::opencode_environment_is_merged_and_redacted ... ok
+test guard_cli::guard_scan::tests::source_paths_clean_parent_components ... ok
+test guard_cli::guard_scan::tests::yaml_environment_is_not_merged ... ok
+test guard_cli::tests::audit_path_prefers_xdg_then_home_then_temp ... ok
+test guard_cli::tests::decide_preserves_go_trailing_json_diagnostic ... ok
+test guard_cli::tests::top_level_guard_routes_match_go ... ok
+test guard_cli::tests::unknown_verb_matches_go_dispatch ... ok
+test doctor_cli::doctor_process::tests::terminates_timed_out_probe ... ok
+test health_probe::tests::latency_keeps_sub_millisecond_measurement_as_a_fraction ... ok
+test doctor_cli::doctor_process::tests::retained_descendant_pipes_cannot_extend_timeout ... ok
+test health_probe::tests::sse_reply_parser_accepts_jsonrpc_data_and_ignores_other_events ... ok
+test health_probe::tests::stdio_argument_credential_guards_are_conservative ... ok
+test health_probe::tests::streamable_http_negotiates_protocol_and_pings_with_session ... ok
+test health_probe::tests::streamable_http_accepts_bounded_sse_rpc_replies ... ok
+test health_probe::tests::unsupported_transports_and_credentials_never_get_probe_metadata ... ok
+test init_cli::tests::help_flag_outputs_usage ... ok
+test init_cli::tests::malformed_flag_preserves_go_diagnostic ... ok
+test init_cli::tests::mkdir_collision_reports_first_failing_ancestor ... ok
+test init_cli::tests::symlink_loop_preserves_stat_context ... ok
+test init_cli::tests::unknown_flag_fails_with_usage ... ok
+test install_cli::tests::foreign_symbrain_entry_is_not_removed ... ok
+test install_cli::tests::parser_accepts_all_install_flags ... ok
+test install_cli::tests::superseded_names_are_exact_basenames ... ok
+test mcp_cli::tests::configured_module_path_reads_server_override ... ok
+test mcp_cli::tests::inline_flags_accept_both_dash_forms ... ok
+test mcp_cli::tests::url_only_foreign_server_matches_go_warning_and_is_skipped ... ok
+test memory_cli::tests::hand_written_usage_shapes_stay_native ... ok
+test memory_cli::tests::json_output_escapes_what_the_shipped_encoder_escapes ... ok
+test memory_cli::tests::memory_sync_with_arguments_stays_on_go ... ok
+test health_probe::tests::streamable_http_rejects_malformed_and_error_replies_without_leaking_body ... ok
+test doctor_cli::doctor_process::tests::drains_large_stdout_and_stderr_without_deadlock ... ok
+test memory_cli::tests::query_log_rejects_positionals_and_unknown_flags ... ok
+test memory_cli::tests::query_log_json_matches_go_fixture ... ok
+test memory_cli::tests::query_log_table_and_actor_filter_match_go_shape ... ok
+test memory_cli::tests::search_flag_parser_rejects_unsupported_query_shapes ... ok
+test memory_cli::tests::search_flags_consume_their_values ... ok
+test memory_cli::tests::search_prints_the_shipped_usage_for_help ... ok
+test memory_cli::tests::search_refuses_a_missing_query_with_the_shipped_message ... ok
+test memory_cli::write_output::tests::injected_broken_pipe_does_not_terminate_the_library_caller ... ok
+test memory_cli::tests::query_log_normalizes_schema_default_timestamp ... ok
+test passthrough::tests::config_binary_path_is_read_from_nested_table ... ok
+test passthrough::tests::configured_path_diagnostic_preserves_non_utf8_bytes ... ok
+test passthrough::tests::empty_config_binary_path_is_not_an_override ... ok
+test passthrough::tests::managed_binary_requires_regular_executable_file ... ok
+test passthrough::tests::path_lookup_finds_binary_in_ordered_path_entry ... ok
+test passthrough::tests::windows_path_extensions_match_go_defaults ... ok
+test setup_cli::config::tests::go_parse_bool_spellings_and_empty_env_contract ... ok
+test setup_cli::config::tests::optional_browse_selection_matches_go_default_and_explicit_values ... ok
+test setup_cli::config::tests::toml_false_does_not_clear_prior_true_like_configkit ... ok
+test setup_cli::flags::tests::help_lists_the_go_owned_module_lifecycle_flags ... ok
+test setup_cli::flags::tests::parse_flags_and_stop_at_first_positional_match_go_flagset ... ok
+test setup_cli::flags::tests::unknown_flag_has_go_usage_shape ... ok
+test skills_cli::tests::explicit_target_status_is_native_only_for_absent_user_roots ... ok
+test skills_cli::tests::list_fallback_uses_cached_typed_inventory_issues ... ok
+test skills_cli::tests::sync_project_dir_matches_absolute_working_directory ... ok
+test sync_cli::tests::help_flag_prints_bare_usage_not_unknown_flag_rejection ... ok
+test sync_cli::tests::unknown_flag_matches_go_flag_package_rejection ... ok
+test tests::config_get_executes_in_process ... ok
+test tests::config_get_extra_arg_rejected ... ok
+test tests::config_get_normalizes_extra_flag ... ok
+test tests::config_path_normalizes_unexpected_flags ... ok
+test tests::config_path_prints_path ... ok
+test tests::config_path_rejects_extra_argument ... ok
+test tests::config_set_executes_in_process ... ok
+test tests::config_terminator_before_get ... ok
+test tests::config_terminator_before_set ... ok
+test tests::fallback_executor_receives_unmigrated_commands_only ... ok
+test tests::help_matches_frozen_usage ... ok
+test tests::json_help_exits_usage_with_unknown_command ... ok
+test tests::missing_command_prints_help_and_exits_usage ... ok
+test tests::module_lifecycle_flags_are_forwarded_to_the_go_fallback ... ok
+test tests::run_in_process_returns_none_for_unmigrated_commands ... ok
+test tests::unknown_command_quotes_properly ... ok
+test tests::unrelated_native_doctor_and_setup_invocations_do_not_fallback ... ok
+test tests::version_bare_hyphen_treated_as_positional ... ok
+test tests::version_help_flags_print_usage_only ... ok
+test tests::version_json_keeps_schema ... ok
+test tests::version_json_order_variants ... ok
+test tests::version_rejects_unknown_flag ... ok
+test tests::version_rejects_unknown_flag_with_value ... ok
+test tests::version_terminator_alone_succeeds ... ok
+test tests::version_terminator_with_extra_arg_rejected ... ok
+test tests::version_terminator_with_flag_arg_rejected_as_positional ... ok
+test tests::version_terminator_with_json_succeeds ... ok
+test tests::version_unexpected_argument ... ok
+test tests::version_version_exits_usage_with_unexpected_argument ... ok
+test usage_cli::fetch_output_tests::usage_fetch_620_cli_json_and_table_match_go_bytes ... ok
+test usage_cli::tests::help_is_native_without_resolving_credentials ... ok
+test usage_cli::tests::table_matches_go_shape ... ok
+test memory_cli::tests::query_log_table_sanitizes_multiline_query_text ... ok
+test memory_cli::write_output::tests::output_failure_reports_error_after_committed_set ... ok
+test health_probe::tests::http_deadline_and_redirect_refusal_are_measured_and_redacted ... ok
+
+test result: ok. 119 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.28s
+
+     Running unittests src/main.rs (target/debug/deps/symbrain-40b686993726e97f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/activity_cli_oracle_tests.rs (target/debug/deps/activity_cli_oracle_tests-17684d32bbb8db8a)
+
+running 1 test
+test bounded_activity_reads_match_the_pinned_go_commands ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.45s
+
+     Running tests/activity_validation_tests.rs (target/debug/deps/activity_validation_tests-91908cc48b55d592)
+
+running 1 test
+test activity_validation_matches_complete_go_process_fixture_without_fallback ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.96s
+
+     Running tests/cli_tree_tests.rs (target/debug/deps/cli_tree_tests-0d5b6ad4f73edc53)
+
+running 4 tests
+test tests::fixture_loads_and_has_correct_count ... ok
+test tests::path_separator_normalization_is_confined_to_oracle_roots ... ok
+test tests::temp_root_normalization_accepts_windows_short_path_aliases ... ok
+test cli_tree_fixture_matches_native_binary ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.99s
+
+     Running tests/doctor_modules.rs (target/debug/deps/doctor_modules-efe6094e29019cc3)
+
+running 5 tests
+test doctor_omits_empty_optional_module_extension_for_old_json_parity ... ok
+test doctor_omits_missing_modules_and_safely_ignores_missing_malformed_or_special_sidecars ... ok
+test doctor_bounds_provenance_sidecar_reads ... ok
+test doctor_preserves_release_version_repo_and_hash_without_source_build_fields ... ok
+test doctor_reports_installed_optional_modules_and_exact_sidecar_provenance ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/doctor_native.rs (target/debug/deps/doctor_native-9d9293488b3875db)
+
+running 8 tests
+test doctor_vault_agent_skips_broken_profile_without_go ... ok
+test doctor_vault_agent_skips_unlistable_profiles_without_go ... ok
+test doctor_json_reports_static_config_and_registered_harness_natively ... ok
+test doctor_json_true_uses_json_output ... ok
+test doctor_vault_agent_with_disabled_vault_profile_stays_native ... ok
+test doctor_vault_agent_with_missing_vault_binary_stays_native ... ok
+test doctor_vault_agent_without_profiles_stays_native_with_invalid_go_binary ... ok
+test doctor_vault_probe_does_not_expose_child_stderr ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/guard_decide_adapter.rs (target/debug/deps/guard_decide_adapter-1e36590296089f19)
+
+running 4 tests
+test production_route_oversize_input_is_fail_closed ... ok
+test production_route_reader_failure_is_one_audited_deny ... ok
+test production_route_bounds_input_audits_and_writes_one_response ... ok
+test production_route_audit_failure_denies_and_output_failure_returns_one ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/guard_decide_raw_bytes.rs (target/debug/deps/guard_decide_raw_bytes-66938d5f1408f689)
+
+running 1 test
+test production_binary_matches_frozen_raw_byte_responses_and_audits ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/guard_doctor_oracle_tests.rs (target/debug/deps/guard_doctor_oracle_tests-8ceed9681491b24b)
+
+running 1 test
+test every_oracle_case_matches_native_go_bytes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/guard_grants_native.rs (target/debug/deps/guard_grants_native-be47190af6565417)
+
+running 11 tests
+test native_grants_creates_new_store_directory_with_go_mode ... ok
+test native_grants_accepts_go_null_defaults_but_rejects_empty_timestamps ... ok
+test native_grants_formats_list_time_and_preserves_persisted_time_shape ... ok
+test native_grants_keeps_go_malformed_diagnostic_for_oracle_case ... ok
+test native_grants_does_not_rewrite_ephemeral_revoke ... ok
+test native_grants_keeps_legacy_entries_revivable ... ok
+test native_grants_module_compiles_and_handles_empty_store ... ok
+test native_grants_opens_store_before_empty_id_usage ... ok
+test native_grants_preserves_existing_store_directory_mode ... ok
+test native_grants_matches_order_and_revoke_shape ... ok
+test native_grants_persist_uses_go_html_escaping ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/guard_oracle_grants.rs (target/debug/deps/guard_oracle_grants-0f592ab3599ee414)
+
+running 1 test
+test grants_cli_matches_go_oracle_bytes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/harness_health_tests.rs (target/debug/deps/harness_health_tests-29ac9e63aa61fa29)
+
+running 7 tests
+test multiple_missing_stdio_probes_are_reported_natively ... ok
+test empty_health_matches_go_shapes ... ok
+test protocol_mismatch_is_redacted_without_fallback ... ok
+test multiple_native_probes_run_in_parallel_and_are_sorted ... ok
+test native_health_reports_unsupported_and_probes_stdio ... ok
+test successful_probe_reaps_persistent_child ... ok
+test stdio_ping_error_is_redacted_and_silent_ping_hits_the_deadline ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.01s
+
+     Running tests/harness_list_tests.rs (target/debug/deps/harness_list_tests-a3955caa7231eefa)
+
+running 9 tests
+test invalid_and_extra_arguments_keep_go_exit_and_diagnostics ... ok
+test json_is_compact_and_preserves_inventory_schema ... ok
+test malformed_config_health_is_native_without_go_fallback ... ok
+test missing_command_health_reports_redacted_error_without_go_fallback ... ok
+test malformed_json_inventory_is_native_without_go_fallback ... ok
+test table_reports_parsed_global_and_project_configs ... ok
+test table_matches_go_layout_for_populated_and_missing_configs ... ok
+test successful_health_probe_is_native_without_go_fallback ... ok
+test toml_and_io_inventory_errors_keep_go_fallback_before_output ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/init_cli_tests.rs (target/debug/deps/init_cli_tests-842c73fd81291715)
+
+running 9 tests
+test custom_xdg_environment_variables_honored ... ok
+test fresh_init_creates_files_and_dirs_with_proper_modes ... ok
+test dangling_symlink_is_replaced ... ok
+test missing_home_fails_with_expected_error ... ok
+test native_success_with_nonexistent_symbrain_go_binary ... ok
+test symlink_to_existing_file_is_skipped ... ok
+test init_help_and_unknown_flags_via_subprocess ... ok
+test rerun_skips_existing_files_and_preserves_user_edits ... ok
+test positionals_and_terminators_are_accepted ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/install_oracle_tests.rs (target/debug/deps/install_oracle_tests-349fe50abb9ea4fb)
+
+running 2 tests
+test install_oracle_comparison_rejects_intentional_mutation ... ok
+test install_oracle_fixture_is_consumed_by_the_native_rust_cli ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/mcp_cli_tests.rs (target/debug/deps/mcp_cli_tests-2c000befcffb1de3)
+
+running 20 tests
+test configured_antigravity_does_not_force_the_usage_route_to_go ... ok
+test claude_oauth_file_routes_usage_to_native_parser_without_keychain_or_provider_request ... ok
+test codex_default_file_env_and_home_override_routes_are_native ... ok
+test direct_claude_oauth_routes_usage_to_native_parser_without_provider_request ... ok
+test enabled_skills_server_exposes_native_tools_without_go_fallback ... ok
+test kimi_and_nous_supported_home_overrides_route_natively_only_for_proven_files ... ok
+test copilot_single_default_file_routes_natively_and_unproven_shapes_keep_go ... ok
+test mcp_profile_errors_and_unknown_flags_do_not_fallback ... ok
+test deprecated_serve_alias_is_native_and_warns_only_on_stderr ... ok
+test kimi_default_file_routes_follow_the_source_bound_candidate_contract ... ok
+test command_factory_hermetically_isolates_environment_from_outer_xdg_and_provider_keys ... ok
+test noncanonical_or_ambiguous_claude_files_remain_on_go ... ok
+test mcp_profile_flag_loads_xdg_profile_directory ... ok
+manifest: /workspace/symaira-memory649-integrated/rust/symbrain-cli/Cargo.toml; gateway: /workspace/symaira-memory649-integrated/target/debug/symbrain
+test mcp_subprocess_runs_native_initialize_list_call_and_silent_notification ... ok
+test native_mcp_audit_creates_redacted_jsonl_without_stdout_pollution ... ok
+test supported_provider_combination_routes_before_any_live_request ... ok
+test usage_subprocess_lists_and_calls_native_tool_without_go_fallback ... ok
+test nous_auth_file_presence_keeps_unproven_shapes_on_go ... ok
+test sigterm_while_idle_exits_cleanly_with_stdin_open ... ok
+MCP-ready leader=3163585, descendant=3163609, pgid=3163585
+test sigterm_cancels_gateway_and_terminates_child_process_group ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests/memory_set_sigpipe.rs (target/debug/deps/memory_set_sigpipe-99b9bf715327da1e)
+
+running 1 test
+test actual_stdout_closed_reader_preserves_committed_set_and_sigpipe ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.34s
+
+     Running tests/profile_cli_tests.rs (target/debug/deps/profile_cli_tests-4f53146ad9a10419)
+
+running 14 tests
+test add_uses_restricted_template_by_default_and_secure_modes ... ok
+test remove_aborts_on_oversized_confirmation_input ... ok
+test add_personal_flag_after_name_and_show_json_are_native ... ok
+test remove_deletes_file_symlink_without_following ... ok
+test remove_deletes_fifo_without_following ... ok
+test list_json_has_canonical_core_order_and_partial_errors ... ok
+test remove_fails_closed_for_symlink_harness_config ... ok
+test remove_fails_closed_for_fifo_harness_config ... ok
+test remove_is_native_and_force_deletes_profile ... ok
+test remove_oracle_fixture_records_source_provenance ... ok
+test remove_rejects_symlinked_profiles_root_without_touching_target ... ok
+test remove_keeps_relative_project_display_and_rejects_symlink_project_root ... ok
+test remove_refuses_global_and_project_bindings_without_side_effects ... ok
+test remove_prompt_matches_go_for_yes_no_and_eof ... ok
+
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/setup_fix_native.rs (target/debug/deps/setup_fix_native-e5412140a2b2d005)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/setup_repair_native.rs (target/debug/deps/setup_repair_native-01a69c730bd41039)
+
+running 1 test
+test source_installs_are_preserved_without_a_go_binary_or_release_host ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
+
+     Running tests/skills_doctor_native.rs (target/debug/deps/skills_doctor_native-1df03cf05bc64797)
+
+running 3 tests
+test global_config_falls_back_before_stdout ... ok
+test default_doctor_matches_go_schema_and_formats ... ok
+test doctor_flags_and_dynamic_inputs_fallback_before_stdout ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/skills_list_native.rs (target/debug/deps/skills_list_native-bc53fba599d6dbc3)
+
+running 11 tests
+test empty_library_json_matches_go_bytes ... ok
+test category_variants_collapse_to_one_spelling ... ok
+test access_time_inside_the_install_gap_is_not_usage ... ok
+test classified_input_rejection_never_uses_go_even_with_an_override ... ok
+test empty_library_table_matches_go_bytes ... ok
+test empty_library_with_extra_flag_keeps_go_fallback ... ok
+test marker_install_and_access_time_fill_the_record ... ok
+test populated_library_is_reported_natively ... ok
+test sync_dry_run_json_matches_go_bytes ... ok
+test special_installed_marker_does_not_block_or_fabricate_an_install ... ok
+test unloadable_library_entry_keeps_go_fallback ... ok
+
+test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/skills_log_native.rs (target/debug/deps/skills_log_native-88d59ddc0c8b7c91)
+
+running 8 tests
+test readable_current_and_rotated_logs_are_native_newest_first ... ok
+test symlinked_log_ancestor_uses_go_before_stdout ... ok
+test log_filters_trim_values_and_ignore_blank_filters ... ok
+test empty_log_is_native_with_exact_table_and_json_bytes ... ok
+test symlinked_log_uses_go_before_stdout ... ok
+test unavailable_log_path_uses_go_before_stdout ... ok
+test unreadable_log_uses_go_before_stdout ... ok
+test log_flags_filter_and_limit_natively_but_invalid_args_use_go ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/skills_status_opencode_tests.rs (target/debug/deps/skills_status_opencode_tests-95e045d8d2a00a59)
+
+running 19 tests
+test default_status_with_dynamic_target_state_keeps_go_fallback ... ok
+test configured_status_keeps_go_fallback ... ok
+test default_user_status_empty_json_matches_go_bytes ... ok
+test default_user_status_empty_table_matches_go_bytes ... ok
+test legacy_go_config_wins_when_new_skills_config_dir_exists ... ok
+test opencode_project_status_ignores_the_user_root ... ok
+test opencode_project_status_matches_go_bytes ... ok
+test opencode_project_status_symlink_chain_keeps_go_fallback ... ok
+test opencode_project_status_no_scope_flag_defaults_to_user ... ok
+test opencode_user_status_empty_table_matches_go_bytes ... ok
+test opencode_user_status_empty_json_matches_go_bytes ... ok
+test opencode_user_status_json_escapes_html_like_go ... ok
+test opencode_user_status_link_onto_file_matches_go_bytes ... ok
+test opencode_user_status_populated_table_matches_go_bytes ... ok
+test opencode_user_status_managed_marker_row_matches_go_bytes ... ok
+test empty_explicit_user_roots_are_native ... ok
+test symskills_config_override_keeps_go_fallback ... ok
+test opencode_user_status_symlink_chain_keeps_go_fallback ... ok
+test opencode_user_status_marker_states_keep_go_fallback ... ok
+
+test result: ok. 19 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/skills_sync_legacy_roots.rs (target/debug/deps/skills_sync_legacy_roots-1285cd16c5f9f35b)
+
+running 3 tests
+test native_sync_plan_uses_the_platform_home_when_home_variables_disagree ... ok
+test both_layouts_present_sync_uses_the_current_namespace ... ok
+test legacy_layout_sync_repairs_like_go ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/skills_targets_native.rs (target/debug/deps/skills_targets_native-b4946fe39157ae1c)
+
+running 7 tests
+test config_file_targets_variant_keeps_go_fallback_before_output ... ok
+test symlinked_skill_root_is_inventoried_natively ... ok
+test managed_and_unmanaged_skill_roots_are_classified_natively ... ok
+test target_binary_is_reported_as_evidence_natively ... ok
+test user_targets_json_is_compact_and_has_go_schema ... ok
+test user_targets_table_matches_go_bytes_for_empty_sandbox ... ok
+test scope_flag_is_native_but_config_stays_on_go ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/sync_native.rs (target/debug/deps/sync_native-3dc91d6fb45077c1)
+
+running 4 tests
+test skill_target_harness_syncs_natively_without_a_go_binary ... ok
+test instruction_only_target_is_native_and_matches_sync_schema ... ok
+test project_override_syncs_natively_without_a_go_binary ... ok
+test instruction_target_error_fails_sync_after_reporting_all_statuses ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/vault_admin_native.rs (target/debug/deps/vault_admin_native-0d4abc7a9837057b)
+
+running 2 tests
+test vault_validation_stays_native_with_a_fallback_executor ... ok
+test vault_administration_matches_real_go_process_contracts ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.06s
+
+     Running unittests src/lib.rs (target/debug/deps/symbrain_gateway-416cebe6db072f11)
+
+running 3 tests
+test audit::tests::usage_audit_status_distinguishes_success_partial_and_cancelled ... ok
+test response::tests::success_response_never_swallows_serialization_errors ... ok
+test embedded::skills::skills_status::tests::target_status_matches_harness_inventory_semantics ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/gateway_tests.rs (target/debug/deps/gateway_tests-1495da05121ffe79)
+
+running 9 tests
+test identity_injection_covers_missing_unmapped_and_disabled_calls ... ok
+test optional_modules_default_disabled_without_public_registration ... ok
+test memory_identity_injection_is_caller_wins ... ok
+test optional_modules_enabled_without_allowlist_remain_private ... ok
+test routing_joins_all_content_and_classifies_broker_failures ... ok
+test writer_loop_preserves_framed_gateway_responses ... ok
+test optional_modules_public_handlers_bound_tools_and_deny_unknown_calls ... ok
+test fixture_is_the_complete_gateway_black_box_contract ... ok
+test in_flight_tools_call_cancellation_matches_go_oracle ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+
+     Running tests/usage_tests.rs (target/debug/deps/usage_tests-92ffda85ae05a05c)
+
+running 5 tests
+test production_usage_discovery_helper ... ok
+test usage_tools_deny_hides_native_tool_and_returns_method_not_found ... ok
+test usage_is_one_policy_filtered_native_tool_and_dispatches_without_identity ... ok
+test production_usage_discovery_is_lazy_and_per_call ... ok
+test usage_handler_deadline_cancels_active_provider_and_skips_later_batches ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 30.02s
+
+     Running unittests src/lib.rs (target/debug/deps/symbrain_mcp-d38ded23c4e31c77)
+
+running 5 tests
+test frame::tests::response_mode_is_symmetric ... ok
+test model::tests::response_omits_opposite_branch_and_keeps_null_id ... ok
+test frame::tests::reads_line_and_framed_requests ... ok
+test model::tests::request_distinguishes_absent_null_and_numeric_ids ... ok
+test frame::tests::preserves_null_id_as_a_request ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/gateway_protocol_tests.rs (target/debug/deps/gateway_protocol_tests-0fac87281cc9b139)
+
+running 16 tests
+test every_write_mode_flushes_buffered_writer ... ok
+
+thread 'dispatcher_panics_become_internal_errors_in_sync_and_concurrent_modes' (3164925) panicked at rust/symbrain-mcp/tests/fixtures/gateway_protocol_tests_part2.rs:117:9:
+test dispatcher panic
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test cancellation_context_reaches_in_flight_tool_dispatch ... ok
+test excessive_framed_headers_are_rejected_by_total_bytes_and_line_count ... ok
+test invalid_jsonrpc_envelopes_receive_invalid_request_errors ... ok
+test loop_dispatches_requests_and_keeps_transport_mode_symmetric ... ok
+
+thread '<unnamed>' (3164934) panicked at rust/symbrain-mcp/tests/fixtures/gateway_protocol_tests_part2.rs:117:9:
+test dispatcher panic
+
+thread '<unnamed>' (3164937) panicked at rust/symbrain-mcp/tests/fixtures/gateway_protocol_tests_part2.rs:117:9:
+test dispatcher panic
+test malformed_framed_body_gets_framed_parse_error ... ok
+test dispatcher_panics_become_internal_errors_in_sync_and_concurrent_modes ... ok
+test loop_dispatches_tools_list_and_call ... ok
+test notifications_are_silent_but_null_id_is_a_request ... ok
+test malformed_line_gets_parse_error_and_loop_continues ... ok
+test partial_framed_body_is_a_fatal_frame_error ... ok
+test response_serialization_failure_is_returned ... ok
+test protocol_fixture_covers_required_loop_cases ... ok
+test writer_failure_is_returned ... ok
+test concurrent_failures_preserve_dispatch_and_response_types ... ok
+test tool_calls_dispatch_concurrently_and_join_before_eof ... ok
+
+test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/oracle_differential_tests.rs (target/debug/deps/oracle_differential_tests-0b273838cc5562d8)
+
+running 2 tests
+test params_preserve_raw_json_bytes ... ok
+test framing_and_response_bytes_match_go_oracle ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running unittests src/lib.rs (target/debug/deps/symbrain_memory-c052a9cb1e1d98dd)
+
+running 65 tests
+test db_oracle_tests::constraint_cases_are_rejected_like_go ... ok
+test db_oracle_tests::indexes_match_the_go_schema ... ok
+test db_oracle_tests::lock_pragmas_match_the_go_facts ... ok
+test db_oracle_tests::memories_columns_match_the_go_schema ... ok
+test db_oracle_tests::ordering_cases_match_the_go_facts ... ok
+test db_oracle_tests::tables_match_the_go_schema ... ok
+test embedding::tests::hash_fallback_is_normalized_and_deterministic ... ok
+test embedding::tests::shared_llm_client_keeps_ollama_openai_request_contract ... ok
+test embedding::tests::shared_llm_client_rejects_extra_embedding_items_like_go_llmkit ... ok
+test embedding::tests::shared_llm_client_rejects_wrong_dimension_and_http_errors ... ok
+test cli_write::tests::governance_callbacks_stop_without_reverting_committed_steps ... ok
+test embedding::tests::stop_words_and_punctuation_do_not_change_the_direction ... ok
+test db_oracle_tests::triggers_and_views_match_the_go_schema ... ok
+test evidence_store::tests::grounded_only_persistence_and_cascade_match_go ... ok
+test evidence_store::tests::missing_memory_rejects_grounded_evidence_and_skips_invalid ... ok
+test gorand::tests::the_normal_stream_matches_go ... ok
+test gorand::tests::the_projection_rows_match_go ... ok
+test gotime::tests::parses_every_known_rendering ... ok
+test gotime::tests::renders_the_shipped_form ... ok
+test cli_delete_admission::tests::malformed_hydration_refuses_delete_before_any_mutation ... ok
+test lsh::tests::a_dimension_mismatch_is_rejected_instead_of_truncated ... ok
+test lsh::tests::neighbors_cover_every_bucket_within_two_flips ... ok
+test lsh::tests::the_hash_is_deterministic_and_covers_the_bucket_range ... ok
+test lsh::tests::the_hash_matches_the_shipped_store ... ok
+test evidence_store::tests::rollback_and_reparent_keep_memory_and_evidence_atomic ... ok
+test migration::backfill_tests::claimed_blank_identity_repairs_only_its_unchanged_relation_triple ... ok
+test migration::backfill_tests::known_native_false_completion_repairs_rule_and_relation_provenance ... ok
+test migration::backfill_tests::healthy_claimed_migrations_preserve_unrelated_nullable_rows_and_ids ... ok
+test migration::backfill_tests::missing_claimed_rule_column_is_sufficient_evidence_to_backfill ... ok
+test migration::defaults_tests::missing_or_wrong_oplog_default_rejects_before_markers_and_row_repairs ... ok
+test migration::backfill_tests::nullable_attribution_and_target_fields_keep_existing_cells ... ok
+test migration::defaults_tests::proven_old_query_default_preserves_rows_ddl_and_reopen_then_accepts_writes ... ok
+test migration::defaults_tests::original_and_added_defaults_share_strict_public_admission ... ok
+test migration::fts_tests::current_porter_missing_old_rows_is_rebuilt_despite_claimed_marker ... ok
+test migration::fts_tests::unknown_fts_table_tokenizer_or_trigger_is_not_destructively_repaired ... ok
+test migration::fts_tests::old_unicode61_and_missing_fts_gain_existing_row_search_and_maintenance ... ok
+test migration::historical_tests::healthy_reopen_retains_every_schema_and_fts_shadow_cell ... ok
+test migration::historical_tests::historical_unconditional_sync_triggers_are_replaced_with_exclusion ... ok
+test migration::rollback_tests::actual_rule_and_relation_abort_callbacks_preserve_the_whole_database ... ok
+test migration::rollback_tests::duplicate_nonempty_relation_ids_are_preserved_and_unique_repair_aborts ... ok
+test migration::rollback_tests::ignored_backfills_and_marker_insert_cannot_publish_false_completion ... ok
+test migration::rollback_tests::later_wrong_index_rolls_back_uuid_backfill_fts_upgrade_and_new_markers ... ok
+test migration::rollback_tests::missing_check_constraint_is_not_certified_by_column_presence ... ok
+test migration::rollback_tests::successful_public_open_secures_existing_database_without_rewriting_its_rows ... ok
+test migration::rollback_tests::unknown_sync_trigger_is_preserved_instead_of_replaced ... ok
+test migration::sql_tests::check_reader_excludes_mentions_inside_literals_comments_and_identifiers ... ok
+test migration::sql_tests::every_owned_resource_has_only_explicit_supported_actions ... ok
+test migration::sql_tests::object_names_support_both_create_and_drop_qualifiers ... ok
+test embedding::tests::shared_llm_client_times_out_to_hash_fallback ... ok
+test migration::tests::later_ddl_failure_rolls_back_columns_and_migration_entries ... ok
+test migration::tests::repairs_the_five_649_columns_despite_all_migrations_claimed ... ok
+test retrieval::tests::cosine_is_one_for_identical_directions ... ok
+test retrieval::tests::placeholders_match_the_shipped_clause ... ok
+test retrieval::tests::the_score_weights_the_three_default_terms ... ok
+test store::tests::sync_oplog_tracks_memory_lifecycle_and_excludes_marked_rows ... ok
+test wal_open::tests::caller_transaction_is_not_retried_or_rolled_back ... ok
+test wal_open::tests::disk_read_transaction_retains_ownership_after_forbidden_mode_change ... ok
+test migration::historical_tests::all_37_historical_prefixes_complete_without_losing_owned_data ... ok
+original pragma batch under reserved writer: SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some("database is locked")); actual busy callbacks=0; autocommit=true
+observed genuine early WAL BUSY then released reserved writer: actual IMMEDIATE migration complete; journal=wal; busy_timeout=5000; retained row unchanged
+test wal_open::tests::genuine_wal_upgrade_busy_succeeds_after_reserved_writer_release ... ok
+test migration::defaults_tests::every_declared_owned_default_rejects_a_changed_omission_value ... ok
+test wal_open::tests::only_observed_plain_busy_is_retryable ... ok
+test migration::tests::concurrent_public_opens_and_writes_preserve_data_without_snapshot_upgrade ... ok
+mixed real WAL contention: 191 early BUSY attempts; writer released at 1.00213303s; final actual SQLite timeout=3992ms; total=5.011657987s; error=SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some("database is locked"))
+test wal_open::tests::early_writer_then_waiting_reader_share_the_actual_sqlite_timeout ... ok
+retained reserved WAL writer: 962 real early BUSY attempts in 5.000057993s; final error=SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some("database is locked"))
+test wal_open::tests::many_skipped_handler_attempts_share_one_budget_under_retained_writer ... ok
+retained WAL reader exhausted shared budget: 5.013079147s
+test wal_open::tests::retained_reader_exhausts_one_budget_and_preserves_original_error_and_rows ... ok
+
+test result: ok. 65 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 9.68s
+
+     Running tests/evidence_oracle_tests.rs (target/debug/deps/evidence_oracle_tests-3329c5e826410753)
+
+running 4 tests
+test jsonl_writer_failure_propagates_without_faking_success ... ok
+test every_validation_boundary_and_error_priority_matches_go ... ok
+test all_alignment_strategies_offsets_and_ties_match_executed_go ... ok
+test jsonl_bytes_hash_and_go_roundtrip_match ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/store_contract_tests.rs (target/debug/deps/store_contract_tests-37056a349f390ae5)
+
+running 7 tests
+test shipped_timestamp_rendering_is_readable ... ok
+test a_native_row_reaches_the_shipped_fts_index ... ok
+test written_row_uses_shipped_columns ... ok
+test missing_shipped_columns_are_added_to_an_existing_database ... ok
+test written_row_uses_shipped_embedding ... ok
+test written_row_uses_shipped_identifiers ... ok
+test written_row_uses_shipped_timestamps ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.17s
+

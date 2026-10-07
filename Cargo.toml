@@ -18,6 +18,7 @@ members = [
     "rust/symbrain-skills",
     "rust/symbrain-usage",
     "rust/symbrain-guard-core",
+    "rust/symguard-cli",
 ]
 resolver = "2"
 
@@ -61,5 +62,6 @@ symbrain-adapter = { version = "0.12.1", path = "rust/symbrain-adapter" }
 symbrain-skills = { version = "0.12.1", path = "rust/symbrain-skills" }
 symbrain-usage = { version = "0.12.1", path = "rust/symbrain-usage" }
 symbrain-guard-core = { version = "0.12.1", path = "rust/symbrain-guard-core" }
+symguard-cli = { version = "0.12.1", path = "rust/symguard-cli" }
 tempfile = "3.27.0"
 toml_edit = "0.25.13"

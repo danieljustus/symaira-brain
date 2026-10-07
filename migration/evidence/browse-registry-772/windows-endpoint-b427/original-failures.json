@@ -1,0 +1,11 @@
+{
+  "source": "cf959b72515f7679ecc3cc5142e89918c30cb405",
+  "published_head": "b42730bfea8224d1cba1bb7883708b61e1ac096e",
+  "native_failure": "client_contract explicit incompatible-owner fixture supplies filesystem endpoint to Windows named-pipe listener; OS123 InvalidFilename before readiness",
+  "full_raw_sha256": {
+    "symaira-registry-b427-windows-job-111309756720.log": "f6216e2bce4a43eb3722806e903d89fa74adaa0b1782bd4e08a9ae1cba5058ad",
+    "symaira-registry-b427-windows-job-111309756758.log": "dc2e0a0bc05b96a40897d6153eff226de6cab62d312689c6ab2577dd03d1d3e6"
+  },
+  "production_changed": false,
+  "native_correction_acceptance": "Windows amd64/arm64 current-source jobs required; no Linux-derived claim"
+}

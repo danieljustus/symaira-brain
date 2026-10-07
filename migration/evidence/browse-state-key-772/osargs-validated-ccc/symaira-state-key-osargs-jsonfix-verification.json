@@ -1,0 +1,93 @@
+{
+  "validated_source": "ccc5c87eb3bf69cf4adbf054b60d5e5342af3891",
+  "candidate_source_maps": {
+    "ownership_candidate_source_sha256": 197,
+    "key_candidate_source_sha256": 197,
+    "key_go_source_sha256": 670,
+    "process_candidate_source_sha256": 197,
+    "process_go_source_sha256": 670,
+    "registry_candidate_source_sha256": 197,
+    "registry_go_source_sha256": 670
+  },
+  "tests": {
+    "affected": {
+      "passed": 209,
+      "failed": 0,
+      "ignored": 3,
+      "summaries": 34
+    },
+    "mcp-lib": {
+      "passed": 16,
+      "failed": 0,
+      "ignored": 0,
+      "summaries": 1
+    },
+    "mcp.json.tests": {
+      "passed": 310,
+      "failed": 0,
+      "ignored": 3,
+      "summaries": 67
+    }
+  },
+  "registry_journal_events": 2180,
+  "comparator_actual_function_text_identical": true,
+  "comparator_functions_sha256": {
+    "normalize": "780d5f75c4a9bac1391d276452ae2ebc1060c3ff8cf7149feac23f4aef3a1562",
+    "compare": "970d58a2a05b1d81a0abb761093d8a9178b51da6fc0f4e3cb1f66d7dc1217e4e",
+    "controls": "d819059e907fdbad65c02053ae900f89ede61565cb5bacf8e2dfad8d27f3d3e1"
+  },
+  "standalone_provider_file_byte_identical": true,
+  "standalone_provider_file_sha256": "28ace6936b05bf1d347feb1b442a94964663539bbfd5ce3738a45ac96d6af312",
+  "original_root_review_artifacts_verified": 30,
+  "archives_reverified": [
+    {
+      "receipt": "/workspace/oracles/symaira-daemon772-state-key-4cd56e3e4733-idle-binaries/receipt.json",
+      "receipt_sha256": "5ae572d2cad26f303824c7bfaa1d8a024405662c8770d335016e43fa6775c2d7",
+      "elf_paths": 137,
+      "unique": 107
+    },
+    {
+      "receipt": "/workspace/oracles/symaira-daemon772-state-key-407bc5e3b902-idle-binaries/receipt.json",
+      "receipt_sha256": "ddee40adc950098ec7aeeb4a672c21f790aef57261882c561151b1c0ad6a6f53",
+      "elf_paths": 147,
+      "unique": 114
+    },
+    {
+      "receipt": "/workspace/oracles/symaira-daemon772-state-key-3db69a655e43-idle-binaries/receipt.json",
+      "receipt_sha256": "89c8e3e5973b9d043de054d34dcb0f1efa029a623b22e9c87280d60d7654b4c0",
+      "elf_paths": 149,
+      "unique": 115
+    },
+    {
+      "receipt": "/workspace/oracles/symaira-state-key-osargs-1a91-before-fifo/receipt.json",
+      "receipt_sha256": "28447809dbac6f88d6489472b68ceb5effdd626115fbc05d2df9d50bba4b5e76",
+      "elf_paths": 218,
+      "unique": 159
+    },
+    {
+      "receipt": "/workspace/oracles/symaira-state-key-osargs-330-before-import/receipt.json",
+      "receipt_sha256": "ad1288d3b11ba00ee5d5cf457d1a6cf7a1662e74354d77b7c4ec92cceef79cea",
+      "elf_paths": 218,
+      "unique": 159
+    },
+    {
+      "receipt": "/workspace/oracles/symaira-state-key-osargs-046-before-json/receipt.json",
+      "receipt_sha256": "9323bedc4ee969e95e4830c3c6fa89ff5fd5bca9b0ed356275c32f6c2f845694",
+      "elf_paths": 218,
+      "unique": 159
+    },
+    {
+      "receipt": "/workspace/oracles/symaira-state-key-osargs-ccc-final/receipt.json",
+      "receipt_sha256": "24bb49fc2f0c777688b366fef116e72568df3536e82230c32bed834fecb8045f",
+      "elf_paths": 247,
+      "unique": 187
+    }
+  ],
+  "distinct_payload_roundtrips_verified": 524,
+  "current_elf_paths": 247,
+  "current_elf_unique": 187,
+  "current_actual_cargo_or_build_bindings": 61,
+  "target_users": [],
+  "target_deleted": false,
+  "scope": "author runtime and source verification only; native Windows/Darwin execution and independent review required; source-only cross checks do not waive native gates"
+}

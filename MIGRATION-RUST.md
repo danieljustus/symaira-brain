@@ -1,5 +1,14 @@
 # Go → Rust migration
 
+Memory803's isolated coherent-workspace successor normally integrates reviewed
+standalone Guard805 so the unchanged complete runtime plan has its real
+`symguard-cli` owner. Supplemental Skills inheritance now binds five exact
+reviewed source owners and the equal early output-return path; actual parent
+process/state comparisons remain required. The failed5a4 native Windows run and
+missing-package bootstrap attempt remain retained. This checkpoint is source
+preparation only; full runtime, native-three-OS and protected acceptance remain
+pending. See `docs/adr/memory803-coherent-guard-and-inherited-output-owner.md`.
+
 The migration is deliberately incremental. Go remains the executable oracle
 until every contract row is green. Every oracle command is built from the
 immutable revision selected by `GO_ORACLE_REF` (default: the checked-out
@@ -34,6 +43,51 @@ three-OS workflow is required before accepting this increment. Full memory CLI,
 dynamic configuration, governed writes and JSONL decoding remain open; no Go
 fallback route is removed, and #649 remains pending the shipped Rust release.
 The rationale is recorded in `docs/adr/758-native-memory-evidence.md`.
+
+The isolated #649 historical-repair successor preserves the complete original
+314-file census and proposes all 37 ordered migration effects, including rule
+timestamps, relation UUIDs/nullable intervals, attribution/target columns,
+unique indexes, FTS porter rebuilds and sync-exclusion triggers. The source
+draft checks actual postconditions while retaining the approved IMMEDIATE
+transaction and concurrency reservation. Known native false-completion repairs
+are explicit; unknown custom FTS/trigger/index definitions fail with rollback,
+and unrelated legitimate NULLs remain unchanged. The new 37-prefix process
+gate and focused state/rollback tests are prepared but **not executed** at this
+checkpoint. Target/compiler/runtime allocation, independent review, native
+three-OS CI and the shipped Rust release remain pending. The decision is in
+`docs/adr/memory-historical-migration-repair-649.md`.
+
+The focused Store-open successor preserves the actual PR811 Windows BUSY
+failure and bounds only pre-migration WAL plain-BUSY retries to the remaining
+five-second budget. BEGIN IMMEDIATE, migration rollback and all 80 existing
+concurrent-open assertions stay unchanged. At combined source `4c62355`, 40
+Memory library tests and strict checks pass, including actual reserved-writer,
+reader and mixed-lock controls with a rejected compiled timeout-reset mutant.
+The original Windows failure's internal phase, independent review, full CLI
+gates and exact-head native three-OS verification remain pending; this does not
+complete historical repair or close #649/#758. See
+`docs/adr/memory-wal-open-race-803.md` and the preserved `memory-open-race-803`
+evidence.
+
+The isolated historical/default/WAL integration normally merges main 5e and the
+independently approved 2fe WAL prerequisite. At source `1fc5910`, the full
+allocated Linux driver passes 392 tests with no failures/ignores, all 28
+historical cases, seven unchanged WAL cases, strict Clippy/fmt/actionlint,
+37 actual frozen-Go/native constructor pairs, 37 whole-state native reopens,
+nine actual repair/rollback controls and the 184-column SQL default inventory.
+Inherited gates also pass: 590 reads/two 32-case mutation controls,
+60 Set/16 Delete/13 fallback/10 output cases/three process mutants, and the
+32/48/3 evidence corpus/four production Go DB tests/three negative controls.
+Original failed 252 fixtures, the later incompatible handwritten integration
+fixture and first strict lint run are preserved with actual executed binaries
+before precise fixture/style corrections. All 37 SQL resources and approved
+WAL behavior remain unchanged; no lint or callback/state assertion is weakened.
+The complete 23-file default static review and Root WAL prerequisite review
+remain separate lineage. Author Linux validation is not independent acceptance:
+full different-author runtime review, native three-OS CI and the shipped Rust
+release remain pending, and #649/#758 stay open. Decisions and exact proof
+bindings are in `docs/adr/memory-historical-wal-integration-649.md` and
+`migration/evidence/memory-historical-649/final-1fc5910`.
 
 The follow-up #758 CLI increment splits the oversized memory module into focused
 behavior modules, ports raw Go flags/error grammar and all 86 typed memory
@@ -264,8 +318,14 @@ directory capability with finite depth/link limits. Inventory, Markdown reads,
 hashing and copy use the same resolver and retain the shared actual-read budget.
 Outside targets, parent traversal, link cycles and outside-target replacements
 remain rejected; replacing the ambient root path cannot redirect the retained
-source handle. This is a separate Rust-only contract deviation (SKL-006), with
-native Windows link evidence pending rather than implied by Unix tests.
+source handle. This is a separate Rust-only contract deviation (SKL-006).
+Exact-head run `37068639832` at `682177d99816357716a3f0387733d22982a88b80`
+passed all eleven acceptance checks, including native Linux/macOS/Windows
+init/link tests. The Windows log confirms all ten cases, including root/ancestor
+aliases and protected rename refusal. Independent full-layer review found no
+code defects; its sole missing-Windows-evidence condition was resolved from that
+actual log, not relabeled as reviewer approval. PR #792 was regularly squash-merged
+as `dcddcef0df5789123c7c9a7ebe6e01f10e941f2c`; #490 is closed.
 Windows ordinary and extended drive/UNC prefixes are equivalent only for
 lexical root comparison; device namespaces remain distinct and no ambient
 resource access is added. Cap-std's Windows directory handles deliberately
@@ -273,6 +333,35 @@ exclude `FILE_SHARE_DELETE`, so a live source-root rename is refused with a
 sharing violation rather than permitted as on Unix. The regression asserts
 that refusal and continued same-source hashing/copying; handle protections
 are not loosened to make the Unix replacement scenario work on Windows.
+
+Rust-only native preflight correction #793 closes two additional bypasses found
+while scoping #764. Native `skills sync` validates missing values, unknown flags,
+Go boolean spellings, target/scope, help and positional termination before any
+filesystem work, reusing the existing Go-compatible quoter and whole-vector
+normalizer. Raw argument values survive until validation, including Unix non-UTF-8
+bytes and separated flag-like values. Target validation trims Go Unicode
+whitespace at valid UTF-8 boundaries while preserving invalid interior bytes;
+invalid scope diagnostics retain their original padding. All 198 isolated flag
+probes (including both previously failing padded targets and Unicode/control
+boundaries) match stdout, stderr and exit code against the actual frozen Go binary
+built from a complete archive of `dcddcef0df5789123c7c9a7ebe6e01f10e941f2c`.
+OpenCode fallback eligibility reuses the common no-follow marker reader, which
+now uses the existing regular-file, same-handle, size/growth-bounded reader and
+its nonblocking Unix final open. Typed `MarkerState::Rejected` keeps unsafe
+marker inputs native even when an ordinary malformed marker or dynamic config
+would otherwise select Go. Ordinary malformed/future-schema fallback remains.
+Marker directory probing uses the existing-only no-follow opener; missing or
+concurrently renamed directories remain absent without status creating paths.
+Marker reads retain the existing per-file `MAX_INPUT_SIZE`; this slice does not
+claim a new aggregate marker budget or complete native config/all-target status
+coverage. Parent #476/#764 stay open and #621 no-follow/product policy is unchanged.
+Bounded child-process regressions and the complete affected three-package suite
+pass on Linux x86_64: 421 top-level tests, zero failures, two ignored child
+entrypoints. Formatting and strict all-target Clippy pass. The cloud checkout
+uses standard 0644/0755 tracked-file permissions and umask 022; a subreaper
+reaps adopted test children because the container PID 1 is not a reaping init.
+Fresh native three-OS CI and independent full-layer review remain required.
+Earlier macOS and Windows cross-build records describe their original code heads.
 
 The Go oracle and source fixtures remain frozen. These are documented Rust-only
 security deviations, not a claim that the vulnerable Go paths have changed.
@@ -326,3 +415,41 @@ for example `make GO_ORACLE_REF=<commit> rust-check parity-smoke`.
 
 The SwiftUI applications remain Swift. Their CLI JSON contracts are migration
 inputs, not candidates for translation to Rust.
+
+For #770, Guard CLI handlers now live in the Guard-owned `symguard-cli` crate,
+shared by the Brain compatibility route and an independently buildable native
+`symguard` binary. The standalone graph includes no Brain gateway, broker or
+memory dependencies and cannot invoke Go. The real reachable command inventory
+and remaining doctor/audit diagnostics are recorded in
+`migration/guard-standalone-tree-770.md`; nonexistent planned CLI verbs are not
+invented or treated as retired. The scoped process runner executes124 actual
+Go/Rust cases: the current Linux replay has121 full matches and three selected
+TOML diagnostic states explicitly fail closed. Typed anchor errors and the proven
+Unix directory audit-open spelling are native; Windows audit wording remains
+separately unported. Three actual output mutants test the new boundaries. These
+selected states do not inventory all unsupported TOML/discovery/I/O shapes. Native three-OS acceptance, remaining diagnostics and release
+are still pending; #770 stays open. Production Go and frozen fixtures are unchanged.
+
+
+
+For #621, the native explicit-target status report adds a bounded, read-only
+library-versus-render comparison, including reference files. It compares a fresh
+target render, reports paths/hashes and unreadable caches, and labels verified
+managed cache links `linked` without changing persisted markers or sync policy.
+The original Go report is compared live for 12 clean/edited states across six
+targets, removing only these documented product extensions; no Go source or
+existing fixture is changed. See `scripts/skills-render-drift/README.md`. Native
+three-OS CI at the final candidate head remains required. Dynamic config and
+unqualified multi-target CLI fallback remain part of #764.
+
+
+### Skills sync Windows raw argv follow-up (#793 / #794)
+
+Source preparation corrects the earlier Windows replacement assumption: pinned
+Go 1.26.7 preserves unpaired UTF-16 surrogates as WTF-8. Skills sync now keeps
+its normalized argv as raw Go byte vectors and uses the existing byte quote
+formatter. The original 315 cases, 459-test checkpoint and native CI proofs
+remain historical acceptance of their exact source. New native Windows wide
+CreateProcessW comparisons, unchanged Unix315 regression, affected tests/strict
+checks and independent review are pending; copied SDK source is no Windows
+runtime evidence. This does not complete broader Skills/Rust cutover.

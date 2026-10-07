@@ -1,0 +1,19 @@
+   Compiling symbrain-memory v0.12.1 (/workspace/symaira-memory803-open/rust/symbrain-memory)
+    Finished `test` profile [unoptimized] target(s) in 1.72s
+     Running unittests src/lib.rs (target/debug/deps/symbrain_memory-dde9bae26a7c26aa)
+
+running 1 test
+
+thread 'wal_open::tests::early_writer_then_waiting_reader_share_the_actual_sqlite_timeout' (3093339) panicked at rust/symbrain-memory/src/wal_open/tests.rs:258:5:
+5000
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+test wal_open::tests::early_writer_then_waiting_reader_share_the_actual_sqlite_timeout ... FAILED
+
+failures:
+
+failures:
+    wal_open::tests::early_writer_then_waiting_reader_share_the_actual_sqlite_timeout
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 39 filtered out; finished in 6.01s
+
+error: test failed, to rerun pass `-p symbrain-memory --lib`

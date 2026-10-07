@@ -1,9 +1,18 @@
 //! Schema-versioned, read-only AI provider usage reporting.
 #![deny(unsafe_code)]
 
+mod go_decimal;
+mod go_decimal_fast;
+mod go_decimal_shift;
+#[cfg(test)]
+mod go_decimal_tests;
+mod go_float;
+#[cfg(test)]
+mod go_float_tests;
 mod model;
 mod parser;
 mod providers;
+mod retry_after;
 mod transport;
 
 pub use model::{AuthStatus, ProviderUsage, Report, UsageMeter, UsageSnapshot};
@@ -12,6 +21,7 @@ pub use providers::{
     needs_go_fallback, resolve_reference, resolve_reference_or_env, secretref_timeout,
     set_secretref_timeout,
 };
+pub use retry_after::parse_retry_after;
 pub use transport::{Cancellation, FixtureTransport, Request, Response, Transport, UreqTransport};
 
 use std::collections::BTreeSet;

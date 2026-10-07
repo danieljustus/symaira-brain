@@ -1,0 +1,43 @@
+{
+  "immutable_PR803_head": "f428a866d7817c269cdfc32b6affc50dfe014418",
+  "merge_head": "5c7312d10a9244a32c39ad10719f1fcbada75fb1",
+  "tree": "4f2f9c02fdbe4ad8397e8820486aef24b41166ab",
+  "linux": {
+    "job": 111400013694,
+    "python": "3.13.7",
+    "actual_sqlite": "3.45.1",
+    "failure": "checker semantic preflight false NULL for REAL NOT NULL DEFAULT0.5",
+    "historical_product_children_started": false,
+    "full_distribution_sha256": "06962ffec2157889b6edaddcfc47e96c3b002a55db076adcd0144d7d7a3b716d",
+    "extension_needed": "libsqlite3.so.0",
+    "distribution_contains_libsqlite3": false
+  },
+  "windows": {
+    "job": 111400013639,
+    "started_at": "2026-10-04T08:51:55Z",
+    "completed_at": "2026-10-04T09:22:13Z",
+    "conclusion": "cancelled",
+    "actual_SQLite": "3.50.4",
+    "ordinary_cases": 553,
+    "ordinary_passed": 553,
+    "historical_pairs": 37,
+    "historical_controls": 9,
+    "set_pairs_passed": 60,
+    "delete_pairs_passed": 16,
+    "budget_minutes": 30,
+    "observed_cancel_during": "governed write gate after original intermediate receipts",
+    "no_observed_assertion_failure": true,
+    "full_job_accepted": false
+  },
+  "darwin": {
+    "runtime": "NOT_EXECUTED_QUEUED",
+    "static_distribution": "python-3.13.7-darwin-arm64.tar.gz",
+    "sha256": "6380430c3b4741b4e13148cbfdaad4bbd06c7855ec017fd6286d1e04c6b8f4b1",
+    "extension_MachO_sha256": "09fcc99746cd6520f0fe8ef4e79eac98f5dc39eda45398289b7358f1f44a11da",
+    "architectures": "x86_64 and arm64",
+    "sqlite_static_source_id": "2025-07-30 19:33:53 4d8adfb30e03f9cf27f800a2c1ba3c48fb4ca1b08b0f5ed59a4d5ecbf45e20a3",
+    "LC_LOAD_DYLIB": "only libSystem; no libsqlite3",
+    "mandatory_semantic_preflight": true
+  },
+  "prepared_provider_and_native3": "UNEXECUTED; no compiler/target/product/port allocation used"
+}

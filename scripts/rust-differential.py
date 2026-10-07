@@ -25,7 +25,9 @@ from pathlib import Path
 from typing import Callable
 
 from external_env import ensure_external_environment
+from differential_journal import Journal
 from harness_health_contract import HEALTH_DEVIATIONS, legacy_health_view
+from skills_render_contract import RENDER_DEVIATIONS, legacy_render_view
 if os.name == "posix":
     import pty
 RELEASE_BASE_URL = ""
@@ -3006,10 +3008,13 @@ def go_reports_install_atime(goos: str) -> bool:
 
 
 def normalize_fixture_root(data: bytes, root: Path) -> bytes:
-    """Replace only the supplied fixture root in plain or JSON-escaped output."""
+    """Bind the supplied root in plain, JSON and quoted-error JSON output."""
     raw_root = str(root).encode()
-    json_root = json.dumps(str(root), ensure_ascii=True)[1:-1].encode("ascii")
-    return data.replace(json_root, b"<root>").replace(raw_root, b"<root>")
+    json_text = json.dumps(str(root), ensure_ascii=True)[1:-1]
+    json_root = json_text.encode("ascii")
+    # Go's quoted executable path is itself escaped by the outer JSON string.
+    quoted_json_root = json.dumps(json_text, ensure_ascii=True)[1:-1].encode("ascii")
+    return data.replace(quoted_json_root, b"<root>").replace(json_root, b"<root>").replace(raw_root, b"<root>")
 
 
 def normalize_atomic_tempfile(data: bytes) -> bytes:
@@ -3099,6 +3104,9 @@ def main() -> int:
         return 2
     go_binary = Path(sys.argv[1]).resolve()
     rust_binary = Path(sys.argv[2]).resolve()
+    journal = Journal()
+    journal.bind("Go", go_binary)
+    journal.bind("Rust", rust_binary)
     _build_windows_stub()
     fixture_server = ReleaseFixtureServer()
     RELEASE_BASE_URL = fixture_server.__enter__()
@@ -3119,6 +3127,7 @@ def main() -> int:
         for name, reason in skipped_cases:
             print(f"  {name}: {reason}")
     for case in cases:
+        journal.event("case_begin", case=case.name)
         with tempfile.TemporaryDirectory(prefix="symbrain-parity-") as temp_dir:
             # macOS exposes /var as a symlink to /private/var. The native
             # capability walk intentionally rejects symlink ancestors, so
@@ -3134,9 +3143,11 @@ def main() -> int:
                 go_env.update(case.env_overrides)
                 rust_env.update(case.env_overrides)
             try:
+                journal.event("setup_begin", case=case.name)
                 if case.setup:
                     case.setup(go_root, go_env)
                     case.setup(rust_root, rust_env)
+                journal.event("setup_end", case=case.name)
                 go_argv = materialize_argv(case.argv, go_root)
                 rust_argv = materialize_argv(case.argv, rust_root)
                 # For atime-sensitive cases: capture atime before each run.
@@ -3145,8 +3156,8 @@ def main() -> int:
                 if case.normalize_atime:
                     go_atime_captured = capture_access_time_ns(go_root, "demo")
                     rust_atime_captured = capture_access_time_ns(rust_root, "demo")
-                go_result = run(go_binary, go_argv, go_env, case.stdin, case.pty)
-                rust_result = run(rust_binary, rust_argv, rust_env, case.stdin, case.pty)
+                go_result = journal.run(case.name, "Go", run, go_binary, go_argv, go_env, case.stdin, case.pty)
+                rust_result = journal.run(case.name, "Rust", run, rust_binary, rust_argv, rust_env, case.stdin, case.pty)
                 go_stdout = go_result.stdout
                 rust_stdout = rust_result.stdout
                 go_stderr = go_result.stderr
@@ -3271,8 +3282,16 @@ def main() -> int:
                         failures.append(f"{case.name}: HAR-007 health contract failed: {err}")
                         continue
                     print(f"ACCEPTED HAR-007 {case.name} (validated versioned health contract)")
+                if case.name in RENDER_DEVIATIONS:
+                    try:
+                        rust_stdout = legacy_render_view(case.name, go_stdout, rust_stdout, rust_root)
+                    except (AssertionError, ValueError, TypeError, KeyError, OSError) as err:
+                        failures.append(f"{case.name}: SKL-008 render contract failed: {err}")
+                        continue
+                    print(f"ACCEPTED SKL-008 {case.name} (validated render drift contract)")
                 observed = (rust_result.returncode, rust_stdout, rust_stderr)
                 expected = (go_result.returncode, go_stdout, go_stderr)
+                journal.event("comparison", case=case.name, equal=observed == expected)
                 if observed != expected:
                     failures.append(
                         f"{case.name}: Go={expected!r}, Rust={observed!r}"
@@ -3289,6 +3308,9 @@ def main() -> int:
                 else:
                     print(f"PASS {case.name}")
             finally:
+                journal.fixture_state(case.name, "Go", go_root)
+                journal.fixture_state(case.name, "Rust", rust_root)
+                journal.event("case_end", case=case.name)
                 for base_root in (go_root, rust_root):
                     if base_root.exists():
                         for p in base_root.rglob("*"):

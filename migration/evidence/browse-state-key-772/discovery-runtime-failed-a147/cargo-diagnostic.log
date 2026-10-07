@@ -1,0 +1,57 @@
+a147cedb6fd003f257cc491fcb94c45db4291400
+   Compiling syn v2.0.119
+   Compiling getrandom v0.4.3
+   Compiling crypto-common v0.2.2
+   Compiling getrandom v0.3.4
+   Compiling smallvec v1.16.0
+   Compiling cipher v0.5.2
+   Compiling rand_core v0.9.5
+   Compiling universal-hash v0.6.1
+   Compiling polyval v0.7.3
+   Compiling synstructure v0.13.2
+   Compiling wait-timeout v0.2.1
+   Compiling once_cell v1.21.4
+   Compiling percent-encoding v2.3.2
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerofrom v0.1.8
+   Compiling yoke v0.8.3
+   Compiling serde_json v1.0.151
+   Compiling form_urlencoded v1.2.2
+   Compiling zerovec v0.11.8
+   Compiling zerotrie v0.2.5
+   Compiling tempfile v3.27.0
+   Compiling tinystr v0.8.4
+   Compiling potential_utf v0.1.6
+   Compiling icu_locale_core v2.3.0
+   Compiling icu_collections v2.3.0
+   Compiling ppv-lite86 v0.2.21
+   Compiling ghash v0.6.0
+   Compiling icu_provider v2.3.1
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_properties v2.3.0
+   Compiling aes v0.9.3
+   Compiling ctr v0.10.1
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling aead v0.6.1
+   Compiling memchr v2.8.3
+   Compiling time v0.3.55
+   Compiling rusty-fork v0.3.1
+   Compiling url v2.5.8
+   Compiling aes-gcm v0.11.1
+   Compiling rand_chacha v0.9.0
+   Compiling rand v0.9.5
+   Compiling rand_xorshift v0.4.0
+   Compiling tokio v1.53.1
+   Compiling proptest v1.11.0
+   Compiling symbrowse-core v0.0.0 (/workspace/symaira-daemon772-discovery-runtime/browse/crates/symbrowse-core)
+    Finished `test` profile [unoptimized] target(s) in 11.41s
+     Running tests/policy_guard.rs (/workspace/symaira-daemon772-discovery-runtime/target/debug/deps/policy_guard-12661e3eaa035ad6)
+
+running 2 tests
+test unix::guard_receives_stdin_json_and_validates_verdict ... ok
+test unix::guard_errors_fail_closed_and_timeout_is_bounded ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+

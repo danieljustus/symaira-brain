@@ -92,6 +92,7 @@ mod unix {
     }
 
     #[test]
+    #[allow(clippy::result_large_err)]
     fn unix_listener_shutdown_runs_runtime_cleanup_hook() {
         let root = root("shutdown-hook");
         let socket = root.join("default.sock");
@@ -250,6 +251,17 @@ mod unix {
             .unwrap();
         assert!(response.success, "ping the surviving daemon: {response:?}");
         assert_eq!(response.data.unwrap()["pong"], true);
+        // Every loser must contend while the owner is live. Under load a
+        // starter can reach the lock only after the owner released it; stop
+        // the owner only once all others have returned (bounded wait).
+        let deadline = Instant::now() + Duration::from_secs(10);
+        while threads.iter().filter(|thread| thread.is_finished()).count() < STARTERS - 1 {
+            assert!(
+                Instant::now() < deadline,
+                "losing starters did not finish while the owner was live"
+            );
+            thread::sleep(Duration::from_millis(5));
+        }
         for server in &servers {
             server.stop();
         }
@@ -274,18 +286,35 @@ mod unix {
         assert!(!socket.exists(), "owner did not clean up its socket");
 
         // Once the owner has released its advisory lock and removed its own
-        // socket, a fresh same-process daemon can reclaim the endpoint.
-        let replacement = Server::new(ServerOptions {
-            socket_path: socket,
-            session: "default".to_owned(),
-            idle_timeout: Some(Duration::from_millis(1)),
-            handler: Some(Arc::new(|_, _| Ok((None, Vec::new())))),
-            ..Default::default()
-        })
-        .unwrap();
+        // socket, a fresh same-process daemon can reclaim the endpoint. With
+        // the other lifecycle tests running in parallel threads, the released
+        // flock can stay briefly contended (never seen serially: 0/48 runs,
+        // nor for this test alone: 0/96). Retry, bounded, while proving no
+        // other owner ever publishes the endpoint in between.
+        let deadline = Instant::now() + Duration::from_secs(2);
+        let result = loop {
+            let replacement = Server::new(ServerOptions {
+                socket_path: socket.clone(),
+                session: "default".to_owned(),
+                idle_timeout: Some(Duration::from_millis(1)),
+                handler: Some(Arc::new(|_, _| Ok((None, Vec::new())))),
+                ..Default::default()
+            })
+            .unwrap();
+            match replacement.listen_and_serve() {
+                Err(ServerError::AlreadyRunning) if Instant::now() < deadline => {
+                    assert!(
+                        !socket.exists(),
+                        "a second owner published the released endpoint"
+                    );
+                    thread::sleep(Duration::from_millis(10));
+                }
+                result => break result,
+            }
+        };
         assert!(
-            replacement.listen_and_serve().is_ok(),
-            "released endpoint was not recoverable"
+            result.is_ok(),
+            "released endpoint was not recoverable: {result:?}"
         );
         fs::remove_dir_all(root).unwrap();
     }
@@ -395,6 +424,117 @@ mod unix {
         server.stop();
         assert!(thread.join().unwrap().is_ok());
         fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    #[allow(clippy::result_large_err)]
+    fn caller_parent_mode_and_wrong_owner_stop_preserve_the_live_server() {
+        use symbrowse_daemon::{SessionRegistry, SessionRegistryOptions};
+
+        let root = std::env::temp_dir().join(format!(
+            "sb{}-{}",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        let caller = root.join("caller");
+        fs::create_dir_all(&caller).unwrap();
+        fs::set_permissions(&caller, fs::Permissions::from_mode(0o755)).unwrap();
+        let owner = format!("owner-{}", std::process::id());
+        let victim = format!("victim-{}", std::process::id());
+        let endpoint = caller.join("direct.sock");
+        let registry = Arc::new(SessionRegistry::new(SessionRegistryOptions {
+            user_data_root: root.join("profiles"),
+            ..Default::default()
+        }));
+        let server = Arc::new(
+            Server::new(ServerOptions {
+                socket_path: endpoint.clone(),
+                session: owner.clone(),
+                idle_timeout: None,
+                registry: Some(registry.clone()),
+                ..Default::default()
+            })
+            .unwrap(),
+        );
+        let running = server.clone();
+        let thread = thread::spawn(move || running.listen_and_serve());
+        wait_for_socket(&endpoint);
+        let caller_mode = fs::metadata(&caller).unwrap().permissions().mode() & 0o777;
+
+        let wrong_owner = Client::new(ClientOptions {
+            socket_path: endpoint.clone(),
+            session: victim,
+            autostart: false,
+            ..Default::default()
+        });
+        let stop = wrong_owner
+            .request_without_autostart(Frame {
+                cmd: "daemon.stop".into(),
+                ..Default::default()
+            })
+            .unwrap();
+        let owner_client = Client::new(ClientOptions {
+            socket_path: endpoint,
+            session: owner,
+            autostart: false,
+            ..Default::default()
+        });
+        let owner_alive = owner_client
+            .request_without_autostart(Frame {
+                cmd: "daemon.status".into(),
+                ..Default::default()
+            })
+            .is_ok();
+        let sessions_after_wrong_stop = registry.list().len();
+        if owner_alive {
+            owner_client
+                .request_without_autostart(Frame {
+                    cmd: "daemon.stop".into(),
+                    ..Default::default()
+                })
+                .unwrap();
+        }
+        assert!(thread.join().unwrap().is_ok());
+
+        let nested = caller.join("owned");
+        let nested_endpoint = nested.join("nested.sock");
+        let nested_server = Arc::new(
+            Server::new(ServerOptions {
+                socket_path: nested_endpoint.clone(),
+                session: format!("nested-{}", std::process::id()),
+                idle_timeout: None,
+                ..Default::default()
+            })
+            .unwrap(),
+        );
+        let running = nested_server.clone();
+        let nested_thread = thread::spawn(move || running.listen_and_serve());
+        wait_for_socket(&nested_endpoint);
+        let caller_mode_with_owned = fs::metadata(&caller).unwrap().permissions().mode() & 0o777;
+        let owned_mode = fs::metadata(&nested).unwrap().permissions().mode() & 0o777;
+        let socket_mode = fs::symlink_metadata(&nested_endpoint)
+            .unwrap()
+            .permissions()
+            .mode()
+            & 0o777;
+        nested_server.stop();
+        assert!(nested_thread.join().unwrap().is_ok());
+        fs::remove_dir_all(root).unwrap();
+
+        assert!(!stop.success);
+        assert_eq!(
+            stop.error.unwrap().code,
+            symbrowse_daemon::codes::INVALID_SESSION
+        );
+        assert_eq!(sessions_after_wrong_stop, 1);
+        assert!(
+            owner_alive,
+            "wrong-owner stop terminated the running daemon"
+        );
+        assert_eq!(caller_mode, 0o755, "listener changed a caller-owned parent");
+        assert_eq!(caller_mode_with_owned, 0o755);
+        assert_eq!(owned_mode, 0o700, "new owned directory is not private");
+        assert_eq!(socket_mode, 0o600, "Unix socket is not private");
     }
 
     fn wait_for_socket(path: &Path) {

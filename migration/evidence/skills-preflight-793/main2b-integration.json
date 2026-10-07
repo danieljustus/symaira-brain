@@ -1,0 +1,178 @@
+{
+  "previous": "faa8f12f6c77aad694003c9fa8c5e66d94919ba0",
+  "main": "2b6d49f250a81650eda1b93cec7d859a171873bb",
+  "prior_ci": 37162341373,
+  "jobs": [
+    {
+      "id": 111318190551,
+      "name": "rust-migration",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190625,
+      "name": "go-test-shard (3)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190626,
+      "name": "rust-mcp-fuzz-smoke (ubuntu-latest)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190665,
+      "name": "pin-check",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190672,
+      "name": "go-lint-build",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190675,
+      "name": "go-test-shard (1)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190676,
+      "name": "go-test-shard (2)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190688,
+      "name": "rust-migration-windows",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190695,
+      "name": "go-test-shard (0)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190700,
+      "name": "gui",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190704,
+      "name": "rust-migration-macos",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190707,
+      "name": "stdio-hygiene",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190711,
+      "name": "rust-init-native (macos-15)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190716,
+      "name": "browse-corekit-version-windows",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190720,
+      "name": "govulncheck",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190732,
+      "name": "rust-windows-audit-guard",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190756,
+      "name": "browse-windows-daemon",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190776,
+      "name": "guard-decide-raw-byte",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190779,
+      "name": "rust-init-native (ubuntu-latest)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190782,
+      "name": "rust-mcp-fuzz-smoke (macos-15)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318190793,
+      "name": "rust-init-native (windows-2025)",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111318191201,
+      "name": "operate-native-swiftpm",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 111318191205,
+      "name": "browse-native",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 111318213024,
+      "name": "goreleaser-snapshot",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 111318214557,
+      "name": "scope-native-swiftpm",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 111323741405,
+      "name": "build-test",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111327967741,
+      "name": "coverage",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 111330424500,
+      "name": "publish-coverage-data",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "threads": [],
+  "reviews": [],
+  "decision": "Normal main integration changes documentation/evidence only; production, tests, workflows, dependency locks and contract matrix remain byte-identical. Preserve previous full315-process/459-test proof and native3 runtime jobs; exact new-head protected/native CI still required. No issue closure based solely on preflight slice."
+}

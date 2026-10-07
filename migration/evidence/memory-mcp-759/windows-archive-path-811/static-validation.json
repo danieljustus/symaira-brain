@@ -1,0 +1,23 @@
+{
+  "base": "11f5777a91bd980f16a68fe187ef70f6b50fa9ff",
+  "static_only": true,
+  "unchanged_tracked_files": 2943,
+  "all_frozen_Go_MCP_fixture_and_assertion_files_unchanged": true,
+  "workflow_delta": "exact four additive shell/comment lines before original mkdir/tar; all other bytes unchanged",
+  "bash_n_run_blocks": 4,
+  "actionlint_exit": 0,
+  "actionlint_binary": "/workspace/toolchains/bin/actionlint",
+  "actionlint_binary_sha256": "0bdaeb1510e0d35e8ca3ee5b94abfacda1ab79472234b7e16d97f3f31b6192fc",
+  "actionlint_log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "initial_actionlint_attempt": "actionlint not on shell PATH; no lint executed, rerun explicit installed tool path passes",
+  "target_accessed": false,
+  "compiler_or_runtime_executed": false,
+  "native_windows_result": "pending fresh native exact-head CI; static path normalization only",
+  "original_11f_and_Skills97d_preserved": true,
+  "initial_evidence_git_storage_attempt": {
+    "commit": "5371099167d5cd9745efc6668d64d00030ff22b2",
+    "reason": "Repository text attributes normalized original CRLF log when staged. Original working and /tmp raw bytes untouched. Successor local exact-file -text attribute restores immutable Git raw-byte retention.",
+    "normalized_blob_sha256": "a6c4933ab18f61bd5c1b4ac954a3525a73ec87e443def230191573aafc5a1648",
+    "original_sha256": "f3be0a729c4d03cceb1e7ddad0b911456c86fb1b96711eed0c53defaca9f9dc8"
+  }
+}

@@ -1,0 +1,364 @@
+#![deny(unsafe_code)]
+
+use std::env;
+use std::ffi::{OsStr, OsString};
+use std::io::{self, Write};
+use std::path::PathBuf;
+use std::process::{Command, Stdio};
+use symbrain_core::exit;
+use symbrain_core::output::{self, OutputFormat};
+use symbrain_core::version::{self, VersionInfo};
+
+mod activity_cli;
+mod audit_cli;
+mod cli_flags;
+mod config_cli;
+
+use cli_flags::has_go_owned_flag;
+pub use cli_flags::normalize_flags;
+mod doctor_cli;
+pub mod guard_cli;
+mod harness_cli;
+mod health_probe;
+mod init_cli;
+mod install_cli;
+mod mcp_cli;
+mod memory_cli;
+mod passthrough;
+mod profile_actions;
+mod profile_args;
+mod profile_cli;
+mod profile_render;
+mod setup_cli;
+mod skills_cli;
+mod sync_cli;
+mod usage_cli;
+mod vault_admin;
+mod vault_config;
+
+const USAGE: &str = "symbrain — portable agent-context layer for AI harnesses\n\nUsage:\n  symbrain <command> [flags]\n\nGlobal output flags (version, sync, memory, skills, activity, profile, harness, audit, usage, and doctor):\n  --output table|json  Output format (default: table)\n  --json               Shorthand for --output json\n\nCommands:\n  init        Create XDG directories, default config, and example profiles\n  doctor      Check environment, config, profiles, and child binaries\n  setup       Download and install pinned core binaries to ~/.symaira/bin\n  profile     Manage profiles (list, show, add, remove)\n  config      Inspect and edit the global config (path, get, set)\n  harness     Inspect registered AI harnesses and their MCP servers\n  usage       AI subscription/token usage per provider\n  mcp         Run the MCP gateway over stdio for a profile (serve is a deprecated alias)\n  install     Register symbrain with a harness\n  uninstall   Remove symbrain from a harness\n  sync        Sync instructions and skills to harnesses\n  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync, serve)\n  skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)\n  activity    Read bounded activity summaries with explicit profile access\n  audit       Inspect the audit log\n  vault       Human credential management (create <path> and set <path.field> read single-line secrets from stdin; delete requires --yes)\n  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)\n\n  version     Print version information\n  help        Show this help message\n\nVault approval passthrough:\n  symbrain vault approval list [--output json]\n  symbrain vault approval decide <request-id> --approve|--deny\n\nRun 'symbrain <command> --help' for details on a specific command.\n";
+
+/// Execution strategy for commands delegated to the Go oracle or child processes.
+pub trait FallbackExecutor {
+    /// Executes an unmigrated command with the provided arguments and diagnostics writer.
+    fn execute(&self, args: &[OsString], stderr: &mut dyn Write) -> u8;
+}
+
+/// Production executor that spawns the Go fallback child process with inherited stdio.
+///
+/// Inherited stdio preserves interactive streaming for protocols like MCP (JSON-RPC over
+/// stdin/stdout) and prevents buffering or stdio pollution across process boundaries.
+pub struct InheritedProcessExecutor;
+
+impl FallbackExecutor for InheritedProcessExecutor {
+    fn execute(&self, args: &[OsString], stderr: &mut dyn Write) -> u8 {
+        run_go_fallback(args, stderr)
+    }
+}
+
+/// Runs `symbrain` with the production inherited-process fallback executor.
+pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {
+    run_with_executor(args, stdout, stderr, &InheritedProcessExecutor)
+}
+
+/// Runs the CLI on its actual process standard streams.
+///
+/// Only native Memory Set completion uses this stdout identity to retain Go's
+/// Unix broken-pipe termination. Embedded writers keep ordinary errors.
+#[must_use]
+pub fn run_stdio(args: &[OsString]) -> u8 {
+    let mut stdout = io::stdout();
+    let mut stderr = io::stderr();
+    run_native(args, &mut stdout, &mut stderr, true)
+        .unwrap_or_else(|| InheritedProcessExecutor.execute(args, &mut stderr))
+}
+
+/// Runs `symbrain` with an explicit fallback executor strategy.
+pub fn run_with_executor<E: FallbackExecutor>(
+    args: &[OsString],
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write,
+    executor: &E,
+) -> u8 {
+    if let Some(code) = run_in_process(args, stdout, stderr) {
+        code
+    } else {
+        executor.execute(args, stderr)
+    }
+}
+
+/// Attempts to execute a command natively in-process without invoking any fallback.
+///
+/// Returns `Some(code)` if the command was recognized and handled in-process, writing
+/// all output directly to `stdout` and `stderr`.
+/// Returns `None` if the command is unmigrated and requires fallback execution.
+pub fn run_in_process(
+    args: &[OsString],
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write,
+) -> Option<u8> {
+    run_native(args, stdout, stderr, false)
+}
+
+fn run_native(
+    args: &[OsString],
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write,
+    process_stdout: bool,
+) -> Option<u8> {
+    let peeked = peek_command(args);
+    let (format, normalized) = if is_output_command(&peeked) {
+        match output::extract_format(args) {
+            Ok(result) => result,
+            Err(err) => {
+                let _ = writeln!(stderr, "symbrain: {err}");
+                return Some(exit::USAGE);
+            }
+        }
+    } else {
+        (OutputFormat::Table, args.to_vec())
+    };
+
+    if normalized.is_empty() {
+        if write!(stdout, "{USAGE}").is_err() {
+            return Some(exit::GENERIC);
+        }
+        return Some(exit::USAGE);
+    }
+
+    let cmd = normalized[0].to_string_lossy();
+    let rest = &normalized[1..];
+
+    match cmd.as_ref() {
+        "help" | "--help" | "-h" => Some(write_usage(stdout)),
+        "version" => Some(run_version(rest, stdout, stderr, format)),
+        "config" => config_cli::run(rest, stdout, stderr),
+        "profile" => profile_cli::run(rest, stdout, stderr, format),
+        "audit" => Some(audit_cli::run(rest, stdout, stderr, format)),
+        "setup" if setup_cli::requires_go_fallback(rest) => None,
+        "setup" => Some(setup_cli::run(rest, stdout, stderr)),
+        "doctor" if doctor_cli::requires_go_fallback(rest) => None,
+        "doctor" => Some(doctor_cli::run(rest, stdout, stderr, format)),
+        "install" => Some(install_cli::run_install(rest, stdout, stderr)),
+        "uninstall" => Some(install_cli::run_uninstall(rest, stdout, stderr)),
+        "mcp" => Some(mcp_cli::run(rest, stderr)),
+        "serve" => Some(mcp_cli::run_serve(rest, stderr)),
+        "usage" if usage_cli::requires_go_fallback(rest) => None,
+        "usage" => Some(usage_cli::run(rest, stdout, stderr, format)),
+        "init" => Some(init_cli::run(rest, stdout, stderr)),
+        "harness" => harness_cli::run(rest, stdout, stderr, format),
+        "sync" if sync_cli::requires_go_fallback(rest) => None,
+        "sync" => Some(sync_cli::run(rest, stdout, stderr, format)),
+        "memory" if memory_cli::requires_go_fallback(rest) => None,
+        "memory" if process_stdout => Some(memory_cli::run_with_stdout(
+            rest, stdout, stderr, format, true,
+        )),
+        "memory" => Some(memory_cli::run(rest, stdout, stderr, format)),
+        "skills" => skills_cli::run(rest, stdout, stderr, format),
+        "activity" => Some(activity_cli::run(rest, stdout, stderr, format)),
+        "vault" => Some(vault_admin::run(args, stdout, stderr)),
+        "guard" => guard_cli::run(rest, stdout, stderr),
+        _ => {
+            let _ = writeln!(stderr, "symbrain: unknown command {cmd:?}\n");
+            let _ = write!(stderr, "{USAGE}");
+            Some(exit::USAGE)
+        }
+    }
+}
+
+/// Encodes JSON the way Go's `json.Encoder` does: compact output with `&`,
+/// `<` and `>` escaped, and no trailing newline.
+///
+/// Go renders every CLI report through `encoding/json`, so a report that must
+/// match its bytes has to escape those three characters too.
+pub(crate) fn go_json<T: serde::Serialize>(value: &T) -> String {
+    serde_json::to_string(value)
+        .unwrap_or_default()
+        .replace('&', "\\u0026")
+        .replace('<', "\\u003c")
+        .replace('>', "\\u003e")
+}
+
+fn is_output_command(cmd: &str) -> bool {
+    matches!(
+        cmd,
+        "version"
+            | "sync"
+            | "memory"
+            | "skills"
+            | "activity"
+            | "profile"
+            | "harness"
+            | "audit"
+            | "doctor"
+            | "usage"
+    )
+}
+
+fn peek_command(args: &[OsString]) -> std::borrow::Cow<'_, str> {
+    let mut skip_value = false;
+    for arg in args {
+        if skip_value {
+            skip_value = false;
+            continue;
+        }
+        let arg = arg.to_string_lossy();
+        match arg.as_ref() {
+            "--json" | "-json" => {}
+            "--output" | "-output" => {
+                skip_value = true;
+            }
+            value if value.starts_with("--output=") || value.starts_with("-output=") => {}
+            value if !value.starts_with('-') => return arg,
+            _ => {}
+        }
+    }
+    "".into()
+}
+
+fn write_usage(stdout: &mut dyn Write) -> u8 {
+    if write!(stdout, "{USAGE}").is_ok() {
+        exit::OK
+    } else {
+        exit::GENERIC
+    }
+}
+
+fn run_version(
+    args: &[OsString],
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write,
+    format: OutputFormat,
+) -> u8 {
+    let normalized = normalize_flags(args);
+    if let Some(first) = normalized.first() {
+        let first_str = first.to_string_lossy();
+        if first_str == "--" {
+            if normalized.len() > 1 {
+                let unexpected = args
+                    .get(1)
+                    .map_or_else(|| "".into(), |a| a.to_string_lossy());
+                let _ = writeln!(
+                    stderr,
+                    "symbrain version: unexpected argument {unexpected:?}"
+                );
+                return exit::USAGE;
+            }
+        } else if first_str == "-" {
+            let _ = writeln!(stderr, "symbrain version: unexpected argument \"-\"");
+            return exit::USAGE;
+        } else if first_str.starts_with('-') {
+            let trimmed = first_str.trim_start_matches('-');
+            let name = match trimmed.split_once('=') {
+                Some((k, _)) => k,
+                None => trimmed,
+            };
+            if name == "h" || name == "help" {
+                let _ = writeln!(stderr, "Usage of version:");
+                return exit::USAGE;
+            }
+            let _ = writeln!(stderr, "flag provided but not defined: -{name}");
+            let _ = writeln!(stderr, "Usage of version:");
+            return exit::USAGE;
+        } else {
+            let _ = writeln!(
+                stderr,
+                "symbrain version: unexpected argument {first_str:?}"
+            );
+            return exit::USAGE;
+        }
+    }
+
+    let version = option_env!("SYMBRAIN_VERSION").unwrap_or("dev");
+    let info = VersionInfo::new("symbrain", version);
+    if output::render(&mut *stdout, format, &info, |w| -> io::Result<()> {
+        writeln!(w, "symbrain {version}")?;
+        writeln!(w, "  rust    {}", rustc_version())?;
+        writeln!(
+            w,
+            "  os/arch {}/{}",
+            version::current_os(),
+            version::current_arch()
+        )
+    })
+    .is_err()
+    {
+        let _ = writeln!(stderr, "symbrain version: format output");
+        return exit::GENERIC;
+    }
+    exit::OK
+}
+
+#[cfg(unix)]
+fn exit_status_code(status: std::process::ExitStatus) -> u8 {
+    use std::os::unix::process::ExitStatusExt;
+    if let Some(code) = status.code() {
+        u8::try_from(code).unwrap_or(exit::GENERIC)
+    } else if let Some(sig) = status.signal() {
+        u8::try_from(128 + sig).unwrap_or(exit::GENERIC)
+    } else {
+        exit::GENERIC
+    }
+}
+
+#[cfg(not(unix))]
+fn exit_status_code(status: std::process::ExitStatus) -> u8 {
+    status
+        .code()
+        .and_then(|code| u8::try_from(code).ok())
+        .unwrap_or(exit::GENERIC)
+}
+
+fn run_go_fallback(args: &[OsString], stderr: &mut dyn Write) -> u8 {
+    let Some(binary) = go_fallback_binary() else {
+        let command = args
+            .first()
+            .map_or_else(|| "".into(), |arg| arg.to_string_lossy());
+        let _ = writeln!(
+            stderr,
+            "symbrain: command {command:?} is not ported yet and no Go fallback was found; set SYMBRAIN_GO_BINARY"
+        );
+        return exit::GENERIC;
+    };
+
+    let status = Command::new(&binary)
+        .args(args)
+        .stdin(Stdio::inherit())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
+        .status();
+    match status {
+        Ok(status) => exit_status_code(status),
+        Err(error) => {
+            let _ = writeln!(
+                stderr,
+                "symbrain: start Go fallback {}: {error}",
+                binary.display()
+            );
+            exit::GENERIC
+        }
+    }
+}
+
+fn go_fallback_binary() -> Option<PathBuf> {
+    if let Some(path) = env::var_os("SYMBRAIN_GO_BINARY") {
+        return Some(PathBuf::from(path));
+    }
+    path_lookup(OsStr::new("symbrain-go"))
+}
+
+fn path_lookup(binary: &OsStr) -> Option<PathBuf> {
+    env::var_os("PATH").and_then(|paths| {
+        env::split_paths(&paths)
+            .map(|dir| dir.join(binary))
+            .find(|candidate| candidate.is_file())
+    })
+}
+
+pub(crate) fn rustc_version() -> &'static str {
+    option_env!("RUSTC_VERSION").unwrap_or("rustc")
+}
+
+#[cfg(test)]
+#[path = "cli_tests.rs"]
+mod tests;

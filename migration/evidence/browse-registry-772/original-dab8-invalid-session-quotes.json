@@ -1,0 +1,98 @@
+{
+  "original_rust_head": "dab8bdac8055ee5ea6c17eb3a891df964eb01c21",
+  "go_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "observations": [
+    {
+      "binary": "/tmp/symaira-pr801-go-1.26.7",
+      "sha256": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8",
+      "observations": [
+        {
+          "session": "bad\u0000session",
+          "response": {
+            "success": false,
+            "error": {
+              "code": "invalid_session",
+              "message": "invalid session \"bad\\x00session\""
+            }
+          }
+        },
+        {
+          "session": "bad\u001bsession",
+          "response": {
+            "success": false,
+            "error": {
+              "code": "invalid_session",
+              "message": "invalid session \"bad\\x1bsession\""
+            }
+          }
+        },
+        {
+          "session": "bad\u0301session",
+          "response": {
+            "success": false,
+            "error": {
+              "code": "invalid_session",
+              "message": "invalid session \"bad\u0301session\""
+            }
+          }
+        },
+        {
+          "session": "bad\u00adsession",
+          "response": {
+            "success": false,
+            "error": {
+              "code": "invalid_session",
+              "message": "invalid session \"bad\\u00adsession\""
+            }
+          }
+        }
+      ]
+    },
+    {
+      "binary": "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+      "sha256": "a73deaecf99ec33a25cb58921eda2274d6480307750d8d95f0f4d739ed21555f",
+      "observations": [
+        {
+          "session": "bad\u0000session",
+          "response": {
+            "success": false,
+            "error": {
+              "code": "invalid_session",
+              "message": "invalid session \"bad\\0session\""
+            }
+          }
+        },
+        {
+          "session": "bad\u001bsession",
+          "response": {
+            "success": false,
+            "error": {
+              "code": "invalid_session",
+              "message": "invalid session \"bad\\u{1b}session\""
+            }
+          }
+        },
+        {
+          "session": "bad\u0301session",
+          "response": {
+            "success": false,
+            "error": {
+              "code": "invalid_session",
+              "message": "invalid session \"bad\\u{301}session\""
+            }
+          }
+        },
+        {
+          "session": "bad\u00adsession",
+          "response": {
+            "success": false,
+            "error": {
+              "code": "invalid_session",
+              "message": "invalid session \"bad\\u{ad}session\""
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

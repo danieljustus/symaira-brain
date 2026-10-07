@@ -1,0 +1,51 @@
+{
+  "status": "GENUINE_FAILED_B17_PRESERVED_BEFORE_DIAGNOSTIC_CHANGE",
+  "source": "b17b125f78099ddc0693b4fbfe93b6076d83ac95",
+  "files": [
+    {
+      "original": "/tmp/symaira-discovery-runtime-b17-nonport/validation.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-b17/validation.json",
+      "sha256": "c9c88a7dcf6a5e2036bb79cba920d57d745df62212e5f18d4041e9228eb2fbeb",
+      "bytes": 371112
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-b17-nonport/failure-attribution.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-b17/failure-attribution.json",
+      "sha256": "dcfd0cb4cd59581149f788b69edba123708f2548ebfbe1b83e037d2342a5a91e",
+      "bytes": 1190
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-b17-nonport/fmt.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-b17/fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-b17-nonport/strict.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-b17/strict.log",
+      "sha256": "d907028e9359a8d658f2d51a038ecfe56ee84fd6910c77802b603c0cc5b75661",
+      "bytes": 7109
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-b17-nonport/affected-original.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-b17/affected-original.log",
+      "sha256": "044dc1026ad53f2d20fc82dd12952189919cbcc61e8174a7eb3910cda8197f2c",
+      "bytes": 29267
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-b17-nonport/affected-all-targets.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-b17/affected-all-targets.log",
+      "sha256": "df3415c9a6e08a5092dbc5aea8d09475ae5064f3478029119c614df67e8a044e",
+      "bytes": 13315
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-b17-nonport-driver.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-failed-b17/driver.log",
+      "sha256": "74cf11e3af9e52260ac49d4ab10922bdf1771c7a59bd95659b749b12e4a2c9fc",
+      "bytes": 118
+    }
+  ],
+  "target_all_ELF_archive": "/tmp/symaira-discovery-runtime-b17-nonport/failed-executables",
+  "inventory_601_payloads_551_roundtrip": true,
+  "candidate_bound_roles": "Literal Cargo Running paths only; transferred historical target roles are not candidate execution."
+}

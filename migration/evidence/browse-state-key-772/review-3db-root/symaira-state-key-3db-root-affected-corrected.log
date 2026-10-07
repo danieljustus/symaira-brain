@@ -1,0 +1,57 @@
+    Finished `test` profile [unoptimized] target(s) in 0.13s
+     Running unittests src/main.rs (/workspace/symaira-daemon772-registry/target/debug/deps/symbrowse-dc337014870bffd2)
+
+running 22 tests
+test completion::tests::hidden_completion_matches_cobra_flag_candidates_and_order ... ok
+test completion::tests::no_description_protocol_drops_candidate_descriptions_only ... ok
+test completion::tests::hidden_completion_uses_only_the_implemented_command_tree ... ok
+test completion::tests::parser_exposes_only_supported_shell_generators_and_hidden_protocol ... ok
+test completion::tests::no_description_script_uses_cobra_no_desc_request_protocol ... ok
+test daemon_state::tests::session_selection_and_format_are_independent_of_flag_position ... ok
+test tests::browser_fetch_and_flow_commands_are_typed_dispatches ... ok
+test tests::a11y_routes_tags_selector_and_optional_url ... ok
+test tests::mcp_rejects_unknown_engine_like_go ... ok
+test tests::parses_batch_flags_and_commands ... ok
+test tests::parses_config_show ... ok
+test tests::parses_mcp_daemon_autostart_flags ... ok
+test tests::parses_version_flag_permutations ... ok
+test tests::preserves_version_errors ... ok
+test tests::unknown_public_commands_fail_instead_of_succeeding ... ok
+test tests::state_key_init_parser_and_output_match_go ... ok
+test tests::batch_mcp_list_profiles_matches_source_pinned_go_output ... ok
+test upgrade::tests::cache_write_rejects_user_symlink_parent ... ok
+test upgrade::tests::stable_versions_and_major_zero_guard_match_go ... ok
+test upgrade::tests::update_hint_does_not_recommend_unimplemented_apply ... ok
+test completion::tests::cobra_scripts_match_the_pinned_go_oracle_bytes ... ok
+test upgrade::tests::local_fake_release_is_fetched_then_reused_from_go_compatible_cache ... ok
+
+test result: ok. 22 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/flow_list.rs (/workspace/symaira-daemon772-registry/target/debug/deps/flow_list-d6e96093c5be1461)
+
+running 1 test
+test flow_list_preserves_go_json_envelope_for_empty_and_populated_discovery ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/help_oracle.rs (/workspace/symaira-daemon772-registry/target/debug/deps/help_oracle-de9b37a06e40131b)
+
+running 1 test
+test rust_help_and_completion_follow_the_go_source_tree ... FAILED
+
+failures:
+
+---- rust_help_and_completion_follow_the_go_source_tree stdout ----
+
+thread 'rust_help_and_completion_follow_the_go_source_tree' (2673159) panicked at crates/symbrowse-cli/tests/help_oracle.rs:99:5:
+Go oracle build failed: Go: Unknown option: build
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    rust_help_and_completion_follow_the_go_source_tree
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p symbrowse-cli --test help_oracle`

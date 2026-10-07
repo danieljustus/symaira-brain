@@ -13,15 +13,17 @@ mod activity_cli;
 mod audit_cli;
 mod cli_flags;
 mod config_cli;
+mod stdio_output;
 
-use cli_flags::has_go_owned_flag;
 pub use cli_flags::normalize_flags;
 mod doctor_cli;
+mod go_json_escape;
 pub mod guard_cli;
 mod harness_cli;
 mod health_probe;
 mod init_cli;
 mod install_cli;
+mod managed_home;
 mod mcp_cli;
 mod memory_cli;
 mod passthrough;
@@ -63,8 +65,8 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
 
 /// Runs the CLI on its actual process standard streams.
 ///
-/// Only native Memory Set completion uses this stdout identity to retain Go's
-/// Unix broken-pipe termination. Embedded writers keep ordinary errors.
+/// Native Setup writes and Memory Set completion use this stdout identity to
+/// retain Go's Unix broken-pipe termination. Embedded writers keep ordinary errors.
 #[must_use]
 pub fn run_stdio(args: &[OsString]) -> u8 {
     let mut stdout = io::stdout();
@@ -136,8 +138,12 @@ fn run_native(
         "profile" => profile_cli::run(rest, stdout, stderr, format),
         "audit" => Some(audit_cli::run(rest, stdout, stderr, format)),
         "setup" if setup_cli::requires_go_fallback(rest) => None,
+        "setup" if process_stdout => Some(setup_cli::run_with_stdout(rest, stdout, stderr, true)),
         "setup" => Some(setup_cli::run(rest, stdout, stderr)),
         "doctor" if doctor_cli::requires_go_fallback(rest) => None,
+        "doctor" if process_stdout => Some(doctor_cli::run_with_stdout(
+            rest, stdout, stderr, format, true,
+        )),
         "doctor" => Some(doctor_cli::run(rest, stdout, stderr, format)),
         "install" => Some(install_cli::run_install(rest, stdout, stderr)),
         "uninstall" => Some(install_cli::run_uninstall(rest, stdout, stderr)),

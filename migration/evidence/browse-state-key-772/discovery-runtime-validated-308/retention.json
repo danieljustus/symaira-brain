@@ -1,0 +1,454 @@
+{
+  "tested_source": "308f3049f83fdc26c5b81f843b0160644d8ca0c3",
+  "records": [
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/finalize.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/finalize.log.gz",
+      "sha256": "e07e070b0bcee326156795ad10928e4b36b0edc2fb46f2e5b4230532a6b6f2e0",
+      "gzip_sha256": "f9e1eae86a6f2b41c967ce072b25f95c47b10ae2279ab061373797b468059217",
+      "bytes": 362
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/cache-retirement.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/cache-retirement.log.gz",
+      "sha256": "2831a0083cf6a66ea066a8928af46cb3bc55a79231b997b0c37c6c5817aa2420",
+      "gzip_sha256": "874693b235a90a49c71dd52a22970830f27396b6ba546fc89385af5889aa4ccc",
+      "bytes": 206
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/finalize.py",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/finalize.py.gz",
+      "sha256": "c0204e31535d27ed6d612779da55bd8fd18bfec2d1d280a0bc4794afcdf67eb9",
+      "gzip_sha256": "e618b58ddf094b9482c70eb2f0975b0de123ce5b0b59af539d4b69ba5963481c",
+      "bytes": 7754
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/finalize-corrected.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/finalize-corrected.log.gz",
+      "sha256": "696594dde5ad20683871a657c2179f01ebde6c1b6897ce4049ab16a1e56d0067",
+      "gzip_sha256": "d4f0a4ec23ffd39467f8b52a3b48b73d5e64d8cd2b75e658df97f40190776ede",
+      "bytes": 2256
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/cache-retirement.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/cache-retirement.json.gz",
+      "sha256": "e59e35062cd50ef3765001d83556171112b0170a60bfed32e2518f22f8753ed5",
+      "gzip_sha256": "136cd30924ea0eaac2cc6cb6a9886c86873c0ac1cf779c2b93f77d269b368106",
+      "bytes": 41553
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/frozen-go-source.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/frozen-go-source.json.gz",
+      "sha256": "374c1a604f6d2c74d4610e3a8e5c23caa11d7fc3d09d6388a0f287e78262f430",
+      "gzip_sha256": "e5495c7db88d9a3712ac08f66faef01f001550d53deb510e3eb1138296975403",
+      "bytes": 135207
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/summary.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/summary.json.gz",
+      "sha256": "696594dde5ad20683871a657c2179f01ebde6c1b6897ce4049ab16a1e56d0067",
+      "gzip_sha256": "d4f0a4ec23ffd39467f8b52a3b48b73d5e64d8cd2b75e658df97f40190776ede",
+      "bytes": 2256
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/proof-map.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/proof-map.json.gz",
+      "sha256": "0519420a139b099982012d144cb300e6bab2423cc3b100fc20042b34118c34b7",
+      "gzip_sha256": "e314bf56e8694efbf08e47488bf6c2f12412bdba365cc7588367a67f7b0b0855",
+      "bytes": 5653
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/preparation.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/preparation.json.gz",
+      "sha256": "56c58bda7a2a296fd440f04e9fc7b18e146879093828b97754e0311dfe2c6c19",
+      "gzip_sha256": "5cb83ad673328ae36b9c18394514dea105fdb4dcfcf95506149bbb839c164e9e",
+      "bytes": 714
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/port-receipt.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/port-receipt.json.gz",
+      "sha256": "03904ab719ebf1bdf34c5f56236d3cb5845b84cddc272d41db712380ac14e06b",
+      "gzip_sha256": "f801e86fd8a80d3d6938cfeca259df63f78121db10e9237c8dfd355dc3be10c4",
+      "bytes": 336
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/retire-cache.py",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/retire-cache.py.gz",
+      "sha256": "74e380279974bc4cefe17eb0e6069654148f8cc7b3d2c8132145e17b2d55b108",
+      "gzip_sha256": "23ecf012facb5176d13bf6086df0b0049ead0cda3e072ac70e488ae492df8a8c",
+      "bytes": 3071
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/go-cache-manifest.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/go-cache-manifest.json.gz",
+      "sha256": "1403d78771637f0e720e2d9229ecd9e56988313db923406f0dfc53e4e2a3d613",
+      "gzip_sha256": "f13404f865622152f542ec7a74a37a977dcb3606484893ff6b21095d92d01077",
+      "bytes": 1199556
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/run-port.sh",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/run-port.sh.gz",
+      "sha256": "eaaac3cfefa1ef375dfcd81cadc2ef6fdbc72f905f7cda4e73c61284752ad156",
+      "gzip_sha256": "c1e4f12ef8333bb2a3bc00a844a51d6f7c01cfa47355b448cd2c23219485ffbe",
+      "bytes": 1746
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/driver.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/driver.log.gz",
+      "sha256": "b51a3f7bc87ec7647369327ca8c6983b61874321d18a53c0072822d664351f8e",
+      "gzip_sha256": "99f038b3de75ddf3c63ac4860431a7b24ff164b15bb8fcced6d7e91773778627",
+      "bytes": 215
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/registry.raw.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/registry.raw.json.gz",
+      "sha256": "66209cac4c04a6d81428e628fcc047a1de92a4326d3e90f4ace8506697692860",
+      "gzip_sha256": "6a81b7e8bb35b4e0e5500643c43c9fde49e2a6ae6914042a415e637d57a92c4f",
+      "bytes": 550227
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/mcp.json.tests.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/mcp.json.tests.log.gz",
+      "sha256": "f8da3ad53faf752577fbc2c0024744f24d0bd092d0a2fd54b9057f8d9ab3be00",
+      "gzip_sha256": "ba1f0856e04b30d13a8a0aef8e1623756fb399b555b199b6ea90d1b982e39ccb",
+      "bytes": 38161
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/build-original-provider.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/build-original-provider.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 0
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/process.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/process.log.gz",
+      "sha256": "bc05628be3eaeb347ddff73fbf2d1462a22dc0921a0ee8816656e5b257383c1c",
+      "gzip_sha256": "05bd8cd23f5288302af7803d8da5f4bd8f8ee695fbaddafcd9c8de4a934d0a2a",
+      "bytes": 70
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/registry.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/registry.log.gz",
+      "sha256": "4fb2cb1baf8936dc49552c1d2aa21bf447d9378bef03c7f6085566b241cc8695",
+      "gzip_sha256": "d7592761cf69210e0393954463b373b5e3fee055a1ad08fbea2e93d4c623c4dd",
+      "bytes": 183
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/process.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/process.json.gz",
+      "sha256": "67b50f6193ba069f3c38381f7ee619a72f3f038681475f08f51b7d179c431afd",
+      "gzip_sha256": "1cfdec14cb711bee826946d48a89cea8f8fd7c3d6144b6350458fb42882f0d2f",
+      "bytes": 191475
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/mcp.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/mcp.json.gz",
+      "sha256": "3c72bc94360b740ea097853b594603aef938a29e1b5ea214b820f018035e3bba",
+      "gzip_sha256": "452e915c34a4ce83ec5a8aa733eb67262cb1de890d5ea10192875048ab169479",
+      "bytes": 146104
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/ownership.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/ownership.json.gz",
+      "sha256": "191961410f2dacaa70fb82011680e5cfe2f77892ccab61cf500df36fdbfa518f",
+      "gzip_sha256": "3b75b665e4acf8ee55071c3cf20a34bc80789aebabde1bc92c114217c20988ab",
+      "bytes": 47321
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/mcp.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/mcp.log.gz",
+      "sha256": "5df69082fee5d7f320a2f97da92fb463fbef95eeab35aff1aa68dd13446f22b4",
+      "gzip_sha256": "d36bd9758ebb8afc7dc883a0968ed429152f26dfbe309239ff673f9e048bb6f4",
+      "bytes": 55
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/ownership.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/ownership.log.gz",
+      "sha256": "673f0864b56ea48cc0be4b4bf15bb3d3b8d05af7c535a0a4381a65a6c4f115d2",
+      "gzip_sha256": "20c6f67b3a8496a6dc45bef851f5a44d11767a1795222e0f9b514d010b4dc2ff",
+      "bytes": 340
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/discovery.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/discovery.json.gz",
+      "sha256": "be6f77f1402df87cf6eda7853be64a7fb76ba1e73b38ef176d97a594d4c739fc",
+      "gzip_sha256": "1d6467f55837a4e63bb083ffa1969628ae0efbba287f36d0a62d496c5216ac31",
+      "bytes": 312320
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/key.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/key.json.gz",
+      "sha256": "4e9d38b608c62461154f896257dd39c717768aae243e274a9fd9707dccf1bf51",
+      "gzip_sha256": "f3a5a6d2d5b27a73548b2a794678fbaf5435b1b6f58764f0474d44a1b6ccb38a",
+      "bytes": 405183
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/discovery.raw.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/discovery.raw.json.gz",
+      "sha256": "c165181512390972b897bf3c1f34950f4fb0e25ac7d4a30c22df3b1b8f38e5c3",
+      "gzip_sha256": "7ac27bb706b5f6ae4d0128f5e335802e30f748520cd0b8283ee0a06a24b75564",
+      "bytes": 368895
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/registry.progress.jsonl",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/registry.progress.jsonl.gz",
+      "sha256": "0ab918ab0fda6b63e79785fe2cb070990ef79c6636f4c299e72a727370a7d99b",
+      "gzip_sha256": "ae759841aaddb178dc4bc2e75c2701355c3ba6e73098a92486d5ba35ceb74137",
+      "bytes": 592800
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/key.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/key.log.gz",
+      "sha256": "530a0ce4de8f0538b2d5dbbecac81db91b790f076639c92b99d9990942b4d859",
+      "gzip_sha256": "aa673b6fda9ae35aba557f56484239f3789894e21e13d5ba69774bdcb1984ed5",
+      "bytes": 1101
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/retained-provider.go",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/retained-provider.go.gz",
+      "sha256": "743e0dea17126b89565c35878609e3c0f52abc9da9a881b7ab83ffe2e924117b",
+      "gzip_sha256": "670d42a5b9f22d76cc2b14034327d62eb46b332389de9f2d38df00bab317c8c5",
+      "bytes": 748
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/validation.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/validation.json.gz",
+      "sha256": "db02773fd4d58520eddc517df8bf6b40d6b2b80b617fa31ba1f07834a8acc6a5",
+      "gzip_sha256": "6efa1f91e10af1a8d0a32d46c2c996290ca0231cb06f2c9175885b36a98e4fb2",
+      "bytes": 34613
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/retained-provider",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/retained-provider.gz",
+      "sha256": "fc1b14931fd72583f36d6e1fab31374e29b87b8026f0a400704262339e1ad7b4",
+      "gzip_sha256": "727934e78f31cb63c6dcf702812f240ff09dee532ef2b5eedcc640cfd74bcb6e",
+      "bytes": 2824715
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/key.raw.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/key.raw.json.gz",
+      "sha256": "fc5542f4b82861d7bf024dd12d25eac91fba4b1b1249c0d4d863471a9ad0bb71",
+      "gzip_sha256": "e55847c0304b4b84f4aaa3c9aa44e28ac39321313e99f35a8b84678561ab9b1d",
+      "bytes": 299654
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/registry.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/registry.json.gz",
+      "sha256": "64eac7365fdd3d5702f200064d8bc3808ed6fc16c519e94e768a51039034e56a",
+      "gzip_sha256": "38ff1f00c6010c22548d034a9a3500086bfebc205fc7c4d4f8a5885efd4e190d",
+      "bytes": 693433
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/full/discovery.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/full/discovery.log.gz",
+      "sha256": "01abc87731a005077485588f91d0e3387521f59e8a1ea58f1d1b19e362f8dcc4",
+      "gzip_sha256": "b8e373d91ce40838dc0c52c68e5b2ee692e6e1f9093cc9be0922e2441a6c7b6c",
+      "bytes": 185
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/failed-first-finalizer/receipt.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/failed-first-finalizer/receipt.json.gz",
+      "sha256": "669d4ba6f6e0520451e038f77afb9a75210793e7c61ff221aec06f041c6f309e",
+      "gzip_sha256": "d438ac4d68c7d56a400c45617e5308a70ea714c692a9d2cae174b23686795494",
+      "bytes": 1235
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/failed-first-finalizer/finalize.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/failed-first-finalizer/finalize.log.gz",
+      "sha256": "e07e070b0bcee326156795ad10928e4b36b0edc2fb46f2e5b4230532a6b6f2e0",
+      "gzip_sha256": "f9e1eae86a6f2b41c967ce072b25f95c47b10ae2279ab061373797b468059217",
+      "bytes": 362
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/failed-first-finalizer/finalize.py",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/failed-first-finalizer/finalize.py.gz",
+      "sha256": "9c1ea6225d2ea8e9829b9b03f0fa2301de5ac49d5a3b07597118eb3cc7448218",
+      "gzip_sha256": "44e2ee9f032b0e3b2e966ce4c99d962af24c7ddcf97f874935ea03d0022e5313",
+      "bytes": 6808
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/config/go/telemetry/local/go@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/config/go/telemetry/local/go@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count.gz",
+      "sha256": "7b18e13f2fdb8f2e5bb231132946d6e7f34be1c31f91c15b8e46edbdd7614511",
+      "gzip_sha256": "36a0a83652c4e139feb8af1535c3e6be127fd4e255c8a94a53c356a2c280d057",
+      "bytes": 16384
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/config/go/telemetry/local/vet@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/config/go/telemetry/local/vet@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count.gz",
+      "sha256": "8b1797a2e68cc622f649fa68ea76335a236055e015ccaadde491471cb9bdd5dc",
+      "gzip_sha256": "e3f962766e768c5a38339054dc790dc7a909b17a351d28655670b4283987ed5d",
+      "bytes": 16384
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/config/go/telemetry/local/link@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/config/go/telemetry/local/link@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count.gz",
+      "sha256": "89e772ce274faf9addc1559d1476848325e1a987b47096af92b37a9d8e7eb963",
+      "gzip_sha256": "3e713948372e438ab5d7b21940db9140636a4ba71b8501f572424b254d616090",
+      "bytes": 16384
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/config/go/telemetry/local/compile@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/config/go/telemetry/local/compile@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count.gz",
+      "sha256": "c9a59580b2caa5670ece73cddfbacb177f7b0c87d6edccf43b56b3d2eeaac694",
+      "gzip_sha256": "fb090cabd8fa24981289f7920f79950f7a35c465f845a9a43548433a3e18fda6",
+      "bytes": 16384
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/config/go/telemetry/local/upload.token",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/config/go/telemetry/local/upload.token.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 0
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/config/go/telemetry/local/weekends",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/config/go/telemetry/local/weekends.gz",
+      "sha256": "1121cfccd5913f0a63fec40a6ffd44ea64f9dc135c66634ba001d10bcf4302a2",
+      "gzip_sha256": "a5a24e8b98066cd161debcc43e5b51f09159244be697b458445683cfe59a7c92",
+      "bytes": 2
+    },
+    {
+      "original": "/workspace/symaira-discovery772-port-owned-308/config/go/telemetry/local/asm@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/port/config/go/telemetry/local/asm@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count.gz",
+      "sha256": "0962955bc8346f16a7d326c60000a77972b039370b8169766d4afd4867b8c550",
+      "gzip_sha256": "6e7d5e58582d624a4c23b2b2fd358b47c14bbad46c54af9ed93cea09f7fd2901",
+      "bytes": 16384
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport/portable.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/portable.log.gz",
+      "sha256": "ba7ccc824660f99f10c5378a4598ede6de9cccb44d4230bf847998033f779998",
+      "gzip_sha256": "f49bc54877511330d4d1e1e29801486f11cc60d2986930508b94d0919457ab6a",
+      "bytes": 104
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport/test_registry_progress.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/test_registry_progress.log.gz",
+      "sha256": "485f6e85fc4fda602971012ce6862d752ca18aae4a5575ce544961ea27ea3a86",
+      "gzip_sha256": "b7b88ec7dc8120200aba2e4594e83abc15ef54526186d681d7be87188f8c4528",
+      "bytes": 103
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport/test_windows_pipe.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/test_windows_pipe.log.gz",
+      "sha256": "75ff54e727b57e4bd7b88956ed0c92c4b9a416e6f0976707e8fb54aa385ac0bd",
+      "gzip_sha256": "6a71ac2ec35156e12dd0313e17ab1fd3a4fa5dbcc0a3cfad0633d3d5ac61d007",
+      "bytes": 106
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport/matrix.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/matrix.log.gz",
+      "sha256": "f5bfa3059aad5fdddb33c5356c9bfa859a33d90f12f51ff8393cf106c56421b4",
+      "gzip_sha256": "2c98c42e1497e68dd9753169cb3f9b3bc4c22789b2c9d3ae7368e19260d73f07",
+      "bytes": 58
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport/actionlint.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/actionlint.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport/darwin-static.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/darwin-static.log.gz",
+      "sha256": "51741433d129a898f48fb5c0ecfe69ba14176f467a6c22b043c4289ed7e7e101",
+      "gzip_sha256": "d96f1769afe98e79d334ce2bd287f6d53651b6149f811c1302b31c419ca431f9",
+      "bytes": 3205
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport/windows-static.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/windows-static.log.gz",
+      "sha256": "0d6d721f2bf3fd896d71c91863525201341702a6adc992279d16e3649538d34b",
+      "gzip_sha256": "b3942b9d6398fd6b0222b933e17c889fd6ca7c295234c3519a6b68dc80fcc0d8",
+      "bytes": 173
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport/build-probes.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/build-probes.log.gz",
+      "sha256": "d3aaa6ab1e226012a06b27e1b5ef67ca0e38336a28aba52582ea1cbc1e1990e6",
+      "gzip_sha256": "98e12e306c1c3f80d3b2249b18518c60e25fc0af36a0b4829c0a9902861734f8",
+      "bytes": 173
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport/build-cli.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/build-cli.log.gz",
+      "sha256": "4b395c9c76c7f7fb5221d30df7320c7a2387ff3842c426dbee6a59a54b5cffab",
+      "gzip_sha256": "8135007ed9012844706878be7460c9a04ae3dd97316db2c0a6f69b7c288b580d",
+      "bytes": 60
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport/mcp-lib.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/mcp-lib.log.gz",
+      "sha256": "a2cdfeb38c40aeeb025751ccf55b4739e600a1e8b3e016ade3941811c66938fb",
+      "gzip_sha256": "3cbe090dce45d9d99f0ca4ae9a2a180e5ef0b93989d23b836f6c85ed9f4cfe24",
+      "bytes": 1951
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport/affected-all-targets.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/affected-all-targets.log.gz",
+      "sha256": "31524caf84c6ffc5c10f33c499b69273d924f09c18cb9b0a2facccc6510e8b84",
+      "gzip_sha256": "dbd4314631784381437fe46e6f1b3e612ac13c78eb629b0e51d08b03d383630a",
+      "bytes": 23452
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport/affected-original.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/affected-original.log.gz",
+      "sha256": "9adda43ee55dfffd2bc2f31e83646d3b413d7051b03bcb6bc442a97b98bf7542",
+      "gzip_sha256": "2c2a262c734b81841561350e065c7f5ca69c83bccfe9fab5b3bc0b0e19852bd8",
+      "bytes": 23916
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport/strict.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/strict.log.gz",
+      "sha256": "2a8386115cc5274688a2e59ca72e5f8f2c1e849bfccdba6f781ad7a31351e1ad",
+      "gzip_sha256": "9fcb56f51e6b2ff5aecc7a7a5d52bbd8a8810594e0e1fdc4aa2b50316f179bad",
+      "bytes": 627
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport/fmt.log",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/fmt.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport/validation.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/validation.json.gz",
+      "sha256": "29cb18cb59189d517cacbfd069f80cd0d8b1749fc497950eebf96db92e87264b",
+      "gzip_sha256": "c0cfdbbd7b592ba3a4f54c19e5be9f36e7b3696f4119809d1cae9ffa8a0f8712",
+      "bytes": 36063
+    },
+    {
+      "original": "/tmp/symaira-discovery-runtime-308-nonport-handoff.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/symaira-discovery-runtime-308-nonport-handoff.json.gz",
+      "sha256": "516554ad35a242070c6208d3e7fc5fad14a814fe9668f2905cdc042ccd4001b4",
+      "gzip_sha256": "103c8f3a3f9c220416f16aa403c3943dba911a7869ce54b9b1bf362b5eec378e",
+      "bytes": 41819
+    },
+    {
+      "original": "/workspace/review-proof/discovery772-308-port-allocation.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/discovery772-308-port-allocation.json.gz",
+      "sha256": "0fdb2946476b08e438b9e6c7441ebe8e177069f72cbfa813b0dc6255076720e2",
+      "gzip_sha256": "f16dc3856d15f9fd4debc198f1cc07a7ec5e86500c65cf0e159e9b4dd6a281f0",
+      "bytes": 1636
+    },
+    {
+      "original": "/workspace/symaira-discovery772-cross-cache-retirement.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/nonport/symaira-discovery772-cross-cache-retirement.json.gz",
+      "sha256": "5774d723ef55860d1b6d1f49ffeaf9169e9c079a69d0d191512229dda7cc679d",
+      "gzip_sha256": "168439bdddb24029068c76c7a73391bf7dad79c621dd37609c3d16eca31cc472",
+      "bytes": 410107
+    },
+    {
+      "original": "/workspace/oracles/symaira-discovery772-308-current-binaries/receipt.json",
+      "retained": "migration/evidence/browse-state-key-772/discovery-runtime-validated-308/current-binaries-receipt.json.gz",
+      "sha256": "f4fec567e2ead405e7738e8045deacb9e3d8cbf06b94227cf00f44d3a819cc61",
+      "gzip_sha256": "08ae8b6fb5fc6f1076ab993584fccbd434e6b18b53515629d4877e17acf10429",
+      "bytes": 459456
+    }
+  ],
+  "all_roundtrips_verified": true
+}
