@@ -1238,8 +1238,8 @@ jobs:
 
   # Init is a production Rust path; run the genuine Go comparison on each OS.
   rust-init-native:
-    # Windows already took ~18 min before #806; the grown workspace now exceeds 20.
-    timeout-minutes: 40
+    # Windows workspace tests took 26-38 min on recent main pushes and hit 40 on PR #809.
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
