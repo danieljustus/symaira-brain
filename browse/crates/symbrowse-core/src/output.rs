@@ -155,9 +155,7 @@ fn write_yaml_error(output: &mut String, error: Option<&ErrorPayload>) -> Result
     let code = serde_json::to_value(error.code).map_err(RenderError::Json)?;
     write_yaml_field(output, "code", &code, 4);
     write_yaml_field(output, "message", &Value::String(error.message.clone()), 4);
-    if !error.hint.is_empty() {
-        write_yaml_field(output, "hint", &Value::String(error.hint.clone()), 4);
-    }
+    write_yaml_field(output, "hint", &Value::String(error.hint.clone()), 4);
     write_yaml_field(
         output,
         "details",
@@ -287,12 +285,18 @@ fn yaml_string(value: &str) -> String {
         return format!("'{}'", value.replace('\'', "''"));
     }
     if needs_yaml_quotes(value) {
+        if (value.contains('"') || value.contains(": ")) && !value.contains(['\n', '\r', '\t']) {
+            return format!("'{}'", value.replace('\'', "''"));
+        }
         return serde_json::to_string(value).expect("string serialization cannot fail");
     }
     value.to_owned()
 }
 
 fn needs_yaml_quotes(value: &str) -> bool {
+    if time::OffsetDateTime::parse(value, &time::format_description::well_known::Rfc3339).is_ok() {
+        return true;
+    }
     if value.is_empty() || value.contains(['\n', '\r', '\t']) || value.contains(": ") {
         return true;
     }

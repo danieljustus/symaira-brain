@@ -12,10 +12,10 @@ name = "symbrain"
 path = "src/main.rs"
 
 [dependencies]
+symguard-cli.workspace = true
 chrono.workspace = true
 serde.workspace = true
 serde_json.workspace = true
-serde_yaml_ng.workspace = true
 rusqlite.workspace = true
 signal-hook.workspace = true
 symbrain-audit.workspace = true
@@ -24,7 +24,6 @@ symbrain-adapter.workspace = true
 symbrain-broker.workspace = true
 symbrain-core.workspace = true
 symbrain-gateway.workspace = true
-symbrain-guard-core.workspace = true
 symbrain-harness.workspace = true
 symbrain-instructions.workspace = true
 symbrain-managed.workspace = true
@@ -36,11 +35,12 @@ symbrain-skills.workspace = true
 symbrain-usage.workspace = true
 ureq.workspace = true
 toml_edit.workspace = true
+tempfile.workspace = true
 
 [dev-dependencies]
+symbrain-guard-core.workspace = true
 regex.workspace = true
 sha2.workspace = true
-tempfile.workspace = true
 
 [lints.rust]
 unsafe_code = "deny"
@@ -48,3 +48,7 @@ unsafe_code = "deny"
 [lints.clippy]
 all = { level = "deny", priority = -1 }
 pedantic = { level = "deny", priority = -1 }
+
+[target."cfg(windows)".dependencies]
+process-wrap = { version = "=10.0.1", default-features = false, features = ["std", "job-object"] }
+same-file = "=1.0.6"

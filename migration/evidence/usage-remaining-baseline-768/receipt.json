@@ -1,0 +1,85 @@
+{
+  "reviewed_head": "eea73b7478e62f1bb174d456bbbecccc1de94034",
+  "reviewed_source": "8803847278546f3161eaaa84d2e65bc2eec594a2",
+  "normal_main": "e3dbda6cbb95429237d15a9b176209b7d107792c",
+  "predicate_source_sha256": {
+    "rust/symbrain-usage/src/provider_config/routing.rs": "232643e3e86175308a62759aac4bddd24cb85f0cd25898b563b0a5d47e807774",
+    "rust/symbrain-usage/src/provider_config/files.rs": "c2a8b0556d59ecfa1bca067684e3b081d4790cc8ad83f70e5649d30ed6728595",
+    "rust/symbrain-usage/src/provider_config/claude_file.rs": "c34aa5dff0bf260fa9d480686abe466b7b67c2260ee989ae76e569a0c548c66c",
+    "rust/symbrain-usage/src/provider_config/copilot_file.rs": "685111def77ebe6cac5624ceae762b6f4b8ba7d06972be4c4bdad0c0ba0006a2",
+    "rust/symbrain-usage/src/provider_config/kimi_nous.rs": "0dacbd6b4da5976b9e894ba6358e2c5656eb14ff27c7038eda177991804887ae",
+    "rust/symbrain-usage/src/provider_config/hermes.rs": "ba071c4c0b41bc33757ff3b4b62c671b9c305934cce5dce016de701fd85941af",
+    "rust/symbrain-usage/src/provider_config/jwt.rs": "75c39e8593b649d085c656e92cfd08654143c146252cffffc1c32dd4d84922c6",
+    "rust/symbrain-usage/src/provider_config/keychain.rs": "7faa01420807d05b5d057b38e94c75b05fd62d10940bec882348e3dba3d77612",
+    "rust/symbrain-usage/src/provider_requests.rs": "700af0f6be0bccbd97ecf0addbdc19a38d10f7f36d544755bf2b19d75d4f0ca9",
+    "rust/symbrain-usage/src/provider_opencode_workspace.rs": "2f8d47ff8bec9b414ea104c3e459a82f9e20c3293aa455ff007abfbaa88f11b4",
+    "rust/symbrain-usage/src/provider_identity.rs": "4d2a320bc2689bf0a1d31fbd737bebac3a7dcb6d511aab11dfcd4d0012a9b043",
+    "rust/symbrain-usage/src/transport.rs": "30ef2ca4b90f3f568a8d98a68cffa511514742f58082522cd00e28e63234bc98",
+    "rust/symbrain-cli/src/usage_cli.rs": "46d3184450ecc4bc8d7f1f7c9600766acdb6d35197eb61c10cdf50d81a6a38d1",
+    "rust/symbrain-cli/src/lib.rs": "decf6229c8fd9295893c456ca15dc8ab20ab79390988de051591bc80f21aa9ca"
+  },
+  "artifacts": [
+    {
+      "original": "/tmp/symaira-usage768-remaining-current-gates.json",
+      "retained": "symaira-usage768-remaining-current-gates.json",
+      "sha256": "25a852320aff1a1b974c48dd090ccae3a413b99d4572786928f82bc2c59d8bf1",
+      "bytes": 130681
+    },
+    {
+      "original": "/tmp/symaira-usage768-remaining-current-gates.log",
+      "retained": "symaira-usage768-remaining-current-gates.log",
+      "sha256": "ec56839d90597f757fa96e472e5ccec3e630994d61344d036b418a6d16439ac1",
+      "bytes": 94
+    },
+    {
+      "original": "/tmp/symaira-usage768-remaining-current-gates.py",
+      "retained": "symaira-usage768-remaining-current-gates.py",
+      "sha256": "1c4624b85bb6e2993ab3612cdcde4414053543c0e2078dd48575bc0e9c4461a1",
+      "bytes": 7344
+    },
+    {
+      "original": "/tmp/symaira-usage768-remaining-device-go-receipt.json",
+      "retained": "symaira-usage768-remaining-device-go-receipt.json",
+      "sha256": "4cfc17a4c532596bb8ae7197088a9ba9ec60c676d08471f1a699a300cf87cfe0",
+      "bytes": 6891
+    },
+    {
+      "original": "/tmp/symaira-usage768-remaining-device-go-test.log",
+      "retained": "symaira-usage768-remaining-device-go-test.log",
+      "sha256": "f0a475f0634a351ac3e0fda04645a479fcf564ea3fee94443312636729b783ad",
+      "bytes": 65
+    },
+    {
+      "original": "/tmp/symaira-usage768-remaining-device-go.json",
+      "retained": "symaira-usage768-remaining-device-go.json",
+      "sha256": "40ea3985bb32bcaf8f6b498943a18b3fa174d2cfbe2f9e52cfbc766dda68a7ee",
+      "bytes": 706741
+    },
+    {
+      "original": "/tmp/symaira-usage768-remaining-device-input.json",
+      "retained": "symaira-usage768-remaining-device-input.json",
+      "sha256": "db267d96dbdc63ee0170a7cb95f24bb49176343ce5e06b31d191f5526891d850",
+      "bytes": 270902
+    },
+    {
+      "original": "/tmp/symaira-usage768-remaining-go-run.log",
+      "retained": "symaira-usage768-remaining-go-run.log",
+      "sha256": "3f672ac81c51e57302b56db431c37de0975551bb86d58c3c588d7fdf0df75491",
+      "bytes": 113
+    },
+    {
+      "original": "/tmp/symaira-usage768-remaining-go-run.py",
+      "retained": "symaira-usage768-remaining-go-run.py",
+      "sha256": "eb5c7948252c0ca86ca8594993334d6c2a60fca9a74aea7113bdd13ac60ba562",
+      "bytes": 2875
+    }
+  ],
+  "go_full_value_cases": 39,
+  "current_gate_cases": 59,
+  "current_requires_go": 44,
+  "current_native": 15,
+  "original_source_target_unchanged": true,
+  "rust_cargo_builds": 0,
+  "positive_native_acceptance": false,
+  "scope": "Readonly inventory and proposed positive family only; actual immutable copied executables, full frozenGo custom-canned constructor/report/request/state baseline, owned privateGo worktree. No operator credentials, paid/public provider network, target execution or edits, Github writes, gate weakening or full768 closure."
+}

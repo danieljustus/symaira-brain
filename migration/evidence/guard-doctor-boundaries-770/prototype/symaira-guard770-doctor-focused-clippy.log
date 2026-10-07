@@ -1,0 +1,20 @@
+    Checking symbrain-core v0.12.1 (/workspace/symaira-guard770-doctor-boundaries/rust/symbrain-core)
+   Compiling symguard-cli v0.12.1 (/workspace/symaira-guard770-doctor-boundaries/rust/symguard-cli)
+    Checking symbrain-guard-core v0.12.1 (/workspace/symaira-guard770-doctor-boundaries/rust/symbrain-guard-core)
+    Checking symbrain-audit v0.12.1 (/workspace/symaira-guard770-doctor-boundaries/rust/symbrain-audit)
+error: items after a test module
+   --> rust/symbrain-guard-core/src/go_json.rs:104:1
+    |
+104 | mod tests {
+    | ^^^^^^^^^
+...
+153 | pub fn repair_go_json_strings(input: &[u8]) -> String {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#items_after_test_module
+    = note: `-D clippy::items-after-test-module` implied by `-D clippy::all`
+    = help: to override `-D clippy::all` add `#[allow(clippy::items_after_test_module)]`
+    = help: move the items to before the test module was defined
+
+error: could not compile `symbrain-guard-core` (lib test) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

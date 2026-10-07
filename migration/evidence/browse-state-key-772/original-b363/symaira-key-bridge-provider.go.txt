@@ -1,0 +1,3 @@
+package main
+import("encoding/json";"fmt";"os";"path/filepath";"strconv";"strings";"time")
+func main(){name:=strings.TrimSuffix(filepath.Base(os.Args[0]),".exe"); mode:=os.Getenv("SYMBROWSE_KEY_PROBE_MODE");f,err:=os.OpenFile(os.Getenv("SYMBROWSE_KEY_PROBE_LEDGER"),os.O_APPEND|os.O_CREATE|os.O_WRONLY,0600);if err!=nil{panic(err)};_ = json.NewEncoder(f).Encode(map[string]any{"name":name,"pid":os.Getpid(),"arguments":os.Args[1:]});_ = f.Close();if name=="security"{os.Exit(44)};switch mode{case "ab","cd":fmt.Println(`{"value":"`+strings.Repeat(mode,32)+`"}`);case "invalid":fmt.Println("not-a-key");case "empty":fmt.Print("");case "timeout":time.Sleep(30*time.Second);default:code,err:=strconv.Atoi(mode);if err!=nil{panic(err)};os.Exit(code)}}

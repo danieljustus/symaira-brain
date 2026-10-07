@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/deletes.py", line 83, in <module>
+    args=parser.parse_args(); execute(args.go.resolve(),args.rust.resolve(),args.report)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/deletes.py", line 70, in execute
+    fts=writes.audit_fts(path)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/writes.py", line 68, in audit_fts
+    db.execute("INSERT INTO memories_fts(memories_fts,rank) VALUES('integrity-check',1)")
+sqlite3.DatabaseError: fts5: checksum mismatch for table "memories_fts"

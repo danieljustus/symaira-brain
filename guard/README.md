@@ -267,8 +267,18 @@ Not a chat frontend, not a SIEM, not a cloud-only SaaS, not a VPN replacement, n
 
 ## Install
 
-The standalone `symguard` binary is retired (ADR 0001, D6). Its command set is
-absorbed into `symbrain`:
+The released Go command set is available through `symbrain guard`. A scoped
+Rust standalone `symguard` is now buildable from source for #770
+([decision](../docs/adr/0011-standalone-rust-guard.md)); remaining doctor/audit
+diagnostic contracts and native acceptance are still pending. It shares the
+Guard-owned implementation with Brain, and has no legacy fallback.
+
+```sh
+cargo build --locked -p symguard-cli
+target/debug/symguard help
+```
+
+For the released integrated entrypoint:
 
 ```bash
 # Install symbrain (see the repository root README)

@@ -1,5 +1,6 @@
 //! Bounded managed-version probes with Go-compatible Windows path resolution.
 use crate::ManagedError;
+use crate::process_status;
 use std::fs;
 use std::path::Path;
 #[cfg(any(windows, test))]
@@ -7,8 +8,6 @@ use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::thread;
 use std::time::{Duration, Instant};
-#[path = "process_status.rs"]
-mod process_status;
 const VERSION_PROBE_TIMEOUT: Duration = Duration::from_secs(3);
 
 /// Probes `<binary> version --json`, returning an empty string when absent.
@@ -18,9 +17,10 @@ const VERSION_PROBE_TIMEOUT: Duration = Duration::from_secs(3);
 /// or emits malformed JSON.
 pub fn installed_version(bin_dir: &Path, binary_name: &str) -> Result<String, ManagedError> {
     let path = bin_dir.join(binary_name);
-    if fs::metadata(&path).is_err_and(|error| error.kind() == std::io::ErrorKind::NotFound) {
-        return Ok(String::new());
-    }
+    let stat_error = match fs::metadata(&path) {
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(String::new()),
+        result => result.err(),
+    };
 
     #[cfg(windows)]
     let path =
@@ -45,10 +45,17 @@ pub fn installed_version(bin_dir: &Path, binary_name: &str) -> Result<String, Ma
         .stderr(Stdio::null());
     configure_probe_process(&mut command);
     let mut child = command.spawn().map_err(|error| {
-        ManagedError::Context(format!(
-            "probe {binary_name}: fork/exec {}: {}",
-            path.display(),
-            crate::provenance::go_io_error(&error)
+        // Go reports execve's errno. macOS 15 posix_spawn (used by std on
+        // Apple) reports ENOENT for a non-directory path component where
+        // execve and stat report ENOTDIR, so prefer the stat path error.
+        let error = match stat_error {
+            Some(stat_error) if error.kind() == std::io::ErrorKind::NotFound => stat_error,
+            _ => error,
+        };
+        ManagedError::RawContext(crate::GoText::path(
+            &format!("probe {binary_name}: fork/exec "),
+            &path,
+            &format!(": {}", crate::provenance::go_io_error(&error)),
         ))
     })?;
     let process_group = child.id();
@@ -180,6 +187,17 @@ fn windows_probe_path(path: &Path, raw_extensions: Option<&str>) -> Option<PathB
 #[cfg(test)]
 mod tests {
     use super::windows_probe_path;
+
+    #[cfg(unix)]
+    #[test]
+    fn file_bin_dir_reports_execve_not_a_directory() {
+        let root = tempfile::tempdir().expect("fixture root");
+        let bin = root.path().join("bin");
+        std::fs::write(&bin, b"owned obstruction").expect("obstruction");
+        let error = super::installed_version(&bin, "symvault").expect_err("probe fails");
+        assert!(error.to_string().ends_with(": not a directory"), "{error}");
+    }
+
     #[test]
     fn extensionless_pe_is_not_executed_without_a_pathext_candidate() {
         let root = tempfile::tempdir().expect("fixture root");

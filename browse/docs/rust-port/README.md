@@ -62,6 +62,8 @@ binary cutover therefore does not automatically authorize deleting all Go.
 
 ## Migration rule
 
+Daemon acceptance additionally retains raw unit/lifecycle/race logs and direct process comparisons with integrated Go `dcddcef0`. This supplements the pinned historical oracle; it does not mark pending native gates complete.
+
 Port vertical slices behind language-neutral fixtures. Each slice runs both
 binaries with identical argv, stdin, cwd, environment, HOME/XDG roots, locale,
 timezone, clock/seed controls and fixture servers. Compare exit code, stdout,

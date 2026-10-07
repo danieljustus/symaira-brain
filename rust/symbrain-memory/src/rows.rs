@@ -4,12 +4,11 @@ use rusqlite::Row;
 use crate::Memory;
 
 pub(crate) fn row_memory(row: &Row<'_>) -> rusqlite::Result<Memory> {
-    let metadata: String = row.get(3)?;
     Ok(Memory {
         id: row.get(0)?,
         content: row.get(1)?,
         scope: row.get(2)?,
-        metadata: serde_json::from_str(&metadata).unwrap_or_default(),
+        metadata: json(row, 3)?,
         created_at: parse_time(&row.get::<_, String>(4)?)?,
         updated_at: parse_time(&row.get::<_, String>(5)?)?,
         created_by: row.get(6)?,
@@ -23,6 +22,20 @@ pub(crate) fn row_memory(row: &Row<'_>) -> rusqlite::Result<Memory> {
 
 pub(crate) fn row_memory_score(row: &Row<'_>) -> rusqlite::Result<(Memory, f32)> {
     Ok((row_memory(row)?, 1.0))
+}
+
+/// Stored decode errors are data errors, never successful empty defaults.
+pub(crate) fn json<T: serde::de::DeserializeOwned>(
+    row: &Row<'_>,
+    index: usize,
+) -> rusqlite::Result<T> {
+    serde_json::from_str(&row.get::<_, String>(index)?).map_err(|error| {
+        rusqlite::Error::FromSqlConversionFailure(
+            index,
+            rusqlite::types::Type::Text,
+            Box::new(error),
+        )
+    })
 }
 
 fn parse_time(raw: &str) -> rusqlite::Result<DateTime<Utc>> {

@@ -1,0 +1,672 @@
+{
+  "original_review_head": "4d78b6e52c53d1c273126b0dac3c554915a15438",
+  "original_source": "fb2844b02b7c03b7c34650c6d3aed693c47b2997",
+  "review_files": 92,
+  "extra_original_receipts": 2,
+  "records": [
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-actionlint-final.log",
+      "retained": "symaira-guard770-warnings-independent-actionlint-final.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-actionlint-first-path-failure.log",
+      "retained": "symaira-guard770-warnings-independent-actionlint-first-path-failure.log.gz",
+      "sha256": "6a90e98f064ae3b027784d2e3ad7ff84b8191d9aed63581565d6fdc8769c1377",
+      "bytes": 50,
+      "gzip_sha256": "e08891efbb266fd99e5473422908ba725029692fdef665708adfb0d4120267c1"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-actionlint.log",
+      "retained": "symaira-guard770-warnings-independent-actionlint.log.gz",
+      "sha256": "6a90e98f064ae3b027784d2e3ad7ff84b8191d9aed63581565d6fdc8769c1377",
+      "bytes": 50,
+      "gzip_sha256": "e08891efbb266fd99e5473422908ba725029692fdef665708adfb0d4120267c1"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-brain-extra-heredoc-first.json",
+      "retained": "symaira-guard770-warnings-independent-brain-extra-heredoc-first.json.gz",
+      "sha256": "62d45f9309b9c238caef5ed208528e71ade5e4b456a9ba84801f1bd671f9a365",
+      "bytes": 3561,
+      "gzip_sha256": "825f6031b1040d60b81de153452ae5c8287368ee3d76ad87a4c70e8b833be6bb"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-brain-extra.json",
+      "retained": "symaira-guard770-warnings-independent-brain-extra.json.gz",
+      "sha256": "1a4a60113338bcb3b5df8e6cb0a9cc048c20c4fe26a5dc6002ceefaa95a38651",
+      "bytes": 3648,
+      "gzip_sha256": "491ed4c8796fa3ffea6d81bce037edb052fa2cf646dfdc05da13236ddbad0376"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-brain-extra.log",
+      "retained": "symaira-guard770-warnings-independent-brain-extra.log.gz",
+      "sha256": "037539d4066dd026093abf85a923e1af5a29cf1120f854cd4784600da0eee2d4",
+      "bytes": 139,
+      "gzip_sha256": "2b1b278e42e89c3526e915631f5e847a34dede801d04c1027aa4dd537b1b80e6"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-brain-extra.py",
+      "retained": "symaira-guard770-warnings-independent-brain-extra.py.gz",
+      "sha256": "381694fac624f7ca38d6caa1784389d96fd2831374f8b02c356fa07c39294119",
+      "bytes": 2458,
+      "gzip_sha256": "f70cc69ca06b5c9fc4ebf0b4a781e554a74bd972318367816eac31c4b1cfa45d"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-clippy.log",
+      "retained": "symaira-guard770-warnings-independent-clippy.log.gz",
+      "sha256": "1094a36867300c1838cdc4ee40efe961d83bac574665f8ee57a40d5b1e88698c",
+      "bytes": 60,
+      "gzip_sha256": "23cf5f567b9510b9af06d267231f641a66db3d57349f7971ea5dad96ac877bee"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-closure-audit-filesystem.json",
+      "retained": "symaira-guard770-warnings-independent-closure-audit-filesystem.json.gz",
+      "sha256": "10f4a0fe1d675fdd7c314d29bcda9c2d955954cc44e3af8437e8fea1375ac028",
+      "bytes": 12407,
+      "gzip_sha256": "f29e54b99d7332815e358aa4a840463c72c08d0deddc6575b973fe862921c9d4"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-closure-audit-filesystem.log",
+      "retained": "symaira-guard770-warnings-independent-closure-audit-filesystem.log.gz",
+      "sha256": "e0270fd81cdc038299e9fa18a4535c7e52cece725549fe19ec414edbb604e2a7",
+      "bytes": 206,
+      "gzip_sha256": "94771a24810c2be8b349ba0933adac62461a1becbd9417cb8a8532e10294cf21"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-closure-audit-filesystem.py",
+      "retained": "symaira-guard770-warnings-independent-closure-audit-filesystem.py.gz",
+      "sha256": "ce25977907a0749c8a4490c1ed2280e49557bd8756fe4f6f8b7eb79b68c0573b",
+      "bytes": 2971,
+      "gzip_sha256": "fafdcfd565b6470f20a314a5e418d367b531a4ef12d11640c5f9420cf7c7a0f8"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-closure-extra.json",
+      "retained": "symaira-guard770-warnings-independent-closure-extra.json.gz",
+      "sha256": "35d3b778bc12a02e4b34451587f31c743a1a46994d23fdaaffeec2edc51ed3aa",
+      "bytes": 184461,
+      "gzip_sha256": "0969891452d8221cfb08c298390e87da64e6ad8892460e0ac98d5a5a342ee987"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-closure-extra.log",
+      "retained": "symaira-guard770-warnings-independent-closure-extra.log.gz",
+      "sha256": "4bbc4d896cdc3ae3a900f0c778e5d118048176c747d51ea218c520fd5486ff90",
+      "bytes": 419,
+      "gzip_sha256": "347d2a93c3967cb0f771605992bc716fd67cc6b00772bf5e87cceee3ed1f7234"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-closure-extra.py",
+      "retained": "symaira-guard770-warnings-independent-closure-extra.py.gz",
+      "sha256": "6daeae964d02472e41fb3885f330da7c1dcc34e310a479072d1a3f46137af503",
+      "bytes": 4489,
+      "gzip_sha256": "767fff9eea51e95c1880b1f96dcc410470cd54898c4418e830ac5a6fd859388e"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-closure-raw-paths-unicode.json",
+      "retained": "symaira-guard770-warnings-independent-closure-raw-paths-unicode.json.gz",
+      "sha256": "576097bfbfbf396620e005963e8448223871c0ea103ac2b8ac930773236714ce",
+      "bytes": 17658,
+      "gzip_sha256": "3170b1b6d0ac64f781b920a7c276a92876835f0bbb81781d2c7471f9c990fca5"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-closure-raw-paths-unicode.log",
+      "retained": "symaira-guard770-warnings-independent-closure-raw-paths-unicode.log.gz",
+      "sha256": "9044ceeb696197924c7e4a2d1a93c2821c7f87eb2c830432ead2aa4da565e53b",
+      "bytes": 3551,
+      "gzip_sha256": "e177ec9183cd0e8bc64bee01214eb50923fc7a4592a3ed7a8bee7f4e5ef7d62e"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-closure-raw-paths-unicode.py",
+      "retained": "symaira-guard770-warnings-independent-closure-raw-paths-unicode.py.gz",
+      "sha256": "ce8bf21a944ff9e1a298a32c387bdae9c618169e13afc92907f546a9faa89f1e",
+      "bytes": 2496,
+      "gzip_sha256": "421872f2a40ab2bbf9becc2459fcb881d620a95608e60c99ab06dcc11b59f34c"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-closure-raw-paths.json",
+      "retained": "symaira-guard770-warnings-independent-closure-raw-paths.json.gz",
+      "sha256": "ecb7883959aa01e44f3d3318c56f8d763526c26acb3c94f99619e93fcb341779",
+      "bytes": 17746,
+      "gzip_sha256": "15fead3741b7149149a25b939df3256f9013a0cf306e682788ddd4b75a8fa2c1"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-closure-raw-paths.log",
+      "retained": "symaira-guard770-warnings-independent-closure-raw-paths.log.gz",
+      "sha256": "43717172d76b940366dc7245920cd7647309a7eda09f1004bfd2303a5bf8087b",
+      "bytes": 3531,
+      "gzip_sha256": "f093dfa07c4843ee7b7b5e6d407f104f64eda31167810f8cd0a127f6e1397116"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-closure-raw-paths.py",
+      "retained": "symaira-guard770-warnings-independent-closure-raw-paths.py.gz",
+      "sha256": "ebe1a32419cefabf0ddc11ba450b60b0db6f0ee7a58bab310027f9c64421886f",
+      "bytes": 2480,
+      "gzip_sha256": "244e470f48d8c7ece409f90954de9fb8bf3d7562f3c6558ffd8ecbec8679771d"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-config_warnings.json",
+      "retained": "symaira-guard770-warnings-independent-config_warnings.json.gz",
+      "sha256": "4901f009ccddecaa93966dbfb8d643df09c4b592a6259c97d1be7a2ea7070d81",
+      "bytes": 412474,
+      "gzip_sha256": "7669ca5d599d5890508e5c2c03135cece29d08555100b1e6fbb507aa0927a43e"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-config_warnings.log",
+      "retained": "symaira-guard770-warnings-independent-config_warnings.log.gz",
+      "sha256": "54c87dffb9647f0b4a219c378201191637ea71fd4512cb82f9a5d2596e980525",
+      "bytes": 96,
+      "gzip_sha256": "94fef3e1cd31d29efa397185e13b1b9f983b3adc66af2da308aefdf29d967de7"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-controls.json",
+      "retained": "symaira-guard770-warnings-independent-controls.json.gz",
+      "sha256": "1d4d9beebf10e1431bec6634482b15c9472df6894719e13f09bc05cf716d5bfc",
+      "bytes": 12170,
+      "gzip_sha256": "6952b695bb6fcdca60c3a2508c8704c0400651eb85be91082fd5601e049fc492"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-controls.log",
+      "retained": "symaira-guard770-warnings-independent-controls.log.gz",
+      "sha256": "44b3b57283d005d52bddd62d5a9c7f2ab76ece3db966b20f11426c42fb937a17",
+      "bytes": 45,
+      "gzip_sha256": "30959473942876b93f2573d53fb8b71a5fa2d3d8fc6bd2e49bfa46e1181973ac"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-current124.json",
+      "retained": "symaira-guard770-warnings-independent-current124.json.gz",
+      "sha256": "b26b126ac7223a83fe9297e81b1629b8f58d167643ec5b0b94edb71f867843a2",
+      "bytes": 665589,
+      "gzip_sha256": "c730edf035a71c218737e42415afe3ed2e3b362cfb30dc2b462d80db0c01d8e2"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-current124.log",
+      "retained": "symaira-guard770-warnings-independent-current124.log.gz",
+      "sha256": "32bcf98fde9a57bea9ce22062733e6c748c1cfd2b38c386a19c04ce3a84d699f",
+      "bytes": 146,
+      "gzip_sha256": "10b0e62929b6b2ef642baf9008d1737be923d39ad07945882c7f24e1a917ea21"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-doctor_boundaries.json",
+      "retained": "symaira-guard770-warnings-independent-doctor_boundaries.json.gz",
+      "sha256": "cd9f88ccf252b41407da80f6676122535ea47317a8583a2a5aa8b91d163b4bc7",
+      "bytes": 418980,
+      "gzip_sha256": "b0d347e14a96b867a727e2ccce9e92153b064c3fcaf507ed8c73b16735a56a6a"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-doctor_boundaries.log",
+      "retained": "symaira-guard770-warnings-independent-doctor_boundaries.log.gz",
+      "sha256": "4689e5127e49446d423430f6428796500a06adcfdc3f721cf0eca8e61dfb42de",
+      "bytes": 80,
+      "gzip_sha256": "2e52056a33afc9f4c1c6e2e99bd30ecc11c1b4be62811918c47e56f945af4be0"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-finalize-final.log",
+      "retained": "symaira-guard770-warnings-independent-finalize-final.log.gz",
+      "sha256": "3bce11ddcd85a446e52f7abffd86f71a4d58cb02503d72de5c1869c356bb00ad",
+      "bytes": 308,
+      "gzip_sha256": "201ff914a8def15fd55a79d97b9fbda602396424dda7db2bf76af93562d3a419"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-finalize-first-doc-boundary.log",
+      "retained": "symaira-guard770-warnings-independent-finalize-first-doc-boundary.log.gz",
+      "sha256": "773e751a794470ed66c850d9c259e4054ea18222397cfa89c286b8965d6fb63d",
+      "bytes": 447,
+      "gzip_sha256": "28db73788c34150448744af223e508cd1b2a9302324589d27cd43bf868fa642d"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-finalize-first-doc-boundary.py",
+      "retained": "symaira-guard770-warnings-independent-finalize-first-doc-boundary.py.gz",
+      "sha256": "9bca08d1957ac84fd256e6ebf0bee196154b1efb25886fb8ecc0f93c119c9a24",
+      "bytes": 4765,
+      "gzip_sha256": "cfafcfeabd3e96a6d25e9341526cd0a1caa72c717375b14ef74b5afb9277d5ea"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-finalize.log",
+      "retained": "symaira-guard770-warnings-independent-finalize.log.gz",
+      "sha256": "773e751a794470ed66c850d9c259e4054ea18222397cfa89c286b8965d6fb63d",
+      "bytes": 447,
+      "gzip_sha256": "28db73788c34150448744af223e508cd1b2a9302324589d27cd43bf868fa642d"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-finalize.py",
+      "retained": "symaira-guard770-warnings-independent-finalize.py.gz",
+      "sha256": "605637bdf34e093e89a6a972af895d0af8a857391eb93f86ea408be2f55c2fbb",
+      "bytes": 4830,
+      "gzip_sha256": "12b08afbe736d48577d4dd159c4a923debd02bb656b71f9ad66e81c0ef092a86"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-fmt.log",
+      "retained": "symaira-guard770-warnings-independent-fmt.log.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic.json",
+      "retained": "symaira-guard770-warnings-independent-fresh-owner-semantic.json.gz",
+      "sha256": "f3306749eef5ed26414e4b822502d6c20291432ddf826f21b5593651529c583e",
+      "bytes": 37638,
+      "gzip_sha256": "b076928eb2fe1ae0e3faab06b14d7d69dadc32ba93ef991419199d7094e7f82f"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic.log",
+      "retained": "symaira-guard770-warnings-independent-fresh-owner-semantic.log.gz",
+      "sha256": "acae9f78d65ce13dcae9e8a0c7f599c365a3e7d23b478f4ba98a6ae38eafa1e5",
+      "bytes": 1128,
+      "gzip_sha256": "2e72d95d551cb32d9a437bb4d05f6c1bfa24e795d2be67d2738521fa2c40eacd"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic.py",
+      "retained": "symaira-guard770-warnings-independent-fresh-owner-semantic.py.gz",
+      "sha256": "72d048bee1dbb49bd57b1315521046fac26651e03473f2e022cd4df5fe609f89",
+      "bytes": 3379,
+      "gzip_sha256": "9570dfa075ae2309a4e90e92ad4cb63528e8a5a403bd43ed4d77105633a505c0"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-fresh-owner.json",
+      "retained": "symaira-guard770-warnings-independent-fresh-owner.json.gz",
+      "sha256": "a5a892e0b8b406646dc7c5605eaa852bbba22e37466207096f589d4f968b48f5",
+      "bytes": 34140,
+      "gzip_sha256": "6f490b386fe5d3ce258c898afb878a94faac6dcc9bdecd327d0dba103e716ce5"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-fresh-owner.log",
+      "retained": "symaira-guard770-warnings-independent-fresh-owner.log.gz",
+      "sha256": "acae9f78d65ce13dcae9e8a0c7f599c365a3e7d23b478f4ba98a6ae38eafa1e5",
+      "bytes": 1128,
+      "gzip_sha256": "2e72d95d551cb32d9a437bb4d05f6c1bfa24e795d2be67d2738521fa2c40eacd"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-fresh-owner.py",
+      "retained": "symaira-guard770-warnings-independent-fresh-owner.py.gz",
+      "sha256": "bb8c82d2e05cbea3b5af70408a6e70b2e7fa21e3b50a97b5729364faf7cff707",
+      "bytes": 3279,
+      "gzip_sha256": "e6ca69461e90cd305be7516431b7d067db078399b3f7b7cd6579d8b38cd73e49"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-full-config-warnings.json",
+      "retained": "symaira-guard770-warnings-independent-full-config-warnings.json.gz",
+      "sha256": "9e2fedd64df7b07474df44dbf241ba30d06fbbc865307ba690e6662efaa8e81d",
+      "bytes": 412474,
+      "gzip_sha256": "7086711364e810cc7df089949b72f84984440921d33595a786a37a46ca0bb4eb"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-full-controls.json",
+      "retained": "symaira-guard770-warnings-independent-full-controls.json.gz",
+      "sha256": "31b111489c0e78662bb0cc4c3e48a307a1fbb8e8be9eb4e0c6ce5d7263f76b38",
+      "bytes": 12170,
+      "gzip_sha256": "1f09fcd24537151126317ac155204d8a0e310b3003c66dbc65ae99f4db7e6114"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-full-doctor-boundaries.json",
+      "retained": "symaira-guard770-warnings-independent-full-doctor-boundaries.json.gz",
+      "sha256": "b7173469415808899374f3ae45d867315f1a800de0853646099bc7eaf033a45d",
+      "bytes": 418984,
+      "gzip_sha256": "c419210502125305f0a6eacd33af2ab25cf50c639b41d1f33bfa377a20784c08"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-full-raw-paths.json",
+      "retained": "symaira-guard770-warnings-independent-full-raw-paths.json.gz",
+      "sha256": "d8325802ac4a30be537e7a0bc0d3edc17f5b2179ff87d32d21c6912738d56dc7",
+      "bytes": 209090,
+      "gzip_sha256": "0bb2c8827fe723bcd243d5730fc5c3581430063eb44e98fce277719a93a1701a"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-full.json",
+      "retained": "symaira-guard770-warnings-independent-full.json.gz",
+      "sha256": "0b85e8cd928c7f3f774e870df56b8941dd890cb47c692dfd42940b4d9bdfddcb",
+      "bytes": 665585,
+      "gzip_sha256": "d3664c051281b56fe793cab4e9af47809348460e7e20a7e26b8dfd3d83ddfa28"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-full.log",
+      "retained": "symaira-guard770-warnings-independent-full.log.gz",
+      "sha256": "fa5d62735b92136b59330534adaae99580f4d552079fa8e23f934527041fcf25",
+      "bytes": 488,
+      "gzip_sha256": "36497a58945050db885dddacc4fe7e8f41365b3c998328cf92a1718aea65feb0"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-go-buildinfo.log",
+      "retained": "symaira-guard770-warnings-independent-go-buildinfo.log.gz",
+      "sha256": "f252d5f4975c9a40b01ff71523ad1e2c7be38346c1ed3c32e89a47eb280d9879",
+      "bytes": 717,
+      "gzip_sha256": "6879f051d4399d7aff8ddf84ce2fc1b8cdee78878aa03cbbb38114653da4977e"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-kernel-clippy.log",
+      "retained": "symaira-guard770-warnings-independent-kernel-clippy.log.gz",
+      "sha256": "63bd8a3ac13f8b1c160887cdaf9b30715b07e638d60df463cb8815f661518191",
+      "bytes": 60,
+      "gzip_sha256": "1dcc42af5af0aad69da60ba23273028feaabf4f6043775e22ce6e0564fcf1d42"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-kernel-tests.log",
+      "retained": "symaira-guard770-warnings-independent-kernel-tests.log.gz",
+      "sha256": "c3ca1424b4dbd3f8dafd9e3444bb9c45a64f4950323fcd979d5ac075d2d3ed81",
+      "bytes": 4558,
+      "gzip_sha256": "9f2daaad7bd5f10fde7f77517be747dede7df4e8d9e87f00990ab3403364b42d"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-novel-classification.json",
+      "retained": "symaira-guard770-warnings-independent-novel-classification.json.gz",
+      "sha256": "5f16c3dee51ded08709dc4e566df8538d00e82b16c9ae7b51e0ccd1059fb3568",
+      "bytes": 442,
+      "gzip_sha256": "59b501049da34c057c6b4c18fd075478a5996b8ac13b2a79d8b54a14626a40bc"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-novel.json",
+      "retained": "symaira-guard770-warnings-independent-novel.json.gz",
+      "sha256": "5a2abc505e641b7266ef5620548aaef8ee413b1516e38298c52aaf2b46e515cf",
+      "bytes": 213572,
+      "gzip_sha256": "c0d30b240b01303b1258a4dd90822389e3ab4da393dc77608cef59521cd8e7a1"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-novel.log",
+      "retained": "symaira-guard770-warnings-independent-novel.log.gz",
+      "sha256": "effe959384f5be7f58223273462d2191b3de52c4c087b44ef676b67e194795f2",
+      "bytes": 944,
+      "gzip_sha256": "0710b27259fc05a850c070072e6e3eeb81b6c705e3980afeeff9c26bc6aef949"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-novel.py",
+      "retained": "symaira-guard770-warnings-independent-novel.py.gz",
+      "sha256": "f45bc1034834ab862d2df018cee5e82fab41f9f3883b18e08b40eb43536000d5",
+      "bytes": 2761,
+      "gzip_sha256": "9451b10f1cb713ea029b7f166e4abdd47bc201fa6dec4dfc1bd351eef3f5ae27"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-original80.json",
+      "retained": "symaira-guard770-warnings-independent-original80.json.gz",
+      "sha256": "527b91047e1a91a4615e22db853bbf972e28365d8e868bad343432c07cfaa7f8",
+      "bytes": 419253,
+      "gzip_sha256": "440ecba77daaed53fd5574c3eaefbdf54b2b85e7c7914db6e6d2326acb741b28"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-original94.json",
+      "retained": "symaira-guard770-warnings-independent-original94.json.gz",
+      "sha256": "2c6db3614b9463ee816364bbf49f120af1bd21d79e7c0dd40999c8e53122a6ae",
+      "bytes": 488332,
+      "gzip_sha256": "62ea1b7e91b0b779e614fb9169727e1c355e0d67f8c8a7808c38b6a820d0edcf"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-owner-semantic.json",
+      "retained": "symaira-guard770-warnings-independent-owner-semantic.json.gz",
+      "sha256": "f9778fe15031f6c68122168aa59aae3c1daca07e11b9149191c76606a057e2a8",
+      "bytes": 37263,
+      "gzip_sha256": "a0abdc9597bbc02585e08e07c82fb652db7df81b080f9db2ee301ec4e6b2effd"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-owner-semantic.log",
+      "retained": "symaira-guard770-warnings-independent-owner-semantic.log.gz",
+      "sha256": "acae9f78d65ce13dcae9e8a0c7f599c365a3e7d23b478f4ba98a6ae38eafa1e5",
+      "bytes": 1128,
+      "gzip_sha256": "2e72d95d551cb32d9a437bb4d05f6c1bfa24e795d2be67d2738521fa2c40eacd"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-owner-semantic.py",
+      "retained": "symaira-guard770-warnings-independent-owner-semantic.py.gz",
+      "sha256": "f213b5415e7bdf9fb4eb417b4fb86a2593efa58f49b2d09907c6b22267da5e3a",
+      "bytes": 3364,
+      "gzip_sha256": "95c8b1b44575416cda58ae6cac2e2c949971c819e5d8d772985ec66874e0f2eb"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-owner-state-manifest-final.json",
+      "retained": "symaira-guard770-warnings-independent-owner-state-manifest-final.json.gz",
+      "sha256": "58fcf5381eac72be3f3f1d7d6d9f165f5e1420bc8f8991ed2f3fdcdb8d5f9890",
+      "bytes": 49439,
+      "gzip_sha256": "48c26888f655f95899c7a975c4aa58d52ba5756d585aca5f13ba1d7c33acf36f"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-owner-state-manifest.json",
+      "retained": "symaira-guard770-warnings-independent-owner-state-manifest.json.gz",
+      "sha256": "92a2a9dfddf88a09d583bc1dbfafe212915d62a963de2e28f944e6f3360401cf",
+      "bytes": 32787,
+      "gzip_sha256": "d2dc92b2cc0474b61cc28a2107e043f2a4bf9462e0f6cf19975eb5236337559b"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-owner.json",
+      "retained": "symaira-guard770-warnings-independent-owner.json.gz",
+      "sha256": "2c904b05bec1e0335d3960469fb88c0407c11e6024110999749ee1fad1c5cf98",
+      "bytes": 33837,
+      "gzip_sha256": "53769c8ba22ca7cb550d33062869514a99ca1cfe4326663617457f8701399f96"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-owner.log",
+      "retained": "symaira-guard770-warnings-independent-owner.log.gz",
+      "sha256": "acae9f78d65ce13dcae9e8a0c7f599c365a3e7d23b478f4ba98a6ae38eafa1e5",
+      "bytes": 1128,
+      "gzip_sha256": "2e72d95d551cb32d9a437bb4d05f6c1bfa24e795d2be67d2738521fa2c40eacd"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-owner.py",
+      "retained": "symaira-guard770-warnings-independent-owner.py.gz",
+      "sha256": "5c4268cfe0c99b89657665b9579f937e5c2be0582a09ad915845ae14c7c02171",
+      "bytes": 3264,
+      "gzip_sha256": "3700ba884d268ea005d373a2fc5d12851a2a602b6c3cd4653a10e3f38df22bd8"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-parent-known-owner.json",
+      "retained": "symaira-guard770-warnings-independent-parent-known-owner.json.gz",
+      "sha256": "736dab8f8e85bf9c6eabbb12770fdb09b78cdde4f679690a235d5eb96833abe4",
+      "bytes": 31384,
+      "gzip_sha256": "d2710d668bfae62c33b87c4da098a3a5a2a0382a88215b382b42d677e0608252"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-parent-known-owner.log",
+      "retained": "symaira-guard770-warnings-independent-parent-known-owner.log.gz",
+      "sha256": "c6f54a8d7d0c2b299f3a83c6b107d3d7984b8ed8924e319c9b2a9a5860fa1e27",
+      "bytes": 257,
+      "gzip_sha256": "d26e3a681fffd0dd30f38cd50f16234344f5696c574a97e3e72986032f2f4f28"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-parent-known-owner.py",
+      "retained": "symaira-guard770-warnings-independent-parent-known-owner.py.gz",
+      "sha256": "872048a7d3471f785e3e7a5420ba0cf214f4a44a122f64e5a812c1a47bf86a12",
+      "bytes": 3361,
+      "gzip_sha256": "06e2652c5d5615bb1997dbafd8436bd3dda12df0ab395e9ae6161d6be7319360"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-parent-mixed35.json",
+      "retained": "symaira-guard770-warnings-independent-parent-mixed35.json.gz",
+      "sha256": "ece5aed61549f097b46773c9a5e8fab927971635666395510a56eddad0fd2de8",
+      "bytes": 115062,
+      "gzip_sha256": "0897878caf2dfff45e75bab4f3bafdfe1d3fc8351ed43de4ec30b8c6b7717db5"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-parent-mixed35.log",
+      "retained": "symaira-guard770-warnings-independent-parent-mixed35.log.gz",
+      "sha256": "9d5a04d1f3cc0efcd3d22a18b752601c90d6f2660b26bc6659434f14eec87c60",
+      "bytes": 90,
+      "gzip_sha256": "cf09622d69970b00e94b235ef3ddc8a69b719adbd3672364aceb8c47722fb74a"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-parent-mixed35.py",
+      "retained": "symaira-guard770-warnings-independent-parent-mixed35.py.gz",
+      "sha256": "8dc4f36ad69db26bea441df558ba3fb5edb6b3aefe54a86f4cfd21f128c3da90",
+      "bytes": 1565,
+      "gzip_sha256": "b9c89a89a35e1fc0efe9ce43717b6b7486b9e40a0648bae6aa07cb2e4d19ba59"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-parent-new32.json",
+      "retained": "symaira-guard770-warnings-independent-parent-new32.json.gz",
+      "sha256": "d9b61bdea124f0542fa6fbb39c60cec3dc34fdce26eaed54064abd6bbcfc23b8",
+      "bytes": 187691,
+      "gzip_sha256": "965f355f330178e7d9c501f8eabb347e255c1d0f728da32853116b1ca215e65a"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-parent-new32.log",
+      "retained": "symaira-guard770-warnings-independent-parent-new32.log.gz",
+      "sha256": "a3cadc56c357f3db221ef5cd2bd78306a727181a7a631c42be0fbe69c65edce8",
+      "bytes": 32,
+      "gzip_sha256": "7c3a887222415d062b1fc3d0161875038b6877785ca0b90618d3022893120790"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-parent-new32.py",
+      "retained": "symaira-guard770-warnings-independent-parent-new32.py.gz",
+      "sha256": "be24051054286780df650b7f844e16ca9460de6eb8fe8cf929c01dfbcc6631be",
+      "bytes": 4520,
+      "gzip_sha256": "c59450e728658f58d61aa7a09b83e8fcfacbc6be97c968a508c306d2cca0f18f"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-parent-owner.json",
+      "retained": "symaira-guard770-warnings-independent-parent-owner.json.gz",
+      "sha256": "ad6cfbc44c51480dc7401b0549fd37ee2f2ce4fe8ef4deb8e4b08dee612221e0",
+      "bytes": 24004,
+      "gzip_sha256": "f1792bd0b06a5f2e49e97c3f8e38a647949a6a866d547e595603913a783ad417"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-parent-owner.log",
+      "retained": "symaira-guard770-warnings-independent-parent-owner.log.gz",
+      "sha256": "1db12b4574b091e1ff6596d0e6d439828c1f285531b181fb9a8cbf109a8af681",
+      "bytes": 1117,
+      "gzip_sha256": "6c6ad68e7014cac5848541eb8af2d0a3cd663ab83b299ae189a84c4140bd9685"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-parent-owner.py",
+      "retained": "symaira-guard770-warnings-independent-parent-owner.py.gz",
+      "sha256": "614b80e8adb952f8d94cd3d183c4ab17211212ce9d7dd73577aa7b78db9f2657",
+      "bytes": 3275,
+      "gzip_sha256": "1bcaf277f5a27f721e84f9360b3322b3d3e57b809539a239f625aa585fc2b18c"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-parent-proof-verification.json",
+      "retained": "symaira-guard770-warnings-independent-parent-proof-verification.json.gz",
+      "sha256": "52b90874d56caa57302741fc487e4174b335cf79e5d514095fe88d77934067d5",
+      "bytes": 220,
+      "gzip_sha256": "a8c3e6ea957db6a53b92814328db7ea9ddc4d42f5d6f8aafb91690cc2cddff62"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-parent-symguard",
+      "retained": "symaira-guard770-warnings-independent-parent-symguard.gz",
+      "sha256": "a39c1c425b9ea7aad75f12ddf9297c6a7dd5afb55171380b19408d387c6d70a9",
+      "bytes": 4888360,
+      "gzip_sha256": "3933a4353660a9e86b1a8e09df312a3df6850b3e7799beaa8546b1e3143156a7"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-provenance-after-gates.log",
+      "retained": "symaira-guard770-warnings-independent-provenance-after-gates.log.gz",
+      "sha256": "20f1332712857715d91402128b7b4fb47350dc842dc67411dab223671e075194",
+      "bytes": 420,
+      "gzip_sha256": "4a23985d551c1366457bca94bc2d243d5ea7f9a2abc6839446c191f4fd1a3758"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-provenance-final.log",
+      "retained": "symaira-guard770-warnings-independent-provenance-final.log.gz",
+      "sha256": "20f1332712857715d91402128b7b4fb47350dc842dc67411dab223671e075194",
+      "bytes": 420,
+      "gzip_sha256": "4a23985d551c1366457bca94bc2d243d5ea7f9a2abc6839446c191f4fd1a3758"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-provenance-repeat-shape-first.py",
+      "retained": "symaira-guard770-warnings-independent-provenance-repeat-shape-first.py.gz",
+      "sha256": "3d0ff6c3a74ac7f57ca3a46361dc43949ec5f08a83287a1fb686f94feb2950a1",
+      "bytes": 4542,
+      "gzip_sha256": "16213284b63b08c622d0adf8bae046c75f7f35c9ac646b8a49982bc920985ace"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-provenance-second.log",
+      "retained": "symaira-guard770-warnings-independent-provenance-second.log.gz",
+      "sha256": "a3b694fe53889af7940c8b56ab5db5507a038f3927a935c2331cc198e4c1fa16",
+      "bytes": 248,
+      "gzip_sha256": "1f280fa439ee1a3a301f57bbab7cc5c8a94b1c5997f67e2d0b28210e832728bc"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-provenance.json",
+      "retained": "symaira-guard770-warnings-independent-provenance.json.gz",
+      "sha256": "d72ce3fef88219990cb0e0a62649e112fd133ab78ab0d361cb269e2c9535a640",
+      "bytes": 151693,
+      "gzip_sha256": "d1cc66f6e286dcbfbb1c10f9cda2a34631e03f403f5c28956ac085b872660529"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-provenance.log",
+      "retained": "symaira-guard770-warnings-independent-provenance.log.gz",
+      "sha256": "2e9befd976f9db160c4a721be71a247bf1bf34ccfbe98b12acd63e80e9b45624",
+      "bytes": 447,
+      "gzip_sha256": "ac03b0be1ceeb3e6f0d786a0dfc35db709c11dd5ab2cf06ee1c67ab39bfcd454"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-provenance.py",
+      "retained": "symaira-guard770-warnings-independent-provenance.py.gz",
+      "sha256": "0714c3812b8712f7e8934457076c5c17292737f564fdd079ff6e54aaae2abda8",
+      "bytes": 4550,
+      "gzip_sha256": "7a6d3291dd4f2628edebbe9d2de9ab55e7f05ca391ee8f445d0a9fccf10fed65"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-raw_paths.json",
+      "retained": "symaira-guard770-warnings-independent-raw_paths.json.gz",
+      "sha256": "baf59f520856a0eb06fbbfe83906ea0199f1a6ac9714cf1fbec622496dc37196",
+      "bytes": 209090,
+      "gzip_sha256": "34551cd0ad275a7e0ac3c169e36ebf654de3bb33003096a6bd5de53d885c0f9d"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-raw_paths.log",
+      "retained": "symaira-guard770-warnings-independent-raw_paths.log.gz",
+      "sha256": "b670587c84a5b9d6ef24aee025ac8a122a51ec85318389036cd4e85401de7b73",
+      "bytes": 61,
+      "gzip_sha256": "78ca58b8c3a2503e334cee81ee637d69e1bc817bb25e2db61bcf86d85c149060"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-receipt.py",
+      "retained": "symaira-guard770-warnings-independent-receipt.py.gz",
+      "sha256": "6df5f99f1bf1308e56fb38331dc075812d55a2c8f3fc5b1cd842670e4ef9e723",
+      "bytes": 5738,
+      "gzip_sha256": "71bd4cd0a3cda4dee28ed72cb88c50499126e7e374d270130cc6459d0590a56d"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-retained-corpora.log",
+      "retained": "symaira-guard770-warnings-independent-retained-corpora.log.gz",
+      "sha256": "378de67f3b96aebf297100eb5999caa4b4cbe476a03bd4d1482b8ea19cf399d7",
+      "bytes": 183,
+      "gzip_sha256": "36d1d3fc150888a1602e3fa9d8e9af7d08e330bc073ff732ec7e6f11bfdd33d6"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-retained-corpora.py",
+      "retained": "symaira-guard770-warnings-independent-retained-corpora.py.gz",
+      "sha256": "78a453a3141a6fd7dc87b75eb4467d16ccff258fd2f80be13cce2f5739f53843",
+      "bytes": 2795,
+      "gzip_sha256": "de935dbb390f6ce122ab47c4ef3383fb7747c79d227f8337b8de1ac9f440a36c"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-review-draft.md",
+      "retained": "symaira-guard770-warnings-independent-review-draft.md.gz",
+      "sha256": "efe1515419cacd1cc6a9a190892ef8e6eddcedee6c04f077e581b7f31ce137d2",
+      "bytes": 9136,
+      "gzip_sha256": "e2e83e42accc0286561aa8246b0bca7b1e56ec98cf5c206e22a53f4ea7bed373"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-review.md",
+      "retained": "symaira-guard770-warnings-independent-review.md.gz",
+      "sha256": "7b583b8df78cf00d021226037cdcb9fe51c9b7d8ca49bbc2f3264b4913090a92",
+      "bytes": 11164,
+      "gzip_sha256": "c8cee94e8720027588087f4cdfc0d4f9d13b19c043ea81593f369577cdcd41ea"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-tests.log",
+      "retained": "symaira-guard770-warnings-independent-tests.log.gz",
+      "sha256": "1f7c7fc6542f0ba6d9ae622ac7592ed41d61010f4cf2f0177a9cd4aa6c928f33",
+      "bytes": 15905,
+      "gzip_sha256": "079fcd08e2bfe10200bd414f10d7c112b6a6f88e1504955e556d14fc8948fd96"
+    },
+    {
+      "original": "/tmp/symaira-guard770-warnings-independent-review-receipt.json",
+      "retained": "symaira-guard770-warnings-independent-review-receipt.json.gz",
+      "sha256": "4966ad908d1a49598939a70c53ffef61b5d0daf3d7391a5392cb7da2e5627ba1",
+      "bytes": 175507,
+      "gzip_sha256": "b3ff6bec95e13e2f906b126e9f5ebdd26a348083ffb7fe261b60493037bfee74"
+    },
+    {
+      "original": "/workspace/oracles/symaira-guard770-warnings-independent-4d-binaries/receipt.json",
+      "retained": "receipt.json.gz",
+      "sha256": "5cd8823cafe36adb54f077c59d4e5ebe2a9321d815fde40a214a77251c68dfc4",
+      "bytes": 40104,
+      "gzip_sha256": "85269cc920e89c320a9f539c1c3281b9fa6df46500ebcd8502df7c9ca3773540"
+    }
+  ],
+  "raw_state_paths": 180,
+  "elf_paths": 69,
+  "unique_elf_bytes": 46,
+  "elf_archive": "/workspace/oracles/symaira-guard770-warnings-independent-4d-binaries/receipt.json",
+  "all_original_bytes_verified": true,
+  "note": "Originals unchanged; existing ELF gzip archive verified before target reuse; no new execution claims."
+}

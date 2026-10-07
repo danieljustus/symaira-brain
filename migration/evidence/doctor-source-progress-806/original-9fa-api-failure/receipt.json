@@ -1,0 +1,39 @@
+{
+  "original_head": "9faee8b0a2619909aa8ee53ed84b2cb4d6ef50b8",
+  "original_progress_sha256": "98a1529025fbdee11dcfa77692a071ebe9fcea674e9b883db9f84b10dea84fdd",
+  "failed_before_fixture_tool_build_or_cli_process": true,
+  "actual_exception": "AttributeError: tempfile has no attribute NamedTempFile; correct Python API NamedTemporaryFile",
+  "full_root_driver_pending": false,
+  "files": {
+    "/workspace/symaira-doctor806-source-progress/scripts/setup-source-oracle/progress.py": {
+      "bytes": 5042,
+      "sha256": "98a1529025fbdee11dcfa77692a071ebe9fcea674e9b883db9f84b10dea84fdd",
+      "preserved": "migration/evidence/doctor-source-progress-806/original-9fa-api-failure/0-progress.py.gz"
+    },
+    "/workspace/symaira-doctor806-source-progress/scripts/setup-source-oracle/replay.py": {
+      "bytes": 26463,
+      "sha256": "7688e0d185e5257ed1a45c61659e36234ac1660e623b0e442fc016a15b91f17a",
+      "preserved": "migration/evidence/doctor-source-progress-806/original-9fa-api-failure/1-replay.py.gz"
+    },
+    "/tmp/symaira-doctor806-root-source-progress-full.log": {
+      "bytes": 1485,
+      "sha256": "c3a44412ece246a0ee4fad16191df612e54fd7e1d622cd6b0788fa60da370b7d",
+      "preserved": "migration/evidence/doctor-source-progress-806/original-9fa-api-failure/2-symaira-doctor806-root-source-progress-full.log.gz"
+    },
+    "/tmp/symaira-doctor806-source-progress-final-handoff.json": {
+      "bytes": 2891,
+      "sha256": "85651146c2255a9453e733dee5b6e35b12abaa3f84e04c9c081ef05d6ff17585",
+      "preserved": "migration/evidence/doctor-source-progress-806/original-9fa-api-failure/3-symaira-doctor806-source-progress-final-handoff.json.gz"
+    },
+    "/tmp/symaira-doctor806-root-source-progress-full-run.sh": {
+      "bytes": 629,
+      "sha256": "d27d0b647112fca7383185a3391be8c1b8561746dee837f56111f3d4fac0bcc1",
+      "preserved": "migration/evidence/doctor-source-progress-806/original-9fa-api-failure/symaira-doctor806-root-source-progress-full-run.sh.gz"
+    },
+    "/tmp/symaira-doctor806-root-source-progress-first-failure-command.json": {
+      "bytes": 1007,
+      "sha256": "4f8eb1d599a8189b5d9d014c7b68b1aea1f1fc732417e10bce261101946a144c",
+      "preserved": "migration/evidence/doctor-source-progress-806/original-9fa-api-failure/symaira-doctor806-root-source-progress-first-failure-command.json.gz"
+    }
+  }
+}

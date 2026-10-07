@@ -1,0 +1,255 @@
+{
+  "purpose": "Initial exploratory process observations before daemon metadata fixes; binary digests were not recorded, so this is diagnostic evidence, not an acceptance receipt. Go origin / differs from Rust because the exploratory helper chose different binary-relative working directories; the supplemental acceptance runner uses disposable owned working roots for both binaries.",
+  "observations": [
+    {
+      "kind": "go",
+      "pid": 408785,
+      "transcript": [
+        {
+          "request": {
+            "cmd": "daemon.ping",
+            "session": "probe"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "pong": true
+            }
+          }
+        },
+        {
+          "request": {
+            "cmd": "daemon.status",
+            "session": "probe"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "engine": "chrome",
+              "last_activity": "2026-10-03T15:18:16.241650234Z",
+              "pid": 408785,
+              "policy": {
+                "ssrf_enabled": false,
+                "fetch_ssrf_enabled": true,
+                "allow_private": false
+              },
+              "running": true,
+              "socket": "/tmp/sb772-y13ckhu6/run/symbrowse/probe.sock",
+              "started_at": "2026-10-03T15:18:16.227626735Z"
+            }
+          }
+        },
+        {
+          "request": {
+            "cmd": "session.list",
+            "session": "probe"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "schema_version": 1,
+              "sessions": [
+                {
+                  "name": "probe",
+                  "pid": 408785,
+                  "started_at": "2026-10-03T15:18:16.227628277Z",
+                  "active_tabs": 0,
+                  "last_activity": "2026-10-03T15:18:16.241853311Z",
+                  "user_data_dir": "/tmp/sb772-y13ckhu6/cache/symbrowse/sessions/probe",
+                  "browser_context_id": "context-probe",
+                  "ref_count": 0,
+                  "scope": "worktree",
+                  "origin_path": "/"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "request": {
+            "cmd": "session.info",
+            "session": "probe"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "name": "probe",
+              "pid": 408785,
+              "started_at": "2026-10-03T15:18:16.227628277Z",
+              "active_tabs": 0,
+              "last_activity": "2026-10-03T15:18:16.242083359Z",
+              "user_data_dir": "/tmp/sb772-y13ckhu6/cache/symbrowse/sessions/probe",
+              "browser_context_id": "context-probe",
+              "ref_count": 0,
+              "scope": "worktree",
+              "origin_path": "/"
+            }
+          }
+        },
+        {
+          "request": {
+            "cmd": "session.ensure",
+            "session": "probe"
+          },
+          "response": {
+            "success": false,
+            "error": {
+              "code": "unknown_command",
+              "message": "command is not implemented by the daemon"
+            }
+          }
+        },
+        {
+          "request": {
+            "cmd": "unknown",
+            "session": "probe"
+          },
+          "response": {
+            "success": false,
+            "error": {
+              "code": "unknown_command",
+              "message": "command is not implemented by the daemon"
+            }
+          }
+        },
+        {
+          "request": {
+            "cmd": "daemon.stop",
+            "session": "probe"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "stopping": true
+            }
+          }
+        }
+      ]
+    },
+    {
+      "kind": "rust",
+      "pid": 408793,
+      "transcript": [
+        {
+          "request": {
+            "cmd": "daemon.ping",
+            "session": "probe"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "pong": true
+            }
+          }
+        },
+        {
+          "request": {
+            "cmd": "daemon.status",
+            "session": "probe"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "engine": "chrome",
+              "last_activity": "2026-10-03T15:18:16.265258193Z",
+              "mode": "browser",
+              "pid": 408793,
+              "policy": {
+                "allow_private": false,
+                "fetch_ssrf_enabled": false,
+                "ssrf_enabled": false
+              },
+              "running": true,
+              "session": "probe",
+              "socket": "/tmp/sb772-_tjcvgve/run/symbrowse/probe.sock",
+              "started_at": "2026-10-03T15:18:16.248506869Z"
+            }
+          }
+        },
+        {
+          "request": {
+            "cmd": "session.list",
+            "session": "probe"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "schema_version": 1,
+              "sessions": [
+                {
+                  "active_tabs": 0,
+                  "browser_context_id": "context-probe",
+                  "last_activity": "2026-10-03T15:18:16.265275559Z",
+                  "name": "probe",
+                  "pid": 408793,
+                  "ref_count": 0,
+                  "started_at": "2026-10-03T15:18:16.24911262Z",
+                  "user_data_dir": "/tmp/sb772-_tjcvgve/home/.local/state/symbrowse/sessions/probe"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "request": {
+            "cmd": "session.info",
+            "session": "probe"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "active_tabs": 0,
+              "browser_context_id": "context-probe",
+              "last_activity": "2026-10-03T15:18:16.265758389Z",
+              "name": "probe",
+              "pid": 408793,
+              "ref_count": 0,
+              "started_at": "2026-10-03T15:18:16.24911262Z",
+              "user_data_dir": "/tmp/sb772-_tjcvgve/home/.local/state/symbrowse/sessions/probe"
+            }
+          }
+        },
+        {
+          "request": {
+            "cmd": "session.ensure",
+            "session": "probe"
+          },
+          "response": {
+            "success": false,
+            "error": {
+              "code": "unknown_command",
+              "message": "command \"session.ensure\" is not implemented by the Rust daemon",
+              "hint": "use a registered MCP tool or daemon command"
+            }
+          }
+        },
+        {
+          "request": {
+            "cmd": "unknown",
+            "session": "probe"
+          },
+          "response": {
+            "success": false,
+            "error": {
+              "code": "unknown_command",
+              "message": "command \"unknown\" is not implemented by the Rust daemon",
+              "hint": "use a registered MCP tool or daemon command"
+            }
+          }
+        },
+        {
+          "request": {
+            "cmd": "daemon.stop",
+            "session": "probe"
+          },
+          "response": {
+            "success": true,
+            "data": {
+              "stopping": true
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

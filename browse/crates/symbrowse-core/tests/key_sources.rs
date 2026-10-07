@@ -219,6 +219,32 @@ mod unix {
         fs::remove_dir_all(root).unwrap();
     }
 
+    #[cfg(target_os = "macos")]
+    #[test]
+    fn owned_security_absence_is_distinct_from_unavailable_or_denied() {
+        let root = root("keychain-results");
+        let absent = script(&root, "security-absent", "#!/bin/sh\nexit 44\n");
+        let denied = script(&root, "security-denied", "#!/bin/sh\nexit 4\n");
+        let sources =
+            SystemKeySources::with_programs("/missing/symvault", &absent, Duration::from_secs(1));
+        assert_eq!(sources.keychain("symbrowse", "encryption-key"), Ok(None));
+        let sources =
+            SystemKeySources::with_programs("/missing/symvault", &denied, Duration::from_secs(1));
+        assert_eq!(
+            sources.keychain("symbrowse", "encryption-key"),
+            Err(ProbeError::Failed("keychain lookup: exit status 4".into()))
+        );
+        let sources = SystemKeySources::with_programs(
+            "/missing/symvault",
+            root.join("missing-security"),
+            Duration::from_secs(1),
+        );
+        assert!(
+            matches!(sources.keychain("symbrowse", "encryption-key"), Err(ProbeError::Failed(message)) if message.starts_with("keychain lookup:"))
+        );
+        fs::remove_dir_all(root).unwrap();
+    }
+
     fn root(name: &str) -> PathBuf {
         let id = NEXT_ROOT.fetch_add(1, Ordering::Relaxed);
         let root = std::env::temp_dir().join(format!(

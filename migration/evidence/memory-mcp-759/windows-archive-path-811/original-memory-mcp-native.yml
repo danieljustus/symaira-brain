@@ -1,0 +1,105 @@
+name: Memory MCP native catalog parity
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'rust/symbrain-gateway/**'
+      - 'rust/symbrain-mcp/**'
+      - 'rust/symbrain-policy/**'
+      - 'rust/symbrain-cli/**'
+      - 'rust/symbrain-memory/**'
+      - 'rust/symbrain-activity/**'
+      - 'scripts/memory-mcp-oracle/**'
+      - 'scripts/mcp-differential.py'
+      - '.github/workflows/memory-mcp-native.yml'
+      - 'Cargo.lock'
+      - 'Cargo.toml'
+  push:
+    branches: [main]
+    paths:
+      - 'rust/symbrain-gateway/**'
+      - 'rust/symbrain-mcp/**'
+      - 'rust/symbrain-policy/**'
+      - 'rust/symbrain-cli/**'
+      - 'rust/symbrain-memory/**'
+      - 'rust/symbrain-activity/**'
+      - 'scripts/memory-mcp-oracle/**'
+      - 'scripts/mcp-differential.py'
+      - '.github/workflows/memory-mcp-native.yml'
+      - 'Cargo.lock'
+      - 'Cargo.toml'
+
+permissions:
+  contents: read
+
+jobs:
+  catalog:
+    name: memory MCP catalog (${{ matrix.runner }})
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, macos-15, windows-2025]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    env:
+      CARGO_INCREMENTAL: '0'
+      CARGO_PROFILE_DEV_DEBUG: '0'
+      CARGO_PROFILE_TEST_DEBUG: '0'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: '1.26.7'
+      - name: Build native owner and immutable Go oracle
+        run: |
+          set -euo pipefail
+          umask 022
+          cargo fmt --all -- --check
+          cargo build -p symbrain-cli --locked
+          export ORACLE_SOURCE="$RUNNER_TEMP/memory-mcp-go-source"
+          mkdir -p "$ORACLE_SOURCE"
+          git archive dcddcef0df5789123c7c9a7ebe6e01f10e941f2c | tar -x -C "$ORACLE_SOURCE"
+          export CGO_ENABLED=0 GOWORK=off GOENV=off
+          export ORACLE_BIN="$RUNNER_TEMP/memory-mcp-go"
+          if [[ "$RUNNER_OS" == Windows ]]; then ORACLE_BIN="$ORACLE_BIN.exe"; fi
+          (cd "$ORACLE_SOURCE" && go build -o "$ORACLE_BIN" ./cmd/symbrain)
+          echo "ORACLE_BIN=$ORACLE_BIN" >> "$GITHUB_ENV"
+      - name: Verify owner and generic transport contracts
+        run: |
+          set -euo pipefail
+          umask 022
+          cargo test -p symbrain-gateway -p symbrain-mcp --all-targets --all-features --locked 2>&1 | tee "$RUNNER_TEMP/memory-mcp-tests.log"
+          cargo clippy -p symbrain-gateway -p symbrain-mcp --all-targets --all-features --locked -- -D warnings 2>&1 | tee "$RUNNER_TEMP/memory-mcp-clippy.log"
+      - name: Compare complete catalogs and real negative controls
+        run: |
+          set -euo pipefail
+          umask 022
+          NATIVE=target/debug/symbrain
+          if [[ "$RUNNER_OS" == Windows ]]; then NATIVE="$NATIVE.exe"; fi
+          python3 scripts/memory-mcp-oracle/catalog.py --go "$ORACLE_BIN" --rust "$NATIVE" --report "$RUNNER_TEMP/memory-mcp-catalog.json" 2>&1 | tee "$RUNNER_TEMP/memory-mcp-catalog.log"
+          python3 scripts/mcp-differential.py "$ORACLE_BIN" "$NATIVE" 2>&1 | tee "$RUNNER_TEMP/memory-mcp-parent.log"
+      - name: Record actual SDK and source
+        if: always()
+        run: |
+          set -euo pipefail
+          {
+            echo "source_revision=$GITHUB_SHA"
+            echo "runner=${{ matrix.runner }}"
+            rustc -Vv
+            cargo -V
+            go version
+          } > "$RUNNER_TEMP/memory-mcp-native.txt"
+      - name: Retain complete native receipts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: memory-mcp-${{ matrix.runner }}-${{ github.sha }}
+          path: ${{ runner.temp }}/memory-mcp-*
+          if-no-files-found: error
+          retention-days: 14

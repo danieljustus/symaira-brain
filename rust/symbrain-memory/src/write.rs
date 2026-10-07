@@ -172,7 +172,7 @@ fn validate_set(content: &str, scope: &str, kind: &str) -> Result<(), StoreError
 }
 
 /// Generates a UUID v4 string, the identifier shape the shipped store uses.
-fn new_uuid() -> String {
+pub(crate) fn new_uuid() -> String {
     let mut bytes = [0_u8; 16];
     if getrandom::fill(&mut bytes).is_err() {
         // Fall back to the deterministic form rather than failing a write.
@@ -195,7 +195,7 @@ fn new_uuid() -> String {
 }
 
 /// SHA-256 hex digest of the content, as the shipped store records it.
-fn content_hash(content: &str) -> String {
+pub(crate) fn content_hash(content: &str) -> String {
     use sha2::{Digest, Sha256};
 
     let mut hasher = Sha256::new();

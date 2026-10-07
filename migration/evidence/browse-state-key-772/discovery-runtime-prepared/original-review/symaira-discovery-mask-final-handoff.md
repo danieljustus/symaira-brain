@@ -1,0 +1,11 @@
+Clean publication 7e5c4561c82803403b579d011fb687bbe254d32a, production/test/harness source445c19688aa8f669ea99e15e6517005f6156b775, parent381e324852e70fd7c647dce9bbffccb4c2731484. Worktree/workspace/symaira-daemon772-state-key-discovery-mask. Original381/718 REQUEST retained before correction, all177 source maps and1219 frozen-Go files freshly verified; no original bytes altered.
+
+General predicate correction skips assignments when stored bits exceed their suffix mask. This preserves valid impossible conditions, existing sets/order/inversion, universal mask0/bits0, width64 and invalid nil-matcher behavior without literal exceptions. Two new private tests are prepared, not executed.
+
+Prepared gates retain every old26/35 CLI,13+8 typed,5 optional,6Windows scripts,3/2mutants; additions produce40/49CLI,30supported+8unportedtyped and4/3mutants. Fresh candidateRust/full parent/native6 gates remain required.
+
+Actual authorized offline private SDK-only run, p2 with700MiB floor: all5600 original finite patterns plus18 unique cross-controls,56180 concrete enable/print values per binary. Exact SDK has zero differences; actual owned SDK predicate mutation has230 differences. Separate native source projection has zero mismatches over bounded suffix classes. Actual SDK is not a Rust/provider/native acceptance proof. Both executed SDK binaries and complete sources/input/output/results/buildlogs are retained in22 gzip/raw SHA maps.16original REQUEST+57CCC+7prior-review archives and17author maps freshly reverified.
+
+Rustfmt, actionlint, Python syntax/global scope, six Go-fixture formatting and diff pass; no Cargo/Rust compiler, candidateCLI/provider, target or port. Actual SDK cache retired, all actual binaries/proofs preserved. Prepared actual owner mutant must still execute during future runtime allocation. Conditional/reporting stack and native Windows exact-owner/argv0/FileID obligations stay open; no new waiver, selfapproval or GitHub writes.
+
+Machine handoff /tmp/symaira-discovery-mask-final-handoff.json. Tracked source_checks and raw SDK receipt/mutant/fullretention in migration/evidence/browse-state-key-772/discovery-mask-prepared. Ready for different-author source review; heavy runtime allocation is still held.

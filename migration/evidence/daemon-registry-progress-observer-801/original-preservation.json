@@ -1,0 +1,10 @@
+{
+  "head": "76132675ee81cae30bd610cd955ae3d28f7b5df8",
+  "full_tracked_count": 3694,
+  "all_original_members": 13,
+  "archive": "/workspace/review-proof/review-pr800-daemon801-progress-correction/complete-originals.tar.gz",
+  "archive_sha256": "1650bc0df690835eca2b9043a58a7e427f9b6d0044a74380dd1f549a56b2e456",
+  "manifest_sha256": "3a5541152b75bac2d9ae238acc8f0e3146f5e4491a8cab38d1d661c2a7c082b4",
+  "all_roundtrips": true,
+  "before_any_candidate_edits": true
+}

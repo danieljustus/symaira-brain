@@ -1,0 +1,21 @@
+from pathlib import Path
+import builtins,hashlib,json,subprocess,symtable,sys
+root=Path('/workspace/symaira-daemon772-state-key-osargs');here=root/'browse/port/harness';sys.path.insert(0,str(here))
+import registry_compare
+sha=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+raw=Path('/tmp/symaira-state-key-osargs-final-registry.raw.json');original=sha(raw);case=json.loads(raw.read_text())
+assert registry_compare.normalize(case['go'],rust=False)==registry_compare.normalize(case['rust'],rust=True)
+assert registry_compare.compare(case)
+controls=registry_compare.controls(case);assert len(controls)==8 and all(c['rejected'] for c in controls)
+audit={}
+for name in ['registry_compare.py','daemon_registry.py','registry_progress.py','daemon_registry_cli.py','startup_key_paths.py']:
+ p=here/name;table=symtable.symtable(p.read_text(),str(p),'exec');defined={s.get_name() for s in table.get_symbols() if s.is_assigned() or s.is_imported() or s.is_namespace()};references=set()
+ def visit(t):
+  references.update(s.get_name() for s in t.get_symbols() if s.is_referenced() and s.is_global())
+  for child in t.get_children():visit(child)
+ visit(table);missing=references-defined-set(dir(builtins))-{'__file__','__name__','__doc__','__package__'}
+ assert not missing,(name,missing)
+ audit[name]={'sha256':sha(p),'unresolved_globals':sorted(missing),'referenced_globals':sorted(references)}
+assert sha(raw)==original
+report={'comparison_source':subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),'comparison_source_dirty':bool(subprocess.check_output(['git','status','--porcelain'],cwd=root)),'original_process_source':'046bf9088a21371f30a0c2ccea829ff93ab78f56','original_process_cli_sha256':json.loads(Path('/tmp/symaira-state-key-osargs-final-registry.progress.jsonl').read_text().splitlines()[0])['rust_binary_sha256'],'original_raw_receipt':str(raw),'original_raw_sha256':original,'matches':True,'negative_controls':controls,'global_audit':audit,'scope':'Supplemental corrected comparator execution over untouched original046 actual process observations; no new-source CLI executions.'}
+Path('/tmp/symaira-state-key-osargs-jsonfix-supplemental.json').write_text(json.dumps(report,indent=2)+'\n');print('unchanged046 observations match; eight controls rejected; five module global audits clean')

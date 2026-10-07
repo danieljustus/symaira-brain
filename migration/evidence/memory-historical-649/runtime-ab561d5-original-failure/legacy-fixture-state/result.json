@@ -1,0 +1,510 @@
+{
+  "after": {
+    "integrity": "ok",
+    "main_file_mode": 384,
+    "schema": [
+      [
+        "index",
+        "sqlite_autoindex_memories_1",
+        "memories",
+        null
+      ],
+      [
+        "index",
+        "sqlite_autoindex_rules_1",
+        "rules",
+        null
+      ],
+      [
+        "table",
+        "memories",
+        "memories",
+        "CREATE TABLE memories (id TEXT PRIMARY KEY, content TEXT NOT NULL, scope TEXT NOT NULL DEFAULT '', metadata TEXT NOT NULL DEFAULT '{}', embedding TEXT NOT NULL DEFAULT '', created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, kind TEXT NOT NULL DEFAULT '')"
+      ],
+      [
+        "table",
+        "rules",
+        "rules",
+        "CREATE TABLE rules (id TEXT PRIMARY KEY, content TEXT NOT NULL, scope TEXT NOT NULL DEFAULT '', metadata TEXT NOT NULL DEFAULT '{}', created_at DATETIME)"
+      ]
+    ],
+    "tables": {
+      "memories": {
+        "columns": [
+          [
+            0,
+            "id",
+            "TEXT",
+            0,
+            null,
+            1
+          ],
+          [
+            1,
+            "content",
+            "TEXT",
+            1,
+            null,
+            0
+          ],
+          [
+            2,
+            "scope",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            3,
+            "metadata",
+            "TEXT",
+            1,
+            "'{}'",
+            0
+          ],
+          [
+            4,
+            "embedding",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            5,
+            "created_at",
+            "DATETIME",
+            1,
+            null,
+            0
+          ],
+          [
+            6,
+            "updated_at",
+            "DATETIME",
+            1,
+            null,
+            0
+          ],
+          [
+            7,
+            "kind",
+            "TEXT",
+            1,
+            "''",
+            0
+          ]
+        ],
+        "foreign_keys": [],
+        "indexes": {
+          "sqlite_autoindex_memories_1": {
+            "keys": [
+              [
+                0,
+                "id",
+                0,
+                "BINARY",
+                1
+              ],
+              [
+                1,
+                null,
+                0,
+                "BINARY",
+                0
+              ]
+            ],
+            "origin": "pk",
+            "partial": 0,
+            "raw_keys": [
+              [
+                0,
+                0,
+                "id",
+                0,
+                "BINARY",
+                1
+              ],
+              [
+                1,
+                -1,
+                null,
+                0,
+                "BINARY",
+                0
+              ]
+            ],
+            "unique": 1
+          }
+        },
+        "rows": [],
+        "sql": "CREATE TABLE memories (id TEXT PRIMARY KEY, content TEXT NOT NULL, scope TEXT NOT NULL DEFAULT '', metadata TEXT NOT NULL DEFAULT '{}', embedding TEXT NOT NULL DEFAULT '', created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, kind TEXT NOT NULL DEFAULT '')",
+        "without_rowid": 0
+      },
+      "rules": {
+        "columns": [
+          [
+            0,
+            "id",
+            "TEXT",
+            0,
+            null,
+            1
+          ],
+          [
+            1,
+            "content",
+            "TEXT",
+            1,
+            null,
+            0
+          ],
+          [
+            2,
+            "scope",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            3,
+            "metadata",
+            "TEXT",
+            1,
+            "'{}'",
+            0
+          ],
+          [
+            4,
+            "created_at",
+            "DATETIME",
+            0,
+            null,
+            0
+          ]
+        ],
+        "foreign_keys": [],
+        "indexes": {
+          "sqlite_autoindex_rules_1": {
+            "keys": [
+              [
+                0,
+                "id",
+                0,
+                "BINARY",
+                1
+              ],
+              [
+                1,
+                null,
+                0,
+                "BINARY",
+                0
+              ]
+            ],
+            "origin": "pk",
+            "partial": 0,
+            "raw_keys": [
+              [
+                0,
+                0,
+                "id",
+                0,
+                "BINARY",
+                1
+              ],
+              [
+                1,
+                -1,
+                null,
+                0,
+                "BINARY",
+                0
+              ]
+            ],
+            "unique": 1
+          }
+        },
+        "rows": [],
+        "sql": "CREATE TABLE rules (id TEXT PRIMARY KEY, content TEXT NOT NULL, scope TEXT NOT NULL DEFAULT '', metadata TEXT NOT NULL DEFAULT '{}', created_at DATETIME)",
+        "without_rowid": 0
+      }
+    }
+  },
+  "before": {
+    "integrity": "ok",
+    "main_file_mode": 384,
+    "schema": [
+      [
+        "index",
+        "sqlite_autoindex_memories_1",
+        "memories",
+        null
+      ],
+      [
+        "index",
+        "sqlite_autoindex_rules_1",
+        "rules",
+        null
+      ],
+      [
+        "table",
+        "memories",
+        "memories",
+        "CREATE TABLE memories (id TEXT PRIMARY KEY, content TEXT NOT NULL, scope TEXT NOT NULL DEFAULT '', metadata TEXT NOT NULL DEFAULT '{}', embedding TEXT NOT NULL DEFAULT '', created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, kind TEXT NOT NULL DEFAULT '')"
+      ],
+      [
+        "table",
+        "rules",
+        "rules",
+        "CREATE TABLE rules (id TEXT PRIMARY KEY, content TEXT NOT NULL, scope TEXT NOT NULL DEFAULT '', metadata TEXT NOT NULL DEFAULT '{}', created_at DATETIME)"
+      ]
+    ],
+    "tables": {
+      "memories": {
+        "columns": [
+          [
+            0,
+            "id",
+            "TEXT",
+            0,
+            null,
+            1
+          ],
+          [
+            1,
+            "content",
+            "TEXT",
+            1,
+            null,
+            0
+          ],
+          [
+            2,
+            "scope",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            3,
+            "metadata",
+            "TEXT",
+            1,
+            "'{}'",
+            0
+          ],
+          [
+            4,
+            "embedding",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            5,
+            "created_at",
+            "DATETIME",
+            1,
+            null,
+            0
+          ],
+          [
+            6,
+            "updated_at",
+            "DATETIME",
+            1,
+            null,
+            0
+          ],
+          [
+            7,
+            "kind",
+            "TEXT",
+            1,
+            "''",
+            0
+          ]
+        ],
+        "foreign_keys": [],
+        "indexes": {
+          "sqlite_autoindex_memories_1": {
+            "keys": [
+              [
+                0,
+                "id",
+                0,
+                "BINARY",
+                1
+              ],
+              [
+                1,
+                null,
+                0,
+                "BINARY",
+                0
+              ]
+            ],
+            "origin": "pk",
+            "partial": 0,
+            "raw_keys": [
+              [
+                0,
+                0,
+                "id",
+                0,
+                "BINARY",
+                1
+              ],
+              [
+                1,
+                -1,
+                null,
+                0,
+                "BINARY",
+                0
+              ]
+            ],
+            "unique": 1
+          }
+        },
+        "rows": [],
+        "sql": "CREATE TABLE memories (id TEXT PRIMARY KEY, content TEXT NOT NULL, scope TEXT NOT NULL DEFAULT '', metadata TEXT NOT NULL DEFAULT '{}', embedding TEXT NOT NULL DEFAULT '', created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, kind TEXT NOT NULL DEFAULT '')",
+        "without_rowid": 0
+      },
+      "rules": {
+        "columns": [
+          [
+            0,
+            "id",
+            "TEXT",
+            0,
+            null,
+            1
+          ],
+          [
+            1,
+            "content",
+            "TEXT",
+            1,
+            null,
+            0
+          ],
+          [
+            2,
+            "scope",
+            "TEXT",
+            1,
+            "''",
+            0
+          ],
+          [
+            3,
+            "metadata",
+            "TEXT",
+            1,
+            "'{}'",
+            0
+          ],
+          [
+            4,
+            "created_at",
+            "DATETIME",
+            0,
+            null,
+            0
+          ]
+        ],
+        "foreign_keys": [],
+        "indexes": {
+          "sqlite_autoindex_rules_1": {
+            "keys": [
+              [
+                0,
+                "id",
+                0,
+                "BINARY",
+                1
+              ],
+              [
+                1,
+                null,
+                0,
+                "BINARY",
+                0
+              ]
+            ],
+            "origin": "pk",
+            "partial": 0,
+            "raw_keys": [
+              [
+                0,
+                0,
+                "id",
+                0,
+                "BINARY",
+                1
+              ],
+              [
+                1,
+                -1,
+                null,
+                0,
+                "BINARY",
+                0
+              ]
+            ],
+            "unique": 1
+          }
+        },
+        "rows": [],
+        "sql": "CREATE TABLE rules (id TEXT PRIMARY KEY, content TEXT NOT NULL, scope TEXT NOT NULL DEFAULT '', metadata TEXT NOT NULL DEFAULT '{}', created_at DATETIME)",
+        "without_rowid": 0
+      }
+    }
+  },
+  "cli": {
+    "archive": {
+      "bytes": 39667416,
+      "gzip": "/workspace/oracles/symaira-memory649-25292fe-failure-binaries/356d240a0bbd23f7c62fd6e4cfc3908145810a07d53d4d02fba8ea1ccb05ebf2.gz",
+      "gzip_sha256": "362d1e9cc8363f57fbfad4f0b99cea637fc01319c77d1b1e843375f20f55532f"
+    },
+    "meaning": "Cargo built CLI used by earlier native process tests; explicit later production build stage was not reached",
+    "path": "/workspace/symaira-memory649-integrated/target/debug/symbrain",
+    "sha256": "356d240a0bbd23f7c62fd6e4cfc3908145810a07d53d4d02fba8ea1ccb05ebf2"
+  },
+  "process": {
+    "argv": [
+      "/workspace/symaira-memory649-integrated/target/debug/symbrain",
+      "memory",
+      "list",
+      "--db",
+      "/tmp/symaira-memory649-ab561-legacy-state/memory.db",
+      "--json"
+    ],
+    "end": 1791096637.427978,
+    "environment": {
+      "HOME": "/tmp/symaira-memory649-ab561-legacy-state/home",
+      "LANG": "C.UTF-8",
+      "PATH": "",
+      "SYMBRAIN_GO_BINARY": "/tmp/symaira-memory649-ab561-legacy-state/absent-fallback",
+      "TZ": "UTC",
+      "USERPROFILE": "/tmp/symaira-memory649-ab561-legacy-state/home",
+      "XDG_CACHE_HOME": "/tmp/symaira-memory649-ab561-legacy-state/cache",
+      "XDG_CONFIG_HOME": "/tmp/symaira-memory649-ab561-legacy-state/config",
+      "XDG_DATA_HOME": "/tmp/symaira-memory649-ab561-legacy-state/data",
+      "XDG_STATE_HOME": "/tmp/symaira-memory649-ab561-legacy-state/state"
+    },
+    "exit": 1,
+    "start": 1791096637.3936174,
+    "stderr_hex": "73796d627261696e206d656d6f72793a206f70656e2064617461626173653a20696e636f6d70617469626c65206f776e65642064656661756c74206d656d6f726965732e73636f70650a",
+    "stdout_hex": ""
+  },
+  "scope": "Fresh exact original handwritten SQL fixture reconstruction using Python SQLite, actual archived ab561 Rust CLI; original Cargo test tempdir bytes are not claimed.",
+  "source": "ab561d57e0fb110e44b28535a99e237cac4a88f1",
+  "whole_state_unchanged": true
+}

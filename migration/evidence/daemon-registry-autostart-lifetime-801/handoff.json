@@ -1,0 +1,114 @@
+{
+  "schema": "source-only-autostart-lifetime-handoff-v1",
+  "source": "50ed5d372a77dfb964ce1f73b4ba780400d9bcd1",
+  "original": "8a95b40e854724384b4a551f316215662d7b5815",
+  "worktree": "/workspace/symaira-daemon801-autostart-cleanup",
+  "branch": "issue/801-autostart-cleanup",
+  "source_body_bindings": [
+    {
+      "path": ".github/workflows/browse-daemon-native.yml",
+      "bytes": 8747,
+      "sha256": "7802cdf9e3e80f27064436f93d2562a877e68438a66fdef6a26450f304cd0fb3",
+      "git_mode": "100644"
+    },
+    {
+      "path": "browse/port/harness/daemon_registry.py",
+      "bytes": 19082,
+      "sha256": "b5ba316697b76f4e3ea405eee26d58df8c702051e5dd7781ef5fc740113ca70b",
+      "git_mode": "100644"
+    },
+    {
+      "path": "browse/port/harness/registry_daemon_lifetime.py",
+      "bytes": 6368,
+      "sha256": "be97af2bbc5e81cc90f4339034a8423400abf3a5066d1c4d6ce4dca91d0d0b46",
+      "git_mode": "100644"
+    },
+    {
+      "path": "browse/port/harness/test_registry_daemon_lifetime.py",
+      "bytes": 7051,
+      "sha256": "d2f7bfbe1a3a320d08faae93175e01d45960341e79d244bc26e89fbaaf53d858",
+      "git_mode": "100644"
+    },
+    {
+      "path": "docs/adr/daemon-registry-autostart-lifetime-801.md",
+      "bytes": 3750,
+      "sha256": "f59e75735787a41a19453d2f677e8d798a696d771f99472eb2af4f7f1142be0b",
+      "git_mode": "100644"
+    }
+  ],
+  "unchanged_original_files": 3699,
+  "original_whole_files": 3701,
+  "original_archive": {
+    "path": "/workspace/symaira-daemon801-autostart-cleanup/migration/evidence/daemon-registry-autostart-lifetime-801/complete-before-edit.tar.gz",
+    "sha256": "bffad9674a2c2ab883228dd1f826f8c54409e0404733fc8a564e1525b334ab50",
+    "members": 209,
+    "prior193_complete": true
+  },
+  "native_originals": {
+    "full_ledger": "/workspace/review-proof/root-daemon801-8a95-native-originals/receipt.json",
+    "sha256": "9dc5a9d41ed6300414efa31988ffa6f1fe878dd60591f7e139c044ac67062083",
+    "archives": [
+      {
+        "path": "/workspace/attachments/23552983-9317-4d7e-b159-00c4856193d0/daemon801-8a95-native-11306979515.zip",
+        "bytes": 1916890,
+        "sha256": "c38ce903aaecc6cbd5dc8ec59622bb5b4ee01855a61a208a8e56b2ac8fc145aa",
+        "members": 3083,
+        "full_payload_CRC_metadata_verified": true
+      },
+      {
+        "path": "/workspace/attachments/90b2c986-b7bf-4165-bd3d-c84ee1dd73c5/daemon801-8a95-native-11307114320.zip",
+        "bytes": 1918146,
+        "sha256": "92c42936e57608015faa2c7e7590c80b73f1b28a393cbea1165f6d9168dea757",
+        "members": 3083,
+        "full_payload_CRC_metadata_verified": true
+      },
+      {
+        "path": "/workspace/attachments/26f8789c-9d84-4372-acc5-09aec20f26c6/daemon801-8a95-native-11306619101.zip",
+        "bytes": 1044707,
+        "sha256": "1ffee31e7ba5901aa3d83cf8ca1a24b089f5166bae0b96c956b885bd3936917d",
+        "members": 1798,
+        "full_payload_CRC_metadata_verified": true
+      },
+      {
+        "path": "/workspace/attachments/47226a04-f8d8-4e9b-88ea-d14f47f0b6bf/daemon801-8a95-native-11307252607.zip",
+        "bytes": 1054113,
+        "sha256": "3586750538c51d5d7fac272fb8b16f7c649c5cde8b73e801d347ab5f0fbdce36",
+        "members": 1798,
+        "full_payload_CRC_metadata_verified": true
+      }
+    ],
+    "members": 9762
+  },
+  "tests": {
+    "progress": 5,
+    "capture": 4,
+    "ownership_api_mocks": 13,
+    "source_mock_controls": 4,
+    "controls_intended_assertions": true
+  },
+  "unchanged_real_registry_controls": 8,
+  "actual_current": {
+    "compiler": 0,
+    "SDK": 0,
+    "product": 0,
+    "native_Windows": 0,
+    "Target": 0,
+    "ports": 0
+  },
+  "pending": "Root different-author review and exact-source full six-native registry/cleanup identities; no overall current Windows acceptance",
+  "limitations": [
+    "Original journal does not identify remaining PID; WinError32 alone is not that identity",
+    "Actual unit fixtures mock Windows API; no current native Windows process-handle/API proof",
+    "Original preceding 35 pairs and three controls do not constitute full registry/job acceptance"
+  ],
+  "validation": {
+    "path": "/workspace/symaira-daemon801-autostart-cleanup/migration/evidence/daemon-registry-autostart-lifetime-801/validation.json",
+    "sha256": "58705b9cbf7681538673586ba07c6f1456093fcf9fcaa4bfba763781f18a33f4"
+  },
+  "fresh_pure_archive": {
+    "path": "/workspace/symaira-daemon801-autostart-cleanup/migration/evidence/daemon-registry-autostart-lifetime-801/fresh-pure-machinery.tar.gz",
+    "sha256": "32cb0e21e98ff25bc75c7a91159da120c8e46324c3e8f4e552f93ebb61442edb",
+    "members": 20
+  },
+  "resources": "No Target/cache/SDK/port leases held or mutated; Python-only child fixtures completed/reaped"
+}

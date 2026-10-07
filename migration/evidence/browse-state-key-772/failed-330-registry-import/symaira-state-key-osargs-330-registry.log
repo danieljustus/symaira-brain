@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/workspace/symaira-daemon772-state-key-osargs/browse/port/harness/daemon_registry.py", line 289, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/symaira-daemon772-state-key-osargs/browse/port/harness/daemon_registry.py", line 258, in main
+    case = {"go": observe(args.go.resolve(), session, fixtures, progress), "rust": observe(args.rust.resolve(), session, fixtures, progress)}
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-daemon772-state-key-osargs/browse/port/harness/daemon_registry.py", line 134, in observe
+    assert datetime.fromisoformat(after_touch["last_activity"].replace("Z", "+00:00")) > datetime.fromisoformat(before_touch["last_activity"].replace("Z", "+00:00"))
+           ^^^^^^^^
+NameError: name 'datetime' is not defined. Did you forget to import 'datetime'?

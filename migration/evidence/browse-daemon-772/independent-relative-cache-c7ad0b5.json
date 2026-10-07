@@ -1,0 +1,74 @@
+[
+  {
+    "binary": "go",
+    "binary_sha256": "10df8816128c4a9408ee7c00f2182eca928e079f55fd9d6f6a1d4f299267beb8",
+    "cwd": "/tmp/review801-3vb1xe0s",
+    "tmpdir": "/tmp/review801-3vb1xe0s/tmp",
+    "env": {
+      "HOME": "/tmp/review801-3vb1xe0s/home",
+      "USERPROFILE": "/tmp/review801-3vb1xe0s/home",
+      "PATH": "",
+      "TMPDIR": "/tmp/review801-3vb1xe0s/tmp",
+      "XDG_CACHE_HOME": "relative-cache",
+      "XDG_RUNTIME_DIR": "/tmp/review801-3vb1xe0s/run",
+      "XDG_CONFIG_HOME": "/tmp/review801-3vb1xe0s/config",
+      "XDG_DATA_HOME": "/tmp/review801-3vb1xe0s/data",
+      "XDG_STATE_HOME": "/tmp/review801-3vb1xe0s/state",
+      "SYMBROWSE_NO_AUTOSTART": "1"
+    },
+    "response": {
+      "success": true,
+      "data": {
+        "name": "review-644441",
+        "pid": 644442,
+        "started_at": "2026-10-03T18:18:42.00176278Z",
+        "active_tabs": 0,
+        "last_activity": "2026-10-03T18:18:42.028241091Z",
+        "user_data_dir": "/tmp/review801-3vb1xe0s/tmp/symbrowse/sessions/review-644441",
+        "browser_context_id": "context-review-644441",
+        "ref_count": 0,
+        "scope": "worktree",
+        "origin_path": "/tmp/review801-3vb1xe0s"
+      }
+    },
+    "exit": 0,
+    "stdout": "",
+    "stderr": "time=2026-10-03T18:18:42.001Z level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\n"
+  },
+  {
+    "binary": "rust",
+    "binary_sha256": "37c3ffe032a38d3ef36e43a0e51535919032f4bfa05e47f5f94566b787cbd1f7",
+    "cwd": "/tmp/review801-vzr656g6",
+    "tmpdir": "/tmp/review801-vzr656g6/tmp",
+    "env": {
+      "HOME": "/tmp/review801-vzr656g6/home",
+      "USERPROFILE": "/tmp/review801-vzr656g6/home",
+      "PATH": "",
+      "TMPDIR": "/tmp/review801-vzr656g6/tmp",
+      "XDG_CACHE_HOME": "relative-cache",
+      "XDG_RUNTIME_DIR": "/tmp/review801-vzr656g6/run",
+      "XDG_CONFIG_HOME": "/tmp/review801-vzr656g6/config",
+      "XDG_DATA_HOME": "/tmp/review801-vzr656g6/data",
+      "XDG_STATE_HOME": "/tmp/review801-vzr656g6/state",
+      "SYMBROWSE_NO_AUTOSTART": "1"
+    },
+    "response": {
+      "success": true,
+      "data": {
+        "active_tabs": 0,
+        "browser_context_id": "context-review-644441",
+        "last_activity": "2026-10-03T18:18:42.09191441Z",
+        "name": "review-644441",
+        "origin_path": "/tmp/review801-vzr656g6",
+        "pid": 644450,
+        "ref_count": 0,
+        "scope": "worktree",
+        "started_at": "2026-10-03T18:18:42.034261548Z",
+        "user_data_dir": "relative-cache/symbrowse/sessions/review-644441"
+      }
+    },
+    "exit": 0,
+    "stdout": "",
+    "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n"
+  }
+]

@@ -1,0 +1,1638 @@
+{
+  "original_publication": "3f4c28701c5454f0b2b42090db0706fce8d0857c",
+  "original_validation_source": "824a95e0bdbe6a25108e1dbadaaebf7d89dc8cc4",
+  "retained_files": [
+    {
+      "original": "/tmp/symaira-memory763-independent-actionlint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cargo-tests.log",
+      "bytes": 29271,
+      "sha256": "edb5f20de64411eade5b87ce1ca65dd01c9bf365094a1a407086e666a044f735",
+      "retained": "retained/edb5f20de64411eade5b87ce1ca65dd01c9bf365094a1a407086e666a044f735.gz",
+      "retained_sha256": "391c0ff2b0b49e4565985875457b43619b99a8dbb681cfbca7ac6082403ffc35"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-read-controls.json",
+      "bytes": 3546744,
+      "sha256": "f28c19de37ae1afc832f89072ceb3e9c76f32d272fdb78a508198a83401fcdc0",
+      "retained": "retained/f28c19de37ae1afc832f89072ceb3e9c76f32d272fdb78a508198a83401fcdc0.gz",
+      "retained_sha256": "eb99ccd60d7cfdeb5c35bc031397f2fa25075c794601b78f9d97325a43e81519"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-read-controls.log",
+      "bytes": 36,
+      "sha256": "ed8e6e81ddbcd4ac7c127a0d3297a6a8812dff963705fc6c8c0d86270d0630ef",
+      "retained": "retained/ed8e6e81ddbcd4ac7c127a0d3297a6a8812dff963705fc6c8c0d86270d0630ef.gz",
+      "retained_sha256": "8c5d575d20744cff93ffed791844bb31a4d089048c13df00d7b5fc894f051faa"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-read.json",
+      "bytes": 2272670,
+      "sha256": "81389274a72993e047c7d2303b0496ca97f9337d83e3168a0e93e033fd0183cb",
+      "retained": "retained/81389274a72993e047c7d2303b0496ca97f9337d83e3168a0e93e033fd0183cb.gz",
+      "retained_sha256": "3bfe849135059985f984fbc4e8616b726993f92e0b9a70ba1d0e2b7f4a064e5d"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-read.log",
+      "bytes": 819,
+      "sha256": "3dcf929df7436e7917b74b3e58a8d66edf40093f3943d630e5456c4be1cadcca",
+      "retained": "retained/3dcf929df7436e7917b74b3e58a8d66edf40093f3943d630e5456c4be1cadcca.gz",
+      "retained_sha256": "03a85c5b3acf8ed725538f385fe96693e7fd05c350101f1549e78331e2cbc32e"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-write/audit-failure.json",
+      "bytes": 3804631,
+      "sha256": "fc013390f0ec4b00de36833641cc22c8ff63af8d3eec23869c6252d03ffbded5",
+      "retained": "retained/fc013390f0ec4b00de36833641cc22c8ff63af8d3eec23869c6252d03ffbded5.gz",
+      "retained_sha256": "982aa4f7e57061b09229308ebd2ea2cef96682bd99e18bca4696f34e5f3a7cfb"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-write/audit-failure.stderr",
+      "bytes": 2613,
+      "sha256": "72640557c24bc7338912ce8f0b399328d86bff49082b55db45cad38c952095cb",
+      "retained": "retained/72640557c24bc7338912ce8f0b399328d86bff49082b55db45cad38c952095cb.gz",
+      "retained_sha256": "d4151034299631c035429af545d356e5a5da52083f1a7cd3f225a5373628113d"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-write/audit-failure.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-write/deletes.json",
+      "bytes": 744149,
+      "sha256": "3215d94d8a32c92b7b2f959870df17b96a612516029b19408d5989482e647f48",
+      "retained": "retained/3215d94d8a32c92b7b2f959870df17b96a612516029b19408d5989482e647f48.gz",
+      "retained_sha256": "dbb533889164de01f656d73d844a0746cd88eb696781983c4c2b48e423bfa047"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-write/exit-failure.json",
+      "bytes": 42659,
+      "sha256": "fcd266218c371f8a779d0982baa1006b34c8d3dbdcb86ffa08170f0287c87f02",
+      "retained": "retained/fcd266218c371f8a779d0982baa1006b34c8d3dbdcb86ffa08170f0287c87f02.gz",
+      "retained_sha256": "4bf73afa7f873f7aaaf2e571d24d88d851d2488033b5daf54da0a657b65caaed"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-write/exit-failure.stderr",
+      "bytes": 756,
+      "sha256": "7eaf809acedd2d7205fce83b39281022905c13de86dcedc2e357f28f5fede927",
+      "retained": "retained/7eaf809acedd2d7205fce83b39281022905c13de86dcedc2e357f28f5fede927.gz",
+      "retained_sha256": "1f86fc136065a08ec786762004c98b86bc5667c459461091907709749c851ccf"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-write/exit-failure.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-write/fallback-boundaries.json",
+      "bytes": 229585,
+      "sha256": "b7daabfa81557aa93319f11c2c9ea0f0b468c8617b4321ee0ba2b029e2ce93f1",
+      "retained": "retained/b7daabfa81557aa93319f11c2c9ea0f0b468c8617b4321ee0ba2b029e2ce93f1.gz",
+      "retained_sha256": "feedc6e12bdf9d75e02e5a694dd71e878cecfb7a2af4b84aca4e25051f5e0609"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-write/identity-failure.json",
+      "bytes": 42369,
+      "sha256": "ea95a4433fe1db2cc6094bb5ec4dc437fde4e263766160032c34c730a095e927",
+      "retained": "retained/ea95a4433fe1db2cc6094bb5ec4dc437fde4e263766160032c34c730a095e927.gz",
+      "retained_sha256": "348497d07012f96dc1c2ccc4757a8eeb36745a985c06954877dc26ce3b69163b"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-write/identity-failure.stderr",
+      "bytes": 679,
+      "sha256": "89e466a61048935dcbf9f9e02a4a0f6ed7f4d9397501babd4a00d57c9cd702c1",
+      "retained": "retained/89e466a61048935dcbf9f9e02a4a0f6ed7f4d9397501babd4a00d57c9cd702c1.gz",
+      "retained_sha256": "156c122092c098b5bcdb724dd9de20886539189b566daca256707c1eeb53c13c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-write/identity-failure.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-write/receipt.json",
+      "bytes": 161209,
+      "sha256": "2d2b72f3152401313a93eb26c54744dc4b77669d034bd6372f19c6dee3c087bb",
+      "retained": "retained/2d2b72f3152401313a93eb26c54744dc4b77669d034bd6372f19c6dee3c087bb.gz",
+      "retained_sha256": "b9ddf1480f51a8d8947740ce8622202969800f71f67e63671caba6f14426b99c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-write/write-failures.json",
+      "bytes": 598771,
+      "sha256": "049564651512ceccd052f40421a31f2edaf7e7dacee07564cc466a992ccacfbc",
+      "retained": "retained/049564651512ceccd052f40421a31f2edaf7e7dacee07564cc466a992ccacfbc.gz",
+      "retained_sha256": "b2b4e6496f46f4df63aa7093c71c9c7312af0637245d05df81dfe429de07f47f"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-write/writes.json",
+      "bytes": 3805124,
+      "sha256": "914c0008142e1008eb2b8960a7149e837a4ffa0177528045361d33bb07ced216",
+      "retained": "retained/914c0008142e1008eb2b8960a7149e837a4ffa0177528045361d33bb07ced216.gz",
+      "retained_sha256": "79b9a92b6c261b166a2b7fcc9d2cdac15fe99a32ea6db151c2d965d9c0f2c244"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-cli-write.log",
+      "bytes": 140,
+      "sha256": "5d934b7f7a02d27fdf940ab06ffbd9d7a0c2eb70448005ee4c8a30664e0cdc8d",
+      "retained": "retained/5d934b7f7a02d27fdf940ab06ffbd9d7a0c2eb70448005ee4c8a30664e0cdc8d.gz",
+      "retained_sha256": "d0b067f4bd9149d8c7e38211dc3038f77e54e18425d50053a59a3373c3a2a283"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-clippy.log",
+      "bytes": 60,
+      "sha256": "1b06c206522a9ad6653edd56b1bb9e19254f4cd592480fbc8b10cbddc2b994e9",
+      "retained": "retained/1b06c206522a9ad6653edd56b1bb9e19254f4cd592480fbc8b10cbddc2b994e9.gz",
+      "retained_sha256": "e18afd706e93f5bc52c749d561aae538c9d1309912b74766d6ec07e0058d32c4"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-diff-check.log",
+      "bytes": 76,
+      "sha256": "1f3668a759775600aca8aa06dc50b63ceedd0f1e859f3a272bb2f8a1257589b6",
+      "retained": "retained/1f3668a759775600aca8aa06dc50b63ceedd0f1e859f3a272bb2f8a1257589b6.gz",
+      "retained_sha256": "6fe480d65c8dd663007c3cd1c7b5de1558cbb71a6b31feb040f7c6b804566205"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-dom/dom.json",
+      "bytes": 14644,
+      "sha256": "8f1520e21ac06079bed0bfc78cc57d72e92202cba3d03cd67e621f6b1027597c",
+      "retained": "retained/8f1520e21ac06079bed0bfc78cc57d72e92202cba3d03cd67e621f6b1027597c.gz",
+      "retained_sha256": "22050ecfbf54e3d8ec72b4f892f7410563611291371290cd9e07186d1b4136e0"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-dom/native/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "6b20ad3926124de05582367233e3fad845ba3da17c6f25df7d8ef22d65aea8be",
+      "retained": "retained/6b20ad3926124de05582367233e3fad845ba3da17c6f25df7d8ef22d65aea8be.gz",
+      "retained_sha256": "b9312a2f72abe913a59a804d849d727bc745825df76bd75685f38c5446bc70ed"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-dom/native/current.db",
+      "bytes": 446464,
+      "sha256": "1513206ca0cebddfb51cfd2d3434d2a74f33f094f499145538748ca0bdb0dd3d",
+      "retained": "retained/1513206ca0cebddfb51cfd2d3434d2a74f33f094f499145538748ca0bdb0dd3d.gz",
+      "retained_sha256": "cb369d70a78d02d028a32b138c164912c79807f2a76da619438dba26e93b1f06"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-dom/native/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-dom/native/stdout.log",
+      "bytes": 42,
+      "sha256": "9267debbcbadd87416d5d7feab807e45da265b806308084fe01d8bf68b459cf6",
+      "retained": "retained/9267debbcbadd87416d5d7feab807e45da265b806308084fe01d8bf68b459cf6.gz",
+      "retained_sha256": "81d99bcdb5d3acfa0f5ff9e57a4cf7a8185f857d02b202a0c0708698b5fae075"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-dom/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "6b20ad3926124de05582367233e3fad845ba3da17c6f25df7d8ef22d65aea8be",
+      "retained": "retained/6b20ad3926124de05582367233e3fad845ba3da17c6f25df7d8ef22d65aea8be.gz",
+      "retained_sha256": "b9312a2f72abe913a59a804d849d727bc745825df76bd75685f38c5446bc70ed"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-dom/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "302ca4adc5ffa8d7863be4a6e3611d31315c51a4283dc19908a31ce9c017fe1e",
+      "retained": "retained/302ca4adc5ffa8d7863be4a6e3611d31315c51a4283dc19908a31ce9c017fe1e.gz",
+      "retained_sha256": "3075f12d22aa550babaa4f4a654a482541beed575e9ccee1b49fba821db9dc67"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-dom.cjs",
+      "bytes": 2798,
+      "sha256": "35944216c6b37dac34b0ab93907659bb26fbd5de80c8f11b68b748e0fe61056a",
+      "retained": "retained/35944216c6b37dac34b0ab93907659bb26fbd5de80c8f11b68b748e0fe61056a.gz",
+      "retained_sha256": "3e74e13e67c0687fe3d52d8ba3adb29a01ad8c7e89001cd83ea61a885a93ec95"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-dom.json",
+      "bytes": 37552,
+      "sha256": "591862bcf65938b548aaa6efacaf83ef31ae993985ec130ec146cc913e640784",
+      "retained": "retained/591862bcf65938b548aaa6efacaf83ef31ae993985ec130ec146cc913e640784.gz",
+      "retained_sha256": "1eb3e29d227b23bac581ad9c1ef5740994df3decb024b9ed873547b3089e8e87"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-dom.log",
+      "bytes": 25,
+      "sha256": "d7e980929105ce9d8fee99652b0d004bd390c2b23aa8c55c77e2a872a27e885e",
+      "retained": "retained/d7e980929105ce9d8fee99652b0d004bd390c2b23aa8c55c77e2a872a27e885e.gz",
+      "retained_sha256": "d838928d2d76566667085986c256b163a4aaa30aaa06e1ef1a2a17ec39ac87d4"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-dom.py",
+      "bytes": 1685,
+      "sha256": "d1a152aee73b07197fb074d44afc9b86e445373eb4cb51276277655863ebfef9",
+      "retained": "retained/d1a152aee73b07197fb074d44afc9b86e445373eb4cb51276277655863ebfef9.gz",
+      "retained_sha256": "73c22e09a9bc6a1f308706f39a25cb0eb8aa7a09fa4ea0a938b4f018e8a728af"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-draft-status.json",
+      "bytes": 4003,
+      "sha256": "931cd854ece574a70b6ccb58d8748409750838d2ba6049d17305b37dbfff022b",
+      "retained": "retained/931cd854ece574a70b6ccb58d8748409750838d2ba6049d17305b37dbfff022b.gz",
+      "retained_sha256": "7f7fb217c8ffb3424a4bf92b40b25797d19f459caa5c4cd1fff7d1ab61918106"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-finalize-v2.py",
+      "bytes": 6545,
+      "sha256": "36dc94c352ba8f9e6c6b12c3ee45e04dd2caee47fb8b7677271f876e0b8357ba",
+      "retained": "retained/36dc94c352ba8f9e6c6b12c3ee45e04dd2caee47fb8b7677271f876e0b8357ba.gz",
+      "retained_sha256": "de7f2fca1cbf5981c418747b6fa6af457650b6b59bf83bba84361d758a6ba01c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-finalize.log",
+      "bytes": 316,
+      "sha256": "f4c7b81d826bfa2bae55155657f0ee34eeac646c093b6110a1c4aeb4aa13786e",
+      "retained": "retained/f4c7b81d826bfa2bae55155657f0ee34eeac646c093b6110a1c4aeb4aa13786e.gz",
+      "retained_sha256": "ed331106d1f1dced32ce4b470484574636040348babdc8a59368443152f4381b"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-finalize.py",
+      "bytes": 6481,
+      "sha256": "bb583ea8a935981aaa7cd3642a2aed0b1ae7889038ba10bb140c8578d2301891",
+      "retained": "retained/bb583ea8a935981aaa7cd3642a2aed0b1ae7889038ba10bb140c8578d2301891.gz",
+      "retained_sha256": "4fa9f5c5dc9bbe5e2d6d75dd366970efdf36362a316e10d88b45225a986fefd7"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-fmt.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-host/go/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "cfe2bcaf0c51f5ec143704c27d0ae6278fa467d1fb0cbac6b61faf552ab9ed52",
+      "retained": "retained/cfe2bcaf0c51f5ec143704c27d0ae6278fa467d1fb0cbac6b61faf552ab9ed52.gz",
+      "retained_sha256": "a38655c5ef902b2e22d03620c225d7a8b4e0b571cb92040b7d59d127d4953ca4"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-host/go/current.db",
+      "bytes": 442368,
+      "sha256": "02a37bec60e52b17f381728c8e0351a659e2c95805ed0d9417aa61591269ebdf",
+      "retained": "retained/02a37bec60e52b17f381728c8e0351a659e2c95805ed0d9417aa61591269ebdf.gz",
+      "retained_sha256": "e57a1d9f0e7c8ddbf32cbb49d36e44ec499b73feaaed73736a86a081b422c3b6"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-host/go/stderr.log",
+      "bytes": 854,
+      "sha256": "63e593eaefa32eb0accb40ca4526644c48182d70a1f82fe64abbc1dc3cbcb859",
+      "retained": "retained/63e593eaefa32eb0accb40ca4526644c48182d70a1f82fe64abbc1dc3cbcb859.gz",
+      "retained_sha256": "8554551f6bf22d4a645008b33f93401f49e37c55a41f08544101d2a78eeedec6"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-host/go/stdout.log",
+      "bytes": 59,
+      "sha256": "0a4dac5ccceaaab091e5934e8a2b59f4eca55e81f3b108a4cc1f8e2d1c2318bb",
+      "retained": "retained/0a4dac5ccceaaab091e5934e8a2b59f4eca55e81f3b108a4cc1f8e2d1c2318bb.gz",
+      "retained_sha256": "89f84951743227b7f5a8ba7e592d672a52412872a19da8553f2ea1b01307c5b6"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-host/native/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "cfe2bcaf0c51f5ec143704c27d0ae6278fa467d1fb0cbac6b61faf552ab9ed52",
+      "retained": "retained/cfe2bcaf0c51f5ec143704c27d0ae6278fa467d1fb0cbac6b61faf552ab9ed52.gz",
+      "retained_sha256": "a38655c5ef902b2e22d03620c225d7a8b4e0b571cb92040b7d59d127d4953ca4"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-host/native/current.db",
+      "bytes": 454656,
+      "sha256": "01ece063a06675274aeb4304ea576ebb63f66f380f289d6ab822566b5be090a3",
+      "retained": "retained/01ece063a06675274aeb4304ea576ebb63f66f380f289d6ab822566b5be090a3.gz",
+      "retained_sha256": "626262af3dfe165eb0b483d1650e4733ebe3e7dff4409e93b335c341e25e0c64"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-host/native/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-host/native/stdout.log",
+      "bytes": 42,
+      "sha256": "0231d237960a634a3eb8a47b552aa8ceab089d6ddf30ac21e70a4a0107a97c8d",
+      "retained": "retained/0231d237960a634a3eb8a47b552aa8ceab089d6ddf30ac21e70a4a0107a97c8d.gz",
+      "retained_sha256": "ac997fc003a840ae7701eb8cdfacde73f78c98d849db07c9ed8175d37497e550"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-host/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "cfe2bcaf0c51f5ec143704c27d0ae6278fa467d1fb0cbac6b61faf552ab9ed52",
+      "retained": "retained/cfe2bcaf0c51f5ec143704c27d0ae6278fa467d1fb0cbac6b61faf552ab9ed52.gz",
+      "retained_sha256": "a38655c5ef902b2e22d03620c225d7a8b4e0b571cb92040b7d59d127d4953ca4"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-host/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "321373a848122cbdd087c0e653883576c9fa6b2003d0ba4d778b214a11e9047e",
+      "retained": "retained/321373a848122cbdd087c0e653883576c9fa6b2003d0ba4d778b214a11e9047e.gz",
+      "retained_sha256": "aa6dc6b028168d27fb348e6fc7905fc5ffd46f8d52cf2155c5a1f208d99ca1fa"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-host.json",
+      "bytes": 1305065,
+      "sha256": "295ff13b2f4ec6523db813a4ade0b2dbf613d26c2d3271618b19d864a1b0f491",
+      "retained": "retained/295ff13b2f4ec6523db813a4ade0b2dbf613d26c2d3271618b19d864a1b0f491.gz",
+      "retained_sha256": "7e8d3cb91557938b0723420d2926a85e8a0cbda1be9c75859038b1bf3b9228f0"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-host.log",
+      "bytes": 42,
+      "sha256": "09ec13741b15f8d3e27971835074bfce4b4e2879a9d6b128a6e01f3f1cae0901",
+      "retained": "retained/09ec13741b15f8d3e27971835074bfce4b4e2879a9d6b128a6e01f3f1cae0901.gz",
+      "retained_sha256": "f57161343b55e7f4ea308103de0631e1749f7f6921bdbb1b32ae1d4849dc6f54"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-host.py",
+      "bytes": 4468,
+      "sha256": "07b3a1ab9b45fadefc6bd55ad9a5148256a4710470c0ce991c0fe7fefe96b7c6",
+      "retained": "retained/07b3a1ab9b45fadefc6bd55ad9a5148256a4710470c0ce991c0fe7fefe96b7c6.gz",
+      "retained_sha256": "493dcb175dbe914c2876b75e777b44897c3c6f1500a5df3b9fd9dc5e43e3ccf3"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/dom.evidence/native/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "a1f653b1d9475f937fc928accba7cb0f24bb7a819987eb5e2a6f0e8e6648a657",
+      "retained": "retained/a1f653b1d9475f937fc928accba7cb0f24bb7a819987eb5e2a6f0e8e6648a657.gz",
+      "retained_sha256": "e499d3a90c7dc6c865a45a51c2ff25cc7a2c2a59ff78220425f3fe96b19b2e51"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/dom.evidence/native/current.db",
+      "bytes": 450560,
+      "sha256": "a55f60eff029a42d97a5507ac3640b0de4a78d51151a2fe328239e6c92fd779d",
+      "retained": "retained/a55f60eff029a42d97a5507ac3640b0de4a78d51151a2fe328239e6c92fd779d.gz",
+      "retained_sha256": "8ec1601a6f7404108607ea2b4e68376e5eb8bddb2504b418bb2816cee8bcbe00"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/dom.evidence/native/dom.json",
+      "bytes": 21400,
+      "sha256": "8689fcf4fbd70e1abda7fefd2b296f0079ea657b2b2e93c926e20d59c405575a",
+      "retained": "retained/8689fcf4fbd70e1abda7fefd2b296f0079ea657b2b2e93c926e20d59c405575a.gz",
+      "retained_sha256": "d2e52192f1c56aefcbd80e0a5215355414a8beb878309b98b325c6b8cccc9d7c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/dom.evidence/native/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/dom.evidence/native/stdout.log",
+      "bytes": 42,
+      "sha256": "10a01eca4855d04577d17fc7db599e9d35d656c01492cec95be14fd085f21ba0",
+      "retained": "retained/10a01eca4855d04577d17fc7db599e9d35d656c01492cec95be14fd085f21ba0.gz",
+      "retained_sha256": "411e10a35ca6bfe6ca513781981f89b377e2a52f767f62c303b109cbeed1ee2a"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/dom.evidence/original/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "a1f653b1d9475f937fc928accba7cb0f24bb7a819987eb5e2a6f0e8e6648a657",
+      "retained": "retained/a1f653b1d9475f937fc928accba7cb0f24bb7a819987eb5e2a6f0e8e6648a657.gz",
+      "retained_sha256": "e499d3a90c7dc6c865a45a51c2ff25cc7a2c2a59ff78220425f3fe96b19b2e51"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/dom.evidence/original/current.db",
+      "bytes": 446464,
+      "sha256": "6bd02d504d019a49774da61ec6bd43688ffbb472176ee0c68a02bcddcae23535",
+      "retained": "retained/6bd02d504d019a49774da61ec6bd43688ffbb472176ee0c68a02bcddcae23535.gz",
+      "retained_sha256": "54d189428776b5dcf79d209accced612b80f96178985c450a5e3f7d0bafdde6a"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/dom.evidence/original/dom.json",
+      "bytes": 12377,
+      "sha256": "b58f071f65c07dc8dded8dd0f674d3b8404b9c1be125988ff0879caf52ce7de8",
+      "retained": "retained/b58f071f65c07dc8dded8dd0f674d3b8404b9c1be125988ff0879caf52ce7de8.gz",
+      "retained_sha256": "c904256a2e19375e2a54baf223f7eeddf160f46f82c9241b3c602f5c1b07bbf0"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/dom.evidence/original/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/dom.evidence/original/stdout.log",
+      "bytes": 42,
+      "sha256": "b0d0feddbc97a2417fd38dc38c1d722622cf817f1ab4945bb5afe6a76911b435",
+      "retained": "retained/b0d0feddbc97a2417fd38dc38c1d722622cf817f1ab4945bb5afe6a76911b435.gz",
+      "retained_sha256": "b315b4685b5c767075141d8842f611afb449872257540f9dd2fa9c452c5558a7"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/dom.evidence/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "a1f653b1d9475f937fc928accba7cb0f24bb7a819987eb5e2a6f0e8e6648a657",
+      "retained": "retained/a1f653b1d9475f937fc928accba7cb0f24bb7a819987eb5e2a6f0e8e6648a657.gz",
+      "retained_sha256": "e499d3a90c7dc6c865a45a51c2ff25cc7a2c2a59ff78220425f3fe96b19b2e51"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/dom.evidence/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "54da419d7dd46b8845a633577d017875321de3ccaa2d49af0944b89a942d6e5a",
+      "retained": "retained/54da419d7dd46b8845a633577d017875321de3ccaa2d49af0944b89a942d6e5a.gz",
+      "retained_sha256": "1254ab47ba4af16946029c40a786e58a13df245d1888447fcd0ced68b6688acf"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/dom.json",
+      "bytes": 2034,
+      "sha256": "023c7b487cc14af37f8b7d3c3f336d55d8e4d5c0347f1410e650da0b794874b7",
+      "retained": "retained/023c7b487cc14af37f8b7d3c3f336d55d8e4d5c0347f1410e650da0b794874b7.gz",
+      "retained_sha256": "d46e5de389855f9fdbacadbfd2e9162e2a72725fb030f463e39e73f3bdeacbbb"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/dom.log",
+      "bytes": 80,
+      "sha256": "05e6103ee0c20327891d6bbe329d86d2f9146a9182f5be425a068ba37137c1df",
+      "retained": "retained/05e6103ee0c20327891d6bbe329d86d2f9146a9182f5be425a068ba37137c1df.gz",
+      "retained_sha256": "bb662ff9d099675351defde68d8c8b1263c037d60e9a8477fe872b5b62a51921"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/empty-state.evidence/go/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7abc2bd7df4add6e0277a1b09b38d1ddf3dcd511b2ada549fb6f6987c00e002c",
+      "retained": "retained/7abc2bd7df4add6e0277a1b09b38d1ddf3dcd511b2ada549fb6f6987c00e002c.gz",
+      "retained_sha256": "9622c41045e13e5a825fe36162d5ccdd7f5fc3e5cee30f4d0a36e8bf91f79261"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/empty-state.evidence/go/current.db",
+      "bytes": 442368,
+      "sha256": "36428fef764c5e865634951f8f0947cf54fc9ad13dffcedebc5b984bc84f2c3d",
+      "retained": "retained/36428fef764c5e865634951f8f0947cf54fc9ad13dffcedebc5b984bc84f2c3d.gz",
+      "retained_sha256": "b1d2725f78aa72dd1e5019587ac20877dd18538dc516da8ee77eb8bde78e299c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/empty-state.evidence/go/stderr.log",
+      "bytes": 3325,
+      "sha256": "65329bf65e63861866ed090b9a1b0b1425b147eff1f67cbd20ec0c7657721868",
+      "retained": "retained/65329bf65e63861866ed090b9a1b0b1425b147eff1f67cbd20ec0c7657721868.gz",
+      "retained_sha256": "d4ec9217f4accfb87396183030f53e5933b0c626d5061ff1e688640c82efd3c5"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/empty-state.evidence/go/stdout.log",
+      "bytes": 59,
+      "sha256": "cd95875b80c3fab3c727a1570b275b48b5c176940d5cd7124fb5300c8f2300bf",
+      "retained": "retained/cd95875b80c3fab3c727a1570b275b48b5c176940d5cd7124fb5300c8f2300bf.gz",
+      "retained_sha256": "961b01d5a2965b8279f5609b39a9c8705821fe6c230f7571a4f287c13e688c12"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/empty-state.evidence/rust/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7abc2bd7df4add6e0277a1b09b38d1ddf3dcd511b2ada549fb6f6987c00e002c",
+      "retained": "retained/7abc2bd7df4add6e0277a1b09b38d1ddf3dcd511b2ada549fb6f6987c00e002c.gz",
+      "retained_sha256": "9622c41045e13e5a825fe36162d5ccdd7f5fc3e5cee30f4d0a36e8bf91f79261"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/empty-state.evidence/rust/current.db",
+      "bytes": 442368,
+      "sha256": "bed3fd4b2bf79792cc415c84e12f7619ab6b2166c5e88db2124488dcf695d50b",
+      "retained": "retained/bed3fd4b2bf79792cc415c84e12f7619ab6b2166c5e88db2124488dcf695d50b.gz",
+      "retained_sha256": "c6cb5aa20a8ec41f94d733a6b4e364b4d5a41ff49fdff1e81f3f026297e1ebac"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/empty-state.evidence/rust/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/empty-state.evidence/rust/stdout.log",
+      "bytes": 42,
+      "sha256": "5b1d5635c3418dd57ff772c0f717d8e374523fc05b1b8ec0b623ac872808a39a",
+      "retained": "retained/5b1d5635c3418dd57ff772c0f717d8e374523fc05b1b8ec0b623ac872808a39a.gz",
+      "retained_sha256": "240b41c9e866a38871bf8958553076d432dabc75fa1a0c3a0e6a0b6c2e402473"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/empty-state.evidence/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7abc2bd7df4add6e0277a1b09b38d1ddf3dcd511b2ada549fb6f6987c00e002c",
+      "retained": "retained/7abc2bd7df4add6e0277a1b09b38d1ddf3dcd511b2ada549fb6f6987c00e002c.gz",
+      "retained_sha256": "9622c41045e13e5a825fe36162d5ccdd7f5fc3e5cee30f4d0a36e8bf91f79261"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/empty-state.evidence/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "2cf7de32493ef17a246cabe82789c9acf088dd0cbadae1f511b0631c3ecd9706",
+      "retained": "retained/2cf7de32493ef17a246cabe82789c9acf088dd0cbadae1f511b0631c3ecd9706.gz",
+      "retained_sha256": "5d3d7c2893867763d8ea1e36a575af58d86f673c26b9fb5efd56902906ab4115"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/empty-state.json",
+      "bytes": 357404,
+      "sha256": "6456d6c86c393290e81853dc72c583343f7d4d09f484b9fadb6a2c4fb0855eac",
+      "retained": "retained/6456d6c86c393290e81853dc72c583343f7d4d09f484b9fadb6a2c4fb0855eac.gz",
+      "retained_sha256": "5b83e2cc3ba66b0aa9526e7596022bdaeaf25bc736d6da7a10b7628a35015b69"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/empty-state.log",
+      "bytes": 6155,
+      "sha256": "b8b18256cba3196557adcaf79423f8937a639863dbf627c9d894308322361d8a",
+      "retained": "retained/b8b18256cba3196557adcaf79423f8937a639863dbf627c9d894308322361d8a.gz",
+      "retained_sha256": "4d2566f66fe1d4998cc010f531dab40b3d6412858c8917fcbc9048a339a5673e"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/http.evidence/go/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7333922fbacfaf7db620fbbcac9b6cfb9173b16877f6d5e8a477891d5b7f7829",
+      "retained": "retained/7333922fbacfaf7db620fbbcac9b6cfb9173b16877f6d5e8a477891d5b7f7829.gz",
+      "retained_sha256": "7a819eeaf9ff4f9d5182591ee660d4a5f958d14b10f7d507f149354c8c5d25ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/http.evidence/go/current.db",
+      "bytes": 446464,
+      "sha256": "8f9e2d4f66db6e4513bfca69142b85593ae077b93bf381fe29402a036e34ed8b",
+      "retained": "retained/8f9e2d4f66db6e4513bfca69142b85593ae077b93bf381fe29402a036e34ed8b.gz",
+      "retained_sha256": "161f616551d2eb249dba99b5be4e84bfaffdefb77458ff9e2a83a44f4d86b03b"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/http.evidence/go/stderr.log",
+      "bytes": 7044,
+      "sha256": "f237a5e488178a8d0cd433e528ea9c3405fb32464ad31faaed164977f28daed3",
+      "retained": "retained/f237a5e488178a8d0cd433e528ea9c3405fb32464ad31faaed164977f28daed3.gz",
+      "retained_sha256": "19bf0c7769abc31c6b08c0eb26fd80d7407692761db15e1a4466cc1000684e47"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/http.evidence/go/stdout.log",
+      "bytes": 59,
+      "sha256": "70859e73bb3c49dcaf606281c04c6b43fea2e42f4a4ad8b8e2f96e55f144a046",
+      "retained": "retained/70859e73bb3c49dcaf606281c04c6b43fea2e42f4a4ad8b8e2f96e55f144a046.gz",
+      "retained_sha256": "aeabf2640fb55da972eb4421773e38655436691717ecc75bd2f545058d316016"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/http.evidence/rust/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7333922fbacfaf7db620fbbcac9b6cfb9173b16877f6d5e8a477891d5b7f7829",
+      "retained": "retained/7333922fbacfaf7db620fbbcac9b6cfb9173b16877f6d5e8a477891d5b7f7829.gz",
+      "retained_sha256": "7a819eeaf9ff4f9d5182591ee660d4a5f958d14b10f7d507f149354c8c5d25ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/http.evidence/rust/current.db",
+      "bytes": 450560,
+      "sha256": "cda2af689f7455808d29e03d26c670e811e606dea86d1a87cd8acc2abd9d9439",
+      "retained": "retained/cda2af689f7455808d29e03d26c670e811e606dea86d1a87cd8acc2abd9d9439.gz",
+      "retained_sha256": "c2627bd97851f7dbaa0cd776e39990c2bc287b6108e31fea0324afb4537de64d"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/http.evidence/rust/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/http.evidence/rust/stdout.log",
+      "bytes": 42,
+      "sha256": "845396324896f899b3e1af6c73ba82aca0a7248f9fe97029061a36b3bd1592eb",
+      "retained": "retained/845396324896f899b3e1af6c73ba82aca0a7248f9fe97029061a36b3bd1592eb.gz",
+      "retained_sha256": "51de48ff41faab5476444bd9f7001e142cb553c126c94b07bdc3aed07df04ddd"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/http.evidence/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7333922fbacfaf7db620fbbcac9b6cfb9173b16877f6d5e8a477891d5b7f7829",
+      "retained": "retained/7333922fbacfaf7db620fbbcac9b6cfb9173b16877f6d5e8a477891d5b7f7829.gz",
+      "retained_sha256": "7a819eeaf9ff4f9d5182591ee660d4a5f958d14b10f7d507f149354c8c5d25ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/http.evidence/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "f4ed236a352ceb73bff6609e5b3deb277d18b75aa1bd253a9cc57bb502f9918e",
+      "retained": "retained/f4ed236a352ceb73bff6609e5b3deb277d18b75aa1bd253a9cc57bb502f9918e.gz",
+      "retained_sha256": "5af17244dd74b4bc964081779df72abeabac80c3a179f8867c14aa4d14c526dc"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/http.json",
+      "bytes": 5153333,
+      "sha256": "1d8e04d7f3e098e1a0794babc9e777351da9661326a71d7810e70f3500031505",
+      "retained": "retained/1d8e04d7f3e098e1a0794babc9e777351da9661326a71d7810e70f3500031505.gz",
+      "retained_sha256": "ab1ecd4beb9765e8bb44f2abf83a21767f5b1b05f58e4b6aab8bc4df4b93cb44"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/http.log",
+      "bytes": 280,
+      "sha256": "ad5e703ae9186e09ce92f2aca3942f1209cad54e73d6ca9b4e68e3f33dcfc282",
+      "retained": "retained/ad5e703ae9186e09ce92f2aca3942f1209cad54e73d6ca9b4e68e3f33dcfc282.gz",
+      "retained_sha256": "a5aa7669a688f571944e4bb20100d9c816efd34a3355bbd7f0ddfcdba25a24ed"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/receipt.json",
+      "bytes": 3342,
+      "sha256": "8d36a356f07d1227ff4f6fcb554fc8256778ea9d1e63213cce0af56d320ad8d3",
+      "retained": "retained/8d36a356f07d1227ff4f6fcb554fc8256778ea9d1e63213cce0af56d320ad8d3.gz",
+      "retained_sha256": "b25fd69a99933da0b847200b21b7ce22b6da636f8b5d259de63a2d06a2e2ff1a"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/same-origin.evidence/go/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "df962d5c75558aedbc0ad29b5be85eef2f96b671f09cd66aa4f48e13e305e9d2",
+      "retained": "retained/df962d5c75558aedbc0ad29b5be85eef2f96b671f09cd66aa4f48e13e305e9d2.gz",
+      "retained_sha256": "78d4ecbc5e27265ea56629865951d348f02e895aafbd195e30194b5a10f52e62"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/same-origin.evidence/go/current.db",
+      "bytes": 442368,
+      "sha256": "0acaec5eb2f22a73f73f22b79ac49d67e6765089d98872ca07411430169a095c",
+      "retained": "retained/0acaec5eb2f22a73f73f22b79ac49d67e6765089d98872ca07411430169a095c.gz",
+      "retained_sha256": "bf9663d261112bfa2953ed900032eb03a20f2571a9faa9a4bc1f660d6c0e251b"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/same-origin.evidence/go/stderr.log",
+      "bytes": 1807,
+      "sha256": "16f98e92236b2b8955f28f5e81e43310cd0936e77e046bb365e182068a36a2ae",
+      "retained": "retained/16f98e92236b2b8955f28f5e81e43310cd0936e77e046bb365e182068a36a2ae.gz",
+      "retained_sha256": "bda514579038a47fd38b7f902944fc321729d0b8218c53263a5baf2399a83212"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/same-origin.evidence/go/stdout.log",
+      "bytes": 59,
+      "sha256": "d833a7125a7e22a056eab9c02ee1fb825605c5ceebbe0c816b8c813e0c8fca25",
+      "retained": "retained/d833a7125a7e22a056eab9c02ee1fb825605c5ceebbe0c816b8c813e0c8fca25.gz",
+      "retained_sha256": "a6c1da275a9a3442d99b860450ca9abd5ec70e36dcb4255e59d97e6c9aa4d42c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/same-origin.evidence/native/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "df962d5c75558aedbc0ad29b5be85eef2f96b671f09cd66aa4f48e13e305e9d2",
+      "retained": "retained/df962d5c75558aedbc0ad29b5be85eef2f96b671f09cd66aa4f48e13e305e9d2.gz",
+      "retained_sha256": "78d4ecbc5e27265ea56629865951d348f02e895aafbd195e30194b5a10f52e62"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/same-origin.evidence/native/current.db",
+      "bytes": 450560,
+      "sha256": "44c457c88979442d6094af5887d9f75e74be9afe2385f0d1f319461e82ea3eb1",
+      "retained": "retained/44c457c88979442d6094af5887d9f75e74be9afe2385f0d1f319461e82ea3eb1.gz",
+      "retained_sha256": "bedd894e35df0693c3c9d297d8f0c52b9a88d441a302ae0b9905b4da06052d04"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/same-origin.evidence/native/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/same-origin.evidence/native/stdout.log",
+      "bytes": 42,
+      "sha256": "f0a1e15c134541be077e0acf42e3e7036a35cc3ea2200bbef64ee07d5c815687",
+      "retained": "retained/f0a1e15c134541be077e0acf42e3e7036a35cc3ea2200bbef64ee07d5c815687.gz",
+      "retained_sha256": "2d020be98f411fdcf9740194b88569f8d90275eea7985c1f7eb02a12615737ba"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/same-origin.evidence/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "df962d5c75558aedbc0ad29b5be85eef2f96b671f09cd66aa4f48e13e305e9d2",
+      "retained": "retained/df962d5c75558aedbc0ad29b5be85eef2f96b671f09cd66aa4f48e13e305e9d2.gz",
+      "retained_sha256": "78d4ecbc5e27265ea56629865951d348f02e895aafbd195e30194b5a10f52e62"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/same-origin.evidence/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "1acc54f0fe6195e26e608f98304be7231785a0e06f27b19138ca569f8fbd4a41",
+      "retained": "retained/1acc54f0fe6195e26e608f98304be7231785a0e06f27b19138ca569f8fbd4a41.gz",
+      "retained_sha256": "028553852899fee2df955631464be4fc06ca76e32684162be192bb0c84f38a44"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/same-origin.json",
+      "bytes": 1671654,
+      "sha256": "0b9e0ec88778b967b6841857bfec6a5a203219bb391813032dc561c92d68b7f1",
+      "retained": "retained/0b9e0ec88778b967b6841857bfec6a5a203219bb391813032dc561c92d68b7f1.gz",
+      "retained_sha256": "0bd21d97f1118a522e2d290d866db7655cc66eff07df0f4612beaad3acb1aeb7"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/same-origin.log",
+      "bytes": 90,
+      "sha256": "724e7a277ef4a8172a8952182504453cc45a084ca5cea93654c9f5d87c432388",
+      "retained": "retained/724e7a277ef4a8172a8952182504453cc45a084ca5cea93654c9f5d87c432388.gz",
+      "retained_sha256": "aca66337ca81ecddc7e4a18f46747a5b7fb6f6013fbc39ca41d54b0e45ed9957"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/wrong-secret.evidence/go/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "32ed923e14d543c5d80de7d009fdfc559186bd5942bef578f90cbb8b859fe343",
+      "retained": "retained/32ed923e14d543c5d80de7d009fdfc559186bd5942bef578f90cbb8b859fe343.gz",
+      "retained_sha256": "3cc7cd838520662ecd124db1ea5d31b09f7fa5a43ee71f7634b0eb35d6771813"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/wrong-secret.evidence/go/current.db",
+      "bytes": 442368,
+      "sha256": "ab058c1361e631f8b5711a45edd62c99fcb53e5fb1ebf5c9ad63774d275c91ba",
+      "retained": "retained/ab058c1361e631f8b5711a45edd62c99fcb53e5fb1ebf5c9ad63774d275c91ba.gz",
+      "retained_sha256": "627cfad7dc0ce465392202503b0c2ec6a94e3bf2d1715101183ba7a0dd2604e3"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/wrong-secret.evidence/go/stderr.log",
+      "bytes": 3318,
+      "sha256": "ac723756e662f61f002b39f1c0aace0bc895bded20cc02fe1a69e619bdceb0ad",
+      "retained": "retained/ac723756e662f61f002b39f1c0aace0bc895bded20cc02fe1a69e619bdceb0ad.gz",
+      "retained_sha256": "901940737c255f9f20fc09b4f5c9a0c63712df2d89d3732bfae43d7f43f63e3a"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/wrong-secret.evidence/go/stdout.log",
+      "bytes": 59,
+      "sha256": "cbc899523eb5f6d5292b2b6bcfe27c2b7b16fbed94b3e3214135a12eab683ea5",
+      "retained": "retained/cbc899523eb5f6d5292b2b6bcfe27c2b7b16fbed94b3e3214135a12eab683ea5.gz",
+      "retained_sha256": "3959c3451861d2654044b3a4c57df4f075e339e6f917169f814d9ced90c7e561"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/wrong-secret.evidence/rust/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "32ed923e14d543c5d80de7d009fdfc559186bd5942bef578f90cbb8b859fe343",
+      "retained": "retained/32ed923e14d543c5d80de7d009fdfc559186bd5942bef578f90cbb8b859fe343.gz",
+      "retained_sha256": "3cc7cd838520662ecd124db1ea5d31b09f7fa5a43ee71f7634b0eb35d6771813"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/wrong-secret.evidence/rust/current.db",
+      "bytes": 442368,
+      "sha256": "90ca04f042fbd96936ed74b0efdca7413938bf96a9b3d100451720a81d0cdd6f",
+      "retained": "retained/90ca04f042fbd96936ed74b0efdca7413938bf96a9b3d100451720a81d0cdd6f.gz",
+      "retained_sha256": "8a8ce21f46f37c8a67b90596c35abb9f949df4794074888c9c2df259b7cedf3f"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/wrong-secret.evidence/rust/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/wrong-secret.evidence/rust/stdout.log",
+      "bytes": 42,
+      "sha256": "34fc9cc4ce0ea8c513f4ad325eb5f01c0771ac24faf58e7034239d915eccb60e",
+      "retained": "retained/34fc9cc4ce0ea8c513f4ad325eb5f01c0771ac24faf58e7034239d915eccb60e.gz",
+      "retained_sha256": "b5b54720e099104e51f5558c3e77f1bd4894bf3871a4c5e7340713c4650704ce"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/wrong-secret.evidence/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "32ed923e14d543c5d80de7d009fdfc559186bd5942bef578f90cbb8b859fe343",
+      "retained": "retained/32ed923e14d543c5d80de7d009fdfc559186bd5942bef578f90cbb8b859fe343.gz",
+      "retained_sha256": "3cc7cd838520662ecd124db1ea5d31b09f7fa5a43ee71f7634b0eb35d6771813"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/wrong-secret.evidence/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "091f1dd18dd9de1ea3ca52be513b8ccc4268d9014bf8dd0454d9387eff0b7332",
+      "retained": "retained/091f1dd18dd9de1ea3ca52be513b8ccc4268d9014bf8dd0454d9387eff0b7332.gz",
+      "retained_sha256": "ed7c6088825c2c39eac621d77cf5f3cd6980c0cb65c7fc54afc1a0d6ac59d66d"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/wrong-secret.json",
+      "bytes": 357596,
+      "sha256": "580a8d7f3df0a2b43b13cc958c1c8d04bd23ace3bda5f40bc293aa64d9c98230",
+      "retained": "retained/580a8d7f3df0a2b43b13cc958c1c8d04bd23ace3bda5f40bc293aa64d9c98230.gz",
+      "retained_sha256": "05fdfac16ecc3531dccf4f5f5ed49b1b2bfba0b8bbd1d842a6a743f51669f358"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates/wrong-secret.log",
+      "bytes": 6336,
+      "sha256": "3a715fb72db0cb5f29b118a036fa739dcc81615572b3459e225b328debc11218",
+      "retained": "retained/3a715fb72db0cb5f29b118a036fa739dcc81615572b3459e225b328debc11218.gz",
+      "retained_sha256": "c7d0b89eb96d9c76433d8b959baeaeece49d9003cde45e58acc204987b492965"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates.log",
+      "bytes": 2415,
+      "sha256": "7780a1c67212fc24cbef82ad4dfd594d0efafe6d54c332b74b506f5fc49ae919",
+      "retained": "retained/7780a1c67212fc24cbef82ad4dfd594d0efafe6d54c332b74b506f5fc49ae919.gz",
+      "retained_sha256": "7cf0edb3f96db1cac0795a3b7ee1838507d1d2b55c6cb10cc138c8a29cb2326c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-http-gates.py",
+      "bytes": 2537,
+      "sha256": "84bfbfb4e3ccccfb5f7aaa86bab0126f8de926c2d30c0f3b176ccec110d89212",
+      "retained": "retained/84bfbfb4e3ccccfb5f7aaa86bab0126f8de926c2d30c0f3b176ccec110d89212.gz",
+      "retained_sha256": "938a0a8da015c09d42c8f741bcedd2ae32eeed6fe22951ef57a74e126fc7c3a2"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-retention-final.log",
+      "bytes": 289,
+      "sha256": "8353e6fb7aa4962d2453977d586321737f13bb60429225602a501d2da8197b0f",
+      "retained": "retained/8353e6fb7aa4962d2453977d586321737f13bb60429225602a501d2da8197b0f.gz",
+      "retained_sha256": "9ec366775c0f2a884a001a419ad4f890d8cd6347489d258802ae4f030cdfb06e"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-retention.log",
+      "bytes": 289,
+      "sha256": "8353e6fb7aa4962d2453977d586321737f13bb60429225602a501d2da8197b0f",
+      "retained": "retained/8353e6fb7aa4962d2453977d586321737f13bb60429225602a501d2da8197b0f.gz",
+      "retained_sha256": "9ec366775c0f2a884a001a419ad4f890d8cd6347489d258802ae4f030cdfb06e"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-review.md",
+      "bytes": 12020,
+      "sha256": "1cf93cbfca127ba119f63c85f468a103941b96dc3dec8098d3bc20927e9afcc8",
+      "retained": "retained/1cf93cbfca127ba119f63c85f468a103941b96dc3dec8098d3bc20927e9afcc8.gz",
+      "retained_sha256": "bfe8d70e8dfa936dbfa9d7e3076adc6aa735659c9191f253fd017a0b5394a673"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-rust-gates.sh",
+      "bytes": 722,
+      "sha256": "701fa2ed077eb51ab23cb7572dc6b5d2de7cf7d6bfebf7d35ff3a8dc8f58d6d8",
+      "retained": "retained/701fa2ed077eb51ab23cb7572dc6b5d2de7cf7d6bfebf7d35ff3a8dc8f58d6d8.gz",
+      "retained_sha256": "80829c5bfaf119df445896ffb1f05af451fc721f67c1288b88aa873f80c3fe8d"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/jwt/go/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "49de09f03f7b730db90cbaaa1ad49a6294a3551fdbeb439cd073cbf19327112a",
+      "retained": "retained/49de09f03f7b730db90cbaaa1ad49a6294a3551fdbeb439cd073cbf19327112a.gz",
+      "retained_sha256": "a9a861fda43ed23c5728a67a84a638bcd52ad2f645a800cc8fb03fb3b12d407c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/jwt/go/current.db",
+      "bytes": 442368,
+      "sha256": "f22f5bc445daddd620b0832d98b06e117c4d8e6670271465f829013b48aad202",
+      "retained": "retained/f22f5bc445daddd620b0832d98b06e117c4d8e6670271465f829013b48aad202.gz",
+      "retained_sha256": "bdf059ee8394aba7bcddbc68195f0f424fc8364b0a34ce34fc3dea512755ad65"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/jwt/go/stderr.log",
+      "bytes": 1805,
+      "sha256": "ae9168fa053741faae8d739f8588ee9c544829677b0a0f486b341c6ee0d66af1",
+      "retained": "retained/ae9168fa053741faae8d739f8588ee9c544829677b0a0f486b341c6ee0d66af1.gz",
+      "retained_sha256": "8471087f1f5e9ff207d9590a7da320478cb6f378a91d867588ba6966ed1988ce"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/jwt/go/stdout.log",
+      "bytes": 59,
+      "sha256": "63864a02c756306b340be2fe8247d91882b2f7225731d17fb2c7aa3c888a539a",
+      "retained": "retained/63864a02c756306b340be2fe8247d91882b2f7225731d17fb2c7aa3c888a539a.gz",
+      "retained_sha256": "a3a5e7d99ac6ebdeeb7f6887b922c8719250d6f5664c3a011e06dabe8d17cd2b"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/jwt/native/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "49de09f03f7b730db90cbaaa1ad49a6294a3551fdbeb439cd073cbf19327112a",
+      "retained": "retained/49de09f03f7b730db90cbaaa1ad49a6294a3551fdbeb439cd073cbf19327112a.gz",
+      "retained_sha256": "a9a861fda43ed23c5728a67a84a638bcd52ad2f645a800cc8fb03fb3b12d407c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/jwt/native/current.db",
+      "bytes": 442368,
+      "sha256": "ac080b33226ba0ca3f85fbe2a1dcd0d6089c3cb93cadb1e906b37c9edc8a9969",
+      "retained": "retained/ac080b33226ba0ca3f85fbe2a1dcd0d6089c3cb93cadb1e906b37c9edc8a9969.gz",
+      "retained_sha256": "ddb9819500a59c80413c0c93cafd7a5e03ccefd46ea80cca0da9b7fa55f8abc9"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/jwt/native/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/jwt/native/stdout.log",
+      "bytes": 42,
+      "sha256": "2feba2db05b13d821587adfcf5cc2e4243efe499a2caeed0a3fc018568682b46",
+      "retained": "retained/2feba2db05b13d821587adfcf5cc2e4243efe499a2caeed0a3fc018568682b46.gz",
+      "retained_sha256": "dca4cd66935ea9f5b2dc1a94443eac6fd219843fd071e7059d0b2aa7987f5ba5"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/jwt/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "49de09f03f7b730db90cbaaa1ad49a6294a3551fdbeb439cd073cbf19327112a",
+      "retained": "retained/49de09f03f7b730db90cbaaa1ad49a6294a3551fdbeb439cd073cbf19327112a.gz",
+      "retained_sha256": "a9a861fda43ed23c5728a67a84a638bcd52ad2f645a800cc8fb03fb3b12d407c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/jwt/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "d95c942121d5f6ecf7e2e629dcd3386922cbdbe799b2d41bd7a4266e030e4972",
+      "retained": "retained/d95c942121d5f6ecf7e2e629dcd3386922cbdbe799b2d41bd7a4266e030e4972.gz",
+      "retained_sha256": "0ff9dfbc464f70b03f722843e2f6895784c7519148d36279c3cb18848f9da595"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/required-profile/go/config/symmemory/config.toml",
+      "bytes": 143,
+      "sha256": "6c6fedc61cdc24005860d498e60dd91da09b8bd5ad850e989d5abb58456c7650",
+      "retained": "retained/6c6fedc61cdc24005860d498e60dd91da09b8bd5ad850e989d5abb58456c7650.gz",
+      "retained_sha256": "41167d2d9e260847a730f3b6c87d6f60b1a75103c19eeff87820f012ab2e87eb"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/required-profile/go/current.db",
+      "bytes": 442368,
+      "sha256": "ce55838df53ebebc092be2ce860bfd476c04a32792ab07235e553344b553c545",
+      "retained": "retained/ce55838df53ebebc092be2ce860bfd476c04a32792ab07235e553344b553c545.gz",
+      "retained_sha256": "2cb0d635daa4c8dec40939a96a7877ee2b35b8792deccff6e6c0e925653bce41"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/required-profile/go/stderr.log",
+      "bytes": 197,
+      "sha256": "dc5b59a9ceb6ac7ba8d771aad4d7bc69dbb6124312806be9f4fc8f30eb2632c5",
+      "retained": "retained/dc5b59a9ceb6ac7ba8d771aad4d7bc69dbb6124312806be9f4fc8f30eb2632c5.gz",
+      "retained_sha256": "8ed78338fc9e7a33687b98d8dcabfb520d8cbb0a6fe79ddc26379948fd55bf59"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/required-profile/go/stdout.log",
+      "bytes": 59,
+      "sha256": "e9f18dff95f2ab5c64cdf63e16f53b570cc7d79f301988c1dd612cc93c52c650",
+      "retained": "retained/e9f18dff95f2ab5c64cdf63e16f53b570cc7d79f301988c1dd612cc93c52c650.gz",
+      "retained_sha256": "067b046f0b3416d8b770a4f9c8e087ee277e5d1fea839a378d0c82b344f6d7e8"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/required-profile/native/config/symmemory/config.toml",
+      "bytes": 143,
+      "sha256": "6c6fedc61cdc24005860d498e60dd91da09b8bd5ad850e989d5abb58456c7650",
+      "retained": "retained/6c6fedc61cdc24005860d498e60dd91da09b8bd5ad850e989d5abb58456c7650.gz",
+      "retained_sha256": "41167d2d9e260847a730f3b6c87d6f60b1a75103c19eeff87820f012ab2e87eb"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/required-profile/native/current.db",
+      "bytes": 446464,
+      "sha256": "2dbf3c78e25e828e1cc70a790067211d31d582aeb43f1c427ea517c0b3318c5c",
+      "retained": "retained/2dbf3c78e25e828e1cc70a790067211d31d582aeb43f1c427ea517c0b3318c5c.gz",
+      "retained_sha256": "856d4f4d2a99114235da994fd779f06f5cf28a512b1db6bf30909bb0e5cc6aca"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/required-profile/native/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/required-profile/native/stdout.log",
+      "bytes": 42,
+      "sha256": "82eaa8893f53bb49ee63bc5228067a999342cd14b475d268092fde153d6f3629",
+      "retained": "retained/82eaa8893f53bb49ee63bc5228067a999342cd14b475d268092fde153d6f3629.gz",
+      "retained_sha256": "04b44fef7c81adb277a23309942c8b20bbe28c2998de4cb56bc3ffa5647e11f2"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/required-profile/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "49de09f03f7b730db90cbaaa1ad49a6294a3551fdbeb439cd073cbf19327112a",
+      "retained": "retained/49de09f03f7b730db90cbaaa1ad49a6294a3551fdbeb439cd073cbf19327112a.gz",
+      "retained_sha256": "a9a861fda43ed23c5728a67a84a638bcd52ad2f645a800cc8fb03fb3b12d407c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/required-profile/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "480a465fb32837a813cee003faae0ccf4f1e4c107247654a2fc0436523e97251",
+      "retained": "retained/480a465fb32837a813cee003faae0ccf4f1e4c107247654a2fc0436523e97251.gz",
+      "retained_sha256": "4dabe0bf46b2ad2d6a6384fd8cbdcd79b4d20cd043457d0499f5d863c9ce25e6"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/roles/go/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "49de09f03f7b730db90cbaaa1ad49a6294a3551fdbeb439cd073cbf19327112a",
+      "retained": "retained/49de09f03f7b730db90cbaaa1ad49a6294a3551fdbeb439cd073cbf19327112a.gz",
+      "retained_sha256": "a9a861fda43ed23c5728a67a84a638bcd52ad2f645a800cc8fb03fb3b12d407c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/roles/go/current.db",
+      "bytes": 442368,
+      "sha256": "ac9dd745a55832a6f14d061a764ace1952078fd270222886f3552f56195189c8",
+      "retained": "retained/ac9dd745a55832a6f14d061a764ace1952078fd270222886f3552f56195189c8.gz",
+      "retained_sha256": "57629f10fb70537a84b377a8f238ba57cd166c629208074a3df931f0e3219602"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/roles/go/stderr.log",
+      "bytes": 535,
+      "sha256": "2f4dbc08d2d31a623964687d06203955690b87131d8f6191e702713bd04e83da",
+      "retained": "retained/2f4dbc08d2d31a623964687d06203955690b87131d8f6191e702713bd04e83da.gz",
+      "retained_sha256": "bd49ee4f5411eec0cddeb10a110b38246c0dc843c1fb4c1b3e5fb9da01e7e0fe"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/roles/go/stdout.log",
+      "bytes": 59,
+      "sha256": "b7bbc57ecb38dd0a1ca3ce37537ea1868724d00913e33fd38cac961d4deed113",
+      "retained": "retained/b7bbc57ecb38dd0a1ca3ce37537ea1868724d00913e33fd38cac961d4deed113.gz",
+      "retained_sha256": "3f4d5114e198cfc9d40dc7b44cf613bf036883ff05726544ce440d41785682d4"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/roles/native/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "49de09f03f7b730db90cbaaa1ad49a6294a3551fdbeb439cd073cbf19327112a",
+      "retained": "retained/49de09f03f7b730db90cbaaa1ad49a6294a3551fdbeb439cd073cbf19327112a.gz",
+      "retained_sha256": "a9a861fda43ed23c5728a67a84a638bcd52ad2f645a800cc8fb03fb3b12d407c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/roles/native/current.db",
+      "bytes": 442368,
+      "sha256": "ae53508dd25be527622fe4f0a12f426c2b0af81a2f1c19b51d980d8521aee5c2",
+      "retained": "retained/ae53508dd25be527622fe4f0a12f426c2b0af81a2f1c19b51d980d8521aee5c2.gz",
+      "retained_sha256": "cc68b3b26ea509fb3df4cba105a50d7c03cf1bbf047069d8d90ca59639a7cb0d"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/roles/native/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/roles/native/stdout.log",
+      "bytes": 42,
+      "sha256": "4a901286107d0c95c3c5a7cd17fd0ab9d7d190016131b6e6d5fff90d8dc44a00",
+      "retained": "retained/4a901286107d0c95c3c5a7cd17fd0ab9d7d190016131b6e6d5fff90d8dc44a00.gz",
+      "retained_sha256": "b946b6602e52ffe464f6ccec274399288949a2a72b58155bbeffd3d8a87956bb"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/roles/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "49de09f03f7b730db90cbaaa1ad49a6294a3551fdbeb439cd073cbf19327112a",
+      "retained": "retained/49de09f03f7b730db90cbaaa1ad49a6294a3551fdbeb439cd073cbf19327112a.gz",
+      "retained_sha256": "a9a861fda43ed23c5728a67a84a638bcd52ad2f645a800cc8fb03fb3b12d407c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security/roles/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "9d7b5394da296f071f874313a396b38dcc1c079c703cdf9e34b7137903cf16c4",
+      "retained": "retained/9d7b5394da296f071f874313a396b38dcc1c079c703cdf9e34b7137903cf16c4.gz",
+      "retained_sha256": "680947864d7130c70265564e29c7d170bc12d67695d8e20b582c3316ce485df8"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/body-errors/go/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/body-errors/go/current.db",
+      "bytes": 442368,
+      "sha256": "f9aaef16c8ae404c359ed851d08c0914be700d7d4bf8d4097b55c186e6fbc55c",
+      "retained": "retained/f9aaef16c8ae404c359ed851d08c0914be700d7d4bf8d4097b55c186e6fbc55c.gz",
+      "retained_sha256": "5ea97c579873b898a9e7597aebf9a5fc168439bcfc6b48d7c036c868692912ff"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/body-errors/go/stderr.log",
+      "bytes": 1099,
+      "sha256": "f3e5e8ff0b5af14f5b7c87161c5cacff8adc5d6bea5ed93544aebf48458e0a80",
+      "retained": "retained/f3e5e8ff0b5af14f5b7c87161c5cacff8adc5d6bea5ed93544aebf48458e0a80.gz",
+      "retained_sha256": "521acab2cf2e5b13703a0735aa18527c1a6ef46fadf71f2d76c9c3dd8bac7777"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/body-errors/go/stdout.log",
+      "bytes": 59,
+      "sha256": "400601053c504b995ce88996f70c22edcf10091f3fadc40703e7b051f2e42d08",
+      "retained": "retained/400601053c504b995ce88996f70c22edcf10091f3fadc40703e7b051f2e42d08.gz",
+      "retained_sha256": "913ed7b7a8f67e064a39f17efb1d48d190e01fd2b2f389a18699b18484f294af"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/body-errors/native/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/body-errors/native/current.db",
+      "bytes": 446464,
+      "sha256": "c9a534bfdd3ecb17ca4ee5d1eae918260da439dc1b0b5fb0fe80e9dbeaa76640",
+      "retained": "retained/c9a534bfdd3ecb17ca4ee5d1eae918260da439dc1b0b5fb0fe80e9dbeaa76640.gz",
+      "retained_sha256": "593dc46d4d047d91ad0ade19b0c303e9485390cee80c03b3d85c3b5153ce35d6"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/body-errors/native/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/body-errors/native/stdout.log",
+      "bytes": 42,
+      "sha256": "d4b9fb22d9e7ad46c2234c24d3cfae6e6635436ddd17078aabacc1e7ac8ecf3f",
+      "retained": "retained/d4b9fb22d9e7ad46c2234c24d3cfae6e6635436ddd17078aabacc1e7ac8ecf3f.gz",
+      "retained_sha256": "24c8e0931ecf7cbd581d3c6d142b6da331066a87214b29d4c956d7c5b3b72cb9"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/body-errors/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/body-errors/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "3709f54977c0f61008ff4312313ff152aae9eac87ffe67f4f1474b80ee3f8e3a",
+      "retained": "retained/3709f54977c0f61008ff4312313ff152aae9eac87ffe67f4f1474b80ee3f8e3a.gz",
+      "retained_sha256": "3b5b9e390f7e482a574768a2f6d36f896cdf3459b388b451cf1119129c5c2b78"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/jwt/go/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/jwt/go/current.db",
+      "bytes": 442368,
+      "sha256": "94a67b81b6d3fe8aea0f67394e0afa84d848faf93e9c387d12dd8377deaeb669",
+      "retained": "retained/94a67b81b6d3fe8aea0f67394e0afa84d848faf93e9c387d12dd8377deaeb669.gz",
+      "retained_sha256": "ebca475fa72cd909335290ae0c4c34379de1a17d5124e570292937d9b96344a9"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/jwt/go/stderr.log",
+      "bytes": 1806,
+      "sha256": "af649059bfa13edd1b7c8457752672fc460c92216f00fb38752c75fce999a5c7",
+      "retained": "retained/af649059bfa13edd1b7c8457752672fc460c92216f00fb38752c75fce999a5c7.gz",
+      "retained_sha256": "241cbc82054bb05adc9bf3c35b3f232e217a3d59143a2fe471d6c0223af7840f"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/jwt/go/stdout.log",
+      "bytes": 59,
+      "sha256": "d1e74b4a4dfe6c1d753012616fdf2ec367cf216bc4ee6069336f76753afc1b59",
+      "retained": "retained/d1e74b4a4dfe6c1d753012616fdf2ec367cf216bc4ee6069336f76753afc1b59.gz",
+      "retained_sha256": "e77b30ffdb7551461f84e63340601d8a563323f76a44b8ae2648bebb383bb8c7"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/jwt/native/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/jwt/native/current.db",
+      "bytes": 442368,
+      "sha256": "49122263953773630608ebf76654b63af056abe4d0f92257b81895868e550d5c",
+      "retained": "retained/49122263953773630608ebf76654b63af056abe4d0f92257b81895868e550d5c.gz",
+      "retained_sha256": "3b65ae16493172ef2474c3250fd3eba0fd19aae027c540f2e936419bc228cb29"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/jwt/native/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/jwt/native/stdout.log",
+      "bytes": 42,
+      "sha256": "8283f5385ac59bb4cda9e4d4cfcfc8dab5772245ec1e355ac1f66111f5a21fa0",
+      "retained": "retained/8283f5385ac59bb4cda9e4d4cfcfc8dab5772245ec1e355ac1f66111f5a21fa0.gz",
+      "retained_sha256": "46c05e907209ab32fccfc040bff7aa842e594c8c39335700d088f260b8420f42"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/jwt/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/jwt/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "630d1849e8d1a2e967a242024dfcba5ecd0bbf93d33c3ee76f680ab462084f3f",
+      "retained": "retained/630d1849e8d1a2e967a242024dfcba5ecd0bbf93d33c3ee76f680ab462084f3f.gz",
+      "retained_sha256": "8e1a86d5f0dbef20bde91bdee78b9e0e007f40d03518c5e04d97fc2b5931e21b"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/persistent-revoke/go/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/persistent-revoke/go/current.db",
+      "bytes": 442368,
+      "sha256": "43df5a8984636dacd506a208eee2bdcc1842447482b77c9038794e52d69b8275",
+      "retained": "retained/43df5a8984636dacd506a208eee2bdcc1842447482b77c9038794e52d69b8275.gz",
+      "retained_sha256": "01bcdae63e4e2c7e3ea95a0b57f486435f043ef7d81da4ee039cb20395a6e668"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/persistent-revoke/go/stderr.log",
+      "bytes": 309,
+      "sha256": "ca3626268b6d3e32051db1c65ed7725fb0cfd1dba4509bba069e4f2c7b27adbb",
+      "retained": "retained/ca3626268b6d3e32051db1c65ed7725fb0cfd1dba4509bba069e4f2c7b27adbb.gz",
+      "retained_sha256": "61c00a289f1a656ce2bb11dd93f010bf15a2b5fba64f0115672b1f7b489ce7f0"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/persistent-revoke/go/stdout.log",
+      "bytes": 59,
+      "sha256": "7c28b1ca3de44d6fcfe5c25b34e3b4dfbafebf8589d3b3780609ce1e25d5b394",
+      "retained": "retained/7c28b1ca3de44d6fcfe5c25b34e3b4dfbafebf8589d3b3780609ce1e25d5b394.gz",
+      "retained_sha256": "af4795c25f9034cb6634af7dbbb9fffbb95f1d93d61553d04b5ba26da8148100"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/persistent-revoke/native/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/persistent-revoke/native/current.db",
+      "bytes": 442368,
+      "sha256": "7121e89b0aca8c4f89dc95a1fde7064a7e6e4acb482fdbf7f73d4aedec9ddf09",
+      "retained": "retained/7121e89b0aca8c4f89dc95a1fde7064a7e6e4acb482fdbf7f73d4aedec9ddf09.gz",
+      "retained_sha256": "2bec3a2acacd8397c670778fc8bdcf1c9dc38f0dde5ec0613eb0c532e7db192c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/persistent-revoke/native/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/persistent-revoke/native/stdout.log",
+      "bytes": 42,
+      "sha256": "ebe36263ad9533bc2b8778d78dc647f004ff45bc9ec1723d0ee2bcc451d4bfe2",
+      "retained": "retained/ebe36263ad9533bc2b8778d78dc647f004ff45bc9ec1723d0ee2bcc451d4bfe2.gz",
+      "retained_sha256": "7a3889fcba5af66cc25bf9427ae42499ad6a5d157e7135e1d6640316e3de1978"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/persistent-revoke/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/persistent-revoke/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "2356350dbba8bc8b4e6364d9e698b4b5aa8a1b339a06dfb640613b78935a57d2",
+      "retained": "retained/2356350dbba8bc8b4e6364d9e698b4b5aa8a1b339a06dfb640613b78935a57d2.gz",
+      "retained_sha256": "3b13b637a6d6e84613facd5ca67740688e551d1cb196bd0800b772d5e5b88d5e"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/required-profile/go/config/symmemory/config.toml",
+      "bytes": 143,
+      "sha256": "d3764ef2c571bbf62b870cd4b5fda10919cd39d29183cff15eb443cb4f37dea4",
+      "retained": "retained/d3764ef2c571bbf62b870cd4b5fda10919cd39d29183cff15eb443cb4f37dea4.gz",
+      "retained_sha256": "562d6d25e5e08980ef619886472f1134d410c8bc63a1dc61e6b974a26e5679d2"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/required-profile/go/current.db",
+      "bytes": 442368,
+      "sha256": "40f96eb244de2d0fb9cc2152a203c603bd8bec3c4c55da7b40579f05d14e6248",
+      "retained": "retained/40f96eb244de2d0fb9cc2152a203c603bd8bec3c4c55da7b40579f05d14e6248.gz",
+      "retained_sha256": "c00fa04864ab312cfe84055906a5e0c17fde74d402d079bd51c512d2409df530"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/required-profile/go/stderr.log",
+      "bytes": 297,
+      "sha256": "c44c8cee336f279d670389aee9149752936f0ba4a2489095622703d2bf054286",
+      "retained": "retained/c44c8cee336f279d670389aee9149752936f0ba4a2489095622703d2bf054286.gz",
+      "retained_sha256": "554cdb591e09d488c97f70b717c440d0f1b80f127973b62d122abc39146de407"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/required-profile/go/stdout.log",
+      "bytes": 59,
+      "sha256": "08c6aa05243dc3df2dde69389642958f54cc3aa46106eea5da0ee392a48cc644",
+      "retained": "retained/08c6aa05243dc3df2dde69389642958f54cc3aa46106eea5da0ee392a48cc644.gz",
+      "retained_sha256": "e0920e06a720ba5dce87a81035999d7b92997c4cd6c20982e6525dcc133caf2b"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/required-profile/native/config/symmemory/config.toml",
+      "bytes": 143,
+      "sha256": "d3764ef2c571bbf62b870cd4b5fda10919cd39d29183cff15eb443cb4f37dea4",
+      "retained": "retained/d3764ef2c571bbf62b870cd4b5fda10919cd39d29183cff15eb443cb4f37dea4.gz",
+      "retained_sha256": "562d6d25e5e08980ef619886472f1134d410c8bc63a1dc61e6b974a26e5679d2"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/required-profile/native/current.db",
+      "bytes": 442368,
+      "sha256": "0b34e42da31070ef457fc6d3e62f147844289761c2ae83dd49f359f791b11ec3",
+      "retained": "retained/0b34e42da31070ef457fc6d3e62f147844289761c2ae83dd49f359f791b11ec3.gz",
+      "retained_sha256": "cad6f3b0431a0620918c8642af585dc7eb96bdd72a83d246e903b66caa2d096d"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/required-profile/native/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/required-profile/native/stdout.log",
+      "bytes": 42,
+      "sha256": "d746c7323a74859c70fc2ffc1e73a22d2892e5928662ca9ecf0081ebecf134eb",
+      "retained": "retained/d746c7323a74859c70fc2ffc1e73a22d2892e5928662ca9ecf0081ebecf134eb.gz",
+      "retained_sha256": "c351c5c38c5681c7140d75c60e59e10152a2667d17c00b89b849a0660cc7275e"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/required-profile/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/required-profile/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "84017c2d20e3258c6a7fb82a2842e5384379b56e6881eae82e4d3c361c55d90c",
+      "retained": "retained/84017c2d20e3258c6a7fb82a2842e5384379b56e6881eae82e4d3c361c55d90c.gz",
+      "retained_sha256": "7e263ad42562a41e01e92a69954e86cc20be1607da0839e4e461a570b551f678"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/revoke-failure/go/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/revoke-failure/go/current.db",
+      "bytes": 442368,
+      "sha256": "82d14b4105bb5bf71c8b15d9b75f67c5eda0c080c3f7a283c4b361a145b96b79",
+      "retained": "retained/82d14b4105bb5bf71c8b15d9b75f67c5eda0c080c3f7a283c4b361a145b96b79.gz",
+      "retained_sha256": "9bf77dd4db7e83f3e034785de742ff40c0069e71f47c2d41d837defc8c4dfe48"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/revoke-failure/go/stderr.log",
+      "bytes": 616,
+      "sha256": "e2c3dec6e62f7fd1f57e7bd7beeda9c04adf775c36ae940c6c54452ea0894ccf",
+      "retained": "retained/e2c3dec6e62f7fd1f57e7bd7beeda9c04adf775c36ae940c6c54452ea0894ccf.gz",
+      "retained_sha256": "bf38ba35c24a307d69da81272c448baae43798ca678f709d7e8b5d08988d51fe"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/revoke-failure/go/stdout.log",
+      "bytes": 59,
+      "sha256": "eb423d28e86c9c229d8177ff4741a568dc8ad2bc57ea3cce1e502f3ad724dbe2",
+      "retained": "retained/eb423d28e86c9c229d8177ff4741a568dc8ad2bc57ea3cce1e502f3ad724dbe2.gz",
+      "retained_sha256": "568db7f5ccae24f8e2787586a4243e679a1cad5e1b59f293da1e4874319dd53b"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/revoke-failure/native/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/revoke-failure/native/current.db",
+      "bytes": 442368,
+      "sha256": "a3cfd009b85c1f19d387a6ca0e7ce11feca6d86fb9d17c99d8a32bc1f03382dc",
+      "retained": "retained/a3cfd009b85c1f19d387a6ca0e7ce11feca6d86fb9d17c99d8a32bc1f03382dc.gz",
+      "retained_sha256": "2da7fdc9fe76f5fc6e08c80a09d7353b20c95b18e96e715c68af3e6f5cdf2c12"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/revoke-failure/native/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/revoke-failure/native/stdout.log",
+      "bytes": 42,
+      "sha256": "d0b3c2d94d187a5c4568f86ef814e14158ef738f81599f927524e0dd0b57adc0",
+      "retained": "retained/d0b3c2d94d187a5c4568f86ef814e14158ef738f81599f927524e0dd0b57adc0.gz",
+      "retained_sha256": "1605d9b6f52349c68545d56bf09b2a6ef6818ab31035a7c7f1f9a2c47ac17e35"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/revoke-failure/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/revoke-failure/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "084acd162b73955e8c392df399e6070ada9f468f3e3f374e1aed997307e40c5f",
+      "retained": "retained/084acd162b73955e8c392df399e6070ada9f468f3e3f374e1aed997307e40c5f.gz",
+      "retained_sha256": "82b45644c72ba4cf98c618807db84cedb2527ade2ea79344a58c5610b180e0ba"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/roles/go/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/roles/go/current.db",
+      "bytes": 442368,
+      "sha256": "b1541bb48caa84ead466b252d98a711ff1806ee1bbdce0a17f41c5f586437b87",
+      "retained": "retained/b1541bb48caa84ead466b252d98a711ff1806ee1bbdce0a17f41c5f586437b87.gz",
+      "retained_sha256": "f697589f0b01aae0980b73cf0934e56738daf73e2f0975ea86093585060dbc01"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/roles/go/stderr.log",
+      "bytes": 535,
+      "sha256": "7e95097e6d189ff6573414e180276c93b84521bbb0f19f4da1399a03b50ab740",
+      "retained": "retained/7e95097e6d189ff6573414e180276c93b84521bbb0f19f4da1399a03b50ab740.gz",
+      "retained_sha256": "150465d05ac26d33f302b752d458fe278f047efbb15fc186612b12f8692997e9"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/roles/go/stdout.log",
+      "bytes": 59,
+      "sha256": "cdfeb2688f13c4992a729c8179af1c15c8c9f35cb9ca945cdad5e6d608cf2542",
+      "retained": "retained/cdfeb2688f13c4992a729c8179af1c15c8c9f35cb9ca945cdad5e6d608cf2542.gz",
+      "retained_sha256": "f24c4fe5ebb5325383676e3da966b0d39143ce9e4211d3379050e985605dc433"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/roles/native/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/roles/native/current.db",
+      "bytes": 442368,
+      "sha256": "080324f6b422bf35b99ca09cec046fd74304bdf09b2c936a0b9089eeec164193",
+      "retained": "retained/080324f6b422bf35b99ca09cec046fd74304bdf09b2c936a0b9089eeec164193.gz",
+      "retained_sha256": "b157a75f9d68d5a27023c92b666506de2f30d15fd745de22f4943774a7f460c5"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/roles/native/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/roles/native/stdout.log",
+      "bytes": 42,
+      "sha256": "80a1215646ecbb83286d6fce5dc55790b7a362fdc812417513e17722a0a1300e",
+      "retained": "retained/80a1215646ecbb83286d6fce5dc55790b7a362fdc812417513e17722a0a1300e.gz",
+      "retained_sha256": "d3a4a8e8c299d6d740be60d0af4ad6e4abb4dfe21fb91305316b729c48734474"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/roles/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4",
+      "retained": "retained/7a321f56f40df6f69a8c35343f299026d90a8e01501a5cd1e333ea4f18cda6c4.gz",
+      "retained_sha256": "cff586972d34d15494583ba55c2c4046f19edeb4f86bcc5265d1cab534ae6552"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2/roles/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "744f92a4b9bdd710bbf92ec25781da5c5af08a8f16199bd067e40d33ae75d990",
+      "retained": "retained/744f92a4b9bdd710bbf92ec25781da5c5af08a8f16199bd067e40d33ae75d990.gz",
+      "retained_sha256": "54c5a09340386b9a2e5d7c00607760adba7239f65e1fb82c7eb674aba705286d"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2.json",
+      "bytes": 2425871,
+      "sha256": "5e4e2680dc4927e58fa3eb4bacc3ce51b70bba6470547b9cada4fbefd619f2b5",
+      "retained": "retained/5e4e2680dc4927e58fa3eb4bacc3ce51b70bba6470547b9cada4fbefd619f2b5.gz",
+      "retained_sha256": "c3cc7aed2a3675c97d084a6c2fac507af7d775c133f8e093ae9719f3eb6a9b4d"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2.log",
+      "bytes": 34,
+      "sha256": "12da03ce34397aea1f6d32bb93d5ad86aaf61e4c20eacb10059b90a7615b9207",
+      "retained": "retained/12da03ce34397aea1f6d32bb93d5ad86aaf61e4c20eacb10059b90a7615b9207.gz",
+      "retained_sha256": "c7658fccd0573290b3d617bb33140ef1f0d1449f9d183f4fe8755cc3c74ecccf"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security-v2.py",
+      "bytes": 6277,
+      "sha256": "e667d3049243416c81b8d3f166eaa446b3869e71ee8854a95b29f8bfc56039b4",
+      "retained": "retained/e667d3049243416c81b8d3f166eaa446b3869e71ee8854a95b29f8bfc56039b4.gz",
+      "retained_sha256": "61baeef5d4ba106d73da7daba128a8ce07e4188b6802b6d070bc82448d4c8c32"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security.json",
+      "bytes": 1314783,
+      "sha256": "d0ae37d3c53f4109a1863fb341be9d64a1e76fbb100dbe92173a0424196a2942",
+      "retained": "retained/d0ae37d3c53f4109a1863fb341be9d64a1e76fbb100dbe92173a0424196a2942.gz",
+      "retained_sha256": "83fb557ece92dfd2a9d2f1efe265cc31fbd6be842fdcad7e5eec097cab3518b7"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security.log",
+      "bytes": 53279,
+      "sha256": "677b2e62f5bd07d28b6fe3f87461136a76caf0842de08c74aedff7db13057279",
+      "retained": "retained/677b2e62f5bd07d28b6fe3f87461136a76caf0842de08c74aedff7db13057279.gz",
+      "retained_sha256": "34f7c61b01a8eeaaf0bd51cbb68a4086e03aef16063d1828fbf9f4318d614591"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-security.py",
+      "bytes": 6265,
+      "sha256": "726a26d99fe6c17095faba6d949191ecb9b57f3d65774a5fadc4a33ecb878c05",
+      "retained": "retained/726a26d99fe6c17095faba6d949191ecb9b57f3d65774a5fadc4a33ecb878c05.gz",
+      "retained_sha256": "85c0a6bbc2b8f4bcc8e7c387d5d0de6d8cc0a151ebe92bc669f663150c63c52f"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-transport/go/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "8b7b31056e1f668a2679ae5cbff0bd65d0cc327abaf77834a2467c91707ff5ef",
+      "retained": "retained/8b7b31056e1f668a2679ae5cbff0bd65d0cc327abaf77834a2467c91707ff5ef.gz",
+      "retained_sha256": "9b8d1db08a42d0756286d07a74dfc6af39f43afb902726b280ed9c89fe49699c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-transport/go/current.db",
+      "bytes": 442368,
+      "sha256": "29927e3292143f419f5be03358531c97b57936d4fab5d6b17deb90bcfee610c3",
+      "retained": "retained/29927e3292143f419f5be03358531c97b57936d4fab5d6b17deb90bcfee610c3.gz",
+      "retained_sha256": "dd00b1f45dab460fe97f4007f4fd122e4fc609b8b22e219f65a3adddef15bdf5"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-transport/go/stderr.log",
+      "bytes": 767,
+      "sha256": "cae7b4639b538bb3140cca22cfcff96c66a4eb006f185b31ed18114bc86c061e",
+      "retained": "retained/cae7b4639b538bb3140cca22cfcff96c66a4eb006f185b31ed18114bc86c061e.gz",
+      "retained_sha256": "12128f31aac23d7ff3e79cca2d27eef605adecf8aa8e2b1a529c5d1eeb2e6b75"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-transport/go/stdout.log",
+      "bytes": 59,
+      "sha256": "2f873c270d7d48c5b25336baef0496881d236b19dbe1594e6f078c7a064462ad",
+      "retained": "retained/2f873c270d7d48c5b25336baef0496881d236b19dbe1594e6f078c7a064462ad.gz",
+      "retained_sha256": "558ea3c70e0a70d5b774ad6d4558beb135ccee4a53245fb41920c22d2ebb865a"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-transport/native/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "8b7b31056e1f668a2679ae5cbff0bd65d0cc327abaf77834a2467c91707ff5ef",
+      "retained": "retained/8b7b31056e1f668a2679ae5cbff0bd65d0cc327abaf77834a2467c91707ff5ef.gz",
+      "retained_sha256": "9b8d1db08a42d0756286d07a74dfc6af39f43afb902726b280ed9c89fe49699c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-transport/native/current.db",
+      "bytes": 442368,
+      "sha256": "1623cd2a55df800b0bc18fd72f2828870bed0790b1d2f53ab210e456db5a2b65",
+      "retained": "retained/1623cd2a55df800b0bc18fd72f2828870bed0790b1d2f53ab210e456db5a2b65.gz",
+      "retained_sha256": "c0b5c6513ea54fb37b71eaa504fff98082ed6266f6dbd90664614f9f26a13382"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-transport/native/stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "retained": "retained/e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855.gz",
+      "retained_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-transport/native/stdout.log",
+      "bytes": 42,
+      "sha256": "16b86f9498073d9a79f32a0e0b7672cf882080fc383a7daea0196a235808e79d",
+      "retained": "retained/16b86f9498073d9a79f32a0e0b7672cf882080fc383a7daea0196a235808e79d.gz",
+      "retained_sha256": "85b55567cdc05a2007b5076a0c29254009c4517239074d6a4e0b5306f36e30d3"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-transport/seed/config/symmemory/config.toml",
+      "bytes": 109,
+      "sha256": "8b7b31056e1f668a2679ae5cbff0bd65d0cc327abaf77834a2467c91707ff5ef",
+      "retained": "retained/8b7b31056e1f668a2679ae5cbff0bd65d0cc327abaf77834a2467c91707ff5ef.gz",
+      "retained_sha256": "9b8d1db08a42d0756286d07a74dfc6af39f43afb902726b280ed9c89fe49699c"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-transport/seed/seed.db",
+      "bytes": 442368,
+      "sha256": "007404ce1dc267c7d8ad39523a72b60270c33f86df31fb6fd93d688399c7047a",
+      "retained": "retained/007404ce1dc267c7d8ad39523a72b60270c33f86df31fb6fd93d688399c7047a.gz",
+      "retained_sha256": "a9dafffc774514431834395cc84fae099f00ed1df2e575151ec5dd3543441e52"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-transport.json",
+      "bytes": 743060,
+      "sha256": "ae5cc6b1f9b6f05884787c732493b701c321f9b31f32e430c30eb8b40a4d866f",
+      "retained": "retained/ae5cc6b1f9b6f05884787c732493b701c321f9b31f32e430c30eb8b40a4d866f.gz",
+      "retained_sha256": "714bf55cc9acd8ba11592d3deb361d6c11e48fc132c425ddb07bda8b8163f617"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-transport.log",
+      "bytes": 38,
+      "sha256": "93e3450ab33e44b3d379b78bfd906a1c69c2d0cfde374fe8d7e7b090db5cb180",
+      "retained": "retained/93e3450ab33e44b3d379b78bfd906a1c69c2d0cfde374fe8d7e7b090db5cb180.gz",
+      "retained_sha256": "ffff8e4db92acbec2ce0fdbd33e97063abcc50087d1b7ef88cf6cfadc4853857"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-transport.py",
+      "bytes": 3463,
+      "sha256": "399fa6cdfac4528d9a6bbb6bcc94aa17826c9158ffbbfeedb174f0038a036558",
+      "retained": "retained/399fa6cdfac4528d9a6bbb6bcc94aa17826c9158ffbbfeedb174f0038a036558.gz",
+      "retained_sha256": "b1674e739c840e12d7c770b2e0c76f461aa82d16e3af50dfe70e4a7e92e07c8d"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-finalize-v2.log",
+      "bytes": 268,
+      "sha256": "658495790d71e8f29c481a9e41df9df763cb13ec535682901c2d40e962b9a85f",
+      "retained": "retained/658495790d71e8f29c481a9e41df9df763cb13ec535682901c2d40e962b9a85f.gz",
+      "retained_sha256": "e466eea2ae4b88ded034d587f3861656786e752c8fdcecd29fe202917fea6a86"
+    },
+    {
+      "original": "/tmp/symaira-memory763-independent-review-receipt.json",
+      "bytes": 76965,
+      "sha256": "93fcb936ba3ff58e52cda11f1697e3dd6a127707bfc9d87f4e3208637003dc4e",
+      "retained": "retained/93fcb936ba3ff58e52cda11f1697e3dd6a127707bfc9d87f4e3208637003dc4e.gz",
+      "retained_sha256": "ae365f5cc85ac8082384cc43b210bedd323bf19ce4dd02e4dcec5bad4da5dc74"
+    }
+  ],
+  "own_proof_count": 231,
+  "total_with_receipt": 232,
+  "actual_ELF_paths": 526,
+  "unique_ELF_verified": 492,
+  "original_binary_archive_receipt_sha256": "9de950a6f73494e8b838b96439ab75ffb18c78689965d777a3897e11dcbd415f",
+  "original_report_sha256": "1cf93cbfca127ba119f63c85f468a103941b96dc3dec8098d3bc20927e9afcc8",
+  "original_review_receipt_sha256": "93fcb936ba3ff58e52cda11f1697e3dd6a127707bfc9d87f4e3208637003dc4e",
+  "original_source_unchanged": true
+}

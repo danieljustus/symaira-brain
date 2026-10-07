@@ -1,0 +1,4 @@
+{
+  "sha256": "364f4c7824a32c72a74a9821edc61683f495fbab3437a889844edfeda58fb9a2",
+  "text": "    Finished `dev` profile [unoptimized] target(s) in 0.12s\nSource setup: 69/69 matched\nFAIL explicit-browse-json ['exit']\nSource setup: 0/1 matched\nFAIL explicit-browse-json ['stdout_base64']\nSource setup: 0/1 matched\n"
+}

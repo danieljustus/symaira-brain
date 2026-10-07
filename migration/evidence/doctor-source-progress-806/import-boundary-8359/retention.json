@@ -1,0 +1,135 @@
+[
+  {
+    "original": "/tmp/symaira-doctor806-journal-import-root/review.json",
+    "sha256": "99cf7d6f5a6f956ac8e54335c8666accc8dd9dab44e990045ebeaadb663d5c0c",
+    "bytes": 3295,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/00-review.json.gz",
+    "gzip_sha256": "26e83c95dd6617865b49e0eab251c88d6396360b2da3f00b75f51b3e0bc1a12f"
+  },
+  {
+    "original": "/workspace/symaira-doctor765/scripts/setup-source-oracle/replay.py",
+    "sha256": "7688e0d185e5257ed1a45c61659e36234ac1660e623b0e442fc016a15b91f17a",
+    "bytes": 26463,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/01-replay.py.gz",
+    "gzip_sha256": "67b0e6f9a7828fa64a974a30775e529754a7d7550ffa06add6b56d55faa83ed2"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-journal-import-root/controls.json",
+    "sha256": "2c0de722e854db9d16f59dde1947f8a605d6d83787d4f28543c87d560e3985f2",
+    "bytes": 934742,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/02-controls.json.gz",
+    "gzip_sha256": "20ae54a2fed080180de18e30dc6154d546986ca6053e5fa2810fc5adb9499529"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-journal-import-root/controls.log",
+    "sha256": "d89d8d936b337df0f9e082f0a1780b94b71e215180af52fc555b0741e9aa2828",
+    "bytes": 79,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/03-controls.log.gz",
+    "gzip_sha256": "977b1bc47235a4ec5e54588a5feb35a4317903ff29ff6b03868e3934245aa648"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-journal-import-root/embedded.json",
+    "sha256": "d7c66ad837f7407689331772a8f6ab11174086df85becb830b542a7b9edeba6d",
+    "bytes": 239023,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/04-embedded.json.gz",
+    "gzip_sha256": "76748cc0604f64a0d09c3519d46c946171cc9f0cce2534e726046a052bc58736"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-journal-import-root/embedded.log",
+    "sha256": "f4f4ee8df066b36c90ba6cc5536381a8e784d48be4e63cc10fde3f1a792cbd5e",
+    "bytes": 867,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/05-embedded.log.gz",
+    "gzip_sha256": "24ef8fdbd2ce0a0af5a4b3e64b94e41bcdfec5f6948533bbbada3f837b16fd61"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-journal-import-root/human-pipe-probes.json",
+    "sha256": "d438d01c2166c3fae18fb700abb9de33263eedc7bbe8d22f10fb326384cebe3d",
+    "bytes": 475783,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/06-human-pipe-probes.json.gz",
+    "gzip_sha256": "936d6482c588a2553e55cce3d4b011152379799f42177717caebda0b008682a0"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-journal-import-root/human-pipe-probes.log",
+    "sha256": "bb99d6a951589ef82508a6800a9b5c04d74ec10ffcc8af4a68841477816589fd",
+    "bytes": 264,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/07-human-pipe-probes.log.gz",
+    "gzip_sha256": "96672aae8817fd6d4e35bfaad0da4ef3c6aaab69a4f3a54850cc40e1a036e9db"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-journal-import-root/pipe-probes.json",
+    "sha256": "6530383b8f26b0e066158a17a2bdeb3fc183759497f59ad1e112362450bc289d",
+    "bytes": 361791,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/08-pipe-probes.json.gz",
+    "gzip_sha256": "ad47fcf297b05ddb2eed0256d8fe27caf6c3e5e58c66a22d3552cd7ff2796fb8"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-journal-import-root/pipe-probes.log",
+    "sha256": "9888c9b7b1262d18988382ff36d8fb0015f9319cc191590f76e51b9c7b4b9966",
+    "bytes": 240,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/09-pipe-probes.log.gz",
+    "gzip_sha256": "547ecbe7b396c779d0396463e55aebf8b5fab83da56708d104319bab5652412e"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-journal-import-root/output-probes.json",
+    "sha256": "df98849d313d09111bfe94bcea1598bb1adecf0b203e9a133ff5d9a2ca89ac47",
+    "bytes": 33755,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/10-output-probes.json.gz",
+    "gzip_sha256": "d34958337b7019acaacf75ae9d231e05d4543213b16ee8d04ea42ddd050d8144"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-journal-import-root/output-probes.log",
+    "sha256": "8ba94463e30913a3cb50c630ace1642947b5c6ed3bf9bd2d7b6f2ccf96c51b1f",
+    "bytes": 247,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/11-output-probes.log.gz",
+    "gzip_sha256": "841ad7f3a1ff604393f3a91e3924abf79764fe4ee8368be39e81572ff28937df"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-journal-import-root/source-output.json",
+    "sha256": "3790b479ca8b868c0a7e96368438366bafcc850fa57dec61b8d1a43c857abee1",
+    "bytes": 23518,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/12-source-output.json.gz",
+    "gzip_sha256": "22b5a06371e0cbcdbfbebc2ccb260177434f695bb3263cc5fa07b19214f1985a"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-journal-import-root/source-output.log",
+    "sha256": "39008d5bf05080f7ba689af7404a2241532482eec3c4013e72ff72c7d5c8eab7",
+    "bytes": 106,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/13-source-output.log.gz",
+    "gzip_sha256": "57d2b51d254272771a30707406900953975476634ac1b7cd103485cf484e8c1b"
+  },
+  {
+    "original": "/tmp/symaira-current-ci-job-111372955009.log",
+    "sha256": "1b307db7c091dcfd5204b09e98dd2230774400913e7bda7e0c88141dfaefe18a",
+    "bytes": 459344,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/14-symaira-current-ci-job-111372955009.log.gz",
+    "gzip_sha256": "0524b928429ea7b5010806929401e5c00d19d7db83d2ca3ff38eb73ba31113aa"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-current-native-artifacts/receipt.json",
+    "sha256": "f8728c47d1f3f5074cf237ad1a12e7b575722aac01996a8d5117173cb9f05fc1",
+    "bytes": 1607,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/15-receipt.json.gz",
+    "gzip_sha256": "81593daf1d29e9896a2cf59039c625ba4ebc217756d7b49b6ec9bd0322d733c3"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-current-native-artifacts/11295287138/source-output.log",
+    "sha256": "607e35ab71ddcfbe44dddbc2e1a13b6e58ad1e8cf00b38beefdc64c45055c415",
+    "bytes": 889,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/16-source-output.log.gz",
+    "gzip_sha256": "025e4cbee3cf923b98cb496b75544e550ff40956865b6800e21f68aa24d9322d"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-current-native-artifacts/11295287138/output-probes.log",
+    "sha256": "8ba94463e30913a3cb50c630ace1642947b5c6ed3bf9bd2d7b6f2ccf96c51b1f",
+    "bytes": 247,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/17-output-probes.log.gz",
+    "gzip_sha256": "841ad7f3a1ff604393f3a91e3924abf79764fe4ee8368be39e81572ff28937df"
+  },
+  {
+    "original": "/tmp/symaira-doctor806-current-native-artifacts/11295287138/output-probes.json",
+    "sha256": "b4e1e226da25ca72e70dd8d809a3c39a793c2829bc23f9ec68b68174246fc54e",
+    "bytes": 33755,
+    "archive": "migration/evidence/doctor-source-progress-806/import-boundary-8359/18-output-probes.json.gz",
+    "gzip_sha256": "b6c558ebe546bea648f29dd5b90138e0e9d8f68b9ef4b12fe99504f294ad204d"
+  }
+]

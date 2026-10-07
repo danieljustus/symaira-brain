@@ -190,15 +190,7 @@ fn missing_shipped_columns_are_added_to_an_existing_database() {
     {
         let connection = rusqlite::Connection::open(&path).expect("open");
         connection
-            .execute_batch(
-                "CREATE TABLE memories (id TEXT PRIMARY KEY, content TEXT NOT NULL, \
-                 scope TEXT NOT NULL DEFAULT '', metadata TEXT NOT NULL DEFAULT '{}', \
-                 embedding TEXT NOT NULL DEFAULT '', created_at DATETIME NOT NULL, \
-                 updated_at DATETIME NOT NULL, kind TEXT NOT NULL DEFAULT '');\
-                 CREATE TABLE rules (id TEXT PRIMARY KEY, content TEXT NOT NULL, \
-                 scope TEXT NOT NULL DEFAULT '', metadata TEXT NOT NULL DEFAULT '{}', \
-                 created_at DATETIME);",
-            )
+            .execute_batch(include_str!("../src/migration/sql/001_init.sql"))
             .expect("legacy schema");
     }
     let _store = Store::open(&path).expect("store opens a legacy database");

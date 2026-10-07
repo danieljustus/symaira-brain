@@ -1,6 +1,7 @@
 """Doctor fixtures; no historical Go production source or fixture is changed."""
 from dataclasses import dataclass
 import json
+import sys
 
 @dataclass(frozen=True)
 class Case:
@@ -17,6 +18,12 @@ class Case:
     nonexecutable: bool = False
     verifier: bool = False
     signal: str | None = None
+    raw_home: bool = False
+    home_mode: str | None = None
+    home_fallback: bool = False
+    home_lexical: str | None = None
+    bin_fault: str | None = None
+    escaping_home: str | None = None
 
 
 def cases():
@@ -26,6 +33,8 @@ def cases():
                    provenance=b'{"source":"brain-source"}'),
               Case("timeout", probe_wait=10000, provenance=b'{"source":"brain-source"}'),
               Case("provenance-directory", version=b'{"version":"0.0.0"}', provenance="directory")]
+    # APFS cannot create invalid-UTF-8 path components; Linux still exercises them.
+    raw_filesystem_paths = sys.platform == "linux"
     if __import__('os').name != 'nt':
         result.append(Case("nonexecutable", nonexecutable=True, provenance=b'{"source":"brain-source"}'))
         for signal in ("TERM", "INT", "KILL"):
@@ -33,6 +42,31 @@ def cases():
     else:
         for code in (65536,0xc0000005):
             result.append(Case(f"large-probe-exit-{code}",probe_exit=code,provenance=b'{"source":"brain-source"}'))
+    for mode in ("empty","unset"):
+        result.append(Case("home-"+mode,all_missing=True,home_mode=mode))
+        result.append(Case("home-before-config-"+mode,all_missing=True,home_mode=mode,config="[bad config"))
+        if __import__('os').name=='nt':
+            result.append(Case("userprofile-fallback-refused-"+mode,all_missing=True,home_mode=mode,home_fallback=True))
+    if raw_filesystem_paths:
+        result.extend((
+            Case("raw-home-correct",raw_home=True),
+            Case("raw-home-source",raw_home=True,version=b'{"version":"0.0.0"}',provenance=b'{"source":"brain-source"}'),
+            Case("raw-home-directory",raw_home=True,version=b'{"version":"0.0.0"}',provenance="directory"),
+            Case("raw-home-force-source",raw_home=True,args=("doctor","--fix","--force-release"),version=b'{"version":"0.0.0"}',provenance=b'{"source":"brain-source"}',verifier=True),
+            Case("raw-home-force-directory",raw_home=True,args=("doctor","--fix","--force-release"),version=b'{"version":"0.0.0"}',provenance="directory",verifier=True),
+            Case("raw-home-force-corrupt",raw_home=True,args=("doctor","--fix","--force-release"),version=b'{"version":"0.0.0"}',provenance=b'{bad',verifier=True)))
+    for lexical in ("dot", "parent", "slash"):
+        result.append(Case("managed-home-"+lexical,home_lexical=lexical,
+                           args=("doctor","--fix","--force-release"),verifier=True))
+    for fault in ("bin", "parent"):
+        result.append(Case("managed-file-"+fault,bin_fault=fault,
+                           args=("doctor","--fix","--force-release"),verifier=True))
+        if raw_filesystem_paths:
+            result.append(Case("raw-managed-file-"+fault,bin_fault=fault,raw_home=True,
+                               args=("doctor","--fix","--force-release"),verifier=True))
+    if __import__('os').name!='nt':
+        result.append(Case("managed-home-symlink-parent",home_lexical="symlink-parent",
+                           args=("doctor","--fix","--force-release"),verifier=True))
     payloads = [b'', b'{bad', b'null', b'{}', b'[]', b'1', b'true', b'"str"',
                 b'{"source":"brain-source"}', b'{"SOURCE":"brain-source","receiver_commit":"fixture commit=123"}',
                 '{"ſOURCE":"brain-source","RECEIVER_COMMIT":"unicode"}'.encode(),
@@ -105,6 +139,19 @@ def cases():
                    Case("terminator",args=("doctor","--fix","--","--force-release")),
                    Case("positional",args=("doctor","--fix","positional","--force-release")),
                    Case("legacy-single-dash",args=("doctor","-fix","-force-release=false"))))
+    for name,args in (
+        ("excess-dash-fix",("doctor","----fix")),
+        ("excess-dash-json",("doctor","--fix","----json")),
+        ("excess-dash-force",("doctor","--fix","----force-release")),
+        ("bad-flag-syntax",("doctor","--fix","--=bad")),
+        ("valid-triple-force",("doctor","--fix","---force-release"))):
+        result.append(Case(name,args=args,version=b'{"version":"0.0.0"}',
+                           provenance=b'{"source":"brain-source"}',verifier=True))
+    if __import__('os').name!='nt':
+        raw=__import__('os').fsdecode(b'bad\xff\xe2\x82')
+        for flag in ("fix","force-release","json"):
+            result.append(Case("raw-bool-"+flag,args=("doctor","--fix","--"+flag+"="+raw)))
+        result.append(Case("raw-unknown-flag",args=("doctor","--fix","--"+raw)))
     result.extend((
         Case("verified-repair-missing", all_missing=True, verifier=True),
         Case("verified-repair-mismatch", version=b'{"version":"0.0.0"}', verifier=True),
@@ -112,4 +159,10 @@ def cases():
              provenance=b'{"source":"brain-source","receiver_commit":"kept until explicit force"}',verifier=True),
         Case("verified-force-corrupt",args=("doctor","--fix","--force-release"),version=b'{"version":"0.0.0"}',
              provenance=b'{bad',verifier=True)))
+    if raw_filesystem_paths:
+        escaped = __import__('os').fsdecode(b"home\xff\xef\xbf\xbd\xe2\x82&<>\xe2\x80\xa8\xe2\x80\xa9")
+        for lexical, fault in (("parent", None), ("symlink-parent", None), ("parent", "parent")):
+            result.append(Case(f"escaped-home-doctor-{lexical}-fault-{fault}",
+                args=("doctor", "--fix", "--force-release"), verifier=True,
+                escaping_home=escaped, home_lexical=lexical, bin_fault=fault))
     return result

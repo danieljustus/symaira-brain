@@ -1,0 +1,103 @@
+{
+  "validated_source": "3db69a655e43ef8cffa3776ad00a823d947ff31b",
+  "parents": {
+    "registry": "b42730bfea8224d1cba1bb7883708b61e1ac096e",
+    "main": "e3dbda6cbb95429237d15a9b176209b7d107792c",
+    "owned_windows_fixture": "d4cb8e67cd20e0f1939c432f740cf1e71b11f209",
+    "windows_pipe": "c31b557be18adfdb32d81212e21b23c3d5e53cd4",
+    "original_owner_candidate": "407bc5e3b9022ee96f2ad99c9971198cfc8c8569"
+  },
+  "frozen_go_source": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "worktree": "/workspace/symaira-daemon772-state-key",
+  "exclusive_target": "/workspace/symaira-daemon772-registry/target",
+  "binaries_sha256": {
+    "/workspace/symaira-daemon772-registry/target/debug/symbrowse": "ecb9bcefb4fa1c8bf208ab5a08f8ea64c513b28be0a16c83533806e186f69707",
+    "/workspace/symaira-daemon772-registry/target/debug/examples/state_key_store_probe": "280b39534554df80717f7c406c3e0f9163d726f4e22a4f01d1b5ee850b268343",
+    "/workspace/symaira-daemon772-registry/target/debug/examples/startup_key_source_probe": "9939df8439b94e2c73953d0d107d50779d9f9885165ffcbc8dce13641b72bb73",
+    "/tmp/symaira-pr801-go-1.26.7": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8",
+    "/tmp/symaira-pr801-go-mcp-v0.8.0": "5f35bc2bc89753301e7151af4eb8dee45e7c80242719ec270827708eb2a183dc",
+    "/workspace/oracles/symaira-state-key-4cd-owned-provider": "e231f7b6707a4cff1714057f00c67ec454d5e2aa696dee9a217c2e7ece9062d1",
+    "/workspace/oracles/symaira-state-key-407-owner-missing-probe": "a4ddd71ba7a37318e73cea5712eace48ecafa003b82f7b9730934d745f97579f"
+  },
+  "archive": "/workspace/oracles/symaira-daemon772-state-key-3db69a655e43-idle-binaries/receipt.json",
+  "archive_paths": 149,
+  "archive_unique": 115,
+  "archive_compressed_bytes": 165580170,
+  "affected_tests": {
+    "passed": 207,
+    "failed": 0,
+    "ignored": 3
+  },
+  "workspace_tests": {
+    "passed": 310,
+    "failed": 0,
+    "ignored": 3
+  },
+  "ownership": {
+    "actual_cases": 8,
+    "unix_refusals": 9,
+    "missing_provider": 1,
+    "source_boundaries": 5,
+    "held_writer_control_rejected": true,
+    "false_absence_control_rejected": true
+  },
+  "key_gate": {
+    "startup_pairs": 31,
+    "original_baseline_pairs_retained": 17,
+    "actual_executable_controls_rejected": 3
+  },
+  "process": {
+    "requests": 63,
+    "controls_rejected": 3
+  },
+  "registry": {
+    "cli": 510,
+    "raw_frames": 20,
+    "clients": 8,
+    "roots": 7,
+    "go_persisted_files": 3,
+    "controls_rejected": 8
+  },
+  "mcp": {
+    "literal_byte_cases": 13,
+    "actual_cargo101_controls_rejected": 3,
+    "historical_go_sources": 4
+  },
+  "verified_source_maps": {
+    "candidate_files": 192,
+    "frozen_go_files": 670
+  },
+  "strict_checks": [
+    "workspace fmt",
+    "workspace all-target all-feature Clippy -D warnings",
+    "actionlint",
+    "matrix88/contracts17DAG",
+    "Windows Core strict cross-Clippy source only",
+    "Darwin Core cross-check source only"
+  ],
+  "portable_tests": {
+    "windows_pipe": 8,
+    "run_harness_supported": 6,
+    "run_harness_full": {
+      "passed": 6,
+      "errors": 3,
+      "cause": "inherited direct-macOS tests require actual mounted /Volumes/1TB_NVMe_SN850X, absent on Linux; raw failure retained; no fabricated mount"
+    }
+  },
+  "retained_original_provider_replay": {
+    "original_source": "4cd56e3e47338aef30e5d83ea554227ace70fe71",
+    "current_source": "3db69a655e43ef8cffa3776ad00a823d947ff31b",
+    "fixture_identical_sha256": "e231f7b6707a4cff1714057f00c67ec454d5e2aa696dee9a217c2e7ece9062d1",
+    "go_and_native_client_exit": 1,
+    "elapsed_seconds_approximately": 5,
+    "both_providers_gone_at_16_5_seconds": true,
+    "native_immediate_sample": "briefly S; separate ownership gate asserts bounded cleanup, no instant-exit claim"
+  },
+  "scope": "author validation only; no independent approval or native Windows/Darwin runtime claim",
+  "remaining": [
+    "independent full review",
+    "native six exact published head",
+    "pre-existing inherited root --session parser gap",
+    "full issue772 acceptance/release"
+  ]
+}

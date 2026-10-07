@@ -2,6 +2,11 @@
 #![deny(unsafe_code)]
 
 mod activity;
+mod cli_delete_admission;
+mod cli_entity;
+mod cli_read_admission;
+mod cli_write;
+mod direct_admission;
 mod embedding;
 mod entity;
 pub mod evidence;
@@ -9,6 +14,7 @@ mod evidence_store;
 mod gojson;
 mod gorand;
 mod gotime;
+pub mod http;
 mod list_rows;
 mod lsh;
 mod migration;
@@ -19,6 +25,7 @@ mod schema;
 mod schema_inspection;
 mod search_rows;
 mod store;
+mod wal_open;
 mod write;
 
 #[cfg(test)]
@@ -26,6 +33,11 @@ mod write;
 mod db_oracle_tests;
 
 pub use activity::{ActivityItem, ActivityPage, ActivitySearch, ActivityStatus, Provenance};
+pub use cli_delete_admission::direct_delete_supported;
+pub use cli_entity::direct_entities_supported;
+pub use cli_read_admission::direct_reads_supported;
+pub use cli_write::{DirectWrite, direct_project_supported};
+pub use direct_admission::{direct_content_supported, direct_text_supported};
 pub use embedding::{EmbeddingGenerator, GeneratedEmbedding};
 pub use list_rows::{MemoryListRow, RuleRow};
 pub use model::{Memory, SetOptions, Store, StoreError};

@@ -9,6 +9,11 @@ mod go_printable;
 const GO_QUOTE_HEX: &[u8; 16] = b"0123456789abcdef";
 
 /// Quotes raw bytes with Go's byte-preserving `%q` behavior.
+///
+/// # Panics
+/// The internal prefix assertion would panic if Rust's UTF-8 validator reported
+/// a valid prefix containing invalid UTF-8. Malformed input bytes are escaped
+/// and do not trigger this assertion.
 #[must_use]
 pub fn format_go_quoted_bytes(bytes: &[u8]) -> String {
     let mut out = String::with_capacity(bytes.len() + 2);
@@ -25,7 +30,7 @@ pub fn format_go_quoted_bytes(bytes: &[u8]) -> String {
                 if valid_len > 0 {
                     append_go_quoted_str(
                         &mut out,
-                        &String::from_utf8_lossy(&remaining[..valid_len]),
+                        std::str::from_utf8(&remaining[..valid_len]).expect("valid prefix"),
                     );
                 }
                 append_go_hex_escape(&mut out, remaining[valid_len]);

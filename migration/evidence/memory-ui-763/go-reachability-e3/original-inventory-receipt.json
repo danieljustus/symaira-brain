@@ -1,0 +1,93 @@
+{
+  "base": "e3dbda6cbb95429237d15a9b176209b7d107792c",
+  "frozen_go": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "oracle_binary_sha256": "a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41",
+  "source_manifest_verified": 20,
+  "cli_cases": 13,
+  "http_cases": 17,
+  "owned_embeddings": 1,
+  "server_exit": 0,
+  "web_reachable": true,
+  "tui_production_dependency": false,
+  "clean": true,
+  "rust_target_built": false,
+  "rust_parity_claim": false,
+  "recommendation": "Port portable reachable Web Console alongside native HTTP owner; retire unreachable TUI implementation/mandatory-port plan explicitly after Root decision",
+  "files": [
+    {
+      "path": "/tmp/symaira-memory763-ui-inventory.md",
+      "bytes": 7276,
+      "sha256": "824d1f6bba457a7f5a1f439c4367a8789c15a522d80a3b499c505ff2f6019627"
+    },
+    {
+      "path": "/tmp/symaira-memory763-ui-oracle.py",
+      "bytes": 7318,
+      "sha256": "12890e34c0b4eee8bbac8e3f5c35f6ae11e66efc8e8f6dde25553435ec843065"
+    },
+    {
+      "path": "/tmp/symaira-memory763-ui-oracle-initial.py",
+      "bytes": 7124,
+      "sha256": "b17d0e33c7836bed550abb5e56b6c236efdd5d7471c11636d46eceba1480441b"
+    },
+    {
+      "path": "/tmp/symaira-memory763-ui-oracle-second.py",
+      "bytes": 7150,
+      "sha256": "c82cae6db95745f7e49132a14b6b03c0d0aeb0cea685322bdb44ae6806c46e05"
+    },
+    {
+      "path": "/tmp/symaira-memory763-ui-oracle.log",
+      "bytes": 506,
+      "sha256": "1215fba39aedad2fd8d9d45d37e860abf5d91ebadc09545f6ae8adc9f9c0ca14"
+    },
+    {
+      "path": "/tmp/symaira-memory763-ui-oracle-final.log",
+      "bytes": 474,
+      "sha256": "9e7baaac275bcf2b530296ab6a605bbdef0346c413036d9e544ab6ee0c0992eb"
+    },
+    {
+      "path": "/tmp/symaira-memory763-ui-oracle-complete.log",
+      "bytes": 132,
+      "sha256": "82d28956a11164a7a3cdb354132a0accbb98dbaa44bed45a07d69567b5cc090c"
+    },
+    {
+      "path": "/tmp/symaira-memory763-ui-go-command-dependencies.txt",
+      "bytes": 8814,
+      "sha256": "95974210f1bb0f9600aec8b1d23c9bd072815f9491b712bd82927a65ee0b1218"
+    },
+    {
+      "path": "/tmp/symaira-memory763-ui-go-binary-metadata.txt",
+      "bytes": 1647,
+      "sha256": "87bcb1397ba164bf70910a11dacebc400a125ab3329b402e7d7564004319f4af"
+    },
+    {
+      "path": "/tmp/symaira-memory763-ui-oracle-complete/receipt.json",
+      "bytes": 108892,
+      "sha256": "b1324611d67f981e8672ef5c4b8f3d1ecb134671e7827b32da221f87f57a542b"
+    },
+    {
+      "path": "/tmp/symaira-memory763-ui-oracle-complete/partial-observations.json",
+      "bytes": 106125,
+      "sha256": "f66b763003988406648ea6ee2e2d1ceec399c28b5ef57f5731db8a2dbabe36ad"
+    },
+    {
+      "path": "/tmp/symaira-memory763-ui-oracle-complete/server.stderr",
+      "bytes": 2130,
+      "sha256": "edbff7e0bcc205f8fb3e5867a915f8eea46fb8a23d12d765aac317ed5a65f7f5"
+    },
+    {
+      "path": "/tmp/symaira-memory763-ui-oracle-complete/server.stdout",
+      "bytes": 59,
+      "sha256": "2f66cec9414037e9fac97be36356fecc591ae13d3a6f1dc0a45301b6731825b5"
+    },
+    {
+      "path": "/tmp/symaira-memory763-ui-oracle-complete/data/owned.sqlite",
+      "bytes": 434176,
+      "sha256": "ad4c638846c0074892516d497bdb8bd740597f96bcfe2a2d073ce99a45169571"
+    },
+    {
+      "path": "/tmp/symaira-memory763-ui-oracle-complete/config/symmemory/config.toml",
+      "bytes": 112,
+      "sha256": "1d576c2f21dddbe989aa28324bf2724498b7acf551bd7d82ec1cf532b875595a"
+    }
+  ]
+}

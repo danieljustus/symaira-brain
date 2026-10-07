@@ -1,0 +1,86 @@
+   Compiling symbrain-core v0.12.1 (/workspace/symaira-guard770-doctor-boundaries/rust/symbrain-core)
+   Compiling symbrain-guard-core v0.12.1 (/workspace/symaira-guard770-doctor-boundaries/rust/symbrain-guard-core)
+    Finished `test` profile [unoptimized] target(s) in 2.23s
+     Running unittests src/lib.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/symbrain_guard_core-2c7cbffa5f62790d)
+
+running 18 tests
+test external_decision::tests::quote_go_char_preserves_frozen_latin1_printability ... ok
+test go_json::tests::matches_go_marshal_indent_layout_and_escaping ... ok
+test key_storage::tests::default_data_path_prefers_xdg_then_home_then_temp ... ok
+test go_json::tests::formats_utc_seconds_from_fractional_offset_time ... ok
+test key_storage::tests::generate_key_has_required_size ... ok
+test key_storage::tests::load_or_create_is_stable_and_owner_only ... ok
+test key_storage::tests::regular_file_parent_fails_closed ... ok
+test go_json::tests::matches_go_html_and_line_separator_escaping ... ok
+test key_storage::tests::short_existing_key_fails_closed ... ok
+test sequence::tests::disabled_detector_does_not_record ... ok
+test sequence::tests::ledger_summarizes_successes_failures_and_last_error_sorted ... ok
+test sequence::tests::canonicalizes_object_key_order ... ok
+test sequence::tests::fuzzy_search_and_find_tools_deduplicate_queries ... ok
+test sequence::tests::exact_repetition_blocks_at_default_threshold ... ok
+test sequence::tests::non_positive_window_size_uses_default ... ok
+test sequence::tests::only_attempt_states_count_and_denies_are_recoverable ... ok
+test sequence::tests::threshold_and_tool_are_part_of_exact_contract ... ok
+test sequence::tests::window_eviction_forgets_least_recent_signature ... ok
+
+test result: ok. 18 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/capability_oracle_tests.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/capability_oracle_tests-65ee36cfdb931296)
+
+running 5 tests
+test capability_signing_matches_pinned_go_bytes ... ok
+test capability_scope_intersection_matches_pinned_go ... ok
+test capability_oracle_provenance_and_case_ids_are_complete ... ok
+test capability_wire_matches_pinned_go_bytes ... ok
+test capability_verification_matches_pinned_go ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/external_decision.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/external_decision-544816ab25c3cb82)
+
+running 6 tests
+test deadline_equality_is_expired_with_injected_time ... ok
+test audit_failure_flips_allow_to_deny_but_keeps_existing_deny ... ok
+test audit_record_preserves_received_fields_and_injected_timestamp ... ok
+test trailing_json_diagnostics_match_go_byte_scanner ... ok
+test fixture_provenance_mutations_are_rejected_by_the_same_validator ... ok
+test pinned_go_fixture_matches_direct_response_bytes ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/external_decision_review.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/external_decision_review-f0a091eeb4c37430)
+
+running 2 tests
+test mutated_review_capture_fails_the_actual_validator ... ok
+test reviewed_counterexamples_match_go_response_and_audit ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/external_decision_serialization.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/external_decision_serialization-4e9fa7f8e16a262c)
+
+running 3 tests
+test audit_serialization_omits_optional_empty_fields_like_go ... ok
+test go_timestamp_is_utc_seconds_precision_for_audit_records ... ok
+test matches_pinned_go_generated_audit_and_response_fixture ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/external_repair.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/external_repair-2e3dae7e5938d71a)
+
+running 2 tests
+test deadline_nanosecond_boundary_is_not_rounded ... ok
+test replay_f01_f05_production_go_observations ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/oracle_tests.rs (/workspace/symaira-guard770-diagnostics/target/debug/deps/oracle_tests-8fbaf264f3f2ddc6)
+
+running 5 tests
+test fail_closed_control_has_no_reason_bytes ... ok
+test catalog_json_validation_preserves_unknown_decision_error ... ok
+test static_scope_kernel_rejects_missing_capability ... ok
+test policy_match_criteria_is_conjunctive ... ok
+test guard_core_matches_go_oracle_bytes ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

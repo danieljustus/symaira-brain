@@ -1,0 +1,4 @@
+{
+  "sha256": "904473d4cc4e43770d860301cb29a3e31284c4f5d7539175723adb8608607e74",
+  "text": "[('tmp-extra-missing', ['stdout_base64', 'stderr_base64', 'filesystem']), ('tmp-extra-file', ['stdout_base64', 'stderr_base64', 'filesystem'])]\n"
+}

@@ -1,0 +1,69 @@
+{
+  "original_source": "25292fe2d3349fe3b716783310096accb1f63007",
+  "original_library_result": {
+    "passed": 61,
+    "failed": 4,
+    "ignored": 0
+  },
+  "catalog_order": {
+    "0": "001_init",
+    "1": "002_vector_index",
+    "2": "003_jwt_revocations",
+    "3": "004_sync_state",
+    "4": "005_indexes",
+    "5": "006_provenance",
+    "6": "007_profiles",
+    "7": "008_entities",
+    "8": "009_consolidation",
+    "9": "010_import_state",
+    "10": "011_importance",
+    "11": "012_audit_log",
+    "12": "014_temporal_validity",
+    "13": "015_entities_aliases",
+    "14": "016_fts5",
+    "15": "017_embedding_source",
+    "16": "018_content_hash",
+    "17": "019_memory_evidence",
+    "18": "020_entity_relations",
+    "19": "021_context_profiles",
+    "20": "022_entity_relation_provenance",
+    "21": "023_sync_oplog",
+    "22": "024_working_memory_tier",
+    "23": "025_entity_relation_temporal",
+    "24": "026_binary_embedding",
+    "25": "027_access_count",
+    "26": "027_consolidation_runs",
+    "27": "027_fts5_porter",
+    "28": "027_query_log",
+    "29": "027_retrieval_feedback",
+    "30": "028_embedding_quantization",
+    "31": "029_query_log_attribution",
+    "32": "030_audit_target",
+    "33": "031_query_log_results",
+    "34": "032_memory_governance",
+    "35": "033_recall_quality",
+    "36": "034_activity_store"
+  },
+  "original_inclusive20_actual_marker_count": 21,
+  "named_before022_actual_marker_count": 20,
+  "named_before006_actual_marker_count": 5,
+  "all_other_prefix_callers_reviewed": {
+    "FTS13_14_15": [
+      "015_entities_aliases",
+      "016_fts5",
+      "017_embedding_source"
+    ],
+    "complete36": "034_activity_store",
+    "nullable_attribution28": "027_query_log",
+    "historical_sync22": "024_working_memory_tier",
+    "remaining_custom_sync20": {
+      "last_applied": "022_entity_relation_provenance",
+      "next_pending": "023_sync_oplog"
+    },
+    "all_prefix_loop": "Every end in0..catalog.STEPS.len inclusive helper intentionally completes each full prefix",
+    "seed_entities_index7": "008_entities",
+    "seed_relations_index19": "021_context_profiles"
+  },
+  "unchanged_production": true,
+  "strong_assertions": "All callbacks/expected diagnostics/full schema-and-row shadow snapshot equality retained; actual marker cardinality derives catalog position; missing id verified before opening."
+}

@@ -1,0 +1,523 @@
+{
+  "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "candidate_head": "42490d2163899e46abd41dde398daac4199651a3",
+  "candidate_dirty": false,
+  "runtime": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "go_sdk": "go version go1.26.7 linux/amd64",
+  "go_binary_sha256": "7412c237b5e64c5a68a4138933b7952fcec968d87647aa89fc54560d3ae4bc5f",
+  "rust_binary_sha256": "a120ff899704b899e7c1b4a12cbbaac6caffd746006c34c6c4186ee9559d389c",
+  "tool_binary_sha256": "e2cf3e0d5ea5724ff5fd3ea633cdb3f9ee7320bc5bf09b9ab04f831c6481816d",
+  "real_worker_toolchain": "Actual go build -trimpath ./cmd/symbrowse on owned dependency-free module; shared owned cache outside individual fixture snapshots, removed with the runner temporary directory.",
+  "total": 1,
+  "matched": 0,
+  "complete_observations": 1,
+  "control": "wrong-source",
+  "native_cleanup": null,
+  "exit": 1,
+  "failures": [
+    {
+      "case": "explicit-browse-json",
+      "fields": [
+        "stdout_base64"
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "case": "explicit-browse-json",
+      "go": {
+        "started": 1791060278.5380805,
+        "ended": 1791060278.6673799,
+        "actual_exit": 0,
+        "raw_stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zZXR1cC1zb3VyY2UtY2FzZS05aTFmd29kbS9ob21lLy5zeW1haXJhL2JpbiIsInJvb3QiOiIvdG1wL3NldHVwLXNvdXJjZS1jYXNlLTlpMWZ3b2RtL3JlY2VpdmluZyBzb3VyY2VzIiwicmVzdWx0cyI6W3sibW9kdWxlIjoiYnJvd3NlIiwiYmluYXJ5Ijoic3ltYnJvd3NlIiwidmVyc2lvbiI6IjAuNzY1LjAtbG9jYWwiLCJzdGF0dXMiOiJpbnN0YWxsZWQiLCJzb3VyY2UiOiJicmFpbi1zb3VyY2UiLCJyZWNlaXZlcl9jb21taXQiOiI3NjUwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTYiLCJiaW5hcnlfc2hhMjU2IjoiZTJjZjNlMGQ1ZWE1NzI0ZmY1ZmQzZWE2MzNjZGIzZjllZTczMjBiYzViZjA5YjlhYjA0ZjgzMWM2NDgxODE2ZCJ9XX0K",
+        "raw_stderr_base64": "",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3266075,
+            "sha256": "e2cf3e0d5ea5724ff5fd3ea633cdb3f9ee7320bc5bf09b9ab04f831c6481816d"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3266075,
+            "sha256": "e2cf3e0d5ea5724ff5fd3ea633cdb3f9ee7320bc5bf09b9ab04f831c6481816d"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3266075,
+            "sha256": "e2cf3e0d5ea5724ff5fd3ea633cdb3f9ee7320bc5bf09b9ab04f831c6481816d"
+          }
+        },
+        "contract": {
+          "exit": 0,
+          "stdout_base64": "eyJiaW5fZGlyIjoiPHJvb3Q+L2hvbWUvLnN5bWFpcmEvYmluIiwicm9vdCI6Ijxyb290Pi9yZWNlaXZpbmcgc291cmNlcyIsInJlc3VsdHMiOlt7Im1vZHVsZSI6ImJyb3dzZSIsImJpbmFyeSI6InN5bWJyb3dzZSIsInZlcnNpb24iOiIwLjc2NS4wLWxvY2FsIiwic3RhdHVzIjoiaW5zdGFsbGVkIiwic291cmNlIjoiYnJhaW4tc291cmNlIiwicmVjZWl2ZXJfY29tbWl0IjoiNzY1MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2IiwiYmluYXJ5X3NoYTI1NiI6ImUyY2YzZTBkNWVhNTcyNGZmNWZkM2VhNjMzY2RiM2Y5ZWU3MzIwYmM1YmYwOWI5YWIwNGY4MzFjNjQ4MTgxNmQifV19Cg==",
+          "stderr_base64": "",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin/symbrowse": {
+              "type": "file",
+              "mode": 493,
+              "size": 3266075,
+              "sha256": "e2cf3e0d5ea5724ff5fd3ea633cdb3f9ee7320bc5bf09b9ab04f831c6481816d"
+            },
+            "home/.symaira/bin/symbrowse.provenance.json": {
+              "type": "file",
+              "mode": 420,
+              "size": 352,
+              "sha256": "d15b53fa0227a61f55fa5db388ec4f27ee0ed557911ee0654a05c58610d104fa",
+              "content_base64": "ewogICJiaW5hcnkiOiAic3ltYnJvd3NlIiwKICAic291cmNlIjogImJyYWluLXNvdXJjZSIsCiAgInZlcnNpb24iOiAiIiwKICAicmVjZWl2ZXJfY29tbWl0IjogIjc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsCiAgIm1vZHVsZV9kaXIiOiAiYnJvd3NlIiwKICAiYnVpbGRlciI6ICJnbyB2ZXJzaW9uIGdvMS4yNi43IGZpeHR1cmUvZml4dHVyZSIsCiAgImJ1aWx0X2F0IjogIjx2YWxpZGF0ZWQtaW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICJlMmNmM2UwZDVlYTU3MjRmZjVmZDNlYTYzM2NkYjNmOWVlNzMyMGJjNWJmMDliOWFiMDRmODMxYzY0ODE4MTZkIgp9Cg=="
+            },
+            "invocations.jsonl": {
+              "type": "file",
+              "mode": 420,
+              "size": 342,
+              "sha256": "7f6d3420b228e7404c7d5f6c76d4f8854a585969453b1e07786508a831fb0d16",
+              "content_base64": "eyJhcmdzIjpbIi1DIiwiPHJvb3Q+L3JlY2VpdmluZyBzb3VyY2VzIiwicmV2LXBhcnNlIiwiSEVBRCJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnaXQifQp7ImFyZ3MiOlsidmVyc2lvbiJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnbyJ9CnsiYXJncyI6WyJidWlsZCIsIi10cmltcGF0aCIsIi1vIiwiPHJvb3Q+L3RtcC9zeW1icmFpbi1zb3VyY2UtYnVpbGQtPHVuaXF1ZT4vc3ltYnJvd3NlIiwiLi9jbWQvc3ltYnJvd3NlIl0sImNnbyI6IjAiLCJjd2QiOiI8cm9vdD4vcmVjZWl2aW5nIHNvdXJjZXMvYnJvd3NlIiwidG9vbCI6ImdvIn0K"
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3266075,
+              "sha256": "e2cf3e0d5ea5724ff5fd3ea633cdb3f9ee7320bc5bf09b9ab04f831c6481816d"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3266075,
+              "sha256": "e2cf3e0d5ea5724ff5fd3ea633cdb3f9ee7320bc5bf09b9ab04f831c6481816d"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3266075,
+              "sha256": "e2cf3e0d5ea5724ff5fd3ea633cdb3f9ee7320bc5bf09b9ab04f831c6481816d"
+            }
+          }
+        }
+      },
+      "rust": {
+        "started": 1791060278.8931797,
+        "ended": 1791060279.1704197,
+        "actual_exit": 0,
+        "raw_stdout_base64": "eyJiaW5fZGlyIjoiL3RtcC9zZXR1cC1zb3VyY2UtY2FzZS0zMGwyeTB3bC9ob21lLy5zeW1haXJhL2JpbiIsInJvb3QiOiIvdG1wL3NldHVwLXNvdXJjZS1jYXNlLTMwbDJ5MHdsL3JlY2VpdmluZyBzb3VyY2VzIiwicmVzdWx0cyI6W3sibW9kdWxlIjoiYnJvd3NlIiwiYmluYXJ5Ijoic3ltYnJvd3NlIiwidmVyc2lvbiI6IjAuNzY1LjAtbG9jYWwiLCJzdGF0dXMiOiJpbnN0YWxsZWQiLCJzb3VyY2UiOiJyZWxlYXNlIiwicmVjZWl2ZXJfY29tbWl0IjoiNzY1MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2IiwiYmluYXJ5X3NoYTI1NiI6ImUyY2YzZTBkNWVhNTcyNGZmNWZkM2VhNjMzY2RiM2Y5ZWU3MzIwYmM1YmYwOWI5YWIwNGY4MzFjNjQ4MTgxNmQifV19Cg==",
+        "raw_stderr_base64": "",
+        "before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/browse": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/operate": {
+            "type": "dir",
+            "mode": 493
+          },
+          "receiving sources/scope": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tmp": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools": {
+            "type": "dir",
+            "mode": 493
+          },
+          "tools/git": {
+            "type": "file",
+            "mode": 493,
+            "size": 3266075,
+            "sha256": "e2cf3e0d5ea5724ff5fd3ea633cdb3f9ee7320bc5bf09b9ab04f831c6481816d"
+          },
+          "tools/go": {
+            "type": "file",
+            "mode": 493,
+            "size": 3266075,
+            "sha256": "e2cf3e0d5ea5724ff5fd3ea633cdb3f9ee7320bc5bf09b9ab04f831c6481816d"
+          },
+          "tools/swift": {
+            "type": "file",
+            "mode": 493,
+            "size": 3266075,
+            "sha256": "e2cf3e0d5ea5724ff5fd3ea633cdb3f9ee7320bc5bf09b9ab04f831c6481816d"
+          }
+        },
+        "contract": {
+          "exit": 0,
+          "stdout_base64": "eyJiaW5fZGlyIjoiPHJvb3Q+L2hvbWUvLnN5bWFpcmEvYmluIiwicm9vdCI6Ijxyb290Pi9yZWNlaXZpbmcgc291cmNlcyIsInJlc3VsdHMiOlt7Im1vZHVsZSI6ImJyb3dzZSIsImJpbmFyeSI6InN5bWJyb3dzZSIsInZlcnNpb24iOiIwLjc2NS4wLWxvY2FsIiwic3RhdHVzIjoiaW5zdGFsbGVkIiwic291cmNlIjoicmVsZWFzZSIsInJlY2VpdmVyX2NvbW1pdCI6Ijc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsImJpbmFyeV9zaGEyNTYiOiJlMmNmM2UwZDVlYTU3MjRmZjVmZDNlYTYzM2NkYjNmOWVlNzMyMGJjNWJmMDliOWFiMDRmODMxYzY0ODE4MTZkIn1dfQo=",
+          "stderr_base64": "",
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin/symbrowse": {
+              "type": "file",
+              "mode": 493,
+              "size": 3266075,
+              "sha256": "e2cf3e0d5ea5724ff5fd3ea633cdb3f9ee7320bc5bf09b9ab04f831c6481816d"
+            },
+            "home/.symaira/bin/symbrowse.provenance.json": {
+              "type": "file",
+              "mode": 420,
+              "size": 352,
+              "sha256": "d15b53fa0227a61f55fa5db388ec4f27ee0ed557911ee0654a05c58610d104fa",
+              "content_base64": "ewogICJiaW5hcnkiOiAic3ltYnJvd3NlIiwKICAic291cmNlIjogImJyYWluLXNvdXJjZSIsCiAgInZlcnNpb24iOiAiIiwKICAicmVjZWl2ZXJfY29tbWl0IjogIjc2NTAxMjM0NTY3ODlhYmNkZWYwMTIzNDU2Nzg5YWJjZGVmMDEyMzQ1NiIsCiAgIm1vZHVsZV9kaXIiOiAiYnJvd3NlIiwKICAiYnVpbGRlciI6ICJnbyB2ZXJzaW9uIGdvMS4yNi43IGZpeHR1cmUvZml4dHVyZSIsCiAgImJ1aWx0X2F0IjogIjx2YWxpZGF0ZWQtaW5zdGFsbC10aW1lc3RhbXA+IiwKICAiYmluYXJ5X3NoYTI1NiI6ICJlMmNmM2UwZDVlYTU3MjRmZjVmZDNlYTYzM2NkYjNmOWVlNzMyMGJjNWJmMDliOWFiMDRmODMxYzY0ODE4MTZkIgp9Cg=="
+            },
+            "invocations.jsonl": {
+              "type": "file",
+              "mode": 420,
+              "size": 342,
+              "sha256": "7f6d3420b228e7404c7d5f6c76d4f8854a585969453b1e07786508a831fb0d16",
+              "content_base64": "eyJhcmdzIjpbIi1DIiwiPHJvb3Q+L3JlY2VpdmluZyBzb3VyY2VzIiwicmV2LXBhcnNlIiwiSEVBRCJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnaXQifQp7ImFyZ3MiOlsidmVyc2lvbiJdLCJjZ28iOiIiLCJjd2QiOiI8cm9vdD4vcHJvamVjdCIsInRvb2wiOiJnbyJ9CnsiYXJncyI6WyJidWlsZCIsIi10cmltcGF0aCIsIi1vIiwiPHJvb3Q+L3RtcC9zeW1icmFpbi1zb3VyY2UtYnVpbGQtPHVuaXF1ZT4vc3ltYnJvd3NlIiwiLi9jbWQvc3ltYnJvd3NlIl0sImNnbyI6IjAiLCJjd2QiOiI8cm9vdD4vcmVjZWl2aW5nIHNvdXJjZXMvYnJvd3NlIiwidG9vbCI6ImdvIn0K"
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/browse": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/operate": {
+              "type": "dir",
+              "mode": 493
+            },
+            "receiving sources/scope": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tmp": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools": {
+              "type": "dir",
+              "mode": 493
+            },
+            "tools/git": {
+              "type": "file",
+              "mode": 493,
+              "size": 3266075,
+              "sha256": "e2cf3e0d5ea5724ff5fd3ea633cdb3f9ee7320bc5bf09b9ab04f831c6481816d"
+            },
+            "tools/go": {
+              "type": "file",
+              "mode": 493,
+              "size": 3266075,
+              "sha256": "e2cf3e0d5ea5724ff5fd3ea633cdb3f9ee7320bc5bf09b9ab04f831c6481816d"
+            },
+            "tools/swift": {
+              "type": "file",
+              "mode": 493,
+              "size": 3266075,
+              "sha256": "e2cf3e0d5ea5724ff5fd3ea633cdb3f9ee7320bc5bf09b9ab04f831c6481816d"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "comparison": "Exact stdout, stderr, exit and full owned fixture files/types/modes/hashes, including real tool argv/cwd/CGO and actual installed-payload hash. Only owned fixture roots, observed unique source staging paths, and new validated UTC install timestamps normalize. No failures or files are dropped.",
+  "remaining_scope": "Full typed invalid-configuration diagnostics remain Go-owned; hardware, signing and native macOS/Windows execution are not established by this Linux receipt.",
+  "candidate_source_sha256": {
+    ".github/workflows/ci.yml": "e127e3de3ddec8246640c4237f545e0728719a5f06fb695ef3865d507a6d4bde",
+    ".github/workflows/rust-coverage.yml": "a94fff5bb4498b7c0e7ee23b9d845cf95674be6ad04503857364007550bb250c",
+    ".gitignore": "ed6a833952014dc3be05ceb2bdb867c8afc5bf0258908b6e79d09be55bae1e5f",
+    "Cargo.lock": "b9c559a34f88865e86e2ff04a2d590bd2603d3a1d45252e3f3087a638a922173",
+    "MIGRATION-RUST.md": "31f7a6cb3de5322f60b65cca4df7e1eb0fa3044bd2810db8e540a2c16ab43336",
+    "Makefile": "7d37d2e275208ac7e3e0a2a5324c4d6025a62b1b86f78652cfbfa37811f1158a",
+    "README.md": "cb6d84bc28ee66d90561830d5ae2f6c3583bb6a24e06142b3bbac55f80a8218a",
+    "docs/adr/0006-activity-integer-error-precedence.md": "094b97bdc4062ae5e347477183ef457bc713bc85f5b31a55ef2a33a0e3f05c7a",
+    "docs/adr/2026-10-03-native-doctor-repair.md": "de1f7930a25f2dfd23ea21b5242d63aa6185eaaa50af7eabf4c05eefb0a5e164",
+    "docs/adr/2026-10-03-native-source-setup.md": "2e1906dc41d48cb43fa83433b539021bce81b9da2944a5efb2c1d447e8f266af",
+    "migration/contract-matrix.csv": "63d9bcd8eec6a5d94d30cc4f208700a1c4477c81196ffdeec58c08821dc7c5ad",
+    "rust/coverage-policy.json": "03cbbb11d4128f0e1989a2abab327235d1980b9dfc83364cc007ef7efd70d9d1",
+    "rust/symbrain-activity/src/lib.rs": "709f266eaf00b917eeea2d4da4e67d4fdbe0fdbacc4ddbe51ba6b76d731b1d82",
+    "rust/symbrain-audit/src/lib.rs": "3eecae6a46dcdae73478729a1d79ee7fb7e61c76f26cdd6a739c2766f2dc0c22",
+    "rust/symbrain-audit/src/redact.rs": "0f071038acd66c1995b025fddefab83b0cd100330d6d9b69cd5d71b01e4ec553",
+    "rust/symbrain-broker/tests/broker_tests.rs": "b2e81f34cda0f58940a119f26f019958363e728e1f9a8b2ab3d00f1c79bb2764",
+    "rust/symbrain-cli/Cargo.toml": "220ff759378dbb77a1b4bbe03c388e309d23b7d15dd4f1c1cd1dbe3d2ab9e179",
+    "rust/symbrain-cli/src/activity_args.rs": "5bea6864075f6c2f26114e7c43b759d764da23e4bbbcdaa625a7835a7e02b6a7",
+    "rust/symbrain-cli/src/activity_cli.rs": "3e332795d6aad6ef530b93edb73918d9438f50d56c41c5b4051977fcba452af6",
+    "rust/symbrain-cli/src/activity_tests.rs": "e097bda5f45eec2ecdf038add15ea985da8c98612cc3f72428877c276aec0980",
+    "rust/symbrain-cli/src/activity_time.rs": "ffe48f0f95f668a863b93af2f9085c230971a29dd91f3fc8ba872b66e2664404",
+    "rust/symbrain-cli/src/cli_tests.rs": "00a9e1abdd632f409faa2de3dd8c0a1dd24ae9e3c20ce866e818390fcf3bf64a",
+    "rust/symbrain-cli/src/doctor_cli.rs": "730ff4ecd216a4f6711b97dbaae27a90b2a33e348aec0377c8b7ed8ee4effec8",
+    "rust/symbrain-cli/src/doctor_fix.rs": "73594fd4cc8caabc9169ee225f2cbb2bfd7577f1dbc7e873081a9f7d4a379a0d",
+    "rust/symbrain-cli/src/doctor_fix_log.rs": "b07397b6e80de6a1edc8b4b274601068d4250f8a6eee4dab16eea4d18b5bbe9f",
+    "rust/symbrain-cli/src/doctor_process.rs": "35ddb638017ec617fd897bdd298c20e0688407365f886e9c62c70c55995c2ade",
+    "rust/symbrain-cli/src/lib.rs": "623eb33dee17547dbc6be0bf94eef8e479b9af0495c9b0baee4d885574d8110b",
+    "rust/symbrain-cli/src/passthrough.rs": "58eb151e105af40366dd6b24fb7105401f258c9dd24b67f9106fa046eeddf3e1",
+    "rust/symbrain-cli/src/passthrough_tests.rs": "69f8d33d1bfad1682c9eb1439a41361526de0a19090c36e56df7afa1b9f9a811",
+    "rust/symbrain-cli/src/setup_args.rs": "84cb407b2d77a1c48a6235a05be31c7e3f5322cb0604df1ecc43db724a3300fe",
+    "rust/symbrain-cli/src/setup_cli.rs": "9aba0979b699648acb68dad79ea778ce60d24e1757ad2f1e2c47d074b1a45a93",
+    "rust/symbrain-cli/src/setup_config.rs": "cfc178d86002c3879de5e2ca635c9792b7389beece37b88ef2a9326d4a4d9287",
+    "rust/symbrain-cli/src/setup_source.rs": "d5ebff486aff6ae550df543f9b9352cdf066c651660c9ce83febc973538412ee",
+    "rust/symbrain-cli/src/setup_source_build.rs": "cbd4e5a8d7fd9c4e482dada274d3efbabde1b7b3dfa94bbb385c080166b18cd1",
+    "rust/symbrain-cli/src/setup_source_layout.rs": "f650c448a8399ec9bd2a0ba252fec37fd128c731e7f4e3ea92b23e703f20d72b",
+    "rust/symbrain-cli/src/setup_source_process.rs": "4f2f09392d1386a72a42de272a220f116e416faaec9d40223424105d1021222c",
+    "rust/symbrain-cli/src/setup_source_temp.rs": "23651b1fa7a26d2e07728fbe459d2eac587613746e9adda7600a9fa34bb7d324",
+    "rust/symbrain-cli/src/setup_source_text.rs": "f28862b6f3f180c874ed54eafc74ad959be80764582d60398369dc84f10b0a10",
+    "rust/symbrain-cli/src/usage_cli.rs": "51f900ee73c2a3de0b47549d63c77e7228a4f2c249b4c942c35f075398eede0a",
+    "rust/symbrain-cli/src/usage_fetch_output_tests.rs": "3ff61d31bbd27467edb8df5ea357ce12317e3df2374d3ed3e55b6728eb406482",
+    "rust/symbrain-cli/src/vault_admin.rs": "85e8466e9e5d781368051f3f1c0a3066ff2c86eb16a9a5de3323ce9604c231da",
+    "rust/symbrain-cli/src/vault_config.rs": "1b1538509663c718b27bfbe7fde07bf89fa12e15ee933ac321e65ff0c50a175d",
+    "rust/symbrain-cli/src/vault_response.rs": "ad8a66f0a55f5d601c5b4da333a9253c93cf7d008aaf41fd6bd3a31430b6b65c",
+    "rust/symbrain-cli/tests/activity_cli_oracle_tests.rs": "09a446f9bb2bd75294a37e72f0fdd0cd80920e4b6082865de606add5af21bcf9",
+    "rust/symbrain-cli/tests/activity_validation_tests.rs": "b9a85ed7d37461379295b39a4554a9c8fd4fd29a3d644634e2987f435e89454a",
+    "rust/symbrain-cli/tests/cli_tree_tests.rs": "f4a9db302b39d8359150115c63b155022415dc6b08438de569dec3d2172bf85a",
+    "rust/symbrain-cli/tests/doctor_fix_native.rs": "cbbb323ec3cc2c25d0e2b79780bddf46af8ed3ba370ec0784cb163e995deb7fe",
+    "rust/symbrain-cli/tests/doctor_modules.rs": "222b24d10fb7e237661ebc58e0ddd4258a0f985e7045511584c9b0fb06e0bb98",
+    "rust/symbrain-cli/tests/doctor_native.rs": "dba6fea31b469e640ba7aa2c8ac5d9a63b81e3105c4a77ca83b68804e5f9afcb",
+    "rust/symbrain-cli/tests/fixtures/activity_validation_767.json": "124052ee32653f7956b235a0afb543f9e895bf5caf7b2abf7ac39626726bfd12",
+    "rust/symbrain-cli/tests/fixtures/vault_admin_go.json": "202a98c14ce7c35ecab1f33f3dc1100dfe35acd3e2d72b42b9b54fefe68329bb",
+    "rust/symbrain-cli/tests/fixtures/vault_unicode_go.json": "078a303a757ca31976f043be2960ae0651553d1d39921d4da8c4bc4b0a99642a",
+    "rust/symbrain-cli/tests/guard_doctor_oracle_tests.rs": "cfa5c047bcba060578cc2623517bd5e794568871e7b9bdb10236fe4cdd8abeaf",
+    "rust/symbrain-cli/tests/harness_health_tests.rs": "19018400b15baa4447a22c42528262707e03879f490693e2d699fe5417d1b860",
+    "rust/symbrain-cli/tests/harness_list_tests.rs": "fb23c81397dbb6121970e7a1b145372ca7406a3b2dcc70313dd97fdb49de07ef",
+    "rust/symbrain-cli/tests/init_cli_tests.rs": "5cf56e33be68522d26aae3ff854cf59e9e38a92467e1577d042bdda49994ee18",
+    "rust/symbrain-cli/tests/install_oracle_tests.rs": "c0eae662a3a99dd467c35ff5f533ac15a2c6af3f9650006bc07bbc5c71a19955",
+    "rust/symbrain-cli/tests/mcp_cli_tests.rs": "859dcbfcf03910aaff2ffeccd42f6209ab411355725e7b06acabd169a9e9f0af",
+    "rust/symbrain-cli/tests/setup_fix_native.rs": "673427cb6351c4abc4c8a74a69c066e88853074e4b5789f4ecd1a0f10a0281a5",
+    "rust/symbrain-cli/tests/setup_repair_native.rs": "5032cf011006493cce3988b195cf8eb0b4b5a3618f30e8728239d33da765a0dd",
+    "rust/symbrain-cli/tests/skills_doctor_native.rs": "a4d60c07354e538c2100415a1910d45775bdbb3ff0c79ace783e65b4494b01a6",
+    "rust/symbrain-cli/tests/skills_list_native.rs": "b74522b32885b897f3eb91b854cb0ec18fd71cd492375309d23e36911fd391aa",
+    "rust/symbrain-cli/tests/skills_log_native.rs": "cb438b2da6161343e912366912a032f2fe691027d5f77bf6d67bad74ba1ec73b",
+    "rust/symbrain-cli/tests/skills_status_opencode_tests.rs": "88d022c8377d7d45557405e6578a97e0b230f526bcb48960bec65fbccfdcd5e3",
+    "rust/symbrain-cli/tests/skills_sync_legacy_roots.rs": "121fadf1140f25c27d90bf012b69cc8ea9b8bd66193a7afdff14a15083b288bc",
+    "rust/symbrain-cli/tests/skills_targets_native.rs": "0dc4a04903d10691d4ff7c636f9843f0e09a88a6d7c92ab945d735d33f6f00ae",
+    "rust/symbrain-cli/tests/support/setup_child.rs": "e73cb2e3ef5ab3b9970a881a9e29d76ab352ca90e7a618c496d394b7f9483cd2",
+    "rust/symbrain-cli/tests/support/vault_child.rs": "e379a4f44f488389ddfb98fc9fd0ee773923955051b3c2888f1b394c7a0a2078",
+    "rust/symbrain-cli/tests/sync_native.rs": "70027d172da217c991613c23284b936a42467d7df53060d8cfedba735a31a049",
+    "rust/symbrain-cli/tests/vault_admin_native.rs": "1e4a62b3d7c0d1d5ee0cbd327b7895cdc6bb99e5af9a1e42f6b382ffcdf23242",
+    "rust/symbrain-core/src/config/format.rs": "1a31fc16a95b1fa213fcfef22bae64aa6e7bacb6e427ccf52efb5c6ef67dba49",
+    "rust/symbrain-core/src/config/mod.rs": "1979424ee5be5a373425b43d933b56e223f7144026590a76d40fa7ecf4cfec36",
+    "rust/symbrain-gateway/tests/usage_tests.rs": "6f67af7933c01e5a4514af3e56a0289ec9d06918c387997bfb2a21fb41d88ca1",
+    "rust/symbrain-managed/Cargo.toml": "032a38a1c1d1d947a40916d31c12b0b406ff17352405f572dd42bef5ff4ec1a7",
+    "rust/symbrain-managed/src/archive.rs": "2e7409659d5741ff811894b0e978fcf7e9fa373e20ab6c9cc437526e8eb17866",
+    "rust/symbrain-managed/src/install.rs": "9779dd895fdd02db5153fdedc625ffde80d98001b8e8bfbe8772e2b65870315f",
+    "rust/symbrain-managed/src/json_record.rs": "ccb87203b8dd23199d33041c06d72ff90790b000d08aed9ea66773f014140cb7",
+    "rust/symbrain-managed/src/json_string.rs": "be9b242499941114d70a6b215a1d46411533ba58731ba7820cd0a11a7876d865",
+    "rust/symbrain-managed/src/json_syntax.rs": "1e179f9956e8fb01a115ffdd6c412ea16d4152576a52998eb910479405fb7117",
+    "rust/symbrain-managed/src/lib.rs": "5f44597fbe5a5bb143eb0bfeb340012d9e399b4513f33db11a34c26840bfe92c",
+    "rust/symbrain-managed/src/local_install.rs": "c90cb14347b3e9426be44098c0fc4271bb501de49f36af845b5c20fe7e7372b9",
+    "rust/symbrain-managed/src/process_status.rs": "d8b981d6f096b8e078ab1ea5d9e0abc0ae3979f75c1b49240fa859f2d9af14ad",
+    "rust/symbrain-managed/src/provenance.rs": "16182dd903490f44c86d9587bbd1a512f0c431f0a6e8c2a59582b1f13168505f",
+    "rust/symbrain-managed/src/provenance_json.rs": "a324dd4944625e5f14200a78f43002504584c4217fa04744a1343834939bdb7e",
+    "rust/symbrain-managed/src/provenance_time.rs": "8ee51ef465143e1fa44600c0d3844fed64345d229694327e93618a418a29adb6",
+    "rust/symbrain-managed/src/version_probe.rs": "14637e8828102bee620bc7bdd059ab6fd3f149a1a7a09de2f2dcb65439cab293",
+    "rust/symbrain-managed/tests/install_tests.rs": "ca4ea17dd861f1730e056bac0013b1ff168f6821e09fc567fcc9282845f97260",
+    "rust/symbrain-managed/tests/source_local.rs": "c6ffdd0930a7bc5fb704910e9ae391cd5ece1c6ce449788e750b5de6bc7bdd30",
+    "rust/symbrain-managed/tests/support/server.rs": "0b43e84b001fdb556ae886dc90339946c9052951e84ef7f67f8b1e9e9ece7e3a",
+    "rust/symbrain-managed/tests/version_probe_windows.rs": "50987e6f0257c4fc26a0dd43fa3fafb7c4fdfa0cad9ef7635b565d2454db6111",
+    "rust/symbrain-usage/Cargo.toml": "6cac15132956d7fe2dd72b285688adc0a75d75cee126a986ab1ff49dda2cacd2",
+    "rust/symbrain-usage/src/provider_antigravity.rs": "2c6bbcd24894be5c35a28ff7253d973e10fe601f1349c5088a085c900066b4f4",
+    "rust/symbrain-usage/src/provider_identity.rs": "4d2a320bc2689bf0a1d31fbd737bebac3a7dcb6d511aab11dfcd4d0012a9b043",
+    "rust/symbrain-usage/src/provider_request_encoding.rs": "d4ac3370033bc0ffd5606b75e632bbe7745a38865beaf3237a9accb672b76a79",
+    "rust/symbrain-usage/src/provider_requests.rs": "700af0f6be0bccbd97ecf0addbdc19a38d10f7f36d544755bf2b19d75d4f0ca9",
+    "rust/symbrain-usage/src/provider_requests_tests.rs": "b2e79ff538c99488aa150010a66c27bec08a6c09ffe6a24955f3df417fc33aef",
+    "rust/symbrain-usage/src/providers.rs": "5f6631bde7a1cc918469d9a7e1f0fbe26fb6c54c8d3921b98425d514f33966b0",
+    "rust/symbrain-usage/src/request_oracle_tests.rs": "5bc1e853e4f9f3a28e90a3930a84b1f7d662f482fdcbc37697b58f224f80e9ea",
+    "rust/symbrain-usage/src/usage_fetch_oracle_tests.rs": "df38e903711a6502628e5d0a8fe91ae0b8c962db361561b6139c6b553481053f",
+    "rust/symbrain-usage/tests/fixtures/usage_fetch_620.json": "7afe0b5cdcd2a5abb5cd5352b89c49dba5ccf8140c9302c07fe90084165617d6",
+    "rust/test-support/coverage.rs": "1f61d27a35fb0ab797747350eafe335b090d59256a136d09c0363a2cb9f86dca",
+    "scripts/activity-validation-oracle/README.md": "3745366ee0714a6541c96e639994e8cfcaf78574c8f204ae2e357ad6fae35d70",
+    "scripts/activity-validation-oracle/controls.py": "ac3843c82ddd40cf2cb8b62e3e01b2288cf65f5be213d9c175cdcdb622167e27",
+    "scripts/activity-validation-oracle/replay.py": "7d099dd6612a5878281d3fe07d5c46f583ebeafe9ee4174112da29f93945ae56",
+    "scripts/activity-validation-oracle/run.sh": "ea6c5ebe81338492eabdebd7f385ee23d465a72c487146825c6a1c8821216bfd",
+    "scripts/doctor-repair-oracle/README.md": "f622a123fed6d10fba1e409f4b0db9ebb7a85e1df7aa97f656bba439eed6a3bd",
+    "scripts/doctor-repair-oracle/cases.py": "698d792150cd7e7a20e444fc1d54476a36b05b5b091e0300ade42c9e2c52b016",
+    "scripts/doctor-repair-oracle/probe_fixture.go.txt": "e44eefecda9b14de3fffa7e5db3903df50419c8349a59c1215b297ed7c430391",
+    "scripts/doctor-repair-oracle/replay.py": "1a132f629ceb2aa1e55518a0511ec6204ac40b217e9f50e2aef184d0272c92ce",
+    "scripts/doctor-repair-oracle/run.sh": "78bffd7f44248a91a64244f765af4bdc4fbf6472b82f04d219418b3ba879a676",
+    "scripts/rust-coverage/README.md": "715244de5d3752eeb551e12fd38ddd0b701966d6db92e48adf3f605853951b69",
+    "scripts/rust-coverage/go_oracles.py": "b435cb49b7e7c6aa25db1fa7347a1dfa25913596e0bf5829b828fd71397ff65b",
+    "scripts/rust-coverage/report.py": "b8a1d90ac2ff89169a693f96681ce8da64c271e4d0ca84d1b6f3e32046ad2960",
+    "scripts/rust-coverage/run.sh": "d32292c7b724cbec497de260e2bfde718643eb125a15e9a005e6ab033b9aa7cf",
+    "scripts/rust-coverage/test_reports.py": "3ea6e77488f5e27f484b66eeed91626d0890e8449e4832857be4ca86c6d76c17",
+    "scripts/setup-repair-oracle/README.md": "dd588197bd921c5de97fb2165b9c5499cbe0f36330a52b13efcbdecbaeb5f6d5",
+    "scripts/setup-repair-oracle/replay.py": "a907d9aef16960939f078d23b5742f046461cac9067c179ee7f277f893c1afe1",
+    "scripts/setup-repair-oracle/run.sh": "7f370b5270f0545e959d809f3d2541728c281669c5ac8207fe4d8f9666cbc720",
+    "scripts/setup-source-oracle/README.md": "ae3a173a4d3a33b047d699ed9fe533b6ad7316627ae15cc0146bee0211313188",
+    "scripts/setup-source-oracle/replay.py": "040dfcde1a6a8b281c116fa840a74617c853895b175939377739ca384c44760b",
+    "scripts/setup-source-oracle/run.sh": "f4a22007724136b746bbfd4359e214c3c0c579b1b379125dd93ea6d5bdabdeaf",
+    "scripts/setup-source-oracle/tool_fixture.go.txt": "e92419134baa8712ed06a31b65226e5d0a0dd8b99604718349e7f85347e15bf2",
+    "scripts/usage-fetch-oracle/README.md": "a777b43cf45a014bbe9a362c2cb7be3cb50888eb8848cac2d3f32ceeec62ef2e",
+    "scripts/usage-fetch-oracle/cli_test.go.txt": "38832812106d0b06fd19911ba427c6d204069dd7dd41a43347b18811ee28c676",
+    "scripts/usage-fetch-oracle/controls.py": "ff58d823820971c2d3fc24981cbb53988a75d4b2a10404ed2c4edbbbf34e48a4",
+    "scripts/usage-fetch-oracle/receipt.py": "07fd8d66baea9cbc4e849dfb79159e03bd87719f2d16cc0342c622a4b1fb5465",
+    "scripts/usage-fetch-oracle/run.sh": "892dca49b8742f149416e83261697bfd4c037624e611254715f5073f1d6e6268",
+    "scripts/usage-fetch-oracle/usage_test.go.txt": "5720d69efde9f4e9cd10a203915f9e59cf76ab5380e6aee28d328a8873404411",
+    "scripts/vault-admin-oracle/README.md": "2f0d2ac080d28bf04ca3d94e040e52414fa2c6d79776e5fcad2dd5ce9023f5a0",
+    "scripts/vault-admin-oracle/replay.py": "c95ca6eeaf737d9322d98aad619dcfb2c50d3e79adbf7c970709998e04219174",
+    "scripts/vault-admin-oracle/test_replay.py": "4cd0bbdda6b329fc5aa08400e8d48cade277b4384fd653c4312405ad34411940"
+  },
+  "go_source_sha256": {
+    "cmd/symbrain/cmd_setup.go": "2efa90acdbc8d776bd2b88e6cf08e2992edb660c7a36230f8bad4c69dc3ec163",
+    "cmd/symbrain/cmd_setup_source.go": "1da7578d2af333e3676359941f769a2b4ec7bb1babc2c06bc58edacab7161492",
+    "internal/managed/install.go": "97bb600cc2d6047696c8e77eb09e4abf6bf75cca956d2da4ddc2bcd24f91677d",
+    "internal/managed/provenance.go": "0956c9f2011aee75722c10ef1b769b2b3dcd2d04250af6e36e6dd40acf421d5d"
+  }
+}

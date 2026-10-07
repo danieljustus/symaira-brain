@@ -88,14 +88,16 @@ pub struct SearchRow {
 impl SearchRow {
     /// Reads one full memory row in the shipped column order.
     pub(crate) fn from_row(row: &Row<'_>) -> rusqlite::Result<Self> {
-        let embedding_text: String = row.get(4)?;
         let embedding_binary: Option<Vec<u8>> = row.get(5)?;
-        let embedding: Vec<f32> = serde_json::from_str(&embedding_text).unwrap_or_default();
+        let embedding: Vec<f32> = crate::rows::json(row, 4)?;
+        if embedding.iter().any(|value| !value.is_finite()) {
+            return Err(rusqlite::Error::InvalidQuery);
+        }
         Ok(Self {
             id: row.get(0)?,
             content: row.get(1)?,
             scope: row.get(2)?,
-            metadata: serde_json::from_str(&row.get::<_, String>(3)?).unwrap_or_default(),
+            metadata: crate::rows::json(row, 3)?,
             // The shipped full scan omits `embedding_dim` and derives the
             // length from the vector itself.
             embedding_dim: i64::try_from(embedding.len()).unwrap_or_default(),

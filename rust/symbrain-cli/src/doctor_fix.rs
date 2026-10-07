@@ -1,19 +1,28 @@
 //! Native Doctor repair, retaining per-core failure and source-build protection.
 use std::io::Write;
 
-use symbrain_core::{exit, xdg};
+use symbrain_core::exit;
 use symbrain_managed::{
-    Installer, Manifest, Platform, installed_version, read_provenance, versions_match,
+    Installer, Manifest, Platform, installed_version, read_provenance_bytes, versions_match,
 };
 
 #[path = "doctor_fix_log.rs"]
 mod log;
 
+pub(super) fn managed_bin_dir() -> Option<std::path::PathBuf> {
+    crate::managed_home::bin_dir()
+}
+
 pub(super) fn run_fix(force_release: bool, stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {
-    let Some(bin_dir) = xdg::managed_bin_dir() else {
+    let Some(bin_dir) = managed_bin_dir() else {
+        let home_label = if cfg!(windows) {
+            "%userprofile%"
+        } else {
+            "$HOME"
+        };
         let _ = writeln!(
             stderr,
-            "symbrain doctor --fix: user home directory not found"
+            "symbrain doctor --fix: managed: cannot determine home directory: {home_label} is not defined"
         );
         return exit::GENERIC;
     };
@@ -30,11 +39,10 @@ pub(super) fn run_fix(force_release: bool, stdout: &mut dyn Write, stderr: &mut 
         let _ = writeln!(stderr, "  ✗  repair failed: {error}");
         return exit::GENERIC;
     }
-    let _ = writeln!(
-        stdout,
-        "\nDone. Binaries installed to {}",
-        bin_dir.display()
-    );
+    let mut complete = b"\nDone. Binaries installed to ".to_vec();
+    complete.extend_from_slice(&symbrain_core::config::os_bytes(bin_dir.as_os_str()));
+    complete.push(b'\n');
+    let _ = stdout.write_all(&complete);
     exit::OK
 }
 
@@ -62,11 +70,12 @@ fn repair(
         let existing = match installed_version(bin_dir, &core.binary_name) {
             Ok(version) => version,
             Err(error) => {
-                log::event(
+                let error = error.into_go_text();
+                log::event_bytes(
                     stderr,
                     "WARN",
                     "cannot probe",
-                    &[("binary", &name), ("error", &error.to_string())],
+                    &[("binary", name.as_bytes()), ("error", error.as_ref())],
                 );
                 String::new()
             }
@@ -115,11 +124,12 @@ fn repair(
                 repaired += 1;
             }
             Err(error) => {
-                log::event(
+                let error = error.into_go_text();
+                log::event_bytes(
                     stderr,
                     "ERROR",
                     "repair failed",
-                    &[("binary", &name), ("error", &error.to_string())],
+                    &[("binary", name.as_bytes()), ("error", error.as_ref())],
                 );
                 failed += 1;
             }
@@ -151,13 +161,13 @@ fn protected(
     existing: &str,
     stderr: &mut dyn Write,
 ) -> bool {
-    match read_provenance(bin_dir, &core.binary_name) {
+    match read_provenance_bytes(bin_dir, &core.binary_name) {
         Err(error) => {
-            log::event(
+            log::event_bytes(
                 stderr,
                 "WARN",
                 "cannot read provenance; leaving binary untouched",
-                &[("binary", name), ("error", &error)],
+                &[("binary", name.as_bytes()), ("error", error.as_ref())],
             );
             return true;
         }

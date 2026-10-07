@@ -1,0 +1,2 @@
+2026/10/04 01:32:08 INFO Symaira Memory API listening addr=127.0.0.1:50173 url=http://127.0.0.1:50173
+2026/10/04 01:32:08 INFO HTTP request method=POST path=/api/set status=403 duration=25.519µs

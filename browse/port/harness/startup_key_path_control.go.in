@@ -1,0 +1,33 @@
+// Executable regression control corrupts only the public owned provider path.
+package main
+
+import (
+	"errors"
+	"os"
+	"os/exec"
+	"strings"
+)
+
+func main() {
+	if len(os.Args) != 3 || os.Getenv("SYMBROWSE_STARTUP_PATH_PROBE") == "" {
+		os.Exit(99)
+	}
+	// Invalid UTF-8 becomes U+FFFD on Unix; non-ASCII Unicode also changes on
+	// Windows, where raw Unix bytes cannot be a native filename.
+	provider := strings.Map(func(r rune) rune {
+		if r > 127 {
+			return '\ufffd'
+		}
+		return r
+	}, os.Args[1])
+	child := exec.Command(os.Getenv("SYMBROWSE_STARTUP_PATH_PROBE"), provider, os.Args[2])
+	child.Env, child.Stdin = os.Environ(), os.Stdin
+	child.Stdout, child.Stderr = os.Stdout, os.Stderr
+	if err := child.Run(); err != nil {
+		var status *exec.ExitError
+		if errors.As(err, &status) {
+			os.Exit(status.ExitCode())
+		}
+		os.Exit(99)
+	}
+}

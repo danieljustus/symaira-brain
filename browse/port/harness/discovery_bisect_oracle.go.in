@@ -1,0 +1,32 @@
+// Owned typed oracle; bisect package is copied byte-exact from the pinned SDK.
+package main
+
+import (
+	"./bisect"
+	"bytes"
+	"encoding/base64"
+	"encoding/json"
+	"os"
+)
+
+func main() {
+	pattern := os.Args[1]
+	matcher, err := bisect.New(pattern)
+	result := map[string]any{"pattern": pattern, "nil_matcher": matcher == nil, "parse_error": ""}
+	if err != nil {
+		result["parse_error"] = err.Error()
+	}
+	var values []map[string]any
+	for _, id := range []uint64{0, 1, 2, 3, 15, 16, 255, 256, 1 << 63, ^uint64(0)} {
+		values = append(values, map[string]any{"id": id, "enabled": matcher.ShouldEnable(id), "print": matcher.ShouldPrint(id)})
+	}
+	result["typed_ids"] = values
+	var output bytes.Buffer
+	result["actual_sdk_stack_enabled"] = matcher.Stack(&output)
+	result["actual_sdk_stack_report_base64"] = base64.StdEncoding.EncodeToString(output.Bytes())
+	// This stack observation belongs to this actual Go fixture, never Rust or
+	// frozen Go's distinct LookupVault stack. It is not an owner-decision alias.
+	if err := json.NewEncoder(os.Stdout).Encode(result); err != nil {
+		panic(err)
+	}
+}

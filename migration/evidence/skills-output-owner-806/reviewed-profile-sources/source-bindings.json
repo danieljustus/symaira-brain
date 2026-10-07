@@ -1,0 +1,186 @@
+{
+  "purpose": "Pure reviewed-owner test data only; never used by actual parent_provenance or as a binary/source build receipt",
+  "authority": "Memorya111 independent review reportSHA153430754e494542d01af20a9acdfea8fc46de05b7b2a8c380f8ed7f510a2deb",
+  "files": [
+    {
+      "reference": "01f41906e2e021db3c693ec97617bb701e4dad8a",
+      "path": "rust/symbrain-cli/src/lib.rs",
+      "fixture": "01f41906e2e021db3c693ec97617bb701e4dad8a/rust/symbrain-cli/src/lib.rs",
+      "blob": "5f43de826e879986d975bf5ce1ab428885020757",
+      "sha256": "decf6229c8fd9295893c456ca15dc8ab20ab79390988de051591bc80f21aa9ca",
+      "bytes": 15619,
+      "mode": "100644"
+    },
+    {
+      "reference": "01f41906e2e021db3c693ec97617bb701e4dad8a",
+      "path": "rust/symbrain-cli/src/main.rs",
+      "fixture": "01f41906e2e021db3c693ec97617bb701e4dad8a/rust/symbrain-cli/src/main.rs",
+      "blob": "40e690541772f4429d73947e4905c9cf0bcc1b2b",
+      "sha256": "e6dd8093173873f5eddab3d213368e90aacad77092d03c37d5b5b1ff3426a7a6",
+      "bytes": 325,
+      "mode": "100644"
+    },
+    {
+      "reference": "01f41906e2e021db3c693ec97617bb701e4dad8a",
+      "path": "rust/symbrain-core/src/lib.rs",
+      "fixture": "01f41906e2e021db3c693ec97617bb701e4dad8a/rust/symbrain-core/src/lib.rs",
+      "blob": "0a81eb8066f049c9d4a1f7b74a0884768e18c89a",
+      "sha256": "9e9e2d32f3cd59f939544e213a7cd05a585513d4ea8962016ca8b3cdb40d6cc4",
+      "bytes": 215,
+      "mode": "100644"
+    },
+    {
+      "reference": "01f41906e2e021db3c693ec97617bb701e4dad8a",
+      "path": "rust/symbrain-core/src/output.rs",
+      "fixture": "01f41906e2e021db3c693ec97617bb701e4dad8a/rust/symbrain-core/src/output.rs",
+      "blob": "5a9b5deaf305f199d9aed9126f3297508ea6b958",
+      "sha256": "a8e01e7d19d7eadc8f71d1634166691294b0223959248b0a8fc50b1d8264856a",
+      "bytes": 5953,
+      "mode": "100644"
+    },
+    {
+      "reference": "01f41906e2e021db3c693ec97617bb701e4dad8a",
+      "path": "rust/symbrain-core/src/exit.rs",
+      "fixture": "01f41906e2e021db3c693ec97617bb701e4dad8a/rust/symbrain-core/src/exit.rs",
+      "blob": "6b38721ccb5d735375eed76b6dcbbc981f82c3c2",
+      "sha256": "7f5efe594eb3bc7f5957a12bfd9642e07846fc71cff181647884d781ae66d2ea",
+      "bytes": 906,
+      "mode": "100644"
+    },
+    {
+      "reference": "5a4f0464bc24efefa82e26068276fc747c5b1b11",
+      "path": "rust/symbrain-cli/src/lib.rs",
+      "fixture": "5a4f0464bc24efefa82e26068276fc747c5b1b11/rust/symbrain-cli/src/lib.rs",
+      "blob": "2ff8f76b3bb7b8d82d88a02532558cff73707790",
+      "sha256": "7ba14c445953dc3a9d8267562853cf2bfb924c2e90892413a28b8a7b1b9bd6dd",
+      "bytes": 13571,
+      "mode": "100644"
+    },
+    {
+      "reference": "5a4f0464bc24efefa82e26068276fc747c5b1b11",
+      "path": "rust/symbrain-cli/src/main.rs",
+      "fixture": "5a4f0464bc24efefa82e26068276fc747c5b1b11/rust/symbrain-cli/src/main.rs",
+      "blob": "fbcab0d550b4efd600d2bc16a92840c5404c6d47",
+      "sha256": "3e94f3f39e073b32151350707bc0416a3d01bba19903a0e5ad4a2cb47cf4fff7",
+      "bytes": 222,
+      "mode": "100644"
+    },
+    {
+      "reference": "5a4f0464bc24efefa82e26068276fc747c5b1b11",
+      "path": "rust/symbrain-core/src/lib.rs",
+      "fixture": "5a4f0464bc24efefa82e26068276fc747c5b1b11/rust/symbrain-core/src/lib.rs",
+      "blob": "0a81eb8066f049c9d4a1f7b74a0884768e18c89a",
+      "sha256": "9e9e2d32f3cd59f939544e213a7cd05a585513d4ea8962016ca8b3cdb40d6cc4",
+      "bytes": 215,
+      "mode": "100644"
+    },
+    {
+      "reference": "5a4f0464bc24efefa82e26068276fc747c5b1b11",
+      "path": "rust/symbrain-core/src/output.rs",
+      "fixture": "5a4f0464bc24efefa82e26068276fc747c5b1b11/rust/symbrain-core/src/output.rs",
+      "blob": "5a9b5deaf305f199d9aed9126f3297508ea6b958",
+      "sha256": "a8e01e7d19d7eadc8f71d1634166691294b0223959248b0a8fc50b1d8264856a",
+      "bytes": 5953,
+      "mode": "100644"
+    },
+    {
+      "reference": "5a4f0464bc24efefa82e26068276fc747c5b1b11",
+      "path": "rust/symbrain-core/src/exit.rs",
+      "fixture": "5a4f0464bc24efefa82e26068276fc747c5b1b11/rust/symbrain-core/src/exit.rs",
+      "blob": "6b38721ccb5d735375eed76b6dcbbc981f82c3c2",
+      "sha256": "7f5efe594eb3bc7f5957a12bfd9642e07846fc71cff181647884d781ae66d2ea",
+      "bytes": 906,
+      "mode": "100644"
+    },
+    {
+      "reference": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+      "path": "rust/symbrain-cli/src/lib.rs",
+      "fixture": "cdb2aca223bd9030f834608fd13cc4e643ebdc68/rust/symbrain-cli/src/lib.rs",
+      "blob": "5f43de826e879986d975bf5ce1ab428885020757",
+      "sha256": "decf6229c8fd9295893c456ca15dc8ab20ab79390988de051591bc80f21aa9ca",
+      "bytes": 15619,
+      "mode": "100644"
+    },
+    {
+      "reference": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+      "path": "rust/symbrain-cli/src/main.rs",
+      "fixture": "cdb2aca223bd9030f834608fd13cc4e643ebdc68/rust/symbrain-cli/src/main.rs",
+      "blob": "40e690541772f4429d73947e4905c9cf0bcc1b2b",
+      "sha256": "e6dd8093173873f5eddab3d213368e90aacad77092d03c37d5b5b1ff3426a7a6",
+      "bytes": 325,
+      "mode": "100644"
+    },
+    {
+      "reference": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+      "path": "rust/symbrain-core/src/lib.rs",
+      "fixture": "cdb2aca223bd9030f834608fd13cc4e643ebdc68/rust/symbrain-core/src/lib.rs",
+      "blob": "57cd958f17b5c70351d4b833e65762fbc078e073",
+      "sha256": "4df524358123e41fb3a7959de3dd3064e477dd738bf8b36faf4cec961dc77d75",
+      "bytes": 314,
+      "mode": "100644"
+    },
+    {
+      "reference": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+      "path": "rust/symbrain-core/src/output.rs",
+      "fixture": "cdb2aca223bd9030f834608fd13cc4e643ebdc68/rust/symbrain-core/src/output.rs",
+      "blob": "5a9b5deaf305f199d9aed9126f3297508ea6b958",
+      "sha256": "a8e01e7d19d7eadc8f71d1634166691294b0223959248b0a8fc50b1d8264856a",
+      "bytes": 5953,
+      "mode": "100644"
+    },
+    {
+      "reference": "cdb2aca223bd9030f834608fd13cc4e643ebdc68",
+      "path": "rust/symbrain-core/src/exit.rs",
+      "fixture": "cdb2aca223bd9030f834608fd13cc4e643ebdc68/rust/symbrain-core/src/exit.rs",
+      "blob": "6b38721ccb5d735375eed76b6dcbbc981f82c3c2",
+      "sha256": "7f5efe594eb3bc7f5957a12bfd9642e07846fc71cff181647884d781ae66d2ea",
+      "bytes": 906,
+      "mode": "100644"
+    },
+    {
+      "reference": "a111084cfc34f03b1f58f934cd2420c603e017c3",
+      "path": "rust/symbrain-cli/src/lib.rs",
+      "fixture": "a111084cfc34f03b1f58f934cd2420c603e017c3/rust/symbrain-cli/src/lib.rs",
+      "blob": "2ff8f76b3bb7b8d82d88a02532558cff73707790",
+      "sha256": "7ba14c445953dc3a9d8267562853cf2bfb924c2e90892413a28b8a7b1b9bd6dd",
+      "bytes": 13571,
+      "mode": "100644"
+    },
+    {
+      "reference": "a111084cfc34f03b1f58f934cd2420c603e017c3",
+      "path": "rust/symbrain-cli/src/main.rs",
+      "fixture": "a111084cfc34f03b1f58f934cd2420c603e017c3/rust/symbrain-cli/src/main.rs",
+      "blob": "fbcab0d550b4efd600d2bc16a92840c5404c6d47",
+      "sha256": "3e94f3f39e073b32151350707bc0416a3d01bba19903a0e5ad4a2cb47cf4fff7",
+      "bytes": 222,
+      "mode": "100644"
+    },
+    {
+      "reference": "a111084cfc34f03b1f58f934cd2420c603e017c3",
+      "path": "rust/symbrain-core/src/lib.rs",
+      "fixture": "a111084cfc34f03b1f58f934cd2420c603e017c3/rust/symbrain-core/src/lib.rs",
+      "blob": "57cd958f17b5c70351d4b833e65762fbc078e073",
+      "sha256": "4df524358123e41fb3a7959de3dd3064e477dd738bf8b36faf4cec961dc77d75",
+      "bytes": 314,
+      "mode": "100644"
+    },
+    {
+      "reference": "a111084cfc34f03b1f58f934cd2420c603e017c3",
+      "path": "rust/symbrain-core/src/output.rs",
+      "fixture": "a111084cfc34f03b1f58f934cd2420c603e017c3/rust/symbrain-core/src/output.rs",
+      "blob": "5a9b5deaf305f199d9aed9126f3297508ea6b958",
+      "sha256": "a8e01e7d19d7eadc8f71d1634166691294b0223959248b0a8fc50b1d8264856a",
+      "bytes": 5953,
+      "mode": "100644"
+    },
+    {
+      "reference": "a111084cfc34f03b1f58f934cd2420c603e017c3",
+      "path": "rust/symbrain-core/src/exit.rs",
+      "fixture": "a111084cfc34f03b1f58f934cd2420c603e017c3/rust/symbrain-core/src/exit.rs",
+      "blob": "6b38721ccb5d735375eed76b6dcbbc981f82c3c2",
+      "sha256": "7f5efe594eb3bc7f5957a12bfd9642e07846fc71cff181647884d781ae66d2ea",
+      "bytes": 906,
+      "mode": "100644"
+    }
+  ]
+}

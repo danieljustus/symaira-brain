@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/deletes.py", line 66, in <module>
+    args=parser.parse_args(); execute(args.go.resolve(),args.rust.resolve(),args.report)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/deletes.py", line 47, in execute
+    assert state['memory_entities']==[row for row in before['memory_entities'] if row['memory_id']=='retained']
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

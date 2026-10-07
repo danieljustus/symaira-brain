@@ -1,0 +1,64 @@
+   Compiling symbrain-memory v0.12.1 (/workspace/symaira-memory758-write-fix/rust/symbrain-memory)
+    Finished `test` profile [unoptimized] target(s) in 1.66s
+     Running unittests src/lib.rs (/workspace/symaira-memory758-writes/target/debug/deps/symbrain_memory-27bfbd9a34ca415c)
+
+running 33 tests
+test db_oracle_tests::indexes_match_the_go_schema ... ok
+test db_oracle_tests::constraint_cases_are_rejected_like_go ... ok
+test db_oracle_tests::memories_columns_match_the_go_schema ... ok
+test db_oracle_tests::lock_pragmas_match_the_go_facts ... ok
+test db_oracle_tests::tables_match_the_go_schema ... ok
+test db_oracle_tests::ordering_cases_match_the_go_facts ... ok
+test embedding::tests::hash_fallback_is_normalized_and_deterministic ... ok
+test embedding::tests::shared_llm_client_keeps_ollama_openai_request_contract ... ok
+test embedding::tests::shared_llm_client_rejects_extra_embedding_items_like_go_llmkit ... ok
+test db_oracle_tests::triggers_and_views_match_the_go_schema ... ok
+test embedding::tests::shared_llm_client_rejects_wrong_dimension_and_http_errors ... ok
+test embedding::tests::stop_words_and_punctuation_do_not_change_the_direction ... ok
+test evidence_store::tests::grounded_only_persistence_and_cascade_match_go ... ok
+test evidence_store::tests::missing_memory_rejects_grounded_evidence_and_skips_invalid ... ok
+test evidence_store::tests::rollback_and_reparent_keep_memory_and_evidence_atomic ... ok
+test gorand::tests::the_normal_stream_matches_go ... ok
+test gorand::tests::the_projection_rows_match_go ... ok
+test gotime::tests::parses_every_known_rendering ... ok
+test gotime::tests::renders_the_shipped_form ... ok
+test lsh::tests::a_dimension_mismatch_is_rejected_instead_of_truncated ... ok
+test lsh::tests::neighbors_cover_every_bucket_within_two_flips ... ok
+test lsh::tests::the_hash_is_deterministic_and_covers_the_bucket_range ... ok
+test lsh::tests::the_hash_matches_the_shipped_store ... ok
+test cli_delete_admission::tests::malformed_hydration_refuses_delete_before_any_mutation ... ok
+test cli_write::tests::governance_callbacks_stop_without_reverting_committed_steps ... ok
+test migration::tests::later_ddl_failure_rolls_back_columns_and_migration_entries ... ok
+test retrieval::tests::cosine_is_one_for_identical_directions ... ok
+test migration::tests::repairs_the_five_649_columns_despite_all_migrations_claimed ... ok
+test retrieval::tests::placeholders_match_the_shipped_clause ... ok
+test retrieval::tests::the_score_weights_the_three_default_terms ... ok
+test store::tests::sync_oplog_tracks_memory_lifecycle_and_excludes_marked_rows ... ok
+test migration::tests::concurrent_public_opens_and_writes_preserve_data_without_snapshot_upgrade ... ok
+test embedding::tests::shared_llm_client_times_out_to_hash_fallback ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.35s
+
+     Running tests/evidence_oracle_tests.rs (/workspace/symaira-memory758-writes/target/debug/deps/evidence_oracle_tests-57c76531d7fbf19c)
+
+running 4 tests
+test jsonl_writer_failure_propagates_without_faking_success ... ok
+test jsonl_bytes_hash_and_go_roundtrip_match ... ok
+test all_alignment_strategies_offsets_and_ties_match_executed_go ... ok
+test every_validation_boundary_and_error_priority_matches_go ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/store_contract_tests.rs (/workspace/symaira-memory758-writes/target/debug/deps/store_contract_tests-c76534e28b18f500)
+
+running 7 tests
+test shipped_timestamp_rendering_is_readable ... ok
+test a_native_row_reaches_the_shipped_fts_index ... ok
+test written_row_uses_shipped_embedding ... ok
+test written_row_uses_shipped_columns ... ok
+test written_row_uses_shipped_identifiers ... ok
+test written_row_uses_shipped_timestamps ... ok
+test missing_shipped_columns_are_added_to_an_existing_database ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+

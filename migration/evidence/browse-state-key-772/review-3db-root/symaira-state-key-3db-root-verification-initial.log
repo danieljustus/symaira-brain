@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/tmp/symaira-state-key-3db-root-verify-retire.py", line 18, in <module>
+    data=subprocess.check_output(['git','show',ref+':'+name],cwd=r)
+                                               ~~~^~~~
+TypeError: unsupported operand type(s) for +: 'NoneType' and 'str'

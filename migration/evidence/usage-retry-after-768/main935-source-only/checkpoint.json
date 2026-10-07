@@ -1,0 +1,229 @@
+{
+  "status": "SOURCE_READY_PURE_ONLY_REQUIRES_DIFFERENT_AUTHOR_REVIEW_AND_RUNTIME_ALLOCATION",
+  "source_commit": "6761bd8fdb5f002e646f1113985d675a82d233be",
+  "normal_merge_parents": [
+    "3797d40fa34c57cf1314853438170e607cbd7875",
+    "9353520a34c5819c7d0a6cd58d3bfaa2b22b045b"
+  ],
+  "common_base": "5e232700bb9031fc34d4995465a4037837540abb",
+  "immutable_original_source": "3797d40fa34c57cf1314853438170e607cbd7875",
+  "original_root_source_review_sha256": "b34f713aedb377cba8377f5f65fefb4f6e3512088845051311770269d821c9a9",
+  "all707_current_source_bindings_in_full_verification_gzip": true,
+  "all_changed_both_parent_git_body_bindings_in_full_verification_gzip": true,
+  "all_prior_evidence_unchanged_git_counts": {
+    "3797d40fa34c57cf1314853438170e607cbd7875": 1630,
+    "9353520a34c5819c7d0a6cd58d3bfaa2b22b045b": 383
+  },
+  "physical_source_checkpoint_bytes": 13795371,
+  "source_count": 707,
+  "prepared_original": {
+    "scalars": 1600,
+    "TLS": 1164,
+    "controls": 4
+  },
+  "prepared_additive": {
+    "scalars": 1681,
+    "TLS": 1356,
+    "controls": 7
+  },
+  "full_original_case_prefix_and_all_records_equal": true,
+  "actual_current_native_cases": 0,
+  "all_six_old_gates_and_additive_Runtime_pending": true,
+  "pure_projection": {
+    "retained_historical_linux_amd64_SDK81": 81,
+    "original1600": 1600,
+    "novel_decimal": 1000,
+    "novel_hex": 300,
+    "syntax_rejections": 19,
+    "SDK_power_pairs": 696,
+    "SDK_shift_pairs": 61,
+    "not_native": true
+  },
+  "source_only_checks": {
+    "workflow_actionlint_exit": 0,
+    "Bash_all_script_syntax_exit": 0,
+    "Bash_script_count": 20,
+    "standalone_declared_Rust_targets_fmt_exit": 0,
+    "declared_entrypoints": 110,
+    "all_scripts_Python_AST_count": 68,
+    "git_diff_check_exit": 0
+  },
+  "all_original_19_Root_review_files_retained": true,
+  "initial_pure_check_failures": "Exact own slice-bound metadata error and overbroad standalone fmt invocation retained with source/commands/logs; no candidate/assertion changes. Declared workspace entrypoint formatter is green. Current full Cargo checks remain pending.",
+  "runtime": {
+    "Cargo": 0,
+    "compilers": 0,
+    "SDK_executable_runs": 0,
+    "products": 0,
+    "HTTP_TLS_peers": 0,
+    "target_access": false,
+    "ports": 0,
+    "GitHub_writes": 0,
+    "self_approval": false,
+    "native3": false
+  },
+  "records": [
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/verify-integration.py",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/00-verify-integration.py.gz",
+      "bytes": 10470,
+      "sha256": "34d8edccc7cbc0ba02181e2056b0327979d71470923693cc9ca5bda8c11d96fc",
+      "archive_sha256": "894b9aa69191f9e9e0c6df806538e34f66348417298067666be5dc1f0d6f4c39"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/source-integration-verification.json",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/01-source-integration-verification.json.gz",
+      "bytes": 3513572,
+      "sha256": "54570d99b63c7dda73dc9ed48bd25ea0bd9da635efc2f92a48ffb0faca7d738a",
+      "archive_sha256": "0902d9db47ed9eaff990be429a7bea341cc5e34a731a63b441a1508e0d341fca"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/verify-integration-final.stdout",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/02-verify-integration-final.stdout.gz",
+      "bytes": 611,
+      "sha256": "9d35d160058cb11a5d2503692c2b63fe50a50f0b40b344c45a95d98d2e42fbc0",
+      "archive_sha256": "1ff04ee15f700726c4c8785040f7dc73262c1068675a7b67fa874328c695711e"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/verify-integration-final.stderr",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/03-verify-integration-final.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/current-source-projection.py",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/04-current-source-projection.py.gz",
+      "bytes": 11142,
+      "sha256": "05881b9954f8d07e13a93ff1488fe871b3c649c73ee1bf7ba4e299af72bcd765",
+      "archive_sha256": "455d408cf56e27fcb3d45af76878d5a3a600b7155e21dfe41e393597df632be3"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/current-source-projection.json",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/05-current-source-projection.json.gz",
+      "bytes": 714824,
+      "sha256": "1d0a1f87f2e4cf8754d483dfb5356ae9fad30db02b7b0473423b4431368681fc",
+      "archive_sha256": "d33c7cb94be9894d9ab954add31de74fd86bcb4ddbd6de98d56b442f3598f238"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/current-source-projection.stdout",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/06-current-source-projection.stdout.gz",
+      "bytes": 309,
+      "sha256": "5c7c2c954b958defc5ceede81a1ad6d599d5c469044596415031d69cc14cc65d",
+      "archive_sha256": "00272ec932cfe6f9ce88651fd1db870e513b0d58b79329f4fc9cfc25c809dff3"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/current-source-projection.stderr",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/07-current-source-projection.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/actionlint.stdout",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/08-actionlint.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/actionlint.stderr",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/09-actionlint.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/static-tools.json",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/10-static-tools.json.gz",
+      "bytes": 22656,
+      "sha256": "230f7a7b505b6cfe1bc07843f565f10087af2acf637380132ee08b10d3e584b6",
+      "archive_sha256": "5307153017f610c362289ff1c24a7885118574486836cf8df2ccbb507dd35c0d"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/workspace-entry-rustfmt.json",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/11-workspace-entry-rustfmt.json.gz",
+      "bytes": 6095,
+      "sha256": "f7e03086957817bdeca3149b468197235e8ab3d0d2fc01d060d9d9fcc09886a3",
+      "archive_sha256": "e68c1b909e1ab3c8a566c213ffeb86c5aa7ddb38ec3338e7cc8b8b35ac6582e8"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/workspace-entry-rustfmt.stdout",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/12-workspace-entry-rustfmt.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/workspace-entry-rustfmt.stderr",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/13-workspace-entry-rustfmt.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/git-diff-check.stdout",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/14-git-diff-check.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/git-diff-check.stderr",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/15-git-diff-check.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/initial-pure-tool-attempts/receipt.json",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/16-receipt.json.gz",
+      "bytes": 2837,
+      "sha256": "e6b58b564acfb64aa935c72362192bac5c31e34f798dac407f1a0ac4bf760242",
+      "archive_sha256": "5d3e7fddbf12986b16a585be253a569bf11e0618d577772b1ffe484119ea7977"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/initial-pure-tool-attempts/static-tools.json.gz",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/17-static-tools.json.gz.gz",
+      "bytes": 3128,
+      "sha256": "5307153017f610c362289ff1c24a7885118574486836cf8df2ccbb507dd35c0d",
+      "archive_sha256": "5da5234f0d3eaae2df6f20537068df9be1b1a9513f8828fd8db3392a9dd9e35b"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/initial-pure-tool-attempts/verify-integration.py.gz",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/18-verify-integration.py.gz.gz",
+      "bytes": 3615,
+      "sha256": "058bd6a9362230913bcf0fe200448de993e904659204e315cc3d371e24525493",
+      "archive_sha256": "16c97b88937074d061af7224cf37ed8bb38a6a73df821970eb89335f61df841f"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/initial-pure-tool-attempts/standalone-rustfmt.stderr.gz",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/19-standalone-rustfmt.stderr.gz.gz",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "archive_sha256": "e860dba6f12d00e6f05f9c29f3ac246b67efb295dfcdb684ebb3400db057363f"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/initial-pure-tool-attempts/standalone-rustfmt.stdout.gz",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/20-standalone-rustfmt.stdout.gz.gz",
+      "bytes": 1764,
+      "sha256": "2d8bab4d4f4c91024320be1721b23153a23f186620d175f94cd4dce671478683",
+      "archive_sha256": "8469e73061312967746b99d5c9cd961f1b903d5c55ac6497f1377a7c26007e16"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/initial-pure-tool-attempts/verify-integration.stderr.gz",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/21-verify-integration.stderr.gz.gz",
+      "bytes": 195,
+      "sha256": "ff588e088af17d5429d164d9172cbc74eb30f3f90c4b4e7f20e98c71a4479e4a",
+      "archive_sha256": "61a71ca7929ce80e3a5b78f7675883fba368013857a57a68ad6061db6f987332"
+    },
+    {
+      "original": "/workspace/review-artifacts/usage768-retry-main935-source/initial-pure-tool-attempts/verify-integration.stdout.gz",
+      "tracked": "migration/evidence/usage-retry-after-768/main935-source-only/pure-checks/22-verify-integration.stdout.gz.gz",
+      "bytes": 20,
+      "sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "archive_sha256": "e860dba6f12d00e6f05f9c29f3ac246b67efb295dfcdb684ebb3400db057363f"
+    }
+  ],
+  "limitations": "Source-only normal integration; original source and static approval historical identities remain intact. No current actual runtime/CI or whole768 acceptance."
+}

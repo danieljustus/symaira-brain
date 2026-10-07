@@ -1,0 +1,51 @@
+[
+  {
+    "original": "/tmp/symaira-doctor-source-independent-second-extra.py",
+    "sha256": "ea693c23f459aacf77c89849cdcee30173f03f6f29b4131657040cbb6eb81833",
+    "adapted": "/tmp/symaira-doctor-source-independent-third-extra.py",
+    "adapted_sha256": "28606c859ffe21f41da591fe53e14bfa23a9727a7dc6a81a628ce3ef0bc8e17f",
+    "changes": "Output prefix only; complete original inputs and assertions retained"
+  },
+  {
+    "original": "/tmp/symaira-doctor-source-independent-second-home.py",
+    "sha256": "21a203e04fa244a907cdd40f71e0d6389260d90b7c5b0556079e95eea9c7c756",
+    "adapted": "/tmp/symaira-doctor-source-independent-third-home.py",
+    "adapted_sha256": "9091bb546833561754f986fe2b64f99b2d35cb178fdccaabca1192f4ec3dcd47",
+    "changes": "Output prefix only; complete original inputs and assertions retained"
+  },
+  {
+    "original": "/tmp/symaira-doctor-source-independent-second-boundaries.py",
+    "sha256": "99fb1db685198a710d4d20ca2b044b336b05bb3ce14eeeda5778c59f2be34165",
+    "adapted": "/tmp/symaira-doctor-source-independent-third-boundaries.py",
+    "adapted_sha256": "519596fb437095ec4d87d0f850e73f818e0a301a7a8ad51d2fdf2fe9f69187a3",
+    "changes": "Output prefix only; complete original inputs and assertions retained"
+  },
+  {
+    "original": "/tmp/symaira-doctor-source-independent-second-symlink.py",
+    "sha256": "59a7cab76e652a39ead14ae1dbcea726dd97d6bb1b3e2652f09f537c67c77bb5",
+    "adapted": "/tmp/symaira-doctor-source-independent-third-symlink.py",
+    "adapted_sha256": "78cb82ef1c8b9ab8e5fb8ac658ea8251c326e94ac26595804e3a78b7e2f05d99",
+    "changes": "Output prefix only; complete original inputs and assertions retained"
+  },
+  {
+    "original": "/tmp/symaira-doctor-source-independent-second-original-raw-signals.py",
+    "sha256": "7e53ebc9bd62e597c725722ff498c979b97c34f78d4e595d6c977358154d6d5f",
+    "adapted": "/tmp/symaira-doctor-source-independent-third-original-raw-signals.py",
+    "adapted_sha256": "c80ee4c3102c75661d6a04a0054fe775e356cca38e636c253d2aeeaf1952bf2e",
+    "changes": "Output prefix only; complete original inputs and assertions retained"
+  },
+  {
+    "original": "/tmp/symaira-doctor-source-independent-second-original-findings.py",
+    "sha256": "db1f500c50cd5ebb8e0919b6d258becd4579246336b32fd0e9adec132506acbf",
+    "adapted": "/tmp/symaira-doctor-source-independent-third-original-findings.py",
+    "adapted_sha256": "a3bc15be36e84b5164017c2542069b7a70998a98d1514be7fd465dcfd4346dde",
+    "changes": "Output prefix only; complete original inputs and assertions retained"
+  },
+  {
+    "original": "/tmp/symaira-doctor-source-independent-second-original-lookup.py",
+    "sha256": "82f1b5578b0b5bc1318122e545be80ac95f893e1f0dfa8a82a30cd4cd1e45804",
+    "adapted": "/tmp/symaira-doctor-source-independent-third-original-lookup.py",
+    "adapted_sha256": "fa87bb24f660deaa5a926b8c3c81d522b8b3f58fe5fe340e45dd542238174229",
+    "changes": "Output prefix only; complete original inputs and assertions retained"
+  }
+]

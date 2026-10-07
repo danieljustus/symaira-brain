@@ -1,0 +1,13 @@
+{
+  "candidate_head": "a59b02e17d4c19a5b18c05ee433f3e13bc020a8e",
+  "purpose": "read-only path constructor versus Go TempDir fallback with empty TMPDIR; no profile directories created",
+  "env_overrides": {
+    "TMPDIR": "",
+    "HOME": "",
+    "XDG_CACHE_HOME": "",
+    "SYMBROWSE_CACHE_PATH_TEST_EXPECTED": "/tmp/symbrowse/sessions"
+  },
+  "exit": 101,
+  "stdout": "\nrunning 1 test\ntest spec::paths::tests::cache_environment_child ... FAILED\n\nfailures:\n\nfailures:\n    spec::paths::tests::cache_environment_child\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 26 filtered out; finished in 0.00s\n\n",
+  "stderr": "\nthread 'spec::paths::tests::cache_environment_child' (766641) panicked at crates/symbrowse-daemon/src/spec_paths_tests.rs:107:5:\nassertion `left == right` failed\n  left: \"symbrowse/sessions\"\n right: \"/tmp/symbrowse/sessions\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n"
+}

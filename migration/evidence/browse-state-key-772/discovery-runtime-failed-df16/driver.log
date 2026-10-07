@@ -1,0 +1,15 @@
+START fmt
+PASS fmt
+START strict
+PASS strict
+START affected-original
+PASS affected-original
+START affected-all-targets
+PASS affected-all-targets
+START mcp-lib
+PASS mcp-lib
+START build-cli
+PASS build-cli
+START build-probes
+PASS build-probes
+START windows-static

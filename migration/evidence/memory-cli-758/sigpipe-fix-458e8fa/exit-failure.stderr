@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspace/symaira-memory758-sigpipe/scripts/memory-cli-oracle/writes.py", line 304, in <module>
+    execute(args.go.resolve(),args.rust.resolve(),args.report)
+  File "/workspace/symaira-memory758-sigpipe/scripts/memory-cli-oracle/writes.py", line 270, in execute
+    assert transcript['exit'] == 0, ('native set exit must be zero',case,binary,transcript)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('native set exit must be zero', {'name': 'kind-user-False', 'kind': 'user', 'staged': False}, PosixPath('/tmp/memory-write-oracle-gglfhqn4/control'), {'exit': 1, 'stdout': 'eyJpZCI6ImViYjRhNGMyLTU2NjMtNGM1MC1iYTVlLWE4NzA4NWNiNmQ3OCIsInNjb3BlIjoiZ2xvYmFsIiwia2luZCI6InVzZXIiLCJzdGFnZWQiOmZhbHNlfQo=', 'stderr': ''})

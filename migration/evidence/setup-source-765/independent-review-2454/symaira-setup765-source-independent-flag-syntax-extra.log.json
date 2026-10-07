@@ -1,0 +1,4 @@
+{
+  "sha256": "da9da748a668eec013c4917679c7ed7cbee6a804b9aad7562c43ec18c6a44706",
+  "text": "[('flag-syntax-extra-0', ['exit', 'stdout_base64', 'stderr_base64', 'filesystem']), ('flag-syntax-extra-1', ['exit', 'stdout_base64', 'stderr_base64', 'filesystem']), ('flag-syntax-extra-2', ['exit', 'stdout_base64', 'stderr_base64', 'filesystem']), ('flag-syntax-extra-3', ['stderr_base64']), ('flag-syntax-extra-4', [])]\n"
+}

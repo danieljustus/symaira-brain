@@ -1,0 +1,36 @@
+{
+  "source": "9b92e1ad6006585f3d5109b54fe500400043e50a",
+  "artifacts": [
+    {
+      "original": "/tmp/symaira-memory763-same-origin-original.py",
+      "retained": "migration/evidence/memory-ui-763/same-origin-original-9b/0-symaira-memory763-same-origin-original.py",
+      "sha256": "d9da26c44728fc6a4ce4008130d54dcd9e380021a22287864f7ecf49e40e9a89",
+      "bytes": 1698
+    },
+    {
+      "original": "/tmp/symaira-memory763-same-origin-original.log",
+      "retained": "migration/evidence/memory-ui-763/same-origin-original-9b/1-symaira-memory763-same-origin-original.log",
+      "sha256": "6378c686a280564b7bb97f66154b96cd8f5c1c1f4d175aed7f3761c31dbb74d0",
+      "bytes": 65
+    },
+    {
+      "original": "/tmp/symaira-memory763-same-origin-source9b-original/receipt.json",
+      "retained": "migration/evidence/memory-ui-763/same-origin-original-9b/2-receipt.json",
+      "sha256": "0b2c740d9a59e63a9926c51016c69a3dd01b1d1852759bac1ebb65a747a5d7cf",
+      "bytes": 4007
+    },
+    {
+      "original": "/tmp/symaira-memory763-same-origin-source9b-original/go/stderr.log",
+      "retained": "migration/evidence/memory-ui-763/same-origin-original-9b/3-stderr.log",
+      "sha256": "800da5335b2c750ef5cc585d4a6c5a307e7c76c2ebcc5d9f2d81d551e122aa54",
+      "bytes": 196
+    },
+    {
+      "original": "/tmp/symaira-memory763-same-origin-source9b-original/rust/stderr.log",
+      "retained": "migration/evidence/memory-ui-763/same-origin-original-9b/4-stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "limits": "Actual supplied same-Origin headers and real frozen Go/native owner; no graphical-browser request claim."
+}

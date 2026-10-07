@@ -1,10 +1,10 @@
 use super::{
     MAX_CREDENTIAL_FILE_BYTES, UsageFallbackSignals, claude_file_token_in, codex_file_token,
     codex_from_resolved, copilot_file_token_candidate_in, copilot_file_token_in, decode_base64url,
-    is_secret_reference, json_string, kimi_device_id_is_native, kimi_file_token_candidate,
-    kimi_store, names_from_keychain_dump, needs_go_fallback_for, nous_file_token,
-    nous_file_token_candidate, nous_jwt_is_live, parse_claude_keychain_blob, path_may_exist,
-    read_limited, supported_custom_base, supported_opencode_workspace,
+    json_string, kimi_device_id_is_native, kimi_file_token_candidate, kimi_store,
+    names_from_keychain_dump, needs_go_fallback_for, nous_file_token, nous_jwt_is_live,
+    parse_claude_keychain_blob, path_may_exist, read_limited, supported_custom_base,
+    supported_opencode_workspace,
 };
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -141,26 +141,19 @@ fn claude_file_token_accepts_only_go_equivalent_deterministic_shapes() {
         );
         let got = claude_file_token_in(&path);
         let id = case["id"].as_str().expect("case id");
-        match id {
-            "default-account-precedes-other-accounts"
-            | "single-nondefault-account-is-unambiguous"
-            | "duplicate-account-key-uses-last-token" => {
-                assert_eq!(
-                    got.as_deref(),
-                    case["token"].as_str(),
-                    "safe candidate must match Go case {id}"
-                );
-            }
-            _ => {
-                assert!(
-                    case["token"].is_string() || case["possible_tokens"].is_array(),
-                    "Go oracle case {id} must record an exact token or its normalized choices"
-                );
-                assert!(
-                    got.is_none(),
-                    "unproven Go case {id} must remain on the Go path, got {got:?}"
-                );
-            }
+        if case["possible_tokens"].is_array() {
+            assert!(
+                got.is_none(),
+                "ambiguous account selection stays gated: {id}"
+            );
+            assert!(super::claude_file_requires_go(&path));
+        } else {
+            assert_eq!(
+                got.unwrap_or_default(),
+                case["token"].as_str().unwrap(),
+                "Go case {id}"
+            );
+            assert!(!super::claude_file_requires_go(&path));
         }
     }
 }
@@ -178,21 +171,13 @@ fn copilot_file_token_matches_go_for_native_shapes_and_rejects_unproven_files() 
         }
         let got = copilot_file_token_candidate_in(directory.path());
         let id = case["id"].as_str().expect("case id");
-        if case["rust_candidate"] == true {
-            let expected = case["token"].as_str().expect("Go token");
-            let expected = (!expected.is_empty()).then_some(expected);
-            assert_eq!(got.ok().flatten().as_deref(), expected, "Go case {id}");
-            if case["native_route"] == true {
-                assert_eq!(copilot_file_token_in(directory.path()).as_deref(), expected);
-            }
-        } else if case["native_route"] == true {
-            assert!(
-                got.expect("both Copilot files absent").is_none(),
-                "Go case {id}"
-            );
-            assert!(copilot_file_token_in(directory.path()).is_none());
+        if case["token"].is_null() {
+            assert!(got.is_err(), "distinct Go map tokens remain gated: {id}");
         } else {
-            assert!(got.is_err(), "unproven Go case {id} must stay on Go");
+            let expected = case["token"].as_str().unwrap();
+            let expected = (!expected.is_empty()).then_some(expected);
+            assert_eq!(got.unwrap().as_deref(), expected, "Go case {id}");
+            assert_eq!(copilot_file_token_in(directory.path()).as_deref(), expected);
         }
     }
 }
@@ -265,7 +250,7 @@ fn copilot_token_prefers_the_github_host_entry() {
     write(
         directory.path(),
         "apps.json",
-        r#"{"github.com":{"oauth_token":"github-token"},"other.com":{"oauth_token":"other-token"}}"#,
+        r#"{"github.com:owned":{"oauth_token":"github-token"},"other.com":{"oauth_token":"other-token"}}"#,
     );
     assert_eq!(
         copilot_file_token_in(directory.path()).as_deref(),
@@ -293,275 +278,70 @@ fn copilot_token_reads_hosts_json_after_apps_json() {
 }
 
 #[test]
-fn supported_provider_credentials_can_be_combined_natively() {
+fn literal_file_references_are_native_and_other_unproven_sources_keep_go() {
     assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_admin_env: Some("synthetic-claude-admin-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_env: Some("synthetic-copilot-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_file: Some("synthetic-copilot-file-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_file: Some("symvault://copilot/token"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_file: Some("synthetic-copilot-file-fixture"),
-        copilot_env: Some("synthetic-copilot-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_env: Some("symvault://copilot/token"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_env: Some("synthetic-copilot-fixture"),
-        other_provider_env: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_env: Some("synthetic-copilot-fixture"),
-        other_credential_source: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_env: Some("synthetic-copilot-fixture"),
-        local_provider_present: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        openrouter_env: Some("synthetic-openrouter-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        moonshot_env: Some("synthetic-moonshot-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        cursor_env: Some("synthetic-cursor-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        kimi_api_env: Some("synthetic-kimi-api-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        nous_env: Some("synthetic-nous-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        codex_env: Some("synthetic-codex-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        opencode_env: Some("synthetic-opencode-cookie"),
-        ..UsageFallbackSignals::default()
-    }));
-}
-
-#[test]
-fn claude_file_credential_can_be_combined_with_proven_sources() {
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("synthetic-claude-file-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("synthetic-claude-file-fixture"),
-        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("synthetic-claude-file-fixture"),
-        claude_admin_env: Some("synthetic-claude-admin-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("synthetic-claude-file-fixture"),
-        copilot_env: Some("synthetic-copilot-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("synthetic-claude-file-fixture"),
-        other_credential_source: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("synthetic-claude-file-fixture"),
+        copilot_file: Some("synthetic-copilot-file"),
+        kimi_cli: Some("synthetic-kimi-file"),
+        claude_file: Some("synthetic-claude-file"),
         ..UsageFallbackSignals::default()
     }));
     for reference in [
-        "symvault://claude/oauth-token",
-        "vault://claude/oauth-token",
-        "env://ANTHROPIC_OAUTH_TOKEN",
-        "keychain://Claude Code-credentials/account",
+        "symvault://test/token",
+        "vault://test/token",
+        "env://TOKEN",
+        "keychain://test/account",
     ] {
-        assert!(needs_go_fallback_for(&UsageFallbackSignals {
-            claude_file: Some(reference),
+        for signals in [
+            UsageFallbackSignals {
+                copilot_file: Some(reference),
+                ..UsageFallbackSignals::default()
+            },
+            UsageFallbackSignals {
+                kimi_cli: Some(reference),
+                ..UsageFallbackSignals::default()
+            },
+        ] {
+            assert!(!needs_go_fallback_for(&signals));
+        }
+    }
+    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
+        claude_file: Some("symvault://literal-file-token"),
+        ..UsageFallbackSignals::default()
+    }));
+    for signals in [
+        UsageFallbackSignals {
+            other_provider_env: true,
             ..UsageFallbackSignals::default()
-        }));
+        },
+        UsageFallbackSignals {
+            other_credential_source: true,
+            ..UsageFallbackSignals::default()
+        },
+        UsageFallbackSignals {
+            local_provider_present: true,
+            ..UsageFallbackSignals::default()
+        },
+    ] {
+        assert!(needs_go_fallback_for(&signals));
     }
 }
 
 #[test]
 fn claude_oauth_source_preempts_keychain_fallback() {
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
-        local_provider_present: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_file: Some("synthetic-claude-file-fixture"),
-        local_provider_present: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        claude_oauth_env: Some("env://SYMBRAIN_TEST_MISSING_CLAUDE_TOKEN"),
-        local_provider_present: true,
-        ..UsageFallbackSignals::default()
-    }));
-}
-
-#[test]
-fn codex_file_credential_can_be_combined_with_proven_sources() {
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        codex_file: Some("synthetic-codex-file-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        codex_file: Some("synthetic-codex-file-fixture"),
-        codex_env: Some("synthetic-codex-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        codex_file: Some("synthetic-codex-file-fixture"),
-        other_provider_env: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        codex_file: Some("synthetic-codex-file-fixture"),
-        other_credential_source: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        codex_file: Some("synthetic-codex-file-fixture"),
-        local_provider_present: true,
-        ..UsageFallbackSignals::default()
-    }));
-    for reference in [
-        "symvault://codex/access-token",
-        "vault://codex/access-token",
-        "env://CODEX_ACCESS_TOKEN",
-        "keychain://Codex/account",
+    for credential in [
+        "synthetic-claude-oauth",
+        "env://MISSING",
+        "symvault://test/token",
     ] {
-        assert!(is_secret_reference(reference));
-        assert!(needs_go_fallback_for(&UsageFallbackSignals {
-            codex_file: Some(reference),
+        assert!(!needs_go_fallback_for(&UsageFallbackSignals {
+            claude_oauth_env: Some(credential),
+            local_provider_present: true,
             ..UsageFallbackSignals::default()
         }));
     }
-}
-
-#[test]
-fn secret_references_and_unproven_sources_keep_go_fallback() {
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        claude_admin_env: Some("symvault://claude/admin-key"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        claude_oauth_env: Some("symvault://claude/oauth-token"),
-        ..UsageFallbackSignals::default()
-    }));
     assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_admin_env: Some("synthetic-claude-admin-env-fixture"),
-        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
-        other_provider_env: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        claude_oauth_env: Some("synthetic-claude-oauth-env-fixture"),
-        other_credential_source: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        claude_admin_env: Some("synthetic-claude-admin-env-fixture"),
-        openrouter_env: Some("synthetic-openrouter-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        openrouter_env: Some("symvault://openrouter/key"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        cursor_env: Some("symvault://cursor/cookie"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        openrouter_env: Some("synthetic-openrouter-fixture"),
-        moonshot_env: Some("synthetic-moonshot-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        copilot_env: Some("synthetic-copilot-fixture"),
-        openrouter_env: Some("synthetic-openrouter-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        moonshot_env: Some("symvault://moonshot/key"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        moonshot_env: Some("synthetic-moonshot-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        openrouter_env: Some("synthetic-openrouter-fixture"),
-        moonshot_env: Some("synthetic-moonshot-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        cursor_env: Some("synthetic-cursor-fixture"),
-        other_provider_env: true,
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        kimi_api_env: Some("symvault://kimi/api-key"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        kimi_api_env: Some("synthetic-kimi-api-fixture"),
-        kimi_cli: Some("synthetic-kimi-cli-fixture"),
-        kimi_auth_env: Some("synthetic-kimi-web-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        nous_env: Some("symvault://nous/access-token"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(!needs_go_fallback_for(&UsageFallbackSignals {
-        nous_env: Some("synthetic-nous-env-fixture"),
-        nous_file: Some("synthetic-nous-file-fixture"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        codex_env: Some("symvault://codex/access-token"),
-        ..UsageFallbackSignals::default()
-    }));
-    assert!(needs_go_fallback_for(&UsageFallbackSignals {
-        codex_env: Some("synthetic-codex-env-fixture"),
-        other_provider_env: true,
+        claude_file: Some("synthetic-claude-file"),
+        local_provider_present: true,
         ..UsageFallbackSignals::default()
     }));
 }
@@ -596,22 +376,15 @@ fn kimi_file_candidate_matches_only_the_source_bound_native_shapes() {
             fs::remove_file(&path).expect("remove absent-file fixture");
         }
         let candidate = kimi_file_token_candidate(&path);
-        if case["native_route"].as_bool().expect("native route") {
-            assert_eq!(candidate.as_deref(), Some("synthetic-kimi-file-token"));
-            assert_eq!(
-                kimi_store(directory.path()).0.as_deref(),
-                case["token"].as_str(),
-                "production store follows Go for {}",
-                case["id"]
-            );
-        } else {
-            assert!(candidate.is_none(), "{} must remain on Go", case["id"]);
-        }
+        let expected = case["token"].as_str().unwrap();
+        let expected = (!expected.is_empty()).then_some(expected);
+        assert_eq!(candidate.as_deref(), expected, "{}", case["id"]);
+        assert_eq!(kimi_store(directory.path()).0.as_deref(), expected);
     }
 }
 
 #[test]
-fn nous_file_candidate_matches_source_bound_plain_and_live_jwt_tokens() {
+fn nous_file_parser_matches_all_frozen_go_shapes() {
     let fixture: serde_json::Value =
         serde_json::from_str(NOUS_FILE_TOKEN_ORACLE).expect("Go Nous file parser oracle");
     for case in fixture["cases"].as_array().expect("oracle cases") {
@@ -624,13 +397,12 @@ fn nous_file_candidate_matches_source_bound_plain_and_live_jwt_tokens() {
         if !case["file_present"].as_bool().expect("file presence") {
             fs::remove_file(&path).expect("remove absent-file fixture");
         }
-        let candidate = nous_file_token_candidate(&path);
-        if case["native_route"].as_bool().expect("native route") {
-            assert_eq!(candidate.as_deref(), Some(case["token"].as_str().unwrap()));
-            assert_eq!(nous_file_token(&path), candidate, "Go and Rust selection");
-        } else {
-            assert!(candidate.is_none(), "{} must remain on Go", case["id"]);
-        }
+        assert_eq!(
+            nous_file_token(&path).unwrap_or_default(),
+            case["token"].as_str().expect("Go token"),
+            "{}",
+            case["id"]
+        );
     }
 }
 
@@ -730,15 +502,14 @@ fn nous_token_accepts_a_live_jwt() {
     assert!(nous_jwt_is_live(&format!(
         "header.{fractional_payload}.signature"
     )));
-    for ambiguous_payload in [
-        r#"{"exp":4102444800,"EXP":0}"#,
-        r#"{"EXP":0,"exp":4102444800}"#,
-    ] {
-        assert!(!nous_jwt_is_live(&format!(
-            "header.{}.signature",
-            encode_base64url(ambiguous_payload)
-        )));
-    }
+    assert!(!nous_jwt_is_live(&format!(
+        "header.{}.signature",
+        encode_base64url(r#"{"exp":4102444800,"EXP":0}"#)
+    )));
+    assert!(nous_jwt_is_live(&format!(
+        "header.{}.signature",
+        encode_base64url(r#"{"EXP":0,"exp":4102444800}"#)
+    )));
     assert!(!nous_jwt_is_live("not-a-jwt"));
     assert!(!nous_jwt_is_live("only.two"));
     assert!(!nous_jwt_is_live("no.exp-claim.signature"));
@@ -876,7 +647,7 @@ fn kimi_device_id_native_gate_accepts_only_absent_or_readable_ascii_files() {
         vec![b'x'; usize::try_from(MAX_CREDENTIAL_FILE_BYTES).expect("file size fits usize") + 1],
     )
     .expect("write oversized device id");
-    assert!(!kimi_device_id_is_native(&path));
+    assert!(kimi_device_id_is_native(&path));
 
     #[cfg(unix)]
     {

@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/workspace/symaira-daemon772-state-key-osargs/browse/port/harness/daemon_registry.py", line 290, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/symaira-daemon772-state-key-osargs/browse/port/harness/daemon_registry.py", line 262, in main
+    case["matches"] = compare(case)
+                      ^^^^^^^^^^^^^
+  File "/workspace/symaira-daemon772-state-key-osargs/browse/port/harness/registry_compare.py", line 101, in compare
+    return normalize(case["go"], rust=False) == normalize(case["rust"], rust=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/symaira-daemon772-state-key-osargs/browse/port/harness/registry_compare.py", line 86, in normalize
+    observed["stdout"] = json.loads(observed["stdout"])
+                         ^^^^
+NameError: name 'json' is not defined. Did you forget to import 'json'?

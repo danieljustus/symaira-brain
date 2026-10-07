@@ -1,0 +1,860 @@
+{
+  "reviewed_original_head": "ddd34beee51ef83bc0d115f3ad6b3038b7a970aa",
+  "verification_state": "local correction before commit; clean integrated native acceptance is still pending",
+  "runtime": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "primary_affected_suites": {
+    "passed": 418,
+    "failed": 0,
+    "ignored_child_harnesses": 2,
+    "complete_parent_summaries": 54
+  },
+  "focused_render_suites": {
+    "library": 8,
+    "actual_cli": 2
+  },
+  "strict_all_target_all_feature_clippy": "passed",
+  "workspace_fmt": "passed",
+  "diff_whitespace": "passed",
+  "live_go_existing_report_comparisons": {
+    "cases": [
+      {
+        "existing_report_matches": true,
+        "go": {
+          "installs": [
+            {
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "symlink",
+              "name": "example",
+              "path": "/tmp/.tmpHp0sWH/home/.claude/skills/example",
+              "source_hash": "cd187a46f623931eadddd049cb939b7a770669346734b39ae5e84a4f9a3507d9",
+              "status": "in-sync",
+              "target": "claude"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 0,
+            "in_sync": 1,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "rust": {
+          "installs": [
+            {
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "linked",
+              "name": "example",
+              "path": "/tmp/.tmpHp0sWH/home/.claude/skills/example",
+              "render_status": "in-sync",
+              "source_hash": "cd187a46f623931eadddd049cb939b7a770669346734b39ae5e84a4f9a3507d9",
+              "status": "in-sync",
+              "target": "claude"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 0,
+            "in_sync": 1,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "state": "clean",
+        "target": "claude"
+      },
+      {
+        "existing_report_matches": true,
+        "go": {
+          "installs": [
+            {
+              "drift": [
+                {
+                  "base": "fe00634c516718c80e546ef8365f641b8e176c67fcf93a804f4258c464cf49ee",
+                  "kind": "unchanged",
+                  "left": "fe00634c516718c80e546ef8365f641b8e176c67fcf93a804f4258c464cf49ee",
+                  "path": "SKILL.md",
+                  "right": "fe00634c516718c80e546ef8365f641b8e176c67fcf93a804f4258c464cf49ee"
+                },
+                {
+                  "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "kind": "harness-changed",
+                  "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "symlink",
+              "name": "example",
+              "path": "/tmp/.tmpHp0sWH/home/.claude/skills/example",
+              "source_hash": "cd187a46f623931eadddd049cb939b7a770669346734b39ae5e84a4f9a3507d9",
+              "status": "harness-changed",
+              "target": "claude"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 1,
+            "in_sync": 0,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "rust": {
+          "installs": [
+            {
+              "drift": [
+                {
+                  "base": "fe00634c516718c80e546ef8365f641b8e176c67fcf93a804f4258c464cf49ee",
+                  "kind": "unchanged",
+                  "left": "fe00634c516718c80e546ef8365f641b8e176c67fcf93a804f4258c464cf49ee",
+                  "path": "SKILL.md",
+                  "right": "fe00634c516718c80e546ef8365f641b8e176c67fcf93a804f4258c464cf49ee"
+                },
+                {
+                  "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "kind": "harness-changed",
+                  "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "linked",
+              "name": "example",
+              "path": "/tmp/.tmpHp0sWH/home/.claude/skills/example",
+              "render_drift": [
+                {
+                  "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "render_hash": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "render_status": "drift",
+              "source_hash": "cd187a46f623931eadddd049cb939b7a770669346734b39ae5e84a4f9a3507d9",
+              "status": "harness-changed",
+              "target": "claude"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 1,
+            "in_sync": 0,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "state": "render-edit",
+        "target": "claude"
+      },
+      {
+        "existing_report_matches": true,
+        "go": {
+          "installs": [
+            {
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "symlink",
+              "name": "example",
+              "path": "/tmp/.tmpLuQNyN/home/.config/opencode/skills/example",
+              "source_hash": "c193716902709995279a5866dcd2e2f8dc48b1275b51e73606d0a239b1caa5e0",
+              "status": "in-sync",
+              "target": "opencode"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 0,
+            "in_sync": 1,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "rust": {
+          "installs": [
+            {
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "linked",
+              "name": "example",
+              "path": "/tmp/.tmpLuQNyN/home/.config/opencode/skills/example",
+              "render_status": "in-sync",
+              "source_hash": "c193716902709995279a5866dcd2e2f8dc48b1275b51e73606d0a239b1caa5e0",
+              "status": "in-sync",
+              "target": "opencode"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 0,
+            "in_sync": 1,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "state": "clean",
+        "target": "opencode"
+      },
+      {
+        "existing_report_matches": true,
+        "go": {
+          "installs": [
+            {
+              "drift": [
+                {
+                  "base": "d92c0b32afad079b7481a81f5cf5b6382d8fa462849fe930b504bcc1c44b2366",
+                  "kind": "unchanged",
+                  "left": "d92c0b32afad079b7481a81f5cf5b6382d8fa462849fe930b504bcc1c44b2366",
+                  "path": "SKILL.md",
+                  "right": "d92c0b32afad079b7481a81f5cf5b6382d8fa462849fe930b504bcc1c44b2366"
+                },
+                {
+                  "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "kind": "harness-changed",
+                  "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "symlink",
+              "name": "example",
+              "path": "/tmp/.tmpLuQNyN/home/.config/opencode/skills/example",
+              "source_hash": "c193716902709995279a5866dcd2e2f8dc48b1275b51e73606d0a239b1caa5e0",
+              "status": "harness-changed",
+              "target": "opencode"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 1,
+            "in_sync": 0,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "rust": {
+          "installs": [
+            {
+              "drift": [
+                {
+                  "base": "d92c0b32afad079b7481a81f5cf5b6382d8fa462849fe930b504bcc1c44b2366",
+                  "kind": "unchanged",
+                  "left": "d92c0b32afad079b7481a81f5cf5b6382d8fa462849fe930b504bcc1c44b2366",
+                  "path": "SKILL.md",
+                  "right": "d92c0b32afad079b7481a81f5cf5b6382d8fa462849fe930b504bcc1c44b2366"
+                },
+                {
+                  "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "kind": "harness-changed",
+                  "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "linked",
+              "name": "example",
+              "path": "/tmp/.tmpLuQNyN/home/.config/opencode/skills/example",
+              "render_drift": [
+                {
+                  "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "render_hash": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "render_status": "drift",
+              "source_hash": "c193716902709995279a5866dcd2e2f8dc48b1275b51e73606d0a239b1caa5e0",
+              "status": "harness-changed",
+              "target": "opencode"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 1,
+            "in_sync": 0,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "state": "render-edit",
+        "target": "opencode"
+      },
+      {
+        "existing_report_matches": true,
+        "go": {
+          "installs": [
+            {
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "symlink",
+              "name": "example",
+              "path": "/tmp/.tmpk4oNmk/home/.agents/skills/example",
+              "source_hash": "e1464042ba6c2c3e09c4ce6e0ed4fc77a3f25021608c65f13feef41916f66957",
+              "status": "in-sync",
+              "target": "codex"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 0,
+            "in_sync": 1,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "rust": {
+          "installs": [
+            {
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "linked",
+              "name": "example",
+              "path": "/tmp/.tmpk4oNmk/home/.agents/skills/example",
+              "render_status": "in-sync",
+              "source_hash": "e1464042ba6c2c3e09c4ce6e0ed4fc77a3f25021608c65f13feef41916f66957",
+              "status": "in-sync",
+              "target": "codex"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 0,
+            "in_sync": 1,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "state": "clean",
+        "target": "codex"
+      },
+      {
+        "existing_report_matches": true,
+        "go": {
+          "installs": [
+            {
+              "drift": [
+                {
+                  "base": "59ad8caed547a0a767cc98a82f4af0415a916e056cf30438bde2efb022b66d1d",
+                  "kind": "unchanged",
+                  "left": "59ad8caed547a0a767cc98a82f4af0415a916e056cf30438bde2efb022b66d1d",
+                  "path": "SKILL.md",
+                  "right": "59ad8caed547a0a767cc98a82f4af0415a916e056cf30438bde2efb022b66d1d"
+                },
+                {
+                  "base": "006e16281ee2b96e4b16b68cc6c4f5b4cb954a4d3e463399e2c8a4329d30ff6a",
+                  "kind": "unchanged",
+                  "left": "006e16281ee2b96e4b16b68cc6c4f5b4cb954a4d3e463399e2c8a4329d30ff6a",
+                  "path": "agents/openai.yaml",
+                  "right": "006e16281ee2b96e4b16b68cc6c4f5b4cb954a4d3e463399e2c8a4329d30ff6a"
+                },
+                {
+                  "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "kind": "harness-changed",
+                  "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "symlink",
+              "name": "example",
+              "path": "/tmp/.tmpk4oNmk/home/.agents/skills/example",
+              "source_hash": "e1464042ba6c2c3e09c4ce6e0ed4fc77a3f25021608c65f13feef41916f66957",
+              "status": "harness-changed",
+              "target": "codex"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 1,
+            "in_sync": 0,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "rust": {
+          "installs": [
+            {
+              "drift": [
+                {
+                  "base": "59ad8caed547a0a767cc98a82f4af0415a916e056cf30438bde2efb022b66d1d",
+                  "kind": "unchanged",
+                  "left": "59ad8caed547a0a767cc98a82f4af0415a916e056cf30438bde2efb022b66d1d",
+                  "path": "SKILL.md",
+                  "right": "59ad8caed547a0a767cc98a82f4af0415a916e056cf30438bde2efb022b66d1d"
+                },
+                {
+                  "base": "006e16281ee2b96e4b16b68cc6c4f5b4cb954a4d3e463399e2c8a4329d30ff6a",
+                  "kind": "unchanged",
+                  "left": "006e16281ee2b96e4b16b68cc6c4f5b4cb954a4d3e463399e2c8a4329d30ff6a",
+                  "path": "agents/openai.yaml",
+                  "right": "006e16281ee2b96e4b16b68cc6c4f5b4cb954a4d3e463399e2c8a4329d30ff6a"
+                },
+                {
+                  "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "kind": "harness-changed",
+                  "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "linked",
+              "name": "example",
+              "path": "/tmp/.tmpk4oNmk/home/.agents/skills/example",
+              "render_drift": [
+                {
+                  "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "render_hash": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "render_status": "drift",
+              "source_hash": "e1464042ba6c2c3e09c4ce6e0ed4fc77a3f25021608c65f13feef41916f66957",
+              "status": "harness-changed",
+              "target": "codex"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 1,
+            "in_sync": 0,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "state": "render-edit",
+        "target": "codex"
+      },
+      {
+        "existing_report_matches": true,
+        "go": {
+          "installs": [
+            {
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "symlink",
+              "name": "example",
+              "path": "/tmp/.tmpb3SIV2/home/.gemini/config/skills/example",
+              "source_hash": "d9cbe3e4ae51cdc953baa4131eb8ffa5151d26cd60de33a2d5139614f006f841",
+              "status": "in-sync",
+              "target": "antigravity"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 0,
+            "in_sync": 1,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "rust": {
+          "installs": [
+            {
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "linked",
+              "name": "example",
+              "path": "/tmp/.tmpb3SIV2/home/.gemini/config/skills/example",
+              "render_status": "in-sync",
+              "source_hash": "d9cbe3e4ae51cdc953baa4131eb8ffa5151d26cd60de33a2d5139614f006f841",
+              "status": "in-sync",
+              "target": "antigravity"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 0,
+            "in_sync": 1,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "state": "clean",
+        "target": "antigravity"
+      },
+      {
+        "existing_report_matches": true,
+        "go": {
+          "installs": [
+            {
+              "drift": [
+                {
+                  "base": "cc5dfc548b2192429279f8f4c5d3b5ae75f7c059ce70580cf31e53b3ccd6ca51",
+                  "kind": "unchanged",
+                  "left": "cc5dfc548b2192429279f8f4c5d3b5ae75f7c059ce70580cf31e53b3ccd6ca51",
+                  "path": "SKILL.md",
+                  "right": "cc5dfc548b2192429279f8f4c5d3b5ae75f7c059ce70580cf31e53b3ccd6ca51"
+                },
+                {
+                  "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "kind": "harness-changed",
+                  "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "symlink",
+              "name": "example",
+              "path": "/tmp/.tmpb3SIV2/home/.gemini/config/skills/example",
+              "source_hash": "d9cbe3e4ae51cdc953baa4131eb8ffa5151d26cd60de33a2d5139614f006f841",
+              "status": "harness-changed",
+              "target": "antigravity"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 1,
+            "in_sync": 0,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "rust": {
+          "installs": [
+            {
+              "drift": [
+                {
+                  "base": "cc5dfc548b2192429279f8f4c5d3b5ae75f7c059ce70580cf31e53b3ccd6ca51",
+                  "kind": "unchanged",
+                  "left": "cc5dfc548b2192429279f8f4c5d3b5ae75f7c059ce70580cf31e53b3ccd6ca51",
+                  "path": "SKILL.md",
+                  "right": "cc5dfc548b2192429279f8f4c5d3b5ae75f7c059ce70580cf31e53b3ccd6ca51"
+                },
+                {
+                  "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "kind": "harness-changed",
+                  "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "linked",
+              "name": "example",
+              "path": "/tmp/.tmpb3SIV2/home/.gemini/config/skills/example",
+              "render_drift": [
+                {
+                  "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "render_hash": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "render_status": "drift",
+              "source_hash": "d9cbe3e4ae51cdc953baa4131eb8ffa5151d26cd60de33a2d5139614f006f841",
+              "status": "harness-changed",
+              "target": "antigravity"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 1,
+            "in_sync": 0,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "state": "render-edit",
+        "target": "antigravity"
+      },
+      {
+        "existing_report_matches": true,
+        "go": {
+          "installs": [
+            {
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "symlink",
+              "name": "example",
+              "path": "/tmp/.tmpbCwapc/home/.hermes/skills/symaira/example",
+              "source_hash": "48e78b86b68603c86a980edfaf0623f2db04136ec68cd719dae7003cbf1316e7",
+              "status": "in-sync",
+              "target": "hermes"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 0,
+            "in_sync": 1,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "rust": {
+          "installs": [
+            {
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "linked",
+              "name": "example",
+              "path": "/tmp/.tmpbCwapc/home/.hermes/skills/symaira/example",
+              "render_status": "in-sync",
+              "source_hash": "48e78b86b68603c86a980edfaf0623f2db04136ec68cd719dae7003cbf1316e7",
+              "status": "in-sync",
+              "target": "hermes"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 0,
+            "in_sync": 1,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "state": "clean",
+        "target": "hermes"
+      },
+      {
+        "existing_report_matches": true,
+        "go": {
+          "installs": [
+            {
+              "drift": [
+                {
+                  "base": "40e78d1edcab5ef43b22bf87e0ed64eb89db1def75b6d474c96026542bc2a581",
+                  "kind": "unchanged",
+                  "left": "40e78d1edcab5ef43b22bf87e0ed64eb89db1def75b6d474c96026542bc2a581",
+                  "path": "SKILL.md",
+                  "right": "40e78d1edcab5ef43b22bf87e0ed64eb89db1def75b6d474c96026542bc2a581"
+                },
+                {
+                  "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "kind": "harness-changed",
+                  "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "symlink",
+              "name": "example",
+              "path": "/tmp/.tmpbCwapc/home/.hermes/skills/symaira/example",
+              "source_hash": "48e78b86b68603c86a980edfaf0623f2db04136ec68cd719dae7003cbf1316e7",
+              "status": "harness-changed",
+              "target": "hermes"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 1,
+            "in_sync": 0,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "rust": {
+          "installs": [
+            {
+              "drift": [
+                {
+                  "base": "40e78d1edcab5ef43b22bf87e0ed64eb89db1def75b6d474c96026542bc2a581",
+                  "kind": "unchanged",
+                  "left": "40e78d1edcab5ef43b22bf87e0ed64eb89db1def75b6d474c96026542bc2a581",
+                  "path": "SKILL.md",
+                  "right": "40e78d1edcab5ef43b22bf87e0ed64eb89db1def75b6d474c96026542bc2a581"
+                },
+                {
+                  "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "kind": "harness-changed",
+                  "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "linked",
+              "name": "example",
+              "path": "/tmp/.tmpbCwapc/home/.hermes/skills/symaira/example",
+              "render_drift": [
+                {
+                  "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "render_hash": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "render_status": "drift",
+              "source_hash": "48e78b86b68603c86a980edfaf0623f2db04136ec68cd719dae7003cbf1316e7",
+              "status": "harness-changed",
+              "target": "hermes"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 1,
+            "in_sync": 0,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "state": "render-edit",
+        "target": "hermes"
+      },
+      {
+        "existing_report_matches": true,
+        "go": {
+          "installs": [
+            {
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "symlink",
+              "name": "example",
+              "path": "/tmp/.tmpAql3QM/home/.openclaw/skills/example",
+              "source_hash": "adc2fed452340980476b33b39656a19172471945a40b2904098e45e5d763ccc2",
+              "status": "in-sync",
+              "target": "openclaw"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 0,
+            "in_sync": 1,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "rust": {
+          "installs": [
+            {
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "linked",
+              "name": "example",
+              "path": "/tmp/.tmpAql3QM/home/.openclaw/skills/example",
+              "render_status": "in-sync",
+              "source_hash": "adc2fed452340980476b33b39656a19172471945a40b2904098e45e5d763ccc2",
+              "status": "in-sync",
+              "target": "openclaw"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 0,
+            "in_sync": 1,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "state": "clean",
+        "target": "openclaw"
+      },
+      {
+        "existing_report_matches": true,
+        "go": {
+          "installs": [
+            {
+              "drift": [
+                {
+                  "base": "a60afbeaa62926b0e0d07b000faebad2fed0a58bf230d9cbf90d6592d4563529",
+                  "kind": "unchanged",
+                  "left": "a60afbeaa62926b0e0d07b000faebad2fed0a58bf230d9cbf90d6592d4563529",
+                  "path": "SKILL.md",
+                  "right": "a60afbeaa62926b0e0d07b000faebad2fed0a58bf230d9cbf90d6592d4563529"
+                },
+                {
+                  "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "kind": "harness-changed",
+                  "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "symlink",
+              "name": "example",
+              "path": "/tmp/.tmpAql3QM/home/.openclaw/skills/example",
+              "source_hash": "adc2fed452340980476b33b39656a19172471945a40b2904098e45e5d763ccc2",
+              "status": "harness-changed",
+              "target": "openclaw"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 1,
+            "in_sync": 0,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "rust": {
+          "installs": [
+            {
+              "drift": [
+                {
+                  "base": "a60afbeaa62926b0e0d07b000faebad2fed0a58bf230d9cbf90d6592d4563529",
+                  "kind": "unchanged",
+                  "left": "a60afbeaa62926b0e0d07b000faebad2fed0a58bf230d9cbf90d6592d4563529",
+                  "path": "SKILL.md",
+                  "right": "a60afbeaa62926b0e0d07b000faebad2fed0a58bf230d9cbf90d6592d4563529"
+                },
+                {
+                  "base": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "kind": "harness-changed",
+                  "left": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "right": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "installed_at": "2026-10-03T18:09:05Z",
+              "mode": "linked",
+              "name": "example",
+              "path": "/tmp/.tmpAql3QM/home/.openclaw/skills/example",
+              "render_drift": [
+                {
+                  "library_hash": "25607455c7cd988654ed38a9e635893b2bb37c584364aa18a1ce5450156b468a",
+                  "path": "references/lesson.md",
+                  "render_hash": "06f60603696fe0e3458ee1980711641c51b44c9175d35026b48deb6e62caf94a"
+                }
+              ],
+              "render_status": "drift",
+              "source_hash": "adc2fed452340980476b33b39656a19172471945a40b2904098e45e5d763ccc2",
+              "status": "harness-changed",
+              "target": "openclaw"
+            }
+          ],
+          "summary": {
+            "conflict": 0,
+            "harness_changed": 1,
+            "in_sync": 0,
+            "orphaned": 0,
+            "stale": 0,
+            "unmanaged": 0
+          }
+        },
+        "state": "render-edit",
+        "target": "openclaw"
+      }
+    ],
+    "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+    "total": 12
+  },
+  "tested_source_sha256": {
+    "rust/symbrain-skills/src/install/status_compare.rs": "8d9eadb8163d73d6d316f0784e0465aa6f85d84c8a635a5b974d423c47842137",
+    "rust/symbrain-skills/tests/render_drift_status.rs": "e3a8952a32b040c90016587065d8bc2b56f1de0362bc9c091ca085ce093e924e",
+    "rust/symbrain-cli/tests/skills_render_drift.rs": "1c4b8dea1def6a0ca5b7ebe00597991e8c53f93f21f666afa6b3c10b5d9b61f3"
+  },
+  "native_binary_sha256": "1f7ab418d8702de6897eed69f4fe7aecff7dca9581e73308e510312b4922f5e4",
+  "existing_immutable_go_binary_sha256": "a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41",
+  "final_gate_log_sha256": "5fa1f9df76c8ef517560c994322fd7983fcd022c237d2a25edbf7d13e42496aa",
+  "independent_review": "correction not yet independently reviewed; original reviewer implemented it",
+  "native_platforms_proved_here": [
+    "Linux x86_64"
+  ]
+}

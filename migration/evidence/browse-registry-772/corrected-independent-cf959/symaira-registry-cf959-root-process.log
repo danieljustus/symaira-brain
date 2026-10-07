@@ -1,0 +1,1 @@
+510 CLI observations (48 original invalid + 392 literal edge + 4 selected-output errors + 6 help) + 20 raw frames + 8 concurrent clients per binary: matches=True; 8 controls rejected
