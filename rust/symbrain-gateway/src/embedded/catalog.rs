@@ -3,20 +3,20 @@ use crate::response::{ListedTool, ToolAnnotations};
 use symbrain_policy::Profile;
 
 pub(crate) const MEMORY_TOOLS: &[&str] = &[
+    "memory_get",
+    "memory_set",
+    "memory_search",
+    "memory_list",
     "entity_list",
     "entity_relate",
     "entity_resolve",
     "graph_neighbors",
     "memory_candidates",
-    "memory_get",
-    "memory_list",
     "memory_promote",
     "memory_reject",
-    "memory_search",
-    "memory_set",
     "query_log",
 ];
-pub(crate) const ACTIVITY_TOOLS: &[&str] = &["activity_get", "activity_search", "activity_status"];
+pub(crate) const ACTIVITY_TOOLS: &[&str] = &["activity_search", "activity_get", "activity_status"];
 pub(crate) const SKILLS_TOOLS: &[&str] = &[
     "skills_list",
     "skills_inspect",
@@ -28,35 +28,11 @@ pub(crate) const SKILLS_TOOLS: &[&str] = &[
 
 fn schema(name: &str) -> Box<serde_json::value::RawValue> {
     let text = match name {
-        "memory_get" | "memory_promote" | "memory_reject" => {
+        "memory_promote" | "memory_reject" => {
             r#"{"type":"object","properties":{"id":{"type":"string"},"client_id":{"type":"string"},"with_evidence":{"type":"boolean"}},"required":["id"]}"#
         }
-        "memory_set" => {
-            r#"{"type":"object","properties":{"content":{"type":"string"},"kind":{"type":"string"},"scope":{"type":"string"},"metadata":{"type":"string"},"session_id":{"type":"string"},"entities":{"type":"string"},"working":{"type":"boolean"},"staged":{"type":"boolean"}},"required":["content","kind"]}"#
-        }
-        "memory_search" => {
-            r#"{"type":"object","properties":{"query":{"type":"string"},"scope":{"type":"string"},"session_id":{"type":"string"},"profile":{"type":"string"},"limit":{"type":"integer"},"entity":{"type":"string"},"min_confidence":{"type":"string"},"verification":{"type":"string"},"exclude_superseded":{"type":"boolean"},"max_age":{"type":"string"},"max_sensitivity":{"type":"string"},"min_sharing_level":{"type":"string"},"client_id":{"type":"string"},"with_evidence":{"type":"boolean"},"min_score":{"type":"number"},"max_payload_bytes":{"type":"integer"},"cursor":{"type":"string"}},"required":["query"]}"#
-        }
-        "memory_list" | "memory_candidates" | "query_log" => {
+        "memory_candidates" | "query_log" => {
             r#"{"type":"object","properties":{"scope":{"type":"string"},"limit":{"type":"integer"},"max_sensitivity":{"type":"string"},"min_sharing_level":{"type":"string"},"client_id":{"type":"string"},"as_of":{"type":"string"},"max_payload_bytes":{"type":"integer"},"cursor":{"type":"string"}}}"#
-        }
-        "activity_search" => {
-            r#"{"type":"object","properties":{"query":{"type":"string"},"source":{"type":"string"},"from":{"type":"string"},"to":{"type":"string"},"limit":{"type":"integer"},"max_tokens":{"type":"integer"},"include_episodes":{"type":"boolean"}},"required":["query","from","to","limit","max_tokens"]}"#
-        }
-        "activity_get" => {
-            r#"{"type":"object","properties":{"id":{"type":"string"},"max_tokens":{"type":"integer"}},"required":["id","max_tokens"]}"#
-        }
-        "activity_status" => {
-            r#"{"type":"object","properties":{"max_tokens":{"type":"integer"}},"required":["max_tokens"]}"#
-        }
-        "entity_resolve" => {
-            r#"{"type":"object","properties":{"query":{"type":"string"},"type":{"type":"string"},"aliases":{"type":"string"},"limit":{"type":"integer"}},"required":["query"]}"#
-        }
-        "entity_relate" => {
-            r#"{"type":"object","properties":{"from":{"type":"string"},"to":{"type":"string"},"from_id":{"type":"string"},"to_id":{"type":"string"},"relation":{"type":"string"},"action":{"type":"string"},"source":{"type":"string"},"source_ref":{"type":"string"},"verification":{"type":"string"},"evidence":{"type":"string"},"valid_from":{"type":"string"},"valid_until":{"type":"string"}},"required":["relation"]}"#
-        }
-        "graph_neighbors" => {
-            r#"{"type":"object","properties":{"entity":{"type":"string"},"depth":{"type":"integer"}},"required":["entity"]}"#
         }
         "skills_list" => r#"{"type":"object","properties":{}}"#,
         "skills_inspect" | "skills_validate" => {
@@ -75,6 +51,9 @@ fn schema(name: &str) -> Box<serde_json::value::RawValue> {
 }
 
 fn listed(name: &str) -> ListedTool {
+    if let Some(tool) = super::memory_catalog::listed(name) {
+        return tool;
+    }
     let read = !matches!(
         name,
         "memory_set"
@@ -106,9 +85,18 @@ impl Gateway {
         let mut tools = Vec::new();
         if self.memory.is_some() {
             tools.extend(
-                self.memory_tool_names
+                MEMORY_TOOLS
                     .iter()
-                    .chain(self.activity_tool_names.iter())
+                    .filter(|name| {
+                        self.memory_tool_names
+                            .iter()
+                            .any(|allowed| allowed == **name)
+                    })
+                    .chain(ACTIVITY_TOOLS.iter().filter(|name| {
+                        self.activity_tool_names
+                            .iter()
+                            .any(|allowed| allowed == **name)
+                    }))
                     .map(|name| listed(name)),
             );
         }
