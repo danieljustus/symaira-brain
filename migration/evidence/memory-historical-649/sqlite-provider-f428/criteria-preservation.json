@@ -1,0 +1,25 @@
+{
+  "base": "f428a866d7817c269cdfc32b6affc50dfe014418",
+  "replay_controls": [
+    {
+      "path": "scripts/memory-historical-oracle/replay.py",
+      "all_original_functions_ast_equal": true,
+      "original_sha256": "e02832e902ec4ff6d3bdc65ca8739f18af74efaada75bb7a7acf352c7032b7f0",
+      "new_sha256": "15d4160efd0cb4415eb05133e2337df6be7fda66c2575a2afb9268b6efa7ee08"
+    },
+    {
+      "path": "scripts/memory-historical-oracle/controls.py",
+      "all_original_functions_ast_equal": true,
+      "original_sha256": "604a867f208dfc983e1334624b4d8dbe1de83d7fd924c71a1a4d31d770c1877e",
+      "new_sha256": "84cbe996024c5b78c2d558873751d1edcd110a054f5bf702b579518f73eaff77"
+    }
+  ],
+  "checker_all_original_assertions_queries_fixtures_and_result_criteria_unchanged": true,
+  "CI_overall_budget_minutes": [
+    30,
+    60
+  ],
+  "all_product_child_timeouts_and_original_case_counts_controls_unchanged": true,
+  "SDK_not_compiled_or_loaded": true,
+  "all_product_executions_not_run": true
+}

@@ -50,6 +50,12 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     if !database_path_is_usable(&path) {
         return true;
     }
+    if matches!(verb, "list" | "rules" | "search")
+        && path.is_file()
+        && !symbrain_memory::direct_reads_supported(&path, verb)
+    {
+        return true;
+    }
     // File/directory modes for newly created stores are still a release gate.
     if matches!(verb, "set" | "delete") && !path.is_file() {
         return true;

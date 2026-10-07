@@ -1,0 +1,13 @@
+diff --git a/rust/symbrain-memory/src/wal_open.rs b/rust/symbrain-memory/src/wal_open.rs
+index 4e5a2ba..1102298 100644
+--- a/rust/symbrain-memory/src/wal_open.rs
++++ b/rust/symbrain-memory/src/wal_open.rs
+@@ -26,7 +26,7 @@ fn attempts(conn: &Connection, mut observer: impl FnMut()) -> Result<(), Error>
+     loop {
+         // SQLite's own waiting and our yielding share one monotonic budget.
+         // In particular no early BUSY grants a fresh five-second timeout.
+-        conn.busy_timeout(BUDGET.saturating_sub(started.elapsed()))?;
++        conn.busy_timeout(BUDGET)?;
+         match conn.execute_batch("PRAGMA journal_mode=WAL;") {
+             Ok(()) => return Ok(()),
+             Err(error) => {

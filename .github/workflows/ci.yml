@@ -858,6 +858,8 @@ jobs:
 
       - name: Go/Rust executable parity on native Windows
         shell: bash
+        env:
+          SYMBRAIN_DIFFERENTIAL_JOURNAL: ${{ runner.temp }}/memory803-parity-journal
         run: |
           set -euo pipefail
           CGO_ENABLED=0 go build -ldflags "-X main.version=dev" -o "$RUNNER_TEMP/symbrain-go.exe" ./cmd/symbrain
@@ -933,6 +935,8 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+
+
       - name: Native skills render drift and frozen Go baseline
         shell: bash
         run: scripts/skills-render-drift/run.sh "$RUNNER_TEMP/skills-render-drift.json"
@@ -945,6 +949,7 @@ jobs:
           path: ${{ runner.temp }}/skills-render-drift.json
           if-no-files-found: error
           retention-days: 14
+
 
       - name: Fetch the immutable native Skills comparison parent
         shell: bash
@@ -994,6 +999,30 @@ jobs:
           path: |
             ${{ runner.temp }}/skills-wide-argv/*.json
             ${{ runner.temp }}/skills-wide-argv/*.exe
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Diagnose owned Go MCP startup and native broker phases
+        if: ${{ !cancelled() }}
+        shell: pwsh
+        env:
+          SYMBRAIN_HEALTH_GO_DIAGNOSTIC_BINARY: ${{ runner.temp }}/symbrain-go.exe
+          SYMBRAIN_HEALTH_DIAGNOSTIC_OUTPUT: ${{ runner.temp }}/memory803-health-phases
+        run: |
+          if (!(Test-Path "$env:SYMBRAIN_HEALTH_GO_DIAGNOSTIC_BINARY")) { throw 'Existing actual Go parity binary is missing; diagnostic cannot run' }
+          Get-FileHash "$env:SYMBRAIN_HEALTH_GO_DIAGNOSTIC_BINARY" | Format-List | Out-File "$env:RUNNER_TEMP/memory803-health-binary.txt"
+          cargo test --locked -p symbrain-cli --test health_stdio_windows_diagnostic -- --ignored --nocapture 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP/memory803-health-console.log"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Preserve complete Windows parity and owned MCP phase diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: memory803-parity-diagnostics-general-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/memory803-parity-journal
+            ${{ runner.temp }}/memory803-health-phases
+            ${{ runner.temp }}/memory803-health-console.log
+            ${{ runner.temp }}/memory803-health-binary.txt
           if-no-files-found: error
           retention-days: 14
 
@@ -1409,11 +1438,35 @@ jobs:
         shell: bash
         env:
           PYTHONUTF8: "1"
+          SYMBRAIN_DIFFERENTIAL_JOURNAL: ${{ runner.temp }}/memory803-parity-journal
         run: |
           set -euo pipefail
           go build -ldflags "-X main.version=dev" -o "$RUNNER_TEMP/symbrain-go.exe" ./cmd/symbrain
           cargo build -p symbrain-cli --locked
           python3 scripts/rust-differential.py "$RUNNER_TEMP/symbrain-go.exe" target/debug/symbrain.exe
+      - name: Diagnose owned Go MCP startup and native broker phases
+        if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
+        shell: pwsh
+        env:
+          SYMBRAIN_HEALTH_GO_DIAGNOSTIC_BINARY: ${{ runner.temp }}/symbrain-go.exe
+          SYMBRAIN_HEALTH_DIAGNOSTIC_OUTPUT: ${{ runner.temp }}/memory803-health-phases
+        run: |
+          if (!(Test-Path "$env:SYMBRAIN_HEALTH_GO_DIAGNOSTIC_BINARY")) { throw 'Existing actual Go parity binary is missing; diagnostic cannot run' }
+          Get-FileHash "$env:SYMBRAIN_HEALTH_GO_DIAGNOSTIC_BINARY" | Format-List | Out-File "$env:RUNNER_TEMP/memory803-health-binary.txt"
+          cargo test --locked -p symbrain-cli --test health_stdio_windows_diagnostic -- --ignored --nocapture 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP/memory803-health-console.log"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Preserve complete Windows parity and owned MCP phase diagnostics
+        if: ${{ always() && matrix.os == 'windows-2025' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: memory803-parity-diagnostics-init-${{ runner.os }}
+          path: |
+            ${{ runner.temp }}/memory803-parity-journal
+            ${{ runner.temp }}/memory803-health-phases
+            ${{ runner.temp }}/memory803-health-console.log
+            ${{ runner.temp }}/memory803-health-binary.txt
+          if-no-files-found: error
+          retention-days: 14
       - name: Capture native Windows install oracle
         if: ${{ matrix.os == 'windows-2025' && !cancelled() }}
         shell: bash

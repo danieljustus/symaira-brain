@@ -1,0 +1,25 @@
+{
+  "source": "62b27577092e19a7ecb89876aa07d94b1a02e136",
+  "executed_test_binary": {
+    "path": "/workspace/symaira-memory803-open/target/debug/deps/symbrain_memory-dde9bae26a7c26aa",
+    "sha256": "4c0b17e526ae8b14affdd251fbaca68aa7f39834850d81a6bb06bc138eca224c",
+    "bytes": 19339840,
+    "gzip": "/workspace/oracles/symaira-memory803-62b2757-binaries/symbrain_memory-dde9bae26a7c26aa.gz",
+    "gzip_sha256": "8573cc62d77b0bc0924d139e36f90f6404e95562fa801b5067836240c43363ea",
+    "roundtrip": true
+  },
+  "test_outcome": {
+    "passed": 37,
+    "failed": 1,
+    "ignored": 0,
+    "exit": 101,
+    "original_80_concurrent_opens": "passed",
+    "held_reader_budget_seconds": 5.006471718
+  },
+  "failed_control": "A retained reader reaches RESERVED-to-EXCLUSIVE and invokes callback once; no skipped-handler proof was established. The exact original62b source/recipe and executable remain retained.",
+  "runtime_fixture": "Disposable generated temp DB cleaned by the preexisting test Drop; original fixture recipe is immutable Git62b and actual observed failure remains literal in retained log.",
+  "files": {
+    "memory-lib-tests.log": "b7eefb35780ce51ced1357203d4310b80f5b32c49fbe5d33bae1ff244904ebff",
+    "started.json": "00b78e3f170b6b5ad4846d245b7094e1cbc130e0a2dbd49173a8b85b4784e726"
+  }
+}

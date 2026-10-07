@@ -1,0 +1,37 @@
+{
+  "job": "111341331340",
+  "run": "37170162739",
+  "platform": "windows-2025",
+  "raw_log_checkout_sha": "48979c1134180eaa53641378aed498145166dce3",
+  "job_observation": "three worker Store::open panics at migration.rs:156 with primary/extended SQLITE_BUSY 5; 32 passed, 1 failed, 0 ignored, outer test exit101",
+  "stage_attribution": "not established by outer callsite",
+  "retained_files": [
+    {
+      "original": "/tmp/symaira-current-ci-job-111341331340.log",
+      "retained": "migration/evidence/memory-open-race-803/windows-111341331340/symaira-current-ci-job-111341331340.log",
+      "bytes": 83380,
+      "sha256": "8f1841541b1aca62fba02236ea6e075f3cdd3acb8638e837d4410a1288774c61"
+    },
+    {
+      "original": "/tmp/symaira-current-ci-job-111341331340-decoded.json",
+      "retained": "migration/evidence/memory-open-race-803/windows-111341331340/symaira-current-ci-job-111341331340-decoded.json",
+      "bytes": 86561,
+      "sha256": "b877317cc1c5b4bfd860cafa10995c9b6f10d44033b5c28e259bb7a31bb8bb4f"
+    }
+  ],
+  "source_bindings": {
+    "rust/symbrain-memory/src/migration.rs": {
+      "canonical": "6ae73a7eef3442e2b4211a56043941339fb5a1d6",
+      "pr811_source": "11f5777a91bd980f16a68fe187ef70f6b50fa9ff",
+      "sha256": "837e1bfb55d02d569bc708beea2b9d460e6d2e751a73236425d5624e5911f74c"
+    },
+    "rust/symbrain-memory/src/lib.rs": {
+      "canonical": "6ae73a7eef3442e2b4211a56043941339fb5a1d6",
+      "pr811_source": "11f5777a91bd980f16a68fe187ef70f6b50fa9ff",
+      "sha256": "fee8661041add1e63275a788021ab88bc4a08ff1eb840a8d4e684e51a7c0be53"
+    }
+  },
+  "historical_candidate_unchanged": "dba88d23dade87eb5194e9c2451a0ad20d08a83e",
+  "operations": "static/read-only preservation; no target/compiler/runtime/port",
+  "git_retention_note": "Initial preservation commit ad61338 applied the existing text=auto/eol=lf filter to the .log Git blob; the original /tmp and worktree bytes remained intact. A narrow binary attribute restores the exact raw Git blob in the next preservation commit. ad61338 remains retained, without rewriting input or runtime evidence."
+}

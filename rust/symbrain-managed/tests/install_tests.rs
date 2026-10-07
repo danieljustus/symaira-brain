@@ -342,10 +342,24 @@ fn installed_version_timeout_is_bounded_and_reaps_descendants() {
 
     let started = Instant::now();
     let error = installed_version(temp.path(), "tool").unwrap_err();
-    assert_eq!(error.to_string(), "probe tool: signal: killed");
-    assert!(started.elapsed() < Duration::from_secs(5));
+    assert_eq!(
+        error.to_string(),
+        "probe tool: signal: killed",
+        "unexpected probe error: {error}; debug={error:?}; elapsed={:?}; fixture={binary:?}; metadata={:?}; child_marker={:?}",
+        started.elapsed(),
+        std::fs::metadata(&binary).map(|metadata| (metadata.len(), metadata.permissions().mode())),
+        std::fs::read_to_string(&marker),
+    );
+    assert!(
+        started.elapsed() < Duration::from_secs(5),
+        "probe exceeded bound: {error}; elapsed={:?}; child_marker={:?}",
+        started.elapsed(),
+        std::fs::read_to_string(&marker),
+    );
 
-    let pid = std::fs::read_to_string(marker).unwrap();
+    let pid = std::fs::read_to_string(&marker).unwrap_or_else(|marker_error| {
+        panic!("missing descendant marker: {marker_error}; probe={error}; fixture={binary:?}")
+    });
     let alive = Command::new("/bin/kill")
         .arg("-0")
         .arg(pid.trim())
@@ -353,5 +367,9 @@ fn installed_version_timeout_is_bounded_and_reaps_descendants() {
         .stderr(Stdio::null())
         .status()
         .is_ok_and(|status| status.success());
-    assert!(!alive, "version-probe descendant survived timeout");
+    assert!(
+        !alive,
+        "version-probe descendant survived timeout: pid={pid:?}; probe={error}; elapsed={:?}; fixture={binary:?}",
+        started.elapsed(),
+    );
 }

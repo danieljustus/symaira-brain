@@ -10,6 +10,8 @@ actual delegated-Go boundary observations, plus three executable mutants. Runtim
 HOME/USERPROFILE/XDG/cwd are disposable, PATH is empty, credentials/proxy variables
 are not inherited and every embedding endpoint is owned. Existing Go production
 and frozen fixtures remain unchanged; the `.go.txt` helpers are additive wrappers.
+The default `localhost:11434` endpoint is owned on IPv4 and, when localhost
+resolves to it, IPv6 before any invalid-configuration case can use the default.
 
 The failure-state supplement also runs six healthy governance callbacks in both
 output formats: ignored kind, ignored staging and removal during the set audit.

@@ -1,0 +1,10 @@
+{
+  "bytes": 1186870,
+  "sha256": "1c4ee07fab252876ad4daf33b5b9e18276e8e89a4563a7bb48892d6ef2eabb08",
+  "all_full_raw_members_roundtrip_verified": 52,
+  "initial15_proof_refs": {
+    "first13": "5081205bbc27264bc0c701b92330410fcbe56c02:migration/evidence/resource-retirement-2026-10-04/full-audit.tar.gz",
+    "final2": "c310cb54bb4f6d871eb6ba419da5e37740a377f2:migration/evidence/resource-retirement-2026-10-04-completion"
+  },
+  "full_source_recreation": "all retired branchrefs andfullGitblobs preserved; native modes in full manifests"
+}

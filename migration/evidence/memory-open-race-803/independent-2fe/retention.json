@@ -1,0 +1,259 @@
+{
+  "review": {
+    "reviewer": "Root different author",
+    "source": "2fe09ea78f1beb0225b9c325d76a054c183a9e42",
+    "result": "BOUNDED APPROVE pre-migration plain BUSY5 WAL setup retry",
+    "tests_passed": 327,
+    "tests_failed": 0,
+    "tests_ignored": 0,
+    "test_summaries": 32,
+    "read_pairs": 590,
+    "read_mutants": 64,
+    "set_pairs": 60,
+    "delete_pairs": 16,
+    "actual_delegated_boundaries": 13,
+    "output_pairs": 10,
+    "actual_write_mutants": 3,
+    "source_hashes_verified": 165,
+    "frozen_go_hashes_verified": 1215,
+    "author_full_raw_proofs_verified": 83,
+    "author_archived_unique_payloads_verified": 477,
+    "root_archived_ELF_paths": 557,
+    "root_archived_unique_payloads": 515,
+    "actual_executed_role_count": 33,
+    "actual_native_cli_sha256": "52cfbe94a98c01e4b23d7d993d46a4da1d6f07a1417fbf5e38cafb9f5fcce713",
+    "actual_go_cli_sha256": "a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41",
+    "archive_receipt": "/workspace/oracles/symaira-memory803-root-2fe-binaries/receipt.json",
+    "strict_clippy_fmt_actionlint": true,
+    "reviewed_policy": "Only autocommit pre-migration journal_mode=WAL with exact primaryBUSY5 retries, one5s monotonic budget inclSQLite waiting/yields; original error/transaction/data preserved; restore5000ms; unchanged IMMEDIATE migrations/33tests/FTS and caller operations",
+    "original_windows_phase": "full raw BUSY5 public-open panic retained; internal failing phase not established by CI log",
+    "native_platform_requirement": "fresh exact-head Windows/macOS/Linux MemoryCLI/Evidence and protected checks mandatory",
+    "historical649": "full37migration repair/default successor remains uncompiled separate scope"
+  },
+  "complete_raw_files": [
+    {
+      "original": "/tmp/symaira-memory803-root-11434-after.log",
+      "retained": "0-symaira-memory803-root-11434-after.log.gz",
+      "bytes": 57,
+      "sha256": "cd3de20d9b2b540509c5472957e6ab48cec5145438823bdda559e33f71f8c543",
+      "gzip_sha256": "b6b0f8e6c20187a57a78ad07578a90d4136de04dbae1be07966fb194f4c5e272"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-11434-before.log",
+      "retained": "1-symaira-memory803-root-11434-before.log.gz",
+      "bytes": 57,
+      "sha256": "cd3de20d9b2b540509c5472957e6ab48cec5145438823bdda559e33f71f8c543",
+      "gzip_sha256": "b6b0f8e6c20187a57a78ad07578a90d4136de04dbae1be07966fb194f4c5e272"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-actionlint.log",
+      "retained": "2-symaira-memory803-root-actionlint.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-build.log",
+      "retained": "3-symaira-memory803-root-build.log.gz",
+      "bytes": 60,
+      "sha256": "4b395c9c76c7f7fb5221d30df7320c7a2387ff3842c426dbee6a59a54b5cffab",
+      "gzip_sha256": "8135007ed9012844706878be7460c9a04ae3dd97316db2c0a6f69b7c288b580d"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-clippy.log",
+      "retained": "4-symaira-memory803-root-clippy.log.gz",
+      "bytes": 2896,
+      "sha256": "2e7968bf51cded91ee5969617611e810309c1ffbc80945cc4e01f184c28df468",
+      "gzip_sha256": "8d06c0034c0d6ab51ab291033d2bd0d1805d3bc9f333e31d56e7f60b42ff5992"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-fmt.log",
+      "retained": "5-symaira-memory803-root-fmt.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-full.sh",
+      "retained": "6-symaira-memory803-root-full.sh.gz",
+      "bytes": 2239,
+      "sha256": "bc139bfe64286b879c5574221e88a6823450fe25f7c2b86014be7f38e7f53860",
+      "gzip_sha256": "84b264f6a948d875cb8d9d9697280901520a7705eb0f13eb1424bc3928ab4521"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-publication-merge.log",
+      "retained": "7-symaira-memory803-root-publication-merge.log.gz",
+      "bytes": 15320,
+      "sha256": "fe6db18c33f8ae5b5ae1a26b78fda3a9b19cdadd9a8d13d49a335a89474c6442",
+      "gzip_sha256": "a1fd14b8989342c60788c5894d1163c929dfc732330d340e22dc74edea9e95a4"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-read-controls.json",
+      "retained": "8-symaira-memory803-root-read-controls.json.gz",
+      "bytes": 3544328,
+      "sha256": "68ad74dfde512b008cd4c247666c09a05dd7f99ab2f462928b149eae383ad9c1",
+      "gzip_sha256": "01b6ce3d377ced30f6351fffc0efeb9a0daecf1dba65f68d521e4055113121cf"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-read-controls.log",
+      "retained": "9-symaira-memory803-root-read-controls.log.gz",
+      "bytes": 36,
+      "sha256": "ed8e6e81ddbcd4ac7c127a0d3297a6a8812dff963705fc6c8c0d86270d0630ef",
+      "gzip_sha256": "8c5d575d20744cff93ffed791844bb31a4d089048c13df00d7b5fc894f051faa"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-read.json",
+      "retained": "10-symaira-memory803-root-read.json.gz",
+      "bytes": 2271518,
+      "sha256": "dc48b02d58eab95911f40abb46554ed649360c76af2f79bf2adaedf096fbe647",
+      "gzip_sha256": "84472c7189bd9a48bec2e8c75a2a35a2ebd75cfb9a93c563dda793121a0c909b"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-read.log",
+      "retained": "11-symaira-memory803-root-read.log.gz",
+      "bytes": 819,
+      "sha256": "61a5a80c92c37eabebacbe51bfeb6546d97fec91bde02465f433bcaa897b75da",
+      "gzip_sha256": "6aa49293cdae9a8e7578ded16779ffa7a5320edf9328aca21516d4758b45967e"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-review-archive.log",
+      "retained": "12-symaira-memory803-root-review-archive.log.gz",
+      "bytes": 1649,
+      "sha256": "b277352a0d6de397d127b507087c13a32d4102b6622c5097510445f76ffdab04",
+      "gzip_sha256": "c4873251c81e3859cf59aaf2454f432f174d0318ffcdc0b9fa8735acac98bf4d"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-review-archive.py",
+      "retained": "13-symaira-memory803-root-review-archive.py.gz",
+      "bytes": 5864,
+      "sha256": "816ecfb1b83e41034cdd60d5f0ecd9d1ecedaa092aac4f35b9980d4e0f809767",
+      "gzip_sha256": "ad437b739253f5d3995d09039db50488e600135367d895a4bbdf8d1a96597996"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-review.json",
+      "retained": "14-symaira-memory803-root-review.json.gz",
+      "bytes": 1649,
+      "sha256": "b277352a0d6de397d127b507087c13a32d4102b6622c5097510445f76ffdab04",
+      "gzip_sha256": "c4873251c81e3859cf59aaf2454f432f174d0318ffcdc0b9fa8735acac98bf4d"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-tests.log",
+      "retained": "15-symaira-memory803-root-tests.log.gz",
+      "bytes": 32527,
+      "sha256": "4a72c24b08a46ffd9fdc419b94c8f839438e00fbc49606f3360b9baaed661e45",
+      "gzip_sha256": "414d54907fed0d86b81309d199e8cfb9bb78b7eaa875b40fca6c776afc188e63"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-write/audit-failure.json",
+      "retained": "16-audit-failure.json.gz",
+      "bytes": 3804641,
+      "sha256": "8ca082a888d953e92399ca5e5914acdfc438825c09fc801b9fb204c52422d9fc",
+      "gzip_sha256": "666957fa30182f2149e402d08c6ed02aa4069f8342f8201f7b91850be23d63d8"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-write/audit-failure.stderr",
+      "retained": "17-audit-failure.stderr.gz",
+      "bytes": 2617,
+      "sha256": "04978bbc40efd0223709084cd50ab3b6a62ff976b1b54595a0ab04596325adb0",
+      "gzip_sha256": "aa1e784cfb7692261b70ea019a7a21466f3e591da3e0060e38625621f592318e"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-write/audit-failure.stdout",
+      "retained": "18-audit-failure.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-write/deletes.json",
+      "retained": "19-deletes.json.gz",
+      "bytes": 744147,
+      "sha256": "af317621391905bf22109be11cd71b5d65837f07d5c9a7e49dd943094e667697",
+      "gzip_sha256": "f9e045a104b181f424b1a13e453dad742051d8ac6596b4ff8ca3abf96dd0c2f7"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-write/exit-failure.json",
+      "retained": "20-exit-failure.json.gz",
+      "bytes": 42661,
+      "sha256": "ae977230c3dae27e8e83f2aed0c730d0dafbb3e106d1e03a20bc596920017410",
+      "gzip_sha256": "d03377aa81f210bb018e4b7bb31ae5455499f5cc57de971138cc0cb93a278469"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-write/exit-failure.stderr",
+      "retained": "21-exit-failure.stderr.gz",
+      "bytes": 760,
+      "sha256": "77071c4ba48851b5d109f830e6cefc338854928b0a43909d95c5390e08028b05",
+      "gzip_sha256": "6548e06d8440bae1b416332d8c90dcd677cec58fa1ff41e7692213a1bd71288c"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-write/exit-failure.stdout",
+      "retained": "22-exit-failure.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-write/fallback-boundaries.json",
+      "retained": "23-fallback-boundaries.json.gz",
+      "bytes": 229585,
+      "sha256": "0bcf0f0bc8fa657130acc1bed77c2c2d945a693f0dfd2a6247c4ee38fa73dc7a",
+      "gzip_sha256": "e5e61da8811b65bcb4641ff5dceb05bab1a1ee81c69d68dd15ea13fa078799d5"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-write/identity-failure.json",
+      "retained": "24-identity-failure.json.gz",
+      "bytes": 42370,
+      "sha256": "526ebdb830c9a221644880e31bdbb21295bad784a09da452529257baaed22aed",
+      "gzip_sha256": "feb5c4b8a9924fcb51f61e52360e0baddb9ca4cc12bff960ab23c28ca9805bc9"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-write/identity-failure.stderr",
+      "retained": "25-identity-failure.stderr.gz",
+      "bytes": 685,
+      "sha256": "61d3eacebf2da6c4dd8e6638939f890f2310881eb4b064da473b53808a5ee6a5",
+      "gzip_sha256": "95d896f30b4324bf368b249452789af06021d6fa9668b8695a636308da6aba1a"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-write/identity-failure.stdout",
+      "retained": "26-identity-failure.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-write/receipt.json",
+      "retained": "27-receipt.json.gz",
+      "bytes": 160057,
+      "sha256": "1836336242ae76ebd28bfff05505eca5f79722a82848167649e6cf55f67d9fc2",
+      "gzip_sha256": "bfd0c6d7a6309e0e2a5abf7ebc8fa6fe8ec85bca7df6b2d112b02ac39f3a5953"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-write/write-failures.json",
+      "retained": "28-write-failures.json.gz",
+      "bytes": 598759,
+      "sha256": "1ccc21cfa9a92def5e5dd8253d341d232fdb40c1287b7f8e20b5df121fe2d372",
+      "gzip_sha256": "7f7fef737fb025cc951cb1308e0ba4cad4f952fb7ab3b08e02220e844005c3c6"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-write/writes.json",
+      "retained": "29-writes.json.gz",
+      "bytes": 3805160,
+      "sha256": "9ef2abe25ddfd27dd343bdbfc35955a60299d2bdf260c5c4734eceaf4e732568",
+      "gzip_sha256": "347ec5c2169f76376ccf526cdd662d9fa21cef606dd1b6db1cca0ed849fd82d3"
+    },
+    {
+      "original": "/tmp/symaira-memory803-root-write.log",
+      "retained": "30-symaira-memory803-root-write.log.gz",
+      "bytes": 140,
+      "sha256": "5d934b7f7a02d27fdf940ab06ffbd9d7a0c2eb70448005ee4c8a30664e0cdc8d",
+      "gzip_sha256": "d0b067f4bd9149d8c7e38211dc3038f77e54e18425d50053a59a3373c3a2a283"
+    },
+    {
+      "original": "/workspace/oracles/symaira-memory803-root-2fe-binaries/receipt.json",
+      "retained": "31-receipt.json.gz",
+      "bytes": 461436,
+      "sha256": "28beb5898536fd4ddb3a0d3dc2e81e65db2fba3682d16906502b36752682c7a6",
+      "gzip_sha256": "70745a5c4e8a17e445d573c5da591e364492e03d7cc6f0edfc37dc4257db8bcd"
+    }
+  ]
+}
