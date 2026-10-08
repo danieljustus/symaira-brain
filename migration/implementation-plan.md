@@ -66,6 +66,15 @@ runs with two different invalid-default reports stay evidence, not an exception.
 See the linked [ADR](../docs/adr/guard-doctor-equivalent-config-and-anchor-unicode.md)
 and [remaining inventory](guard-doctor-boundary-inventory-770.md). This does not
 close #770/#769 or claim full standalone/Brain cutover.
+## Read-only Doctor schema inspection — 2026-10-03
+
+The #649 successor compares actual required columns against the schema embedded
+in the native binary, separately from atomic Store repair. Applied migration
+records and `quick_check=ok` no longer hide missing DDL in Doctor. The new
+`memory-schema-native.yml` requires native Linux/macOS/Windows process evidence,
+including a real unchanged-Go false-green rejection control. Acceptance remains
+pending; #649 is open. Decision and explicit scope are recorded in
+`docs/adr/649-doctor-schema-inspection.md`.
 
 ## Additional native init, Swift and fuzz evidence — 2026-09-29
 
