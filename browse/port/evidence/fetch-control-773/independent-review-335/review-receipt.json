@@ -1,0 +1,447 @@
+{
+  "head": "335073aab4bc49b6a4497b38115ed5d8a688374a",
+  "source": "e2ecf4026806dd4d9fd219f15f931848b1fd56d9",
+  "parent": "52236234a197f00de89edbb185fc762a4f121161",
+  "base_main": "31de72294521701fc4b1a0bce39f03cc34d72e7e",
+  "frozen_go": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "sdk": "go1.26.7",
+  "clean": true,
+  "disposition": "request_changes",
+  "findings": [
+    {
+      "priority": "P2",
+      "path": "browse/crates/symbrowse-fetch/src/honest/proxy_uri.rs",
+      "line": 31,
+      "title": "Preserve proxy credential bytes rather than silently dropping/truncating them"
+    }
+  ],
+  "target_users": [],
+  "target_released": true,
+  "binaries": {
+    "native_probe": {
+      "path": "/workspace/symaira-fetch773-proxy-uri/target/debug/examples/control_probe",
+      "sha256": "ef2dc9ac7d95e7be58499cf70acf9e8e64cdee0ddc13adb6682a741b938a0920",
+      "bytes": 15498744
+    },
+    "rust_release": {
+      "path": "/workspace/symaira-fetch773-proxy-uri/target/release/symbrowse",
+      "sha256": "1900720a4c0b518f80747f7cfc8202b96b1778124072a6eafc138d6c67c4042f",
+      "bytes": 10707264
+    },
+    "go_release": {
+      "path": "/tmp/symaira-fetch773-proxy-uri-e2-go-release",
+      "sha256": "221b047aa18e2c4eb421dd970de18e6e82372059c492f6bd52ac337c95c5a5f6",
+      "bytes": 26611127
+    },
+    "original_go_probe": {
+      "path": "/tmp/symaira-fetch773-second-fix-independent-go-probe",
+      "sha256": "8e92be70d9b908c11f47720b1bf34c5717b327c246686dbb71e03b336f820786",
+      "bytes": 19682949
+    }
+  },
+  "fresh_gates": {
+    "process_pairs": 251,
+    "original_controls": 5,
+    "raw_proxy_pairs": 32,
+    "referer_equal": 7,
+    "referer_E011": 1,
+    "linux_tls_pairs": 4,
+    "native_jars": 4,
+    "new_controls": 3,
+    "ordinary_passed": 123,
+    "ordinary_failed": 0,
+    "parent_owned_ignored": 1,
+    "parent_asserted_child_runs": 7,
+    "fetch_tests": 55,
+    "summaries": 26,
+    "go_packages": 10,
+    "fixture_vectors": 28,
+    "profiles": 11,
+    "robots": 15,
+    "clippy": true,
+    "fmt": true,
+    "actionlint": true,
+    "matrix_contracts": 88,
+    "matrix_work_items": 17
+  },
+  "extras": {
+    "auth_pairs": 38,
+    "auth_equal": 18,
+    "enforcing_auth_pairs": 8,
+    "enforcing_equal": 4,
+    "body_pairs": 18,
+    "body_equal": 14,
+    "body_differences_inherited": true,
+    "h2_pairs": 3,
+    "h2_equal": 0,
+    "h2_gap_inherited": true
+  },
+  "value_check": {
+    "source": "e2ecf4026806dd4d9fd219f15f931848b1fd56d9",
+    "samples_recomputed": 240,
+    "sets": [
+      {
+        "side": "go",
+        "workload": "cli",
+        "samples": 30,
+        "p95_ns": 11271009,
+        "median_ns": 6267406
+      },
+      {
+        "side": "go",
+        "workload": "daemon",
+        "samples": 30,
+        "p95_ns": 20609326,
+        "median_ns": 20496841
+      },
+      {
+        "side": "go",
+        "workload": "fetch",
+        "samples": 30,
+        "p95_ns": 2292506,
+        "median_ns": 1199774
+      },
+      {
+        "side": "go",
+        "workload": "mcp",
+        "samples": 30,
+        "p95_ns": 8068648,
+        "median_ns": 6593856
+      },
+      {
+        "side": "rust",
+        "workload": "cli",
+        "samples": 30,
+        "p95_ns": 3724401,
+        "median_ns": 2690912
+      },
+      {
+        "side": "rust",
+        "workload": "daemon",
+        "samples": 30,
+        "p95_ns": 20434001,
+        "median_ns": 20318536
+      },
+      {
+        "side": "rust",
+        "workload": "fetch",
+        "samples": 30,
+        "p95_ns": 939039,
+        "median_ns": 561820
+      },
+      {
+        "side": "rust",
+        "workload": "mcp",
+        "samples": 30,
+        "p95_ns": 4250475,
+        "median_ns": 2799492
+      }
+    ],
+    "load_observations": 17,
+    "load_receipt_sha256": "6142b13f9eae87f92765bc231d014e510e1d6e4480129a0cee980d285e9e3eb6",
+    "current_size_bytes": {
+      "go": 26611127,
+      "rust": 10707264
+    },
+    "unchanged_comparator": {
+      "schema_version": 2,
+      "gate": "pass",
+      "workloads": {
+        "cli": {
+          "p95_change_percent": -66.95592204744048
+        },
+        "mcp": {
+          "p95_change_percent": -47.32110013970122
+        },
+        "daemon": {
+          "p95_change_percent": -0.8507071022118784
+        },
+        "fetch": {
+          "p95_change_percent": -59.03875496945265,
+          "hard_gate": "<=10%"
+        }
+      },
+      "reasons": [],
+      "size_reduction_percent": 41.587606119778954
+    },
+    "cost_pairs": 120,
+    "cost": [
+      {
+        "scheme": "http",
+        "port": "81",
+        "side": "go",
+        "connections": 1,
+        "later_response_median_ms": 0.1997719999999994
+      },
+      {
+        "scheme": "http",
+        "port": "81",
+        "side": "rust",
+        "connections": 1,
+        "later_response_median_ms": 0.7141190000000002
+      },
+      {
+        "scheme": "http",
+        "port": "080",
+        "side": "go",
+        "connections": 1,
+        "later_response_median_ms": 0.17407299999999992
+      },
+      {
+        "scheme": "http",
+        "port": "080",
+        "side": "rust",
+        "connections": 30,
+        "later_response_median_ms": 0.6329969999999996
+      },
+      {
+        "scheme": "https",
+        "port": "81",
+        "side": "go",
+        "connections": 1,
+        "later_response_median_ms": 0.23255100000000084
+      },
+      {
+        "scheme": "https",
+        "port": "81",
+        "side": "rust",
+        "connections": 1,
+        "later_response_median_ms": 0.6037929999999996
+      },
+      {
+        "scheme": "https",
+        "port": "080",
+        "side": "go",
+        "connections": 1,
+        "later_response_median_ms": 0.2412440000000018
+      },
+      {
+        "scheme": "https",
+        "port": "080",
+        "side": "rust",
+        "connections": 30,
+        "later_response_median_ms": 2.240788000000002
+      }
+    ]
+  },
+  "provenance": {
+    "head": "335073aab4bc49b6a4497b38115ed5d8a688374a",
+    "source": "e2ecf4026806dd4d9fd219f15f931848b1fd56d9",
+    "counts": {
+      "fetch": 34,
+      "harness": 14,
+      "rust": 152,
+      "go": 415
+    },
+    "preserved_originals": 53,
+    "archived_executables": 42,
+    "binaries_verified": 4,
+    "retained_evidence": 55,
+    "evidence_docs_only_changes": 56,
+    "locked_packages_unchanged": true,
+    "frozen_go_fixtures_unchanged": true,
+    "clean": true
+  },
+  "evidence": {
+    "/tmp/symaira-fetch773-proxy-uri-independent-actionlint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-auth-extra.json": {
+      "sha256": "61564d303fbf50d3a228615f3af9b3e28a9a31beec3a656c4d43dcc53d6f1d4a",
+      "bytes": 55817
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-auth-extra.log": {
+      "sha256": "6c0b0f7af814d22ea1196d4d3afda4610316aefbcf195b5448c5a6400b2fc4c3",
+      "bytes": 24901
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-auth-extra.py": {
+      "sha256": "9bbb1cc5d6f5fc7482735343b8ea43d3f8115bb73769e82701eb3c9436a2ea15",
+      "bytes": 1949
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-auth-parent.json": {
+      "sha256": "b837b2545316865336e0702ce958d6c1851371e71c06728d368dee412c6c656c",
+      "bytes": 55408
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-auth-parent.log": {
+      "sha256": "fa3bc91b3ec66e2d38477c7e5e0b17934b74f8b5b307173eca598966b9ed1e86",
+      "bytes": 41474
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-auth-parent.py": {
+      "sha256": "7b7f8b91d6c83d71af37569b3c25f34a38ffab8d8e2c5a1d58d4f78c75b15e08",
+      "bytes": 1923
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-auth-required.json": {
+      "sha256": "83214480ab45525c98dd1b4c22d601897701f2472eddba62a0c62943df7a6e3f",
+      "bytes": 8369
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-auth-required.log": {
+      "sha256": "3a57704d1bfa51a014f09a46bfefe6997e3ec85d53fa39305b1d2859f1125d7b",
+      "bytes": 488
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-auth-required.py": {
+      "sha256": "bd6a22d8d1e631f6ee52110fbbbd553e166e51c9359daf8723ed1151ec83f38c",
+      "bytes": 2365
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-benchmark-tests.log": {
+      "sha256": "233d7385de70b0d5291436ee858178071ad42353e4b7f91145bec281b4722a77",
+      "bytes": 117
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-body-extra-final.log": {
+      "sha256": "d6e4acdb65451af00a2cca5ac8c811927b92c89e637b49c68c6db1a68292836c",
+      "bytes": 28036
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-body-extra-first.py": {
+      "sha256": "3e507146074ec67f96612acdd480b86c3921d6b346e7f0f46ed31fb05ff5f0c5",
+      "bytes": 2498
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-body-extra.json": {
+      "sha256": "d6e4acdb65451af00a2cca5ac8c811927b92c89e637b49c68c6db1a68292836c",
+      "bytes": 28036
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-body-extra.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-body-extra.py": {
+      "sha256": "da68b7306ce64b5adaa8c17c99f373947d528f347d1435b2281b564df331b69a",
+      "bytes": 3227
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-body-parent.json": {
+      "sha256": "d2dca0e0d6b8fe964014878324800399131b11e54411927b1a170f4a7a858342",
+      "bytes": 28093
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-body-parent.log": {
+      "sha256": "d2dca0e0d6b8fe964014878324800399131b11e54411927b1a170f4a7a858342",
+      "bytes": 28093
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-body-parent.py": {
+      "sha256": "a17fdc559fcf73abf6c4882482c64177f2012493003515faa77b7efb2a7f1454",
+      "bytes": 3201
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-classification.json": {
+      "sha256": "2cf34eae85cee46eb4e787c01b39d7158d91952eb1a5485f8a0d56c040904e44",
+      "bytes": 7311
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-clippy.log": {
+      "sha256": "60752725ea6f194f20ebc7150276eef9d351f09c52a8c6e784e05f6a10ca45df",
+      "bytes": 60
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-comparison.json": {
+      "sha256": "fd60490810d45286738881cbc28ec25bc9a966157aac1ce4d8ce7727174063d0",
+      "bytes": 432
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-fmt.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-go-fixtures.log": {
+      "sha256": "3857f7c3cf52b842d130fcdb37f182bd171e8c2b66890c0a74b686b260d91b73",
+      "bytes": 1163
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-h2-extra.json": {
+      "sha256": "ee68035299e67d48ed1f31248cd93c04c30a1387adbe9f986296c1152e6facc8",
+      "bytes": 3285
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-h2-extra.log": {
+      "sha256": "ee68035299e67d48ed1f31248cd93c04c30a1387adbe9f986296c1152e6facc8",
+      "bytes": 3285
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-h2-extra.py": {
+      "sha256": "847c887109f4a29ff7af00acbb50fd78acc3a5eb67b3d8a13d40c01acaab4c23",
+      "bytes": 1600
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-h2-peer.go": {
+      "sha256": "8317ace79214935002f881159b01a65eed7cd7209f1515bba343ea6de5dac53d",
+      "bytes": 620
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-identity.log": {
+      "sha256": "feabb4add9e2ca3374e538560634d1ec97dc4f4ce89aab12f3d726e36ea9b2f6",
+      "bytes": 102
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-matrix.log": {
+      "sha256": "f5bfa3059aad5fdddb33c5356c9bfa859a33d90f12f51ff8393cf106c56421b4",
+      "bytes": 58
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-original5.json": {
+      "sha256": "f87534a4a4c232e07554422d7f6b42810cf26fae55b4d39609d667a6dfde92ee",
+      "bytes": 5951
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-original5.log": {
+      "sha256": "93d91eef7811cb26d6178dca1f0b0955acd3c463f189c040cc7cb6d9bc359ce3",
+      "bytes": 965
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-original5.py": {
+      "sha256": "014bc348e2e236d8f496b8df7a3e8049294eb95b1584e59b1fe025f2f77b2d3f",
+      "bytes": 1827
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-original8.json": {
+      "sha256": "2c7fdb92a5242eead2f965eb6edc2e0f9a778fa2d36e24605a71f520834c3f48",
+      "bytes": 13898
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-original8.log": {
+      "sha256": "e1359aef2387660b469cd3c9f0bbac6b9c0e410de0398746f037ab4c34e895d7",
+      "bytes": 1649
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-original8.py": {
+      "sha256": "23470b6a0f71d4060bfa63409abefe26b7fe16e21cac81393208219451591802",
+      "bytes": 2533
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-process-controls.json": {
+      "sha256": "e8ef9432811679ebb0aac91970908897d27cfe9033cc1824a34ef3cc39c5362d",
+      "bytes": 4415
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-process-raw-proxy-controls.json": {
+      "sha256": "bd4b33b8434e59b55ac1b6a757002afe20a5a209b83b2ac59b82c1ab5d158833",
+      "bytes": 13355
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-process-raw-proxy.json": {
+      "sha256": "22238bdb48892b09669af450362b52eb18c3b7839d8fac9cc960672cf0fbccfd",
+      "bytes": 64401
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-process.json": {
+      "sha256": "fdb1c18c309133282753a427ee402fa331d28f6802f99e1c6d89b125fb0e29b9",
+      "bytes": 265939
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-process.log": {
+      "sha256": "72373242f5f11d7beaac3157f8514d0005b1683e1155409bd40d8079f17af536",
+      "bytes": 311
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-provenance.json": {
+      "sha256": "3418ef10bed0ac6aa73833a77138b5bf43a88d7142e7cc0a5829e6521d2a230b",
+      "bytes": 441
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-review.md": {
+      "sha256": "f1806006c8898fc9fac73bae63276c460e13af32986f6d2cf94c3a24be5c4291",
+      "bytes": 13324
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-tests.log": {
+      "sha256": "f933ba8f07b5d6dc9ff207c7c271d92587bdf5da82a9f6e81b86213f7a880701",
+      "bytes": 14739
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-value-check.json": {
+      "sha256": "63fca944f9eee746afae18b28375fb16b8b0bbf1fd7a14f9fbea56dfd813b0a0",
+      "bytes": 3152
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-verify.log": {
+      "sha256": "6e695ee1e8f3d11fcae1a47c3199ecf463402c39343c8e1f1a8237e311213a20",
+      "bytes": 397
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-verify.py": {
+      "sha256": "0729e48c75ccab632a9d8dabfc606ab7fc86e0d58666723f15fc279252d7192d",
+      "bytes": 3469
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-h2-parent.json": {
+      "sha256": "e0c952f1f85ba14393f31df3f4a8cf00eccb25af6a2a840eb2b3c601c2792f36",
+      "bytes": 3150
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-h2-parent.log": {
+      "sha256": "e0c952f1f85ba14393f31df3f4a8cf00eccb25af6a2a840eb2b3c601c2792f36",
+      "bytes": 3150
+    },
+    "/tmp/symaira-fetch773-proxy-uri-independent-h2-parent.py": {
+      "sha256": "33012a9af4452e6f8136bcd6430be9a5c76bf33590b8a9f30f7aff7fcd54109a",
+      "bytes": 1574
+    }
+  }
+}

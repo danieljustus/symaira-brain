@@ -1,0 +1,10 @@
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/agentdom	0.019s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/archive	0.040s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/cache	0.091s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/dom	0.036s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/fetch	0.439s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/pipeline	0.146s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/relevance	0.003s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/render	0.008s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/robots	0.076s
+ok  	github.com/danieljustus/symaira-browse/internal/fetch/semantic	0.017s

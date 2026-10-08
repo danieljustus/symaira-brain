@@ -1,0 +1,15 @@
+{
+  "original_sha256": "e8b8271cef350efa5cd5d8568bc2ac8572163b7eecda76231f1ecd0f80f5cc62",
+  "original_unchanged": true,
+  "reported_go_binary_sha256": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8",
+  "reported_go_vcs_revision": "6c3bf1f93d2760b17f4f936076d26f0f4c00fe1d",
+  "correction": "The runner copied its candidate checkout revision into both identities. This is not Go build provenance. The literal original has not been repaired or accepted as a source-bound value gate.",
+  "original_go_build_metadata_has_vcs": false,
+  "supplemental_only": true,
+  "required_runs": 30,
+  "thresholds_unchanged": {
+    "max_p95_regression_percent": 10,
+    "size_or_median_rss_reduction_percent": 20
+  },
+  "fresh_proof": "New executable digest-bound clean source receipts distinguish frozen Go dcddcef0 from the actual candidate source; no retroactive provenance is invented."
+}

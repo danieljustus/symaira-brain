@@ -1,0 +1,288 @@
+{
+  "total": 8,
+  "passed": 8,
+  "pairs": [
+    {
+      "case": {
+        "id": "password-080",
+        "url": "http://93.184.216.34:080/password",
+        "proxy": "http://user:%ff@127.0.0.1:38417"
+      },
+      "go": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b2242617369632064584e6c636a722f225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "46"
+          ]
+        },
+        "id": "password-080",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:080/password"
+      },
+      "rust": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b2242617369632064584e6c636a722f225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "46"
+          ]
+        },
+        "id": "password-080",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:080/password"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "id": "password-81",
+        "url": "http://93.184.216.34:81/password",
+        "proxy": "http://user:%ff@127.0.0.1:38417"
+      },
+      "go": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b2242617369632064584e6c636a722f225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "46"
+          ]
+        },
+        "id": "password-81",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:81/password"
+      },
+      "rust": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b2242617369632064584e6c636a722f225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "46"
+          ]
+        },
+        "id": "password-81",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:81/password"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "id": "username-080",
+        "url": "http://93.184.216.34:080/username",
+        "proxy": "http://%ff:password@127.0.0.1:38417"
+      },
+      "go": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b224261736963202f7a707759584e7a643239795a413d3d225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "54"
+          ]
+        },
+        "id": "username-080",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:080/username"
+      },
+      "rust": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b224261736963202f7a707759584e7a643239795a413d3d225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "54"
+          ]
+        },
+        "id": "username-080",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:080/username"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "id": "username-81",
+        "url": "http://93.184.216.34:81/username",
+        "proxy": "http://%ff:password@127.0.0.1:38417"
+      },
+      "go": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b224261736963202f7a707759584e7a643239795a413d3d225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "54"
+          ]
+        },
+        "id": "username-81",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:81/username"
+      },
+      "rust": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b224261736963202f7a707759584e7a643239795a413d3d225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "54"
+          ]
+        },
+        "id": "username-81",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:81/username"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "id": "ascii-080",
+        "url": "http://93.184.216.34:080/ascii",
+        "proxy": "http://user:password@127.0.0.1:38417"
+      },
+      "go": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b2242617369632064584e6c636a707759584e7a643239795a413d3d225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "58"
+          ]
+        },
+        "id": "ascii-080",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:080/ascii"
+      },
+      "rust": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b2242617369632064584e6c636a707759584e7a643239795a413d3d225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "58"
+          ]
+        },
+        "id": "ascii-080",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:080/ascii"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "id": "ascii-81",
+        "url": "http://93.184.216.34:81/ascii",
+        "proxy": "http://user:password@127.0.0.1:38417"
+      },
+      "go": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b2242617369632064584e6c636a707759584e7a643239795a413d3d225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "58"
+          ]
+        },
+        "id": "ascii-81",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:81/ascii"
+      },
+      "rust": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b2242617369632064584e6c636a707759584e7a643239795a413d3d225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "58"
+          ]
+        },
+        "id": "ascii-81",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:81/ascii"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "id": "unicode-080",
+        "url": "http://93.184.216.34:080/unicode",
+        "proxy": "http://%C3%A9:%C3%A9@127.0.0.1:38417"
+      },
+      "go": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b2242617369632077366b3677366b3d225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "46"
+          ]
+        },
+        "id": "unicode-080",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:080/unicode"
+      },
+      "rust": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b2242617369632077366b3677366b3d225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "46"
+          ]
+        },
+        "id": "unicode-080",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:080/unicode"
+      },
+      "matched": true
+    },
+    {
+      "case": {
+        "id": "unicode-81",
+        "url": "http://93.184.216.34:81/unicode",
+        "proxy": "http://%C3%A9:%C3%A9@127.0.0.1:38417"
+      },
+      "go": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b2242617369632077366b3677366b3d225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "46"
+          ]
+        },
+        "id": "unicode-81",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:81/unicode"
+      },
+      "rust": {
+        "body_hex": "7b226163636570746564223a747275652c2268656164657273223a5b2242617369632077366b3677366b3d225d7d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "46"
+          ]
+        },
+        "id": "unicode-81",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:81/unicode"
+      },
+      "matched": true
+    }
+  ],
+  "synthetic_expected_credentials_hex": {
+    "password": "757365723aff",
+    "username": "ff3a70617373776f7264",
+    "ascii": "757365723a70617373776f7264",
+    "unicode": "c3a93ac3a9"
+  },
+  "binaries": {
+    "/tmp/symaira-fetch773-second-fix-independent-go-probe": "8e92be70d9b908c11f47720b1bf34c5717b327c246686dbb71e03b336f820786",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/examples/control_probe": "9b20e709f1c29ba2df49d1072bae4a101d038ca0de6dc54702a4f7551f5e726c"
+  }
+}

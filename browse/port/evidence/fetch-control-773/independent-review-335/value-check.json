@@ -1,0 +1,148 @@
+{
+  "source": "e2ecf4026806dd4d9fd219f15f931848b1fd56d9",
+  "samples_recomputed": 240,
+  "sets": [
+    {
+      "side": "go",
+      "workload": "cli",
+      "samples": 30,
+      "p95_ns": 11271009,
+      "median_ns": 6267406
+    },
+    {
+      "side": "go",
+      "workload": "daemon",
+      "samples": 30,
+      "p95_ns": 20609326,
+      "median_ns": 20496841
+    },
+    {
+      "side": "go",
+      "workload": "fetch",
+      "samples": 30,
+      "p95_ns": 2292506,
+      "median_ns": 1199774
+    },
+    {
+      "side": "go",
+      "workload": "mcp",
+      "samples": 30,
+      "p95_ns": 8068648,
+      "median_ns": 6593856
+    },
+    {
+      "side": "rust",
+      "workload": "cli",
+      "samples": 30,
+      "p95_ns": 3724401,
+      "median_ns": 2690912
+    },
+    {
+      "side": "rust",
+      "workload": "daemon",
+      "samples": 30,
+      "p95_ns": 20434001,
+      "median_ns": 20318536
+    },
+    {
+      "side": "rust",
+      "workload": "fetch",
+      "samples": 30,
+      "p95_ns": 939039,
+      "median_ns": 561820
+    },
+    {
+      "side": "rust",
+      "workload": "mcp",
+      "samples": 30,
+      "p95_ns": 4250475,
+      "median_ns": 2799492
+    }
+  ],
+  "load_observations": 17,
+  "load_receipt_sha256": "6142b13f9eae87f92765bc231d014e510e1d6e4480129a0cee980d285e9e3eb6",
+  "current_size_bytes": {
+    "go": 26611127,
+    "rust": 10707264
+  },
+  "unchanged_comparator": {
+    "schema_version": 2,
+    "gate": "pass",
+    "workloads": {
+      "cli": {
+        "p95_change_percent": -66.95592204744048
+      },
+      "mcp": {
+        "p95_change_percent": -47.32110013970122
+      },
+      "daemon": {
+        "p95_change_percent": -0.8507071022118784
+      },
+      "fetch": {
+        "p95_change_percent": -59.03875496945265,
+        "hard_gate": "<=10%"
+      }
+    },
+    "reasons": [],
+    "size_reduction_percent": 41.587606119778954
+  },
+  "cost_pairs": 120,
+  "cost": [
+    {
+      "scheme": "http",
+      "port": "81",
+      "side": "go",
+      "connections": 1,
+      "later_response_median_ms": 0.1997719999999994
+    },
+    {
+      "scheme": "http",
+      "port": "81",
+      "side": "rust",
+      "connections": 1,
+      "later_response_median_ms": 0.7141190000000002
+    },
+    {
+      "scheme": "http",
+      "port": "080",
+      "side": "go",
+      "connections": 1,
+      "later_response_median_ms": 0.17407299999999992
+    },
+    {
+      "scheme": "http",
+      "port": "080",
+      "side": "rust",
+      "connections": 30,
+      "later_response_median_ms": 0.6329969999999996
+    },
+    {
+      "scheme": "https",
+      "port": "81",
+      "side": "go",
+      "connections": 1,
+      "later_response_median_ms": 0.23255100000000084
+    },
+    {
+      "scheme": "https",
+      "port": "81",
+      "side": "rust",
+      "connections": 1,
+      "later_response_median_ms": 0.6037929999999996
+    },
+    {
+      "scheme": "https",
+      "port": "080",
+      "side": "go",
+      "connections": 1,
+      "later_response_median_ms": 0.2412440000000018
+    },
+    {
+      "scheme": "https",
+      "port": "080",
+      "side": "rust",
+      "connections": 30,
+      "later_response_median_ms": 2.240788000000002
+    }
+  ]
+}

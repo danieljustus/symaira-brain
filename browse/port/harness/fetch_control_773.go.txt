@@ -1,0 +1,73 @@
+// Supplemental actual Go process oracle; not a production or frozen-fixture edit.
+package main
+
+import (
+    "context"
+    "encoding/hex"
+    "encoding/json"
+    "errors"
+    "io"
+    "os"
+    "net/http"
+    "net/url"
+    "strings"
+    "time"
+    "github.com/danieljustus/symaira-browse/internal/fetch/fetch"
+)
+
+type testCase struct {
+    ID string `json:"id"`
+    URL string `json:"url"`
+    Method string `json:"method"`
+    Headers map[string]string `json:"headers"`
+    Body string `json:"body"`
+    UserAgent string `json:"user_agent"`
+    TimeoutMS int64 `json:"timeout_ms"`
+    MaxBody int64 `json:"max_body"`
+    Session string `json:"session"`
+    AllowPrivate *bool `json:"allow_private"`
+    Proxy string `json:"proxy"`
+    RouteOnly bool `json:"route_only"`
+}
+
+func main() {
+    var cases []testCase
+    if err := json.NewDecoder(io.LimitReader(os.Stdin,1<<20)).Decode(&cases); err != nil { panic(err) }
+    client, err := fetch.New(fetch.ProfileHonest,fetch.WithTimeout(1))
+    if err != nil { panic(err) }
+    defer client.Close()
+    encoder := json.NewEncoder(os.Stdout)
+    for _, c := range cases {
+        if c.RouteOnly {
+            parsed, err := url.Parse(c.URL); if err != nil { panic(err) }
+            route, err := http.ProxyFromEnvironment(&http.Request{URL:parsed})
+            result := map[string]any{"id":c.ID,"error":"","route":""}
+            if err != nil { result=map[string]any{"id":c.ID,"error":"transport","detail":err.Error()} } else if route != nil { result["route"]=route.String() }
+            // URL rendering is normalized by the Python comparator; Go keeps an absent path.
+            if err := encoder.Encode(result); err != nil { panic(err) }; continue
+        }
+        allowPrivate := true
+        if c.AllowPrivate != nil { allowPrivate = *c.AllowPrivate }
+        response, err := client.Fetch(context.Background(), fetch.Request{URL:c.URL,Method:c.Method,
+            Headers:c.Headers,Body:[]byte(c.Body),UserAgent:c.UserAgent,Timeout:time.Duration(c.TimeoutMS)*time.Millisecond,
+            MaxBody:c.MaxBody,Session:c.Session,AllowPrivate:allowPrivate,Proxy:c.Proxy})
+        result := map[string]any{"id":c.ID,"error":""}
+        if err != nil {
+            kind := "transport"
+            var large *fetch.ErrTooLarge
+            switch {
+            case errors.Is(err,context.DeadlineExceeded):kind="timeout"
+            case errors.As(err,&large):kind="too_large"
+            case strings.Contains(err.Error(),"too many redirects"):kind="redirect"
+            case strings.Contains(err.Error(),"build request:"):kind="invalid_request"
+            }
+            result["error"]=kind;result["detail"]=err.Error()
+        } else {
+            headers := map[string][]string{}
+            for name, values := range response.Headers { headers[strings.ToLower(name)] = values }
+            result["status"]=response.StatusCode;result["url"]=response.FinalURL
+            result["body_hex"]=hex.EncodeToString(response.Body);result["headers"]=headers;result["protocol"]=response.Protocol
+        }
+        if err := encoder.Encode(result); err != nil { panic(err) }
+    }
+}

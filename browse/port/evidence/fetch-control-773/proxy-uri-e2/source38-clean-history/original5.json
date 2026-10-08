@@ -1,0 +1,187 @@
+{
+  "candidate_head": "38e11d8560dc515811e92fddde1d16c7c96c2055",
+  "observations": [
+    {
+      "id": "proxy-target-port-80",
+      "input": {
+        "id": "proxy-target-port-80",
+        "url": "http://93.184.216.34:80/path",
+        "method": "GET",
+        "proxy": "http://127.0.0.1:36005"
+      },
+      "go": {
+        "body_hex": "7b22686f7374223a2239332e3138342e3231362e33343a3830222c22726571756573745f746172676574223a22687474703a2f2f39332e3138342e3231362e33343a38302f70617468227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "75"
+          ]
+        },
+        "id": "proxy-target-port-80",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:80/path"
+      },
+      "rust": {
+        "body_hex": "7b22686f7374223a2239332e3138342e3231362e33343a3830222c22726571756573745f746172676574223a22687474703a2f2f39332e3138342e3231362e33343a38302f70617468227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "75"
+          ]
+        },
+        "id": "proxy-target-port-80",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:80/path"
+      },
+      "equal": true
+    },
+    {
+      "id": "proxy-target-port-080",
+      "input": {
+        "id": "proxy-target-port-080",
+        "url": "http://93.184.216.34:080/path",
+        "method": "GET",
+        "proxy": "http://127.0.0.1:36005"
+      },
+      "go": {
+        "body_hex": "7b22686f7374223a2239332e3138342e3231362e33343a303830222c22726571756573745f746172676574223a22687474703a2f2f39332e3138342e3231362e33343a3038302f70617468227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "77"
+          ]
+        },
+        "id": "proxy-target-port-080",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:080/path"
+      },
+      "rust": {
+        "body_hex": "7b22686f7374223a2239332e3138342e3231362e33343a303830222c22726571756573745f746172676574223a22687474703a2f2f39332e3138342e3231362e33343a3038302f70617468227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "77"
+          ]
+        },
+        "id": "proxy-target-port-080",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:080/path"
+      },
+      "equal": true
+    },
+    {
+      "id": "proxy-target-port-00080",
+      "input": {
+        "id": "proxy-target-port-00080",
+        "url": "http://93.184.216.34:00080/path",
+        "method": "GET",
+        "proxy": "http://127.0.0.1:36005"
+      },
+      "go": {
+        "body_hex": "7b22686f7374223a2239332e3138342e3231362e33343a3030303830222c22726571756573745f746172676574223a22687474703a2f2f39332e3138342e3231362e33343a30303038302f70617468227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "81"
+          ]
+        },
+        "id": "proxy-target-port-00080",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:00080/path"
+      },
+      "rust": {
+        "body_hex": "7b22686f7374223a2239332e3138342e3231362e33343a3030303830222c22726571756573745f746172676574223a22687474703a2f2f39332e3138342e3231362e33343a30303038302f70617468227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "81"
+          ]
+        },
+        "id": "proxy-target-port-00080",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:00080/path"
+      },
+      "equal": true
+    },
+    {
+      "id": "proxy-target-port-81",
+      "input": {
+        "id": "proxy-target-port-81",
+        "url": "http://93.184.216.34:81/path",
+        "method": "GET",
+        "proxy": "http://127.0.0.1:36005"
+      },
+      "go": {
+        "body_hex": "7b22686f7374223a2239332e3138342e3231362e33343a3831222c22726571756573745f746172676574223a22687474703a2f2f39332e3138342e3231362e33343a38312f70617468227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "75"
+          ]
+        },
+        "id": "proxy-target-port-81",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:81/path"
+      },
+      "rust": {
+        "body_hex": "7b22686f7374223a2239332e3138342e3231362e33343a3831222c22726571756573745f746172676574223a22687474703a2f2f39332e3138342e3231362e33343a38312f70617468227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "75"
+          ]
+        },
+        "id": "proxy-target-port-81",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:81/path"
+      },
+      "equal": true
+    },
+    {
+      "id": "proxy-target-port-00081",
+      "input": {
+        "id": "proxy-target-port-00081",
+        "url": "http://93.184.216.34:00081/path",
+        "method": "GET",
+        "proxy": "http://127.0.0.1:36005"
+      },
+      "go": {
+        "body_hex": "7b22686f7374223a2239332e3138342e3231362e33343a3030303831222c22726571756573745f746172676574223a22687474703a2f2f39332e3138342e3231362e33343a30303038312f70617468227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "81"
+          ]
+        },
+        "id": "proxy-target-port-00081",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:00081/path"
+      },
+      "rust": {
+        "body_hex": "7b22686f7374223a2239332e3138342e3231362e33343a3030303831222c22726571756573745f746172676574223a22687474703a2f2f39332e3138342e3231362e33343a30303038312f70617468227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "81"
+          ]
+        },
+        "id": "proxy-target-port-00081",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34:00081/path"
+      },
+      "equal": true
+    }
+  ],
+  "passed": 5,
+  "failed": 0
+}

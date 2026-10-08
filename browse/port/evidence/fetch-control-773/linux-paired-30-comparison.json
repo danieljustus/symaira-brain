@@ -1,0 +1,21 @@
+{
+  "schema_version": 2,
+  "gate": "pass",
+  "workloads": {
+    "cli": {
+      "p95_change_percent": -52.180354767961546
+    },
+    "mcp": {
+      "p95_change_percent": -50.2885591216569
+    },
+    "daemon": {
+      "p95_change_percent": -2.343631013373726
+    },
+    "fetch": {
+      "p95_change_percent": -63.857141021632714,
+      "hard_gate": "<=10%"
+    }
+  },
+  "reasons": [],
+  "size_reduction_percent": 42.2961096570049
+}

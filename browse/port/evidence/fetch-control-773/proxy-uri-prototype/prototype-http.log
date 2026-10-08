@@ -1,0 +1,12 @@
+fragment-automatic-referer False
+go {"body_hex": "7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b223132372e302e302e313a3433303831225d2c2272656665726572223a5b22687474703a2f2f3132372e302e302e313a34333038312f72656469726563742d617574686f726974793f7461726765743d2532466563686f2d617574686f7269747923707269766174652d667261676d656e74225d7d2c226d6574686f64223a22474554227d", "error": "", "headers": {"content-length": ["163"], "content-type": ["text/plain; charset=utf-8"]}, "id": "fragment-automatic-referer", "protocol": "HTTP/1.1", "status": 200, "url": "http://127.0.0.1:43081/echo-authority"}
+go decoded {"body":"","headers":{"host":["127.0.0.1:43081"],"referer":["http://127.0.0.1:43081/redirect-authority?target=%2Fecho-authority#private-fragment"]},"method":"GET"}
+rust {"body_hex": "7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b223132372e302e302e313a3433303831225d2c2272656665726572223a5b22687474703a2f2f3132372e302e302e313a34333038312f72656469726563742d617574686f726974793f7461726765743d2532466563686f2d617574686f72697479225d7d2c226d6574686f64223a22474554227d", "error": "", "headers": {"content-length": ["146"], "content-type": ["text/plain; charset=utf-8"]}, "id": "fragment-automatic-referer", "protocol": "HTTP/1.1", "status": 200, "url": "http://127.0.0.1:43081/echo-authority"}
+rust decoded {"body":"","headers":{"host":["127.0.0.1:43081"],"referer":["http://127.0.0.1:43081/redirect-authority?target=%2Fecho-authority"]},"method":"GET"}
+fragment-explicit-referer True
+userinfo-same-host True
+userinfo-cross-host True
+redirect-host-header True
+direct-host-header True
+head-to-get302 True
+lowercase-method302 True

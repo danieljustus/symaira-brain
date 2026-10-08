@@ -15,6 +15,7 @@ pub mod render;
 mod retry;
 pub mod robots;
 pub mod semantic;
+mod types;
 
 pub use client::{
     BodyTooLarge, Client, ClientOptions, FetchClient, FetchError, Profile, Request, Response,

@@ -1,0 +1,77 @@
+{
+  "candidate_revision": "a0732ec57357fd0e1a60dbf1ca5f8c42d8c59c41",
+  "source_revision": "8973726d531a946a6e4a041f0e590b9a16407bbe",
+  "dirty": false,
+  "verdict": "request_changes",
+  "findings": 3,
+  "fresh_full_corpus": {
+    "total": 231,
+    "actual_http": 64,
+    "route_only": 167,
+    "matched": 231
+  },
+  "fresh_real_negative_controls": 5,
+  "original_extra_routing_fresh_matches": 70,
+  "original_extra_routing_cases": 70,
+  "original_extra_gzip_fresh_matches": 3,
+  "original_extra_gzip_cases": 3,
+  "additional_routing_cases": 10,
+  "additional_routing_matches": 3,
+  "cache_collision_actual_http_cases": 2,
+  "cache_collision_matches": 1,
+  "independently_executed_parent_tests": 117,
+  "independently_executed_parent_ignored": 1,
+  "independently_executed_direct_ignored_child_tests": 7,
+  "authored_parent_counts_separately_verified": {
+    "passed": 117,
+    "ignored": 1,
+    "summaries": 24,
+    "fetch_package_passed": 49
+  },
+  "candidate_source_hash_count": 28,
+  "harness_workflow_hash_count": 9,
+  "frozen_go_hash_count": 415,
+  "rust_build_source_hash_count": 146,
+  "paired_samples_verified": 240,
+  "paired_comparator": "passed unchanged gate",
+  "paired_measurements_rerun": false,
+  "fresh_identity_tests": 4,
+  "fresh_rust_test_run_initial_tooling_error": "Initial direct test-binary driver omitted pinned Go SDK PATH; help_oracle attempted the unrelated system Go executable and failed Go: Unknown option: build. The unchanged source/binary rerun with Go1.26.7 PATH and subreaper passes all 117 parents and 7 explicit children.",
+  "first_hash_audit_tooling_error": "First audit used len on the benchmark numeric samples field; corrected audit verifies samples==30 and len(raw_samples)==30.",
+  "native_probe_sha256": "972882b60a0421c5cb974e47d6892792652900ec9c40483a5f725c198f007f0c",
+  "go_probe_sha256": "d52a94fccfa0d07c571f7109c0f43a9771ab6f5b3ea207569f539945bf8c4401",
+  "findings_locations": [
+    {
+      "priority": 2,
+      "path": "browse/crates/symbrowse-fetch/src/honest/proxy.rs",
+      "line": 121,
+      "summary": "Reject signed CIDR prefix grammar before integer parse"
+    },
+    {
+      "priority": 2,
+      "path": "browse/crates/symbrowse-fetch/src/honest/proxy.rs",
+      "line": 60,
+      "summary": "Preserve valid target URL literal port for NO_PROXY routing"
+    },
+    {
+      "priority": 2,
+      "path": "browse/crates/symbrowse-fetch/src/client.rs",
+      "line": 108,
+      "summary": "Use an unambiguous typed transport cache key"
+    }
+  ],
+  "evidence_sha256": {
+    "/tmp/symaira-fetch773-fixed-independent-process.json": "2d2908bd332d0bb04fc44558eb48a0db1cd52f4589d46ccb4dd31c189f2bc2cf",
+    "/tmp/symaira-fetch773-fixed-independent-controls.json": "66b42b26b225ace991c6f42078525950c3b669551106c8f810e620f94a3ef7a0",
+    "/tmp/symaira-fetch773-fixed-independent-extra-routing.json": "16c707f6acd325923ac2bb294d87d22ef0ee6aa03ed98b5ace6f515a89f62038",
+    "/tmp/symaira-fetch773-fixed-independent-gzip-extra.json": "a7ee7a10d6b74e6fb3a2e960fdc2cfe01ca7e335272dfaef86fbc7a9ba3876e2",
+    "/tmp/symaira-fetch773-fixed-independent-cache-collision.json": "88a4edf602c2ab68132623e408a2e93840e169c00bf3a609b76ea1cd5b93ab6f",
+    "/tmp/symaira-fetch773-fixed-independent-hash-audit.json": "870bbcdf887fd23126d162e7e3b7269daf2cf7fea038cc682c9d4e14e87eacfe",
+    "/tmp/symaira-fetch773-fixed-independent-rust-tests.json": "3805707b61a7181638b73cd4aa0845e824410e16f533702386a62d005261fb27",
+    "/tmp/symaira-fetch773-fixed-independent-paired-comparison.json": "ec68b95ca000e54cdb9fe479a69e1e80d6b1257a9a7f0660e7819fd2aeec537b",
+    "/tmp/symaira-fetch773-fixed-independent-identity-tests.log": "feabb4add9e2ca3374e538560634d1ec97dc4f4ce89aab12f3d726e36ea9b2f6"
+  },
+  "source_or_github_mutations": false,
+  "native_six_target_acceptance": "pending",
+  "full_773_cutover": "pending"
+}

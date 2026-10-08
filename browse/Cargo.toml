@@ -9,6 +9,8 @@ license = "Apache-2.0"
 repository = "https://github.com/danieljustus/symaira-browse"
 
 [workspace.dependencies]
+base64 = "=0.22.1"
+percent-encoding = "=2.3.2"
 aes-gcm = { version = "=0.11.1", features = ["zeroize"] }
 async-tungstenite = { version = "=0.32.1", default-features = false, features = ["tokio-runtime"] }
 chromiumoxide = { version = "=0.9.1", default-features = false }
@@ -20,6 +22,11 @@ futures = "=0.3.34"
 futures-util = { version = "=0.3.34", features = ["sink"] }
 getrandom = "=0.4.3"
 httpdate = "=1.0.3"
+http = "=1.5.0"
+hyper = { version = "=1.11.1", features = ["client", "http1"] }
+hyper-util = { version = "=0.1.20", features = ["tokio"] }
+native-tls = "=0.2.18"
+tokio-native-tls = "=0.3.1"
 html5ever = "=0.39.0"
 markup5ever_rcdom = "=0.39.0"
 rand = "=0.9.5"

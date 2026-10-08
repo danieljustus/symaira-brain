@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any, Sequence
@@ -77,8 +78,15 @@ def main(argv: Sequence[str] | None = None) -> int:
         result["reasons"].append("benchmark report did not pass its paired execution gate")
     for label, value in ((args.reference, reference), (args.candidate, candidate)):
         identity = value.get("identity")
-        if not isinstance(identity, dict) or not identity.get("sha256") or not identity.get("vcs_revision"):
+        if not isinstance(identity, dict) or not re.fullmatch(r"[0-9a-f]{64}", str(identity.get("sha256", ""))) or not re.fullmatch(r"[0-9a-f]{40}", str(identity.get("vcs_revision", ""))):
             result["reasons"].append(f"{label} binary identity digest and revision are required")
+            continue
+        receipt = identity.get("build_receipt")
+        if isinstance(receipt, dict):
+            if receipt.get("binary_sha256") != identity["sha256"] or receipt.get("source_revision") != identity["vcs_revision"] or receipt.get("source_clean") is not True or not receipt.get("source_sha256"):
+                result["reasons"].append(f"{label} clean source build receipt is invalid")
+        elif identity.get("vcs_modified") != "false":
+            result["reasons"].append(f"{label} needs embedded clean VCS metadata or a source-bound build receipt")
     comparable = []
     for name in REQUIRED_WORKLOADS:
         left = reference.get(name)

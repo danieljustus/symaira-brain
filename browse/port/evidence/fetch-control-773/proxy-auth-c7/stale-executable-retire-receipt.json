@@ -1,0 +1,558 @@
+{
+  "utc": "2026-10-03T23:35:01.289903+00:00",
+  "source": "c7beb3a7a39dbc10f7e84769fccea5cf20e7f09e",
+  "source_clean": true,
+  "target_users": [],
+  "archive": "/workspace/oracles/symaira-fetch773-335-binaries/actual-executables.tar.gz",
+  "archive_sha256": "a70ef4053c736874374abd7e93480b1501825b0a804ee70fb9cf341486c6de42",
+  "original_plan_sha256": "844bc3ea006b9ca8d538865c54ad9b4d97f12b8dbd467f6fc95c4a2d3216c5b7",
+  "retired": [
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/render_corpus-2569438f7cdd5aa5",
+      "sha256": "ab1b107b2ed3c57c7f3299a82b1a995a68c6e77b330809e1bccd51f362091967",
+      "bytes": 5425968,
+      "inode": 930970,
+      "links": 1,
+      "archive_member": "target/debug/deps/render_corpus-2569438f7cdd5aa5"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/control_contract-dd0e00e1792c55ed",
+      "sha256": "dfffa890deee7d4d6c545f5d5650245e2601e0e7ad6957a69e90b48a02c9a713",
+      "bytes": 2926584,
+      "inode": 931149,
+      "links": 1,
+      "archive_member": "target/debug/deps/control_contract-dd0e00e1792c55ed"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/archive_http-103b280d39f53dbd",
+      "sha256": "381c2ebb15efbd3c420162d4bfb34ff4fa085c95388690bb4776c6f7f7d6ce17",
+      "bytes": 16226544,
+      "inode": 931366,
+      "links": 1,
+      "archive_member": "target/debug/deps/archive_http-103b280d39f53dbd"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/protocol_fixture-9bbb0c6168cf3657",
+      "sha256": "76909a676e820e3b1870e947ef87b990b225ff8d320c6a8e9c1b73f63d1c4557",
+      "bytes": 4400928,
+      "inode": 931408,
+      "links": 1,
+      "archive_member": "target/debug/deps/protocol_fixture-9bbb0c6168cf3657"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/safari_native-e77dc11cfdbbf43f",
+      "sha256": "e7e0741cad6de8a00a4248fec7b6b69af6e1f735264518b9fa8b910a1bd081e3",
+      "bytes": 1079936,
+      "inode": 931348,
+      "links": 1,
+      "archive_member": "target/debug/deps/safari_native-e77dc11cfdbbf43f"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/pipeline_controls-c71aed045a9b0f1f",
+      "sha256": "080a584b25c00160a12dd38800c656674ed4aa33993470bf0b15b12dea993e8c",
+      "bytes": 19144016,
+      "inode": 931332,
+      "links": 1,
+      "archive_member": "target/debug/deps/pipeline_controls-c71aed045a9b0f1f"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/chrome_native-cb6b9437978bca16",
+      "sha256": "b820f532ad54af3434e2eddb0f80656c9c4ec2ec8f67630f0007dc7abaa31efa",
+      "bytes": 1079936,
+      "inode": 931353,
+      "links": 1,
+      "archive_member": "target/debug/deps/chrome_native-cb6b9437978bca16"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/upgrade_check_native-dd0d5df845c5615b",
+      "sha256": "d34893294b3252eefa1c52eb6e9cf0b11c59b1cbdaf459cc4115d48acc58cf05",
+      "bytes": 1910616,
+      "inode": 931385,
+      "links": 1,
+      "archive_member": "target/debug/deps/upgrade_check_native-dd0d5df845c5615b"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/symbrowse_fetch-2c5cbde74afd1853",
+      "sha256": "c70e6f31fabcc556a9a0d044c3736d747c7aafefbf33808ac88efe0d98349557",
+      "bytes": 6100760,
+      "inode": 931331,
+      "links": 1,
+      "archive_member": "target/debug/deps/symbrowse_fetch-2c5cbde74afd1853"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/firefox_native-38c184aae926dc85",
+      "sha256": "16d451bfaf6a095aa7e9cf501ff06f3a24fdfa70b25e7cc075b47b904ebd4edb",
+      "bytes": 1079944,
+      "inode": 931343,
+      "links": 1,
+      "archive_member": "target/debug/deps/firefox_native-38c184aae926dc85"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/flow_list-50661b9d7bdd3a16",
+      "sha256": "4e7cded192936905c98a0e6f0e0d8c26c3d2d51d0dc9804d9bfb35a0ced489d5",
+      "bytes": 1730248,
+      "inode": 931382,
+      "links": 1,
+      "archive_member": "target/debug/deps/flow_list-50661b9d7bdd3a16"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/http-470f5250b23c3ce5",
+      "sha256": "f7424c0a9466f48c3256a5b958ec5234a30b115081372a34ef73b10d53de3cd3",
+      "bytes": 16699752,
+      "inode": 931127,
+      "links": 1,
+      "archive_member": "target/debug/deps/http-470f5250b23c3ce5"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/symbrowse_fetch-48736364b5fe113f",
+      "sha256": "f1be36c233c2dfc9b3c39c461793911317cfb76647326a598a7da1552a652e7f",
+      "bytes": 6044824,
+      "inode": 931051,
+      "links": 1,
+      "archive_member": "target/debug/deps/symbrowse_fetch-48736364b5fe113f"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/symbrowse_fetch-eceab7710c8fc62f",
+      "sha256": "7ee954b2992e3586dede33ef4f08ae8f9821cd661a65df840c32368192157635",
+      "bytes": 6043952,
+      "inode": 931103,
+      "links": 1,
+      "archive_member": "target/debug/deps/symbrowse_fetch-eceab7710c8fc62f"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/render_corpus-d671a0b9acc51fe5",
+      "sha256": "b414b91307d9f0c48afda993203c5ed633894ce1b5fa4d83d437372b39f3d092",
+      "bytes": 5425336,
+      "inode": 931093,
+      "links": 1,
+      "archive_member": "target/debug/deps/render_corpus-d671a0b9acc51fe5"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/retry-8927adb9323cb9e9",
+      "sha256": "a9d013da2e4e076b4750ee94681ce293454c0e19df6b8e46031c2b8f66690747",
+      "bytes": 3418952,
+      "inode": 930947,
+      "links": 1,
+      "archive_member": "target/debug/deps/retry-8927adb9323cb9e9"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/retry-f6726928a63a373f",
+      "sha256": "6aa917fd95b387ba29f8c54fc9c0fbbb18c57999099f560d73730cbdd00c7708",
+      "bytes": 3410656,
+      "inode": 931139,
+      "links": 1,
+      "archive_member": "target/debug/deps/retry-f6726928a63a373f"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/lifecycle-8208ab30333fbffe",
+      "sha256": "35dc6094645f55b2a59694a5b53ffdf79f85fa06aa0a1a6ee08513ca90773007",
+      "bytes": 51158776,
+      "inode": 931144,
+      "links": 1,
+      "archive_member": "target/debug/deps/lifecycle-8208ab30333fbffe"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/cancellation-135d578dbded69f4",
+      "sha256": "52c16ad23a8273d691244060619edf02bb0c9ccc307ab3bf6774d83b2781d203",
+      "bytes": 51128952,
+      "inode": 931371,
+      "links": 1,
+      "archive_member": "target/debug/deps/cancellation-135d578dbded69f4"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/http-2d7df58b243fc05f",
+      "sha256": "c14cbf8f0d03352d09c2c52700e391ec76d9e67a6406b44f061344ede740cdda",
+      "bytes": 16745296,
+      "inode": 931028,
+      "links": 1,
+      "archive_member": "target/debug/deps/http-2d7df58b243fc05f"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/platform-da6712009c52538e",
+      "sha256": "97af1e4189fcaadd97f86649214ff7bd140a06fe0e7d922082fa1f9632e0009a",
+      "bytes": 1079880,
+      "inode": 931346,
+      "links": 1,
+      "archive_member": "target/debug/deps/platform-da6712009c52538e"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/static_controls-741c15f0991467ec",
+      "sha256": "b3094a706b34288773a82f1e1b12b60a5779c0feda9185d2ebd0ce2c3c862c68",
+      "bytes": 5418392,
+      "inode": 931136,
+      "links": 1,
+      "archive_member": "target/debug/deps/static_controls-741c15f0991467ec"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/robots-c6a5b6456e0c53e8",
+      "sha256": "158ee82e663e5f6992b2c8fb1736bf408705105751d9fa91c3522042ff413eba",
+      "bytes": 11586944,
+      "inode": 930963,
+      "links": 1,
+      "archive_member": "target/debug/deps/robots-c6a5b6456e0c53e8"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/proxy_uri-9c8bfbf10af07d9b",
+      "sha256": "e27bb4c5c505c1e46fe2047083881962e7ecfa7618f979c1625c5a0fcd376934",
+      "bytes": 15995760,
+      "inode": 931137,
+      "links": 1,
+      "archive_member": "target/debug/deps/proxy_uri-9c8bfbf10af07d9b"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/proxy_uri-8cccfec45eee3664",
+      "sha256": "bf075ccfb2894645d10ed843d80f46ac74f13704560ff9c1c9315f4d6387033f",
+      "bytes": 15971456,
+      "inode": 931101,
+      "links": 1,
+      "archive_member": "target/debug/deps/proxy_uri-8cccfec45eee3664"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/robots-705f594f47e74fd7",
+      "sha256": "81b5cece17b8fc5cac08f1cbf9084ac689fe759ba92c2af9cea79bd083f57f19",
+      "bytes": 11586136,
+      "inode": 931083,
+      "links": 1,
+      "archive_member": "target/debug/deps/robots-705f594f47e74fd7"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/pipeline_controls-4bce7a07bc262814",
+      "sha256": "5836889f76f6496144f600ba8e21221ffd913191881ea844fbc22667faa0c222",
+      "bytes": 19063608,
+      "inode": 930978,
+      "links": 1,
+      "archive_member": "target/debug/deps/pipeline_controls-4bce7a07bc262814"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/profiles-9f86790ff46d3fb0",
+      "sha256": "fa21a4b2ca7a76c3d4d4ca1749bba3ef9e2ce09ab3fd945d1edb748a3d7e667c",
+      "bytes": 1841696,
+      "inode": 931384,
+      "links": 1,
+      "archive_member": "target/debug/deps/profiles-9f86790ff46d3fb0"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/symbrowse-8f3b4825c2672b17",
+      "sha256": "0bf5df864255c8526f089eafa96b15dbd3f1e512091fb9c6815b5d07c03f2b46",
+      "bytes": 16845304,
+      "inode": 931436,
+      "links": 1,
+      "archive_member": "target/debug/deps/symbrowse-8f3b4825c2672b17"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/control_contract-cd5376cbd0f7aeff",
+      "sha256": "524a7763efdb7f78073a447a5aef99562a606ba79606980ac9bc90148e9788d9",
+      "bytes": 2955960,
+      "inode": 931344,
+      "links": 1,
+      "archive_member": "target/debug/deps/control_contract-cd5376cbd0f7aeff"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/help_oracle-6f27e57768b479ed",
+      "sha256": "a3c79cca080fc4e7157cab0a2efc01fff998f8101bd18405750a01e4571fc71f",
+      "bytes": 1705240,
+      "inode": 931388,
+      "links": 1,
+      "archive_member": "target/debug/deps/help_oracle-6f27e57768b479ed"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/retry-18659cb3378a6e7d",
+      "sha256": "322ddeb05893f93fe725d1ce134d6d863afe590aafb9550e158245db0d296687",
+      "bytes": 3419664,
+      "inode": 931027,
+      "links": 1,
+      "archive_member": "target/debug/deps/retry-18659cb3378a6e7d"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/control_contract-5ba9fd8511eead67",
+      "sha256": "d9158a11d97293120a00d98c7f52d9e4ddc3ce9a1a15443a8ff8f9bed074e40f",
+      "bytes": 2927368,
+      "inode": 931052,
+      "links": 1,
+      "archive_member": "target/debug/deps/control_contract-5ba9fd8511eead67"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/static_controls-9acccd514b6e45a5",
+      "sha256": "0a56e5f2d119c6bcbca3ce99ada22c36d2052cb1db7a380eef1b6c36c62f4f1c",
+      "bytes": 5228832,
+      "inode": 930922,
+      "links": 1,
+      "archive_member": "target/debug/deps/static_controls-9acccd514b6e45a5"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/archive_http-bf569b25a77ba308",
+      "sha256": "3057ff10647ab97b24a8170dfb38edfd417a6ea53c0060633dcb0f29725cb4cc",
+      "bytes": 16255864,
+      "inode": 931030,
+      "links": 1,
+      "archive_member": "target/debug/deps/archive_http-bf569b25a77ba308"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/version-1910a0aefad97c3f",
+      "sha256": "6b8fe4f1bce91978e8480c82656e05697ceb63cdda3baa3dcb3c385ce9486cad",
+      "bytes": 1155952,
+      "inode": 931379,
+      "links": 1,
+      "archive_member": "target/debug/deps/version-1910a0aefad97c3f"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/symbrowse-15e3ca0ef8ed756d",
+      "sha256": "33f77441e50fb73cb8f1d42543cf9055d032c1ed07389a52c7f5045bf0815750",
+      "bytes": 53637432,
+      "inode": 931411,
+      "links": 1,
+      "archive_member": "target/debug/deps/symbrowse-15e3ca0ef8ed756d"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/cache_identity-8b2d3f5989adb2eb",
+      "sha256": "e0c2aada1c19151564d997a555ea881443ba5513f9d2a62abdd78d2a6bf630c6",
+      "bytes": 15712968,
+      "inode": 931108,
+      "links": 1,
+      "archive_member": "target/debug/deps/cache_identity-8b2d3f5989adb2eb"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/proxy_uri-290989dd852aa165",
+      "sha256": "fc31b616ed895c4a2cd847acfc422a47d9b346ed792b025b8186d86c011c75c0",
+      "bytes": 16016960,
+      "inode": 931074,
+      "links": 1,
+      "archive_member": "target/debug/deps/proxy_uri-290989dd852aa165"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/cache_identity-957aa8d7459cfa30",
+      "sha256": "976f9425a89830d510f19c5a853abab2a8f17bc203e3841e0670b40411db2c44",
+      "bytes": 15734224,
+      "inode": 931033,
+      "links": 1,
+      "archive_member": "target/debug/deps/cache_identity-957aa8d7459cfa30"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/static_controls-d63ede6e8597eb5f",
+      "sha256": "d99fad9a2902fc95657e282b7364aaf8b5212a22e277c6a45c43f1ef75a09472",
+      "bytes": 5229552,
+      "inode": 930954,
+      "links": 1,
+      "archive_member": "target/debug/deps/static_controls-d63ede6e8597eb5f"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/archive_http-800ad53c69e325f7",
+      "sha256": "8a7f5145b0111fbc78037272fe69bee5234a6f172c9cfa252b6c6b03a2530e4a",
+      "bytes": 16210384,
+      "inode": 931121,
+      "links": 1,
+      "archive_member": "target/debug/deps/archive_http-800ad53c69e325f7"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/pipeline_controls-d49e1846f4d0ae3c",
+      "sha256": "0e1890908cdb67fc6c589bcef054d5f4045ea60a3f72cc1f9fc91af8ec5ad868",
+      "bytes": 19017800,
+      "inode": 931109,
+      "links": 1,
+      "archive_member": "target/debug/deps/pipeline_controls-d49e1846f4d0ae3c"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/render_corpus-f2a9a860335a4268",
+      "sha256": "d53340d61b20e14b65521ca003b5aba18727dd04eff7674595afb2e91e8a7526",
+      "bytes": 5556912,
+      "inode": 931350,
+      "links": 1,
+      "archive_member": "target/debug/deps/render_corpus-f2a9a860335a4268"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/http-d998ddc179aae314",
+      "sha256": "742b878c1945ad5dfb1d349539d8a73434cd1468a4f765004d91af2a106ff602",
+      "bytes": 16707616,
+      "inode": 931340,
+      "links": 1,
+      "archive_member": "target/debug/deps/http-d998ddc179aae314"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/cache_identity-8909c87b25f87ad4",
+      "sha256": "44c9436398d2c6abe3a9a5f6c46f04f971cf28f531dd9faf8d75c9ddc68244ea",
+      "bytes": 15688792,
+      "inode": 931086,
+      "links": 1,
+      "archive_member": "target/debug/deps/cache_identity-8909c87b25f87ad4"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/robots-d9be93c07a2f7395",
+      "sha256": "56b75f128f5a71e8eb1ea9e2f42c21816bb2ecd2ce42c28e146aaccdcc5d2bc4",
+      "bytes": 11625968,
+      "inode": 931166,
+      "links": 1,
+      "archive_member": "target/debug/deps/robots-d9be93c07a2f7395"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/symbrowse_daemon-930efd900095d5c5",
+      "sha256": "df49a8b124fb9054b7f6643f1dd3102d36c8eebfcf2643348886181842641ded",
+      "bytes": 51059296,
+      "inode": 931395,
+      "links": 1,
+      "archive_member": "target/debug/deps/symbrowse_daemon-930efd900095d5c5"
+    }
+  ],
+  "preserved_dependencies": [
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libdisplaydoc-6c6768d3ecddb761.so",
+      "sha256": "28b47482e0c128b4ea7c364ec204216648b69e7fad6e9a59220c6d08445bab53",
+      "bytes": 3630912,
+      "inode": 958627,
+      "links": 1,
+      "archive_member": "target/debug/deps/libdisplaydoc-6c6768d3ecddb761.so"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libzerofrom_derive-79252203437eed57.so",
+      "sha256": "2d42c0052c65304af9bebdaf7efa9de8ae88cc2f9463732257ce0f98604a4804",
+      "bytes": 4705448,
+      "inode": 958659,
+      "links": 1,
+      "archive_member": "target/debug/deps/libzerofrom_derive-79252203437eed57.so"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libtracing_attributes-de8faa5ee62d3573.so",
+      "sha256": "41d042c33bada7331323371f7293964915533745c0b6ffc05813529bc0d6d892",
+      "bytes": 4398672,
+      "inode": 966456,
+      "links": 1,
+      "archive_member": "target/debug/deps/libtracing_attributes-de8faa5ee62d3573.so"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libfutures_macro-50e5ccb384c8f66c.so",
+      "sha256": "5cf714d06ca241c07d87ddbb3915ffecbe99a1fcf66e92035f4bd36d59dd6402",
+      "bytes": 3196664,
+      "inode": 958984,
+      "links": 1,
+      "archive_member": "target/debug/deps/libfutures_macro-50e5ccb384c8f66c.so"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libopenssl_macros-1e84a3c26c3dba10.so",
+      "sha256": "cfa6cdb5bbee22f016a5c4c20df03b87ebf6d2b1c51f4f45afbb7ac48698d990",
+      "bytes": 2885608,
+      "inode": 966461,
+      "links": 1,
+      "archive_member": "target/debug/deps/libopenssl_macros-1e84a3c26c3dba10.so"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libserde_derive-28a78b73c7aa6e1d.so",
+      "sha256": "d110f25b57ba6835744ee5eba7538ee3a242ae3bf249b2a672bc90b6d0a917c2",
+      "bytes": 5048992,
+      "inode": 958718,
+      "links": 1,
+      "archive_member": "target/debug/deps/libserde_derive-28a78b73c7aa6e1d.so"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libyoke_derive-b6ba32d8ac2730d3.so",
+      "sha256": "d6a22b99628aeda17f48e35878ed1939c055de4586983defcdda47fb7e39960a",
+      "bytes": 4327208,
+      "inode": 966424,
+      "links": 1,
+      "archive_member": "target/debug/deps/libyoke_derive-b6ba32d8ac2730d3.so"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libopenssl_macros-ba89a7b339fb5470.so",
+      "sha256": "5112905b095fbf63042341e6ec817a4f878206f5f86ed96d3bc5f97cb5e20471",
+      "bytes": 2885552,
+      "inode": 959128,
+      "links": 1,
+      "archive_member": "target/debug/deps/libopenssl_macros-ba89a7b339fb5470.so"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libyoke_derive-be07d130dae8477e.so",
+      "sha256": "ee03867ce3d3a7e85338ecc4d6026de58241b3fa32a1a346bef3935b32d077a8",
+      "bytes": 4327208,
+      "inode": 958660,
+      "links": 1,
+      "archive_member": "target/debug/deps/libyoke_derive-be07d130dae8477e.so"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libdocument_features-dbaaee733906dbee.so",
+      "sha256": "7f9f81b5e2a152f4296dc6bd4687f8de6578100c1d76d2efb9beb639367c2d81",
+      "bytes": 1006952,
+      "inode": 959491,
+      "links": 1,
+      "archive_member": "target/debug/deps/libdocument_features-dbaaee733906dbee.so"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libdoctest_file-299425a01276dcbc.so",
+      "sha256": "3edf8eb5f8ef9a0fd9931e0fb5a8d87e5d9cd27ec8e9fea7d33d95bb4f3c26ab",
+      "bytes": 699560,
+      "inode": 966575,
+      "links": 1,
+      "archive_member": "target/debug/deps/libdoctest_file-299425a01276dcbc.so"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libzerovec_derive-d4deca73499a36fb.so",
+      "sha256": "ae7478a4848c8a343a43999cc22e6be4b888d8a16075a212eff377ff3fd153e4",
+      "bytes": 3919792,
+      "inode": 958618,
+      "links": 1,
+      "archive_member": "target/debug/deps/libzerovec_derive-d4deca73499a36fb.so"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libzerofrom_derive-02ea84dc86ea0158.so",
+      "sha256": "d8585e6bb5111472e0691f5bb55f0d5fa4abee174e2d2f9f664bfb9d36d91a9d",
+      "bytes": 4705552,
+      "inode": 966444,
+      "links": 1,
+      "archive_member": "target/debug/deps/libzerofrom_derive-02ea84dc86ea0158.so"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libtime_macros-d2fe0fb092e1da59.so",
+      "sha256": "5950d9a7eae452e3673e19d355ec778d8f8282e0872aa8387ef6902bc1a0497d",
+      "bytes": 1467016,
+      "inode": 959109,
+      "links": 1,
+      "archive_member": "target/debug/deps/libtime_macros-d2fe0fb092e1da59.so"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libthiserror_impl-cb6888054e25bdc6.so",
+      "sha256": "9327b5eaa8249dfc4dee6286b570caeaa3015954c90415a9d6cc48f9e327555a",
+      "bytes": 4039936,
+      "inode": 966473,
+      "links": 1,
+      "archive_member": "target/debug/deps/libthiserror_impl-cb6888054e25bdc6.so"
+    },
+    {
+      "path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/libtokio_macros-8f1368bdeaf68738.so",
+      "sha256": "5c25fa0b169eb216f51991c52f8e1accf2c49cb75eaa0a25fb8e3998db02c949",
+      "bytes": 3522248,
+      "inode": 958562,
+      "links": 1,
+      "archive_member": "target/debug/deps/libtokio_macros-8f1368bdeaf68738.so"
+    }
+  ],
+  "classification_correction": "Original64-path plan included16 proc-macro shared libraries because ELF scanning was broader than actual executable-run logs; these were explicitly excluded and remain untouched.48 extensionless archived stale test/CLI paths alone retired.",
+  "retired_nominal_bytes": 596417936,
+  "protected": [
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/archive_http-2fd1a80619a9308b",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/cache_identity-63070f32cc1ebd8d",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/cancellation-90f98d40c518d014",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/chrome_native-89050e69b795152f",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/control_contract-568dd29762fa83d5",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/firefox_native-458ff77b4e5473f4",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/flow_list-55c098acfde44ad2",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/help_oracle-85ef3dfe52783819",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/http-7fd9309bb0ab9e29",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/lifecycle-75ad30ec8b516b5f",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/pipeline_controls-901fdcf757f3ea99",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/platform-8574b02c07bacd8d",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/profiles-25e954cb6e14be40",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/protocol_fixture-e7b7aa2d4422aa3a",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/proxy_uri-4e263d12ae6c9265",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/render_corpus-8ce68c2e1970399b",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/retry-2ee132ec9e6e308e",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/robots-a20b168d7f239604",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/safari_native-6fdd7b32d863b151",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/static_controls-d709ab4d5081066d",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/symbrowse-6cf4b1484e24c00f",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/symbrowse_daemon-219a5e759692cb14",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/symbrowse_fetch-23c0b8db04542bfd",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/upgrade_check_native-0900c73537dcd3cb",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/version-bc26282ce2e7ba95",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/examples/control_probe",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/examples/control_probe-26b433a9eedb7661",
+    "/workspace/symaira-fetch773-proxy-auth/target/debug/symbrowse",
+    "/workspace/symaira-fetch773-proxy-auth/target/release/symbrowse"
+  ]
+}

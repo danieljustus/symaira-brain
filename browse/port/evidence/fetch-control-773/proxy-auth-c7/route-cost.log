@@ -1,0 +1,4 @@
+http 81 {'go': {'accepted_connections': 1, 'process_total_ms': 14.530598}, 'rust': {'accepted_connections': 1, 'process_total_ms': 40.67954}}
+http 080 {'go': {'accepted_connections': 1, 'process_total_ms': 17.062551}, 'rust': {'accepted_connections': 30, 'process_total_ms': 43.789474}}
+https 81 {'go': {'accepted_connections': 1, 'process_total_ms': 21.660693}, 'rust': {'accepted_connections': 1, 'process_total_ms': 30.238686}}
+https 080 {'go': {'accepted_connections': 1, 'process_total_ms': 22.868518}, 'rust': {'accepted_connections': 30, 'process_total_ms': 85.143346}}
