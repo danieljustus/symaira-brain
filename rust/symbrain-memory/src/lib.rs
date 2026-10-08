@@ -22,6 +22,7 @@ mod model;
 mod retrieval;
 mod rows;
 mod schema;
+mod schema_inspection;
 mod search_rows;
 mod store;
 mod wal_open;
@@ -40,6 +41,7 @@ pub use direct_admission::{direct_content_supported, direct_text_supported};
 pub use embedding::{EmbeddingGenerator, GeneratedEmbedding};
 pub use list_rows::{MemoryListRow, RuleRow};
 pub use model::{Memory, SetOptions, Store, StoreError};
+pub use schema_inspection::missing_required_columns;
 pub use search_rows::{SearchHit, SearchRow};
 
 pub use evidence_store::{EvidenceSpan, reparent_memory_evidence_tx, save_memory_evidence_tx};
