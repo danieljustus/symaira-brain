@@ -17,12 +17,16 @@ inconsistent denominator, omitted workspace member, or coverage below 80%
 fails the gate. The CI artifact retains both reports for 14 days. The job
 summary includes each crate, so weak packages remain visible in the aggregate.
 
-The measured baseline is **33,698 / 41,701 lines = 80.80861%**, with 953 passing
-tests and two existing ignored child-harness entrypoints. All 18 workspace
-members are represented. `migration/evidence/coverage-682/linux-baseline.json`
-retains every file summary and aggregate denominator, normalized source paths,
-tool/source provenance and the complete raw report's SHA-256. The full raw
-export also contains execution segments/functions; CI preserves those.
+At the **2026-10-03 baseline commit**
+`dcddcef0df5789123c7c9a7ebe6e01f10e941f2c`, the measured result was
+**33,698 / 41,701 lines = 80.80861%**, with 953 passing tests and two existing
+ignored child-harness entrypoints. All 18 workspace members at that revision are
+represented. `migration/evidence/coverage-682/linux-baseline.json` retains every
+file summary and aggregate denominator, normalized source paths, tool/source
+provenance and the complete raw report's SHA-256. The current root workspace has
+19 packages after `symguard-cli` was added; keep the frozen 18-member baseline
+unchanged and do not read it as the current package count. The full raw export
+also contains execution segments/functions; CI preserves those.
 
 Source filtering uses cargo-llvm-cov's standard exclusions for external
 Rust/toolchain dependencies, generated target files, and integration-test,

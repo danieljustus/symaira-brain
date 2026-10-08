@@ -250,14 +250,23 @@ as its siblings.
 ## Development
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contribution workflow.
-The short version: build and verify before opening a pull request.
+Run these checks from the `browse/` module directory. Browse has no module-local
+Makefile; the repository-root Makefile targets Brain's root Go module and
+excludes Browse from its formatting check. The Browse CI job runs
+`go build ./...` and `go vet ./...`; it omits Browse's Go tests because they can
+exercise live Chrome and network I/O. Run those tests only in a suitable
+environment:
 
 ```sh
-make fmt-check
-make build
-make test
-make lint
+test -z "$(find . -type f -name '*.go' -not -path './.git/*' -exec gofmt -l {} +)"
+go build ./...
+go test ./...
+go test -race ./...
+go vet ./...
 ```
+
+See the [CI workflow](../.github/workflows/ci.yml) for Browse's additional Rust
+build and CLI/MCP smoke checks.
 
 Changes to the default branch are squash-merged only.
 
