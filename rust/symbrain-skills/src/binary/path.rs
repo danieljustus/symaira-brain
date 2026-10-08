@@ -54,8 +54,7 @@ pub(crate) fn join(directory: &Path, program: &Path) -> PathBuf {
                     path.extend_from_slice(&[46, 92]);
                 }
             }
-            Some(58) if volume_len(&path) == path.len() => {}
-            Some(58) => path.push(92),
+            Some(58) => {}
             _ => path.push(92),
         }
     }
@@ -290,7 +289,10 @@ mod tests {
                 r"\\.\UNC\host\share\..\bin",
                 r"\\.\UNC\host\share\bin\symvault",
             ),
-            (r"a\..\c:", r".\c:\symvault"),
+            // Go Join never cleans elements first: `a\..\c:` ends in ':' so no
+            // separator is added, Clean gives `c:symvault`, and postClean
+            // prefixes `.\` because ':' precedes the first separator.
+            (r"a\..\c:", r".\c:symvault"),
             (r"\a\..\??\x", r"\.\??\x\symvault"),
             ("C:/owned//./bin/", r"C:\owned\bin\symvault"),
         ] {
