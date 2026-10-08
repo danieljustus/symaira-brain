@@ -31,6 +31,22 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def checkpoint(output, report):
+    # Cancellation must retain the previous complete raw observation.
+    raw = (json.dumps(report, indent=2) + "\n").encode("utf-8")
+    staged = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=output.parent, prefix=output.name + ".", delete=False) as stream:
+            staged = Path(stream.name)
+            stream.write(raw)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(staged, output)
+    finally:
+        if staged is not None:
+            staged.unlink(missing_ok=True)
+
+
 def terminate(child, report):
     if child.poll() is not None:
         return
@@ -167,7 +183,7 @@ def main():
                 pair = {"id": name, "mcp": data is not None, "variant": selected,
                         "stdin_hex": data.hex() if data else None, "matched": False}
                 report["results"].append(pair)
-                output.write_text(json.dumps(report, indent=2) + "\n")
+                checkpoint(output, report)
                 for flavor in ("go", "rust"):
                     remove_tree(root)
                     shutil.copytree(retained, root, symlinks=True)
@@ -186,17 +202,17 @@ def main():
                         pair["matched"] = False
                         raise
                     finally:
-                        output.write_text(json.dumps(report, indent=2) + "\n")
+                        checkpoint(output, report)
                 try:
                     pair["matched"] = (json_matched(name, pair["go"], pair["rust"], root) if name.startswith("json-")
                                        else matched(pair["go"], pair["rust"], root, data is not None))
                 except Exception as error:
                     pair["comparison_error"] = {"type": type(error).__name__, "message": str(error)}
                     raise
-                output.write_text(json.dumps(report, indent=2) + "\n")
-            denied_pairs(report, lambda: output.write_text(json.dumps(report, indent=2) + "\n"),
+                checkpoint(output, report)
+            denied_pairs(report, lambda: checkpoint(output, report),
                          binaries, root, retained, env, invoke, incoming)
-            output_pairs(report, lambda: output.write_text(json.dumps(report, indent=2) + "\n"),
+            output_pairs(report, lambda: checkpoint(output, report),
                          binaries, root, retained, env, terminate, full_stream)
             assert [row["id"] for row in report["results"]] == report["required_ids"]
             report["total"] = len(report["results"])
@@ -218,7 +234,7 @@ def main():
                 report["controls"].append(control)
                 control["candidate"] = {}
                 mutant = invoke(binaries["rust"], argv, env, root, data, record=control["candidate"])
-                output.write_text(json.dumps(report, indent=2) + "\n")
+                checkpoint(output, report)
                 rejected = not matched(baseline["go"], mutant, root, data is not None)
                 control["rejected"] = rejected
                 assert rejected and mutant["exit"] == (0 if data else 2), "bootstrap failure is not a negative control"
@@ -228,11 +244,11 @@ def main():
                 else:
                     assert not bytes.fromhex(mutant["stdout_hex"])
                     assert bytes.fromhex(mutant["stderr_hex"]), "actual argument rejection diagnostic required"
-            byte_controls(report, lambda: output.write_text(json.dumps(report, indent=2) + "\n"),
+            byte_controls(report, lambda: checkpoint(output, report),
                           binaries, root, retained, env, invoke, incoming, matched, mcp_view)
-            json_controls(report, lambda: output.write_text(json.dumps(report, indent=2) + "\n"),
+            json_controls(report, lambda: checkpoint(output, report),
                           binaries, root, retained, env, invoke, incoming)
-            eof_controls(report, lambda: output.write_text(json.dumps(report, indent=2) + "\n"),
+            eof_controls(report, lambda: checkpoint(output, report),
                          binaries, root, retained, env, invoke, incoming)
             assert report["candidate_sources"] == source_map()
             assert report["binaries"] == {name: {"path": str(path), "sha256": sha(path)} for name, path in binaries.items()}
@@ -241,7 +257,7 @@ def main():
         report.update(status="failed", error={"type": type(error).__name__, "message": str(error)})
         raise
     finally:
-        output.write_text(json.dumps(report, indent=2) + "\n")
+        checkpoint(output, report)
 
 
 if __name__ == "__main__":

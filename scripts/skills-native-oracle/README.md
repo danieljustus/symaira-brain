@@ -92,3 +92,18 @@ captures or erase files/errors from comparisons. The frozen process gate stays
 strict and can still fail where its historical Go behavior conflicts with these
 boundaries. Such failures need separately reviewed corrective-contract evidence;
 a focused test pass is not Linux/macOS/Windows native acceptance.
+
+## Checkpoint publication
+
+Every existing checkpoint retains the same complete raw JSON payload, but is
+written to an owned temporary file beside the report, flushed and synced before
+atomic replacement. Cancellation during publication leaves the last complete
+report readable; it does not turn the unfinished case into a completed case.
+`python scripts/skills-native-oracle/test_checkpoint.py` verifies a failed
+replacement, a real killed writer at the publication boundary, and a successful
+retry. The native workflow runs this check before its process matrix.
+
+The workflow has a bounded 90-minute job budget because the previous 45-minute
+budget cancelled Linux and Windows collection. Twenty-second individual process
+deadlines, every declared case, negative controls, and mismatch failures remain
+unchanged. The native inventories remain 1,112 Unix and 1,070 Windows cases.

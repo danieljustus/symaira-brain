@@ -17,7 +17,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    # Complete native inventories exceeded 45 minutes on Linux and Windows.
+    timeout-minutes: 90
     env:
       CARGO_BUILD_JOBS: "2"
       CARGO_PROFILE_DEV_DEBUG: "0"
@@ -84,6 +85,7 @@ jobs:
           set -euo pipefail
           python scripts/skills-native-oracle/test_fixture_cleanup.py
           python scripts/skills-native-oracle/test_full_stdout.py
+          python scripts/skills-native-oracle/test_checkpoint.py
       - name: Actual owned CLI/MCP differential and input controls
         shell: bash
         run: |
