@@ -29,6 +29,23 @@ impl Store {
         request: &DirectWrite,
         generator: &EmbeddingGenerator,
     ) -> Result<String, StoreError> {
+        self.set_direct_service(
+            request,
+            generator,
+            "symbrain-cli",
+            Some(&request.kind),
+            true,
+        )
+    }
+
+    pub(crate) fn set_direct_service(
+        &self,
+        request: &DirectWrite,
+        generator: &EmbeddingGenerator,
+        source_tool: &str,
+        kind: Option<&str>,
+        audit_enabled: bool,
+    ) -> Result<String, StoreError> {
         if !crate::direct_content_supported(&request.content)
             || request
                 .metadata
@@ -37,7 +54,8 @@ impl Store {
             || (!request.staged && request.conflict_enabled)
             || !["", "global", "project", "agent", "user", "session"]
                 .contains(&request.scope.as_str())
-            || !["user", "feedback", "project", "reference"].contains(&request.kind.as_str())
+            || kind
+                .is_some_and(|kind| !["user", "feedback", "project", "reference"].contains(&kind))
         {
             return Err(StoreError::Invalid(
                 "direct CLI write requires the delegated Go pipeline".into(),
@@ -46,7 +64,7 @@ impl Store {
         let observed_at = Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string();
         let mut metadata: BTreeMap<String, String> = [
             ("source_type", "direct"),
-            ("source_tool", "symbrain-cli"),
+            ("source_tool", source_tool),
             ("source_uri", ""),
             ("authority", "direct"),
             ("confidence", "high"),
@@ -87,21 +105,27 @@ impl Store {
         let id = crate::write::new_uuid();
         let created_at = timestamp();
         let conn = self.lock()?;
+        // Go preserves Prepare creation time and observes Save update time.
+        let updated_at = timestamp();
         conn.execute(
             "INSERT INTO memories(id,content,scope,metadata,embedding,embedding_binary,embedding_dim,embedding_source,embedding_model,embedding_quantization,content_hash,lsh_hash,created_at,updated_at,created_by,updated_by,created_session,updated_session,consolidation_status,consolidated_into_id,importance,valid_from,valid_to,superseded_by,tier,expires_at,access_count,last_access,prev_access,review_status,kind,decay_factor,retired_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'','','raw',NULL,0,?,NULL,NULL,'long_term',NULL,1,NULL,NULL,'approved','',1,NULL)",
             params![id, request.content, scope, metadata, embedding_json(&embedding.vector), binary,
                 i64::try_from(embedding.vector.len()).unwrap_or(768), embedding.source, model, "",
                 crate::write::content_hash(&request.content), crate::lsh::compute_lsh(&embedding.vector).map_err(StoreError::Invalid)?,
-                created_at, created_at, request.author, request.author, valid_from],
+                created_at, updated_at, request.author, request.author, valid_from],
         ).map_err(|error| StoreError::Invalid(format!("failed to save memory: {error}")))?;
-        audit(&conn, "set", &id, scope, "", &request.author, "");
+        if audit_enabled {
+            audit(&conn, "set", &id, scope, "", &request.author, "");
+        }
         crate::cli_entity::link(&conn, &id, &request.entities, &request.author);
-        let affected = conn.execute(
-            "UPDATE memories SET kind=?,updated_at=? WHERE id=?",
-            params![request.kind, timestamp(), id],
-        )?;
-        if affected == 0 {
-            return Err(StoreError::Invalid(format!("memory not found: {id}")));
+        if let Some(kind) = kind {
+            let affected = conn.execute(
+                "UPDATE memories SET kind=?,updated_at=? WHERE id=?",
+                params![kind, timestamp(), id],
+            )?;
+            if affected == 0 {
+                return Err(StoreError::Invalid(format!("memory not found: {id}")));
+            }
         }
         if request.staged {
             let affected = conn.execute(
@@ -120,6 +144,10 @@ impl Store {
     /// # Errors
     /// Returns a SQLite error; audit errors do not fail a completed deletion.
     pub fn delete_cli(&self, id: &str) -> Result<bool, StoreError> {
+        self.delete_service(id, true)
+    }
+
+    pub(crate) fn delete_service(&self, id: &str, audit_enabled: bool) -> Result<bool, StoreError> {
         let conn = self.lock()?;
         if !crate::cli_delete_admission::checked(&conn, id)? {
             return Ok(false);
@@ -135,7 +163,9 @@ impl Store {
             return Ok(true);
         };
         conn.execute("DELETE FROM memories WHERE id=?", [id])?;
-        audit(&conn, "delete", id, &scope, &session, &author, "");
+        if audit_enabled {
+            audit(&conn, "delete", id, &scope, &session, &author, "");
+        }
         Ok(true)
     }
 }
@@ -214,7 +244,7 @@ pub fn direct_project_supported() -> bool {
     crate::direct_text_supported(&active_project())
 }
 
-fn timestamp() -> String {
+pub(crate) fn timestamp() -> String {
     let now = Utc::now();
     let base = now.format("%Y-%m-%d %H:%M:%S").to_string();
     let nanos = now.timestamp_subsec_nanos();

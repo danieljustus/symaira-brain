@@ -1,0 +1,22 @@
+2026/10/04 00:24:26 INFO Symaira Memory API listening addr=127.0.0.1:38513 url=http://127.0.0.1:38513
+2026/10/04 00:24:26 INFO HTTP request method=GET path=/ status=200 duration=96.226µs
+2026/10/04 00:24:26 INFO HTTP request method=GET path=/style.css status=200 duration=1.550694ms
+2026/10/04 00:24:26 INFO HTTP request method=GET path=/app.js status=200 duration=66.2µs
+2026/10/04 00:24:26 WARN Host header validation rejected host=untrusted.invalid method=GET path=/
+2026/10/04 00:24:26 INFO HTTP request method=GET path=/ status=403 duration=36.575µs
+2026/10/04 00:24:26 INFO HTTP request method=GET path=/api/list status=401 duration=13.24µs
+2026/10/04 00:24:26 ERROR HTTP error code=FORBIDDEN msg="invalid or expired token" err="invalid token structure"
+2026/10/04 00:24:26 INFO HTTP request method=GET path=/api/list status=401 duration=40.812µs
+2026/10/04 00:24:26 INFO HTTP request method=GET path=/api/status status=200 duration=18.097µs
+2026/10/04 00:24:26 INFO HTTP request method=GET path=/api/status status=200 duration=10.126µs
+2026/10/04 00:24:26 INFO HTTP request method=GET path=/api/list status=200 duration=477.442µs
+2026/10/04 00:24:26 INFO HTTP request method=GET path=/api/rules status=200 duration=165.109µs
+2026/10/04 00:24:26 INFO HTTP request method=GET path=/api/entities status=200 duration=127.092µs
+2026/10/04 00:24:26 WARN JWT subject has no matching profile; granting default access subject=owned-human
+2026/10/04 00:24:26 INFO HTTP request method=POST path=/api/set status=200 duration=3.623523ms
+2026/10/04 00:24:26 INFO HTTP request method=GET path=/api/list status=200 duration=298.271µs
+2026/10/04 00:24:26 INFO HTTP request method=GET path=/api/list status=200 duration=186.201µs
+2026/10/04 00:24:26 INFO HTTP request method=POST path=/api/search status=200 duration=864.577µs
+2026/10/04 00:24:26 WARN JWT subject has no matching profile; granting default access subject=owned-human
+2026/10/04 00:24:26 INFO HTTP request method=DELETE path=/api/delete status=200 duration=1.000853ms
+2026/10/04 00:24:26 INFO HTTP request method=GET path=/api/list status=200 duration=183.488µs

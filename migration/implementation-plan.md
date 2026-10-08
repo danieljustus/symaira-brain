@@ -66,6 +66,15 @@ runs with two different invalid-default reports stay evidence, not an exception.
 See the linked [ADR](../docs/adr/guard-doctor-equivalent-config-and-anchor-unicode.md)
 and [remaining inventory](guard-doctor-boundary-inventory-770.md). This does not
 close #770/#769 or claim full standalone/Brain cutover.
+## Read-only Doctor schema inspection — 2026-10-03
+
+The #649 successor compares actual required columns against the schema embedded
+in the native binary, separately from atomic Store repair. Applied migration
+records and `quick_check=ok` no longer hide missing DDL in Doctor. The new
+`memory-schema-native.yml` requires native Linux/macOS/Windows process evidence,
+including a real unchanged-Go false-green rejection control. Acceptance remains
+pending; #649 is open. Decision and explicit scope are recorded in
+`docs/adr/649-doctor-schema-inspection.md`.
 
 ## Additional native init, Swift and fuzz evidence — 2026-09-29
 
@@ -1966,10 +1975,11 @@ Go remains the production enforcement path until the full Guard-specific matrix 
 - Port list/search/set/delete/rules/query-log/sync/serve and all memory MCP schemas.
 - Preserve JWT/secret resolution (`symvault://`, deprecated `vault://`, env fallback), loopback binding, request limits, and encrypted relay compatibility.
 
-### Task 10.8: Preserve reachable Memory interfaces
-- Port the embedded web interface with the native HTTP server and preserve its auth/API behavior (#759/#762/#763).
-- Retire the unreachable legacy TUI migration target under ADR0003/E010: frozen Go's Brain command dependencies do not include the TUI;12 actual Go/native command probes match. No new terminal UI command is introduced.
-- Keep #763 open until the reachable HTTP UI has full native acceptance; Go source remains frozen until its separately gated removal.
+### Task 10.8: Preserve the reachable portable Memory Console
+- Accepted #763 decision: port the Web Console reachable through `memory serve` with the shared native HTTP/store owner (#759/#762/#763); verify assets, authentication, nested search results, read/write safety and lifecycle using actual isolated Go/native processes and an owned frontend runtime.
+- Retire the mandatory Ratatui port plan for the unconnected legacy TUI under ADR0003/E010 and `docs/adr/memory-ui-and-unreachable-tui-763.md`. Main's12 actual Go/native command probes and the original13 Go-only CLI probes remain separate source-bound evidence; both dependency inventories exclude the production TUI. Keep domain operations and frozen Go intact; no shipped command or new terminal client is introduced by this decision.
+- The scoped Host/absolute-request authority correction preserves original source824 failure proofs and early Go rejection precedence; fresh Linux gates, independent review and native three-OS acceptance remain required (`docs/adr/memory-http-request-authority-763.md`).
+- Resources or a partial UI server do not complete `memory serve`: keep #763 open and preserve fallback until the admitted HTTP/API/sync/configuration contracts are proved, with genuine native three-platform CI and independent review. Go source remains frozen until its separately gated removal.
 
 ### Phase 10 acceptance
 - Rust opens and migrates every Go database fixture.
