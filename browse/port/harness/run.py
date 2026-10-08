@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 import signal
@@ -153,21 +154,12 @@ def request(socket_path: Path, frame: dict[str, object], *, timeout: float = 3.0
     if len(payload) >= MAX_FRAME_BYTES:
         raise ValueError("harness request must stay below the daemon frame limit")
     if os.name == "nt":
-        # Python exposes named pipes as byte streams on Windows. Opening the
-        # endpoint for each request mirrors the Rust client's one-request
-        # connection lifecycle and needs no third-party package.
-        with open(socket_path, "r+b", buffering=0) as connection:
-            connection.write(payload)
-            response = bytearray()
-            deadline = time.monotonic() + timeout
-            while time.monotonic() < deadline and len(response) <= MAX_FRAME_BYTES:
-                chunk = connection.read(min(65536, MAX_FRAME_BYTES + 1 - len(response)))
-                if not chunk:
-                    break
-                response.extend(chunk)
-                if b"\n" in response:
-                    return json.loads(bytes(response).split(b"\n", 1)[0])
-        raise AssertionError("daemon closed without a JSON response")
+        specification = importlib.util.spec_from_file_location(
+            "browse_windows_pipe", Path(__file__).with_name("windows_pipe.py"))
+        assert specification and specification.loader
+        transport = importlib.util.module_from_spec(specification)
+        specification.loader.exec_module(transport)
+        return transport.request(str(socket_path), payload, MAX_FRAME_BYTES, timeout)
     with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as connection:
         connection.settimeout(timeout)
         connection.connect(str(socket_path))
@@ -397,6 +389,11 @@ def daemon_suite(root: Path, env: dict[str, str], *, rounds: int, starters: int)
             SYMBROWSE_USER_DATA_DIR=str(data),
             SYMBROWSE_NO_AUTOSTART="1",
         )
+        import key_test_environment
+        owned_bin = key_test_environment.absent_providers(base / "providers")
+        scoped.pop("SYMBROWSE_ENCRYPTION_KEY", None)
+        scoped.update(PATH=str(owned_bin) + os.pathsep + scoped.get("PATH", ""),
+                      SYMBROWSE_KEY_PROBE_MODE="3", SYMBROWSE_KEYCHAIN_PROBE_MODE="44")
         lifecycle_once(binary, scoped, runtime, suffix="one")
         stale_socket_once(binary, scoped, runtime, suffix="one")
         for index in range(rounds):

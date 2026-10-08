@@ -1,0 +1,13 @@
+F
+======================================================================
+FAIL: test_real_child_begin_is_readable_while_child_is_running (__main__.ProgressTests.test_real_child_begin_is_readable_while_child_is_running)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/bk-progress-mutants-hibnamig/missing-begin/test_registry_progress.py", line 37, in test_real_child_begin_is_readable_while_child_is_running
+    self.assertTrue(any(line["stage"] == "cli.begin" for line in lines))
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 1 test in 2.002s
+
+FAILED (failures=1)

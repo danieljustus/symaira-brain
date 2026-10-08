@@ -1,0 +1,101 @@
+{
+  "source_head": "f1abdf24193c3e440153e2f0e69371cd3d570f4c",
+  "cases": [
+    {
+      "input": "forged-none",
+      "go": {
+        "root": "/tmp/bk-show-xym9nkq5",
+        "frame": {
+          "cmd": "state.show",
+          "session": "ks2173127",
+          "args": {
+            "name": "malformed"
+          }
+        },
+        "response": {
+          "success": false,
+          "error": {
+            "code": "operation_failed",
+            "message": "decode state \"malformed\": parse state payload: invalid character '\\x03' looking for beginning of value"
+          }
+        },
+        "exit": 0,
+        "stdout": "",
+        "stderr": "time=2026-10-03T23:45:03.287Z level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\n",
+        "input_hex": "53594d42524f5753452d5354415445007b22736368656d615f76657273696f6e223a332c2273617665645f6174223a22323032362d30382d32355431343a30303a30305a222c22657870697265735f6174223a22323032362d30392d32345431343a30303a30305a222c226b65795f736f75726365223a226e6f6e65227d0a030303030303030303030303f529a324d44988ce2db7287a1e8e675e7bc1eef937fc9a636141a8531d893180604e501643a633bcf6dfe4787c7d7dbf8bc3cbd3a85a53967695785c5ec2aa4b76809457da4648bab86ba80a98be9b6003257b0e2ea49b1b0a74b9f068f44808018874dc16479ebbbde5f71fa08dc36229dd9f695f2c536579a26e8bc323b91108f4f1a38e29209d0a7c6286a247dcc736f89394f0cb095b05b006fdf329b7f06c948be6e09f00d7a1114e0f4cc288a9726b1cdac664004d38d409df98442de9dc75f30f1b65641116db5d57e60a7cbdd07e02b8ffb5ed77fa111e94c5c9823c69ac1fe3d82cf9fd22fc836fe02516515c20ec9ffbb5c41ff0250eac981d1b9e0b0b3e37ee3d3ffa02b9a46b21df4b473c29271d930d1a4b9b95e1b251ea0b8aad119c78e9c7e3e7bf749d899e79c5bf851d096dbb28411e9a2ebf2767e84595b0a944936308ecf138099f37e5790ea115a981a5c5d66b83fbd89bdcf353fbcdadc08b7aa16562cb8ae1a11e0bcedf0d403282e51bbef06dafa1360db2cb897925260983dd88dc39d5672d93b58880f5293a98b10521ee318289e387ee10a8c6e6c4067bb3257b7e59cfe538c0ee0c5e4c",
+        "binary_sha256": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8"
+      },
+      "rust": {
+        "root": "/tmp/bk-show-lpmngt8v",
+        "frame": {
+          "cmd": "state.show",
+          "session": "ks2173127",
+          "args": {
+            "name": "malformed"
+          }
+        },
+        "response": {
+          "success": false,
+          "error": {
+            "code": "operation_failed",
+            "message": "decode state \"malformed\": parse state payload: expected value at line 1 column 1"
+          }
+        },
+        "exit": 0,
+        "stdout": "",
+        "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n",
+        "input_hex": "53594d42524f5753452d5354415445007b22736368656d615f76657273696f6e223a332c2273617665645f6174223a22323032362d30382d32355431343a30303a30305a222c22657870697265735f6174223a22323032362d30392d32345431343a30303a30305a222c226b65795f736f75726365223a226e6f6e65227d0a030303030303030303030303f529a324d44988ce2db7287a1e8e675e7bc1eef937fc9a636141a8531d893180604e501643a633bcf6dfe4787c7d7dbf8bc3cbd3a85a53967695785c5ec2aa4b76809457da4648bab86ba80a98be9b6003257b0e2ea49b1b0a74b9f068f44808018874dc16479ebbbde5f71fa08dc36229dd9f695f2c536579a26e8bc323b91108f4f1a38e29209d0a7c6286a247dcc736f89394f0cb095b05b006fdf329b7f06c948be6e09f00d7a1114e0f4cc288a9726b1cdac664004d38d409df98442de9dc75f30f1b65641116db5d57e60a7cbdd07e02b8ffb5ed77fa111e94c5c9823c69ac1fe3d82cf9fd22fc836fe02516515c20ec9ffbb5c41ff0250eac981d1b9e0b0b3e37ee3d3ffa02b9a46b21df4b473c29271d930d1a4b9b95e1b251ea0b8aad119c78e9c7e3e7bf749d899e79c5bf851d096dbb28411e9a2ebf2767e84595b0a944936308ecf138099f37e5790ea115a981a5c5d66b83fbd89bdcf353fbcdadc08b7aa16562cb8ae1a11e0bcedf0d403282e51bbef06dafa1360db2cb897925260983dd88dc39d5672d93b58880f5293a98b10521ee318289e387ee10a8c6e6c4067bb3257b7e59cfe538c0ee0c5e4c",
+        "binary_sha256": "8b47ec96091cb56d275aab83969390558cb974deba87e067f68354f575702892"
+      },
+      "matches": false
+    },
+    {
+      "input": "authenticated-nonjson",
+      "go": {
+        "root": "/tmp/bk-show-j_38toa5",
+        "frame": {
+          "cmd": "state.show",
+          "session": "ks2173127",
+          "args": {
+            "name": "malformed"
+          }
+        },
+        "response": {
+          "success": false,
+          "error": {
+            "code": "operation_failed",
+            "message": "decode state \"malformed\": parse state payload: invalid character 'o' looking for beginning of value"
+          }
+        },
+        "exit": 0,
+        "stdout": "",
+        "stderr": "time=2026-10-03T23:45:03.456Z level=WARN msg=\"state is expired\" state=malformed\ntime=2026-10-03T23:45:03.456Z level=WARN msg=\"no external risk decider available (symbrain not found or disabled); risk decisions fall back to the built-in policy\"\n",
+        "input_hex": "53594d42524f5753452d5354415445007b22736368656d615f76657273696f6e223a332c2273617665645f6174223a22323032362d30382d32355431343a30303a30305a222c22657870697265735f6174223a22323032362d30392d32345431343a30303a30305a222c226b65795f736f75726365223a22656e7669726f6e6d656e74227d0a3ada4a460fc9e24c16c4e119d1ff9e06d0f9ed83d067f98150b02663f240b72faea9e5367f2e996474cab6f42996",
+        "binary_sha256": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8"
+      },
+      "rust": {
+        "root": "/tmp/bk-show-zsww4t_t",
+        "frame": {
+          "cmd": "state.show",
+          "session": "ks2173127",
+          "args": {
+            "name": "malformed"
+          }
+        },
+        "response": {
+          "success": false,
+          "error": {
+            "code": "operation_failed",
+            "message": "decode state \"malformed\": parse state payload: expected value at line 1 column 1"
+          }
+        },
+        "exit": 0,
+        "stdout": "",
+        "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n",
+        "input_hex": "53594d42524f5753452d5354415445007b22736368656d615f76657273696f6e223a332c2273617665645f6174223a22323032362d30382d32355431343a30303a30305a222c22657870697265735f6174223a22323032362d30392d32345431343a30303a30305a222c226b65795f736f75726365223a22656e7669726f6e6d656e74227d0a3ada4a460fc9e24c16c4e119d1ff9e06d0f9ed83d067f98150b02663f240b72faea9e5367f2e996474cab6f42996",
+        "binary_sha256": "8b47ec96091cb56d275aab83969390558cb974deba87e067f68354f575702892"
+      },
+      "matches": false
+    }
+  ]
+}

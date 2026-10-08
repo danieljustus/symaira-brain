@@ -1,0 +1,44 @@
+{
+  "base": "5dcac5b9a8add850b0985352ddc649b34b51f46f",
+  "worktree": "/workspace/symaira-memory803-windows-diagnostics",
+  "branch": "diagnose/memory803-windows-parity",
+  "actual_original_ci_merge": "7b2b85e58a2650f1138e654e96b21547bc9b82c9",
+  "ci_merge_object_available": false,
+  "prepared_sources": {
+    "scripts/rust-differential.py": "724712c4391c22edbe4ebbf5398f11beebc02eff25ef7cc0b2d1d6ace1ebf055",
+    "scripts/differential_journal.py": "381760c27723ca6c9f9021c280c22765ac068d12e0936c65871eb8c1d29e45ef",
+    "rust/symbrain-cli/tests/health_stdio_windows_diagnostic.rs": "6ca0c2d662eee9629741a8bd03bc65c6443559eecf60f545580c3f2c586123af",
+    ".github/workflows/ci.yml": "8a1351834a204a92879c47213a21ca92dadb782de6efb8e7a58981577fb9976b",
+    "docs/adr/memory-windows-parity-diagnostics-803.md": "5c5687256240870dd8d2bcf048cdcc64cd17ed78d62cce69dd116df17af50a1d"
+  },
+  "retention": {
+    "raw_sources_logs": 8,
+    "all_unmodified_go_files": 1219,
+    "gzip_sha_and_roundtrips": "verified"
+  },
+  "source_only_checks": {
+    "python_AST": "passed; all existing functions/classes except main byte-structurally unchanged, CASES unchanged",
+    "rustfmt": "edition2024/style2024/skip_children syntax-format passed only",
+    "actionlint": "passed",
+    "git_diff_check": "passed",
+    "Go_Rust_production_deps_health_contract": "unchanged"
+  },
+  "not_executed": [
+    "Cargo",
+    "compiler",
+    "Go build",
+    "product",
+    "diagnostic test",
+    "native Windows",
+    "target",
+    "endpoint",
+    "port"
+  ],
+  "prepared_runtime": {
+    "full_original_differential": "unchanged cases/assertions/projections/run/10-second timeout plus opt-in durable raw journal",
+    "owned_windows_peer": "one explicitly ignored test invoked by both scoped Windows CI steps, init+ping5s enclosing10s, full test console plus sampled bounded1MiB broker stderr tail",
+    "native3_protected_independent_review": "required pending"
+  },
+  "root_cause": "unproven; source identifies redacted initialize error boundary and shared possible Go SQLite startup phase only",
+  "resources_held": false
+}

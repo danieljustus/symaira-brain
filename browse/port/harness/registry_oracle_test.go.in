@@ -1,0 +1,245 @@
+// Supplemental observations applied through go -overlay; frozen Go is unchanged.
+package daemon
+
+import (
+	"crypto/sha256"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strconv"
+	"testing"
+	"time"
+	"unicode/utf8"
+
+	browserstate "github.com/danieljustus/symaira-browse/internal/state"
+)
+
+func TestPortRegistryAPISupplemental(t *testing.T) {
+	root := t.TempDir()
+	profiles := filepath.Join(root, "profiles")
+	registry := NewSessionRegistry(SessionRegistryOptions{
+		UserDataRoot: root + string(os.PathSeparator) + "unused" + string(os.PathSeparator) + ".." + string(os.PathSeparator) + "profiles", PID: 4242,
+		Scope: "worktree", OriginPath: "private-origin",
+	})
+	if registry.UserDataRoot() != profiles {
+		t.Fatal("registry did not clean its root")
+	}
+	if _, err := os.Stat(profiles); !os.IsNotExist(err) {
+		t.Fatal("constructor created profiles")
+	}
+	for _, invalid := range []string{"", "../escape", "a/b", "bad session", "_first", "é"} {
+		if _, err := registry.Ensure(invalid); err == nil {
+			t.Fatalf("accepted %q", invalid)
+		}
+	}
+	if _, err := registry.Ensure("beta"); err != nil {
+		t.Fatal(err)
+	}
+	alpha, err := registry.Ensure("alpha")
+	if err != nil {
+		t.Fatal(err)
+	}
+	before, err := registry.Get("alpha")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := registry.Ensure("alpha"); err != nil {
+		t.Fatal(err)
+	}
+	after, _ := registry.Get("alpha")
+	if before.StartedAt != after.StartedAt {
+		t.Fatal("ensure recreated session")
+	}
+	if err := registry.SetRef("alpha", "save", "@e1"); err != nil {
+		t.Fatal(err)
+	}
+	if err := registry.SetRef("alpha", "save", "@e2"); err != nil {
+		t.Fatal(err)
+	}
+	refs, err := registry.RefTable("alpha")
+	if err != nil {
+		t.Fatal(err)
+	}
+	refs["injected"] = "@outside"
+	if _, err := registry.Ref("alpha", "injected"); err == nil {
+		t.Fatal("ref table was not copied")
+	}
+	if _, err := registry.Ref("beta", "save"); err == nil {
+		t.Fatal("refs leaked across sessions")
+	}
+	negative := registry.SetActiveTabs("alpha", -1)
+	if negative == nil || negative.Error() != "active tab count cannot be negative" {
+		t.Fatal(negative)
+	}
+	if err := registry.SetActiveTabs("alpha", 2); err != nil {
+		t.Fatal(err)
+	}
+	missing := registry.Touch("missing")
+	if missing == nil || missing.Error() != "session not found: \"missing\"" {
+		t.Fatal(missing)
+	}
+	if err := registry.Touch("alpha"); err != nil {
+		t.Fatal(err)
+	}
+	after, _ = registry.Get("alpha")
+	if after.RefCount != 1 || after.ActiveTabs != 2 || after.PID != 4242 {
+		t.Fatal(after)
+	}
+	if after.LastActivity < before.LastActivity {
+		t.Fatal("activity moved backwards")
+	}
+	listed := registry.ListData()
+	if listed.SchemaVersion != 1 || len(listed.Sessions) != 2 || listed.Sessions[0].Name != "alpha" {
+		t.Fatal(listed)
+	}
+	if runtime.GOOS != "windows" {
+		mode, err := os.Stat(alpha.UserDataDir)
+		if err != nil || mode.Mode().Perm() != 0700 {
+			t.Fatal("profile mode", err)
+		}
+	}
+	registry.Clear()
+	if len(registry.List()) != 0 {
+		t.Fatal("clear retained stale sessions")
+	}
+	if _, err := os.Stat(alpha.UserDataDir); err != nil {
+		t.Fatal("clear removed profile")
+	}
+	t.Setenv("HOME", root)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(root, "config"))
+	t.Setenv("SYMBROWSE_STATE_DIR", "")
+	t.Setenv("SYMBROWSE_DAEMON_LOG", "")
+	t.Setenv("SYMBROWSE_READ_TIMEOUT", "")
+	configDir := filepath.Join(root, "config", "symbrowse")
+	if err := os.MkdirAll(configDir, 0700); err != nil {
+		t.Fatal(err)
+	}
+	state := filepath.Join(root, "configured-state")
+	stateJSON, _ := json.Marshal(filepath.ToSlash(state))
+	if err := os.WriteFile(filepath.Join(configDir, "config.toml"),
+		[]byte(fmt.Sprintf("state_dir = %s\nread_timeout = 7\n", stateJSON)), 0600); err != nil {
+		t.Fatal(err)
+	}
+	client := NewClient(ClientOptions{SocketPath: "private-endpoint", Session: "alpha"})
+	if client.options.ReadTimeout != 7*time.Second {
+		t.Fatal("read timeout ignored config")
+	}
+	if client.options.DaemonLogPath != filepath.Join(state, "daemon.log") {
+		t.Fatal("log ignored configured state")
+	}
+	t.Setenv("SYMBROWSE_READ_TIMEOUT", "9")
+	overridden := NewClient(ClientOptions{SocketPath: "private-endpoint", Session: "alpha"})
+	if overridden.options.ReadTimeout != 9*time.Second {
+		t.Fatal("environment did not override timeout")
+	}
+	explicit := NewClient(ClientOptions{SocketPath: "private-endpoint", ReadTimeout: 333 * time.Millisecond})
+	if explicit.options.ReadTimeout != 333*time.Millisecond {
+		t.Fatal("config overrode explicit timeout")
+	}
+	fixtures := map[string]string{}
+	for _, name := range []string{"alpha", "zulu", "expired"} {
+		dir := filepath.Join(root, "state-seeds", name)
+		now := time.Date(2030, time.January, 1, 0, 0, 0, 0, time.UTC)
+		if name == "expired" {
+			now = time.Date(2020, time.January, 1, 0, 0, 0, 0, time.UTC)
+		}
+		store, err := browserstate.NewStore(browserstate.StoreOptions{Dir: dir, Now: func() time.Time { return now }, ExpireIn: 24 * time.Hour})
+		if err != nil {
+			t.Fatal(err)
+		}
+		sample := &browserstate.State{Name: name, Origins: map[string]browserstate.OriginState{
+			"https://owned.invalid": {LocalStorage: map[string]string{"owned-key": "private-owned-value"}},
+		}}
+		if err := store.Save(sample); err != nil {
+			t.Fatal(err)
+		}
+		raw, err := os.ReadFile(filepath.Join(dir, name+".json"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		fixtures[name] = fmt.Sprintf("%x", raw)
+	}
+	value := map[string]any{"scalar_quote_sha256": observeScalarQuotes(), "default_roots": observeDefaultRoots(t, root), "state_fixtures_hex": fixtures, "registry": listed, "missing_error": missing.Error(),
+		"negative_tabs_error": negative.Error(), "read_timeout": client.options.ReadTimeout.Seconds(),
+		"environment_timeout": overridden.options.ReadTimeout.Seconds(), "explicit_timeout_ms": explicit.options.ReadTimeout.Milliseconds(),
+		"daemon_log": client.options.DaemonLogPath, "clear_retains_profile": true, "copied_refs": true}
+	encoded, err := json.Marshal(value)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("REGISTRY_API_OBSERVATIONS=" + string(encoded))
+}
+
+func observeScalarQuotes() string {
+	digest := sha256.New()
+	for scalar := rune(0); scalar <= utf8.MaxRune; scalar++ {
+		if !utf8.ValidRune(scalar) {
+			continue
+		}
+		digest.Write(strconv.AppendQuote(nil, string(scalar)))
+		digest.Write([]byte{'\n'})
+	}
+	return fmt.Sprintf("%x", digest.Sum(nil))
+}
+
+func observeDefaultRoots(t *testing.T, root string) []map[string]string {
+	t.Helper()
+	home, cache, temp := filepath.Join(root, "probe-home"), filepath.Join(root, "probe-cache"), filepath.Join(root, "probe-temp")
+	records := []map[string]string{}
+	for _, kind := range []string{"missing", "empty", "home", "absolute-cache", "relative-cache", "missing-temp", "empty-temp"} {
+		t.Run(kind, func(t *testing.T) {
+			for _, key := range []string{"HOME", "LOCALAPPDATA", "XDG_CACHE_HOME"} {
+				t.Setenv(key, "")
+				if kind == "missing" {
+					if err := os.Unsetenv(key); err != nil {
+						t.Fatal(err)
+					}
+				}
+			}
+			t.Setenv("TMPDIR", temp)
+			if kind == "missing-temp" {
+				if err := os.Unsetenv("TMPDIR"); err != nil {
+					t.Fatal(err)
+				}
+			}
+			if kind == "empty-temp" {
+				t.Setenv("TMPDIR", "")
+			}
+			if kind == "home" || kind == "absolute-cache" || kind == "relative-cache" {
+				t.Setenv("HOME", home)
+				t.Setenv("LOCALAPPDATA", home)
+			}
+			if kind == "absolute-cache" {
+				t.Setenv("XDG_CACHE_HOME", cache)
+				t.Setenv("LOCALAPPDATA", cache)
+			}
+			if kind == "relative-cache" {
+				t.Setenv("XDG_CACHE_HOME", "relative-cache")
+			}
+			expected := filepath.Join(os.TempDir(), "symbrowse", "sessions")
+			if kind == "home" || kind == "absolute-cache" || kind == "relative-cache" {
+				switch runtime.GOOS {
+				case "darwin":
+					expected = filepath.Join(home, "Library", "Caches", "symbrowse", "sessions")
+				case "windows":
+					expected = filepath.Join(os.Getenv("LOCALAPPDATA"), "symbrowse", "sessions")
+				default:
+					if kind == "home" {
+						expected = filepath.Join(home, ".cache", "symbrowse", "sessions")
+					}
+					if kind == "absolute-cache" {
+						expected = filepath.Join(cache, "symbrowse", "sessions")
+					}
+				}
+			}
+			got := NewSessionRegistry(SessionRegistryOptions{}).UserDataRoot()
+			if got != expected {
+				t.Fatalf("default root: got %q want %q", got, expected)
+			}
+			records = append(records, map[string]string{"case": kind, "root": got})
+		})
+	}
+	return records
+}

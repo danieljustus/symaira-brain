@@ -1,0 +1,149 @@
+{
+  "validated_source": "f23d01010e3321cc74d06b46009c8e90d94136a0",
+  "base": "e13f4caa07a4aecff5ab54a4ab57e2e248374438",
+  "source_files": [
+    {
+      "path": "scripts/guard-standalone-oracle/README.md",
+      "bytes": 6801,
+      "sha256": "6856bac16efb2bb17ca218a424f36b9d0811ec7bc13913e12832e78e71dd07ec"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/config_path_journal.py",
+      "bytes": 1331,
+      "sha256": "150bd5c13df436fa486b5cda282511ed9a77d14399d0f9895c91fa192922a8fd"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/config_paths.py",
+      "bytes": 16329,
+      "sha256": "7263c4096ec2d913ed314f2f243198da112a1a5012663069693deb0ebfc6cc3e"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/config_warnings.py",
+      "bytes": 13397,
+      "sha256": "0dfd8f541b47a0050f7054f96b0be0080b2d4aa04d33922f40d2b45241c24895"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/controls.py",
+      "bytes": 2797,
+      "sha256": "188846aaa11d626b34eedbade7ba4f4fd6e8b37bd851785b559a4573ffda62f0"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/doctor_boundaries.py",
+      "bytes": 11506,
+      "sha256": "df753cc8bca49068676f1d20bb612fbf7f277c89444f317f602beb2561f34d8d"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/kernel_admission.py",
+      "bytes": 6612,
+      "sha256": "9560996a08e3f7f0eb4f7d6a2247feb3c19d61a6c84b2909ed702496e0fd94ff"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/main.go.txt",
+      "bytes": 1747,
+      "sha256": "011384ce4b11b6e40250cfabf80f15f75caa43933d49a24e00351984c87618a6"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/raw_paths.py",
+      "bytes": 10319,
+      "sha256": "65b2e2d55ed1c8925b7805b430b0fb0dc9bdf5edab6f11ec1a5a1e492a16264b"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/replay.py",
+      "bytes": 18190,
+      "sha256": "a071b5675701968c891702581e03b93a4f4cbab411f0d6d459df51424da34aa2"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/retain_binaries.py",
+      "bytes": 1435,
+      "sha256": "4d9e15cd35d18cde6fe60bf005b4add50f25e8ac9afebe1870229130f73499ab"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/run.sh",
+      "bytes": 2078,
+      "sha256": "d309170fd066eeebbc642206e0b625f3d1696baa3c7c72e61ddc74171fbb8fb3"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/test_config_path_admission.py",
+      "bytes": 5866,
+      "sha256": "43bcc73cd63274146bae6bc8c9931b170cd698cb628fb2fb94d77e38fdc33123"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/test_config_path_fixtures.py",
+      "bytes": 6285,
+      "sha256": "dc54dcdb1b0fde73fc0c265d3719c2a4df70fdadeb7739198de0b30fffd7975c"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/test_config_path_progress.py",
+      "bytes": 10881,
+      "sha256": "61df622079953f2c8c4892b2ec6abb18cb1654dd1e2e9ba038161055d1d00c13"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/windows-sdk-LICENSE.txt",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/windows-sdk-source.json",
+      "bytes": 721,
+      "sha256": "36baaf61eccf9a72c1e2da02179ff32537551925d266e043d9b62cbb11b04522"
+    },
+    {
+      "path": "scripts/guard-standalone-oracle/windows_path_reference.py",
+      "bytes": 8253,
+      "sha256": "a0644e1bdf4b5b7c6810454fca9778f689c8a91887cc0fe4edb3ec57218b2c2a"
+    }
+  ],
+  "raw_archive_members": [
+    {
+      "member": "clean-f23-check/broad-errno.stderr",
+      "bytes": 3778,
+      "sha256": "8a3156151cc972ab84768c6cda672a4e651d1b90af35292eb449b75f7cbf5399"
+    },
+    {
+      "member": "clean-f23-check/broad-errno.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "clean-f23-check/drop-accounting.stderr",
+      "bytes": 1768,
+      "sha256": "16231ec0c889499f4815e36f747cda4bf0ebd3a675ae4a53d06db47cd7f2e645"
+    },
+    {
+      "member": "clean-f23-check/drop-accounting.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "clean-f23-check/kernel-probes.json",
+      "bytes": 16299,
+      "sha256": "a3929f0c864699724ba34d062604a16fa339abf6e6ec2b2dbe1c845c38a2159a"
+    },
+    {
+      "member": "clean-f23-check/portable.stderr",
+      "bytes": 3693,
+      "sha256": "d5a253d047699617b3de401d134f68d04839e63b6d8a0bef9152f858bc653897"
+    },
+    {
+      "member": "clean-f23-check/portable.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "member": "clean-f23-check/verification.json",
+      "bytes": 226349,
+      "sha256": "fcb0a4aca7ebf3a121b06279d6a2482b785657ed541c805f375f14021972627c"
+    }
+  ],
+  "raw_archive_sha256": "e3f698f1b5735206d9a6436d374a578f7a8445183f9c41be33d0f93bc1d9c209",
+  "actual_Linux_portable_tests": 21,
+  "actual_Linux_component_probes": 11,
+  "actual_Python_fixture_mutants": 2,
+  "protected_unchanged_blobs": 1471,
+  "requested_Linux_raw_cases": 63,
+  "requested_Linux_config_cases": 25,
+  "actual_Guard_Go_native_cases": 0,
+  "actual_Darwin_Windows_cases": 0,
+  "compiler_SDK_target_port_execution": false,
+  "self_approval": false
+}

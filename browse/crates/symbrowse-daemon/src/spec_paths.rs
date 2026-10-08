@@ -58,17 +58,7 @@ pub(crate) fn worktree_origin() -> String {
     };
     // Go asks git for the worktree root and falls back to the caller's cwd.
     // Bound child execution and reap the process before using that fallback.
-    let fallback = || {
-        #[cfg(unix)]
-        {
-            use std::os::unix::ffi::OsStrExt;
-            go_json_text(cwd.as_os_str().as_bytes())
-        }
-        #[cfg(not(unix))]
-        {
-            cwd.to_string_lossy().into_owned()
-        }
-    };
+    let fallback = || json_path(&cwd);
     let Ok(mut child) = std::process::Command::new("git")
         .args(["rev-parse", "--show-toplevel"])
         .current_dir(&cwd)
@@ -97,6 +87,18 @@ pub(crate) fn worktree_origin() -> String {
                 return fallback();
             }
         }
+    }
+}
+
+pub(crate) fn json_path(path: &std::path::Path) -> String {
+    #[cfg(unix)]
+    {
+        use std::os::unix::ffi::OsStrExt;
+        go_json_text(path.as_os_str().as_bytes())
+    }
+    #[cfg(not(unix))]
+    {
+        path.to_string_lossy().into_owned()
     }
 }
 

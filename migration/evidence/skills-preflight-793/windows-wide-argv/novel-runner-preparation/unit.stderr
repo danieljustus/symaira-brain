@@ -1,0 +1,9 @@
+test_original_plan_and_native_scope (test_novel.NovelPreparation.test_original_plan_and_native_scope) ... ok
+test_seeded_full_state_detects_content_metadata_and_links (test_novel.NovelPreparation.test_seeded_full_state_detects_content_metadata_and_links) ... ok
+test_unix_bytes_survive_and_are_rejected_as_windows_vectors (test_novel.NovelPreparation.test_unix_bytes_survive_and_are_rejected_as_windows_vectors) ... ok
+test_windows_code_units_survive_every_selected_vector (test_novel.NovelPreparation.test_windows_code_units_survive_every_selected_vector) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.009s
+
+OK

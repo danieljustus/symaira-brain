@@ -67,17 +67,25 @@ mod unix {
             timeout: Duration::from_millis(20),
         };
         let error = timeout.decide(&input()).unwrap_err();
-        assert!(error.to_string().contains("timed out"));
+        assert!(
+            error.to_string().contains("timed out"),
+            "actual Guard error: {error}"
+        );
+        // Consume the request before exiting: this fixture must isolate a
+        // descendant-held output pipe, not race the parent stdin writer.
         let descendant = Guard {
             executable: script(
                 &root,
-                "sleep 5 &\nprintf '%s\\n' '{\"decision\":\"allow\"}'\nexit 0\n",
+                "cat >/dev/null\nsleep 5 &\nprintf '%s\\n' '{\"decision\":\"allow\"}'\nexit 0\n",
             ),
             subcommand: Vec::new(),
             timeout: Duration::from_millis(50),
         };
         let error = descendant.decide(&input()).unwrap_err();
-        assert!(error.to_string().contains("timed out"));
+        assert!(
+            error.to_string().contains("timed out"),
+            "actual Guard error: {error}"
+        );
         fs::remove_dir_all(root).unwrap();
     }
 

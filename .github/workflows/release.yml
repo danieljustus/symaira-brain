@@ -57,7 +57,8 @@ jobs:
           fmt_out="$fmt_tmp/gofmt.out"
           : >"$fmt_out"
 
-          if ! find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -print0 >"$files_tmp"; then
+          # Retained original evidence must keep its historical bytes.
+          if ! find . -name '*.go' -not -path './browse/*' -not -path './.git/*' -not -path './migration/evidence/*' -print0 >"$files_tmp"; then
             echo "::error::find failed while collecting Go source files"
             exit 1
           fi
@@ -229,6 +230,7 @@ jobs:
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
           set -euo pipefail
+          umask 077
           for secret in CERTIFICATE_P12 CERTIFICATE_PASSWORD KEYCHAIN_PASSWORD; do
             if [ -z "${!secret:-}" ]; then
               echo "::error::$secret must be configured in the release environment."
@@ -238,30 +240,26 @@ jobs:
 
           echo "signed=true" >> "$GITHUB_OUTPUT"
           KEYCHAIN_PATH="$RUNNER_TEMP/signing.keychain-db"
+          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
           security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           CERTIFICATE_PATH="$RUNNER_TEMP/certificate.p12"
           echo -n "$CERTIFICATE_P12" | base64 --decode -o "$CERTIFICATE_PATH"
-          security import "$CERTIFICATE_PATH" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" -P "$CERTIFICATE_PASSWORD" -f pkcs12 -k "$KEYCHAIN_PATH" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
           security list-keychain -d user -s "$KEYCHAIN_PATH"
           IDENTITY=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" | grep "Developer ID Application" | head -1 | sed 's/.*"\(.*\)".*/\1/')
           TEAM_ID=$(security find-identity -v -p codesigning "$KEYCHAIN_PATH" | grep "Developer ID Application" | head -1 | sed 's/.*(\([A-Z0-9]*\)).*/\1/')
-          if [ -z "$IDENTITY" ]; then
+          if [ -z "$IDENTITY" ] || [[ ! "$TEAM_ID" =~ ^[A-Z0-9]{10}$ ]]; then
             echo "::error::No Developer ID Application identity found."
             exit 1
           fi
           echo "CODESIGN_IDENTITY=$IDENTITY" >> "$GITHUB_ENV"
           echo "TEAM_ID=$TEAM_ID" >> "$GITHUB_ENV"
-          echo "KEYCHAIN_PATH=$KEYCHAIN_PATH" >> "$GITHUB_ENV"
-
-      - name: Patch project.yml for CI (replace local path dependency with pinned URL)
-        run: |
-          perl -i'' -pe "s|path: ../symaira-appkit|url: https://github.com/danieljustus/symaira-appkit\\n    exactVersion: 0.6.0|" project.yml
 
       - name: Install XcodeGen
-        run: brew install xcodegen 2>/dev/null || brew upgrade xcodegen 2>/dev/null || true
+        run: brew list xcodegen >/dev/null 2>&1 || brew install xcodegen
 
       - name: Set app version
         run: ./scripts/set-app-version.sh "${{ steps.version.outputs.version }}"
@@ -271,6 +269,7 @@ jobs:
 
       - name: Build and sign GUI app
         run: |
+          set -euo pipefail
           xcodebuild -project SymBrain.xcodeproj \
             -scheme SymBrain \
             -configuration Release \
@@ -302,6 +301,7 @@ jobs:
           NOTARY_API_ISSUER_ID: ${{ secrets.NOTARY_API_ISSUER_ID }}
         run: |
           set -euo pipefail
+          umask 077
 
           APP="${{ env.APP_BUNDLE }}"
           if [ -z "$APP" ] || [ ! -d "$APP" ]; then
@@ -319,16 +319,8 @@ jobs:
           API_KEY_PATH="$RUNNER_TEMP/AuthKey.p8"
           echo -n "$NOTARY_API_KEY" | base64 --decode -o "$API_KEY_PATH"
 
-          # --- Notarize app bundle ---
-          ZIP_PATH="$RUNNER_TEMP/Symaira-Brain.zip"
-          ditto -c -k --sequesterRsrc --keepParent "$APP" "$ZIP_PATH"
-          xcrun notarytool submit "$ZIP_PATH" \
-            -d "$NOTARY_API_KEY_ID" \
-            -i "$NOTARY_API_ISSUER_ID" \
-            -k "$API_KEY_PATH" \
-            --wait
-          xcrun stapler staple "$APP"
-          echo "App notarization complete"
+          export API_KEY_PATH
+          bash scripts/notarize-and-verify.sh "$APP" app "$RUNNER_TEMP/notary-app"
 
           # --- Create DMG with branded drag-to-Applications window ---
           VERSION="${{ steps.version.outputs.version }}"
@@ -348,30 +340,49 @@ jobs:
             "$DMG_PATH" \
             "Symaira Brain $VERSION"
 
-          echo "dmg_path=$DMG_PATH" >> "$GITHUB_OUTPUT"
-          echo "dmg_name=Symaira-Brain-$VERSION-macos.dmg" >> "$GITHUB_OUTPUT"
+          codesign --force --sign "$CODESIGN_IDENTITY" --timestamp "$DMG_PATH"
+          bash scripts/notarize-and-verify.sh "$DMG_PATH" dmg "$RUNNER_TEMP/notary-dmg"
+          {
+            echo "dmg_path=$DMG_PATH"
+            echo "dmg_name=Symaira-Brain-$VERSION-macos.dmg"
+          } >> "$GITHUB_OUTPUT"
 
-          # --- Notarize DMG ---
-          xcrun notarytool submit "$DMG_PATH" \
-            -d "$NOTARY_API_KEY_ID" \
-            -i "$NOTARY_API_ISSUER_ID" \
-            -k "$API_KEY_PATH" \
-            --wait
-          xcrun stapler staple "$DMG_PATH"
-          echo "DMG notarization complete"
+      - name: Retain notarization read-back receipts
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: notarization-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/notary-*.json
+          retention-days: 14
+          if-no-files-found: warn
 
-      - name: Upload GUI app to release
+      - name: Upload and independently read back GUI release asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          DMG_PATH: ${{ steps.dmg.outputs.dmg_path }}
+          DMG_NAME: ${{ steps.dmg.outputs.dmg_name }}
         run: |
-          gh release upload "${{ steps.version.outputs.tag }}" \
-            "${{ steps.dmg.outputs.dmg_path }}" --clobber
+          set -euo pipefail
+          gh release upload "$RELEASE_TAG" "$DMG_PATH" --clobber
+          readback="$(mktemp -d "$RUNNER_TEMP/release-readback.XXXXXX")"
+          gh release download "$RELEASE_TAG" --pattern "$DMG_NAME" --dir "$readback"
+          cmp "$DMG_PATH" "$readback/$DMG_NAME"
+          bash scripts/notarize-and-verify.sh --verify-only "$readback/$DMG_NAME" dmg
 
       - name: Clean up signing material
         if: always()
         run: |
+          set -euo pipefail
+          python3 - "$RUNNER_TEMP" <<'PYTHON'
+          from pathlib import Path
+          import sys
+          root = Path(sys.argv[1])
+          for name in ('certificate.p12', 'AuthKey.p8'):
+              (root / name).unlink(missing_ok=True)
+          PYTHON
           if [ -n "${KEYCHAIN_PATH:-}" ] && [ -f "$KEYCHAIN_PATH" ]; then
-            security delete-keychain "$KEYCHAIN_PATH" 2>/dev/null || true
+            security delete-keychain "$KEYCHAIN_PATH"
           fi
 
   # ---------------------------------------------------------------------------

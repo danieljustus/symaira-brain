@@ -1,0 +1,43 @@
+{
+  "source": "70b76390f372c6f05983f01f5a2b8147356ca39e",
+  "classification": "immutable source-preparation and independent static review only; no native/runtime approval",
+  "files": [
+    {
+      "original": "/tmp/symaira-skills794-wide-argv-precompile.json",
+      "retained": "symaira-skills794-wide-argv-precompile.json",
+      "bytes": 3940,
+      "sha256": "0ba10012e2e726646571b5b5eb091adfc0767790444e52ac81b51d1e9bf0b6c2"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-argv-independent-static-handoff.json",
+      "retained": "symaira-skills794-wide-argv-independent-static-handoff.json",
+      "bytes": 1156,
+      "sha256": "d9807cefb05b067b0c5bbe2e82ac3497c3688cf1a7470f74b60722698b7fbc93"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-argv-independent-static-provenance.json",
+      "retained": "symaira-skills794-wide-argv-independent-static-provenance.json",
+      "bytes": 46942,
+      "sha256": "e8f793fa112c431f7d378e2b75c6fdf2d9c199c4cfe5b890bc8e72ca19e815e4"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-argv-independent-static-review.md",
+      "retained": "symaira-skills794-wide-argv-independent-static-review.md",
+      "bytes": 8826,
+      "sha256": "b726418ed1424315b4dc142fe0814a37f67b763adfb5ccf905f600d5d05806d3"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-argv-independent-prepared312.json",
+      "retained": "symaira-skills794-wide-argv-independent-prepared312.json",
+      "bytes": 48784,
+      "sha256": "fa305cec4347862c5cc63a31b324f7728cb42a00ecbfbbc17b6a96ef09f9983e"
+    },
+    {
+      "original": "/tmp/symaira-skills794-wide-argv-independent-novel-plan.json",
+      "retained": "symaira-skills794-wide-argv-independent-novel-plan.json",
+      "bytes": 43261,
+      "sha256": "5478c095a73d0332baa987dfae3dea6d3c3863104841be7b4d689edfba762bce"
+    }
+  ],
+  "original_files_unchanged": true
+}

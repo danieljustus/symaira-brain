@@ -1,0 +1,14 @@
+go CLI 1 b'{"success":false,"error":{"code":"daemon_unavailable","message":"daemon did not become ready for session \\"pt2211722\\"","hint":"start daemon with \'symbrowse daemon --session pt2211722\'; see daemon log at /tmp/bk-parent-ph78vfok/state/symbrowse/daemon.log","details":{"session":"pt2211722","socket_path":"/tmp/bk-parent-ph78vfok/run/symbrowse/pt2211722.sock"}}}\n' b''
+go 1 5.01590589999978 {'pid': 2211777, 'state': 'S', 'parent': 2211767, 'executable': '/tmp/bk-parent-ph78vfok/bin/symvault'} {'pid': 2211777, 'state': 'gone'}
+rust CLI 2 b'' b'unknown flag: --session\n'
+Traceback (most recent call last):
+  File "/tmp/symaira-state-key-4cd-autostart-timeout.py", line 11, in <module>
+    stdout,stderr=child.communicate(timeout=20);finished=time.monotonic();print(label, 'CLI', child.returncode, stdout, stderr, flush=True);queries=[json.loads(line) for line in ledger.read_text().splitlines()];assert len(queries)==1;pid=queries[0]['pid'];original_pidfd=os.pidfd_open(pid)
+                                                                                                                                                                                  ^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1027, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/bk-parent-azyx_d7e/queries.jsonl'

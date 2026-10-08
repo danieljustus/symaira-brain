@@ -1,0 +1,32 @@
+{
+  "/tmp/symaira-doctor-source-independent-second-extra.py": {
+    "original": "/tmp/symaira-doctor-source-independent-extra.py",
+    "original_sha256": "2c94527fe08126997e6e12554a46017a848121354480197da5cfaeaa7bd74380",
+    "adapted_sha256": "ea693c23f459aacf77c89849cdcee30173f03f6f29b4131657040cbb6eb81833",
+    "change": "output paths only; original runtime fixture inputs retained"
+  },
+  "/tmp/symaira-doctor-source-independent-second-home.py": {
+    "original": "/tmp/symaira-doctor-source-independent-home.py",
+    "original_sha256": "e45dbf57ed26f2b7fde5a3175791c664f6cf4093a2a4aa2146ba4ccf23953c42",
+    "adapted_sha256": "21a203e04fa244a907cdd40f71e0d6389260d90b7c5b0556079e95eea9c7c756",
+    "change": "output paths only; original runtime fixture inputs retained"
+  },
+  "/tmp/symaira-doctor-source-independent-second-original-raw-signals.py": {
+    "original": "/tmp/symaira-doctor-source-independent-original-raw-signals.py",
+    "original_sha256": "7ebc441d5f648fe126a17c189d4044a8fbd2398f411be1c1777cb0b0e1f225cf",
+    "adapted_sha256": "7e53ebc9bd62e597c725722ff498c979b97c34f78d4e595d6c977358154d6d5f",
+    "change": "output paths only; original runtime fixture inputs retained"
+  },
+  "/tmp/symaira-doctor-source-independent-second-original-findings.py": {
+    "original": "/tmp/symaira-doctor-source-independent-original-findings.py",
+    "original_sha256": "4c20d4d4ea4feedd56e9c388a65f13e273cd240741a12db97caa33bda6da4700",
+    "adapted_sha256": "db1f500c50cd5ebb8e0919b6d258becd4579246336b32fd0e9adec132506acbf",
+    "change": "output paths and rename original reviewed source provenance key only; runtime fixture inputs retained"
+  },
+  "/tmp/symaira-doctor-source-independent-second-original-lookup.py": {
+    "original": "/tmp/symaira-doctor-source-independent-original-lookup.py",
+    "original_sha256": "ad0d1f2a2455ae6d930065381aefe4afd03eaf657ac53a8d2d3cc54f34adea05",
+    "adapted_sha256": "82f1b5578b0b5bc1318122e545be80ac95f893e1f0dfa8a82a30cd4cd1e45804",
+    "change": "output paths only; original runtime fixture inputs retained"
+  }
+}

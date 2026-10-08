@@ -7,6 +7,9 @@ use crate::{UsageError, UsageMeter, UsageSnapshot};
 mod parser_extra;
 #[path = "parser_opencode.rs"]
 mod parser_opencode;
+#[cfg(test)]
+#[path = "parser_unit_tests.rs"]
+mod unit_tests;
 
 pub(crate) fn parse_snapshot(
     id: &str,
@@ -18,7 +21,14 @@ pub(crate) fn parse_snapshot(
         return parser_opencode::parse(body, now);
     }
     if body.is_empty() {
-        return Err(UsageError::parse(id, "empty response"));
+        return Err(UsageError::parse(
+            id,
+            if id == "cursor" {
+                "usage summary is not JSON"
+            } else {
+                "empty response"
+            },
+        ));
     }
     // Cursor's own parser names the payload it could not read; every other
     // provider surfaces only the shared wording.

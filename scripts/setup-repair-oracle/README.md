@@ -1,6 +1,7 @@
 `run.sh OUTPUT_JSON` builds the complete production Go CLI from immutable
 `dcddcef0df5789123c7c9a7ebe6e01f10e941f2c` and the candidate Rust CLI, then
-replays 151 local release-repair cases. The original differential corpus and
+replays 201 local release-repair cases on Linux (179 on macOS, whose APFS
+cannot create the invalid-UTF-8 raw HOME paths; 177 on Windows). The original differential corpus and
 Go source stay unchanged. Existing release fixtures supply archives, publisher
 failures, checksums, platform skips and fake version probes; no production
 release endpoint or user credentials are used by the replay.
@@ -8,7 +9,7 @@ release endpoint or user credentials are used by the replay.
 Additional cases cover source preservation, explicit replacement, duplicate,
 case-folded and null provenance fields, malformed typed fields, invalid UTF-8,
 unpaired UTF-16 escapes, Go time.Time parsing, optional module configuration and
-all accepted/rejected boolean flag spellings. Every Rust process has an absent
+all accepted/rejected boolean flag spellings. Managed HOME/USERPROFILE lexical dot, parent and repeated-separator cases, owned Unix symlink parents, raw paths and leaf/ancestor file obstructions preserve the same owner and exact JSON/human errors. Captured files are anchored to the owned project fixture, never to mutable HOME. Every Rust process has an absent
 Go fallback path. Output, exit and the complete fixture filesystem/modes must
 match. Only fixture roots, download scratch names and newly created release
 timestamps differ by construction. New timestamps must be UTC and within the

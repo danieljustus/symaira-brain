@@ -1,0 +1,157 @@
+{
+  "files": [
+    {
+      "path": "/workspace/review-proof/root-guard805-f1/actionlint.log",
+      "member": "000-actionlint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791115367782009113
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-f1/ci-original.yml",
+      "member": "001-ci-original.yml",
+      "bytes": 74975,
+      "sha256": "f84724045d3793c180c4ac5494602b7a1b7dab9fa460705087e351d91c583f05",
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791115367782009113
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-f1/fresh-pure/broad-errno.stderr",
+      "member": "002-broad-errno.stderr",
+      "bytes": 3700,
+      "sha256": "6733947e2ca71e5c5f24e2d798358366d618088339da901b1c50987e45d4196d",
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791115226475380826
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-f1/fresh-pure/broad-errno.stdout",
+      "member": "003-broad-errno.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791115226472500338
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-f1/fresh-pure/drop-accounting.stderr",
+      "member": "004-drop-accounting.stderr",
+      "bytes": 1742,
+      "sha256": "982a449ce7a66e0327ce8896083833058980b483b6e9c26ef29a143012ff0e7d",
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791115226376441012
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-f1/fresh-pure/drop-accounting.stdout",
+      "member": "005-drop-accounting.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791115226372497229
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-f1/fresh-pure/kernel-probes.json",
+      "member": "006-kernel-probes.json",
+      "bytes": 15155,
+      "sha256": "856a27b0a8ffa334aecd897610978208bcfba9a8ee1addb74588d9e488e174ea",
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791115226085667932
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-f1/fresh-pure/portable.stderr",
+      "member": "007-portable.stderr",
+      "bytes": 3693,
+      "sha256": "021ead0ef23529052b356288263a2af5f7f4c24e8150ae836999036f0ed8df47",
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791115226265701073
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-f1/fresh-pure/portable.stdout",
+      "member": "008-portable.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791115226260493746
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-f1/fresh-pure/verification.json",
+      "member": "009-verification.json",
+      "bytes": 226349,
+      "sha256": "fcb0a4aca7ebf3a121b06279d6a2482b785657ed541c805f375f14021972627c",
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791115229284781035
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-f1/independent-review.md",
+      "member": "010-independent-review.md",
+      "bytes": 3762,
+      "sha256": "d2d65695565b95794645926320a54682bb98396fe0ca193a98073f5e5903a2e2",
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791115638669969143
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-f1/initial-sparse-workflow-actionlint.log",
+      "member": "011-initial-sparse-workflow-actionlint.log",
+      "bytes": 100,
+      "sha256": "6dd28be6694dcb0417d35055c7af0c5c34700b31842f0d01c463fe5fbec60b8a",
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791115367782009113
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-f1/source-verifier.log",
+      "member": "012-source-verifier.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791115226024486406
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-f1/whole-protected-body-bindings.json",
+      "member": "013-whole-protected-body-bindings.json",
+      "bytes": 282838,
+      "sha256": "4fc2f17c5307e73f0474503716440962e01b332b4064390e63caa2a9e433b439",
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791115638669759706
+    },
+    {
+      "path": "/workspace/review-proof/root-guard805-f1/review-receipt.json",
+      "member": "014-review-receipt.json",
+      "bytes": 3258,
+      "sha256": "f3e6da3a37d87e13fe2188f64ceeef136bed2ee860715c7c1b468d7ad272d6de",
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791115638674886366
+    }
+  ],
+  "archive_sha256": "bc4d4a7d763fbaf50f201fabe3380137ee30aecb2a322fbdff8b6d513a12ce97",
+  "full_source_review_only": true,
+  "actual_native_at_integrated_head": 0
+}

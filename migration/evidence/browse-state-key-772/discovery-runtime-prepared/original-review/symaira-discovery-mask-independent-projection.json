@@ -1,0 +1,242 @@
+{
+  "status": "READY_FOR_RUNTIME_REVIEW_SOURCE_ONLY",
+  "head": "7e5c4561c82803403b579d011fb687bbe254d32a",
+  "source": "445c19688aa8f669ea99e15e6517005f6156b775",
+  "archive_payloads_verified": 22,
+  "archived_actual_SDK_patterns": 5618,
+  "archived_actual_SDK_values": 56180,
+  "archived_actual_mutant_differences": 230,
+  "all_source_projection_classes_match": true,
+  "arbitrary_width_source_projection_assignments": 640,
+  "focused": [
+    {
+      "pattern": "q!xyf",
+      "sdk": {
+        "disposition": "universal quiet/nonprinting",
+        "allow_relative": true,
+        "conditions": [
+          [
+            0,
+            15,
+            true
+          ]
+        ]
+      },
+      "native_projection": {
+        "disposition": "leaf",
+        "allow_relative": true
+      }
+    },
+    {
+      "pattern": "q!y-xyf",
+      "sdk": {
+        "disposition": "universal quiet/nonprinting",
+        "allow_relative": false,
+        "conditions": [
+          [
+            0,
+            0,
+            true
+          ],
+          [
+            0,
+            15,
+            false
+          ]
+        ]
+      },
+      "native_projection": {
+        "disposition": "leaf",
+        "allow_relative": false
+      }
+    },
+    {
+      "pattern": "q-xyf",
+      "sdk": {
+        "disposition": "universal quiet/nonprinting",
+        "allow_relative": true,
+        "conditions": [
+          [
+            0,
+            0,
+            true
+          ],
+          [
+            0,
+            15,
+            false
+          ]
+        ]
+      },
+      "native_projection": {
+        "disposition": "leaf",
+        "allow_relative": true
+      }
+    },
+    {
+      "pattern": "qxy",
+      "sdk": {
+        "disposition": "universal quiet/nonprinting",
+        "allow_relative": true,
+        "conditions": [
+          [
+            0,
+            0,
+            true
+          ]
+        ]
+      },
+      "native_projection": {
+        "disposition": "leaf",
+        "allow_relative": true
+      }
+    },
+    {
+      "pattern": "qxy0",
+      "sdk": {
+        "disposition": "nil matcher",
+        "allow_relative": true,
+        "conditions": []
+      },
+      "native_projection": {
+        "disposition": "nil matcher",
+        "allow_relative": true
+      }
+    },
+    {
+      "pattern": "qxyF",
+      "sdk": {
+        "disposition": "universal quiet/nonprinting",
+        "allow_relative": false,
+        "conditions": [
+          [
+            0,
+            15,
+            true
+          ]
+        ]
+      },
+      "native_projection": {
+        "disposition": "leaf",
+        "allow_relative": false
+      }
+    },
+    {
+      "pattern": "qxya",
+      "sdk": {
+        "disposition": "universal quiet/nonprinting",
+        "allow_relative": false,
+        "conditions": [
+          [
+            0,
+            10,
+            true
+          ]
+        ]
+      },
+      "native_projection": {
+        "disposition": "leaf",
+        "allow_relative": false
+      }
+    },
+    {
+      "pattern": "qxyf",
+      "sdk": {
+        "disposition": "universal quiet/nonprinting",
+        "allow_relative": false,
+        "conditions": [
+          [
+            0,
+            15,
+            true
+          ]
+        ]
+      },
+      "native_projection": {
+        "disposition": "leaf",
+        "allow_relative": false
+      }
+    },
+    {
+      "pattern": "qxyf+y",
+      "sdk": {
+        "disposition": "universal quiet/nonprinting",
+        "allow_relative": true,
+        "conditions": [
+          [
+            0,
+            15,
+            true
+          ],
+          [
+            0,
+            0,
+            true
+          ]
+        ]
+      },
+      "native_projection": {
+        "disposition": "leaf",
+        "allow_relative": true
+      }
+    },
+    {
+      "pattern": "qxyf+y-y",
+      "sdk": {
+        "disposition": "universal quiet/nonprinting",
+        "allow_relative": false,
+        "conditions": [
+          [
+            0,
+            15,
+            true
+          ],
+          [
+            0,
+            0,
+            true
+          ],
+          [
+            0,
+            0,
+            false
+          ]
+        ]
+      },
+      "native_projection": {
+        "disposition": "leaf",
+        "allow_relative": false
+      }
+    },
+    {
+      "pattern": "qy-xyf",
+      "sdk": {
+        "disposition": "universal quiet/nonprinting",
+        "allow_relative": true,
+        "conditions": [
+          [
+            0,
+            0,
+            true
+          ],
+          [
+            0,
+            15,
+            false
+          ]
+        ]
+      },
+      "native_projection": {
+        "disposition": "leaf",
+        "allow_relative": true
+      }
+    }
+  ],
+  "bindings": {
+    "/workspace/toolchains/go1.26.7/src/internal/bisect/bisect.go": "978d518986ba6867f5f96356531f35bfa59b865fbb363b98eb9052e862a2160c",
+    "/workspace/toolchains/go1.26.7/src/internal/godebug/godebug.go": "cd492e76ae63872ac4310fc09b2e097229588dbf114d14d713be3f027b0233c8",
+    "/workspace/symaira-daemon772-state-key-discovery-mask/browse/crates/symbrowse-core/src/key_sources/startup_discovery/godebug.rs": "0b4645a823188bfb2453e18568cc1e7ab09a8348250e63a804cefb8084362f71",
+    "/workspace/symaira-daemon772-state-key-discovery-mask/migration/evidence/browse-state-key-772/discovery-mask-prepared/actual-sdk-only/retention.json": "1773811c485fd5daee65456dcbdd137c0da65ef34c21f30862d21de03173b36a"
+  },
+  "fresh_compiler_or_native_or_SDK_execution": false
+}

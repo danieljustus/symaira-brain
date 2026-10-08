@@ -1,0 +1,15 @@
+{
+  "mutant": "BUDGET instead of remaining actual SQLite busy_timeout",
+  "base_head": "a112189b31fb5bf2d7100d42b716bddeac9eb7c7",
+  "patch_sha256": "9a05c8208f95babb9941c8a388efb922aae4c66e05107b1fd305d5ac9e0db62d",
+  "executed_binary": "/workspace/symaira-memory803-open/target/debug/deps/symbrain_memory-dde9bae26a7c26aa",
+  "sha256": "dbbc2110f9e407dcaa221442abbbf9b9d1165fbf4b1ef83afc888172ac29e5fe",
+  "gzip": "/workspace/oracles/symaira-memory803-a112189-mutant-binaries/dbbc2110f9e407dcaa221442abbbf9b9d1165fbf4b1ef83afc888172ac29e5fe.gz",
+  "gzip_sha256": "ac6d3118259335533140b7ceca3352eb9868a59b4711d9a5057e4a7d63547e02",
+  "exit": 101,
+  "passed": 0,
+  "failed": 1,
+  "ignored": 0,
+  "actual_last_busy_timeout_ms": 5000,
+  "actual_test_duration_seconds": 6.01
+}

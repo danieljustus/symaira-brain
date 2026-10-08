@@ -1,0 +1,937 @@
+{
+  "original_head": "abf20713bacdab562644256e27616a9dd7acb81e",
+  "original_source": "00bcc6f51a2fbc00581ca7f6b7af0e868d168971",
+  "records": [
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-actionlint.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-actionlint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-actionlint.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-cli-extra-first.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-cli-extra-first.log",
+      "sha256": "2aaa76c7b490e4205c4ee7c6230161e921f6f7fa60630ceb337a9439de08eee0",
+      "bytes": 187,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-cli-extra-first.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-cli-extra-first.py",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-cli-extra-first.py",
+      "sha256": "a7837d132d947ba8f3c3a4bbd12f6641a37de484de6f3cb66f6e478fb8bc7073",
+      "bytes": 2619,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-cli-extra-first.py"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-cli-extra.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-cli-extra.json",
+      "sha256": "4f11ecf9b576fb9f56bd946736320cbc9e18f97ecf17faa49de1d3dd671ff052",
+      "bytes": 61693,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-cli-extra.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-cli-extra.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-cli-extra.log",
+      "sha256": "5960ccb0b8820010b99680a10bd5893bb9977fcaf9edf34e2b630dff4c8b91b6",
+      "bytes": 1419,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-cli-extra.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-cli-extra.py",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-cli-extra.py",
+      "sha256": "6513627fe0120eb271b765a38c273bbd808f6e7d9a266d31cd8b72272690be3f",
+      "bytes": 2541,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-cli-extra.py"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-clippy.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-clippy.log",
+      "sha256": "bd78efc584786aedeff4a2938ba22269233ac68fe183a1ecbdd47ccc783b7a43",
+      "bytes": 60,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-clippy.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-diff.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-diff.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-diff.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-extra.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-extra.json",
+      "sha256": "e602fb0d57275892efa817e07c35216fafef42f94956871cdb396dac2266d775",
+      "bytes": 144884,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-extra.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-extra.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-extra.log",
+      "sha256": "cde122b12b58d467d98264b240932504a691b36564cfa0ea0d3aa6ba7d74fa29",
+      "bytes": 8,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-extra.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-extra.py",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-extra.py",
+      "sha256": "5cc1be7385810656e347abdae018c94496a54f9c6d31b2b8005bc8879a627345",
+      "bytes": 5600,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-extra.py"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-files.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-files.json",
+      "sha256": "813e5b050fe53d2c50676da5c7c7f0edc1c7efe167d64598ec70dfe6de651fdc",
+      "bytes": 1301989,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-files.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-files.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-files.log",
+      "sha256": "96f70ad3136aef16aa4398e27fec47a74f7f8121b650369bb5b9dfd5559ef573",
+      "bytes": 585,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-files.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-fmt.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-fmt.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-hermes.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-hermes.json",
+      "sha256": "9a2ab681e488b95b84ac658b7fcaa393885985727959f10a7fa92ea6a4df7747",
+      "bytes": 1117047,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-hermes.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-hermes.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-hermes.log",
+      "sha256": "529eb13180b018c7b39d04248a6d64476f5d3724f259baad9ad09a4a96cc8f5f",
+      "bytes": 549,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-hermes.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.json",
+      "sha256": "901c470abd866ed198ceddd23d62c05c5b6140bb61b08e9a74bcad258185b8af",
+      "bytes": 633317,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.log",
+      "sha256": "683e8c54d47102006f444e4aa47690d3ca4842f27dd6809d6284caa136c496a0",
+      "bytes": 828,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-original-owner-replay.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-original-owner-replay.json",
+      "sha256": "0a1c0ff4a63a6d4d7eb6d7e057e65aa6ce32a61308563204c18c196f11034cc7",
+      "bytes": 19909,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-original-owner-replay.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-original-owner-replay.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-original-owner-replay.log",
+      "sha256": "0e061e192fb9bb5ca8432b5c72713e4b0dabd1c7339281fd2af41aa07b7d7d59",
+      "bytes": 71,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-original-owner-replay.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-original-owner-replay.py",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-original-owner-replay.py",
+      "sha256": "c40b1a60bdeb1535cd3aa8c1b94cd9d45e2e0a286f8d0883b84a470e1c450264",
+      "bytes": 3501,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-original-owner-replay.py"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-path-build.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-path-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-path-build.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-path-extra.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-path-extra.log",
+      "sha256": "95fa3d0b717884de7d6fd5ce9b1b7d3d8afd8067079c70f56b10329f8ac46eb3",
+      "bytes": 1909,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-path-extra.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-path-extra.py",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-path-extra.py",
+      "sha256": "1613880462ff6315606877cf9d9bff442f6082859102b56ee48b823269087d1a",
+      "bytes": 2350,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-path-extra.py"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-path-prepare.py",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-path-prepare.py",
+      "sha256": "1f67f340943f567c91bd738ce03f062d104471a6c499b13fb6abb12a2bf78667",
+      "bytes": 3895,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-path-prepare.py"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-probe-build.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-probe-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-probe-build.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-public-probe",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-public-probe",
+      "sha256": "4b5a9bc6bd11300dc538c9cf3ac52ec798f11b6e61f3ea35af4b7857311ea026",
+      "bytes": 13393296,
+      "binary": true,
+      "tracked": false
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-reference.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-reference.json",
+      "sha256": "88552c93fdb4873fb1ba8e221e64ccb28a8cc2fe4961c3b1399a16d879a7ada5",
+      "bytes": 754678,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-reference.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-reference.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-reference.log",
+      "sha256": "b84bb9178a2606dde109a42043d04ee657b1c0ae47c2919a6c14d9ccb685e54f",
+      "bytes": 542,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-reference.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-retention.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-retention.json",
+      "sha256": "b2552249d4b125fefbffb942fcb294573b6ae293d737f3d23a3db087019adcf8",
+      "bytes": 167,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-retention.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-review-receipt.py",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-review-receipt.py",
+      "sha256": "c216810c9f80948bc6d5ae62b250e7856e533f96a59480851167da41dc4805f1",
+      "bytes": 7332,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-review-receipt.py"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-review.md",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-review.md",
+      "sha256": "a1ff0ebb81eac3768168d81dec621a6adf6cece3b223a9e2886972c684c0d07b",
+      "bytes": 6928,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-review.md"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-tests.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-tests.log",
+      "sha256": "6a80bdb1ed77b4409228d4b73455236310acd53119b4f6dfe6217a4401df4217",
+      "bytes": 34862,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-tests.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-path/receipt.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-path/receipt.json",
+      "sha256": "6638f9c3d1a306080065a7371fd1f9a834a9095b13e4b87bc73547a11165a061",
+      "bytes": 31778,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-path/receipt.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-path/native.stderr",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-path/native.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-path/native.stderr"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-path/native.stdout",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-path/native.stdout",
+      "sha256": "4b75cf79646a235555a25a81a9f6104ff688b60d665eeece801ceb72f54556ff",
+      "bytes": 1000983,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-path/native.stdout"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-path/oracle.stderr",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-path/oracle.stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-path/oracle.stderr"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-path/oracle.stdout",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-path/oracle.stdout",
+      "sha256": "3a9b43dffb74c66c75808f3450782ecb2a28bcca28fa57d22ae781e777955615",
+      "bytes": 1000483,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-path/oracle.stdout"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-path/input.txt",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-path/input.txt",
+      "sha256": "2ddf3b97f86e9c997362bc71c92ee1325f1639b7bfa32e5cb6f277662de40163",
+      "bytes": 637424,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-path/input.txt"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-path/oracle",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-path/oracle",
+      "sha256": "d98aa4c1742c138a94188e07165b359046dddb3bf14fa6e644efe8655ee450d0",
+      "bytes": 2477654,
+      "binary": true,
+      "tracked": false
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-path/native",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-path/native",
+      "sha256": "8b349770f2bb2e4674f47ef355c873256cfe24c726a6aefdc6165b78d476b3f7",
+      "bytes": 4659952,
+      "binary": true,
+      "tracked": false
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-path/source.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-path/source.json",
+      "sha256": "681a30d82f1de4231091aec05cd3fc79385f0b9bc35e6821a30b23901f4c7161",
+      "bytes": 1270,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-path/source.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-path/path.go",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-path/path.go",
+      "sha256": "e1ef974be48ab4e0bf1c352db130cc1473967de79c3a38e69654b721b52d071c",
+      "bytes": 10688,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-path/path.go"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-path/path.rs",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-path/path.rs",
+      "sha256": "7c49572d3fd498c5a8ce7ba7a64d26d5233150f7a4343ae1f9eb6b5569cfafc8",
+      "bytes": 6331,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-path/path.rs"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/path-native.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/path-native.json",
+      "sha256": "de7bbf9a5c03cf071975edf7ce1a95f4351b8db9c5174361cd906e1a335fa919",
+      "bytes": 73,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/path-native.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/path.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/path.json",
+      "sha256": "f2458cc7f1d019e96e41d9cdffa2a6b7351b24c845f8546d7297057d2ea464e5",
+      "bytes": 3052,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/path.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/owner-controls.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/owner-controls.json",
+      "sha256": "296f4dc0abadbcfc90a60819c6da5a38c676d76c87b5053bb1eac25b1d1ba5de",
+      "bytes": 1992,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/owner-controls.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/owner-cli.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/owner-cli.json",
+      "sha256": "e42b947f33ef70540bfebcfb23e0229f424c68f0ae2cc7bca8e6c6c3c15c76bb",
+      "bytes": 34187,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/owner-cli.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/owner-native.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/owner-native.json",
+      "sha256": "e5fc1d5b90f642ad53bcde292bed175a929ca1d3512d54b11a33d0b832d20cef",
+      "bytes": 89,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/owner-native.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/owner.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/owner.json",
+      "sha256": "b5b5f207a11a63701eede60c849b91a3ba16f2fddc5c35206ec0d94be670732d",
+      "bytes": 43375,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/owner.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/baseline-native.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/baseline-native.json",
+      "sha256": "58b2467f45096975a3cf982c1d84d36c07c675cffb8912d9fd771c31d05cd67d",
+      "bytes": 9798,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/baseline-native.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/baseline-go.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/baseline-go.json",
+      "sha256": "98989436839f0f7dd3053fabe53bd0c1ed28afea593aa841f892c4f29e3b3f72",
+      "bytes": 192271,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/baseline-go.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/baseline-input.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/baseline-input.json",
+      "sha256": "52613525f1c0ca38395603e00ac00cc0fdcc42c9bab14aaeb70e0aa2a2da76dc",
+      "bytes": 161191,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/baseline-input.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/controls.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/controls.json",
+      "sha256": "8a260fa36234ec74c5af74af3bae1fbe3872707fd6a5eb223d91f82955a64222",
+      "bytes": 11063,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/controls.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/cli.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/cli.json",
+      "sha256": "0c1c4ab34e0a8d007d448510f2c211aa0e78ba70d3a6b2a69d995e50cf5c9639",
+      "bytes": 308149,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/cli.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/input.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/input.json",
+      "sha256": "917a1f7a31e7db3c614531dc2b8c4a022fd4638194d5d9905f78ea802ba11ec8",
+      "bytes": 845556,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/input.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/native.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/native.json",
+      "sha256": "d7dd433962f1b471b743b9266628846378b9fcd786ee27d1110b3ef1586508ed",
+      "bytes": 84,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/native.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/go.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/go.json",
+      "sha256": "969332012fe2a8e8c256b9746c4771bec97edc1fa89ac4e7161589fab466e122",
+      "bytes": 173471,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/go.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/controls.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/controls.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/controls.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/owner-cli.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/owner-cli.log",
+      "sha256": "cb7ff35f6ef5169d325eb8fb8a10f30b3a6bb90b93483bb8ea200d97108b84c9",
+      "bytes": 46,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/owner-cli.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/cli.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/cli.log",
+      "sha256": "22a85b7d6fb4627e689cc08da4ab0bd0f19f5b3301017967b83515fdbac5f068",
+      "bytes": 47,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/cli.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/native-build.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/native-build.log",
+      "sha256": "60752725ea6f194f20ebc7150276eef9d351f09c52a8c6e784e05f6a10ca45df",
+      "bytes": 60,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/native-build.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/native-constructors.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/native-constructors.log",
+      "sha256": "718966eac3b9432370a8f37f4760b95061a76dd5fd5931bd7f4416ea42b0ffe8",
+      "bytes": 364,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/native-constructors.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/go-owners.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/go-owners.log",
+      "sha256": "15d583cef2904be9d19c26885b4c4c868d4cb205d433800e5c6d2d9a41988ecf",
+      "bytes": 65,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/go-owners.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/go-original-baseline.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/go-original-baseline.log",
+      "sha256": "6aa776651691d354f9416b57a911319087a2888b435f74b0447638366ac4ae28",
+      "bytes": 65,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/go-original-baseline.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/go-constructors.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/go-constructors.log",
+      "sha256": "28ac6ed7e1f95f847cd463ad9d2900e34c5426a84723b62e35f5e119651d8e76",
+      "bytes": 65,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/go-constructors.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-local.evidence/go-build.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-local.evidence/go-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-local.evidence/go-build.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-files.evidence/filesystem.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-files.evidence/filesystem.json",
+      "sha256": "3acaaaca28c754ef3d884d70d43333c262b6c99e3be5b08442287614abe3c827",
+      "bytes": 20417,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-files.evidence/filesystem.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-files.evidence/controls.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-files.evidence/controls.json",
+      "sha256": "08ad9fe91f4f268fd960cd7c4524aa0dfef805bc8ff557a8666eba2bb0d3772c",
+      "bytes": 9851,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-files.evidence/controls.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-files.evidence/cli.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-files.evidence/cli.json",
+      "sha256": "a923a734eb528d350312e922b5af2570f23a26665734d4411707f29bb6d3f9ad",
+      "bytes": 474199,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-files.evidence/cli.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-files.evidence/input.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-files.evidence/input.json",
+      "sha256": "24cfdacd09840a91900555d2a3e20dc70e86d427f3d0b0ed264f5a2fe551f9cc",
+      "bytes": 711033,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-files.evidence/input.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-files.evidence/native.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-files.evidence/native.json",
+      "sha256": "9a75a2e9f88a6a114263de58f57cf40ee57a834ef733ba399c785c0ee69290ec",
+      "bytes": 84,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-files.evidence/native.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-files.evidence/go.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-files.evidence/go.json",
+      "sha256": "a7847a086745b749ead5643b3f2709f0c391b2df08d4a0c67c7ff364eba8f003",
+      "bytes": 779974,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-files.evidence/go.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-files.evidence/controls.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-files.evidence/controls.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-files.evidence/controls.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-files.evidence/filesystem.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-files.evidence/filesystem.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-files.evidence/filesystem.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-files.evidence/cli.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-files.evidence/cli.log",
+      "sha256": "70f9a5a40d08b92f72a27b1471c92180c50e0c8fab02ad60666302444babdc35",
+      "bytes": 48,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-files.evidence/cli.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-files.evidence/native-build.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-files.evidence/native-build.log",
+      "sha256": "1094a36867300c1838cdc4ee40efe961d83bac574665f8ee57a40d5b1e88698c",
+      "bytes": 60,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-files.evidence/native-build.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-files.evidence/native-constructors.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-files.evidence/native-constructors.log",
+      "sha256": "440570ddcc59da6fbf3db1a4342dad33f5ab06d688e8866bb3395dae753686b9",
+      "bytes": 367,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-files.evidence/native-constructors.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-files.evidence/go-constructors.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-files.evidence/go-constructors.log",
+      "sha256": "df5b92fa2296975ff8b60d9b0b92ec9e00783fd5c9cec9026131dae40f88fd44",
+      "bytes": 65,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-files.evidence/go-constructors.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-files.evidence/go-build.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-files.evidence/go-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-files.evidence/go-build.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-hermes.evidence/filesystem.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-hermes.evidence/filesystem.json",
+      "sha256": "a7db210799e350f6f8d398156515e2be72d9762f9417ed366c5fb00ce95b1df1",
+      "bytes": 20137,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-hermes.evidence/filesystem.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-hermes.evidence/controls.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-hermes.evidence/controls.json",
+      "sha256": "5ee1666172b27499bf3e547f014a019b5b61c0f1981bee6b6ef18b1d725ac149",
+      "bytes": 10242,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-hermes.evidence/controls.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-hermes.evidence/cli.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-hermes.evidence/cli.json",
+      "sha256": "6253780eaaf3e32d5872dbf8cfce88643ffc08510aeb6fc859f30ac091db1ade",
+      "bytes": 462077,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-hermes.evidence/cli.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-hermes.evidence/input.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-hermes.evidence/input.json",
+      "sha256": "2b4ee1bf165f63c7bad553bceb9b299af6c536e0ebc3d00e4ae0b351d0f7963a",
+      "bytes": 474248,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-hermes.evidence/input.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-hermes.evidence/native.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-hermes.evidence/native.json",
+      "sha256": "c4acb2c86d137f27e5acaa385d8efebe5c6476d8fe93660bfc4a6a1b7a9b111e",
+      "bytes": 48,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-hermes.evidence/native.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-hermes.evidence/go.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-hermes.evidence/go.json",
+      "sha256": "02e7107ad23edd3a7fa27a49b55d03f33b4147999e0505a5186951bcc078875e",
+      "bytes": 608908,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-hermes.evidence/go.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-hermes.evidence/controls.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-hermes.evidence/controls.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-hermes.evidence/controls.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-hermes.evidence/filesystem.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-hermes.evidence/filesystem.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-hermes.evidence/filesystem.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-hermes.evidence/cli.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-hermes.evidence/cli.log",
+      "sha256": "5b5cffcf49a8cee3310b5765c3695d0b03ed05d74aebddfb346401a55d47ad32",
+      "bytes": 45,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-hermes.evidence/cli.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-hermes.evidence/native-build.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-hermes.evidence/native-build.log",
+      "sha256": "fcce12e8e9a3743502ec98eb1888a43a32489c10219b715f931aa40675ed5311",
+      "bytes": 60,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-hermes.evidence/native-build.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-hermes.evidence/native-constructors.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-hermes.evidence/native-constructors.log",
+      "sha256": "c9e88b296255ebe532f40f73bd0a0d87d96a9cec8e25ef8e213c3887f506bef1",
+      "bytes": 349,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-hermes.evidence/native-constructors.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-hermes.evidence/go-constructors.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-hermes.evidence/go-constructors.log",
+      "sha256": "033d56ee14bb2349a702d82cb35b8970b1229f91868f8a21218a59f71d5c47c3",
+      "bytes": 65,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-hermes.evidence/go-constructors.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-hermes.evidence/go-build.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-hermes.evidence/go-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-hermes.evidence/go-build.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-reference.evidence/controls.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-reference.evidence/controls.json",
+      "sha256": "6057eeeda8c4c0c99d9ee40d2e65c87011112d8c2ea26e7d9e446a807521679f",
+      "bytes": 8207,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-reference.evidence/controls.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-reference.evidence/cli.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-reference.evidence/cli.json",
+      "sha256": "63793e974e55ee2b149e0b9e75df2429c5dcd6b42ee3ae3bacadee2556b04dfe",
+      "bytes": 662712,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-reference.evidence/cli.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-reference.evidence/native.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-reference.evidence/native.json",
+      "sha256": "bea03abfc4ad02564ef447d21b6b9757a6e07684d1c3e38b254816d9f85cbbd6",
+      "bytes": 48,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-reference.evidence/native.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-reference.evidence/go.json",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-reference.evidence/go.json",
+      "sha256": "5e9c92a1e8517edffefe7505c211937ee8258bc1a3d8e29310eeee9c678daf3f",
+      "bytes": 70389,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-reference.evidence/go.json"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-reference.evidence/controls.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-reference.evidence/controls.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-reference.evidence/controls.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-reference.evidence/cli.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-reference.evidence/cli.log",
+      "sha256": "19f63b9a5d3edda82fe5aefd0176889cec505f985da89187b7be4c1c5299cdea",
+      "bytes": 55,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-reference.evidence/cli.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-reference.evidence/native-build.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-reference.evidence/native-build.log",
+      "sha256": "fcce12e8e9a3743502ec98eb1888a43a32489c10219b715f931aa40675ed5311",
+      "bytes": 60,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-reference.evidence/native-build.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-reference.evidence/native-constructors.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-reference.evidence/native-constructors.log",
+      "sha256": "5406bb81bfb880db59df8bf57374bf8ce39d7930b9f0021db5bad114846329f2",
+      "bytes": 362,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-reference.evidence/native-constructors.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-reference.evidence/go-constructors.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-reference.evidence/go-constructors.log",
+      "sha256": "c1e4f1e5cd7596574e031d692e84fbf643420937125170232b1e021b8c9c486c",
+      "bytes": 65,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-reference.evidence/go-constructors.log"
+    },
+    {
+      "original": "/tmp/symaira-usage768-abf-root-doctor-reference.evidence/go-build.log",
+      "retained": "/workspace/oracles/symaira-usage768-abf-binaries/review-proof/symaira-usage768-abf-root-doctor-reference.evidence/go-build.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "binary": false,
+      "tracked": true,
+      "tracked_path": "proof/symaira-usage768-abf-root-doctor-reference.evidence/go-build.log"
+    }
+  ],
+  "exact_raw_artifacts": 103,
+  "tracked_nonbinary": 100,
+  "external_binary": 3,
+  "original36_roundtrip_archive": "/workspace/oracles/symaira-usage768-abf-binaries/actual-reviewed-binaries.tar.gz",
+  "original73_11_verified": true,
+  "accepted112_74_verified": true,
+  "scope": "Original full independent REQUEST_CHANGES report and all103 artifacts preserved byte-identically; three actual probe binaries retained externally rather than Git. No original failure removed."
+}

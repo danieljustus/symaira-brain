@@ -1,0 +1,346 @@
+{
+  "product_execution": false,
+  "observations": [
+    {
+      "component_hex": "6f776e65642defbfbd",
+      "component_sha256": "f315a998beb7b8d5937ae9452766d64a4f0fc13ef23baf2d8e0e2273c9f15d2a",
+      "system": "linux",
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+      "os_name": "posix",
+      "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+      "kernel": {
+        "system": "Linux",
+        "node": "b063a03e36ce",
+        "release": "6.18.44",
+        "version": "#1 SMP Sat Sep 26 20:02:31 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "invalid_utf8": false,
+      "product_children_started": 0,
+      "owned_root_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d7a666333647a7136",
+      "attempted_path_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d7a666333647a71362f6f776e65642defbfbd",
+      "before_entries": [],
+      "admitted": true,
+      "disposition": "admitted",
+      "created_name_bytes_hex": [
+        "6f776e65642defbfbd"
+      ],
+      "entries_before_cleanup": [
+        "6f776e65642defbfbd"
+      ],
+      "entries_after_cleanup": [],
+      "owned_root_removed": true
+    },
+    {
+      "component_hex": "6f776e65642de280a8e280a9",
+      "component_sha256": "08bbe06c330aafb701da6afb697422c2530edbfb59077eab479418fa32528121",
+      "system": "linux",
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+      "os_name": "posix",
+      "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+      "kernel": {
+        "system": "Linux",
+        "node": "b063a03e36ce",
+        "release": "6.18.44",
+        "version": "#1 SMP Sat Sep 26 20:02:31 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "invalid_utf8": false,
+      "product_children_started": 0,
+      "owned_root_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d307831306e6c7666",
+      "attempted_path_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d307831306e6c76662f6f776e65642de280a8e280a9",
+      "before_entries": [],
+      "admitted": true,
+      "disposition": "admitted",
+      "created_name_bytes_hex": [
+        "6f776e65642de280a8e280a9"
+      ],
+      "entries_before_cleanup": [
+        "6f776e65642de280a8e280a9"
+      ],
+      "entries_after_cleanup": [],
+      "owned_root_removed": true
+    },
+    {
+      "component_hex": "6f776e65642de282",
+      "component_sha256": "c093771ce8fcbf0129812eb4e2d8479fc0fc7f86bb211e6271393c274390e03b",
+      "system": "linux",
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+      "os_name": "posix",
+      "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+      "kernel": {
+        "system": "Linux",
+        "node": "b063a03e36ce",
+        "release": "6.18.44",
+        "version": "#1 SMP Sat Sep 26 20:02:31 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "invalid_utf8": true,
+      "product_children_started": 0,
+      "owned_root_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d766979727936356e",
+      "attempted_path_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d766979727936356e2f6f776e65642de282",
+      "before_entries": [],
+      "admitted": true,
+      "disposition": "admitted",
+      "created_name_bytes_hex": [
+        "6f776e65642de282"
+      ],
+      "entries_before_cleanup": [
+        "6f776e65642de282"
+      ],
+      "entries_after_cleanup": [],
+      "owned_root_removed": true
+    },
+    {
+      "component_hex": "6f776e65642dff",
+      "component_sha256": "e7ffccc0fa9dd598e3bb28b3d55b54c7812258e552940af8ded90edb8029e776",
+      "system": "linux",
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+      "os_name": "posix",
+      "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+      "kernel": {
+        "system": "Linux",
+        "node": "b063a03e36ce",
+        "release": "6.18.44",
+        "version": "#1 SMP Sat Sep 26 20:02:31 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "invalid_utf8": true,
+      "product_children_started": 0,
+      "owned_root_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d67727a6d796e6c73",
+      "attempted_path_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d67727a6d796e6c732f6f776e65642dff",
+      "before_entries": [],
+      "admitted": true,
+      "disposition": "admitted",
+      "created_name_bytes_hex": [
+        "6f776e65642dff"
+      ],
+      "entries_before_cleanup": [
+        "6f776e65642dff"
+      ],
+      "entries_after_cleanup": [],
+      "owned_root_removed": true
+    },
+    {
+      "component_hex": "6f776e65642df08080",
+      "component_sha256": "6511192fdacd75a0614636fbac963bb9ba18c8b428d05f3ab3b5f01c9a3eaedf",
+      "system": "linux",
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+      "os_name": "posix",
+      "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+      "kernel": {
+        "system": "Linux",
+        "node": "b063a03e36ce",
+        "release": "6.18.44",
+        "version": "#1 SMP Sat Sep 26 20:02:31 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "invalid_utf8": true,
+      "product_children_started": 0,
+      "owned_root_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d31327576636d3772",
+      "attempted_path_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d31327576636d37722f6f776e65642df08080",
+      "before_entries": [],
+      "admitted": true,
+      "disposition": "admitted",
+      "created_name_bytes_hex": [
+        "6f776e65642df08080"
+      ],
+      "entries_before_cleanup": [
+        "6f776e65642df08080"
+      ],
+      "entries_after_cleanup": [],
+      "owned_root_removed": true
+    },
+    {
+      "component_hex": "6f776e65642deda080",
+      "component_sha256": "141fe312c039fb28026366cf4fc02a9b2bb0626d81aab1d6352c22b8c83f9243",
+      "system": "linux",
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+      "os_name": "posix",
+      "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+      "kernel": {
+        "system": "Linux",
+        "node": "b063a03e36ce",
+        "release": "6.18.44",
+        "version": "#1 SMP Sat Sep 26 20:02:31 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "invalid_utf8": true,
+      "product_children_started": 0,
+      "owned_root_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d3868723961386e6a",
+      "attempted_path_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d3868723961386e6a2f6f776e65642deda080",
+      "before_entries": [],
+      "admitted": true,
+      "disposition": "admitted",
+      "created_name_bytes_hex": [
+        "6f776e65642deda080"
+      ],
+      "entries_before_cleanup": [
+        "6f776e65642deda080"
+      ],
+      "entries_after_cleanup": [],
+      "owned_root_removed": true
+    },
+    {
+      "component_hex": "6f776e65642dc0af",
+      "component_sha256": "4e3c79587e122cff48dfeb08aed32d0bcfebcb046649feaace7d2991f5a03023",
+      "system": "linux",
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+      "os_name": "posix",
+      "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+      "kernel": {
+        "system": "Linux",
+        "node": "b063a03e36ce",
+        "release": "6.18.44",
+        "version": "#1 SMP Sat Sep 26 20:02:31 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "invalid_utf8": true,
+      "product_children_started": 0,
+      "owned_root_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d7a72707a67623875",
+      "attempted_path_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d7a72707a676238752f6f776e65642dc0af",
+      "before_entries": [],
+      "admitted": true,
+      "disposition": "admitted",
+      "created_name_bytes_hex": [
+        "6f776e65642dc0af"
+      ],
+      "entries_before_cleanup": [
+        "6f776e65642dc0af"
+      ],
+      "entries_after_cleanup": [],
+      "owned_root_removed": true
+    },
+    {
+      "component_hex": "6f776e65642d3c263e",
+      "component_sha256": "299258a7218817433acb6b8efac2df54bfa242c892663a023dfd414d3524a280",
+      "system": "linux",
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+      "os_name": "posix",
+      "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+      "kernel": {
+        "system": "Linux",
+        "node": "b063a03e36ce",
+        "release": "6.18.44",
+        "version": "#1 SMP Sat Sep 26 20:02:31 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "invalid_utf8": false,
+      "product_children_started": 0,
+      "owned_root_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d66687270786d6c65",
+      "attempted_path_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d66687270786d6c652f6f776e65642d3c263e",
+      "before_entries": [],
+      "admitted": true,
+      "disposition": "admitted",
+      "created_name_bytes_hex": [
+        "6f776e65642d3c263e"
+      ],
+      "entries_before_cleanup": [
+        "6f776e65642d3c263e"
+      ],
+      "entries_after_cleanup": [],
+      "owned_root_removed": true
+    },
+    {
+      "component_hex": "6f776e65642d225c",
+      "component_sha256": "87865a336fb17341939bf34abf1b93a1eef15b99d1a51da8065de004b0be620a",
+      "system": "linux",
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+      "os_name": "posix",
+      "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+      "kernel": {
+        "system": "Linux",
+        "node": "b063a03e36ce",
+        "release": "6.18.44",
+        "version": "#1 SMP Sat Sep 26 20:02:31 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "invalid_utf8": false,
+      "product_children_started": 0,
+      "owned_root_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d79316e7568797a5f",
+      "attempted_path_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d79316e7568797a5f2f6f776e65642d225c",
+      "before_entries": [],
+      "admitted": true,
+      "disposition": "admitted",
+      "created_name_bytes_hex": [
+        "6f776e65642d225c"
+      ],
+      "entries_before_cleanup": [
+        "6f776e65642d225c"
+      ],
+      "entries_after_cleanup": [],
+      "owned_root_removed": true
+    },
+    {
+      "component_hex": "6f776e65642de2823c263e",
+      "component_sha256": "fe58a103802d79a7aae401705cec4d3ccaf16698dae2a990a76c4577a53b9bc2",
+      "system": "linux",
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+      "os_name": "posix",
+      "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+      "kernel": {
+        "system": "Linux",
+        "node": "b063a03e36ce",
+        "release": "6.18.44",
+        "version": "#1 SMP Sat Sep 26 20:02:31 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "invalid_utf8": true,
+      "product_children_started": 0,
+      "owned_root_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d7874646b31773676",
+      "attempted_path_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d7874646b317736762f6f776e65642de2823c263e",
+      "before_entries": [],
+      "admitted": true,
+      "disposition": "admitted",
+      "created_name_bytes_hex": [
+        "6f776e65642de2823c263e"
+      ],
+      "entries_before_cleanup": [
+        "6f776e65642de2823c263e"
+      ],
+      "entries_after_cleanup": [],
+      "owned_root_removed": true
+    },
+    {
+      "component_hex": "6f776e65642de2823c263e2d686f6d65",
+      "component_sha256": "15b20784309d096adcfab355e88466d843fff43458f90bc9ab10ab93c12d68c9",
+      "system": "linux",
+      "platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+      "os_name": "posix",
+      "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+      "kernel": {
+        "system": "Linux",
+        "node": "b063a03e36ce",
+        "release": "6.18.44",
+        "version": "#1 SMP Sat Sep 26 20:02:31 UTC 2026",
+        "machine": "x86_64",
+        "processor": ""
+      },
+      "invalid_utf8": true,
+      "product_children_started": 0,
+      "owned_root_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d3475776139783937",
+      "attempted_path_bytes_hex": "2f776f726b73706163652f7265766965772d70726f6f662f7265766965772d70723830302d67756172643830352d6b65726e656c2d66697874757265732f6f776e65642d746d702f746d707367653475326a702f6f776e65642d6b65726e656c2d61646d697373696f6e2d34757761397839372f6f776e65642de2823c263e2d686f6d65",
+      "before_entries": [],
+      "admitted": true,
+      "disposition": "admitted",
+      "created_name_bytes_hex": [
+        "6f776e65642de2823c263e2d686f6d65"
+      ],
+      "entries_before_cleanup": [
+        "6f776e65642de2823c263e2d686f6d65"
+      ],
+      "entries_after_cleanup": [],
+      "owned_root_removed": true
+    }
+  ]
+}

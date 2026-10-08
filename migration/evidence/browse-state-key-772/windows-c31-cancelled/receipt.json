@@ -1,0 +1,20 @@
+{
+  "scope": "Actual published c31 Windows jobs cancelled after process matches, Registry step incomplete; cause unproved; no timeout/skip/runtime-fix claim",
+  "files": [
+    {
+      "path": "/tmp/symaira-current-ci-job-111325494848.log",
+      "sha256": "e7452f6f8a502f8b6248ccd64383e0cd3af866455dd2aa36caa0984c03df0871",
+      "bytes": 106344
+    },
+    {
+      "path": "/tmp/symaira-current-ci-job-111325494725.log",
+      "sha256": "55296c60287e83599a7ad45f0bf225c1d665b5c53b081b9bfb9289e85247924d",
+      "bytes": 113692
+    },
+    {
+      "path": "/workspace/attachments/bc559c9e-cbae-4f33-a1f3-d50e5d925eac/daemon-current-11289619552.zip",
+      "sha256": "bd7905bdee125235cb09fd7042f268765907e3f07d0db9927d3586a1083e2802",
+      "bytes": 47060
+    }
+  ]
+}

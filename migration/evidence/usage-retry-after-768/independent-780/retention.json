@@ -1,0 +1,122 @@
+{
+  "original_source": "780f93987e2f20c6dbd6cbed8a4a07af1b914d11",
+  "review": "STATIC_REQUEST_CHANGES_ONE_P2",
+  "entries": [
+    {
+      "original": "/tmp/symaira-usage768-retry-independent-static-review.md",
+      "bytes": 12902,
+      "sha256": "09c2b758291662ae90b2405eb4c5aa2d3695f660a3a27fc7c7797a5e897d5207",
+      "archive": "migration/evidence/usage-retry-after-768/independent-780/000-symaira-usage768-retry-independent-static-review.md.gz",
+      "archive_sha256": "1c1f248dd117aa1ee4807f1063cf301d0cadce2a585070e4dcf8c0a0dbca2f37",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-retry-independent-static-review-receipt.json",
+      "bytes": 5056,
+      "sha256": "d0ea8cb5562a547dc6f5e3baeea272aa009fdf0103359fb1f39283dfe3b8bad1",
+      "archive": "migration/evidence/usage-retry-after-768/independent-780/001-symaira-usage768-retry-independent-static-review-receipt.json.gz",
+      "archive_sha256": "c599f6dd0b56421319108b6fabcaac31fdda2952550b3cb33d932389ef5a223f",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-retry-independent-static-projection.py",
+      "bytes": 3446,
+      "sha256": "03ed3d4150c259da5855ba84622e84dc6f34435e1f70a326aee249fe30c0911f",
+      "archive": "migration/evidence/usage-retry-after-768/independent-780/002-symaira-usage768-retry-independent-static-projection.py.gz",
+      "archive_sha256": "64fcdcf31bdc8736fab4846d5967fffa8c44d39effb543efc3e1eedfe29a620c",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-retry-independent-static-projection.log",
+      "bytes": 4171,
+      "sha256": "89a7362861b7c956d1fc6fe54e29a71ac2e4184e024736ea798f49d4e28bfb2e",
+      "archive": "migration/evidence/usage-retry-after-768/independent-780/003-symaira-usage768-retry-independent-static-projection.log.gz",
+      "archive_sha256": "ee042e1b03e5716aad1bc1fbe4c6d800453637d7b558b4f5bf1298132c7f1eb0",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-retry-independent-static-projection/correction.json",
+      "bytes": 2342,
+      "sha256": "4ceeb6a9fb44acebed1d3ea667f54851e3b456f575a35c6723f3025dc329b02b",
+      "archive": "migration/evidence/usage-retry-after-768/independent-780/004-correction.json.gz",
+      "archive_sha256": "5f54a199e32a4a0d74c80c390aa0b9b5049ce76890130c05c5f248f6c657e2e9",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-retry-independent-static-projection/negative-exponent-underflow.header",
+      "bytes": 10009,
+      "sha256": "952b9637ae433ba03070cb86908ac9152e80aef78e75d60756500b7aa83c3972",
+      "archive": "migration/evidence/usage-retry-after-768/independent-780/005-negative-exponent-underflow.header.gz",
+      "archive_sha256": "8e0240d7d05e52fbe43f156de53d0c4d75aa464bab425d9763032e82a545ca34",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-retry-independent-static-projection/positive-exponent-overflow.header",
+      "bytes": 10010,
+      "sha256": "cf8db6085218dc12e84d439e4a136d8f36f8cdaa49430e6b2ffe26008841b9e8",
+      "archive": "migration/evidence/usage-retry-after-768/independent-780/006-positive-exponent-overflow.header.gz",
+      "archive_sha256": "c7a404de20be8e1ab3b32b6aeeff380aed4abd00c19a9ac98987a210f81d5d2b",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-retry-independent-static-projection/receipt.json",
+      "bytes": 4171,
+      "sha256": "89a7362861b7c956d1fc6fe54e29a71ac2e4184e024736ea798f49d4e28bfb2e",
+      "archive": "migration/evidence/usage-retry-after-768/independent-780/007-receipt.json.gz",
+      "archive_sha256": "ee042e1b03e5716aad1bc1fbe4c6d800453637d7b558b4f5bf1298132c7f1eb0",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-retry-independent-static-projection/underscore-positive-overflow.header",
+      "bytes": 10015,
+      "sha256": "95cb84481c0315128c27128f43882d9f86d7b2bcaf656ad5386f5176a3f1e293",
+      "archive": "migration/evidence/usage-retry-after-768/independent-780/008-underscore-positive-overflow.header.gz",
+      "archive_sha256": "faf9132e795421a96b60aa3006a0308d51472c258fff0b371c62446d42e1c073",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-retry-independent-static-projection/within-cap-five-digits.header",
+      "bytes": 10009,
+      "sha256": "c40eb0d7711aaebebdd135db0153394446d4870ee80a0a47ba6b14d45b9763f8",
+      "archive": "migration/evidence/usage-retry-after-768/independent-780/009-within-cap-five-digits.header.gz",
+      "archive_sha256": "2b6a293216e4bfd3c3cdc4769f7243ca9ea314654c58179b82ddc321c2006ca4",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-retry-independent-static-projection/within-cap-small.header",
+      "bytes": 16,
+      "sha256": "eee162819231582809169b1145cd7f3035a9d81439e4750da38b711a1facc4a8",
+      "archive": "migration/evidence/usage-retry-after-768/independent-780/010-within-cap-small.header.gz",
+      "archive_sha256": "dbf77d286a179b14a839b60712ed8219d236a8d8511970b2b7a0a110a9cb1fd9",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-root-sdk-exp/main.go",
+      "bytes": 738,
+      "sha256": "14e79a4a5cd434b48148a51e4650331f444e03e2d1a8319a9e6d5b0b56a3916a",
+      "archive": "migration/evidence/usage-retry-after-768/independent-780/011-main.go.gz",
+      "archive_sha256": "57ad9e61241a2e731aba58ebef8d36f7585c87aef84d8bdb33b853c91717198f",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-root-sdk-exp/receipt.json",
+      "bytes": 3012,
+      "sha256": "874bbec10f8ccb1bd5d7396db60c42eef19b7bdd68390a5b9553e2007076fa82",
+      "archive": "migration/evidence/usage-retry-after-768/independent-780/012-receipt.json.gz",
+      "archive_sha256": "e70213bb0abf89793bc13d03ee96fef929535f2a9574e5d36317850faa2a4312",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-root-sdk-exp/results.json",
+      "bytes": 1274,
+      "sha256": "06f1f4dcb23dd1b0b0fb6ad8717dc1b5c281a0f23286665ae09265b969bb3681",
+      "archive": "migration/evidence/usage-retry-after-768/independent-780/013-results.json.gz",
+      "archive_sha256": "fcc4cc758d247b73fa25d7d57352c20ef28ae92a3413a8d4b04493520d17e5ce",
+      "roundtrip": true
+    }
+  ],
+  "original_actual_Go_SDK_only": true,
+  "original_native_780_uncompiled": true,
+  "withdrawn_negative_projection_retained": true,
+  "unchanged_initial_review": "migration/evidence/usage-retry-after-768/original-independent-review-5e774/manifest.json"
+}

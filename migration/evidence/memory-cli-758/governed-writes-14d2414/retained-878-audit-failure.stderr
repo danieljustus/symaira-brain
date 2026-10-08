@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/writes.py", line 303, in <module>
+    execute(args.go.resolve(),args.rust.resolve(),args.report)
+  File "/workspace/symaira-memory758-writes/scripts/memory-cli-oracle/writes.py", line 269, in execute
+    assert transcript['exit'] == 0, ('native set exit must be zero',case,binary,transcript)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('native set exit must be zero', {'name': 'repeat-disabled', 'repeat': True}, PosixPath('/tmp/memory-write-oracle-1uk_out4/control'), {'exit': 99, 'stdout': '', 'stderr': ''})

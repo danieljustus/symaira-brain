@@ -90,6 +90,9 @@ pub struct ServerOptions {
     pub shutdown_handler: Option<ShutdownHandler>,
     pub registry: Option<Arc<crate::SessionRegistry>>,
     pub session_spec: Option<crate::SessionSpec>,
+    /// Explicit CLI startup executable owning provider lifetimes; library users
+    /// keep the existing standalone resolver unless they opt in.
+    pub startup_provider_owner: Option<PathBuf>,
     pub policy: PolicyStatus,
     pub engine: String,
     pub mode: String,
@@ -106,6 +109,7 @@ impl Default for ServerOptions {
             shutdown_handler: None,
             registry: None,
             session_spec: None,
+            startup_provider_owner: None,
             policy: PolicyStatus::default(),
             engine: "chrome".into(),
             mode: "browser".into(),
@@ -137,10 +141,7 @@ impl std::fmt::Display for ServerError {
         match self {
             Self::Io(e) => write!(f, "{e}"),
             Self::AlreadyRunning => f.write_str("a daemon is already running for this session"),
-            Self::InvalidSession(s) => write!(
-                f,
-                "invalid session {s:?}: use 1-64 letters, digits, '.', '_' or '-'"
-            ),
+            Self::InvalidSession(s) => f.write_str(&crate::invalid_session_message(s.as_bytes())),
             Self::Unsupported => f.write_str("daemon sockets are not supported on this platform"),
         }
     }
@@ -217,8 +218,12 @@ impl Server {
             }))
         });
         if options.handler.is_none() {
-            let (handler, shutdown_handler) = crate::runtime::handlers(spec)
-                .map_err(|error| ServerError::Io(io::Error::other(error.message)))?;
+            let handlers = match options.startup_provider_owner.clone() {
+                Some(owner) => crate::runtime::handlers_with_startup_owner(spec, Some(owner)),
+                None => crate::runtime::handlers(spec),
+            };
+            let (handler, shutdown_handler) =
+                handlers.map_err(|error| ServerError::Io(io::Error::other(error.message)))?;
             options.handler = Some(handler);
             options.shutdown_handler = Some(shutdown_handler);
         }

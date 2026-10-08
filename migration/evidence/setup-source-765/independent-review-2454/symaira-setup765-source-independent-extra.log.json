@@ -1,0 +1,4 @@
+{
+  "sha256": "3d81027c394e958b98527772445d4118580d33d77756abcb9a20a578a7614a80",
+  "text": "raw cases 6 mismatches [('module-raw-separate', ['stderr_base64']), ('module-raw-inline', ['stderr_base64']), ('missing-root-raw', ['stderr_base64']), ('unknown-raw-after-source', ['stderr_base64']), ('bool-raw-after-source', ['stderr_base64']), ('existing-root-raw-json', ['stdout_base64'])] signals passed 2\n"
+}

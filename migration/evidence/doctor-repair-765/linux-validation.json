@@ -1,0 +1,65 @@
+{
+  "source_head": "2f793f3cb78c4a3731dfe0d06a4fb222c6ccc2eb",
+  "source_dirty": false,
+  "base_main": "e8c7f7990ab61967db0a3cbadaf6e485b4a33d99",
+  "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "go_sdk": "go version go1.26.7 linux/amd64",
+  "runtime": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "scope": "Native doctor --fix managed-release repair; full typed configuration diagnostics and source/module lifecycle remain Go-owned. Native macOS/Windows CI acceptance is pending.",
+  "doctor": {
+    "matched": 255,
+    "total": 255,
+    "complete_observations": 255,
+    "exit": 0
+  },
+  "setup_regression": {
+    "total": 151,
+    "matches": true,
+    "exit": 0
+  },
+  "negative_controls": {
+    "wrong-exit": "exit only",
+    "missing-header": "stdout_base64 only",
+    "missing-core-event": "logs only"
+  },
+  "tests": {
+    "passed": 396,
+    "failed": 0,
+    "ignored": 0,
+    "parent_summaries": 37
+  },
+  "checks": {
+    "fmt": "passed",
+    "strict_clippy": "passed",
+    "actionlint": "passed"
+  },
+  "production_go_changed": false,
+  "environment": {
+    "umask": "022",
+    "PATH_prefix": "/workspace/toolchains/go1.26.7/bin",
+    "rust_env": "/home/agent/.cargo/env",
+    "CARGO_TARGET_DIR": "/workspace/symaira-doctor765/target",
+    "CARGO_INCREMENTAL": "0",
+    "CARGO_PROFILE_DEV_DEBUG": "0",
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "lifecycle_wrapper": "python3 /tmp/symaira-subreaper.py bash -c"
+  },
+  "commands": [
+    "cargo test -p symbrain-cli -p symbrain-managed -p symbrain-core --all-features --locked",
+    "cargo fmt --all --check",
+    "cargo clippy -p symbrain-cli -p symbrain-managed -p symbrain-core --all-targets --all-features --locked -- -D warnings",
+    "/workspace/toolchains/bin/actionlint .github/workflows/ci.yml",
+    "scripts/doctor-repair-oracle/run.sh /tmp/symaira-doctor765-final-clean-process.json",
+    "scripts/setup-repair-oracle/run.sh /tmp/symaira-doctor765-final-clean-setup-process.json"
+  ],
+  "evidence_sha256": {
+    "linux-process-report.json": "6ab6826ee662fd59f68f3c38eba99025499fb151c8c6c29bfaeb27aa1ae5aae9",
+    "linux-setup-regression-report.json": "dd0fa66c646a5862a8a12494865b2d1c5a4c1aeb7507a942192129145ee83a88",
+    "linux-control-wrong-exit.json": "2336256f84046b521f9a28d97e73105c75082db6290dede7407902b773ddb2f9",
+    "linux-control-missing-header.json": "a840dad697616d97ccf96f5766975693f7d5c15ebc357b40b6a7dfa7bf2c91e0",
+    "linux-control-missing-core-event.json": "70c8ac4b12a04753b18b511a531a110c243f5f54efabab60f60e6b53db417b35",
+    "linux-validation-logs.json": "f63e10b5035b9caf971e46a9bf1d02458e9436c1f52d2e11ebf18e860ca4b7f8"
+  },
+  "publication_note": "This receipt is added by a subsequent evidence-only commit; its source_head and source hashes identify the immutable clean code actually tested.",
+  "log_storage": "Raw log contents and original SHA-256 are retained verbatim in linux-validation-logs.json."
+}

@@ -1,0 +1,10 @@
+{
+  "reviewed_publication": "2c7d1c243b17fd4e85f78c26267a371a25472669",
+  "tested_source": "b7fb40fda3ec68526ad5b4eb5e05b285d3f00935",
+  "normal_main": "2b6d49f250a81650eda1b93cec7d859a171873bb",
+  "normal_803_parent": "6ae73a7eef3442e2b4211a56043941339fb5a1d6",
+  "integration_commit": "2a6ede74e6849cdd1f33c92b7ed0068e5c8f954c",
+  "production_harness_dependency_workflow_changes": [],
+  "fresh_runtime_integration_claim": false,
+  "protected_native3_and_803_merge_required": true
+}

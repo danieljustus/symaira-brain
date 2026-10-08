@@ -1,0 +1,78 @@
+[
+  {
+    "label": "focused",
+    "selected_exact_lines": [
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/trace.3415511",
+        "line": "1791102036.949580 openat(AT_FDCWD</workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused>, \"/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/tmp/.tmpksh7cT/tool\", O_WRONLY|O_CREAT|O_TRUNC|O_CLOEXEC, 0666) = 3</workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/tmp/.tmpksh7cT/tool>"
+      },
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/trace.3415511",
+        "line": "1791102039.963063 wait4(3415512, [{WIFSIGNALED(s) && WTERMSIG(s) == SIGTERM}], WNOHANG, NULL) = 3415512"
+      },
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/trace.3415512",
+        "line": "1791102036.951288 execve(\"/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/tmp/.tmpksh7cT/tool\", [\"/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/tmp/.tmpksh7cT/tool\", \"version\", \"--json\"], 0x562a54932310 /* 10 vars */) = 0"
+      },
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/trace.3416347",
+        "line": "1791102039.962519 kill(-3415512, SIGTERM) = 0"
+      },
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/trace.3416348",
+        "line": "1791102039.972475 kill(-3415512, SIGKILL) = -1 ESRCH (No such process)"
+      },
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/trace.3416354",
+        "line": "1791102039.990990 kill(3415513, 0)      = -1 ESRCH (No such process)"
+      }
+    ],
+    "interpretation": "historical local exec/group termination/reaping evidence, not CI cause"
+  },
+  {
+    "label": "full-historical-six",
+    "selected_exact_lines": [
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416427",
+        "line": "1791102040.077742 openat(AT_FDCWD</workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six>, \"/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/tmp/.tmpJYDgiq/tool\", O_WRONLY|O_CREAT|O_TRUNC|O_CLOEXEC, 0666) = 6</workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/tmp/.tmpJYDgiq/tool>"
+      },
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416428",
+        "line": "1791102040.075134 openat(AT_FDCWD</workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six>, \"/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/tmp/.tmpiu4bI5/tool\", O_WRONLY|O_CREAT|O_TRUNC|O_CLOEXEC, 0666) = 3</workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/tmp/.tmpiu4bI5/tool>"
+      },
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416429",
+        "line": "1791102040.074870 openat(AT_FDCWD</workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six>, \"/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/tmp/.tmpHhWOI6/tool\", O_WRONLY|O_CREAT|O_TRUNC|O_CLOEXEC, 0666) = 3</workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/tmp/.tmpHhWOI6/tool>"
+      },
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416429",
+        "line": "1791102043.103706 wait4(3416431, [{WIFSIGNALED(s) && WTERMSIG(s) == SIGTERM}], WNOHANG, NULL) = 3416431"
+      },
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416431",
+        "line": "1791102040.076234 execve(\"/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/tmp/.tmpHhWOI6/tool\", [\"/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/tmp/.tmpHhWOI6/tool\", \"version\", \"--json\"], 0x55d5faf23320 /* 10 vars */) = 0"
+      },
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416432",
+        "line": "1791102040.077944 execve(\"/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/tmp/.tmpiu4bI5/tool\", [\"/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/tmp/.tmpiu4bI5/tool\", \"version\", \"--json\"], 0x55d5faf23320 /* 10 vars */) = 0"
+      },
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416436",
+        "line": "1791102040.111012 kill(-3416432, SIGKILL) = -1 ESRCH (No such process)"
+      },
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3417114",
+        "line": "1791102043.093386 kill(-3416431, SIGTERM) = 0"
+      },
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3417115",
+        "line": "1791102043.110982 kill(-3416431, SIGKILL) = -1 ESRCH (No such process)"
+      },
+      {
+        "trace": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3417116",
+        "line": "1791102043.118800 kill(3416435, 0)      = -1 ESRCH (No such process)"
+      }
+    ],
+    "interpretation": "historical local exec/group termination/reaping evidence, not CI cause"
+  }
+]

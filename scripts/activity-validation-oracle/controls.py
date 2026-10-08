@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def main():
-    fixture = json.loads((ROOT/'rust/symbrain-cli/tests/fixtures/activity_validation_767.json').read_text())
+    fixture = json.loads((ROOT/'rust/symbrain-cli/tests/fixtures/activity_validation_767.json').read_text(encoding='utf-8'))
     controls = []
     with tempfile.TemporaryDirectory(prefix='activity-controls-767-') as temp:
         root = Path(temp)
@@ -21,13 +21,13 @@ def main():
         for name, data, diagnostic in [('missing-fixture', None, 'required activity validation fixture'), ('changed-Go-exit', mutated, 'exit'), ('missing-case', shortened, 'complete activity process case count')]:
             path = root/f'{name}.json'
             if data is not None:
-                path.write_text(json.dumps(data))
+                path.write_text(json.dumps(data), encoding='utf-8')
             env = dict(os.environ, SYMBRAIN_ACTIVITY_VALIDATION_FIXTURE=str(path))
-            output = subprocess.run(['cargo','test','-p','symbrain-cli','--test','activity_validation_tests','--locked'],cwd=ROOT,env=env,capture_output=True,text=True,timeout=120)
+            output = subprocess.run(['cargo','test','-p','symbrain-cli','--test','activity_validation_tests','--locked'],cwd=ROOT,env=env,capture_output=True,text=True, encoding='utf-8',timeout=120)
             passed = output.returncode != 0 and diagnostic in output.stdout+output.stderr
             controls.append(dict(name=name,exit=output.returncode,expected_diagnostic=diagnostic,rejected=passed))
             assert passed, f'{name}: failure control did not reject for intended reason'
-    Path(sys.argv[1]).write_text(json.dumps(dict(controls=controls),indent=2)+'\n')
+    Path(sys.argv[1]).write_text(json.dumps(dict(controls=controls),indent=2)+'\n', encoding='utf-8')
     print('3/3 actual native fixture failure controls passed')
     return 0
 

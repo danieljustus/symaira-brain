@@ -1,0 +1,576 @@
+{
+  "candidate_source": "4cd56e3e47338aef30e5d83ea554227ace70fe71",
+  "original_b363": "b363762cb85b879630fecd3fd141cba1ae85f71c",
+  "binary_sha256": {
+    "go": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8",
+    "b363": "91de2c212944e742e509bcc805136e90e98e2bda14c917e2bd553823a868a808",
+    "candidate": "48acebf1eb67a5b270d802f7d1e09217f82d3e2cd7c5c56b29f7c45ffa7ecd00"
+  },
+  "cases": [
+    {
+      "arguments": [
+        "--session",
+        "owned-prefix",
+        "session",
+        "list"
+      ],
+      "go": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "list"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "daemon is unavailable for session \"owned-prefix\"\n"
+      },
+      "b363": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "list"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "candidate": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "list"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "b363_matches_candidate": true,
+      "go_matches_candidate": false
+    },
+    {
+      "arguments": [
+        "--session",
+        "owned-prefix",
+        "session",
+        "list",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "list",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"daemon_unavailable\",\"message\":\"daemon is unavailable for session \\\"owned-prefix\\\"\",\"hint\":\"start daemon with 'symbrowse daemon --session owned-prefix' (autostart disabled via SYMBROWSE_NO_AUTOSTART); see daemon log at /tmp/bk-prefix-9bpf6hcv/state/symbrowse/daemon.log\",\"details\":{\"session\":\"owned-prefix\",\"socket_path\":\"/tmp/bk-prefix-9bpf6hcv/run/symbrowse/owned-prefix.sock\"}}}\n",
+        "stderr": ""
+      },
+      "b363": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "list",
+          "--json"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "candidate": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "list",
+          "--json"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "b363_matches_candidate": true,
+      "go_matches_candidate": false
+    },
+    {
+      "arguments": [
+        "--session",
+        "owned-prefix",
+        "session",
+        "list",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "list",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: daemon_unavailable\n    message: daemon is unavailable for session \"owned-prefix\"\n    hint: start daemon with 'symbrowse daemon --session owned-prefix' (autostart disabled via SYMBROWSE_NO_AUTOSTART); see daemon log at /tmp/bk-prefix-9bpf6hcv/state/symbrowse/daemon.log\n    details:\n        session: owned-prefix\n        socket_path: /tmp/bk-prefix-9bpf6hcv/run/symbrowse/owned-prefix.sock\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "b363": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "list",
+          "--output",
+          "yaml"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "candidate": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "list",
+          "--output",
+          "yaml"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "b363_matches_candidate": true,
+      "go_matches_candidate": false
+    },
+    {
+      "arguments": [
+        "--session",
+        "owned-prefix",
+        "session",
+        "info"
+      ],
+      "go": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "info"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "daemon is unavailable for session \"owned-prefix\"\n"
+      },
+      "b363": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "info"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "candidate": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "info"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "b363_matches_candidate": true,
+      "go_matches_candidate": false
+    },
+    {
+      "arguments": [
+        "--session",
+        "owned-prefix",
+        "session",
+        "info",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "info",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"daemon_unavailable\",\"message\":\"daemon is unavailable for session \\\"owned-prefix\\\"\",\"hint\":\"start daemon with 'symbrowse daemon --session owned-prefix' (autostart disabled via SYMBROWSE_NO_AUTOSTART); see daemon log at /tmp/bk-prefix-9bpf6hcv/state/symbrowse/daemon.log\",\"details\":{\"session\":\"owned-prefix\",\"socket_path\":\"/tmp/bk-prefix-9bpf6hcv/run/symbrowse/owned-prefix.sock\"}}}\n",
+        "stderr": ""
+      },
+      "b363": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "info",
+          "--json"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "candidate": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "info",
+          "--json"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "b363_matches_candidate": true,
+      "go_matches_candidate": false
+    },
+    {
+      "arguments": [
+        "--session",
+        "owned-prefix",
+        "session",
+        "info",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "info",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: daemon_unavailable\n    message: daemon is unavailable for session \"owned-prefix\"\n    hint: start daemon with 'symbrowse daemon --session owned-prefix' (autostart disabled via SYMBROWSE_NO_AUTOSTART); see daemon log at /tmp/bk-prefix-9bpf6hcv/state/symbrowse/daemon.log\n    details:\n        session: owned-prefix\n        socket_path: /tmp/bk-prefix-9bpf6hcv/run/symbrowse/owned-prefix.sock\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "b363": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "info",
+          "--output",
+          "yaml"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "candidate": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "session",
+          "info",
+          "--output",
+          "yaml"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "b363_matches_candidate": true,
+      "go_matches_candidate": false
+    },
+    {
+      "arguments": [
+        "--session",
+        "owned-prefix",
+        "daemon",
+        "status"
+      ],
+      "go": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "daemon",
+          "status"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "daemon is unavailable for session \"owned-prefix\"\n"
+      },
+      "b363": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "daemon",
+          "status"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "candidate": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "daemon",
+          "status"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "b363_matches_candidate": true,
+      "go_matches_candidate": false
+    },
+    {
+      "arguments": [
+        "--session",
+        "owned-prefix",
+        "daemon",
+        "status",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "daemon",
+          "status",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"daemon_unavailable\",\"message\":\"daemon is unavailable for session \\\"owned-prefix\\\"\",\"hint\":\"start daemon with 'symbrowse daemon --session owned-prefix' (autostart disabled via SYMBROWSE_NO_AUTOSTART); see daemon log at /tmp/bk-prefix-9bpf6hcv/state/symbrowse/daemon.log\",\"details\":{\"session\":\"owned-prefix\",\"socket_path\":\"/tmp/bk-prefix-9bpf6hcv/run/symbrowse/owned-prefix.sock\"}}}\n",
+        "stderr": ""
+      },
+      "b363": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "daemon",
+          "status",
+          "--json"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "candidate": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "daemon",
+          "status",
+          "--json"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "b363_matches_candidate": true,
+      "go_matches_candidate": false
+    },
+    {
+      "arguments": [
+        "--session",
+        "owned-prefix",
+        "daemon",
+        "status",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "daemon",
+          "status",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: daemon_unavailable\n    message: daemon is unavailable for session \"owned-prefix\"\n    hint: start daemon with 'symbrowse daemon --session owned-prefix' (autostart disabled via SYMBROWSE_NO_AUTOSTART); see daemon log at /tmp/bk-prefix-9bpf6hcv/state/symbrowse/daemon.log\n    details:\n        session: owned-prefix\n        socket_path: /tmp/bk-prefix-9bpf6hcv/run/symbrowse/owned-prefix.sock\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "b363": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "daemon",
+          "status",
+          "--output",
+          "yaml"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "candidate": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "daemon",
+          "status",
+          "--output",
+          "yaml"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "b363_matches_candidate": true,
+      "go_matches_candidate": false
+    },
+    {
+      "arguments": [
+        "--session",
+        "owned-prefix",
+        "state",
+        "list"
+      ],
+      "go": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "state",
+          "list"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "daemon is unavailable for session \"owned-prefix\"\n"
+      },
+      "b363": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "state",
+          "list"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "candidate": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "state",
+          "list"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "b363_matches_candidate": true,
+      "go_matches_candidate": false
+    },
+    {
+      "arguments": [
+        "--session",
+        "owned-prefix",
+        "state",
+        "list",
+        "--json"
+      ],
+      "go": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "state",
+          "list",
+          "--json"
+        ],
+        "exit": 1,
+        "stdout": "{\"success\":false,\"error\":{\"code\":\"daemon_unavailable\",\"message\":\"daemon is unavailable for session \\\"owned-prefix\\\"\",\"hint\":\"start daemon with 'symbrowse daemon --session owned-prefix' (autostart disabled via SYMBROWSE_NO_AUTOSTART); see daemon log at /tmp/bk-prefix-9bpf6hcv/state/symbrowse/daemon.log\",\"details\":{\"session\":\"owned-prefix\",\"socket_path\":\"/tmp/bk-prefix-9bpf6hcv/run/symbrowse/owned-prefix.sock\"}}}\n",
+        "stderr": ""
+      },
+      "b363": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "state",
+          "list",
+          "--json"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "candidate": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "state",
+          "list",
+          "--json"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "b363_matches_candidate": true,
+      "go_matches_candidate": false
+    },
+    {
+      "arguments": [
+        "--session",
+        "owned-prefix",
+        "state",
+        "list",
+        "--output",
+        "yaml"
+      ],
+      "go": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "state",
+          "list",
+          "--output",
+          "yaml"
+        ],
+        "exit": 1,
+        "stdout": "success: false\ndata: null\nwarnings: []\nerror:\n    code: daemon_unavailable\n    message: daemon is unavailable for session \"owned-prefix\"\n    hint: start daemon with 'symbrowse daemon --session owned-prefix' (autostart disabled via SYMBROWSE_NO_AUTOSTART); see daemon log at /tmp/bk-prefix-9bpf6hcv/state/symbrowse/daemon.log\n    details:\n        session: owned-prefix\n        socket_path: /tmp/bk-prefix-9bpf6hcv/run/symbrowse/owned-prefix.sock\n    retryable: null\n    requiresuserconfirmation: null\n    resumehint: \"\"\n",
+        "stderr": ""
+      },
+      "b363": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "state",
+          "list",
+          "--output",
+          "yaml"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "candidate": {
+        "arguments": [
+          "--session",
+          "owned-prefix",
+          "state",
+          "list",
+          "--output",
+          "yaml"
+        ],
+        "exit": 2,
+        "stdout": "",
+        "stderr": "unknown flag: --session\n"
+      },
+      "b363_matches_candidate": true,
+      "go_matches_candidate": false
+    }
+  ],
+  "scope": "private roots/no autostart; pre-existing CLI root session spelling outside newly enabled bridge; no candidate writes"
+}

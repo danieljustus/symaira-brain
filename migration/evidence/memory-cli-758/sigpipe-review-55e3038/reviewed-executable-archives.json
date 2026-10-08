@@ -1,0 +1,42 @@
+{
+  "source": "647477f63688b09f313f93e27cc8222d2f5b1450",
+  "publication": "55e3038665946a9f077af335bec661d02191d004",
+  "files": {
+    "/workspace/symaira-memory758-writes/target/debug/symbrain": {
+      "original_sha256": "b1314acbf02747ccd6395ecd8917498df69f98f5096f25db31819f6b4484feaf",
+      "original_bytes": 38649496,
+      "archive": "/workspace/oracles/symaira-memory758-647-binaries/symbrain.gz",
+      "archive_sha256": "c2082497246bf7ddade0d2ff4ffab1a6310ac9d6d5b4b97064ebd51f17342e2f"
+    },
+    "/workspace/symaira-memory758-writes/target/debug/deps/symbrain_cli-9b8d2c092400099e": {
+      "original_sha256": "d34360a1d4f2ce3449f4d8fe08b680011a5e2bf7ba46cb123e64107c2836de92",
+      "original_bytes": 40279800,
+      "archive": "/workspace/oracles/symaira-memory758-647-binaries/symbrain_cli-9b8d2c092400099e.gz",
+      "archive_sha256": "c92708018983566b200a882862ceb1d25519ac74a2e1c5b91d673ef58c37d6b9"
+    },
+    "/workspace/symaira-memory758-writes/target/debug/deps/symbrain_memory-27bfbd9a34ca415c": {
+      "original_sha256": "60f30bf678240ebbb176d7f34b08d053dbbd5745a283f32e8d0112f6c3bb50fb",
+      "original_bytes": 19179608,
+      "archive": "/workspace/oracles/symaira-memory758-647-binaries/symbrain_memory-27bfbd9a34ca415c.gz",
+      "archive_sha256": "2a55933dfbf6af3a37fa45f00dcb389d195c5838b9ce114a981de8576cf6b25e"
+    },
+    "/workspace/symaira-memory758-writes/target/debug/deps/evidence_oracle_tests-57c76531d7fbf19c": {
+      "original_sha256": "7d9a58ce399962b0cc84ffcbc88c90f01e61d2a39225187028b27111965e51de",
+      "original_bytes": 3018616,
+      "archive": "/workspace/oracles/symaira-memory758-647-binaries/evidence_oracle_tests-57c76531d7fbf19c.gz",
+      "archive_sha256": "5c05f16a42a947f28902cf36ac7fadcd24ccc93f3068d1d21c3ff93b014fed78"
+    },
+    "/workspace/symaira-memory758-writes/target/debug/deps/store_contract_tests-c76534e28b18f500": {
+      "original_sha256": "61aa0c95656b4a96710f6570c1cfe3354b2d129f38661fe15e168a5ae5c196af",
+      "original_bytes": 10442208,
+      "archive": "/workspace/oracles/symaira-memory758-647-binaries/store_contract_tests-c76534e28b18f500.gz",
+      "archive_sha256": "78525072741cb9b545f54795295ec9fcfe4cbec3210b48e10d5aae5d1d7c0c07"
+    },
+    "/workspace/symaira-memory758-writes/target/debug/deps/activity_validation_tests-7406bd09e3c3536c": {
+      "original_sha256": "3c23d4b294ca48878a361bcb2a566eafef8d722d5455f07905723dca316f383e",
+      "original_bytes": 1848328,
+      "archive": "/workspace/oracles/symaira-memory758-647-binaries/activity_validation_tests-7406bd09e3c3536c.gz",
+      "archive_sha256": "22fc0f0ba41cec1a59ba2d9c5531ba9c84dfe70763a8c668c31f5d2f8a06242f"
+    }
+  }
+}

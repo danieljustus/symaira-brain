@@ -1,0 +1,8 @@
+   Compiling symbrain-policy v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-policy)
+   Compiling symbrain-usage v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-usage)
+   Compiling symbrain-activity v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-activity)
+   Compiling symbrain-catalog v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-catalog)
+   Compiling symbrain-memory v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-memory)
+   Compiling symbrain-gateway v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-gateway)
+   Compiling symbrain-cli v0.12.1 (/workspace/symaira-usage768-local-files/rust/symbrain-cli)
+    Finished `dev` profile [unoptimized] target(s) in 5.05s

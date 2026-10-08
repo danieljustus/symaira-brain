@@ -42,8 +42,7 @@ impl Server {
             .socket_path
             .parent()
             .unwrap_or_else(|| Path::new("."));
-        fs::create_dir_all(parent)?;
-        set_mode(parent, 0o700)?;
+        crate::session::create_directory(parent)?;
         let lock_path = self.options.socket_path.with_extension("sock.lock");
         let lock = acquire_lock(&lock_path)?;
         self.registry

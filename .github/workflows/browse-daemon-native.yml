@@ -23,7 +23,8 @@ jobs:
       matrix:
         runner: [ubuntu-24.04, ubuntu-24.04-arm, macos-15-intel, macos-15, windows-2025, windows-11-arm]
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 30
+    # macos-15-intel needs ~34 min (slow release build + ~7 min MCP stage); stages themselves are bounded.
+    timeout-minutes: 45
     permissions:
       contents: read
     defaults:
@@ -44,8 +45,14 @@ jobs:
       - name: Resolve pinned Rust toolchain
         run: rustup show active-toolchain
 
+      - name: Verify provider lease acquisition diagnostics
+        run: python3 -B port/harness/test_daemon_state_key_ownership.py
+
       - name: Build the Rust CLI
-        run: cargo build -p symbrowse-cli --bin symbrowse --release --locked
+        run: |
+          set -euo pipefail
+          cargo build -p symbrowse-cli --bin symbrowse --release --locked
+          cargo build -p symbrowse-core --example state_key_store_probe --example startup_key_source_probe --release --locked
 
       - name: Verify native daemon and workspace lint
         run: cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
@@ -53,7 +60,17 @@ jobs:
       - name: Verify daemon platform and lifecycle contracts
         run: |
           set -euo pipefail
-          cargo test -p symbrowse-daemon --locked 2>&1 | tee "$RUNNER_TEMP/browse-daemon-unit.log"
+          python3 port/harness/key_test_environment.py -- cargo test -p symbrowse-daemon --locked 2>&1 | tee "$RUNNER_TEMP/browse-daemon-unit.log"
+          # Native startup-provider discovery (Windows LookPath/PATHEXT tests are cfg(windows)).
+          cargo test -p symbrowse-core --lib --locked key_sources::startup_discovery 2>&1 | tee -a "$RUNNER_TEMP/browse-daemon-unit.log"
+
+      - name: Require Windows client cancellation and eight-client contracts
+        if: runner.os == 'Windows'
+        run: |
+          set -euo pipefail
+          cargo test -p symbrowse-daemon --test windows_client_deadlines --locked \
+            native_windows_client_deadlines -- --ignored --exact --nocapture \
+            2>&1 | tee "$RUNNER_TEMP/browse-daemon-client-deadlines.log"
 
       - name: Exercise native daemon lifecycle and races
         env:
@@ -64,6 +81,11 @@ jobs:
         run: |
           set -euo pipefail
           python3 port/harness/test_run.py DaemonExitTests 2>&1 | tee "$RUNNER_TEMP/browse-daemon-harness.log"
+          python3 port/harness/test_windows_pipe.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-pipe-controls.log"
+          python3 port/harness/test_registry_progress.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-registry-progress-tests.log"
+          python3 port/harness/test_registry_cli_process.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-cli-capture-tests.log"
+          python3 port/harness/test_registry_daemon_lifetime.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-owner-tests.log"
+          python3 port/harness/test_raw_path_admission.py 2>&1 | tee "$RUNNER_TEMP/browse-daemon-raw-path-tests.log"
           python3 port/harness/run.py --suite daemon 2>&1 | tee "$RUNNER_TEMP/browse-daemon-lifecycle.log"
           python3 port/harness/run.py --suite daemon-races --repeat 50 2>&1 | tee "$RUNNER_TEMP/browse-daemon-races.log"
 
@@ -83,6 +105,28 @@ jobs:
           go -C "$oracle/browse" build -o "$go_binary" ./cmd/symbrowse
           python3 port/harness/daemon_process.py --go "$go_binary" --rust "$rust_binary" \
             --go-source "$oracle" --out "$RUNNER_TEMP/browse-daemon-process.json"
+          python3 port/harness/daemon_registry.py --go "$go_binary" --rust "$rust_binary" \
+            --go-source "$oracle" --out "$RUNNER_TEMP/browse-daemon-registry.json"
+          store_probe="$GITHUB_WORKSPACE/browse/target/release/examples/state_key_store_probe"
+          if [ "${OS:-}" = Windows_NT ]; then
+            store_probe="$(cygpath -m "$store_probe.exe")"
+          fi
+          python3 port/harness/daemon_state_key.py --go "$go_binary" --rust "$rust_binary" \
+            --rust-store-probe "$store_probe" --go-source "$oracle" \
+            --out "$RUNNER_TEMP/browse-daemon-state-key.json" \
+            2>&1 | tee "$RUNNER_TEMP/browse-daemon-state-key.log"
+          source_probe="$GITHUB_WORKSPACE/browse/target/release/examples/startup_key_source_probe"
+          if [ "${OS:-}" = Windows_NT ]; then
+            source_probe="$(cygpath -m "$source_probe.exe")"
+          fi
+          python3 port/harness/daemon_state_key_ownership.py --rust "$rust_binary" \
+            --rust-source-probe "$source_probe" \
+            --out "$RUNNER_TEMP/browse-daemon-state-key-ownership.json" \
+            2>&1 | tee "$RUNNER_TEMP/browse-daemon-state-key-ownership.log"
+          python3 port/harness/daemon_provider_discovery.py --go "$go_binary" --rust "$rust_binary" \
+            --go-source "$oracle" --rust-source-probe "$source_probe" \
+            --out "$RUNNER_TEMP/browse-daemon-provider-discovery.json" \
+            2>&1 | tee "$RUNNER_TEMP/browse-daemon-provider-discovery.log"
           fixture_binary="$RUNNER_TEMP/symbrowse-mcp-go-v0.8.0"
           if [ "${OS:-}" = Windows_NT ]; then
             fixture_binary="$(cygpath -m "$fixture_binary.exe")"
@@ -113,9 +157,28 @@ jobs:
             ${{ runner.temp }}/browse-daemon-${{ matrix.runner }}.txt
             ${{ runner.temp }}/browse-daemon-unit.log
             ${{ runner.temp }}/browse-daemon-harness.log
+            ${{ runner.temp }}/browse-daemon-pipe-controls.log
+            ${{ runner.temp }}/browse-daemon-registry-progress-tests.log
+            ${{ runner.temp }}/browse-daemon-cli-capture-tests.log
+            ${{ runner.temp }}/browse-daemon-owner-tests.log
+            ${{ runner.temp }}/browse-daemon-raw-path-tests.log
+            ${{ runner.temp }}/browse-daemon-client-deadlines.log
+            ${{ runner.temp }}/browse-daemon-client-deadlines/**
             ${{ runner.temp }}/browse-daemon-lifecycle.log
             ${{ runner.temp }}/browse-daemon-races.log
             ${{ runner.temp }}/browse-daemon-process.json
+            ${{ runner.temp }}/browse-daemon-registry.json
+            ${{ runner.temp }}/browse-daemon-registry.raw.json
+            ${{ runner.temp }}/browse-daemon-registry.progress.jsonl
+            ${{ runner.temp }}/browse-daemon-registry.progress.cli/**
+            ${{ runner.temp }}/browse-daemon-state-key.json
+            ${{ runner.temp }}/browse-daemon-state-key.raw.json
+            ${{ runner.temp }}/browse-daemon-state-key.log
+            ${{ runner.temp }}/browse-daemon-state-key-ownership.json
+            ${{ runner.temp }}/browse-daemon-state-key-ownership.log
+            ${{ runner.temp }}/browse-daemon-provider-discovery.json
+            ${{ runner.temp }}/browse-daemon-provider-discovery.raw.json
+            ${{ runner.temp }}/browse-daemon-provider-discovery.log
             ${{ runner.temp }}/browse-daemon-mcp.json
             ${{ runner.temp }}/browse-daemon-mcp.json.tests.log
           if-no-files-found: error

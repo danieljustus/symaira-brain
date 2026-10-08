@@ -1,0 +1,141 @@
+{
+  "disposition": "STATIC_BOUNDED_APPROVE; runtime/native/compiled acceptance pending",
+  "source_head": "63706e6ea8a05d0926d07ea8c232ffb5b45bc839",
+  "publication_head": "9b0e6ec9f5a87418ac9e46073c98edc503ea196e",
+  "base": "dba88d23dade87eb5194e9c2451a0ad20d08a83e",
+  "candidate_clean": true,
+  "new_actionable_findings": [],
+  "original_P2": "source-backed all-column default admission closes; actualRust rejection not yet executed",
+  "source_hashes": 395,
+  "archive_maps": 347,
+  "columns": 184,
+  "declared_defaults": 62,
+  "resources": 37,
+  "prepared_migration_tests": 28,
+  "PythonSQLite_only": {
+    "version": "3.53.1",
+    "fresh_original_oplog_controls": 3,
+    "actual_mutation_fixture_declarations": 62,
+    "novel_boundaries": 6,
+    "caller_function_evaluations": 0,
+    "predicate_projection_is_not_Rust_execution": true
+  },
+  "compiler_product_target_port_GitHub_executions": 0,
+  "files": [
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-actionlint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-extra-sql/owned37.sql",
+      "bytes": 23522,
+      "sha256": "fb40d583262d24f1a00b5a345737d07b26702b3c6acf95be237a6b642e6c21fd"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-extra-sql/receipt.json",
+      "bytes": 29102,
+      "sha256": "df3a272c68c85bba485d1d9a206bb9d6f6e3cb290bf5429ed25ddb11ce279058"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-extra-sql.log",
+      "bytes": 109,
+      "sha256": "40d4d15d9ce617dd2dd331e9afee2ec558df34e31f20faa7d5fd163770e079c6"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-extra-sql.py",
+      "bytes": 5071,
+      "sha256": "25950723f177b5dc781d23a9f522b8506bb9b7411eede67e709d75cdc8d2ad2b"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-original-results.json",
+      "bytes": 38755,
+      "sha256": "eb81c263dab5d0e85e0cdfe846361b50cd076dbef6bf1c9ef4d9e3fe867980b6"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-owned-sql/frozen-go.db",
+      "bytes": 434176,
+      "sha256": "0e944e1caa27a9df4dc93ccb45019ec6bc8b44b06801c91e5dfd282d9f213f10"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-owned-sql/frozen-go.sql",
+      "bytes": 23522,
+      "sha256": "fb40d583262d24f1a00b5a345737d07b26702b3c6acf95be237a6b642e6c21fd"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-owned-sql/native-known-base.db",
+      "bytes": 233472,
+      "sha256": "bd83199e5d584a5a038c6251c739c1dfb2649e95468f88605e255080d123acfa"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-owned-sql/native-known-base.sql",
+      "bytes": 9125,
+      "sha256": "5a01eb4377fa35f385501d378e68610c5df1a721c9104d4a4316acd255d68d2b"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-owned-sql/native-successor.db",
+      "bytes": 233472,
+      "sha256": "69980ee80628e3ac8ea25bedc5f88e0284a09416f88a41207b68316821303b25"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-owned-sql/native-successor.sql",
+      "bytes": 9125,
+      "sha256": "ff6e4d863e5ad0048d9cfcec6ea498048c6081bd559ba3f6f29227a5e4a93540"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-owned-sql/oplog-missing.db",
+      "bytes": 233472,
+      "sha256": "e698e461f313bfbaa90e26ba80f0762c0381ff82932f8b5fdff11453616c565e"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-owned-sql/oplog-missing.sql",
+      "bytes": 9077,
+      "sha256": "2b336b17527ec55b2ebc7f6968bb0c7f4355c3e729f0e5a1f6ef8dcf95d49539"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-owned-sql/oplog-unchanged.db",
+      "bytes": 233472,
+      "sha256": "a0da9568dde2c5b1694e1f52f0be6215b41822bcd3c7456db56b9d2134d0d56d"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-owned-sql/oplog-unchanged.sql",
+      "bytes": 9125,
+      "sha256": "ff6e4d863e5ad0048d9cfcec6ea498048c6081bd559ba3f6f29227a5e4a93540"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-owned-sql/oplog-wrong.db",
+      "bytes": 233472,
+      "sha256": "65b231aa7d77e3944a7a50520334bf999b59143320a23098ee7e1a78f627f13b"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-owned-sql/oplog-wrong.sql",
+      "bytes": 9103,
+      "sha256": "9392b502778e5e23f19b0162eaf7aeb6829554035331564f10b940ee4dcb00dc"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-owned-sql/receipt.json",
+      "bytes": 45723,
+      "sha256": "f04666626a88ded5681073bb8d4b76cbcd7e1963eb56d8c00d1812a17cb99589"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-owned-sql/timestamp-equivalence.db",
+      "bytes": 8192,
+      "sha256": "2dee251c29b59be4fd51df056a66691e6ed6fb7abbe9efd6d76a2b0f372522c8"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-owned-sql.log",
+      "bytes": 188,
+      "sha256": "b07eb564525a5a7afd23ff786f302c432beedb2d20a72da3ef52b73c814c8aec"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-provenance.json",
+      "bytes": 184791,
+      "sha256": "b332231028e6120ebf96e570cd4781b5fbb8d27de16ea1f065f56e3cee2b1e31"
+    },
+    {
+      "path": "/tmp/symaira-memory649-defaults-independent-static-review.md",
+      "bytes": 8136,
+      "sha256": "3a4d17280e0823dbd713a11f0d192bd798c06c86733e337f621a0fbc8a9aaee9"
+    }
+  ]
+}

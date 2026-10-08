@@ -1,0 +1,134 @@
+[
+  {
+    "base_hex": "",
+    "child": "file",
+    "clean_hex": "2e",
+    "join_hex": "66696c65"
+  },
+  {
+    "base_hex": "2e",
+    "child": "file",
+    "clean_hex": "2e",
+    "join_hex": "66696c65"
+  },
+  {
+    "base_hex": "612f2e2f622f2e2e2f63",
+    "child": "file",
+    "clean_hex": "612f63",
+    "join_hex": "612f632f66696c65"
+  },
+  {
+    "base_hex": "2e2e2f2e2e2f612f2e2e2f62",
+    "child": "file",
+    "clean_hex": "2e2e2f2e2e2f62",
+    "join_hex": "2e2e2f2e2e2f622f66696c65"
+  },
+  {
+    "base_hex": "2f2e2e2f2e2e2f61",
+    "child": "file",
+    "clean_hex": "2f61",
+    "join_hex": "2f612f66696c65"
+  },
+  {
+    "base_hex": "2f2f612f2f2f622f2e2e",
+    "child": "file",
+    "clean_hex": "2f61",
+    "join_hex": "2f612f66696c65"
+  },
+  {
+    "base_hex": "433a",
+    "child": "file",
+    "clean_hex": "433a",
+    "join_hex": "433a2f66696c65"
+  },
+  {
+    "base_hex": "433a5c615c2e2e5c62",
+    "child": "file",
+    "clean_hex": "433a5c615c2e2e5c62",
+    "join_hex": "433a5c615c2e2e5c622f66696c65"
+  },
+  {
+    "base_hex": "5c5c686f73745c73686172655c6469725c2e2e",
+    "child": "file",
+    "clean_hex": "5c5c686f73745c73686172655c6469725c2e2e",
+    "join_hex": "5c5c686f73745c73686172655c6469725c2e2e2f66696c65"
+  },
+  {
+    "base_hex": "5c5c3f5c433a5c615c2e2e5c62",
+    "child": "file",
+    "clean_hex": "5c5c3f5c433a5c615c2e2e5c62",
+    "join_hex": "5c5c3f5c433a5c615c2e2e5c622f66696c65"
+  },
+  {
+    "base_hex": "5c5c2e5c554e435c686f73745c73686172655c615c2e2e",
+    "child": "file",
+    "clean_hex": "5c5c2e5c554e435c686f73745c73686172655c615c2e2e",
+    "join_hex": "5c5c2e5c554e435c686f73745c73686172655c615c2e2e2f66696c65"
+  },
+  {
+    "base_hex": "5c615c2e2e5c3f3f5c433a5c",
+    "child": "file",
+    "clean_hex": "5c615c2e2e5c3f3f5c433a5c",
+    "join_hex": "5c615c2e2e5c3f3f5c433a5c2f66696c65"
+  },
+  {
+    "base_hex": "612f2e2e2f633a",
+    "child": "file",
+    "clean_hex": "633a",
+    "join_hex": "633a2f66696c65"
+  },
+  {
+    "base_hex": "cf802f2e2e2fe99baa",
+    "child": "file",
+    "clean_hex": "e99baa",
+    "join_hex": "e99baa2f66696c65"
+  },
+  {
+    "base_hex": "5c3f3f5c433a5c615c2e2e5c62",
+    "child": "file",
+    "clean_hex": "5c3f3f5c433a5c615c2e2e5c62",
+    "join_hex": "5c3f3f5c433a5c615c2e2e5c622f66696c65"
+  },
+  {
+    "base_hex": "2e2e2f613a",
+    "child": "file",
+    "clean_hex": "2e2e2f613a",
+    "join_hex": "2e2e2f613a2f66696c65"
+  },
+  {
+    "base_hex": "",
+    "child": "",
+    "clean_hex": "2e",
+    "join_hex": ""
+  },
+  {
+    "base_hex": "2f61",
+    "child": "/b",
+    "clean_hex": "2f61",
+    "join_hex": "2f612f62"
+  },
+  {
+    "base_hex": "5c",
+    "child": "??\\C:\\x",
+    "clean_hex": "5c",
+    "join_hex": "5c2f3f3f5c433a5c78"
+  },
+  {
+    "base_hex": "433a",
+    "child": "\\file",
+    "clean_hex": "433a",
+    "join_hex": "433a2f5c66696c65"
+  },
+  {
+    "base_hex": "433a",
+    "child": "",
+    "clean_hex": "433a",
+    "join_hex": "433a"
+  },
+  {
+    "base_hex": "7261772dff2f2e2e2f6f776e65722dfe",
+    "child": "file",
+    "clean_hex": "6f776e65722dfe",
+    "join_hex": "6f776e65722dfe2f66696c65"
+  }
+]

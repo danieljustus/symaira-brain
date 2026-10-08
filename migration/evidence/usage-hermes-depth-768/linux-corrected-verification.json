@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "source_head": "7bdde611aef63b1700fed5cbc12d5ce2bafe7a4d",
+  "source_dirty": false,
+  "native_binary_path": "/workspace/symaira-usage768-files/target/debug/symbrain",
+  "native_binary_sha256": "9aed2a28060fe84f945db937def4ed10c83f13b15a008d4720ebebf3cd853f38",
+  "reports": {
+    "hermes": {
+      "path": "migration/evidence/usage-hermes-depth-768/linux-corrected-hermes-process.json",
+      "sha256": "7baad7cddaa7ad823b2938bd290199eb305d35a7d2cad03fad9ba00fa2ea0ce4",
+      "source_manifest_count": 51,
+      "cli_cases": 104,
+      "negative_control_exits": [
+        1,
+        1,
+        101,
+        101,
+        101
+      ]
+    },
+    "files": {
+      "path": "migration/evidence/usage-hermes-depth-768/linux-corrected-files-process.json",
+      "sha256": "c26b114696ea29483733cc87a5dc5ac212de1add7ef46ec6c5054daf501a3535",
+      "source_manifest_count": 53,
+      "cli_cases": 151,
+      "negative_control_exits": [
+        1,
+        1,
+        101,
+        101,
+        101
+      ]
+    },
+    "reference": {
+      "path": "migration/evidence/usage-hermes-depth-768/linux-corrected-reference-process.json",
+      "sha256": "8f4e20f2657f45fbfba6a4819595b86d0ac347a77b0673cc83d9c602f35016a6",
+      "source_manifest_count": 47,
+      "cli_cases": 110,
+      "negative_control_exits": [
+        1,
+        1,
+        101,
+        101,
+        101
+      ]
+    }
+  },
+  "shared_source_manifest_count": 44,
+  "all_source_hashes_verified": true,
+  "original_92_inputs_unchanged": true,
+  "four_exact_independent_boundary_inputs_appended": true,
+  "original_review_files_verified": 50,
+  "ordinary_tests": {
+    "passed": 355,
+    "failed": 0,
+    "ignored": 3,
+    "summaries": 35
+  },
+  "ignored_process_oracles_explicitly_run": 3,
+  "strict_checks": {
+    "all_features_all_targets_cli_usage_clippy": "pass",
+    "workspace_and_include_fragment_fmt": "pass",
+    "ci_actionlint": "pass",
+    "diff_check": "pass"
+  },
+  "verification_logs": {
+    "tests": {
+      "path": "migration/evidence/usage-hermes-depth-768/linux-corrected-tests.log",
+      "sha256": "2e203e265222bf6c94d3ca5fece307c7e70f1bf08714e91b756ab2169ac8f896"
+    },
+    "clippy": {
+      "path": "migration/evidence/usage-hermes-depth-768/linux-corrected-clippy.log",
+      "sha256": "06740ed6b2e5aee96607271cfd2364898d6f79835de99958ae836c35978bbe11"
+    },
+    "fmt": {
+      "path": "migration/evidence/usage-hermes-depth-768/linux-corrected-fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "actionlint": {
+      "path": "migration/evidence/usage-hermes-depth-768/linux-corrected-actionlint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "frozen_go_and_historical_fixture_diff": "empty",
+  "native_macos_windows_current_head": "required, not supplied by Linux receipt",
+  "host_keychain_acl": "unproven; existing routing gate retained",
+  "full_issue_768": "open"
+}

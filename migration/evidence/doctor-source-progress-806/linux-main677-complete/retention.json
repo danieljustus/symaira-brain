@@ -1,0 +1,109 @@
+{
+  "source": "677ef643e37d3579d9b17e2a5c18801ebce83cfc",
+  "archive_sha256": "472e09d375db757a4d241afa34577f6f8e9f438c9ccd04a4e743dc0378e08e77",
+  "files": [
+    {
+      "original_path": "/workspace/symaira-source765-main677-full-independent-runtime-review/final-review-proof-manifest.json",
+      "member": "000-final-review-proof-manifest.json",
+      "sha256": "4385d53b552cfc6f4520cba41dad8639427ea5d17dae572c2e50fffbf0725feb",
+      "bytes": 1507,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791116681901096717
+    },
+    {
+      "original_path": "/workspace/symaira-source765-main677-full-independent-runtime-review/handoff.json",
+      "member": "001-handoff.json",
+      "sha256": "f3935994a43f9b3e0ccacd81afaeb31048831581a9dc66500c4f0f8ff2ac5a0f",
+      "bytes": 4093,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791116746798942174
+    },
+    {
+      "original_path": "/workspace/symaira-source765-main677-full-independent-runtime-review/handoff.md",
+      "member": "002-handoff.md",
+      "sha256": "c4c51365b82fa39316d72f8ac7e1e514d1397b64b2f2f7c5178f675b9ccadb0b",
+      "bytes": 3436,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791116816421597439
+    },
+    {
+      "original_path": "/workspace/symaira-source765-main677-full-independent-runtime-review/projection-preparer-schema-correction.json",
+      "member": "003-projection-preparer-schema-correction.json",
+      "sha256": "7c7ec2e9d97507c6baeea1effd6539f5433c6737475956dc66f884d4e48b3346",
+      "bytes": 541,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791116567646265240
+    },
+    {
+      "original_path": "/workspace/symaira-source765-main677-full-independent-runtime-review/receipt.json",
+      "member": "004-receipt.json",
+      "sha256": "e94f6f927d0bd99a2838067a5641e02a103597c2dca85703dda38a67de76982b",
+      "bytes": 13659290,
+      "mode": 420,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791116427221595060
+    },
+    {
+      "original_path": "/workspace/symaira-source765-main677-full-independent-runtime-review/release.json",
+      "member": "005-release.json",
+      "sha256": "306cc582250c55f03db7e8d28f332daeb6856939cb3275a3f3c65a8aeb6ff0e1",
+      "bytes": 970,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791116746725497531
+    },
+    {
+      "original_path": "/workspace/symaira-source765-main677-full-independent-runtime-review/review.md",
+      "member": "006-review.md",
+      "sha256": "0b7ed62652677601036247483e9cb9eaeabc1fc86c7cd9685a9481bec26118b5",
+      "bytes": 6200,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791116681605450898
+    },
+    {
+      "original_path": "/workspace/symaira-source765-main677-full-independent-runtime-review/source-projection.json",
+      "member": "007-source-projection.json",
+      "sha256": "61333169ce284bbb3e66c58827afebaf9e17c9171a9381ddfade7127dd0d8be0",
+      "bytes": 8051,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791116567646080450
+    },
+    {
+      "original_path": "/workspace/symaira-source765-main677-full-independent-runtime-review/completion-manifest.json",
+      "member": "008-completion-manifest.json",
+      "sha256": "087f042489675f1ee0c147e381e662fd6cef57cf3efd7c8fad396ca618c82b85",
+      "bytes": 1892,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791116816660613702
+    },
+    {
+      "original_path": "/workspace/review-proof/root-source765-main677-final/verification.json",
+      "member": "009-verification.json",
+      "sha256": "44a8ad29886c138c1bf0e6e89d4392cae3a06d07ec4cc165e5470d77c6fff5d9",
+      "bytes": 512,
+      "mode": 384,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791117030034553890
+    }
+  ],
+  "external_ELF_payloads_embedded": false,
+  "external_raw_payloads_embedded": false,
+  "external_payloads_full_bindings_in_receipt": true
+}

@@ -95,3 +95,15 @@ fn invalid_utf8_key_cannot_match_replacement_character_key() {
         )
     );
 }
+
+#[test]
+fn public_go_byte_quote_keeps_wtf8_distinct_from_valid_unicode() {
+    for (bytes, expected) in [
+        (b"\xed\xa0\x80".as_slice(), r#""\xed\xa0\x80""#),
+        (b"\xed\xb0\x80", r#""\xed\xb0\x80""#),
+        (b"\xef\xbf\xbd", "\"�\""),
+        (b"\xf0\x9f\x98\x80", "\"😀\""),
+    ] {
+        assert_eq!(crate::config::format_go_quoted_bytes(bytes), expected);
+    }
+}

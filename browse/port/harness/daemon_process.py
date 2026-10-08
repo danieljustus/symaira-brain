@@ -19,6 +19,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from raw_path_admission import probe, unavailable_is_proven, validate_accounting, accounting_controls
 
 HERE = Path(__file__).resolve().parent
 SPEC = importlib.util.spec_from_file_location("daemon_harness", HERE / "run.py")
@@ -46,6 +47,18 @@ def private_temporary_parent() -> str | None:
     return parent
 
 
+def absent_keychain_path(root: Path) -> str:
+    """Go treats a missing security executable as failure, not key absence."""
+    if sys.platform != "darwin":
+        return ""
+    owned_bin = root / "provider-bin"
+    owned_bin.mkdir(mode=0o700, exist_ok=True)
+    security = owned_bin / "security"
+    security.write_text("#!/bin/sh\nexit 44\n")
+    security.chmod(0o700)
+    return str(owned_bin)
+
+
 def observe(binary: Path, settings: dict[str, str], session: str,
             raw_origin: bytes | None = None, git_origin: bool = False) -> dict:
     with tempfile.TemporaryDirectory(prefix="bd-", dir=private_temporary_parent()) as temporary:
@@ -62,7 +75,7 @@ def observe(binary: Path, settings: dict[str, str], session: str,
         env.update(HOME=str(home), USERPROFILE=str(home), LOCALAPPDATA=str(root / "Local"),
                    XDG_CONFIG_HOME=str(root / "config"), XDG_CACHE_HOME=str(root / "cache"),
                    XDG_DATA_HOME=str(root / "data"), XDG_STATE_HOME=str(root / "state"),
-                   XDG_RUNTIME_DIR=str(runtime), PATH="", SYMBROWSE_NO_AUTOSTART="1",
+                   XDG_RUNTIME_DIR=str(runtime), PATH=absent_keychain_path(root), SYMBROWSE_NO_AUTOSTART="1",
                    TMPDIR=str(temporary), TMP=str(temporary), TEMP=str(temporary))
         env.update(settings)
         cwd = root
@@ -79,7 +92,7 @@ def observe(binary: Path, settings: dict[str, str], session: str,
             escaped = "".join(f"\\{byte:03o}" for byte in payload)
             script.write_text(f"#!/bin/sh\nprintf '{escaped}'\n")
             script.chmod(0o700)
-            env["PATH"] = str(git_bin)
+            env["PATH"] = str(git_bin) + os.pathsep + absent_keychain_path(root)
         begin = time.time()
         process = subprocess.Popen([str(binary), "daemon", "--session", session], cwd=cwd,
                                    env=env, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
@@ -179,42 +192,85 @@ def main() -> int:
     parser.add_argument("--go-source", type=Path, required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
+    report = {"status": "started", "matches": False, "total": 0,
+              "cases": [], "unavailable_cases": [], "requested_cases": []}
+    save_report(args, report)
+    try:
+        return run_gate(args, report)
+    except BaseException as error:
+        report.update(status="failed", failure={"type": type(error).__name__, "message": str(error)})
+        save_report(args, report)
+        raise
+
+
+def save_report(args, report):
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(report, indent=2) + "\n")
+
+
+def run_gate(args, report):
     source = args.go_source.resolve()
     revision = subprocess.check_output(["git", "-C", str(source), "rev-parse", "HEAD"], text=True).strip()
     dirty = subprocess.check_output(["git", "-C", str(source), "status", "--porcelain"], text=True)
     if revision != GO_REF or dirty:
         raise AssertionError("supplemental Go source must be immutable dcddcef0")
-    cases = []
-    variants = [(settings, None, False) for settings in SETTINGS]
-    if os.name == "posix":
-        variants.extend(({}, raw, False) for raw in (b"\xe2\x82", b"\xc0\xaf", b"\xef\xbf\xbd"))
-        variants.append(({}, None, True))
-    for index, (settings, raw_origin, git_origin) in enumerate(variants):
-        session = f"parity{os.getpid()}-{index}"
-        case = {"session": session, "settings": settings,
-                "raw_origin_hex": None if raw_origin is None else raw_origin.hex(),
-                "git_origin": git_origin,
-                "go": observe(args.go.resolve(), settings, session, raw_origin, git_origin),
-                "rust": observe(args.rust.resolve(), settings, session, raw_origin, git_origin)}
-        case["matches"] = compare(case)
-        cases.append(case)
     root = HERE.parents[2]
     head = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
     dirty = bool(subprocess.check_output(["git", "-C", str(root), "status", "--porcelain"], text=True))
     sources = subprocess.check_output(["git", "-C", str(source), "ls-files", "browse"], text=True).splitlines()
     candidate_sources = subprocess.check_output(
         ["git", "-C", str(root), "ls-files", "browse/crates", "browse/port/harness"], text=True).splitlines()
-    report = {"supplemental_go_ref": GO_REF, "historical_oracle_unchanged": "652453d",
+    report.update({"supplemental_go_ref": GO_REF, "historical_oracle_unchanged": "652453d",
               "candidate_head": head, "candidate_dirty": dirty, "platform": platform.platform(),
               "go_binary_sha256": digest(args.go), "rust_binary_sha256": digest(args.rust),
               "go_source_sha256": {name: digest(source / name) for name in sources if (source / name).is_file()},
               "candidate_source_sha256": {name: digest(root / name) for name in candidate_sources
-                                          if (root / name).is_file()},
-              "total": len(cases) * len(COMMANDS), "matches": all(c["matches"] for c in cases),
-              "cases": cases, "negative_controls": controls(cases)}
-    args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(report, indent=2) + "\n")
-    print(f"{report['total']} actual daemon requests: matches={report['matches']}; 3 negative controls rejected")
+                                          if (root / name).is_file()}})
+    save_report(args, report)
+    report.update(platform_system=sys.platform, cases=[], unavailable_cases=[], requested_cases=[])
+    variants = [(settings, None, False) for settings in SETTINGS]
+    if os.name == "posix":
+        variants.extend(({}, raw, False) for raw in (b"\xe2\x82", b"\xc0\xaf", b"\xef\xbf\xbd"))
+        variants.append(({}, None, True))
+    for index, (settings, raw_origin, git_origin) in enumerate(variants):
+        report["requested_cases"].append({"id": f"process-{index}", "session": f"parity{os.getpid()}-{index}",
+                "settings": settings, "raw_origin_hex": None if raw_origin is None else raw_origin.hex(),
+                "git_origin": git_origin})
+    save_report(args, report)
+    for requested in report["requested_cases"]:
+        settings, git_origin, session = requested["settings"], requested["git_origin"], requested["session"]
+        raw_origin = None if requested["raw_origin_hex"] is None else bytes.fromhex(requested["raw_origin_hex"])
+        case = dict(requested)
+        # The live record precedes probe/child operations and survives failures.
+        report["cases"].append(case)
+        save_report(args, report)
+        if raw_origin is not None:
+            case["kernel_probe"] = {}
+            probe(raw_origin, private_temporary_parent(), case["kernel_probe"])
+            save_report(args, report)
+            if not case["kernel_probe"]["admitted"]:
+                if not unavailable_is_proven(case["kernel_probe"], raw_origin):
+                    raise AssertionError("raw filename exclusion lacks exact owned Darwin EILSEQ92 proof")
+                report["cases"].remove(case)
+                case.update(child_executed=False, parity=False)
+                report["unavailable_cases"].append(case)
+                save_report(args, report)
+                continue
+        for owner, binary in (("go", args.go), ("rust", args.rust)):
+            case[owner] = observe(binary.resolve(), settings, session, raw_origin, git_origin)
+            save_report(args, report)
+        case["matches"] = compare(case)
+        save_report(args, report)
+    cases = report["cases"]
+    report.update({"total": len(cases) * len(COMMANDS), "matches": all(c["matches"] for c in cases),
+              "cases": cases, "negative_controls": controls(cases), "status": "complete"})
+    report.update(matches_executed=report["matches"], platform_admitted_complete=validate_accounting(report),
+                  original_requested_domain_complete=not report["unavailable_cases"])
+    report["domain_accounting_controls"] = accounting_controls(report)
+    save_report(args, report)
+    print(f"{report['total']} actual daemon requests: matches_executed={report['matches_executed']}; "
+          f"platform_admitted_complete={report['platform_admitted_complete']}; "
+          f"unavailable_cases={len(report['unavailable_cases'])}; 3 original negative controls rejected")
     return 0 if report["matches"] else 1
 
 

@@ -1,0 +1,3831 @@
+{
+  "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "go_version": "1.26.7",
+  "platform": "linux-x86_64",
+  "source_head": "a22c297085925b8423bfcb89ff939b69e93cfa78",
+  "source_hashes": {
+    "rust/symbrain-cli/src/skills_sync_flags.rs": "2ec843bc45228d8fc2ecd8cf376c7294f7848981e52d8b374ce6b43e9299cf9b",
+    "rust/symbrain-cli/tests/skills_preflight_native.rs": "9b7f90b274c72fc5ddd2a89c00a515dbb987f146417da32551cb64aaaceb2b7b"
+  },
+  "total": 198,
+  "matched": 198,
+  "results": [
+    {
+      "raw_args_hex": [
+        "2d2d746172676574"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -target\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -target\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d746172676574"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -target\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -target\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -scope\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -scope\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d73636f7065"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -scope\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag needs an argument: -scope\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d756e6b6e6f776e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag provided but not defined: -unknown\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "flag provided but not defined: -unknown\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d6472792d72756e3d696e76616c6964"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "invalid boolean value \"invalid\" for -dry-run: parse error\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "invalid boolean value \"invalid\" for -dry-run: parse error\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d68656c70"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "Usage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "Usage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d68"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "Usage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "Usage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d6e6f742d612d746172676574"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"not-a-target\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"not-a-target\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653d6e6f742d612d73636f7065"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"not-a-scope\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"not-a-scope\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d6472792d72756e3d74727565"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d6472792d72756e3d66616c7365"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d6472792d72756e3d31"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d6472792d72756e3d30"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d",
+        "2d2d746172676574"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "706f736974696f6e616c",
+        "2d2d73636f7065"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d2d",
+        "2d2d746172676574"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d2d6472792d72756e3d74727565"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d2d2d746172676574"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "bad flag syntax: ---target\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "bad flag syntax: ---target\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d6472792d72756e3d74727565",
+        "2d2d6472792d72756e3d66616c7365"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d206f70656e636f646520",
+        "2d2d73636f70653d207573657220"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":false}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653d6261641b"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"bad\\x1b\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"bad\\x1b\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d6472792d72756e3d6261641b"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "invalid boolean value \"bad\\x1b\" for -dry-run: parse error\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "invalid boolean value \"bad\\x1b\" for -dry-run: parse error\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "2d2d626164"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"-bad\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"-bad\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "2d2d626164"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"-bad\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"-bad\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653d626164ff"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"bad\\xff\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"bad\\xff\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "626164ff"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"bad\\xff\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"bad\\xff\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d626164ff"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "626164ff"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d6472792d72756e3d626164ff"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "invalid boolean value \"bad\\xff\" for -dry-run: parse error\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "invalid boolean value \"bad\\xff\" for -dry-run: parse error\nUsage of skills sync:\n  -dry-run\n    \treport the plan without writing\n  -scope string\n    \tinstall scope: user or project (default \"user\")\n  -target string\n    \tlimit to one harness target\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d20626164ff20"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "20626164ff20"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d20626164ff20",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "20626164ff20",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653d20626164ff20",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \" bad\\xff \" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \" bad\\xff \" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "20626164ff20",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \" bad\\xff \" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \" bad\\xff \" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d206f70656e636f646520",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "206f70656e636f646520",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653d206f70656e636f646520",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \" opencode \" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \" opencode \" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "206f70656e636f646520",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \" opencode \" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \" opencode \" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d20",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "20",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653d20",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "20",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d090a0b0c0d626164ff090a0b0c0d",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "090a0b0c0d626164ff090a0b0c0d",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653d090a0b0c0d626164ff090a0b0c0d",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\t\\n\\v\\f\\rbad\\xff\\t\\n\\v\\f\\r\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\t\\n\\v\\f\\rbad\\xff\\t\\n\\v\\f\\r\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "090a0b0c0d626164ff090a0b0c0d",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\t\\n\\v\\f\\rbad\\xff\\t\\n\\v\\f\\r\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\t\\n\\v\\f\\rbad\\xff\\t\\n\\v\\f\\r\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d090a0b0c0d6f70656e636f6465090a0b0c0d",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "090a0b0c0d6f70656e636f6465090a0b0c0d",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653d090a0b0c0d6f70656e636f6465090a0b0c0d",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\t\\n\\v\\f\\ropencode\\t\\n\\v\\f\\r\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\t\\n\\v\\f\\ropencode\\t\\n\\v\\f\\r\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "090a0b0c0d6f70656e636f6465090a0b0c0d",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\t\\n\\v\\f\\ropencode\\t\\n\\v\\f\\r\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\t\\n\\v\\f\\ropencode\\t\\n\\v\\f\\r\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d090a0b0c0d",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "090a0b0c0d",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653d090a0b0c0d",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "090a0b0c0d",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743dc285626164ffc285",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "c285626164ffc285",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653dc285626164ffc285",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u0085bad\\xff\\u0085\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u0085bad\\xff\\u0085\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "c285626164ffc285",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u0085bad\\xff\\u0085\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u0085bad\\xff\\u0085\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743dc2856f70656e636f6465c285",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "c2856f70656e636f6465c285",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653dc2856f70656e636f6465c285",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u0085opencode\\u0085\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u0085opencode\\u0085\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "c2856f70656e636f6465c285",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u0085opencode\\u0085\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u0085opencode\\u0085\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743dc285",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "c285",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653dc285",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "c285",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743dc2a0626164ffc2a0",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "c2a0626164ffc2a0",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653dc2a0626164ffc2a0",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u00a0bad\\xff\\u00a0\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u00a0bad\\xff\\u00a0\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "c2a0626164ffc2a0",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u00a0bad\\xff\\u00a0\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u00a0bad\\xff\\u00a0\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743dc2a06f70656e636f6465c2a0",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "c2a06f70656e636f6465c2a0",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653dc2a06f70656e636f6465c2a0",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u00a0opencode\\u00a0\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u00a0opencode\\u00a0\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "c2a06f70656e636f6465c2a0",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u00a0opencode\\u00a0\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u00a0opencode\\u00a0\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743dc2a0",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "c2a0",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653dc2a0",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "c2a0",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de19a80626164ffe19a80",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e19a80626164ffe19a80",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de19a80626164ffe19a80",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u1680bad\\xff\\u1680\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u1680bad\\xff\\u1680\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e19a80626164ffe19a80",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u1680bad\\xff\\u1680\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u1680bad\\xff\\u1680\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de19a806f70656e636f6465e19a80",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e19a806f70656e636f6465e19a80",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de19a806f70656e636f6465e19a80",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u1680opencode\\u1680\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u1680opencode\\u1680\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e19a806f70656e636f6465e19a80",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u1680opencode\\u1680\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u1680opencode\\u1680\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de19a80",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e19a80",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de19a80",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e19a80",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a626164ffe28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a626164ffe28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a626164ffe28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200abad\\xff\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200abad\\xff\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a626164ffe28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200abad\\xff\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200abad\\xff\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a6f70656e636f6465e28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a6f70656e636f6465e28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a6f70656e636f6465e28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200aopencode\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200aopencode\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a6f70656e636f6465e28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200aopencode\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200aopencode\\u2000\\u2001\\u2002\\u2003\\u2004\\u2005\\u2006\\u2007\\u2008\\u2009\\u200a\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e28080e28081e28082e28083e28084e28085e28086e28087e28088e28089e2808a",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de280a8e280a9626164ffe280a8e280a9",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e280a8e280a9626164ffe280a8e280a9",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de280a8e280a9626164ffe280a8e280a9",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2028\\u2029bad\\xff\\u2028\\u2029\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2028\\u2029bad\\xff\\u2028\\u2029\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e280a8e280a9626164ffe280a8e280a9",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2028\\u2029bad\\xff\\u2028\\u2029\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2028\\u2029bad\\xff\\u2028\\u2029\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de280a8e280a96f70656e636f6465e280a8e280a9",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e280a8e280a96f70656e636f6465e280a8e280a9",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de280a8e280a96f70656e636f6465e280a8e280a9",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2028\\u2029opencode\\u2028\\u2029\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2028\\u2029opencode\\u2028\\u2029\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e280a8e280a96f70656e636f6465e280a8e280a9",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2028\\u2029opencode\\u2028\\u2029\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u2028\\u2029opencode\\u2028\\u2029\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de280a8e280a9",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e280a8e280a9",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de280a8e280a9",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e280a8e280a9",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de280af626164ffe280af",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e280af626164ffe280af",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de280af626164ffe280af",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u202fbad\\xff\\u202f\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u202fbad\\xff\\u202f\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e280af626164ffe280af",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u202fbad\\xff\\u202f\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u202fbad\\xff\\u202f\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de280af6f70656e636f6465e280af",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e280af6f70656e636f6465e280af",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de280af6f70656e636f6465e280af",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u202fopencode\\u202f\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u202fopencode\\u202f\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e280af6f70656e636f6465e280af",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u202fopencode\\u202f\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u202fopencode\\u202f\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de280af",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e280af",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de280af",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e280af",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de2819f626164ffe2819f",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e2819f626164ffe2819f",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de2819f626164ffe2819f",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u205fbad\\xff\\u205f\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u205fbad\\xff\\u205f\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e2819f626164ffe2819f",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u205fbad\\xff\\u205f\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u205fbad\\xff\\u205f\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de2819f6f70656e636f6465e2819f",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e2819f6f70656e636f6465e2819f",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de2819f6f70656e636f6465e2819f",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u205fopencode\\u205f\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u205fopencode\\u205f\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e2819f6f70656e636f6465e2819f",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u205fopencode\\u205f\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u205fopencode\\u205f\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de2819f",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e2819f",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de2819f",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e2819f",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de38080626164ffe38080",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e38080626164ffe38080",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de38080626164ffe38080",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u3000bad\\xff\\u3000\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u3000bad\\xff\\u3000\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e38080626164ffe38080",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u3000bad\\xff\\u3000\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u3000bad\\xff\\u3000\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de380806f70656e636f6465e38080",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e380806f70656e636f6465e38080",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de380806f70656e636f6465e38080",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u3000opencode\\u3000\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u3000opencode\\u3000\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e380806f70656e636f6465e38080",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u3000opencode\\u3000\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u3000opencode\\u3000\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de38080",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e38080",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de38080",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e38080",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      },
+      "rust": {
+        "exit_code": 0,
+        "stdout": "{\"results\":[],\"dry_run\":true}\n",
+        "stderr": ""
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de2808b626164ffe2808b",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\u200bbad\\xff\\u200b\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\u200bbad\\xff\\u200b\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e2808b626164ffe2808b",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\u200bbad\\xff\\u200b\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\u200bbad\\xff\\u200b\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de2808b626164ffe2808b",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u200bbad\\xff\\u200b\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u200bbad\\xff\\u200b\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e2808b626164ffe2808b",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u200bbad\\xff\\u200b\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u200bbad\\xff\\u200b\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de2808b6f70656e636f6465e2808b",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\u200bopencode\\u200b\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\u200bopencode\\u200b\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e2808b6f70656e636f6465e2808b",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\u200bopencode\\u200b\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\u200bopencode\\u200b\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de2808b6f70656e636f6465e2808b",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u200bopencode\\u200b\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u200bopencode\\u200b\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e2808b6f70656e636f6465e2808b",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u200bopencode\\u200b\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u200bopencode\\u200b\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743de2808b",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\u200b\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\u200b\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "e2808b",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\u200b\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\u200b\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653de2808b",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u200b\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u200b\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "e2808b",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u200b\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\u200b\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743defbbbf626164ffefbbbf",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\ufeffbad\\xff\\ufeff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\ufeffbad\\xff\\ufeff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "efbbbf626164ffefbbbf",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\ufeffbad\\xff\\ufeff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\ufeffbad\\xff\\ufeff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653defbbbf626164ffefbbbf",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\ufeffbad\\xff\\ufeff\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\ufeffbad\\xff\\ufeff\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "efbbbf626164ffefbbbf",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\ufeffbad\\xff\\ufeff\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\ufeffbad\\xff\\ufeff\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743defbbbf6f70656e636f6465efbbbf",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\ufeffopencode\\ufeff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\ufeffopencode\\ufeff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "efbbbf6f70656e636f6465efbbbf",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\ufeffopencode\\ufeff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\ufeffopencode\\ufeff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653defbbbf6f70656e636f6465efbbbf",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\ufeffopencode\\ufeff\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\ufeffopencode\\ufeff\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "efbbbf6f70656e636f6465efbbbf",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\ufeffopencode\\ufeff\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\ufeffopencode\\ufeff\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743defbbbf",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\ufeff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\ufeff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "efbbbf",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\ufeff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\ufeff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653defbbbf",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\ufeff\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\ufeff\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "efbbbf",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\ufeff\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\ufeff\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d1c626164ff1c",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\x1cbad\\xff\\x1c\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\x1cbad\\xff\\x1c\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "1c626164ff1c",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\x1cbad\\xff\\x1c\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\x1cbad\\xff\\x1c\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653d1c626164ff1c",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\x1cbad\\xff\\x1c\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\x1cbad\\xff\\x1c\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "1c626164ff1c",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\x1cbad\\xff\\x1c\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\x1cbad\\xff\\x1c\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d1c6f70656e636f64651c",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\x1copencode\\x1c\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\x1copencode\\x1c\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "1c6f70656e636f64651c",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\x1copencode\\x1c\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\x1copencode\\x1c\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653d1c6f70656e636f64651c",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\x1copencode\\x1c\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\x1copencode\\x1c\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "1c6f70656e636f64651c",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\x1copencode\\x1c\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\x1copencode\\x1c\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d1c",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\x1c\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\x1c\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "1c",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\x1c\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\x1c\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f70653d1c",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\x1c\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\x1c\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d73636f7065",
+        "1c",
+        "2d2d6472792d72756e"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\x1c\" (known: user, project)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown scope \"\\x1c\" (known: user, project)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d20a0626164ffc220"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xa0bad\\xff\\xc2\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xa0bad\\xff\\xc2\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "20a0626164ffc220"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xa0bad\\xff\\xc2\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xa0bad\\xff\\xc2\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d20ff20ff20"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xff \\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xff \\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "20ff20ff20"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xff \\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xff \\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d20e28020626164ff20"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xe2\\x80 bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xe2\\x80 bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "20e28020626164ff20"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xe2\\x80 bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xe2\\x80 bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d20626164ffe28020"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\\xe2\\x80\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\\xe2\\x80\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "20626164ffe28020"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\\xe2\\x80\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"bad\\xff\\xe2\\x80\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d7461726765743d20c0a0626164ff20"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xc0\\xa0bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xc0\\xa0bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    },
+    {
+      "raw_args_hex": [
+        "2d2d746172676574",
+        "20c0a0626164ff20"
+      ],
+      "matched": true,
+      "go": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xc0\\xa0bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      },
+      "rust": {
+        "exit_code": 2,
+        "stdout": "",
+        "stderr": "symbrain skills sync: unknown target \"\\xc0\\xa0bad\\xff\" (known: claude, opencode, codex, antigravity, hermes, openclaw)\n"
+      }
+    }
+  ],
+  "candidate_dirty": false,
+  "candidate_source_sha256": {
+    "Cargo.lock": "95657aeeba4f12cde301afa9aaf6b01b021b0d7892ed4cad6907a1db390785c0",
+    "Cargo.toml": "982fdf67af364bb689371f888d79e4662bcbd2d7088dec0d7a2aa85f308a0155",
+    "rust/symbrain-activity/Cargo.toml": "108293987bfc56b3f878ad0addd37bd9eec269cf7e31f53743e248f31df816e7",
+    "rust/symbrain-activity/src/lib.rs": "11e63f15e7773c485b0f5c80ba6c2e6556cf35277e5504134de318986ee299c2",
+    "rust/symbrain-activity/tests/oracle_differential_tests.rs": "d4ec2e3f8d04ba92ee64f4467dbc99a11d1149e451430667dc5fcb7d258a0b2b",
+    "rust/symbrain-adapter/Cargo.toml": "dea5ac5455150b17f471425763ddba101c6fa24e5c82545406907bb4654229e5",
+    "rust/symbrain-adapter/src/atomic.rs": "6c8fffe7185c00eccd17ca29cfb9f66b0f14010b64d6bcde0ec732bbebfbb025",
+    "rust/symbrain-adapter/src/lib.rs": "226a0a98b5379965c9211a34529bf01095aa0c779a0ede8dd7dc6b1452080e93",
+    "rust/symbrain-adapter/src/metadata_unix.rs": "7524c36ea2368eb59afd893ad9cede72cd01eb988a5b19d5b2244ba25873e344",
+    "rust/symbrain-adapter/src/metadata_windows.rs": "0d3741e743089a9af02f0d47082f8143ebf14f9305808a8ab63c4c4f2911cde3",
+    "rust/symbrain-adapter/src/path.rs": "747f8e821e0b718957ebfe5491a6d2331da43b7c1f8977e2bcf85cb27d9a45c8",
+    "rust/symbrain-adapter/src/target.rs": "4b4c23c1efd971a4c08fc3c11e3f55bba6bb1ed07fc89b01865750331cab675a",
+    "rust/symbrain-adapter/tests/adapter_tests.rs": "130e46328bbce2599e5e0083124a887c4861294ad224babd0ba05fc4aac84962",
+    "rust/symbrain-adapter/tests/confinement_tests.rs": "cdbbf7ffa89ef0a0bf4c620df1e0e74d1a61bdf78890114d88f792692004b0a6",
+    "rust/symbrain-audit/Cargo.toml": "315e0c0a628053ac7b8526f40dac0a13f1ea87730bf9795ddd477f16e8b9745a",
+    "rust/symbrain-audit/src/lib.rs": "3eecae6a46dcdae73478729a1d79ee7fb7e61c76f26cdd6a739c2766f2dc0c22",
+    "rust/symbrain-audit/src/logger.rs": "65ce1366e8fa4b09f0b447b25d498ceb3ce3ded6b014d357f96fd33fdbf9ad8d",
+    "rust/symbrain-audit/src/model.rs": "74edfcbfec2cbc510a059c9b79b0dacadacb5b9d13494960e081fd0e95252564",
+    "rust/symbrain-audit/src/raw.rs": "a78dad01de7a89ce8b3c2d5b05593ec4ea1e51ee3e926d9af93c651723a222fe",
+    "rust/symbrain-audit/src/raw_unix.rs": "906266b42a6587155ad236d3dd2470656b104b947a86ee0fbe505579f93b7981",
+    "rust/symbrain-audit/src/raw_windows.rs": "cb96db4fdd4ca8f3c3f0ff9345f4c832f2fea6560a0a4e973a05e82d97032949",
+    "rust/symbrain-audit/src/redact.rs": "0f071038acd66c1995b025fddefab83b0cd100330d6d9b69cd5d71b01e4ec553",
+    "rust/symbrain-audit/src/sink.rs": "c2ace5ff8c9a17aec89f7b7796c48436cb68dc6ff140b91a824f902bea7b45f2",
+    "rust/symbrain-audit/src/tail.rs": "fb90e63d4bb05a5aeca832b062ba0e2f668182f1d6e5deafc84d13f2e5cb67d8",
+    "rust/symbrain-audit/tests/oracle_differential_tests.rs": "f65e55089ec39d8f13f5ea35ce29d889e0ee43d9488dc6d2c7321adab62851ba",
+    "rust/symbrain-audit/tests/raw_windows_tests.rs": "2e31118c0439b335e2056f949a70cbde89a3a205dad12a83574614bc67e9fcd9",
+    "rust/symbrain-broker/Cargo.toml": "eac4c547ecbeec135b1aee23988f04e3b1eeba2c7a86e92f265f1499dce083f9",
+    "rust/symbrain-broker/src/bin/fakemcp.rs": "22ace858c752adb709a904534cc5117dcc85ee301ae6b9fb6b27a46dcbfbe145",
+    "rust/symbrain-broker/src/client.rs": "8dbbdbd2fa79a397ccd7d2f5ea5c730458c94f902c85b184818e0b6ae806b456",
+    "rust/symbrain-broker/src/lib.rs": "fbb3cd0920e0cc1d55090b082bfa6bde55dd418c66c2ce98924d628fd70dd25c",
+    "rust/symbrain-broker/src/server.rs": "8f608db783772be11c7084c71da82c7065e253fa788d165c956da3a681af269a",
+    "rust/symbrain-broker/tests/broker_tests.rs": "eaab61600a7acfd5cbbbc2d5fde6c388d5b970295308a76c999eed94e831f0c1",
+    "rust/symbrain-catalog/Cargo.toml": "21d2d57e389b337b3fceae67c08aeb78441cdba0cbaa768c1f329d28daf930bc",
+    "rust/symbrain-catalog/src/lib.rs": "57347a722cffe899cae0db9d5e1bea9c812fd9ed1e9072a3371058831cd78d0d",
+    "rust/symbrain-catalog/tests/oracle_differential_tests.rs": "0a5400cb6256ce96236a0021380dcbae0dd4bf9733175aa143064e382b5d3d08",
+    "rust/symbrain-cli/Cargo.toml": "264401fd592b03c30f3bc5f3b0f831607a50fe91fed4d955210978c777585cf5",
+    "rust/symbrain-cli/build.rs": "c7d6abd8014332091d999c1a72c5db224044694c1f4571c24572327c0da87267",
+    "rust/symbrain-cli/src/activity_cli.rs": "daaa406796e185348bce97b15f8732a80aff62959b19587a835d8cd8fe9970cc",
+    "rust/symbrain-cli/src/audit_cli.rs": "5fdda55957e637715ef859af2c61ba40da659a7cdc32bb1230e8ba00ad2d3d1d",
+    "rust/symbrain-cli/src/cli_tests.rs": "3a4734eead15924813493fda3e5d5939ebc2f3190969085578e3f12100352472",
+    "rust/symbrain-cli/src/config_cli.rs": "11293458c72851b4911a24b32e65a90f59f0279197dd6a9ffe052be83b19b58a",
+    "rust/symbrain-cli/src/doctor_checks.rs": "de08bb41f70b4ccf2b31562d8440106e4ef9d7c1170dd990eb0452a8c6f91908",
+    "rust/symbrain-cli/src/doctor_cli.rs": "e5d980e72ffea8f2aae528416f32caee539fd24240365dbb709ec89093b65ac1",
+    "rust/symbrain-cli/src/doctor_core.rs": "de5de8fc42fdb9df20034e4316e03d8dfa948d9aa1a4813fe00045585f07b1d9",
+    "rust/symbrain-cli/src/doctor_fix.rs": "1fc27da32d6cc7866ac6d241611240e05869e2f1021257043d0c9e7309404774",
+    "rust/symbrain-cli/src/doctor_links.rs": "f81fd8412d0101c1b2b7a9ff38550611a3373e47ef810f514b504de6c43c797d",
+    "rust/symbrain-cli/src/doctor_process.rs": "35ddb638017ec617fd897bdd298c20e0688407365f886e9c62c70c55995c2ade",
+    "rust/symbrain-cli/src/doctor_render.rs": "53016c1751eac5446cad88b1e6dafe5a6d902ce5246c667dc3140154e9fa9f4a",
+    "rust/symbrain-cli/src/doctor_types.rs": "98d0d5c3cf815f4749227fc4a7173677b67417fe5e6b202d48db60ec518a5631",
+    "rust/symbrain-cli/src/guard_cli.rs": "08b4a2c16b53c8202f9eb8b4b2bc82317d13c67b0bf392e34bc7344ef629ce21",
+    "rust/symbrain-cli/src/guard_doctor.rs": "1b839af6029b11184d2d4afc348cd899df2fc1a268aa42d5b514d7934dbd3b8d",
+    "rust/symbrain-cli/src/guard_grants.rs": "056d60b2b8b54a717fab673e8468aff5d60e19fdcae9a41753f76d9188414dc7",
+    "rust/symbrain-cli/src/guard_grants_store.rs": "05daf2ce769bbe0ab6ef600eab15ef1a4d18ad595a34c026ee9e137a57b9db51",
+    "rust/symbrain-cli/src/guard_scan.rs": "c124b318b89f7b260464dd75c4c6b6c378d0d672fef757ab2354e4f6b3573259",
+    "rust/symbrain-cli/src/guard_scan_config.rs": "3f4403534bcba6ce3d0c994ba6b1120b7ea8a75ab9a1b50884d8d06c4c31a1e7",
+    "rust/symbrain-cli/src/harness_cli.rs": "c023d4d97e11df1e32269cde6964c381c9e1e16713855e87ea529600d9a07b15",
+    "rust/symbrain-cli/src/health_probe.rs": "b4387bd297383bcd7cd20e1233a59168260f96d1c446879cda6060e42e18a200",
+    "rust/symbrain-cli/src/init_cli.rs": "f1bdc936cd4edd4d79f8de091b5cf5b22b94682362056169e35178c42ed17f8d",
+    "rust/symbrain-cli/src/init_templates/default_config.toml": "42d528661b9266b3990a5a380be25e3562f86467ff34ae83efd32437d52ad605",
+    "rust/symbrain-cli/src/init_templates/foreign-read-only.toml": "16607220063a636ee4c22d817ac138acce236fd6e61ce016f5f54a60bf1f7181",
+    "rust/symbrain-cli/src/init_templates/personal.toml": "686267ba7443a5342a785e397adf741d619b6d7bb95d59fbaa38cb6d5110054a",
+    "rust/symbrain-cli/src/init_templates/restricted.toml": "d71a5bcd132acfd41529e86800ff80612393dc4aaf734b46e1e7232f496c1bf9",
+    "rust/symbrain-cli/src/install_cli.rs": "25474e4c87af3f78c69023b21b85472a2f20265cce0dd65d7f47f4c36f530975",
+    "rust/symbrain-cli/src/lib.rs": "4dae0ce8a5580f5864a3bd3b3368c35cea3dc401f77f39ef1373e9ca01bcdbef",
+    "rust/symbrain-cli/src/main.rs": "e6dd8093173873f5eddab3d213368e90aacad77092d03c37d5b5b1ff3426a7a6",
+    "rust/symbrain-cli/src/mcp_cli.rs": "df13ab029d74d6b987c26139fd2b5d3679dd71ddad6a65190641e8c8ab1e6af4",
+    "rust/symbrain-cli/src/memory_cli.rs": "78b664330aba0c79676e62000cfa9153a99831edd13d80ecc44bcaced3aabb95",
+    "rust/symbrain-cli/src/passthrough.rs": "58eb151e105af40366dd6b24fb7105401f258c9dd24b67f9106fa046eeddf3e1",
+    "rust/symbrain-cli/src/passthrough_tests.rs": "69f8d33d1bfad1682c9eb1439a41361526de0a19090c36e56df7afa1b9f9a811",
+    "rust/symbrain-cli/src/profile_actions.rs": "347c0ba2fac9b24e6f308c91edcb042fcc39bb34e305a17522c0d533c620d3c9",
+    "rust/symbrain-cli/src/profile_args.rs": "c46a25adc43643fc94d65fd2639cfe3304d64c9a65f533beda1530b9754a5b92",
+    "rust/symbrain-cli/src/profile_cli.rs": "84ea453ddf1981992a2e8bb660f635f5de5a46c5c9cd3ccb5af4e64eb3e886d7",
+    "rust/symbrain-cli/src/profile_render.rs": "cc348dce9a1f51a73c8b49957e6e1a0bc0682c000fbcb0fb370f88667638cf3c",
+    "rust/symbrain-cli/src/setup_args.rs": "ef62c564e91b277958420101562632027980415374fc59dcc0c76bf94d526878",
+    "rust/symbrain-cli/src/setup_cli.rs": "e068a23610485db4caa515f11048e960b5026d6237a0c266eb0a84e6b9c0557e",
+    "rust/symbrain-cli/src/setup_config.rs": "a8338db6477d65e1bbfa9ed24556cd8b4f8f59f67d4036da1b66f04ca2d3caa0",
+    "rust/symbrain-cli/src/skills_cli.rs": "a9bf440caeed05c012c6b192ed68c6e7c91abca748d3adf1bc9c073489bbd9b4",
+    "rust/symbrain-cli/src/skills_sync_flags.rs": "2ec843bc45228d8fc2ecd8cf376c7294f7848981e52d8b374ce6b43e9299cf9b",
+    "rust/symbrain-cli/src/sync_cli.rs": "6a2378e7e22b66d3463e48719f6345bf230980e85962fa661b6d9512c726e447",
+    "rust/symbrain-cli/src/usage_cli.rs": "51f900ee73c2a3de0b47549d63c77e7228a4f2c249b4c942c35f075398eede0a",
+    "rust/symbrain-cli/src/usage_fetch_output_tests.rs": "3ff61d31bbd27467edb8df5ea357ce12317e3df2374d3ed3e55b6728eb406482",
+    "rust/symbrain-cli/src/vault_admin.rs": "85e8466e9e5d781368051f3f1c0a3066ff2c86eb16a9a5de3323ce9604c231da",
+    "rust/symbrain-cli/src/vault_config.rs": "1b1538509663c718b27bfbe7fde07bf89fa12e15ee933ac321e65ff0c50a175d",
+    "rust/symbrain-cli/src/vault_response.rs": "ad8a66f0a55f5d601c5b4da333a9253c93cf7d008aaf41fd6bd3a31430b6b65c",
+    "rust/symbrain-cli/tests/activity_cli_oracle_tests.rs": "413da6d1c6034bbb27cef032f2798d27176bd887627d5d43773b6a96e33e203a",
+    "rust/symbrain-cli/tests/cli_tree_tests.rs": "f4a9db302b39d8359150115c63b155022415dc6b08438de569dec3d2172bf85a",
+    "rust/symbrain-cli/tests/common/doctor_header.rs": "bbae58c3f13664fb7fb58c28f28b8f04f40ab331b55e4ccce0e10c57f55a116a",
+    "rust/symbrain-cli/tests/doctor_modules.rs": "222b24d10fb7e237661ebc58e0ddd4258a0f985e7045511584c9b0fb06e0bb98",
+    "rust/symbrain-cli/tests/doctor_native.rs": "dba6fea31b469e640ba7aa2c8ac5d9a63b81e3105c4a77ca83b68804e5f9afcb",
+    "rust/symbrain-cli/tests/guard_decide_adapter.rs": "97fd3f4a1129840371ff4e8460244d985fd9134adede42183ccefbcad5ea5f61",
+    "rust/symbrain-cli/tests/guard_decide_raw_bytes.rs": "3ffbfde15363dd9d3b1e0ab45313905d459e29a07d1b75ded3c648b40f375847",
+    "rust/symbrain-cli/tests/guard_doctor_oracle_tests.rs": "cfa5c047bcba060578cc2623517bd5e794568871e7b9bdb10236fe4cdd8abeaf",
+    "rust/symbrain-cli/tests/guard_grants_native.rs": "52a344e1568f6e4b5a619542d1ae560ff2257dcc9acf394722b5b5b5ce3490ef",
+    "rust/symbrain-cli/tests/guard_oracle_grants.rs": "79583c621e333a2f3fc3630393fc58e262b74b69796a5b30471fb22fd2886962",
+    "rust/symbrain-cli/tests/harness_health_tests.rs": "19018400b15baa4447a22c42528262707e03879f490693e2d699fe5417d1b860",
+    "rust/symbrain-cli/tests/harness_list_tests.rs": "fb23c81397dbb6121970e7a1b145372ca7406a3b2dcc70313dd97fdb49de07ef",
+    "rust/symbrain-cli/tests/init_cli_tests.rs": "5cf56e33be68522d26aae3ff854cf59e9e38a92467e1577d042bdda49994ee18",
+    "rust/symbrain-cli/tests/install_oracle_tests.rs": "c0eae662a3a99dd467c35ff5f533ac15a2c6af3f9650006bc07bbc5c71a19955",
+    "rust/symbrain-cli/tests/mcp_cli_tests.rs": "859dcbfcf03910aaff2ffeccd42f6209ab411355725e7b06acabd169a9e9f0af",
+    "rust/symbrain-cli/tests/profile_cli_tests.rs": "e9fe05f8ef3cb1f691c06b07c7cb840d3e7627e474763eafe118e7a8cf6b3255",
+    "rust/symbrain-cli/tests/setup_fix_native.rs": "673427cb6351c4abc4c8a74a69c066e88853074e4b5789f4ecd1a0f10a0281a5",
+    "rust/symbrain-cli/tests/setup_repair_native.rs": "5032cf011006493cce3988b195cf8eb0b4b5a3618f30e8728239d33da765a0dd",
+    "rust/symbrain-cli/tests/skills_doctor_native.rs": "a4d60c07354e538c2100415a1910d45775bdbb3ff0c79ace783e65b4494b01a6",
+    "rust/symbrain-cli/tests/skills_list_native.rs": "b74522b32885b897f3eb91b854cb0ec18fd71cd492375309d23e36911fd391aa",
+    "rust/symbrain-cli/tests/skills_log_native.rs": "cb438b2da6161343e912366912a032f2fe691027d5f77bf6d67bad74ba1ec73b",
+    "rust/symbrain-cli/tests/skills_preflight_native.rs": "9b7f90b274c72fc5ddd2a89c00a515dbb987f146417da32551cb64aaaceb2b7b",
+    "rust/symbrain-cli/tests/skills_status_opencode_tests.rs": "88d022c8377d7d45557405e6578a97e0b230f526bcb48960bec65fbccfdcd5e3",
+    "rust/symbrain-cli/tests/skills_sync_legacy_roots.rs": "121fadf1140f25c27d90bf012b69cc8ea9b8bd66193a7afdff14a15083b288bc",
+    "rust/symbrain-cli/tests/skills_targets_native.rs": "0dc4a04903d10691d4ff7c636f9843f0e09a88a6d7c92ab945d735d33f6f00ae",
+    "rust/symbrain-cli/tests/support/mcp_lifecycle.rs": "489acd25237ef1465ae8c6f829983e2cda0eed17aa5f4198bd29f8e405d37172",
+    "rust/symbrain-cli/tests/support/setup_child.rs": "e73cb2e3ef5ab3b9970a881a9e29d76ab352ca90e7a618c496d394b7f9483cd2",
+    "rust/symbrain-cli/tests/support/vault_child.rs": "e379a4f44f488389ddfb98fc9fd0ee773923955051b3c2888f1b394c7a0a2078",
+    "rust/symbrain-cli/tests/sync_native.rs": "70027d172da217c991613c23284b936a42467d7df53060d8cfedba735a31a049",
+    "rust/symbrain-cli/tests/vault_admin_native.rs": "1e4a62b3d7c0d1d5ee0cbd327b7895cdc6bb99e5af9a1e42f6b382ffcdf23242",
+    "rust/symbrain-core/Cargo.toml": "9af57f0120c3787b74a037c714460ffa3bea39725489ceb13cc5b9385dd862af",
+    "rust/symbrain-core/src/config/atomic.rs": "a933dcb9d86d7e704e31bcbffb80a0207f31e49e4a2440725b3d5421aef48621",
+    "rust/symbrain-core/src/config/bytes_tests.rs": "629b276170d3313df1309ed680a6f8909072453d997fa3269cdd19ee1b932270",
+    "rust/symbrain-core/src/config/encode.rs": "0f6feed0f98c83c061292db1ffb957044eddba0f230f17ece1b4c0d6f1e98aec",
+    "rust/symbrain-core/src/config/format.rs": "9e6f68b61896e6f5c559c948a533b633e099bf91dde65b6c5bd03796cc3e8a7c",
+    "rust/symbrain-core/src/config/format_tests.rs": "60bbfce6074e323b6288e60aa5a9590c2dac4be6b80e7595aabf59244a42edb8",
+    "rust/symbrain-core/src/config/get.rs": "736bb2ad63e4c244281a0db8846d16518586e22484cfb71aab030f330467066b",
+    "rust/symbrain-core/src/config/get_tests.rs": "b4009c3365fc20c9cea4a23708dab3b82e25b45d8808a10e93dd4771a5e59f45",
+    "rust/symbrain-core/src/config/lossless.rs": "597878ad7289376f85baca09efda6ceedbf3474f48013e3064b590e2c453f45a",
+    "rust/symbrain-core/src/config/mod.rs": "a12833bf6b943009a26d12f0f3e7272164de9e75651ac4d90737c25db95d2384",
+    "rust/symbrain-core/src/config/set.rs": "c76abd5ccd9e41f856c0abaaeade081f9d9113041928f13512ece10e5715fa2e",
+    "rust/symbrain-core/src/config/set_fixtures_tests.rs": "f70c22fcf867709a36491acf365cf7e009994381fa73b45444fb95aef3f126b9",
+    "rust/symbrain-core/src/config/set_flag_alias_tests.rs": "716069a7ab0e0ce01a5aa8cd68ea6ef3fb6ad976eb2dc8a6e05858d75e10a5fb",
+    "rust/symbrain-core/src/config/set_tests.rs": "51f06844332c48bb33cad1a7c550a33580ab377720843405cd02fd48e93dd11f",
+    "rust/symbrain-core/src/exit.rs": "7f5efe594eb3bc7f5957a12bfd9642e07846fc71cff181647884d781ae66d2ea",
+    "rust/symbrain-core/src/go_printable.rs": "f9c9e9fc24130e3d2ef59649ebedbb0586137d21fd5af2bcae232d812734de9a",
+    "rust/symbrain-core/src/lib.rs": "9e9e2d32f3cd59f939544e213a7cd05a585513d4ea8962016ca8b3cdb40d6cc4",
+    "rust/symbrain-core/src/output.rs": "a8e01e7d19d7eadc8f71d1634166691294b0223959248b0a8fc50b1d8264856a",
+    "rust/symbrain-core/src/output_tests.rs": "91a449506c9af3a50a6b402121b786da104ea8a39e338cde776224afb9ca10c8",
+    "rust/symbrain-core/src/paths.rs": "db2a7633131b77577afa9e5aac6956c479e62ca6f27b3990298917ec03673c34",
+    "rust/symbrain-core/src/version.rs": "3f8ce20ca4877e98f180d5da31a91f097ae0921804fb582ebd7e6c1bc2b87442",
+    "rust/symbrain-core/src/xdg.rs": "41d4d4367d5c3ac7766f054ddb91a71b79547701997271f80347990ffabda201",
+    "rust/symbrain-core/tests/xdg_paths_tests.rs": "af07faabe7b9b003e2df4b0a1677a5376ff23693825512656caa8369c3e8457d",
+    "rust/symbrain-gateway/Cargo.toml": "a4b54f28815c364d6e2da31067bad5fa9c2b820c228413b94069938e547260aa",
+    "rust/symbrain-gateway/src/audit.rs": "ed08d7765fb941d0e68c6ea497c540a0189622b8f67095a0ead2cbf50ded5bf6",
+    "rust/symbrain-gateway/src/builtin.rs": "e36de48c65f4ea45759b19e53622c6bdb2226e5993541ee55001aa1cec8081c5",
+    "rust/symbrain-gateway/src/catalog.rs": "5b869163e2b4ca84a6077a4b8ac3dee4291eb978e7aa37e4a368b7fcce0d8753",
+    "rust/symbrain-gateway/src/dispatch.rs": "2f558e2c19ee3a51320e7f78183f858e57bb836a8bfcf283b6c2804d2f5d3afc",
+    "rust/symbrain-gateway/src/dispatcher_impl.rs": "33f71856db53052c243d8acffb51ff6a7e761d5439999679dda7994ca41b9fe7",
+    "rust/symbrain-gateway/src/embedded.rs": "ee3cef46ec1257598f0e358caa732a80ac0b64c35e595c52de056a91736167e6",
+    "rust/symbrain-gateway/src/embedded/activity.rs": "b8dea6884698ab4d25219ade421aa4289343f1db3992c5c109f210d9a6d71e73",
+    "rust/symbrain-gateway/src/embedded/catalog.rs": "2d9b1ab3265af136cdbb3ba66e701f1a849523cd2ee00af7b947a1ccfeccd69d",
+    "rust/symbrain-gateway/src/embedded/common.rs": "985d2cb99a04a35851a9effd6bd57f68fede06c595b88e4b496b88978cd58dc5",
+    "rust/symbrain-gateway/src/embedded/memory.rs": "fe7b00a875ac70adcfb0fd8027621e0e7c30f7ee766e63068bf1e596f6b973f3",
+    "rust/symbrain-gateway/src/embedded/skills.rs": "9fc91a8f3aa888dbcbb573881a36b59894142d4a0abd14d8c1c985403fed5c32",
+    "rust/symbrain-gateway/src/embedded/skills_status.rs": "4e6e51b5fdf3437733fb08b5731eec29028dcdfe7908f895262024b0eae39cee",
+    "rust/symbrain-gateway/src/error.rs": "d36114a75c5ad4901b1f33ae4efc50206607a3a6cd531fdd2c53f080d724c13e",
+    "rust/symbrain-gateway/src/lib.rs": "9a2305fe7824f6a95624e9cf483bf205baec97d3bbeab533f48999f3111af0e7",
+    "rust/symbrain-gateway/src/response.rs": "09ec27a388d450fbde89fc6d6f1489224648ee49d3106e7779553c765e848909",
+    "rust/symbrain-gateway/src/routing.rs": "5077b45857bcf3343711f9aa819561c163fe4c0c20c7560eb0b205bbb55bd371",
+    "rust/symbrain-gateway/tests/gateway_tests.rs": "e39c5abcb69a16ded876ead431b2d9d844e2e8b5d006808fa499d4f0b2d4e330",
+    "rust/symbrain-gateway/tests/usage_tests.rs": "6f67af7933c01e5a4514af3e56a0289ec9d06918c387997bfb2a21fb41d88ca1",
+    "rust/symbrain-guard-core/Cargo.toml": "64ba7eec3b3c31e830f46e769e498f2643f72d12bff6899012b001a6a836fbd3",
+    "rust/symbrain-guard-core/src/approval.rs": "3d02bd8625858023cbed9251354365e5392da75a072cd61eb75c2dcfb66473ac",
+    "rust/symbrain-guard-core/src/audit.rs": "82b10af924ac2ca015d1b566f745b0387cfc266a8426fe83c07eac6e25e0bc7b",
+    "rust/symbrain-guard-core/src/capability.rs": "d5fd61dba31b80f926c9f79a9a4fae1ef97d476ca14416c15fff2762505c3b42",
+    "rust/symbrain-guard-core/src/capability_wire.rs": "eeee0bb77e5aa4c0bf8c39c69dc73b9beb87dd88c46cd7ded273336bc8052d27",
+    "rust/symbrain-guard-core/src/external_deadline.rs": "8b533f31814da5d2de442405741f093a289a58f3ab6a5763ea23210b708c1f35",
+    "rust/symbrain-guard-core/src/external_decision.rs": "00036f841a6a0afa5fba154b44404a04e041e64d6592f8f154a0b53965732224",
+    "rust/symbrain-guard-core/src/external_decode.rs": "07597791456ed82e451bbb0e0268791b1cd8521a7f9e543a712a3b3fff8f62a4",
+    "rust/symbrain-guard-core/src/external_json.rs": "98d431108b16547dc6f741ae6c928e82a844834ff2ba5364a00e5826bdcf4aea",
+    "rust/symbrain-guard-core/src/go_json.rs": "f98fb8b3c4a77ff310c4d8a16725d3399c0d4a232bbbf2c5f60b5d1441f2399a",
+    "rust/symbrain-guard-core/src/grant.rs": "7db0fc3ec825251b74e38862714716fd50dfda53e475e44cb49b8bc3061d94f9",
+    "rust/symbrain-guard-core/src/key_storage.rs": "5cd9a9da06f29f5ee9f7199e8978d61616146a8af5db1b9cf9d9a3c4315e2364",
+    "rust/symbrain-guard-core/src/lib.rs": "272d9c892047e4e5d4f44c0368c8a168262f7b5cfbfcd94fd37f7af58ed7d568",
+    "rust/symbrain-guard-core/src/marginal.rs": "28a9bbf50d5e43a721090bdb9a37734d4f79517774f5806157b83660b5857f41",
+    "rust/symbrain-guard-core/src/model.rs": "4d9649271162f9d9e1ec571df8126700d3d7575b91d765a5f1afc0e3d6912d66",
+    "rust/symbrain-guard-core/src/model_validation.rs": "ff2801bad1c26b15946034aaf1dd9a5bf2323a5698b4f293e28fc2becec6ec7f",
+    "rust/symbrain-guard-core/src/policy.rs": "819bb9cc479f484dc6dd7c2f6d42e2cf14d2b1b848cbae876c0e9a1ee573325b",
+    "rust/symbrain-guard-core/src/scope.rs": "cf412da982a5b4e0e66cc73e4ea513e0a8d1a963cf2b565408736eb6f12a5b4a",
+    "rust/symbrain-guard-core/src/sequence.rs": "9d440ff6eb20decca4545616ba34c5d566af5281900e9f2a42c83c8ae37afb75",
+    "rust/symbrain-guard-core/tests/capability_oracle_tests.rs": "a5b47b1629c43407d30996056fd6719e54362fbefef417024cf367d4b5c16ba8",
+    "rust/symbrain-guard-core/tests/external_decision.rs": "4a6c5c1fe03d2393f5a630b891f61d32fab69fcac877e39aae9c1701bd079e66",
+    "rust/symbrain-guard-core/tests/external_decision_review.rs": "1bdab7cd879f81cd2fe87c56f26ce276d8d3aff88054619b73d5ba5b52cfe1d8",
+    "rust/symbrain-guard-core/tests/external_decision_serialization.rs": "3509df7b4b3c1bc574a0491959157be8e9a58b3b366b897bb21a3e3dd7407f7a",
+    "rust/symbrain-guard-core/tests/external_repair.rs": "e145b95e84cac3dc939f1df8cf5eaf84e80e4a640ad160289f6c42fa3be4e858",
+    "rust/symbrain-guard-core/tests/fixtures/external_repair_trust_anchor.rs": "6f975a886c0610e23258b19a58f7f658892f2e7802bb54bee3a77aabf24194d6",
+    "rust/symbrain-guard-core/tests/oracle_tests.rs": "b81ffd3b99019250e8c99e8c3307d5a83be7829066809cf5786682fa5f83ae63",
+    "rust/symbrain-harness/Cargo.toml": "cd1d06452abe41143ca9fdb549ac32a2d7653f247341bf3c5d0d4f5ba5ed7bac",
+    "rust/symbrain-harness/src/backup.rs": "1328d4efdb97f024b0215c8a2f5ca9e8a8f746b01acf50643c1cddc6de92dfd1",
+    "rust/symbrain-harness/src/diff.rs": "c6984b8240e6a7f3b26e1c635adc0644707db3c64dc0ffb7320ee1a043ffeca6",
+    "rust/symbrain-harness/src/document.rs": "272d633a137dcf638b0a2164ec4af1cc0ef1e6ffc16e221bfc227a7f53fec172",
+    "rust/symbrain-harness/src/entry.rs": "7b0fde06f765cf8ee96d7ca2de0893b7429ca94582317f2ee08282ba23ac6e4c",
+    "rust/symbrain-harness/src/inventory.rs": "94f51a8a2317f373768fe89e045c6fda2a0ff6608e3c2518fd995e94a936e01d",
+    "rust/symbrain-harness/src/inventory_read.rs": "781a65143ffcf8bd7de99a4bd0a361055d42f0d71d321a4bd9fc5ced03987646",
+    "rust/symbrain-harness/src/json.rs": "9d3242c36eec63904c662aacbd9a70f5ec4e9fe970a9685aae8cca3a6a74a773",
+    "rust/symbrain-harness/src/json_parser.rs": "0a7148acb407d99435ea49a77db507b69ef71904a4fcde4d3b5c12ab1b64d2d8",
+    "rust/symbrain-harness/src/lib.rs": "e292d48b003bb400102a2c1eb55c5ae14313b0176fd64a31a014592dc7944e56",
+    "rust/symbrain-harness/src/registry.rs": "c528d2648435eb7234c01d04a895505118fa7ef6b28d7f54b30ec61141cb5914",
+    "rust/symbrain-harness/src/server_info.rs": "f4d2f9b248b9dc034c327f855434c341faec60ba181901cad26e5d495d0bb8aa",
+    "rust/symbrain-harness/src/toml_backend.rs": "b3ea57269c0110eeb7ccd117202c6da24c7e6112cd5f5f04c0be05fc2f3992fd",
+    "rust/symbrain-harness/src/write.rs": "7dfe9efbab02792878c143c2a9288fabee998673f2273f0a09a54126245223b7",
+    "rust/symbrain-harness/src/write/atomic.rs": "b763ba1607172b4fe2232b72778ffb83e5bd51da8fffdb52ce5f30e2554628c5",
+    "rust/symbrain-harness/src/write/core.rs": "fd8a4f8f3caedaf07b08d076a693bd35c34cbeb0dd8c7c1e986b47097088fdf6",
+    "rust/symbrain-harness/src/write/paths.rs": "71b6e024f4766e3fb8cb1d5755876786a22aa9f3609c70a088e2702f65236bd4",
+    "rust/symbrain-harness/src/write/replace.rs": "723b379f432faf9dc443101bdecb950683e10c1223402611acbe0879df22da54",
+    "rust/symbrain-harness/tests/fixtures/golden/codex/after.toml": "ab90fdbc44169652f1fd69ae151d324ca8b9344c8480bc57935e947fafc7a414",
+    "rust/symbrain-harness/tests/fixtures/golden/codex/before.toml": "212f82cab5f16659bf6c4f3a32cf65920457674874dd3959f3c214f1e93bd55e",
+    "rust/symbrain-harness/tests/harness_tests.rs": "edbe52f91efa417645082e7a34b0ad47e342815af67e3a581b754d7902bbb9e7",
+    "rust/symbrain-harness/tests/path_safety.rs": "c80bd083b1e2c3ed1f693a3735291dadb8068bebe3cbadad69350b90bacda33a",
+    "rust/symbrain-instructions/Cargo.toml": "e2b76a396a7ef7ef9bc2593b00b1c65ee4d42636c39898cd1aa6be5da1273055",
+    "rust/symbrain-instructions/src/block.rs": "9b0837ca49a53bad7e0ebb09ed37790166b3c2c2b0f4d434903c27bbfa2adc76",
+    "rust/symbrain-instructions/src/lib.rs": "ff88ffa753b5a1966b7aab6a004079c1cb948a64e2da5faeec6e8d90f815221e",
+    "rust/symbrain-instructions/src/paths.rs": "46737eb47e292b1dfbf5b1bb833b7b7d2606673c7d2a181c2c398b81f76d6960",
+    "rust/symbrain-instructions/src/source.rs": "2c17bdf92209f6309901c73265f3c03019bb0b49d8bfd7c9b217b8a1e41b1eff",
+    "rust/symbrain-instructions/tests/confinement_tests.rs": "7fb2831487b6f724f324f534195c2e72aa302bfdda58307fcf96fcf6e184d251",
+    "rust/symbrain-instructions/tests/instruction_tests.rs": "02212f4bd7191d62b23e8647f9ed2e8c58e911c3967b9360ee5f4a49c6ad6ee9",
+    "rust/symbrain-managed/Cargo.toml": "7c7213ed3baa6a0e1917305b45ecd1e709beeb6c77f47718f16e9c0078d63030",
+    "rust/symbrain-managed/src/archive.rs": "3d6cde3519bef5b10e8558764de16c1c7b7b0f16997f7dd95486d32a28b67021",
+    "rust/symbrain-managed/src/install.rs": "9779dd895fdd02db5153fdedc625ffde80d98001b8e8bfbe8772e2b65870315f",
+    "rust/symbrain-managed/src/lib.rs": "3ce072c606fba6e48a25a6d31b76e81df22d1fb03f87b8ae894a75bc2436f624",
+    "rust/symbrain-managed/src/manifest.rs": "9eb10b48253251e9d19c163482d363ea7d70c8b8684d32cdc23afa825def5980",
+    "rust/symbrain-managed/src/provenance.rs": "3beee7a3a45f82c02a24ce69134921d9ede6f76dd7f7e5f4857f9dc0300e9d66",
+    "rust/symbrain-managed/src/provenance_json.rs": "6667fc1d287dbfef9b5eaa4f2945118493fd2b0729a49615747997a581f1bfff",
+    "rust/symbrain-managed/src/version_probe.rs": "bd5e00670e86afc87ef7631828fb6d9c68a09610f710c86b4947c6bbaf8bdbf3",
+    "rust/symbrain-managed/tests/install_tests.rs": "2a017b66116aae75404c2c46eca620a71bc78079093d01add029156cfb258372",
+    "rust/symbrain-managed/tests/oracle_differential_tests.rs": "064503a56691f1782649cb096987c6978c09cfab423856823b0e7d5563d1d21f",
+    "rust/symbrain-managed/tests/support/server.rs": "0b43e84b001fdb556ae886dc90339946c9052951e84ef7f67f8b1e9e9ece7e3a",
+    "rust/symbrain-managed/tests/version_probe_windows.rs": "50987e6f0257c4fc26a0dd43fa3fafb7c4fdfa0cad9ef7635b565d2454db6111",
+    "rust/symbrain-mcp/Cargo.toml": "fbcf5b53060f43f659c93072d14588e6c01ccb47713558ed8a80009dff27955c",
+    "rust/symbrain-mcp/src/frame.rs": "4e6050efeb0dc9e9f5eceea40ffe5a4703a670f1f060baecf22da9bdf1608b21",
+    "rust/symbrain-mcp/src/lib.rs": "a7238c07a9d03deee711370a78e121d6220a124419b20af4ac17c65986ecffa2",
+    "rust/symbrain-mcp/src/loop_helpers.rs": "51b5345d66bc917ef360fe9a9b7c58607b1c65355dcf814087c45542764611bd",
+    "rust/symbrain-mcp/src/model.rs": "ad821f55f2b9d69d681753f31856accfd19853aa1dab5c4e4cf4f4d27a043f7a",
+    "rust/symbrain-mcp/src/server.rs": "d72daaaae2635bc38a5251e8e91357ac7689d225b588e0b4974051bb195e42be",
+    "rust/symbrain-mcp/tests/fixtures/gateway_protocol_tests_part1.rs": "e4eb23a9e977f86f2ffe78a5c675225bec3869532148cd5dc49142657245cd10",
+    "rust/symbrain-mcp/tests/fixtures/gateway_protocol_tests_part2.rs": "3f00c36cfee149f989948b377827a9903c0f410a1a41ea7f9b0e58ac9dbd4c22",
+    "rust/symbrain-mcp/tests/gateway_protocol_tests.rs": "8ce17c641cb01fd74a12ad85de7798265bbd0860f2c4ed9e013ae52cfec4537d",
+    "rust/symbrain-mcp/tests/oracle_differential_tests.rs": "8e425f7d23d1b270498fe2f486e921e1f59f65c6f7444ef1060479540b751847",
+    "rust/symbrain-memory/Cargo.toml": "418e282e1fc9ab7ebac4d7324ee8e39b2242acdd4ecf7193fd9477753cfe0a0d",
+    "rust/symbrain-memory/src/activity.rs": "89f8254f28dfcc92e7db9856535c31bf44d00967a4006e85fe1c73c82297b273",
+    "rust/symbrain-memory/src/db_oracle_tests.rs": "583231e19b52afda08fb32472dc94d7b9f6df836bd207ce9f8a3e70a13ea7fc4",
+    "rust/symbrain-memory/src/embedding.rs": "4f56b3056cf713935af32c772e0af041ea2c99036f3efd08965d68ae9721a3c4",
+    "rust/symbrain-memory/src/entity.rs": "7f70dc3cf02bd71da6d256cbad1d1a8a1ffab4a5d3faaaaa2b54646ef2d98e6b",
+    "rust/symbrain-memory/src/gojson.rs": "bc90cc505b4e09e7c461f4c1db947ff4b3fc1de6d5b32456246a41ceb56694a6",
+    "rust/symbrain-memory/src/gorand.rs": "86a1c52d7a916091e7164babf1321d4282baa054d76207f662f5406628fe8c2b",
+    "rust/symbrain-memory/src/gotime.rs": "2235f3731a0417acb2b1842d6db109db725118f77322bfeab69e5700381e59c2",
+    "rust/symbrain-memory/src/lib.rs": "ba516d99b4de8f9aeae9ef33459a27e065b569ab7f2b243ffc2934f2e6df12b5",
+    "rust/symbrain-memory/src/list_rows.rs": "4c7b0328e69db23d2f1f2ed13886e8cca3d6572fc696dd1bf15985d9ae5b5771",
+    "rust/symbrain-memory/src/lsh.rs": "fe482f424364baefc4bb50caae158db185a82c87bdb4538788712dcd572556a9",
+    "rust/symbrain-memory/src/model.rs": "dfd905688801ad6b1faca9bcc6ea74b6892b3dfab775c7663b0d501d26b25659",
+    "rust/symbrain-memory/src/retrieval.rs": "3f14cd8e48042735bb3399aa9edd53621cfcaee57a029fbf984fc0d9d8905eee",
+    "rust/symbrain-memory/src/rows.rs": "df335ae17fce3f7221cc41ef9f8f511dd88ffd0c9235e5c6ec1ad84c6ba28dc3",
+    "rust/symbrain-memory/src/schema.rs": "58f2e06a2cc0bea98761d5078783608698c0401794864d1a1e77b2cb3f0edf8b",
+    "rust/symbrain-memory/src/search.rs": "25d8a6ff0325069c7950115b42fddfbd5038b15e6c3a81a05c74deabab406b7a",
+    "rust/symbrain-memory/src/search_rows.rs": "79e7e36d6bb514b6f960d75886dac78485f63a68e1db3a35a502b1b9bc2b45a9",
+    "rust/symbrain-memory/src/store.rs": "db267344dd284a3f8be187b40ed988a51d0c091e9c6be73cfb6647e7c2ab6c09",
+    "rust/symbrain-memory/tests/store_contract_tests.rs": "7e08cb5bf0872468efc8d2b238ca86e5bbdac0df00e93129d08f6327fd3073d3",
+    "rust/symbrain-patterns/Cargo.toml": "4059b24117b8af53384a0284a5b222be47642f46e7a39240ec409c8c7fa09267",
+    "rust/symbrain-patterns/src/lib.rs": "cd8132c46c110360bd1b0147c9bd3229764ae4bce710edaa0fac21821cab0391",
+    "rust/symbrain-patterns/src/store.rs": "50076e4da3696021d1424a48946c9134cb22e351272dd3947a9516d3e2621d4d",
+    "rust/symbrain-policy/Cargo.toml": "881bd2d8189bf816267959792450281b6cb4ff623cc7b08c997674b1d3df7f86",
+    "rust/symbrain-policy/src/constants.rs": "8e80dd5cd3c5118fa092c8e46c7f2acbd1f4c370dabdac8d3da0729aa53f2495",
+    "rust/symbrain-policy/src/error.rs": "624e29fa5526e288b46d7d28bdf01d817033d1a3d75753de27b4667659726127",
+    "rust/symbrain-policy/src/lib.rs": "40b040170cabae01567522ac51eff95e281c1a46d1ff12d41706f2e55189c7f6",
+    "rust/symbrain-policy/src/policy/eval.rs": "24c9967b85f72686d2dcd8addcbd4b0a480ee6be28f5094a73730119422864d4",
+    "rust/symbrain-policy/src/policy/foreign.rs": "77138aed63596e0a19cb0ef2c92f538ea5e31ca99ccbdeb649f67cfe6277ce30",
+    "rust/symbrain-policy/src/policy/identity.rs": "4507053f1f1b61bf111e93b80cac4bebc7945fa906c17115c95bb7a977152d47",
+    "rust/symbrain-policy/src/policy/mod.rs": "b4d411a95a97a5167455794e936652e1769d34357cce159f34923f745423d78a",
+    "rust/symbrain-policy/src/policy/presets.rs": "cacf94c6663c9b467b8e9bdbf048b86e6c92d4e501ba1932aa265a2402ccb2e1",
+    "rust/symbrain-policy/src/profile/create.rs": "13c3de6a10eaabe50585ac1f12f177a3962aec353bf4caabd76f85647b7c7386",
+    "rust/symbrain-policy/src/profile/fs.rs": "55d638f76bd35894cd8bcb25bc0c5d4bbaf238394664775edacdd77152325bb4",
+    "rust/symbrain-policy/src/profile/mod.rs": "3fb855a0c96d496400ec3182ee137bf31372d479a663c44a74fa7c0aa8644599",
+    "rust/symbrain-policy/src/profile/parse.rs": "73c7cfc21b07b8e34c1339fc9b8b27c333285447eb40b5710b88967891602fb9",
+    "rust/symbrain-policy/src/profile/resolve.rs": "ed3ffa1443504450b13db93200f97ff898664ec0532163a30381cc9f848d8c24",
+    "rust/symbrain-policy/src/profile/undecoded.rs": "a7f0699084741ca3a6d60cc191a79989961659c26c30840060a4948bc727ce6f",
+    "rust/symbrain-policy/src/profile/validate.rs": "b8e7e49da050b668aad6073b9a36a7acd9aa0a66a546dcf3a46c7bc3c953dcbe",
+    "rust/symbrain-policy/tests/activity_tests.rs": "b25567067bec9c8c4bce654179cd745745dc7f2d06988be44b86f84b573a23d9",
+    "rust/symbrain-policy/tests/fixtures_tests.rs": "0face362c7eeafab2581bbf3bebc106bd50c61fd6f1e615c45790eddb2b6da57",
+    "rust/symbrain-policy/tests/foreign_tests.rs": "515b6792dc8cd986dd14467a84b2ab15c5574fc5abd5cb16460b9e4783740915",
+    "rust/symbrain-policy/tests/oracle_differential_tests.rs": "db3158b03b5a7ef34966478dcafafe38d3a4849130313ba160b47567422aa6fe",
+    "rust/symbrain-policy/tests/policy_tests.rs": "1a7ea0b24e5765ac68679116a49dae450dfa5914c2c62a7c9eb4b0a375be1404",
+    "rust/symbrain-policy/tests/profile_fs_tests.rs": "0eaf1cd49987e3c1edf12c23a5e476665ea1363210bb18a33a96a34b8695d991",
+    "rust/symbrain-policy/tests/profile_tests.rs": "e26b9ac210265116c58864b449d476833bc6ad14917227cfbc367c17970606fb",
+    "rust/symbrain-policy/tests/profile_validation_tests.rs": "45223782bec237aa4ce1ba187fa0eae95be50ab20a63b31b7a0ebe00a7283931",
+    "rust/symbrain-policy/tests/typed_decode_tests.rs": "c721f18836005dd669af7af4fb928ebcf2d585b3b84d9b877e233eb744df89d5",
+    "rust/symbrain-skills/Cargo.toml": "4d0fcb29f4fee6202896e535170f1767cec5752331106fd71190d08458b0d1bb",
+    "rust/symbrain-skills/src/cap_root.rs": "110c59e06ddaca95c8501d1a771127b0c433ded25c030ad796e26074c4682da8",
+    "rust/symbrain-skills/src/encode.rs": "cd239f90ed56bc1b666c185e066a264f7ca4c8b3787f4d414ce20c80f491b478",
+    "rust/symbrain-skills/src/install/base.rs": "59f52f4710a011ed207d4191c8bc09f39cbece056aa106a860b85c29f10b30c9",
+    "rust/symbrain-skills/src/install/cache.rs": "f66aca3ac02f9193caf6ead5cbcece03afa5a3b02ed3880adf3dad97a7bb6c80",
+    "rust/symbrain-skills/src/install/core.rs": "9231d8b62bf382928f1b70abe86a6855d7f10624f0fba374ee4dbbf7ea2bae9f",
+    "rust/symbrain-skills/src/install/destination.rs": "7f1d9154ca2398fa9f4d45cc8954e749db766ec1411121415f876f6050c67da7",
+    "rust/symbrain-skills/src/install/drift.rs": "0db853e108bca0abb6769aa9b34cd759373906f97f3c240a8c999d59e7286ace",
+    "rust/symbrain-skills/src/install/event.rs": "a7b626d3803ac47aa888a670d4a134ecfcbe87f095c55e85be63dd0ca8bb3905",
+    "rust/symbrain-skills/src/install/lock.rs": "e27366e8df14c1a8582920f84b9a87cfc12d2240e520b247e5eadcc12e07768a",
+    "rust/symbrain-skills/src/install/marker.rs": "ec89498ce6c4b387b944520e7af08d3458cadb7390a2a276601d7915ca90018a",
+    "rust/symbrain-skills/src/install/mod.rs": "e1784d292f43757617a7051a6a8f1a2fb2b6223829d00f7ef8524b5e318617dd",
+    "rust/symbrain-skills/src/install/modes.rs": "35f97ba22b8c24c27803a52c9c5f0d3a82d171b1350c8b0a68b307e4258e2347",
+    "rust/symbrain-skills/src/install/ops.rs": "7868cf8ae78d4eab2ccbf20907d14d2356e32a557ceb5e8a41efe0e11e1d6503",
+    "rust/symbrain-skills/src/install/replace.rs": "5773c467f1bd37f45e1beb2d785fd823f5e82244150da1b529f10e7ed4d1ccdf",
+    "rust/symbrain-skills/src/install/replace_io.rs": "6317c951bb417b84657b161a524ff685c045da8fe87dabd5fc8264ee24a8a0d6",
+    "rust/symbrain-skills/src/install/status.rs": "2d5400f9d987ed8a5e0573eb4b051713cd2f660c1c8b46a5ff658a08c6f749f3",
+    "rust/symbrain-skills/src/install/status_compare.rs": "3d485a1ebd323c239fa7bb202637d80ed3b7bc90774fa60554bad032276cd518",
+    "rust/symbrain-skills/src/install/sync.rs": "35d0f0799ec58cafec380d312a4a6a0638b60fad05f9ca5c403f13f0b3d6bf70",
+    "rust/symbrain-skills/src/install/sync_lock.rs": "17855156b7cff61d024093565e86de3ea2745eb8e934bf26788969b7545e4dfe",
+    "rust/symbrain-skills/src/install/transaction.rs": "4a96e00c2c13d11b3faab613ba1321f903c9f3ba7db9d9aa4afd849f78f475c0",
+    "rust/symbrain-skills/src/install/uninstall.rs": "65eae4b70f2463a62a6a92455da63ca6db28c5e93b356d5da7d0dacb3962d2a0",
+    "rust/symbrain-skills/src/lib.rs": "a6b2e37669f58043cd39a1a50e9ec130742ed476a52f5d095b320618c5b3b4a9",
+    "rust/symbrain-skills/src/library.rs": "4a6eeda82fe56290ad44dc018d213d45ead8e141229a47a301181d3b4bdbf529",
+    "rust/symbrain-skills/src/load.rs": "21bdf4a05df347f1a26b811983b3c88828657075de2ade3c7f2cc7b77024e5b4",
+    "rust/symbrain-skills/src/load_helpers.rs": "757160ccbe672c4fb7d361f08d14dcac84d5f7d275382a3e2a8c95d545a04ec5",
+    "rust/symbrain-skills/src/load_paths.rs": "44f77965328900d6f236ff938e017baa3e457c92dc6e88c9fef46975f59a6283",
+    "rust/symbrain-skills/src/load_read.rs": "4b9d1233ceb0ad0e8fb4cec530bf277e5663bfa3133b6afca4fc25590216f54c",
+    "rust/symbrain-skills/src/load_tests.rs": "1743ae794decd2b873f36993cab88ed6f3748126f39727a7192eb8e0c61175fc",
+    "rust/symbrain-skills/src/materialize.rs": "3eb65969139effabf94fa7e9d74be4d5db6bea96e52139012545a9b335dce450",
+    "rust/symbrain-skills/src/materialize_fs.rs": "de8845e9682b5508e50034287ebf10c63d8773fc1ae5cc1107ebe3989e2264f9",
+    "rust/symbrain-skills/src/materialize_manifest.rs": "ac7dd8e7563aaafea1e049a4aea9c0c3db0e65e9ce61c1622b62a19a946530b7",
+    "rust/symbrain-skills/src/materialize_stage.rs": "873ac4792eca25369391de5fec548bdb55387cc8057c04022b5ad2bf492857f4",
+    "rust/symbrain-skills/src/metadata.rs": "2ab997a45a20513e5e96d327206ee34b970dd6d8c7bab808fab2459ea5eca2b6",
+    "rust/symbrain-skills/src/model.rs": "b0ea93f7b75913f7e44979f9ef9a9a397b8a0b8680e0c7a475299062c20889e1",
+    "rust/symbrain-skills/src/model_parse.rs": "f895a7ce7c776cf3d05663bf57daa36ec5e8c2bae898a8427cccd4969c8a7bf8",
+    "rust/symbrain-skills/src/render.rs": "b60ad4970858eb5ccfdd11163a53b9704ade8ca569a624c43e2e7573c46e81ec",
+    "rust/symbrain-skills/src/render_variants.rs": "8fbeb3ed249e2a39f13d4dcf75624eedac1cd83311ea273e9891a4cd374dc147",
+    "rust/symbrain-skills/src/runner.rs": "f864ff56536a9d07d67628e441c11176d575bc93c859afe6c403f1a67e3e73ea",
+    "rust/symbrain-skills/src/target.rs": "0ecfa59c673b3354e68e02c3d4184066377d5661299504bc92f13deb99e9dc6b",
+    "rust/symbrain-skills/src/targets_status.rs": "3bbbd3b4814ea945a9074ed8a9847ad469a0bfb31a34a84a0c65e03ed976e09f",
+    "rust/symbrain-skills/src/validation.rs": "052c60098ccc0e9dff1ac3dd4e9c05c1f9aed34ad0540383307ba593176a2787",
+    "rust/symbrain-skills/src/variant.rs": "3118358acf982f9891ec14687c4cd8094341592fb2f4aad0f80b1ee4a03d368e",
+    "rust/symbrain-skills/src/variant_ops.rs": "944e7341a2eb67856a01f47ce938a024aaa1d51aa59db6c4ca86b3063436db16",
+    "rust/symbrain-skills/src/variant_types.rs": "db873fbe1c2273af4c6cce03662c7a034d3a03a5cb0e21de7c8eb4ba5795d40a",
+    "rust/symbrain-skills/tests/all_target_scope_tests.rs": "6b421cb8edae604349dd4e6d27d3b5e284c155c42c8556801c1e8a378721ae1e",
+    "rust/symbrain-skills/tests/common/mod.rs": "7c00acde1eddde40ee105a3a7c164a1b2d0c4ec266973fc20124c3f7835f036f",
+    "rust/symbrain-skills/tests/concurrent_installs.rs": "e8c85370cda2dee8f0cba48a3cb710073ed2292cafd3800ba58641057206834d",
+    "rust/symbrain-skills/tests/confined_symlink_render_tests.rs": "15cc37e5ee1b01fb89c0c3eeb3a0b04108e2b1339e9abd1f3094f1145290552e",
+    "rust/symbrain-skills/tests/event_tests.rs": "8770f14953c2d0b5893e63c9877e10da394bd737253521fd711635e486b54904",
+    "rust/symbrain-skills/tests/generated_artifact_tests.rs": "995a6fb39aba305538b55ca978cbc3b85b3ec43e0e0e0f09bbc3a5b4d2bfd888",
+    "rust/symbrain-skills/tests/input_bounds.rs": "1ff790a2445abb92e62e67bbb99ff7a2db1cebb6856e388d46583e11dc0c0307",
+    "rust/symbrain-skills/tests/install_oracle_tests.rs": "b2ca31dddb0a75975e8d22722ef008ca50cbd102713922672dec797ca153ffee",
+    "rust/symbrain-skills/tests/install_tests.rs": "b0edb617b61a90643de6ab5aeb3bbc3f18fbd0ce9d840ff13d34bda401d8798d",
+    "rust/symbrain-skills/tests/model_security_tests.rs": "9c0e428b0588e0b210797ea935478d747355bb9c81c4c47baab2e4757d0ea317",
+    "rust/symbrain-skills/tests/model_tests.rs": "cbc8d9024cd4b584defc5e34219a23b3e73517bb38a2c777c12393c0d7bf0ddc",
+    "rust/symbrain-skills/tests/project_identity_tests.rs": "1a8c3750d4f1c3cb6930dc992591ec2f6c10fc839630289984baa17681758ba7",
+    "rust/symbrain-skills/tests/recovery_uninstall_smoke.rs": "b00e93f543b8f59fd41d4e7a1bbd39effab52baa78075bb473c392a2fced2d28",
+    "rust/symbrain-skills/tests/relative_root_tests.rs": "93f831dbea77ca20731c97723de9be9f66856e29af61ebb377142b4664914298",
+    "rust/symbrain-skills/tests/render_materialize_tests.rs": "7b80e0e99fc9fff87dd838f4a1c7e3a2ced049a6cf20ccf9cfbd2403a2191fcb",
+    "rust/symbrain-skills/tests/render_tests.rs": "7e858d058ed58909959c7a64697b8550c4f0a373458ee43c8560ec096ae3e631",
+    "rust/symbrain-skills/tests/runner_env_tests.rs": "9235656c6739dbe7ed491a168591e618c2e147b5bc3d701fb4b16ebdbc7715b2",
+    "rust/symbrain-skills/tests/runner_tests.rs": "4e2dba0ab2b557f18b9c826868b99e84e73130507256cf337491e86cb9048eef",
+    "rust/symbrain-skills/tests/status_parity_tests.rs": "1624089ebb89f40df01fd12bd29b763611228715a609d54f90ebe86b965070bd",
+    "rust/symbrain-skills/tests/sync_policy_tests.rs": "dff599fc47f895ed61030ed1b465fa57b2a85169645616f600656ec415314bfb",
+    "rust/symbrain-skills/tests/variant_tests.rs": "86d9040aca24f19583caba4f4f17fb61f9297698a5f1664343e13bd71e3a6826",
+    "rust/symbrain-skills/tests/windows_roots.rs": "14995ed7d61e2fc9e999b422726c2fc2ef50b253929d16ba1ff02f16bacb2659",
+    "rust/symbrain-usage/Cargo.toml": "6cac15132956d7fe2dd72b285688adc0a75d75cee126a986ab1ff49dda2cacd2",
+    "rust/symbrain-usage/src/antigravity_tests.rs": "752779ebddfcfea39718880a825512be3474fce4bfb7debf5da81ffd00bdb5f0",
+    "rust/symbrain-usage/src/lib.rs": "a70b47bff3e41a66198e52c1f1bb1d8b4277bf151b8489148c81854d05ee50ca",
+    "rust/symbrain-usage/src/model.rs": "8c7e9d083cd01a2014b792a51c7e2411398eef7f426fde1644bfe11f5d6e7326",
+    "rust/symbrain-usage/src/opencode_discovery_tests.rs": "6595e79878fde8fe457a0131b2f7f4d685e6fa99e70d964d12cec4d27c276acd",
+    "rust/symbrain-usage/src/opencode_provenance_tests.rs": "e8a7a8c48c7db0fa8400a489cfae030fce1f28f185b0f9624508d852b1011fab",
+    "rust/symbrain-usage/src/parser.rs": "dd6c72b85ef2af5b89916ef9aa2c930d0ece577e0ec50c0d5331beefe2743af5",
+    "rust/symbrain-usage/src/parser_extra.rs": "155e2b2c3faf68f3347d988c879dec7e064dab2442237c352933d3e596ac2896",
+    "rust/symbrain-usage/src/parser_opencode.rs": "e13d756161de06e3aeee8e8971fb74adbffb96adca68699d1f452c7f2969c736",
+    "rust/symbrain-usage/src/provider_antigravity.rs": "2c6bbcd24894be5c35a28ff7253d973e10fe601f1349c5088a085c900066b4f4",
+    "rust/symbrain-usage/src/provider_config.rs": "0eaa489559aa76da6a1d1d3fdb8856bf5a98ebbaa95383cf3841376b27e82095",
+    "rust/symbrain-usage/src/provider_config_tests.rs": "13863f026bd079c611c6117276871675ae511085f3a764f46ef3cd2c6297de94",
+    "rust/symbrain-usage/src/provider_errors.rs": "715da3aa0cef287e7e22e43b47955389a3f9ae911e229d15b2bc0eb7daee02b8",
+    "rust/symbrain-usage/src/provider_fetch.rs": "14653a0601e122939c4b96bace879011ff4e05de3f325900495a47e04e0f1760",
+    "rust/symbrain-usage/src/provider_identity.rs": "4d2a320bc2689bf0a1d31fbd737bebac3a7dcb6d511aab11dfcd4d0012a9b043",
+    "rust/symbrain-usage/src/provider_opencode.rs": "887bddde334d4669495b40c995b1f65ec9f8f859ffe62ec8b704de6ee468c0e8",
+    "rust/symbrain-usage/src/provider_opencode_workspace.rs": "2f8d47ff8bec9b414ea104c3e459a82f9e20c3293aa455ff007abfbaa88f11b4",
+    "rust/symbrain-usage/src/provider_request_encoding.rs": "d4ac3370033bc0ffd5606b75e632bbe7745a38865beaf3237a9accb672b76a79",
+    "rust/symbrain-usage/src/provider_requests.rs": "700af0f6be0bccbd97ecf0addbdc19a38d10f7f36d544755bf2b19d75d4f0ca9",
+    "rust/symbrain-usage/src/provider_requests_tests.rs": "b2e79ff538c99488aa150010a66c27bec08a6c09ffe6a24955f3df417fc33aef",
+    "rust/symbrain-usage/src/providers.rs": "5f6631bde7a1cc918469d9a7e1f0fbe26fb6c54c8d3921b98425d514f33966b0",
+    "rust/symbrain-usage/src/request_oracle_opencode_tests.rs": "2312476f3f9ef407caaa8db54c3828a1b73a7956bcb38e09a530b0ff0108dabd",
+    "rust/symbrain-usage/src/request_oracle_tests.rs": "5bc1e853e4f9f3a28e90a3930a84b1f7d662f482fdcbc37697b58f224f80e9ea",
+    "rust/symbrain-usage/src/transport.rs": "30ef2ca4b90f3f568a8d98a68cffa511514742f58082522cd00e28e63234bc98",
+    "rust/symbrain-usage/src/usage_fetch_oracle_tests.rs": "df38e903711a6502628e5d0a8fe91ae0b8c962db361561b6139c6b553481053f",
+    "rust/symbrain-usage/tests/secret_oracle_tests.rs": "488df496183b581a66a8a6a4145bf65d75d5e58b83d6604fab2733e09aa6e607",
+    "rust/symbrain-usage/tests/support/fake_symvault.rs": "23456c139aa722fc57f6e4feb0aec06f02be83a26cc4a581ff66dc9c5aa54e89",
+    "rust/symbrain-usage/tests/usage_tests.rs": "da13763f87e98c27e232fb8b6de4710ca05d7ded1229433ac7e0670affd51ab9",
+    "rust/test-support/coverage.rs": "1f61d27a35fb0ab797747350eafe335b090d59256a136d09c0363a2cb9f86dca"
+  },
+  "binaries_sha256": {
+    "go": "a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41",
+    "rust": "1957d79efdb899f01afe18101fd86f0c1ebd366fbf2c24919773b8883875b361"
+  },
+  "verification": "Actual immutable Go and native Rust processes, absent fallback, bounded children; raw argv and complete stdout/stderr/exit equal, including all retained Go observations.",
+  "local_validation": {
+    "integrated_main_head": "e8c7f7990ab61967db0a3cbadaf6e485b4a33d99",
+    "affected_packages": [
+      "symbrain-cli",
+      "symbrain-skills",
+      "symbrain-audit"
+    ],
+    "complete_parent_summaries": 56,
+    "passed": 444,
+    "failed": 0,
+    "ignored": 2,
+    "formatting": "passed",
+    "strict_all_features_clippy": "passed",
+    "actionlint": "passed",
+    "independent_full_layer_review": "pending"
+  }
+}

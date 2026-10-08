@@ -1,0 +1,22 @@
+{
+  "candidate_head": "407bc5e3b9022ee96f2ad99c9971198cfc8c8569",
+  "probe_binary": "/workspace/oracles/symaira-state-key-407-owner-missing-probe",
+  "probe_binary_sha256": "a4ddd71ba7a37318e73cea5712eace48ecafa003b82f7b9730934d745f97579f",
+  "probe_source_sha256": "1708d3304f058ea7591156143f21c254cc5d56ab307eeafcca5e2e0d816f64eb",
+  "rlib": "/workspace/symaira-daemon772-registry/target/debug/deps/libsymbrowse_core-0477f0ee3142c600.rlib",
+  "rlib_sha256": "4d074ebf1ab38db29343f639f03950b670ec8d375418d17318b85a69455a9423",
+  "root": "/tmp/bk-own-missing-391mji_3",
+  "provider_source": "#!/bin/sh\nprintf query > \"$SYMBROWSE_KEY_PROBE_LEDGER\"\nexit 4\n",
+  "provider_source_sha256": "1802410faf4df349bf6ee813cf6096371737246553834034bec233b9141c2641",
+  "arguments": [
+    "/workspace/oracles/symaira-state-key-407-owner-missing-probe",
+    "/tmp/bk-own-missing-391mji_3/symvault",
+    "/tmp/bk-own-missing-391mji_3/missing-owner"
+  ],
+  "stdout": "Ok(Some(\"environment\"))\n",
+  "stderr": "",
+  "exit": 0,
+  "owned_denied_provider_not_queried": true,
+  "public_environment_selected_instead_of_supervisor_failure": true,
+  "scope": "actual Core API; owned exit4 provider, publicAB fixture only, missing explicitly requested supervisor; no SSOT or operator credentials"
+}

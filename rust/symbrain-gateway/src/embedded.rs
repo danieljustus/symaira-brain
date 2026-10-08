@@ -4,6 +4,7 @@ mod activity;
 mod catalog;
 mod common;
 mod memory;
+mod memory_catalog;
 mod skills;
 
 use crate::{Gateway, GatewayError, GatewayResponse};

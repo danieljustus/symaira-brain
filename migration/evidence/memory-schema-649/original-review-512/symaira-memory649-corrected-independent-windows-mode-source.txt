@@ -1,0 +1,28 @@
+Pinned Go 1.26.7 Windows permission implementation; no local Windows runtime claim.
+/workspace/toolchains/go1.26.7/src/os/types_windows.go
+176: 
+177: func (fs *fileStat) mode() (m FileMode) {
+178: 	if fs.FileAttributes&syscall.FILE_ATTRIBUTE_READONLY != 0 {
+179: 		m |= 0444
+180: 	} else {
+181: 		m |= 0666
+182: 	}
+183: 
+Frozen Go Doctor
+366: 	mode := info.Mode().Perm()
+367: 	check.Mode = fmt.Sprintf("%04o", mode)
+368: 	check.ModeOK = mode == 0o600
+369: 
+370: 	conn, err := sqlitekit.Open(path)
+371: 	if err != nil {
+Existing native Doctor
+42:         check.mode = format!("{mode:04o}");
+43:         check.mode_ok = mode == 0o600;
+44:     }
+45:     #[cfg(not(unix))]
+46:     {
+47:         let _ = metadata;
+48:         check.mode = "0600".to_string();
+49:         check.mode_ok = true;
+New process assertion
+  if not expected_missing:assert out[0]==out[1],out

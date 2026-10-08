@@ -1,0 +1,10 @@
+package main
+import("errors";"os";"strconv";"syscall")
+type ownedDoctorOutput struct{mode string;remaining int;recover,failed bool}
+func(w *ownedDoctorOutput)Write(p []byte)(int,error){
+ if w.failed&&w.recover{return os.Stdout.Write(p)}
+ n:=min(w.remaining,len(p));if _,err:=os.Stdout.Write(p[:n]);err!=nil{return 0,err};w.remaining-=n
+ if w.remaining>0{return n,nil};w.failed=true
+ switch w.mode{case "raw-pipe":return n,syscall.EPIPE;case "raw-full":return n,syscall.ENOSPC;default:return n,errors.New("owned partial callback")}
+}
+func init(){if mode:=os.Getenv("DOCTOR_WRITER_MODE");mode!=""{budget,err:=strconv.Atoi(os.Getenv("DOCTOR_WRITER_BUDGET"));if err!=nil{panic(err)};os.Exit(int(cmdDoctor(os.Args[2:],&ownedDoctorOutput{mode:mode,remaining:budget,recover:os.Getenv("DOCTOR_WRITER_RECOVER")=="1"},os.Stderr)))}}

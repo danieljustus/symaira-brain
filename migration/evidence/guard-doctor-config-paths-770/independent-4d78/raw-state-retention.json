@@ -1,0 +1,1382 @@
+[
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/0/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079501978256736,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/0/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-state/0/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/0/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079501978291218,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/0/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079501982449525,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/0/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-state/0/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/0/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079501982476826,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/1/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079501985791967,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/1/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-state/1/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/1/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079501985818067,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/1/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079501988846936,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/1/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-state/1/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/1/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079501988872465,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/2/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079501991688362,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/2/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-state/2/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/2/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079501991715032,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/2/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079501994815940,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/2/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-state/2/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/2/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079501994841388,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/3/go/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079501998021656,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/3/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-state/3/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/3/go/physical/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079501998055587,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/3/native/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079502001022532,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/3/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-state/3/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/3/native/physical/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079502001055592,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/4/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079502003868575,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/4/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-state/4/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/4/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079502003894945,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/4/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079502006844323,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/4/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-state/4/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-state/4/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079502006869782,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/0/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791079993879992602,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/0/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/0/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/0/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791079993880026563,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/0/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791079993883987200,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/0/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/0/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/0/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791079993884012478,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/1/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791079993887594953,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/1/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/1/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/1/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791079993887622995,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/1/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791079993890818395,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/1/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/1/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/1/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791079993890844905,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/2/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791079993893739791,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/2/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/2/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/2/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791079993893766151,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/2/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791079993896971070,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/2/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/2/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/2/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791079993896997741,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/3/go/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791079993899881750,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/3/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/3/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/3/go/physical/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791079993899915030,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/3/native/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791079993902901935,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/3/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/3/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/3/native/physical/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791079993902936017,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/4/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791079993905820847,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/4/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/4/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/4/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791079993905848259,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/4/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791079993909021115,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/4/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/4/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-owner-semantic-state/4/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791079993909047925,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/0/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079639725707036,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/0/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/0/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/0/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079639725752124,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/0/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079639730734185,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/0/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/0/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/0/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079639730771882,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/1/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079639734692328,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/1/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/1/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/1/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079639734729344,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/1/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079639738701439,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/1/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/1/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/1/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079639738740438,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/2/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079639742264425,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/2/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/2/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/2/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079639742333199,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/2/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079639746504515,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/2/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/2/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/2/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079639746534109,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/3/go/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079639749231787,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/3/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/3/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/3/go/physical/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079639749266419,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/3/native/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079639752280195,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/3/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/3/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/3/native/physical/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079639752334978,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/4/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079639755015120,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/4/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/4/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/4/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079639755041039,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/4/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791079639757975755,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/4/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/4/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-owner-state/4/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791079639758007954,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/0/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45",
+    "bytes": 36,
+    "mode": 33152,
+    "mtime_ns": 1791079993993764024,
+    "blob": "state-blobs/f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/0/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/0/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/0/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45",
+    "bytes": 37,
+    "mode": 33152,
+    "mtime_ns": 1791079993993797024,
+    "blob": "state-blobs/f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/0/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45",
+    "bytes": 36,
+    "mode": 33152,
+    "mtime_ns": 1791079993997648846,
+    "blob": "state-blobs/f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/0/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/0/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/0/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45",
+    "bytes": 37,
+    "mode": 33152,
+    "mtime_ns": 1791079993997674685,
+    "blob": "state-blobs/f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/1/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45",
+    "bytes": 36,
+    "mode": 33152,
+    "mtime_ns": 1791079994000846409,
+    "blob": "state-blobs/f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/1/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/1/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/1/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45",
+    "bytes": 37,
+    "mode": 33152,
+    "mtime_ns": 1791079994000873250,
+    "blob": "state-blobs/f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/1/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45",
+    "bytes": 36,
+    "mode": 33152,
+    "mtime_ns": 1791079994004287120,
+    "blob": "state-blobs/f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/1/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/1/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/1/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45",
+    "bytes": 37,
+    "mode": 33152,
+    "mtime_ns": 1791079994004348012,
+    "blob": "state-blobs/f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/2/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45",
+    "bytes": 36,
+    "mode": 33152,
+    "mtime_ns": 1791079994007240655,
+    "blob": "state-blobs/f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/2/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/2/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/2/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45",
+    "bytes": 37,
+    "mode": 33152,
+    "mtime_ns": 1791079994007265372,
+    "blob": "state-blobs/f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/2/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45",
+    "bytes": 36,
+    "mode": 33152,
+    "mtime_ns": 1791079994010355794,
+    "blob": "state-blobs/f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/2/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/2/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/2/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45",
+    "bytes": 37,
+    "mode": 33152,
+    "mtime_ns": 1791079994010397627,
+    "blob": "state-blobs/f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/3/go/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45",
+    "bytes": 36,
+    "mode": 33152,
+    "mtime_ns": 1791079994013093151,
+    "blob": "state-blobs/f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/3/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/3/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/3/go/physical/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45",
+    "bytes": 37,
+    "mode": 33152,
+    "mtime_ns": 1791079994013144609,
+    "blob": "state-blobs/f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/3/native/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45",
+    "bytes": 36,
+    "mode": 33152,
+    "mtime_ns": 1791079994016125525,
+    "blob": "state-blobs/f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/3/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/3/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/3/native/physical/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45",
+    "bytes": 37,
+    "mode": 33152,
+    "mtime_ns": 1791079994016158134,
+    "blob": "state-blobs/f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/4/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45",
+    "bytes": 36,
+    "mode": 33152,
+    "mtime_ns": 1791079994019281135,
+    "blob": "state-blobs/f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/4/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/4/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/4/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45",
+    "bytes": 37,
+    "mode": 33152,
+    "mtime_ns": 1791079994019328897,
+    "blob": "state-blobs/f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/4/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45",
+    "bytes": 36,
+    "mode": 33152,
+    "mtime_ns": 1791079994022581524,
+    "blob": "state-blobs/f22e7822dad1693be50cc6512d94656812e4316f2e20c6e71357324329b81e45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/4/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/4/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-parent-known-owner-state/4/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45",
+    "bytes": 37,
+    "mode": 33152,
+    "mtime_ns": 1791079994022609937,
+    "blob": "state-blobs/f6ce525df28e73a4240b1e9f3a6368775297d298736354540db866e6fb48eb45.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/0/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791080655263487262,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/0/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/0/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/0/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791080655263518550,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/0/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791080655267973404,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/0/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/0/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/0/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791080655267999233,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/1/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791080655271669221,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/1/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/1/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/1/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791080655271695621,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/1/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791080655275267992,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/1/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/1/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/1/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791080655275408153,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/2/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791080655278611045,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/2/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/2/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/2/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791080655278638877,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/2/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791080655281767337,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/2/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/2/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/2/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791080655281795109,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/3/go/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791080655284651677,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/3/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/3/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/3/go/physical/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791080655284687151,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/3/native/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791080655287758635,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/3/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/3/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/3/native/physical/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791080655287795080,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/4/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791080655290589354,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/4/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/4/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/4/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791080655290615483,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/4/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f",
+    "bytes": 16,
+    "mode": 33152,
+    "mtime_ns": 1791080655293761920,
+    "blob": "state-blobs/65aa3d0d2d1dbdf3763c5cf28fd58308221bfb2ed860e43ca121fb23500e312f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/4/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/4/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-state/4/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f",
+    "bytes": 17,
+    "mode": 33152,
+    "mtime_ns": 1791080655293787969,
+    "blob": "state-blobs/ccccf866a4bcd0d134c3d1dcc0ca1d409d087ec967341e65b3145e955d3a170f.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/0/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791080655382631088,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/0/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/0/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/0/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791080655382666602,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/0/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791080655386773951,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/0/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/0/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/0/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791080655386802424,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/1/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791080655390124977,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/1/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/1/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/1/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791080655390180511,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/1/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791080655393473509,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/1/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/1/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/1/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791080655393501301,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/2/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791080655396524471,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/2/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/2/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/2/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791080655396555999,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/2/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791080655399719732,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/2/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/2/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/2/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791080655399748996,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/3/go/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791080655402758235,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/3/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/3/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/3/go/physical/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791080655402794961,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/3/native/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791080655406113057,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/3/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/3/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/3/native/physical/home/.config/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791080655406193248,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/4/go/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791080655409262618,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/4/go/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/4/go/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/4/go/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791080655409290430,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/4/native/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e",
+    "bytes": 52,
+    "mode": 33152,
+    "mtime_ns": 1791080655412697511,
+    "blob": "state-blobs/2be190dff4b39c3699dee754523f6ff7421938e7db749fa1a6766763df8f873e.gz"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/4/native/link",
+    "kind": "symlink",
+    "target": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/4/native/physical/anchor"
+  },
+  {
+    "path": "/tmp/symaira-guard770-warnings-independent-fresh-owner-semantic-state/4/native/physical/cfg/symguard/config.toml",
+    "kind": "file",
+    "sha256": "23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086",
+    "bytes": 54,
+    "mode": 33152,
+    "mtime_ns": 1791080655412724041,
+    "blob": "state-blobs/23722d3c581cfda22ecde4bf482f38ebb6686e4c9562bd6b9c442be2fd67b086.gz"
+  }
+]

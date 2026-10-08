@@ -1,0 +1,1112 @@
+{
+  "members": [
+    {
+      "name": "checks/actionlint.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 384
+    },
+    {
+      "name": "checks/actionlint.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 384
+    },
+    {
+      "name": "checks/all-actionlint.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 384
+    },
+    {
+      "name": "checks/all-actionlint.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 384
+    },
+    {
+      "name": "checks/fmt-owned/rust/symbrain-cli/src/skills_cli.rs",
+      "bytes": 43141,
+      "sha256": "a9bf440caeed05c012c6b192ed68c6e7c91abca748d3adf1bc9c073489bbd9b4",
+      "mode": 384
+    },
+    {
+      "name": "checks/fmt-owned/rust/symbrain-cli/src/skills_sync_bytes.rs",
+      "bytes": 3498,
+      "sha256": "33bee3aea7b09167602fc1483a6dee6bdea81335b41a8d5a93e563ee19c70ac5",
+      "mode": 384
+    },
+    {
+      "name": "checks/fmt-owned/rust/symbrain-cli/src/skills_sync_flags.rs",
+      "bytes": 5425,
+      "sha256": "ff7c39a6cb28abbfc4c4a92802c4c46bd71e8b094937e8cf316d33c8f7ea5b8b",
+      "mode": 384
+    },
+    {
+      "name": "checks/fmt-owned/rust/symbrain-cli/tests/skills_preflight_native.rs",
+      "bytes": 11573,
+      "sha256": "55f664bbde0f55319e07af28b4606e22683b6147e960c225708f688b9fe54783",
+      "mode": 384
+    },
+    {
+      "name": "checks/fmt-owned/rust/symbrain-cli/tests/skills_raw_flag_names.rs",
+      "bytes": 2382,
+      "sha256": "fa89831dd204f4c9dee18a2c420d26634e216570a7a6df3be59a31f8c4f7b058",
+      "mode": 384
+    },
+    {
+      "name": "checks/fmt-owned/rust/symbrain-cli/tests/skills_windows_wide_flags.rs",
+      "bytes": 3100,
+      "sha256": "9062f87010a80e5adb11b643ee447cfc68fa069b6b296a8d409418b1a55abd7f",
+      "mode": 384
+    },
+    {
+      "name": "checks/fmt-owned/rust/symbrain-cli/tests/support/skills_preflight_process.rs",
+      "bytes": 2408,
+      "sha256": "018f4f11644d7edbd96966b065ff2e4a43b737cdafe4e9a670edb3f94b41c7e3",
+      "mode": 384
+    },
+    {
+      "name": "checks/fmt-owned/rust/symbrain-core/src/config/bytes_tests.rs",
+      "bytes": 3536,
+      "sha256": "8ec133484314484892e45ab059f127019ef1fc393220d08da21cc7c3b3446605",
+      "mode": 384
+    },
+    {
+      "name": "checks/fmt-owned/rust/symbrain-core/src/config/format.rs",
+      "bytes": 8662,
+      "sha256": "f2360ccf0a4ade10ba622b5da09d40139139e0427d27aa1b7ee3846723b639ac",
+      "mode": 384
+    },
+    {
+      "name": "checks/fmt-owned/rust/symbrain-core/src/config/mod.rs",
+      "bytes": 364,
+      "sha256": "f90494018160e6fa6f630b00d6a6046c31931ff207efcc09de5f7d58282be29c",
+      "mode": 384
+    },
+    {
+      "name": "checks/fmt-owned/rust/symbrain-skills/src/install/marker.rs",
+      "bytes": 7729,
+      "sha256": "ec89498ce6c4b387b944520e7af08d3458cadb7390a2a276601d7915ca90018a",
+      "mode": 384
+    },
+    {
+      "name": "checks/fmt-owned/rust/symbrain-skills/src/install/status_compare.rs",
+      "bytes": 7304,
+      "sha256": "3d485a1ebd323c239fa7bb202637d80ed3b7bc90774fa60554bad032276cd518",
+      "mode": 384
+    },
+    {
+      "name": "checks/fmt_owned.py",
+      "bytes": 1426,
+      "sha256": "25cbc155af17111485ede8f6467befffcc0dc8dd313226a53d2b12ade6f4c00c",
+      "mode": 384
+    },
+    {
+      "name": "checks/host-patch-controls.json",
+      "bytes": 216,
+      "sha256": "63f79885fdd7a66f140674ce2663d23773bb3b1f8c52eacf36a1b2f5e5144f83",
+      "mode": 384
+    },
+    {
+      "name": "checks/host-patch-controls.log",
+      "bytes": 178,
+      "sha256": "5a11040b8a25c5df2112fbfb516c7c483311988bbc63a037c1d7ba102e1cecd0",
+      "mode": 384
+    },
+    {
+      "name": "checks/host_patch_controls.py",
+      "bytes": 1935,
+      "sha256": "34f43de38239ca9cb4d2f256880e0275fcec6c3051d162e82165c9172caf81b0",
+      "mode": 384
+    },
+    {
+      "name": "checks/migration-rust.base",
+      "bytes": 16674,
+      "sha256": "31f7a6cb3de5322f60b65cca4df7e1eb0fa3044bd2810db8e540a2c16ab43336",
+      "mode": 384
+    },
+    {
+      "name": "checks/migration-rust.main",
+      "bytes": 20008,
+      "sha256": "30002e19b4debcc10451cd943a33cafc9a64a2ca17cae60e9d67b53ec080a1d2",
+      "mode": 384
+    },
+    {
+      "name": "checks/migration-rust.ours",
+      "bytes": 24837,
+      "sha256": "c4cf3febcb399be52b916e997a08cc2ffa9905d25a527e6d635abbd077ce9f1b",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/binding.json",
+      "bytes": 2702,
+      "sha256": "f9a6a25bf44a255ed21a8bbc9365bb565ac9eb877eee430bfd1a2727b385c726",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/missing-host-current.py",
+      "bytes": 1744,
+      "sha256": "5ace924bebf07ac79e5af100c04ddc59524aee1947c435069f0642be54454d1b",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/missing-host-current.stderr",
+      "bytes": 1100,
+      "sha256": "60b0abea1b3341b91bf41cb76e38f73b91451802270fc5df17ecc7ff530b8347",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/missing-host-current.stdout",
+      "bytes": 101,
+      "sha256": "7cb9c44a4f12f74770764669ec9810e389ba62241bbde181bb9e1aceb7a9f05d",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/explicit-extension-mode/checker.py",
+      "bytes": 3500,
+      "sha256": "ad795732bf943e134216d013caa80157494754e78a8428f861da1f61b866da86",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/explicit-extension-mode/controls.py",
+      "bytes": 6221,
+      "sha256": "84cbe996024c5b78c2d558873751d1edcd110a054f5bf702b579518f73eaff77",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/explicit-extension-mode/defaults_inventory.py",
+      "bytes": 6687,
+      "sha256": "0ec51e0e334133d118378651e479691d3b519eb0fb8fafee9a714a5ab6d0221e",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/explicit-extension-mode/driver.py",
+      "bytes": 1345,
+      "sha256": "bc24fbc14d1644a7b9f934ae8ee0b6cf37b3c5c2cf2d415643ef60d79af1e1d0",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/explicit-extension-mode/prepare_provider.py",
+      "bytes": 3785,
+      "sha256": "c0cf4c21998b9ef2dd04b9a7225234aa0c28e4a818c166474700942660a68b5a",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/explicit-extension-mode/provider.py",
+      "bytes": 4357,
+      "sha256": "1cb987ecc12d7b256abf7e0cd3a97aff09a8378329d713299f8db6c6d36eb1a7",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/explicit-extension-mode/replay.py",
+      "bytes": 14280,
+      "sha256": "15d4160efd0cb4415eb05133e2337df6be7fda66c2575a2afb9268b6efa7ee08",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/explicit-extension-mode/stderr",
+      "bytes": 36659,
+      "sha256": "dc450f9da7849f5a5efa589796e39e6c2f8e60b7bd1d7ff600f12b155eb2a30b",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/explicit-extension-mode/stdout",
+      "bytes": 108,
+      "sha256": "94c44f3b35978d6edefdd7fa2cf6809f3a4dfa6c16862c062ebc69afdbc1e94c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/explicit-extension-mode/test_provider.py",
+      "bytes": 5594,
+      "sha256": "306ee920c5d5ede21cb13c0685480ddc0c0e3377b4818e22f7b44936caf24aa6",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/explicit-extension-mode/test_provider_admission.py",
+      "bytes": 8619,
+      "sha256": "4fae3bb923e632e8707368b157dadba054fa7fea227cb15a14e88d18cc939d17",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/explicit-extension-mode/test_provider_platform.py",
+      "bytes": 3264,
+      "sha256": "5acbbb666703365cd0c994c0d61923b2c9984f18d909230c3ffd88eb0d80f842",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/explicit-extension-mode/validate.py",
+      "bytes": 11115,
+      "sha256": "686bfcc5dc4f12fa624cfe9e8f94d906436bcd48a8b60c14541cdae206574475",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/explicit-extension-mode/verify_portable_admission_static.py",
+      "bytes": 6904,
+      "sha256": "2a030d8b5dc416d9b9264f867b6d7f4bee3308254ae2c3743df534dd55c4bb8c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-global/checker.py",
+      "bytes": 3500,
+      "sha256": "ad795732bf943e134216d013caa80157494754e78a8428f861da1f61b866da86",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-global/controls.py",
+      "bytes": 6221,
+      "sha256": "84cbe996024c5b78c2d558873751d1edcd110a054f5bf702b579518f73eaff77",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-global/defaults_inventory.py",
+      "bytes": 6687,
+      "sha256": "0ec51e0e334133d118378651e479691d3b519eb0fb8fafee9a714a5ab6d0221e",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-global/driver.py",
+      "bytes": 1336,
+      "sha256": "63dcdf55dc83800c39d3ae200a88099cfd55d9c989b3b1da6b57b889cd62debd",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-global/prepare_provider.py",
+      "bytes": 3785,
+      "sha256": "c0cf4c21998b9ef2dd04b9a7225234aa0c28e4a818c166474700942660a68b5a",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-global/provider.py",
+      "bytes": 4297,
+      "sha256": "306d28e20750258ef4139934800c4e7979348d503665f39c03331911191e9048",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-global/replay.py",
+      "bytes": 14280,
+      "sha256": "15d4160efd0cb4415eb05133e2337df6be7fda66c2575a2afb9268b6efa7ee08",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-global/stderr",
+      "bytes": 33965,
+      "sha256": "6318b72af42460166ed7ed9e4a05791f9e6a81f37fa7e25a142e878a63ef8355",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-global/stdout",
+      "bytes": 108,
+      "sha256": "94c44f3b35978d6edefdd7fa2cf6809f3a4dfa6c16862c062ebc69afdbc1e94c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-global/test_provider.py",
+      "bytes": 5594,
+      "sha256": "306ee920c5d5ede21cb13c0685480ddc0c0e3377b4818e22f7b44936caf24aa6",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-global/test_provider_admission.py",
+      "bytes": 8619,
+      "sha256": "4fae3bb923e632e8707368b157dadba054fa7fea227cb15a14e88d18cc939d17",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-global/test_provider_platform.py",
+      "bytes": 3264,
+      "sha256": "5acbbb666703365cd0c994c0d61923b2c9984f18d909230c3ffd88eb0d80f842",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-global/validate.py",
+      "bytes": 11115,
+      "sha256": "686bfcc5dc4f12fa624cfe9e8f94d906436bcd48a8b60c14541cdae206574475",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-global/verify_portable_admission_static.py",
+      "bytes": 6904,
+      "sha256": "2a030d8b5dc416d9b9264f867b6d7f4bee3308254ae2c3743df534dd55c4bb8c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-now/checker.py",
+      "bytes": 3500,
+      "sha256": "ad795732bf943e134216d013caa80157494754e78a8428f861da1f61b866da86",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-now/controls.py",
+      "bytes": 6221,
+      "sha256": "84cbe996024c5b78c2d558873751d1edcd110a054f5bf702b579518f73eaff77",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-now/defaults_inventory.py",
+      "bytes": 6687,
+      "sha256": "0ec51e0e334133d118378651e479691d3b519eb0fb8fafee9a714a5ab6d0221e",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-now/driver.py",
+      "bytes": 1333,
+      "sha256": "5884ee09401fc1ba20a636dcac8d5659b655c099114e1177ecba7fb8a3a96ddc",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-now/prepare_provider.py",
+      "bytes": 3785,
+      "sha256": "c0cf4c21998b9ef2dd04b9a7225234aa0c28e4a818c166474700942660a68b5a",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-now/provider.py",
+      "bytes": 4304,
+      "sha256": "0939f9f561cac969572cd24f211563eda833d5e3125839126088a300c1386c70",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-now/replay.py",
+      "bytes": 14280,
+      "sha256": "15d4160efd0cb4415eb05133e2337df6be7fda66c2575a2afb9268b6efa7ee08",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-now/stderr",
+      "bytes": 33926,
+      "sha256": "3c79f70270f82eb722e1ac94411eda6d158c691deaeb4566c32402dd01593ab2",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-now/stdout",
+      "bytes": 108,
+      "sha256": "94c44f3b35978d6edefdd7fa2cf6809f3a4dfa6c16862c062ebc69afdbc1e94c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-now/test_provider.py",
+      "bytes": 5594,
+      "sha256": "306ee920c5d5ede21cb13c0685480ddc0c0e3377b4818e22f7b44936caf24aa6",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-now/test_provider_admission.py",
+      "bytes": 8619,
+      "sha256": "4fae3bb923e632e8707368b157dadba054fa7fea227cb15a14e88d18cc939d17",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-now/test_provider_platform.py",
+      "bytes": 3264,
+      "sha256": "5acbbb666703365cd0c994c0d61923b2c9984f18d909230c3ffd88eb0d80f842",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-now/validate.py",
+      "bytes": 11115,
+      "sha256": "686bfcc5dc4f12fa624cfe9e8f94d906436bcd48a8b60c14541cdae206574475",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/missing-now/verify_portable_admission_static.py",
+      "bytes": 6904,
+      "sha256": "2a030d8b5dc416d9b9264f867b6d7f4bee3308254ae2c3743df534dd55c4bb8c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-global-host-patch/checker.py",
+      "bytes": 3500,
+      "sha256": "ad795732bf943e134216d013caa80157494754e78a8428f861da1f61b866da86",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-global-host-patch/controls.py",
+      "bytes": 6221,
+      "sha256": "84cbe996024c5b78c2d558873751d1edcd110a054f5bf702b579518f73eaff77",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-global-host-patch/defaults_inventory.py",
+      "bytes": 6687,
+      "sha256": "0ec51e0e334133d118378651e479691d3b519eb0fb8fafee9a714a5ab6d0221e",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-global-host-patch/driver.py",
+      "bytes": 1344,
+      "sha256": "86abc4508f50d3b0a8ebf35cbaca9ac093828675fc4518166934b7d3309e5bb4",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-global-host-patch/prepare_provider.py",
+      "bytes": 3785,
+      "sha256": "c0cf4c21998b9ef2dd04b9a7225234aa0c28e4a818c166474700942660a68b5a",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-global-host-patch/provider.py",
+      "bytes": 4318,
+      "sha256": "48f1d71a77ca0772265c24552a75e41a4858194d876ebe866b72ee342d109882",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-global-host-patch/replay.py",
+      "bytes": 14280,
+      "sha256": "15d4160efd0cb4415eb05133e2337df6be7fda66c2575a2afb9268b6efa7ee08",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-global-host-patch/stderr",
+      "bytes": 14387,
+      "sha256": "896b191dbd1458cf67036d1c668c0bf4dbc8ca7c8005adc5b76d61b44832994a",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-global-host-patch/stdout",
+      "bytes": 108,
+      "sha256": "94c44f3b35978d6edefdd7fa2cf6809f3a4dfa6c16862c062ebc69afdbc1e94c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-global-host-patch/test_provider.py",
+      "bytes": 5594,
+      "sha256": "306ee920c5d5ede21cb13c0685480ddc0c0e3377b4818e22f7b44936caf24aa6",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-global-host-patch/test_provider_admission.py",
+      "bytes": 8509,
+      "sha256": "b0246f9c8bdfce0a15f34e7480bcc8ebcbe02627a18d6407637d26a547cfc919",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-global-host-patch/test_provider_platform.py",
+      "bytes": 3264,
+      "sha256": "5acbbb666703365cd0c994c0d61923b2c9984f18d909230c3ffd88eb0d80f842",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-global-host-patch/validate.py",
+      "bytes": 11115,
+      "sha256": "686bfcc5dc4f12fa624cfe9e8f94d906436bcd48a8b60c14541cdae206574475",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-global-host-patch/verify_portable_admission_static.py",
+      "bytes": 6904,
+      "sha256": "2a030d8b5dc416d9b9264f867b6d7f4bee3308254ae2c3743df534dd55c4bb8c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-now-host-patch/checker.py",
+      "bytes": 3500,
+      "sha256": "ad795732bf943e134216d013caa80157494754e78a8428f861da1f61b866da86",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-now-host-patch/controls.py",
+      "bytes": 6221,
+      "sha256": "84cbe996024c5b78c2d558873751d1edcd110a054f5bf702b579518f73eaff77",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-now-host-patch/defaults_inventory.py",
+      "bytes": 6687,
+      "sha256": "0ec51e0e334133d118378651e479691d3b519eb0fb8fafee9a714a5ab6d0221e",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-now-host-patch/driver.py",
+      "bytes": 1341,
+      "sha256": "8c4952e3ef39ce8f7d8366c456a2da2e835f334506705a97236246a52510b71a",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-now-host-patch/prepare_provider.py",
+      "bytes": 3785,
+      "sha256": "c0cf4c21998b9ef2dd04b9a7225234aa0c28e4a818c166474700942660a68b5a",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-now-host-patch/provider.py",
+      "bytes": 4318,
+      "sha256": "48f1d71a77ca0772265c24552a75e41a4858194d876ebe866b72ee342d109882",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-now-host-patch/replay.py",
+      "bytes": 14280,
+      "sha256": "15d4160efd0cb4415eb05133e2337df6be7fda66c2575a2afb9268b6efa7ee08",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-now-host-patch/stderr",
+      "bytes": 14036,
+      "sha256": "316d3a27ccb360e70ce97101a8720cdd4e6ef95de1c336bbeb6c63f6ac3449c3",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-now-host-patch/stdout",
+      "bytes": 108,
+      "sha256": "94c44f3b35978d6edefdd7fa2cf6809f3a4dfa6c16862c062ebc69afdbc1e94c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-now-host-patch/test_provider.py",
+      "bytes": 5594,
+      "sha256": "306ee920c5d5ede21cb13c0685480ddc0c0e3377b4818e22f7b44936caf24aa6",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-now-host-patch/test_provider_admission.py",
+      "bytes": 8528,
+      "sha256": "eaccc30d6282100093552e34fcf604a246e295ce3439d7277fe54258642b1c3b",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-now-host-patch/test_provider_platform.py",
+      "bytes": 3264,
+      "sha256": "5acbbb666703365cd0c994c0d61923b2c9984f18d909230c3ffd88eb0d80f842",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-now-host-patch/validate.py",
+      "bytes": 11115,
+      "sha256": "686bfcc5dc4f12fa624cfe9e8f94d906436bcd48a8b60c14541cdae206574475",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/omit-now-host-patch/verify_portable_admission_static.py",
+      "bytes": 6904,
+      "sha256": "2a030d8b5dc416d9b9264f867b6d7f4bee3308254ae2c3743df534dd55c4bb8c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-extension-address/checker.py",
+      "bytes": 3500,
+      "sha256": "ad795732bf943e134216d013caa80157494754e78a8428f861da1f61b866da86",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-extension-address/controls.py",
+      "bytes": 6221,
+      "sha256": "84cbe996024c5b78c2d558873751d1edcd110a054f5bf702b579518f73eaff77",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-extension-address/defaults_inventory.py",
+      "bytes": 6687,
+      "sha256": "0ec51e0e334133d118378651e479691d3b519eb0fb8fafee9a714a5ab6d0221e",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-extension-address/driver.py",
+      "bytes": 1344,
+      "sha256": "ee83ab111e553917669c802d8f6ecb19ebc06bdd384855b7241f5b840766f918",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-extension-address/prepare_provider.py",
+      "bytes": 3785,
+      "sha256": "c0cf4c21998b9ef2dd04b9a7225234aa0c28e4a818c166474700942660a68b5a",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-extension-address/provider.py",
+      "bytes": 4288,
+      "sha256": "f97c6a8b25c599455680c7297fbc34d727abef4d7781f11d4c25c3adcab090a3",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-extension-address/replay.py",
+      "bytes": 14280,
+      "sha256": "15d4160efd0cb4415eb05133e2337df6be7fda66c2575a2afb9268b6efa7ee08",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-extension-address/stderr",
+      "bytes": 9657,
+      "sha256": "afe4e8d348b40d4afff63fa2a80e1c1b864ae09832f621f59f1207234db26c26",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-extension-address/stdout",
+      "bytes": 108,
+      "sha256": "94c44f3b35978d6edefdd7fa2cf6809f3a4dfa6c16862c062ebc69afdbc1e94c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-extension-address/test_provider.py",
+      "bytes": 5594,
+      "sha256": "306ee920c5d5ede21cb13c0685480ddc0c0e3377b4818e22f7b44936caf24aa6",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-extension-address/test_provider_admission.py",
+      "bytes": 8619,
+      "sha256": "4fae3bb923e632e8707368b157dadba054fa7fea227cb15a14e88d18cc939d17",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-extension-address/test_provider_platform.py",
+      "bytes": 3264,
+      "sha256": "5acbbb666703365cd0c994c0d61923b2c9984f18d909230c3ffd88eb0d80f842",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-extension-address/validate.py",
+      "bytes": 11115,
+      "sha256": "686bfcc5dc4f12fa624cfe9e8f94d906436bcd48a8b60c14541cdae206574475",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-extension-address/verify_portable_admission_static.py",
+      "bytes": 6904,
+      "sha256": "2a030d8b5dc416d9b9264f867b6d7f4bee3308254ae2c3743df534dd55c4bb8c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-process-admission/checker.py",
+      "bytes": 3500,
+      "sha256": "ad795732bf943e134216d013caa80157494754e78a8428f861da1f61b866da86",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-process-admission/controls.py",
+      "bytes": 6221,
+      "sha256": "84cbe996024c5b78c2d558873751d1edcd110a054f5bf702b579518f73eaff77",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-process-admission/defaults_inventory.py",
+      "bytes": 6687,
+      "sha256": "0ec51e0e334133d118378651e479691d3b519eb0fb8fafee9a714a5ab6d0221e",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-process-admission/driver.py",
+      "bytes": 1344,
+      "sha256": "dd856262e0415aa6d16f62f0cb9c4b3af8ebc4e7417dd3947fa7affe08768759",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-process-admission/prepare_provider.py",
+      "bytes": 3785,
+      "sha256": "c0cf4c21998b9ef2dd04b9a7225234aa0c28e4a818c166474700942660a68b5a",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-process-admission/provider.py",
+      "bytes": 4349,
+      "sha256": "87246f7c302455153d6a027c63c9ea21dac50b439c91f26287f0432dcc239094",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-process-admission/replay.py",
+      "bytes": 14280,
+      "sha256": "15d4160efd0cb4415eb05133e2337df6be7fda66c2575a2afb9268b6efa7ee08",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-process-admission/stderr",
+      "bytes": 19227,
+      "sha256": "dda80b8490d534f6a0369f223f767381b81f453705f2744ad589cb1f97b51ed9",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-process-admission/stdout",
+      "bytes": 108,
+      "sha256": "94c44f3b35978d6edefdd7fa2cf6809f3a4dfa6c16862c062ebc69afdbc1e94c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-process-admission/test_provider.py",
+      "bytes": 5594,
+      "sha256": "306ee920c5d5ede21cb13c0685480ddc0c0e3377b4818e22f7b44936caf24aa6",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-process-admission/test_provider_admission.py",
+      "bytes": 8619,
+      "sha256": "4fae3bb923e632e8707368b157dadba054fa7fea227cb15a14e88d18cc939d17",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-process-admission/test_provider_platform.py",
+      "bytes": 3264,
+      "sha256": "5acbbb666703365cd0c994c0d61923b2c9984f18d909230c3ffd88eb0d80f842",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-process-admission/validate.py",
+      "bytes": 11115,
+      "sha256": "686bfcc5dc4f12fa624cfe9e8f94d906436bcd48a8b60c14541cdae206574475",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/skip-process-admission/verify_portable_admission_static.py",
+      "bytes": 6904,
+      "sha256": "2a030d8b5dc416d9b9264f867b6d7f4bee3308254ae2c3743df534dd55c4bb8c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/zero-mode/checker.py",
+      "bytes": 3500,
+      "sha256": "ad795732bf943e134216d013caa80157494754e78a8428f861da1f61b866da86",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/zero-mode/controls.py",
+      "bytes": 6221,
+      "sha256": "84cbe996024c5b78c2d558873751d1edcd110a054f5bf702b579518f73eaff77",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/zero-mode/defaults_inventory.py",
+      "bytes": 6687,
+      "sha256": "0ec51e0e334133d118378651e479691d3b519eb0fb8fafee9a714a5ab6d0221e",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/zero-mode/driver.py",
+      "bytes": 1331,
+      "sha256": "cd00ced6535a4b4ff47571d89b11946f308a7aae1b3714061d50508a9637aec9",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/zero-mode/prepare_provider.py",
+      "bytes": 3785,
+      "sha256": "c0cf4c21998b9ef2dd04b9a7225234aa0c28e4a818c166474700942660a68b5a",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/zero-mode/provider.py",
+      "bytes": 4287,
+      "sha256": "31e14497a91e9cd3ef1e1e9c0fa28c4c9fcd52fdb6cd465c21cb0220aa020f1d",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/zero-mode/replay.py",
+      "bytes": 14280,
+      "sha256": "15d4160efd0cb4415eb05133e2337df6be7fda66c2575a2afb9268b6efa7ee08",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/zero-mode/stderr",
+      "bytes": 33510,
+      "sha256": "19e5579d7fef53532654361a1090f9afb7d301eef3041cf58ed3737c025d39fa",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/zero-mode/stdout",
+      "bytes": 108,
+      "sha256": "94c44f3b35978d6edefdd7fa2cf6809f3a4dfa6c16862c062ebc69afdbc1e94c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/zero-mode/test_provider.py",
+      "bytes": 5594,
+      "sha256": "306ee920c5d5ede21cb13c0685480ddc0c0e3377b4818e22f7b44936caf24aa6",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/zero-mode/test_provider_admission.py",
+      "bytes": 8619,
+      "sha256": "4fae3bb923e632e8707368b157dadba054fa7fea227cb15a14e88d18cc939d17",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/zero-mode/test_provider_platform.py",
+      "bytes": 3264,
+      "sha256": "5acbbb666703365cd0c994c0d61923b2c9984f18d909230c3ffd88eb0d80f842",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/zero-mode/validate.py",
+      "bytes": 11115,
+      "sha256": "686bfcc5dc4f12fa624cfe9e8f94d906436bcd48a8b60c14541cdae206574475",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/mutants/zero-mode/verify_portable_admission_static.py",
+      "bytes": 6904,
+      "sha256": "2a030d8b5dc416d9b9264f867b6d7f4bee3308254ae2c3743df534dd55c4bb8c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/run_controls.py",
+      "bytes": 4371,
+      "sha256": "73cdabb24ae184ccb51b9b6d489417ea21a9218fd32f44189339ce8490f9d8a5",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/run_portable.py",
+      "bytes": 1299,
+      "sha256": "7fb65dc16a589b591e173608fdcb34bebd43acbe6b158e7187b59cc36fa4db6a",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/runner-tree/migration/evidence/memory-historical-649/sqlite-provider-f428/sqlite-amalgamation-3500400.zip",
+      "bytes": 2845716,
+      "sha256": "1d3049dd0f830a025a53105fc79fd2ab9431aea99e137809d064d8ee8356b032",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/runner-tree/scripts/memory-historical-oracle/README.md",
+      "bytes": 7453,
+      "sha256": "f0e2f747dd49eef3bdfcd9e39a8be52cf23e07207612fd876bc318873ce8c74a",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/runner-tree/scripts/memory-historical-oracle/checker.py",
+      "bytes": 3500,
+      "sha256": "ad795732bf943e134216d013caa80157494754e78a8428f861da1f61b866da86",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/runner-tree/scripts/memory-historical-oracle/controls.py",
+      "bytes": 6221,
+      "sha256": "84cbe996024c5b78c2d558873751d1edcd110a054f5bf702b579518f73eaff77",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/runner-tree/scripts/memory-historical-oracle/defaults_inventory.py",
+      "bytes": 6687,
+      "sha256": "0ec51e0e334133d118378651e479691d3b519eb0fb8fafee9a714a5ab6d0221e",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/runner-tree/scripts/memory-historical-oracle/prepare_provider.py",
+      "bytes": 3785,
+      "sha256": "c0cf4c21998b9ef2dd04b9a7225234aa0c28e4a818c166474700942660a68b5a",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/runner-tree/scripts/memory-historical-oracle/provider.py",
+      "bytes": 4318,
+      "sha256": "48f1d71a77ca0772265c24552a75e41a4858194d876ebe866b72ee342d109882",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/runner-tree/scripts/memory-historical-oracle/replay.py",
+      "bytes": 14280,
+      "sha256": "15d4160efd0cb4415eb05133e2337df6be7fda66c2575a2afb9268b6efa7ee08",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/runner-tree/scripts/memory-historical-oracle/run.sh",
+      "bytes": 1412,
+      "sha256": "67eca9c6f625e6c253cb5f589e43be639cbb741a12a2a8aa0d5e74ffb06ff892",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/runner-tree/scripts/memory-historical-oracle/test_provider.py",
+      "bytes": 5506,
+      "sha256": "f2bef740e4ab87b7780d7e392662debe5566ced99246738f497ba445fdb86894",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/runner-tree/scripts/memory-historical-oracle/test_provider_admission.py",
+      "bytes": 8619,
+      "sha256": "4fae3bb923e632e8707368b157dadba054fa7fea227cb15a14e88d18cc939d17",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/runner-tree/scripts/memory-historical-oracle/test_provider_platform.py",
+      "bytes": 3264,
+      "sha256": "5acbbb666703365cd0c994c0d61923b2c9984f18d909230c3ffd88eb0d80f842",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/runner-tree/scripts/memory-historical-oracle/validate.py",
+      "bytes": 11115,
+      "sha256": "686bfcc5dc4f12fa624cfe9e8f94d906436bcd48a8b60c14541cdae206574475",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/runner-tree/scripts/memory-historical-oracle/verify_portable_admission_static.py",
+      "bytes": 6904,
+      "sha256": "2a030d8b5dc416d9b9264f867b6d7f4bee3308254ae2c3743df534dd55c4bb8c",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-runner/source-controls.json",
+      "bytes": 1465,
+      "sha256": "98bc326ccb98bc64f05cae9d4fae1829cc2fd37763db3ec5c529775f66b086b3",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable-source-mutants.log",
+      "bytes": 1104,
+      "sha256": "4001a1cfb0cf71955a6f9bcb190a78864d9c65ec1d09e7959e8d2cea43891fba",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable17.stderr",
+      "bytes": 2814,
+      "sha256": "31f7bcd9f07070a13fb7df5e40112e56a9b1317f3ed3b4e38eee6c5e9e0ccdef",
+      "mode": 384
+    },
+    {
+      "name": "checks/portable17.stdout",
+      "bytes": 108,
+      "sha256": "94c44f3b35978d6edefdd7fa2cf6809f3a4dfa6c16862c062ebc69afdbc1e94c",
+      "mode": 384
+    },
+    {
+      "name": "checks/reviewer-check-expectations.json",
+      "bytes": 707,
+      "sha256": "13edf83ebdc5148f6cc6d572a2b2ef4dd0af12c72205debd8c3180425020e5cb",
+      "mode": 384
+    },
+    {
+      "name": "checks/rustfmt-source-binding.json",
+      "bytes": 3875,
+      "sha256": "a4c6d4cdab2b00ced14675e2e76984f37e0a7fbdf7b967357522797569b08c88",
+      "mode": 384
+    },
+    {
+      "name": "checks/rustfmt.log",
+      "bytes": 26,
+      "sha256": "209865e2087774217275981ec6963f8e963db0233b7aeac169a300bbe56b03c4",
+      "mode": 384
+    },
+    {
+      "name": "checks/rustfmt.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 384
+    },
+    {
+      "name": "checks/rustfmt.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 384
+    },
+    {
+      "name": "checks/skills-original-plan.json",
+      "bytes": 43261,
+      "sha256": "5478c095a73d0332baa987dfae3dea6d3c3863104841be7b4d689edfba762bce",
+      "mode": 420
+    },
+    {
+      "name": "checks/skills-pure.stderr",
+      "bytes": 1727,
+      "sha256": "88724d44c63f87463c2f111916fbc04eeb525bfe6d5ee026d731b17f3cd669d0",
+      "mode": 384
+    },
+    {
+      "name": "checks/skills-pure.stdout",
+      "bytes": 93,
+      "sha256": "80165891d64bc9f5b5ca73d1ed15c2b348001fb6c6d1e593d33f0a3180495950",
+      "mode": 384
+    },
+    {
+      "name": "checks/skills_pure.py",
+      "bytes": 1377,
+      "sha256": "37536bf5c8d7e71e65253ffec55ce7e4a4f89876c09ee0017ecd66fec217bcd7",
+      "mode": 384
+    },
+    {
+      "name": "checks/source-union-final.log",
+      "bytes": 711,
+      "sha256": "01cf491b5d057c7a3f96542a10f43c3718c5de10b75acd457357e21a2b50d82e",
+      "mode": 384
+    },
+    {
+      "name": "checks/source-union-initial.log",
+      "bytes": 300,
+      "sha256": "84c32be8f0d971ef2ebc3c005adc312b7ebec80e75eee886360b70b7c2466e15",
+      "mode": 384
+    },
+    {
+      "name": "checks/source-union-pass.log",
+      "bytes": 829,
+      "sha256": "2b7c194303eccc246c9ac8ee45060a3dadd732b133039cc150be122ac7a7b19c",
+      "mode": 384
+    },
+    {
+      "name": "checks/source-union.json",
+      "bytes": 893,
+      "sha256": "d8f1d01ad34e7201f4a232cdaebfc3123cf5c4aa0621a5a1ede732024aa8367e",
+      "mode": 384
+    },
+    {
+      "name": "checks/source-union.log",
+      "bytes": 300,
+      "sha256": "84c32be8f0d971ef2ebc3c005adc312b7ebec80e75eee886360b70b7c2466e15",
+      "mode": 384
+    },
+    {
+      "name": "checks/source_union-initial.py",
+      "bytes": 4589,
+      "sha256": "3ffed478f9548f940c85f49908009b03635340122668252b51068da958fafc08",
+      "mode": 384
+    },
+    {
+      "name": "checks/source_union-second.py",
+      "bytes": 4860,
+      "sha256": "109f68b1d6c0c54144fd8ced1d2d8286f97ead2f36a431040cc9492b9778f9d3",
+      "mode": 384
+    },
+    {
+      "name": "checks/source_union.py",
+      "bytes": 5019,
+      "sha256": "24078dfd86b4421b433ed9cbd4287043462ec7ab4abd40f2d8446602add567bb",
+      "mode": 384
+    },
+    {
+      "name": "conflicts/ci.yml",
+      "bytes": 77007,
+      "sha256": "66195f3f3e3a2919b75e4725f11dff2ce3a5032e10dd4473ace7fb23c1980e95",
+      "mode": 384
+    },
+    {
+      "name": "conflicts/ci.yml.stage1",
+      "bytes": 70968,
+      "sha256": "327e3ac86fac19ffdc43e8b39e0647d22ffee3a84a3026a2e327ddc8a47c244f",
+      "mode": 384
+    },
+    {
+      "name": "conflicts/ci.yml.stage2",
+      "bytes": 74094,
+      "sha256": "8a1351834a204a92879c47213a21ca92dadb782de6efb8e7a58981577fb9976b",
+      "mode": 384
+    },
+    {
+      "name": "conflicts/ci.yml.stage3",
+      "bytes": 73876,
+      "sha256": "ff81d2e9b856003f882d2c9c4fa7d9bf3243a676ad3e02a8090dc097cc38fb84",
+      "mode": 384
+    },
+    {
+      "name": "conflicts/contract-matrix.csv",
+      "bytes": 34433,
+      "sha256": "4f1d463e4eef81082d2826d0ecac3414d6d195f56a7dfec15e496338a3283e6f",
+      "mode": 384
+    },
+    {
+      "name": "conflicts/contract-matrix.csv.stage1",
+      "bytes": 27051,
+      "sha256": "49b38f4744cbbb261d9ea22bf0979dd255d4e00942e63348816711723c9bf3d7",
+      "mode": 384
+    },
+    {
+      "name": "conflicts/contract-matrix.csv.stage2",
+      "bytes": 30863,
+      "sha256": "9b97d548791b18fc298ab96eb9cf893c944d769c47c6846cba498fb78c6ef14f",
+      "mode": 384
+    },
+    {
+      "name": "conflicts/contract-matrix.csv.stage3",
+      "bytes": 28676,
+      "sha256": "3d128ba0bcfad3add7205c1ba258c6ed1912eb8970885d28526f6dea8ea17c1e",
+      "mode": 384
+    }
+  ],
+  "archive_sha256": "5494656f5cd0dd2f41f0b140f5777f4f81a66d21ca12c4e0e7d8ce004aaf921b",
+  "source": "a84a19e91f333dbbe07b1e1103122abc98e6e633",
+  "actual_compiler_CSDK_SQLite_product_target_port": 0,
+  "format_only_tools": "rustfmt and actionlint"
+}

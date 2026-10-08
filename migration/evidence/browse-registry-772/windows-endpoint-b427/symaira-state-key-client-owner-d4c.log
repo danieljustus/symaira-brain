@@ -1,0 +1,83 @@
+   Compiling zerofrom-derive v0.1.7
+   Compiling yoke-derive v0.8.2
+   Compiling zerovec-derive v0.11.6
+   Compiling zerofrom v0.1.8
+   Compiling yoke v0.8.3
+   Compiling displaydoc v0.2.7
+   Compiling serde_derive v1.0.229
+   Compiling zerovec v0.11.8
+   Compiling tokio-macros v2.7.2
+   Compiling tokio v1.53.1
+   Compiling serde v1.0.229
+   Compiling tinystr v0.8.4
+   Compiling icu_locale_core v2.3.0
+   Compiling potential_utf v0.1.6
+   Compiling zerotrie v0.2.5
+   Compiling icu_collections v2.3.0
+   Compiling icu_provider v2.3.1
+   Compiling futures-macro v0.3.34
+   Compiling futures-util v0.3.34
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_properties v2.3.0
+   Compiling idna_adapter v1.2.2
+   Compiling time-macros v0.2.32
+   Compiling idna v1.1.0
+   Compiling time v0.3.55
+   Compiling tracing-attributes v0.1.31
+   Compiling tracing v0.1.44
+   Compiling url v2.5.8
+   Compiling tokio-util v0.7.19
+   Compiling openssl-macros v0.1.1
+   Compiling openssl v0.10.81
+   Compiling h2 v0.4.19
+   Compiling string_cache v0.9.0
+   Compiling native-tls v0.2.18
+   Compiling hyper v1.11.1
+   Compiling thiserror-impl v2.0.20
+   Compiling hyper-util v0.1.20
+   Compiling tower v0.5.3
+   Compiling document-features v0.2.12
+   Compiling publicsuffix v2.3.0
+   Compiling thiserror v2.0.20
+   Compiling web_atoms v0.2.6
+   Compiling tokio-native-tls v0.3.1
+   Compiling cookie v0.18.2
+   Compiling tungstenite v0.28.0
+   Compiling cookie_store v0.22.1
+   Compiling hyper-tls v0.6.0
+   Compiling markup5ever v0.39.0
+   Compiling tower-http v0.6.11
+   Compiling chromiumoxide_types v0.9.1
+   Compiling chromiumoxide_pdl v0.9.1
+   Compiling reqwest v0.13.4
+   Compiling async-tungstenite v0.32.1
+   Compiling futures-executor v0.3.34
+   Compiling futures v0.3.34
+   Compiling chromiumoxide_cdp v0.9.1
+   Compiling symbrowse-engine v0.0.0 (/workspace/symaira-daemon772-state-key/browse/crates/symbrowse-engine)
+   Compiling xml5ever v0.39.0
+   Compiling html5ever v0.39.0
+   Compiling symbrowse-core v0.0.0 (/workspace/symaira-daemon772-state-key/browse/crates/symbrowse-core)
+   Compiling markup5ever_rcdom v0.39.0+unofficial
+   Compiling doctest-file v1.1.1
+   Compiling symbrowse-fetch v0.0.0 (/workspace/symaira-daemon772-state-key/browse/crates/symbrowse-fetch)
+   Compiling interprocess v2.4.4
+   Compiling symbrowse-engine-firefox v0.0.0 (/workspace/symaira-daemon772-state-key/browse/crates/symbrowse-engine-firefox)
+   Compiling symbrowse-compat v0.0.0 (/workspace/symaira-daemon772-state-key/browse/crates/symbrowse-compat)
+   Compiling chromiumoxide v0.9.1
+   Compiling symbrowse-engine-chrome v0.0.0 (/workspace/symaira-daemon772-state-key/browse/crates/symbrowse-engine-chrome)
+   Compiling symbrowse-daemon v0.0.0 (/workspace/symaira-daemon772-state-key/browse/crates/symbrowse-daemon)
+    Finished `test` profile [unoptimized] target(s) in 57.10s
+     Running tests/client_contract.rs (/workspace/symaira-daemon772-registry/target/debug/deps/client_contract-4fb4b9dc83798752)
+
+running 7 tests
+test config_owned_child ... ignored, isolated environment explicitly executed by config parent
+test daemon_owned_child_fixture ... ignored, owned starter executable explicitly launched by startup deadline test
+test launch_failure_has_session_context_and_validates_argv_before_spawning ... ok
+test unavailable_keeps_stable_metadata_and_no_transport_text ... ok
+test client_uses_resolved_config_and_preserves_explicit_timeout_in_isolated_child ... ok
+test explicit_engine_and_policy_checks_stop_incompatible_owner_before_dispatch ... ok
+test startup_deadline_returns_readiness_failure_and_reaps_its_owned_child ... ok
+
+test result: ok. 5 passed; 0 failed; 2 ignored; 0 measured; 0 filtered out; finished in 0.51s
+

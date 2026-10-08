@@ -1,0 +1,6 @@
+Auto-merging .github/workflows/ci.yml
+CONFLICT (content): Merge conflict in .github/workflows/ci.yml
+Auto-merging MIGRATION-RUST.md
+Auto-merging migration/contract-matrix.csv
+CONFLICT (content): Merge conflict in migration/contract-matrix.csv
+Automatic merge failed; fix conflicts and then commit the result.

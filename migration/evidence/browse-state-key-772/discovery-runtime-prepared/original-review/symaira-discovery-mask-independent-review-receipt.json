@@ -1,0 +1,89 @@
+{
+  "disposition": "READY_FOR_RUNTIME_REVIEW",
+  "findings": [],
+  "worktree": "/workspace/symaira-daemon772-state-key-discovery-mask",
+  "head": "7e5c4561c82803403b579d011fb687bbe254d32a",
+  "source": "445c19688aa8f669ea99e15e6517005f6156b775",
+  "base": "381e324852e70fd7c647dce9bbffccb4c2731484",
+  "original_P2": "impossible stored bits outside suffix mask; corrected in source, actual native closure pending",
+  "compiler_or_SDK_or_native_or_provider_execution": false,
+  "target_or_ports_used": false,
+  "GitHub_writes": false,
+  "source_mutations": false,
+  "candidate_clean": true,
+  "approval_or_native_acceptance": false,
+  "prepared_only": {
+    "Unix_CLI": 40,
+    "Windows_CLI": 49,
+    "supported": 30,
+    "unported": 8,
+    "optional": 5,
+    "Windows_scripts": 6,
+    "Unix_mutants": 4,
+    "Windows_mutants": 3,
+    "new_Rust_units": 2
+  },
+  "independent_evidence": {
+    "archived_actual_SDK_patterns": 5618,
+    "archived_actual_SDK_values_per_binary": 56180,
+    "archived_actual_SDK_mutant_differences": 230,
+    "source_projection_assignment_combinations": 640,
+    "SDK_archives": 22,
+    "original_raw_proofs": 80,
+    "frozen_Go_files": 1219,
+    "prior_source_maps": 177,
+    "current_source_maps": 177,
+    "old_SDK_maps": 17,
+    "historical_unique_ELF_payloads": 187,
+    "historical_ELF_paths": 247,
+    "historical_actual_bindings": 61
+  },
+  "artifacts": {
+    "/tmp/symaira-discovery-mask-independent-review.md": {
+      "sha256": "23a151f51e702a07d19522d707f2f1dfbbece6109d1ff4963bcc65a0b89357fe",
+      "bytes": 9452
+    },
+    "/tmp/symaira-discovery-mask-independent-provenance.py": {
+      "sha256": "2d5f0b068da2a7dac10b61ad81b64a8b46c994dea2eeb7a06c53700aea7377cd",
+      "bytes": 6538
+    },
+    "/tmp/symaira-discovery-mask-independent-provenance.json": {
+      "sha256": "fb76ede4e47277bb0a4955305d0460ef5c2f84a28691a2e7877d51e13c728a7e",
+      "bytes": 308276
+    },
+    "/tmp/symaira-discovery-mask-independent-provenance.log": {
+      "sha256": "18a1a413fa1a8c12252bfff5db4a239e6e702ec9a207058850824f41a66c7b33",
+      "bytes": 152
+    },
+    "/tmp/symaira-discovery-mask-independent-projection.py": {
+      "sha256": "4814e4685b006326e58f72e1b80622d78b3dcf43575d0e679b3a4e50af0d0ba6",
+      "bytes": 8006
+    },
+    "/tmp/symaira-discovery-mask-independent-projection.json": {
+      "sha256": "8cceec8c8056ffbcc3c82faa73bd5bbbb470b6b570795a0bd9e67cf0d80241d0",
+      "bytes": 5471
+    },
+    "/tmp/symaira-discovery-mask-independent-projection.log": {
+      "sha256": "1601a95d3fcb5a01ab5475168dfc93cbdf03de2da1e61a9ecea714b0d5e83f0c",
+      "bytes": 459
+    },
+    "/tmp/symaira-discovery-mask-independent-additional-static.py": {
+      "sha256": "bb56e1b909610ff6a15f302988d15040c178d03d6e67f62e4431974afc17d64c",
+      "bytes": 2710
+    },
+    "/tmp/symaira-discovery-mask-independent-additional-static.json": {
+      "sha256": "45a3aaac4a3bcfe57c48eb77d23c9d3b0a3048e84b7e105f362dc3dd4208b937",
+      "bytes": 401
+    },
+    "/tmp/symaira-discovery-mask-independent-additional-static.log": {
+      "sha256": "b4e50b8035e7ea7c5734ace7059c52e8889b4dd50ab25f20f2173f25cf1e7468",
+      "bytes": 381
+    },
+    "/tmp/symaira-discovery-mask-independent-static-first-precheck.log": {
+      "sha256": "c109e62aa5d834eb2b8484606a8a98b4fb48d6a0af8fda61e3e60e4fae87f1be",
+      "bytes": 414
+    }
+  },
+  "limitations": "Source readiness only. Full current Rust/runtime/original/native-six gates still mandatory, conditional/reporting, raw Windows argv0/GetCommandLine and owner identity contracts open.",
+  "target_release": "No target resource held or used; immutable candidate released unchanged"
+}

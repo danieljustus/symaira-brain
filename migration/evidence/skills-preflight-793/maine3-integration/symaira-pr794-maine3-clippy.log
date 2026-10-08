@@ -1,0 +1,8 @@
+    Checking symbrain-policy v0.12.1 (/workspace/symaira-pr794/rust/symbrain-policy)
+    Checking symbrain-audit v0.12.1 (/workspace/symaira-pr794/rust/symbrain-audit)
+    Checking symbrain-activity v0.12.1 (/workspace/symaira-pr794/rust/symbrain-activity)
+    Checking symbrain-memory v0.12.1 (/workspace/symaira-pr794/rust/symbrain-memory)
+    Checking symbrain-catalog v0.12.1 (/workspace/symaira-pr794/rust/symbrain-catalog)
+    Checking symbrain-gateway v0.12.1 (/workspace/symaira-pr794/rust/symbrain-gateway)
+    Checking symbrain-cli v0.12.1 (/workspace/symaira-pr794/rust/symbrain-cli)
+    Finished `dev` profile [unoptimized] target(s) in 3.88s

@@ -1,0 +1,21 @@
+{
+  "observed_source": "b17b125f78099ddc0693b4fbfe93b6076d83ac95",
+  "target_ELF_inventory_at_failure": 601,
+  "unique_payloads": 551,
+  "all_payloads_roundtrip_verified": true,
+  "stale_transferred_roles_are_not_candidate_execution": true,
+  "actual_executed_roles_from_logs": "Only literal Running paths in affected-original.log and affected-all-targets.log bind executed tests; old Memory roles remain historical.",
+  "failed_summary": {
+    "supplemental_alltargets_passed": 132,
+    "failed": 1,
+    "ignored": 0,
+    "summaries": 15
+  },
+  "source_sha256": {
+    "browse/crates/symbrowse-core/tests/policy_guard.rs": "17a4a2a2b18e5e0fdb582f6d0e6f94116f28de5c3ba73c3a6a204e7748d2f6b2",
+    "browse/crates/symbrowse-core/src/policy_guard.rs": "631fea056197a3fa517732cf54241cf15aba90b180a826d7b8a4f4d10a12b55d",
+    "migration/evidence/browse-state-key-772/discovery-runtime-prepared/run.py": "d42fee83c1717bfb51a35132a5a8bfcc0f85813642f5c828c116b7710ad7d611"
+  },
+  "diagnostic": "assertion failed: error.to_string().contains(\"timed out\"); actualerror text not emitted by original assert",
+  "original_log_sha256": "df3415c9a6e08a5092dbc5aea8d09475ae5064f3478029119c614df67e8a044e"
+}

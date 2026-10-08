@@ -1,0 +1,1704 @@
+[
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-env",
+      "NOUS_PORTAL_ACCESS_TOKEN": "env://USAGE_768_TOKEN",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-env/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-env",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-env/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-env/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-env/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "NOUS_PORTAL_ACCESS_TOKEN-env://USAGE_768_TOKEN",
+    "provider": "nous",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "nous",
+          "display_name": "Nous Portal",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via Hermes CLI auth store (NOUS_PORTAL_ACCESS_TOKEN or file)",
+            "source": "env"
+          },
+          "error": "all AI usage fallbacks failed: AI usage provider \"nous\" is not configured"
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-symvault",
+      "NOUS_PORTAL_ACCESS_TOKEN": "symvault://test/token",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-symvault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-symvault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-symvault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-symvault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-symvault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "NOUS_PORTAL_ACCESS_TOKEN-symvault://test/token",
+    "provider": "nous",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "nous",
+          "display_name": "Nous Portal",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via Hermes CLI auth store (NOUS_PORTAL_ACCESS_TOKEN or file)",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: AI usage provider \"nous\" is not configured"
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-vault",
+      "NOUS_PORTAL_ACCESS_TOKEN": "vault://test/token",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-vault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-vault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-vault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-vault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-vault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "NOUS_PORTAL_ACCESS_TOKEN-vault://test/token",
+    "provider": "nous",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "nous",
+          "display_name": "Nous Portal",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via Hermes CLI auth store (NOUS_PORTAL_ACCESS_TOKEN or file)",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: AI usage provider \"nous\" is not configured"
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-keychain",
+      "NOUS_PORTAL_ACCESS_TOKEN": "keychain://test/account",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-keychain/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-keychain",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-keychain/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-keychain/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/NOUS_PORTAL_ACCESS_TOKEN-keychain/data"
+    },
+    "headers": [],
+    "id": "NOUS_PORTAL_ACCESS_TOKEN-keychain://test/account",
+    "provider": "nous",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "nous",
+          "display_name": "Nous Portal",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "credential resolution failed: resolve NOUS_PORTAL_ACCESS_TOKEN: secret resolution failed for keychain://test/account: resolve keychain://test/account: keychain:// references are only resolvable on macOS; set env var  as fallback or install symvault",
+            "source": "vault"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_TOKEN",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-env",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-env/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-env",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-env/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-env/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-env/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "ANTHROPIC_OAUTH_TOKEN-env://USAGE_768_TOKEN",
+    "provider": "claude",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "claude",
+          "display_name": "Claude",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via Claude Code OAuth token",
+            "source": "env"
+          },
+          "error": "all AI usage fallbacks failed: Claude rejected the login (HTTP 401). Re-auth or switch the usage source."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "symvault://test/token",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-symvault",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-symvault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-symvault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-symvault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-symvault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-symvault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "ANTHROPIC_OAUTH_TOKEN-symvault://test/token",
+    "provider": "claude",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "claude",
+          "display_name": "Claude",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via Claude Code OAuth token",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: Claude rejected the login (HTTP 401). Re-auth or switch the usage source."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "vault://test/token",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-vault",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-vault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-vault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-vault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-vault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-vault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "ANTHROPIC_OAUTH_TOKEN-vault://test/token",
+    "provider": "claude",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "claude",
+          "display_name": "Claude",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via Claude Code OAuth token",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: Claude rejected the login (HTTP 401). Re-auth or switch the usage source."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "keychain://test/account",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-keychain",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-keychain/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-keychain",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-keychain/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-keychain/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_OAUTH_TOKEN-keychain/data"
+    },
+    "headers": [],
+    "id": "ANTHROPIC_OAUTH_TOKEN-keychain://test/account",
+    "provider": "claude",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "claude",
+          "display_name": "Claude",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "credential resolution failed: resolve ANTHROPIC_OAUTH_TOKEN: secret resolution failed for keychain://test/account: resolve keychain://test/account: keychain:// references are only resolvable on macOS; set env var  as fallback or install symvault",
+            "source": "vault"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "COPILOT_ACCESS_TOKEN": "env://USAGE_768_TOKEN",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-env",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-env/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-env",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-env/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-env/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-env/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "COPILOT_ACCESS_TOKEN-env://USAGE_768_TOKEN",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "env"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "COPILOT_ACCESS_TOKEN": "symvault://test/token",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-symvault",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-symvault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-symvault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-symvault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-symvault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-symvault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "COPILOT_ACCESS_TOKEN-symvault://test/token",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "COPILOT_ACCESS_TOKEN": "vault://test/token",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-vault",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-vault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-vault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-vault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-vault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-vault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "COPILOT_ACCESS_TOKEN-vault://test/token",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "COPILOT_ACCESS_TOKEN": "keychain://test/account",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-keychain",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-keychain/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-keychain",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-keychain/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-keychain/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/COPILOT_ACCESS_TOKEN-keychain/data"
+    },
+    "headers": [],
+    "id": "COPILOT_ACCESS_TOKEN-keychain://test/account",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "credential resolution failed: resolve COPILOT_ACCESS_TOKEN: secret resolution failed for keychain://test/account: resolve keychain://test/account: keychain:// references are only resolvable on macOS; set env var  as fallback or install symvault",
+            "source": "vault"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "CURSOR_COOKIE": "env://USAGE_768_TOKEN",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-env",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-env/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-env",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-env/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-env/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-env/data"
+    },
+    "headers": [
+      {
+        "cookie": "synthetic-768-only"
+      }
+    ],
+    "id": "CURSOR_COOKIE-env://USAGE_768_TOKEN",
+    "provider": "cursor",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "cursor",
+          "display_name": "Cursor",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Cookie configured (CURSOR_COOKIE)",
+            "source": "env"
+          },
+          "error": "all AI usage fallbacks failed: Cursor session is invalid or expired. Re-import the cursor.com cookie or sign in to Cursor.app."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "CURSOR_COOKIE": "symvault://test/token",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-symvault",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-symvault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-symvault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-symvault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-symvault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-symvault/data"
+    },
+    "headers": [
+      {
+        "cookie": "synthetic-768-only"
+      }
+    ],
+    "id": "CURSOR_COOKIE-symvault://test/token",
+    "provider": "cursor",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "cursor",
+          "display_name": "Cursor",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Cookie configured (CURSOR_COOKIE)",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: Cursor session is invalid or expired. Re-import the cursor.com cookie or sign in to Cursor.app."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "CURSOR_COOKIE": "vault://test/token",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-vault",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-vault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-vault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-vault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-vault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-vault/data"
+    },
+    "headers": [
+      {
+        "cookie": "synthetic-768-only"
+      }
+    ],
+    "id": "CURSOR_COOKIE-vault://test/token",
+    "provider": "cursor",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "cursor",
+          "display_name": "Cursor",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Cookie configured (CURSOR_COOKIE)",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: Cursor session is invalid or expired. Re-import the cursor.com cookie or sign in to Cursor.app."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "CURSOR_COOKIE": "keychain://test/account",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-keychain",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-keychain/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-keychain",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-keychain/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-keychain/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CURSOR_COOKIE-keychain/data"
+    },
+    "headers": [],
+    "id": "CURSOR_COOKIE-keychain://test/account",
+    "provider": "cursor",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "cursor",
+          "display_name": "Cursor",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "credential resolution failed: resolve CURSOR_COOKIE: secret resolution failed for keychain://test/account: resolve keychain://test/account: keychain:// references are only resolvable on macOS; set env var  as fallback or install symvault",
+            "source": "vault"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-env",
+      "OPENCODE_COOKIE": "env://USAGE_768_TOKEN",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-env/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-env",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-env/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-env/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-env/data"
+    },
+    "headers": [
+      {
+        "cookie": "synthetic-768-only"
+      }
+    ],
+    "id": "OPENCODE_COOKIE-env://USAGE_768_TOKEN",
+    "provider": "opencode",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "opencode",
+          "display_name": "OpenCode Go",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Cookie configured (OPENCODE_COOKIE)",
+            "source": "env"
+          },
+          "error": "all AI usage fallbacks failed: OpenCode session cookie is invalid or expired. Re-import the opencode.ai cookie."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-symvault",
+      "OPENCODE_COOKIE": "symvault://test/token",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-symvault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-symvault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-symvault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-symvault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-symvault/data"
+    },
+    "headers": [
+      {
+        "cookie": "synthetic-768-only"
+      }
+    ],
+    "id": "OPENCODE_COOKIE-symvault://test/token",
+    "provider": "opencode",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "opencode",
+          "display_name": "OpenCode Go",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Cookie configured (OPENCODE_COOKIE)",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: OpenCode session cookie is invalid or expired. Re-import the opencode.ai cookie."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-vault",
+      "OPENCODE_COOKIE": "vault://test/token",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-vault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-vault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-vault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-vault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-vault/data"
+    },
+    "headers": [
+      {
+        "cookie": "synthetic-768-only"
+      }
+    ],
+    "id": "OPENCODE_COOKIE-vault://test/token",
+    "provider": "opencode",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "opencode",
+          "display_name": "OpenCode Go",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Cookie configured (OPENCODE_COOKIE)",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: OpenCode session cookie is invalid or expired. Re-import the opencode.ai cookie."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-keychain",
+      "OPENCODE_COOKIE": "keychain://test/account",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-keychain/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-keychain",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-keychain/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-keychain/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENCODE_COOKIE-keychain/data"
+    },
+    "headers": [],
+    "id": "OPENCODE_COOKIE-keychain://test/account",
+    "provider": "opencode",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "opencode",
+          "display_name": "OpenCode Go",
+          "configured": true,
+          "auth_status": {
+            "status": "missing",
+            "detail": "credential resolution failed: resolve OPENCODE_COOKIE: secret resolution failed for keychain://test/account: resolve keychain://test/account: keychain:// references are only resolvable on macOS; set env var  as fallback or install symvault",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: "
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-env",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "OPENROUTER_API_KEY": "env://USAGE_768_TOKEN",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-env/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-env",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-env/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-env/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-env/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "OPENROUTER_API_KEY-env://USAGE_768_TOKEN",
+    "provider": "openrouter",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "openrouter",
+          "display_name": "OpenRouter",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "API key from OPENROUTER_API_KEY",
+            "source": "env"
+          },
+          "error": "all AI usage fallbacks failed: AI usage provider \"openrouter\" is not configured"
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-symvault",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "OPENROUTER_API_KEY": "symvault://test/token",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-symvault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-symvault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-symvault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-symvault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-symvault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "OPENROUTER_API_KEY-symvault://test/token",
+    "provider": "openrouter",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "openrouter",
+          "display_name": "OpenRouter",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "API key from OPENROUTER_API_KEY",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: AI usage provider \"openrouter\" is not configured"
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-vault",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "OPENROUTER_API_KEY": "vault://test/token",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-vault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-vault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-vault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-vault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-vault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "OPENROUTER_API_KEY-vault://test/token",
+    "provider": "openrouter",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "openrouter",
+          "display_name": "OpenRouter",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "API key from OPENROUTER_API_KEY",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: AI usage provider \"openrouter\" is not configured"
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-keychain",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "OPENROUTER_API_KEY": "keychain://test/account",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-keychain/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-keychain",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-keychain/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-keychain/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/OPENROUTER_API_KEY-keychain/data"
+    },
+    "headers": [],
+    "id": "OPENROUTER_API_KEY-keychain://test/account",
+    "provider": "openrouter",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "openrouter",
+          "display_name": "OpenRouter",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "credential resolution failed: resolve OPENROUTER_API_KEY: secret resolution failed for keychain://test/account: resolve keychain://test/account: keychain:// references are only resolvable on macOS; set env var  as fallback or install symvault",
+            "source": "vault"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_ADMIN_KEY": "env://USAGE_768_TOKEN",
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-env",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-env/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-env",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-env/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-env/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-env/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "ANTHROPIC_ADMIN_KEY-env://USAGE_768_TOKEN",
+    "provider": "claude",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "claude",
+          "display_name": "Claude",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Admin API key from ANTHROPIC_ADMIN_KEY",
+            "source": "env"
+          },
+          "error": "all AI usage fallbacks failed: Claude rejected the login (HTTP 401). Re-auth or switch the usage source."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_ADMIN_KEY": "symvault://test/token",
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-symvault",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-symvault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-symvault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-symvault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-symvault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-symvault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "ANTHROPIC_ADMIN_KEY-symvault://test/token",
+    "provider": "claude",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "claude",
+          "display_name": "Claude",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Admin API key from ANTHROPIC_ADMIN_KEY",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: Claude rejected the login (HTTP 401). Re-auth or switch the usage source."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_ADMIN_KEY": "vault://test/token",
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-vault",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-vault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-vault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-vault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-vault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-vault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "ANTHROPIC_ADMIN_KEY-vault://test/token",
+    "provider": "claude",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "claude",
+          "display_name": "Claude",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Admin API key from ANTHROPIC_ADMIN_KEY",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: Claude rejected the login (HTTP 401). Re-auth or switch the usage source."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_ADMIN_KEY": "keychain://test/account",
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-keychain",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-keychain/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-keychain",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-keychain/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-keychain/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/ANTHROPIC_ADMIN_KEY-keychain/data"
+    },
+    "headers": [],
+    "id": "ANTHROPIC_ADMIN_KEY-keychain://test/account",
+    "provider": "claude",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "claude",
+          "display_name": "Claude",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "credential resolution failed: resolve ANTHROPIC_ADMIN_KEY: secret resolution failed for keychain://test/account: resolve keychain://test/account: keychain:// references are only resolvable on macOS; set env var  as fallback or install symvault",
+            "source": "vault"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "CODEX_ACCESS_TOKEN": "env://USAGE_768_TOKEN",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-env",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-env/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-env",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-env/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-env/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-env/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "CODEX_ACCESS_TOKEN-env://USAGE_768_TOKEN",
+    "provider": "codex",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "codex",
+          "display_name": "Codex",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via Codex CLI OAuth (CODEX_ACCESS_TOKEN or auth.json)",
+            "source": "env"
+          },
+          "error": "all AI usage fallbacks failed: AI usage provider \"codex\" is not configured"
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "CODEX_ACCESS_TOKEN": "symvault://test/token",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-symvault",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-symvault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-symvault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-symvault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-symvault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-symvault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "CODEX_ACCESS_TOKEN-symvault://test/token",
+    "provider": "codex",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "codex",
+          "display_name": "Codex",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via Codex CLI OAuth (CODEX_ACCESS_TOKEN or auth.json)",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: AI usage provider \"codex\" is not configured"
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "CODEX_ACCESS_TOKEN": "vault://test/token",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-vault",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-vault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-vault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-vault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-vault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-vault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "CODEX_ACCESS_TOKEN-vault://test/token",
+    "provider": "codex",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "codex",
+          "display_name": "Codex",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via Codex CLI OAuth (CODEX_ACCESS_TOKEN or auth.json)",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: AI usage provider \"codex\" is not configured"
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "CODEX_ACCESS_TOKEN": "keychain://test/account",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-keychain",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-keychain/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-keychain",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-keychain/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-keychain/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/CODEX_ACCESS_TOKEN-keychain/data"
+    },
+    "headers": [],
+    "id": "CODEX_ACCESS_TOKEN-keychain://test/account",
+    "provider": "codex",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "codex",
+          "display_name": "Codex",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "credential resolution failed: resolve CODEX_ACCESS_TOKEN: secret resolution failed for keychain://test/account: resolve keychain://test/account: keychain:// references are only resolvable on macOS; set env var  as fallback or install symvault",
+            "source": "vault"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-env",
+      "KIMI_CODE_API_KEY": "env://USAGE_768_TOKEN",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-env/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-env",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-env/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-env/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-env/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "KIMI_CODE_API_KEY-env://USAGE_768_TOKEN",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "API key from KIMI_CODE_API_KEY",
+            "source": "env"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-symvault",
+      "KIMI_CODE_API_KEY": "symvault://test/token",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-symvault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-symvault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-symvault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-symvault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-symvault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "KIMI_CODE_API_KEY-symvault://test/token",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "API key from KIMI_CODE_API_KEY",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-vault",
+      "KIMI_CODE_API_KEY": "vault://test/token",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-vault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-vault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-vault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-vault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-vault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "KIMI_CODE_API_KEY-vault://test/token",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "API key from KIMI_CODE_API_KEY",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-keychain",
+      "KIMI_CODE_API_KEY": "keychain://test/account",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-keychain/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-keychain",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-keychain/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-keychain/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_CODE_API_KEY-keychain/data"
+    },
+    "headers": [],
+    "id": "KIMI_CODE_API_KEY-keychain://test/account",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "credential resolution failed: resolve KIMI_CODE_API_KEY: secret resolution failed for keychain://test/account: resolve keychain://test/account: keychain:// references are only resolvable on macOS; set env var  as fallback or install symvault",
+            "source": "vault"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-env",
+      "KIMI_AUTH_TOKEN": "env://USAGE_768_TOKEN",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-env/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-env",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-env/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-env/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-env/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "KIMI_AUTH_TOKEN-env://USAGE_768_TOKEN",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Web auth token from KIMI_AUTH_TOKEN",
+            "source": "env"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-symvault",
+      "KIMI_AUTH_TOKEN": "symvault://test/token",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-symvault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-symvault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-symvault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-symvault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-symvault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "KIMI_AUTH_TOKEN-symvault://test/token",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Web auth token from KIMI_AUTH_TOKEN",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-vault",
+      "KIMI_AUTH_TOKEN": "vault://test/token",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-vault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-vault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-vault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-vault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-vault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "KIMI_AUTH_TOKEN-vault://test/token",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Web auth token from KIMI_AUTH_TOKEN",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-keychain",
+      "KIMI_AUTH_TOKEN": "keychain://test/account",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-keychain/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-keychain",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-keychain/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-keychain/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/KIMI_AUTH_TOKEN-keychain/data"
+    },
+    "headers": [],
+    "id": "KIMI_AUTH_TOKEN-keychain://test/account",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "credential resolution failed: resolve KIMI_AUTH_TOKEN: secret resolution failed for keychain://test/account: resolve keychain://test/account: keychain:// references are only resolvable on macOS; set env var  as fallback or install symvault",
+            "source": "vault"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-env",
+      "MOONSHOT_API_KEY": "env://USAGE_768_TOKEN",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-env/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-env",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-env/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-env/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-env/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "MOONSHOT_API_KEY-env://USAGE_768_TOKEN",
+    "provider": "moonshot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "moonshot",
+          "display_name": "Moonshot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "API key from MOONSHOT_API_KEY",
+            "source": "env"
+          },
+          "error": "all AI usage fallbacks failed: AI usage provider \"moonshot\" is not configured"
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-symvault",
+      "MOONSHOT_API_KEY": "symvault://test/token",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-symvault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-symvault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-symvault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-symvault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-symvault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "MOONSHOT_API_KEY-symvault://test/token",
+    "provider": "moonshot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "moonshot",
+          "display_name": "Moonshot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "API key from MOONSHOT_API_KEY",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: AI usage provider \"moonshot\" is not configured"
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-vault",
+      "MOONSHOT_API_KEY": "vault://test/token",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-vault/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-vault",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-vault/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-vault/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-vault/data"
+    },
+    "headers": [
+      {
+        "authorization": "Bearer synthetic-768-only"
+      }
+    ],
+    "id": "MOONSHOT_API_KEY-vault://test/token",
+    "provider": "moonshot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "moonshot",
+          "display_name": "Moonshot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "API key from MOONSHOT_API_KEY",
+            "source": "vault"
+          },
+          "error": "all AI usage fallbacks failed: AI usage provider \"moonshot\" is not configured"
+        }
+      ]
+    }
+  },
+  {
+    "env": {
+      "ANTHROPIC_OAUTH_TOKEN": "env://USAGE_768_ABSENT",
+      "HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-keychain",
+      "MOONSHOT_API_KEY": "keychain://test/account",
+      "OPENCODE_WORKSPACE_ID": "wrk_fixture",
+      "PATH": "/tmp/symbrain-usage-768.sWkbyd/bin",
+      "SECRET_ORACLE_FAKE_ARGS_PATH": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-keychain/args.log",
+      "SECRET_ORACLE_FAKE_EXIT": "0",
+      "SECRET_ORACLE_FAKE_STDOUT": " \tsynthetic-768-only\n",
+      "USAGE_768_TOKEN": "synthetic-768-only",
+      "USERPROFILE": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-keychain",
+      "XDG_CACHE_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-keychain/cache",
+      "XDG_CONFIG_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-keychain/config",
+      "XDG_DATA_HOME": "/tmp/symbrain-usage-768.sWkbyd/home/MOONSHOT_API_KEY-keychain/data"
+    },
+    "headers": [],
+    "id": "MOONSHOT_API_KEY-keychain://test/account",
+    "provider": "moonshot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "moonshot",
+          "display_name": "Moonshot",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "credential resolution failed: resolve MOONSHOT_API_KEY: secret resolution failed for keychain://test/account: resolve keychain://test/account: keychain:// references are only resolvable on macOS; set env var  as fallback or install symvault",
+            "source": "vault"
+          }
+        }
+      ]
+    }
+  }
+]

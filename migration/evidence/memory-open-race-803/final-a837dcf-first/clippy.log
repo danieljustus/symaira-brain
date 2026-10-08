@@ -1,0 +1,13 @@
+    Checking symbrain-memory v0.12.1 (/workspace/symaira-memory803-open/rust/symbrain-memory)
+error: unchecked subtraction of a `Duration`
+   --> rust/symbrain-memory/src/wal_open/tests.rs:259:13
+    |
+259 |     assert!(elapsed - released_at >= Duration::from_millis(u64::from(last_timeout)));
+    |             ^^^^^^^^^^^^^^^^^^^^^ help: try: `elapsed.checked_sub(released_at).unwrap()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#unchecked_time_subtraction
+    = note: `-D clippy::unchecked-time-subtraction` implied by `-D clippy::pedantic`
+    = help: to override `-D clippy::pedantic` add `#[allow(clippy::unchecked_time_subtraction)]`
+
+error: could not compile `symbrain-memory` (lib test) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...

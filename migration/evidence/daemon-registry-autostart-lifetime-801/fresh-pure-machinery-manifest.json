@@ -1,0 +1,208 @@
+{
+  "source": "50ed5d372a77dfb964ce1f73b4ba780400d9bcd1",
+  "archive_sha256": "32cb0e21e98ff25bc75c7a91159da120c8e46324c3e8f4e552f93ebb61442edb",
+  "archive_bytes": 1990,
+  "members": [
+    {
+      "name": "clean-source-tests/actionlint.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129228796598231,
+      "atime_ns": 1791129546614422382
+    },
+    {
+      "name": "clean-source-tests/actionlint.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129228796598231,
+      "atime_ns": 1791129546614422382
+    },
+    {
+      "name": "clean-source-tests/diff.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129228804598479,
+      "atime_ns": 1791129546614422382
+    },
+    {
+      "name": "clean-source-tests/diff.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129228804598479,
+      "atime_ns": 1791129546614422382
+    },
+    {
+      "name": "clean-source-tests/mutant-force-numeric-PID.log",
+      "bytes": 1015,
+      "sha256": "9ea56848768e656e82f171c2f1cd7eb4896ac151aaa637eeeaa6444a9d5ed72c",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129215276504499,
+      "atime_ns": 1791129215276524179
+    },
+    {
+      "name": "clean-source-tests/mutant-ignore-image-owner.log",
+      "bytes": 773,
+      "sha256": "aea7950e0304a2155b8cae3faf1e62970d5340d2fa1ea420094bb2b02750388a",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129215277649380,
+      "atime_ns": 1791129215277668308
+    },
+    {
+      "name": "clean-source-tests/mutant-skip-normal-wait.log",
+      "bytes": 1206,
+      "sha256": "2507f65d92da7e42db4fe9b7ea30b92d45d7a3cdc4ef0c9088fc8d0e515c06c3",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129215273657535,
+      "atime_ns": 1791129215273684957
+    },
+    {
+      "name": "clean-source-tests/mutant-swallow-timeout.log",
+      "bytes": 804,
+      "sha256": "f144dea6e9efea99e343fe5ba29f82c3705b12be3b48afb0272b80d5438eb7ff",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129215275034116,
+      "atime_ns": 1791129215275053195
+    },
+    {
+      "name": "clean-source-tests/test_registry_cli_process.py.stderr",
+      "bytes": 102,
+      "sha256": "7c38317dd098fad2fc5c0510ed6cb06fe6b7fcc9e9f066c70cadb12a94c9cd7e",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129215082952995,
+      "atime_ns": 1791129215116175941
+    },
+    {
+      "name": "clean-source-tests/test_registry_cli_process.py.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129214752164715,
+      "atime_ns": 1791129215116175941
+    },
+    {
+      "name": "clean-source-tests/test_registry_daemon_lifetime.py.stderr",
+      "bytes": 112,
+      "sha256": "b986091cdd4d7aeb1185de9a51d74065913d71702d10fa5dada3e4c584a2ddd7",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129215216179026,
+      "atime_ns": 1791129215232179519
+    },
+    {
+      "name": "clean-source-tests/test_registry_daemon_lifetime.py.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129215116175941,
+      "atime_ns": 1791129215232179519
+    },
+    {
+      "name": "clean-source-tests/test_registry_progress.py.stderr",
+      "bytes": 103,
+      "sha256": "606d39c636f84868ef7e9ffb9d9d1ea14b1a7d408e57f1c72f86bffb1966bb73",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129214741843134,
+      "atime_ns": 1791129214752164715
+    },
+    {
+      "name": "clean-source-tests/test_registry_progress.py.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129214289491883,
+      "atime_ns": 1791129214752164715
+    },
+    {
+      "name": "validate.stdout",
+      "bytes": 183,
+      "sha256": "57514c5c8515a96ea8e40550f6743a7adce055933289381358971304d8df1655",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129228839742011,
+      "atime_ns": 1791129546614422382
+    },
+    {
+      "name": "validate.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791129214212148060,
+      "atime_ns": 1791129546614422382
+    },
+    {
+      "name": "lifetime-tests.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128978416863344,
+      "atime_ns": 1791129546614422382
+    },
+    {
+      "name": "lifetime-tests.stderr",
+      "bytes": 112,
+      "sha256": "b986091cdd4d7aeb1185de9a51d74065913d71702d10fa5dada3e4c584a2ddd7",
+      "native_mode": 33152,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128978524866679,
+      "atime_ns": 1791128978540867173
+    },
+    {
+      "name": "preserve.stdout",
+      "bytes": 157,
+      "sha256": "27c0c61aa6c99ce9484ec4c8b7805c9e2bf847995f28b3b9d8022ebd5d66a259",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128591781902041,
+      "atime_ns": 1791128721060905035
+    },
+    {
+      "name": "preserve.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "native_mode": 33188,
+      "uid": 1000,
+      "gid": 1000,
+      "mtime_ns": 1791128585077811846,
+      "atime_ns": 1791129546614422382
+    }
+  ],
+  "actual_sdk_product_native": false
+}

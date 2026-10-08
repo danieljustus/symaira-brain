@@ -1,0 +1,7 @@
+{
+  "check": "actual Bash copy with executable and simultaneous PDB",
+  "exit": 0,
+  "copied_executable_only": true,
+  "debug_symbols_preserved": true,
+  "native_windows_runtime": false
+}

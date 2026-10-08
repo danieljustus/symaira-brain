@@ -1,0 +1,386 @@
+{
+  "source_head": "718125743c58a8a6d6f1ab0f7444f2475342d39e",
+  "source_clean": true,
+  "current_main_ancestor": "5e232700bb9031fc34d4995465a4037837540abb",
+  "root_request_parent": "4798e5d099343e89d7a48dac916816df8a421510",
+  "original_state_publication": "2b2755231b4ec5ce79de6fb2f022ac423abb44bd",
+  "static_checks": {
+    "rustfmt": true,
+    "six_owned_go_fixtures_gofmt": true,
+    "python_compile_no_execution": true,
+    "unresolved_python_globals": [],
+    "actionlint": true,
+    "all57_original_root_gzip_raw_sha": true,
+    "standalone_byte_identity": "28ace6936b05bf1d347feb1b442a94964663539bbfd5ce3738a45ac96d6af312",
+    "sdk187_lower_ranges_exact": true,
+    "manual_target_windows_lock_validation": {
+      "same-file": {
+        "name": "same-file",
+        "version": "1.0.6",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "checksum": "93fc1dc3aaa9bfed95e02e6eadabb4baf7e3078b0bd1b4d7b6b0b68378900502",
+        "dependencies": [
+          "winapi-util"
+        ]
+      },
+      "winapi-util": {
+        "name": "winapi-util",
+        "version": "0.1.11",
+        "source": "registry+https://github.com/rust-lang/crates.io-index",
+        "checksum": "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22",
+        "dependencies": [
+          "windows-sys 0.61.2"
+        ]
+      }
+    }
+  },
+  "candidate_source_sha256": {
+    ".github/workflows/browse-daemon-native.yml": "ad9938c5e03c4f5139985a51cd31b35dc54498178f8f9c0da1d0969934795538",
+    "browse/Cargo.lock": "a2a8e0c9ea2d5007dc80039f2c19f8975846cd130f380d47b5314c90031bb15d",
+    "browse/crates/symbrowse-core/Cargo.toml": "c810fa50e9305ef6518fa88b2a6e384432f3f71f7eb084646121152bbdd1444f",
+    "browse/crates/symbrowse-core/src/key_sources.rs": "246c45daedbdd668e2510b8913b78034d531ef8afbfb39ba5b3d9b25e6d95237",
+    "browse/crates/symbrowse-core/src/key_sources/command.rs": "307a00861d72f997ac28dd1bf2b0e5c69456301dbc6868630ccd7bf8381503ae",
+    "browse/crates/symbrowse-core/src/key_sources/startup_discovery.rs": "49af5bbca46313931ce8801ac37b95302e459de2180ef59fdec2d5aecaf0bcf0",
+    "browse/crates/symbrowse-core/src/key_sources/startup_discovery/godebug.rs": "a9f5a2e1981803577f717ec989a8e473b69275d9da68594b6ecc314fbb889075",
+    "browse/crates/symbrowse-core/src/key_sources/startup_discovery/path.rs": "551c5493b4b63a8c19318d31f4966d0e293b12d9ba98108fe25efed61ef12321",
+    "browse/crates/symbrowse-core/src/key_sources/startup_discovery/windows.rs": "bb1c6c7293e628b11bba99ebef534f1f251526058e0778b83b8d94dd5d8b0561",
+    "browse/crates/symbrowse-core/src/key_sources/startup_discovery/windows_lower.rs": "b87aa1b9b8f44a049c0765a7675a31b3ec944aeb1cba71467488e8ada74b53c7",
+    "browse/port/harness/daemon_provider_discovery.py": "8af6015326e88701c11d93ba90bde13f7aed9c52c64abfe8c807c3b44863bd9f",
+    "browse/port/harness/discovery_bisect_oracle.go.in": "3f87c1f2b91fab3128d8c2eea32369aabed579da80c3f8493c338118a9adbbcd",
+    "browse/port/harness/discovery_owner_control.go.in": "150a14bce5a54c4c3313dd42660df8e1dc0b5d50f91977d3a14ad37cccfda15d",
+    "browse/port/harness/discovery_provider.go.in": "30bde62a20dad60c650413151915a33ea2f38b16c44cf698e883e3fb5622dade",
+    "browse/port/harness/discovery_provider_unix.go.in": "3a16387b530289725b24c274b8d23cf5978526eca2be08bfd0e9f35e31d97eec",
+    "browse/port/harness/discovery_provider_windows.go.in": "479711f57883cb34e9a039f80aaf31ea6ca97fa1b818c1c876edaa2267d4fba9",
+    "browse/port/harness/discovery_sdk_oracle.go.in": "425b6ac077eb0ba1601c67d60fe71e3897484f571b3f9c74e8c9cb990b4f18e9"
+  },
+  "original_proofs": [
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-actionlint.log.gz",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-affected.log.gz",
+      "raw_sha256": "975ddbf786c7b8c58ecea5b34c00653d528739ac43236de298cecffde7bdec8d",
+      "gzip_sha256": "5c46405ba0746b99d51b50b8f05ad102c4fab917c69bb8b22d3c0ab115f28634"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-build.log.gz",
+      "raw_sha256": "5a378e08d652b79bb444f773ce8e754d3995445cc56ba87aed12b516e406a06e",
+      "gzip_sha256": "427e714a508e902cf8c634fff03fce34b7d507e60a6908beaca2961cce4ea887"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-clippy.log.gz",
+      "raw_sha256": "f694a9e074374d315f58b8a63ce849858b1b8708cf56b3d194218605bd2a9d6e",
+      "gzip_sha256": "484a70832ff413bcf6682ad7b52ea7333b75afc05f8fea72c1d9a09247072fc4"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-darwin-static.log.gz",
+      "raw_sha256": "4b395c9c76c7f7fb5221d30df7320c7a2387ff3842c426dbee6a59a54b5cffab",
+      "gzip_sha256": "8135007ed9012844706878be7460c9a04ae3dd97316db2c0a6f69b7c288b580d"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-driver.log.gz",
+      "raw_sha256": "52cb385d57050a1a176e4fbbad25b9b0d9d0d90758138d12a3e900fca551bbf3",
+      "gzip_sha256": "42b2f5807773af8d4e17269d2a446486f3d72ef1b98dd372b1e2e11e04acbc3e"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-fmt.log.gz",
+      "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-full-gates.sh.gz",
+      "raw_sha256": "de76d357d8f5b87712ccd3fc5f103c789c5274adf2095bbd96177754f4ed4651",
+      "gzip_sha256": "cb2cfbad041484b03c740418f8777b0eeaf5a08743f5c8ffba4287914a230a24"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-key.json.gz",
+      "raw_sha256": "4fffb6ec649a7ad868afaf013fea069be7cb50759bd41e29310289d733643ddd",
+      "gzip_sha256": "5c40a8e24b8c86b846706d5ca8190cd7bf5c6fe61a5d88c844938801eaec868a"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-key.log.gz",
+      "raw_sha256": "530a0ce4de8f0538b2d5dbbecac81db91b790f076639c92b99d9990942b4d859",
+      "gzip_sha256": "aa673b6fda9ae35aba557f56484239f3789894e21e13d5ba69774bdcb1984ed5"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-key.raw.json.gz",
+      "raw_sha256": "da699b50dd9b8d411a03a9abe17289aa406381cd4b9b5f57865f476d7db878c5",
+      "gzip_sha256": "d739d4ad13c98af8fda160cb728f698631b0af5f7f13a52b6b7088f622bf22d5"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-matrix.log.gz",
+      "raw_sha256": "f5bfa3059aad5fdddb33c5356c9bfa859a33d90f12f51ff8393cf106c56421b4",
+      "gzip_sha256": "2c98c42e1497e68dd9753169cb3f9b3bc4c22789b2c9d3ae7368e19260d73f07"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-mcp-lib.log.gz",
+      "raw_sha256": "56a6dac2b371a3342f2d97ea2d92e1d8e3c512c8814b412261fec84864682ada",
+      "gzip_sha256": "ae24d79a66f9d560f80d8c0af4da34844165fbbfd82340c0368875bc79af2073"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-mcp.json.gz",
+      "raw_sha256": "274f8e17172900665c68f33217c6d82b099bc545fc22dde260f378f834cbdcbc",
+      "gzip_sha256": "dd064036eb4eeced094a3d6666473bb2a31aa769658009e843b2e65bc2704358"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-mcp.json.tests.log.gz",
+      "raw_sha256": "e8b1658318ec5cca1795b48386464fbbbb38d613853991d03bd1b3ae22de1162",
+      "gzip_sha256": "8d59bd32b914c2b91d63e8d182ebd381cb4d16ee14576a339f28eaf38773b1f3"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-mcp.log.gz",
+      "raw_sha256": "5df69082fee5d7f320a2f97da92fb463fbef95eeab35aff1aa68dd13446f22b4",
+      "gzip_sha256": "d36bd9758ebb8afc7dc883a0968ed429152f26dfbe309239ff673f9e048bb6f4"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-novel-owned-cleanup.json.gz",
+      "raw_sha256": "a0ef56f0104723488aea2c160b7decff0c9db657f4c456400c826bac657e37b3",
+      "gzip_sha256": "813cef5160647b5fdc13013960c5a60407445c8b109375d8d533bb92a331e354"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-original-paths.json.gz",
+      "raw_sha256": "99876e2c411f67f8cfba668c200b5add1a32b56f66aa85b1253ec9faa8adaf12",
+      "gzip_sha256": "8d5e48bc55edff3639740920f9b70901c0cbf1958550b59fd97544c6b81c2ecf"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-original-paths.log.gz",
+      "raw_sha256": "a21caca91f265d0707ac6e5db546dbf5fca8c9a912abad35a51c7622d0abd860",
+      "gzip_sha256": "eb38b61fe03f7b0a01352ec7b77cb3a95d7cabec92cd9a8db574b056df1ed19f"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-original-paths.py.gz",
+      "raw_sha256": "e1cbae345c8073b35156dcced762de64e633f4c3eb81b43c5cc6f371a4cb8489",
+      "gzip_sha256": "aac432c90566491770ff97d376e9c3eb6e326dd6d7c23f02ed9b3162dad9dcd9"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-original-timeout.json.gz",
+      "raw_sha256": "d16fbe294969053a1581bca22fa1b6791627af7492f07700cbac758d4d7f5c1f",
+      "gzip_sha256": "d821c12a51f51d45c3c6ab296c82dce834174c4a06ba662ad08a429c9ebfd655"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-original-timeout.log.gz",
+      "raw_sha256": "2e30a8f32f8aa6303bbc79744a08f1a94969ae88b38fb05f9d94318b32b2750a",
+      "gzip_sha256": "c84629e7fec297cb8e09656395b2ef0622b6c64db4e9c3aeabbea6c36e6ecaac"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-original-timeout.py.gz",
+      "raw_sha256": "7fa17da6e6e652f6f4c5c21fbad800147b9df097f1c4cd00aaf755a1efebb96f",
+      "gzip_sha256": "2eda780b32bd016a6131a022e060d472e821f9e3b227e89458bdbbf6349eb8fb"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-ownership.json.gz",
+      "raw_sha256": "90ac15efbfd8a556f141d3f143e3c70a0eca744f5561ad891da66216a50bee02",
+      "gzip_sha256": "c5bb2a64704d40803fe892a194b3a912408062b2882fcf0380bf1be63e063b4f"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-ownership.log.gz",
+      "raw_sha256": "673f0864b56ea48cc0be4b4bf15bb3d3b8d05af7c535a0a4381a65a6c4f115d2",
+      "gzip_sha256": "20c6f67b3a8496a6dc45bef851f5a44d11767a1795222e0f9b514d010b4dc2ff"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-path-discovery.json.gz",
+      "raw_sha256": "ece9b9f1f62ab55ba0b37e40872849dab7af016d0f4b4778a9de1b7e42ee36d5",
+      "gzip_sha256": "213404cc130e9bc5c7541775c257d64b1edde59d2b5be4b8b861f4bdf0e79203"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-path-discovery.log.gz",
+      "raw_sha256": "454d32bdbb6cfefabf5991d2a992ad38f228a85069227f7e760bd6ee57c4b1ae",
+      "gzip_sha256": "9cefc0f6481279a39bd96bbb3331e022ec982bf70723b037661575d5f94cf090"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-path-discovery.py.gz",
+      "raw_sha256": "170ebe05fc50ede1abca292cfdff4d65bd5ecd46dd6595f9eb1ced5a3a2b9d96",
+      "gzip_sha256": "848875668d332c0fbe0a3e5c7bda3e89cf7ab6fe65b8548361165ad728cce304"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-pipe-tests.log.gz",
+      "raw_sha256": "75ff54e727b57e4bd7b88956ed0c92c4b9a416e6f0976707e8fb54aa385ac0bd",
+      "gzip_sha256": "6a71ac2ec35156e12dd0313e17ab1fd3a4fa5dbcc0a3cfad0633d3d5ac61d007"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-preserve.log.gz",
+      "raw_sha256": "696f47aa1750f1f395501f643a42b1b8c7833a47644de56b4d1919483d5bade5",
+      "gzip_sha256": "c1e51ee880864c657d65e84630396b8023474d5e6b38541ccbe6a1076c71d17a"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-preserve.py.gz",
+      "raw_sha256": "31caf47b22e9a886edd7244856df1e059922ffbc9835f7b32d0e486d86b6cf38",
+      "gzip_sha256": "ca7df3efd70a4e9a21bc992d90b6d01787cc2c81d63c12fd1e7562b9661bb3b0"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-process.json.gz",
+      "raw_sha256": "9bee8676e92906bcff7da1c3fa3a1540679f96014d305fe57c9cf6e15842805d",
+      "gzip_sha256": "396cd13e01f6a89518301b1bc19fbb63801189ea40bdd00a432c02ce9ce7d908"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-process.log.gz",
+      "raw_sha256": "bc05628be3eaeb347ddff73fbf2d1462a22dc0921a0ee8816656e5b257383c1c",
+      "gzip_sha256": "05bd8cd23f5288302af7803d8da5f4bd8f8ee695fbaddafcd9c8de4a934d0a2a"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutant-lost-case-link.log.gz",
+      "raw_sha256": "6f791a0925801668a5d182b2197cf43c85bd762dc1ed9394853bfa25fcf1a037",
+      "gzip_sha256": "af0967da07a03724fa7323b8ab72e14dffe062644433ddefa919760e07e1eed5"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutant-lost-case-link.py.txt.gz",
+      "raw_sha256": "287da8f28f48edd40d7b2e9d566cadef158e47b79ff9de3319328fbba83ef250",
+      "gzip_sha256": "9977583e8933dc7d51a79de2e494c99a5f0bf8bc1bfa7fe8480aa9125dbc61d8"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutant-missing-begin.log.gz",
+      "raw_sha256": "15aca1ce5491b3968bf3f44f2b85e500435b8cb086f9af872ef3f4c64eb7439e",
+      "gzip_sha256": "aa4e570ffad492f3f8d36aac99b25b41ee8121812b1be58f58d0f0b8ae532198"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutant-missing-begin.py.txt.gz",
+      "raw_sha256": "057e01bc80fcef9a9318594243a9edf5cdcf0b785ce5a8b57a2f32f46f279420",
+      "gzip_sha256": "6c7766641e205c890819c2cc0cd8b0281078c14d03876498a8b146583b425926"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutant-wrong-output-hash.log.gz",
+      "raw_sha256": "c59a4df586ac240ce200698ee171586c00b73e18fad8c6e85c903a85e0e105ed",
+      "gzip_sha256": "c11c5997fe35fd4088055ec493ace349a0020fe5acdc55a16a4bf098263effda"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutant-wrong-output-hash.py.txt.gz",
+      "raw_sha256": "91170ee2b17e0221c28649a66db9dd2ca7440f8096ae62f55da3901338597840",
+      "gzip_sha256": "c4de88c0770e6b8b5e32fd96782f3380181983fe55912d102c286b7b47821868"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutants.json.gz",
+      "raw_sha256": "4d0fdd8bfd54a48f63bc8f7d84c902ab17adedf15416c22c44a02ea6d04be51b",
+      "gzip_sha256": "699758244f883a297526c10d6c850a639f1ee3cbf526f361fc05922772e99873"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutants.log.gz",
+      "raw_sha256": "0845abad636490ae75f12caf14fd07a38198c983f3d3b2c54562c6b48c404a8a",
+      "gzip_sha256": "2f01ddacfa969c77010c4f2a5ed86a52e3b59bb7ca8856c801cb686d7efbf602"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutants.py.gz",
+      "raw_sha256": "a35bb102bc4129fcc927f525cded8f7754f278f30960741433b0bba912128ecd",
+      "gzip_sha256": "6438d2dd85c95f12bde2da9fd26026393104a379119674e6fecc06d6cdf1800d"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-progress-tests.log.gz",
+      "raw_sha256": "485f6e85fc4fda602971012ce6862d752ca18aae4a5575ce544961ea27ea3a86",
+      "gzip_sha256": "b7b88ec7dc8120200aba2e4594e83abc15ef54526186d681d7be87188f8c4528"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-registry.json.gz",
+      "raw_sha256": "4aba990c412434856f45e0f86f0e7a655557704fbe0e62bfd44b4352cb8f5315",
+      "gzip_sha256": "e8346dd45d93cd639c2e0a32840e627c23feefe698dd8882ac91eec6337cd59a"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-registry.log.gz",
+      "raw_sha256": "4fb2cb1baf8936dc49552c1d2aa21bf447d9378bef03c7f6085566b241cc8695",
+      "gzip_sha256": "d7592761cf69210e0393954463b373b5e3fee055a1ad08fbea2e93d4c623c4dd"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-registry.progress.jsonl.gz",
+      "raw_sha256": "91bca0345ac835ebdf0af54c2af51d60d310eee51e3a9f47e7e71c1f94b9618f",
+      "gzip_sha256": "ad0ae65e2d5d72a3c814642308e4d27aabc4f5cbf80a8afd36a3d53eee6ddf6e"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-registry.raw.json.gz",
+      "raw_sha256": "56be879d54e3ad1cb93f0e14a3397fb007bed71ec3c3242f84988d21477c2a47",
+      "gzip_sha256": "b16683afc9bc0c232b127cdc340ebce339fc9c9b8a74f37b92e538aef33f95c4"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-review-publication.py.gz",
+      "raw_sha256": "b3184b80c2d8c6aaba59532efd6858545691a3365ce14412c601b71ad9c0f110",
+      "gzip_sha256": "788736316ac5ac7e6889f4c5ac71efeca1a4b50cb2cbe6c1a927b507c988a5f3"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-run-portable-tests.log.gz",
+      "raw_sha256": "46f2d84bfe093b26b7bcf5ac58897d67f9784fc95a0494869930d59b5496eced",
+      "gzip_sha256": "23ec400b7241985a74409848b91e79a8679a2965dc5f2574bf2325b6200cdbcf"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-source.txt.gz",
+      "raw_sha256": "2931923e5d09adede431764e5435ff0645cd14a727098747a75de9ce4a167208",
+      "gzip_sha256": "75be28b398445f1783359065b600769069ee4392e4bb54269adca3ecf52a0dc1"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-stage-space.jsonl.gz",
+      "raw_sha256": "5df77a6ad6f2e2a2a54f3a89b6bd2bb4cec2ad2766a19532928b96a8bcff6e41",
+      "gzip_sha256": "55f4da310600e2e88fb61f745725850a8f481040eacd414a3f996f646cc22a60"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-verification-after-owned-cleanup.log.gz",
+      "raw_sha256": "a90758c8ab5e7f3eb748b5cff77196856dc683af331913f18498867179dfc780",
+      "gzip_sha256": "8f151434333bedebfd4f33fe790c511798cef889e673b3db40da34d1be592b19"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-verification.json.gz",
+      "raw_sha256": "a90758c8ab5e7f3eb748b5cff77196856dc683af331913f18498867179dfc780",
+      "gzip_sha256": "8f151434333bedebfd4f33fe790c511798cef889e673b3db40da34d1be592b19"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-verification.log.gz",
+      "raw_sha256": "d16c00b84fa777ae3a4be008259a7d87bd7e7df2ce1439a8e5005a03b2ca4179",
+      "gzip_sha256": "864833ef8dd22bd395fad62970a8c5bfdb3ee669e42ae6caac4341195e9dc593"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-verification.py.gz",
+      "raw_sha256": "5fc8b91185344f6f6f93a8ad970c542ec0f386f7f973893e971890bed39e46ad",
+      "gzip_sha256": "e9e8f8346fdd99c621cdcdcc801a8764c42b0912a2a922a89a98d64b05fa41fe"
+    },
+    {
+      "retained": "symaira-state-key-osargs-root-ccc-windows-static.log.gz",
+      "raw_sha256": "fcce12e8e9a3743502ec98eb1888a43a32489c10219b715f931aa40675ed5311",
+      "gzip_sha256": "17d379bf4c88a0217fa10b48ed79f1e44cc465b8be92ca655348cf711087d526"
+    },
+    {
+      "retained": "receipt.json.gz",
+      "raw_sha256": "f13bb2a960c9e3c8fa64f02e9de7dcaf897834e3b0fd50722be38da8864b58b0",
+      "gzip_sha256": "8b87778de19833fa0626664abe106ba05a14f4d6a547b8501da80851296e5e63"
+    }
+  ],
+  "sdk_source_sha256": {
+    "src/internal/godebug/godebug.go": "cd492e76ae63872ac4310fc09b2e097229588dbf114d14d713be3f027b0233c8",
+    "src/internal/bisect/bisect.go": "978d518986ba6867f5f96356531f35bfa59b865fbb363b98eb9052e862a2160c",
+    "src/path/filepath/path_unix.go": "d92b04d88e202d2916f803ceb3c8806475b510907a142571f4e9ba70b52c1c1d",
+    "src/path/filepath/path_windows.go": "96c1af1caace59a146241f5a48a700a142f2e5520f932fb2fc6376ce5a94ed81",
+    "src/internal/filepathlite/path.go": "dd1a0138328d6353d089d6ba8e04905d9e951bedfef1b85913c64de2ca2fd223",
+    "src/internal/filepathlite/path_windows.go": "ad313fae9fd1e150df082ad7f43c34b0830ce79433d0eef89c7724fdb07d06bb",
+    "LICENSE": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+    "src/os/exec/lp_unix.go": "5ee781400e1f04ffea869496f161555f31d1af0ca521fb77ef16f54522808746",
+    "src/os/exec/lp_windows.go": "b43699d7c9c5fa2cfe82edb55be04b509619232ad514a34a11c481d43290a6fd",
+    "src/os/exec/exec.go": "0bbfd988045f66e78e7416a1a0d47016ea966c65323d2c6ca7a18cdf4b7b5df0",
+    "src/syscall/syscall_windows.go": "f1b22dde6bb980cf036561cee7ece968daa260cb622f32c96cebd52477b7a346",
+    "src/unicode/tables.go": "6a88d48746c4b2c471cc04ae40559694b734770212e6f5ea5f1962adb0c0bdb1"
+  },
+  "prepared_scope": {
+    "unix_cli_pairs": 26,
+    "windows_cli_pairs": 35,
+    "optional_original_retained_provider_pairs": 5,
+    "windows_actual_sdk_script_pairs": 6,
+    "typed_sdk_supported_settings": 13,
+    "explicit_unported_settings": 8,
+    "unix_actual_mutants": 3,
+    "windows_actual_mutants": 2,
+    "unix_new_unit_cases": 4,
+    "windows_new_unit_cases": 6
+  },
+  "status": "STATIC PREPARATION ONLY: no Cargo/Go build, runtime/provider/port allocation, native proof, full acceptance or argv0 waiver. Compiler hold; old target absent. Fresh --locked compiler and all old/new actual gates plus different-author/native6 review required.",
+  "original48fc_immutable14source_maps_verified": 14,
+  "original1219_frozen_Go_maps_verified": 1219,
+  "new7_independent_review_proofs_roundtrip": 7,
+  "unported_compatibility_boundaries": [
+    "Go runtime stack-selective bisect identity and marker/stack reporting",
+    "Windows bare argv0/raw GetCommandLine identity",
+    "Windows Lstat ACL/sharing/retained-handle identity differences"
+  ],
+  "full_discovery_compatibility": false,
+  "source_only": true,
+  "runtime_runs": 0,
+  "targets_absent": {
+    "/workspace/symaira-daemon772-state-key-discovery-clean/target": true,
+    "/workspace/symaira-daemon772-state-key-discovery-clean/browse/target": true,
+    "/workspace/symaira-daemon772-state-key-osargs/target": true
+  }
+}

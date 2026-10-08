@@ -1,0 +1,77 @@
+{
+  "original_published_head": "43dfda366437d586b8609478164292e77685665f",
+  "actual_CI_merge": "09ebf1cdd0d93a652ef8372ffbb1b184fd1e2245",
+  "equal_tree": "fd29c7b7bce420e50eeb4ec4c5a3c0d814fab89b",
+  "full9ZIPmembers_andbothPE_reverified": true,
+  "originalZIP_SHA": "8a75a12d12d6a9ff2c672aa0651c79c886cb017623fb29ce41d4f10875ec7058",
+  "original_full1311_sourcebindings": {
+    "candidate_source_sha256": 91,
+    "candidate_manifest_sha256": 3,
+    "go_source_sha256": 1217
+  },
+  "raw_records": {
+    "job-111405014212.logs.decoded": {
+      "original_path": "/workspace/review-proof/review-pr800-guard805-windows43/job-111405014212.logs.decoded",
+      "raw_bytes": 372399,
+      "raw_sha256": "bbce0850200b8610d9bc3d24de67b77e0d2f3c361fce511c9a54483ac04e85fe",
+      "retained": "job-111405014212.logs.decoded.gz",
+      "compressed_sha256": "88b078cb304b4d2cada8ba6dbf7608ba91f19a37ee1c230d308c4134530a8cc3"
+    },
+    "artifact-manifest.json": {
+      "original_path": "/workspace/review-proof/review-pr800-guard805-windows43/artifact-manifest.json",
+      "raw_bytes": 2188,
+      "raw_sha256": "7c4b98b0768e71d648021ea0ae4dada87d1b0b7443c0554c5c60679b371318c6",
+      "retained": "artifact-manifest.json.gz",
+      "compressed_sha256": "96e122b91ef6d20fb1b706eb6e76301b56a53b55f12752303b570d13e5fbd700"
+    },
+    "all23-pair-classification.json": {
+      "original_path": "/workspace/review-proof/review-pr800-guard805-windows43/all23-pair-classification.json",
+      "raw_bytes": 35883,
+      "raw_sha256": "544fd2fca96cea4149f277e23ef893b4a81992b1e35ed004457395ae8c09ea25",
+      "retained": "all23-pair-classification.json.gz",
+      "compressed_sha256": "6e5560f93750ead4f85d7b2a140b1c6c1323dd77c91e80fb645979c22041edb8"
+    },
+    "first-cause-decoded.json": {
+      "original_path": "/workspace/review-proof/review-pr800-guard805-windows43/first-cause-decoded.json",
+      "raw_bytes": 7390,
+      "raw_sha256": "73bfc57cafdf9217328f9f612a57eb064b25f5c635a6b07fc28b3915adf8d123",
+      "retained": "first-cause-decoded.json.gz",
+      "compressed_sha256": "7ebfb024f44124d5a81feff9eb1990acb95998aeb944167f055cadc8ee742ddf"
+    },
+    "merge-commit.json": {
+      "original_path": "/workspace/review-proof/review-pr800-guard805-windows43/merge-commit.json",
+      "raw_bytes": 2709,
+      "raw_sha256": "c1f798f09041e1fa78bc50e4025080b2bbc8b8297f8dbc2750ae5b679622102b",
+      "retained": "merge-commit.json.gz",
+      "compressed_sha256": "972252ff4069582792f8f4ef540c635d41ec0d5ec4bef61ba81b7a40f013cba0"
+    },
+    "full-report.md": {
+      "original_path": "/workspace/review-proof/review-pr800-guard805-windows43/full-report.md",
+      "raw_bytes": 3724,
+      "raw_sha256": "312c3e06341589c9763d19ec48a30d79a2eb80255eb5ba41558cea3b086b711e",
+      "retained": "full-report.md.gz",
+      "compressed_sha256": "727415e50e68cb3d9a72f372c8b5d47a5b9cc788cc187f4fa7cf36700f2aac25"
+    },
+    "full-receipt.json": {
+      "original_path": "/workspace/review-proof/review-pr800-guard805-windows43/full-receipt.json",
+      "raw_bytes": 3734,
+      "raw_sha256": "6395c489b7290ec49aad5785b48db3a3792a09fca5239ad293d28faabb34c7db",
+      "retained": "full-receipt.json.gz",
+      "compressed_sha256": "097c988ad71415654ff4e1677a6f4a1b608b7c60486f98f783f56aabbeab9357"
+    },
+    "run-metadata.json": {
+      "original_path": "/workspace/review-proof/review-pr800-guard805-windows43/run-metadata.json",
+      "raw_bytes": 13607,
+      "raw_sha256": "585d2a1100427164404c60d325efe17dafbce4d759171cc30146f8224c4413dc",
+      "retained": "run-metadata.json.gz",
+      "compressed_sha256": "f06434d700409cf625a3be08d70c09e8d4187453be8950f53b4fecc44f759204"
+    },
+    "source-verification-first-failure.json": {
+      "original_path": "/workspace/review-proof/review-pr800-guard805-windows43/source-verification-first-failure.json",
+      "raw_bytes": 323,
+      "raw_sha256": "1e6e8d9d75cbc0246ecc40d0100774e158dbf21a32a003a0cd7e1265f6a6c5e9",
+      "retained": "source-verification-first-failure.json.gz",
+      "compressed_sha256": "bfc95e29cc1461c08cf1a817b1962177f0253473b1fa651e5bedda706428269c"
+    }
+  }
+}

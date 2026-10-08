@@ -188,12 +188,11 @@ pub(crate) fn list_rules(conn: &Connection, scope: &str) -> rusqlite::Result<Vec
     };
     let mut result = Vec::new();
     while let Some(row) = rows.next()? {
-        let metadata_text: String = row.get(3)?;
         result.push(RuleRow {
             id: row.get(0)?,
             content: row.get(1)?,
             scope: row.get(2)?,
-            metadata: serde_json::from_str(&metadata_text).unwrap_or_default(),
+            metadata: crate::rows::json(row, 3)?,
             created_at: time(row, 4)?,
             updated_at: time(row, 5)?,
             created_by: row.get::<_, Option<String>>(6)?.unwrap_or_default(),
@@ -237,12 +236,11 @@ pub(crate) fn list_lite(
 }
 
 fn scan_lite(row: &Row<'_>) -> rusqlite::Result<MemoryListRow> {
-    let metadata_text: String = row.get(3)?;
     Ok(MemoryListRow {
         id: row.get(0)?,
         content: row.get(1)?,
         scope: row.get(2)?,
-        metadata: serde_json::from_str(&metadata_text).unwrap_or_default(),
+        metadata: crate::rows::json(row, 3)?,
         created_at: time(row, 4)?,
         updated_at: time(row, 5)?,
         created_by: row.get(6)?,

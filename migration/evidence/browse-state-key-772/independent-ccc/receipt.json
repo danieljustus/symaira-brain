@@ -1,0 +1,506 @@
+{
+  "result": "REQUEST_CHANGES",
+  "source": "ccc5c87eb3bf69cf4adbf054b60d5e5342af3891",
+  "publication": "2b2755231b4ec5ce79de6fb2f022ac423abb44bd",
+  "reviewer": "Root different author",
+  "full_verification": {
+    "validated_source": "2b2755231b4ec5ce79de6fb2f022ac423abb44bd",
+    "candidate_source_maps": {
+      "ownership_candidate_source_sha256": 197,
+      "key_candidate_source_sha256": 197,
+      "key_go_source_sha256": 670,
+      "process_candidate_source_sha256": 197,
+      "process_go_source_sha256": 670,
+      "registry_candidate_source_sha256": 197,
+      "registry_go_source_sha256": 670
+    },
+    "tests": {
+      "affected": {
+        "passed": 209,
+        "failed": 0,
+        "ignored": 3,
+        "summaries": 34
+      },
+      "mcp-lib": {
+        "passed": 16,
+        "failed": 0,
+        "ignored": 0,
+        "summaries": 1
+      },
+      "mcp.json.tests": {
+        "passed": 310,
+        "failed": 0,
+        "ignored": 3,
+        "summaries": 67
+      }
+    },
+    "registry_journal_events": 2180,
+    "comparator_actual_function_text_identical": true,
+    "comparator_functions_sha256": {
+      "normalize": "780d5f75c4a9bac1391d276452ae2ebc1060c3ff8cf7149feac23f4aef3a1562",
+      "compare": "970d58a2a05b1d81a0abb761093d8a9178b51da6fc0f4e3cb1f66d7dc1217e4e",
+      "controls": "d819059e907fdbad65c02053ae900f89ede61565cb5bacf8e2dfad8d27f3d3e1"
+    },
+    "standalone_provider_file_byte_identical": true,
+    "standalone_provider_file_sha256": "28ace6936b05bf1d347feb1b442a94964663539bbfd5ce3738a45ac96d6af312",
+    "original_root_review_artifacts_verified": 30,
+    "archives_reverified": [
+      {
+        "receipt": "/workspace/oracles/symaira-daemon772-state-key-4cd56e3e4733-idle-binaries/receipt.json",
+        "receipt_sha256": "5ae572d2cad26f303824c7bfaa1d8a024405662c8770d335016e43fa6775c2d7",
+        "elf_paths": 137,
+        "unique": 107
+      },
+      {
+        "receipt": "/workspace/oracles/symaira-daemon772-state-key-407bc5e3b902-idle-binaries/receipt.json",
+        "receipt_sha256": "ddee40adc950098ec7aeeb4a672c21f790aef57261882c561151b1c0ad6a6f53",
+        "elf_paths": 147,
+        "unique": 114
+      },
+      {
+        "receipt": "/workspace/oracles/symaira-daemon772-state-key-3db69a655e43-idle-binaries/receipt.json",
+        "receipt_sha256": "89c8e3e5973b9d043de054d34dcb0f1efa029a623b22e9c87280d60d7654b4c0",
+        "elf_paths": 149,
+        "unique": 115
+      },
+      {
+        "receipt": "/workspace/oracles/symaira-state-key-osargs-1a91-before-fifo/receipt.json",
+        "receipt_sha256": "28447809dbac6f88d6489472b68ceb5effdd626115fbc05d2df9d50bba4b5e76",
+        "elf_paths": 218,
+        "unique": 159
+      },
+      {
+        "receipt": "/workspace/oracles/symaira-state-key-osargs-330-before-import/receipt.json",
+        "receipt_sha256": "ad1288d3b11ba00ee5d5cf457d1a6cf7a1662e74354d77b7c4ec92cceef79cea",
+        "elf_paths": 218,
+        "unique": 159
+      },
+      {
+        "receipt": "/workspace/oracles/symaira-state-key-osargs-046-before-json/receipt.json",
+        "receipt_sha256": "9323bedc4ee969e95e4830c3c6fa89ff5fd5bca9b0ed356275c32f6c2f845694",
+        "elf_paths": 218,
+        "unique": 159
+      },
+      {
+        "receipt": "/workspace/oracles/symaira-state-key-osargs-ccc-final/receipt.json",
+        "receipt_sha256": "24bb49fc2f0c777688b366fef116e72568df3536e82230c32bed834fecb8045f",
+        "elf_paths": 247,
+        "unique": 187
+      }
+    ],
+    "distinct_payload_roundtrips_verified": 524,
+    "current_elf_paths": 247,
+    "current_elf_unique": 187,
+    "current_actual_cargo_or_build_bindings": 61,
+    "target_users": [],
+    "target_deleted": false,
+    "scope": "Root different-author fresh full runtime and source verification; novel review pending; native Windows/Darwin execution mandatory; source cross checks do not waive native gates"
+  },
+  "novel_cases": 10,
+  "novel_problem_pairs": 4,
+  "absolute_path_positive_pairs": 1,
+  "raw_proofs": [
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-actionlint.log",
+      "retained": "symaira-state-key-osargs-root-ccc-actionlint.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-affected.log",
+      "retained": "symaira-state-key-osargs-root-ccc-affected.log.gz",
+      "bytes": 22616,
+      "sha256": "975ddbf786c7b8c58ecea5b34c00653d528739ac43236de298cecffde7bdec8d",
+      "gzip_sha256": "5c46405ba0746b99d51b50b8f05ad102c4fab917c69bb8b22d3c0ab115f28634"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-build.log",
+      "retained": "symaira-state-key-osargs-root-ccc-build.log.gz",
+      "bytes": 120,
+      "sha256": "5a378e08d652b79bb444f773ce8e754d3995445cc56ba87aed12b516e406a06e",
+      "gzip_sha256": "427e714a508e902cf8c634fff03fce34b7d507e60a6908beaca2961cce4ea887"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-clippy.log",
+      "retained": "symaira-state-key-osargs-root-ccc-clippy.log.gz",
+      "bytes": 60,
+      "sha256": "f694a9e074374d315f58b8a63ce849858b1b8708cf56b3d194218605bd2a9d6e",
+      "gzip_sha256": "484a70832ff413bcf6682ad7b52ea7333b75afc05f8fea72c1d9a09247072fc4"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-darwin-static.log",
+      "retained": "symaira-state-key-osargs-root-ccc-darwin-static.log.gz",
+      "bytes": 60,
+      "sha256": "4b395c9c76c7f7fb5221d30df7320c7a2387ff3842c426dbee6a59a54b5cffab",
+      "gzip_sha256": "8135007ed9012844706878be7460c9a04ae3dd97316db2c0a6f69b7c288b580d"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-driver.log",
+      "retained": "symaira-state-key-osargs-root-ccc-driver.log.gz",
+      "bytes": 1301,
+      "sha256": "52cb385d57050a1a176e4fbbad25b9b0d9d0d90758138d12a3e900fca551bbf3",
+      "gzip_sha256": "42b2f5807773af8d4e17269d2a446486f3d72ef1b98dd372b1e2e11e04acbc3e"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-fmt.log",
+      "retained": "symaira-state-key-osargs-root-ccc-fmt.log.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-full-gates.sh",
+      "retained": "symaira-state-key-osargs-root-ccc-full-gates.sh.gz",
+      "bytes": 4812,
+      "sha256": "de76d357d8f5b87712ccd3fc5f103c789c5274adf2095bbd96177754f4ed4651",
+      "gzip_sha256": "cb2cfbad041484b03c740418f8777b0eeaf5a08743f5c8ffba4287914a230a24"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-key.json",
+      "retained": "symaira-state-key-osargs-root-ccc-key.json.gz",
+      "bytes": 400245,
+      "sha256": "4fffb6ec649a7ad868afaf013fea069be7cb50759bd41e29310289d733643ddd",
+      "gzip_sha256": "5c40a8e24b8c86b846706d5ca8190cd7bf5c6fe61a5d88c844938801eaec868a"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-key.log",
+      "retained": "symaira-state-key-osargs-root-ccc-key.log.gz",
+      "bytes": 1101,
+      "sha256": "530a0ce4de8f0538b2d5dbbecac81db91b790f076639c92b99d9990942b4d859",
+      "gzip_sha256": "aa673b6fda9ae35aba557f56484239f3789894e21e13d5ba69774bdcb1984ed5"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-key.raw.json",
+      "retained": "symaira-state-key-osargs-root-ccc-key.raw.json.gz",
+      "bytes": 296325,
+      "sha256": "da699b50dd9b8d411a03a9abe17289aa406381cd4b9b5f57865f476d7db878c5",
+      "gzip_sha256": "d739d4ad13c98af8fda160cb728f698631b0af5f7f13a52b6b7088f622bf22d5"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-matrix.log",
+      "retained": "symaira-state-key-osargs-root-ccc-matrix.log.gz",
+      "bytes": 58,
+      "sha256": "f5bfa3059aad5fdddb33c5356c9bfa859a33d90f12f51ff8393cf106c56421b4",
+      "gzip_sha256": "2c98c42e1497e68dd9753169cb3f9b3bc4c22789b2c9d3ae7368e19260d73f07"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-mcp-lib.log",
+      "retained": "symaira-state-key-osargs-root-ccc-mcp-lib.log.gz",
+      "bytes": 1494,
+      "sha256": "56a6dac2b371a3342f2d97ea2d92e1d8e3c512c8814b412261fec84864682ada",
+      "gzip_sha256": "ae24d79a66f9d560f80d8c0af4da34844165fbbfd82340c0368875bc79af2073"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-mcp.json",
+      "retained": "symaira-state-key-osargs-root-ccc-mcp.json.gz",
+      "bytes": 146104,
+      "sha256": "274f8e17172900665c68f33217c6d82b099bc545fc22dde260f378f834cbdcbc",
+      "gzip_sha256": "dd064036eb4eeced094a3d6666473bb2a31aa769658009e843b2e65bc2704358"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-mcp.json.tests.log",
+      "retained": "symaira-state-key-osargs-root-ccc-mcp.json.tests.log.gz",
+      "bytes": 36548,
+      "sha256": "e8b1658318ec5cca1795b48386464fbbbb38d613853991d03bd1b3ae22de1162",
+      "gzip_sha256": "8d59bd32b914c2b91d63e8d182ebd381cb4d16ee14576a339f28eaf38773b1f3"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-mcp.log",
+      "retained": "symaira-state-key-osargs-root-ccc-mcp.log.gz",
+      "bytes": 55,
+      "sha256": "5df69082fee5d7f320a2f97da92fb463fbef95eeab35aff1aa68dd13446f22b4",
+      "gzip_sha256": "d36bd9758ebb8afc7dc883a0968ed429152f26dfbe309239ff673f9e048bb6f4"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-novel-owned-cleanup.json",
+      "retained": "symaira-state-key-osargs-root-ccc-novel-owned-cleanup.json.gz",
+      "bytes": 1738,
+      "sha256": "a0ef56f0104723488aea2c160b7decff0c9db657f4c456400c826bac657e37b3",
+      "gzip_sha256": "813cef5160647b5fdc13013960c5a60407445c8b109375d8d533bb92a331e354"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-original-paths.json",
+      "retained": "symaira-state-key-osargs-root-ccc-original-paths.json.gz",
+      "bytes": 2858,
+      "sha256": "99876e2c411f67f8cfba668c200b5add1a32b56f66aa85b1253ec9faa8adaf12",
+      "gzip_sha256": "8d5e48bc55edff3639740920f9b70901c0cbf1958550b59fd97544c6b81c2ecf"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-original-paths.log",
+      "retained": "symaira-state-key-osargs-root-ccc-original-paths.log.gz",
+      "bytes": 243,
+      "sha256": "a21caca91f265d0707ac6e5db546dbf5fca8c9a912abad35a51c7622d0abd860",
+      "gzip_sha256": "eb38b61fe03f7b0a01352ec7b77cb3a95d7cabec92cd9a8db574b056df1ed19f"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-original-paths.py",
+      "retained": "symaira-state-key-osargs-root-ccc-original-paths.py.gz",
+      "bytes": 2499,
+      "sha256": "e1cbae345c8073b35156dcced762de64e633f4c3eb81b43c5cc6f371a4cb8489",
+      "gzip_sha256": "aac432c90566491770ff97d376e9c3eb6e326dd6d7c23f02ed9b3162dad9dcd9"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-original-timeout.json",
+      "retained": "symaira-state-key-osargs-root-ccc-original-timeout.json.gz",
+      "bytes": 3421,
+      "sha256": "d16fbe294969053a1581bca22fa1b6791627af7492f07700cbac758d4d7f5c1f",
+      "gzip_sha256": "d821c12a51f51d45c3c6ab296c82dce834174c4a06ba662ad08a429c9ebfd655"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-original-timeout.log",
+      "retained": "symaira-state-key-osargs-root-ccc-original-timeout.log.gz",
+      "bytes": 1022,
+      "sha256": "2e30a8f32f8aa6303bbc79744a08f1a94969ae88b38fb05f9d94318b32b2750a",
+      "gzip_sha256": "c84629e7fec297cb8e09656395b2ef0622b6c64db4e9c3aeabbea6c36e6ecaac"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-original-timeout.py",
+      "retained": "symaira-state-key-osargs-root-ccc-original-timeout.py.gz",
+      "bytes": 3231,
+      "sha256": "7fa17da6e6e652f6f4c5c21fbad800147b9df097f1c4cd00aaf755a1efebb96f",
+      "gzip_sha256": "2eda780b32bd016a6131a022e060d472e821f9e3b227e89458bdbbf6349eb8fb"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-ownership.json",
+      "retained": "symaira-state-key-osargs-root-ccc-ownership.json.gz",
+      "bytes": 43957,
+      "sha256": "90ac15efbfd8a556f141d3f143e3c70a0eca744f5561ad891da66216a50bee02",
+      "gzip_sha256": "c5bb2a64704d40803fe892a194b3a912408062b2882fcf0380bf1be63e063b4f"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-ownership.log",
+      "retained": "symaira-state-key-osargs-root-ccc-ownership.log.gz",
+      "bytes": 340,
+      "sha256": "673f0864b56ea48cc0be4b4bf15bb3d3b8d05af7c535a0a4381a65a6c4f115d2",
+      "gzip_sha256": "20c6f67b3a8496a6dc45bef851f5a44d11767a1795222e0f9b514d010b4dc2ff"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-path-discovery.json",
+      "retained": "symaira-state-key-osargs-root-ccc-path-discovery.json.gz",
+      "bytes": 4674,
+      "sha256": "ece9b9f1f62ab55ba0b37e40872849dab7af016d0f4b4778a9de1b7e42ee36d5",
+      "gzip_sha256": "213404cc130e9bc5c7541775c257d64b1edde59d2b5be4b8b861f4bdf0e79203"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-path-discovery.log",
+      "retained": "symaira-state-key-osargs-root-ccc-path-discovery.log.gz",
+      "bytes": 3289,
+      "sha256": "454d32bdbb6cfefabf5991d2a992ad38f228a85069227f7e760bd6ee57c4b1ae",
+      "gzip_sha256": "9cefc0f6481279a39bd96bbb3331e022ec982bf70723b037661575d5f94cf090"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-path-discovery.py",
+      "retained": "symaira-state-key-osargs-root-ccc-path-discovery.py.gz",
+      "bytes": 1833,
+      "sha256": "170ebe05fc50ede1abca292cfdff4d65bd5ecd46dd6595f9eb1ced5a3a2b9d96",
+      "gzip_sha256": "848875668d332c0fbe0a3e5c7bda3e89cf7ab6fe65b8548361165ad728cce304"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-pipe-tests.log",
+      "retained": "symaira-state-key-osargs-root-ccc-pipe-tests.log.gz",
+      "bytes": 106,
+      "sha256": "75ff54e727b57e4bd7b88956ed0c92c4b9a416e6f0976707e8fb54aa385ac0bd",
+      "gzip_sha256": "6a71ac2ec35156e12dd0313e17ab1fd3a4fa5dbcc0a3cfad0633d3d5ac61d007"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-preserve.log",
+      "retained": "symaira-state-key-osargs-root-ccc-preserve.log.gz",
+      "bytes": 70,
+      "sha256": "696f47aa1750f1f395501f643a42b1b8c7833a47644de56b4d1919483d5bade5",
+      "gzip_sha256": "c1e51ee880864c657d65e84630396b8023474d5e6b38541ccbe6a1076c71d17a"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-preserve.py",
+      "retained": "symaira-state-key-osargs-root-ccc-preserve.py.gz",
+      "bytes": 4632,
+      "sha256": "31caf47b22e9a886edd7244856df1e059922ffbc9835f7b32d0e486d86b6cf38",
+      "gzip_sha256": "ca7df3efd70a4e9a21bc992d90b6d01787cc2c81d63c12fd1e7562b9661bb3b0"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-process.json",
+      "retained": "symaira-state-key-osargs-root-ccc-process.json.gz",
+      "bytes": 183942,
+      "sha256": "9bee8676e92906bcff7da1c3fa3a1540679f96014d305fe57c9cf6e15842805d",
+      "gzip_sha256": "396cd13e01f6a89518301b1bc19fbb63801189ea40bdd00a432c02ce9ce7d908"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-process.log",
+      "retained": "symaira-state-key-osargs-root-ccc-process.log.gz",
+      "bytes": 70,
+      "sha256": "bc05628be3eaeb347ddff73fbf2d1462a22dc0921a0ee8816656e5b257383c1c",
+      "gzip_sha256": "05bd8cd23f5288302af7803d8da5f4bd8f8ee695fbaddafcd9c8de4a934d0a2a"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-progress-mutant-lost-case-link.log",
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutant-lost-case-link.log.gz",
+      "bytes": 877,
+      "sha256": "6f791a0925801668a5d182b2197cf43c85bd762dc1ed9394853bfa25fcf1a037",
+      "gzip_sha256": "af0967da07a03724fa7323b8ab72e14dffe062644433ddefa919760e07e1eed5"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-progress-mutant-lost-case-link.py.txt",
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutant-lost-case-link.py.txt.gz",
+      "bytes": 2139,
+      "sha256": "287da8f28f48edd40d7b2e9d566cadef158e47b79ff9de3319328fbba83ef250",
+      "gzip_sha256": "9977583e8933dc7d51a79de2e494c99a5f0bf8bc1bfa7fe8480aa9125dbc61d8"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-progress-mutant-missing-begin.log",
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutant-missing-begin.log.gz",
+      "bytes": 698,
+      "sha256": "15aca1ce5491b3968bf3f44f2b85e500435b8cb086f9af872ef3f4c64eb7439e",
+      "gzip_sha256": "aa4e570ffad492f3f8d36aac99b25b41ee8121812b1be58f58d0f0b8ae532198"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-progress-mutant-missing-begin.py.txt",
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutant-missing-begin.py.txt.gz",
+      "bytes": 1936,
+      "sha256": "057e01bc80fcef9a9318594243a9edf5cdcf0b785ce5a8b57a2f32f46f279420",
+      "gzip_sha256": "6c7766641e205c890819c2cc0cd8b0281078c14d03876498a8b146583b425926"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-progress-mutant-wrong-output-hash.log",
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutant-wrong-output-hash.log.gz",
+      "bytes": 998,
+      "sha256": "c59a4df586ac240ce200698ee171586c00b73e18fad8c6e85c903a85e0e105ed",
+      "gzip_sha256": "c11c5997fe35fd4088055ec493ace349a0020fe5acdc55a16a4bf098263effda"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-progress-mutant-wrong-output-hash.py.txt",
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutant-wrong-output-hash.py.txt.gz",
+      "bytes": 2167,
+      "sha256": "91170ee2b17e0221c28649a66db9dd2ca7440f8096ae62f55da3901338597840",
+      "gzip_sha256": "c4de88c0770e6b8b5e32fd96782f3380181983fe55912d102c286b7b47821868"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-progress-mutants.json",
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutants.json.gz",
+      "bytes": 4604,
+      "sha256": "4d0fdd8bfd54a48f63bc8f7d84c902ab17adedf15416c22c44a02ea6d04be51b",
+      "gzip_sha256": "699758244f883a297526c10d6c850a639f1ee3cbf526f361fc05922772e99873"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-progress-mutants.log",
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutants.log.gz",
+      "bytes": 35,
+      "sha256": "0845abad636490ae75f12caf14fd07a38198c983f3d3b2c54562c6b48c404a8a",
+      "gzip_sha256": "2f01ddacfa969c77010c4f2a5ed86a52e3b59bb7ca8856c801cb686d7efbf602"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-progress-mutants.py",
+      "retained": "symaira-state-key-osargs-root-ccc-progress-mutants.py.gz",
+      "bytes": 2609,
+      "sha256": "a35bb102bc4129fcc927f525cded8f7754f278f30960741433b0bba912128ecd",
+      "gzip_sha256": "6438d2dd85c95f12bde2da9fd26026393104a379119674e6fecc06d6cdf1800d"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-progress-tests.log",
+      "retained": "symaira-state-key-osargs-root-ccc-progress-tests.log.gz",
+      "bytes": 103,
+      "sha256": "485f6e85fc4fda602971012ce6862d752ca18aae4a5575ce544961ea27ea3a86",
+      "gzip_sha256": "b7b88ec7dc8120200aba2e4594e83abc15ef54526186d681d7be87188f8c4528"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-registry.json",
+      "retained": "symaira-state-key-osargs-root-ccc-registry.json.gz",
+      "bytes": 682634,
+      "sha256": "4aba990c412434856f45e0f86f0e7a655557704fbe0e62bfd44b4352cb8f5315",
+      "gzip_sha256": "e8346dd45d93cd639c2e0a32840e627c23feefe698dd8882ac91eec6337cd59a"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-registry.log",
+      "retained": "symaira-state-key-osargs-root-ccc-registry.log.gz",
+      "bytes": 183,
+      "sha256": "4fb2cb1baf8936dc49552c1d2aa21bf447d9378bef03c7f6085566b241cc8695",
+      "gzip_sha256": "d7592761cf69210e0393954463b373b5e3fee055a1ad08fbea2e93d4c623c4dd"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-registry.progress.jsonl",
+      "retained": "symaira-state-key-osargs-root-ccc-registry.progress.jsonl.gz",
+      "bytes": 587632,
+      "sha256": "91bca0345ac835ebdf0af54c2af51d60d310eee51e3a9f47e7e71c1f94b9618f",
+      "gzip_sha256": "ad0ae65e2d5d72a3c814642308e4d27aabc4f5cbf80a8afd36a3d53eee6ddf6e"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-registry.raw.json",
+      "retained": "symaira-state-key-osargs-root-ccc-registry.raw.json.gz",
+      "bytes": 541789,
+      "sha256": "56be879d54e3ad1cb93f0e14a3397fb007bed71ec3c3242f84988d21477c2a47",
+      "gzip_sha256": "b16683afc9bc0c232b127cdc340ebce339fc9c9b8a74f37b92e538aef33f95c4"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-review-publication.py",
+      "retained": "symaira-state-key-osargs-root-ccc-review-publication.py.gz",
+      "bytes": 6221,
+      "sha256": "b3184b80c2d8c6aaba59532efd6858545691a3365ce14412c601b71ad9c0f110",
+      "gzip_sha256": "788736316ac5ac7e6889f4c5ac71efeca1a4b50cb2cbe6c1a927b507c988a5f3"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-run-portable-tests.log",
+      "retained": "symaira-state-key-osargs-root-ccc-run-portable-tests.log.gz",
+      "bytes": 104,
+      "sha256": "46f2d84bfe093b26b7bcf5ac58897d67f9784fc95a0494869930d59b5496eced",
+      "gzip_sha256": "23ec400b7241985a74409848b91e79a8679a2965dc5f2574bf2325b6200cdbcf"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-source.txt",
+      "retained": "symaira-state-key-osargs-root-ccc-source.txt.gz",
+      "bytes": 41,
+      "sha256": "2931923e5d09adede431764e5435ff0645cd14a727098747a75de9ce4a167208",
+      "gzip_sha256": "75be28b398445f1783359065b600769069ee4392e4bb54269adca3ecf52a0dc1"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-stage-space.jsonl",
+      "retained": "symaira-state-key-osargs-root-ccc-stage-space.jsonl.gz",
+      "bytes": 2736,
+      "sha256": "5df77a6ad6f2e2a2a54f3a89b6bd2bb4cec2ad2766a19532928b96a8bcff6e41",
+      "gzip_sha256": "55f4da310600e2e88fb61f745725850a8f481040eacd414a3f996f646cc22a60"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-verification-after-owned-cleanup.log",
+      "retained": "symaira-state-key-osargs-root-ccc-verification-after-owned-cleanup.log.gz",
+      "bytes": 3466,
+      "sha256": "a90758c8ab5e7f3eb748b5cff77196856dc683af331913f18498867179dfc780",
+      "gzip_sha256": "8f151434333bedebfd4f33fe790c511798cef889e673b3db40da34d1be592b19"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-verification.json",
+      "retained": "symaira-state-key-osargs-root-ccc-verification.json.gz",
+      "bytes": 3466,
+      "sha256": "a90758c8ab5e7f3eb748b5cff77196856dc683af331913f18498867179dfc780",
+      "gzip_sha256": "8f151434333bedebfd4f33fe790c511798cef889e673b3db40da34d1be592b19"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-verification.log",
+      "retained": "symaira-state-key-osargs-root-ccc-verification.log.gz",
+      "bytes": 241,
+      "sha256": "d16c00b84fa777ae3a4be008259a7d87bd7e7df2ce1439a8e5005a03b2ca4179",
+      "gzip_sha256": "864833ef8dd22bd395fad62970a8c5bfdb3ee669e42ae6caac4341195e9dc593"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-verification.py",
+      "retained": "symaira-state-key-osargs-root-ccc-verification.py.gz",
+      "bytes": 5984,
+      "sha256": "5fc8b91185344f6f6f93a8ad970c542ec0f386f7f973893e971890bed39e46ad",
+      "gzip_sha256": "e9e8f8346fdd99c621cdcdcc801a8764c42b0912a2a922a89a98d64b05fa41fe"
+    },
+    {
+      "original_path": "/tmp/symaira-state-key-osargs-root-ccc-windows-static.log",
+      "retained": "symaira-state-key-osargs-root-ccc-windows-static.log.gz",
+      "bytes": 60,
+      "sha256": "fcce12e8e9a3743502ec98eb1888a43a32489c10219b715f931aa40675ed5311",
+      "gzip_sha256": "17d379bf4c88a0217fa10b48ed79f1e44cc465b8be92ca655348cf711087d526"
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-state-key-root-ccc-request/receipt.json",
+      "retained": "receipt.json.gz",
+      "bytes": 180107,
+      "sha256": "f13bb2a960c9e3c8fa64f02e9de7dcaf897834e3b0fd50722be38da8864b58b0",
+      "gzip_sha256": "8b87778de19833fa0626664abe106ba05a14f4d6a547b8501da80851296e5e63"
+    }
+  ],
+  "actual_archive_receipt": "/workspace/oracles/symaira-state-key-root-ccc-request/receipt.json",
+  "no_candidate_mutation": true,
+  "no_native_windows_darwin_runtime_claim": true
+}
