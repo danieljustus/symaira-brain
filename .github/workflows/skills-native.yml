@@ -59,6 +59,12 @@ jobs:
             go build -ldflags "-X main.version=dev" -o "$activity_cli_go_binary" ./cmd/symbrain
             go run ./scripts/activity-cli-oracle -go-binary "$activity_cli_go_binary" -output "$activity_cli_fixture"
             export SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE="$activity_cli_fixture"
+            export SYMBRAIN_CLI_TREE_ORACLE_FIXTURE="$RUNNER_TEMP/cli-tree-oracle-windows.json"
+            export SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE="$RUNNER_TEMP/profile-remove-oracle-windows.json"
+            export SYMBRAIN_XDG_ORACLE_FIXTURE="$RUNNER_TEMP/xdg-oracle-windows.json"
+            go run ./scripts/cli-oracle -go-binary "$activity_cli_go_binary" -output "$SYMBRAIN_CLI_TREE_ORACLE_FIXTURE"
+            go run ./scripts/profile-remove-oracle -output "$SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE"
+            go run ./scripts/xdg-oracle -output "$SYMBRAIN_XDG_ORACLE_FIXTURE"
           fi
           cargo test --locked -p symbrain-core -p symbrain-skills -p symbrain-gateway -p symbrain-cli -p symbrain-mcp
           cargo build --locked -p symbrain-cli
@@ -86,4 +92,8 @@ jobs:
           path: |
             ${{ runner.temp }}/skills764-go-build.json
             ${{ runner.temp }}/skills764-native.json
+            ${{ runner.temp }}/activity-cli-oracle-windows.json
+            ${{ runner.temp }}/cli-tree-oracle-windows.json
+            ${{ runner.temp }}/profile-remove-oracle-windows.json
+            ${{ runner.temp }}/xdg-oracle-windows.json
           if-no-files-found: error
