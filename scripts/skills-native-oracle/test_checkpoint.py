@@ -30,13 +30,15 @@ class CheckpointTest(unittest.TestCase):
             self.assertEqual(output.read_bytes(), original)
             self.assertEqual(list(output.parent.iterdir()), [output])
 
-            # Real child reaches publication before it is killed; no timing guess.
+            # Real publication boundary; force Windows text newlines on every host.
             source = (
                 "import sys, threading\n"
                 "from pathlib import Path\n"
                 "import run\n"
+                "sys.stdout.reconfigure(newline='\\r\\n')\n"
                 "def stopped_publication(*args):\n"
-                "    print('staged', flush=True)\n"
+                "    sys.stdout.buffer.write(b'staged\\n')\n"
+                "    sys.stdout.buffer.flush()\n"
                 "    threading.Event().wait(30)\n"
                 "    raise RuntimeError('parent did not terminate owned writer')\n"
                 "run.os.replace = stopped_publication\n"
