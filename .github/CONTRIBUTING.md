@@ -27,7 +27,9 @@ make fmt-check   # fail if gofmt would change any file
 make vet         # go vet ./...
 ```
 
-Before opening a PR, run the same checks CI runs:
+The following command covers Go checks, not the full CI matrix. Before opening a
+PR, run it; see the [CI workflow](workflows/ci.yml) for Rust migration,
+native-platform, module, and GUI jobs.
 
 ```bash
 go vet ./... && go test -race ./... && go build -o symbrain ./cmd/symbrain
@@ -49,6 +51,7 @@ go vet ./... && go test -race ./... && go build -o symbrain ./cmd/symbrain
 - Reference the issue a PR addresses (e.g. `Closes #123`) where one
   exists.
 - Make sure `make test` and `make lint` pass locally before requesting
-  review; CI runs the same checks.
+  review. CI runs race-enabled Go tests and the Go lint/build gate, plus the
+  Rust, native-platform, module, and GUI jobs; see [the workflow](workflows/ci.yml).
 - Fill in the PR template's Testing and Checklist sections — reviewers
   use them to verify what was actually exercised.
