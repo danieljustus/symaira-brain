@@ -53,6 +53,13 @@ jobs:
           set -euo pipefail
           cargo fmt --all --check
           cargo clippy --locked -p symbrain-core -p symbrain-skills -p symbrain-gateway -p symbrain-cli -p symbrain-mcp --all-targets -- -D warnings
+          if [ "${OS:-}" = Windows_NT ]; then
+            activity_cli_fixture="$RUNNER_TEMP/activity-cli-oracle-windows.json"
+            activity_cli_go_binary="$RUNNER_TEMP/symbrain-activity-oracle-go.exe"
+            go build -ldflags "-X main.version=dev" -o "$activity_cli_go_binary" ./cmd/symbrain
+            go run ./scripts/activity-cli-oracle -go-binary "$activity_cli_go_binary" -output "$activity_cli_fixture"
+            export SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE="$activity_cli_fixture"
+          fi
           cargo test --locked -p symbrain-core -p symbrain-skills -p symbrain-gateway -p symbrain-cli -p symbrain-mcp
           cargo build --locked -p symbrain-cli
           cargo build --locked -p symbrain-skills --example git_stream_fixture
