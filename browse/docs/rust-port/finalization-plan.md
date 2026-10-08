@@ -23,6 +23,15 @@ Go at 5.894 ms; the maximum permitted Rust p95 is 6.4834 ms.
 
 ## Operating rules for every phase
 
+**Make target status at this checkout:** Browse has no module-local Makefile, and
+neither its directory nor the repository-root Makefile defines
+`rust-fetch-contract`, `rust-fetch-static-slice`, `rust-browser-contract`,
+`rust-hardening`, `rust-gates`, `rust-native-browser-contract`, or
+`port-contract`. These are intended future targets, not runnable acceptance
+checks or evidence until their recipes are implemented. The final matrix's
+`make fmt-check`, `make build`, `make test`, and `make lint` are repository-root
+Brain Go targets; run them from the repository root, not as Browse module gates.
+
 1. Work only from the parent migration worktree. Before each slice record
    `pwd -P`, `git rev-parse --show-toplevel`, branch, HEAD, and `git status`.
 2. Start with a failing, hermetic Go-generated fixture or a target-contract
@@ -94,9 +103,10 @@ those exact-candidate native receipts pass.
 3. Wire the complete static fetch path through daemon and CLI, then prove the
    same case IDs run in the harness and the Rust test corpus.
 
-**Acceptance:** `make rust-fetch-contract` plus `python3 port/harness/run.py
---suite fetch-control` and a programmatic set-equality check of declared versus
-executed case IDs.
+**Acceptance (planned target, not implemented here):** `make rust-fetch-contract`,
+plus `python3 port/harness/run.py --suite fetch-control` and a programmatic
+set-equality check of declared versus executed case IDs. Do not treat the Make
+target as runnable evidence until its recipe exists.
 
 ### 1C. Static document pipeline (RUST-008)
 
@@ -110,8 +120,10 @@ executed case IDs.
 3. Preserve byte comparison wherever formatting is contractually fixed; declare
    semantic comparison explicitly where byte equality is not the contract.
 
-**Acceptance:** `make rust-fetch-static-slice`, full `fetch-render` harness, and
-`FETCH-006/007/008` green.
+**Acceptance (planned target, not implemented here):**
+`make rust-fetch-static-slice`, full `fetch-render` harness, and
+`FETCH-006/007/008` green. Do not treat the Make target as runnable evidence
+until its recipe exists.
 
 ## Phase 2 — repair and enforce the value gate before browser expansion
 
@@ -247,9 +259,11 @@ create Firefox fixture generator/corpus and native tests.
    tests. Do not treat the old Go TLS `firefox` preset as a Firefox automation
    oracle; use target-contract functional fixtures.
 
-**Acceptance:** `make rust-browser-contract`, a new compat-sidecar suite, and
-native Chrome/Safari/Firefox gates pass independently. Only then may
-`CFG-006`, `FETCH-009/010/011`, `ENG-009/010` become green.
+**Acceptance (planned target, not implemented here):**
+`make rust-browser-contract`, a new compat-sidecar suite, and native
+Chrome/Safari/Firefox gates pass independently. Only then may `CFG-006`,
+`FETCH-009/010/011`, `ENG-009/010` become green. Do not treat the Make target
+as runnable evidence until its recipe exists.
 
 ## Phase 6 — finish user-facing orchestration
 
@@ -292,8 +306,10 @@ and lifecycle tests.
    process-tree cleanup. Cross-builds produce artifacts only; they are not
    runtime evidence.
 
-**Acceptance:** `make rust-hardening`; all required PR/native workflows green;
-no unresolved advisory, license, unsafe-inventory or fuzz regression.
+**Acceptance (planned target, not implemented here):**
+`make rust-hardening`; all required PR/native workflows green; no unresolved
+advisory, license, unsafe-inventory or fuzz regression. Do not treat the Make
+target as runnable evidence until its recipe exists.
 
 ## Phase 8 — release rehearsal, dual rollout and cutover
 
@@ -330,11 +346,27 @@ Run this only after the individual phase gates are green; a stopped command
 chain leaves later gates unexecuted.
 
 ```text
+# From browse/: current Go module checks
+test -z "$(find . -type f -name '*.go' -not -path './.git/*' -exec gofmt -l {} +)"
+go build ./...
+go vet ./...
+# Run the Go test suites only in a suitable environment; they may use live Chrome/network.
+go test ./...
+go test -race ./...
 python3 docs/rust-port/validate.py
-make fmt-check && make build && make test && make lint
-make rust-gates
-make rust-hardening
-make rust-native-browser-contract
+cargo fmt --all --check
+cargo check --workspace --all-targets --all-features
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo nextest run --workspace --all-features
+cargo test --workspace --doc --all-features
+cargo hack check --workspace --each-feature --no-dev-deps
+cargo +nightly miri test --workspace
+cargo audit
+cargo deny check
+# Planned/unimplemented at this checkout; do not treat as runnable gates:
+# make rust-gates
+# make rust-hardening
+# make rust-native-browser-contract
 python3 port/harness/run.py --suite all --native-targets
 python3 port/bench/compare.py docs/rust-port/baseline.json port/results/rust-release.json
 python3 port/release/verify.py --oracle-tag v0.8.0 --candidate dist/
