@@ -46,7 +46,10 @@ jobs:
         run: rustup show active-toolchain
 
       - name: Verify provider lease acquisition diagnostics
-        run: python3 -B port/harness/test_daemon_state_key_ownership.py
+        run: |
+          set -euo pipefail
+          python3 -B port/harness/test_daemon_state_key_ownership.py
+          python3 -B port/harness/test_startup_key_paths.py
 
       - name: Build the Rust CLI
         run: |

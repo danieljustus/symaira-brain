@@ -1,0 +1,4328 @@
+{
+  "candidate_source": "c7beb3a7a39dbc10f7e84769fccea5cf20e7f09e",
+  "candidate_dirty": false,
+  "binary_sha256": {
+    "go": "8e92be70d9b908c11f47720b1bf34c5717b327c246686dbb71e03b336f820786",
+    "rust": "9b20e709f1c29ba2df49d1072bae4a101d038ca0de6dc54702a4f7551f5e726c"
+  },
+  "driver_sha256": "96139f39dd2b9f4913ca10f30f8affffc9f80ce88be7b7c9926cf78bfbe843ae",
+  "scope": "Owned local fixture, thirty consecutive responses in one process per route/client; exact outputs checked. First response includes startup. Interarrival durations are process-visible, not isolated Fetch timings. Explicit-port raw path owns unpooled connections; ordinary paths may pool. TCP_NODELAY fixture peer identically applied; HTTPS per-process owned CA trust Linux only. No global performance threshold/claim.",
+  "groups": [
+    {
+      "proxy_scheme": "http",
+      "target_port": "81",
+      "cases": [
+        {
+          "id": "http-81-0",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-1",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-2",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-3",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-4",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-5",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-6",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-7",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-8",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-9",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-10",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-11",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-12",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-13",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-14",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-15",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-16",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-17",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-18",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-19",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-20",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-21",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-22",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-23",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-24",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-25",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-26",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-27",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-28",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-81-29",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "http://127.0.0.1:36113"
+        }
+      ],
+      "matched": 30,
+      "go": {
+        "records": [
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-0",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-1",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-2",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-3",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-4",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-5",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-6",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-7",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-8",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-9",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-10",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-11",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-12",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-13",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-14",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-15",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-16",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-17",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-18",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-19",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-20",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-21",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-22",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-23",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-24",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-25",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-26",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-27",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-28",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-29",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          }
+        ],
+        "response_arrival_ms": [
+          7.52274,
+          7.670343,
+          7.914301,
+          8.094854,
+          8.369859,
+          8.46329,
+          8.686968,
+          9.03306,
+          9.111669,
+          9.354826,
+          9.617022,
+          9.67586,
+          9.866829,
+          10.054762,
+          10.284209,
+          10.415156,
+          10.592244,
+          10.769922,
+          10.970384,
+          11.328445,
+          11.615969,
+          11.696711,
+          11.872787,
+          12.034941,
+          12.202845,
+          12.560945,
+          12.660866,
+          12.813987,
+          12.962662,
+          13.158307
+        ],
+        "response_interarrival_ms": [
+          7.52274,
+          0.14760300000000015,
+          0.24395800000000012,
+          0.18055299999999974,
+          0.27500500000000017,
+          0.09343100000000071,
+          0.2236779999999996,
+          0.3460920000000005,
+          0.07860899999999837,
+          0.24315700000000007,
+          0.2621960000000012,
+          0.058837999999999724,
+          0.19096899999999906,
+          0.18793300000000102,
+          0.2294470000000004,
+          0.13094699999999904,
+          0.17708800000000124,
+          0.17767799999999845,
+          0.20046199999999992,
+          0.3580610000000011,
+          0.28752399999999945,
+          0.08074200000000076,
+          0.17607600000000012,
+          0.16215399999999924,
+          0.16790400000000005,
+          0.3581000000000003,
+          0.09992100000000015,
+          0.15312099999999873,
+          0.14867500000000078,
+          0.19564500000000073
+        ],
+        "process_total_ms": 14.530598,
+        "exit": 0,
+        "accepted_connections": 1
+      },
+      "rust": {
+        "records": [
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-0",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-1",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-2",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-3",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-4",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-5",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-6",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-7",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-8",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-9",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-10",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-11",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-12",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-13",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-14",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-15",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-16",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-17",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-18",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-19",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-20",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-21",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-22",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-23",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-24",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-25",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-26",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-27",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-28",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-81-29",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          }
+        ],
+        "response_arrival_ms": [
+          21.775129,
+          22.389582,
+          22.954454,
+          23.459657,
+          24.004239,
+          24.447618,
+          24.99869,
+          25.460507,
+          25.970587,
+          26.505224,
+          27.060362,
+          27.50283,
+          27.962464,
+          28.406564,
+          29.171519,
+          29.958096,
+          30.448567,
+          31.059228,
+          31.664162,
+          32.249726,
+          32.86239,
+          33.462717,
+          34.050804,
+          34.618411,
+          35.269785,
+          35.923541,
+          36.545089,
+          37.240068,
+          37.847996,
+          38.62587
+        ],
+        "response_interarrival_ms": [
+          21.775129,
+          0.614453000000001,
+          0.5648719999999976,
+          0.5052030000000016,
+          0.5445819999999983,
+          0.4433790000000002,
+          0.5510720000000013,
+          0.4618169999999999,
+          0.5100799999999985,
+          0.534637,
+          0.555138000000003,
+          0.4424679999999981,
+          0.4596340000000012,
+          0.44409999999999883,
+          0.7649550000000005,
+          0.7865770000000012,
+          0.49047099999999944,
+          0.6106610000000003,
+          0.6049340000000001,
+          0.5855640000000015,
+          0.6126639999999952,
+          0.600327,
+          0.5880870000000016,
+          0.5676070000000024,
+          0.651373999999997,
+          0.6537560000000013,
+          0.6215479999999971,
+          0.6949790000000036,
+          0.6079280000000011,
+          0.7778739999999971
+        ],
+        "process_total_ms": 40.67954,
+        "exit": 0,
+        "accepted_connections": 1
+      }
+    },
+    {
+      "proxy_scheme": "http",
+      "target_port": "080",
+      "cases": [
+        {
+          "id": "http-080-0",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-1",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-2",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-3",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-4",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-5",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-6",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-7",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-8",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-9",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-10",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-11",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-12",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-13",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-14",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-15",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-16",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-17",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-18",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-19",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-20",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-21",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-22",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-23",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-24",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-25",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-26",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-27",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-28",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        },
+        {
+          "id": "http-080-29",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "http://127.0.0.1:36113"
+        }
+      ],
+      "matched": 30,
+      "go": {
+        "records": [
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-0",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-1",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-2",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-3",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-4",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-5",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-6",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-7",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-8",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-9",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-10",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-11",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-12",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-13",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-14",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-15",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-16",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-17",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-18",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-19",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-20",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-21",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-22",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-23",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-24",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-25",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-26",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-27",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-28",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-29",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          }
+        ],
+        "response_arrival_ms": [
+          5.625322,
+          5.919957,
+          6.243946,
+          6.355324,
+          6.584129,
+          6.857612,
+          7.22759,
+          7.297045,
+          7.533602,
+          7.6113,
+          7.845333,
+          8.460696,
+          8.632726,
+          8.95972,
+          9.037187,
+          9.212301,
+          12.885196,
+          13.164467,
+          13.352611,
+          13.578402,
+          13.796872,
+          14.076804,
+          14.167842,
+          14.378289,
+          14.67023,
+          15.120079,
+          15.383306,
+          15.545601,
+          15.698763,
+          15.773185
+        ],
+        "response_interarrival_ms": [
+          5.625322,
+          0.2946350000000004,
+          0.3239890000000001,
+          0.1113780000000002,
+          0.22880499999999948,
+          0.2734829999999997,
+          0.3699780000000006,
+          0.0694549999999996,
+          0.23655700000000035,
+          0.07769799999999982,
+          0.23403300000000016,
+          0.6153630000000003,
+          0.17202999999999946,
+          0.3269940000000009,
+          0.07746699999999862,
+          0.17511400000000066,
+          3.6728950000000005,
+          0.2792709999999996,
+          0.18814399999999942,
+          0.22579100000000096,
+          0.21846999999999994,
+          0.27993199999999874,
+          0.09103800000000106,
+          0.21044700000000027,
+          0.29194099999999956,
+          0.4498490000000004,
+          0.26322699999999877,
+          0.1622950000000003,
+          0.15316200000000002,
+          0.07442200000000021
+        ],
+        "process_total_ms": 17.062551,
+        "exit": 0,
+        "accepted_connections": 1
+      },
+      "rust": {
+        "records": [
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-0",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-1",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-2",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-3",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-4",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-5",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-6",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-7",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-8",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-9",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-10",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-11",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-12",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-13",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-14",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-15",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-16",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-17",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-18",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-19",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-20",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-21",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-22",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-23",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-24",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-25",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-26",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-27",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-28",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "http-080-29",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          }
+        ],
+        "response_arrival_ms": [
+          20.830248,
+          21.666931,
+          22.313828,
+          22.965912,
+          23.651407,
+          24.322199,
+          24.892881,
+          25.62761,
+          26.332083,
+          27.028174,
+          27.71446,
+          28.372743,
+          29.15876,
+          29.979639,
+          30.681148,
+          31.370088,
+          32.147842,
+          32.85515,
+          33.646675,
+          34.326831,
+          35.033077,
+          35.744121,
+          36.469916,
+          37.212347,
+          37.999976,
+          38.802948,
+          39.478528,
+          40.190743,
+          40.87148,
+          41.614773
+        ],
+        "response_interarrival_ms": [
+          20.830248,
+          0.8366830000000007,
+          0.6468969999999992,
+          0.6520839999999986,
+          0.6854949999999995,
+          0.6707920000000023,
+          0.5706819999999979,
+          0.7347290000000015,
+          0.7044730000000001,
+          0.6960909999999991,
+          0.6862859999999991,
+          0.6582830000000008,
+          0.7860170000000011,
+          0.8208789999999979,
+          0.7015090000000015,
+          0.6889399999999988,
+          0.7777539999999981,
+          0.7073080000000047,
+          0.791525,
+          0.6801559999999967,
+          0.7062460000000002,
+          0.7110440000000011,
+          0.725794999999998,
+          0.7424310000000034,
+          0.7876289999999955,
+          0.802972000000004,
+          0.6755799999999965,
+          0.7122150000000005,
+          0.6807370000000006,
+          0.7432930000000013
+        ],
+        "process_total_ms": 43.789474,
+        "exit": 0,
+        "accepted_connections": 30
+      }
+    },
+    {
+      "proxy_scheme": "https",
+      "target_port": "81",
+      "cases": [
+        {
+          "id": "https-81-0",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-1",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-2",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-3",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-4",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-5",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-6",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-7",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-8",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-9",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-10",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-11",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-12",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-13",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-14",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-15",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-16",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-17",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-18",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-19",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-20",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-21",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-22",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-23",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-24",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-25",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-26",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-27",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-28",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-81-29",
+          "url": "http://93.184.216.34:81/body",
+          "proxy": "https://127.0.0.1:46617"
+        }
+      ],
+      "matched": 30,
+      "go": {
+        "records": [
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-0",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-1",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-2",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-3",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-4",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-5",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-6",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-7",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-8",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-9",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-10",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-11",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-12",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-13",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-14",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-15",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-16",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-17",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-18",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-19",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-20",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-21",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-22",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-23",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-24",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-25",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-26",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-27",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-28",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-29",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          }
+        ],
+        "response_arrival_ms": [
+          14.089802,
+          14.355814,
+          14.580043,
+          14.780766,
+          15.064575,
+          15.223545,
+          15.434334,
+          15.582037,
+          15.734487,
+          15.860448,
+          16.286111,
+          17.528488,
+          17.771926,
+          18.241035,
+          18.2775,
+          18.462079,
+          18.662101,
+          19.054935,
+          19.234266,
+          19.430713,
+          19.790597,
+          19.825439,
+          20.021706,
+          20.228919,
+          20.392106,
+          20.560039,
+          20.764909,
+          20.973584,
+          21.151623,
+          21.34141
+        ],
+        "response_interarrival_ms": [
+          14.089802,
+          0.2660119999999999,
+          0.22422899999999935,
+          0.20072299999999998,
+          0.28380899999999976,
+          0.15897000000000006,
+          0.21078900000000012,
+          0.14770299999999992,
+          0.15244999999999997,
+          0.1259610000000002,
+          0.42566299999999835,
+          1.2423770000000012,
+          0.24343800000000115,
+          0.46910899999999955,
+          0.03646499999999975,
+          0.18457899999999938,
+          0.2000220000000006,
+          0.39283400000000057,
+          0.17933100000000124,
+          0.19644699999999915,
+          0.359884000000001,
+          0.0348419999999976,
+          0.19626699999999886,
+          0.20721300000000298,
+          0.16318699999999708,
+          0.16793300000000144,
+          0.20486999999999966,
+          0.2086749999999995,
+          0.17803900000000183,
+          0.18978699999999904
+        ],
+        "process_total_ms": 21.660693,
+        "exit": 0,
+        "accepted_connections": 1
+      },
+      "rust": {
+        "records": [
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-0",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-1",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-2",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-3",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-4",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-5",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-6",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-7",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-8",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-9",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-10",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-11",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-12",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-13",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-14",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-15",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-16",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-17",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-18",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-19",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-20",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-21",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-22",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-23",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-24",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-25",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-26",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-27",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-28",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-81-29",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:81/body"
+          }
+        ],
+        "response_arrival_ms": [
+          10.399185,
+          11.042958,
+          12.071402,
+          12.693132,
+          13.404286,
+          13.945855,
+          14.564009,
+          15.14046,
+          15.707437,
+          16.485994,
+          17.253353,
+          18.102186,
+          18.809204,
+          19.436412,
+          20.020174,
+          20.61968,
+          21.355242,
+          21.885393,
+          22.577579,
+          23.197856,
+          23.805184,
+          24.385651,
+          25.035213,
+          25.64197,
+          26.218481,
+          26.804116,
+          27.43521,
+          27.946723,
+          28.540901,
+          29.10934
+        ],
+        "response_interarrival_ms": [
+          10.399185,
+          0.6437730000000013,
+          1.0284440000000004,
+          0.6217299999999994,
+          0.7111540000000005,
+          0.5415689999999991,
+          0.6181540000000005,
+          0.5764509999999987,
+          0.5669770000000014,
+          0.778557000000001,
+          0.767358999999999,
+          0.8488329999999991,
+          0.7070180000000015,
+          0.6272079999999995,
+          0.5837620000000001,
+          0.5995059999999981,
+          0.7355620000000016,
+          0.530151,
+          0.6921859999999995,
+          0.6202770000000015,
+          0.607327999999999,
+          0.5804669999999987,
+          0.6495619999999995,
+          0.6067570000000018,
+          0.576511,
+          0.5856349999999999,
+          0.6310940000000009,
+          0.5115129999999972,
+          0.594178000000003,
+          0.5684389999999979
+        ],
+        "process_total_ms": 30.238686,
+        "exit": 0,
+        "accepted_connections": 1
+      }
+    },
+    {
+      "proxy_scheme": "https",
+      "target_port": "080",
+      "cases": [
+        {
+          "id": "https-080-0",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-1",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-2",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-3",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-4",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-5",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-6",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-7",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-8",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-9",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-10",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-11",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-12",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-13",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-14",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-15",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-16",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-17",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-18",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-19",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-20",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-21",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-22",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-23",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-24",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-25",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-26",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-27",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-28",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        },
+        {
+          "id": "https-080-29",
+          "url": "http://93.184.216.34:080/body",
+          "proxy": "https://127.0.0.1:46617"
+        }
+      ],
+      "matched": 30,
+      "go": {
+        "records": [
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-0",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-1",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-2",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-3",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-4",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-5",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-6",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-7",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-8",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-9",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-10",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-11",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-12",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-13",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-14",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-15",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-16",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-17",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-18",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-19",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-20",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-21",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-22",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-23",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-24",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-25",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-26",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-27",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-28",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-29",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          }
+        ],
+        "response_arrival_ms": [
+          14.968279,
+          15.317507,
+          15.588877,
+          15.891064,
+          16.379482,
+          17.098158,
+          17.111678,
+          17.706177,
+          18.13179,
+          18.591224,
+          18.668771,
+          18.950818,
+          19.148576,
+          19.360336,
+          19.603274,
+          19.829495,
+          20.053284,
+          20.258133,
+          20.488351,
+          20.702054,
+          20.931991,
+          21.117442,
+          21.306087,
+          21.497566,
+          21.6592,
+          21.842267,
+          21.984642,
+          22.122971,
+          22.259017,
+          22.399008
+        ],
+        "response_interarrival_ms": [
+          14.968279,
+          0.3492280000000001,
+          0.2713699999999992,
+          0.302187,
+          0.48841799999999935,
+          0.7186760000000021,
+          0.013519999999999754,
+          0.594498999999999,
+          0.42561299999999846,
+          0.4594340000000017,
+          0.07754699999999914,
+          0.28204700000000216,
+          0.19775799999999677,
+          0.21176000000000172,
+          0.24293799999999877,
+          0.22622100000000245,
+          0.22378900000000002,
+          0.2048489999999994,
+          0.2302180000000007,
+          0.21370299999999887,
+          0.22993699999999961,
+          0.18545100000000048,
+          0.18864500000000106,
+          0.1914789999999975,
+          0.1616339999999994,
+          0.1830670000000012,
+          0.14237500000000125,
+          0.13832899999999881,
+          0.13604600000000033,
+          0.13999099999999842
+        ],
+        "process_total_ms": 22.868518,
+        "exit": 0,
+        "accepted_connections": 1
+      },
+      "rust": {
+        "records": [
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-0",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-1",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-2",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-3",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-4",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-5",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-6",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-7",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-8",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-9",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-10",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-11",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-12",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-13",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-14",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-15",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-16",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-17",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-18",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-19",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-20",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-21",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-22",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-23",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-24",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-25",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-26",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-27",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-28",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          },
+          {
+            "body_hex": "3132333435363738",
+            "error": "",
+            "headers": {
+              "content-length": [
+                "8"
+              ]
+            },
+            "id": "https-080-29",
+            "protocol": "HTTP/1.1",
+            "status": 200,
+            "url": "http://93.184.216.34:080/body"
+          }
+        ],
+        "response_arrival_ms": [
+          11.178493,
+          13.341051,
+          15.822861,
+          18.259083,
+          21.428572,
+          23.204516,
+          25.639055,
+          28.645599,
+          31.320581,
+          34.151408,
+          36.802064,
+          39.58532,
+          42.082304,
+          44.742834,
+          47.278136,
+          50.121562,
+          52.860286,
+          55.503079,
+          58.048496,
+          60.874687,
+          63.426684,
+          66.046482,
+          68.301971,
+          70.686279,
+          73.125976,
+          75.265198,
+          77.514517,
+          79.720741,
+          81.808176,
+          84.075362
+        ],
+        "response_interarrival_ms": [
+          11.178493,
+          2.1625580000000006,
+          2.4818099999999994,
+          2.4362220000000008,
+          3.1694889999999987,
+          1.7759440000000026,
+          2.4345389999999973,
+          3.0065440000000017,
+          2.674982,
+          2.830827000000003,
+          2.650655999999998,
+          2.7832560000000015,
+          2.4969839999999976,
+          2.6605300000000014,
+          2.5353020000000015,
+          2.843425999999994,
+          2.738724000000005,
+          2.6427929999999975,
+          2.5454170000000005,
+          2.8261910000000015,
+          2.551997,
+          2.619797999999996,
+          2.255488999999997,
+          2.3843080000000043,
+          2.4396969999999953,
+          2.1392220000000037,
+          2.249319,
+          2.206224000000006,
+          2.0874349999999993,
+          2.2671859999999953
+        ],
+        "process_total_ms": 85.143346,
+        "exit": 0,
+        "accepted_connections": 30
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+proxy-target-port-80 False
+go {"host":"93.184.216.34:80","request_target":"http://93.184.216.34:80/path"}
+rust {"host":"93.184.216.34:80","request_target":"http://93.184.216.34/path"}
+proxy-target-port-080 False
+go {"host":"93.184.216.34:080","request_target":"http://93.184.216.34:080/path"}
+rust {"host":"93.184.216.34:080","request_target":"http://93.184.216.34/path"}
+proxy-target-port-00080 False
+go {"host":"93.184.216.34:00080","request_target":"http://93.184.216.34:00080/path"}
+rust {"host":"93.184.216.34:00080","request_target":"http://93.184.216.34/path"}
+proxy-target-port-81 True
+go {"host":"93.184.216.34:81","request_target":"http://93.184.216.34:81/path"}
+rust {"host":"93.184.216.34:81","request_target":"http://93.184.216.34:81/path"}
+proxy-target-port-00081 False
+go {"host":"93.184.216.34:00081","request_target":"http://93.184.216.34:00081/path"}
+rust {"host":"93.184.216.34:00081","request_target":"http://93.184.216.34:81/path"}

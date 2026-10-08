@@ -7,6 +7,8 @@ VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev
 # Keep fixture checks on the Go toolchain declared by this checkout.
 GO_ORACLE_TOOLCHAIN := $(shell awk '$$1 == "go" { print "go" $$2; exit }' go.mod)
 GO_ORACLE_REF ?= HEAD
+OPENCODE_ORACLE_REVISION := a92385d2deecc08d1fd96869908b81b7abd355fe
+OPENCODE_ORACLE_TOOLCHAIN := go1.26.7
 LDFLAGS := -X main.version=$(VERSION)
 
 EXTERNAL_ARTIFACT_ROOT := .
@@ -89,7 +91,7 @@ rust-go-printable-check:
 .PHONY: usage-opencode-check
 ## usage-opencode-check: Verify pinned OpenCode request/parse corpus without rewriting it
 usage-opencode-check:
-	$(EXTERNAL_RUN) env GOTOOLCHAIN=go1.26.7 go run ./scripts/usage-request-oracle/opencode -check
+	$(EXTERNAL_RUN) env GOTOOLCHAIN=$(OPENCODE_ORACLE_TOOLCHAIN) go run ./scripts/usage-request-oracle/opencode -oracle-revision $(OPENCODE_ORACLE_REVISION) -oracle-toolchain $(OPENCODE_ORACLE_TOOLCHAIN) -check
 
 ## usage-oracle-check: Ensure native Usage fixtures remain derived from Go
 usage-oracle-check:

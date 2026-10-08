@@ -1,0 +1,233 @@
+{
+  "tested_source": "6eb3cde9db6160d099a29670c4ba287f2faa5891",
+  "review_publication": "6e19b2bdc847915ee645ffe79af0b79d6e726fe7",
+  "decision": "APPROVE bounded test-only deadline correction",
+  "proofs": [
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-independent-review.md",
+      "sha256": "2903466365a305c51906cdf19b7c742a7464e376e954b1ff8e6f1a56569b47f2",
+      "gzip_file": "symaira-fetch773-deadline-root-independent-review.md.gz",
+      "compressed_sha256": "24ba91c1c865346d6ae07df13cc32648c030f2a55a1ae1d13bead9dd98359aae"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-retire.log",
+      "sha256": "7e3cc76031fc86ec332ab3421bf557447fe833c055dbe6a5944eebac9f0f0476",
+      "gzip_file": "symaira-fetch773-deadline-root-retire.log.gz",
+      "compressed_sha256": "99f217b92ba9a40937d9ebf11f9adb4f9aff62177e063617dc4709d960f1563e"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-retire.py",
+      "sha256": "3b13ed82f1e6eaaa8dfcaeadf538a6df7d546d1404e1ae3807d108c5a1d5d6dd",
+      "gzip_file": "symaira-fetch773-deadline-root-retire.py.gz",
+      "compressed_sha256": "4db7a774fb3e80c51c34737f5192ae58db15d413a0e90b159e274a22767bda8f"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-verification.json",
+      "sha256": "bd7b35aa03851bafc570dd6f5989c3f78e863c2e35dffa93616ac607e703416a",
+      "gzip_file": "symaira-fetch773-deadline-root-verification.json.gz",
+      "compressed_sha256": "39ca92faa242c76ce48f5bec36a586cc8a2036571f1579253c51469b1ae88420"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-verification-feature-variant.log",
+      "sha256": "c177d1181ecb16e27270569bcd3ace05edce0ba323bc3271401745a269664fbc",
+      "gzip_file": "symaira-fetch773-deadline-root-verification-feature-variant.log.gz",
+      "compressed_sha256": "4e4beb41179fbbb7a527f473c45137c2ca1bdc73bbc0b9284541682cee1dc14a"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-verification-initial.log",
+      "sha256": "b6a45e3b89caef76e587385a9d8b34dafce03982a8ed5aa59c2e8cf003740b69",
+      "gzip_file": "symaira-fetch773-deadline-root-verification-initial.log.gz",
+      "compressed_sha256": "ffb8338c1ba785c3b28f86120508d3b5042bcd7491b0e69e96f9144c184b122c"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-verify-initial.py",
+      "sha256": "e46fa1c90e73fc21032621951040cc7327a9f91f4794ab8b90d84f17e00f21a0",
+      "gzip_file": "symaira-fetch773-deadline-root-verify-initial.py.gz",
+      "compressed_sha256": "3708d66b47a9a288e40abb537b112f1d114aea391f5d94becf57df8fe2a2bcbb"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-matrix.log",
+      "sha256": "f5bfa3059aad5fdddb33c5356c9bfa859a33d90f12f51ff8393cf106c56421b4",
+      "gzip_file": "symaira-fetch773-deadline-root-matrix.log.gz",
+      "compressed_sha256": "fb4163f95e09b29453084e626e0d56ce53cf31c1f8f6c80da11cb12c2ccb896c"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-actionlint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_file": "symaira-fetch773-deadline-root-actionlint.log.gz",
+      "compressed_sha256": "42a151f628dfa15f7499aed43f01356b52a80207c7644c00719e0cb9b8795c13"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_file": "symaira-fetch773-deadline-root-fmt.log.gz",
+      "compressed_sha256": "639d1d8d10056adba513b779e0162b85bba31c9f96105fc0977676a7d02d4237"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-clippy.log",
+      "sha256": "6a981e4e2a0c9af6dead9afee0224555ade213f42082f62ec9b38c4d1fc0dd36",
+      "gzip_file": "symaira-fetch773-deadline-root-clippy.log.gz",
+      "compressed_sha256": "1bb2a299d03a714ec01941437a0519d526d46c33a67514605aef916f0105b091"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-mcp.json",
+      "sha256": "63b6266604b67e8617cf82eb6bb4a0123b9d8de52378c4b893089f911b168861",
+      "gzip_file": "symaira-fetch773-deadline-root-mcp.json.gz",
+      "compressed_sha256": "644ce0da521f6200812e3e971ae1e7d64a4df302fe921f3cf2d47ef73f3e8d42"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-mcp.json.tests.log",
+      "sha256": "d580d353314f76004c8e9ed76b335575827eac9235d6b46a878b7de3ac5c62a4",
+      "gzip_file": "symaira-fetch773-deadline-root-mcp.json.tests.log.gz",
+      "compressed_sha256": "fe3f9a0f18e61dcf5b50656f6ea186586cd985fd8ed639c749344c5ddcdfc26b"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-mcp.log",
+      "sha256": "5df69082fee5d7f320a2f97da92fb463fbef95eeab35aff1aa68dd13446f22b4",
+      "gzip_file": "symaira-fetch773-deadline-root-mcp.log.gz",
+      "compressed_sha256": "20d622df535a192f883da2ed6f6360db7562065c17d4d1f286a475ac339f1547"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-verification.log",
+      "sha256": "bd7b35aa03851bafc570dd6f5989c3f78e863c2e35dffa93616ac607e703416a",
+      "gzip_file": "symaira-fetch773-deadline-root-verification.log.gz",
+      "compressed_sha256": "d62487d3ec0e2a275ff9b987e6cf9323e927feb5aae2a9822a985fd016d4c425"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-verify.py",
+      "sha256": "99dd6f3a0fde42cccf68fcd4e4d841c174bf7f699ed62065c78354d604042bb5",
+      "gzip_file": "symaira-fetch773-deadline-root-verify.py.gz",
+      "compressed_sha256": "60df71c1240f1126bbfcee9ebb19b28e6fa83efa8c949f2f15e240dd15d4acd6"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-daemon.json",
+      "sha256": "ecd103a739de1c4d00fd56c104f496d8f8dfb2879e267a7844f566e3190d0b2b",
+      "gzip_file": "symaira-fetch773-deadline-root-daemon.json.gz",
+      "compressed_sha256": "615570965cd032b7de86f8b0e62fd3d481829791737dc8831da947d059ddd8d0"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-daemon.log",
+      "sha256": "bc05628be3eaeb347ddff73fbf2d1462a22dc0921a0ee8816656e5b257383c1c",
+      "gzip_file": "symaira-fetch773-deadline-root-daemon.log.gz",
+      "compressed_sha256": "41d1e7e8f8c0c7fd4deec80817d7d6fc28e36c4886a215a496421ba5e51ee939"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-deadline-controls.json",
+      "sha256": "837736c5c74f3c46e1b0ecc407c0cbf83566f1d7c3f2a1b5bf744e91b09cf959",
+      "gzip_file": "symaira-fetch773-deadline-root-deadline-controls.json.gz",
+      "compressed_sha256": "69f93a6ccf34f731d1b72ef776b2090478db5e0dd23f900e690129b4020e4bc4"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-deadline-controls.log",
+      "sha256": "c2855415d292d72ba098bec29608e3ea9e2ec900747debe389d94f2b021c9f1f",
+      "gzip_file": "symaira-fetch773-deadline-root-deadline-controls.log.gz",
+      "compressed_sha256": "89ea3068de94f1c4d7c2525e43118703332af1da5e392816793e3129a3034d04"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-proxy-auth-controls.json",
+      "sha256": "c7e55d77aa6a9b1f89e24173d757b262f80b27fd1288fe588398b99f50a0c58a",
+      "gzip_file": "symaira-fetch773-deadline-root-proxy-auth-controls.json.gz",
+      "compressed_sha256": "e531aac0e9e7017d8c5dd3927268441093d063cd68a20561e1ff5d09b9802345"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-proxy-auth-controls.log",
+      "sha256": "b1f45278d1a5c4d285bb40a6c6d31cf380f2f00fb685c97721704ec2deccc918",
+      "gzip_file": "symaira-fetch773-deadline-root-proxy-auth-controls.log.gz",
+      "compressed_sha256": "19932999725147a95788038b4e6b485f0fd6d3aa27c6076d92d554b0bbf42b6a"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-proxy-auth.json",
+      "sha256": "f240b9c974fa87d306532762984e11c4f4c89eb9725a5da6816dd73de03b3383",
+      "gzip_file": "symaira-fetch773-deadline-root-proxy-auth.json.gz",
+      "compressed_sha256": "f9bbac4f49adf976f3d092d56eca66d6745cd1f7d87d6358b06e3f6158d43251"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-proxy-auth.log",
+      "sha256": "55bca94495b86d28e964833780d3b85e5b6921d658cd013a18d1404de021a089",
+      "gzip_file": "symaira-fetch773-deadline-root-proxy-auth.log.gz",
+      "compressed_sha256": "fe821434fd6c82fce3730f4f073154645cfe3d0e1acf27894173eb0c9bea2ab6"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-raw-proxy-controls.json",
+      "sha256": "66b8fe5b3f03bf5c366a28594316c48c5d2b8c713bf19fbe552dacdfba5a9ac7",
+      "gzip_file": "symaira-fetch773-deadline-root-raw-proxy-controls.json.gz",
+      "compressed_sha256": "a1516d2eedb76c2b858b430a2d47c208f9fdd7024c59b8c91ac5664b043ac547"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-raw-proxy-controls.log",
+      "sha256": "a3bd45b93e10da07068a3276fd1dac788ff79c6a617fbea24be9b6e38500d60f",
+      "gzip_file": "symaira-fetch773-deadline-root-raw-proxy-controls.log.gz",
+      "compressed_sha256": "31f3059155101bed6d2cbadcb06ffc5a597e08dda48f54503c9a43f0f2437dfc"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-raw-proxy.json",
+      "sha256": "238db382cb3cf74dba10b6ae141e80d3236771d450aa886ad64ff687f0e9b88e",
+      "gzip_file": "symaira-fetch773-deadline-root-raw-proxy.json.gz",
+      "compressed_sha256": "8d93185601736ac8657db26c1d5fc2386bcf7ccd3325d6cad73e8254e18307a0"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-raw-proxy.log",
+      "sha256": "67e10d286971c8f243c0d56e536408e1401c746cae26054e490bf6d79d355079",
+      "gzip_file": "symaira-fetch773-deadline-root-raw-proxy.log.gz",
+      "compressed_sha256": "25e259f7e2759e40f5472fe6840f9e66a99db264d7cf859acb78e6310d6e4b4b"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-process-controls.json",
+      "sha256": "f4773d37103f0bd6539b32deb14c4129f974da63660e3de6a75741dc3dd9962b",
+      "gzip_file": "symaira-fetch773-deadline-root-process-controls.json.gz",
+      "compressed_sha256": "0a6e2f60888a46220b955c627d6447185f16d70f4b0f027a272d70896d1c1193"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-process-controls.log",
+      "sha256": "ac3523da5e6c73426d114e70a372a9f06115822acfb792eaa48edfe25902db76",
+      "gzip_file": "symaira-fetch773-deadline-root-process-controls.log.gz",
+      "compressed_sha256": "0479abe733daba7872281a943b9c0bf39b860164668f6377fd720d6d05b1554e"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-process.json",
+      "sha256": "4229d6af00ce7251897598f105f3fc56d207cd4494bcc331187926bf460bd50d",
+      "gzip_file": "symaira-fetch773-deadline-root-process.json.gz",
+      "compressed_sha256": "c460e8d82eee0c45a9363030d88186ec63668c449e8a2068417a1eddb3cfb3ec"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-process.log",
+      "sha256": "b950aa7bfb5d03f2fbf9232362239399314c36ef3a7586303e74f53d05953657",
+      "gzip_file": "symaira-fetch773-deadline-root-process.log.gz",
+      "compressed_sha256": "58ac6d1cb8a53174008f40d4a5f3b24e48f4c24cca90cb6c5ba63c17b6cb3f3e"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-repeated-phases.json",
+      "sha256": "617d3d1f4855bbeaf82fe9be2ac4b5543cfcf7380a42be499c63201409877f83",
+      "gzip_file": "symaira-fetch773-deadline-root-repeated-phases.json.gz",
+      "compressed_sha256": "c4f220c3ff0b08282d6e6671bc67d08112fd376106d7ce16fb6441b6bf97955b"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-repeated-phases.log",
+      "sha256": "54f638cb8a70fdc5e4af888dc90c053caf29bb5e6691af7394a027e068a1be99",
+      "gzip_file": "symaira-fetch773-deadline-root-repeated-phases.log.gz",
+      "compressed_sha256": "5fce9c62070e42097d87fb535c514af5fedc4092b2e00520c73d9eefbfe9fe95"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-repeated-phases.py",
+      "sha256": "84ea1973d4d388f1ffc760f6d4c54bdd0d57795545797329860da39972bb9b71",
+      "gzip_file": "symaira-fetch773-deadline-root-repeated-phases.py.gz",
+      "compressed_sha256": "5d1643d081265f9e17d6d1341608ead93969f7bf2655c201f6595a1d7cd769ee"
+    },
+    {
+      "original_path": "/tmp/symaira-fetch773-deadline-root-independent-receipt.json",
+      "sha256": "e2d8e12e6a0ff5776fba21412c0c28634b9e8dc983f8e66e22f8ba5234081860",
+      "gzip_file": "symaira-fetch773-deadline-root-independent-receipt.json.gz",
+      "compressed_sha256": "71ccf21b2cf68af204f2df34296562b59fe86316a1fc9fffd9ee95a19262d604"
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-fetch773-deadline-root-idle-binaries/receipt.json",
+      "sha256": "fb4b22b94dffd04b641e57617bdbf5c59a82dff45ef185f9d96704e097e0909f",
+      "gzip_file": "receipt.json.gz",
+      "compressed_sha256": "ba40395125de4293be1ad371e6115d25181d11f1e2ebd99409cbc1643b6ffd4d"
+    }
+  ],
+  "integrated_main": "2b6d49f250a81650eda1b93cec7d859a171873bb",
+  "production_tests_harness_workflow_Cargo_unchanged": true,
+  "target_retired_only_after_all_current_ELF_and_users_verified": true,
+  "remaining": "genuine current-head native6/protected and801 final integration; broader773/772/release"
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": 2,
+  "gate": "blocked",
+  "workloads": {
+    "cli": {
+      "p95_change_percent": -59.161136415557216
+    },
+    "mcp": {
+      "p95_change_percent": 51.81170308160794
+    },
+    "daemon": {
+      "p95_change_percent": 145.552724778808
+    },
+    "fetch": {
+      "p95_change_percent": -62.98412913497857,
+      "hard_gate": "<=10%"
+    }
+  },
+  "reasons": [
+    "p95 regression gate is missing or exceeds 10%"
+  ],
+  "size_reduction_percent": 42.17884040700329
+}

@@ -240,7 +240,7 @@ async fn redirect_loop_is_bounded() {
     let mut request = Request::get(server.url("/loop"));
     request.allow_private = true;
     let result = client.fetch(request).await;
-    assert!(matches!(result, Err(FetchError::Request(_))));
+    assert!(matches!(result, Err(FetchError::Redirect(_))));
     assert!(server.requests.load(Ordering::SeqCst) <= 11);
 }
 
@@ -253,7 +253,7 @@ async fn cross_host_redirect_is_rejected_by_allowlist() {
     request.allowlist = Some(Allowlist::parse(&[server.address.ip().to_string()]).unwrap());
     let result = client.fetch(request).await;
     match result {
-        Err(FetchError::Request(error)) => assert!(
+        Err(FetchError::Redirect(error)) => assert!(
             !error.to_string().is_empty(),
             "redirect rejection error was empty"
         ),
@@ -410,4 +410,37 @@ fn read_all(mut reader: impl Read) -> Vec<u8> {
     let mut body = Vec::new();
     reader.read_to_end(&mut body).unwrap();
     body
+}
+
+#[tokio::test]
+async fn proxy_peer_uses_shared_pinned_policy_before_connecting() {
+    use std::sync::{Arc, Mutex};
+    use symbrowse_fetch::PinnedResolver;
+    let looked_up = Arc::new(Mutex::new(Vec::new()));
+    let recorded = Arc::clone(&looked_up);
+    let client = FetchClient::honest()
+        .unwrap()
+        .with_resolver(PinnedResolver::with_lookup(move |host| {
+            recorded.lock().unwrap().push(host.to_owned());
+            // A proxy hostname rebinding to a private peer must fail before dialing.
+            Ok(vec![
+                if host == "93.184.216.34" {
+                    "93.184.216.34:0"
+                } else {
+                    "127.0.0.1:0"
+                }
+                .parse()
+                .unwrap(),
+            ])
+        }));
+    let mut request = Request::get("http://93.184.216.34/");
+    request.proxy = Some("http://private-proxy.fixture:12345".to_owned());
+    assert!(matches!(
+        client.fetch(request).await,
+        Err(FetchError::BlockedPrivate(_))
+    ));
+    assert_eq!(
+        *looked_up.lock().unwrap(),
+        ["93.184.216.34", "private-proxy.fixture"]
+    );
 }

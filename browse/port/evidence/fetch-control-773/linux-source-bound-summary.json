@@ -1,0 +1,104 @@
+{
+  "source_revision": "8973726d531a946a6e4a041f0e590b9a16407bbe",
+  "source_clean": true,
+  "actual_main_ancestor": "31de72294521701fc4b1a0bce39f03cc34d72e7e",
+  "parent_test_summaries": 24,
+  "parent_tests_passed": 117,
+  "parent_tests_failed": 0,
+  "parent_tests_ignored": 1,
+  "isolated_child_executions": 7,
+  "isolated_child_evidence": "Successful cache_environment_uses_go_platform_fallbacks_in_isolated_children invokes --ignored child seven times and requires 1 passed each time.",
+  "fetch_tests": 49,
+  "process_counts": {
+    "all": 231,
+    "actual_http": 64,
+    "route_only_no_network": 167,
+    "matched": 231
+  },
+  "actual_executable_mutants_rejected": 5,
+  "strict_clippy": "passed: locked fetch/daemon/CLI all-targets all-features -D warnings",
+  "fmt": "passed",
+  "actionlint": "passed",
+  "matrix_validation": "88contracts/17items/acyclic/links valid",
+  "original_go_fixture_checks": "Go1.26.6: static28vectors +11profiles/15robots; production internal/fetch/... tests passed",
+  "identity_tests": 4,
+  "legacy_benchmark_tests": {
+    "executed": 5,
+    "skipped": 2,
+    "skip_reason": "manual macOS NVMe-only tests; excluded from native HTTP evidence"
+  },
+  "paired_comparison": {
+    "schema_version": 2,
+    "gate": "pass",
+    "workloads": {
+      "cli": {
+        "p95_change_percent": -52.180354767961546
+      },
+      "mcp": {
+        "p95_change_percent": -50.2885591216569
+      },
+      "daemon": {
+        "p95_change_percent": -2.343631013373726
+      },
+      "fetch": {
+        "p95_change_percent": -63.857141021632714,
+        "hard_gate": "<=10%"
+      }
+    },
+    "reasons": [],
+    "size_reduction_percent": 42.2961096570049
+  },
+  "same_host_size_reduction_percent": 60.25199534014474,
+  "limitations": [
+    "Native six-target CI receipts pending; Windows paired daemon/fetch probe not ported.",
+    "Historical value size baseline is Darwin arm64; paired timing host is Linux x86_64.",
+    "Partial static transport slice: no default cutover or #773 closure claim."
+  ],
+  "candidate_source_sha256": {
+    "browse/crates/symbrowse-fetch/Cargo.toml": "76806a7e0eb60c56e223489ac1505cf82834a107c73448868427094372756839",
+    "browse/crates/symbrowse-fetch/examples/control_probe.rs": "db1127787e338801ee5c5c52b741319379584322b6f9600db8d58b95081b0520",
+    "browse/crates/symbrowse-fetch/src/archive.rs": "873d2e6a4cff7a9e40e744f3f3ae4f9d6b5ece221c8c0059ef5e4ef2d61845cc",
+    "browse/crates/symbrowse-fetch/src/batch.rs": "e5ed01876f33a15b3dcf55233a9bed3e4cdb9dff1a6efcf8322e07a66dc21cab",
+    "browse/crates/symbrowse-fetch/src/cache.rs": "badfbd680535e07590d13fc0c8ba6b96cf8393ea925d9e52e0d948caef0f13e7",
+    "browse/crates/symbrowse-fetch/src/client.rs": "3fa22e813dcca16d47c2f2a8481bdbe952c2dbba83ccf160581cce384714dfb0",
+    "browse/crates/symbrowse-fetch/src/dom.rs": "86236866574ea3244d14d2a4c7748c1872edb169a98d052da6ce3a568dab96d8",
+    "browse/crates/symbrowse-fetch/src/honest/headers.rs": "c6b3861f688ee915d6e15aca37c5045b4b2cac4c58625d7f579428b815fd14c8",
+    "browse/crates/symbrowse-fetch/src/honest/proxy.rs": "34b9823153979b625de9056d3f9651f212514e89644c0ec13f368bdf19e26656",
+    "browse/crates/symbrowse-fetch/src/honest/response.rs": "4ea42197e9f4aa427f1b9c84a3159b4577050c7a0e62aa8ba9f026d95a2486d0",
+    "browse/crates/symbrowse-fetch/src/honest.rs": "c0695743a4e1ee11d22634f839c70023ee396b17de8b21042673a8badf38833f",
+    "browse/crates/symbrowse-fetch/src/lib.rs": "3f6827f642801d5758d34b2296e44b653326655a324ce12b7e47f913730bd691",
+    "browse/crates/symbrowse-fetch/src/pipeline.rs": "f165cd45e6dbc01d5648a6f99ae32db2cf3a85fe9fd72f4ff7e9efc700732537",
+    "browse/crates/symbrowse-fetch/src/rate_limit.rs": "00dd7988806d57ad8c4506cb49825861f76809dba50ed18d025a135bfe712c5e",
+    "browse/crates/symbrowse-fetch/src/relevance.rs": "d839012ad237338f0c10812032dc95f07fe20f89862b1e649111b1053b9ea345",
+    "browse/crates/symbrowse-fetch/src/render.rs": "9682c521e74053cc228ef8d1a38d5b957f67541718b458a3ff1fe5461e319d8e",
+    "browse/crates/symbrowse-fetch/src/retry.rs": "37881585695ae7b54d8155880891c3dbc625c4408b483a8d9238e2bba9463c1f",
+    "browse/crates/symbrowse-fetch/src/robots.rs": "5c7e99cd5c8ec699156f5ced155ff6890f51063670f99911e39b21b23d3a855c",
+    "browse/crates/symbrowse-fetch/src/semantic.rs": "3075b95dcd29078ee74208e89b25f363551e6e429a47d21a74e4675b5e941857",
+    "browse/crates/symbrowse-fetch/src/types.rs": "bf98e1701953d64d15b7c08db20a48019caaa0fc97722178f729db61a1b7b845",
+    "browse/crates/symbrowse-fetch/tests/archive_http.rs": "28c6382d01b771a8493d57c1a7dc820b7fac0fabf860b5392299192392170e05",
+    "browse/crates/symbrowse-fetch/tests/control_contract.rs": "28e39cd0eaea537b376fe189f59fd595bf36399697e419b3e0a80b4bd91deea3",
+    "browse/crates/symbrowse-fetch/tests/http.rs": "08ae47a470de5a58d33ab4ef332bf0a624e123ea0bb403881a6f99a55fb00da4",
+    "browse/crates/symbrowse-fetch/tests/pipeline_controls.rs": "5b865449f2f3231e3764b0bff9587896930c3d38a3a7c9c9faf4308157a6cfd0",
+    "browse/crates/symbrowse-fetch/tests/render_corpus.rs": "552343cf4ff128f42279a61df138290fefa2f2b01c0fbc36a459edeb3eba368f",
+    "browse/crates/symbrowse-fetch/tests/retry.rs": "a2d2130caf06c2661da34b14d1683417b17b77b481e0588cdd18cd477b86d69e",
+    "browse/crates/symbrowse-fetch/tests/robots.rs": "bd580f54baab3a06706550b20903dd2411f0f4a4211a19666bab8d39e571c1c0",
+    "browse/crates/symbrowse-fetch/tests/static_controls.rs": "80977c24d9976e42a621239a8e2c1bed52d332736d43c1ed160ec1d470e475a6"
+  },
+  "harness_workflow_sha256": {
+    "browse/port/harness/fetch_control_process.py": "bce9bdae888bb8c231c66c4823c35b6be121e815b38367fd0f02fc0454273302",
+    "browse/port/harness/fetch_control_negative.py": "0a7b20628da27fc3c7278805233c1aec818efc1da7b9f4c6dbc770ee73578417",
+    "browse/port/harness/fetch_control_773.go.txt": "9e0729730cedd8402b0aeff0604ad0a56bde67f0178d5391df076c49c071f3d4",
+    "browse/port/harness/run_fetch_control_773.sh": "df7f86906d56f5e1baecb341bdf5276883581826fab4ee99c5d75413a3136c04",
+    "browse/port/bench/run.py": "7075dc12cc32af3141edc5920de3232a61842fe0cb225285fbcef8dbc84959c9",
+    "browse/port/bench/compare.py": "b361e42ec8988de38dc4c1e6e53a4a80717b11fe7ea85c22503ca9586b5010d2",
+    "browse/port/bench/build_receipt.py": "b50b232e98f80b3f2cf49a4ff4f67c3cb97d376f41e15e081b9f9f12add1c14d",
+    "browse/port/bench/test_identity.py": "c570b32f7856e47f175e3c16ab22761c5c5df40f4214b0c5cc3a7a251c9470fd",
+    ".github/workflows/browse-fetch-native.yml": "13635cae9710df9bc9fb9678c39854f18a507f01e4c218e5df989cf0e91e9a5e"
+  },
+  "logs_sha256": {
+    "symaira-fetch773-fixed-clean-native-tests.log": "6a524520159a7837823a28c4e2a6a264acc87182e9ca3fd5fc617515c34c724a",
+    "symaira-fetch773-fixed-clean-clippy.log": "f694a9e074374d315f58b8a63ce849858b1b8708cf56b3d194218605bd2a9d6e",
+    "symaira-fetch773-fixed-original-go-gate.log": "93d6dc57f5cadd88f1a2389f1083335b0681796f20b3adb21bf93a714bd7dbda",
+    "symaira-fetch773-fixed-release-build.log": "af6ab714447a5b7608bdb638d1e5d788cd8d3e8d7e8a9f3150697cd4a2d12295"
+  }
+}

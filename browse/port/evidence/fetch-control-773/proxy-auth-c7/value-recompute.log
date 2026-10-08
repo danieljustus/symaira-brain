@@ -1,0 +1,63 @@
+{
+  "samples": 240,
+  "pairs": 120,
+  "gate": "pass",
+  "cost": [
+    {
+      "scheme": "http",
+      "port": "81",
+      "side": "go",
+      "connections": 1,
+      "later_response_median_ms": 0.18055299999999974
+    },
+    {
+      "scheme": "http",
+      "port": "81",
+      "side": "rust",
+      "connections": 1,
+      "later_response_median_ms": 0.5855640000000015
+    },
+    {
+      "scheme": "http",
+      "port": "080",
+      "side": "go",
+      "connections": 1,
+      "later_response_median_ms": 0.22880499999999948
+    },
+    {
+      "scheme": "http",
+      "port": "080",
+      "side": "rust",
+      "connections": 30,
+      "later_response_median_ms": 0.7062460000000002
+    },
+    {
+      "scheme": "https",
+      "port": "81",
+      "side": "go",
+      "connections": 1,
+      "later_response_median_ms": 0.2000220000000006
+    },
+    {
+      "scheme": "https",
+      "port": "81",
+      "side": "rust",
+      "connections": 1,
+      "later_response_median_ms": 0.6181540000000005
+    },
+    {
+      "scheme": "https",
+      "port": "080",
+      "side": "go",
+      "connections": 1,
+      "later_response_median_ms": 0.21370299999999887
+    },
+    {
+      "scheme": "https",
+      "port": "080",
+      "side": "rust",
+      "connections": 30,
+      "later_response_median_ms": 2.5353020000000015
+    }
+  ]
+}

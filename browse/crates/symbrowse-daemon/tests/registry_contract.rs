@@ -18,6 +18,29 @@ fn owned_root() -> PathBuf {
     ))
 }
 
+fn timestamp_at_least(value: &str, reference: &str) -> bool {
+    let parse = |value: &str| {
+        time::OffsetDateTime::parse(value, &time::format_description::well_known::Rfc3339)
+            .expect("registry timestamps use RFC3339")
+    };
+    parse(value) >= parse(reference)
+}
+
+#[test]
+fn rfc3339_fractional_timestamps_compare_by_instant() {
+    let format = &time::format_description::well_known::Rfc3339;
+    let earlier = time::OffsetDateTime::parse("2026-10-08T00:00:00.123Z", format)
+        .unwrap()
+        .format(format)
+        .unwrap();
+    let later = time::OffsetDateTime::parse("2026-10-08T00:00:00.1234Z", format)
+        .unwrap()
+        .format(format)
+        .unwrap();
+    assert!(later < earlier, "fixture must expose lexical misordering");
+    assert!(timestamp_at_least(&later, &earlier));
+}
+
 #[test]
 fn constructor_defaults_without_creating_profiles() {
     let registry = SessionRegistry::new(SessionRegistryOptions {
@@ -101,7 +124,11 @@ fn isolation_errors_order_and_clear_preserve_private_profiles() {
     assert_eq!(registry.reference("alpha", "save").unwrap(), "@e2");
     assert!(registry.reference("beta", "save").is_err());
     registry.touch("alpha").unwrap();
-    assert!(registry.get("alpha").unwrap().last_activity >= alpha.last_activity);
+    let touched = registry.get("alpha").unwrap();
+    assert!(
+        timestamp_at_least(&touched.last_activity, &alpha.last_activity),
+        "touch must not move last_activity backwards",
+    );
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;

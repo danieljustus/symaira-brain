@@ -261,6 +261,8 @@ def run_once(binary: Path, probe: Probe, env: dict[str, str], cwd: Path) -> dict
 
 
 def summarize(samples: list[dict[str, object]]) -> dict[str, object]:
+    if not samples:
+        return {"status": "error", "samples": 0, "reason": "no executed samples"}
     passed = [
         int(duration)
         for item in samples
@@ -269,7 +271,7 @@ def summarize(samples: list[dict[str, object]]) -> dict[str, object]:
     ]
     statuses = [str(item.get("status")) for item in samples]
     if len(passed) != len(samples):
-        return {"status": statuses[0] if statuses else "error", "samples": samples}
+        return {"status": next((value for value in statuses if value != "pass"), "error"), "samples": samples}
     ordered = sorted(passed)
     p95 = ordered[max(0, (len(ordered) * 95 + 99) // 100 - 1)]
     peak_rss = [
@@ -509,20 +511,30 @@ def fetch_probe(
         server.server_close()
 
 
-def binary_identity(binary: Path, repo_root: Path) -> dict[str, object]:
+def binary_identity(binary: Path, repo_root: Path, *, go_binary: bool = False,
+                    build_receipt: Path | None = None) -> dict[str, object]:
     digest = hashlib.sha256(binary.read_bytes()).hexdigest()
-    try:
-        revision = subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=repo_root, text=True, stderr=subprocess.DEVNULL
-        ).strip()
-    except (OSError, subprocess.CalledProcessError):
-        revision = "unknown"
-    return {
+    # A measurement checkout is not evidence of either executable's source.
+    identity: dict[str, object] = {
         "path": str(binary),
         "size_bytes": binary.stat().st_size,
         "sha256": digest,
-        "vcs_revision": revision,
+        "vcs_revision": "unknown",
     }
+    if go_binary:
+        metadata = subprocess.check_output(["go", "version", "-m", str(binary)], text=True)
+        settings = dict(line.strip().split("\t", 1)[1].split("=", 1)
+                        for line in metadata.splitlines() if line.startswith("\tbuild\t")
+                        and "=" in line)
+        identity.update(vcs_revision=settings.get("vcs.revision", "unknown"),
+                        vcs_modified=settings.get("vcs.modified", "unknown"),
+                        go_build_metadata=metadata)
+    if build_receipt is not None:
+        receipt = json.loads(build_receipt.read_text())
+        if receipt.get("binary_sha256") != digest:
+            raise ValueError("build receipt does not bind the measured executable")
+        identity.update(vcs_revision=receipt["source_revision"], build_receipt=receipt)
+    return identity
 
 
 def run_binary(
@@ -533,6 +545,7 @@ def run_binary(
     repo_root: Path,
     *,
     static_mode: bool,
+    build_receipt: Path | None = None,
 ) -> dict[str, object]:
     if not binary.is_file() or not os.access(binary, os.X_OK):
         return {"status": "blocked", "reason": f"missing or non-executable binary: {binary}"}
@@ -546,7 +559,8 @@ def run_binary(
             '{"jsonrpc":"2.0","id":2,"method":"tools/list"}\n',
         ),
     }
-    result: dict[str, object] = {"identity": binary_identity(binary, repo_root)}
+    result: dict[str, object] = {"identity": binary_identity(binary, repo_root,
+        go_binary=not static_mode, build_receipt=build_receipt)}
     for name, probe in probes.items():
         if name in selected:
             result[name] = summarize([run_once(binary, probe, env, root) for _ in range(runs)])
@@ -562,6 +576,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--go", type=Path)
     parser.add_argument("--rust", type=Path)
+    parser.add_argument("--rust-build-receipt", type=Path,
+                        help="source/toolchain build receipt binding the Rust binary digest")
+    parser.add_argument("--go-build-receipt", type=Path,
+                        help="verified source build receipt when Go omits embedded VCS metadata")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--runs", type=int, default=3)
     parser.add_argument("--workload", action="append", choices=WORKLOADS)
@@ -605,6 +623,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 root,
                 Path(__file__).resolve().parents[2],
                 static_mode=name == "rust",
+                build_receipt=args.rust_build_receipt if name == "rust" else args.go_build_receipt,
             )
         rust_result = report["binaries"].get("rust")
         if isinstance(rust_result, dict):

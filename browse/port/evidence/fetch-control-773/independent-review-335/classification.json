@@ -1,0 +1,373 @@
+{
+  "auth_changes": [
+    {
+      "id": "proxy-080-user@-True",
+      "go": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic dXNlcjo="
+        ]
+      },
+      "new": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic dXNlcjo="
+        ]
+      },
+      "parent": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller"
+        ]
+      }
+    },
+    {
+      "id": "proxy-080-user:@-True",
+      "go": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic dXNlcjo="
+        ]
+      },
+      "new": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic dXNlcjo="
+        ]
+      },
+      "parent": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller"
+        ]
+      }
+    },
+    {
+      "id": "proxy-080-:password@-True",
+      "go": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic OnBhc3N3b3Jk"
+        ]
+      },
+      "new": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic OnBhc3N3b3Jk"
+        ]
+      },
+      "parent": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller"
+        ]
+      }
+    },
+    {
+      "id": "proxy-080-%ff:password@-False",
+      "go": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "Basic /zpwYXNzd29yZA=="
+        ]
+      },
+      "new": {
+        "host": [
+          "93.184.216.34:080"
+        ]
+      },
+      "parent": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "Basic 77+9OnBhc3N3b3Jk"
+        ]
+      }
+    },
+    {
+      "id": "proxy-080-user:%ff@-False",
+      "go": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "Basic dXNlcjr/"
+        ]
+      },
+      "new": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "Basic dXNlcjo="
+        ]
+      },
+      "parent": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "Basic dXNlcjrvv70="
+        ]
+      }
+    },
+    {
+      "id": "proxy-080-user:%ff@-True",
+      "go": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic dXNlcjr/"
+        ]
+      },
+      "new": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic dXNlcjo="
+        ]
+      },
+      "parent": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller"
+        ]
+      }
+    },
+    {
+      "id": "proxy-080-%C3%A9:%C3%A9@-True",
+      "go": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic w6k6w6k="
+        ]
+      },
+      "new": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic w6k6w6k="
+        ]
+      },
+      "parent": {
+        "host": [
+          "93.184.216.34:080"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller"
+        ]
+      }
+    },
+    {
+      "id": "proxy-81-user@-True",
+      "go": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic dXNlcjo="
+        ]
+      },
+      "new": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic dXNlcjo="
+        ]
+      },
+      "parent": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller"
+        ]
+      }
+    },
+    {
+      "id": "proxy-81-user:@-True",
+      "go": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic dXNlcjo="
+        ]
+      },
+      "new": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic dXNlcjo="
+        ]
+      },
+      "parent": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller"
+        ]
+      }
+    },
+    {
+      "id": "proxy-81-:password@-True",
+      "go": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic OnBhc3N3b3Jk"
+        ]
+      },
+      "new": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic OnBhc3N3b3Jk"
+        ]
+      },
+      "parent": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller"
+        ]
+      }
+    },
+    {
+      "id": "proxy-81-user:%ff@-False",
+      "go": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "Basic dXNlcjr/"
+        ]
+      },
+      "new": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "Basic dXNlcjo="
+        ]
+      },
+      "parent": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "Basic dXNlcjrvv70="
+        ]
+      }
+    },
+    {
+      "id": "proxy-81-user:%ff@-True",
+      "go": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic dXNlcjr/"
+        ]
+      },
+      "new": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic dXNlcjo="
+        ]
+      },
+      "parent": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller"
+        ]
+      }
+    },
+    {
+      "id": "proxy-81-%C3%A9:%C3%A9@-True",
+      "go": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic w6k6w6k="
+        ]
+      },
+      "new": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller",
+          "Basic w6k6w6k="
+        ]
+      },
+      "parent": {
+        "host": [
+          "93.184.216.34:81"
+        ],
+        "proxy-authorization": [
+          "synthetic-caller"
+        ]
+      }
+    }
+  ],
+  "body_header_differences_inherited": true
+}

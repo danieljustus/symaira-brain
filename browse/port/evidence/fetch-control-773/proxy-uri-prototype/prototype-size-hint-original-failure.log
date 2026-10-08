@@ -1,0 +1,98 @@
+   Compiling symbrowse-fetch v0.0.0 (/workspace/symaira-fetch773-proxy-uri/browse/crates/symbrowse-fetch)
+    Finished `test` profile [unoptimized] target(s) in 3.58s
+     Running unittests src/lib.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/symbrowse_fetch-48736364b5fe113f)
+
+running 4 tests
+test client::tests::default_honest_client_shares_a_pinned_resolver_with_policy ... ok
+test honest::redirect::tests::relative_and_absolute_redirects_retain_literal_authority_ports ... ok
+test batch::tests::preserves_input_order_and_partial_failures ... ok
+test honest::proxy_io::tests::protected_raw_proxy_dial_uses_the_shared_resolver_and_rejects_private_result ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/archive_http.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/archive_http-bf569b25a77ba308)
+
+running 2 tests
+test cdx_lookup_is_http_backed_and_encodes_all_query_controls ... ok
+test wayback_fetch_and_404_410_recovery_are_http_backed ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/cache_identity.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/cache_identity-957aa8d7459cfa30)
+
+running 1 test
+test delimiter_collision_cannot_change_proxy_route_or_attach_another_sessions_cookie_jar ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/control_contract.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/control_contract-5ba9fd8511eead67)
+
+running 7 tests
+test pinned_go_control_fixture_has_provenance_and_full_boundaries ... ok
+test declared_case_ids_are_the_rust_control_corpus ... ok
+test batch_boundaries_match_pinned_go_counts ... ok
+test profile_selection_matches_pinned_go_cases ... ok
+test retry_classification_and_deterministic_backoff_match_fixture ... ok
+test static_selection_is_explicit_and_never_claims_browser_identity ... ok
+test robots_control_cases_match_pinned_go_rules ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/http.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/http-2d7df58b243fc05f)
+
+running 13 tests
+test honest_http_methods_headers_and_body_are_preserved ... ok
+test cross_host_redirect_is_rejected_by_allowlist ... ok
+test http_proxy_is_used_for_a_request ... ok
+test invalid_proxy_is_rejected_before_request ... ok
+test proxy_peer_uses_shared_pinned_policy_before_connecting ... ok
+test compressed_and_decompressed_limits_are_bounded ... ok
+test resolver_pins_one_public_address_set_per_host ... ok
+test resolver_rejects_private_addresses_before_connecting ... ok
+test redirects_are_followed_and_final_url_is_reported ... ok
+test redirect_loop_is_bounded ... ok
+test socks5_proxy_tunnels_http_request ... ok
+test named_sessions_persist_cookies_but_ephemeral_sessions_do_not ... ok
+test retry_retries_503_and_returns_recovered_body ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/pipeline_controls.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/pipeline_controls-4bce7a07bc262814)
+
+running 8 tests
+test batch_boundaries_are_one_twenty_and_reject_twenty_one ... ok
+test frontmatter_keeps_final_url_and_schema_type ... ok
+test pipeline_marks_both_not_found_statuses_for_recovery ... ok
+test no_cache_disables_store_full_text_side_effects ... ok
+test pipeline_store_full_text_uses_output_cache_and_is_bounded ... ok
+test pipeline_covers_selector_raw_frontmatter_and_no_cache_controls ... ok
+test production_pipeline_uses_a_valid_response_cache_before_network ... ok
+test response_cache_expires_and_removes_stale_entries ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/proxy_uri.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/proxy_uri-290989dd852aa165)
+
+running 3 tests
+test cancelling_raw_proxy_fetch_closes_its_connection ... ok
+test raw_proxy_deadline_closes_connection_while_client_remains_alive ... ok
+test raw_proxy_body_limit_closes_connection_while_client_remains_alive ... FAILED
+
+failures:
+
+---- raw_proxy_body_limit_closes_connection_while_client_remains_alive stdout ----
+
+thread 'raw_proxy_body_limit_closes_connection_while_client_remains_alive' (1669662) panicked at crates/symbrowse-fetch/tests/proxy_uri.rs:32:14:
+called `Result::unwrap()` on an `Err` value: Elapsed(())
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+thread 'raw_proxy_body_limit_closes_connection_while_client_remains_alive' (1669662) panicked at crates/symbrowse-fetch/tests/proxy_uri.rs:73:5:
+assertion failed: matches!(client.fetch(request).await, Err(FetchError::BodyTooLarge(_)))
+
+
+failures:
+    raw_proxy_body_limit_closes_connection_while_client_remains_alive
+
+test result: FAILED. 2 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.03s
+
+error: test failed, to rerun pass `-p symbrowse-fetch --test proxy_uri`

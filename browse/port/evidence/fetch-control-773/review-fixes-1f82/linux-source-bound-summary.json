@@ -1,0 +1,145 @@
+{
+  "source_revision": "1f82e9cf8812c5b383a19349241787215a857493",
+  "source_clean": true,
+  "actual_main_ancestor": "31de72294521701fc4b1a0bce39f03cc34d72e7e",
+  "rejected_original_revision": "a0732ec57357fd0e1a60dbf1ca5f8c42d8c59c41",
+  "parent_test_summaries": 25,
+  "parent_tests_passed": 119,
+  "parent_tests_failed": 0,
+  "parent_tests_ignored": 1,
+  "isolated_child_executions": 7,
+  "isolated_child_evidence": "Successful cache_environment_uses_go_platform_fallbacks_in_isolated_children invokes --ignored child seven times and requires 1 passed each time.",
+  "fetch_tests": 51,
+  "process_counts": {
+    "all": 251,
+    "actual_http": 74,
+    "route_only_no_network": 177,
+    "matched": 251
+  },
+  "actual_executable_mutants_rejected": 5,
+  "strict_clippy": "locked fetch/daemon/CLI all-targets all-features -D warnings passed",
+  "fmt": "passed",
+  "actionlint": "passed",
+  "matrix_validation": "88contracts/17items/acyclic/links valid",
+  "original_go_fixture_checks": "Go1.26.6: static28, profiles11, robots15, uncached internal/fetch/... tests; identical original fixture checks also passed actual native-CI SDK1.26.7",
+  "identity_tests": 4,
+  "legacy_benchmark_tests": {
+    "executed": 5,
+    "skipped": 2,
+    "skip_reason": "manual macOS NVMe-only tests"
+  },
+  "paired_comparison": {
+    "schema_version": 2,
+    "gate": "pass",
+    "workloads": {
+      "cli": {
+        "p95_change_percent": -44.087463168222605
+      },
+      "mcp": {
+        "p95_change_percent": -49.441543222859885
+      },
+      "daemon": {
+        "p95_change_percent": -1.1399100332633583
+      },
+      "fetch": {
+        "p95_change_percent": -61.88021261807498,
+        "hard_gate": "<=10%"
+      }
+    },
+    "reasons": [],
+    "size_reduction_percent": 42.17884040700329
+  },
+  "original_loaded_comparison": {
+    "schema_version": 2,
+    "gate": "blocked",
+    "workloads": {
+      "cli": {
+        "p95_change_percent": -59.161136415557216
+      },
+      "mcp": {
+        "p95_change_percent": 51.81170308160794
+      },
+      "daemon": {
+        "p95_change_percent": 145.552724778808
+      },
+      "fetch": {
+        "p95_change_percent": -62.98412913497857,
+        "hard_gate": "<=10%"
+      }
+    },
+    "reasons": [
+      "p95 regression gate is missing or exceeds 10%"
+    ],
+    "size_reduction_percent": 42.17884040700329
+  },
+  "original_loaded_interpretation": "Original unchanged gate failed under observed concurrent compiler activity; retained as unaccepted evidence. Root then coordinated a quiet window; complete fresh30x4 same binaries and all samples passed. Neither observation replaced or edited.",
+  "original_nonfinal_tooling_attempts": "Clippy requested a range pattern before final source commit; corrected. One Go wrapper named an absent local SDK directory and did not execute Go. Literal errors retained; unchanged clean-source original Go gates then executed through the actual pinned toolchain.",
+  "same_host_size_reduction_percent": 60.171217100275385,
+  "limitations": [
+    "Native six-target CI receipts pending; Windows paired daemon/fetch probe not ported.",
+    "Historical value size baseline is Darwin arm64; paired timing host is Linux x86_64.",
+    "Partial static transport slice: no default cutover or #773 closure claim."
+  ],
+  "candidate_source_sha256": {
+    "browse/crates/symbrowse-fetch/Cargo.toml": "76806a7e0eb60c56e223489ac1505cf82834a107c73448868427094372756839",
+    "browse/crates/symbrowse-fetch/examples/control_probe.rs": "aa6dbac72fbae13bd30f7e340fcda0eae433d0a51d70f9d09be284b4889e1185",
+    "browse/crates/symbrowse-fetch/src/archive.rs": "873d2e6a4cff7a9e40e744f3f3ae4f9d6b5ece221c8c0059ef5e4ef2d61845cc",
+    "browse/crates/symbrowse-fetch/src/batch.rs": "e5ed01876f33a15b3dcf55233a9bed3e4cdb9dff1a6efcf8322e07a66dc21cab",
+    "browse/crates/symbrowse-fetch/src/cache.rs": "badfbd680535e07590d13fc0c8ba6b96cf8393ea925d9e52e0d948caef0f13e7",
+    "browse/crates/symbrowse-fetch/src/client.rs": "3b8b5f3fa6702f28b018219fa3d8dfeea90344282e9ebeca7187984fd7c3e926",
+    "browse/crates/symbrowse-fetch/src/dom.rs": "86236866574ea3244d14d2a4c7748c1872edb169a98d052da6ce3a568dab96d8",
+    "browse/crates/symbrowse-fetch/src/honest/headers.rs": "c6b3861f688ee915d6e15aca37c5045b4b2cac4c58625d7f579428b815fd14c8",
+    "browse/crates/symbrowse-fetch/src/honest/proxy.rs": "f8b3d61dafca9734111e364bc7051aa0bac1440bb643a03442b38dfd2df8b7f0",
+    "browse/crates/symbrowse-fetch/src/honest/redirect.rs": "aec53a6cf3a17c7a9985173b4a77247931003a77bc8ad19d306521f3c3e673e6",
+    "browse/crates/symbrowse-fetch/src/honest/response.rs": "84bbfde3ba6c7f0e3f1ebe9075a3c2a27d02fec9a8193791c119245c6f9a50cf",
+    "browse/crates/symbrowse-fetch/src/honest.rs": "72497ed73f8da6454111f4ef728c77bca615c42f9d4d59bbaba990f241714385",
+    "browse/crates/symbrowse-fetch/src/lib.rs": "3f6827f642801d5758d34b2296e44b653326655a324ce12b7e47f913730bd691",
+    "browse/crates/symbrowse-fetch/src/pipeline.rs": "f165cd45e6dbc01d5648a6f99ae32db2cf3a85fe9fd72f4ff7e9efc700732537",
+    "browse/crates/symbrowse-fetch/src/rate_limit.rs": "00dd7988806d57ad8c4506cb49825861f76809dba50ed18d025a135bfe712c5e",
+    "browse/crates/symbrowse-fetch/src/relevance.rs": "d839012ad237338f0c10812032dc95f07fe20f89862b1e649111b1053b9ea345",
+    "browse/crates/symbrowse-fetch/src/render.rs": "9682c521e74053cc228ef8d1a38d5b957f67541718b458a3ff1fe5461e319d8e",
+    "browse/crates/symbrowse-fetch/src/retry.rs": "37881585695ae7b54d8155880891c3dbc625c4408b483a8d9238e2bba9463c1f",
+    "browse/crates/symbrowse-fetch/src/robots.rs": "5c7e99cd5c8ec699156f5ced155ff6890f51063670f99911e39b21b23d3a855c",
+    "browse/crates/symbrowse-fetch/src/semantic.rs": "3075b95dcd29078ee74208e89b25f363551e6e429a47d21a74e4675b5e941857",
+    "browse/crates/symbrowse-fetch/src/types.rs": "4cfa72cadee793e52af6fd5640234a6298ab166cc7745275de4a55a3f2758903",
+    "browse/crates/symbrowse-fetch/tests/archive_http.rs": "28c6382d01b771a8493d57c1a7dc820b7fac0fabf860b5392299192392170e05",
+    "browse/crates/symbrowse-fetch/tests/cache_identity.rs": "b0da4c8d1932c3af1ec8f6fea8a33309c1ba0ba90b522ca32fb6abf50dbbf43b",
+    "browse/crates/symbrowse-fetch/tests/control_contract.rs": "28e39cd0eaea537b376fe189f59fd595bf36399697e419b3e0a80b4bd91deea3",
+    "browse/crates/symbrowse-fetch/tests/http.rs": "1c26cb608ea36570f7bf53879c2ee3cd127b05a54f5efc690a6974cac4d54542",
+    "browse/crates/symbrowse-fetch/tests/pipeline_controls.rs": "5b865449f2f3231e3764b0bff9587896930c3d38a3a7c9c9faf4308157a6cfd0",
+    "browse/crates/symbrowse-fetch/tests/render_corpus.rs": "552343cf4ff128f42279a61df138290fefa2f2b01c0fbc36a459edeb3eba368f",
+    "browse/crates/symbrowse-fetch/tests/retry.rs": "a2d2130caf06c2661da34b14d1683417b17b77b481e0588cdd18cd477b86d69e",
+    "browse/crates/symbrowse-fetch/tests/robots.rs": "bd580f54baab3a06706550b20903dd2411f0f4a4211a19666bab8d39e571c1c0",
+    "browse/crates/symbrowse-fetch/tests/static_controls.rs": "80977c24d9976e42a621239a8e2c1bed52d332736d43c1ed160ec1d470e475a6"
+  },
+  "harness_workflow_sha256": {
+    "browse/port/harness/fetch_control_process.py": "58856451e7ed52761f994f368674c5d97dc2393fb561471394a422a9e259ddd5",
+    "browse/port/harness/fetch_control_negative.py": "0a7b20628da27fc3c7278805233c1aec818efc1da7b9f4c6dbc770ee73578417",
+    "browse/port/harness/fetch_control_773.go.txt": "9e0729730cedd8402b0aeff0604ad0a56bde67f0178d5391df076c49c071f3d4",
+    "browse/port/harness/run_fetch_control_773.sh": "df7f86906d56f5e1baecb341bdf5276883581826fab4ee99c5d75413a3136c04",
+    "browse/port/bench/run.py": "7075dc12cc32af3141edc5920de3232a61842fe0cb225285fbcef8dbc84959c9",
+    "browse/port/bench/compare.py": "b361e42ec8988de38dc4c1e6e53a4a80717b11fe7ea85c22503ca9586b5010d2",
+    "browse/port/bench/build_receipt.py": "b50b232e98f80b3f2cf49a4ff4f67c3cb97d376f41e15e081b9f9f12add1c14d",
+    "browse/port/bench/test_identity.py": "c570b32f7856e47f175e3c16ab22761c5c5df40f4214b0c5cc3a7a251c9470fd",
+    ".github/workflows/browse-fetch-native.yml": "13635cae9710df9bc9fb9678c39854f18a507f01e4c218e5df989cf0e91e9a5e",
+    "browse/port/harness/fetch_control_followups.py": "59210245865c8f67c74aa2b90c9bc9fec99b1545eb38f075355b1492eeec4fd7"
+  },
+  "rust_build_inputs": 148,
+  "immutable_go_inputs": 415,
+  "operator_home_used": false,
+  "fallback_available": false,
+  "evidence_file_sha256": {
+    "go-build.json": "074e6e240845471690f5ed75daf5523f58b8cbfaa66477001f4febaf92d8af88",
+    "linux-controls.json": "ffaddf0c91a3fe157b61fab374f060d1388915b6e8bdabb9a808828d706dd727",
+    "linux-exact-logs.json": "ea8b431963056faeb5a10326b171436672eba06cd56bf3892168ab8eccf7aaf5",
+    "linux-process.json": "5d949d1c0888e3411714313ea5afc84fb90a3a6ea82a8b037f5a1628076f0735",
+    "linux-quiet-comparison.json": "548a9d7863b6642fcc7502efd5674ff9ee5af4bd0e2ae51427c9788edbd8f994",
+    "linux-quiet-load.json": "01f1c4e126f12439ed0c1f575e70eb68bb34527933be15ffa2383384c243af16",
+    "linux-quiet-paired-30.json": "5214eca9f1a634349c0695ba2f44cc2c1e20eb9e87d439d6ae0135487a6706dd",
+    "original-loaded-comparison.json": "b8e3441fb8d36a75b67f93497aed1124cfb4c969d49fe623004b9185a4e0d289",
+    "original-loaded-paired-30.json": "87bb9a6269ab17211f5a320979847d966ef7354d5afb229f6659aa6368855a06",
+    "original-loaded-receipt.json": "bc60c122c33afb78e67014c8c3c05090304a879d8f993a3028bcf7fea9b12281",
+    "quiet-benchmark-driver.py.txt": "2da2c2522be82a58afacb3a0c03889c4991685ea9877a03c8540df81390c853c",
+    "rust-build.json": "6ed68c666f2a25c91cda1fd68f2c9b0569a9f8e0ed39f692235bed8129ba1535"
+  }
+}

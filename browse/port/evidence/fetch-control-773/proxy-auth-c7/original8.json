@@ -1,0 +1,363 @@
+{
+  "candidate_head": "c7beb3a7a39dbc10f7e84769fccea5cf20e7f09e",
+  "candidate_dirty": false,
+  "observations": [
+    {
+      "id": "fragment-automatic-referer",
+      "input": {
+        "id": "fragment-automatic-referer",
+        "url": "http://127.0.0.1:43063/redirect-authority?target=%2Fecho-authority#private-fragment",
+        "method": "GET"
+      },
+      "go": {
+        "body_hex": "7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b223132372e302e302e313a3433303633225d2c2272656665726572223a5b22687474703a2f2f3132372e302e302e313a34333036332f72656469726563742d617574686f726974793f7461726765743d2532466563686f2d617574686f7269747923707269766174652d667261676d656e74225d7d2c226d6574686f64223a22474554227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "163"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "fragment-automatic-referer",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://127.0.0.1:43063/echo-authority"
+      },
+      "rust": {
+        "body_hex": "7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b223132372e302e302e313a3433303633225d2c2272656665726572223a5b22687474703a2f2f3132372e302e302e313a34333036332f72656469726563742d617574686f726974793f7461726765743d2532466563686f2d617574686f72697479225d7d2c226d6574686f64223a22474554227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "146"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "fragment-automatic-referer",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://127.0.0.1:43063/echo-authority"
+      },
+      "equal": false
+    },
+    {
+      "id": "fragment-explicit-referer",
+      "input": {
+        "id": "fragment-explicit-referer",
+        "url": "http://127.0.0.1:43063/redirect-authority?target=%2Fecho-authority",
+        "method": "GET",
+        "headers": {
+          "Referer": "http://example.com/custom#fragment"
+        }
+      },
+      "go": {
+        "body_hex": "7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b223132372e302e302e313a3433303633225d2c2272656665726572223a5b22687474703a2f2f6578616d706c652e636f6d2f637573746f6d23667261676d656e74225d7d2c226d6574686f64223a22474554227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "114"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "fragment-explicit-referer",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://127.0.0.1:43063/echo-authority"
+      },
+      "rust": {
+        "body_hex": "7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b223132372e302e302e313a3433303633225d2c2272656665726572223a5b22687474703a2f2f6578616d706c652e636f6d2f637573746f6d23667261676d656e74225d7d2c226d6574686f64223a22474554227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "114"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "fragment-explicit-referer",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://127.0.0.1:43063/echo-authority"
+      },
+      "equal": true
+    },
+    {
+      "id": "userinfo-same-host",
+      "input": {
+        "id": "userinfo-same-host",
+        "url": "http://user:secret@127.0.0.1:43063/redirect-authority?target=%2Fecho-authority",
+        "method": "GET"
+      },
+      "go": {
+        "body_hex": "7b22626f6479223a22222c2268656164657273223a7b22617574686f72697a6174696f6e223a5b2242617369632064584e6c636a707a5a574e795a58513d225d2c22686f7374223a5b223132372e302e302e313a3433303633225d2c2272656665726572223a5b22687474703a2f2f3132372e302e302e313a34333036332f72656469726563742d617574686f726974793f7461726765743d2532466563686f2d617574686f72697479225d7d2c226d6574686f64223a22474554227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "189"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "userinfo-same-host",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://user:secret@127.0.0.1:43063/echo-authority"
+      },
+      "rust": {
+        "body_hex": "7b22626f6479223a22222c2268656164657273223a7b22617574686f72697a6174696f6e223a5b2242617369632064584e6c636a707a5a574e795a58513d225d2c22686f7374223a5b223132372e302e302e313a3433303633225d2c2272656665726572223a5b22687474703a2f2f3132372e302e302e313a34333036332f72656469726563742d617574686f726974793f7461726765743d2532466563686f2d617574686f72697479225d7d2c226d6574686f64223a22474554227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "189"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "userinfo-same-host",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://user:secret@127.0.0.1:43063/echo-authority"
+      },
+      "equal": true
+    },
+    {
+      "id": "userinfo-cross-host",
+      "input": {
+        "id": "userinfo-cross-host",
+        "url": "http://user:secret@127.0.0.1:43063/redirect-authority?target=http%3A%2F%2Flocalhost%3A43063%2Fecho-authority",
+        "method": "GET"
+      },
+      "go": {
+        "body_hex": "7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b226c6f63616c686f73743a3433303633225d2c2272656665726572223a5b22687474703a2f2f3132372e302e302e313a34333036332f72656469726563742d617574686f726974793f7461726765743d687474702533412532462532466c6f63616c686f737425334134333036332532466563686f2d617574686f72697479225d7d2c226d6574686f64223a22474554227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "176"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "userinfo-cross-host",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://localhost:43063/echo-authority"
+      },
+      "rust": {
+        "body_hex": "7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b226c6f63616c686f73743a3433303633225d2c2272656665726572223a5b22687474703a2f2f3132372e302e302e313a34333036332f72656469726563742d617574686f726974793f7461726765743d687474702533412532462532466c6f63616c686f737425334134333036332532466563686f2d617574686f72697479225d7d2c226d6574686f64223a22474554227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "176"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "userinfo-cross-host",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://localhost:43063/echo-authority"
+      },
+      "equal": true
+    },
+    {
+      "id": "redirect-host-header",
+      "input": {
+        "id": "redirect-host-header",
+        "url": "http://127.0.0.1:43063/redirect-authority?target=%2Fecho-authority",
+        "method": "GET",
+        "headers": {
+          "Host": "custom.example"
+        }
+      },
+      "go": {
+        "body_hex": "7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b223132372e302e302e313a3433303633225d2c2272656665726572223a5b22687474703a2f2f3132372e302e302e313a34333036332f72656469726563742d617574686f726974793f7461726765743d2532466563686f2d617574686f72697479225d7d2c226d6574686f64223a22474554227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "146"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "redirect-host-header",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://127.0.0.1:43063/echo-authority"
+      },
+      "rust": {
+        "body_hex": "7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b223132372e302e302e313a3433303633225d2c2272656665726572223a5b22687474703a2f2f3132372e302e302e313a34333036332f72656469726563742d617574686f726974793f7461726765743d2532466563686f2d617574686f72697479225d7d2c226d6574686f64223a22474554227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "146"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "redirect-host-header",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://127.0.0.1:43063/echo-authority"
+      },
+      "equal": true
+    },
+    {
+      "id": "direct-host-header",
+      "input": {
+        "id": "direct-host-header",
+        "url": "http://127.0.0.1:43063/echo-authority",
+        "method": "GET",
+        "headers": {
+          "Host": "custom.example"
+        }
+      },
+      "go": {
+        "body_hex": "7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b223132372e302e302e313a3433303633225d7d2c226d6574686f64223a22474554227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "65"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "direct-host-header",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://127.0.0.1:43063/echo-authority"
+      },
+      "rust": {
+        "body_hex": "7b22626f6479223a22222c2268656164657273223a7b22686f7374223a5b223132372e302e302e313a3433303633225d7d2c226d6574686f64223a22474554227d",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "65"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "direct-host-header",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://127.0.0.1:43063/echo-authority"
+      },
+      "equal": true
+    },
+    {
+      "id": "head-to-get302",
+      "input": {
+        "id": "head-to-get302",
+        "url": "http://127.0.0.1:43063/redirect-authority?target=%2Fecho-authority",
+        "method": "HEAD"
+      },
+      "go": {
+        "body_hex": "",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "147"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "head-to-get302",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://127.0.0.1:43063/echo-authority"
+      },
+      "rust": {
+        "body_hex": "",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "147"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "head-to-get302",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://127.0.0.1:43063/echo-authority"
+      },
+      "equal": true
+    },
+    {
+      "id": "lowercase-method302",
+      "input": {
+        "id": "lowercase-method302",
+        "url": "http://127.0.0.1:43063/redirect-authority?target=%2Fecho-authority",
+        "method": "head"
+      },
+      "go": {
+        "body_hex": "3c21444f43545950452048544d4c3e0a3c68746d6c206c616e673d22656e223e0a202020203c686561643e0a20202020202020203c6d65746120636861727365743d227574662d38223e0a20202020202020203c7469746c653e4572726f7220726573706f6e73653c2f7469746c653e0a202020203c2f686561643e0a202020203c626f64793e0a20202020202020203c68313e4572726f7220726573706f6e73653c2f68313e0a20202020202020203c703e4572726f7220636f64653a203530313c2f703e0a20202020202020203c703e4d6573736167653a20556e737570706f72746564206d6574686f642028276865616427292e3c2f703e0a20202020202020203c703e4572726f7220636f6465206578706c616e6174696f6e3a20353031202d2053657276657220646f6573206e6f7420737570706f72742074686973206f7065726174696f6e2e3c2f703e0a202020203c2f626f64793e0a3c2f68746d6c3e0a",
+        "error": "",
+        "headers": {
+          "connection": [
+            "close"
+          ],
+          "content-length": [
+            "357"
+          ],
+          "content-type": [
+            "text/html;charset=utf-8"
+          ],
+          "date": [
+            "Sat, 03 Oct 2026 23:28:50 GMT"
+          ],
+          "server": [
+            "BaseHTTP/0.6 Python/3.12.14"
+          ]
+        },
+        "id": "lowercase-method302",
+        "protocol": "HTTP/1.1",
+        "status": 501,
+        "url": "http://127.0.0.1:43063/redirect-authority?target=%2Fecho-authority"
+      },
+      "rust": {
+        "body_hex": "3c21444f43545950452048544d4c3e0a3c68746d6c206c616e673d22656e223e0a202020203c686561643e0a20202020202020203c6d65746120636861727365743d227574662d38223e0a20202020202020203c7469746c653e4572726f7220726573706f6e73653c2f7469746c653e0a202020203c2f686561643e0a202020203c626f64793e0a20202020202020203c68313e4572726f7220726573706f6e73653c2f68313e0a20202020202020203c703e4572726f7220636f64653a203530313c2f703e0a20202020202020203c703e4d6573736167653a20556e737570706f72746564206d6574686f642028276865616427292e3c2f703e0a20202020202020203c703e4572726f7220636f6465206578706c616e6174696f6e3a20353031202d2053657276657220646f6573206e6f7420737570706f72742074686973206f7065726174696f6e2e3c2f703e0a202020203c2f626f64793e0a3c2f68746d6c3e0a",
+        "error": "",
+        "headers": {
+          "connection": [
+            "close"
+          ],
+          "content-length": [
+            "357"
+          ],
+          "content-type": [
+            "text/html;charset=utf-8"
+          ],
+          "date": [
+            "Sat, 03 Oct 2026 23:28:50 GMT"
+          ],
+          "server": [
+            "BaseHTTP/0.6 Python/3.12.14"
+          ]
+        },
+        "id": "lowercase-method302",
+        "protocol": "HTTP/1.1",
+        "status": 501,
+        "url": "http://127.0.0.1:43063/redirect-authority?target=%2Fecho-authority"
+      },
+      "equal": true
+    }
+  ],
+  "passed": 7,
+  "failed": 1
+}
