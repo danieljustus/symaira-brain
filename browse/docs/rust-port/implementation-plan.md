@@ -38,8 +38,10 @@ rewrite.
 5. Add paired startup/RSS distributions for version/help/config and MCP
    process-mode fixture loads. Capture daemon steady-state with its IPC slice,
    where lifecycle and cleanup can be measured honestly.
-6. Run `make port-contract`; proceed only after self-equality, negative controls
-   and the tracked baseline are verified.
+6. After its Makefile recipe is added, run the planned `make port-contract`
+   target; it is not implemented in the root or Browse module at this checkout.
+   Proceed only after self-equality, negative controls and the tracked baseline
+   are verified.
 
 ## RUST-002: Workspace and version/protocol slice
 
