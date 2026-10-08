@@ -90,6 +90,17 @@ pub(super) fn inspect(
     }
 }
 
+#[cfg(windows)]
+fn same_cached_install(installed: &Path, cached: &Path) -> bool {
+    // Windows canonical paths use the extended-length prefix; canonicalize
+    // both spellings before comparing the resolved install and render cache.
+    matches!(
+        (std::fs::canonicalize(installed), std::fs::canonicalize(cached)),
+        (Ok(installed), Ok(cached)) if installed == cached
+    )
+}
+
+#[cfg(not(windows))]
 fn same_cached_install(installed: &Path, cached: &Path) -> bool {
     // Presentation only, after bounded no-follow hashing. Reuse the existing
     // exact OS-alias check; arbitrary links do not gain read authority.

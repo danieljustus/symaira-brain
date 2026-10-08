@@ -109,14 +109,17 @@ fn find(program: &Path, extensions: &[OsString]) -> Option<PathBuf> {
     fn present(path: &Path) -> bool {
         fs::metadata(path).is_ok_and(|metadata| !metadata.is_dir())
     }
+    if present(program) {
+        return Some(program.to_owned());
+    }
     if extensions.is_empty() {
-        return present(program).then(|| program.to_owned());
+        return None;
     }
     // The provider is a basename here. A dot starts an extension, including
     // a leading dot; don't inspect or normalize its native encoding.
     let has_extension = program.file_name()?.encode_wide().any(|unit| unit == 46);
-    if has_extension && present(program) {
-        return Some(program.to_owned());
+    if has_extension {
+        return None;
     }
     for extension in extensions {
         let mut candidate = program.as_os_str().to_owned();

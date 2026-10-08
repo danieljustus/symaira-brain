@@ -54,7 +54,8 @@ pub(crate) fn join(directory: &Path, program: &Path) -> PathBuf {
                     path.extend_from_slice(&[46, 92]);
                 }
             }
-            Some(58) => {}
+            Some(58) if volume_len(&path) == path.len() => {}
+            Some(58) => path.push(92),
             _ => path.push(92),
         }
     }

@@ -86,6 +86,24 @@ fn candidate(path: &Path, source: &str, target: &str, loader: &BundleLoader) -> 
     }
     row
 }
+
+fn read_directory_error(
+    path: &Path,
+    _metadata: &std::fs::Metadata,
+    error: &std::io::Error,
+) -> crate::GoText {
+    #[cfg(windows)]
+    if _metadata.file_type().is_symlink()
+        && error.kind() == std::io::ErrorKind::NotFound
+        && std::fs::metadata(path)
+            .is_err_and(|target| target.kind() == std::io::ErrorKind::NotFound)
+    {
+        // Go opens a dangling directory link and reports ERROR_FILE_NOT_FOUND.
+        return crate::io_contract::path_error("open", path, &std::io::Error::from_raw_os_error(2));
+    }
+    crate::io_contract::path_error("open", path, error)
+}
+
 /// Discovers harness roots plus explicit paths without copying/writing skills.
 /// # Errors
 /// Returns bounds failures; ordinary inaccessible explicit paths are rows.
@@ -173,7 +191,7 @@ pub fn scanned(
                 row.managed = false;
                 let diagnostic = match error {
                     crate::library::LibraryReadError::Io(error) => {
-                        crate::io_contract::path_error("open", &path, &error)
+                        read_directory_error(&path, &metadata, &error)
                     }
                     crate::library::LibraryReadError::InputBound => error.to_string().into(),
                 };
