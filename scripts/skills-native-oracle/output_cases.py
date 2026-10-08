@@ -5,6 +5,7 @@ import subprocess
 import time
 
 from compare import filesystem, matched
+from fixtures import remove_tree
 
 
 def selected_sinks():
@@ -16,7 +17,7 @@ def required_ids():
             for form in ("table", "json") for sink in selected_sinks()]
 
 
-def invoke(binary, argv, env, root, sink, terminate, row):
+def invoke(binary, argv, env, root, sink, terminate, row, full_stream=None):
     row.update(argv=[str(binary), *argv], cwd=str(root / "project"), stdout_sink=sink)
     options = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP} if os.name == "nt" else {"start_new_session": True}
     fd = None
@@ -29,8 +30,9 @@ def invoke(binary, argv, env, root, sink, terminate, row):
             os.close(reader)
             stream = fd
         elif sink == "full":
-            handle = open("/dev/full", "wb", buffering=0)
-            stream = handle
+            if full_stream is None:
+                raise AssertionError("a verified native full-stdout prerequisite is required")
+            stream = full_stream
         else:
             path = root / "tmp/owned-readonly-sink"
             path.write_bytes(b"owned read-only stdout sentinel")
@@ -70,7 +72,7 @@ def invoke(binary, argv, env, root, sink, terminate, row):
     return row
 
 
-def run_pairs(report, output, binaries, root, retained, env, terminate):
+def run_pairs(report, output, binaries, root, retained, env, terminate, full_stream=None):
     for verb in ("list", "status", "targets", "log", "sync", "doctor"):
         for form in ("table", "json"):
             argv = ["skills", verb, *(["--json"] if form == "json" else [])]
@@ -79,12 +81,12 @@ def run_pairs(report, output, binaries, root, retained, env, terminate):
                 report["results"].append(pair)
                 output()
                 for flavor in ("go", "rust"):
-                    shutil.rmtree(root)
+                    remove_tree(root)
                     shutil.copytree(retained, root, symlinks=True)
                     # Store the live row before assertions/process exceptions.
                     pair[flavor] = {}
                     try:
-                        invoke(binaries[flavor], argv, env, root, sink, terminate, pair[flavor])
+                        invoke(binaries[flavor], argv, env, root, sink, terminate, pair[flavor], full_stream)
                     except Exception as error:
                         pair["execution_error"] = {"type": type(error).__name__, "message": str(error)}
                         raise

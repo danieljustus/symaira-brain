@@ -77,6 +77,16 @@ the inherited JSON parser and diagnosis in both line and Content-Length modes.
 No prefix search or permissive partial parser establishes ownership. Valid
 owned Skills input still uses its existing bounded, ordered outer decoder.
 
+## Full stdout prerequisite
+
+The gate checks the real stdout sink before its expensive case matrix. Linux
+uses `/dev/full`. macOS uses one owned 10 MiB HFS+ image, mounted at the platform
+default `/Volumes` location, with a measured `ENOSPC` write. It never fills the
+host filesystem and detaches only the image whose exact identity it created.
+Windows retains its existing read-only sink cases and has no full-device case.
+The partial report retains prerequisite commands, bytes, errno and cleanup.
+Passing this prerequisite does not establish Go/Rust process parity.
+
 These are explicit corrective contracts, not permission to rewrite historical
 captures or erase files/errors from comparisons. The frozen process gate stays
 strict and can still fail where its historical Go behavior conflicts with these

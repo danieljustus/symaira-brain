@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 import subprocess
 import shutil
+import stat
 
 TARGET_ROOTS = {"opencode": ".config/opencode/skills", "claude": ".claude/skills",
                 "codex": ".agents/skills", "hermes": ".hermes/skills/symaira",
@@ -21,6 +22,16 @@ enabled = false
 [audit]
 enabled = false
 '''
+
+
+def remove_tree(root):
+    """Remove only an owned fixture, including Windows read-only Git objects."""
+    def retry_readonly(function, path, error):
+        if os.name != "nt" or getattr(error, "winerror", None) != 5 or Path(path).is_symlink():
+            raise error
+        os.chmod(path, stat.S_IWRITE)
+        function(path)
+    shutil.rmtree(root, onexc=retry_readonly)
 
 
 def write(path, data):

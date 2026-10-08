@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Prepared native3 Skills764 differential gate using actual owned processes."""
 import argparse
+from contextlib import ExitStack
 import hashlib
 import json
 import os
@@ -14,7 +15,8 @@ import time
 
 from cases import OMIT_ARGS, cli_cases, config_cases, mcp_cases, mcp_config_cases, raw_cli_cases, correction_cases, raw_argument_cases
 from compare import matched, mcp_view, filesystem
-from fixtures import setup, variant
+from fixtures import remove_tree, setup, variant
+from full_stdout import full_stdout
 from output_cases import run_pairs as output_pairs, required_ids as output_ids
 from library_denied import run_pairs as denied_pairs, required_ids as denied_ids
 from byte_cases import cases as byte_cases, variant as byte_variant, input_description, run_controls as byte_controls
@@ -131,9 +133,11 @@ def main():
               "oracle_receipt_sha256": sha(args.oracle_receipt), "results": [], "controls": [],
               "status": "running", "native_surface_gate_passed": False}
     try:
-        with tempfile.TemporaryDirectory(prefix="skills-native-764-") as owned_name:
+        with tempfile.TemporaryDirectory(prefix="skills-native-764-") as owned_name, ExitStack() as resources:
             owned = Path(owned_name).resolve()
             root, retained = owned / "case", owned / "retained"
+            report["stdout_prerequisite"] = {}
+            full_stream = resources.enter_context(full_stdout(owned / "full-stdout", report["stdout_prerequisite"]))
             ledger = []
             report["fixture_commands"] = ledger
             report["owned_root"] = str(owned)
@@ -165,7 +169,7 @@ def main():
                 report["results"].append(pair)
                 output.write_text(json.dumps(report, indent=2) + "\n")
                 for flavor in ("go", "rust"):
-                    shutil.rmtree(root)
+                    remove_tree(root)
                     shutil.copytree(retained, root, symlinks=True)
                     case_env = byte_variant(root, env, selected) if selected and selected.startswith("byte-") else variant(root, env, selected, binaries["git_fixture"]) if selected else env
                     if name.startswith("byte-"):
@@ -193,7 +197,7 @@ def main():
             denied_pairs(report, lambda: output.write_text(json.dumps(report, indent=2) + "\n"),
                          binaries, root, retained, env, invoke, incoming)
             output_pairs(report, lambda: output.write_text(json.dumps(report, indent=2) + "\n"),
-                         binaries, root, retained, env, terminate)
+                         binaries, root, retained, env, terminate, full_stream)
             assert [row["id"] for row in report["results"]] == report["required_ids"]
             report["total"] = len(report["results"])
             report["matched"] = sum(row["matched"] for row in report["results"])
@@ -208,7 +212,7 @@ def main():
             for (name, argv, data), selector in zip(controls, selectors):
                 baseline = next(row for row in report["results"] if row["id"] == selector)
                 bound = actual_control(baseline["go"], baseline["rust"], root, data is not None)
-                shutil.rmtree(root)
+                remove_tree(root)
                 shutil.copytree(retained, root, symlinks=True)
                 control = {"name": name, "baseline": selector, **bound, "rejected": False}
                 report["controls"].append(control)

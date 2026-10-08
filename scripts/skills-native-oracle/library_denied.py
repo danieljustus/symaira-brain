@@ -6,7 +6,7 @@ import shutil
 import stat
 
 from compare import matched
-from fixtures import fixture_command, write
+from fixtures import fixture_command, remove_tree, write
 
 
 def required_ids():
@@ -27,7 +27,7 @@ def run_pairs(report, save, binaries, root, retained, env, invoke, incoming):
         report["results"].append(pair)
         save()
         for flavor in ("go", "rust"):
-            shutil.rmtree(root)
+            remove_tree(root)
             shutil.copytree(retained, root, symlinks=True)
             document = root / "data/symbrain/skills/library/denied/SKILL.md"
             write(document, "---\nname: denied\ndescription: owned\n---\nbody\n")

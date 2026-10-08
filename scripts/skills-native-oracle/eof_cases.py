@@ -1,6 +1,7 @@
 """Additive Go-state EOF plans; source-only until real process allocation."""
 from pathlib import Path
 from byte_cases import request, transport
+from fixtures import remove_tree
 
 INPUTS = Path(__file__).with_name('eof-review-inputs')
 ORIGINALS = ('minus', 'dot', 'exponent', 'exp-sign', 'true', 'false', 'null', 'escape', 'unicode')
@@ -73,7 +74,7 @@ def run_controls(report, checkpoint, binaries, root, retained, env, invoke, inco
         assert baseline['matched'] and matched(baseline['go'], baseline['rust'], root, True)
         baseline_view = mcp_view(baseline['go'])
         assert baseline_view[1][2]['id'] == 3 and 'error' not in baseline_view[1][2]
-        shutil.rmtree(root)
+        remove_tree(root)
         shutil.copytree(retained, root, symlinks=True)
         argv, data = rows[mutant_selector]
         control = {'name': name, 'baseline': selector, 'mutant_input': mutant_selector,

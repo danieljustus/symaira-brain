@@ -1,6 +1,7 @@
 """Additive byte/outer/control-owner plans; never executed by source checks."""
 import os
 from cases import TARGETS
+from fixtures import remove_tree
 
 RAW = {"ff": b"\xff", "e282": b"\xe2\x82", "c0af": b"\xc0\xaf", "literal": "\ufffd".encode()}
 BODY = {**RAW, "ordinary": b"ordinary UTF8"}
@@ -155,7 +156,7 @@ def run_controls(report, save, binaries, root, retained, env, invoke, incoming, 
         report["controls"].append(row)
         save()
         try:
-            shutil.rmtree(root)
+            remove_tree(root)
             shutil.copytree(retained, root, symlinks=True)
             case_env = variant(root, env, selected) if selected else env
             invoke(binaries["rust"], argv, case_env, root, data, record=row["candidate"])

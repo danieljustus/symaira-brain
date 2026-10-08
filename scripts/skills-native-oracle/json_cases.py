@@ -2,6 +2,7 @@
 from pathlib import Path
 from byte_cases import request, transport
 from eof_cases import cases as eof_cases
+from fixtures import remove_tree
 
 INPUTS = Path(__file__).with_name('json-review-inputs')
 
@@ -71,7 +72,7 @@ def run_controls(report, checkpoint, binaries, root, retained, env, invoke, inco
     for name, selector, mutant_selector, expected_code in controls:
         baseline = next(row for row in report['results'] if row['id'] == selector)
         assert baseline['matched'] and matched(baseline['go'], baseline['rust'], root, True)
-        shutil.rmtree(root)
+        remove_tree(root)
         shutil.copytree(retained, root, symlinks=True)
         argv, data = rows[mutant_selector]
         control = {'name': name, 'baseline': selector, 'mutant_input': mutant_selector,
