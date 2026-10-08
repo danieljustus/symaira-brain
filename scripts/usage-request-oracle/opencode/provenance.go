@@ -9,9 +9,6 @@ import (
 	"runtime"
 )
 
-const oracleRevision = "a92385d2deecc08d1fd96869908b81b7abd355fe"
-const oracleToolchain = "go1.26.7"
-
 var sourcePaths = []string{
 	"internal/usage/opencode.go",
 	"internal/usage/opencode_parse.go",
@@ -22,7 +19,6 @@ var sourcePaths = []string{
 	"internal/usage/format.go",
 	"internal/usage/testdata/opencode-workspaces.txt",
 	"internal/usage/testdata/opencode-subscription-json.txt",
-	"go.mod", "go.sum",
 }
 
 var harnessPaths = []string{
@@ -39,7 +35,10 @@ func digestText(data []byte) string {
 	return fmt.Sprintf("%x", sha256.Sum256(bytes.ReplaceAll(data, []byte("\r\n"), []byte("\n"))))
 }
 
-func recordProvenance(p *provenance) error {
+func recordProvenance(p *provenance, oracleRevision, oracleToolchain string) error {
+	if oracleRevision == "" || oracleToolchain == "" {
+		return fmt.Errorf("oracle revision and toolchain must be supplied by the gate")
+	}
 	if runtime.Version() != oracleToolchain {
 		return fmt.Errorf("oracle needs %s, got %s", oracleToolchain, runtime.Version())
 	}

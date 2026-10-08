@@ -13,13 +13,13 @@
 //
 // Regenerate with:
 //
-//	go run ./scripts/usage-request-oracle/opencode
+//	go run ./scripts/usage-request-oracle/opencode -oracle-revision <commit> -oracle-toolchain <version>
 //
-// Verify the committed fixture matches the generator byte-for-byte:
+// Verify the committed fixture byte-for-byte using the same pinned metadata:
 //
-//	go run ./scripts/usage-request-oracle/opencode -check
+//	go run ./scripts/usage-request-oracle/opencode -oracle-revision <commit> -oracle-toolchain <version> -check
 //
-// The fixture lives at rust/symbrain-usage/tests/fixtures/opencode_discovery.json
+// The dependency-update fixture lives at rust/symbrain-usage/tests/fixtures/opencode_discovery_go_dependency_update_20261008.json
 // and is never hand-edited.
 package main
 
@@ -42,7 +42,7 @@ import (
 )
 
 const (
-	defaultOutput = "rust/symbrain-usage/tests/fixtures/opencode_discovery.json"
+	defaultOutput = "rust/symbrain-usage/tests/fixtures/opencode_discovery_go_dependency_update_20261008.json"
 
 	// Dummy cookie, replaced with CREDENTIAL by normalize.
 	fixtureCookie = "dump-opencode-cookie"
@@ -100,6 +100,8 @@ func (t *recordingTransport) RoundTrip(req *http.Request) (*http.Response, error
 func main() { os.Exit(run()) }
 
 func run() int {
+	oracleRevision := flag.String("oracle-revision", "", "ancestor commit pinning the Go behavior source")
+	oracleToolchain := flag.String("oracle-toolchain", "", "required Go toolchain version")
 	check := flag.Bool("check", false, "fail if the committed fixture differs")
 	output := flag.String("output", defaultOutput, "fixture path")
 	flag.Parse()
@@ -132,12 +134,13 @@ func run() int {
 	}
 
 	declared := append(cases(), reviewCases()...)
+	command := fmt.Sprintf("GOTOOLCHAIN=%s go run ./scripts/usage-request-oracle/opencode -oracle-revision %s -oracle-toolchain %s", *oracleToolchain, *oracleRevision, *oracleToolchain)
 	out := dump{
 		SchemaVersion: 2,
 		Provenance: provenance{
 			Generator:    "scripts/usage-request-oracle/opencode/main.go",
-			Command:      "go run ./scripts/usage-request-oracle/opencode",
-			CheckCommand: "go run ./scripts/usage-request-oracle/opencode -check",
+			Command:      command,
+			CheckCommand: command + " -check",
 			OracleSource: "internal/usage/opencode.go",
 			OracleSources: []string{
 				"internal/usage/opencode.go",
@@ -166,7 +169,7 @@ func run() int {
 		Cases: make([]recordedCase, 0, len(declared)),
 	}
 
-	if err := recordProvenance(&out.Provenance); err != nil {
+	if err := recordProvenance(&out.Provenance, *oracleRevision, *oracleToolchain); err != nil {
 		fmt.Fprintln(os.Stderr, "opencode-discovery-oracle:", err)
 		return 1
 	}
@@ -194,7 +197,7 @@ func run() int {
 	if *check {
 		existing, err := os.ReadFile(*output)
 		if err != nil || !bytes.Equal(existing, encoded) {
-			fmt.Fprintf(os.Stderr, "%s is out of date; run go run ./scripts/usage-request-oracle/opencode\n", *output)
+			fmt.Fprintf(os.Stderr, "%s is out of date; run %s\n", *output, out.Provenance.Command)
 			return 1
 		}
 		return 0
