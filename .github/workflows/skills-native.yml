@@ -32,7 +32,7 @@ jobs:
         with:
           go-version: "1.26.7"
           cache: true
-      - name: Materialize immutable oracle dependency cache
+      - name: Prepare candidate dependency cache
         shell: bash
         run: |
           set -euo pipefail
@@ -44,6 +44,7 @@ jobs:
           suffix=""
           if [ "${OS:-}" = Windows_NT ]; then suffix=".exe"; fi
           python scripts/skills-argv-oracle/build_go.py \
+            --prepare-module-cache \
             --out "$RUNNER_TEMP/skills764-go$suffix" \
             --receipt "$RUNNER_TEMP/skills764-go-build.json" \
             --go-cache "$(go env GOCACHE)" --module-cache "$(go env GOMODCACHE)"
