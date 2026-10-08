@@ -1,0 +1,19 @@
+{
+  "original_source": "4cd56e3e47338aef30e5d83ea554227ace70fe71",
+  "standalone_function_body_byte_identical": true,
+  "standalone_body_sha256": "a8507eca1c5c1dc4ab6767c6106be8fed5a28fe32b8f6c27fa4e925ef94bc029",
+  "new_path": "browse/crates/symbrowse-core/src/key_sources/command/standalone.rs",
+  "only_signature_visibility_changed": "fn \u2192 pub(in crate::key_sources) fn",
+  "process_wrap": {
+    "version": "10.0.1",
+    "checksum": "1f21b97672d2dc848e7b25701ab4535618b92f4861c13cc3f7f7bed52ad3c8da",
+    "target": "cfg(windows)",
+    "default_features": false,
+    "features": [
+      "std",
+      "job-object",
+      "creation-flags"
+    ]
+  },
+  "scope": "Static preservation/dependency receipt; Windows runtime remains required"
+}

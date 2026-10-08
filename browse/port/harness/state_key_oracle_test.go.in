@@ -1,0 +1,61 @@
+// Additive private Go API observation; the frozen checkout is not edited.
+package state
+
+import (
+	"bytes"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+type portStateKeyProvider struct{}
+
+func (portStateKeyProvider) Key() ([]byte, KeySource, error) {
+	return bytes.Repeat([]byte{0xab}, 32), KeySourceEnv, nil
+}
+func (portStateKeyProvider) Source() (KeySource, error) { return KeySourceEnv, nil }
+
+func TestPortStateKeyStoreObservation(t *testing.T) {
+	root := t.TempDir()
+	encrypted, err := NewStore(StoreOptions{Dir: root, Keys: portStateKeyProvider{}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = encrypted.Save(&State{Name: "existing"}); err != nil {
+		t.Fatal(err)
+	}
+	before, err := os.ReadFile(filepath.Join(root, "existing.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	plain, err := NewStore(StoreOptions{Dir: root})
+	if err != nil {
+		t.Fatal(err)
+	}
+	saved := plain.Save(&State{Name: "existing"})
+	after, err := os.ReadFile(filepath.Join(root, "existing.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	loaded, loadErr := plain.Load("existing")
+	record := map[string]any{"fresh_snapshot_save_success": saved == nil, "retained_bytes_unchanged": bytes.Equal(before, after), "no_key_load_success": loadErr == nil, "loaded_key_source": loaded.KeySource}
+	raw, err := json.Marshal(record)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println("STATE_KEY_STORE_OBSERVATIONS=" + string(raw))
+	// Destructive header authentication must not demand that the authenticated
+	// payload is JSON. Generate actual Go GCM bytes with valid expired metadata.
+	header := []byte(`{"schema_version":3,"saved_at":"2026-08-25T14:00:00Z","expires_at":"2026-09-24T14:00:00Z","key_source":"environment"}`)
+	codec := &gcmCodec{keys: portStateKeyProvider{}}
+	body, err := codec.Encrypt([]byte("owned-invalid-json"), header)
+	if err != nil {
+		t.Fatal(err)
+	}
+	file := append(append(append([]byte{}, fileMagic...), header...), '\n')
+	file = append(file, body...)
+	fmt.Println("STATE_KEY_AUTHENTICATED_NONJSON_HEX=" + hex.EncodeToString(file))
+}

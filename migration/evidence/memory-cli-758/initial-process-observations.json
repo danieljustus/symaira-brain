@@ -1,0 +1,36 @@
+{
+  "initial_argument_probe": {
+    "cases": 239,
+    "failures": 3,
+    "cases_affected": [
+      194,
+      195,
+      196
+    ],
+    "difference": "Rust added flag in boolean error text; immutable Go prints for -staged",
+    "literal_log": "initial-argument-differences.txt",
+    "literal_log_sha256": "fc2ee6b666e9e025a6a91366ee9bd0b10430601339e309a0d35ce66a78041086"
+  },
+  "initial_schema_coverage_probe": {
+    "observed_count": 85,
+    "expected_count": 86,
+    "omitted_field": "hybrid_search.bm25_weight",
+    "reason": "regex excluded digits from field names",
+    "correction": "include digits and require exact executed Go reflection equality",
+    "original_failure_log_retained": false,
+    "receipt_kind": "observation summary; original log overwritten by rerun"
+  },
+  "initial_seeded_json_probe": {
+    "cases": 32,
+    "failures": 8,
+    "cause": "native list omitted Go HTML escaping for &, < and >",
+    "parsed_json_equal": true,
+    "database_state_unchanged": true,
+    "source_bound_receipt": "initial-seeded-json-difference.json"
+  },
+  "early_json_harness_probe": {
+    "cause": "used unsupported --format=json instead of --json",
+    "correction": "use --json and require successful exit before accepting read/search cases",
+    "receipt_kind": "observation summary"
+  }
+}

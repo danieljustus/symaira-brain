@@ -1,0 +1,817 @@
+﻿2026-10-03T20:48:09.9119894Z Current runner version: '2.337.0'
+2026-10-03T20:48:09.9147339Z ##[group]Runner Image Provisioner
+2026-10-03T20:48:09.9148158Z Hosted Compute Agent
+2026-10-03T20:48:09.9148720Z Version: 20260901.588
+2026-10-03T20:48:09.9149296Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-03T20:48:09.9149958Z Build Date: 2026-09-01T19:56:44Z
+2026-10-03T20:48:09.9150599Z Worker ID: {909e9bb3-7344-4c83-bd0c-54a0d60ec686}
+2026-10-03T20:48:09.9151249Z Azure Region: westus
+2026-10-03T20:48:09.9151759Z ##[endgroup]
+2026-10-03T20:48:09.9153229Z ##[group]Operating System
+2026-10-03T20:48:09.9153833Z Microsoft Windows Server 2025
+2026-10-03T20:48:09.9154426Z 10.0.26100
+2026-10-03T20:48:09.9154895Z Datacenter
+2026-10-03T20:48:09.9155350Z ##[endgroup]
+2026-10-03T20:48:09.9155837Z ##[group]Runner Image
+2026-10-03T20:48:09.9156375Z Image: windows-2025-vs2026
+2026-10-03T20:48:09.9156932Z Version: 20260925.250.1
+2026-10-03T20:48:09.9158427Z Included Software: https://github.com/actions/runner-images/blob/win25-vs2026/20260925.250/images/windows/Windows2025-VS2026-Readme.md
+2026-10-03T20:48:09.9160055Z Image Release: https://github.com/actions/runner-images/releases/tag/win25-vs2026%2F20260925.250
+2026-10-03T20:48:09.9160983Z ##[endgroup]
+2026-10-03T20:48:09.9162040Z ##[group]GITHUB_TOKEN Permissions
+2026-10-03T20:48:09.9163860Z Contents: read
+2026-10-03T20:48:09.9164804Z Metadata: read
+2026-10-03T20:48:09.9165311Z ##[endgroup]
+2026-10-03T20:48:09.9167719Z Secret source: Actions
+2026-10-03T20:48:09.9168579Z Cache mode: write
+2026-10-03T20:48:09.9169276Z Prepare workflow directory
+2026-10-03T20:48:09.9531786Z Prepare all required actions
+2026-10-03T20:48:09.9584024Z Getting action download info
+2026-10-03T20:48:10.3127161Z Download action repository 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1' (SHA:3d3c42e5aac5ba805825da76410c181273ba90b1)
+2026-10-03T20:48:10.4415651Z Download action repository 'actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e' (SHA:b7ad1dad31e06c5925ef5d2fc7ad053ef454303e)
+2026-10-03T20:48:10.8471500Z Download action repository 'actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9' (SHA:55cc8345863c7cc4c66a329aec7e433d2d1c52a9)
+2026-10-03T20:48:10.9969586Z Download action repository 'actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+2026-10-03T20:48:11.2782901Z Complete job name: rust-migration-windows
+2026-10-03T20:48:11.4641920Z ##[group]Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+2026-10-03T20:48:11.4643770Z with:
+2026-10-03T20:48:11.4644541Z   fetch-depth: 0
+2026-10-03T20:48:11.4645426Z   repository: danieljustus/symaira-brain
+2026-10-03T20:48:11.4653304Z   token: ***
+2026-10-03T20:48:11.4654109Z   ssh-strict: true
+2026-10-03T20:48:11.4654903Z   ssh-user: git
+2026-10-03T20:48:11.4655732Z   persist-credentials: true
+2026-10-03T20:48:11.4656609Z   clean: true
+2026-10-03T20:48:11.4657430Z   sparse-checkout-cone-mode: true
+2026-10-03T20:48:11.4658376Z   fetch-tags: false
+2026-10-03T20:48:11.4659231Z   show-progress: true
+2026-10-03T20:48:11.4660058Z   lfs: false
+2026-10-03T20:48:11.4660828Z   submodules: false
+2026-10-03T20:48:11.4661661Z   set-safe-directory: true
+2026-10-03T20:48:11.4662604Z   allow-unsafe-pr-checkout: false
+2026-10-03T20:48:11.4663843Z ##[endgroup]
+2026-10-03T20:48:11.6183658Z Syncing repository: danieljustus/symaira-brain
+2026-10-03T20:48:11.6186456Z ##[group]Getting Git version info
+2026-10-03T20:48:11.6187715Z Working directory is 'D:\a\symaira-brain\symaira-brain'
+2026-10-03T20:48:11.7177401Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-03T20:48:12.0323901Z git version 2.55.0.windows.5
+2026-10-03T20:48:12.0370720Z ##[endgroup]
+2026-10-03T20:48:12.0387570Z Temporarily overriding HOME='D:\a\_temp\7a0b5251-95b4-4e96-970f-ee146f736cac' before making global git config changes
+2026-10-03T20:48:12.0389976Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-03T20:48:12.0398576Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\symaira-brain\symaira-brain
+2026-10-03T20:48:12.0992008Z Deleting the contents of 'D:\a\symaira-brain\symaira-brain'
+2026-10-03T20:48:12.0997494Z ##[group]Determining repository object format
+2026-10-03T20:48:12.0999880Z ##[endgroup]
+2026-10-03T20:48:12.1001298Z ##[group]Initializing the repository
+2026-10-03T20:48:12.1008541Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\symaira-brain\symaira-brain
+2026-10-03T20:48:12.1795295Z Initialized empty Git repository in D:/a/symaira-brain/symaira-brain/.git/
+2026-10-03T20:48:12.1844566Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/danieljustus/symaira-brain
+2026-10-03T20:48:12.2425044Z ##[endgroup]
+2026-10-03T20:48:12.2426753Z ##[group]Disabling automatic garbage collection
+2026-10-03T20:48:12.2434263Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-10-03T20:48:12.2750319Z ##[endgroup]
+2026-10-03T20:48:12.2752526Z ##[group]Setting up auth
+2026-10-03T20:48:12.2754189Z Removing SSH command configuration
+2026-10-03T20:48:12.2762133Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-03T20:48:12.3073929Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-03T20:48:13.7023504Z Removing HTTP extra header
+2026-10-03T20:48:13.7032678Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-03T20:48:13.7352195Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-03T20:48:14.2972877Z Removing includeIf entries pointing to credentials config files
+2026-10-03T20:48:14.2982711Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-03T20:48:14.3311049Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-03T20:48:14.8891137Z [command]"C:\Program Files\Git\bin\git.exe" config --file D:\a\_temp\git-credentials-1f843e0e-4e92-4f4d-944f-d9cd7a901adc.config http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-10-03T20:48:14.9219287Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/symaira-brain/symaira-brain/.git.path D:\a\_temp\git-credentials-1f843e0e-4e92-4f4d-944f-d9cd7a901adc.config
+2026-10-03T20:48:14.9538326Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:D:/a/symaira-brain/symaira-brain/.git/worktrees/*.path D:\a\_temp\git-credentials-1f843e0e-4e92-4f4d-944f-d9cd7a901adc.config
+2026-10-03T20:48:14.9895762Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-1f843e0e-4e92-4f4d-944f-d9cd7a901adc.config
+2026-10-03T20:48:15.0203205Z [command]"C:\Program Files\Git\bin\git.exe" config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-1f843e0e-4e92-4f4d-944f-d9cd7a901adc.config
+2026-10-03T20:48:15.0497818Z ##[endgroup]
+2026-10-03T20:48:15.0509500Z ##[group]Fetching the repository
+2026-10-03T20:48:15.0510662Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +6a826b1938de68f3d08dc410fde98b70782665d3:refs/remotes/pull/803/merge
+2026-10-03T20:48:17.5091910Z From https://github.com/danieljustus/symaira-brain
+2026-10-03T20:48:17.5093042Z  * [new branch]      agent/skills-preflight-793               -> origin/agent/skills-preflight-793
+2026-10-03T20:48:17.5095638Z  * [new branch]      codex/browse-batch-mcp-profiles-20260926 -> origin/codex/browse-batch-mcp-profiles-20260926
+2026-10-03T20:48:17.5097221Z  * [new branch]      codex/browse-cli-parity-proof-20260927   -> origin/codex/browse-cli-parity-proof-20260927
+2026-10-03T20:48:17.5098415Z  * [new branch]      codex/browse-cli-runtime-20260926        -> origin/codex/browse-cli-runtime-20260926
+2026-10-03T20:48:17.5099886Z  * [new branch]      codex/browse-native-daemon-gate-20260924 -> origin/codex/browse-native-daemon-gate-20260924
+2026-10-03T20:48:17.5101236Z  * [new branch]      codex/browse-perf003-win-timeout-20260926 -> origin/codex/browse-perf003-win-timeout-20260926
+2026-10-03T20:48:17.5102448Z  * [new branch]      codex/browse-upgrade-check-native-20260927 -> origin/codex/browse-upgrade-check-native-20260927
+2026-10-03T20:48:17.5103546Z  * [new branch]      coverage-data                            -> origin/coverage-data
+2026-10-03T20:48:17.5104503Z  * [new branch]      docs/issue-resolution-decisions          -> origin/docs/issue-resolution-decisions
+2026-10-03T20:48:17.5106131Z  * [new branch]      handoff/20261003-skills-457-partial      -> origin/handoff/20261003-skills-457-partial
+2026-10-03T20:48:17.5107822Z  * [new branch]      handoff/20261003-skills-457-worker       -> origin/handoff/20261003-skills-457-worker
+2026-10-03T20:48:17.5109913Z  * [new branch]      handoff/20261003-skills-476-interrupted  -> origin/handoff/20261003-skills-476-interrupted
+2026-10-03T20:48:17.5110729Z  * [new branch]      issue/621-skills-render-drift            -> origin/issue/621-skills-render-drift
+2026-10-03T20:48:17.5111398Z  * [new branch]      issue/730-release-verification           -> origin/issue/730-release-verification
+2026-10-03T20:48:17.5112087Z  * [new branch]      issue/758-native-memory-store            -> origin/issue/758-native-memory-store
+2026-10-03T20:48:17.5112759Z  * [new branch]      issue/765-native-doctor-fix              -> origin/issue/765-native-doctor-fix
+2026-10-03T20:48:17.5113484Z  * [new branch]      issue/768-native-credential-usage        -> origin/issue/768-native-credential-usage
+2026-10-03T20:48:17.5114154Z  * [new branch]      issue/770-standalone-rust-guard          -> origin/issue/770-standalone-rust-guard
+2026-10-03T20:48:17.5115608Z  * [new branch]      issue/772-daemon-native-acceptance       -> origin/issue/772-daemon-native-acceptance
+2026-10-03T20:48:17.5116265Z  * [new branch]      main                                     -> origin/main
+2026-10-03T20:48:17.5116675Z  * [new tag]         v0.1.0                                   -> v0.1.0
+2026-10-03T20:48:17.5117051Z  * [new tag]         v0.10.0                                  -> v0.10.0
+2026-10-03T20:48:17.5117417Z  * [new tag]         v0.11.0                                  -> v0.11.0
+2026-10-03T20:48:17.5117777Z  * [new tag]         v0.12.0                                  -> v0.12.0
+2026-10-03T20:48:17.5118138Z  * [new tag]         v0.2.0                                   -> v0.2.0
+2026-10-03T20:48:17.5118862Z  * [new tag]         v0.2.1                                   -> v0.2.1
+2026-10-03T20:48:17.5119278Z  * [new tag]         v0.2.2                                   -> v0.2.2
+2026-10-03T20:48:17.5119823Z  * [new tag]         v0.2.3                                   -> v0.2.3
+2026-10-03T20:48:17.5120208Z  * [new tag]         v0.2.4                                   -> v0.2.4
+2026-10-03T20:48:17.5120561Z  * [new tag]         v0.3.0                                   -> v0.3.0
+2026-10-03T20:48:17.5120912Z  * [new tag]         v0.3.1                                   -> v0.3.1
+2026-10-03T20:48:17.5121270Z  * [new tag]         v0.4.0                                   -> v0.4.0
+2026-10-03T20:48:17.5121623Z  * [new tag]         v0.4.1                                   -> v0.4.1
+2026-10-03T20:48:17.5122000Z  * [new tag]         v0.4.2                                   -> v0.4.2
+2026-10-03T20:48:17.5122339Z  * [new tag]         v0.4.3                                   -> v0.4.3
+2026-10-03T20:48:17.5122871Z  * [new tag]         v0.5.0                                   -> v0.5.0
+2026-10-03T20:48:17.5123204Z  * [new tag]         v0.5.1                                   -> v0.5.1
+2026-10-03T20:48:17.5123531Z  * [new tag]         v0.6.0                                   -> v0.6.0
+2026-10-03T20:48:17.5123863Z  * [new tag]         v0.7.0                                   -> v0.7.0
+2026-10-03T20:48:17.5124184Z  * [new tag]         v0.7.1                                   -> v0.7.1
+2026-10-03T20:48:17.5124507Z  * [new tag]         v0.7.2                                   -> v0.7.2
+2026-10-03T20:48:17.5124908Z  * [new tag]         v0.7.3                                   -> v0.7.3
+2026-10-03T20:48:17.5125235Z  * [new tag]         v0.8.0                                   -> v0.8.0
+2026-10-03T20:48:17.5125565Z  * [new tag]         v0.8.1                                   -> v0.8.1
+2026-10-03T20:48:17.5125890Z  * [new tag]         v0.9.0                                   -> v0.9.0
+2026-10-03T20:48:17.5126224Z  * [new tag]         v0.9.1                                   -> v0.9.1
+2026-10-03T20:48:17.5126613Z  * [new ref]         6a826b1938de68f3d08dc410fde98b70782665d3 -> pull/803/merge
+2026-10-03T20:48:17.5155652Z ##[endgroup]
+2026-10-03T20:48:17.5156299Z ##[group]Determining the checkout info
+2026-10-03T20:48:17.5158057Z ##[endgroup]
+2026-10-03T20:48:17.5167898Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-10-03T20:48:17.5674305Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-10-03T20:48:17.6047097Z ##[group]Checking out the ref
+2026-10-03T20:48:17.6055586Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force refs/remotes/pull/803/merge
+2026-10-03T20:48:18.7084616Z Updating files:  92% (2413/2605)
+2026-10-03T20:48:18.7152010Z Updating files:  93% (2423/2605)
+2026-10-03T20:48:18.7252686Z Updating files:  94% (2449/2605)
+2026-10-03T20:48:18.7325207Z Updating files:  95% (2475/2605)
+2026-10-03T20:48:18.7444702Z Updating files:  96% (2501/2605)
+2026-10-03T20:48:18.7527951Z Updating files:  97% (2527/2605)
+2026-10-03T20:48:18.7611313Z Updating files:  98% (2553/2605)
+2026-10-03T20:48:18.7690638Z Updating files:  99% (2579/2605)
+2026-10-03T20:48:18.7691352Z Updating files: 100% (2605/2605)
+2026-10-03T20:48:18.7691635Z Updating files: 100% (2605/2605), done.
+2026-10-03T20:48:18.7823972Z Note: switching to 'refs/remotes/pull/803/merge'.
+2026-10-03T20:48:18.7824253Z 
+2026-10-03T20:48:18.7824461Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-03T20:48:18.7824978Z changes and commit them, and you can discard any commits you make in this
+2026-10-03T20:48:18.7825424Z state without impacting any branches by switching back to a branch.
+2026-10-03T20:48:18.7825692Z 
+2026-10-03T20:48:18.7825859Z If you want to create a new branch to retain commits you create, you may
+2026-10-03T20:48:18.7826282Z do so (now or later) by using -c with the switch command. Example:
+2026-10-03T20:48:18.7826535Z 
+2026-10-03T20:48:18.7826662Z   git switch -c <new-branch-name>
+2026-10-03T20:48:18.7826823Z 
+2026-10-03T20:48:18.7826917Z Or undo this operation with:
+2026-10-03T20:48:18.7827062Z 
+2026-10-03T20:48:18.7827139Z   git switch -
+2026-10-03T20:48:18.7827251Z 
+2026-10-03T20:48:18.7827449Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-03T20:48:18.7827878Z 
+2026-10-03T20:48:18.7829580Z HEAD is now at 6a826b1 Merge 160f24b37faf12a4cbc38873196e61bd5d5b834c into 31de72294521701fc4b1a0bce39f03cc34d72e7e
+2026-10-03T20:48:18.7984426Z ##[endgroup]
+2026-10-03T20:48:18.8420523Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-03T20:48:18.8719339Z 6a826b1938de68f3d08dc410fde98b70782665d3
+2026-10-03T20:48:18.9209725Z ##[group]Run actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+2026-10-03T20:48:18.9210142Z with:
+2026-10-03T20:48:18.9210327Z   go-version-file: go.mod
+2026-10-03T20:48:18.9210756Z   cache: true
+2026-10-03T20:48:18.9210928Z   check-latest: false
+2026-10-03T20:48:18.9213273Z   token: ***
+2026-10-03T20:48:18.9213454Z ##[endgroup]
+2026-10-03T20:48:19.0747464Z Setup go version spec 1.26.7
+2026-10-03T20:48:19.0764236Z Attempting to download 1.26.7...
+2026-10-03T20:48:19.6541720Z matching 1.26.7...
+2026-10-03T20:48:19.6552175Z Acquiring 1.26.7 from https://github.com/actions/go-versions/releases/download/1.26.7-32325178046/go-1.26.7-win32-x64.zip
+2026-10-03T20:48:20.4867650Z Extracting Go...
+2026-10-03T20:48:20.5966254Z [command]"C:\Program Files\PowerShell\7\pwsh.exe" -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Unrestricted -Command "$ErrorActionPreference = 'Stop' ; try { Add-Type -AssemblyName System.IO.Compression.ZipFile } catch { } ; try { [System.IO.Compression.ZipFile]::ExtractToDirectory('D:\a\_temp\go-1.26.7-win32-x64.zip', 'D:\a\_temp\475900e8-4509-4a37-a044-92d1e1cde2c2', $true) } catch { if (($_.Exception.GetType().FullName -eq 'System.Management.Automation.MethodException') -or ($_.Exception.GetType().FullName -eq 'System.Management.Automation.RuntimeException') ){ Expand-Archive -LiteralPath 'D:\a\_temp\go-1.26.7-win32-x64.zip' -DestinationPath 'D:\a\_temp\475900e8-4509-4a37-a044-92d1e1cde2c2' -Force } else { throw $_ } } ;"
+2026-10-03T20:48:26.0205725Z Successfully extracted go to D:\a\_temp\475900e8-4509-4a37-a044-92d1e1cde2c2
+2026-10-03T20:48:26.0206189Z Adding to the cache ...
+2026-10-03T20:48:37.4948493Z Created link C:\hostedtoolcache\windows\go\1.26.7\x64 => D:\hostedtoolcache\windows\go\1.26.7\x64
+2026-10-03T20:48:37.4952446Z Created link C:\hostedtoolcache\windows\go\1.26.7\x64.complete => D:\hostedtoolcache\windows\go\1.26.7\x64.complete
+2026-10-03T20:48:37.4953661Z Successfully cached go to C:\hostedtoolcache\windows\go\1.26.7\x64
+2026-10-03T20:48:37.4960487Z Added go to the path
+2026-10-03T20:48:37.4963521Z Successfully set up Go version 1.26.7
+2026-10-03T20:48:37.8760882Z [command]C:\hostedtoolcache\windows\go\1.26.7\x64\bin\go.exe env GOCACHE
+2026-10-03T20:48:37.8826827Z [command]C:\hostedtoolcache\windows\go\1.26.7\x64\bin\go.exe env GOMODCACHE
+2026-10-03T20:48:37.9096022Z C:\Users\runneradmin\AppData\Local\go-build
+2026-10-03T20:48:37.9144103Z C:\Users\runneradmin\go\pkg\mod
+2026-10-03T20:48:38.3273038Z Cache hit for: setup-go-Windows-x64-go-1.26.7-da193973ccd725fdd1a6125e59e1398e6714d9dc4da6b8fd1ec8954a4a0bd404
+2026-10-03T20:48:39.6282584Z Received 33554432 of 219869179 (15.3%), 31.9 MBs/sec
+2026-10-03T20:48:40.6398916Z Received 171966464 of 219869179 (78.2%), 81.4 MBs/sec
+2026-10-03T20:48:40.9321546Z Received 219869179 of 219869179 (100.0%), 90.9 MBs/sec
+2026-10-03T20:48:40.9324726Z Cache Size: ~210 MB (219869179 B)
+2026-10-03T20:48:40.9446272Z [command]"C:\Program Files\Git\usr\bin\tar.exe" -xf D:/a/_temp/3a0ffae9-10d7-4d51-9a7d-97bceec27fbd/cache.tzst -P -C D:/a/symaira-brain/symaira-brain --force-local --use-compress-program "zstd -d"
+2026-10-03T20:49:01.6411079Z Cache restored successfully
+2026-10-03T20:49:01.6547350Z Cache restored from key: setup-go-Windows-x64-go-1.26.7-da193973ccd725fdd1a6125e59e1398e6714d9dc4da6b8fd1ec8954a4a0bd404
+2026-10-03T20:49:01.6572670Z go version go1.26.7 windows/amd64
+2026-10-03T20:49:01.6572981Z 
+2026-10-03T20:49:01.6573389Z ##[group]go env
+2026-10-03T20:49:02.6493582Z set AR=ar
+2026-10-03T20:49:02.6493957Z set CC=gcc
+2026-10-03T20:49:02.6494449Z set CGO_CFLAGS=-O2 -g
+2026-10-03T20:49:02.6494816Z set CGO_CPPFLAGS=
+2026-10-03T20:49:02.6495176Z set CGO_CXXFLAGS=-O2 -g
+2026-10-03T20:49:02.6495525Z set CGO_ENABLED=1
+2026-10-03T20:49:02.6495852Z set CGO_FFLAGS=-O2 -g
+2026-10-03T20:49:02.6496191Z set CGO_LDFLAGS=-O2 -g
+2026-10-03T20:49:02.6496508Z set CXX=g++
+2026-10-03T20:49:02.6496786Z set GCCGO=gccgo
+2026-10-03T20:49:02.6497075Z set GO111MODULE=
+2026-10-03T20:49:02.6500106Z set GOAMD64=v1
+2026-10-03T20:49:02.6500396Z set GOARCH=amd64
+2026-10-03T20:49:02.6500868Z set GOAUTH=netrc
+2026-10-03T20:49:02.6501194Z set GOBIN=
+2026-10-03T20:49:02.6501629Z set GOCACHE=C:\Users\runneradmin\AppData\Local\go-build
+2026-10-03T20:49:02.6504256Z set GOCACHEPROG=
+2026-10-03T20:49:02.6504565Z set GODEBUG=
+2026-10-03T20:49:02.6504958Z set GOENV=C:\Users\runneradmin\AppData\Roaming\go\env
+2026-10-03T20:49:02.6505437Z set GOEXE=.exe
+2026-10-03T20:49:02.6505713Z set GOEXPERIMENT=
+2026-10-03T20:49:02.6506017Z set GOFIPS140=off
+2026-10-03T20:49:02.6506305Z set GOFLAGS=
+2026-10-03T20:49:02.6507512Z set GOGCCFLAGS=-m64 -mthreads -Wl,--no-gc-sections -fmessage-length=0 -ffile-prefix-map=C:\Users\RUNNER~1\AppData\Local\Temp\go-build3135288825=/tmp/go-build -gno-record-gcc-switches
+2026-10-03T20:49:02.6508810Z set GOHOSTARCH=amd64
+2026-10-03T20:49:02.6509125Z set GOHOSTOS=windows
+2026-10-03T20:49:02.6509453Z set GOINSECURE=
+2026-10-03T20:49:02.6509835Z set GOMOD=D:\a\symaira-brain\symaira-brain\go.mod
+2026-10-03T20:49:02.6510382Z set GOMODCACHE=C:\Users\runneradmin\go\pkg\mod
+2026-10-03T20:49:02.6510863Z set GONOPROXY=
+2026-10-03T20:49:02.6511162Z set GONOSUMDB=
+2026-10-03T20:49:02.6511465Z set GOOS=windows
+2026-10-03T20:49:02.6511841Z set GOPATH=C:\Users\runneradmin\go
+2026-10-03T20:49:02.6512220Z set GOPRIVATE=
+2026-10-03T20:49:02.6512578Z set GOPROXY=https://proxy.golang.org,direct
+2026-10-03T20:49:02.6513092Z set GOROOT=C:\hostedtoolcache\windows\go\1.26.7\x64
+2026-10-03T20:49:02.6513569Z set GOSUMDB=sum.golang.org
+2026-10-03T20:49:02.6513907Z set GOTELEMETRY=local
+2026-10-03T20:49:02.6514360Z set GOTELEMETRYDIR=C:\Users\runneradmin\AppData\Roaming\go\telemetry
+2026-10-03T20:49:02.6514907Z set GOTMPDIR=
+2026-10-03T20:49:02.6515199Z set GOTOOLCHAIN=local
+2026-10-03T20:49:02.6515735Z set GOTOOLDIR=C:\hostedtoolcache\windows\go\1.26.7\x64\pkg\tool\windows_amd64
+2026-10-03T20:49:02.6516353Z set GOVCS=
+2026-10-03T20:49:02.6516611Z set GOVERSION=go1.26.7
+2026-10-03T20:49:02.6516913Z set GOWORK=
+2026-10-03T20:49:02.6517225Z set PKG_CONFIG=pkg-config
+2026-10-03T20:49:02.6517445Z 
+2026-10-03T20:49:02.6517887Z ##[endgroup]
+2026-10-03T20:49:02.6835070Z ##[group]Run rustup show active-toolchain
+2026-10-03T20:49:02.6835466Z [36;1mrustup show active-toolchain[0m
+2026-10-03T20:49:02.7254829Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-03T20:49:02.7255326Z env:
+2026-10-03T20:49:02.7255569Z   GOTOOLCHAIN: local
+2026-10-03T20:49:02.7255848Z ##[endgroup]
+2026-10-03T20:49:03.6012524Z info: syncing channel updates for 1.98.0-x86_64-pc-windows-msvc
+2026-10-03T20:49:04.0710153Z info: latest update on 2026-08-20 for version 1.98.0 (88d9e12ae 2026-08-18)
+2026-10-03T20:49:04.0761056Z info: downloading 5 components
+2026-10-03T20:49:13.1671622Z warn: the missing active toolchain `1.98.0-x86_64-pc-windows-msvc` has been auto-installed
+2026-10-03T20:49:13.1672820Z warn: auto-installation is deprecated for most `rustup` commands
+2026-10-03T20:49:13.1673705Z warn: scripts relying on this behavior in `rustup` may stop working in the future
+2026-10-03T20:49:13.1674534Z warn: to install the active toolchain, use `rustup install` instead
+2026-10-03T20:49:13.1676337Z warn: see <https://github.com/rust-lang/rustup/issues/4836> for more info
+2026-10-03T20:49:13.1678020Z 1.98.0-x86_64-pc-windows-msvc (overridden by 'D:\a\symaira-brain\symaira-brain\rust-toolchain.toml')
+2026-10-03T20:49:13.2975442Z ##[group]Run choco install make --version=4.4.1 --yes --no-progress
+2026-10-03T20:49:13.2976019Z [36;1mchoco install make --version=4.4.1 --yes --no-progress[0m
+2026-10-03T20:49:13.3058890Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-03T20:49:13.3059231Z env:
+2026-10-03T20:49:13.3059409Z   GOTOOLCHAIN: local
+2026-10-03T20:49:13.3059627Z ##[endgroup]
+2026-10-03T20:49:16.3410525Z Chocolatey v2.7.4
+2026-10-03T20:49:16.5835199Z Installing the following packages:
+2026-10-03T20:49:16.5839978Z make
+2026-10-03T20:49:16.5843796Z By installing, you accept licenses for the packages.
+2026-10-03T20:49:19.5805477Z Downloading package from source 'https://community.chocolatey.org/api/v2/'
+2026-10-03T20:49:20.0405196Z 
+2026-10-03T20:49:20.0405669Z make v4.4.1 [Approved]
+2026-10-03T20:49:20.0649987Z make package files install completed. Performing other installation steps.
+2026-10-03T20:49:21.0300476Z  ShimGen has successfully created a shim for make.exe
+2026-10-03T20:49:21.0776010Z  The install of make was successful.
+2026-10-03T20:49:21.0778961Z   Deployed to 'C:\ProgramData\chocolatey\lib\make'
+2026-10-03T20:49:21.0862312Z 
+2026-10-03T20:49:21.0862582Z Chocolatey installed 1/1 packages. 
+2026-10-03T20:49:21.0863138Z  See the log for details (C:\ProgramData\chocolatey\logs\chocolatey.log).
+2026-10-03T20:49:21.4543194Z ##[group]Run actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9
+2026-10-03T20:49:21.4543639Z with:
+2026-10-03T20:49:21.4544228Z   path: ~/.cargo/registry
+~/.cargo/git
+~/.cargo/.crates.toml
+~/.cargo/.crates2.json
+~/.cargo/bin/cargo-audit.exe
+~/.cargo/bin/cargo-deny.exe
+
+2026-10-03T20:49:21.4545804Z   key: rust-quality-install-meta-v2-Windows-X64-toolchain-33a4ad9670c778b981b4e54b55039bd7ea7f3eb24b2a78b861b2cdf081a972a3-lock-b5d42111cc642e75fa08d9f5ab21a64ab8801feaff31d2bc0ec1ab0dc1fc471f-audit-0.22.2-deny-0.20.2
+2026-10-03T20:49:21.4547452Z   enableCrossOsArchive: false
+2026-10-03T20:49:21.4547721Z   fail-on-cache-miss: false
+2026-10-03T20:49:21.4547954Z   lookup-only: false
+2026-10-03T20:49:21.4548153Z   save-always: false
+2026-10-03T20:49:21.4548336Z env:
+2026-10-03T20:49:21.4548503Z   GOTOOLCHAIN: local
+2026-10-03T20:49:21.4548684Z ##[endgroup]
+2026-10-03T20:49:21.9649523Z Cache hit for: rust-quality-install-meta-v2-Windows-X64-toolchain-33a4ad9670c778b981b4e54b55039bd7ea7f3eb24b2a78b861b2cdf081a972a3-lock-b5d42111cc642e75fa08d9f5ab21a64ab8801feaff31d2bc0ec1ab0dc1fc471f-audit-0.22.2-deny-0.20.2
+2026-10-03T20:49:23.2752042Z Received 33554432 of 226060853 (14.8%), 31.6 MBs/sec
+2026-10-03T20:49:24.2814206Z Received 192937984 of 226060853 (85.3%), 91.2 MBs/sec
+2026-10-03T20:49:24.5116553Z Received 226060853 of 226060853 (100.0%), 95.9 MBs/sec
+2026-10-03T20:49:24.5121408Z Cache Size: ~216 MB (226060853 B)
+2026-10-03T20:49:24.5162339Z [command]"C:\Program Files\Git\usr\bin\tar.exe" -xf D:/a/_temp/80f192d1-abef-4c6b-ac0b-14eb0f5ad119/cache.tzst -P -C D:/a/symaira-brain/symaira-brain --force-local --use-compress-program "zstd -d"
+2026-10-03T20:50:24.1488409Z Cache restored successfully
+2026-10-03T20:50:24.1744740Z Cache restored from key: rust-quality-install-meta-v2-Windows-X64-toolchain-33a4ad9670c778b981b4e54b55039bd7ea7f3eb24b2a78b861b2cdf081a972a3-lock-b5d42111cc642e75fa08d9f5ab21a64ab8801feaff31d2bc0ec1ab0dc1fc471f-audit-0.22.2-deny-0.20.2
+2026-10-03T20:50:24.2013556Z ##[group]Run set -euo pipefail
+2026-10-03T20:50:24.2013946Z [36;1mset -euo pipefail[0m
+2026-10-03T20:50:24.2014292Z [36;1maudit_version="$(cargo-audit --version 2>/dev/null || true)"[0m
+2026-10-03T20:50:24.2014712Z [36;1mif [ "$audit_version" != "cargo-audit 0.22.2" ]; then[0m
+2026-10-03T20:50:24.2015109Z [36;1m  cargo install cargo-audit --version 0.22.2 --locked[0m
+2026-10-03T20:50:24.2015420Z [36;1mfi[0m
+2026-10-03T20:50:24.2015704Z [36;1mdeny_version="$(cargo-deny --version 2>/dev/null || true)"[0m
+2026-10-03T20:50:24.2016122Z [36;1mif [ "$deny_version" != "cargo-deny 0.20.2" ]; then[0m
+2026-10-03T20:50:24.2016483Z [36;1m  cargo install cargo-deny --version 0.20.2 --locked[0m
+2026-10-03T20:50:24.2016792Z [36;1mfi[0m
+2026-10-03T20:50:24.2036100Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-03T20:50:24.2036494Z env:
+2026-10-03T20:50:24.2036679Z   GOTOOLCHAIN: local
+2026-10-03T20:50:24.2036918Z ##[endgroup]
+2026-10-03T20:50:24.8875842Z ##[group]Run set -euo pipefail
+2026-10-03T20:50:24.8876484Z [36;1mset -euo pipefail[0m
+2026-10-03T20:50:24.8889683Z [36;1mxdg_fixture="$RUNNER_TEMP/xdg-oracle-windows.json"[0m
+2026-10-03T20:50:24.8890715Z [36;1mdoctor_fixture="$RUNNER_TEMP/guard-doctor-oracle-windows.json"[0m
+2026-10-03T20:50:24.8891625Z [36;1minstructions_fixture="$RUNNER_TEMP/instructions-oracle-windows.json"[0m
+2026-10-03T20:50:24.8892431Z [36;1mcli_fixture="$RUNNER_TEMP/cli-tree-oracle-windows.json"[0m
+2026-10-03T20:50:24.8893517Z [36;1mactivity_cli_fixture="$RUNNER_TEMP/activity-cli-oracle-windows.json"[0m
+2026-10-03T20:50:24.8894367Z [36;1mprofile_remove_fixture="$RUNNER_TEMP/profile-remove-oracle-windows.json"[0m
+2026-10-03T20:50:24.8894864Z [36;1mskills_fixture="$RUNNER_TEMP/skills-oracle-windows.json"[0m
+2026-10-03T20:50:24.8895344Z [36;1mskills_install_fixture="$RUNNER_TEMP/skills-install-oracle-windows.json"[0m
+2026-10-03T20:50:24.8895825Z [36;1mcli_go_binary="$PWD/target/go/symbrain-go.exe"[0m
+2026-10-03T20:50:24.8896291Z [36;1m./scripts/run-go-oracle.sh HEAD run ./scripts/xdg-oracle -output "$xdg_fixture"[0m
+2026-10-03T20:50:24.8896950Z [36;1m./scripts/run-go-oracle.sh HEAD run ./guard/scripts/guard-doctor-oracle -output "$doctor_fixture"[0m
+2026-10-03T20:50:24.8897667Z [36;1m./scripts/run-go-oracle.sh HEAD run ./scripts/instructions-oracle -output "$instructions_fixture"[0m
+2026-10-03T20:50:24.8898201Z [36;1mmkdir -p "$(dirname "$cli_go_binary")"[0m
+2026-10-03T20:50:24.8898729Z [36;1m./scripts/run-go-oracle.sh HEAD build -ldflags "-X main.version=dev" -o "$cli_go_binary" ./cmd/symbrain[0m
+2026-10-03T20:50:24.8899302Z [36;1mgo_toolchain="$(awk '$1 == "go" { print "go" $2; exit }' go.mod)"[0m
+2026-10-03T20:50:24.8899947Z [36;1mGOTOOLCHAIN="$go_toolchain" CGO_ENABLED=0 go run ./scripts/cli-oracle -go-binary "$cli_go_binary" -output "$cli_fixture"[0m
+2026-10-03T20:50:24.8900842Z [36;1mGOTOOLCHAIN="$go_toolchain" CGO_ENABLED=0 go run ./scripts/activity-cli-oracle -go-binary "$cli_go_binary" -output "$activity_cli_fixture"[0m
+2026-10-03T20:50:24.8901693Z [36;1m./scripts/run-go-oracle.sh HEAD run ./scripts/profile-remove-oracle -output "$profile_remove_fixture"[0m
+2026-10-03T20:50:24.8902341Z [36;1m./scripts/run-go-oracle.sh HEAD run ./scripts/skills-oracle -output "$skills_fixture"[0m
+2026-10-03T20:50:24.8902998Z [36;1m./scripts/run-go-oracle.sh HEAD run ./scripts/skills-install-oracle -output "$skills_install_fixture"[0m
+2026-10-03T20:50:24.8903583Z [36;1mscan_fixture="$RUNNER_TEMP/guard-scan-oracle-windows.json"[0m
+2026-10-03T20:50:24.8904147Z [36;1mSYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE="$scan_fixture" ./guard/scripts/guard-scan-oracle/run.sh write[0m
+2026-10-03T20:50:24.8904720Z [36;1mecho "SYMBRAIN_XDG_ORACLE_FIXTURE=$xdg_fixture" >> "$GITHUB_ENV"[0m
+2026-10-03T20:50:24.8905226Z [36;1mecho "SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE=$doctor_fixture" >> "$GITHUB_ENV"[0m
+2026-10-03T20:50:24.8905784Z [36;1mecho "SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE=$instructions_fixture" >> "$GITHUB_ENV"[0m
+2026-10-03T20:50:24.8906318Z [36;1mecho "SYMBRAIN_CLI_TREE_ORACLE_FIXTURE=$cli_fixture" >> "$GITHUB_ENV"[0m
+2026-10-03T20:50:24.8906842Z [36;1mecho "SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE=$activity_cli_fixture" >> "$GITHUB_ENV"[0m
+2026-10-03T20:50:24.8907428Z [36;1mecho "SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE=$profile_remove_fixture" >> "$GITHUB_ENV"[0m
+2026-10-03T20:50:24.8907981Z [36;1mecho "SYMBRAIN_SKILLS_ORACLE_FIXTURE=$skills_fixture" >> "$GITHUB_ENV"[0m
+2026-10-03T20:50:24.8908521Z [36;1mecho "SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE=$skills_install_fixture" >> "$GITHUB_ENV"[0m
+2026-10-03T20:50:24.8909075Z [36;1mecho "SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE=$scan_fixture" >> "$GITHUB_ENV"[0m
+2026-10-03T20:50:24.8925555Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-03T20:50:24.8925970Z env:
+2026-10-03T20:50:24.8926166Z   GOTOOLCHAIN: local
+2026-10-03T20:50:24.8926373Z ##[endgroup]
+2026-10-03T20:50:29.7527373Z Wrote D:\a\_temp/xdg-oracle-windows.json (256 cases)
+2026-10-03T20:50:35.6053042Z Wrote D:\a\_temp/guard-doctor-oracle-windows.json (9 cases)
+2026-10-03T20:50:40.4146128Z Wrote D:\a\_temp/instructions-oracle-windows.json (32 cases)
+2026-10-03T20:51:09.7884231Z Wrote D:\a\_temp/cli-tree-oracle-windows.json (88 cases)
+2026-10-03T20:51:12.9149923Z Wrote D:\a\_temp/activity-cli-oracle-windows.json
+2026-10-03T20:51:20.2722610Z Wrote D:\a\_temp/profile-remove-oracle-windows.json (19 cases)
+2026-10-03T20:51:23.1183771Z Wrote D:\a\_temp/skills-oracle-windows.json
+2026-10-03T20:51:26.2717920Z Wrote D:\a\_temp/skills-install-oracle-windows.json (11 cases)
+2026-10-03T20:51:53.8708004Z Wrote D:\a\_temp\guard-scan-oracle-windows.json (8 cases)
+2026-10-03T20:51:53.9118844Z ##[group]Run make rust-check
+2026-10-03T20:51:53.9119191Z [36;1mmake rust-check[0m
+2026-10-03T20:51:53.9135519Z shell: C:\Program Files\Git\bin\bash.EXE --noprofile --norc -e -o pipefail {0}
+2026-10-03T20:51:53.9135908Z env:
+2026-10-03T20:51:53.9136095Z   GOTOOLCHAIN: local
+2026-10-03T20:51:53.9136399Z   SYMBRAIN_XDG_ORACLE_FIXTURE: D:\a\_temp/xdg-oracle-windows.json
+2026-10-03T20:51:53.9136895Z   SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE: D:\a\_temp/guard-doctor-oracle-windows.json
+2026-10-03T20:51:53.9137462Z   SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE: D:\a\_temp/instructions-oracle-windows.json
+2026-10-03T20:51:53.9137991Z   SYMBRAIN_CLI_TREE_ORACLE_FIXTURE: D:\a\_temp/cli-tree-oracle-windows.json
+2026-10-03T20:51:53.9138511Z   SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE: D:\a\_temp/activity-cli-oracle-windows.json
+2026-10-03T20:51:53.9139060Z   SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE: D:\a\_temp/profile-remove-oracle-windows.json
+2026-10-03T20:51:53.9139603Z   SYMBRAIN_SKILLS_ORACLE_FIXTURE: D:\a\_temp/skills-oracle-windows.json
+2026-10-03T20:51:53.9140110Z   SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE: D:\a\_temp/skills-install-oracle-windows.json
+2026-10-03T20:51:53.9141048Z   SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE: D:\a\_temp/guard-scan-oracle-windows.json
+2026-10-03T20:51:53.9141531Z ##[endgroup]
+2026-10-03T20:51:54.6452356Z ./scripts/run-go-oracle.sh "HEAD" run scripts/generate-go-printable-table.go -check
+2026-10-03T20:51:56.6955207Z ./scripts/run-go-oracle.sh "HEAD" run ./scripts/usage-oracle -check
+2026-10-03T20:51:59.3789526Z PASS: usage oracle deterministic check passed (10 providers, 10 cases)
+2026-10-03T20:51:59.7500865Z SYMAIRA_EXTERNAL_BASE="" bash D:/a/symaira-brain/symaira-brain/scripts/run-external-env.sh env GOTOOLCHAIN=go1.26.7 go run ./scripts/usage-request-oracle/opencode -check
+2026-10-03T20:52:01.2258636Z ./scripts/run-go-oracle.sh "HEAD" test -count=1 ./internal/gateway -run '^TestUsageDiscoveryIsDeferredAndRepeatedPerCall$'
+2026-10-03T20:52:14.1867866Z ok  	github.com/danieljustus/symaira-brain/internal/gateway	0.486s [no tests to run]
+2026-10-03T20:52:14.7018277Z ./scripts/run-go-oracle.sh "HEAD" build -ldflags "-X main.version=dev" -o "D:/a/symaira-brain/symaira-brain/target/go/symbrain-go" ./cmd/symbrain
+2026-10-03T20:52:21.1103378Z SYMAIRA_EXTERNAL_BASE="" bash D:/a/symaira-brain/symaira-brain/scripts/run-external-env.sh env GOTOOLCHAIN=go1.26.7 CGO_ENABLED=0 go run ./scripts/activity-cli-oracle -go-binary "D:/a/symaira-brain/symaira-brain/target/go/symbrain-go" -check
+2026-10-03T20:52:22.0748307Z PASS: bounded activity CLI Go oracle is current
+2026-10-03T20:52:22.0843890Z ./scripts/run-go-oracle.sh "HEAD" run ./scripts/policy-oracle -check
+2026-10-03T20:52:24.2054665Z PASS: policy oracle deterministic check passed (0 drift on 50 profile cases, 30 policy cases)
+2026-10-03T20:52:24.5666842Z ./scripts/run-go-oracle.sh "HEAD" run ./scripts/xdg-oracle -check
+2026-10-03T20:52:29.1127937Z PASS: xdg oracle deterministic check passed (0 drift on 256 cases)
+2026-10-03T20:52:29.4913744Z ./scripts/run-go-oracle.sh "HEAD" run ./guard/scripts/guard-oracle -check
+2026-10-03T20:52:31.6615273Z PASS: guard oracle deterministic check passed (0 drift on 164 cases)
+2026-10-03T20:52:32.0603701Z ./scripts/run-go-oracle.sh "HEAD" run ./guard/scripts/guard-doctor-oracle -check
+2026-10-03T20:52:33.9705631Z PASS: guard doctor oracle deterministic check passed (0 drift on 9 cases)
+2026-10-03T20:52:34.3293362Z ./guard/scripts/guard-scan-oracle/run.sh check
+2026-10-03T20:52:37.7476938Z PASS: guard scan oracle byte check passed (8 cases; POSIX TTY case excluded)
+2026-10-03T20:52:37.7585662Z ./guard/scripts/guard-scan-oracle/run.sh test
+2026-10-03T20:52:38.9370977Z .....
+2026-10-03T20:52:38.9371615Z ----------------------------------------------------------------------
+2026-10-03T20:52:38.9373123Z Ran 5 tests in 0.204s
+2026-10-03T20:52:38.9373318Z 
+2026-10-03T20:52:38.9373443Z OK
+2026-10-03T20:52:38.9502526Z ./scripts/run-go-oracle.sh "HEAD" run ./scripts/catalog-oracle -check
+2026-10-03T20:52:41.7251234Z PASS: catalog oracle deterministic check passed (0 drift on 3 cases)
+2026-10-03T20:52:42.1072287Z ./scripts/run-go-oracle.sh "HEAD" run ./scripts/audit-oracle -check
+2026-10-03T20:52:44.0983240Z PASS: audit oracle deterministic check passed
+2026-10-03T20:52:44.4623689Z ./scripts/run-go-oracle.sh "HEAD" run ./scripts/patterns-activity-oracle -check
+2026-10-03T20:52:47.4529887Z PASS: patterns/activity oracle deterministic check passed
+2026-10-03T20:52:47.8241896Z ./scripts/run-go-oracle.sh "HEAD" run ./scripts/mcp-oracle -check
+2026-10-03T20:52:49.5775168Z PASS: MCP oracle deterministic check passed (20 cases)
+2026-10-03T20:52:49.9697853Z ./scripts/run-go-oracle.sh "HEAD" run ./scripts/gateway-oracle -check
+2026-10-03T20:52:55.7232311Z PASS: gateway oracle deterministic check passed (8 cases)
+2026-10-03T20:52:56.1151883Z ./scripts/run-go-oracle.sh "HEAD" run ./scripts/broker-oracle -check
+2026-10-03T20:52:59.1178930Z PASS: broker oracle deterministic check passed
+2026-10-03T20:52:59.4750767Z ./scripts/run-go-oracle.sh "HEAD" test ./internal/managed -run TestRustManagedOracleFixture -count=1
+2026-10-03T20:53:02.0833987Z ok  	github.com/danieljustus/symaira-brain/internal/managed	0.026s
+2026-10-03T20:53:02.4774506Z ./scripts/run-go-oracle.sh "HEAD" run ./scripts/skills-oracle -check
+2026-10-03T20:53:05.0163225Z PASS: skills oracle deterministic check passed
+2026-10-03T20:53:05.4064655Z ./scripts/run-go-oracle.sh "HEAD" run ./scripts/instructions-oracle -check
+2026-10-03T20:53:07.5191274Z PASS: instructions oracle deterministic check passed (32 cases)
+2026-10-03T20:53:07.9130515Z ./scripts/run-go-oracle.sh "HEAD" run ./scripts/adapters-oracle -check
+2026-10-03T20:53:10.2219643Z PASS: adapters oracle deterministic check passed (25 cases)
+2026-10-03T20:53:10.5849644Z ./scripts/run-go-oracle.sh "HEAD" run ./scripts/install-oracle -check
+2026-10-03T20:53:18.1865396Z PASS: install oracle deterministic check passed (21 cases)
+2026-10-03T20:53:18.5686052Z ./scripts/run-go-oracle.sh "HEAD" run ./scripts/profile-remove-oracle -check
+2026-10-03T20:53:25.9754811Z PASS: profile remove oracle deterministic check passed (19 cases)
+2026-10-03T20:53:26.3369497Z ./scripts/run-go-oracle.sh "HEAD" run ./scripts/db-memory-oracle -check
+2026-10-03T20:53:28.9213769Z PASS: db-memory oracle deterministic check passed (29 tables, 4 negative cases, 2 ordering cases)
+2026-10-03T20:53:29.3695512Z ./scripts/run-go-oracle.sh "HEAD" build -ldflags "-X main.version=dev" -o "D:/a/symaira-brain/symaira-brain/target/go/symbrain-go" ./cmd/symbrain
+2026-10-03T20:53:37.8591636Z SYMAIRA_EXTERNAL_BASE="" bash D:/a/symaira-brain/symaira-brain/scripts/run-external-env.sh env GOTOOLCHAIN=go1.26.7 CGO_ENABLED=0 go run ./scripts/cli-oracle -go-binary "D:/a/symaira-brain/symaira-brain/target/go/symbrain-go" -check
+2026-10-03T20:53:42.7788580Z PASS: cli oracle deterministic check passed (88 cases)
+2026-10-03T20:53:42.7915317Z SYMAIRA_EXTERNAL_BASE="" bash D:/a/symaira-brain/symaira-brain/scripts/run-external-env.sh cargo fmt --all --check
+2026-10-03T20:53:49.3378589Z SYMAIRA_EXTERNAL_BASE="" bash D:/a/symaira-brain/symaira-brain/scripts/run-external-env.sh cargo check --workspace --all-targets --all-features --locked
+2026-10-03T20:53:50.3678445Z    Compiling proc-macro2 v1.0.107
+2026-10-03T20:53:50.3679075Z    Compiling unicode-ident v1.0.24
+2026-10-03T20:53:50.3679584Z    Compiling quote v1.0.47
+2026-10-03T20:53:50.3680105Z     Checking windows-link v0.2.1
+2026-10-03T20:53:50.4270414Z     Checking windows-sys v0.61.2
+2026-10-03T20:53:50.5028973Z     Checking cfg-if v1.0.4
+2026-10-03T20:53:50.5514014Z     Checking itoa v1.0.18
+2026-10-03T20:53:50.6771798Z    Compiling serde_core v1.0.229
+2026-10-03T20:53:53.5239543Z    Compiling serde v1.0.229
+2026-10-03T20:53:53.7046017Z     Checking memchr v2.8.3
+2026-10-03T20:53:54.0189843Z     Checking once_cell v1.21.4
+2026-10-03T20:53:54.2891804Z    Compiling zmij v1.0.23
+2026-10-03T20:53:54.4639827Z    Compiling serde_json v1.0.151
+2026-10-03T20:53:55.2649316Z    Compiling syn v3.0.5
+2026-10-03T20:53:55.2743775Z    Compiling getrandom v0.4.3
+2026-10-03T20:53:55.2872527Z     Checking fastrand v2.5.0
+2026-10-03T20:53:55.5189004Z    Compiling autocfg v1.5.1
+2026-10-03T20:53:55.7331137Z     Checking tempfile v3.27.0
+2026-10-03T20:53:56.0176004Z     Checking foldhash v0.2.0
+2026-10-03T20:53:56.1663197Z     Checking hashbrown v0.17.1
+2026-10-03T20:53:56.1869336Z    Compiling num-traits v0.2.19
+2026-10-03T20:53:56.9887096Z     Checking equivalent v1.0.2
+2026-10-03T20:53:57.0510588Z     Checking indexmap v2.14.2
+2026-10-03T20:53:57.5971828Z     Checking subtle v2.6.1
+2026-10-03T20:53:57.7458645Z     Checking winnow v1.0.4
+2026-10-03T20:53:57.9815017Z     Checking toml_writer v1.1.2+spec-1.1.0
+2026-10-03T20:53:58.2448439Z     Checking toml_datetime v1.1.1+spec-1.1.0
+2026-10-03T20:53:58.4401282Z    Compiling version_check v0.9.5
+2026-10-03T20:53:58.5236066Z     Checking typenum v1.20.1
+2026-10-03T20:53:58.9036498Z    Compiling generic-array v0.14.7
+2026-10-03T20:53:59.2261952Z     Checking cpufeatures v0.2.17
+2026-10-03T20:53:59.2810642Z     Checking bitflags v2.13.1
+2026-10-03T20:53:59.3545418Z     Checking toml_parser v1.1.3+spec-1.1.0
+2026-10-03T20:53:59.4657217Z    Compiling windows_x86_64_msvc v0.52.6
+2026-10-03T20:53:59.8103543Z     Checking windows-targets v0.52.6
+2026-10-03T20:53:59.8641902Z     Checking windows-sys v0.52.0
+2026-10-03T20:53:59.8902067Z     Checking toml_edit v0.25.13+spec-1.1.0
+2026-10-03T20:54:00.6881417Z     Checking block-buffer v0.10.4
+2026-10-03T20:54:00.7434725Z     Checking crypto-common v0.1.7
+2026-10-03T20:54:00.8129182Z    Compiling libc v0.2.189
+2026-10-03T20:54:00.8658494Z     Checking digest v0.10.7
+2026-10-03T20:54:01.1176634Z     Checking sha2 v0.10.9
+2026-10-03T20:54:01.4187554Z     Checking ipnet v2.12.2
+2026-10-03T20:54:01.6571792Z    Compiling io-lifetimes v2.0.4
+2026-10-03T20:54:01.7588762Z    Compiling io-lifetimes v3.0.1
+2026-10-03T20:54:02.0501518Z    Compiling io-extras v0.19.0
+2026-10-03T20:54:02.4268890Z    Compiling cap-primitives v4.0.3
+2026-10-03T20:54:02.5597517Z    Compiling cap-std v4.0.3
+2026-10-03T20:54:02.9598802Z     Checking maybe-owned v0.3.4
+2026-10-03T20:54:03.0800292Z     Checking ambient-authority v0.0.2
+2026-10-03T20:54:03.1701627Z    Compiling cap-fs-ext v4.0.3
+2026-10-03T20:54:03.6420651Z    Compiling shlex v2.0.1
+2026-10-03T20:54:03.8858432Z    Compiling jobserver v0.1.35
+2026-10-03T20:54:03.8940018Z    Compiling find-msvc-tools v0.1.12
+2026-10-03T20:54:04.3571991Z     Checking bytes v1.12.1
+2026-10-03T20:54:04.7139275Z    Compiling serde_derive v1.0.229
+2026-10-03T20:54:05.1103690Z    Compiling cc v1.4.5
+2026-10-03T20:54:05.3647364Z    Compiling dunce v1.0.5
+2026-10-03T20:54:05.5404882Z    Compiling fs_extra v1.3.0
+2026-10-03T20:54:05.7631487Z     Checking winx v0.36.4
+2026-10-03T20:54:06.1734709Z     Checking fs-set-times v0.20.3
+2026-10-03T20:54:06.2709080Z    Compiling winapi v0.3.9
+2026-10-03T20:54:06.8794515Z    Compiling cmake v0.1.58
+2026-10-03T20:54:07.4549791Z     Checking ryu v1.0.23
+2026-10-03T20:54:07.6113839Z    Compiling aws-lc-rs v1.18.1
+2026-10-03T20:54:07.9733124Z    Compiling aws-lc-sys v0.45.0
+2026-10-03T20:54:07.9978053Z    Compiling ring v0.17.14
+2026-10-03T20:54:08.7316205Z     Checking unsafe-libyaml v0.2.11
+2026-10-03T20:54:09.3348808Z     Checking zeroize v1.9.0
+2026-10-03T20:54:09.4994658Z     Checking fs2 v0.4.3
+2026-10-03T20:54:09.6237383Z     Checking http v1.5.0
+2026-10-03T20:54:10.4721603Z    Compiling synstructure v0.14.0
+2026-10-03T20:54:10.5818443Z     Checking chrono v0.4.45
+2026-10-03T20:54:11.1505355Z     Checking serde_yaml_ng v0.10.0
+2026-10-03T20:54:11.4629501Z     Checking symbrain-core v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-core)
+2026-10-03T20:54:11.8789691Z     Checking symbrain-harness v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-harness)
+2026-10-03T20:54:12.0979901Z     Checking rustls-pki-types v1.15.1
+2026-10-03T20:54:12.4537759Z     Checking getrandom v0.2.17
+2026-10-03T20:54:12.5575983Z    Compiling httparse v1.10.1
+2026-10-03T20:54:12.6808199Z     Checking untrusted v0.9.0
+2026-10-03T20:54:12.7776921Z     Checking symbrain-skills v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-skills)
+2026-10-03T20:54:12.9719156Z    Compiling zerofrom-derive v0.1.8
+2026-10-03T20:54:14.8976317Z     Checking log v0.4.34
+2026-10-03T20:54:15.0280356Z    Compiling rustls v0.23.45
+2026-10-03T20:54:15.2497731Z     Checking percent-encoding v2.3.2
+2026-10-03T20:54:15.2504935Z     Checking zerofrom v0.1.8
+2026-10-03T20:54:15.3890941Z    Compiling yoke-derive v0.8.4
+2026-10-03T20:54:15.6340128Z     Checking stable_deref_trait v1.2.1
+2026-10-03T20:54:15.6836715Z     Checking symbrain-policy v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-policy)
+2026-10-03T20:54:16.4522224Z     Checking base64 v0.23.1
+2026-10-03T20:54:16.4870857Z    Compiling zerovec-derive v0.11.6
+2026-10-03T20:54:16.8457534Z    Compiling displaydoc v0.2.7
+2026-10-03T20:54:17.1722226Z     Checking yoke v0.8.3
+2026-10-03T20:54:17.3759406Z     Checking pin-project-lite v0.2.17
+2026-10-03T20:54:17.4504298Z     Checking futures-core v0.3.34
+2026-10-03T20:54:17.5605298Z     Checking ureq-proto v0.6.2
+2026-10-03T20:54:17.9508948Z     Checking webpki-roots v1.0.9
+2026-10-03T20:54:17.9861442Z     Checking smallvec v1.16.0
+2026-10-03T20:54:18.0592833Z     Checking utf8-zero v0.8.1
+2026-10-03T20:54:18.1955312Z    Compiling tokio-macros v2.7.2
+2026-10-03T20:54:18.2260260Z     Checking mio v1.2.3
+2026-10-03T20:54:18.2771789Z     Checking zerovec v0.11.8
+2026-10-03T20:54:18.7053056Z     Checking socket2 v0.6.5
+2026-10-03T20:54:19.0325644Z     Checking tinystr v0.8.4
+2026-10-03T20:54:19.0752469Z    Compiling getrandom v0.3.3
+2026-10-03T20:54:19.2225651Z     Checking writeable v0.6.4
+2026-10-03T20:54:19.2483699Z     Checking base64 v0.22.1
+2026-10-03T20:54:19.4878179Z     Checking litemap v0.8.3
+2026-10-03T20:54:19.5351821Z     Checking tokio v1.53.1
+2026-10-03T20:54:19.5629102Z     Checking potential_utf v0.1.6
+2026-10-03T20:54:19.6801013Z     Checking zerotrie v0.2.5
+2026-10-03T20:54:19.7037968Z     Checking icu_locale_core v2.3.0
+2026-10-03T20:54:19.9893903Z     Checking errno v0.3.14
+2026-10-03T20:54:20.1628977Z    Compiling icu_normalizer_data v2.3.0
+2026-10-03T20:54:20.3991877Z     Checking utf8_iter v1.0.4
+2026-10-03T20:54:20.5171273Z    Compiling icu_properties_data v2.3.0
+2026-10-03T20:54:20.7248905Z     Checking icu_provider v2.3.1
+2026-10-03T20:54:20.7992100Z     Checking icu_collections v2.3.0
+2026-10-03T20:54:21.1893137Z    Compiling futures-macro v0.3.34
+2026-10-03T20:54:21.2215830Z     Checking slab v0.4.12
+2026-10-03T20:54:21.4313439Z    Compiling rustix v1.1.4
+2026-10-03T20:54:21.9405302Z     Checking futures-task v0.3.34
+2026-10-03T20:54:22.4321970Z     Checking futures-util v0.3.34
+2026-10-03T20:54:22.5134712Z     Checking http-body v1.1.0
+2026-10-03T20:54:22.6331651Z     Checking icu_properties v2.3.0
+2026-10-03T20:54:23.8950737Z     Checking icu_normalizer v2.3.0
+2026-10-03T20:54:24.3033585Z     Checking aho-corasick v1.1.5
+2026-10-03T20:54:24.4615138Z     Checking regex-syntax v0.8.11
+2026-10-03T20:54:24.9014671Z     Checking try-lock v0.2.5
+2026-10-03T20:54:24.9957153Z     Checking tower-service v0.3.3
+2026-10-03T20:54:25.0691193Z     Checking want v0.3.1
+2026-10-03T20:54:25.1652253Z     Checking idna_adapter v1.2.2
+2026-10-03T20:54:25.2639107Z     Checking futures-channel v0.3.34
+2026-10-03T20:54:25.3990632Z     Checking tracing-core v0.1.36
+2026-10-03T20:54:25.5259657Z     Checking windows-result v0.4.1
+2026-10-03T20:54:25.6890883Z     Checking windows-strings v0.5.1
+2026-10-03T20:54:25.8495524Z     Checking atomic-waker v1.1.2
+2026-10-03T20:54:25.8886956Z     Checking windows-registry v0.6.1
+2026-10-03T20:54:25.9241924Z     Checking hyper v1.11.1
+2026-10-03T20:54:26.1099176Z     Checking tracing v0.1.44
+2026-10-03T20:54:26.3291903Z     Checking idna v1.1.0
+2026-10-03T20:54:26.6412786Z     Checking sync_wrapper v1.0.2
+2026-10-03T20:54:26.7190778Z     Checking regex-automata v0.4.18
+2026-10-03T20:54:26.7215211Z     Checking form_urlencoded v1.2.2
+2026-10-03T20:54:26.8361672Z    Compiling vcpkg v0.2.15
+2026-10-03T20:54:26.8758832Z     Checking tower-layer v0.3.3
+2026-10-03T20:54:27.0479797Z    Compiling pkg-config v0.3.34
+2026-10-03T20:54:27.8703878Z    Compiling thiserror v2.0.20
+2026-10-03T20:54:27.9028471Z    Compiling libsqlite3-sys v0.38.2
+2026-10-03T20:54:28.3633867Z     Checking tower v0.5.3
+2026-10-03T20:54:28.3881051Z     Checking hyper-util v0.1.21
+2026-10-03T20:54:28.9014326Z     Checking url v2.5.8
+2026-10-03T20:54:29.2325348Z     Checking regex v1.13.1
+2026-10-03T20:54:29.4714134Z     Checking symbrain-mcp v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-mcp)
+2026-10-03T20:54:29.5871659Z    Compiling thiserror-impl v2.0.20
+2026-10-03T20:54:29.7054803Z     Checking tower-http v0.6.11
+2026-10-03T20:54:30.1057064Z     Checking http-body-util v0.1.5
+2026-10-03T20:54:30.4205491Z     Checking futures-sink v0.3.34
+2026-10-03T20:54:30.4955246Z     Checking tokio-util v0.7.19
+2026-10-03T20:54:30.8786403Z     Checking symbrain-activity v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-activity)
+2026-10-03T20:54:31.2202088Z     Checking hmac v0.12.1
+2026-10-03T20:54:31.3579954Z     Checking hashlink v0.12.1
+2026-10-03T20:54:31.5510692Z     Checking symaira-core-secretref v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+2026-10-03T20:54:31.7299400Z     Checking symaira-core-exit v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+2026-10-03T20:54:31.8122140Z    Compiling crc32fast v1.5.1
+2026-10-03T20:54:31.8341803Z     Checking fallible-streaming-iterator v0.1.9
+2026-10-03T20:54:31.9743532Z     Checking fallible-iterator v0.3.0
+2026-10-03T20:54:32.1701092Z     Checking hkdf v0.12.4
+2026-10-03T20:54:32.2853166Z     Checking hostname v0.4.2
+2026-10-03T20:54:32.3627241Z     Checking simd-adler32 v0.3.10
+2026-10-03T20:54:32.4090905Z     Checking adler2 v2.0.1
+2026-10-03T20:54:32.5281572Z     Checking miniz_oxide v0.9.1
+2026-10-03T20:54:32.6348764Z     Checking symbrain-broker v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-broker)
+2026-10-03T20:54:33.0497677Z     Checking flate2 v1.1.10
+2026-10-03T20:54:33.2024289Z     Checking symbrain-guard-core v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-guard-core)
+2026-10-03T20:54:33.4797316Z     Checking symbrain-audit v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-audit)
+2026-10-03T20:54:34.1730364Z     Checking symbrain-patterns v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-patterns)
+2026-10-03T20:54:34.2011271Z     Checking rusqlite v0.40.2
+2026-10-03T20:54:34.5001252Z     Checking symbrain-instructions v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-instructions)
+2026-10-03T20:54:34.6963683Z     Checking filetime v0.2.29
+2026-10-03T20:54:34.8196237Z     Checking typed-path v0.12.3
+2026-10-03T20:54:35.0706506Z     Checking tar v0.4.46
+2026-10-03T20:54:35.2688855Z     Checking symbrain-catalog v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-catalog)
+2026-10-03T20:54:35.5587192Z     Checking symbrain-adapter v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-adapter)
+2026-10-03T20:54:35.6272672Z    Compiling signal-hook v0.3.18
+2026-10-03T20:54:35.8516062Z     Checking signal-hook-registry v1.4.8
+2026-10-03T20:54:35.8572209Z    Compiling symbrain-cli v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-cli)
+2026-10-03T20:54:36.1187398Z     Checking zip v8.6.0
+2026-10-03T20:55:25.4616169Z     Checking rustls-webpki v0.103.15
+2026-10-03T20:55:28.8674857Z     Checking ureq v3.4.1
+2026-10-03T20:55:28.8675745Z     Checking tokio-rustls v0.26.6
+2026-10-03T20:55:28.8676841Z     Checking rustls-platform-verifier v0.7.1
+2026-10-03T20:55:29.1731030Z     Checking hyper-rustls v0.27.10
+2026-10-03T20:55:29.3727410Z     Checking reqwest v0.13.4
+2026-10-03T20:55:29.7377570Z     Checking symbrain-usage v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-usage)
+2026-10-03T20:55:29.7380426Z     Checking symbrain-managed v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-managed)
+2026-10-03T20:55:30.7002370Z     Checking symaira-core-llm v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+2026-10-03T20:55:32.6169338Z     Checking symbrain-memory v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-memory)
+2026-10-03T20:55:34.0505008Z     Checking symbrain-gateway v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-gateway)
+2026-10-03T20:55:40.2353699Z     Finished `dev` profile [unoptimized + debuginfo] target(s) in 1m 50s
+2026-10-03T20:55:40.3531551Z SYMAIRA_EXTERNAL_BASE="" bash D:/a/symaira-brain/symaira-brain/scripts/run-external-env.sh cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
+2026-10-03T20:55:41.6994957Z     Checking symbrain-core v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-core)
+2026-10-03T20:55:41.7090677Z     Checking symbrain-harness v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-harness)
+2026-10-03T20:55:41.7182709Z     Checking symbrain-mcp v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-mcp)
+2026-10-03T20:55:41.7190505Z     Checking symbrain-usage v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-usage)
+2026-10-03T20:55:42.5581193Z     Checking symbrain-broker v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-broker)
+2026-10-03T20:55:42.6342727Z     Checking symbrain-policy v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-policy)
+2026-10-03T20:55:43.3189847Z     Checking symbrain-skills v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-skills)
+2026-10-03T20:55:43.4577313Z     Checking symbrain-guard-core v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-guard-core)
+2026-10-03T20:55:43.9404446Z     Checking symbrain-audit v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-audit)
+2026-10-03T20:55:43.9867127Z     Checking symbrain-activity v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-activity)
+2026-10-03T20:55:44.7721625Z     Checking symbrain-memory v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-memory)
+2026-10-03T20:55:45.1404766Z     Checking symbrain-instructions v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-instructions)
+2026-10-03T20:55:45.6578340Z     Checking symbrain-patterns v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-patterns)
+2026-10-03T20:55:46.4414609Z     Checking symbrain-catalog v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-catalog)
+2026-10-03T20:55:46.7231326Z     Checking symbrain-managed v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-managed)
+2026-10-03T20:55:47.1587653Z     Checking symbrain-adapter v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-adapter)
+2026-10-03T20:55:47.3835200Z    Compiling symbrain-cli v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-cli)
+2026-10-03T20:55:47.7027210Z     Checking symbrain-gateway v0.12.1 (D:\a\symaira-brain\symaira-brain\rust\symbrain-gateway)
+2026-10-03T20:55:53.6555506Z error: this argument is passed by value, but not consumed in the function body
+2026-10-03T20:55:53.6740708Z    --> rust\symbrain-cli\src\memory_cli\flags.rs:205:14
+2026-10-03T20:55:53.6820482Z     |
+2026-10-03T20:55:53.7078187Z 205 | fn os(value: Vec<u8>) -> OsString {
+2026-10-03T20:55:53.7171484Z     |              ^^^^^^^ help: consider changing the type to: `&[u8]`
+2026-10-03T20:55:53.7187893Z     |
+2026-10-03T20:55:53.7247408Z     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.98.0/index.html#needless_pass_by_value
+2026-10-03T20:55:53.7440538Z     = note: `-D clippy::needless-pass-by-value` implied by `-D clippy::pedantic`
+2026-10-03T20:55:53.7509299Z     = help: to override `-D clippy::pedantic` add `#[allow(clippy::needless_pass_by_value)]`
+2026-10-03T20:55:53.7510527Z 
+2026-10-03T20:55:53.9870399Z error: could not compile `symbrain-cli` (lib) due to 1 previous error
+2026-10-03T20:55:53.9891837Z warning: build failed, waiting for other jobs to finish...
+2026-10-03T20:55:54.7591314Z error: could not compile `symbrain-cli` (lib test) due to 1 previous error
+2026-10-03T20:55:54.8618062Z make: *** [Makefile:248: rust-check] Error 101
+2026-10-03T20:55:54.8699594Z ##[error]Process completed with exit code 2.
+2026-10-03T20:55:54.8950171Z ##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+2026-10-03T20:55:54.8950650Z with:
+2026-10-03T20:55:54.8950870Z   name: activity-validation-767-Windows
+2026-10-03T20:55:54.8951555Z   path: D:\a\_temp/activity-validation-767.json
+D:\a\_temp/activity-validation-767.json.fixture.json
+D:\a\_temp/activity-validation-767.json.controls.json
+
+2026-10-03T20:55:54.8952256Z   if-no-files-found: error
+2026-10-03T20:55:54.8952475Z   retention-days: 14
+2026-10-03T20:55:54.8952677Z   compression-level: 6
+2026-10-03T20:55:54.8952888Z   overwrite: false
+2026-10-03T20:55:54.8953090Z   include-hidden-files: false
+2026-10-03T20:55:54.8953310Z   archive: true
+2026-10-03T20:55:54.8953498Z env:
+2026-10-03T20:55:54.8953664Z   GOTOOLCHAIN: local
+2026-10-03T20:55:54.8953956Z   SYMBRAIN_XDG_ORACLE_FIXTURE: D:\a\_temp/xdg-oracle-windows.json
+2026-10-03T20:55:54.8954440Z   SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE: D:\a\_temp/guard-doctor-oracle-windows.json
+2026-10-03T20:55:54.8955010Z   SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE: D:\a\_temp/instructions-oracle-windows.json
+2026-10-03T20:55:54.8955540Z   SYMBRAIN_CLI_TREE_ORACLE_FIXTURE: D:\a\_temp/cli-tree-oracle-windows.json
+2026-10-03T20:55:54.8956053Z   SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE: D:\a\_temp/activity-cli-oracle-windows.json
+2026-10-03T20:55:54.8956596Z   SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE: D:\a\_temp/profile-remove-oracle-windows.json
+2026-10-03T20:55:54.8957117Z   SYMBRAIN_SKILLS_ORACLE_FIXTURE: D:\a\_temp/skills-oracle-windows.json
+2026-10-03T20:55:54.8957623Z   SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE: D:\a\_temp/skills-install-oracle-windows.json
+2026-10-03T20:55:54.8958542Z   SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE: D:\a\_temp/guard-scan-oracle-windows.json
+2026-10-03T20:55:54.8959002Z ##[endgroup]
+2026-10-03T20:55:55.0915255Z Multiple search paths detected. Calculating the least common ancestor of all paths
+2026-10-03T20:55:55.0917825Z The least common ancestor is D:\a\_temp. This will be the root directory of the artifact
+2026-10-03T20:55:55.0935555Z ##[error]No files were found with the provided path: D:\a\_temp/activity-validation-767.json
+D:\a\_temp/activity-validation-767.json.fixture.json
+D:\a\_temp/activity-validation-767.json.controls.json. No artifacts will be uploaded.
+2026-10-03T20:55:55.1317183Z ##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+2026-10-03T20:55:55.1317945Z with:
+2026-10-03T20:55:55.1318288Z   name: setup-repair-parity-Windows
+2026-10-03T20:55:55.1318776Z   path: D:\a\_temp/setup-repair-parity.json
+2026-10-03T20:55:55.1319255Z   if-no-files-found: error
+2026-10-03T20:55:55.1320599Z   retention-days: 14
+2026-10-03T20:55:55.1320983Z   compression-level: 6
+2026-10-03T20:55:55.1322046Z   overwrite: false
+2026-10-03T20:55:55.1322415Z   include-hidden-files: false
+2026-10-03T20:55:55.1322805Z   archive: true
+2026-10-03T20:55:55.1323116Z env:
+2026-10-03T20:55:55.1323396Z   GOTOOLCHAIN: local
+2026-10-03T20:55:55.1323897Z   SYMBRAIN_XDG_ORACLE_FIXTURE: D:\a\_temp/xdg-oracle-windows.json
+2026-10-03T20:55:55.1324771Z   SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE: D:\a\_temp/guard-doctor-oracle-windows.json
+2026-10-03T20:55:55.1325738Z   SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE: D:\a\_temp/instructions-oracle-windows.json
+2026-10-03T20:55:55.1326705Z   SYMBRAIN_CLI_TREE_ORACLE_FIXTURE: D:\a\_temp/cli-tree-oracle-windows.json
+2026-10-03T20:55:55.1327614Z   SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE: D:\a\_temp/activity-cli-oracle-windows.json
+2026-10-03T20:55:55.1328894Z   SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE: D:\a\_temp/profile-remove-oracle-windows.json
+2026-10-03T20:55:55.1329821Z   SYMBRAIN_SKILLS_ORACLE_FIXTURE: D:\a\_temp/skills-oracle-windows.json
+2026-10-03T20:55:55.1330721Z   SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE: D:\a\_temp/skills-install-oracle-windows.json
+2026-10-03T20:55:55.1331683Z   SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE: D:\a\_temp/guard-scan-oracle-windows.json
+2026-10-03T20:55:55.1332344Z ##[endgroup]
+2026-10-03T20:55:55.3328414Z ##[error]No files were found with the provided path: D:\a\_temp/setup-repair-parity.json. No artifacts will be uploaded.
+2026-10-03T20:55:55.3686635Z ##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+2026-10-03T20:55:55.3687373Z with:
+2026-10-03T20:55:55.3687691Z   name: usage-fetch-620-Windows
+2026-10-03T20:55:55.3688132Z   path: D:\a\_temp/usage-fetch-620.json
+2026-10-03T20:55:55.3688583Z   if-no-files-found: error
+2026-10-03T20:55:55.3688981Z   retention-days: 14
+2026-10-03T20:55:55.3689319Z   compression-level: 6
+2026-10-03T20:55:55.3689666Z   overwrite: false
+2026-10-03T20:55:55.3690015Z   include-hidden-files: false
+2026-10-03T20:55:55.3690393Z   archive: true
+2026-10-03T20:55:55.3690682Z env:
+2026-10-03T20:55:55.3690966Z   GOTOOLCHAIN: local
+2026-10-03T20:55:55.3691453Z   SYMBRAIN_XDG_ORACLE_FIXTURE: D:\a\_temp/xdg-oracle-windows.json
+2026-10-03T20:55:55.3692311Z   SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE: D:\a\_temp/guard-doctor-oracle-windows.json
+2026-10-03T20:55:55.3693280Z   SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE: D:\a\_temp/instructions-oracle-windows.json
+2026-10-03T20:55:55.3694232Z   SYMBRAIN_CLI_TREE_ORACLE_FIXTURE: D:\a\_temp/cli-tree-oracle-windows.json
+2026-10-03T20:55:55.3695131Z   SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE: D:\a\_temp/activity-cli-oracle-windows.json
+2026-10-03T20:55:55.3696111Z   SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE: D:\a\_temp/profile-remove-oracle-windows.json
+2026-10-03T20:55:55.3697035Z   SYMBRAIN_SKILLS_ORACLE_FIXTURE: D:\a\_temp/skills-oracle-windows.json
+2026-10-03T20:55:55.3698013Z   SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE: D:\a\_temp/skills-install-oracle-windows.json
+2026-10-03T20:55:55.3698984Z   SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE: D:\a\_temp/guard-scan-oracle-windows.json
+2026-10-03T20:55:55.3699641Z ##[endgroup]
+2026-10-03T20:55:55.5699992Z ##[error]No files were found with the provided path: D:\a\_temp/usage-fetch-620.json. No artifacts will be uploaded.
+2026-10-03T20:55:55.6109656Z ##[group]Run actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+2026-10-03T20:55:55.6110418Z with:
+2026-10-03T20:55:55.6110754Z   name: vault-admin-parity-Windows
+2026-10-03T20:55:55.6111232Z   path: D:\a\_temp/vault-admin-parity.json
+2026-10-03T20:55:55.6111724Z   if-no-files-found: error
+2026-10-03T20:55:55.6112095Z   retention-days: 7
+2026-10-03T20:55:55.6112428Z   compression-level: 6
+2026-10-03T20:55:55.6112774Z   overwrite: false
+2026-10-03T20:55:55.6113133Z   include-hidden-files: false
+2026-10-03T20:55:55.6113509Z   archive: true
+2026-10-03T20:55:55.6113803Z env:
+2026-10-03T20:55:55.6114075Z   GOTOOLCHAIN: local
+2026-10-03T20:55:55.6114554Z   SYMBRAIN_XDG_ORACLE_FIXTURE: D:\a\_temp/xdg-oracle-windows.json
+2026-10-03T20:55:55.6115405Z   SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE: D:\a\_temp/guard-doctor-oracle-windows.json
+2026-10-03T20:55:55.6116369Z   SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE: D:\a\_temp/instructions-oracle-windows.json
+2026-10-03T20:55:55.6117314Z   SYMBRAIN_CLI_TREE_ORACLE_FIXTURE: D:\a\_temp/cli-tree-oracle-windows.json
+2026-10-03T20:55:55.6118202Z   SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE: D:\a\_temp/activity-cli-oracle-windows.json
+2026-10-03T20:55:55.6119170Z   SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE: D:\a\_temp/profile-remove-oracle-windows.json
+2026-10-03T20:55:55.6120094Z   SYMBRAIN_SKILLS_ORACLE_FIXTURE: D:\a\_temp/skills-oracle-windows.json
+2026-10-03T20:55:55.6120993Z   SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE: D:\a\_temp/skills-install-oracle-windows.json
+2026-10-03T20:55:55.6122550Z   SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE: D:\a\_temp/guard-scan-oracle-windows.json
+2026-10-03T20:55:55.6123210Z ##[endgroup]
+2026-10-03T20:55:55.8956424Z ##[error]No files were found with the provided path: D:\a\_temp/vault-admin-parity.json. No artifacts will be uploaded.
+2026-10-03T20:55:55.9440061Z Post job cleanup.
+2026-10-03T20:55:56.2078118Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-03T20:55:56.2463776Z git version 2.55.0.windows.5
+2026-10-03T20:55:56.2529702Z Temporarily overriding HOME='D:\a\_temp\be7f1dba-f61e-4145-b060-1d27d6672c53' before making global git config changes
+2026-10-03T20:55:56.2531345Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-03T20:55:56.2544055Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\symaira-brain\symaira-brain
+2026-10-03T20:55:56.2910116Z Removing SSH command configuration
+2026-10-03T20:55:56.2921475Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-03T20:55:56.3251584Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-03T20:55:56.9493471Z Removing HTTP extra header
+2026-10-03T20:55:56.9508791Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-03T20:55:56.9877927Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-03T20:55:57.6441240Z Removing includeIf entries pointing to credentials config files
+2026-10-03T20:55:57.6453923Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-03T20:55:57.6742877Z includeif.gitdir:D:/a/symaira-brain/symaira-brain/.git.path
+2026-10-03T20:55:57.6744033Z includeif.gitdir:D:/a/symaira-brain/symaira-brain/.git/worktrees/*.path
+2026-10-03T20:55:57.6744785Z includeif.gitdir:/github/workspace/.git.path
+2026-10-03T20:55:57.6745432Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-03T20:55:57.6791824Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/symaira-brain/symaira-brain/.git.path
+2026-10-03T20:55:57.7100006Z D:\a\_temp\git-credentials-1f843e0e-4e92-4f4d-944f-d9cd7a901adc.config
+2026-10-03T20:55:57.7153646Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/symaira-brain/symaira-brain/.git.path D\:\\a\\_temp\\git\-credentials\-1f843e0e\-4e92\-4f4d\-944f\-d9cd7a901adc\.config
+2026-10-03T20:55:57.7576801Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:D:/a/symaira-brain/symaira-brain/.git/worktrees/*.path
+2026-10-03T20:55:57.7917769Z D:\a\_temp\git-credentials-1f843e0e-4e92-4f4d-944f-d9cd7a901adc.config
+2026-10-03T20:55:57.7960613Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:D:/a/symaira-brain/symaira-brain/.git/worktrees/*.path D\:\\a\\_temp\\git\-credentials\-1f843e0e\-4e92\-4f4d\-944f\-d9cd7a901adc\.config
+2026-10-03T20:55:57.8344728Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-10-03T20:55:57.8708686Z /github/runner_temp/git-credentials-1f843e0e-4e92-4f4d-944f-d9cd7a901adc.config
+2026-10-03T20:55:57.8780883Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/.git.path \/github\/runner_temp\/git\-credentials\-1f843e0e\-4e92\-4f4d\-944f\-d9cd7a901adc\.config
+2026-10-03T20:55:57.9128122Z [command]"C:\Program Files\Git\bin\git.exe" config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-10-03T20:55:57.9388408Z /github/runner_temp/git-credentials-1f843e0e-4e92-4f4d-944f-d9cd7a901adc.config
+2026-10-03T20:55:57.9496792Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path \/github\/runner_temp\/git\-credentials\-1f843e0e\-4e92\-4f4d\-944f\-d9cd7a901adc\.config
+2026-10-03T20:55:57.9866199Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-03T20:55:58.5727525Z Removing credentials config 'D:\a\_temp\git-credentials-1f843e0e-4e92-4f4d-944f-d9cd7a901adc.config'
+2026-10-03T20:55:58.5941481Z Cleaning up orphan processes
+2026-10-03T20:55:58.6276327Z Terminate orphan process: pid (3808) (vctip)
+

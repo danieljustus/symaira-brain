@@ -1,0 +1,473 @@
+{
+  "source": "8803847278546f3161eaaa84d2e65bc2eec594a2",
+  "candidate_clean": true,
+  "cases": 12,
+  "passed": 12,
+  "failed": 0,
+  "records": [
+    {
+      "original_receipt": "/tmp/symaira-usage768-f759-root-owner-extra.json",
+      "original_receipt_sha256": "99b4b8ddaff381094d20d3e4e2bd4354f2b2916e4d9f8407003b6547b17f7125",
+      "original_index": 0,
+      "provider": "copilot",
+      "variant": "plain-control",
+      "input_bytes_hex": {
+        "owner/home/.config/github-copilot/apps.json": "7b226769746875622e636f6d3a61223a207b226f617574685f746f6b656e223a2022706879736963616c2d6f776e6572227d7d",
+        "home/.config/github-copilot/apps.json": "7b226769746875622e636f6d3a61223a207b226f617574685f746f6b656e223a20226c65786963616c2d6f776e6572227d7d"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer lexical-owner"
+        ],
+        "source": "file",
+        "status": "available"
+      },
+      "native": {
+        "configured": true,
+        "status": "available",
+        "source": "file",
+        "headers": [
+          "Bearer lexical-owner"
+        ]
+      },
+      "needs_go_fallback": false,
+      "matches": true,
+      "read_only": true,
+      "before": {
+        "owner/home/.config/github-copilot/apps.json": "5f3124b1ce9326c824845477044c2ee552bfbdd0e7148c71612c626dfcd0284e",
+        "home/.config/github-copilot/apps.json": "6de1ca6155f75c08c413568b716cfa013df691ef1fa21c8e833814671b25500a"
+      },
+      "after": {
+        "owner/home/.config/github-copilot/apps.json": "5f3124b1ce9326c824845477044c2ee552bfbdd0e7148c71612c626dfcd0284e",
+        "home/.config/github-copilot/apps.json": "6de1ca6155f75c08c413568b716cfa013df691ef1fa21c8e833814671b25500a"
+      }
+    },
+    {
+      "original_receipt": "/tmp/symaira-usage768-f759-root-owner-extra.json",
+      "original_receipt_sha256": "99b4b8ddaff381094d20d3e4e2bd4354f2b2916e4d9f8407003b6547b17f7125",
+      "original_index": 1,
+      "provider": "copilot",
+      "variant": "dotdot-control",
+      "input_bytes_hex": {
+        "owner/home/.config/github-copilot/apps.json": "7b226769746875622e636f6d3a61223a207b226f617574685f746f6b656e223a2022706879736963616c2d6f776e6572227d7d",
+        "home/.config/github-copilot/apps.json": "7b226769746875622e636f6d3a61223a207b226f617574685f746f6b656e223a20226c65786963616c2d6f776e6572227d7d"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer lexical-owner"
+        ],
+        "source": "file",
+        "status": "available"
+      },
+      "native": {
+        "configured": true,
+        "status": "available",
+        "source": "file",
+        "headers": [
+          "Bearer lexical-owner"
+        ]
+      },
+      "needs_go_fallback": false,
+      "matches": true,
+      "read_only": true,
+      "before": {
+        "owner/home/.config/github-copilot/apps.json": "5f3124b1ce9326c824845477044c2ee552bfbdd0e7148c71612c626dfcd0284e",
+        "home/.config/github-copilot/apps.json": "6de1ca6155f75c08c413568b716cfa013df691ef1fa21c8e833814671b25500a"
+      },
+      "after": {
+        "owner/home/.config/github-copilot/apps.json": "5f3124b1ce9326c824845477044c2ee552bfbdd0e7148c71612c626dfcd0284e",
+        "home/.config/github-copilot/apps.json": "6de1ca6155f75c08c413568b716cfa013df691ef1fa21c8e833814671b25500a"
+      }
+    },
+    {
+      "original_receipt": "/tmp/symaira-usage768-f759-root-owner-extra.json",
+      "original_receipt_sha256": "99b4b8ddaff381094d20d3e4e2bd4354f2b2916e4d9f8407003b6547b17f7125",
+      "original_index": 2,
+      "provider": "copilot",
+      "variant": "symlink-home",
+      "input_bytes_hex": {
+        "owner/home/.config/github-copilot/apps.json": "7b226769746875622e636f6d3a61223a207b226f617574685f746f6b656e223a2022706879736963616c2d6f776e6572227d7d",
+        "home/.config/github-copilot/apps.json": "7b226769746875622e636f6d3a61223a207b226f617574685f746f6b656e223a20226c65786963616c2d6f776e6572227d7d"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer lexical-owner"
+        ],
+        "source": "file",
+        "status": "available"
+      },
+      "native": {
+        "configured": true,
+        "status": "available",
+        "source": "file",
+        "headers": [
+          "Bearer lexical-owner"
+        ]
+      },
+      "needs_go_fallback": false,
+      "matches": true,
+      "read_only": true,
+      "before": {
+        "owner/home/.config/github-copilot/apps.json": "5f3124b1ce9326c824845477044c2ee552bfbdd0e7148c71612c626dfcd0284e",
+        "home/.config/github-copilot/apps.json": "6de1ca6155f75c08c413568b716cfa013df691ef1fa21c8e833814671b25500a"
+      },
+      "after": {
+        "owner/home/.config/github-copilot/apps.json": "5f3124b1ce9326c824845477044c2ee552bfbdd0e7148c71612c626dfcd0284e",
+        "home/.config/github-copilot/apps.json": "6de1ca6155f75c08c413568b716cfa013df691ef1fa21c8e833814671b25500a"
+      }
+    },
+    {
+      "original_receipt": "/tmp/symaira-usage768-f759-root-owner-extra.json",
+      "original_receipt_sha256": "99b4b8ddaff381094d20d3e4e2bd4354f2b2916e4d9f8407003b6547b17f7125",
+      "original_index": 3,
+      "provider": "kimi",
+      "variant": "plain-control",
+      "input_bytes_hex": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a2022706879736963616c2d6f776e6572227d",
+        "home/.kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a20226c65786963616c2d6f776e6572227d"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer lexical-owner"
+        ],
+        "source": "cli",
+        "status": "available"
+      },
+      "native": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer lexical-owner"
+        ]
+      },
+      "needs_go_fallback": false,
+      "matches": true,
+      "read_only": true,
+      "before": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      },
+      "after": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      }
+    },
+    {
+      "original_receipt": "/tmp/symaira-usage768-f759-root-owner-extra.json",
+      "original_receipt_sha256": "99b4b8ddaff381094d20d3e4e2bd4354f2b2916e4d9f8407003b6547b17f7125",
+      "original_index": 4,
+      "provider": "kimi",
+      "variant": "dotdot-control",
+      "input_bytes_hex": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a2022706879736963616c2d6f776e6572227d",
+        "home/.kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a20226c65786963616c2d6f776e6572227d"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer lexical-owner"
+        ],
+        "source": "cli",
+        "status": "available"
+      },
+      "native": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer lexical-owner"
+        ]
+      },
+      "needs_go_fallback": false,
+      "matches": true,
+      "read_only": true,
+      "before": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      },
+      "after": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      }
+    },
+    {
+      "original_receipt": "/tmp/symaira-usage768-f759-root-owner-extra.json",
+      "original_receipt_sha256": "99b4b8ddaff381094d20d3e4e2bd4354f2b2916e4d9f8407003b6547b17f7125",
+      "original_index": 5,
+      "provider": "kimi",
+      "variant": "symlink-home",
+      "input_bytes_hex": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a2022706879736963616c2d6f776e6572227d",
+        "home/.kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a20226c65786963616c2d6f776e6572227d"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer lexical-owner"
+        ],
+        "source": "cli",
+        "status": "available"
+      },
+      "native": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer lexical-owner"
+        ]
+      },
+      "needs_go_fallback": false,
+      "matches": true,
+      "read_only": true,
+      "before": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      },
+      "after": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      }
+    },
+    {
+      "original_receipt": "/tmp/symaira-usage768-f759-root-owner-extra.json",
+      "original_receipt_sha256": "99b4b8ddaff381094d20d3e4e2bd4354f2b2916e4d9f8407003b6547b17f7125",
+      "original_index": 6,
+      "provider": "kimi",
+      "variant": "symlink-explicit-home",
+      "input_bytes_hex": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a2022706879736963616c2d6f776e6572227d",
+        "home/.kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a20226c65786963616c2d6f776e6572227d"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer lexical-owner"
+        ],
+        "source": "cli",
+        "status": "available"
+      },
+      "native": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer lexical-owner"
+        ]
+      },
+      "needs_go_fallback": false,
+      "matches": true,
+      "read_only": true,
+      "before": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      },
+      "after": {
+        "owner/home/.kimi-code/credentials/kimi-code.json": "fccee148cdb98b555a58a8f85bf8cc30cd0c8656bf751e370fc23814e9abd23d",
+        "home/.kimi-code/credentials/kimi-code.json": "2748ee8586796ab15d739d821e6016f8f83be929a73d6e45a7892b5e262067c5"
+      }
+    },
+    {
+      "original_receipt": "/tmp/symaira-usage768-f759-root-literal-owner-extra.json",
+      "original_receipt_sha256": "e3421e19cb100b979fd0ebac19bcefb1b9a205b59f6a92374bf12a497a175223",
+      "original_index": 0,
+      "provider": "copilot",
+      "variant": "plain",
+      "input_bytes_hex": {
+        "home/.config/github-copilot/apps.json": "7b226769746875622e636f6d3a61223a207b226f617574685f746f6b656e223a2022656e763a2f2f4c45584943414c5f4f574e4552227d7d",
+        "owner/home/.config/github-copilot/apps.json": "7b226769746875622e636f6d3a61223a207b226f617574685f746f6b656e223a2022656e763a2f2f504859534943414c5f4f574e4552227d7d"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer env://LEXICAL_OWNER"
+        ],
+        "source": "file",
+        "status": "available"
+      },
+      "native": {
+        "configured": true,
+        "status": "available",
+        "source": "file",
+        "headers": [
+          "Bearer env://LEXICAL_OWNER"
+        ]
+      },
+      "needs_go_fallback": false,
+      "matches": true,
+      "read_only": true,
+      "before": {
+        "home/.config/github-copilot/apps.json": "d7a553ce5aeaebd897bbc946fbe4b71bcc9e3997b3f0c8b947dae1d1c1ce5811",
+        "owner/home/.config/github-copilot/apps.json": "c24498a685ed901512e3da7f50421f33ba34f290d771a55646d59fef9aac8d49"
+      },
+      "after": {
+        "home/.config/github-copilot/apps.json": "d7a553ce5aeaebd897bbc946fbe4b71bcc9e3997b3f0c8b947dae1d1c1ce5811",
+        "owner/home/.config/github-copilot/apps.json": "c24498a685ed901512e3da7f50421f33ba34f290d771a55646d59fef9aac8d49"
+      }
+    },
+    {
+      "original_receipt": "/tmp/symaira-usage768-f759-root-literal-owner-extra.json",
+      "original_receipt_sha256": "e3421e19cb100b979fd0ebac19bcefb1b9a205b59f6a92374bf12a497a175223",
+      "original_index": 1,
+      "provider": "copilot",
+      "variant": "symlink-home",
+      "input_bytes_hex": {
+        "home/.config/github-copilot/apps.json": "7b226769746875622e636f6d3a61223a207b226f617574685f746f6b656e223a2022656e763a2f2f4c45584943414c5f4f574e4552227d7d",
+        "owner/home/.config/github-copilot/apps.json": "7b226769746875622e636f6d3a61223a207b226f617574685f746f6b656e223a2022656e763a2f2f504859534943414c5f4f574e4552227d7d"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer env://LEXICAL_OWNER"
+        ],
+        "source": "file",
+        "status": "available"
+      },
+      "native": {
+        "configured": true,
+        "status": "available",
+        "source": "file",
+        "headers": [
+          "Bearer env://LEXICAL_OWNER"
+        ]
+      },
+      "needs_go_fallback": false,
+      "matches": true,
+      "read_only": true,
+      "before": {
+        "home/.config/github-copilot/apps.json": "d7a553ce5aeaebd897bbc946fbe4b71bcc9e3997b3f0c8b947dae1d1c1ce5811",
+        "owner/home/.config/github-copilot/apps.json": "c24498a685ed901512e3da7f50421f33ba34f290d771a55646d59fef9aac8d49"
+      },
+      "after": {
+        "home/.config/github-copilot/apps.json": "d7a553ce5aeaebd897bbc946fbe4b71bcc9e3997b3f0c8b947dae1d1c1ce5811",
+        "owner/home/.config/github-copilot/apps.json": "c24498a685ed901512e3da7f50421f33ba34f290d771a55646d59fef9aac8d49"
+      }
+    },
+    {
+      "original_receipt": "/tmp/symaira-usage768-f759-root-literal-owner-extra.json",
+      "original_receipt_sha256": "e3421e19cb100b979fd0ebac19bcefb1b9a205b59f6a92374bf12a497a175223",
+      "original_index": 2,
+      "provider": "kimi",
+      "variant": "plain",
+      "input_bytes_hex": {
+        "home/.kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a2022656e763a2f2f4c45584943414c5f4f574e4552227d",
+        "owner/home/.kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a2022656e763a2f2f504859534943414c5f4f574e4552227d"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer env://LEXICAL_OWNER"
+        ],
+        "source": "cli",
+        "status": "available"
+      },
+      "native": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer env://LEXICAL_OWNER"
+        ]
+      },
+      "needs_go_fallback": false,
+      "matches": true,
+      "read_only": true,
+      "before": {
+        "home/.kimi-code/credentials/kimi-code.json": "34fe73cebd9c109e02ec77fd9170498cd5030d69bc861ac47f03e9b818cb141c",
+        "owner/home/.kimi-code/credentials/kimi-code.json": "b0c76067c546af78ee746a39384c0a2bc2c2fc07bd8491608b53647b525ed6db"
+      },
+      "after": {
+        "home/.kimi-code/credentials/kimi-code.json": "34fe73cebd9c109e02ec77fd9170498cd5030d69bc861ac47f03e9b818cb141c",
+        "owner/home/.kimi-code/credentials/kimi-code.json": "b0c76067c546af78ee746a39384c0a2bc2c2fc07bd8491608b53647b525ed6db"
+      }
+    },
+    {
+      "original_receipt": "/tmp/symaira-usage768-f759-root-literal-owner-extra.json",
+      "original_receipt_sha256": "e3421e19cb100b979fd0ebac19bcefb1b9a205b59f6a92374bf12a497a175223",
+      "original_index": 3,
+      "provider": "kimi",
+      "variant": "symlink-home",
+      "input_bytes_hex": {
+        "home/.kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a2022656e763a2f2f4c45584943414c5f4f574e4552227d",
+        "owner/home/.kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a2022656e763a2f2f504859534943414c5f4f574e4552227d"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer env://LEXICAL_OWNER"
+        ],
+        "source": "cli",
+        "status": "available"
+      },
+      "native": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer env://LEXICAL_OWNER"
+        ]
+      },
+      "needs_go_fallback": false,
+      "matches": true,
+      "read_only": true,
+      "before": {
+        "home/.kimi-code/credentials/kimi-code.json": "34fe73cebd9c109e02ec77fd9170498cd5030d69bc861ac47f03e9b818cb141c",
+        "owner/home/.kimi-code/credentials/kimi-code.json": "b0c76067c546af78ee746a39384c0a2bc2c2fc07bd8491608b53647b525ed6db"
+      },
+      "after": {
+        "home/.kimi-code/credentials/kimi-code.json": "34fe73cebd9c109e02ec77fd9170498cd5030d69bc861ac47f03e9b818cb141c",
+        "owner/home/.kimi-code/credentials/kimi-code.json": "b0c76067c546af78ee746a39384c0a2bc2c2fc07bd8491608b53647b525ed6db"
+      }
+    },
+    {
+      "original_receipt": "/tmp/symaira-usage768-f759-root-literal-owner-extra.json",
+      "original_receipt_sha256": "e3421e19cb100b979fd0ebac19bcefb1b9a205b59f6a92374bf12a497a175223",
+      "original_index": 4,
+      "provider": "kimi",
+      "variant": "symlink-explicit-home",
+      "input_bytes_hex": {
+        "home/.kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a2022656e763a2f2f4c45584943414c5f4f574e4552227d",
+        "owner/home/.kimi-code/credentials/kimi-code.json": "7b226163636573735f746f6b656e223a2022656e763a2f2f504859534943414c5f4f574e4552227d"
+      },
+      "go": {
+        "configured": true,
+        "headers": [
+          "Bearer env://LEXICAL_OWNER"
+        ],
+        "source": "cli",
+        "status": "available"
+      },
+      "native": {
+        "configured": true,
+        "status": "available",
+        "source": "cli",
+        "headers": [
+          "Bearer env://LEXICAL_OWNER"
+        ]
+      },
+      "needs_go_fallback": false,
+      "matches": true,
+      "read_only": true,
+      "before": {
+        "home/.kimi-code/credentials/kimi-code.json": "34fe73cebd9c109e02ec77fd9170498cd5030d69bc861ac47f03e9b818cb141c",
+        "owner/home/.kimi-code/credentials/kimi-code.json": "b0c76067c546af78ee746a39384c0a2bc2c2fc07bd8491608b53647b525ed6db"
+      },
+      "after": {
+        "home/.kimi-code/credentials/kimi-code.json": "34fe73cebd9c109e02ec77fd9170498cd5030d69bc861ac47f03e9b818cb141c",
+        "owner/home/.kimi-code/credentials/kimi-code.json": "b0c76067c546af78ee746a39384c0a2bc2c2fc07bd8491608b53647b525ed6db"
+      }
+    }
+  ],
+  "binary_sha256": {
+    "/tmp/symaira-usage768-f759-root-owner-go": "a999c43455b6e2dd4df84a05e93378a51f6a703e134df5a4280b46cfbfb72b89",
+    "/tmp/symaira-usage768-argv-final2-public-probe": "c45a2de66b2cce708b36a5f98570f367e7dc57ffe1986f29dc6684c6e78590c0",
+    "/workspace/symaira-usage768-argv/target/debug/deps/libsymbrain_usage-bc5b4536881a808f.rlib": "005230f8dc6c8ff565440b56be745d8b86fdf70adc6a82627e5e20544ae6e5c7"
+  },
+  "probe_source_sha256": "7c5fae9921e941f4c5f5f39df0e717791740eb9cd2e44ebbbe410f3fda87fcee",
+  "runner_sha256": "c922d6ccbe4c020a6acfdc223f1e9b328364e154198c648cde73621079a636a5",
+  "scope": "actual frozen Go constructors and public current all_providers selector with owned canned401 transport; Linux only"
+}

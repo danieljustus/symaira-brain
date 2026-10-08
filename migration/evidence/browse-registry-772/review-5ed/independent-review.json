@@ -1,0 +1,344 @@
+{
+  "schema_version": 1,
+  "disposition": "REQUEST CHANGES: remaining Unix raw-session diagnostic P2 and newly exposed session help P3; original48cases closed",
+  "candidate_head": "5ed6f1733f3bdaf86ef88eddb3616cece5431d8e",
+  "main_base": "31de72294521701fc4b1a0bce39f03cc34d72e7e",
+  "original_rejected_head": "b363762cb85b879630fecd3fd141cba1ae85f71c",
+  "original_registry_start": "a49b25285e8b241f8b0636c8d2b5da164bd63850",
+  "oracle_commit": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "candidate_dirty": false,
+  "go_source_dirty": false,
+  "author_handoff_sha256": "b29e5336a58173b8241325a2ceda57371c0408886190664450dd4a041dce62ee",
+  "author_receipt_log_hashes_verified": {
+    "/tmp/symaira-registry-5ed-process.json": "0ca4c551bcb9e8ce250bc2bb6263d2c7a9ca4c98ac62b25cab419c5d139834d0",
+    "/tmp/symaira-registry-5ed-process.raw.json": "7d2f0e76c0d615d98445bb27c64dd7033386bcea9b44b2e25cc116edbc676af3",
+    "/tmp/symaira-registry-5ed-process.log": "1b5ffe8eadedd33eab8ff2c531578be2acd21d1c3db883b0199004bc4ce83184",
+    "/tmp/symaira-registry-5ed-base-process.json": "72e7c59f542696d732f317fd8e27568f96e6e57c7b9ee7abccf4d3e32197e67b",
+    "/tmp/symaira-registry-5ed-base-process.log": "bc05628be3eaeb347ddff73fbf2d1462a22dc0921a0ee8816656e5b257383c1c",
+    "/tmp/symaira-registry-5ed-mcp.json": "171df58363c903e62b8b05d73c2d3eb3168555fe38b4c4f568e5925072dac760",
+    "/tmp/symaira-registry-5ed-mcp.log": "5df69082fee5d7f320a2f97da92fb463fbef95eeab35aff1aa68dd13446f22b4",
+    "/tmp/symaira-registry-5ed-mcp.json.tests.log": "281d788b7609381361946f8a7006ee850c96e6548ac8fd29ee9826a3fe2150fc",
+    "/tmp/symaira-registry-5ed-fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/symaira-registry-5ed-clippy.log": "40108eb5c2e432741fc7f36afdf5c793ec02b19e7b1ce5e51bdd2ba377bd26cb",
+    "/tmp/symaira-registry-5ed-build.log": "9ae36bb22d8f0f810a77044760863f70b81405396a32cce477ec08eecd4e6d59",
+    "/tmp/symaira-registry-5ed-exit.log": "8fb7c0050b03ef803e8819d7a13002f014f5486222a6e1735d7415084264e70e",
+    "/tmp/symaira-registry-5ed-lifecycle.log": "bb089a16d8353cfbff0fe8c53f8ec586b55e49f95535f3a3fbdecfb6760e95fe",
+    "/tmp/symaira-registry-5ed-races.log": "70af09f35bb0b9cf60a931c3e1db1fa0feac2948baac6c4aa2e1f68a03bbf306"
+  },
+  "actual_binaries_sha256_verified": {
+    "go": {
+      "path": "/tmp/symaira-pr801-go-1.26.7",
+      "sha256": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8"
+    },
+    "go_fixture": {
+      "path": "/tmp/symaira-pr801-go-mcp-v0.8.0",
+      "sha256": "5f35bc2bc89753301e7151af4eb8dee45e7c80242719ec270827708eb2a183dc"
+    },
+    "rust": {
+      "path": "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+      "sha256": "b513cf31821d77af6248f70f76d8fcbbb0b53219672cb7106093cb7c21c6ac2b"
+    },
+    "original_b363_rust": {
+      "path": "/tmp/symaira-registry-b363-rust",
+      "sha256": "91de2c212944e742e509bcc805136e90e98e2bda14c917e2bd553823a868a808"
+    }
+  },
+  "all_changed_inputs_sha256": {
+    ".github/workflows/browse-daemon-native.yml": "5236a8c63d706a868908e4de7b2c4921f9bba90dd35d2824f8bbcb468c7ca2de",
+    "browse/crates/symbrowse-cli/src/daemon_state.rs": "f1de9580c8905b5f94a95ad6437886dac9aabe22eeb990d226c61e408ff129a0",
+    "browse/crates/symbrowse-cli/src/main.rs": "f1232b0947b2c31b4197b4c05834fad9ab017970ec4cd034ed9832d15e511ae0",
+    "browse/crates/symbrowse-cli/src/upgrade.rs": "101a9d397ef6276eeee5c98adeabecbcde20f12d6195326342cd60c0f52aea4b",
+    "browse/crates/symbrowse-cli/src/upgrade/cache_dir.rs": "ad78490c644f5b5fef6b5967bebf37dcc9d0097ce5945bb43b0fd464585b96ea",
+    "browse/crates/symbrowse-cli/tests/help_oracle.rs": "f95c033ca3ea1b3253405e35d2196bfc3d4fdeda584adccfe9123807a67516fa",
+    "browse/crates/symbrowse-core/src/output.rs": "451233d8639d7ebae7deed8b714bd0949e165691955ca7c34a3381e844dd70c9",
+    "browse/crates/symbrowse-core/src/state.rs": "d6fd40ebc8ea3363119ba2790a8c661f49e27b2a8f5befec18e1b4110a009dc6",
+    "browse/crates/symbrowse-core/src/state/model.rs": "ef632a2d0e2fc7e00d698918220d6e6527860a2312948509fe9134525e7063df",
+    "browse/crates/symbrowse-daemon/src/client.rs": "a043fc79d8d77ac5169ded39904bb37bb1daf94e1c60a6c3efaf3339dad93f59",
+    "browse/crates/symbrowse-daemon/src/client/connect.rs": "b41a4857220b4343d953138d994ba9528bda5963ee122033b4fd41b6884cbe3a",
+    "browse/crates/symbrowse-daemon/src/client/errors.rs": "d0d013eeb201be3c79ccc79bf406961206dbcf3dfd9b207017c6924667af047d",
+    "browse/crates/symbrowse-daemon/src/client/process.rs": "f59db9ebc3ecc3a61d2fea066cba636a4f50ed16da6e8f236be843fadb2376a2",
+    "browse/crates/symbrowse-daemon/src/client/tests.rs": "eaacf50753107a5cdc13888fa437ebfdbde4ba52066d6001fd8fae9171a97e3d",
+    "browse/crates/symbrowse-daemon/src/client/transport.rs": "6f1775b7cce6022a65197f4217d22d59778202a485dbc4db3c464fbc704f1c8c",
+    "browse/crates/symbrowse-daemon/src/go_print.rs": "a58145c514f6823cee16e1c7568a28ab0c26380a6834bea0968f69ff7cd59ea8",
+    "browse/crates/symbrowse-daemon/src/lib.rs": "f576109ba9fcc435ce28fef03e48e21c3da85a7fe77be7221ba0c2d235ffa27d",
+    "browse/crates/symbrowse-daemon/src/runtime.rs": "49620585dc301dbc2af761fbe7444736f8228cc38b248805a6550b1fb4b0c34b",
+    "browse/crates/symbrowse-daemon/src/runtime/state.rs": "9f62d6628c8dddc914d1dbc55df8c7efa538878d41af65825fe14f1d63acd627",
+    "browse/crates/symbrowse-daemon/src/server.rs": "0670b2b8490e298c7121725c30dc336d1e6c603211f86680b6aab0f736bc5dd7",
+    "browse/crates/symbrowse-daemon/src/server/connection.rs": "f918d5a576fcf86d79260f6edf2076866a1b18f9f697367a22e34a6270ff2d4e",
+    "browse/crates/symbrowse-daemon/src/server/helpers.rs": "f7bb96d67606d787013a62009ccad9540365ec8777415d180481d8ea25070ead",
+    "browse/crates/symbrowse-daemon/src/server/tests.rs": "657b94e60d7998f061d8a69c9d7a188732c9a234100325d97b498a0f99ea7b71",
+    "browse/crates/symbrowse-daemon/src/server/unix.rs": "3d542e6d4921a913b9ffb5716cdb8751c639d7db8af10ff712392739c1da9a7b",
+    "browse/crates/symbrowse-daemon/src/server/windows.rs": "70284004c47aee25bef42920b057b333eead1aa4d9af1c1a08c4797dcf9f1ee2",
+    "browse/crates/symbrowse-daemon/src/session.rs": "12155d73bbbd06c27f8e4c52bc4a6b041ed51198ca861622002dc69f299f4a09",
+    "browse/crates/symbrowse-daemon/src/session_quote.rs": "37118ff5a4b67cc3ab775044fdb7f7fb9a6e040d30d9a27c0aaed4af9023a814",
+    "browse/crates/symbrowse-daemon/src/spec.rs": "8f5eb7b13f9a5997fb57a8a88556c7afeef13866f2a803787183af2040569193",
+    "browse/crates/symbrowse-daemon/src/spec_paths.rs": "ed7200045c0714c5a0e82fd2a995ed9ba7d3d511e3a1b93806b572e49c60bffe",
+    "browse/crates/symbrowse-daemon/src/spec_paths_tests.rs": "618e5d506cde117fa6de8d374ef380c98187985d2fd361a68e33e6c1f32fe651",
+    "browse/crates/symbrowse-daemon/tests/cancellation.rs": "18e9c79f7488ac96fab6084b8cf30b118d818febbb661f89bf56499b96e56d5c",
+    "browse/crates/symbrowse-daemon/tests/client_contract.rs": "4ecc0a9bd412d11d69409bd23bc8972d39933db620fcd2b7f5c9d282cc1e3c04",
+    "browse/crates/symbrowse-daemon/tests/lifecycle.rs": "b56c70e0c878192ee03470134398d1eed788d2a553521a994eaa7472439dae62",
+    "browse/crates/symbrowse-daemon/tests/registry_contract.rs": "dcb6f84e78138504ae8a6d18b6d792e3a01bef29002bfdd4779e9aa67b9cd602",
+    "browse/crates/symbrowse-mcp/tests/raw_frames.rs": "418dc80fcb919d979270f4d45fa1de33030c7c890fe51cfdd864f1178ec46c37",
+    "browse/docs/rust-port/README.md": "ad5b6804dee87a17d41bc8239eadfdfee74c79e3d0ab1e09e3336a42cb658a55",
+    "browse/docs/rust-port/contract-matrix.json": "5f264ab2b06ffa0d6de2ac4173b6fb1285f4abad3af9c92ef1397dc89f5dc886",
+    "browse/docs/rust-port/implementation-plan.md": "91ccbd35b30be17a53aa7ad50d2869dc00d895462013847d9f9b9670e9db6571",
+    "browse/docs/rust-port/work-items.json": "29f50cebf990da0eb84b23da3840270c92296064b4e1d46e9982ae2c33f767d9",
+    "browse/port/harness/daemon_mcp.py": "160761ae27b3c338e670c2d47884f15052ad018b72902cfe91433df8f7cb2e6b",
+    "browse/port/harness/daemon_process.py": "d4cc6cf46fb495b8e6b03acf4b3ec4d5c11b707312b54a9726019bebdbae2d02",
+    "browse/port/harness/daemon_registry.py": "9e4f2e3cd17c08ed92723f6d64aeceffa5e9f3add3b8b5364e95fd398b3e1a3e",
+    "browse/port/harness/registry_oracle_test.go.in": "9b97e4849f51c44fdcc199a94ddc4d2579cbef3779efa024332d52cc00bbd23b",
+    "browse/port/harness/run.py": "7466c6460ee65e95db36c516e42fa0a09e7bbbfcd71e23829d816586c62eed21",
+    "docs/adr/0007-daemon-session-path-identity.md": "f419c6ed667aab661d02e21563be2940e36ac2da4676b20936b6bc7da1bdff04",
+    "docs/adr/daemon-registry-autostart.md": "9aaf98531ec96717ae9f903552f3700e55c8168229a5e58efe8493e617c00b7a",
+    "migration/evidence/browse-daemon-772/independent-empty-home-c7ad0b5.json": "979f41c71f6c4f6457fcf83c79f5df1b35d3b26c319793ca4e8a9e041fcdec13",
+    "migration/evidence/browse-daemon-772/independent-empty-tmpdir-a59b02e.json": "73e2bbb2e939a093a625b43c594d01e6d2c17d4845f914a336e55d086d9b807a",
+    "migration/evidence/browse-daemon-772/independent-gui-go-path-failure-a3c2bdb.json": "d6297165e10fcfcf9fcdd980527842b8ac02d2596c5e07ece0caf09e7f36c71b",
+    "migration/evidence/browse-daemon-772/independent-raw-worktree-c7ad0b5.json": "eefc8050a14d5e3cf489715aa7663fe0e272b13dce94e30a41cca79bb22b6081",
+    "migration/evidence/browse-daemon-772/independent-relative-cache-c7ad0b5.json": "548063b4e9aec58f676d40d29b3165605f854f5ba6cace534f93da30189180a8",
+    "migration/evidence/browse-daemon-772/independent-review-6c3bf1f.md": "5840170719e070dc68aad4a82aa97eae8d44e8cb379cc054dd951f72353d3b32",
+    "migration/evidence/browse-daemon-772/independent-review-c7ad0b5.md": "20da9bf0f870542716b58771667b7d6abe89d659bc49fd6314545357af28cfaf",
+    "migration/evidence/browse-daemon-772/independent-successor-tests-6c3bf1f.json": "2c49f1aa8edbd8feccf3ae2880e17737eddd963b34f9d3bd664e7abcdcfd74a9",
+    "migration/evidence/browse-daemon-772/independent-temp-probes-a3c2bdb.json": "e6ea8e85d3a71ae8075b93922a69e4705a575de9ca764bd5d93d190d8a197606",
+    "migration/evidence/browse-daemon-772/initial-diagnostic.json": "c8d13d494772b1ae7ef509e0f23293c18ee617f72de84c0a452457c5451fec4a",
+    "migration/evidence/browse-daemon-772/linux-mcp-process-report.json": "fe964c183de16fe1668fad341f440f7a3dacf68a0f5aaa1cff8b2c528dcbe9e3",
+    "migration/evidence/browse-daemon-772/linux-process-report.json": "17d680e6ccacdecfb521a3ce48ac2092a41f4dcb65b193f0cfdfad3eb8cb3527",
+    "migration/evidence/browse-daemon-772/macos-arm-long-socket-c7ad0b5.json": "230727877c6b31f1827e3ffe2d5423de08061fd9c2034b930537741de7902967",
+    "migration/evidence/browse-daemon-772/mcp-initial-mismatch.json": "8d88266b229d4db59651ce58c979606792aa1d0df38fc9caea40527ea1df09d0",
+    "migration/evidence/browse-daemon-772/original-linux-mcp-process-report.json": "5b1ecb63bed22c16a65b148f41f918a9aaab1568261a0aa4608b8d25a5ff100e",
+    "migration/evidence/browse-daemon-772/original-linux-process-report.json": "57dae74d6a033b4969316cdcc912e66c91d06ed66d60bf6f1e39267a7a1d006d",
+    "migration/evidence/browse-daemon-772/windows-arm-go-shutdown-failure.json": "f53385521dee32a700dd85467918c9d7f747aa3ceeb9450e911dba89bd58d925",
+    "migration/evidence/browse-daemon-772/windows-initial-lint-failures.json": "728d183924ecf5e61a572151c23a65085bef7c6d40cd6e60701f58191eae0480",
+    "migration/evidence/browse-daemon-772/windows-session-path-mismatches.json": "52702a22e5070eb8c6407b39e39ce42d1c4e332cb9b7ad397fad26685dbe74a6",
+    "migration/evidence/browse-daemon-772/workspace-failure.json": "c9e4500c7dc22ac3079ccf2ecdce1df0567270e5424d4b1a68e18c649cb4a64c",
+    "migration/evidence/browse-registry-772/README.md": "6f16c874deffbcb1e8b109908ca83445a9c126798027eaa86f0f61e9fe9c8e1f",
+    "migration/evidence/browse-registry-772/go-print-ranges-probe.go.in": "71885f50b7473ff8d85d8c6368f62320926362c5ffca3efd58fde663db0ca05f",
+    "migration/evidence/browse-registry-772/go-quote-provenance.json": "1400291b2a05fade1c9c2716464ef625c8dec235c7b37128041a67b01cc4d267",
+    "migration/evidence/browse-registry-772/go-scalar-quote-probe.go.in": "f17d41de7a4b1e9955bd1b47ca60d58cc322a29798a41e01255698c5ee761df0",
+    "migration/evidence/browse-registry-772/independent-invalid-cli-b363.json": "d24b1bc595c6f3d0ee4238c941f7578fe7bf94ce8df619671890f0adc5e1e923",
+    "migration/evidence/browse-registry-772/independent-review-b363.json": "fe2a518c4e002039e4cff31573b5899ebf18f78f95a41304bc92295a62e816cc",
+    "migration/evidence/browse-registry-772/independent-review-b363.md": "2543a74c569750aaa8945de32939d69444c72e4d6632dfb6ecb1cd2012acf8f4",
+    "migration/evidence/browse-registry-772/original-cli-and-registry-probe.py": "35ae151d0e4e817e4d3cc9c65df2caa2514da60d32f53df7774b7691fab61517",
+    "migration/evidence/browse-registry-772/original-cli-and-registry.json": "db036691a8dbabfe737dd02cba768194346d57a5a1f780e87a334718d59e758e",
+    "migration/evidence/browse-registry-772/original-constructor-failures.log": "e8078f628be7fa97acb4411a36db96470edd6cd3d99708551be6ad4098e2a6a6",
+    "migration/evidence/browse-registry-772/original-dab8-invalid-session-quotes.json": "9ccdc306d78f0a506a35a0dc7d4c75d0307e9a595481c69b0800cbe0d022d13c",
+    "migration/evidence/browse-registry-772/original-go-state-inspection.json": "19dafd201255431a63450705027c7c0ed768eb394e95405d8c5f05d101fc8b73",
+    "migration/evidence/browse-registry-772/original-go-state-probe.log": "16a1d7d78d09bca158ddcdf808a7ca93bbc810d8cbd8f2f2f4d1357f989c547c",
+    "migration/evidence/browse-registry-772/original-go-state-probe.py": "8416fb09b849a5fc1a72ed560d11397c74ae98bc0f236d2d390e6a1846cfe08c",
+    "migration/implementation-plan.md": "29f59108e6817a0b0db93e2d7493c33d8c88e86706fb3aec446b916d79ee3241"
+  },
+  "correction_delta_files": [
+    "browse/crates/symbrowse-cli/src/daemon_state.rs",
+    "browse/crates/symbrowse-daemon/src/server.rs",
+    "browse/docs/rust-port/contract-matrix.json",
+    "browse/docs/rust-port/work-items.json",
+    "browse/port/harness/daemon_registry.py",
+    "docs/adr/daemon-registry-autostart.md",
+    "migration/evidence/browse-registry-772/README.md",
+    "migration/evidence/browse-registry-772/independent-invalid-cli-b363.json",
+    "migration/evidence/browse-registry-772/independent-review-b363.json",
+    "migration/evidence/browse-registry-772/independent-review-b363.md"
+  ],
+  "fresh_independent_receipts": {
+    "process": {
+      "path": "/tmp/symaira-registry-772-corrected-independent-process.json",
+      "sha256": "461358775f619709bfd0a1f0cde9169bb86f2b20784a44de1a403795113e90fa",
+      "matches": true,
+      "counts_per_binary": {
+        "cli_observations": 108,
+        "invalid_session_cli_observations": 48,
+        "recorded_raw_frames": 20,
+        "concurrent_clients": 8,
+        "persisted_go_fixtures": 3
+      },
+      "constructor_root_cases": 7,
+      "actual_mcp_pairs": null,
+      "controls": [
+        {
+          "name": "foreign-owner",
+          "rejected": true
+        },
+        {
+          "name": "previous-owner-after-restart",
+          "rejected": true
+        },
+        {
+          "name": "missing-error-detail",
+          "rejected": true
+        },
+        {
+          "name": "invalid-timestamp",
+          "rejected": true
+        },
+        {
+          "name": "invalid-cli-exit",
+          "rejected": true
+        },
+        {
+          "name": "invalid-cli-protocol-code",
+          "rejected": true
+        }
+      ],
+      "source_manifest_verification": {
+        "candidate_source_sha256": {
+          "count": 170,
+          "file_bytes_and_immutable_git_objects_match": true
+        },
+        "go_source_sha256": {
+          "count": 670,
+          "file_bytes_and_immutable_git_objects_match": true
+        }
+      },
+      "binaries_sha256": {
+        "go": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8",
+        "rust": "b513cf31821d77af6248f70f76d8fcbbb0b53219672cb7106093cb7c21c6ac2b"
+      },
+      "actual_api_sdk": "go version go1.26.7 linux/amd64",
+      "raw_receipt_sha256": "14143c2afdbbe72d22bd2ddb300b8a265112cb0922e5c9cc299ba2bfb067e2cd"
+    },
+    "base-process": {
+      "path": "/tmp/symaira-registry-772-corrected-independent-base-process.json",
+      "sha256": "ec020f9d11a0eb72be9427094cf7843f49e3602a5c06357db7eb1d8670fe749b",
+      "matches": true,
+      "counts_per_binary": null,
+      "constructor_root_cases": 0,
+      "actual_mcp_pairs": 63,
+      "controls": [
+        {
+          "name": "missing-case",
+          "rejected": true
+        },
+        {
+          "name": "wrong-process-pid",
+          "rejected": true
+        },
+        {
+          "name": "wrong-network-policy",
+          "rejected": true
+        }
+      ],
+      "source_manifest_verification": {
+        "candidate_source_sha256": {
+          "count": 170,
+          "file_bytes_and_immutable_git_objects_match": true
+        },
+        "go_source_sha256": {
+          "count": 670,
+          "file_bytes_and_immutable_git_objects_match": true
+        }
+      },
+      "binaries_sha256": {
+        "go": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8",
+        "rust": "b513cf31821d77af6248f70f76d8fcbbb0b53219672cb7106093cb7c21c6ac2b"
+      },
+      "actual_api_sdk": null,
+      "raw_receipt_sha256": null
+    },
+    "mcp": {
+      "path": "/tmp/symaira-registry-772-corrected-independent-mcp.json",
+      "sha256": "f2fef670b52b69d10efe853b9d463bb2ff335835fe01faa09a017b21ba47e141",
+      "matches": true,
+      "counts_per_binary": null,
+      "constructor_root_cases": 0,
+      "actual_mcp_pairs": 13,
+      "controls": [
+        {
+          "name": "missing-output",
+          "exit": 101,
+          "intended_diagnostic": "read MCP output fixture",
+          "rejected": true
+        },
+        {
+          "name": "changed-output",
+          "exit": 101,
+          "intended_diagnostic": "fixture=initialize",
+          "rejected": true
+        },
+        {
+          "name": "missing-daemon",
+          "exit": 101,
+          "intended_diagnostic": "fixture=tool_error",
+          "rejected": true
+        }
+      ],
+      "source_manifest_verification": {},
+      "binaries_sha256": {
+        "go": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8",
+        "go_fixture": "5f35bc2bc89753301e7151af4eb8dee45e7c80242719ec270827708eb2a183dc",
+        "rust": "b513cf31821d77af6248f70f76d8fcbbb0b53219672cb7106093cb7c21c6ac2b"
+      },
+      "actual_api_sdk": null,
+      "raw_receipt_sha256": null
+    }
+  },
+  "original48literalpairs_match": true,
+  "extra_actual_raw_cli": {
+    "path": "/tmp/symaira-registry-772-corrected-independent-extra-cli.json",
+    "sha256": "56a1742a8450bc08f8349e0a57d7018d08b114b54de371ba388f9ab723019287",
+    "script_sha256": "3b7ccd199f5aef1af1195b0e7d044528c2cf8def6a6646d6d3093ced77936e31",
+    "cases": 120,
+    "passed": 84,
+    "failed": 36,
+    "no_state_or_profile_files_created": true
+  },
+  "fresh_workspace": {
+    "passed": 301,
+    "failed": 0,
+    "ignored_child_entries": 3,
+    "child_entries_executed_by_parents": true,
+    "summaries": 66,
+    "compiling_lines": 0,
+    "log_sha256": "2f16840eae43b3ff75f16b1c1a8c249ed659b92c62927003c11964164f716d33"
+  },
+  "actual_persisted_fixtures": {
+    "path": "/tmp/symaira-registry-772-corrected-independent-state-fixtures.json",
+    "sha256": "146aadf8d4d0a7b8f414ab4bb41e81bbaae72cd9532ddac7952f3f74a3726bc6",
+    "count": 3,
+    "validated_magic_header_payload_schema3_null_cookies_and_owned_storage": true
+  },
+  "original_b363_proofs_unchanged_sha256": {
+    "migration/evidence/browse-registry-772/independent-review-b363.md": "2543a74c569750aaa8945de32939d69444c72e4d6632dfb6ecb1cd2012acf8f4",
+    "migration/evidence/browse-registry-772/independent-review-b363.json": "fe2a518c4e002039e4cff31573b5899ebf18f78f95a41304bc92295a62e816cc",
+    "migration/evidence/browse-registry-772/independent-invalid-cli-b363.json": "d24b1bc595c6f3d0ee4238c941f7578fe7bf94ce8df619671890f0adc5e1e923"
+  },
+  "independent_checks": {
+    "strict_workspace_all_targets_all_features_clippy": "pass",
+    "workspace_fmt": "pass",
+    "workflow_actionlint": "pass",
+    "contract_validator": "pass:88contracts/17workitems/acyclicDAG/links"
+  },
+  "author_additional_evidence": {
+    "exit_harness_tests": 2,
+    "lifecycle": "passed",
+    "races": {
+      "rounds": 50,
+      "starters_per_round": 50
+    },
+    "independently_replayed_here": false
+  },
+  "verification_logs_sha256": {
+    "/tmp/symaira-registry-772-corrected-independent-help.log": "ce28de6077db11e29119056a0ab36f41a543f9fbbed1d9aaee8955c3781170cc",
+    "/tmp/symaira-registry-772-corrected-independent-validator.log": "f5bfa3059aad5fdddb33c5356c9bfa859a33d90f12f51ff8393cf106c56421b4",
+    "/tmp/symaira-registry-772-corrected-independent-actionlint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/symaira-registry-772-corrected-independent-clippy.log": "40108eb5c2e432741fc7f36afdf5c793ec02b19e7b1ce5e51bdd2ba377bd26cb",
+    "/tmp/symaira-registry-772-corrected-independent-fmt.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "/tmp/symaira-registry-772-corrected-independent-extra-cli.log": "61d9493a73e2194a830b71a5d446889ac53044dc45b79b0b449bd78fe72095cd",
+    "/tmp/symaira-registry-772-corrected-independent-mcp.json.tests.log": "2f16840eae43b3ff75f16b1c1a8c249ed659b92c62927003c11964164f716d33",
+    "/tmp/symaira-registry-772-corrected-independent-mcp.log": "5df69082fee5d7f320a2f97da92fb463fbef95eeab35aff1aa68dd13446f22b4",
+    "/tmp/symaira-registry-772-corrected-independent-base-process.log": "bc05628be3eaeb347ddff73fbf2d1462a22dc0921a0ee8816656e5b257383c1c",
+    "/tmp/symaira-registry-772-corrected-independent-process.log": "1b5ffe8eadedd33eab8ff2c531578be2acd21d1c3db883b0199004bc4ce83184"
+  },
+  "owned_target_active_processes": [],
+  "source_and_github_mutations": false,
+  "native_six_target_ci": "required, not run here",
+  "state_key_bridge": "separate unresolved successor; runtime Stores still pass None",
+  "issue772": "open",
+  "additional_actual_help_pairs": {
+    "path": "/tmp/symaira-registry-772-corrected-independent-help.json",
+    "sha256": "7e0fe392b247aba5496c7e84c6b83b7eff8b2f8961ca428fa35aa3d0f3f3e028",
+    "script_sha256": "790be5e25484378746dffddbad78d46f505795f10b5b74bcd71ad796cb992357",
+    "cases": 6,
+    "passed": 2,
+    "failed": 4,
+    "no_files_created": true
+  }
+}

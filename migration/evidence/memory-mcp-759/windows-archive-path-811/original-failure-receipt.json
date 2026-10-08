@@ -1,0 +1,27 @@
+{
+  "base_head": "11f5777a91bd980f16a68fe187ef70f6b50fa9ff",
+  "pull_request": 811,
+  "job_id": 111341331634,
+  "actual_checkout_merge_in_log": "48979c1",
+  "frozen_go_commit": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "files": [
+    {
+      "original": "/tmp/symaira-current-ci-job-111341331634.log",
+      "retained": "symaira-current-ci-job-111341331634.log",
+      "bytes": 58063,
+      "sha256": "f3be0a729c4d03cceb1e7ddad0b911456c86fb1b96711eed0c53defaca9f9dc8"
+    },
+    {
+      "original": "/tmp/symaira-current-ci-job-111341331634-decoded.json",
+      "retained": "symaira-current-ci-job-111341331634-decoded.json",
+      "bytes": 60446,
+      "sha256": "341162bf9b2042bb6ad67ee64d761106f2069d5b63d92f44f3b441ad0c57df01"
+    }
+  ],
+  "original_workflow_sha256": "ce48900118f9012825c8c8cbcb1465b6ffac71e038cbb125cffb4e66663c29e0",
+  "decoded_log_content_matches_raw_utf8_bytes": true,
+  "failure": "GNU/MSYS tar -C received native D:\\a\\_temp/memory-mcp-go-source and failed before frozen Go build/catalog comparisons",
+  "correction": "Only shell archive/workdir ORACLE_SOURCE uses cygpath -u when present. ORACLE_BIN remains native RUNNER_TEMP path for Go and native Python process launch. No assertions/fixtures/frozenGo edits.",
+  "initial_static_receipt_attempt": "Read_text normalized CRLF and equality to decoded CRLF string failed. Both original byte sequences preserved and byte-level equality verified; no runtime/compiler executed.",
+  "local_status": "source/static only; no compiler/target/port/oracle/candidate execution; fresh Windows native CI required"
+}

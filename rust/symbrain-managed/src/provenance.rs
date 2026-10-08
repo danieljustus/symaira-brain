@@ -12,83 +12,112 @@ use sha2::{Digest, Sha256};
 
 use crate::{Core, ManagedError};
 
+#[path = "provenance_read.rs"]
+mod reader;
+
 #[path = "provenance_json.rs"]
-mod json;
+pub(super) mod json;
+#[path = "provenance_time.rs"]
+mod time;
 
 /// Reports an intentional source install. Setup, like Go, treats unreadable or
 /// malformed records as unknown; doctor repair has a separate fail-closed rule.
 #[must_use]
 pub fn is_brain_source_install(bin_dir: &Path, binary_name: &str) -> bool {
-    std::fs::read(bin_dir.join(format!("{binary_name}.provenance.json")))
+    read_provenance(bin_dir, binary_name)
         .ok()
-        .and_then(|bytes| {
-            serde_json::from_slice::<SourceRecord>(&json::replace_invalid_strings(&bytes)).ok()
-        })
+        .flatten()
         .is_some_and(|record| record.source == "brain-source")
 }
 
-#[derive(Default)]
-struct SourceRecord {
-    source: String,
+#[derive(Debug, Default)]
+pub struct SourceRecord {
+    pub source: String,
+    pub receiver_commit: String,
+    pub binary_sha256: String,
 }
 
-impl<'de> serde::Deserialize<'de> for SourceRecord {
-    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
-        struct RecordVisitor;
-        impl<'de> serde::de::Visitor<'de> for RecordVisitor {
-            type Value = SourceRecord;
-            fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
-                formatter.write_str("provenance object or null")
-            }
-            fn visit_unit<E: serde::de::Error>(self) -> Result<SourceRecord, E> {
-                Ok(SourceRecord::default())
-            }
-            fn visit_map<M: serde::de::MapAccess<'de>>(
-                self,
-                mut map: M,
-            ) -> Result<SourceRecord, M::Error> {
-                let mut record = SourceRecord::default();
-                while let Some(key) = map.next_key::<String>()? {
-                    let folded = key
-                        .replace('\u{017f}', "s")
-                        .replace('\u{212a}', "k")
-                        .to_ascii_lowercase();
-                    match folded.as_str() {
-                        "binary" | "source" | "version" | "repo" | "receiver_commit"
-                        | "module_dir" | "builder" | "binary_sha256" => {
-                            // encoding/json ignores null for plain string fields,
-                            // retains duplicate order, and rejects other scalar types.
-                            let value = map.next_value::<Option<String>>()?;
-                            if folded == "source"
-                                && let Some(value) = value
-                            {
-                                record.source = value;
-                            }
-                        }
-                        "built_at" => {
-                            // time.Time's JSON decoder parses the literal token,
-                            // rather than JSON-unescaping its timestamp contents.
-                            let raw = map.next_value::<Box<serde_json::value::RawValue>>()?;
-                            let token = raw.get();
-                            if token != "null"
-                                && (!token.starts_with('"')
-                                    || !token.ends_with('"')
-                                    || !json::valid_time(&token[1..token.len() - 1]))
-                            {
-                                return Err(serde::de::Error::custom(
-                                    "invalid provenance built_at",
-                                ));
-                            }
-                        }
-                        _ => {
-                            map.next_value::<serde::de::IgnoredAny>()?;
-                        }
+/// Reads origin information, distinguishing an absent record from corruption.
+///
+/// # Errors
+/// Returns the Go-compatible read or typed JSON error. Repair callers must
+/// leave the binary untouched on error unless force-release was explicit.
+/// Byte-valued paths require [`read_provenance_bytes`]; this conventional text
+/// interface projects diagnostics through `Display` for existing callers.
+pub fn read_provenance(bin_dir: &Path, binary_name: &str) -> Result<Option<SourceRecord>, String> {
+    read_provenance_bytes(bin_dir, binary_name).map_err(|error| error.to_string())
+}
+
+/// Reads a provenance record retaining byte-valued path errors until output.
+///
+/// # Errors
+/// Returns the actual read failure or Go-compatible typed JSON diagnostic.
+pub fn read_provenance_bytes(
+    bin_dir: &Path,
+    binary_name: &str,
+) -> Result<Option<SourceRecord>, crate::GoText> {
+    let path = bin_dir.join(format!("{binary_name}.provenance.json"));
+    let bytes = match reader::read(&path) {
+        Ok(bytes) => bytes,
+        Err((_, error)) if error.kind() == std::io::ErrorKind::NotFound => return Ok(None),
+        Err((operation, error)) => {
+            return Err(crate::GoText::path(
+                &format!("managed: read provenance: {operation} "),
+                &path,
+                &format!(": {}", go_io_error(&error)),
+            ));
+        }
+    };
+    decode_source_record(&bytes)
+        .map(Some)
+        .map_err(|error| format!("managed: parse provenance for {binary_name}: {error}").into())
+}
+
+fn decode_source_record(bytes: &[u8]) -> Result<SourceRecord, String> {
+    let mut record = SourceRecord::default();
+    let mut first_error = None;
+    for (key, raw) in crate::json_record::fields(bytes, "managed.Provenance")? {
+        let folded = crate::json_record::fold(&key);
+        match folded.as_str() {
+            "binary" | "source" | "version" | "repo" | "receiver_commit" | "module_dir"
+            | "builder" | "binary_sha256" => {
+                let kind = if folded == "source" {
+                    "managed.ProvenanceSource"
+                } else {
+                    "string"
+                };
+                match crate::json_record::string(raw, &format!("Provenance.{folded}"), kind) {
+                    Ok(Some(value)) => match folded.as_str() {
+                        "source" => record.source = value,
+                        "receiver_commit" => record.receiver_commit = value,
+                        "binary_sha256" => record.binary_sha256 = value,
+                        _ => {}
+                    },
+                    Ok(None) => {}
+                    Err(error) => {
+                        first_error.get_or_insert(error);
                     }
                 }
-                Ok(record)
             }
+            "built_at" => time::validate(raw)?,
+            _ => {}
         }
-        deserializer.deserialize_any(RecordVisitor)
+    }
+    first_error.map_or(Ok(record), Err)
+}
+
+/// Formats an operating-system error without Rust's extra numeric suffix.
+#[must_use]
+pub fn go_io_error(error: &std::io::Error) -> String {
+    let text = error.to_string();
+    let text = text.split(" (os error ").next().unwrap_or(&text);
+    #[cfg(unix)]
+    {
+        text.to_lowercase()
+    }
+    #[cfg(not(unix))]
+    {
+        text.into()
     }
 }
 
@@ -116,13 +145,33 @@ pub(super) fn record_release_provenance(
         built_at: Utc::now().to_rfc3339_opts(SecondsFormat::AutoSi, true),
         binary_sha256: format!("{:x}", Sha256::digest(binary)),
     };
-    let mut data = serde_json::to_vec_pretty(&provenance)
+    write_record(bin_dir, &core.binary_name, &provenance)
+}
+
+pub(super) fn write_record(
+    bin_dir: &Path,
+    binary_name: &str,
+    provenance: &impl Serialize,
+) -> Result<(), ManagedError> {
+    let mut data = serde_json::to_vec_pretty(provenance)
         .map_err(|error| ManagedError::Context(format!("managed: marshal provenance: {error}")))?;
+    // encoding/json escapes these even when they occur inside toolchain identity strings.
+    let text = String::from_utf8(data).map_err(|error| ManagedError::Context(error.to_string()))?;
+    data = text
+        .replace('&', "\\u0026")
+        .replace('<', "\\u003c")
+        .replace('>', "\\u003e")
+        .replace('\u{2028}', "\\u2028")
+        .replace('\u{2029}', "\\u2029")
+        .into_bytes();
     data.push(b'\n');
 
-    let mut temporary = tempfile::NamedTempFile::new_in(bin_dir).map_err(|error| {
-        ManagedError::Context(format!("managed: create provenance temp: {error}"))
-    })?;
+    let mut temporary = tempfile::Builder::new()
+        .prefix(".provenance-")
+        .tempfile_in(bin_dir)
+        .map_err(|error| {
+            ManagedError::Context(format!("managed: create provenance temp: {error}"))
+        })?;
     temporary
         .write_all(&data)
         .map_err(|error| ManagedError::Context(format!("managed: write provenance: {error}")))?;
@@ -140,9 +189,23 @@ pub(super) fn record_release_provenance(
                 ManagedError::Context(format!("managed: chmod provenance: {error}"))
             })?;
     }
-    let target = bin_dir.join(format!("{}.provenance.json", core.binary_name));
-    temporary.persist(target).map_err(|error| {
-        ManagedError::Context(format!("managed: rename provenance: {}", error.error))
+    let target = bin_dir.join(format!("{binary_name}.provenance.json"));
+    temporary.persist(&target).map_err(|error| {
+        #[cfg(unix)]
+        let detail = if error.error.kind() == std::io::ErrorKind::IsADirectory {
+            "file exists".into()
+        } else {
+            go_io_error(&error.error)
+        };
+        #[cfg(not(unix))]
+        let detail = go_io_error(&error.error);
+        let mut message = crate::GoText::path(
+            "managed: rename provenance: rename ",
+            error.file.path(),
+            " ",
+        );
+        message.push(&symbrain_core::config::os_bytes(target.as_os_str()));
+        ManagedError::RawContext(message.with_suffix(format!(": {detail}").as_bytes()))
     })?;
     Ok(())
 }

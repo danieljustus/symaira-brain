@@ -1,0 +1,96 @@
+{
+  "source": "729184d8addbe94db7d1d172186afa4616565889",
+  "CI_publication": "a30bba8bbd52323fa5e000207f1c391d576ac86c",
+  "CI_merge": "3c4a497cc4efb73c5074f9619b0e6d6e61ea5572",
+  "CI_base": "5e232700bb9031fc34d4995465a4037837540abb",
+  "records": [
+    {
+      "name": "coverage-ci-job-111389667920.log",
+      "sha256": "c10b0163fa1a1ba2b8a44ca8e87c8d4a123b1f51d8209e9f020bee75ed0bf981",
+      "bytes": 132836,
+      "archive": "coverage-ci-job-111389667920.log.gz",
+      "archive_sha256": "fb80674f3c3aabee9fc630a3e88bb744d9ec9396778ee5875cc2dbdb5cdfe31d",
+      "roundtrip_verified": true
+    },
+    {
+      "name": "historical-coverage-receipt.json",
+      "sha256": "b1feab4f37dd0777aba0b03a88598cb6ef73bd00ae6aebb052705b8955b265b8",
+      "bytes": 1142432,
+      "archive": "historical-coverage-receipt.json.gz",
+      "archive_sha256": "9c57c03b2cb6099617be8b40f691fbb87dbba89b5fb2cc11ad950472b3938b13",
+      "roundtrip_verified": true
+    },
+    {
+      "name": "AGENTS.md",
+      "sha256": "96501fab340de5969b201a1060581420f9085f923fbcf4c32d1394e4082189b6",
+      "bytes": 15652,
+      "archive": "AGENTS.md.gz",
+      "archive_sha256": "b3be89ad2919cd3d85d0fcfdc635e94344541df6e4e62951e3a7366a8fdfa5fe",
+      "roundtrip_verified": true
+    },
+    {
+      "name": "Cargo.lock",
+      "sha256": "95657aeeba4f12cde301afa9aaf6b01b021b0d7892ed4cad6907a1db390785c0",
+      "bytes": 65682,
+      "archive": "Cargo.lock.gz",
+      "archive_sha256": "dec159f30e634396f5390fdd70293196e64a67bec35b0c72710763ad8b3e9765",
+      "roundtrip_verified": true
+    },
+    {
+      "name": "rust-toolchain.toml",
+      "sha256": "c7bdffe5b4c71aeafb84939751c9a1690bc39d0e305d4a534ddf7ce9ce64c675",
+      "bytes": 86,
+      "archive": "rust-toolchain.toml.gz",
+      "archive_sha256": "67b055027cdd4e4962103d9742f21f994132168194bce213d563d9379ac70cfb",
+      "roundtrip_verified": true
+    },
+    {
+      "name": "rust__symbrain-managed__Cargo.toml",
+      "sha256": "7c7213ed3baa6a0e1917305b45ecd1e709beeb6c77f47718f16e9c0078d63030",
+      "bytes": 707,
+      "archive": "rust__symbrain-managed__Cargo.toml.gz",
+      "archive_sha256": "6f12f0f08a14f0972e49286f5ab6d46aea992d9f54ab0876e90377da070ed5ae",
+      "roundtrip_verified": true
+    },
+    {
+      "name": "rust__symbrain-managed__tests__install_tests.rs",
+      "sha256": "2a017b66116aae75404c2c46eca620a71bc78079093d01add029156cfb258372",
+      "bytes": 13213,
+      "archive": "rust__symbrain-managed__tests__install_tests.rs.gz",
+      "archive_sha256": "b5db3f24f1a161b0db4e66f96ed91c40f5f6bef6909783eaa967ab5d8d6d4318",
+      "roundtrip_verified": true
+    },
+    {
+      "name": "rust__symbrain-managed__src__version_probe.rs",
+      "sha256": "bd5e00670e86afc87ef7631828fb6d9c68a09610f710c86b4947c6bbaf8bdbf3",
+      "bytes": 7418,
+      "archive": "rust__symbrain-managed__src__version_probe.rs.gz",
+      "archive_sha256": "237cebcf0fb096a8a3a7480c5066b0ea99f027da22cc07cacbe0c2af38cf0b2d",
+      "roundtrip_verified": true
+    },
+    {
+      "name": "rust__symbrain-managed__src__install.rs",
+      "sha256": "9779dd895fdd02db5153fdedc625ffde80d98001b8e8bfbe8772e2b65870315f",
+      "bytes": 12704,
+      "archive": "rust__symbrain-managed__src__install.rs.gz",
+      "archive_sha256": "a045a034c955ee0776aa0ec5ab1d402c50512c2c79c906af4d4a4ca63e4cdd5e",
+      "roundtrip_verified": true
+    },
+    {
+      "name": "rust__symbrain-managed__src__lib.rs",
+      "sha256": "3ce072c606fba6e48a25a6d31b76e81df22d1fb03f87b8ae894a75bc2436f624",
+      "bytes": 583,
+      "archive": "rust__symbrain-managed__src__lib.rs.gz",
+      "archive_sha256": "4f0feec82a82cd76515094cb637e34c6e189d88ab90e2278686978e7a2114700",
+      "roundtrip_verified": true
+    },
+    {
+      "name": "rust__symbrain-managed__src__manifest.rs",
+      "sha256": "9eb10b48253251e9d19c163482d363ea7d70c8b8684d32cdc23afa825def5980",
+      "bytes": 8440,
+      "archive": "rust__symbrain-managed__src__manifest.rs.gz",
+      "archive_sha256": "24250de153d017faf333abe37d04662777c560e417d8b448b05460ba41f3f515",
+      "roundtrip_verified": true
+    }
+  ]
+}

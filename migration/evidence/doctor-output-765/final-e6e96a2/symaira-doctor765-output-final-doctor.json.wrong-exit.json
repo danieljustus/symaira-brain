@@ -1,0 +1,775 @@
+{
+  "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "candidate_head": "e6e96a227410a293d240f33f4fb6f88ccd829298",
+  "candidate_dirty": false,
+  "runtime": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "go_sdk": "go version go1.26.7 linux/amd64",
+  "go_binary_sha256": "94861967fc2155e90255a0116a9ce335dcadd84a76544b361bb89cfaa17a9202",
+  "rust_binary_sha256": "4581c82278857476063c536ef14a588385f2ff47a24536e6137b36b6afaad490",
+  "probe_binary_sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+  "total": 1,
+  "matched": 0,
+  "control": "wrong-exit",
+  "complete_observations": 1,
+  "exit": 1,
+  "failures": [
+    {
+      "case": "correct",
+      "fields": [
+        "exit"
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "case": "correct",
+      "args": [
+        "doctor",
+        "--fix"
+      ],
+      "matches": false,
+      "go": {
+        "binary": "/tmp/doctor-repair-765.KFbVOw/symbrain-go",
+        "fixture_root": "/tmp/doctor-repair-case-m7bekphh/go",
+        "started": 1791076233.6495965,
+        "ended": 1791076233.670491,
+        "exit": 0,
+        "stdout_base64": "c3ltYnJhaW4gZG9jdG9yIC0tZml4CgoKRG9uZS4gQmluYXJpZXMgaW5zdGFsbGVkIHRvIC90bXAvZG9jdG9yLXJlcGFpci1jYXNlLW03YmVrcGhoL2dvL2hvbWUvLnN5bWFpcmEvYmluCg==",
+        "stderr_base64": "MjAyNi8xMC8wNCAwMToxMDozMyBJTkZPIHNraXBwaW5nIChwbGF0Zm9ybSkgYmluYXJ5PXN5bWNvY2twaXQgZ29vcz1saW51eAoyMDI2LzEwLzA0IDAxOjEwOjMzIElORk8gYWxyZWFkeSBjb3JyZWN0IGJpbmFyeT1zeW1kZXNrIHZlcnNpb249MC4xMi4yCjIwMjYvMTAvMDQgMDE6MTA6MzMgSU5GTyBhbHJlYWR5IGNvcnJlY3QgYmluYXJ5PXN5bXZhdWx0IHZlcnNpb249MC4yMi4xCjIwMjYvMTAvMDQgMDE6MTA6MzMgSU5GTyBkb2N0b3IgLS1maXggY29tcGxldGUgcmVwYWlyZWQ9MCBza2lwcGVkPTIgZmFpbGVkPTAK",
+        "filesystem_before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "empty-path": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home/.symaira": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home/.symaira/bin": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home/.symaira/bin/symbrowse": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+            "size": 3455178
+          },
+          "home/.symaira/bin/symbrowse.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "e716541c67d34930166aad511712c2f20c99d2b0e1c6ad56e998077bf6a25cc6",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU9DNHdJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "home/.symaira/bin/symcockpit": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+            "size": 3455178
+          },
+          "home/.symaira/bin/symcockpit.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "221eb264dbee078cff680cb069b61b2253e0defd80bb854ded2f6492c2ce34e8",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU5pNHlJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "home/.symaira/bin/symdesk": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+            "size": 3455178
+          },
+          "home/.symaira/bin/symdesk.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "7716ba1120fda7e0b2121c705de1aec4b9ac3cd3bcea62ab74d7f672fc18b5aa",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1USXVNaUo5IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "home/.symaira/bin/symvault": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+            "size": 3455178
+          },
+          "home/.symaira/bin/symvault.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "d418cfa06c093f84235333657ecb9e4e212abc32b40e60cf8a22a37332ac79b6",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1qSXVNU0o5IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          }
+        },
+        "contract": {
+          "exit": 0,
+          "stdout_base64": "c3ltYnJhaW4gZG9jdG9yIC0tZml4CgoKRG9uZS4gQmluYXJpZXMgaW5zdGFsbGVkIHRvIDxyb290Pi9ob21lLy5zeW1haXJhL2Jpbgo=",
+          "logs": {
+            "encoding": "base64 exact line bytes",
+            "cores": {
+              "symcockpit": [
+                "SU5GTyBza2lwcGluZyAocGxhdGZvcm0pIGJpbmFyeT1zeW1jb2NrcGl0IGdvb3M9bGludXgK"
+              ],
+              "symdesk": [
+                "SU5GTyBhbHJlYWR5IGNvcnJlY3QgYmluYXJ5PXN5bWRlc2sgdmVyc2lvbj0wLjEyLjIK"
+              ],
+              "symvault": [
+                "SU5GTyBhbHJlYWR5IGNvcnJlY3QgYmluYXJ5PXN5bXZhdWx0IHZlcnNpb249MC4yMi4xCg=="
+              ]
+            },
+            "tail": [
+              "SU5GTyBkb2N0b3IgLS1maXggY29tcGxldGUgcmVwYWlyZWQ9MCBza2lwcGVkPTIgZmFpbGVkPTAK"
+            ]
+          },
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "empty-path": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin/symbrowse": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+              "size": 3455178
+            },
+            "home/.symaira/bin/symbrowse.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "e716541c67d34930166aad511712c2f20c99d2b0e1c6ad56e998077bf6a25cc6",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU9DNHdJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "home/.symaira/bin/symcockpit": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+              "size": 3455178
+            },
+            "home/.symaira/bin/symcockpit.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "221eb264dbee078cff680cb069b61b2253e0defd80bb854ded2f6492c2ce34e8",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU5pNHlJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "home/.symaira/bin/symdesk": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+              "size": 3455178
+            },
+            "home/.symaira/bin/symdesk.probe.calls": {
+              "type": "file",
+              "mode": 384,
+              "sha256": "dc0d790763009255f7846a891368a43483ed2d3036cd37d04b84bf05ab2ef3f6",
+              "size": 15,
+              "content_base64": "dmVyc2lvbiAtLWpzb24K"
+            },
+            "home/.symaira/bin/symdesk.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "7716ba1120fda7e0b2121c705de1aec4b9ac3cd3bcea62ab74d7f672fc18b5aa",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1USXVNaUo5IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "home/.symaira/bin/symvault": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+              "size": 3455178
+            },
+            "home/.symaira/bin/symvault.probe.calls": {
+              "type": "file",
+              "mode": 384,
+              "sha256": "dc0d790763009255f7846a891368a43483ed2d3036cd37d04b84bf05ab2ef3f6",
+              "size": 15,
+              "content_base64": "dmVyc2lvbiAtLWpzb24K"
+            },
+            "home/.symaira/bin/symvault.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "d418cfa06c093f84235333657ecb9e4e212abc32b40e60cf8a22a37332ac79b6",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1qSXVNU0o5IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            }
+          }
+        }
+      },
+      "rust": {
+        "binary": "/tmp/doctor-repair-fixture-zk074ypw/probe",
+        "fixture_root": "/tmp/doctor-repair-case-m7bekphh/rust",
+        "started": 1791076233.6924374,
+        "ended": 1791076233.735342,
+        "exit": 42,
+        "stdout_base64": "c3ltYnJhaW4gZG9jdG9yIC0tZml4CgoKRG9uZS4gQmluYXJpZXMgaW5zdGFsbGVkIHRvIC90bXAvZG9jdG9yLXJlcGFpci1jYXNlLW03YmVrcGhoL3J1c3QvaG9tZS8uc3ltYWlyYS9iaW4K",
+        "stderr_base64": "MjAyNi8xMC8wNCAwMToxMDozMyBJTkZPIHNraXBwaW5nIChwbGF0Zm9ybSkgYmluYXJ5PXN5bWNvY2twaXQgZ29vcz1saW51eAoyMDI2LzEwLzA0IDAxOjEwOjMzIElORk8gYWxyZWFkeSBjb3JyZWN0IGJpbmFyeT1zeW1kZXNrIHZlcnNpb249MC4xMi4yCjIwMjYvMTAvMDQgMDE6MTA6MzMgSU5GTyBhbHJlYWR5IGNvcnJlY3QgYmluYXJ5PXN5bXZhdWx0IHZlcnNpb249MC4yMi4xCjIwMjYvMTAvMDQgMDE6MTA6MzMgSU5GTyBkb2N0b3IgLS1maXggY29tcGxldGUgcmVwYWlyZWQ9MCBza2lwcGVkPTIgZmFpbGVkPTAK",
+        "filesystem_before": {
+          "cache": {
+            "type": "dir",
+            "mode": 493
+          },
+          "config": {
+            "type": "dir",
+            "mode": 493
+          },
+          "data": {
+            "type": "dir",
+            "mode": 493
+          },
+          "empty-path": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home/.symaira": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home/.symaira/bin": {
+            "type": "dir",
+            "mode": 493
+          },
+          "home/.symaira/bin/symbrowse": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+            "size": 3455178
+          },
+          "home/.symaira/bin/symbrowse.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "e716541c67d34930166aad511712c2f20c99d2b0e1c6ad56e998077bf6a25cc6",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU9DNHdJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "home/.symaira/bin/symcockpit": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+            "size": 3455178
+          },
+          "home/.symaira/bin/symcockpit.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "221eb264dbee078cff680cb069b61b2253e0defd80bb854ded2f6492c2ce34e8",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU5pNHlJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "home/.symaira/bin/symdesk": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+            "size": 3455178
+          },
+          "home/.symaira/bin/symdesk.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "7716ba1120fda7e0b2121c705de1aec4b9ac3cd3bcea62ab74d7f672fc18b5aa",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1USXVNaUo5IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "home/.symaira/bin/symvault": {
+            "type": "file",
+            "mode": 493,
+            "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+            "size": 3455178
+          },
+          "home/.symaira/bin/symvault.probe.json": {
+            "type": "file",
+            "mode": 420,
+            "sha256": "d418cfa06c093f84235333657ecb9e4e212abc32b40e60cf8a22a37332ac79b6",
+            "size": 67,
+            "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1qSXVNU0o5IiwgIndhaXRfbXMiOiAwfQ=="
+          },
+          "project": {
+            "type": "dir",
+            "mode": 493
+          },
+          "state": {
+            "type": "dir",
+            "mode": 493
+          }
+        },
+        "contract": {
+          "exit": 42,
+          "stdout_base64": "c3ltYnJhaW4gZG9jdG9yIC0tZml4CgoKRG9uZS4gQmluYXJpZXMgaW5zdGFsbGVkIHRvIDxyb290Pi9ob21lLy5zeW1haXJhL2Jpbgo=",
+          "logs": {
+            "encoding": "base64 exact line bytes",
+            "cores": {
+              "symcockpit": [
+                "SU5GTyBza2lwcGluZyAocGxhdGZvcm0pIGJpbmFyeT1zeW1jb2NrcGl0IGdvb3M9bGludXgK"
+              ],
+              "symdesk": [
+                "SU5GTyBhbHJlYWR5IGNvcnJlY3QgYmluYXJ5PXN5bWRlc2sgdmVyc2lvbj0wLjEyLjIK"
+              ],
+              "symvault": [
+                "SU5GTyBhbHJlYWR5IGNvcnJlY3QgYmluYXJ5PXN5bXZhdWx0IHZlcnNpb249MC4yMi4xCg=="
+              ]
+            },
+            "tail": [
+              "SU5GTyBkb2N0b3IgLS1maXggY29tcGxldGUgcmVwYWlyZWQ9MCBza2lwcGVkPTIgZmFpbGVkPTAK"
+            ]
+          },
+          "filesystem": {
+            "cache": {
+              "type": "dir",
+              "mode": 493
+            },
+            "config": {
+              "type": "dir",
+              "mode": 493
+            },
+            "data": {
+              "type": "dir",
+              "mode": 493
+            },
+            "empty-path": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin": {
+              "type": "dir",
+              "mode": 493
+            },
+            "home/.symaira/bin/symbrowse": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+              "size": 3455178
+            },
+            "home/.symaira/bin/symbrowse.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "e716541c67d34930166aad511712c2f20c99d2b0e1c6ad56e998077bf6a25cc6",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU9DNHdJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "home/.symaira/bin/symcockpit": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+              "size": 3455178
+            },
+            "home/.symaira/bin/symcockpit.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "221eb264dbee078cff680cb069b61b2253e0defd80bb854ded2f6492c2ce34e8",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU5pNHlJbjA9IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "home/.symaira/bin/symdesk": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+              "size": 3455178
+            },
+            "home/.symaira/bin/symdesk.probe.calls": {
+              "type": "file",
+              "mode": 384,
+              "sha256": "dc0d790763009255f7846a891368a43483ed2d3036cd37d04b84bf05ab2ef3f6",
+              "size": 15,
+              "content_base64": "dmVyc2lvbiAtLWpzb24K"
+            },
+            "home/.symaira/bin/symdesk.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "7716ba1120fda7e0b2121c705de1aec4b9ac3cd3bcea62ab74d7f672fc18b5aa",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1USXVNaUo5IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "home/.symaira/bin/symvault": {
+              "type": "file",
+              "mode": 493,
+              "sha256": "cb9348e03e7d2198042059940a9b68234f1e14a22eb4977e655d343cf19a1df5",
+              "size": 3455178
+            },
+            "home/.symaira/bin/symvault.probe.calls": {
+              "type": "file",
+              "mode": 384,
+              "sha256": "dc0d790763009255f7846a891368a43483ed2d3036cd37d04b84bf05ab2ef3f6",
+              "size": 15,
+              "content_base64": "dmVyc2lvbiAtLWpzb24K"
+            },
+            "home/.symaira/bin/symvault.probe.json": {
+              "type": "file",
+              "mode": 420,
+              "sha256": "d418cfa06c093f84235333657ecb9e4e212abc32b40e60cf8a22a37332ac79b6",
+              "size": 67,
+              "content_base64": "eyJleGl0IjogMCwgIm91dHB1dCI6ICJleUoyWlhKemFXOXVJam9nSWpBdU1qSXVNU0o5IiwgIndhaXRfbXMiOiAwfQ=="
+            },
+            "project": {
+              "type": "dir",
+              "mode": 493
+            },
+            "state": {
+              "type": "dir",
+              "mode": 493
+            }
+          }
+        }
+      }
+    }
+  ],
+  "comparison": "exact stdout, exit, full fixture files/modes and all per-core log sequences/attributes plus completion tail. Actual Go-equivalent clock timestamp in run window (Unix fixture TZ=UTC; Windows native OS timezone); only known root paths, proven-random provenance rename source basenames and new verified-UTC release-sidecar timestamps normalized. Frozen Go ActiveCores map order permits only between-core reorder; no per-core log or failure is discarded.",
+  "fallback": "every actual process has an absent SYMBRAIN_GO_BINARY; fixture PATH contains no Go CLI",
+  "remaining_scope": "typed config failure diagnostics and setup source-build/module lifecycle remain Go-owned in #765",
+  "go_source_sha256": {
+    "cmd/symbrain/browse_integration_test.go": "c4e2ab70bee25096db7b37369c3511019658a2f3221408288d3c6afc170c6140",
+    "cmd/symbrain/cmd_activity.go": "0b23d53e303641e09e39129d18991a1800750ec824d7eeb4ce507896c6789658",
+    "cmd/symbrain/cmd_activity_backend_test.go": "3af36f6ea80d9f8cf8955fd994035b0b1bf4a37b74ee7aa3a2c5fac6028da1a6",
+    "cmd/symbrain/cmd_activity_edges_test.go": "1bb1dec0d7eb6c7c9c698e4b8501e8449864962d35783637e292ee9cbda1312a",
+    "cmd/symbrain/cmd_activity_table_test.go": "7ff4f9fcf23961a78e0db74076d80bda3c39130d258681557eaa1dbd5b380109",
+    "cmd/symbrain/cmd_activity_test.go": "14cd5c9fb303735fd41425fb2e509ed8934534a821270fda4260b9d00f79dcbc",
+    "cmd/symbrain/cmd_audit.go": "9db43f0f3a891d37aa159e4c0dd44646914968e12f2d94a9cafecaef26d2d08c",
+    "cmd/symbrain/cmd_config.go": "5f8a68e4226363ef29a7f3e840ff2853fa0858e21160d1bf7d67f440c1d33688",
+    "cmd/symbrain/cmd_config_test.go": "3b9ba2c840329f901bb3fc5333a14172e173ee6b25c8d54aec24d50f8297ea96",
+    "cmd/symbrain/cmd_coverage_test.go": "250a5bc39f7d00343143c9f8f31fe2217f1aca388fcd098a3799bbd8c4ba970b",
+    "cmd/symbrain/cmd_doctor.go": "cdcc85b76b970a67e795aa5ce04fb3347e6c3bc11363578a6fd3eb3c8079d2d2",
+    "cmd/symbrain/cmd_doctor_foreign.go": "8f0652461fe2de0fbc857b0115b36173c01e58ebd0f86dcd9f16e4a9d05168dd",
+    "cmd/symbrain/cmd_doctor_foreign_test.go": "0a5344b040c693dbf7e4aac27986b806e6109d0bec7100fb89a19bc07ce084e6",
+    "cmd/symbrain/cmd_doctor_handshake.go": "8a882bedcbc62eed48041a87c80f67a70543360d94c239aac735695b120fd22d",
+    "cmd/symbrain/cmd_doctor_links.go": "149633a41b51b3cafa5a00f3b2c851b8d03b25c8504d36b35a498513edc42810",
+    "cmd/symbrain/cmd_doctor_links_test.go": "a939c33f2eb57ef7306b38ec1a59b4b717b981db9ebd0c668199411259e15f63",
+    "cmd/symbrain/cmd_doctor_print.go": "7a913f40c6495f1256d171dbea3b813261ee0a4ee84487f46c1db5a77a3d7d0b",
+    "cmd/symbrain/cmd_doctor_test.go": "55ea836a2f114a1faf3d2a4c2e919d54b9482a5e675aae937fcefa0f66ce679c",
+    "cmd/symbrain/cmd_guard.go": "cb0b10ae03a69b3c5c1d6952b706710a488ac4219fc908218c254056f2432abc",
+    "cmd/symbrain/cmd_guard_test.go": "d98f3ded0d0af2c929f9bca1870966b19308fc2e064521e89187cde8c6219d58",
+    "cmd/symbrain/cmd_harness.go": "39c0177b3f9dc75dcaf890d9bcf8f1de7dea76675d6f0773f52bce061912629e",
+    "cmd/symbrain/cmd_harness_health.go": "e3b4aa060e434b4c8e83f4bf276bbf68475fae8f35e5642f866dae9d77fae94c",
+    "cmd/symbrain/cmd_harness_health_test.go": "56f75e5c4c2bfc1720b3deec2ebe68b671bed962e5704e782f64b929fa5ab24a",
+    "cmd/symbrain/cmd_harness_test.go": "394e457ecdc7cd9c5b791e2ab5121dfd55a81f346f08b0d537cd2f4cbfddd18a",
+    "cmd/symbrain/cmd_init.go": "17489c1959bea8dfe5c029537bcce97b02e2573e1a49b0558eaf93a06477ea5f",
+    "cmd/symbrain/cmd_init_test.go": "5a1dda688948637d232492f74c89904f4d985372a18849b720831935f6b0dd3b",
+    "cmd/symbrain/cmd_install.go": "5dacb736219aefb0db743fc93fba490adf54b58e6f500feb27c0c394f7cf770c",
+    "cmd/symbrain/cmd_install_migrate_test.go": "a01da090427b6c7bad9e63b74e90a5a3e4da5cd48a61ca7263c3e9f6675e37cc",
+    "cmd/symbrain/cmd_install_test.go": "cf0e349d952150b863f391f6fe9568a59b47e7caad53bff3cedbdeb3865d589a",
+    "cmd/symbrain/cmd_memory.go": "5a24474cf8407323441baab9cc40e5e909231b7eb0e8da0bcc74d42d2ac1528c",
+    "cmd/symbrain/cmd_memory_cli_test.go": "3305e384baa5391e04e1320b3c2b7d8696028f1dda4fafc4a8703926e222c6bb",
+    "cmd/symbrain/cmd_memory_log.go": "fc5065b32c42384002eec128aadf93201fe884b4739ad75bd86717922dc5acbc",
+    "cmd/symbrain/cmd_memory_read.go": "4df921c8bd982476ea1ef4eafd9d18d3f96c78b5ffaed6ece83971a777ba4ac8",
+    "cmd/symbrain/cmd_memory_read_edges_test.go": "3fce95ed3d1662393c5033d219753e94f1208b4cbf22d20ba1bdac498ef3d3cb",
+    "cmd/symbrain/cmd_memory_read_test.go": "3619f34ceeddfc75ea57ded6d694ddb08f6e287302608b67db606263166741ca",
+    "cmd/symbrain/cmd_memory_serve.go": "d2d8975835e2fe935738c9626fd132408459fdc5cc32131df64e84e603980144",
+    "cmd/symbrain/cmd_memory_serve_test.go": "5b36e9dd258171a49fa811a54847ffd0072e76a869d6e3323ea7507d771d2975",
+    "cmd/symbrain/cmd_memory_sync.go": "ae1da40efe11031b29d92bac94b6053ef385a04ac94d530a1e2a1ee7390c77ed",
+    "cmd/symbrain/cmd_memory_test.go": "8e28ff28ecddd0b79a4e5768f173c3df0dcf7d5e0bbea47f8c7dcb519357fb36",
+    "cmd/symbrain/cmd_memory_write.go": "4f7fa0560c003e058db06f82f949336a6071bd646d77f5cd3bcd7141ce897216",
+    "cmd/symbrain/cmd_memory_write_test.go": "0b1ce332e31365e35800e022c6531564bea71f83fedcaf5b19c238bb0118905e",
+    "cmd/symbrain/cmd_passthrough.go": "e550ea185a413f43d212d945e7a532d396110033aa8abfbe10ab9da668f3f0f4",
+    "cmd/symbrain/cmd_passthrough_test.go": "d624d2542ec15aba1380b9ffb6906871b3930f90bc346aaa984afb33ae574fd1",
+    "cmd/symbrain/cmd_profile.go": "a09401699e67d99cff01cfcd676f5c9ebe523b10ada3e0610f08ab5a47f509a9",
+    "cmd/symbrain/cmd_profile_add.go": "eeb735b898803c73f4e73db87c949644a14ebf4c9b1a2d575a564e515245251c",
+    "cmd/symbrain/cmd_profile_add_race_test.go": "10076384763861d9a7bcb26ce74b0b9e35bd4b957aa3b12af37523cd81516504",
+    "cmd/symbrain/cmd_profile_list.go": "4ef279efe698d861e72650c0461aebc7a3b595f7357fd95693e1add6b47ca692",
+    "cmd/symbrain/cmd_profile_print.go": "22919d26a3012df08885110efd5bfa6a21a235e368f48586a60373f26c18bbde",
+    "cmd/symbrain/cmd_profile_remove.go": "1f88a65863650c2be74578e327c22d780c5e0e149b0c85288999caf446c2a9ba",
+    "cmd/symbrain/cmd_profile_security_test.go": "2604941c64be54f9ba00054fd72aeeb7540e6697980118cd2b533c90fb8b46d3",
+    "cmd/symbrain/cmd_profile_show.go": "83c0faa9a28afd2b7ab00a7e1401347b740f07946c31037f52b6635f9a4578cf",
+    "cmd/symbrain/cmd_profile_test.go": "811a03ac1feef38c2ef1a2a3f8525a594a498452dd81e4e3eca2a722291e8859",
+    "cmd/symbrain/cmd_serve.go": "a972c45fc9b1b23b7cbad5846de47d0d7e0315ed00517b507c4aad7a7500558e",
+    "cmd/symbrain/cmd_serve_test.go": "46d87cbe4220d821055a01aab388a6b30c65905b85b80186c1fc737c5af6a3c4",
+    "cmd/symbrain/cmd_setup.go": "2efa90acdbc8d776bd2b88e6cf08e2992edb660c7a36230f8bad4c69dc3ec163",
+    "cmd/symbrain/cmd_setup_source.go": "1da7578d2af333e3676359941f769a2b4ec7bb1babc2c06bc58edacab7161492",
+    "cmd/symbrain/cmd_setup_source_test.go": "64fd8ebf2fc35ac94a9320234367b219d88361b91e2aad324e50a6c302422a1c",
+    "cmd/symbrain/cmd_setup_test.go": "ba49ec498313e4ae2c5346a2e0375f5a3ff10af4bf22c344255b99f83d88ab7b",
+    "cmd/symbrain/cmd_skills.go": "bd2a49918aa8f6a0929cba201631d8795403f5da6fefafee9c3c2b2b1f02dd1c",
+    "cmd/symbrain/cmd_skills_test.go": "4d0ecd0a11d7ac5743658a951096636cc8acf75c92f8a9e061b05ddd3dab6692",
+    "cmd/symbrain/cmd_sync.go": "0f089361e3b711fe0db2e9b9eb2da66114df1e503418a8d2ac67f206760bd83a",
+    "cmd/symbrain/cmd_sync_error_test.go": "583db10393d37d3cd6b286f35dc2bf65787e67168a0530f0a84418ff5397db3f",
+    "cmd/symbrain/cmd_uninstall.go": "b288855e6e69ea06d9cdbba5eec014b277f574e200717dbf8bb39c2e4af067b1",
+    "cmd/symbrain/cmd_uninstall_test.go": "3df94fb785aa4d28982431d95452d6f77aa4648760036a29190838b4ef7f378e",
+    "cmd/symbrain/cmd_usage.go": "9bb1b0ca99859d0b32c955f490494e8e2a61d51e6428d633e5bd4f5531cf3843",
+    "cmd/symbrain/cmd_usage_test.go": "4032ebdecef8be48ed1a86da0daa336518e8bee867a6ed368fccbd81ad5f5086",
+    "cmd/symbrain/cmd_vault_create.go": "3671612f20df30159a064ad1c196c2a758f911ec70d5d0c9315528fd815e7452",
+    "cmd/symbrain/cmd_vault_create_test.go": "f56a1a18a3e8bf9bec6b67aac500157f99c08e6ee5ec3268c6e2d443e41ff079",
+    "cmd/symbrain/cmd_vault_editdel.go": "57edb4e723a0fe07ea85796f05b5b83050013d43cf66349e3679675fbb53ede7",
+    "cmd/symbrain/cmd_vault_editdel_test.go": "7e8888a07810247371086eacf7fb84546d1e01644ff9730e064354a3cb8c7617",
+    "cmd/symbrain/cmd_version.go": "7d78bd4436ef61a26b514863a33b9c6a493ee2ab25cd5afd41b44d783d05fd46",
+    "cmd/symbrain/cmd_version_test.go": "875f17e7bf1e5c7840ece57cfb23fbaf1d08b1c923b19c5b5f2af9ab8ed5b515",
+    "cmd/symbrain/cmd_wrapper_prelude_test.go": "e52c8accf529897f1a9648c3e52124f67f4e36dcc110a24e2bbdbd629ff2e9c6",
+    "cmd/symbrain/doc_consistency_test.go": "122e5946507be7349c4758a7ee8c0368fbc26cd24fce26dee3218a504a7a7de4",
+    "cmd/symbrain/flags.go": "ea6f26ed29e884e84f0e45753dba3d8e424a6c55aaf03afb0f7b3b925920ecf3",
+    "cmd/symbrain/flags_test.go": "dad122298e27e0b12d70bb05bc518eb6586ff33602781c74ebc7662e58d44739",
+    "cmd/symbrain/harness_registry_test.go": "685b79823dbd0a1628c12d3eedf2b2183a16ac64ffa835c17ef018c49e8da957",
+    "cmd/symbrain/hygiene_test.go": "6affe77a810a64b18081c0ba78c3cef69f894aad0b852d3113e8e9e263111b4b",
+    "cmd/symbrain/lifecycle_hardening_test.go": "df1879cd73f60c20e11a3831ae864d82a1ff1e4599f1c79d0e8b05feb04eb03f",
+    "cmd/symbrain/main.go": "46a3245236f0104f34c7e0d0787fcb35c27a0eba6c6bba8d5a5098e1664c6e5b",
+    "cmd/symbrain/main_test.go": "37e6719f1c4a3a262db71a57de3c01948ca5c2defe3a42939166042fb7a4ce70",
+    "cmd/symbrain/optional_modules_test.go": "ac102d47213368c254e85dd1f065b14459a853aab2cb0f21b4b23e316433a74f",
+    "cmd/symbrain/test_helpers_test.go": "5e5564d4a83816669a9bcbc6f22cb85264e520054ff65b622d535b93a44f3c9a",
+    "go.mod": "cd360aeb19457381d88720aa1dd6b62e493c44ac5a4d0b5c5172561ecd4e9d0c",
+    "go.sum": "fb3ec3bc981beb60ae88833cab55335ce3880e68b70a8ad1e931cb02de955aab",
+    "internal/config/config.go": "64284546f2a6ddcbd3a5d23088545fde3f372507f89adaa2d44fb7a22e7c6b21",
+    "internal/config/config_test.go": "c11d0be99fb0610aa4bb9e9a7c23271a31175b6c26ecc1348d8724932fa2777f",
+    "internal/config/modules_test.go": "f37e8eaa76e43eb73deaea37f7fe86b08c6c25407a467973a886061f310058c5",
+    "internal/managed/archive_security_test.go": "749e62542cfdd93f297d9c6e2e8558965818036a666f8fc7706fd270fad89525",
+    "internal/managed/doc.go": "e784323b77ad74e817bfb29b085ee30c53783b0ef20570df4f9024856bc927e4",
+    "internal/managed/download.go": "5e8d85d1b402f7ae7a03710692f2da6c2b0cb40fe89f5c2a701bde786f18809b",
+    "internal/managed/download_test.go": "5970ce20e8d0fbcc7b668caa6eefebda0bf52d4d08c12945eb143b547267b8ba",
+    "internal/managed/drift.go": "5f72bb1b3929fb7c50d4d4aa7c656d18bbb76b58b1c2c743c29515343cdfd756",
+    "internal/managed/drift_test.go": "ed7db651092f11a7c1d4edfedff5553147d5c62afc406c19be7f5ea79450c52f",
+    "internal/managed/fix_provenance_test.go": "67e31ccdf51a52c4bcf703c4cf06abad804c98f73b40ecefdd4abaf5e554ba44",
+    "internal/managed/install.go": "97bb600cc2d6047696c8e77eb09e4abf6bf75cca956d2da4ddc2bcd24f91677d",
+    "internal/managed/install_local_test.go": "4fd6994694d476cc6808ac74bc99d4cbca407fba4ab6bfac3b68ed236ed456cd",
+    "internal/managed/install_test.go": "3d659bda8afffc027354ae6c74654c58041b2646272bcb2ce72b4fc426156d9f",
+    "internal/managed/managed.go": "ba3205862dd3970190f1bb8fbd0c3b33053f79b7553bb026e1cd54b58f485b63",
+    "internal/managed/managed_orchestration_test.go": "f1a093cc2013aba0fa80b0e62f39b429669a1e9fd487c7af95391fe49c11a0cc",
+    "internal/managed/managed_platform_test.go": "b5445f54329c553dd70ec13bc050c71c248cccafb0e166fe16b8559cf9edcbb5",
+    "internal/managed/managed_test.go": "d889d2a22e565bd7dcf998d958a0c3b816f5d719c810e02ce2d55cee07db85e7",
+    "internal/managed/manifest.go": "0dce3b72cc4e2ac38a60e761542d64a5a1adeea48a5139f61de70b7627a36cd4",
+    "internal/managed/provenance.go": "0956c9f2011aee75722c10ef1b769b2b3dcd2d04250af6e36e6dd40acf421d5d",
+    "internal/managed/provenance_test.go": "da9fa8161e4609ea95d787e7c97d3277fafa7f1699a987aa354d4a9226c1800f",
+    "internal/managed/rust_oracle_test.go": "a04bc5dd06f07b0bd91cd4cdefe15ce0f60f0eb0ef2fdd94a2f7dc8d8fca4639",
+    "internal/xdg/xdg.go": "78df3bb774afa38dba2a667ed25bf3ed0ba0e4920daa42ed6080708383bc6fc5",
+    "internal/xdg/xdg_test.go": "3a0e36d61fe474a6d666de912e34dfde22f2198b1187704a3f3fe2601349630d"
+  },
+  "candidate_source_sha256": {
+    ".gitattributes": "85784a3228db1798a026dda10a60b33d0136f14589a55b380fdf4ed09112fd16",
+    ".github/workflows/ci.yml": "f78c21d78beb4cf49b0a901ab56ca8c604c1e9707a15cb21a53911e65f11f36e",
+    ".github/workflows/memory-cli-native.yml": "a18670899172ea44837504c2ec936aba45866a21e0cd6c2300eacfada0bbc9ca",
+    ".github/workflows/memory-evidence-native.yml": "a34d144b9c4f38b3ea15a4333a2dc801d394addaa23fedd15aafc3c5d9b4d429",
+    "Cargo.lock": "b3dfc50eeffd441de466592bbf204840b65d16940f8639dacad56a7f1153594f",
+    "Cargo.toml": "dfa1fc858d8556f92d8175a5a298deec96776ac9f7bef90555954c7cfa4440a3",
+    "MIGRATION-RUST.md": "3c6679850012585710d16ccfe01bf24bf7ac5830a4d5db6972d7f53de559cd0a",
+    "docs/adr/0011-standalone-rust-guard.md": "274bf94c38cd8ca67a1e862385c4f001649853ee833bb1b5f43fc86f2853678c",
+    "docs/adr/2026-10-03-doctor-managed-home-and-byte-diagnostics.md": "b99ad06dc5e7ebacfc37c147b0152d8c16ed23df26c594d5e12ff64a4a31c558",
+    "docs/adr/2026-10-03-doctor-windows-compat.md": "235857daba5e8eb52d231be89837702f1ce9b87855d2f21a7ed0c870b2197a1a",
+    "docs/adr/2026-10-03-managed-owner-clean-and-mkdir.md": "2c545f062bb665202429695d481b9f87c29a75b49d3f89d164d3879cb4e5ad43",
+    "docs/adr/2026-10-03-native-doctor-repair.md": "de1f7930a25f2dfd23ea21b5242d63aa6185eaaa50af7eabf4c05eefb0a5e164",
+    "docs/adr/2026-10-03-native-source-setup.md": "773fe27f517d26e80581fcac847e65ac2b611052f75cea55ea0206732898d2fa",
+    "docs/adr/2026-10-04-setup-output-boundaries.md": "ef6b3e483d0087d795497eba7e25c67e6eec7928ae7b4873ceaa44d1bdf31a36",
+    "docs/adr/2026-10-04-shared-go-json-setup.md": "40fc1047af65b15501d54d582291798958ca4b7a96bb0b2b99dfb4b2620a11d0",
+    "docs/adr/758-native-memory-evidence.md": "8120e55114101d5851260deebc01fca76c8b2b98eeb50eff414fc10bcd0cd9ad",
+    "docs/adr/guard-raw-path-diagnostics.md": "8e2914acf98c98fd9e4e17b7b4aa79542b62e6a55d575391a1d2c85f6effea3c",
+    "docs/adr/memory-native-cli-758.md": "3cad6a4069185a815f1f40c8c6d7f474afcfb2c2fae6cef85eb1e58ce6b39808",
+    "docs/adr/memory-native-governed-writes-758.md": "cd18095bf828f68777679e2cab3cde873eb6d84d15ae17d4efbe9a7138b796be",
+    "docs/adr/memory-set-stdout-sigpipe-758.md": "9afe04983112f36264b90428d056f7725be1c70484927a2365d7cb3bd91fdbb2",
+    "guard/AGENTS.md": "f90d4a9daecfaa08c35e568b2b942ab3802ec6deac6c731b03dc1930dff53d6c",
+    "guard/README.md": "3a98aa275d0994193fc4abf8eb5c4c2f1418e2c08244655bdaa2832140ff445c",
+    "migration/contract-matrix.csv": "f075e7a60bc67df58416d06527a8e9ff3a80e5d65feba8fd04e8560796fee95b",
+    "migration/guard-standalone-tree-770.md": "08adfb46add2c3ba9e8c25b1556694a54092026f141cd6752fe125d5d7d6160b",
+    "migration/implementation-plan.md": "2efc35d2641ac135e667e57edb711cc4745c94fda70620b3b8f0e0f27b012ca5",
+    "rust/symbrain-cli/Cargo.toml": "6edeec4e04c214569477e689c42f390ecba9687546f2acc8c15e1eb2d82b4d50",
+    "rust/symbrain-cli/examples/setup_embedded_output.rs": "4bb25798087f04608fe9e2ff9236580a4d2fad2ca72ae28e42a17083118c8d7e",
+    "rust/symbrain-cli/src/cli_flags.rs": "8f5d7460a5f30da2e2808e6555b3a7d995942e88e4ca36c24ca2e7b8ac686ffd",
+    "rust/symbrain-cli/src/cli_tests.rs": "00a9e1abdd632f409faa2de3dd8c0a1dd24ae9e3c20ce866e818390fcf3bf64a",
+    "rust/symbrain-cli/src/doctor_cli.rs": "df38ab985559153424a3e5655e2e1644adbd1efa82f577311d491280dc60f9e4",
+    "rust/symbrain-cli/src/doctor_fix.rs": "9224cb915eadd102cef67d222ce2a59e7aff2321a2478eb111e86db1705c1934",
+    "rust/symbrain-cli/src/doctor_fix_log.rs": "da9cf786cdd512938aaa7fb5453dcd12526f313a4733d21dde15baee3119a278",
+    "rust/symbrain-cli/src/go_json_escape.rs": "7511d75addcd480301d37c51459f29f8972c1b5122acdf861e503f453e723452",
+    "rust/symbrain-cli/src/guard_cli.rs": "04219b25a7157e85c3bdc30f3ee4378c264a2f60e3031d7121fe3766659f2033",
+    "rust/symbrain-cli/src/lib.rs": "9cf6645b43fc50676869b78071fb9672beafbacb45f721e8750901095ab493ff",
+    "rust/symbrain-cli/src/main.rs": "3e94f3f39e073b32151350707bc0416a3d01bba19903a0e5ad4a2cb47cf4fff7",
+    "rust/symbrain-cli/src/managed_home.rs": "31efa0ba58dd2686aa383f628461a5844ce1d9af7bb864b30c18ba52d33b3be3",
+    "rust/symbrain-cli/src/memory_cli.rs": "b604a2570df3934120ded995d29d25ed0740093a01ce2ef6ecf42b006a204f92",
+    "rust/symbrain-cli/src/memory_cli/config.rs": "6928ba4ff279f5d785c8530199f6b009a2a856d7f0c2cc57864288ec5fb60ad5",
+    "rust/symbrain-cli/src/memory_cli/config_float.rs": "8f1625e2659d30abfbc73f56a5e2adda72f70158ba05828a6a333813996a09de",
+    "rust/symbrain-cli/src/memory_cli/config_schema.rs": "82325b5f480ebc724014c9277d1288940e5c3cf753ab2458787a163f8b1a5bf4",
+    "rust/symbrain-cli/src/memory_cli/config_value.rs": "9b26978cc289d616692c848a7c6ea51eb0d2ff633dc29d170fae3205bcbdc9ff",
+    "rust/symbrain-cli/src/memory_cli/flag_integer.rs": "2085e26dbe99f84642405b6da32322ebce53e587f90f75a9406a9ed0f838ba06",
+    "rust/symbrain-cli/src/memory_cli/flag_usage.rs": "6f5193a505f575aa6b5e2c07856d4113230ac1a225b3c0f8859ebe591382f53d",
+    "rust/symbrain-cli/src/memory_cli/flags.rs": "b11d7ed6d386ebf1a3275eb5931aa884974555eea91f064e711d547a6494571f",
+    "rust/symbrain-cli/src/memory_cli/help.rs": "046df1d38e0b03676bf8d7a93bc5c5ee6562a047a23157e5ede295e9e59e93e3",
+    "rust/symbrain-cli/src/memory_cli/kind.rs": "2f813fd99e430ede791ca324a8b9a25965fe640acaba79d415de94238e9fe1de",
+    "rust/symbrain-cli/src/memory_cli/paths.rs": "1327c20f3a94623fe0f429a14988775c99ba33fadb6377b1601c383757554594",
+    "rust/symbrain-cli/src/memory_cli/query_log.rs": "55c1c321f5f613eedd0f457283cb8ffc45c0603533e98bf15d8cb861d1cef74c",
+    "rust/symbrain-cli/src/memory_cli/read.rs": "edb004430d929c1d36a8ab578863140fec550308e7b3b890aa641aad4ddc3f4c",
+    "rust/symbrain-cli/src/memory_cli/routing.rs": "51a79ff1ca014758e536b3c6aba80f02cd9c5995ddbcfea11865991efecb066e",
+    "rust/symbrain-cli/src/memory_cli/rules.rs": "12ca88c38f88d668ba3eb3c62a86071290e5f82946e32dde348dd97ac2acffe6",
+    "rust/symbrain-cli/src/memory_cli/search.rs": "4c600621d271693d87b3933288f987541af2dc02eafbafd9fe9651da17eac9bc",
+    "rust/symbrain-cli/src/memory_cli/tests.rs": "5d19f47e9bcc6d62a9bb64e675c38130a4dcf57804136137c564c857cb1c9cc3",
+    "rust/symbrain-cli/src/memory_cli/write.rs": "b4602b68bfca95cd0670bf19a20c1a9a9233a5bf3f05db75a913b0fdd698a78e",
+    "rust/symbrain-cli/src/memory_cli/write_output.rs": "4f4ccea6ee8e9747d82dd3d0f36a580ee140f6fbe2c3e906b0499235d9bbbded",
+    "rust/symbrain-cli/src/setup_args.rs": "84cb407b2d77a1c48a6235a05be31c7e3f5322cb0604df1ecc43db724a3300fe",
+    "rust/symbrain-cli/src/setup_cli.rs": "fb0517cf7cffd63294b0359d6d0c0dfae489f3b400f8a4fd04e2ec9760e76521",
+    "rust/symbrain-cli/src/setup_config.rs": "cfc178d86002c3879de5e2ca635c9792b7389beece37b88ef2a9326d4a4d9287",
+    "rust/symbrain-cli/src/setup_json_tests.rs": "612a98ceb9cdf91b6bce6681a84e1b75a216a357c432843b32422786aa19eb13",
+    "rust/symbrain-cli/src/setup_source.rs": "87566e15d2fb210d80ebd64687edf738311b984e333a3a36ee32acd79c4235ee",
+    "rust/symbrain-cli/src/setup_source_build.rs": "f27c67ee5204f53ea409afb4fc10ddd5eaafdb7f72b341ec1e453937c6494c09",
+    "rust/symbrain-cli/src/setup_source_layout.rs": "31bc8732323d14f56e2a5710da0815841bbe30a868a76dbcf7dd1ce51cef07b0",
+    "rust/symbrain-cli/src/setup_source_process.rs": "86699b00d9858f75bfb5b41c6c6c7424287b95661d4275afc55541acaabc2967",
+    "rust/symbrain-cli/src/setup_source_temp.rs": "74308950b5059447b53b00b855e20eee00673a4223c791b172856208dc9f9b85",
+    "rust/symbrain-cli/src/setup_source_text.rs": "f28862b6f3f180c874ed54eafc74ad959be80764582d60398369dc84f10b0a10",
+    "rust/symbrain-cli/src/stdio_output.rs": "09252720e48d64fab6adb1f10895eb52b461e9a17c8c33ab96f5ebb788a451c3",
+    "rust/symbrain-cli/src/stdio_output_tests.rs": "8c15d7dc24539b09546918066d09c97860f1e872bad8b51ad35f6d0152276944",
+    "rust/symbrain-cli/tests/doctor_fix_native.rs": "4157f1d5f9ec7c7afec0b930a51789a140ea23d007b1e2b6d6eb1a2ddaa9b57b",
+    "rust/symbrain-cli/tests/guard_grants_native.rs": "e58231fdfdc0595f2c586f82fef4fddc1dd0be47f77172b8d23fad375b69ca55",
+    "rust/symbrain-cli/tests/guard_oracle_grants.rs": "6c989a7d3bf4eeb64ae9637a8dd7d89dc3d458063837eb3a520a6f744786fb6d",
+    "rust/symbrain-cli/tests/memory_set_sigpipe.rs": "66d0641a84acdc5afc384b6f23037d1a44f84e882b001e479ad989525082df35",
+    "rust/symbrain-core/Cargo.toml": "bbb39f7ec4c81d407b4a5d5d00f73768d69ff17132a80fefe25bde9150c610e8",
+    "rust/symbrain-core/src/config/format.rs": "1a31fc16a95b1fa213fcfef22bae64aa6e7bacb6e427ccf52efb5c6ef67dba49",
+    "rust/symbrain-core/src/config/mod.rs": "1979424ee5be5a373425b43d933b56e223f7144026590a76d40fa7ecf4cfec36",
+    "rust/symbrain-core/src/go_text.rs": "d92030cd11a4de6682eef7508e0a18959847ceb46f560cff2748239d517a08a6",
+    "rust/symbrain-core/src/json_string.rs": "9595500d2fcf5e125f070f8c69f1d98a19c593887c470ee8a04e84b9b11dcad4",
+    "rust/symbrain-core/src/lib.rs": "4df524358123e41fb3a7959de3dd3064e477dd738bf8b36faf4cec961dc77d75",
+    "rust/symbrain-managed/Cargo.toml": "032a38a1c1d1d947a40916d31c12b0b406ff17352405f572dd42bef5ff4ec1a7",
+    "rust/symbrain-managed/src/archive.rs": "10b1d08059bca1eec2318e769a669f03518b1f17fafdf9b5dda90d7e7db0651f",
+    "rust/symbrain-managed/src/install.rs": "6cc511e6ebbbdd0db840c4321465d1d180d506038c91822f34e2b50e34f7f2c2",
+    "rust/symbrain-managed/src/json_record.rs": "ccb87203b8dd23199d33041c06d72ff90790b000d08aed9ea66773f014140cb7",
+    "rust/symbrain-managed/src/json_syntax.rs": "1e179f9956e8fb01a115ffdd6c412ea16d4152576a52998eb910479405fb7117",
+    "rust/symbrain-managed/src/lib.rs": "b46a659d3aadf33c347a4f3e78457f04ba8272fcbf93f5ed1d7d91995851f5d6",
+    "rust/symbrain-managed/src/local_install.rs": "723f62b8981a883a2e2ebdaa8d042d9590cb62b170994a2d7169597520b19041",
+    "rust/symbrain-managed/src/manifest.rs": "d83af4d36f33f8c4cb33e86d5e6acb5169b2b34d529670c54d9d959cb34702ce",
+    "rust/symbrain-managed/src/mkdir.rs": "c37b3c7572395ba604717bdadca1686730d106cc520df6069d04698ad42ba7dd",
+    "rust/symbrain-managed/src/process_status.rs": "d8b981d6f096b8e078ab1ea5d9e0abc0ae3979f75c1b49240fa859f2d9af14ad",
+    "rust/symbrain-managed/src/provenance.rs": "ec9ecda3889248ec509ae055fcc5427fc5c60b2cfd94b750faad925406049ccf",
+    "rust/symbrain-managed/src/provenance_json.rs": "a324dd4944625e5f14200a78f43002504584c4217fa04744a1343834939bdb7e",
+    "rust/symbrain-managed/src/provenance_read.rs": "e833acc4d0272ccb9efbe56ea249800b974138aa09eac8412bd623f8f2695f20",
+    "rust/symbrain-managed/src/provenance_time.rs": "8ee51ef465143e1fa44600c0d3844fed64345d229694327e93618a418a29adb6",
+    "rust/symbrain-managed/src/version_probe.rs": "1abfa450226dde785ec1844521b77a035dff5e627a345fed68a4d66201db6e75",
+    "rust/symbrain-managed/tests/install_tests.rs": "ca4ea17dd861f1730e056bac0013b1ff168f6821e09fc567fcc9282845f97260",
+    "rust/symbrain-managed/tests/provenance_windows.rs": "45c26f1dd635153b7efcdd3b9b68c1eb1a3cadf7dc4977de92f1d50e2342272f",
+    "rust/symbrain-managed/tests/source_local.rs": "c6ffdd0930a7bc5fb704910e9ae391cd5ece1c6ce449788e750b5de6bc7bdd30",
+    "rust/symbrain-memory/src/cli_delete_admission.rs": "10ec759a6bc422a170622b93b2330244d37860c16abc5896374b6474736668cd",
+    "rust/symbrain-memory/src/cli_entity.rs": "9f468856dcbbc76001c68afd81318bc4eebbc799e90d49b64d3a593e6d28a990",
+    "rust/symbrain-memory/src/cli_write.rs": "92bd08e7651384a2764f135d1675d868dbd8fdbd2e74cb2960c0a8ab1f41ec15",
+    "rust/symbrain-memory/src/direct_admission.rs": "61fcbd1f59700ac0c25cb592ea2364edd148912c6538a0e179d469d6611c2c1d",
+    "rust/symbrain-memory/src/embedding.rs": "ebe619a9c5a132967658a59196b5c45df6651bae7282f48a6004723732760af9",
+    "rust/symbrain-memory/src/evidence/fuzzy.rs": "7006cf57df60edf12ae0c972f7026a9fb40bb94d8ec18fb8633742ef207b22a4",
+    "rust/symbrain-memory/src/evidence/mod.rs": "f0af751e82d6598dc3c7f0ed3b3d30b08afaaab6e39cec0d7a8e0be9c5f1343d",
+    "rust/symbrain-memory/src/evidence_store.rs": "c138879c49e25cc0552839c3f01f21f911722c419edd33c0667ccb08b5e97dfb",
+    "rust/symbrain-memory/src/evidence_store/tests.rs": "1b1a30ac3412a9e0b21a97b3743e6bc57d8d4259be9e6b204c6793a039def184",
+    "rust/symbrain-memory/src/lib.rs": "fee8661041add1e63275a788021ab88bc4a08ff1eb840a8d4e684e51a7c0be53",
+    "rust/symbrain-memory/src/migration.rs": "837e1bfb55d02d569bc708beea2b9d460e6d2e751a73236425d5624e5911f74c",
+    "rust/symbrain-memory/src/store.rs": "97b6ca66ff514bce6c037e7330c083c69e92a887d15c53d391b1d6ac2a9a8fd7",
+    "rust/symbrain-memory/src/write.rs": "bc4eca8243343d826141294cce810347c89a4a8c0a4234e61634b62da19a934b",
+    "rust/symbrain-memory/tests/evidence_oracle_tests.rs": "cf5997f2e5bf52a141ed055fb023ae97a729139068e4338cfacdb3041fafe6e3",
+    "rust/symbrain-memory/tests/fixtures/memory_evidence_go_v017.json": "ff78755268228615685cbd4ddbb72247b3dbc201765f27e784237bd013dc30a2",
+    "rust/symguard-cli/Cargo.toml": "478f252e7eeed5f54809363af2c23608f0001be16776519f207feb9806704a4b",
+    "rust/symguard-cli/build.rs": "c7d6abd8014332091d999c1a72c5db224044694c1f4571c24572327c0da87267",
+    "rust/symguard-cli/src/audit_error.rs": "b9d5da0c92812abbd70ffe0ede8c5652482bb4b1f54579c2b0e15dcda522c301",
+    "rust/symguard-cli/src/doctor/anchor_decode.rs": "b6df3b828312f114288d93275ebd42dd516c6fbabba53d9a8d5120bbb8ba3213",
+    "rust/symguard-cli/src/doctor/audit.rs": "a5f5b6ff44219e127b1dea771c0d21f1cb55038af6dd1f762233eca341f0e257",
+    "rust/symguard-cli/src/doctor/config.rs": "1b7548397c9f209c566c5b8378f697718b7a86ba12e5e773961bb9158175af65",
+    "rust/symguard-cli/src/doctor/config_decode.rs": "e2b48f46263975ed4c1099e16f24315141ef0c1f0da2a18c6952937cc5f1cd49",
+    "rust/symguard-cli/src/doctor/discovery.rs": "8ac715a13972c2678647e825f723c16cf1385c1f4f3b49dc0c03173306a92ff2",
+    "rust/symguard-cli/src/doctor/tests.rs": "f7d6e1b317fd50350d4f670744b27ef2623f5449c5d907d14a951b27fb20b2c5",
+    "rust/symguard-cli/src/guard_doctor.rs": "de836b9d36831f0a28fdd56a2b51a4bb60d398f7f039d9c5a6c7516435263507",
+    "rust/symguard-cli/src/guard_grants.rs": "056d60b2b8b54a717fab673e8468aff5d60e19fdcae9a41753f76d9188414dc7",
+    "rust/symguard-cli/src/guard_grants_store.rs": "05daf2ce769bbe0ab6ef600eab15ef1a4d18ad595a34c026ee9e137a57b9db51",
+    "rust/symguard-cli/src/guard_scan.rs": "b5e420d2dffc74daf6d84b12400d6d0a1483691242585272444716c42a54c895",
+    "rust/symguard-cli/src/guard_scan_config.rs": "3f4403534bcba6ce3d0c994ba6b1120b7ea8a75ab9a1b50884d8d06c4c31a1e7",
+    "rust/symguard-cli/src/guard_scan_tests.rs": "92ed217a9488b9dca0723d0c7d40959bf1cf99fe3000aee80d2ecdc190991556",
+    "rust/symguard-cli/src/guard_version.rs": "6d80e39df0df50fb7fceb3f55d400e06d01c31e014f136ce0c7ffe432db24a0b",
+    "rust/symguard-cli/src/lib.rs": "5177f9a2f822d044fb9b8ba0af1230ca4453f79a999a5c7db2d8bb439e070141",
+    "rust/symguard-cli/src/main.rs": "5a976dba1eba154e41ca2738ca12be29a90950b6f29c79fe8050c4b66d0d2904",
+    "rust/symguard-cli/src/standalone.rs": "9793fbe0207583b378c0ae35ec6491375c40a734a55bb81f593010d05744cb75",
+    "rust/symguard-cli/tests/raw_diagnostics.rs": "ab6432dd9654c630dc39b78ce91dd7b5ba82c037dce4122ad5a05be307fb3ca5",
+    "rust/symguard-cli/tests/standalone.rs": "49fe6d451ebfb8c42992d4ad7c54f20403b0f2494a8383d937dfad4839927bd3",
+    "scripts/doctor-repair-oracle/README.md": "ee7008b981e93743b563831a98c9e34b70ca18679a5a4403fde9c152fa095ca5",
+    "scripts/doctor-repair-oracle/cases.py": "cf17ce02c31af893d5217e71cb7a08c2471a53bad160136b42b9f57358fc6af9",
+    "scripts/doctor-repair-oracle/probe_fixture.go.txt": "861543c272164566fa21baafeea06f77d0348e25975d707784a14ce4797b61ce",
+    "scripts/doctor-repair-oracle/replay.py": "ab359087c4ac7e03af164f758c3b2560d74439b406eea85861977d7c9461869f",
+    "scripts/doctor-repair-oracle/run.sh": "78bffd7f44248a91a64244f765af4bdc4fbf6472b82f04d219418b3ba879a676",
+    "scripts/guard-standalone-oracle/README.md": "dab7780423d3fd0ac6e8a23eabaf622a81de5c6e14b8b76d0017d9da22c29010",
+    "scripts/guard-standalone-oracle/controls.py": "188846aaa11d626b34eedbade7ba4f4fd6e8b37bd851785b559a4573ffda62f0",
+    "scripts/guard-standalone-oracle/main.go.txt": "011384ce4b11b6e40250cfabf80f15f75caa43933d49a24e00351984c87618a6",
+    "scripts/guard-standalone-oracle/raw_paths.py": "2bb23a823231b955ab8518fb6e0cf329b34c1b36a69114f9536cde7df3dd2135",
+    "scripts/guard-standalone-oracle/replay.py": "8a9463c403495148faf5fa36ce1092834dc73f5342e23e0767b1216fe99d48d7",
+    "scripts/guard-standalone-oracle/run.sh": "0a44f179ded1ae64f844b5e018b821dba8760d60d65ab70b2b55df8a046aa6a9",
+    "scripts/memory-cli-oracle/README.md": "bf5d5c5e835a706e3b35f4ba71a280c5c339d417401a12901379f651e352da9d",
+    "scripts/memory-cli-oracle/WRITE-CONTRACT.md": "d2995da137b2bfaf5223b91c006cace9f9d9f5437311fe356b8d3357384ac561",
+    "scripts/memory-cli-oracle/cases.py": "74a383a86792a01d00247bf65991fc6f704c6f84b7976a811b37893c28c0f72e",
+    "scripts/memory-cli-oracle/control.go.txt": "dc833ea1d927d8316345fae076864c9b3cf509c33af38c40e422bcc85f6926f1",
+    "scripts/memory-cli-oracle/controls.py": "6ab2bfe70d2b3a34a216b0c3fbc2169095a6c03bf603c27e7a5e3add308a8e0b",
+    "scripts/memory-cli-oracle/deletes.py": "725a87a2379d3ce29c0f0460724660e770fa9b95656f69bbd82da18a8448abc0",
+    "scripts/memory-cli-oracle/path_cases.py": "44b5ff0adf9da29f1684292f14f0025459601d22ef7507fcf7c27cb21082fb93",
+    "scripts/memory-cli-oracle/replay.py": "1008182108ccbac8a2c9d21e50cf6120c2c6a0ac32dfeb0a4ae3cae4c504a691",
+    "scripts/memory-cli-oracle/schema.go.txt": "3475e6dba5991f01fd7317772f24dd3b96e6380e80332ab6c248b29df30d9ff7",
+    "scripts/memory-cli-oracle/write_boundaries.py": "509e8328ff510b380239215d3f49c54dad6b1d1229f9a1bd3fe9314caa9fdd47",
+    "scripts/memory-cli-oracle/write_control.go.txt": "0a9348d8bdf043f949c5b1e59492c894d99a4131d326cc309770f1d4b65d4ae7",
+    "scripts/memory-cli-oracle/write_failures.py": "615c9c6d28ce468a08e3486b23f648704a95191169891d4e4ed0d7e6f380d120",
+    "scripts/memory-cli-oracle/write_fallback.go.txt": "ff85395f0c8c60ed141b60e741bb9d66a74272e710c9f533c2d35ab096744274",
+    "scripts/memory-cli-oracle/write_gate.py": "fc9f57f43c1b77a4313c7b750105a0debe624283c7c1ffb74fe3ca573732df63",
+    "scripts/memory-cli-oracle/writes.py": "65408db7f7b55655ce4b97ae9a2edf63b91f48c2c081eb42a75b462d5290edf3",
+    "scripts/memory-evidence-oracle/README.md": "b0fac6d352d002fcd58fbbf4ed5e8483c266627b6d73a5e4fd54741180966eb7",
+    "scripts/memory-evidence-oracle/controls.py": "36d5705484c856d071147745a7929e3d73bbdcb167f8cda195bbeaf0999f7691",
+    "scripts/memory-evidence-oracle/main.go.txt": "5764e9093d81294536815be185d39c5a41eafd7a834535870c281a64bd877d80",
+    "scripts/memory-evidence-oracle/replay.py": "ab7102ab5136f2d63854e11a8d8c24df514fd7e73d58991b8745be6f598e1413",
+    "scripts/memory-evidence-oracle/run.sh": "8b83598b9646b95b3b77560c437419556718398247b72ca3fa2e4d4d1ba1acc5",
+    "scripts/setup-output-oracle/README.md": "444a1705cd62fcb2a3baf900de820fb2669dd0a4c852be933f73264408b76c9c",
+    "scripts/setup-output-oracle/controls.py": "6818ea6f5a2e58e71f84df6e42200e67fccc1f49aa3a20359ca28416f2b819b1",
+    "scripts/setup-output-oracle/embedded.go.txt": "d59f9b47938d19dadbb0df87f43a3bcd37ddf90201f60dbcdcbc30bd393c47dd",
+    "scripts/setup-output-oracle/embedded.py": "4a56d885c42300f7fa17fbb6fc7ce7a2a5d427fc2b9dabeb683210e1e5ac2384",
+    "scripts/setup-output-oracle/fixtures.py": "9af821a19bb93bbae9d66ad4a521506db60ef441bc28585ae8dbbbe42b478c90",
+    "scripts/setup-output-oracle/human-pipe-probes.py": "0e95011f15bad654fb6f83c1badc0d4deeb55403d29edbe9bb9bbd7d347d82c3",
+    "scripts/setup-output-oracle/output-probes.py": "afbf43b619f4b85be0bbf5950602e7c7830309fe081f11eee6fe07de5588ba4e",
+    "scripts/setup-output-oracle/pipe-probes.py": "5eb6e377c14827f88dcbfec76c9a457a8e97cec2b8b355be3ea34a5ff2744f66",
+    "scripts/setup-output-oracle/run.sh": "549ba484a36305235e4be8ae243a2c7719bc2dcf69a20d1c01c53e294c4af86d",
+    "scripts/setup-output-oracle/source-output.py": "653348fc7e8fb585f218a2a89413138e3536d91ebfa895b91421ee2970aded98",
+    "scripts/setup-repair-oracle/README.md": "9df2fc1fefae6f1050036f800da4a6410eced6a6bcc4fc3493522be91feef6e3",
+    "scripts/setup-repair-oracle/replay.py": "6d7903343121fc0fde89277209ef276a00530a9eca7b475edb263923d1a1ff55",
+    "scripts/setup-source-oracle/README.md": "fefb2819abb0390287e5ee17d0b959780732a61b2cd14b0c9bf0348c45c0b587",
+    "scripts/setup-source-oracle/replay.py": "b0d10ab98b370a797d1e27ddb30f922cef7b7580a5594553c3562d36851a508c",
+    "scripts/setup-source-oracle/run.sh": "f4a22007724136b746bbfd4359e214c3c0c579b1b379125dd93ea6d5bdabdeaf",
+    "scripts/setup-source-oracle/tool_fixture.go.txt": "e92419134baa8712ed06a31b65226e5d0a0dd8b99604718349e7f85347e15bf2"
+  }
+}

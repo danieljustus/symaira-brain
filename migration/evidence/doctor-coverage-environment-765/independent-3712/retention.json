@@ -1,0 +1,18 @@
+{
+  "source": "3712c29ead8f37f35136cd16252285bd9fa8fee9",
+  "disposition": "APPROVE precise test-only instrumentation environment correction; full remote coverage required",
+  "proofs": [
+    {
+      "original": "/tmp/symaira-doctor806-llvm-env-independent-review.md",
+      "retained": "migration/evidence/doctor-coverage-environment-765/independent-3712/symaira-doctor806-llvm-env-independent-review.md.gz",
+      "bytes": 2168,
+      "sha256": "ed28c1f79f4ee8ec7978e41e4b1ebca299004c065355e023230b0c1681e862a0"
+    },
+    {
+      "original": "/tmp/symaira-doctor806-llvm-env-independent-review-receipt.json",
+      "retained": "migration/evidence/doctor-coverage-environment-765/independent-3712/symaira-doctor806-llvm-env-independent-review-receipt.json.gz",
+      "bytes": 4074,
+      "sha256": "50666ebeb0ad07d710cabca51ebdcaeb07ba5d03317a1793041294b2082fcf24"
+    }
+  ]
+}

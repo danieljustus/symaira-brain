@@ -1,0 +1,13 @@
+Hermes source-bound cases: 96
+ok  	github.com/danieljustus/symaira-brain/internal/usage	0.029s
+   Compiling symbrain-usage v0.12.1 (/workspace/symaira-usage768-argv/rust/symbrain-usage)
+    Finished `test` profile [unoptimized] target(s) in 1.22s
+     Running tests/hermes_credential_tests.rs (target/debug/deps/hermes_credential_tests-c837eb94e066b9af)
+
+running 1 test
+test usage_hermes_768_matches_fresh_go_file_and_jwt_contracts ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+    Finished `dev` profile [unoptimized] target(s) in 0.13s
+Hermes CLI oracle: 104/104 byte/exit matches

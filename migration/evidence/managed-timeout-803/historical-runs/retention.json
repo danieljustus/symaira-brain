@@ -1,0 +1,325 @@
+{
+  "scope": "exactly two historical executable runs; no current-source compiled acceptance",
+  "records": [
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/profiles/4736443598399123479_0-3415504.profraw",
+      "path": "historical-runs/focused/profiles/4736443598399123479_0-3415504.profraw.gz",
+      "sha256": "9d01bd4ae4263ac2afb000dd53e94b6872ded8c9bb34c5d27eeb50d2407f4171",
+      "bytes": 843960,
+      "archive_sha256": "a663d044c547a93554d1d62946fcd15ec95bce6c20fad178711e533f3eb377d5",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/stderr",
+      "path": "historical-runs/focused/stderr.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/stdout",
+      "path": "historical-runs/focused/stdout.gz",
+      "sha256": "8ca1e63087d0a586c9f328416ec14f4cf4a37f112e4e7ad7d2fc91f6a7e59033",
+      "bytes": 183,
+      "archive_sha256": "e50a1d1b062b746f4cfb9981782ca49eb156a972fd833051bf28f0ea8bdde217",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/trace.3415504",
+      "path": "historical-runs/focused/trace.3415504.gz",
+      "sha256": "d106ef3c89fe317f9bf9052f774d3a0f4196990621fac74ab815d607057af9f1",
+      "bytes": 30982,
+      "archive_sha256": "3a3e5d7eec26122bb82383ba32da49fda6888f7542bf912a475b0de0c435c288",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/trace.3415511",
+      "path": "historical-runs/focused/trace.3415511.gz",
+      "sha256": "6f899016ae65bfbf5f451ce3bf632b5cd089092d813505333671baf3a1a488a6",
+      "bytes": 29892,
+      "archive_sha256": "02f8774c97d91d3328b4e909d9fab2e4cb4df9decdc7d6f44e2d153d11832ef6",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/trace.3415512",
+      "path": "historical-runs/focused/trace.3415512.gz",
+      "sha256": "c071a4a5c0d36f5875e3970182aa15d14348960fe4f0148e98dd007e0284d5f8",
+      "bytes": 9377,
+      "archive_sha256": "2923e1392fea1eeeebc86391aad00d8034461f96c37e1d098d7285ca96f14862",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/trace.3415513",
+      "path": "historical-runs/focused/trace.3415513.gz",
+      "sha256": "5f20a4a699ba87d492c0e85ed4670b4d799ae392b26f675df5910a3641798a6c",
+      "bytes": 16116,
+      "archive_sha256": "1bb14afa2b1d3a07109613b92a71de5e3c3f306e03e097b3d94754c3c0f4a2f6",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/trace.3416347",
+      "path": "historical-runs/focused/trace.3416347.gz",
+      "sha256": "fa578a24d039dfaa96f9ef5f4276c2a766276077cda84d95abb47051123313e5",
+      "bytes": 15708,
+      "archive_sha256": "fbd9eb8ab53fc9dc1446aa2f4c78a5d3dee88b17f6db7f012cd766a9f59dca25",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/trace.3416348",
+      "path": "historical-runs/focused/trace.3416348.gz",
+      "sha256": "4c81f96feb432d3ca89cab0f3d3223f9bb01be3653af1818e765bbae729863dd",
+      "bytes": 16015,
+      "archive_sha256": "8578255664fc4ebeeb6fc0d20af63002a4715c2bd9f449ac05419f9f7a0000fa",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/focused/trace.3416354",
+      "path": "historical-runs/focused/trace.3416354.gz",
+      "sha256": "42d8a6099dc30d4be67682f505caabfb3009a8c30f6184a4535b530a3e554617",
+      "bytes": 16000,
+      "archive_sha256": "e5a324a7ae1d757bfd709d05efd914e4ce33b9766df250a4b9d1b55428c1f4bc",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/profiles/4736443598399123479_0-3416426.profraw",
+      "path": "historical-runs/full-historical-six/profiles/4736443598399123479_0-3416426.profraw.gz",
+      "sha256": "ed7bba230b002ed8cb4a451d366e8d25dc6eff73ac349041b69f3fd6656f30c3",
+      "bytes": 843960,
+      "archive_sha256": "c91fcec1ec159b6e7aab094460ac25082ef652411e8ff048541927bbb991c653",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/stderr",
+      "path": "historical-runs/full-historical-six/stderr.gz",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/stdout",
+      "path": "historical-runs/full-historical-six/stdout.gz",
+      "sha256": "217d693ac1810c9a35b08d0d58670e6dc78833b450a25643b9f2f7c562853cc1",
+      "bytes": 513,
+      "archive_sha256": "e5ab4ec54b8fbd8f2da98ddad26286e6199f4e7ea9e1a11bf5a36bf395292dc6",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416426",
+      "path": "historical-runs/full-historical-six/trace.3416426.gz",
+      "sha256": "8e285ce26b7172680628edf653199273d7688758c72a0e556f5d67e978c14705",
+      "bytes": 35926,
+      "archive_sha256": "6119b7cf82ab552719d97dd5e84965cd3f14065d495ab3e6521e011b8c0dba15",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416427",
+      "path": "historical-runs/full-historical-six/trace.3416427.gz",
+      "sha256": "2177e3fd76d04cfec269c445ea58764a7c573cccdb81798242e30fe3999e154d",
+      "bytes": 10587,
+      "archive_sha256": "9c179fcd76217f17ab0ea5ef8c446568141a9eee182b31b3554c5b44c66d7653",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416428",
+      "path": "historical-runs/full-historical-six/trace.3416428.gz",
+      "sha256": "1f0b73416c8e4a67f966c164557c9e019ff0b6df02b6a1d86bd7668632e3da56",
+      "bytes": 8482,
+      "archive_sha256": "ac9f5337ab7a8d763bf11990c21eb784c1eafe97b1b520dc5383db5f0db3872b",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416429",
+      "path": "historical-runs/full-historical-six/trace.3416429.gz",
+      "sha256": "4c6ca3d2f1a466fd9080613dccec61e2fbb2a6dce4126a0539aa46ddc57e390b",
+      "bytes": 30809,
+      "archive_sha256": "594477f0f16eb91ed1933bda771370d70152e4de3c84cf5807c55cb57ecb191c",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416430",
+      "path": "historical-runs/full-historical-six/trace.3416430.gz",
+      "sha256": "65258cc5410608499dc096abafeef52ac930c7bb5b959cd382bf79961dea4561",
+      "bytes": 17953,
+      "archive_sha256": "edf80c6852d36687f40711843c890616bb1c6f4d25a853e5491b47a1ec8a9b6e",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416431",
+      "path": "historical-runs/full-historical-six/trace.3416431.gz",
+      "sha256": "08e08246a4547282e9f3ab5740b3b33f6170158f5aa2e81d78020b12cba1049c",
+      "bytes": 9773,
+      "archive_sha256": "9a28c1e29575dba88b3bf1386df47cbe16503ca927ea14b4d0e03bc5fd642b1c",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416432",
+      "path": "historical-runs/full-historical-six/trace.3416432.gz",
+      "sha256": "e47d9f48c3d07acea1ee00950fac460f117a19034ee50fef8c1d9bf131c27b4c",
+      "bytes": 7818,
+      "archive_sha256": "2260665dfb51de2012208b96a311b5385f045b5bf85e5f5d82e408a86970ca00",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416433",
+      "path": "historical-runs/full-historical-six/trace.3416433.gz",
+      "sha256": "73845c765960695444a729d88b1d92a934e2cfbae31b82a9833c03a9367de3e7",
+      "bytes": 1181,
+      "archive_sha256": "aa1e658d0404de6504464cc4aa7129a39f75c0d212a9f01adc3117b84f019d42",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416434",
+      "path": "historical-runs/full-historical-six/trace.3416434.gz",
+      "sha256": "15149c40bc21b90785a7434e88ba80b0460242c5e4a703909403a829407eae1b",
+      "bytes": 1190,
+      "archive_sha256": "5e7d41d936efce1368687260efb239492948b6bfd24457b8c5c62369014d4394",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416435",
+      "path": "historical-runs/full-historical-six/trace.3416435.gz",
+      "sha256": "e2d9a57ba176f03eefadcbfd4a0be8455f8ee82df5747b55d44cfd7b55459729",
+      "bytes": 16524,
+      "archive_sha256": "f79d64fc91d44d289a6ca7c9919b8315af49ee70e7faeb8fb36a98818b6a11a1",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416436",
+      "path": "historical-runs/full-historical-six/trace.3416436.gz",
+      "sha256": "e31874f5dea33a32b178b271bb56aaf78efaf9a167c476bf13b860480849d656",
+      "bytes": 16401,
+      "archive_sha256": "a284543baef690ab1723d3ab737c60dc2fecade48fb171a60a16b4928a1a1641",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416443",
+      "path": "historical-runs/full-historical-six/trace.3416443.gz",
+      "sha256": "3216351fa1d510437092571fa9d0bba8068787453882e7c71ead9bc4481f06f5",
+      "bytes": 15013,
+      "archive_sha256": "cf0be86381683b40421d917ff9e877bef47672ea903d9243cd3b0ff48d63fa92",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416444",
+      "path": "historical-runs/full-historical-six/trace.3416444.gz",
+      "sha256": "5d1bede820a1edcbe3e619b2b3644da363a3073b4c66f384a3b1add5cd133309",
+      "bytes": 885,
+      "archive_sha256": "221f35dcba9a024297b166a24961c864aae38165e397f215e6b207d3699899a3",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416445",
+      "path": "historical-runs/full-historical-six/trace.3416445.gz",
+      "sha256": "ca21ed4901edb43dcd2221a7955158481f1985d16eb148f8408e59d7a9e48134",
+      "bytes": 9742,
+      "archive_sha256": "b6e7ae36cbc4fb756f3884f62d53c688df34c361bff3ad4057d2aa6d9d0fe02c",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3416446",
+      "path": "historical-runs/full-historical-six/trace.3416446.gz",
+      "sha256": "d4c78ccedc01f4672ce10c7ae1817c4543b241888290c2d77b6ae429132da9af",
+      "bytes": 885,
+      "archive_sha256": "a8e56a8748deecb13e8cb29ee801cd7d3335dfa7a9278bee4593963ce70d4b0a",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3417114",
+      "path": "historical-runs/full-historical-six/trace.3417114.gz",
+      "sha256": "e75f31a615fdff8a10ca64d685e5efeb75a8a2f0515c55da4a9b299a2a8f8276",
+      "bytes": 16092,
+      "archive_sha256": "94bce35843a71bdb96f622c5087872a1a8676d128ed67320b7706c4309e51b9c",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3417115",
+      "path": "historical-runs/full-historical-six/trace.3417115.gz",
+      "sha256": "355008c5f80c7aecda6e33d94a2dd5884ce251ecb9276c446223dde163dbadd5",
+      "bytes": 16399,
+      "archive_sha256": "5b20a4a7daa0ebe3d769b8f506a3d4042a9739bc17cfcf7e83c426d5c54329ed",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/full-historical-six/trace.3417116",
+      "path": "historical-runs/full-historical-six/trace.3417116.gz",
+      "sha256": "edddda8e301f41695d0dade4547f19ca202ba992d71c43d22bc12dc91b50d764",
+      "bytes": 16384,
+      "archive_sha256": "c26ab23328b8bc27782a88b9d10dbb1ef1bbd3012595a67817d7f7958387298c",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/initial-floor-stop.json",
+      "path": "historical-runs/initial-floor-stop.json.gz",
+      "sha256": "112dfe69e0208b4974262aacf4a3b481bd6a98f55b1207002af8eea5c52329e0",
+      "bytes": 273,
+      "archive_sha256": "288e7c83491199d36278a4a59d128737bb0b6fed5eaecbb48a72e9281237062b",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/initial-floor-stop.stderr",
+      "path": "historical-runs/initial-floor-stop.stderr.gz",
+      "sha256": "a6c0d8554d9a0159ef3b6fc691874ef13d1e9b7bf3714e875483f37ac12fb6c6",
+      "bytes": 256,
+      "archive_sha256": "b89b0ebf9933438a701a6835a3a5ac56ac1b4c6d46ea3f1de9595877c3bde783",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/initial-runner.py",
+      "path": "historical-runs/initial-runner.py.gz",
+      "sha256": "f634f474db6cb37e87b9e1c570c6b20dd377686341a59dffb6aeb68378193d1f",
+      "bytes": 2028,
+      "archive_sha256": "89738f43a15d3a51039494a4f1bf352ee5ff4930ee90c625fb610178194b1183",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/owned-transfer.json",
+      "path": "historical-runs/owned-transfer.json.gz",
+      "sha256": "7766f5db8f9625696f50c2392d9cc51f8b607796f3429d1d876f82cd04b14de5",
+      "bytes": 362,
+      "archive_sha256": "026ca383d8bd3f58decb75a4b59622bcd48f973dd20b12cbce2a65adc55e33ea",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/restored-executable.json",
+      "path": "historical-runs/restored-executable.json.gz",
+      "sha256": "43a57d328126e8ff3ed7ceba178d8d9ff9ac00c0ea83cfca34db959e83bbda58",
+      "bytes": 489,
+      "archive_sha256": "59664e3d082bd7700b5a3ff0c40ef7adf030b266103d3783d6268cc2467eba1c",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/runs.json",
+      "path": "historical-runs/runs.json.gz",
+      "sha256": "6d1bb63632b4139df368b23bcc2d769b54b59d7a5328a98ed5c508e42231efba",
+      "bytes": 3236,
+      "archive_sha256": "08943f7194227cdc0d54d5e5bcdc8321f1fc197d100faebb80c8cb3153baebb2",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/workspace/oracles/symaira-managed803-timeout-diagnostic-runs/second-floor-stop.json",
+      "path": "historical-runs/second-floor-stop.json.gz",
+      "sha256": "85e1fe123839cb7ae72d2b367e9e534f45086df9af0a43221cff64fb051cbcaa",
+      "bytes": 229,
+      "archive_sha256": "990a2ad0c8360b65f8abf9afed1d934d0581a6edca70a75ab8340e31b55e7e41",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/tmp/symaira-managed803-timeout-historical-runner.py",
+      "path": "historical-runs/symaira-managed803-timeout-historical-runner.py.gz",
+      "sha256": "47c3acebe50658017e93c947304dca45519c7f0da10e3b2b6a6f7ffd6bdf731d",
+      "bytes": 2042,
+      "archive_sha256": "35c85e8625013d3e7fee68f08446179bf3fbb86a8c6db68d0626fe6c0e7c2b49",
+      "roundtrip": true
+    },
+    {
+      "original_path": "/tmp/symaira-subreaper.py",
+      "path": "historical-runs/symaira-subreaper.py.gz",
+      "sha256": "db17ce85778eeefb49c15200ada3fd7f21e8f2dd12e62530ab7b1a00c4771378",
+      "bytes": 438,
+      "archive_sha256": "43f695a67b2e091b660cd3814a9697fd87931dea8872a8f9a7754fd866987b98",
+      "roundtrip": true
+    }
+  ]
+}

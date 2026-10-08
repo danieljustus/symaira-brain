@@ -1,0 +1,43 @@
+{
+  "base": "f9447c5e01bd8c3d78df5115fd62636ac807cbd0",
+  "probe_audit": {
+    "process": {
+      "sha256": "7c50b5e24443279392082b8cb52e70bd55e9e458842223867d876b4ca8a4e5d5",
+      "compiled_statically": true,
+      "all_remaining_bytes_unchanged": true,
+      "executable_inputs": "GO/RUST/BASE resolved at initialization"
+    },
+    "fix": {
+      "sha256": "14d02284d4e2b70a8c1efac544366bfcfc33f505b516e2a17c7714d100aea456",
+      "compiled_statically": true,
+      "all_remaining_bytes_unchanged": true,
+      "executable_inputs": "GO/RUST/BASE resolved at initialization"
+    },
+    "embedded": {
+      "sha256": "3974111176dd0a99f5cd3c68100c38f712f8a67f113a9a778afbe06a30df0845",
+      "compiled_statically": true,
+      "all_remaining_bytes_unchanged": true,
+      "executable_inputs": "GO and existing Rust resolution"
+    },
+    "controls": {
+      "sha256": "3a2152f02011ad1a711d1daf7ff25643a991ba52bdaeb2d28417495d2cd7ca2f",
+      "compiled_statically": true,
+      "all_remaining_bytes_unchanged": true,
+      "executable_inputs": "native already resolved; owned wrappers absolute"
+    },
+    "identity": {
+      "sha256": "1d2d6b1cf77af957606fa3aa0b04d9db3b152dca5d88b5f16139b2c1b5046895",
+      "compiled_statically": true,
+      "all_remaining_bytes_unchanged": true,
+      "executable_inputs": "identity helper unchanged"
+    }
+  },
+  "unchanged_go_build_cargo_arguments_all4_dispatch_and_assertions": true,
+  "original12files_sha_verified": true,
+  "run_sha256": "43717da5bc2790c251e67ecff1e2ded7d1df0066312c363fbf2cf83be4167f4b",
+  "scope": "STATIC Bash parse/Python compile and exact source-byte audit only. No Cargo/Go build, executable probe, target/port/runtime allocation. Native CI remains required. Distinct original Windows25s source timeout unresolved.",
+  "prepared_source": "fd29e3c9729ed1888db5756fb01ea1922dd16c1d",
+  "candidate_dirty": false,
+  "bash_n_exit": 0,
+  "actionlint_exit": 0
+}

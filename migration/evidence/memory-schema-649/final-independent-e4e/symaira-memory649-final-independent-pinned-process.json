@@ -1,0 +1,72 @@
+{
+  "candidate_head": "e4e06371b6f90dedb920072f36bdfa7231200dab",
+  "candidate_dirty": false,
+  "local_platform": "Linux-6.18.44-x86_64-with-glibc2.41",
+  "actual_go_constructor": "memory list --db owned/default.db --json; production migration constructor",
+  "actual_go_revision": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "binary_sha256": {
+    "/tmp/memory-schema-649.IY2Q01/symbrain-go": "b578377343e9a2a4c35d13f22addab816e573396161e78cb981f7965f63ec7a6",
+    "/workspace/symaira-memory649-doctor/target/debug/symbrain": "781694a81155e5b01e19b53c3ffaae6c319c7ce8be1287fffab9a41798ede6cb"
+  },
+  "records": [
+    {
+      "case": "healthy-actual-Go-created-store",
+      "go": {
+        "path": "/tmp/memory649-doctor-00i7f6j2/data/symbrain/memory/default.db",
+        "exists": true,
+        "mode": "0600",
+        "mode_ok": true,
+        "quick_check": "ok"
+      },
+      "native": {
+        "path": "/tmp/memory649-doctor-00i7f6j2/data/symbrain/memory/default.db",
+        "exists": true,
+        "mode": "0600",
+        "mode_ok": true,
+        "quick_check": "ok"
+      },
+      "db_sha256_before_after": "d92cd2bb291c18a71535540beaff70cfb2b470467764b1496273def7661ec578",
+      "diagnostic_difference_intentional": false
+    },
+    {
+      "case": "all-migrations-applied-but-five-columns-missing",
+      "go": {
+        "path": "/tmp/memory649-doctor-00i7f6j2/data/symbrain/memory/default.db",
+        "exists": true,
+        "mode": "0600",
+        "mode_ok": true,
+        "quick_check": "ok"
+      },
+      "native": {
+        "path": "/tmp/memory649-doctor-00i7f6j2/data/symbrain/memory/default.db",
+        "exists": true,
+        "mode": "0600",
+        "mode_ok": true,
+        "quick_check": "ok",
+        "error": "missing required columns: memories.consolidated_into_id, memories.embedding_binary, memories.embedding_dim, memories.embedding_quantization, memories.lsh_hash"
+      },
+      "db_sha256_before_after": "09be6d5b3e0a17c0741e950d0e860b717d623e3544095036dc71e24ff537c1b3",
+      "diagnostic_difference_intentional": true
+    },
+    {
+      "case": "native-open-repairs-existing-store",
+      "go": {
+        "path": "/tmp/memory649-doctor-00i7f6j2/data/symbrain/memory/default.db",
+        "exists": true,
+        "mode": "0600",
+        "mode_ok": true,
+        "quick_check": "ok"
+      },
+      "native": {
+        "path": "/tmp/memory649-doctor-00i7f6j2/data/symbrain/memory/default.db",
+        "exists": true,
+        "mode": "0600",
+        "mode_ok": true,
+        "quick_check": "ok"
+      },
+      "db_sha256_before_after": "38663010f9915fd6dd2cd607b034172560e685e46e3367f850420b8b794609e2",
+      "diagnostic_difference_intentional": false
+    }
+  ],
+  "operator_state_used": false
+}

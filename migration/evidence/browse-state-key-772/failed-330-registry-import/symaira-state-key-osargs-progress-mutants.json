@@ -1,0 +1,44 @@
+{
+  "candidate_head": "330037203853fef057892007c9f35c8226a35ea8",
+  "original_module_sha256": "f54c52ff0b6f097195fef045310b5bb4d37631ad9205f92819e2f8f6eeb36b03",
+  "test_module_sha256": "3822e84bfcc43daebd5a8def6ab56e32690364e4000e367904728b204796f473",
+  "cases": [
+    {
+      "name": "missing-begin",
+      "candidate_head": "330037203853fef057892007c9f35c8226a35ea8",
+      "real_test": "test_real_child_begin_is_readable_while_child_is_running",
+      "exit": 1,
+      "diagnostic": "False is not true",
+      "rejected": true,
+      "mutated_module_sha256": "057e01bc80fcef9a9318594243a9edf5cdcf0b785ce5a8b57a2f32f46f279420",
+      "stdout": "",
+      "stderr": "F\n======================================================================\nFAIL: test_real_child_begin_is_readable_while_child_is_running (__main__.ProgressTests.test_real_child_begin_is_readable_while_child_is_running)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/bk-progress-mutants-lpwtogxj/missing-begin/test_registry_progress.py\", line 37, in test_real_child_begin_is_readable_while_child_is_running\n    self.assertTrue(any(line[\"stage\"] == \"cli.begin\" for line in lines))\nAssertionError: False is not true\n\n----------------------------------------------------------------------\nRan 1 test in 2.003s\n\nFAILED (failures=1)\n",
+      "log": "/tmp/symaira-state-key-osargs-progress-mutant-missing-begin.log"
+    },
+    {
+      "name": "wrong-output-hash",
+      "candidate_head": "330037203853fef057892007c9f35c8226a35ea8",
+      "real_test": "test_real_nonutf8_output_and_failure_are_hashed_without_projection",
+      "exit": 1,
+      "diagnostic": "00000000000000000000",
+      "rejected": true,
+      "mutated_module_sha256": "91170ee2b17e0221c28649a66db9dd2ca7440f8096ae62f55da3901338597840",
+      "stdout": "",
+      "stderr": "F\n======================================================================\nFAIL: test_real_nonutf8_output_and_failure_are_hashed_without_projection (__main__.ProgressTests.test_real_nonutf8_output_and_failure_are_hashed_without_projection)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/bk-progress-mutants-lpwtogxj/wrong-output-hash/test_registry_progress.py\", line 53, in test_real_nonutf8_output_and_failure_are_hashed_without_projection\n    self.assertEqual(complete[\"stdout_sha256\"], hashlib.sha256(b\"\\xff\").hexdigest())\nAssertionError: '0000000000000000000000000000000000000000000000000000000000000000' != 'a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89'\n- 0000000000000000000000000000000000000000000000000000000000000000\n+ a8100ae6aa1940d0b663bb31cd466142ebbdbd5187131b92d93818987832eb89\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.011s\n\nFAILED (failures=1)\n",
+      "log": "/tmp/symaira-state-key-osargs-progress-mutant-wrong-output-hash.log"
+    },
+    {
+      "name": "lost-case-link",
+      "candidate_head": "330037203853fef057892007c9f35c8226a35ea8",
+      "real_test": "test_concurrent_cases_keep_complete_lines_and_distinct_case_links",
+      "exit": 1,
+      "diagnostic": "Items in the",
+      "rejected": true,
+      "mutated_module_sha256": "287da8f28f48edd40d7b2e9d566cadef158e47b79ff9de3319328fbba83ef250",
+      "stdout": "",
+      "stderr": "F\n======================================================================\nFAIL: test_concurrent_cases_keep_complete_lines_and_distinct_case_links (__main__.ProgressTests.test_concurrent_cases_keep_complete_lines_and_distinct_case_links)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/bk-progress-mutants-lpwtogxj/lost-case-link/test_registry_progress.py\", line 66, in test_concurrent_cases_keep_complete_lines_and_distinct_case_links\n    self.assertEqual(len(starts), 8); self.assertEqual(starts, ends)\n                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Items in the first set but not the second:\n2\n3\n4\n5\n6\n7\n8\n9\nItems in the second set but not the first:\n0\n\n----------------------------------------------------------------------\nRan 1 test in 0.031s\n\nFAILED (failures=1)\n",
+      "log": "/tmp/symaira-state-key-osargs-progress-mutant-lost-case-link.log"
+    }
+  ],
+  "scope": "actual portable Python subprocess controls on current native host; temporary module copies only, candidate unchanged, no Windows/Darwin runtime claim"
+}

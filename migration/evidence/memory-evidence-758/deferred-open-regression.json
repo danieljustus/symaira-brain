@@ -1,0 +1,122 @@
+{
+  "candidate_production_source_head": "f54389209cc0cb76b38e3f7653567313d3a2c346",
+  "candidate_production_unchanged_through_head": "14c4627bcbdf8bf3a076c98ba8bb8ca052c052ac",
+  "baseline_source_head": "e8c7f7990ab61967db0a3cbadaf6e485b4a33d99",
+  "candidate_rlib_sha256": "3d418f5ac0849f134d8e8e2d13cfc170422163615c4dc5e1a52bdd8ea259f12e",
+  "probe_source_sha256": "ee1e17af48d156863793694ea719cdbbdd87fa1208af4529f19cd144c7818652",
+  "candidate_executable_sha256": "0609de0f8da3b1463c17c8359f2a2701b46c3ead540d9b4498709cf1c32827d1",
+  "baseline_executable_sha256": "ce090745982b5ca68ed1bb95c77f5e800a6545ad9b53f4c48d9fc23072e97b9a",
+  "concurrent_threads": 8,
+  "observations": [
+    {
+      "implementation": "candidate",
+      "trial": 0,
+      "exit": 101,
+      "stdout": "",
+      "stderr": "\nthread '<unnamed>' (682713) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some(\"database is locked\")))\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\nthread '<unnamed>' (682715) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some(\"database is locked\")))\n\nthread '<unnamed>' (682711) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some(\"database is locked\")))\n\nthread 'main' (682707) panicked at /tmp/symaira-memory758-independent-probe.rs:20:34:\ncalled `Result::unwrap()` on an `Err` value: Any { .. }\n",
+      "original_row_identical": true,
+      "repaired_all_five_columns": true
+    },
+    {
+      "implementation": "candidate",
+      "trial": 1,
+      "exit": 101,
+      "stdout": "",
+      "stderr": "\nthread '<unnamed>' (682721) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 517 }, Some(\"database is locked\")))\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\nthread '<unnamed>' (682718) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 517 }, Some(\"database is locked\")))\n\nthread '<unnamed>' (682722) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 517 }, Some(\"database is locked\")))\n\nthread 'main' (682716) panicked at /tmp/symaira-memory758-independent-probe.rs:20:34:\ncalled `Result::unwrap()` on an `Err` value: Any { .. }\n",
+      "original_row_identical": true,
+      "repaired_all_five_columns": true
+    },
+    {
+      "implementation": "candidate",
+      "trial": 2,
+      "exit": 101,
+      "stdout": "",
+      "stderr": "\nthread '<unnamed>' (682727) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some(\"database is locked\")))\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\nthread '<unnamed>' (682729) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some(\"database is locked\")))\n\nthread '<unnamed>' (682733) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some(\"database is locked\")))\n\nthread '<unnamed>' (682732) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some(\"database is locked\")))\n\nthread '<unnamed>' (682728) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some(\"database is locked\")))\n\nthread 'main' (682725) panicked at /tmp/symaira-memory758-independent-probe.rs:20:34:\ncalled `Result::unwrap()` on an `Err` value: Any { .. }\n",
+      "original_row_identical": true,
+      "repaired_all_five_columns": true
+    },
+    {
+      "implementation": "candidate",
+      "trial": 3,
+      "exit": 101,
+      "stdout": "",
+      "stderr": "\nthread '<unnamed>' (682736) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some(\"database is locked\")))\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\nthread '<unnamed>' (682742) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some(\"database is locked\")))\n\nthread '<unnamed>' (682737) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some(\"database is locked\")))\n\nthread 'main' (682734) panicked at /tmp/symaira-memory758-independent-probe.rs:20:34:\ncalled `Result::unwrap()` on an `Err` value: Any { .. }\n",
+      "original_row_identical": true,
+      "repaired_all_five_columns": true
+    },
+    {
+      "implementation": "candidate",
+      "trial": 4,
+      "exit": 101,
+      "stdout": "",
+      "stderr": "\nthread '<unnamed>' (682749) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some(\"database is locked\")))\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\nthread '<unnamed>' (682746) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 5 }, Some(\"database is locked\")))\n\nthread '<unnamed>' (682745) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 517 }, Some(\"database is locked\")))\n\nthread '<unnamed>' (682744) panicked at /tmp/symaira-memory758-independent-probe.rs:15:60:\ncalled `Result::unwrap()` on an `Err` value: Sql(SqliteFailure(Error { code: DatabaseBusy, extended_code: 517 }, Some(\"database is locked\")))\n\nthread 'main' (682743) panicked at /tmp/symaira-memory758-independent-probe.rs:20:34:\ncalled `Result::unwrap()` on an `Err` value: Any { .. }\n",
+      "original_row_identical": true,
+      "repaired_all_five_columns": true
+    },
+    {
+      "implementation": "baseline",
+      "trial": 0,
+      "exit": 0,
+      "stdout": "reopen/write/data-preservation/concurrent-open checks passed\n",
+      "stderr": "",
+      "original_row_identical": true,
+      "repaired_all_five_columns": true
+    },
+    {
+      "implementation": "baseline",
+      "trial": 1,
+      "exit": 0,
+      "stdout": "reopen/write/data-preservation/concurrent-open checks passed\n",
+      "stderr": "",
+      "original_row_identical": true,
+      "repaired_all_five_columns": true
+    },
+    {
+      "implementation": "baseline",
+      "trial": 2,
+      "exit": 0,
+      "stdout": "reopen/write/data-preservation/concurrent-open checks passed\n",
+      "stderr": "",
+      "original_row_identical": true,
+      "repaired_all_five_columns": true
+    },
+    {
+      "implementation": "baseline",
+      "trial": 3,
+      "exit": 0,
+      "stdout": "reopen/write/data-preservation/concurrent-open checks passed\n",
+      "stderr": "",
+      "original_row_identical": true,
+      "repaired_all_five_columns": true
+    },
+    {
+      "implementation": "baseline",
+      "trial": 4,
+      "exit": 0,
+      "stdout": "reopen/write/data-preservation/concurrent-open checks passed\n",
+      "stderr": "",
+      "original_row_identical": true,
+      "repaired_all_five_columns": true
+    }
+  ],
+  "baseline_rlib_sha256": "65d407910dcf289bbcfea5e18ff609c20aeb3d21a3d7ed08e835117a373edebd",
+  "baseline_memory_source_sha256": {
+    "rust/symbrain-memory/src/search.rs": "25d8a6ff0325069c7950115b42fddfbd5038b15e6c3a81a05c74deabab406b7a",
+    "rust/symbrain-memory/src/model.rs": "dfd905688801ad6b1faca9bcc6ea74b6892b3dfab775c7663b0d501d26b25659",
+    "rust/symbrain-memory/src/retrieval.rs": "3f14cd8e48042735bb3399aa9edd53621cfcaee57a029fbf984fc0d9d8905eee",
+    "rust/symbrain-memory/src/entity.rs": "7f70dc3cf02bd71da6d256cbad1d1a8a1ffab4a5d3faaaaa2b54646ef2d98e6b",
+    "rust/symbrain-memory/src/lsh.rs": "fe482f424364baefc4bb50caae158db185a82c87bdb4538788712dcd572556a9",
+    "rust/symbrain-memory/src/embedding.rs": "4f56b3056cf713935af32c772e0af041ea2c99036f3efd08965d68ae9721a3c4",
+    "rust/symbrain-memory/src/schema.rs": "58f2e06a2cc0bea98761d5078783608698c0401794864d1a1e77b2cb3f0edf8b",
+    "rust/symbrain-memory/src/gotime.rs": "2235f3731a0417acb2b1842d6db109db725118f77322bfeab69e5700381e59c2",
+    "rust/symbrain-memory/src/db_oracle_tests.rs": "583231e19b52afda08fb32472dc94d7b9f6df836bd207ce9f8a3e70a13ea7fc4",
+    "rust/symbrain-memory/src/store.rs": "db267344dd284a3f8be187b40ed988a51d0c091e9c6be73cfb6647e7c2ab6c09",
+    "rust/symbrain-memory/src/gojson.rs": "bc90cc505b4e09e7c461f4c1db947ff4b3fc1de6d5b32456246a41ceb56694a6",
+    "rust/symbrain-memory/src/gorand.rs": "86a1c52d7a916091e7164babf1321d4282baa054d76207f662f5406628fe8c2b",
+    "rust/symbrain-memory/src/lib.rs": "ba516d99b4de8f9aeae9ef33459a27e065b569ab7f2b243ffc2934f2e6df12b5",
+    "rust/symbrain-memory/src/activity.rs": "89f8254f28dfcc92e7db9856535c31bf44d00967a4006e85fe1c73c82297b273",
+    "rust/symbrain-memory/src/rows.rs": "df335ae17fce3f7221cc41ef9f8f511dd88ffd0c9235e5c6ec1ad84c6ba28dc3",
+    "rust/symbrain-memory/src/search_rows.rs": "79e7e36d6bb514b6f960d75886dac78485f63a68e1db3a35a502b1b9bc2b45a9",
+    "rust/symbrain-memory/src/list_rows.rs": "4c7b0328e69db23d2f1f2ed13886e8cca3d6572fc696dd1bf15985d9ae5b5771"
+  }
+}

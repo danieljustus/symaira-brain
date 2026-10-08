@@ -1,0 +1,35 @@
+{
+  "reviewer": "Root different author",
+  "reviewed_source": "e49a80e2560ee3703aa2006c0420ff5885382fc8",
+  "parent": "11f5777a91bd980f16a68fe187ef70f6b50fa9ff",
+  "changed_paths": [
+    ".github/workflows/memory-mcp-native.yml",
+    "docs/adr/memory-mcp-catalog-contract-759.md",
+    "migration/evidence/memory-mcp-759/windows-archive-path-811/.gitattributes",
+    "migration/evidence/memory-mcp-759/windows-archive-path-811/original-failure-receipt.json",
+    "migration/evidence/memory-mcp-759/windows-archive-path-811/original-memory-mcp-native.yml",
+    "migration/evidence/memory-mcp-759/windows-archive-path-811/static-validation.json",
+    "migration/evidence/memory-mcp-759/windows-archive-path-811/symaira-current-ci-job-111341331634-decoded.json",
+    "migration/evidence/memory-mcp-759/windows-archive-path-811/symaira-current-ci-job-111341331634.log"
+  ],
+  "shell_blocks": [
+    "Build native owner and immutable Go oracle",
+    "Verify owner and generic transport contracts",
+    "Compare complete catalogs and real negative controls",
+    "Record actual SDK and source"
+  ],
+  "actionlint_exit": 0,
+  "workflow_sha256": "5cc7ef7bf2cacd57c931b8972d917bbf8ec465230e44ac8602796433c7221231",
+  "original_raw_log_sha256": "f3be0a729c4d03cceb1e7ddad0b911456c86fb1b96711eed0c53defaca9f9dc8",
+  "production_changed": false,
+  "runtime_executed": false,
+  "native_windows_required": true,
+  "separate_shared_store_busy_gate": true,
+  "prior_review_attempt": {
+    "result": "failed evidence allowlist assertion before static checks or edits",
+    "incorrect_prefix": "migration/evidence/windows-archive-path-811/",
+    "actual_prefix": "migration/evidence/memory-mcp-759/windows-archive-path-811/",
+    "subsequent_shell_behavior": "missing fail-fast allowed normal push of unchanged author e49, no Root static approval claimed",
+    "correction": "this complete successful independent verification before evidence-only successor; all current native gates remain required"
+  }
+}

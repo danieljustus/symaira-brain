@@ -1,0 +1,16 @@
+{
+  "timestamp": 1791102256.0102196,
+  "source_only": true,
+  "rustfmt_check": "PASS Rust1.98 direct rustfmt --check --edition2024",
+  "git_diff_check": "PASS",
+  "Cargo_or_target_or_compiler_or_11434_use": false,
+  "current_source_compiled_or_run": false,
+  "protected_unchanged_sources": 1776,
+  "managed_transitive_locked_packages_identical": 114,
+  "historical_actual_runs": {
+    "focused": "1 passed; 5 filtered; 3.071118914s; exit0",
+    "whole_original": "6 passed; 3.070557869s; exit0"
+  },
+  "owned_process_users": [],
+  "floor_stop_note": "floor snapshots recorded immediately after tool-reported AssertionError; original stderr text retained from the exact tool output; /tmp separate low-space mount was not CI evidence"
+}

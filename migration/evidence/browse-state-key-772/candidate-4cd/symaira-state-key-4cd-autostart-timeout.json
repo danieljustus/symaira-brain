@@ -1,0 +1,83 @@
+{
+  "cases": [
+    {
+      "kind": "go",
+      "source": "4cd56e3e47338aef30e5d83ea554227ace70fe71",
+      "binary_sha256": "99ba09243d5132c035485f96af2e2ddad24493ac8bced4f2a5bbb86c63daefe8",
+      "root": "/tmp/bk-parent-j7ztl22j",
+      "arguments": [
+        "/tmp/symaira-pr801-go-1.26.7",
+        "state",
+        "list",
+        "--session",
+        "pt2212172",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout": "{\"success\":false,\"error\":{\"code\":\"daemon_unavailable\",\"message\":\"daemon did not become ready for session \\\"pt2212172\\\"\",\"hint\":\"start daemon with 'symbrowse daemon --session pt2212172'; see daemon log at /tmp/bk-parent-j7ztl22j/state/symbrowse/daemon.log\",\"details\":{\"session\":\"pt2212172\",\"socket_path\":\"/tmp/bk-parent-j7ztl22j/run/symbrowse/pt2212172.sock\"}}}\n",
+      "stderr": "",
+      "elapsed": 5.035105158996885,
+      "queries": [
+        {
+          "arguments": [
+            "get",
+            "symbrowse/encryption-key"
+          ],
+          "name": "symvault",
+          "pid": 2212225
+        }
+      ],
+      "provider_after_cli": {
+        "pid": 2212225,
+        "state": "S",
+        "parent": 2212216,
+        "executable": "/tmp/bk-parent-j7ztl22j/bin/symvault"
+      },
+      "provider_after_16_5_seconds": {
+        "pid": 2212225,
+        "state": "gone"
+      }
+    },
+    {
+      "kind": "rust",
+      "source": "4cd56e3e47338aef30e5d83ea554227ace70fe71",
+      "binary_sha256": "48acebf1eb67a5b270d802f7d1e09217f82d3e2cd7c5c56b29f7c45ffa7ecd00",
+      "root": "/tmp/bk-parent-089t1rk5",
+      "arguments": [
+        "/workspace/symaira-daemon772-registry/target/debug/symbrowse",
+        "state",
+        "list",
+        "--session",
+        "pt2212172",
+        "--json"
+      ],
+      "exit": 1,
+      "stdout": "{\"success\":false,\"error\":{\"code\":\"daemon_unavailable\",\"message\":\"daemon did not become ready for session \\\"pt2212172\\\"\",\"hint\":\"start daemon with 'symbrowse daemon --session pt2212172'; see daemon log at /tmp/bk-parent-089t1rk5/state/symbrowse/daemon.log\",\"details\":{\"session\":\"pt2212172\",\"socket_path\":\"/tmp/bk-parent-089t1rk5/run/symbrowse/pt2212172.sock\"}}}\n",
+      "stderr": "",
+      "elapsed": 5.01819902400166,
+      "queries": [
+        {
+          "arguments": [
+            "get",
+            "symbrowse/encryption-key"
+          ],
+          "name": "symvault",
+          "pid": 2212257
+        }
+      ],
+      "provider_after_cli": {
+        "pid": 2212257,
+        "state": "S",
+        "parent": 2212171,
+        "executable": "/tmp/bk-parent-089t1rk5/bin/symvault"
+      },
+      "provider_after_16_5_seconds": {
+        "pid": 2212257,
+        "state": "S",
+        "parent": 2212171,
+        "executable": "/tmp/bk-parent-089t1rk5/bin/symvault"
+      }
+    }
+  ],
+  "scope": "owned Linux fixture processes only; no Windows/Darwin runtime claim; targeted extra observation, candidate unmodified"
+}

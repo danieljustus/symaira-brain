@@ -1,0 +1,9 @@
+    Finished `test` profile [unoptimized] target(s) in 0.21s
+     Running tests/doctor_memory_schema.rs (target/debug/deps/doctor_memory_schema-c9b5b93a1b498d83)
+
+running 2 tests
+test applied_migrations_with_missing_columns_are_reported_without_modification ... ok
+test same_column_view_cannot_replace_a_required_writable_table ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+

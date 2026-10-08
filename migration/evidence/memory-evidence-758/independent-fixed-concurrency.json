@@ -1,0 +1,93 @@
+{
+  "candidate_source_head": "8d2eefc5c02a77de7eccddb486f5b227e91b079d",
+  "candidate_source_sha256": {
+    ".github/workflows/memory-evidence-native.yml": "a34d144b9c4f38b3ea15a4333a2dc801d394addaa23fedd15aafc3c5d9b4d429",
+    "Cargo.lock": "95657aeeba4f12cde301afa9aaf6b01b021b0d7892ed4cad6907a1db390785c0",
+    "Cargo.toml": "982fdf67af364bb689371f888d79e4662bcbd2d7088dec0d7a2aa85f308a0155",
+    "rust/symbrain-memory/Cargo.toml": "418e282e1fc9ab7ebac4d7324ee8e39b2242acdd4ecf7193fd9477753cfe0a0d",
+    "rust/symbrain-memory/src/activity.rs": "89f8254f28dfcc92e7db9856535c31bf44d00967a4006e85fe1c73c82297b273",
+    "rust/symbrain-memory/src/db_oracle_tests.rs": "583231e19b52afda08fb32472dc94d7b9f6df836bd207ce9f8a3e70a13ea7fc4",
+    "rust/symbrain-memory/src/embedding.rs": "4f56b3056cf713935af32c772e0af041ea2c99036f3efd08965d68ae9721a3c4",
+    "rust/symbrain-memory/src/entity.rs": "7f70dc3cf02bd71da6d256cbad1d1a8a1ffab4a5d3faaaaa2b54646ef2d98e6b",
+    "rust/symbrain-memory/src/evidence/fuzzy.rs": "7006cf57df60edf12ae0c972f7026a9fb40bb94d8ec18fb8633742ef207b22a4",
+    "rust/symbrain-memory/src/evidence/mod.rs": "f0af751e82d6598dc3c7f0ed3b3d30b08afaaab6e39cec0d7a8e0be9c5f1343d",
+    "rust/symbrain-memory/src/evidence_store.rs": "c138879c49e25cc0552839c3f01f21f911722c419edd33c0667ccb08b5e97dfb",
+    "rust/symbrain-memory/src/evidence_store/tests.rs": "1b1a30ac3412a9e0b21a97b3743e6bc57d8d4259be9e6b204c6793a039def184",
+    "rust/symbrain-memory/src/gojson.rs": "bc90cc505b4e09e7c461f4c1db947ff4b3fc1de6d5b32456246a41ceb56694a6",
+    "rust/symbrain-memory/src/gorand.rs": "86a1c52d7a916091e7164babf1321d4282baa054d76207f662f5406628fe8c2b",
+    "rust/symbrain-memory/src/gotime.rs": "2235f3731a0417acb2b1842d6db109db725118f77322bfeab69e5700381e59c2",
+    "rust/symbrain-memory/src/lib.rs": "c539c1dad9dfe5f712bcaa4714162d4bb5109a96c271217e6317e4ef0ec41390",
+    "rust/symbrain-memory/src/list_rows.rs": "4c7b0328e69db23d2f1f2ed13886e8cca3d6572fc696dd1bf15985d9ae5b5771",
+    "rust/symbrain-memory/src/lsh.rs": "fe482f424364baefc4bb50caae158db185a82c87bdb4538788712dcd572556a9",
+    "rust/symbrain-memory/src/migration.rs": "837e1bfb55d02d569bc708beea2b9d460e6d2e751a73236425d5624e5911f74c",
+    "rust/symbrain-memory/src/model.rs": "dfd905688801ad6b1faca9bcc6ea74b6892b3dfab775c7663b0d501d26b25659",
+    "rust/symbrain-memory/src/retrieval.rs": "3f14cd8e48042735bb3399aa9edd53621cfcaee57a029fbf984fc0d9d8905eee",
+    "rust/symbrain-memory/src/rows.rs": "df335ae17fce3f7221cc41ef9f8f511dd88ffd0c9235e5c6ec1ad84c6ba28dc3",
+    "rust/symbrain-memory/src/schema.rs": "58f2e06a2cc0bea98761d5078783608698c0401794864d1a1e77b2cb3f0edf8b",
+    "rust/symbrain-memory/src/search.rs": "25d8a6ff0325069c7950115b42fddfbd5038b15e6c3a81a05c74deabab406b7a",
+    "rust/symbrain-memory/src/search_rows.rs": "79e7e36d6bb514b6f960d75886dac78485f63a68e1db3a35a502b1b9bc2b45a9",
+    "rust/symbrain-memory/src/store.rs": "97b6ca66ff514bce6c037e7330c083c69e92a887d15c53d391b1d6ac2a9a8fd7",
+    "rust/symbrain-memory/src/write.rs": "56fa6303b0f78feb9a6bafd123b80bc3b12261a1e90752ae63f7ce2d8cbda2a2",
+    "rust/symbrain-memory/tests/evidence_oracle_tests.rs": "cf5997f2e5bf52a141ed055fb023ae97a729139068e4338cfacdb3041fafe6e3",
+    "rust/symbrain-memory/tests/fixtures/db_memory_oracle.json": "fdeb140b4e89ee366ceaa4c9b22a24fa251bcadc3719f7e12085560d048fa804",
+    "rust/symbrain-memory/tests/fixtures/go_oracle.json": "ea24b15b9bf6c6bdb3b27f1f4d69b1247f101add99d77eab844b4bbc2057e7c9",
+    "rust/symbrain-memory/tests/fixtures/gorand-reference.txt": "9c007bb0c6215bb9130b9445041299a445dd5a33f5bb2fcdb54000d9992b8893",
+    "rust/symbrain-memory/tests/fixtures/memory_evidence_go_v017.json": "ff78755268228615685cbd4ddbb72247b3dbc201765f27e784237bd013dc30a2",
+    "rust/symbrain-memory/tests/store_contract_tests.rs": "7e08cb5bf0872468efc8d2b238ca86e5bbdac0df00e93129d08f6327fd3073d3",
+    "scripts/memory-evidence-oracle/README.md": "b0fac6d352d002fcd58fbbf4ed5e8483c266627b6d73a5e4fd54741180966eb7",
+    "scripts/memory-evidence-oracle/controls.py": "36d5705484c856d071147745a7929e3d73bbdcb167f8cda195bbeaf0999f7691",
+    "scripts/memory-evidence-oracle/main.go.txt": "5764e9093d81294536815be185d39c5a41eafd7a834535870c281a64bd877d80",
+    "scripts/memory-evidence-oracle/replay.py": "ab7102ab5136f2d63854e11a8d8c24df514fd7e73d58991b8745be6f598e1413",
+    "scripts/memory-evidence-oracle/run.sh": "8b83598b9646b95b3b77560c437419556718398247b72ca3fa2e4d4d1ba1acc5"
+  },
+  "rlib_sha256": "373f2f945aa2cfeeaf0ff5368bce3cf9011bfc06187de626ab44ef8ed1226ba3",
+  "probe_source_sha256": "ee1e17af48d156863793694ea719cdbbdd87fa1208af4529f19cd144c7818652",
+  "probe_binary_sha256": "4c50bbed9c943c19dc60133cd4c4e902cf91f79c561e65caffb27139ecc8000a",
+  "observations": [
+    {
+      "trial": 0,
+      "exit": 0,
+      "stdout": "reopen/write/data-preservation/concurrent-open checks passed\n",
+      "stderr": "",
+      "original_row_identical": true,
+      "repaired_all_five_columns": true,
+      "total_memory_rows": 11
+    },
+    {
+      "trial": 1,
+      "exit": 0,
+      "stdout": "reopen/write/data-preservation/concurrent-open checks passed\n",
+      "stderr": "",
+      "original_row_identical": true,
+      "repaired_all_five_columns": true,
+      "total_memory_rows": 11
+    },
+    {
+      "trial": 2,
+      "exit": 0,
+      "stdout": "reopen/write/data-preservation/concurrent-open checks passed\n",
+      "stderr": "",
+      "original_row_identical": true,
+      "repaired_all_five_columns": true,
+      "total_memory_rows": 11
+    },
+    {
+      "trial": 3,
+      "exit": 0,
+      "stdout": "reopen/write/data-preservation/concurrent-open checks passed\n",
+      "stderr": "",
+      "original_row_identical": true,
+      "repaired_all_five_columns": true,
+      "total_memory_rows": 11
+    },
+    {
+      "trial": 4,
+      "exit": 0,
+      "stdout": "reopen/write/data-preservation/concurrent-open checks passed\n",
+      "stderr": "",
+      "original_row_identical": true,
+      "repaired_all_five_columns": true,
+      "total_memory_rows": 11
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "scope": "Actual SDK-only Linux/amd64 scalar/int observations; not frozen provider/current-native execution or cross-platform result",
+  "entries": [
+    {
+      "original": "/tmp/symaira-usage768-decimal-sdk-proof/build.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "build.stderr.gz",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-sdk-proof/build.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "build.stdout.gz",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-sdk-proof/command.json",
+      "bytes": 756,
+      "sha256": "138758b010b870373252796ad34a8b2c26b9b8602d0b98fb04eaf31c7f14183f",
+      "archive": "command.json.gz",
+      "archive_sha256": "0f42e0531b357a94415d2883bb5a0107fef1d1501405741f7c2eb98cd41d4fee",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-sdk-proof/input.json",
+      "bytes": 925199,
+      "sha256": "4b09076f1e5ae703ced3853d639aed6b5f494f2bf70833369809088d06cbed39",
+      "archive": "input.json.gz",
+      "archive_sha256": "f36609f921fa9a40e7b7f00ee52a679f92eb234f948b8cf773bc96f3886a8e21",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-sdk-proof/probe",
+      "bytes": 2971939,
+      "sha256": "cd483153469e0616aa9d906de0852a717d5e587026bf3f4221bfa7a41354b644",
+      "archive": "probe.gz",
+      "archive_sha256": "97e94e91f5bb7dcff238baa35f8b7a36f62b401c3e14a447aa144a5d005da030",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-sdk-proof/probe.go",
+      "bytes": 1360,
+      "sha256": "4af2bbb60fe8a4a9dd38b871970f936ec1676db59054efc28b977d2646b93208",
+      "archive": "probe.go.gz",
+      "archive_sha256": "ebd403571986c6e05d55a71781702bda200ea9812b9e86fd049980584e195ff7",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-sdk-proof/receipt.json",
+      "bytes": 1898,
+      "sha256": "38cef44ae2134a97d48bf99d8aa6c6acb579c93437e4661722b0e6e3af7a4419",
+      "archive": "receipt.json.gz",
+      "archive_sha256": "2ed47f89c1bc5ad57b27f4cc1304a6dab70a3eb16647bd1f96c584cd73112d5c",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-sdk-proof/stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "archive": "stderr.gz",
+      "archive_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec",
+      "roundtrip": true
+    },
+    {
+      "original": "/tmp/symaira-usage768-decimal-sdk-proof/stdout.json",
+      "bytes": 1024407,
+      "sha256": "3287a4a0250c3f029cfc16467143473bf751f461c46a0773f7f12dc8c89cc944",
+      "archive": "stdout.json.gz",
+      "archive_sha256": "f9ffaff94ce07645d8ee29fb235ba33a38fafb9540c2dee6f629b0860374b373",
+      "roundtrip": true
+    }
+  ],
+  "new_Rust_Cargo_builds": 0,
+  "ports": 0,
+  "targets": 0
+}

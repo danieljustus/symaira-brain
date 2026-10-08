@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/review-proof/review-pr800-daemon801-autostart-cleanup/seal.py", line 12, in <module>
+    assert m.name==row['name'];b=t.extractfile(m).read();assert sha(b)==row['sha256'] and len(b)==row['bytes']
+                   ~~~^^^^^^^^
+KeyError: 'name'

@@ -1,0 +1,52 @@
+{
+  "disposition": "REQUEST_CHANGES",
+  "head": "51269988152b4118e9df9a97fa6f7fe3730618e3",
+  "parent": "0081e1ffce25bd856380958a8c2e9993276d6f3e",
+  "original_reviewed_head": "689b1a8bc6a21425fe9285317f0c9b8b785586fd",
+  "dirty": false,
+  "original_view_finding_closed": true,
+  "findings": [
+    {
+      "priority": "P2",
+      "path": "scripts/memory-schema-oracle/replay.py",
+      "line": 21,
+      "title": "New Windows gate requires incompatible permission fields to match",
+      "proof_kind": "source-proven; native Windows execution required",
+      "evidence": "/tmp/symaira-memory649-corrected-independent-windows-mode-source.txt"
+    }
+  ],
+  "source_sha256": {
+    "docs/adr/649-doctor-schema-inspection.md": "a9e9b93d5b86234c66bd4a6840baba4acfcb326051ba39dead24c467e4facfd3",
+    "docs/adr/memory-native-cli-758.md": "53931439071123324a37297a51472ab05eb5f399d08686f5634c06fcd55c65ef",
+    "migration/evidence/memory-cli-758/linux-cleanup-controls.json.gz": "8c7c08a5b276de758da795cfd0e4aaff619cbc0cd2392f21f385a1789a67bf6d",
+    "migration/evidence/memory-cli-758/linux-cleanup-controls.log": "ed8e6e81ddbcd4ac7c127a0d3297a6a8812dff963705fc6c8c0d86270d0630ef",
+    "migration/evidence/memory-cli-758/linux-cleanup-process.json": "5294f8bd6df08e97a95994ffa9c01f2d4ce09848cf35e8ba84546e40641bb33a",
+    "migration/evidence/memory-cli-758/linux-cleanup-process.log": "16a77ea4a4dfca63c1bc448a61091257e4da0fe13b373294bd57816e45d048fd",
+    "migration/evidence/memory-cli-758/linux-cleanup-verification.json": "fbf700809d0624553d0dd8ff3e294194aed9cd6faa15ea1e622bc85feb4818c8",
+    "migration/evidence/memory-cli-758/windows-cleanup-e8d-job-111293527292.log": "f1045080d97fbf00b5c2d48febe87af59b6b4b5c5b62860d4bb1f7c8f7f03d38",
+    "migration/evidence/memory-schema-649/original-review-689/symaira-memory649-doctor-independent-review.json": "181a829e702ce53e3701968452b4966624273584aeffcfee94800cf7443d706d",
+    "migration/evidence/memory-schema-649/original-review-689/symaira-memory649-doctor-independent-review.md": "e1ef8af7da5b8f771af5160dfc6222bb2a26239af483f79e3c9b84563cf1d160",
+    "migration/evidence/memory-schema-649/original-review-689/symaira-memory649-independent-extra.json": "5c5128c19b78c86df9202fefd1112fa596acb054711ebf3d5292059c8f735bab",
+    "migration/evidence/memory-schema-649/original-review-689/symaira-memory649-independent-extra.log": "280fdfdda2f9f68f2843cf8c11d223a13e26f02b081709ce5c264a0882f60b84",
+    "migration/evidence/memory-schema-649/original-review-689/symaira-memory649-independent-extra.py": "0d8e64d933a812faa452de70b5f3d6d956bd40398d1c756524c8e77f9a59c6db",
+    "rust/symbrain-cli/tests/doctor_memory_schema.rs": "a125e9e9480b2cc9077ef3a484d9899c25478b2f35a29cb12a7cae3d49561d35",
+    "rust/symbrain-memory/src/schema_inspection.rs": "818b83b4d56a4325eb0bd8bb51161ef6a16bdc056e46e8a20813819588a5d1fc",
+    "scripts/memory-cli-oracle/replay.py": "1008182108ccbac8a2c9d21e50cf6120c2c6a0ac32dfeb0a4ae3cae4c504a691",
+    "scripts/memory-schema-oracle/run.sh": "7baf0b1d597224d70945048af868c9cdd3dedd7c2100c8a3b035b4caf19a3d8d"
+  },
+  "evidence_sha256": {
+    "/tmp/symaira-memory649-corrected-independent-windows-mode-source.txt": "858dcb4323e0355f757007741098c5b04faf8916f088fc6eec6a569e94a615e3",
+    "/tmp/symaira-memory649-corrected-independent-pinned-process.json.false-green-control.log": "c81cdf838891d9bb0d79d2e7206d8de669000b453bcaed8a9f1a2ffc1c8af6cf",
+    "/tmp/symaira-memory649-corrected-independent-pinned-process.json": "c5866ee944d375ca652dc5141bd46b02edf983d1c8f84796be057e592902bde6",
+    "/tmp/symaira-memory649-corrected-independent-pinned-process.log": "8b3d47d7e1e03e881fd2b3176cebb8ed8c680d910ee8c8ca26643b9181cb8f02",
+    "/tmp/symaira-memory649-corrected-independent-doctor-tests.log": "7f8ccd14ee1e771548940f3968207234c7012c6975f67b1ea8ce7690d42cd0c9",
+    "/tmp/symaira-memory649-corrected-independent-schema-tests.log": "737270a44999088a4915270b0eaa93f3e701b9968848e14ea4afb4d8ca9d22ad",
+    "/tmp/symaira-memory649-corrected-independent-extra.json": "14bba3e67d5425504a3b5ebe0117c3d36f50ff10473cef912b13ca0de9be3053",
+    "/tmp/symaira-memory649-corrected-independent-extra.log": "d092517ba15813adde1d4bde3a468e026bbda13da8d9d39e8f13baf6c2223261",
+    "/tmp/symaira-memory649-corrected-independent-extra.py": "59785ba2704c8bf74207ed134cdda4638ffec93f772b58ae4c78708e9993f365"
+  },
+  "report_sha256": "e2113de245eb4931d18cf4466ffe3d0199c2071373ceb28029e0270442fbbbca",
+  "binary_sha256": "31782f2f60dcd10399015e43f2790bebe96a122846833c9cfadff4b2cb318aae",
+  "native_gate_waived": false,
+  "source_edited": false
+}

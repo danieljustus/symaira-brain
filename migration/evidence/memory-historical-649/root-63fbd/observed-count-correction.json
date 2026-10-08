@@ -1,0 +1,13 @@
+{
+  "independent_original_source": "63fbd3205ca907c3adb696ad62d42a5b64311976",
+  "actual_37_go_exit0": 37,
+  "actual_37_native_exit0": 37,
+  "actual_go_integrity_ok": 37,
+  "actual_nine_controls_go_exit0": 9,
+  "actual_nine_controls_native_exit0": 3,
+  "actual_nine_controls_native_exit1": 6,
+  "original_census_go_success": 37,
+  "original_census_native_success": 35,
+  "original_census_native_failures": 2,
+  "previous_report_Go35_failures": "incorrect; correction based on complete retained raw reports and original census receipt"
+}

@@ -20,15 +20,22 @@ func TestReleaseFormatCheckBatchesLargeFileSetAndRejectsDrift(t *testing.T) {
 	root := releaseWorkflowRepoRoot(t)
 	script := releaseWorkflowFormatScript(t, filepath.Join(root, ".github", "workflows", "release.yml"))
 	fixtureRoot := t.TempDir()
-	for _, dir := range []string{"long go paths", "space dir", "browse"} {
+	for _, dir := range []string{"long go paths", "space dir", "browse", "migration/evidence/retained-original"} {
 		if err := os.MkdirAll(filepath.Join(fixtureRoot, dir), 0o755); err != nil {
 			t.Fatalf("create fixture directory %q: %v", dir, err)
 		}
 	}
 
 	newline := "\n"
-	if err := os.WriteFile(filepath.Join(fixtureRoot, "browse", "ignored file.go"), []byte("package p"+newline+newline+"func f(){}"+newline), 0o644); err != nil {
-		t.Fatalf("write excluded fixture: %v", err)
+	excludedBody := []byte("package p" + newline + newline + "func f(){}" + newline)
+	excludedPaths := []string{
+		filepath.Join(fixtureRoot, "browse", "ignored file.go"),
+		filepath.Join(fixtureRoot, "migration", "evidence", "retained-original", "original.go"),
+	}
+	for _, path := range excludedPaths {
+		if err := os.WriteFile(path, excludedBody, 0o644); err != nil {
+			t.Fatalf("write excluded fixture: %v", err)
+		}
 	}
 	driftPath := filepath.Join(fixtureRoot, "space dir", "drift file.go")
 	if err := os.WriteFile(driftPath, []byte("package p"+newline), 0o644); err != nil {
@@ -57,6 +64,12 @@ func TestReleaseFormatCheckBatchesLargeFileSetAndRejectsDrift(t *testing.T) {
 
 	if output, err := runReleaseWorkflowFormatCheck(t, script, fixtureRoot); err != nil {
 		t.Fatalf("large formatted fixture failed release format check: %v\n%s", err, output)
+	}
+	for _, path := range excludedPaths {
+		body, err := os.ReadFile(path)
+		if err != nil || !bytes.Equal(body, excludedBody) {
+			t.Fatalf("release format check changed excluded fixture %q: %v", path, err)
+		}
 	}
 
 	before, err := os.ReadFile(driftPath)

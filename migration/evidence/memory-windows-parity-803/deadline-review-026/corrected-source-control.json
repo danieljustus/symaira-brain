@@ -1,0 +1,35 @@
+{
+  "kind": "source-order checks and deterministic integer schedule projection; not native execution",
+  "source_sha256": "6f8543b3b6068613dfb43fc609bb1591b8dfa293144327e70e44ff5c5b6d3bbf",
+  "original_review_schedule": {
+    "calls": [
+      [
+        "init",
+        4900000000
+      ]
+    ],
+    "elapsed_ns": 5050000000,
+    "success": false
+  },
+  "initialize_begin_exhausts_deadline": {
+    "calls": [],
+    "elapsed_ns": 5000000000,
+    "success": false
+  },
+  "healthy_control": {
+    "calls": [
+      [
+        "init",
+        4900000000
+      ],
+      [
+        "ping",
+        3650000000
+      ]
+    ],
+    "elapsed_ns": 1400000000,
+    "success": true
+  },
+  "compiler_or_provider_executions": 0,
+  "original_failure_cause_proved": false
+}

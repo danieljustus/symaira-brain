@@ -1,0 +1,5554 @@
+[
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-single-app-entry-prefers-github-prefix/home/.config/github-copilot/apps.json": "d0c387c8a2173dbce6bd11f979ba58a5adbb0a2f7cb2bcbcb90a73e5f175a24a"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-single-app-entry-prefers-github-prefix/home",
+    "id": "copilot-frozen-single-app-entry-prefers-github-prefix",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220617070732d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer apps-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "617070732d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-single-app-entry-prefers-github-prefix/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-apps-token-precedes-hosts-token/home/.config/github-copilot/apps.json": "02f90525de3f3a6c7d3b6f103ed943111ae5ed24dff09e27168e3d626d920716",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-apps-token-precedes-hosts-token/home/.config/github-copilot/hosts.json": "6e3aa7a7fffcddd024b1f9c9a4217b8d0b9b0fa4c7647774cc7938da690ee3d9"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-apps-token-precedes-hosts-token/home",
+    "id": "copilot-frozen-apps-token-precedes-hosts-token",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220617070732d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer apps-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "617070732d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-apps-token-precedes-hosts-token/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-single-nongithub-app-entry-uses-fallback-pass/home/.config/github-copilot/apps.json": "26e5ad24c19b85d2dfeaf1d2de9d334e9ab7514cb7372d644fd3f1d5583e9d66"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-single-nongithub-app-entry-uses-fallback-pass/home",
+    "id": "copilot-frozen-single-nongithub-app-entry-uses-fallback-pass",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220656e74657270726973652d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer enterprise-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "656e74657270726973652d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-single-nongithub-app-entry-uses-fallback-pass/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-single-hosts-entry-when-apps-absent/home/.config/github-copilot/hosts.json": "d50cf947f86f527f0c262e1e4fcecc24129d82837486dd358c05d95f659c7683"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-single-hosts-entry-when-apps-absent/home",
+    "id": "copilot-frozen-single-hosts-entry-when-apps-absent",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220686f7374732d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer hosts-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "686f7374732d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-single-hosts-entry-when-apps-absent/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-duplicate-root-key-last-value/home/.config/github-copilot/apps.json": "5696fbeb7b0251b317fe5b147a88df91a332644ec37a7fc07bc9bb13d485cb0d"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-duplicate-root-key-last-value/home",
+    "id": "copilot-frozen-duplicate-root-key-last-value",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572206c6173742d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer last-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "6c6173742d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-duplicate-root-key-last-value/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-alternate-case-token-field-is-go-readable/home/.config/github-copilot/apps.json": "c3bcd9c989a41cfc0c8d7979ea59ee40350e44568bca4289243044bb9ea856e9"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-alternate-case-token-field-is-go-readable/home",
+    "id": "copilot-frozen-alternate-case-token-field-is-go-readable",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220636173652d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer case-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "636173652d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-alternate-case-token-field-is-go-readable/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-duplicate-token-fields-use-go-decode-order/home/.config/github-copilot/apps.json": "dd178762a8242f5febc6f6c20a815bfcb1eee5ed9a35670cc96ec4202153f5b7"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-duplicate-token-fields-use-go-decode-order/home",
+    "id": "copilot-frozen-duplicate-token-fields-use-go-decode-order",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572206c6173742d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer last-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "6c6173742d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-duplicate-token-fields-use-go-decode-order/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-unknown-entry-metadata-is-go-readable/home/.config/github-copilot/apps.json": "075400a4bff5d193521feeb3a615123978dfd48a0bec6a770633961870a2ba28"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-unknown-entry-metadata-is-go-readable/home",
+    "id": "copilot-frozen-unknown-entry-metadata-is-go-readable",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220617070732d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer apps-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "617070732d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-unknown-entry-metadata-is-go-readable/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-wrong-type-entry-is-skipped-before-hosts/home/.config/github-copilot/apps.json": "83620e9ac2a4fffbc9f908360e86ecc40d0342ebc0bb088b49be578f1fb615e7",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-wrong-type-entry-is-skipped-before-hosts/home/.config/github-copilot/hosts.json": "6e3aa7a7fffcddd024b1f9c9a4217b8d0b9b0fa4c7647774cc7938da690ee3d9"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-wrong-type-entry-is-skipped-before-hosts/home",
+    "id": "copilot-frozen-wrong-type-entry-is-skipped-before-hosts",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220686f7374732d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer hosts-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "686f7374732d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-wrong-type-entry-is-skipped-before-hosts/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-malformed-apps-json-falls-through-to-hosts/home/.config/github-copilot/apps.json": "6cbcaa2e82111cbdc9c17f27e638cda85c3ebf696ef22c48e4db6c0ecff5f191",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-malformed-apps-json-falls-through-to-hosts/home/.config/github-copilot/hosts.json": "6e3aa7a7fffcddd024b1f9c9a4217b8d0b9b0fa4c7647774cc7938da690ee3d9"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-malformed-apps-json-falls-through-to-hosts/home",
+    "id": "copilot-frozen-malformed-apps-json-falls-through-to-hosts",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220686f7374732d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer hosts-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "686f7374732d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-malformed-apps-json-falls-through-to-hosts/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-empty-apps-token-falls-through-to-hosts/home/.config/github-copilot/apps.json": "ee2b0a86b65b12043c0dd94c9f2211c1a6c29125783c7898be12f208fc9f6424",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-empty-apps-token-falls-through-to-hosts/home/.config/github-copilot/hosts.json": "6e3aa7a7fffcddd024b1f9c9a4217b8d0b9b0fa4c7647774cc7938da690ee3d9"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-empty-apps-token-falls-through-to-hosts/home",
+    "id": "copilot-frozen-empty-apps-token-falls-through-to-hosts",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220686f7374732d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer hosts-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "686f7374732d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-empty-apps-token-falls-through-to-hosts/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-multiple-github-tokens-have-map-order-dependent-choice/home/.config/github-copilot/apps.json": "66024d6539eedc1b95e7c3f00edcca1719bb78449e33b9df2dd628ac7807af0a"
+    },
+    "gate": "distinct eligible Go map tokens",
+    "gated": true,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-multiple-github-tokens-have-map-order-dependent-choice/home",
+    "id": "copilot-frozen-multiple-github-tokens-have-map-order-dependent-choice",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572206f6e652d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer one-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "6f6e652d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-multiple-github-tokens-have-map-order-dependent-choice/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-multiple-fallback-tokens-have-map-order-dependent-choice/home/.config/github-copilot/apps.json": "79d412a3c75de500dd951b56ff323d12a08a57a52a50c723af0c5b3fd8ef0f70"
+    },
+    "gate": "distinct eligible Go map tokens",
+    "gated": true,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-multiple-fallback-tokens-have-map-order-dependent-choice/home",
+    "id": "copilot-frozen-multiple-fallback-tokens-have-map-order-dependent-choice",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572206f6e652d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer one-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "6f6e652d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-multiple-fallback-tokens-have-map-order-dependent-choice/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-github-prefix-phase-precedes-other-hosts/home/.config/github-copilot/apps.json": "3e2f0500baf8313bb9d8027de9f2444e4c791f52a6944948519f3982f1b51a56"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-github-prefix-phase-precedes-other-hosts/home",
+    "id": "copilot-frozen-github-prefix-phase-precedes-other-hosts",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572206769746875622d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer github-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "6769746875622d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-github-prefix-phase-precedes-other-hosts/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-single-reference-shaped-token-stays-on-go/home/.config/github-copilot/apps.json": "25c6f894ab0681da8b389970a90c484f9913256599bf0120d77320a56823f405"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-single-reference-shaped-token-stays-on-go/home",
+    "id": "copilot-frozen-single-reference-shaped-token-stays-on-go",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722073796d7661756c743a2f2f636f70696c6f742f6163636573732d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer symvault://copilot/access-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "73796d7661756c743a2f2f636f70696c6f742f6163636573732d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-single-reference-shaped-token-stays-on-go/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {},
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-missing-both-files-has-no-token/home",
+    "id": "copilot-frozen-missing-both-files-has-no-token",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "No Copilot token found — sign in with the Copilot CLI"
+          }
+        }
+      ]
+    },
+    "requests": [],
+    "selected": {
+      "source": "",
+      "token_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-frozen-missing-both-files-has-no-token/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-token-null-retained/home/.config/github-copilot/apps.json": "95a1ee2d94fbec11a17567357dd9c92077f16fa60e3c55d2087b85b716297b41"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-token-null-retained/home",
+    "id": "copilot-token-null-retained",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722072657461696e6564"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer retained"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "72657461696e6564"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-token-null-retained/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-entry-null-reset/home/.config/github-copilot/apps.json": "799630da97f38ffadb3e24271768fd85c157588b7a16e480dfeb50e59d41aeb3"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-entry-null-reset/home",
+    "id": "copilot-entry-null-reset",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "No Copilot token found — sign in with the Copilot CLI"
+          }
+        }
+      ]
+    },
+    "requests": [],
+    "selected": {
+      "source": "",
+      "token_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-entry-null-reset/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-unicode-fold/home/.config/github-copilot/apps.json": "bb23a635b3e889f40aaaab0a7e07cb724583ac91ab87e70a67ffd275438e7c4c"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-unicode-fold/home",
+    "id": "copilot-unicode-fold",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220756e69636f64652d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer unicode-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "756e69636f64652d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-unicode-fold/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-unknown-overflow/home/.config/github-copilot/apps.json": "b9c444f3cf6260eab79f0462b3ab712b292c35ea8dcb79b290645f059814a78c"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-unknown-overflow/home",
+    "id": "copilot-unknown-overflow",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722072657461696e6564"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer retained"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "72657461696e6564"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-unknown-overflow/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-wrong-entry-skipped/home/.config/github-copilot/apps.json": "172151461b027ee56bc8e6191a803c5904fcbd293c5b09c52e79838af5bbcd6e"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-wrong-entry-skipped/home",
+    "id": "copilot-wrong-entry-skipped",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722072657461696e6564"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer retained"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "72657461696e6564"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-wrong-entry-skipped/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-prefix-priority/home/.config/github-copilot/apps.json": "15d72f69a967f88b548141dfc128279c25d3cc2b2709f45157868de8087b03ed"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-prefix-priority/home",
+    "id": "copilot-prefix-priority",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220707265666572726564"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer preferred"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "707265666572726564"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-prefix-priority/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-same-prefix-tokens/home/.config/github-copilot/apps.json": "017ad56c1736292c1bff692ee876ba376420ccbac53e4af14a0ff65263bc7c96"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-same-prefix-tokens/home",
+    "id": "copilot-same-prefix-tokens",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722073616d65"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer same"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "73616d65"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-same-prefix-tokens/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-different-prefix-tokens/home/.config/github-copilot/apps.json": "0f5cf09341ef1e77f913f07769691ec9ec1aed9932e24c7594d2b19835760526"
+    },
+    "gate": "distinct eligible Go map tokens",
+    "gated": true,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-different-prefix-tokens/home",
+    "id": "copilot-different-prefix-tokens",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572206f6e65"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer one"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "6f6e65"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-different-prefix-tokens/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-fallback-same-tokens/home/.config/github-copilot/apps.json": "959029f95f60a7d2d89272ce963dc941e057ff4181088d36897e35067ca121ba"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-fallback-same-tokens/home",
+    "id": "copilot-fallback-same-tokens",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722073616d65"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer same"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "73616d65"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-fallback-same-tokens/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-surrogate/home/.config/github-copilot/apps.json": "4c4ff4b39f9e3dae346d34a93dc5ea737e1f0404e140a8f86c9538bb94dbc990"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-surrogate/home",
+    "id": "copilot-surrogate",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220746573742defbfbd2d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer test-�-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "746573742defbfbd2d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-surrogate/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-invalid-utf8/home/.config/github-copilot/apps.json": "2bcdde9442f9f0fb93663f807f4c8d0261806c21cfe99fb93a4314123580ccb2"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-invalid-utf8/home",
+    "id": "copilot-invalid-utf8",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220746573742defbfbdefbfbdefbfbd2d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer test-���-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "746573742defbfbdefbfbdefbfbd2d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-invalid-utf8/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-deep-unknown/home/.config/github-copilot/apps.json": "dd7b8a0802c31f6ce9aee518db51abfa5e690aeea02dc54602cf7782558aa398"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-deep-unknown/home",
+    "id": "copilot-deep-unknown",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722072657461696e6564"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer retained"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "72657461696e6564"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-deep-unknown/home"
+  },
+  {
+    "env": {
+      "COPILOT_ACCESS_TOKEN": "synthetic-env-token"
+    },
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-environment-preempts-ambiguous-files/home/.config/github-copilot/apps.json": "9e430e190327ed3179bbf8773db09ce4bd17468d5156aaebce1bf1620dc1564b"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-environment-preempts-ambiguous-files/home",
+    "id": "copilot-environment-preempts-ambiguous-files",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "env"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722073796e7468657469632d656e762d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer synthetic-env-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "env",
+      "token_hex": "73796e7468657469632d656e762d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-environment-preempts-ambiguous-files/home"
+  },
+  {
+    "env": {
+      "COPILOT_ACCESS_TOKEN": "env://USAGE_LOCAL_FILES_ABSENT"
+    },
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-environment-error-preempts-files/home/.config/github-copilot/apps.json": "4e43fc5358a2930f1cff2bb9dbebd13d53774f0220425222ab2cd29c772bec0a"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-environment-error-preempts-files/home",
+    "id": "copilot-environment-error-preempts-files",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "credential resolution failed: resolve COPILOT_ACCESS_TOKEN: secret resolution failed for env://USAGE_LOCAL_FILES_ABSENT: environment variable USAGE_LOCAL_FILES_ABSENT is not set (reference env://USAGE_LOCAL_FILES_ABSENT); set env var  as fallback or install symvault",
+            "source": "vault"
+          }
+        }
+      ]
+    },
+    "requests": [],
+    "selected": {
+      "source": "env",
+      "token_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-environment-error-preempts-files/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-literal-env/home/.config/github-copilot/apps.json": "54d8dda7e984541f1f7ebc5ed244931a6b929396a647a7c16d0a3fb8c9b01ae8"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-literal-env/home",
+    "id": "copilot-literal-env",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220656e763a2f2f414253454e54"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer env://ABSENT"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "656e763a2f2f414253454e54"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-literal-env/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-literal-symvault/home/.config/github-copilot/apps.json": "8bb6646d68285d79ffb18b22ba5e6b14964cd2237a03746f02f290660c3c1694"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-literal-symvault/home",
+    "id": "copilot-literal-symvault",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722073796d7661756c743a2f2f746573742f746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer symvault://test/token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "73796d7661756c743a2f2f746573742f746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-literal-symvault/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-literal-vault/home/.config/github-copilot/apps.json": "a2d2005b6d7ad3a691238c989fda2c4de15e0fdb049600fe7eb7cfbdcbd6466d"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-literal-vault/home",
+    "id": "copilot-literal-vault",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572207661756c743a2f2f746573742f746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer vault://test/token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "7661756c743a2f2f746573742f746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-literal-vault/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-literal-keychain/home/.config/github-copilot/apps.json": "3041c277f35243761624718f053bf00233e8e5d79cef92f77587a4c8b695856f"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-literal-keychain/home",
+    "id": "copilot-literal-keychain",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572206b6579636861696e3a2f2f746573742f6163636f756e74"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer keychain://test/account"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "6b6579636861696e3a2f2f746573742f6163636f756e74"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-literal-keychain/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-canonical-with-ignored-refresh-token/home/.kimi-code/credentials/kimi-code.json": "c67ec52b0797b2b7956d5e0a2a04ad8df02502944e59c4cf817954c65fdd5bdc"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-canonical-with-ignored-refresh-token/home",
+    "id": "kimi-frozen-canonical-with-ignored-refresh-token",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722073796e7468657469632d6b696d692d66696c652d746f6b656e"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer synthetic-kimi-file-token"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-canonical-with-ignored-refresh-token/home/.kimi-code",
+      "cli_token_hex": "73796e7468657469632d6b696d692d66696c652d746f6b656e",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-canonical-with-ignored-refresh-token/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-case-insensitive-struct-field/home/.kimi-code/credentials/kimi-code.json": "78993b5351cddd69b2d96effd2dd8d58dc14a6e1c7b2182afe0bbbaa2cb5b11f"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-case-insensitive-struct-field/home",
+    "id": "kimi-frozen-case-insensitive-struct-field",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722073796e7468657469632d6b696d692d636173652d746f6b656e"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer synthetic-kimi-case-token"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-case-insensitive-struct-field/home/.kimi-code",
+      "cli_token_hex": "73796e7468657469632d6b696d692d636173652d746f6b656e",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-case-insensitive-struct-field/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-canonical-then-case-alias/home/.kimi-code/credentials/kimi-code.json": "70211725bae73cb5cf5cf3e9a13fcf11b4c099b177c456f5d8d587148f0417cc"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-canonical-then-case-alias/home",
+    "id": "kimi-frozen-canonical-then-case-alias",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220616c6961732d746f6b656e"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer alias-token"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-canonical-then-case-alias/home/.kimi-code",
+      "cli_token_hex": "616c6961732d746f6b656e",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-canonical-then-case-alias/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-case-alias-then-canonical/home/.kimi-code/credentials/kimi-code.json": "8b484a23ad98d13d477aafe15c0d6b0e74ded3de73cfb1abf317ac03bc9a8b6e"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-case-alias-then-canonical/home",
+    "id": "kimi-frozen-case-alias-then-canonical",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722063616e6f6e6963616c2d746f6b656e"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer canonical-token"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-case-alias-then-canonical/home/.kimi-code",
+      "cli_token_hex": "63616e6f6e6963616c2d746f6b656e",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-case-alias-then-canonical/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-unknown-field-with-token/home/.kimi-code/credentials/kimi-code.json": "defbbc7e82f963ca77572c72f7f6533323492508826f54fd306595314755257d"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-unknown-field-with-token/home",
+    "id": "kimi-frozen-unknown-field-with-token",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722073796e7468657469632d6b696d692d746f6b656e"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer synthetic-kimi-token"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-unknown-field-with-token/home/.kimi-code",
+      "cli_token_hex": "73796e7468657469632d6b696d692d746f6b656e",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-unknown-field-with-token/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-duplicate-token-field/home/.kimi-code/credentials/kimi-code.json": "d61a8b6f03f2fc0cfffa9a07c61e06fbbc28591b7b2c0a1ed5075157dfe9e0d8"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-duplicate-token-field/home",
+    "id": "kimi-frozen-duplicate-token-field",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572206c6173742d746f6b656e"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer last-token"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-duplicate-token-field/home/.kimi-code",
+      "cli_token_hex": "6c6173742d746f6b656e",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-duplicate-token-field/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-wrong-typed-token/home/.kimi-code/credentials/kimi-code.json": "381816130439bde52172c4c9eee9f819c083f7d5f46398622e1a6d7fbe1290db"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-wrong-typed-token/home",
+    "id": "kimi-frozen-wrong-typed-token",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "No Kimi Code CLI credentials found"
+          }
+        }
+      ]
+    },
+    "requests": [],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-wrong-typed-token/home/.kimi-code",
+      "cli_token_hex": "",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-wrong-typed-token/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-secret-reference-token/home/.kimi-code/credentials/kimi-code.json": "ec911025926e01a23119d7fdc365bc4cc95f1f9c6c7ff9fd09ad78927436624d"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-secret-reference-token/home",
+    "id": "kimi-frozen-secret-reference-token",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722073796d7661756c743a2f2f6b696d692f746f6b656e"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer symvault://kimi/token"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-secret-reference-token/home/.kimi-code",
+      "cli_token_hex": "73796d7661756c743a2f2f6b696d692f746f6b656e",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-secret-reference-token/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {},
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-missing-file/home",
+    "id": "kimi-frozen-missing-file",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "No Kimi Code CLI credentials found"
+          }
+        }
+      ]
+    },
+    "requests": [],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-missing-file/home/.kimi-code",
+      "cli_token_hex": "",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-frozen-missing-file/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-null-scalar-retained/home/.kimi-code/credentials/kimi-code.json": "8b5debb1c5b021830c13c9fcceb6322ac265e00c286d1495926da1d67ac35203"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-null-scalar-retained/home",
+    "id": "kimi-null-scalar-retained",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722072657461696e6564"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer retained"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-null-scalar-retained/home/.kimi-code",
+      "cli_token_hex": "72657461696e6564",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-null-scalar-retained/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-wrong-before-correct/home/.kimi-code/credentials/kimi-code.json": "58ce2b0411ffea794ba8c71a552d0f940d4df45075219103364d869687c64792"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-wrong-before-correct/home",
+    "id": "kimi-wrong-before-correct",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "No Kimi Code CLI credentials found"
+          }
+        }
+      ]
+    },
+    "requests": [],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-wrong-before-correct/home/.kimi-code",
+      "cli_token_hex": "",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-wrong-before-correct/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-root-null/home/.kimi-code/credentials/kimi-code.json": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-root-null/home",
+    "id": "kimi-root-null",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "No Kimi Code CLI credentials found"
+          }
+        }
+      ]
+    },
+    "requests": [],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-root-null/home/.kimi-code",
+      "cli_token_hex": "",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-root-null/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-root-array/home/.kimi-code/credentials/kimi-code.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-root-array/home",
+    "id": "kimi-root-array",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "No Kimi Code CLI credentials found"
+          }
+        }
+      ]
+    },
+    "requests": [],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-root-array/home/.kimi-code",
+      "cli_token_hex": "",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-root-array/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-root-empty/home/.kimi-code/credentials/kimi-code.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-root-empty/home",
+    "id": "kimi-root-empty",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "No Kimi Code CLI credentials found"
+          }
+        }
+      ]
+    },
+    "requests": [],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-root-empty/home/.kimi-code",
+      "cli_token_hex": "",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-root-empty/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-unicode-fold/home/.kimi-code/credentials/kimi-code.json": "a422753ce305c5779b39050dfde03494bd0c17b2cbf4a62070266780d38f3b96"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-unicode-fold/home",
+    "id": "kimi-unicode-fold",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220756e69636f64652d746f6b656e"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer unicode-token"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-unicode-fold/home/.kimi-code",
+      "cli_token_hex": "756e69636f64652d746f6b656e",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-unicode-fold/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-unknown-overflow/home/.kimi-code/credentials/kimi-code.json": "2f558320b520facbbb52db40e9dd04924270379add79c9d4ed721393087663e9"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-unknown-overflow/home",
+    "id": "kimi-unknown-overflow",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722072657461696e6564"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer retained"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-unknown-overflow/home/.kimi-code",
+      "cli_token_hex": "72657461696e6564",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-unknown-overflow/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-surrogate/home/.kimi-code/credentials/kimi-code.json": "0fbfb8c815c63aff07c50fdf3af1e582babc4f2fcceb0a04809af21b538741f5"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-surrogate/home",
+    "id": "kimi-surrogate",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220746573742defbfbd2d746f6b656e"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer test-�-token"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-surrogate/home/.kimi-code",
+      "cli_token_hex": "746573742defbfbd2d746f6b656e",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-surrogate/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-invalid-utf8/home/.kimi-code/credentials/kimi-code.json": "1010ac3213727e4aefc8575f095b657c6f888542f8dfa5710847849bef91287f"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-invalid-utf8/home",
+    "id": "kimi-invalid-utf8",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220746573742defbfbdefbfbdefbfbd2d746f6b656e"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer test-���-token"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-invalid-utf8/home/.kimi-code",
+      "cli_token_hex": "746573742defbfbdefbfbdefbfbd2d746f6b656e",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-invalid-utf8/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-deep-unknown/home/.kimi-code/credentials/kimi-code.json": "0755d9b2c26f2bebae8b20bda4118834080ba3b7c5a254b6befea253cb8d70a4"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-deep-unknown/home",
+    "id": "kimi-deep-unknown",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722072657461696e6564"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer retained"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-deep-unknown/home/.kimi-code",
+      "cli_token_hex": "72657461696e6564",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-deep-unknown/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-ascii/home/.kimi-code/credentials/kimi-code.json": "7fab5e7c6504e8994c278eecd9d88a66a98e9aae7b47141190b145abaae64ff3",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-ascii/home/.kimi-code/device_id": "6c5f6f57caa4612e01da66e061adee58e4aabf2d898b1f35be5cbde6abb26ece"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-ascii/home",
+    "id": "kimi-device-ascii",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220636c692d746f6b656e"
+          ],
+          "X-Msh-Device-Id": [
+            "6f776e65642d646576696365"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer cli-token"
+          ],
+          "X-Msh-Device-Id": [
+            "owned-device"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-ascii/home/.kimi-code",
+      "cli_token_hex": "636c692d746f6b656e",
+      "device_id_hex": "6f776e65642d646576696365"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-ascii/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-unicode-whitespace/home/.kimi-code/credentials/kimi-code.json": "7fab5e7c6504e8994c278eecd9d88a66a98e9aae7b47141190b145abaae64ff3",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-unicode-whitespace/home/.kimi-code/device_id": "eab6666da69ed75fb938a040f530c6397c94747d5ab803f52d88e7b0844f8a19"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-unicode-whitespace/home",
+    "id": "kimi-device-unicode-whitespace",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220636c692d746f6b656e"
+          ],
+          "X-Msh-Device-Id": [
+            "6f776e65642d646576696365"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer cli-token"
+          ],
+          "X-Msh-Device-Id": [
+            "owned-device"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-unicode-whitespace/home/.kimi-code",
+      "cli_token_hex": "636c692d746f6b656e",
+      "device_id_hex": "6f776e65642d646576696365"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-unicode-whitespace/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-unicode-value/home/.kimi-code/credentials/kimi-code.json": "7fab5e7c6504e8994c278eecd9d88a66a98e9aae7b47141190b145abaae64ff3",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-unicode-value/home/.kimi-code/device_id": "6d68aa52b4d4ceedd9e86beb20f91adc18a0d76c531a5e1acd1c4e07da905d0b"
+    },
+    "gate": "unproven device header bytes",
+    "gated": true,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-unicode-value/home",
+    "id": "kimi-device-unicode-value",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220636c692d746f6b656e"
+          ],
+          "X-Msh-Device-Id": [
+            "6f776e65642dcf80"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer cli-token"
+          ],
+          "X-Msh-Device-Id": [
+            "owned-π"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-unicode-value/home/.kimi-code",
+      "cli_token_hex": "636c692d746f6b656e",
+      "device_id_hex": "6f776e65642dcf80"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-unicode-value/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-invalid-utf8/home/.kimi-code/credentials/kimi-code.json": "7fab5e7c6504e8994c278eecd9d88a66a98e9aae7b47141190b145abaae64ff3",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-invalid-utf8/home/.kimi-code/device_id": "84f4c5a39318cde1f782f517419a9ebfc2ec723e755e4cc4043d2dcb425822be"
+    },
+    "gate": "unproven device header bytes",
+    "gated": true,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-invalid-utf8/home",
+    "id": "kimi-device-invalid-utf8",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220636c692d746f6b656e"
+          ],
+          "X-Msh-Device-Id": [
+            "6f776e65642dff2d646576696365"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer cli-token"
+          ],
+          "X-Msh-Device-Id": [
+            "owned-\ufffd-device"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-invalid-utf8/home/.kimi-code",
+      "cli_token_hex": "636c692d746f6b656e",
+      "device_id_hex": "6f776e65642dff2d646576696365"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-invalid-utf8/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-oversize/home/.kimi-code/credentials/kimi-code.json": "7fab5e7c6504e8994c278eecd9d88a66a98e9aae7b47141190b145abaae64ff3",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-oversize/home/.kimi-code/device_id": "1abe08ebecf1c18cab71f6fe28aaddf20268f85bad78bb9a72f88ca47c874662"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-oversize/home",
+    "id": "kimi-device-oversize",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220636c692d746f6b656e"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer cli-token"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-oversize/home/.kimi-code",
+      "cli_token_hex": "636c692d746f6b656e",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-device-oversize/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-current-precedes-legacy/home/.kimi-code/credentials/kimi-code.json": "4bb278e397fe7bde18ba152a8089f98129fc8da8d90f85e42e470416eecf5a23",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-current-precedes-legacy/home/.kimi/credentials/kimi-code.json": "b090e6bc28b30c672fdc9b4b35b24fe2519759dff13bc5a2d2a6cddd2a8cdd32"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-current-precedes-legacy/home",
+    "id": "kimi-current-precedes-legacy",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722063757272656e74"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer current"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-current-precedes-legacy/home/.kimi-code",
+      "cli_token_hex": "63757272656e74",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-current-precedes-legacy/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-empty-current-suppresses-legacy/home/.kimi-code/credentials/kimi-code.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-empty-current-suppresses-legacy/home/.kimi/credentials/kimi-code.json": "b090e6bc28b30c672fdc9b4b35b24fe2519759dff13bc5a2d2a6cddd2a8cdd32"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-empty-current-suppresses-legacy/home",
+    "id": "kimi-empty-current-suppresses-legacy",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "No Kimi Code CLI credentials found"
+          }
+        }
+      ]
+    },
+    "requests": [],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-empty-current-suppresses-legacy/home/.kimi-code",
+      "cli_token_hex": "",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-empty-current-suppresses-legacy/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-legacy-only/home/.kimi/credentials/kimi-code.json": "b090e6bc28b30c672fdc9b4b35b24fe2519759dff13bc5a2d2a6cddd2a8cdd32"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-legacy-only/home",
+    "id": "kimi-legacy-only",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572206c6567616379"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer legacy"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-legacy-only/home/.kimi",
+      "cli_token_hex": "6c6567616379",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-legacy-only/home"
+  },
+  {
+    "env": {
+      "KIMI_CODE_HOME": "$HOME/owned-kimi"
+    },
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-explicit-home/home/.kimi-code/credentials/kimi-code.json": "5fb5a790807c2695139ff7bf0166ea07ebbef3501d42b72d78927850188fce16",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-explicit-home/home/owned-kimi/credentials/kimi-code.json": "b7f49597ad9164cc6056cfa5e83d285ab50059d73290bfde298b62b0719f0b3a"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-explicit-home/home",
+    "id": "kimi-explicit-home",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572206578706c69636974"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer explicit"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-explicit-home/home/owned-kimi",
+      "cli_token_hex": "6578706c69636974",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-explicit-home/home"
+  },
+  {
+    "env": {
+      "KIMI_CODE_HOME": ""
+    },
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-empty-override/home/.kimi-code/credentials/kimi-code.json": "4bb278e397fe7bde18ba152a8089f98129fc8da8d90f85e42e470416eecf5a23"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-empty-override/home",
+    "id": "kimi-empty-override",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722063757272656e74"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer current"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-empty-override/home/.kimi-code",
+      "cli_token_hex": "63757272656e74",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-empty-override/home"
+  },
+  {
+    "env": {
+      "KIMI_AUTH_TOKEN": "web-token",
+      "KIMI_CODE_API_KEY": "api-token"
+    },
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-all-three-strategies/home/.kimi-code/credentials/kimi-code.json": "7fab5e7c6504e8994c278eecd9d88a66a98e9aae7b47141190b145abaae64ff3",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-all-three-strategies/home/.kimi-code/device_id": "0c185e0e44e16b55afc4a7a25684f18fadf82b65c27c9dd323a509b284707384"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-all-three-strategies/home",
+    "id": "kimi-all-three-strategies",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again.; Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again.; Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572206170692d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer api-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      },
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220636c692d746f6b656e"
+          ],
+          "X-Msh-Device-Id": [
+            "6f776e65642d646576696365"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer cli-token"
+          ],
+          "X-Msh-Device-Id": [
+            "owned-device"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      },
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572207765622d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer web-token"
+          ]
+        },
+        "method": "POST",
+        "url": "https://www.kimi.com/apiv2/kimi.gateway.billing.v1.BillingService/GetUsages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-all-three-strategies/home/.kimi-code",
+      "cli_token_hex": "636c692d746f6b656e",
+      "device_id_hex": "6f776e65642d646576696365"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-all-three-strategies/home"
+  },
+  {
+    "env": {
+      "KIMI_CODE_API_KEY": "env://USAGE_LOCAL_FILES_ABSENT"
+    },
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-error-api-retains-cli/home/.kimi-code/credentials/kimi-code.json": "7fab5e7c6504e8994c278eecd9d88a66a98e9aae7b47141190b145abaae64ff3"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-error-api-retains-cli/home",
+    "id": "kimi-error-api-retains-cli",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220636c692d746f6b656e"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer cli-token"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-error-api-retains-cli/home/.kimi-code",
+      "cli_token_hex": "636c692d746f6b656e",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-error-api-retains-cli/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-home-userprofile-disagreement/home/.kimi-code/credentials/kimi-code.json": "01533493dba295d70109b861f4dbac96e22672d87b728b59c144c91b6f562086",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-home-userprofile-disagreement/profile/.kimi-code/credentials/kimi-code.json": "49eb300373d729c11ad3003166b961b62bdb75d0fe817f0363c40033bc3947af"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-home-userprofile-disagreement/home",
+    "id": "kimi-home-userprofile-disagreement",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220686f6d652d746f6b656e"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer home-token"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-home-userprofile-disagreement/home/.kimi-code",
+      "cli_token_hex": "686f6d652d746f6b656e",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-home-userprofile-disagreement/profile"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-root-null-hosts/home/.config/github-copilot/apps.json": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-root-null-hosts/home/.config/github-copilot/hosts.json": "728fe2b24727fc362e5d9aae306e7a7251f1efc6130f828f978fe25261cd0c95"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-root-null-hosts/home",
+    "id": "copilot-port-root-null-hosts",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220686f7374732d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer hosts-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "686f7374732d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-root-null-hosts/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-root-array-hosts/home/.config/github-copilot/apps.json": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-root-array-hosts/home/.config/github-copilot/hosts.json": "728fe2b24727fc362e5d9aae306e7a7251f1efc6130f828f978fe25261cd0c95"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-root-array-hosts/home",
+    "id": "copilot-port-root-array-hosts",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220686f7374732d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer hosts-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "686f7374732d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-root-array-hosts/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-wrong-before-correct-hosts/home/.config/github-copilot/apps.json": "671c14e51fe09d197768f82134f7953fa080d622e803d54b0d5c19c39e7283dc",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-wrong-before-correct-hosts/home/.config/github-copilot/hosts.json": "728fe2b24727fc362e5d9aae306e7a7251f1efc6130f828f978fe25261cd0c95"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-wrong-before-correct-hosts/home",
+    "id": "copilot-port-wrong-before-correct-hosts",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220686f7374732d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer hosts-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "686f7374732d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-wrong-before-correct-hosts/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-duplicate-poison-hosts/home/.config/github-copilot/apps.json": "4287e9f0a6266538c46ce3b6592203e8f645427a1a82c2304c039f0fdcb279e6",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-duplicate-poison-hosts/home/.config/github-copilot/hosts.json": "728fe2b24727fc362e5d9aae306e7a7251f1efc6130f828f978fe25261cd0c95"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-duplicate-poison-hosts/home",
+    "id": "copilot-port-duplicate-poison-hosts",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220686f7374732d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer hosts-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "686f7374732d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-duplicate-poison-hosts/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-unknown-root-overflow/home/.config/github-copilot/apps.json": "40720379607411dd66195f4055143057c35eb066631ca3473ea8740ca5e09382"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-unknown-root-overflow/home",
+    "id": "copilot-port-unknown-root-overflow",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722072657461696e6564"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer retained"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "72657461696e6564"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-unknown-root-overflow/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-malformed-missing/home/.config/github-copilot/apps.json": "021fb596db81e6d02bf3d2586ee3981fe519f275c0ac9ca76bbcf2ebb4097d96"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-malformed-missing/home",
+    "id": "copilot-port-malformed-missing",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "No Copilot token found — sign in with the Copilot CLI"
+          }
+        }
+      ]
+    },
+    "requests": [],
+    "selected": {
+      "source": "",
+      "token_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-malformed-missing/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-depth-10000/home/.config/github-copilot/apps.json": "64d370dbc8e02b429b6ee941a9e8c6c308a33fe315d6a9734f84e8050d9f8564"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-depth-10000/home",
+    "id": "copilot-port-depth-10000",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722072657461696e6564"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer retained"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "72657461696e6564"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-depth-10000/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-depth-10001/home/.config/github-copilot/apps.json": "4d50280b127d36e4e7937b341cbf828b26592f788e738333f1c245cea37c1649"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-depth-10001/home",
+    "id": "copilot-port-depth-10001",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "No Copilot token found — sign in with the Copilot CLI"
+          }
+        }
+      ]
+    },
+    "requests": [],
+    "selected": {
+      "source": "",
+      "token_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-depth-10001/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-size-65536/home/.config/github-copilot/apps.json": "c710148d9d1ee0e884401b9241d76afc770395f06ba995b9d4f756b0f22989a5",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-size-65536/home/.config/github-copilot/hosts.json": "728fe2b24727fc362e5d9aae306e7a7251f1efc6130f828f978fe25261cd0c95"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-size-65536/home",
+    "id": "copilot-port-size-65536",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722072657461696e6564"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer retained"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "72657461696e6564"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-size-65536/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-size-65537/home/.config/github-copilot/apps.json": "2405b1c13529de50d7e2e30966eb3c36ea2488688ad557552e60ad57083cae9a",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-size-65537/home/.config/github-copilot/hosts.json": "728fe2b24727fc362e5d9aae306e7a7251f1efc6130f828f978fe25261cd0c95"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-size-65537/home",
+    "id": "copilot-port-size-65537",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220686f7374732d746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer hosts-token"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "686f7374732d746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-size-65537/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-ignored-refresh-type/home/.kimi-code/credentials/kimi-code.json": "b7b57163079fd3f6708735c2dd395b439e6d2d45a17d629df5bfc80e5d596069"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-ignored-refresh-type/home",
+    "id": "kimi-port-ignored-refresh-type",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722072657461696e6564"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer retained"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-ignored-refresh-type/home/.kimi-code",
+      "cli_token_hex": "72657461696e6564",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-ignored-refresh-type/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-quoted-containers/home/.kimi-code/credentials/kimi-code.json": "7dd4076af09e31e4e55d42a281d0064bc46d09f7a6c99fd062c038f21e49b615"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-quoted-containers/home",
+    "id": "kimi-port-quoted-containers",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722072657461696e6564"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer retained"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-quoted-containers/home/.kimi-code",
+      "cli_token_hex": "72657461696e6564",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-quoted-containers/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-literal-env/home/.kimi-code/credentials/kimi-code.json": "2482998d4f6f8ba78753a474f7b3622cc96b5cba93fcad39d4b2ab050a2bcbbd"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-literal-env/home",
+    "id": "kimi-port-literal-env",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "42656172657220656e763a2f2f414253454e54"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer env://ABSENT"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-literal-env/home/.kimi-code",
+      "cli_token_hex": "656e763a2f2f414253454e54",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-literal-env/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-literal-vault/home/.kimi-code/credentials/kimi-code.json": "07baa48e96498a5fe77eff26c673a16f32380fc099c78c2ce8a68a3a3138b918"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-literal-vault/home",
+    "id": "kimi-port-literal-vault",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572207661756c743a2f2f746573742f746f6b656e"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer vault://test/token"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-literal-vault/home/.kimi-code",
+      "cli_token_hex": "7661756c743a2f2f746573742f746f6b656e",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-literal-vault/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-literal-keychain/home/.kimi-code/credentials/kimi-code.json": "799b7785bf4b23f392d84ec0183942f6eb28f9349bafe9cafc9b4f9802b153e6"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-literal-keychain/home",
+    "id": "kimi-port-literal-keychain",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572206b6579636861696e3a2f2f746573742f6163636f756e74"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer keychain://test/account"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-literal-keychain/home/.kimi-code",
+      "cli_token_hex": "6b6579636861696e3a2f2f746573742f6163636f756e74",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-literal-keychain/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-depth-10000/home/.kimi-code/credentials/kimi-code.json": "0fe4abc80dc70fff40ccaaa3fef7659932eb32fb803166b1b13383aae8580cf5"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-depth-10000/home",
+    "id": "kimi-port-depth-10000",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722072657461696e6564"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer retained"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-depth-10000/home/.kimi-code",
+      "cli_token_hex": "72657461696e6564",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-depth-10000/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-depth-10001/home/.kimi-code/credentials/kimi-code.json": "6b235adcf8f0f741002b7a9963a1e9c419c2a08c324c0b9ab72b6b014001fe5f"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-depth-10001/home",
+    "id": "kimi-port-depth-10001",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "No Kimi Code CLI credentials found"
+          }
+        }
+      ]
+    },
+    "requests": [],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-depth-10001/home/.kimi-code",
+      "cli_token_hex": "",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-depth-10001/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-size-65536/home/.kimi-code/credentials/kimi-code.json": "a9b2c1bac851867743f3b65e8f19769ecb58cf3047f2f6ede7e87fe460e33023"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-size-65536/home",
+    "id": "kimi-port-size-65536",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "4265617265722072657461696e6564"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer retained"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-size-65536/home/.kimi-code",
+      "cli_token_hex": "72657461696e6564",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-size-65536/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-size-65537/home/.kimi-code/credentials/kimi-code.json": "9c7f393da032dad2a42680dbfb73cf0fb7d75efbe240f3680b615af30d917eed"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-size-65537/home",
+    "id": "kimi-port-size-65537",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "No Kimi Code CLI credentials found"
+          }
+        }
+      ]
+    },
+    "requests": [],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-size-65537/home/.kimi-code",
+      "cli_token_hex": "",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-size-65537/home"
+  },
+  {
+    "env": {
+      "KIMI_AUTH_TOKEN": "env://USAGE_LOCAL_FILES_ABSENT",
+      "KIMI_CODE_API_KEY": "env://USAGE_LOCAL_FILES_ABSENT"
+    },
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-both-env-errors-missing/home/.kimi-code/credentials/kimi-code.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    "gate": "",
+    "gated": false,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-both-env-errors-missing/home",
+    "id": "kimi-port-both-env-errors-missing",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": false,
+          "auth_status": {
+            "status": "missing",
+            "detail": "credential resolution failed: resolve KIMI_CODE_API_KEY: secret resolution failed for env://USAGE_LOCAL_FILES_ABSENT: environment variable USAGE_LOCAL_FILES_ABSENT is not set (reference env://USAGE_LOCAL_FILES_ABSENT); set env var  as fallback or install symvault",
+            "source": "vault"
+          }
+        }
+      ]
+    },
+    "requests": [],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-both-env-errors-missing/home/.kimi-code",
+      "cli_token_hex": "",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-both-env-errors-missing/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-newline-token/home/.config/github-copilot/apps.json": "f6778b5aee095e591c79ba0c5d3a1fec571acf16d7dd2a280c37dce334f36e9b"
+    },
+    "gate": "unproven HTTP control-bearing header value",
+    "gated": true,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-newline-token/home",
+    "id": "copilot-port-newline-token",
+    "provider": "copilot",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "copilot",
+          "display_name": "GitHub Copilot",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via GitHub Copilot (COPILOT_ACCESS_TOKEN or Copilot CLI)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: Copilot rejected the login (HTTP 401). Re-authenticate with GitHub Copilot."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572206f776e65640d0a746f6b656e"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer owned\r\ntoken"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.github.com/copilot_internal/user"
+      }
+    ],
+    "selected": {
+      "source": "file",
+      "token_hex": "6f776e65640d0a746f6b656e"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/copilot-port-newline-token/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-newline-token/home/.kimi-code/credentials/kimi-code.json": "0cfb258345997fbebf5dbe6e992e8a1170b6303c96e0248bd97a8d0307e0b237"
+    },
+    "gate": "unproven HTTP control-bearing header value",
+    "gated": true,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-newline-token/home",
+    "id": "kimi-port-newline-token",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572206f776e65640a746f6b656e"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer owned\ntoken"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-newline-token/home/.kimi-code",
+      "cli_token_hex": "6f776e65640a746f6b656e",
+      "device_id_hex": ""
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-newline-token/home"
+  },
+  {
+    "env": {},
+    "file_sha256": {
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-newline-device/home/.kimi-code/credentials/kimi-code.json": "2c71255e7d8c63bf1447b6ea0a9f19c559e53943740432346776cfed5639e693",
+      "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-newline-device/home/.kimi-code/device_id": "6dc5e3cdbd4bb09b02f32dd26fd81940ff22d98d8c8b2e0f6841a2a203c4bccb"
+    },
+    "gate": "unproven HTTP control-bearing header value",
+    "gated": true,
+    "home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-newline-device/home",
+    "id": "kimi-port-newline-device",
+    "provider": "kimi",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "kimi",
+          "display_name": "Kimi Code",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Kimi Code CLI is signed in",
+            "source": "cli"
+          },
+          "error": "all AI usage fallbacks failed: Kimi rejected the login (HTTP 401). Check the API access or sign in with the Kimi Code CLI again."
+        }
+      ]
+    },
+    "requests": [
+      {
+        "body_hex": "",
+        "header_value_hex": {
+          "Accept": [
+            "6170706c69636174696f6e2f6a736f6e"
+          ],
+          "Authorization": [
+            "426561726572206f776e6564"
+          ],
+          "X-Msh-Device-Id": [
+            "6f776e65640a646576696365"
+          ],
+          "X-Msh-Device-Model": [
+            "6c696e757820312e32362e37"
+          ],
+          "X-Msh-Device-Name": [
+            "623036336130336533366365"
+          ],
+          "X-Msh-Os-Version": [
+            "312e32362e37"
+          ],
+          "X-Msh-Platform": [
+            "6c696e7578"
+          ]
+        },
+        "headers": {
+          "Accept": [
+            "application/json"
+          ],
+          "Authorization": [
+            "Bearer owned"
+          ],
+          "X-Msh-Device-Id": [
+            "owned\ndevice"
+          ],
+          "X-Msh-Device-Model": [
+            "linux 1.26.7"
+          ],
+          "X-Msh-Device-Name": [
+            "b063a03e36ce"
+          ],
+          "X-Msh-Os-Version": [
+            "1.26.7"
+          ],
+          "X-Msh-Platform": [
+            "linux"
+          ]
+        },
+        "method": "GET",
+        "url": "https://api.kimi.com/coding/v1/usages"
+      }
+    ],
+    "selected": {
+      "base_url": "https://api.kimi.com",
+      "cli_home": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-newline-device/home/.kimi-code",
+      "cli_token_hex": "6f776e6564",
+      "device_id_hex": "6f776e65640a646576696365"
+    },
+    "userprofile": "/tmp/symbrain-copilot-kimi-768.c351O4/home/kimi-port-newline-device/home"
+  }
+]

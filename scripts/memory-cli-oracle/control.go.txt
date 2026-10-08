@@ -1,0 +1,31 @@
+// Executable negative control delegates to the actual candidate, then corrupts
+// one observable contract while preserving every other byte and database write.
+package main
+
+import (
+	"bytes"
+	"os"
+	"os/exec"
+)
+
+func main() {
+	command := exec.Command(os.Getenv("MEMORY_CLI_CONTROL_RUST"), os.Args[1:]...)
+	command.Stderr = os.Stderr
+	var stdout bytes.Buffer
+	command.Stdout = &stdout
+	err := command.Run()
+	data := stdout.Bytes()
+	if os.Getenv("MEMORY_CLI_CONTROL_MODE") == "stdout" {
+		data = bytes.Replace(data, []byte("Unicode"), []byte("Changed"), 1)
+	}
+	_, _ = os.Stdout.Write(data)
+	if err != nil {
+		if child, ok := err.(*exec.ExitError); ok {
+			os.Exit(child.ExitCode())
+		}
+		os.Exit(1)
+	}
+	if os.Getenv("MEMORY_CLI_CONTROL_MODE") == "exit" {
+		os.Exit(1)
+	}
+}

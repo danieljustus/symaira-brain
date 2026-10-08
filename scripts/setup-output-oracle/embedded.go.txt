@@ -1,0 +1,24 @@
+package main
+
+import (
+    "errors"
+    "os"
+    "syscall"
+)
+
+type ownedOutput struct{ mode string }
+func (w ownedOutput) Write(p []byte) (int, error) {
+    switch w.mode {
+    case "raw-pipe": return 0, syscall.EPIPE
+    case "raw-full": return 0, syscall.ENOSPC
+    default: return 0, errors.New("owned callback")
+    }
+}
+
+// Only the copied frozen Go command package receives this owned caller. Its
+// production sources and the original historical executable remain unchanged.
+func init() {
+    if mode := os.Getenv("SETUP_EMBEDDED_MODE"); mode != "" {
+        os.Exit(int(cmdSetup(os.Args[2:], ownedOutput{mode}, os.Stderr)))
+    }
+}

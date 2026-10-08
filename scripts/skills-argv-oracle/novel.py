@@ -12,6 +12,8 @@ import stat
 import subprocess
 import tempfile
 
+from inherited_output import OWNER_PATHS, qualify
+
 ROOT = Path(__file__).resolve().parents[2]
 PLAN = ROOT / "migration/evidence/skills-preflight-793/windows-wide-argv/original-70b-static/symaira-skills794-wide-argv-independent-novel-plan.json"
 PLAN_SHA = "5478c095a73d0332baa987dfae3dea6d3c3863104841be7b4d689edfba762bce"
@@ -130,15 +132,16 @@ def parent_provenance(parent, proof, current_hash):
                 and data["parent_sha256"] == parent_hash and data["current_sha256"] == current_hash
                 and data["source_before"] == data["source_after"] and data["restored_current"]):
             raise ValueError("parent build/source/current restoration proof is incomplete")
-    owners = {}
-    for name in ["rust/symbrain-cli/src/lib.rs", "rust/symbrain-core/src/output.rs"]:
+    parent_sources = {}
+    current_sources = {}
+    for name in OWNER_PATHS:
         old = subprocess.check_output(["git", "show", f"{reference}:{name}"], cwd=ROOT)
         now = (ROOT / name).read_bytes()
-        if old != now:
-            raise ValueError("inherited global-output owner differs from actual parent source")
-        owners[name] = digest(now)
+        parent_sources[name] = old
+        current_sources[name] = now
+    owners = qualify(reference, parent_sources, current_sources)
     return {"source_ref": reference, "proof_path": str(proof), "proof_sha256": digest(payload),
-            "parent_sha256": parent_hash, "unchanged_owner_sources": owners}
+            "parent_sha256": parent_hash, "inherited_output_owner": owners}
 
 
 def same_output(left, right):
@@ -157,7 +160,7 @@ def main():
     if subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT):
         raise ValueError("candidate source must be clean")
     binaries = {name: getattr(args, name).resolve() for name in ["go", "rust", "parent"]}
-    info = subprocess.check_output(["go", "version", "-m", binaries["go"]], text=True)
+    info = subprocess.check_output(["go", "version", "-m", binaries["go"]], text=True, encoding='utf-8')
     if (info.splitlines()[0].split()[-1] != "go1.26.7" or
             f"vcs.revision={GO_REF}" not in info or "vcs.modified=false" not in info):
         raise ValueError("pinned clean frozen Go metadata required")

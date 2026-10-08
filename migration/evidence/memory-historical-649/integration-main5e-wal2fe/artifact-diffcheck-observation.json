@@ -1,0 +1,12 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--check",
+    "c88897e^1",
+    "c88897e"
+  ],
+  "exit": 2,
+  "meaning": "Only intentionally retained raw conflict-report text contains original markers. Production conflicts were resolved; original reports remain byte preserving. Initial stage lacked fail-fast shell and committed after identical textual observation; retained here before narrowly declaring those reports binary.",
+  "raw_output_sha256": "e8d9b24499da1a630581dbaf1fa901243bc0e58f23021def7415e7362d6303cb"
+}

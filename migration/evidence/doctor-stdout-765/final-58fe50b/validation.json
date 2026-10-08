@@ -1,0 +1,804 @@
+{
+  "source_head": "58fe50b9d275f0cc8a7ab6a8252a6595a58e52ab",
+  "main_ancestor": "2b6d49f250a81650eda1b93cec7d859a171873bb",
+  "tests": {
+    "passed": 501,
+    "failed": 0,
+    "ignored": 0,
+    "summaries": 54,
+    "previous_actual500_retained": true
+  },
+  "gates": {
+    "source": {
+      "total": 111,
+      "go_sha256": "f5a1af6ccce6bd228e59426a529e8f53cb311cefea9649987fa013354d60f4d3",
+      "rust_sha256": "256e5efe3d05b9fe5c8afa41d9821a13ee2dee32de9719a4acd7e79364fde8ee"
+    },
+    "doctor": {
+      "total": 285,
+      "go_sha256": "401e9ab1eb5aa4e7c44c864e5060d20ee31e3f3792f40b9c537bd2895a05cac3",
+      "rust_sha256": "256e5efe3d05b9fe5c8afa41d9821a13ee2dee32de9719a4acd7e79364fde8ee"
+    },
+    "setup": {
+      "total": 201,
+      "go_sha256": "143f46cfc1300860e3dc3acf254aee2bc94df6749f3419d06d072312e51df592",
+      "rust_sha256": "256e5efe3d05b9fe5c8afa41d9821a13ee2dee32de9719a4acd7e79364fde8ee"
+    }
+  },
+  "manifests": {
+    "source": {
+      "candidate_source_sha256": 278,
+      "go_source_sha256": 4
+    },
+    "doctor": {
+      "candidate_source_sha256": 191,
+      "go_source_sha256": 108
+    },
+    "setup": {
+      "candidate_source_sha256": 14,
+      "go_source_sha256": 108
+    },
+    "guard": {
+      "candidate_source_sha256": 84,
+      "candidate_manifest_sha256": 3,
+      "go_source_sha256": 1217
+    },
+    "memory-read": {
+      "candidate_source_sha256": 175,
+      "immutable_go_cli_source_sha256": 12
+    },
+    "memory-write": {
+      "candidate_source_sha256": 175,
+      "frozen_go_source_sha256": 1215
+    },
+    "doctor-output-process": {
+      "candidate_source_sha256": 200,
+      "go_source_sha256": 108
+    },
+    "doctor-output-fix": {
+      "candidate_source_sha256": 200,
+      "go_source_sha256": 108
+    },
+    "doctor-output-embedded": {
+      "candidate_source_sha256": 200,
+      "go_source_sha256": 108
+    },
+    "doctor-output-controls": {
+      "candidate_source_sha256": 200,
+      "go_source_sha256": 108
+    }
+  },
+  "source_doctor_controls": [
+    {
+      "family": "source",
+      "mode": "wrong-exit",
+      "field": "exit"
+    },
+    {
+      "family": "source",
+      "mode": "wrong-source",
+      "field": "stdout_base64"
+    },
+    {
+      "family": "doctor",
+      "mode": "wrong-exit",
+      "field": "exit"
+    },
+    {
+      "family": "doctor",
+      "mode": "missing-header",
+      "field": "stdout_base64"
+    },
+    {
+      "family": "doctor",
+      "mode": "missing-core-event",
+      "field": "logs"
+    }
+  ],
+  "original35_and_actual_cancel2": true,
+  "original23_consumers": true,
+  "guard124_121full_3retained_raw63_controls5": true,
+  "memory590_60_16_13_10_controls5": true,
+  "setup_source_output18_embedded24_controls4_15reject3preserve": true,
+  "doctor_output13_embedded27_controls3_6reject21preserve": true,
+  "novel18_setup_cumulative_writer_pairs": true,
+  "original_doctor_current9_a66_9_and_currentfix4_a66_4": true,
+  "original_a66_two_groups_failures_preserved": {
+    "nonfix": 6,
+    "fix": 2
+  },
+  "fifth_independent_artifacts_retained": 145,
+  "fifth_actual_binaries_retained": 56,
+  "fifth_all_ELF_paths_retained": 661,
+  "prior299_source_hashes_verified_immutable": true,
+  "Go_Core_Managed_Memory_Cargo_unchanged": true,
+  "actual_binary_sha256": {
+    "/workspace/symaira-setup765-source/target/debug/deps/symbrain_cli-b400b9300fed90a4": "e75f58b0a3cf6291b6bc2e62d29ffd4e6372b9bf7b5e7459ed58169632e1cf6c",
+    "/workspace/symaira-setup765-source/target/debug/deps/symbrain-7a3350c60d4df042": "3f8871e91b2982187d9cdcd5903ec64a13429c7d95285c76ebc109ce214875eb",
+    "/workspace/symaira-setup765-source/target/debug/deps/activity_cli_oracle_tests-1b20dfca1e5779b5": "bc0ded8131a35a5964aac1516c945b43a2b8f694588dd07ec4da3f76238cb994",
+    "/workspace/symaira-setup765-source/target/debug/deps/activity_validation_tests-73b8a2ecf8bd64e5": "6b38ea10052b9fdc4cb5f39b1a575dd875cf60a98a21b9aeabd3aea46c3d6fe0",
+    "/workspace/symaira-setup765-source/target/debug/deps/cli_tree_tests-102dc63bf39289ef": "f02a378b6a3afa1e32db7ab7a9a693b7856e1890947ef2b447559547c13b0a5b",
+    "/workspace/symaira-setup765-source/target/debug/deps/doctor_fix_native-64d5ec5282e2d7c1": "cb26c38f96bac01fcdba2eebe79ee6522b958b76e8e698292775cfca05c671fc",
+    "/workspace/symaira-setup765-source/target/debug/deps/doctor_modules-9c9728140c0351c1": "548a141df0a5d8718cb4caa9237f3faecd1307e156cf43faabae1b2ef3f81a76",
+    "/workspace/symaira-setup765-source/target/debug/deps/doctor_native-e50afd9ba7c222ad": "be216b0945cc533a148252f8326c0b8f174c1dc269b5bffdc77dff0520ff421e",
+    "/workspace/symaira-setup765-source/target/debug/deps/guard_decide_adapter-787fa09288553dc3": "b1ec30658bad0491577b8a46fc198aa0f98097c78ebc8d078480b2644ffa989d",
+    "/workspace/symaira-setup765-source/target/debug/deps/guard_decide_raw_bytes-1e64873b06e5186b": "65e6358c18bb7eb497fc2daeae16485bf0fd45bc2f29ca540e29483522323868",
+    "/workspace/symaira-setup765-source/target/debug/deps/guard_doctor_oracle_tests-07351c11b75a4a90": "c913fb6bac3f205f4df163bdb51d92eec27be88ae85fca922c9c03b4c179c32e",
+    "/workspace/symaira-setup765-source/target/debug/deps/guard_grants_native-12eb8654d6295d23": "05106b7f3dad9d7c45c7e4cc86bf261729b1f79eba27e75546bebbe2062a8dac",
+    "/workspace/symaira-setup765-source/target/debug/deps/guard_oracle_grants-fefc0219cef101a6": "226033ac2c7f2f9243c3d250133039ecbc0a84f7792de63e1b798a3d749480c8",
+    "/workspace/symaira-setup765-source/target/debug/deps/harness_health_tests-c26f4d5d893d7710": "9b576c9f5309561ea0918b81ae8244e2af1f92b9feb9a076b727644980c46838",
+    "/workspace/symaira-setup765-source/target/debug/deps/harness_list_tests-f90e38bdcb1970fb": "8824e79b9b69675ac2bb77887ef199c395c9daf2b18f96a85948b64f998f0806",
+    "/workspace/symaira-setup765-source/target/debug/deps/init_cli_tests-bd560cced73f49d9": "90f64fc3cf6a00a34ca59e6b5fb7397433a4f8177c560df46f04b650abe044f6",
+    "/workspace/symaira-setup765-source/target/debug/deps/install_oracle_tests-50122a74f19c4099": "3ba4c3ab12992c1840790b7ec857323871fbe65e41fd02895384bad4716d2e4e",
+    "/workspace/symaira-setup765-source/target/debug/deps/mcp_cli_tests-fe63b64b5599f672": "a9e2e566bdeb2785abbc5b2537a7eeed925a65d45828d909f95e4be4e77a2aa6",
+    "/workspace/symaira-setup765-source/target/debug/deps/memory_set_sigpipe-2bfa9a520442b465": "58ae54b6d6c7c0ca7a1a1fefada83766e538649a100cf981d6b2e1114725f966",
+    "/workspace/symaira-setup765-source/target/debug/deps/profile_cli_tests-0e86cc61bc708190": "b3dd7790ef400b896433263434d82cdcb2d2d3082831373316ce815d212ee205",
+    "/workspace/symaira-setup765-source/target/debug/deps/setup_fix_native-d452937510749726": "ca0fe4304be2e40774a385e5a56050a78fb76ab61863663ff815ea295bec15a5",
+    "/workspace/symaira-setup765-source/target/debug/deps/setup_repair_native-21dd0e750abb6b82": "11728613e7e36880420131f6fbaa53afa569d6da50854c912e73088a2d0b1a62",
+    "/workspace/symaira-setup765-source/target/debug/deps/skills_doctor_native-89d4304894ffb274": "e65110b0e3688730e5efa369cb6f16dd2558163c331dd7fd26b241191391415a",
+    "/workspace/symaira-setup765-source/target/debug/deps/skills_list_native-fc28cf4ed9156fc0": "d55fa50f5b1c42719edda0494035b01b454762a669bf4dc638ced46125c980bc",
+    "/workspace/symaira-setup765-source/target/debug/deps/skills_log_native-638c24b8c1c30717": "e65bbb1e6f1a7d5926ae1628d1845177ddc3165e78052d54b2de3becf8679dd3",
+    "/workspace/symaira-setup765-source/target/debug/deps/skills_status_opencode_tests-f0a46755754dff9a": "8a0977deb0898f869824273e9b4f1ae694d634589437f93dbfd8c63786737dbb",
+    "/workspace/symaira-setup765-source/target/debug/deps/skills_sync_legacy_roots-86635aca606d0eff": "3cb9ee8094f8421051265dc1ad1180e0b4962dbb5c87d9a00e6fff25274a2c2e",
+    "/workspace/symaira-setup765-source/target/debug/deps/skills_targets_native-f584e30cc820d54d": "fe6687493304a06c1168acbe14dfe4e5a616bfc67fe9f487401c120f7dddd89c",
+    "/workspace/symaira-setup765-source/target/debug/deps/sync_native-818aba0d3d1272c1": "81b39c9df87e98979e0c478ebaa18261df862cfb1fb0b2fc5d1af7b712b1ef2a",
+    "/workspace/symaira-setup765-source/target/debug/deps/vault_admin_native-48ccd5bd7210757d": "f2853a9553febe57bc421331936436cd0cc79e35ade1e4070135448256d563a9",
+    "/workspace/symaira-setup765-source/target/debug/examples/doctor_embedded_output-81d4895f5954de83": "d73fadfca26ca9e70fa044057d50a44e095d03bbff5d462c2a8697350b675999",
+    "/workspace/symaira-setup765-source/target/debug/examples/setup_embedded_output-80c9c69128899d3c": "037242c1087c872fda30aa198da9ac7b74918d9f19c638caa0ee9d09dee0a64e",
+    "/workspace/symaira-setup765-source/target/debug/deps/symbrain_core-f91149cf0195d110": "118b1aed7d7be0512bc1d6676c6d2c977f1eea0d76195d627c4ab3f8898e4f50",
+    "/workspace/symaira-setup765-source/target/debug/deps/xdg_paths_tests-f88ef145186c5bdb": "ebcd2e0f0d759121acc27221919d7b6e951725ec9a509a3fe713ba69304a400d",
+    "/workspace/symaira-setup765-source/target/debug/deps/symbrain_guard_core-3c64774cef4810bf": "0cbcd12dfbf8d234f7cc42e40e1332bdac5418d22d71fbaaa1356b00d2945e23",
+    "/workspace/symaira-setup765-source/target/debug/deps/capability_oracle_tests-beff40101f1e6fa8": "dab5088f62ee1cd62d628a0746c7627fe1045aaa60233ecb7a6c875f94d09002",
+    "/workspace/symaira-setup765-source/target/debug/deps/external_decision-c967354c3b480e18": "ddea4b29a11def59a75e6a255c8115a010deb316718d45e35895dae35dfedf58",
+    "/workspace/symaira-setup765-source/target/debug/deps/external_decision_review-b8592f53aa245e50": "f4c4a0d06ac13830e732972838cff58dc9c0db47ba2c443911900bcc7f2bf1fd",
+    "/workspace/symaira-setup765-source/target/debug/deps/external_decision_serialization-00147e3f4883351e": "7a8337e6823c3b7dcd44fa029c2d1b25704d0add25e28a3be9faf2cfa4651fb3",
+    "/workspace/symaira-setup765-source/target/debug/deps/external_repair-a94b63ed62b0a710": "385fcbf2546662532651779ade32d9ba17391ded957be6622c6a5c10fe3165d5",
+    "/workspace/symaira-setup765-source/target/debug/deps/oracle_tests-fdb423a15599dc0d": "8d4a382589ec66115b5a8e1f43f3a3626cc8505dbb3e6beb63c16e36e2391e7e",
+    "/workspace/symaira-setup765-source/target/debug/deps/symbrain_managed-79c6a7de10fd1869": "11c8de14d0ded3de65281d1b230b9b97ad38d830e3f38a7e69a0d0555323d1a9",
+    "/workspace/symaira-setup765-source/target/debug/deps/install_tests-8103cf39730c6e26": "ac6a5fd34d0b9c04387406130bd925710f3150656c458e4cd70e34fec0b9d942",
+    "/workspace/symaira-setup765-source/target/debug/deps/oracle_differential_tests-3212371d91dbdf97": "ca1e6e49be6530f39fcd7dec5d1df78661aea1bdc8848e874cd2bfde1a6fb878",
+    "/workspace/symaira-setup765-source/target/debug/deps/provenance_windows-624f14dfa6a4bb25": "b6521810beb4edd82806a6c52decabbced316031597f92522c6339d9f9908063",
+    "/workspace/symaira-setup765-source/target/debug/deps/source_local-7156e74b2ea6f575": "490cfbf2ebf41c67b51d811568cc4ac26cda89b9143640d49016f586132cb62b",
+    "/workspace/symaira-setup765-source/target/debug/deps/version_probe_windows-34d8acab5e449442": "ba7df314422ad935246a3e32786c386a88a283bf7bfef4e1f639ef8565c9d52d",
+    "/workspace/symaira-setup765-source/target/debug/deps/symbrain_memory-c052a9cb1e1d98dd": "57c9ae366c85c55aa3ebc02f074f68fbe7f247c594cf6b76bc29efc2e9fea11f",
+    "/workspace/symaira-setup765-source/target/debug/deps/evidence_oracle_tests-3329c5e826410753": "d96f44411f2b4a74acb6cd0795673df154def03364ce516bd55eec3c74d38460",
+    "/workspace/symaira-setup765-source/target/debug/deps/store_contract_tests-37056a349f390ae5": "7468784bbe340c68f2afae04818b7114d0c5d93ba7d75297efcbfd6728df1d80",
+    "/workspace/symaira-setup765-source/target/debug/deps/symguard_cli-371ba29ec4d9c019": "307e81bd22949d3ccbdb4f19b9e076cf3977d39509f0f51d3bbdecf7fe287312",
+    "/workspace/symaira-setup765-source/target/debug/deps/symguard-07600a9f04c0401c": "4c33aca06454060fcc68dd72140b4bd4c24b0d4f1e330806c11afdf0dae2f38a",
+    "/workspace/symaira-setup765-source/target/debug/deps/raw_diagnostics-de199ed9a26a94dd": "58123a8eb15b231d2e9780a8851227b3fe3ce8adc2f91a1fda48d4fdd1d78145",
+    "/workspace/symaira-setup765-source/target/debug/deps/standalone-1c3ee2f88291007a": "42600666da8896b071d9d3a306beb14771ceb4bd574a766d79277997310bac44",
+    "/workspace/symaira-setup765-source/target/debug/symbrain": "256e5efe3d05b9fe5c8afa41d9821a13ee2dee32de9719a4acd7e79364fde8ee",
+    "/workspace/symaira-setup765-source/target/debug/symguard": "8f485483c01da8152f171fb55ce12640cd7ec3acfe70136b9ba917a84df701bc",
+    "/workspace/symaira-setup765-source/target/debug/examples/setup_embedded_output": "8ada052d5c0240044fb8910e29fcc8952c2b5f3fb26205e4e3954bac2e804d55",
+    "/workspace/symaira-setup765-source/target/debug/examples/doctor_embedded_output": "50f7528fe3a505bfc7997a0a4a11750b39aaff93fa693279624d129f856bdf4b",
+    "/tmp/symaira-doctor-source-sixth-extra-partial-writer-budget": "42bb5dc267d86030f461c6ce642127fd2a417ffe29ac8edfb5abf6f9b5d6a714",
+    "/tmp/symaira-doctor765-sixth-58fe-cli": "256e5efe3d05b9fe5c8afa41d9821a13ee2dee32de9719a4acd7e79364fde8ee"
+  },
+  "target_users": [],
+  "target_released": true,
+  "native_platforms": {
+    "Linux": "executed",
+    "Windows": "pending",
+    "macOS": "pending"
+  },
+  "disposition": "Author validation only; two inherited Doctor output findings corrected on actual input; independent full review and native gates still required. No GitHub write/full765 closure.",
+  "raw_proof_artifacts": {
+    "/tmp/symaira-doctor-source-sixth-extra-boundaries.json": {
+      "sha256": "779f1df076eb8be592c5b473a209c75596fc07377a2bf7b4e3a121c76008ccbe",
+      "bytes": 105147,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-boundaries.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-boundaries.log": {
+      "sha256": "4959c845f18e7c4825f4b89e952c866f811bbff9919f8e85c75cf69cb9bce3e6",
+      "bytes": 143,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-boundaries.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-boundaries.py": {
+      "sha256": "0747bdbabd542e007aa58f9c9774f98e7ae31df675063fb44c91ee8c4fd0a534",
+      "bytes": 2780,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-boundaries.py.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-consumers-doctor.json": {
+      "sha256": "68c074dc27beea3f0fa1045c4d2b9861ea6e95a6d34f13439b47fb0efc979231",
+      "bytes": 64462,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-consumers-doctor.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-consumers-setup.json": {
+      "sha256": "728f04aabdaf92adf5846ef141e25401030428b270f2b21303be00420ef6ee75",
+      "bytes": 85939,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-consumers-setup.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-consumers-source.json": {
+      "sha256": "7217694c00925c96ac6332736f0e30daec9c000253ee070ac9adc3e4faa4de6f",
+      "bytes": 54841,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-consumers-source.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-consumers.log": {
+      "sha256": "1e887240ae41064e7877e968f78337542e2da47a29a6d4dc478eed8e96bcbdb6",
+      "bytes": 1088,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-consumers.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-consumers.py": {
+      "sha256": "6aa6df5b2e988073bb287510106b58f8248ba43d7a90646fd58afd8e7371ca6b",
+      "bytes": 5909,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-consumers.py.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-eight-extra.json": {
+      "sha256": "534317164d4b0a4c896ea0cdaca4566f6dc932aee853adbf2869ea378461309e",
+      "bytes": 101731,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-eight-extra.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-eight-extra.log": {
+      "sha256": "68a857023756e6395539ed3c2e9bcd90ccfd2ab57b278ddbdd93dba5bd3477e2",
+      "bytes": 197,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-eight-extra.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-eight-extra.py": {
+      "sha256": "e7d7e6d7c9e225a4e529c707149753e1b0381322e93b56746d374fe4e003422e",
+      "bytes": 3183,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-eight-extra.py.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-eight-home.json": {
+      "sha256": "b55c8c6fc522e673cd5f1454efbd6a336d222b241d006f60f9aee9808c60352e",
+      "bytes": 8955,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-eight-home.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-eight-home.log": {
+      "sha256": "dce1bcdb4ef76ae6edd74bea035972224be1dbb9779bf5467ca1714bfc192b2a",
+      "bytes": 55,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-eight-home.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-eight-home.py": {
+      "sha256": "b8bff652df81fb7af942c00434c8453b69044d9013fa7bc93e272d25538ce50b",
+      "bytes": 1777,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-eight-home.py.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-findings.json": {
+      "sha256": "40fa185497464c39e531fcf735fe116be4d0a1e4eefa193ab846358ef502a409",
+      "bytes": 173581,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-findings.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-findings.log": {
+      "sha256": "453b5f4fe955e3e7fc5b53e28c4baf4918023be616d86b8c22908d27c363335a",
+      "bytes": 312,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-findings.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-findings.py": {
+      "sha256": "31c9b09ffc1c2b4c41bf0904ad0bdec72330540a5b0f25e94bca1411e93ee63d",
+      "bytes": 3283,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-findings.py.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-fix-consumers-setup.json": {
+      "sha256": "44466395b9f6f8f9c14109606a69547b4b71332023dc4806b9a13833770f7ef6",
+      "bytes": 85771,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-fix-consumers-setup.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-fix-consumers.log": {
+      "sha256": "923295956c4adb4db6da1bc78a738731b6fbdafad529775c7c79d0190cbb36c0",
+      "bytes": 797,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-fix-consumers.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-fix-consumers.py": {
+      "sha256": "4ff97e4895953d58f8697f867755e82ced6ad44d24ddb56ec50ad3b795706d78",
+      "bytes": 1699,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-fix-consumers.py.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-lookup.json": {
+      "sha256": "6ac648b3587e9d71bb1694f68484d037fcdb85f2e6eaed6bd6b058fdf652a0f1",
+      "bytes": 31125,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-lookup.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-lookup.log": {
+      "sha256": "7e3500bddfde8fcf2baf7b8de43539a9b6536c950372fc23df20420011fa8463",
+      "bytes": 67,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-lookup.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-lookup.py": {
+      "sha256": "4d1078583f06afeea0ded6a450c3e01dbbf854dbdb4fbbf36c2127c486db3c80",
+      "bytes": 2167,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-lookup.py.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-partial-writer-budget.go.txt": {
+      "sha256": "5f6333d0516c1774ea9ca6c0e09c1a9505867476df0646e6934d57fa951438a8",
+      "bytes": 596,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-partial-writer-budget.go.txt.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-partial-writer-budget.json": {
+      "sha256": "78028b032d5809e5f43444e8e389745157c710c2897bb0884525a0d97606893e",
+      "bytes": 180020,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-partial-writer-budget.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-partial-writer-budget.log": {
+      "sha256": "a570fd076b8345a48ef72a964e70ad3dd50fad10117f1d65915a67930c764d88",
+      "bytes": 646,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-partial-writer-budget.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-partial-writer-budget.py": {
+      "sha256": "a9f58fdd827190b00dc9d0c8868752c59ecd2495c9f242d5a27b562656b256f9",
+      "bytes": 4280,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-partial-writer-budget.py.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-partial-writer-budget.rs": {
+      "sha256": "864df5e7aef0c70c9f15a12c0940b08546430643908a9bd82d51343a98feb70d",
+      "bytes": 882,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-partial-writer-budget.rs.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-raw-signals.json": {
+      "sha256": "f4946c3cab5093e05617ed76c1694e0d6e2fac42f92288e8aeb052f28b2a5faa",
+      "bytes": 66452,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-raw-signals.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-raw-signals.log": {
+      "sha256": "e5194bbb6f8a11456f57e66acde83b8c151fa2c2e3923551a0007c9f2a4eb3f1",
+      "bytes": 220,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-raw-signals.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-raw-signals.py": {
+      "sha256": "ed59d1e76bcf861249fe973bf02c716aa3dc1499ca1127e9417b299c2370ff04",
+      "bytes": 4779,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-raw-signals.py.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-symlink.json": {
+      "sha256": "1bb9cd0973c94cee6a9fbc3a15b185ff4257dc53c14174880a51535bbb8940fd",
+      "bytes": 26284,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-symlink.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-symlink.log": {
+      "sha256": "541244f6874fc75a5f19cdb16931ba416030d9911fe51b879872e3a707cd4044",
+      "bytes": 30,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-symlink.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-extra-symlink.py": {
+      "sha256": "aedbabc98d82e8e69cbaa45a8d94537be1d21609bfd40836451b192b9693edad",
+      "bytes": 2852,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-extra-symlink.py.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-actionlint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-actionlint.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-clippy.log": {
+      "sha256": "55749ce149416e3d752af03192a6b3cd146bc7688cfbf3f88527d7d5b210beb9",
+      "bytes": 1896,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-clippy.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-doctor-output/controls.json": {
+      "sha256": "0601acc149f5ef28e809135bab83d0db41be7130041c9266ecc8dca22644ab40",
+      "bytes": 2465480,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-doctor-output--controls.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-doctor-output/controls.log": {
+      "sha256": "0800002a7b93ed12e57d463f59378c8666bf28f93ea18081340a77abc32b4505",
+      "bytes": 82,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-doctor-output--controls.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-doctor-output/embedded.json": {
+      "sha256": "65deb5c537b7114862bf60898880c51d705a0e8969cce0acde17d4fb86e97014",
+      "bytes": 512490,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-doctor-output--embedded.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-doctor-output/embedded.log": {
+      "sha256": "7e260d63a485bd882c6a74050c5d6de749cb5b93bc3f8435e7dbe4684988a235",
+      "bytes": 991,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-doctor-output--embedded.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-doctor-output/fix.json": {
+      "sha256": "73e6e15c46f72a1e7a678736d766befcba2dabf023de2d4cade423294b837797",
+      "bytes": 83595,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-doctor-output--fix.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-doctor-output/fix.log": {
+      "sha256": "6a1961162d04af3dd2422441bb9027ec0cab65b2b7fb7b0d49a7b7f5f15d4d0e",
+      "bytes": 197,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-doctor-output--fix.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-doctor-output/process.json": {
+      "sha256": "60d886f4bc98bc068458233dc1b9fd23b84050f71ac6d2c14a0031ae88ad308d",
+      "bytes": 786856,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-doctor-output--process.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-doctor-output/process.log": {
+      "sha256": "794b9c1cd8c5b32e4ea073cd8f6f9570c2abb515d083fd5f035600da3e69f354",
+      "bytes": 377,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-doctor-output--process.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-doctor-output.log": {
+      "sha256": "4b395c9c76c7f7fb5221d30df7320c7a2387ff3842c426dbee6a59a54b5cffab",
+      "bytes": 60,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-doctor-output.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-doctor.json": {
+      "sha256": "03c0f010c4ca55b98d07eb1742598babcdccae39492a329b4fe6ab61a92153ee",
+      "bytes": 5580163,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-doctor.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-doctor.json.missing-core-event.json": {
+      "sha256": "c56d9654b567c31f2cce1fbebf876226b6e723a3abd0d117b6093fc58f8c14f2",
+      "bytes": 52575,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-doctor.json.missing-core-event.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-doctor.json.missing-header.json": {
+      "sha256": "39e086e5465ace20e2f9e6d72bdb1fc3ef7ef682ab786fa86ef807277f6face4",
+      "bytes": 52758,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-doctor.json.missing-header.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-doctor.json.wrong-exit.json": {
+      "sha256": "3c5c5a0ec728c4b3a190ab3a93785633929523d9117669153de208b880b62559",
+      "bytes": 52803,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-doctor.json.wrong-exit.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-doctor.log": {
+      "sha256": "f735e01e3b9f14d3421c47b38d6f3c5eaa931cac06f0218ac3bbbc1483ba2b6f",
+      "bytes": 295,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-doctor.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-fmt.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-fmt.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-guard-controls.json": {
+      "sha256": "6cb798391307fbe03aed48e75f264d997ffd9ffe4daa31aecb1af9c50726b951",
+      "bytes": 12170,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-guard-controls.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-guard-raw-paths.json": {
+      "sha256": "207fc114ea6604d503ee85f31f7e7f23650ee6b7789e4ed6da70c30fc559dfae",
+      "bytes": 209090,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-guard-raw-paths.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-guard.json": {
+      "sha256": "11a230870511526e5a15e063a33151cbdd2e3c9a6d0d325103c14eac6cb768a8",
+      "bytes": 663431,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-guard.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-guard.log": {
+      "sha256": "f27b903c2ba50122cce6f924879db2d857281703ec16b4639c37d5d183e88b56",
+      "bytes": 692,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-guard.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-read-controls.json": {
+      "sha256": "43f8ced17803f1d5c5e3cc3ab23f9bd940186345986bba3e99cc96341e2798f4",
+      "bytes": 3546868,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-read-controls.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-read-controls.log": {
+      "sha256": "ed8e6e81ddbcd4ac7c127a0d3297a6a8812dff963705fc6c8c0d86270d0630ef",
+      "bytes": 36,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-read-controls.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-read.json": {
+      "sha256": "1935f00a0779d31d7c51765e0ee10f6bee98cb3b61f778e4e14cf10a4b6bdbeb",
+      "bytes": 2272724,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-read.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-read.log": {
+      "sha256": "a8b576804c2222a162bfdf87ad168058ff1ab6c4ef587102484b1fe15fa7764a",
+      "bytes": 819,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-read.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-write/audit-failure.json": {
+      "sha256": "e4dfc08364e67c87bec8f68f31463fb2e3c962b2a1c4cbee975f53820e7dbb03",
+      "bytes": 3804639,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-write--audit-failure.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-write/audit-failure.stderr": {
+      "sha256": "bb49957f491dfbec47400840353b78ce20877b51ae828dc21c5605c952881061",
+      "bytes": 2621,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-write--audit-failure.stderr.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-write/audit-failure.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-write--audit-failure.stdout.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-write/deletes.json": {
+      "sha256": "0de563def9fab7e36e2a853f83dc150c8d460b6c6e3d4e669fc28bb2b5ebfcc5",
+      "bytes": 744147,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-write--deletes.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-write/exit-failure.json": {
+      "sha256": "39af97579c44299daa91ce3a0524b2adc2645444739b9e4a3c172d954ef7df71",
+      "bytes": 42661,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-write--exit-failure.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-write/exit-failure.stderr": {
+      "sha256": "19b4c98f1b4c906fd59a366b24f8214e13b9ad6eba2caa9ed7c238463112cdd3",
+      "bytes": 764,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-write--exit-failure.stderr.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-write/exit-failure.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-write--exit-failure.stdout.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-write/fallback-boundaries.json": {
+      "sha256": "2ab3466ce26be775f385aa7b2bb7937418a202d3ca97bab08e0e5e246755712a",
+      "bytes": 229588,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-write--fallback-boundaries.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-write/identity-failure.json": {
+      "sha256": "2b54f26fc3036c0c381d1590bc00018279e62aab937e9c9ad2805069e382ef33",
+      "bytes": 42368,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-write--identity-failure.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-write/identity-failure.stderr": {
+      "sha256": "a7094bc5e174a3366665947fb5f57703cd3f41c9b1b192b9c4e41fef51de1d3f",
+      "bytes": 691,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-write--identity-failure.stderr.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-write/identity-failure.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-write--identity-failure.stdout.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-write/receipt.json": {
+      "sha256": "9bc795e4ea1753dd65afa18ed92672189a8f23cc5a208b7bc095cb44df14e0e5",
+      "bytes": 161263,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-write--receipt.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-write/write-failures.json": {
+      "sha256": "42cd3b7759f296784821a194ac59e363f3998f17214c5e752b06f68bd90ffd71",
+      "bytes": 598751,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-write--write-failures.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-write/writes.json": {
+      "sha256": "cea3447bb89bbe21af829d0bf37e1026067a057548bdac8ee83fe99297d8409e",
+      "bytes": 3805148,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-write--writes.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-memory-write.log": {
+      "sha256": "5d934b7f7a02d27fdf940ab06ffbd9d7a0c2eb70448005ee4c8a30664e0cdc8d",
+      "bytes": 140,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-memory-write.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-output/controls.json": {
+      "sha256": "8db13fd6603910fefc16cd62a7b012307d8939411931d7e4ab0b236351b98c0c",
+      "bytes": 934711,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-output--controls.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-output/controls.log": {
+      "sha256": "d89d8d936b337df0f9e082f0a1780b94b71e215180af52fc555b0741e9aa2828",
+      "bytes": 79,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-output--controls.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-output/embedded.json": {
+      "sha256": "59cebeeb1fea411e6d0d061fb173646e70438aa0bc92c26ae42e8981ec7ffe0c",
+      "bytes": 239023,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-output--embedded.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-output/embedded.log": {
+      "sha256": "f4f4ee8df066b36c90ba6cc5536381a8e784d48be4e63cc10fde3f1a792cbd5e",
+      "bytes": 867,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-output--embedded.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-output/human-pipe-probes.json": {
+      "sha256": "e4ee618fc1f13cd5fe641201e1b6a108306417380776e382bb3e9339c4075a3d",
+      "bytes": 475783,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-output--human-pipe-probes.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-output/human-pipe-probes.log": {
+      "sha256": "bb99d6a951589ef82508a6800a9b5c04d74ec10ffcc8af4a68841477816589fd",
+      "bytes": 264,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-output--human-pipe-probes.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-output/output-probes.json": {
+      "sha256": "ab2b0d9421f288e3de41c7c0ed8ac0b7f29c472dbbdedf4df5b23ee3bdc5921a",
+      "bytes": 33755,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-output--output-probes.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-output/output-probes.log": {
+      "sha256": "8ba94463e30913a3cb50c630ace1642947b5c6ed3bf9bd2d7b6f2ccf96c51b1f",
+      "bytes": 247,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-output--output-probes.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-output/pipe-probes.json": {
+      "sha256": "e61447bb4ee86ffdd81355b7c0dc47887350ce387076d02b549f61670681dab2",
+      "bytes": 361791,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-output--pipe-probes.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-output/pipe-probes.log": {
+      "sha256": "9888c9b7b1262d18988382ff36d8fb0015f9319cc191590f76e51b9c7b4b9966",
+      "bytes": 240,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-output--pipe-probes.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-output/source-output.json": {
+      "sha256": "4e636b694fdfc345357fee548c851053a5073292781345a0b0caa9acb13ce493",
+      "bytes": 23518,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-output--source-output.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-output/source-output.log": {
+      "sha256": "39008d5bf05080f7ba689af7404a2241532482eec3c4013e72ff72c7d5c8eab7",
+      "bytes": 106,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-output--source-output.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-output.log": {
+      "sha256": "e92b3c092acd691bbb5fb232ee90128d1e520f992018e239625054de92158777",
+      "bytes": 150,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-output.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-setup.json": {
+      "sha256": "4a7133f4f77c9dd924b5b407367d3c73640c445cc5d08652a2af9519bbeca758",
+      "bytes": 1854628,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-setup.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-setup.log": {
+      "sha256": "bf2018539f68f1485398038a86967a0fcaabf603ea23eb03ddcb06a71237ce1f",
+      "bytes": 17149,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-setup.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-source.json": {
+      "sha256": "83c1feb077aee2ac9c2d02b101d72c072caefdb3361481ec1847f05b0c205d40",
+      "bytes": 1380632,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-source.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-source.json.wrong-exit.json": {
+      "sha256": "98b16a8755ed8a919cc4c31173d5f63ee13009d5f7699f067c1b10fe3926aa55",
+      "bytes": 47809,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-source.json.wrong-exit.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-source.json.wrong-source.json": {
+      "sha256": "b389c7931de0fc0c90c7c3e29df847965b150657438fc6bff711d70728ff87fb",
+      "bytes": 47806,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-source.json.wrong-source.json.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-source.log": {
+      "sha256": "dbf57280b0328f202a91df0ddc1684e61f03358f5151a8a881bf195433ad817f",
+      "bytes": 221,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-source.log.gz"
+    },
+    "/tmp/symaira-doctor-source-sixth-full-tests.log": {
+      "sha256": "b2e307ecf64b9d382aa433acaae2a457ecc8d7c23de5049550c68877490b4c95",
+      "bytes": 48991,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor-source-sixth-full-tests.log.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-11434-release.txt": {
+      "sha256": "14f4ea5bdea2bd6f8d856ec28619243555e53de100d4bca155a751876e97a843",
+      "bytes": 64,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-11434-release.txt.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-58fe-cli-receipt.json": {
+      "sha256": "da05a7989ea10a67da4817bca3fa4a05171d5bcffbbca276583a583d67beafd8",
+      "bytes": 476,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-58fe-cli-receipt.json.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-checkpoint-output/controls.json": {
+      "sha256": "172ec0aa4ffa7af7a637f64d81fad6fbe804d9ae56824afd687a88890a302c3b",
+      "bytes": 2465480,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-checkpoint-output--controls.json.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-checkpoint-output/controls.log": {
+      "sha256": "0800002a7b93ed12e57d463f59378c8666bf28f93ea18081340a77abc32b4505",
+      "bytes": 82,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-checkpoint-output--controls.log.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-checkpoint-output/embedded.json": {
+      "sha256": "45477c3b46b03fadf46e0e3bf49e2c2fff700c0a8cb6025bbaebd37e099fd5ee",
+      "bytes": 512490,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-checkpoint-output--embedded.json.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-checkpoint-output/embedded.log": {
+      "sha256": "7e260d63a485bd882c6a74050c5d6de749cb5b93bc3f8435e7dbe4684988a235",
+      "bytes": 991,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-checkpoint-output--embedded.log.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-checkpoint-output/fix.json": {
+      "sha256": "e74cae02900f28ebe448b65d2ecd1a7f6173f8cb8cdd1bc51a1ab7909a1ed830",
+      "bytes": 83595,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-checkpoint-output--fix.json.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-checkpoint-output/fix.log": {
+      "sha256": "6a1961162d04af3dd2422441bb9027ec0cab65b2b7fb7b0d49a7b7f5f15d4d0e",
+      "bytes": 197,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-checkpoint-output--fix.log.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-checkpoint-output/process.json": {
+      "sha256": "f8b76a6bdf2c82f5e376c09a60e15d7154814c3bbcb4f5f887f6e04f9c7d2173",
+      "bytes": 786856,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-checkpoint-output--process.json.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-checkpoint-output/process.log": {
+      "sha256": "794b9c1cd8c5b32e4ea073cd8f6f9570c2abb515d083fd5f035600da3e69f354",
+      "bytes": 377,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-checkpoint-output--process.log.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-checkpoint-output.log": {
+      "sha256": "d349a685dd714bc899786e16dc93330ba62d9b46a248db94008b6dcff3da82e5",
+      "bytes": 150,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-checkpoint-output.log.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-extras-runner.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-extras-runner.log.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-extras.sh": {
+      "sha256": "28a6dff2fb525348976effd873ec7eb65edf87d00456c51d2c2602c1638bd0c6",
+      "bytes": 1247,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-extras.sh.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-focused.log": {
+      "sha256": "b19be63b0b1b344c5f48fcadefc873760cb61625087f6c22f01b6407aad98eaa",
+      "bytes": 2235,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-focused.log.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-full-gates.sh": {
+      "sha256": "5ec023efa031e6aed859022b02bb720e7db66dd7f0a269230299d074877fce2a",
+      "bytes": 2497,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-full-gates.sh.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-full-runner.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-full-runner.log.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-original-bounded18.json": {
+      "sha256": "e6df9962b039f70496a0deaebb7a11696eb4f52def361de4b2e2f3d170ac2f07",
+      "bytes": 1538498,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-original-bounded18.json.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-original-bounded18.log": {
+      "sha256": "d8a3d59f67963505090cd48b988d64299308a9a173f8d91ab7c7b005ea2d44b5",
+      "bytes": 866,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-original-bounded18.log.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-original-fix8.json": {
+      "sha256": "af789a3e6d88dd769c522e3cba24d97030d26b7ae4e5ecf3d9c4d7c8bc0b42d2",
+      "bytes": 136947,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-original-fix8.json.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-original-fix8.log": {
+      "sha256": "00cc668f84021fa54e23867b0bbb0d5250e5e0dce72adfdf7ba75878d6964702",
+      "bytes": 431,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-original-fix8.log.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-verification.json": {
+      "sha256": "f60e3bd1f7377e3acf3301585c19d78cf7feee23be5717efdaa3368eb7f7122f",
+      "bytes": 13290,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-verification.json.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-verify-initial.log": {
+      "sha256": "970f1b4de193ed0c9e88b1cdb99f720c4101fded01e9c808a8e2d88573f799bc",
+      "bytes": 620,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-verify-initial.log.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-verify-initial.py": {
+      "sha256": "d398830da2151c2b0d16440ca835015b97c535a2e5c91f2d583ef823eda6ad99",
+      "bytes": 10483,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-verify-initial.py.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-verify.log": {
+      "sha256": "028d1a058ff10b4b47fe3767798528d14ae1169f547212fb90959ccf3ee1cf51",
+      "bytes": 2141,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-verify.log.gz"
+    },
+    "/tmp/symaira-doctor765-sixth-verify.py": {
+      "sha256": "d9f1ca004f4330bda2e1b1aa8253144a133936fee928d62d28dead15cdf54a96",
+      "bytes": 10522,
+      "tracked_archive": "migration/evidence/doctor-stdout-765/final-58fe50b/symaira-doctor765-sixth-verify.py.gz"
+    }
+  },
+  "external_native_executables": [
+    {
+      "original_path": "/tmp/symaira-doctor-source-sixth-extra-partial-writer-budget",
+      "sha256": "42bb5dc267d86030f461c6ce642127fd2a417ffe29ac8edfb5abf6f9b5d6a714",
+      "role": "Actual native executable retained in final binary archive; not duplicated in Git proof logs."
+    },
+    {
+      "original_path": "/tmp/symaira-doctor765-sixth-58fe-cli",
+      "sha256": "256e5efe3d05b9fe5c8afa41d9821a13ee2dee32de9719a4acd7e79364fde8ee",
+      "role": "Actual native executable retained in final binary archive; not duplicated in Git proof logs."
+    }
+  ],
+  "final_binary_archive": "/workspace/oracles/symaira-doctor765-sixth-58fe-binaries/receipt.json",
+  "original_complete_fifth_archive": "/workspace/oracles/symaira-doctor765-b3-fifth-preservation/receipt.json",
+  "initial_owned_validator_error": "First validator incorrectly required128stdoutbytes for help, whose output is exclusivelystderr. Raw script/log retained; corrected validator scopes128toJSON/human only, with candidate source and original comparisons unchanged.",
+  "headroom_floor_bytes": 734003200,
+  "author_validation_is_independent_approval": false,
+  "final_binary_archive_sha256": "339fd7501642834358453344e2cf8b97604a1864ee492328d6bf04c46bc041d5",
+  "final_actual_binary_paths": 60,
+  "final_unique_actual_binary_hashes": 59,
+  "final_roundtrip_verified": true,
+  "default11434_released_to_root": true
+}

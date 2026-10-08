@@ -1,0 +1,22 @@
+{
+  "candidate_source": "a66b4818f74943812315509a3ba2545b2b6b2ea1",
+  "preserved_original_second_review_files": 46,
+  "exact_tmp_and_tracked_bytes_match": true,
+  "previous_a301_actual_executables_roundtrip_verified": 38,
+  "source_sha256": {
+    "rust/symbrain-cli/src/managed_home.rs": "31efa0ba58dd2686aa383f628461a5844ce1d9af7bb864b30c18ba52d33b3be3",
+    "rust/symbrain-managed/src/mkdir.rs": "c37b3c7572395ba604717bdadca1686730d106cc520df6069d04698ad42ba7dd",
+    "rust/symbrain-cli/src/setup_cli.rs": "96f2222e3356473f02785a1c22813148bdfe1c80a4318649583325647f598381",
+    "rust/symbrain-cli/src/doctor_fix.rs": "9224cb915eadd102cef67d222ce2a59e7aff2321a2478eb111e86db1705c1934",
+    "rust/symbrain-managed/src/install.rs": "6cc511e6ebbbdd0db840c4321465d1d180d506038c91822f34e2b50e34f7f2c2",
+    "rust/symbrain-managed/src/local_install.rs": "723f62b8981a883a2e2ebdaa8d042d9590cb62b170994a2d7169597520b19041"
+  },
+  "actual_sdk_source_sha256": {
+    "/workspace/toolchains/go1.26.7/src/internal/filepathlite/path.go": "dd1a0138328d6353d089d6ba8e04905d9e951bedfef1b85913c64de2ca2fd223",
+    "/workspace/toolchains/go1.26.7/src/internal/filepathlite/path_windows.go": "ad313fae9fd1e150df082ad7f43c34b0830ce79433d0eef89c7724fdb07d06bb",
+    "/workspace/toolchains/go1.26.7/src/path/filepath/path_windows.go": "96c1af1caace59a146241f5a48a700a142f2e5520f932fb2fc6376ce5a94ed81",
+    "/workspace/toolchains/go1.26.7/src/os/path.go": "a901784cb6abfb4817a379bdc909f42090b9cc5e49a6b2dac5c06ee6e844966a",
+    "/workspace/toolchains/go1.26.7/src/syscall/zerrors_windows.go": "627276cf400689ea253d13a2ee2c08cb066d0e019ef7ff3cca691d8ab7144992"
+  },
+  "target_execution_started": false
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "binary": "go",
+    "binary_sha256": "10df8816128c4a9408ee7c00f2182eca928e079f55fd9d6f6a1d4f299267beb8",
+    "cwd": "/tmp/review801-uf1_8xp3",
+    "tmpdir": "/tmp/review801-uf1_8xp3/tmp",
+    "env": {
+      "HOME": "",
+      "USERPROFILE": "",
+      "PATH": "",
+      "TMPDIR": "/tmp/review801-uf1_8xp3/tmp",
+      "XDG_RUNTIME_DIR": "/tmp/review801-uf1_8xp3/run",
+      "XDG_CONFIG_HOME": "/tmp/review801-uf1_8xp3/config",
+      "XDG_DATA_HOME": "/tmp/review801-uf1_8xp3/data",
+      "XDG_STATE_HOME": "/tmp/review801-uf1_8xp3/state",
+      "SYMBROWSE_NO_AUTOSTART": "1"
+    },
+    "note": "Go config exits before cache path is observable; not a successful daemon parity case",
+    "exit": 9,
+    "stdout": "",
+    "stderr": "failed to determine configuration home: cannot determine home directory: $HOME is not defined\n"
+  },
+  {
+    "binary": "rust",
+    "binary_sha256": "37c3ffe032a38d3ef36e43a0e51535919032f4bfa05e47f5f94566b787cbd1f7",
+    "cwd": "/tmp/review801-u3kumj5u",
+    "tmpdir": "/tmp/review801-u3kumj5u/tmp",
+    "env": {
+      "HOME": "",
+      "USERPROFILE": "",
+      "PATH": "",
+      "TMPDIR": "/tmp/review801-u3kumj5u/tmp",
+      "XDG_RUNTIME_DIR": "/tmp/review801-u3kumj5u/run",
+      "XDG_CONFIG_HOME": "/tmp/review801-u3kumj5u/config",
+      "XDG_DATA_HOME": "/tmp/review801-u3kumj5u/data",
+      "XDG_STATE_HOME": "/tmp/review801-u3kumj5u/state",
+      "SYMBROWSE_NO_AUTOSTART": "1"
+    },
+    "response": {
+      "success": true,
+      "data": {
+        "active_tabs": 0,
+        "browser_context_id": "context-review-640850",
+        "last_activity": "2026-10-03T18:18:10.540256381Z",
+        "name": "review-640850",
+        "origin_path": "/tmp/review801-u3kumj5u",
+        "pid": 640856,
+        "ref_count": 0,
+        "scope": "worktree",
+        "started_at": "2026-10-03T18:18:10.481716164Z",
+        "user_data_dir": ".cache/symbrowse/sessions/review-640850"
+      }
+    },
+    "exit": 0,
+    "stdout": "",
+    "stderr": "symbrowse shutdown: begin\nsymbrowse shutdown: no browser session\n"
+  }
+]

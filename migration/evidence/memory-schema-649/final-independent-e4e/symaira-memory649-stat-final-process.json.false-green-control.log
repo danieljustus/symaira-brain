@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/workspace/symaira-memory649-doctor/scripts/memory-schema-oracle/replay.py", line 36, in <module>
+    run('all-migrations-applied-but-five-columns-missing',cols)
+  File "/workspace/symaira-memory649-doctor/scripts/memory-schema-oracle/replay.py", line 23, in run
+    assert 'error' not in out[0],out[0];assert out[0]['quick_check']=='ok';assert out[1].get('error')=='missing required columns: '+', '.join('memories.'+c for c in sorted(expected_missing)),out[1]
+                                                                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: {'path': '/tmp/memory649-doctor-xqqhexwk/data/symbrain/memory/default.db', 'exists': True, 'mode': '0600', 'mode_ok': True, 'quick_check': 'ok'}

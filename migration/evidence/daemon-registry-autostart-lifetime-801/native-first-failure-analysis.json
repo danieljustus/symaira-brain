@@ -1,0 +1,486 @@
+[
+  {
+    "artifact": "11306619101",
+    "report_sha256": "b658f9938d09c4b6bcab4050bf624c5d4e10353774a4ba753ced70f24a5e47f8",
+    "journal_sha256": "29e51f793bfea010ecb4bd500ef07e3a9319a1d84df1c37eb920c35cf11d50cc",
+    "completed_observations": [
+      "go"
+    ],
+    "failure": {
+      "type": "PermissionError",
+      "message": "[WinError 32] The process cannot access the file because it is being used by another process: 'C:\\\\Users\\\\RUNNER~1\\\\AppData\\\\Local\\\\Temp\\\\br-hemn4azd'"
+    },
+    "last8_events": [
+      {
+        "case": 2481,
+        "cwd": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\br-hemn4azd",
+        "monotonic": 1037.875,
+        "sequence": 2482,
+        "stage": "cli.launch.begin",
+        "stderr_file": "D:\\a\\_temp\\browse-daemon-registry.progress.cli\\2481\\stderr.bin",
+        "stdout_file": "D:\\a\\_temp\\browse-daemon-registry.progress.cli\\2481\\stdout.bin",
+        "timeout_seconds": 15
+      },
+      {
+        "case": 2481,
+        "cwd": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\br-hemn4azd",
+        "monotonic": 1037.875,
+        "pid": 2992,
+        "sequence": 2483,
+        "stage": "cli.spawned",
+        "stderr_file": "D:\\a\\_temp\\browse-daemon-registry.progress.cli\\2481\\stderr.bin",
+        "stdout_file": "D:\\a\\_temp\\browse-daemon-registry.progress.cli\\2481\\stdout.bin",
+        "timeout_seconds": 15
+      },
+      {
+        "case": 2481,
+        "cleanup_error": null,
+        "exit": 0,
+        "failure": null,
+        "monotonic": 1037.906,
+        "pid": 2992,
+        "raw_receipt": "D:\\a\\_temp\\browse-daemon-registry.progress.cli\\2481\\result.json",
+        "raw_receipt_sha256": "2f68e127ceefdc38a70b131b84e66a46c2687d77f878b0354498083094dc92f5",
+        "sequence": 2484,
+        "stage": "cli.end",
+        "stderr_bytes": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 95,
+        "stdout_sha256": "fd5a8a614c50a11b899c1be878a2c039a037f848ebe2cb7fb54ef2bab0ee7805",
+        "timed_out": false
+      },
+      {
+        "monotonic": 1037.906,
+        "sequence": 2485,
+        "session": "r9812a",
+        "stage": "autostart.stop.begin"
+      },
+      {
+        "endpoint": "\\\\.\\pipe\\symbrowse-r9812a",
+        "monotonic": 1037.906,
+        "request": {
+          "cmd": "daemon.stop",
+          "session": "r9812a"
+        },
+        "sequence": 2486,
+        "stage": "frame.begin"
+      },
+      {
+        "endpoint": "\\\\.\\pipe\\symbrowse-r9812a",
+        "monotonic": 1037.921,
+        "request": {
+          "cmd": "daemon.stop",
+          "session": "r9812a"
+        },
+        "sequence": 2487,
+        "stage": "frame.end"
+      },
+      {
+        "monotonic": 1037.921,
+        "sequence": 2488,
+        "session": "r9812a",
+        "stage": "autostart.stop.end"
+      },
+      {
+        "binary": "D:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+        "monotonic": 1037.921,
+        "sequence": 2489,
+        "session": "r9812",
+        "stage": "observe.end"
+      }
+    ],
+    "lifecycle_events": [
+      {
+        "binary": "D:\\a\\_temp\\symbrowse-daemon-go.exe",
+        "monotonic": 1014.515,
+        "root": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\br-uvznijp3",
+        "sequence": 4,
+        "session": "r9812",
+        "stage": "observe.begin"
+      },
+      {
+        "binary": "D:\\a\\_temp\\symbrowse-daemon-go.exe",
+        "monotonic": 1030.109,
+        "sequence": 1043,
+        "session": "r9812",
+        "stage": "daemon.start.begin"
+      },
+      {
+        "endpoint": "\\\\.\\pipe\\symbrowse-r9812",
+        "monotonic": 1030.125,
+        "pid": 5072,
+        "sequence": 1044,
+        "session": "r9812",
+        "stage": "daemon.ready.begin"
+      },
+      {
+        "exit": 0,
+        "monotonic": 1030.64,
+        "pid": 5072,
+        "sequence": 1107,
+        "session": "r9812",
+        "stage": "daemon.stop.end"
+      },
+      {
+        "binary": "D:\\a\\_temp\\symbrowse-daemon-go.exe",
+        "monotonic": 1030.64,
+        "sequence": 1108,
+        "session": "r9812",
+        "stage": "daemon.start.begin"
+      },
+      {
+        "endpoint": "\\\\.\\pipe\\symbrowse-r9812",
+        "monotonic": 1030.64,
+        "pid": 5696,
+        "sequence": 1109,
+        "session": "r9812",
+        "stage": "daemon.ready.begin"
+      },
+      {
+        "exit": 0,
+        "monotonic": 1030.718,
+        "pid": 5696,
+        "sequence": 1118,
+        "session": "r9812",
+        "stage": "daemon.stop.end"
+      },
+      {
+        "monotonic": 1032.437,
+        "sequence": 1242,
+        "session": "r9812a",
+        "stage": "autostart.stop.begin"
+      },
+      {
+        "monotonic": 1032.437,
+        "sequence": 1245,
+        "session": "r9812a",
+        "stage": "autostart.stop.end"
+      },
+      {
+        "binary": "D:\\a\\_temp\\symbrowse-daemon-go.exe",
+        "monotonic": 1032.437,
+        "sequence": 1246,
+        "session": "r9812",
+        "stage": "observe.end"
+      },
+      {
+        "binary": "D:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+        "monotonic": 1032.453,
+        "root": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\br-hemn4azd",
+        "sequence": 1247,
+        "session": "r9812",
+        "stage": "observe.begin"
+      },
+      {
+        "binary": "D:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+        "monotonic": 1035.328,
+        "sequence": 2286,
+        "session": "r9812",
+        "stage": "daemon.start.begin"
+      },
+      {
+        "endpoint": "\\\\.\\pipe\\symbrowse-r9812",
+        "monotonic": 1035.343,
+        "pid": 4212,
+        "sequence": 2287,
+        "session": "r9812",
+        "stage": "daemon.ready.begin"
+      },
+      {
+        "exit": 0,
+        "monotonic": 1036.046,
+        "pid": 4212,
+        "sequence": 2350,
+        "session": "r9812",
+        "stage": "daemon.stop.end"
+      },
+      {
+        "binary": "D:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+        "monotonic": 1036.046,
+        "sequence": 2351,
+        "session": "r9812",
+        "stage": "daemon.start.begin"
+      },
+      {
+        "endpoint": "\\\\.\\pipe\\symbrowse-r9812",
+        "monotonic": 1036.046,
+        "pid": 6664,
+        "sequence": 2352,
+        "session": "r9812",
+        "stage": "daemon.ready.begin"
+      },
+      {
+        "exit": 0,
+        "monotonic": 1036.203,
+        "pid": 6664,
+        "sequence": 2361,
+        "session": "r9812",
+        "stage": "daemon.stop.end"
+      },
+      {
+        "monotonic": 1037.906,
+        "sequence": 2485,
+        "session": "r9812a",
+        "stage": "autostart.stop.begin"
+      },
+      {
+        "monotonic": 1037.921,
+        "sequence": 2488,
+        "session": "r9812a",
+        "stage": "autostart.stop.end"
+      },
+      {
+        "binary": "D:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+        "monotonic": 1037.921,
+        "sequence": 2489,
+        "session": "r9812",
+        "stage": "observe.end"
+      }
+    ],
+    "retained_detached_pid_or_exit_wait": false,
+    "remaining_PID_unknown": true,
+    "current_execution": false
+  },
+  {
+    "artifact": "11307252607",
+    "report_sha256": "5d98cb399603187645b8c7bc897abd3def39338ac89aa60de6629f91ca89074d",
+    "journal_sha256": "bebc7588ee0047b66471f734a41e075baba8bd85720d9f7c4cf5c9d5f94e7a29",
+    "completed_observations": [
+      "go"
+    ],
+    "failure": {
+      "type": "PermissionError",
+      "message": "[WinError 32] The process cannot access the file because it is being used by another process: 'C:\\\\Users\\\\RUNNER~1\\\\AppData\\\\Local\\\\Temp\\\\br-ofj0p5g8'"
+    },
+    "last8_events": [
+      {
+        "case": 2481,
+        "cwd": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\br-ofj0p5g8",
+        "monotonic": 1937.4509924,
+        "sequence": 2482,
+        "stage": "cli.launch.begin",
+        "stderr_file": "C:\\a\\_temp\\browse-daemon-registry.progress.cli\\2481\\stderr.bin",
+        "stdout_file": "C:\\a\\_temp\\browse-daemon-registry.progress.cli\\2481\\stdout.bin",
+        "timeout_seconds": 15
+      },
+      {
+        "case": 2481,
+        "cwd": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\br-ofj0p5g8",
+        "monotonic": 1937.4538777,
+        "pid": 9104,
+        "sequence": 2483,
+        "stage": "cli.spawned",
+        "stderr_file": "C:\\a\\_temp\\browse-daemon-registry.progress.cli\\2481\\stderr.bin",
+        "stdout_file": "C:\\a\\_temp\\browse-daemon-registry.progress.cli\\2481\\stdout.bin",
+        "timeout_seconds": 15
+      },
+      {
+        "case": 2481,
+        "cleanup_error": null,
+        "exit": 0,
+        "failure": null,
+        "monotonic": 1937.5127734,
+        "pid": 9104,
+        "raw_receipt": "C:\\a\\_temp\\browse-daemon-registry.progress.cli\\2481\\result.json",
+        "raw_receipt_sha256": "e4ffd6f7b5a3b852191d85f00044d520febc9209d4c2e859c8a40930edfd64af",
+        "sequence": 2484,
+        "stage": "cli.end",
+        "stderr_bytes": 0,
+        "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stdout_bytes": 95,
+        "stdout_sha256": "fd5a8a614c50a11b899c1be878a2c039a037f848ebe2cb7fb54ef2bab0ee7805",
+        "timed_out": false
+      },
+      {
+        "monotonic": 1937.5222865,
+        "sequence": 2485,
+        "session": "r3708a",
+        "stage": "autostart.stop.begin"
+      },
+      {
+        "endpoint": "\\\\.\\pipe\\symbrowse-r3708a",
+        "monotonic": 1937.5225702,
+        "request": {
+          "cmd": "daemon.stop",
+          "session": "r3708a"
+        },
+        "sequence": 2486,
+        "stage": "frame.begin"
+      },
+      {
+        "endpoint": "\\\\.\\pipe\\symbrowse-r3708a",
+        "monotonic": 1937.5484711,
+        "request": {
+          "cmd": "daemon.stop",
+          "session": "r3708a"
+        },
+        "sequence": 2487,
+        "stage": "frame.end"
+      },
+      {
+        "monotonic": 1937.5488247,
+        "sequence": 2488,
+        "session": "r3708a",
+        "stage": "autostart.stop.end"
+      },
+      {
+        "binary": "C:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+        "monotonic": 1937.5490882,
+        "sequence": 2489,
+        "session": "r3708",
+        "stage": "observe.end"
+      }
+    ],
+    "lifecycle_events": [
+      {
+        "binary": "C:\\a\\_temp\\symbrowse-daemon-go.exe",
+        "monotonic": 1920.3440533,
+        "root": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\br-fj2qu9sa",
+        "sequence": 4,
+        "session": "r3708",
+        "stage": "observe.begin"
+      },
+      {
+        "binary": "C:\\a\\_temp\\symbrowse-daemon-go.exe",
+        "monotonic": 1928.7505335,
+        "sequence": 1043,
+        "session": "r3708",
+        "stage": "daemon.start.begin"
+      },
+      {
+        "endpoint": "\\\\.\\pipe\\symbrowse-r3708",
+        "monotonic": 1928.7568913,
+        "pid": 7104,
+        "sequence": 1044,
+        "session": "r3708",
+        "stage": "daemon.ready.begin"
+      },
+      {
+        "exit": 0,
+        "monotonic": 1929.0792687,
+        "pid": 7104,
+        "sequence": 1107,
+        "session": "r3708",
+        "stage": "daemon.stop.end"
+      },
+      {
+        "binary": "C:\\a\\_temp\\symbrowse-daemon-go.exe",
+        "monotonic": 1929.0795586,
+        "sequence": 1108,
+        "session": "r3708",
+        "stage": "daemon.start.begin"
+      },
+      {
+        "endpoint": "\\\\.\\pipe\\symbrowse-r3708",
+        "monotonic": 1929.0823511,
+        "pid": 4184,
+        "sequence": 1109,
+        "session": "r3708",
+        "stage": "daemon.ready.begin"
+      },
+      {
+        "exit": 0,
+        "monotonic": 1929.1366533,
+        "pid": 4184,
+        "sequence": 1118,
+        "session": "r3708",
+        "stage": "daemon.stop.end"
+      },
+      {
+        "monotonic": 1930.0492294,
+        "sequence": 1242,
+        "session": "r3708a",
+        "stage": "autostart.stop.begin"
+      },
+      {
+        "monotonic": 1930.0508759,
+        "sequence": 1245,
+        "session": "r3708a",
+        "stage": "autostart.stop.end"
+      },
+      {
+        "binary": "C:\\a\\_temp\\symbrowse-daemon-go.exe",
+        "monotonic": 1930.0510961,
+        "sequence": 1246,
+        "session": "r3708",
+        "stage": "observe.end"
+      },
+      {
+        "binary": "C:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+        "monotonic": 1930.0600268,
+        "root": "C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\br-ofj0p5g8",
+        "sequence": 1247,
+        "session": "r3708",
+        "stage": "observe.begin"
+      },
+      {
+        "binary": "C:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+        "monotonic": 1935.3232487,
+        "sequence": 2286,
+        "session": "r3708",
+        "stage": "daemon.start.begin"
+      },
+      {
+        "endpoint": "\\\\.\\pipe\\symbrowse-r3708",
+        "monotonic": 1935.330073,
+        "pid": 4404,
+        "sequence": 2287,
+        "session": "r3708",
+        "stage": "daemon.ready.begin"
+      },
+      {
+        "exit": 0,
+        "monotonic": 1936.0535416,
+        "pid": 4404,
+        "sequence": 2350,
+        "session": "r3708",
+        "stage": "daemon.stop.end"
+      },
+      {
+        "binary": "C:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+        "monotonic": 1936.0539428,
+        "sequence": 2351,
+        "session": "r3708",
+        "stage": "daemon.start.begin"
+      },
+      {
+        "endpoint": "\\\\.\\pipe\\symbrowse-r3708",
+        "monotonic": 1936.0568569,
+        "pid": 10056,
+        "sequence": 2352,
+        "session": "r3708",
+        "stage": "daemon.ready.begin"
+      },
+      {
+        "exit": 0,
+        "monotonic": 1936.2193265,
+        "pid": 10056,
+        "sequence": 2361,
+        "session": "r3708",
+        "stage": "daemon.stop.end"
+      },
+      {
+        "monotonic": 1937.5222865,
+        "sequence": 2485,
+        "session": "r3708a",
+        "stage": "autostart.stop.begin"
+      },
+      {
+        "monotonic": 1937.5488247,
+        "sequence": 2488,
+        "session": "r3708a",
+        "stage": "autostart.stop.end"
+      },
+      {
+        "binary": "C:\\a\\symaira-brain\\symaira-brain\\browse\\target\\release\\symbrowse.exe",
+        "monotonic": 1937.5490882,
+        "sequence": 2489,
+        "session": "r3708",
+        "stage": "observe.end"
+      }
+    ],
+    "retained_detached_pid_or_exit_wait": false,
+    "remaining_PID_unknown": true,
+    "current_execution": false
+  }
+]

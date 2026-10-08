@@ -1,0 +1,192 @@
+{
+  "files": [
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/actual-mutant/LICENSE",
+      "retained": "00-LICENSE.gz",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "gzip_sha256": "02d83c094bd4b96c1a044b449e9b9bbf5a93438d3bdc6efd74b2cc65d74e2cb1"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/actual-mutant/bisect/bisect.go",
+      "retained": "01-bisect.go.gz",
+      "bytes": 23496,
+      "sha256": "3f27f9d58661674ce25e3e55879d6ccabb08a9262f0dfece704a3d0873a05a33",
+      "gzip_sha256": "4fc93db325e1965c5ff6325eecaab8750e2c4242c8dfcbd61a19788edde34d5c"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/actual-mutant/main.go",
+      "retained": "02-main.go.gz",
+      "bytes": 951,
+      "sha256": "94246ac5a8200f842ce8fc2830d9b5550cee3c20f7f7e9c4afffa4042814a034",
+      "gzip_sha256": "003ca6ccf953b4c83ca8b9602b4d7cb51093f52c222f17fb0a2f64eb6e5f8b4f"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/actual-mutant-build.stderr",
+      "retained": "03-actual-mutant-build.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/actual-mutant-build.stdout",
+      "retained": "04-actual-mutant-build.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/actual-mutant-result.json",
+      "retained": "05-actual-mutant-result.json.gz",
+      "bytes": 39847,
+      "sha256": "0cb306a1f045472547011a9fa698f7983628e07fd649d33705583cd3abc573a7",
+      "gzip_sha256": "894a8eb4d9ca9879f8092dd2dd75c14c0a14bf009a3d2f9769bb4dac4335f3e4"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/actual-mutant-stderr",
+      "retained": "06-actual-mutant-stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/actual-mutant-stdout.json",
+      "retained": "07-actual-mutant-stdout.json.gz",
+      "bytes": 2921738,
+      "sha256": "7410599150ed60c64b386cd982d92907cd6bb463ec3324367737c66a4677e433",
+      "gzip_sha256": "1f2b71a71911b82eb8da97158b0f9c4ac7d2d0d2610619cdbec247669bb10962"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/actual-mutant-typed-bisect",
+      "retained": "08-actual-mutant-typed-bisect.gz",
+      "bytes": 2975974,
+      "sha256": "a7d9bb170690a19f74a3fcbbdb09e909030c16c4316b9f8ade9c59d33933cf62",
+      "gzip_sha256": "22139dc2b51409ca698fa7f681730b841e7caba571ad43069b2665bdfc60cc34"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/input.json",
+      "retained": "15-input.json.gz",
+      "bytes": 52451,
+      "sha256": "0b8e7b64228399b5766a3e92aa9b8931e1fee45f98e3ae8f76db7b93b6ed6c76",
+      "gzip_sha256": "0b3369a8b659c9d09090441fb668f5a4e17c5636178154d39f77e17e4d2c5fc2"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/projection.json",
+      "retained": "16-projection.json.gz",
+      "bytes": 1448748,
+      "sha256": "3b3ebc31cde92992806312efd6c010795003eaea3806ade49bba82870850dc4b",
+      "gzip_sha256": "4347b1f1c7da9ed2fa3484d31c86f88e46fe6519c1a2a7f167ab7f131774b130"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/receipt.json",
+      "retained": "17-receipt.json.gz",
+      "bytes": 53674,
+      "sha256": "a09dc9119544297e76129988985f5eb78a2e1755149c4f8410cc768e38f93205",
+      "gzip_sha256": "2e8162eaae5ff1c7780f8a44b00097c6e854193498ab0fc1003704980b129051"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/sdk/LICENSE",
+      "retained": "18-LICENSE.gz",
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "gzip_sha256": "02d83c094bd4b96c1a044b449e9b9bbf5a93438d3bdc6efd74b2cc65d74e2cb1"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/sdk/bisect/bisect.go",
+      "retained": "19-bisect.go.gz",
+      "bytes": 23489,
+      "sha256": "978d518986ba6867f5f96356531f35bfa59b865fbb363b98eb9052e862a2160c",
+      "gzip_sha256": "7dfd631c86ea955083ca559549721f28266eb2de04322e431de9ad9eae4e4b1b"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/sdk/main.go",
+      "retained": "20-main.go.gz",
+      "bytes": 951,
+      "sha256": "94246ac5a8200f842ce8fc2830d9b5550cee3c20f7f7e9c4afffa4042814a034",
+      "gzip_sha256": "003ca6ccf953b4c83ca8b9602b4d7cb51093f52c222f17fb0a2f64eb6e5f8b4f"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/sdk-build.stderr",
+      "retained": "21-sdk-build.stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/sdk-build.stdout",
+      "retained": "22-sdk-build.stdout.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/sdk-result.json",
+      "retained": "23-sdk-result.json.gz",
+      "bytes": 525,
+      "sha256": "46c1fb8949399a51080a29ab3b9914200931704f099770a5e876c237dbdbb556",
+      "gzip_sha256": "eed39e969f2e2c8b1033fd94e520cf23e4c5985cd70ad476c6f5aa444a562994"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/sdk-stderr",
+      "retained": "24-sdk-stderr.gz",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "gzip_sha256": "f61f27bd17de546264aa58f40f3aafaac7021e0ef69c17f6b1b4cd7664a037ec"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/sdk-stdout.json",
+      "retained": "25-sdk-stdout.json.gz",
+      "bytes": 2921758,
+      "sha256": "d77f73db8a2ad570f1727371cf9275d004b19a43693e76fc90b343e122713a7b",
+      "gzip_sha256": "2cb083ec2607e635d6ec1aa67931a0f6e649f338aaffe406c6845f97400865b4"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/sdk-typed-bisect",
+      "retained": "26-sdk-typed-bisect.gz",
+      "bytes": 2975740,
+      "sha256": "8a1f44f800d0772cec853a9c4da257d33263d00fb909fa4035a653ca097d6c40",
+      "gzip_sha256": "497755dc9331ad7eca109559da26f3349576a5a71bf26c5b2c2a38e7c9ff275b"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only-driver.log",
+      "retained": "27-symaira-discovery-mask-sdk-only-driver.log.gz",
+      "bytes": 168,
+      "sha256": "ed65a9bf6345e878f5ffaf5f7f9a81c5b2419b1dfaab25c0975b88405d0746d0",
+      "gzip_sha256": "d99d354231a25024b1d3ea8aaec7e018debe85c291be483b81990810e711deea"
+    }
+  ],
+  "scope": "Actual SDK-only typed executables and source/raw proof; no candidate Rust/native provider runtime",
+  "excluded_generated_sdk_home_metadata": [
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/asm@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
+      "bytes": 16384,
+      "sha256": "abb2a1e8addb892ee5d2e94837b743e48baa64ead389226942d5a589e93879cd"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/compile@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
+      "bytes": 16384,
+      "sha256": "8abc24bff7e560e98092e92cf7791f242f70b42373d27541660b693f764aa051"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/go@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
+      "bytes": 16384,
+      "sha256": "9d705f4fab0ce2df023da18e955ef6fddf218583cf8bccb9900a584c0c6b2c63"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/link@go1.26.7-go1.26.7-linux-amd64-2026-10-04.v1.count",
+      "bytes": 16384,
+      "sha256": "6c9efd77d22b428457923fd8c1c4c63bc867dc737d38690d2c921e8548d2a92f"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/upload.token",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "original": "/tmp/symaira-discovery-mask-sdk-only/home/.config/go/telemetry/local/weekends",
+      "bytes": 2,
+      "sha256": "7de1555df0c2700329e815b93b32c571c3ea54dc967b89e81ab73b9972b72d1d"
+    }
+  ],
+  "exclusion_scope": "Generated private Go telemetry bookkeeping is not execution input/output/source/binary proof. All actual SDK proof bytes remain retained; original owned home files remain local."
+}

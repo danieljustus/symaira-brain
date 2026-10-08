@@ -1,0 +1,53 @@
+{
+  "head": "34394496b44d0f95581080885d89d4ed5f43bbd5",
+  "source": "a66b4818f74943812315509a3ba2545b2b6b2ea1",
+  "author_actual_artifacts_verified": 26,
+  "author_encoded_raw_logs_verified": 21,
+  "author_current_actual_binaries_verified": 38,
+  "old_review_file_counts": {
+    "/workspace/symaira-doctor765-windows/migration/evidence/doctor-windows-765/independent-review-a301": 46,
+    "/workspace/symaira-doctor765-windows/migration/evidence/doctor-windows-765/independent-review-0b56": 35,
+    "/workspace/symaira-doctor765-windows/migration/evidence/setup-source-765/independent-review-86ea": 24
+  },
+  "previous_executable_archive_counts": {
+    "a301": 38,
+    "0b56": 41
+  },
+  "original_windows_zip_and_all_five_failures_verified": true,
+  "original_windows_process_sha256": "b54b2702c66b6281e44f217fdcf2a05f2ddf5816a383a2ceb073971beab0037e",
+  "named_case_retention": {
+    "source": {
+      "original": 103,
+      "new": 107,
+      "retained": true
+    },
+    "doctor": {
+      "original": 274,
+      "new": 282,
+      "retained": true
+    },
+    "setup": {
+      "original": 151,
+      "new": 169,
+      "retained": true
+    }
+  },
+  "author_manifest_counts": {
+    "source": {
+      "candidate_source_sha256": 145,
+      "go_source_sha256": 4
+    },
+    "doctor": {
+      "candidate_source_sha256": 59,
+      "go_source_sha256": 108
+    },
+    "setup": {
+      "candidate_source_sha256": 10,
+      "go_source_sha256": 108
+    }
+  },
+  "sdk_source_inputs_verified": 5,
+  "typed_stub_source_hashes_verified": true,
+  "native_windows_macos_runtime_verified": false,
+  "rust_sha256": "a2f9be69dbf324e12a20b5ed3e573f06bb9c66750fec2c3a2a16bd4716bdfc52"
+}

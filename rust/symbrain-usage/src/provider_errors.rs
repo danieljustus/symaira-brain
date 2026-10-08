@@ -141,13 +141,8 @@ pub(super) fn status_error(
         .map(|(_, value)| value.clone());
     let retry_text = retry
         .as_deref()
-        .and_then(|value| value.trim().parse::<f64>().ok())
-        // The shipped text truncates to whole seconds (`int(seconds)`).
-        .map(|seconds| {
-            #[allow(clippy::cast_possible_truncation)]
-            let whole = seconds as i64;
-            format!("; retry in {whole}s")
-        })
+        .and_then(crate::retry_after::seconds)
+        .map(|seconds| format!("; retry in {seconds}s"))
         .unwrap_or_default();
     let detail = match (provider, status) {
         ("claude", 401 | 403) => {

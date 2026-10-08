@@ -1,0 +1,44 @@
+{
+  "disposition": "REQUEST_CHANGES",
+  "head": "689b1a8bc6a21425fe9285317f0c9b8b785586fd",
+  "base": "83f357f50fe9ee06953a855bd2fbf2efc6068dbc",
+  "dirty": false,
+  "findings": [
+    {
+      "priority": "P2",
+      "path": "rust/symbrain-memory/src/schema_inspection.rs",
+      "line": 24,
+      "title": "Verify actual required tables before accepting view columns",
+      "actual_probe": "/tmp/symaira-memory649-independent-extra.json"
+    }
+  ],
+  "source_sha256": {
+    ".github/workflows/memory-schema-native.yml": "44b475d5452e7de4b6eb7abe387ad1ee8251563dea3732ea40853f42307c61e0",
+    "docs/adr/649-doctor-schema-inspection.md": "4e77124db0a0e8b668fa71146e5b63911e68d26a75d97743b0b5cdf2f2308ff3",
+    "migration/contract-matrix.csv": "c274cca4e4cc0edcc2d4f0f69aad4e715ccce176f24e4c9c72e91cac321cd39e",
+    "migration/implementation-plan.md": "13da58e1a36fa0c9020aaa3fa6edc3276c350616a853b7d16ba10ae6d888ddda",
+    "rust/symbrain-cli/src/doctor_core.rs": "dfb212156a6c80118070d535d73e3a9d3a15b6c10444736ba6f79e0bec29efc8",
+    "rust/symbrain-cli/src/doctor_memory.rs": "ddb6908fa6a57199e193f3c8168cfd8b4ba175d21a390ed5af393408ae1e0ea0",
+    "rust/symbrain-cli/tests/doctor_memory_schema.rs": "8fb33a3b7564ebfa377991f4f698c782f6845f016f4d1b87ca86e55f8fae3e08",
+    "rust/symbrain-memory/src/lib.rs": "ba1b90243311f20b4bc565b9f436de9dea0c0ccd0b8dd0bbf19b439d5a06aa6d",
+    "rust/symbrain-memory/src/schema_inspection.rs": "c12e2123a2bf36c56a3101d20864e0e60cb558abdc92c5ea42799ac686943172",
+    "scripts/memory-schema-oracle/replay.py": "88846cf28f8d854692f6680e97e360aecb83b8e70ef5ecca3d88c6c8057cd6dd",
+    "scripts/memory-schema-oracle/run.sh": "bc0ba9daf521c00d3c234727d96d69033f68e54e16c644e6cee0363d804c63c3"
+  },
+  "evidence_sha256": {
+    "/tmp/symaira-memory649-independent-pinned-process.json.false-green-control.log": "36939f6680019c27028c969dfd5788dec18d7c137c4348079ad51455a8c48458",
+    "/tmp/symaira-memory649-independent-pinned-process.json": "abb18f4fcb5556808ce140dc8ceee9216707785488d0c3f38d0a10efc9c4beed",
+    "/tmp/symaira-memory649-independent-pinned-process.log": "37a8e8fa5eac3da3144aed2d6bc70687a68c23fca6a721a8bbf3b77b267cfbaf",
+    "/tmp/symaira-memory649-independent-doctor-tests.log": "1819ab374203195664b9127fb8b21161d901c429a07f79a27dbdf88c16515354",
+    "/tmp/symaira-memory649-independent-schema-tests.log": "c43036b7da15d1dbbb2b7f32a0b29fbf6e539939259dedadb5d9c9f42280b247",
+    "/tmp/symaira-memory649-independent-extra.log": "280fdfdda2f9f68f2843cf8c11d223a13e26f02b081709ce5c264a0882f60b84",
+    "/tmp/symaira-memory649-independent-extra.json": "5c5128c19b78c86df9202fefd1112fa596acb054711ebf3d5292059c8f735bab",
+    "/tmp/symaira-memory649-independent-extra.py": "0d8e64d933a812faa452de70b5f3d6d956bd40398d1c756524c8e77f9a59c6db",
+    "/tmp/symaira-memory649-independent-control.log": "dc202343ef6ac88d7cde1f25f060d01d8a48726595ce47ec786c695620252d0a",
+    "/tmp/symaira-memory649-independent-process.json": "f8a496fb30165e2c041b1ab98ddfdddb5a6972ae71b9cc9283e67788b1bdad45"
+  },
+  "report_sha256": "e1ef8af7da5b8f771af5160dfc6222bb2a26239af483f79e3c9b84563cf1d160",
+  "binary_sha256": "a2684974283ed5eac0e27e5caf53f9b84d27c220b52b60be2a8f312bbe34accd",
+  "native_three_os_gate_waived": false,
+  "candidate_edited": false
+}

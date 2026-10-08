@@ -1,0 +1,10 @@
+{
+  "go_sdk": "go1.26.7",
+  "unicode_version": "15.0.0",
+  "non_printable_range_count": 712,
+  "ranges_probe_sha256": "71885f50b7473ff8d85d8c6368f62320926362c5ffca3efd58fde663db0ca05f",
+  "ranges_output_sha256": "d0788a88f6fa38a3bec1b8b819a0e905d14c12c9964b7084e13882a4d56d2adf",
+  "scalar_quote_probe_sha256": "f17d41de7a4b1e9955bd1b47ca60d58cc322a29798a41e01255698c5ee761df0",
+  "scalar_quote_digest": "4c752b4c6e90df8c641d6ac02a6da80113943bc8fc476c825f27aef51db2a055",
+  "valid_scalars": 1112064
+}

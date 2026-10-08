@@ -1,0 +1,59 @@
+from pathlib import Path
+import ast,gzip,hashlib,json,os,re,subprocess
+root=Path('/workspace/symaira-daemon772-state-key-osargs');head='ccc5c87eb3bf69cf4adbf054b60d5e5342af3891';target=root/'target';prefix='/tmp/symaira-state-key-osargs-jsonfix'
+assert subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip()==head
+assert not subprocess.check_output(['git','status','--porcelain'],cwd=root)
+sha=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
+go=Path('/workspace/oracles/daemon772-go-source');assert not subprocess.check_output(['git','status','--porcelain'],cwd=go)
+reports={n:json.loads(Path(prefix+'-'+n+'.json').read_text()) for n in ['ownership','key','process','registry','mcp']}
+maps={}
+for n,r in reports.items():
+ assert r['candidate_head']==head and not r['candidate_dirty'] and r['matches'],n
+ for field,directory in [('candidate_source_sha256',root),('go_source_sha256',go)]:
+  if field not in r:continue
+  for p,digest in r[field].items():assert sha(directory/p)==digest,(n,field,p)
+  maps[n+'_'+field]=len(r[field])
+assert reports['mcp']['test_exit']==0 and reports['mcp']['total']==13 and reports['mcp']['historical_mcp_source_hashes_match']
+assert all(c['rejected'] and c['exit']==101 for c in reports['mcp']['negative_controls'])
+counts={}
+for name in ['affected','mcp-lib','mcp.json.tests']:
+ t=Path(prefix+'-'+name+'.log').read_text();rows=[tuple(map(int,x)) for x in re.findall(r'test result: ok\. (\d+) passed; (\d+) failed; (\d+) ignored',t)];counts[name]={'passed':sum(x[0] for x in rows),'failed':sum(x[1] for x in rows),'ignored':sum(x[2] for x in rows),'summaries':len(rows)}
+assert counts['affected']['passed']==209 and counts['mcp-lib']['passed']==16 and counts['mcp.json.tests']['passed']==310
+old=subprocess.check_output(['git','show','3c2d731b2b113df81db3601b73f3036c8a558e5c:browse/port/harness/daemon_registry.py'],cwd=root,text=True)
+new=(root/'browse/port/harness/registry_compare.py').read_text()
+def bodies(text):
+ lines=text.splitlines(keepends=True)
+ return {n.name:''.join(lines[n.lineno-1:n.end_lineno]) for n in ast.parse(text).body if isinstance(n,ast.FunctionDef) and n.name in ['normalize','compare','controls']}
+assert bodies(old)==bodies(new)
+standalone='browse/crates/symbrowse-core/src/key_sources/command/standalone.rs';original=subprocess.check_output(['git','show','3c2d731b2b113df81db3601b73f3036c8a558e5c:'+standalone],cwd=root);assert original==(root/standalone).read_bytes()
+retained=json.loads((root/'migration/evidence/browse-state-key-772/review-3db-root/symaira-state-key-3db-root-independent-receipt.json').read_text());assert len(retained['artifacts'])==30
+for original_path,digest in retained['artifacts'].items():assert sha(root/'migration/evidence/browse-state-key-772/review-3db-root'/Path(original_path).name)==digest,original_path
+r=Path('/workspace/oracles/symaira-state-key-osargs-ccc-final/receipt.json');archive=json.loads(r.read_text());assert archive['source']==head and archive['roundtrip_verified']
+for item in archive['records']:assert sha(item['path'])==item['sha256']
+verified={};archives=[]
+for p in [Path('/workspace/oracles/symaira-daemon772-state-key-'+n+'-idle-binaries/receipt.json') for n in ['4cd56e3e4733','407bc5e3b902','3db69a655e43']]+[Path('/workspace/oracles/symaira-state-key-osargs-'+n+'/receipt.json') for n in ['1a91-before-fifo','330-before-import','046-before-json','ccc-final']]:
+ data=json.loads(p.read_text());entries=data['unique']
+ for digest,meta in entries.items():
+  payload=Path(meta['archive']);key=(str(payload),digest)
+  if key not in verified:
+   compressed=sha(payload)
+   if 'archive_sha256' in meta:assert compressed==meta['archive_sha256']
+   with gzip.open(payload,'rb') as stream:assert hashlib.file_digest(stream,'sha256').hexdigest()==digest
+   verified[key]={'archive_sha256':compressed,'raw_sha256':digest}
+ archives.append({'receipt':str(p),'receipt_sha256':sha(p),'elf_paths':len(data.get('records',data.get('executables',[]))),'unique':len(entries)})
+users=[]
+for p in Path('/proc').iterdir():
+ if not p.name.isdigit() or int(p.name)==os.getpid():continue
+ try:
+  values=[str((p/'exe').resolve()),str((p/'cwd').resolve()),(p/'maps').read_text()]
+  for fd in (p/'fd').iterdir():
+   try:values.append(os.readlink(fd))
+   except OSError:pass
+  if any(str(target)+'/' in v for v in values):users.append(p.name)
+ except OSError:pass
+assert not users,users
+journal=[json.loads(line) for line in Path(prefix+'-registry.progress.jsonl').read_text().splitlines()];assert len(journal)==2180 and journal[-1]['stage']=='receipt.complete' and journal[-1]['matches']
+assert len(journal)<=8192 and all(len(line.encode())<=8192 for line in Path(prefix+'-registry.progress.jsonl').read_text().splitlines())
+controls=json.loads(Path(prefix+'-progress-mutants.json').read_text());assert all(c['rejected'] for c in controls['cases'])
+record={'validated_source':head,'candidate_source_maps':maps,'tests':counts,'registry_journal_events':len(journal),'comparator_actual_function_text_identical':True,'comparator_functions_sha256':{k:hashlib.sha256(v.encode()).hexdigest() for k,v in bodies(new).items()},'standalone_provider_file_byte_identical':True,'standalone_provider_file_sha256':hashlib.sha256(original).hexdigest(),'original_root_review_artifacts_verified':len(retained['artifacts']),'archives_reverified':archives,'distinct_payload_roundtrips_verified':len(verified),'current_elf_paths':len(archive['records']),'current_elf_unique':len(archive['unique']),'current_actual_cargo_or_build_bindings':len(archive['actual_affected_or_build_bound_state_paths']),'target_users':users,'target_deleted':False,'scope':'author runtime and source verification only; native Windows/Darwin execution and independent review required; source-only cross checks do not waive native gates'}
+Path(prefix+'-verification.json').write_text(json.dumps(record,indent=2)+'\n');print(json.dumps(record,indent=2))

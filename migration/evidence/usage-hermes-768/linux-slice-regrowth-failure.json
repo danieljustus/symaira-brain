@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "candidate_head": "273a93c03d0cc526d81d962ac137a5a6fb0d73e9",
+  "oracle_commit": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "accepted": false,
+  "original_gate_receipt": {
+    "schema_version": 1,
+    "gate_exit": 101,
+    "candidate_head": "273a93c03d0cc526d81d962ac137a5a6fb0d73e9",
+    "accepted": false
+  },
+  "input_json": "{\"providers\":[{\"id\":\"other\"},{\"id\":\"nous\",\"access_token\":\"retained\"}],\"providers\":[{\"id\":\"other\"}],\"providers\":[{},null]}",
+  "go_record": {
+    "auth_path": "/tmp/symbrain-hermes-768.7bUw0k/home/file-reuse-provider-slice/hermes/auth.json",
+    "authorization": [
+      "Bearer retained"
+    ],
+    "data_hex": "7b2270726f766964657273223a5b7b226964223a226f74686572227d2c7b226964223a226e6f7573222c226163636573735f746f6b656e223a2272657461696e6564227d5d2c2270726f766964657273223a5b7b226964223a226f74686572227d5d2c2270726f766964657273223a5b7b7d2c6e756c6c5d7d",
+    "file_present": true,
+    "hermes_home": "/tmp/symbrain-hermes-768.7bUw0k/home/file-reuse-provider-slice/hermes",
+    "home": "/tmp/symbrain-hermes-768.7bUw0k/home/file-reuse-provider-slice",
+    "id": "file-reuse-provider-slice",
+    "report": {
+      "schema_version": 1,
+      "providers": [
+        {
+          "id": "nous",
+          "display_name": "Nous Portal",
+          "configured": true,
+          "auth_status": {
+            "status": "available",
+            "detail": "Signed in via Hermes CLI auth store (NOUS_PORTAL_ACCESS_TOKEN or file)",
+            "source": "file"
+          },
+          "error": "all AI usage fallbacks failed: AI usage provider \"nous\" is not configured"
+        }
+      ]
+    },
+    "sha256": "4c6cf6f6953002c13ae94c63074198add507f8000eff24e37727abe937bdc59f",
+    "token": "retained"
+  },
+  "native_failure_output": "    Finished `test` profile [unoptimized] target(s) in 0.08s\n     Running tests/hermes_credential_tests.rs (target/debug/deps/hermes_credential_tests-c837eb94e066b9af)\n\nrunning 1 test\n\nthread 'usage_hermes_768_matches_fresh_go_file_and_jwt_contracts' (950640) panicked at rust/symbrain-usage/tests/hermes_credential_tests.rs:111:9:\nassertion `left == right` failed: \"file-reuse-provider-slice\": complete Hermes report\n  left: Object {\"providers\": Array [Object {\"auth_status\": Object {\"detail\": String(\"No Nous Portal credentials found \u2014 sign in with the Hermes CLI\"), \"status\": String(\"missing\")}, \"configured\": Bool(false), \"display_name\": String(\"Nous Portal\"), \"id\": String(\"nous\")}], \"schema_version\": Number(1)}\n right: Object {\"providers\": Array [Object {\"auth_status\": Object {\"detail\": String(\"Signed in via Hermes CLI auth store (NOUS_PORTAL_ACCESS_TOKEN or file)\"), \"source\": String(\"file\"), \"status\": String(\"available\")}, \"configured\": Bool(true), \"display_name\": String(\"Nous Portal\"), \"error\": String(\"all AI usage fallbacks failed: AI usage provider \\\"nous\\\" is not configured\"), \"id\": String(\"nous\")}], \"schema_version\": Number(1)}\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\ntest usage_hermes_768_matches_fresh_go_file_and_jwt_contracts ... FAILED\n\nfailures:\n\nfailures:\n    usage_hermes_768_matches_fresh_go_file_and_jwt_contracts\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s\n\nerror: test failed, to rerun pass `-p symbrain-usage --test hermes_credential_tests`\n",
+  "reason": "Nonempty providers slice shrink truncates Rust backing slots which Go retains for subsequent regrowth."
+}
