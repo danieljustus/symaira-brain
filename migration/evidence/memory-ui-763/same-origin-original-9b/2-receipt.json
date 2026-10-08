@@ -1,0 +1,121 @@
+{
+  "source": "9b92e1ad6006585f3d5109b54fe500400043e50a",
+  "go_binary_sha256": "a68dce5b6f34d10ed568d2a89fab880c889e5ff578735c7bf2ad0535285eda41",
+  "native_binary_sha256": "70435801bf2556cfcf719af61396471bfa8046ead1897bda6b9bd02d0da26c9b",
+  "actual_seed": {
+    "argv": [
+      "/workspace/oracles/symbrain-go-dcddcef0",
+      "memory",
+      "set",
+      "--kind",
+      "reference",
+      "--db",
+      "/tmp/symaira-memory763-same-origin-source9b-original/seed/seed.db",
+      "Blue fox sample"
+    ],
+    "exit": 0,
+    "stdout_hex": "4d656d6f72792037363430613633312d346134642d343638362d396165382d6533303430343735393963302028676c6f62616c2c207265666572656e63652c2073746f726564292e0a",
+    "stderr_hex": ""
+  },
+  "pairs": [
+    {
+      "owner": "go",
+      "actual": {
+        "id": "same-origin-post",
+        "path": "/api/set",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJvd25lZC1vd25lZC1odW1hbiIsImlzcyI6InN5bWFpcmEtbWVtb3J5Iiwic3ViIjoib3duZWQtaHVtYW4iLCJpYXQiOjEsImV4cCI6NDEwMjQ0NDgwMH0.M1ZramRb6H7UmDYsDZ8ZMl_-E5jwGY5eQ4S5lzq5ya0",
+          "Origin": "http://127.0.0.1:50173",
+          "Content-Type": "application/json"
+        },
+        "request_body_hex": "7b22636f6e74656e74223a22417a75726520666f782073706563696d656e227d",
+        "status": 403,
+        "headers": [
+          [
+            "Content-Security-Policy",
+            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'"
+          ],
+          [
+            "Content-Type",
+            "application/json"
+          ],
+          [
+            "X-Content-Type-Options",
+            "nosniff"
+          ],
+          [
+            "X-Frame-Options",
+            "DENY"
+          ],
+          [
+            "Date",
+            "Sun, 04 Oct 2026 01:32:08 GMT"
+          ],
+          [
+            "Content-Length",
+            "50"
+          ]
+        ],
+        "body_hex": "7b22636f6465223a22464f5242494444454e222c226572726f72223a226f726967696e206e6f7420616c6c6f776564227d0a"
+      },
+      "state_unchanged": true
+    },
+    {
+      "owner": "rust",
+      "actual": {
+        "id": "same-origin-post",
+        "path": "/api/set",
+        "method": "POST",
+        "request_headers": {
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJvd25lZC1vd25lZC1odW1hbiIsImlzcyI6InN5bWFpcmEtbWVtb3J5Iiwic3ViIjoib3duZWQtaHVtYW4iLCJpYXQiOjEsImV4cCI6NDEwMjQ0NDgwMH0.M1ZramRb6H7UmDYsDZ8ZMl_-E5jwGY5eQ4S5lzq5ya0",
+          "Origin": "http://127.0.0.1:59431",
+          "Content-Type": "application/json"
+        },
+        "request_body_hex": "7b22636f6e74656e74223a22417a75726520666f782073706563696d656e227d",
+        "status": 403,
+        "headers": [
+          [
+            "content-type",
+            "application/json"
+          ],
+          [
+            "content-security-policy",
+            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'"
+          ],
+          [
+            "x-content-type-options",
+            "nosniff"
+          ],
+          [
+            "x-frame-options",
+            "DENY"
+          ],
+          [
+            "content-length",
+            "50"
+          ],
+          [
+            "date",
+            "Sun, 04 Oct 2026 01:32:08 GMT"
+          ]
+        ],
+        "body_hex": "7b22636f6465223a22464f5242494444454e222c226572726f72223a226f726967696e206e6f7420616c6c6f776564227d0a"
+      },
+      "state_unchanged": true
+    }
+  ],
+  "shutdown": [
+    {
+      "exit": 0,
+      "elapsed_seconds": 0.0012201040008221753,
+      "listener_closed": true
+    },
+    {
+      "exit": 0,
+      "elapsed_seconds": 0.0011842599997180514,
+      "listener_closed": true
+    }
+  ],
+  "limits": "Actual manually supplied browser-equivalent same-Origin POST headers; not an actual graphical browser request or native write success."
+}

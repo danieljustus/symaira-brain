@@ -1,0 +1,42 @@
+   Compiling symbrain-cli v0.12.1 (/workspace/symaira-memory649-doctor/rust/symbrain-cli)
+    Finished `test` profile [unoptimized] target(s) in 0.88s
+     Running tests/doctor_fix_native.rs (target/debug/deps/doctor_fix_native-d7ec659ac581fc71)
+
+running 1 test
+test doctor_repair_preserves_source_and_corruption_and_continues_failures ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.53s
+
+     Running tests/doctor_memory_schema.rs (target/debug/deps/doctor_memory_schema-9efc21f212b9f57a)
+
+running 2 tests
+test same_column_view_cannot_replace_a_required_writable_table ... ok
+test applied_migrations_with_missing_columns_are_reported_without_modification ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/doctor_modules.rs (target/debug/deps/doctor_modules-0ad93ab26f8d901a)
+
+running 5 tests
+test doctor_omits_empty_optional_module_extension_for_old_json_parity ... ok
+test doctor_omits_missing_modules_and_safely_ignores_missing_malformed_or_special_sidecars ... ok
+test doctor_bounds_provenance_sidecar_reads ... ok
+test doctor_preserves_release_version_repo_and_hash_without_source_build_fields ... ok
+test doctor_reports_installed_optional_modules_and_exact_sidecar_provenance ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/doctor_native.rs (target/debug/deps/doctor_native-6219e82393ba046b)
+
+running 8 tests
+test doctor_json_reports_static_config_and_registered_harness_natively ... ok
+test doctor_vault_agent_skips_broken_profile_without_go ... ok
+test doctor_vault_agent_skips_unlistable_profiles_without_go ... ok
+test doctor_json_true_uses_json_output ... ok
+test doctor_vault_agent_with_missing_vault_binary_stays_native ... ok
+test doctor_vault_agent_with_disabled_vault_profile_stays_native ... ok
+test doctor_vault_agent_without_profiles_stays_native_with_invalid_go_binary ... ok
+test doctor_vault_probe_does_not_expose_child_stderr ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+

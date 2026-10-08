@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/tmp/symaira-memory763-ui-oracle.py", line 37, in <module>
+    row,data=request('static-'+path,path);assert row['status']==200,row
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/symaira-memory763-ui-oracle.py", line 24, in request
+    conn=http.client.HTTPConnection('127.0.0.1',port,timeout=10);raw=json.dumps(body).encode() if body is not None else None;h=dict(headers or {})
+         ^^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'client'

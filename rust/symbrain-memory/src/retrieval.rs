@@ -53,6 +53,18 @@ pub(crate) fn search(
     scope: &str,
     limit: usize,
 ) -> Result<Vec<SearchHit>, StoreError> {
+    search_checked(conn, query_vector, query_source, scope, limit, |_| true)
+}
+
+/// Checks the caller's read boundary before recording retrieval feedback.
+pub(crate) fn search_checked(
+    conn: &Connection,
+    query_vector: &[f32],
+    query_source: &str,
+    scope: &str,
+    limit: usize,
+    admitted: impl Fn(&SearchRow) -> bool,
+) -> Result<Vec<SearchHit>, StoreError> {
     let buckets = buckets_for(query_vector)?;
     let candidates = candidates(conn, &buckets, query_source, scope)?;
     let candidates: Vec<Candidate> = candidates
@@ -70,6 +82,11 @@ pub(crate) fn search(
     let mut hits = hydrate(conn, &ids, query_vector)?;
     score_and_rank(&mut hits, query_vector);
     hits.truncate(limit);
+    if hits.iter().any(|hit| !admitted(&hit.memory)) {
+        return Err(StoreError::Invalid(
+            "read requires the unported memory pipeline".into(),
+        ));
+    }
     track_access(conn, &hits)?;
     Ok(hits)
 }
