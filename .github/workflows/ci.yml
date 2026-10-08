@@ -570,15 +570,17 @@ jobs:
           ./scripts/run-go-oracle.sh HEAD run ./scripts/skills-install-oracle -output "$skills_install_fixture"
           scan_fixture="$RUNNER_TEMP/guard-scan-oracle-windows.json"
           SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE="$scan_fixture" ./guard/scripts/guard-scan-oracle/run.sh write
-          echo "SYMBRAIN_XDG_ORACLE_FIXTURE=$xdg_fixture" >> "$GITHUB_ENV"
-          echo "SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE=$doctor_fixture" >> "$GITHUB_ENV"
-          echo "SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE=$instructions_fixture" >> "$GITHUB_ENV"
-          echo "SYMBRAIN_CLI_TREE_ORACLE_FIXTURE=$cli_fixture" >> "$GITHUB_ENV"
-          echo "SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE=$activity_cli_fixture" >> "$GITHUB_ENV"
-          echo "SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE=$profile_remove_fixture" >> "$GITHUB_ENV"
-          echo "SYMBRAIN_SKILLS_ORACLE_FIXTURE=$skills_fixture" >> "$GITHUB_ENV"
-          echo "SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE=$skills_install_fixture" >> "$GITHUB_ENV"
-          echo "SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE=$scan_fixture" >> "$GITHUB_ENV"
+          {
+            echo "SYMBRAIN_XDG_ORACLE_FIXTURE=$xdg_fixture"
+            echo "SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE=$doctor_fixture"
+            echo "SYMBRAIN_INSTRUCTIONS_ORACLE_FIXTURE=$instructions_fixture"
+            echo "SYMBRAIN_CLI_TREE_ORACLE_FIXTURE=$cli_fixture"
+            echo "SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE=$activity_cli_fixture"
+            echo "SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE=$profile_remove_fixture"
+            echo "SYMBRAIN_SKILLS_ORACLE_FIXTURE=$skills_fixture"
+            echo "SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE=$skills_install_fixture"
+            echo "SYMBRAIN_GUARD_SCAN_ORACLE_FIXTURE=$scan_fixture"
+          } >> "$GITHUB_ENV"
 
       - name: Rust workspace and Go fixture gates on native Windows
         shell: bash
@@ -691,19 +693,6 @@ jobs:
             ${{ runner.temp }}/activity-validation-767.json
             ${{ runner.temp }}/activity-validation-767.json.fixture.json
             ${{ runner.temp }}/activity-validation-767.json.controls.json
-          if-no-files-found: error
-          retention-days: 14
-
-      - name: Native skills render drift and frozen Go baseline
-        shell: bash
-        run: scripts/skills-render-drift/run.sh "$RUNNER_TEMP/skills-render-drift.json"
-
-      - name: Upload native skills render drift evidence
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: skills-render-drift-${{ runner.os }}
-          path: ${{ runner.temp }}/skills-render-drift.json
           if-no-files-found: error
           retention-days: 14
 

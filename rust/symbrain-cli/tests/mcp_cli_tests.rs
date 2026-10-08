@@ -16,6 +16,9 @@ use tempfile::TempDir;
 #[path = "support/mcp_lifecycle.rs"]
 mod mcp_lifecycle;
 
+#[path = "support/mcp_profile_startup.rs"]
+mod mcp_profile_startup;
+
 const FAKE_MCP: &str = r#"#!/usr/bin/python3
 import json
 import sys

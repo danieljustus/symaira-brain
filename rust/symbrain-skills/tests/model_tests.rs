@@ -17,6 +17,28 @@ fn fixture(name: &str) -> PathBuf {
 }
 
 #[test]
+fn inspected_bundle_keeps_empty_targets_as_an_object() {
+    for manifest in [None, Some("[targets]\n")] {
+        let root = tempfile::tempdir().expect("owned bundle");
+        fs::write(
+            root.path().join("SKILL.md"),
+            "---\nname: wire-targets\ndescription: test\n---\nBody\n",
+        )
+        .expect("skill");
+        if let Some(manifest) = manifest {
+            fs::write(root.path().join("symskills.toml"), manifest).expect("manifest");
+        }
+        let bundle = load_bundle(root.path()).expect("bundle");
+        assert!(bundle.manifest.targets.is_empty());
+        // Go LoadBundle initializes this map, even without a manifest file.
+        assert_eq!(
+            symbrain_skills::wire::bundle(&bundle)["manifest"]["targets"],
+            json!({})
+        );
+    }
+}
+
+#[test]
 fn source_fixture_loads_frontmatter_manifest_and_resources() {
     let bundle = load_bundle(&fixture("source")).expect("source fixture");
     assert_eq!(bundle.frontmatter.name, "golden-fixture");

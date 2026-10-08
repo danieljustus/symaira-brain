@@ -57,6 +57,8 @@ fn lock_destination(root: &Dir, parent: &Path, destination: &Path) -> io::Result
         .write(true)
         .create(true)
         .follow(FollowSymlinks::No);
+    #[cfg(unix)]
+    options.mode(0o600);
     let file = {
         let mut opened = None;
         for attempt in 0..16 {
@@ -116,7 +118,7 @@ fn open_root(path: &Path) -> io::Result<Dir> {
     Ok(root)
 }
 
-fn normalize_system_alias(path: &Path) -> PathBuf {
+pub(crate) fn normalize_system_alias(path: &Path) -> PathBuf {
     let text = path.to_string_lossy();
     for (alias, real) in [("/var", "/private/var"), ("/tmp", "/private/tmp")] {
         if (text == alias || text.starts_with(&format!("{alias}/")))

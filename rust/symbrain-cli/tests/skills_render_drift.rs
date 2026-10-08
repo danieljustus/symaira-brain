@@ -5,6 +5,10 @@ use std::process::Command;
 use symbrain_skills::install::{InstallOptions, install_rendered};
 use symbrain_skills::{RenderMetadata, load_bundle, render_target};
 
+#[cfg(any(unix, windows))]
+#[path = "support/skills_status_cache.rs"]
+mod skills_status_cache;
+
 #[test]
 fn explicit_target_reports_render_drift_without_a_go_fallback() {
     let oracle = std::env::var_os("SYMBRAIN_SKILLS_STATUS_GO_ORACLE");
@@ -227,7 +231,7 @@ fn write_observations(observations: &[serde_json::Value]) {
 
 #[cfg(any(unix, windows))]
 #[test]
-fn unreadable_real_render_links_keep_json_and_table_reports_read_only() {
+fn unreadable_real_render_links_preserve_protected_state_and_only_cache_comparisons() {
     for kind in ["nested-link", "depth", "fifo"] {
         if kind == "fifo" && !cfg!(unix) {
             continue;
@@ -282,6 +286,8 @@ fn unreadable_real_render_links_keep_json_and_table_reports_read_only() {
             "{kind}"
         );
         assert!(table.ends_with("\tunreadable\n"), "{kind}: {table}");
+        let after_table = snapshot(temp.path());
+        skills_status_cache::assert_only_cache_created(&before, &after_table, kind);
         command.arg("--json");
         let json = command.output().unwrap();
         assert!(json.status.success(), "{kind}");
@@ -299,8 +305,53 @@ fn unreadable_real_render_links_keep_json_and_table_reports_read_only() {
         assert!(row.get("render_drift").is_none(), "{kind}");
         assert_eq!(report["summary"]["stale"], 1, "{kind}");
         assert!(!String::from_utf8_lossy(&json.stdout).contains("OUTSIDE_SECRET_SENTINEL"));
-        assert_eq!(snapshot(temp.path()), before, "{kind}: status wrote state");
+        assert_eq!(
+            snapshot(temp.path()),
+            after_table,
+            "{kind}: hot-cache scan changed state"
+        );
     }
+}
+
+#[test]
+fn default_and_empty_comparison_cache_keep_status_api_read_only() {
+    let Fixture {
+        temp,
+        source,
+        cache,
+        ..
+    } = fixture_with_mode("hermes", "copy");
+    let options = symbrain_skills::install::StatusOptions {
+        home_dir: temp.path().join("home"),
+        targets: vec!["hermes".to_owned()],
+        library_dir: source.parent().unwrap().to_path_buf(),
+        base_dir: Some(temp.path().join("data/symskills/base")),
+        render_dir: Some(cache),
+        ..Default::default()
+    };
+    let before = snapshot(temp.path());
+    let default = symbrain_skills::install::status(&options).unwrap();
+    assert_eq!(default.len(), 1);
+    let empty =
+        symbrain_skills::install::status_with_cache(&options, Some(std::path::Path::new("")))
+            .unwrap();
+    assert_eq!(default, empty);
+    let sync = symbrain_skills::install::SyncOptions {
+        library_dir: options.library_dir.clone(),
+        home_dir: options.home_dir.clone(),
+        base_dir: options.base_dir.clone(),
+        render_dir: options.render_dir.clone(),
+        targets: options.targets.clone(),
+        dry_run: true,
+        ..Default::default()
+    };
+    assert!(symbrain_skills::install::sync(&sync).unwrap().is_empty());
+    assert!(
+        symbrain_skills::install::sync_with_cache(&sync, Some(std::path::Path::new("")))
+            .unwrap()
+            .is_empty()
+    );
+    assert_eq!(snapshot(temp.path()), before);
 }
 
 fn snapshot(root: &std::path::Path) -> std::collections::BTreeMap<std::path::PathBuf, Vec<u8>> {

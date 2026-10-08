@@ -114,5 +114,6 @@ fn repair_keeps_handler_surrogate_escapes_and_go_whitespace_domain_separate() {
         assert_eq!(trim_go_space(&data), b"\xff");
     }
     assert_eq!(trim_go_space(b"\xff \xfe"), b"\xff \xfe");
-    assert!(transport_request(b"{\xff}").unwrap().is_err());
+    assert!(syntax::validate(b"{\xff}").is_err());
+    assert!(transport_request(b"{\xff}").is_none());
 }

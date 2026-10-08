@@ -45,7 +45,29 @@ fn ignored_arguments_and_envelope_keep_full_go_depth_without_value128_fallback()
 }
 
 #[test]
-fn complete_syntax_precedes_typed_errors_and_retains_original_depth_character() {
+fn malformed_non_skills_requests_keep_inherited_errors_in_both_transports() {
+    for raw in [
+        br#"{"jsonrpc":"2.0","method":"ping","params":{"x":01}}"#.as_slice(),
+        br#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"skills_list","arguments":{}}"#,
+        br#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"skills_list"},"method":"ping","params":{"x":01}}"#,
+        br#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"skills_list","name":"memory_list","x":01}}"#,
+        br#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"skills_list"},"m\u0065thod":"ping","p\u0061rams":{"x":01}}"#,
+        br#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":4,"name":"skills_list","_meta":[],"x":01}}"#,
+        br#"{"jsonrpc":"2.0","method":"tools/call","params":{"name":"skills_list"},"broken":"\u12x4"}"#,
+    ] {
+        let expected = serde_json::from_slice::<serde_json::Value>(raw)
+            .unwrap_err()
+            .to_string();
+        each_transport(raw, |found| match found.unwrap_err() {
+            FrameError::Parse { message, .. } => assert_eq!(message, expected),
+            error => panic!("unexpected framing error: {error}"),
+        });
+        assert!(transport_request(raw).is_none());
+    }
+}
+
+#[test]
+fn malformed_depth_and_suffix_keep_inherited_errors_before_typed_admission() {
     for open in ["[", "{"] {
         let child = if open == "[" {
             "[".repeat(9998)
@@ -61,18 +83,25 @@ fn complete_syntax_precedes_typed_errors_and_retains_original_depth_character() 
             r#""name":"skills_list""#,
             r#""name":4,"name":"skills_list""#,
         );
+        assert_eq!(
+            syntax::validate(raw.as_bytes()).unwrap_err(),
+            format!("invalid character '{open}' exceeded max depth")
+        );
+        let inherited = serde_json::from_slice::<serde_json::Value>(raw.as_bytes())
+            .unwrap_err()
+            .to_string();
         each_transport(raw.as_bytes(), |found| match found.unwrap_err() {
-            FrameError::Parse { message, .. } => assert_eq!(
-                message,
-                format!("invalid character '{open}' exceeded max depth")
-            ),
+            FrameError::Parse { message, .. } => assert_eq!(message, inherited),
             error => panic!("unexpected framing error: {error}"),
         });
     }
     let raw = body("{}", r#","_meta":[],"broken":01"#);
+    let inherited = serde_json::from_slice::<serde_json::Value>(raw.as_bytes())
+        .unwrap_err()
+        .to_string();
     each_transport(raw.as_bytes(), |found| {
         assert!(matches!(found, Err(FrameError::Parse { message, .. })
-            if message == "invalid character '1' after object key:value pair"));
+            if message == inherited));
     });
 }
 

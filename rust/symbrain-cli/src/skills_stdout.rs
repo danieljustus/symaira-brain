@@ -1,5 +1,9 @@
 //! Only the executable's Skills fd1 boundary owns Go stdout OS semantics.
 use std::io::{self, Write};
+#[cfg(unix)]
+use std::os::fd::AsFd;
+#[cfg(windows)]
+use std::os::windows::io::AsHandle;
 
 pub(super) struct SkillsStdout(io::Stdout);
 impl SkillsStdout {
@@ -9,6 +13,19 @@ impl SkillsStdout {
 }
 impl Write for SkillsStdout {
     fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+        // Stdout suppresses bad-descriptor errors. Clone its existing handle
+        // only when writing so fd flags and commands with no output survive.
+        #[cfg(unix)]
+        let owned = self.0.as_fd().try_clone_to_owned();
+        #[cfg(windows)]
+        let owned = self.0.as_handle().try_clone_to_owned();
+        #[cfg(any(unix, windows))]
+        {
+            std::fs::File::from(owned.map_err(stdout_error)?)
+                .write(bytes)
+                .map_err(stdout_error)
+        }
+        #[cfg(not(any(unix, windows)))]
         self.0.write(bytes).map_err(stdout_error)
     }
     fn flush(&mut self) -> io::Result<()> {

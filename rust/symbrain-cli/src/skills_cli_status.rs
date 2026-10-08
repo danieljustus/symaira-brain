@@ -77,7 +77,7 @@ pub(super) fn run(
         render_dir: Some(cfg.render_dir),
     };
 
-    let statuses = match install::status(&opts) {
+    let statuses = match install::status_with_cache(&opts, Some(&cfg.cache_dir)) {
         Ok(s) => s,
         Err(err) => {
             let _ = writeln!(stderr, "symbrain skills status: scan installs: {err}");
@@ -191,7 +191,7 @@ pub(super) fn sync(
         events_path: None,
     };
 
-    let results = match install::sync(&sync_opts) {
+    let results = match install::sync_with_cache(&sync_opts, Some(&cfg.cache_dir)) {
         Ok(r) => r,
         Err(err) => {
             let _ = writeln!(stderr, "symbrain skills sync: {err}");

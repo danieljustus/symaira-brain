@@ -142,9 +142,9 @@ pub fn raw_skills_params(params: Option<&RawValue>) -> Option<Result<RawSkillsCa
 }
 
 pub(crate) fn transport_request(bytes: &[u8]) -> Option<Result<crate::Request, String>> {
-    if let Err(error) = syntax::validate(bytes) {
-        return Some(Err(error));
-    }
+    // An incomplete suffix may replace any owner field. Without complete
+    // syntax, leave admission and its diagnosis to the inherited parser.
+    syntax::validate(bytes).ok()?;
     let repaired = strings::transport(bytes, 2)?;
     let fields = serde_json::from_str::<Fields>(&repaired).ok()?;
     let (mut jsonrpc, mut method, mut params, mut id, mut has_id, mut first) =

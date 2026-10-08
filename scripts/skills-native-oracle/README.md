@@ -47,3 +47,38 @@ require matched valid baselines, exact nil-ID errors, stderr and complete
 file/raw-hash/validated-lock state. All nine remain unexecuted. Exact parse-case
 IDs use the existing strict comparator, valid cases use the old comparator;
 no old response/input is normalized. See `docs/adr/skills-native-json-eof-764.md`.
+
+## Approved side-effect and parser boundaries
+
+CLI `skills status` may persist only its derived comparison cache at
+`<CacheDir>/status-render`. The same comparison stage in CLI `skills sync`,
+including dry-run, may use this cache; dry-run still must not change installed
+skills, retained renders, bases, the library or event logs. The library `status`
+and `sync` entrypoints and MCP restore/status callers remain uncached by default.
+An explicitly empty cache path also selects temporary staging. Cache hints do
+not authorize reuse: actual trees and markers must pass full bounded validation.
+
+The derived tree is swapped atomically; its hint is a separate publication, as
+in the frozen Go implementation. A hint failure is reported but does not roll
+back an already committed valid tree. A later call validates that tree again
+and can repair the hint. The synchronized Unix regression exercises the shared
+lock, file and hint operations after root/parent capability capture and ancestor
+replacement; it is not a complete CLI or Windows race-acceptance claim.
+
+Disabled profile memory, audit and history must not be initialized merely to
+match the frozen Go gateway's unconditional startup side effects. An explicitly
+enabled profile audit remains permitted; global audit defaults do not override
+a profile opt-out. The real CLI regression
+`mcp_profile_startup::disabled_memory_and_history_do_not_create_startup_state`
+checks both opt-out and explicit audit opt-in without a Go fallback.
+
+Malformed transport input without a safely determined known Skills owner keeps
+the inherited JSON parser and diagnosis in both line and Content-Length modes.
+No prefix search or permissive partial parser establishes ownership. Valid
+owned Skills input still uses its existing bounded, ordered outer decoder.
+
+These are explicit corrective contracts, not permission to rewrite historical
+captures or erase files/errors from comparisons. The frozen process gate stays
+strict and can still fail where its historical Go behavior conflicts with these
+boundaries. Such failures need separately reviewed corrective-contract evidence;
+a focused test pass is not Linux/macOS/Windows native acceptance.

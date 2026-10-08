@@ -63,15 +63,21 @@ pub(super) fn compare_one<F>(
     options: &StatusOptions,
     loader: &BundleLoader,
     common: F,
+    cache_dir: Option<&Path>,
 ) -> Result<InstallStatus, SkillError>
 where
     F: Fn(StatusKind, Vec<super::drift::FileDrift>, Option<String>) -> InstallStatus,
 {
     let bundle = loader.load(source)?;
     let rendered = render_target(&bundle, target, &RenderMetadata::default())?;
-    let temp = tempfile::tempdir()
-        .map_err(|error| SkillError(format!("create status staging: {error}")))?;
-    let fresh = materialize(&bundle, &rendered, temp.path())?;
+    let staging;
+    let fresh = if let Some(cache) = cache_dir {
+        crate::materialize::cached_comparison(&bundle, &rendered, cache)?
+    } else {
+        staging = tempfile::tempdir()
+            .map_err(|error| SkillError(format!("create status staging: {error}")))?;
+        materialize(&bundle, &rendered, staging.path())?
+    };
     let common = |status, drift, error| {
         let mut row = common(status, drift, error);
         super::render_status::inspect(&mut row, options, installed, &fresh.root);

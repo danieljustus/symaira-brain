@@ -3,6 +3,7 @@ fn marker_bytes(
     mut existing: Option<BTreeMap<String, serde_json::Value>>,
     manifest: &[OutputEntry],
     digest: &str,
+    comparison: bool,
 ) -> Result<Vec<u8>, SkillError> {
     let marker = existing.get_or_insert_with(BTreeMap::new);
     marker.insert(
@@ -13,10 +14,7 @@ fn marker_bytes(
         "output_digest".into(),
         serde_json::Value::String(digest.to_owned()),
     );
-    marker.insert(
-        "output_manifest".into(),
-        serde_json::Value::Null,
-    );
+    marker.insert("output_manifest".into(), serde_json::Value::Null);
     let mut bytes = Vec::new();
     bytes.extend_from_slice(b"{\n");
     let entries = marker.iter().collect::<Vec<_>>();
@@ -47,6 +45,13 @@ fn marker_bytes(
     }
     bytes.push(b'}');
     bytes.push(b'\n');
+    if comparison {
+        bytes = comparison_json_escape(
+            &String::from_utf8(bytes)
+                .map_err(|error| SkillError(format!("encode comparison marker: {error}")))?,
+        )
+        .into_bytes();
+    }
     if bytes.len() as u64 > MAX_INPUT_SIZE {
         return Err(SkillError(format!(
             "render marker exceeds maximum input size of {MAX_INPUT_SIZE} bytes"
@@ -197,8 +202,14 @@ fn collect_manifest_inner(
     Ok(())
 }
 
-fn manifest_digest(manifest: &[OutputEntry]) -> Result<String, SkillError> {
-    let bytes = serde_json::to_vec(manifest)
+fn manifest_digest(manifest: &[OutputEntry], comparison: bool) -> Result<String, SkillError> {
+    let json = serde_json::to_string(manifest)
         .map_err(|error| SkillError(format!("encode output manifest: {error}")))?;
+    let json = if comparison {
+        comparison_json_escape(&json)
+    } else {
+        json
+    };
+    let bytes = json.as_bytes();
     Ok(format!("{:x}", Sha256::digest(bytes)))
 }

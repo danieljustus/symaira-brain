@@ -172,6 +172,16 @@ pub struct SyncResult {
 /// conflicts are only replaced under `PreferSource`, matching the Go safe
 /// default (`Abort`) and making the conflict decision explicit.
 pub fn sync(options: &SyncOptions) -> Result<Vec<SyncResult>, SkillError> {
+    sync_with_cache(options, None)
+}
+
+/// Syncs with an optional derived comparison cache, separate from `render_dir`.
+/// # Errors
+/// Returns the same scope and installation errors as [`sync`].
+pub fn sync_with_cache(
+    options: &SyncOptions,
+    cache_dir: Option<&std::path::Path>,
+) -> Result<Vec<SyncResult>, SkillError> {
     // Go defaults an omitted scope to user, even when a project directory is
     // available. Keep project paths opt-in instead of inferring them.
     let scope = if options.scope.is_empty() {
@@ -194,6 +204,7 @@ pub fn sync(options: &SyncOptions) -> Result<Vec<SyncResult>, SkillError> {
             render_dir: None,
         },
         &loader,
+        cache_dir,
     )?;
     sync_selected(options, &statuses)
 }

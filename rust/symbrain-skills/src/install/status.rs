@@ -109,13 +109,24 @@ pub struct StatusOptions {
 
 /// Scans every requested target and scope in deterministic order.
 pub fn status(options: &StatusOptions) -> Result<Vec<InstallStatus>, SkillError> {
-    status_with_loader(options, &BundleLoader::default())
+    status_with_cache(options, None)
+}
+
+/// Scans with an optional derived comparison cache, separate from `render_dir`.
+pub fn status_with_cache(
+    options: &StatusOptions,
+    cache_dir: Option<&std::path::Path>,
+) -> Result<Vec<InstallStatus>, SkillError> {
+    status_with_loader(options, &BundleLoader::default(), cache_dir)
 }
 
 pub(super) fn status_with_loader(
     options: &StatusOptions,
     loader: &BundleLoader,
+    cache_dir: Option<&std::path::Path>,
 ) -> Result<Vec<InstallStatus>, SkillError> {
+    // Go's empty CacheDir selects temporary staging; whitespace is a real path.
+    let cache_dir = cache_dir.filter(|path| !path.as_os_str().is_empty());
     let targets = if options.targets.is_empty() {
         crate::target::target_names()
     } else {
@@ -125,7 +136,7 @@ pub(super) fn status_with_loader(
     for target in targets {
         let mut one = options.clone();
         one.targets = vec![target.clone()];
-        rows.extend(status_target(&one, &target, loader)?);
+        rows.extend(status_target(&one, &target, loader, cache_dir)?);
     }
     rows.sort_by(|left, right| {
         left.target
@@ -139,6 +150,7 @@ fn status_target(
     options: &StatusOptions,
     target: &str,
     loader: &BundleLoader,
+    cache_dir: Option<&std::path::Path>,
 ) -> Result<Vec<InstallStatus>, SkillError> {
     let scope = if options.scope.is_empty() {
         "user"
@@ -321,6 +333,7 @@ fn status_target(
             options,
             loader,
             common,
+            cache_dir,
         ) {
             Ok(row) => rows.push(row),
             // Go status keeps a broken managed install visible as a stale

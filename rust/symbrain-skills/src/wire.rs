@@ -38,9 +38,6 @@ pub fn bundle(value: &Bundle) -> Value {
             .expect("skill object")
             .remove("requires");
     }
-    if value.manifest.targets.is_empty() {
-        fields.insert("targets".into(), Value::Null);
-    }
     json!({"root":crate::GoText::from_path(&value.root),"frontmatter":frontmatter(&value.frontmatter),"manifest":manifest,"body":value.body,"resources":value.resources})
 }
 /// Render summary exposes generated Markdown as text and omits private files.

@@ -1,9 +1,13 @@
-//! Prepared Go scanner EOF-state and both-transport admission regressions.
+//! Go scanner EOF states and inherited errors for unowned malformed transport.
 use super::*;
 use crate::{Decoder, FrameError, Mode};
 use std::io::Cursor;
 
-fn each_transport(raw: &[u8], expected: &str) {
+fn each_transport(raw: &[u8], go_scanner_error: &str) {
+    assert_eq!(syntax::validate(raw).unwrap_err(), go_scanner_error);
+    let expected = serde_json::from_slice::<serde_json::Value>(raw)
+        .unwrap_err()
+        .to_string();
     for mode in [Mode::Line, Mode::Framed] {
         let mut wire = if mode == Mode::Framed {
             format!("Content-Length: {}\r\n\r\n", raw.len()).into_bytes()
@@ -25,7 +29,7 @@ fn each_transport(raw: &[u8], expected: &str) {
 }
 
 #[test]
-fn required_token_eof_uses_active_go_state_before_generic_end() {
+fn required_token_eof_keeps_scanner_states_without_claiming_transport_ownership() {
     let prefix = br#"{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"skills_list","_meta":{"n":"#;
     let groups: &[(&[&[u8]], &str)] = &[
         (&[b"-"], "in numeric literal"),
@@ -112,7 +116,7 @@ fn incomplete_containers_and_ordinary_strings_keep_generic_eof() {
 }
 
 #[test]
-fn original_independent_eof_wires_keep_full_parse_message_in_both_modes() {
+fn original_independent_eof_wires_keep_inherited_errors_in_both_modes() {
     macro_rules! original {
         ($name:literal, $expected:literal) => {
             for (wire, mode) in [
@@ -135,10 +139,25 @@ fn original_independent_eof_wires_keep_full_parse_message_in_both_modes() {
                     Mode::Framed,
                 ),
             ] {
+                let raw = if mode == Mode::Line {
+                    wire.strip_suffix(b"\n").unwrap_or(wire)
+                } else {
+                    let separator = wire
+                        .windows(4)
+                        .position(|bytes| bytes == b"\r\n\r\n")
+                        .expect("frozen Content-Length fixture");
+                    &wire[separator + 4..]
+                };
+                // Preserve the frozen scanner assertion independently. It
+                // cannot establish ownership of this incomplete envelope.
+                assert_eq!(syntax::validate(raw).unwrap_err(), $expected);
+                let inherited = serde_json::from_slice::<serde_json::Value>(raw)
+                    .unwrap_err()
+                    .to_string();
                 let error = Decoder::new(Cursor::new(wire)).read_request().unwrap_err();
                 assert_eq!(error.mode(), mode);
                 match error {
-                    FrameError::Parse { message, .. } => assert_eq!(message, $expected),
+                    FrameError::Parse { message, .. } => assert_eq!(message, inherited),
                     error => panic!("unexpected framing error: {error}"),
                 }
             }

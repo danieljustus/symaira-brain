@@ -79,11 +79,7 @@ pub(super) fn inspect(
         });
         // This is a presentation mode only. Persisted markers and sync options
         // remain `symlink`; other destinations retain their ordinary mode.
-        if row.mode.as_deref() == Some("symlink")
-            && let (Ok(installed), Ok(cached)) =
-                (std::path::absolute(installed), std::path::absolute(&cached))
-            && installed == cached
-        {
+        if row.mode.as_deref() == Some("symlink") && same_cached_install(installed, &cached) {
             row.mode = Some("linked".to_owned());
         }
         Ok(())
@@ -91,5 +87,45 @@ pub(super) fn inspect(
     if let Err(error) = result {
         row.render_status = Some(RenderStatus::Unreadable);
         row.render_error = Some(error.0);
+    }
+}
+
+fn same_cached_install(installed: &Path, cached: &Path) -> bool {
+    // Presentation only, after bounded no-follow hashing. Reuse the existing
+    // exact OS-alias check; arbitrary links do not gain read authority.
+    matches!(
+        (std::path::absolute(installed), std::path::absolute(cached)),
+        (Ok(installed), Ok(cached))
+            if crate::materialize::normalize_system_alias(&installed)
+                == crate::materialize::normalize_system_alias(&cached)
+    )
+}
+
+#[cfg(all(test, target_os = "macos"))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn linked_mode_recognizes_only_verified_system_aliases() {
+        for (alias, real) in [("/var", "/private/var"), ("/tmp", "/private/tmp")] {
+            assert_eq!(std::fs::canonicalize(alias).unwrap(), Path::new(real));
+            // Structural path comparison; no files are created under /var or /tmp.
+            let installed = Path::new(real).join("owned-comparison-cache");
+            let cached = Path::new(alias).join("owned-comparison-cache");
+            assert!(same_cached_install(&installed, &cached));
+            assert!(same_cached_install(&cached, &installed));
+            assert!(!same_cached_install(
+                &installed,
+                &Path::new(alias).join("different-cache")
+            ));
+        }
+        assert!(!same_cached_install(
+            Path::new("/private/variety/cache"),
+            Path::new("/variety/cache")
+        ));
+        assert!(!same_cached_install(
+            Path::new("/owned/actual-cache"),
+            Path::new("/owned/user-alias")
+        ));
     }
 }
