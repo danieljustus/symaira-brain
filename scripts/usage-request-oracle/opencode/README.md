@@ -15,16 +15,22 @@ From the repository root:
 make usage-opencode-check
 
 # Deliberate regeneration, followed by the actual Rust replay.
-bash scripts/run-external-env.sh env GOTOOLCHAIN=go1.26.7 go run ./scripts/usage-request-oracle/opencode
+bash scripts/run-external-env.sh env GOTOOLCHAIN=go1.26.7 go run ./scripts/usage-request-oracle/opencode -oracle-revision a92385d2deecc08d1fd96869908b81b7abd355fe -oracle-toolchain go1.26.7
 bash scripts/run-external-env.sh cargo test --manifest-path "$PWD/Cargo.toml" -p symbrain-usage --locked
 ```
 
-The generator rejects a changed production source or wrong Go toolchain. Its
-reference is the reachable release commit
-`a92385d2deecc08d1fd96869908b81b7abd355fe`, not a transient feature commit.
-Source/testdata/module hashes and generator/comparator hashes are separate.
-Text source hashing normalizes CRLF to LF; recorded request bodies are not
-normalized. Rust verifies the exact hash inventories and includes negative
+The generator rejects changed production behavior source or the wrong Go
+runtime. Its behavior-source reference is the reachable release commit
+`a92385d2deecc08d1fd96869908b81b7abd355fe`, passed explicitly by the Makefile
+from the independent Rust trust anchor. The dependency-update corpus is written
+to `rust/symbrain-usage/tests/fixtures/opencode_discovery_go_dependency_update_20261008.json`;
+the original `opencode_discovery.json` remains byte-for-byte as the historical
+record. The refreshed corpus retains identical cases, while its behavior-source
+hashes exclude `go.mod` and `go.sum`: those files govern dependency resolution,
+not the recorded provider behavior. The native gate still pins source/testdata
+and generator/comparator hashes. Text source hashing normalizes CRLF to LF;
+recorded request bodies are not normalized. Rust verifies exact hash inventories
+and uses independent full-fixture and evidence-script digests, with negative
 controls against changed hashes, expected results, and requests. `-check`
 regenerates the oracle in memory and compares without overwriting the target.
 

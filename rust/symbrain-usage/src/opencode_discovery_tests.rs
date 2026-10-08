@@ -14,7 +14,8 @@ use std::collections::BTreeMap;
 use std::sync::Arc;
 use std::time::Duration;
 
-const ORACLE: &str = include_str!("../tests/fixtures/opencode_discovery.json");
+const ORACLE: &str =
+    include_str!("../tests/fixtures/opencode_discovery_go_dependency_update_20261008.json");
 
 /// The corpus case ids in fixture order. The replay asserts this list so a
 /// fixture edit that adds, drops, or renames a case fails until the list is
