@@ -670,9 +670,12 @@ make test-race   # go test -race ./...
 make lint        # go vet + gofmt check (matches CI)
 make fmt         # gofmt -w -s .
 
-# Full local check (mirrors CI):
+# Go-only local check (not the full CI matrix):
 go vet ./... && go test -race ./... && go build -o symbrain ./cmd/symbrain
 ```
+
+CI also runs Rust migration, native-platform, module, and GUI jobs; see [the CI
+workflow](.github/workflows/ci.yml).
 
 The incremental Rust workspace includes `symbrain-guard-core`.
 Its [PR workflow](.github/workflows/rust.yml) runs the existing Go fixture

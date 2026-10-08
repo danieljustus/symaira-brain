@@ -12,7 +12,8 @@ all differential, security, native-platform and release gates pass.
 - Stable release: `v0.8.0`
 - Machine-readable schema: `8`
 - Go toolchain: `go1.26.6`
-- Oracle build: `GOTOOLCHAIN=go1.26.6 CGO_ENABLED=0 make build`
+- Oracle build from `browse/`:
+  `GOTOOLCHAIN=go1.26.6 CGO_ENABLED=0 go build ./cmd/symbrowse`
 
 The oracle commit is one commit after `v0.8.0`; contract fixtures must name
 which of those two references produced them. New Go behavior after this pin
