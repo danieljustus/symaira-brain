@@ -35,7 +35,7 @@ def main():
                 "for row in rows: print(json.dumps(row))\n")
             result = subprocess.run([sys.executable, str(Path(__file__).with_name("fetch_control_proxy_auth.py")),
                 "--go", str(args.go), "--rust", str(wrapper), "--output", str(root / (name + ".json"))],
-                capture_output=True, timeout=45)
+                capture_output=True, timeout=300)  # hang guard, not a speed gate (macOS CI VMs are slow)
             error = result.stderr.decode(errors="replace")
             assert result.returncode and "AssertionError" in error and case in error, (name, result.returncode, error)
             controls.append(dict(name=name, case=case, rejected=True, exit=result.returncode,

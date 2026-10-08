@@ -32,7 +32,7 @@ def main():
                 "for row in rows: print(json.dumps(row))\n")
             result = subprocess.run([sys.executable, str(Path(__file__).with_name("fetch_control_raw_proxy.py")),
                 "--go", str(args.go), "--rust", str(wrapper), "--output", str(Path(raw) / (name + ".json"))],
-                capture_output=True, timeout=30)
+                capture_output=True, timeout=300)  # hang guard: one full harness pass takes ~40s on macOS CI VMs
             stderr = result.stderr.decode(errors="replace")
             assert result.returncode and "AssertionError" in stderr and case in stderr, (name, result.returncode, stderr)
             observations.append(dict(name=name, case=case, exit=result.returncode, rejected=True,

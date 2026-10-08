@@ -34,7 +34,7 @@ def main():
                 "\nfor r in records: print(json.dumps(r))\n").encode())
             result = subprocess.run([sys.executable, str(runner), "--go", str(args.go),
                 "--rust", str(wrapper), "--go-source", str(args.go_source),
-                "--output", str(Path(raw) / (name + ".json"))], capture_output=True, timeout=60)
+                "--output", str(Path(raw) / (name + ".json"))], capture_output=True, timeout=300)  # hang guard: one full harness pass takes ~60s on macOS CI VMs
             evidence.append(dict(name=name, rejected=result.returncode != 0, exit=result.returncode,
                 stdout=result.stdout.decode(errors="replace"), stderr=result.stderr.decode(errors="replace"),
                 mutant_sha256=hashlib.sha256(wrapper.read_bytes()).hexdigest()))
