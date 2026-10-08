@@ -1,17 +1,22 @@
 //! Native Windows Go `LookPath`: extensions, implicit cwd and `Lstat` identity.
+#[cfg(windows)]
 use super::{Executable, godebug, path};
+#[cfg(windows)]
 use crate::SkillError;
 #[cfg(windows)]
 use std::os::windows::ffi::OsStrExt;
+#[cfg(windows)]
+use std::{ffi::OsStr, fs};
 use std::{
-    ffi::{OsStr, OsString},
-    fs,
+    ffi::OsString,
     path::{Path, PathBuf},
 };
 
+#[cfg(windows)]
 #[path = "windows_lower.rs"]
 mod windows_lower;
 
+#[cfg(windows)]
 pub(super) fn lookup(program: &Path, path: &OsStr) -> Result<Option<Executable>, SkillError> {
     let extensions = extensions();
     let mut implicit = if std::env::var_os("NoDefaultCurrentDirectoryInExePath").is_none() {
@@ -42,6 +47,7 @@ pub(super) fn lookup(program: &Path, path: &OsStr) -> Result<Option<Executable>,
     Ok(None)
 }
 
+#[cfg(windows)]
 fn absolute(candidate: PathBuf) -> Option<Executable> {
     let owner = if path::is_absolute(&candidate) {
         Some(candidate.clone())
@@ -56,6 +62,7 @@ fn absolute(candidate: PathBuf) -> Option<Executable> {
     })
 }
 
+#[cfg(windows)]
 fn extensions() -> Vec<OsString> {
     let text = std::env::var_os("PATHEXT")
         .filter(|value| !value.is_empty())
@@ -78,10 +85,12 @@ fn extensions() -> Vec<OsString> {
 // Go UTF16ToString keeps WTF-8 in env values; strings.ToLower then decodes
 // invalid UTF-8 one byte at a time. This conversion is ONLY for PATHEXT.
 // PATH and provider OsString values retain their native units unchanged.
+#[cfg(windows)]
 fn go_lower(bytes: &[u8]) -> String {
     go_text(bytes).chars().map(windows_lower::lower).collect()
 }
 
+#[cfg(windows)]
 pub(super) fn go_text(mut bytes: &[u8]) -> String {
     let mut output = String::new();
     while !bytes.is_empty() {
@@ -105,21 +114,27 @@ pub(super) fn go_text(mut bytes: &[u8]) -> String {
     output
 }
 
+#[cfg(windows)]
 fn find(program: &Path, extensions: &[OsString]) -> Option<PathBuf> {
-    fn present(path: &Path) -> bool {
-        fs::metadata(path).is_ok_and(|metadata| !metadata.is_dir())
-    }
-    if present(program) {
-        return Some(program.to_owned());
-    }
+    // Go's hasExt counts any dot in the final component, including a leading dot.
+    let has_extension =
+        !extensions.is_empty() && program.file_name()?.encode_wide().any(|unit| unit == 46);
+    find_with(program, extensions, has_extension, |candidate| {
+        fs::metadata(candidate).is_ok_and(|metadata| !metadata.is_dir())
+    })
+}
+
+fn find_with(
+    program: &Path,
+    extensions: &[OsString],
+    has_extension: bool,
+    mut present: impl FnMut(&Path) -> bool,
+) -> Option<PathBuf> {
     if extensions.is_empty() {
-        return None;
+        return present(program).then(|| program.to_owned());
     }
-    // The provider is a basename here. A dot starts an extension, including
-    // a leading dot; don't inspect or normalize its native encoding.
-    let has_extension = program.file_name()?.encode_wide().any(|unit| unit == 46);
-    if has_extension {
-        return None;
+    if has_extension && present(program) {
+        return Some(program.to_owned());
     }
     for extension in extensions {
         let mut candidate = program.as_os_str().to_owned();
@@ -132,6 +147,7 @@ fn find(program: &Path, extensions: &[OsString]) -> Option<PathBuf> {
     None
 }
 
+#[cfg(windows)]
 fn same_file(first: &Path, second: &Path) -> bool {
     use std::os::windows::fs::OpenOptionsExt;
     fn identity(path: &Path) -> std::io::Result<same_file::Handle> {
@@ -152,9 +168,14 @@ fn same_file(first: &Path, second: &Path) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(windows)]
     use std::sync::atomic::{AtomicU64, Ordering};
+    #[cfg(windows)]
     static NEXT: AtomicU64 = AtomicU64::new(0);
+
+    #[cfg(windows)]
     struct Owned(PathBuf);
+    #[cfg(windows)]
     impl Owned {
         fn new() -> Self {
             let path = std::env::temp_dir().join(format!(
@@ -166,11 +187,62 @@ mod tests {
             Self(path)
         }
     }
+    #[cfg(windows)]
     impl Drop for Owned {
         fn drop(&mut self) {
             let _ = fs::remove_dir_all(&self.0);
         }
     }
+
+    #[test]
+    fn find_uses_only_go_pathext_candidates() {
+        use std::fs as test_fs;
+
+        let root = tempfile::tempdir().expect("fixture directory");
+        let extensionless = root.path().join("tool");
+        let exe = root.path().join("tool.exe");
+        let cmd = root.path().join("tool.cmd");
+        let dotted = root.path().join("tool.bat");
+        let dotted_exe = root.path().join("tool.bat.exe");
+        let extensions = [OsString::from(".exe"), OsString::from(".cmd")];
+        test_fs::write(&extensionless, b"not a PATHEXT candidate").expect("extensionless fixture");
+
+        let present = |candidate: &Path| {
+            test_fs::metadata(candidate).is_ok_and(|metadata| !metadata.is_dir())
+        };
+        assert_eq!(
+            find_with(&extensionless, &extensions, false, present),
+            None,
+            "PATHEXT lookup must not probe an exact extensionless file"
+        );
+        test_fs::write(&exe, b"exe").expect("exe fixture");
+        test_fs::write(&cmd, b"cmd").expect("cmd fixture");
+        assert_eq!(
+            find_with(&extensionless, &extensions, false, present),
+            Some(exe.clone()),
+            "PATHEXT candidates must be searched in declared order"
+        );
+
+        test_fs::write(&dotted_exe, b"bat executable").expect("dotted executable fixture");
+        assert_eq!(
+            find_with(&dotted, &extensions, true, present),
+            Some(dotted_exe),
+            "a missing dotted basename must still try appended extensions"
+        );
+        test_fs::write(&dotted, b"exact dotted file").expect("dotted basename fixture");
+        assert_eq!(
+            find_with(&dotted, &extensions, true, present),
+            Some(dotted),
+            "an existing dotted basename takes precedence over appended extensions"
+        );
+        assert_eq!(
+            find_with(&extensionless, &[], false, present),
+            Some(extensionless),
+            "an empty PATHEXT list probes the exact path"
+        );
+    }
+
+    #[cfg(windows)]
     #[test]
     fn pathext_uses_go_simple_lowercase_and_one_replacement_per_invalid_byte() {
         assert_eq!(go_lower(b".EXE;.CMD"), ".exe;.cmd");
@@ -180,6 +252,8 @@ mod tests {
         // Unicode16 added this casing; pinned Go Unicode15 leaves it alone.
         assert_eq!(go_lower("\u{1c89}".as_bytes()), "\u{1c89}");
     }
+
+    #[cfg(windows)]
     #[test]
     fn lstat_identity_accepts_hardlink_but_not_distinct_file() {
         let root = Owned::new();
@@ -192,6 +266,8 @@ mod tests {
         assert!(same_file(&first, &second));
         assert!(!same_file(&first, &other));
     }
+
+    #[cfg(windows)]
     #[test]
     fn lstat_identity_keeps_symlink_entry_distinct_from_its_target() {
         use std::os::windows::fs::symlink_file;

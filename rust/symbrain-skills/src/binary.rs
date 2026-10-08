@@ -6,7 +6,7 @@ use std::path::{Path, PathBuf};
 
 mod godebug;
 pub(crate) mod path;
-#[cfg(windows)]
+#[cfg(any(windows, test))]
 mod windows;
 use crate::SkillError;
 
