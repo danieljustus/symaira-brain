@@ -162,7 +162,12 @@ fn target_binary_is_reported_as_evidence_natively() {
     let root = TempDir::new().unwrap();
     let bin_dir = root.path().join("bin");
     std::fs::create_dir_all(&bin_dir).unwrap();
-    let binary = bin_dir.join("opencode");
+    // Windows Go LookPath searches PATHEXT candidates, not extensionless files.
+    let binary = bin_dir.join(if cfg!(windows) {
+        "opencode.exe"
+    } else {
+        "opencode"
+    });
     std::fs::write(&binary, b"placeholder").unwrap();
     #[cfg(unix)]
     {

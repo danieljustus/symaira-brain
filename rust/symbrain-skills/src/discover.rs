@@ -89,11 +89,13 @@ fn candidate(path: &Path, source: &str, target: &str, loader: &BundleLoader) -> 
 
 fn read_directory_error(
     path: &Path,
-    _metadata: &std::fs::Metadata,
+    metadata: &std::fs::Metadata,
     error: &std::io::Error,
 ) -> crate::GoText {
+    #[cfg(not(windows))]
+    let _ = metadata;
     #[cfg(windows)]
-    if _metadata.file_type().is_symlink()
+    if metadata.file_type().is_symlink()
         && error.kind() == std::io::ErrorKind::NotFound
         && std::fs::metadata(path)
             .is_err_and(|target| target.kind() == std::io::ErrorKind::NotFound)
