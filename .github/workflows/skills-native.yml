@@ -65,6 +65,14 @@ jobs:
             go run ./scripts/cli-oracle -go-binary "$activity_cli_go_binary" -output "$SYMBRAIN_CLI_TREE_ORACLE_FIXTURE"
             go run ./scripts/profile-remove-oracle -output "$SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE"
             go run ./scripts/xdg-oracle -output "$SYMBRAIN_XDG_ORACLE_FIXTURE"
+            export SYMBRAIN_SKILLS_ORACLE_FIXTURE="$RUNNER_TEMP/skills-oracle-windows.json"
+            export SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE="$RUNNER_TEMP/skills-install-oracle-windows.json"
+            export SYMBRAIN_GUARD_ORACLE_FIXTURE="$RUNNER_TEMP/guard-oracle-windows.json"
+            export SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE="$RUNNER_TEMP/guard-doctor-oracle-windows.json"
+            go run ./scripts/skills-oracle -output "$SYMBRAIN_SKILLS_ORACLE_FIXTURE"
+            go run ./scripts/skills-install-oracle -output "$SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE"
+            go run ./guard/scripts/guard-oracle -output "$SYMBRAIN_GUARD_ORACLE_FIXTURE"
+            go run ./guard/scripts/guard-doctor-oracle -output "$SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE"
           fi
           cargo test --locked -p symbrain-core -p symbrain-skills -p symbrain-gateway -p symbrain-cli -p symbrain-mcp
           cargo build --locked -p symbrain-cli
@@ -96,4 +104,8 @@ jobs:
             ${{ runner.temp }}/cli-tree-oracle-windows.json
             ${{ runner.temp }}/profile-remove-oracle-windows.json
             ${{ runner.temp }}/xdg-oracle-windows.json
+            ${{ runner.temp }}/skills-oracle-windows.json
+            ${{ runner.temp }}/skills-install-oracle-windows.json
+            ${{ runner.temp }}/guard-oracle-windows.json
+            ${{ runner.temp }}/guard-doctor-oracle-windows.json
           if-no-files-found: error
