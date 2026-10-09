@@ -1,0 +1,43 @@
+{
+  "original_publication": "9b4ca8875f23b6668a2814ff73632354afcad777",
+  "original_files": {
+    "/tmp/symaira-current-ci-job-111324721353.log": {
+      "sha256": "93e3a5b76a77548b56750a73ef8864ccc23f9df535f665b58ca72f2dbe87c21c",
+      "bytes": 61086,
+      "retained": "symaira-current-ci-job-111324721353.log.gz",
+      "retained_sha256": "10e3c41c8e9ab41c90cbc71310b3df90404b41de3333563dc515fb1140c00751"
+    },
+    "/tmp/symaira-fetch9b4-daemon-mcp-linux-tests.log": {
+      "sha256": "a3e960002abdd8a6b6d112e12274e600605ff9dd852ae26854aaa6b027d0936b",
+      "bytes": 29816,
+      "retained": "symaira-fetch9b4-daemon-mcp-linux-tests.log.gz",
+      "retained_sha256": "f6ea3123d47ff7ed7f41c0bcb658c2de473376f3022ba89daba863efa13cf553"
+    },
+    "/workspace/attachments/1e04bb14-29ef-4094-b74b-dc281cce2be7/daemon-current-11289477647.zip": {
+      "sha256": "ce5bebe29185a5d16768a390fdc1ac4bfa9ac4c0bbe5de4a4e857251cdb87843",
+      "bytes": 67179,
+      "retained": "daemon-current-11289477647.zip.gz",
+      "retained_sha256": "bb1c44146e85c5154b0d656861bb52ee4d36a3fe0570014c81263a557c515cc7"
+    },
+    "/tmp/symaira-fetch810-deadline-triage.md": {
+      "sha256": "2c1db97cd70645f52f73411c436daccc6c489140a74547bb7449a25080b41158",
+      "bytes": 7810,
+      "retained": "symaira-fetch810-deadline-triage.md.gz",
+      "retained_sha256": "4aaf2cdb5c4c2bc4d666497c6a9c73830e4c36a93f722fc2d680f7fff22534b9"
+    },
+    "/tmp/symaira-fetch810-deadline-triage-receipt.json": {
+      "sha256": "4f0f5932222eda38b1931fcac773d533b5ee1d16bf630ff6aa49b7d7c1a7999b",
+      "bytes": 3763,
+      "retained": "symaira-fetch810-deadline-triage-receipt.json.gz",
+      "retained_sha256": "025e7e4f3babc5a30b854d49ff3fcaff6261820b8323d2b7c054073d59d1c66b"
+    }
+  },
+  "original_input_sha256": "2906b096fe581c3c0e1e03d48f4395563acbdd5ac919ee164cd744cdecd49fa5",
+  "original_test_binary": {
+    "original_path": "/workspace/symaira-fetch773-proxy-auth/target/debug/deps/proxy_uri-4e263d12ae6c9265",
+    "sha256": "ec10c9250682e5b635c6f608c89c6ee0c4aae21e7adff8c3c2b6cdc93a0a4fb2",
+    "retained": "original-proxy_uri-test.elf.gz",
+    "archive_sha256": "a8ce591ebef06e1bee28743edbd33b179478530b61e36efb952d77e5fb9dc59c"
+  },
+  "all169_executables113_unique_original_archive": "/workspace/oracles/symaira-fetch773-proxy-auth-9b4ca8875f23-idle-binaries/receipt.json"
+}

@@ -1,0 +1,139 @@
+{
+  "candidate_head": "52236234a197f00de89edbb185fc762a4f121161",
+  "source_revision": "1f82e9cf8812c5b383a19349241787215a857493",
+  "go_revision": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+  "source_clean": true,
+  "checks": {
+    "fetch30": 30,
+    "harness10": 10,
+    "rust148": 148,
+    "go415": 415,
+    "evidence_digests": 12,
+    "embedded_log_digests": 14,
+    "evidence_only_files": 14,
+    "original_a073_review_receipt_preserved": true,
+    "working_candidate_go_inputs_identical_to_frozen": 415
+  },
+  "binaries": {
+    "native_probe": {
+      "path": "/workspace/symaira-fetch773/target/debug/examples/control_probe",
+      "sha256": "5469c1e7b2ea7f1d3680aa40829bce7a5b109e371c58504e8ad0b03c53697cf6",
+      "size": 14823488
+    },
+    "fresh_go_probe": {
+      "path": "/tmp/symaira-fetch773-second-fix-independent-go-probe",
+      "sha256": "8e92be70d9b908c11f47720b1bf34c5717b327c246686dbb71e03b336f820786",
+      "size": 19682949
+    },
+    "native_release": {
+      "path": "/workspace/symaira-fetch773/target/release/symbrowse",
+      "sha256": "6384a60885922ed76902432712fd4ff2a82f63b0430cd8b06f0defeaa1834853",
+      "size": 10598888
+    },
+    "go_release": {
+      "path": "/tmp/symaira-fetch773-second-fix-go-release",
+      "sha256": "221b047aa18e2c4eb421dd970de18e6e82372059c492f6bd52ac337c95c5a5f6",
+      "size": 26611127
+    }
+  },
+  "benchmark": {
+    "linux-quiet": {
+      "comparator_exit": 0,
+      "result": {
+        "schema_version": 2,
+        "gate": "pass",
+        "workloads": {
+          "cli": {
+            "p95_change_percent": -44.087463168222605
+          },
+          "mcp": {
+            "p95_change_percent": -49.441543222859885
+          },
+          "daemon": {
+            "p95_change_percent": -1.1399100332633583
+          },
+          "fetch": {
+            "p95_change_percent": -61.88021261807498,
+            "hard_gate": "<=10%"
+          }
+        },
+        "reasons": [],
+        "size_reduction_percent": 42.17884040700329
+      },
+      "samples": 240,
+      "p95_ns": {
+        "cli": {
+          "go": 7741956,
+          "rust": 4328724
+        },
+        "mcp": {
+          "go": 8320250,
+          "rust": 4206590
+        },
+        "daemon": {
+          "go": 20641629,
+          "rust": 20406333
+        },
+        "fetch": {
+          "go": 2617087,
+          "rust": 997628
+        }
+      }
+    },
+    "original-loaded": {
+      "comparator_exit": 1,
+      "result": {
+        "schema_version": 2,
+        "gate": "blocked",
+        "workloads": {
+          "cli": {
+            "p95_change_percent": -59.161136415557216
+          },
+          "mcp": {
+            "p95_change_percent": 51.81170308160794
+          },
+          "daemon": {
+            "p95_change_percent": 145.552724778808
+          },
+          "fetch": {
+            "p95_change_percent": -62.98412913497857,
+            "hard_gate": "<=10%"
+          }
+        },
+        "reasons": [
+          "p95 regression gate is missing or exceeds 10%"
+        ],
+        "size_reduction_percent": 42.17884040700329
+      },
+      "samples": 240,
+      "p95_ns": {
+        "cli": {
+          "go": 8570738,
+          "rust": 3500192
+        },
+        "mcp": {
+          "go": 8325978,
+          "rust": 12639809
+        },
+        "daemon": {
+          "go": 21092758,
+          "rust": 51793842
+        },
+        "fetch": {
+          "go": 2361560,
+          "rust": 874152
+        }
+      }
+    }
+  },
+  "ordinary_tests": {
+    "summaries": 25,
+    "passed": 119,
+    "failed": 0,
+    "ignored": 1,
+    "compilations": 0,
+    "isolated_children": 7,
+    "isolated_child_basis": "Passing parent executes all seven distinct environments, asserts child exit0 and stdout contains 1 passed on every iteration; child stdout intentionally captured rather than printed."
+  },
+  "go_sdk_client_sha256": "908d9d964cd157899b60e7ba839befa4bfd398b4fb8f7ff5a1aa389eae75f652"
+}

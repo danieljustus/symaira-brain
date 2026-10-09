@@ -65,7 +65,15 @@ def observe(probe: Path, binary: Path, fixture: Path, go: str) -> dict:
                                     cwd=root, capture_output=True, timeout=5)
             public_queries = queries(ledger)
             assert public.returncode == 0 and not public.stderr
-            assert json.loads(public.stdout) == expected and len(public_queries) == 1
+            observation = json.loads(public.stdout)
+            # Preserve admission, but report no key bytes or provider output.
+            assert observation == expected and len(public_queries) == 1, {
+                "case": label, "configured": observation.get("configured"),
+                "source_matches": observation.get("key_source") == expected["key_source"],
+                "has_error": bool(observation.get("error")),
+                "deadline_exceeded": "timed out" in observation.get("error", ""),
+                "query_count": len(public_queries),
+            }
             ledger.unlink()
             # Keep the private lifetime writer open until this real supervisor
             # exits normally. No key material travels in its public argv.

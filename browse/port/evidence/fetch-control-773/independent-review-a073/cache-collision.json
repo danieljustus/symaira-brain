@@ -1,0 +1,90 @@
+{
+  "candidate_revision": "a0732ec57357fd0e1a60dbf1ca5f8c42d8c59c41",
+  "candidate_dirty": false,
+  "go_binary_sha256": "d52a94fccfa0d07c571f7109c0f43a9771ab6f5b3ea207569f539945bf8c4401",
+  "rust_binary_sha256": "972882b60a0421c5cb974e47d6892792652900ec9c40483a5f725c198f007f0c",
+  "records": [
+    {
+      "request": {
+        "id": "cache-first",
+        "url": "http://93.184.216.34/fixture",
+        "session": "A",
+        "proxy": "http://127.0.0.1:43753/x;proxy=http://127.0.0.1:41047/y"
+      },
+      "go": {
+        "body_hex": "70726f78792d6669727374",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "11"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "cache-first",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34/fixture"
+      },
+      "rust": {
+        "body_hex": "70726f78792d6669727374",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "11"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "cache-first",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34/fixture"
+      },
+      "match": true
+    },
+    {
+      "request": {
+        "id": "cache-second",
+        "url": "http://93.184.216.34/fixture",
+        "session": "A;proxy=http://127.0.0.1:43753/x",
+        "proxy": "http://127.0.0.1:41047/y"
+      },
+      "go": {
+        "body_hex": "70726f78792d7365636f6e64",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "12"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "cache-second",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34/fixture"
+      },
+      "rust": {
+        "body_hex": "70726f78792d6669727374",
+        "error": "",
+        "headers": {
+          "content-length": [
+            "11"
+          ],
+          "content-type": [
+            "text/plain; charset=utf-8"
+          ]
+        },
+        "id": "cache-second",
+        "protocol": "HTTP/1.1",
+        "status": 200,
+        "url": "http://93.184.216.34/fixture"
+      },
+      "match": false
+    }
+  ]
+}

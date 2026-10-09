@@ -1,0 +1,152 @@
+{
+  "candidate_source": "e2ecf4026806dd4d9fd219f15f931848b1fd56d9",
+  "candidate_dirty": false,
+  "coordination": "Root held compilation/replays across all lanes before explicit quiet-window start; no threshold/sample changes",
+  "binary_sha256": {
+    "go": "221b047aa18e2c4eb421dd970de18e6e82372059c492f6bd52ac337c95c5a5f6",
+    "rust": "1900720a4c0b518f80747f7cfc8202b96b1778124072a6eafc138d6c67c4042f"
+  },
+  "benchmark_exit": 0,
+  "comparator_exit": 0,
+  "process_snapshot_before": [
+    "COMMAND         %CPU",
+    "python3         63.6",
+    "containerd       0.0",
+    "codex            0.0",
+    "dockerd          0.0",
+    "tail             0.0",
+    "rustc            0.0",
+    "cargo            0.0",
+    "python3          0.0",
+    "python3          0.0",
+    "python3          0.0",
+    "symbrowse        0.0",
+    "symbrowse        0.0",
+    "symbrowse        0.0",
+    "caas-prefix-tra  0.0"
+  ],
+  "process_snapshot_after": [
+    "COMMAND         %CPU",
+    "python3          1.6",
+    "containerd       0.0",
+    "codex            0.0",
+    "dockerd          0.0",
+    "tail             0.0",
+    "rustc            0.0",
+    "cargo            0.0",
+    "python3          0.0",
+    "python3          0.0",
+    "python3          0.0",
+    "symbrowse        0.0",
+    "symbrowse        0.0",
+    "symbrowse        0.0",
+    "caas-prefix-tra  0.0"
+  ],
+  "cgroup_cpu_max": "400000 100000\n",
+  "observations": [
+    {
+      "utc": "2026-10-03T22:25:10.263707+00:00",
+      "loadavg": "0.06 0.33 0.65 2/422 1785582",
+      "cgroup_cpu_stat": "usage_usec 18692222348\nuser_usec 15451027252\nsystem_usec 3241195095\nnice_usec 0\nnr_periods 155931\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465407 0 310484 22098741 2656 0 6860 58067 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:10.514176+00:00",
+      "loadavg": "0.06 0.33 0.65 2/425 1785692",
+      "cgroup_cpu_stat": "usage_usec 18692505346\nuser_usec 15451193248\nsystem_usec 3241312097\nnice_usec 0\nnr_periods 155933\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465421 0 310494 22098837 2656 0 6860 58068 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:10.764611+00:00",
+      "loadavg": "0.06 0.33 0.65 5/428 1785899",
+      "cgroup_cpu_stat": "usage_usec 18692825416\nuser_usec 15451308661\nsystem_usec 3241516755\nnice_usec 0\nnr_periods 155936\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465430 0 310513 22098927 2656 0 6860 58070 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:11.015041+00:00",
+      "loadavg": "0.06 0.33 0.65 5/428 1786043",
+      "cgroup_cpu_stat": "usage_usec 18693004741\nuser_usec 15451380557\nsystem_usec 3241624184\nnice_usec 0\nnr_periods 155938\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465435 0 310523 22099032 2656 0 6860 58072 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:11.265488+00:00",
+      "loadavg": "0.06 0.33 0.65 3/433 1786171",
+      "cgroup_cpu_stat": "usage_usec 18693160486\nuser_usec 15451460803\nsystem_usec 3241699683\nnice_usec 0\nnr_periods 155941\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465441 0 310530 22099140 2656 0 6860 58073 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:11.515816+00:00",
+      "loadavg": "0.06 0.33 0.65 6/434 1786325",
+      "cgroup_cpu_stat": "usage_usec 18693345379\nuser_usec 15451585965\nsystem_usec 3241759414\nnice_usec 0\nnr_periods 155943\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465449 0 310534 22099245 2656 0 6861 58074 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:11.766332+00:00",
+      "loadavg": "0.06 0.33 0.65 2/424 1786333",
+      "cgroup_cpu_stat": "usage_usec 18693371551\nuser_usec 15451605975\nsystem_usec 3241765576\nnice_usec 0\nnr_periods 155946\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465450 0 310535 22099367 2656 0 6861 58075 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:12.016696+00:00",
+      "loadavg": "0.06 0.33 0.65 2/424 1786333",
+      "cgroup_cpu_stat": "usage_usec 18693388698\nuser_usec 15451620848\nsystem_usec 3241767849\nnice_usec 0\nnr_periods 155948\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465450 0 310535 22099491 2656 0 6861 58075 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:12.267058+00:00",
+      "loadavg": "0.06 0.33 0.65 2/425 1786433",
+      "cgroup_cpu_stat": "usage_usec 18693613157\nuser_usec 15451720983\nsystem_usec 3241892174\nnice_usec 0\nnr_periods 155951\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465459 0 310547 22099593 2656 0 6861 58076 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:12.517413+00:00",
+      "loadavg": "0.06 0.33 0.65 1/424 1786621",
+      "cgroup_cpu_stat": "usage_usec 18693685904\nuser_usec 15451752671\nsystem_usec 3241933232\nnice_usec 0\nnr_periods 155953\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465461 0 310550 22099710 2656 0 6862 58076 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:12.767763+00:00",
+      "loadavg": "0.06 0.33 0.65 3/460 1786811",
+      "cgroup_cpu_stat": "usage_usec 18693750988\nuser_usec 15451783714\nsystem_usec 3241967274\nnice_usec 0\nnr_periods 155956\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465462 0 310553 22099828 2656 0 6863 58077 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:13.018088+00:00",
+      "loadavg": "0.06 0.33 0.65 1/460 1787001",
+      "cgroup_cpu_stat": "usage_usec 18693832880\nuser_usec 15451826394\nsystem_usec 3242006486\nnice_usec 0\nnr_periods 155958\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465465 0 310556 22099944 2656 0 6864 58078 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:13.268560+00:00",
+      "loadavg": "0.06 0.33 0.65 2/425 1787155",
+      "cgroup_cpu_stat": "usage_usec 18693894074\nuser_usec 15451844559\nsystem_usec 3242049514\nnice_usec 0\nnr_periods 155961\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465466 0 310560 22100063 2656 0 6865 58079 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:13.518879+00:00",
+      "loadavg": "0.06 0.33 0.65 3/424 1787344",
+      "cgroup_cpu_stat": "usage_usec 18693968056\nuser_usec 15451880010\nsystem_usec 3242088045\nnice_usec 0\nnr_periods 155963\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465467 0 310564 22100180 2656 0 6865 58079 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:13.769134+00:00",
+      "loadavg": "0.06 0.33 0.65 1/460 1787533",
+      "cgroup_cpu_stat": "usage_usec 18694036666\nuser_usec 15451907010\nsystem_usec 3242129656\nnice_usec 0\nnr_periods 155966\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465468 0 310567 22100298 2656 0 6865 58079 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:14.019541+00:00",
+      "loadavg": "0.06 0.33 0.65 2/424 1787632",
+      "cgroup_cpu_stat": "usage_usec 18694104941\nuser_usec 15451951218\nsystem_usec 3242153723\nnice_usec 0\nnr_periods 155968\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465471 0 310569 22100416 2656 0 6866 58080 0 0"
+    },
+    {
+      "utc": "2026-10-03T22:25:14.269889+00:00",
+      "loadavg": "0.06 0.33 0.65 2/424 1787632",
+      "cgroup_cpu_stat": "usage_usec 18694121348\nuser_usec 15451961292\nsystem_usec 3242160056\nnice_usec 0\nnr_periods 155971\nnr_throttled 13318\nthrottled_usec 739420943\nnr_bursts 0\nburst_usec 0\n",
+      "cpu": "cpu  1465471 0 310569 22100539 2656 0 6866 58080 0 0"
+    }
+  ],
+  "report_sha256": "cbe70ad077b925a3d4f415bd48a7f08e38c10ede860c45025128e558eeb8d212",
+  "comparator_sha256": "fd60490810d45286738881cbc28ec25bc9a966157aac1ce4d8ce7727174063d0"
+}

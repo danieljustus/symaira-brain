@@ -597,7 +597,7 @@
     {
       "id": "FETCH-001",
       "seam": "HTTP profile selection",
-      "fixture": "chrome/firefox/opera/safari/edge/ios/honest/random/unknown; Rust slice: crates/symbrowse-fetch/tests/{http,retry,robots}.rs",
+      "fixture": "chrome/firefox/opera/safari/edge/ios/honest/random/unknown; Rust slice: crates/symbrowse-fetch/tests/{http,retry,robots}.rs; #773 real frozen-Go/native process corpus and original controls; partial slice only, native six-target CI and complete pipeline parity pending (adr-honest-fetch-control-773.md)",
       "go_oracle": "go test ./internal/fetch/fetch -run Profile",
       "expected": "preset selection, random domain and unknown->chrome warning match",
       "comparison": "network",
@@ -609,7 +609,7 @@
         "windows-amd64",
         "windows-arm64"
       ],
-      "status": "parity"
+      "status": "fixture-ready"
     },
     {
       "id": "FETCH-002",
@@ -631,7 +631,7 @@
     {
       "id": "FETCH-009",
       "seam": "transport-mode selection",
-      "fixture": "static, browser and compat selections; omitted/unknown mode; unavailable requested engine",
+      "fixture": "static, browser and compat selections; omitted/unknown mode; unavailable requested engine; #773 real frozen-Go/native process corpus and original controls; partial slice only, native six-target CI and complete pipeline parity pending (adr-honest-fetch-control-773.md)",
       "go_oracle": "new target contract; retain FETCH-001/FETCH-002 as compatibility oracles where applicable",
       "expected": "each request selects exactly one declared mode: static uses the Rust HTTP stack, browser uses the requested real local engine, compat uses the legacy Go transport; selection is reported in machine-readable metadata and never silently falls back between modes or engines",
       "comparison": "json-semantic",
@@ -643,19 +643,19 @@
         "windows-amd64",
         "windows-arm64"
       ],
-      "status": "parity"
+      "status": "fixture-ready"
     },
     {
       "id": "FETCH-010",
       "seam": "static transport honesty",
-      "fixture": "hermetic HTTP/DNS/proxy corpus with static-mode metadata",
+      "fixture": "hermetic HTTP/DNS/proxy corpus with static-mode metadata; #773 real frozen-Go/native process corpus and original controls; partial slice only, native six-target CI and complete pipeline parity pending (adr-honest-fetch-control-773.md); raw HTTP-proxy absolute-form URI/TLS/auth/body ownership supplementary gate fetch_control_raw_proxy.py; byte-preserving proxy Basic and caller append order verified by fetch_control_proxy_auth.py (HTTP/HTTPS owned peers, env routing, enforcing credentials; origin/CONNECT/SOCKS auth remains outside this correction); E011 separately asserts automatic Referer fragment removal and unchanged explicit caller Referer",
       "go_oracle": "new target contract; FETCH-003 through FETCH-008 remain the semantic oracle",
       "expected": "static mode makes no browser-identity or TLS/HTTP2 impersonation claim; it preserves declared HTTP semantics, redirect policy, cookie-session behavior and typed errors without fabricating browser-only state",
       "comparison": "json-semantic",
       "platforms": [
         "all"
       ],
-      "status": "parity"
+      "status": "fixture-ready"
     },
     {
       "id": "FETCH-011",
@@ -677,38 +677,38 @@
     {
       "id": "FETCH-003",
       "seam": "HTTP semantics",
-      "fixture": "methods, headers, body, gzip/br/zstd, charset, limits and content types; Rust slice: crates/symbrowse-fetch/tests/{http,retry,robots}.rs",
+      "fixture": "methods, headers, body, gzip/br/zstd, charset, limits and content types; Rust slice: crates/symbrowse-fetch/tests/{http,retry,robots}.rs; #773 real frozen-Go/native process corpus and original controls; partial slice only, native six-target CI and complete pipeline parity pending (adr-honest-fetch-control-773.md); raw HTTP-proxy absolute-form URI/TLS/auth/body ownership supplementary gate fetch_control_raw_proxy.py; byte-preserving proxy Basic and caller append order verified by fetch_control_proxy_auth.py (HTTP/HTTPS owned peers, env routing, enforcing credentials; origin/CONNECT/SOCKS auth remains outside this correction); E011 separately asserts automatic Referer fragment removal and unchanged explicit caller Referer",
       "go_oracle": "go test ./internal/fetch/fetch -run 'Fetch|Decode|Charset|Body'",
       "expected": "status, headers, decoded UTF-8 body, protocol and size errors match",
       "comparison": "network",
       "platforms": [
         "all"
       ],
-      "status": "parity"
+      "status": "fixture-ready"
     },
     {
       "id": "FETCH-004",
       "seam": "redirect/proxy/cookies",
-      "fixture": "redirect chain/loop, cross-host policy, HTTP/SOCKS proxy and named cookie jar; Rust slice: crates/symbrowse-fetch/tests/{http,retry,robots}.rs",
+      "fixture": "redirect chain/loop, cross-host policy, HTTP/SOCKS proxy and named cookie jar; Rust slice: crates/symbrowse-fetch/tests/{http,retry,robots}.rs; #773 real frozen-Go/native process corpus and original controls; partial slice only, native six-target CI and complete pipeline parity pending (adr-honest-fetch-control-773.md); raw HTTP-proxy absolute-form URI/TLS/auth/body ownership supplementary gate fetch_control_raw_proxy.py; byte-preserving proxy Basic and caller append order verified by fetch_control_proxy_auth.py (HTTP/HTTPS owned peers, env routing, enforcing credentials; origin/CONNECT/SOCKS auth remains outside this correction); E011 separately asserts automatic Referer fragment removal and unchanged explicit caller Referer",
       "go_oracle": "go test ./internal/fetch/fetch -run 'Redirect|Proxy|Cookie|Session'",
-      "expected": "hop policy, final URL, cookie persistence and proxy behavior match",
+      "expected": "hop policy, final URL, cookie persistence and proxy behavior match; intentional E011 automatic Referer fragment sanitization is separately asserted against actual Go bytes, never accepted as ordinary equality",
       "comparison": "network",
       "platforms": [
         "all"
       ],
-      "status": "parity"
+      "status": "fixture-ready"
     },
     {
       "id": "FETCH-005",
       "seam": "robots/retry/rate limit",
-      "fixture": "allow/disallow, matching UA, 408/429/5xx, Retry-After and circuit breaker; Rust slice: crates/symbrowse-fetch/tests/{http,retry,robots}.rs",
+      "fixture": "allow/disallow, matching UA, 408/429/5xx, Retry-After and circuit breaker; Rust slice: crates/symbrowse-fetch/tests/{http,retry,robots}.rs; #773 real frozen-Go/native process corpus and original controls; partial slice only, native six-target CI and complete pipeline parity pending (adr-honest-fetch-control-773.md)",
       "go_oracle": "go test ./internal/fetch/... -run 'Robots|Retry|Backoff|Circuit|Rate'",
       "expected": "request order, deterministic delays and retryable classification match",
       "comparison": "network",
       "platforms": [
         "all"
       ],
-      "status": "parity"
+      "status": "fixture-ready"
     },
     {
       "id": "FETCH-006",

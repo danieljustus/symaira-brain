@@ -1,0 +1,145 @@
+{
+  "reviewed_head": "52236234a197f00de89edbb185fc762a4f121161",
+  "reviewed_source": "1f82e9cf8812c5b383a19349241787215a857493",
+  "files": [
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-actionlint.log",
+      "retained": "actionlint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-clippy.log",
+      "retained": "clippy.log",
+      "sha256": "40108eb5c2e432741fc7f36afdf5c793ec02b19e7b1ce5e51bdd2ba377bd26cb",
+      "bytes": 60
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-cwd-process-controls.json",
+      "retained": "cwd-process-controls.json",
+      "sha256": "a2bbc0ebd186ce6db4bd890afe55bd392ae86747c19dd77364b14b8416ca7a76",
+      "bytes": 4385
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-cwd-process.json",
+      "retained": "cwd-process.json",
+      "sha256": "cdac91d02d1509dc436780ac92f66eb967f62a0a12727b8fc467a0c34ce85ca8",
+      "bytes": 265428
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-cwd-process.log",
+      "retained": "cwd-process.log",
+      "sha256": "ad86943c92acc6ca9553db7a37384c5ac38722fd210a3a94e00f153e2b04204d",
+      "bytes": 163
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-cwd-run.sh",
+      "retained": "cwd-run.sh",
+      "sha256": "9a24a66a3a286d12ca4fa36ac6d97e3652e918091e0c7e20181078bfdcdf1a02",
+      "bytes": 1291
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-extra-http.json",
+      "retained": "extra-http.json",
+      "sha256": "f14e3c41bdccbc2e2975d08993cfb08119dd5a44eba29daf9bfe16675c7eabd1",
+      "bytes": 13898
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-extra-http.log",
+      "retained": "extra-http.log",
+      "sha256": "2fdb1f751744c0980936c4a53bd47635534e83c09bb716126b317cb1ad2fe300",
+      "bytes": 1649
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-extra-http.py",
+      "retained": "extra-http.py",
+      "sha256": "bb9e2abc3168e9311bb77188625177cd231e428f0797e1bfbc86dda2c0e66282",
+      "bytes": 2495
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-extra-proxy.json",
+      "retained": "extra-proxy.json",
+      "sha256": "8579fe22cb962aa5ecf823e38e8f1ae876dd7c0cebae4c9a9a4cfccc6d650b60",
+      "bytes": 5923
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-extra-proxy.log",
+      "retained": "extra-proxy.log",
+      "sha256": "c527cca2eab667782edd0d1c586cc673a42bc24c4180556ec10ec58002b621e8",
+      "bytes": 953
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-extra-proxy.py",
+      "retained": "extra-proxy.py",
+      "sha256": "3784814fd286afc3653acbb0b52a67971f4e5a3057d0ff3cb5f240c61b574885",
+      "bytes": 1800
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-fmt.log",
+      "retained": "fmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-go-fixtures.log",
+      "retained": "go-fixtures.log",
+      "sha256": "c6dc2a116fcc0d2a416d60edd9d35715fc2e8c486269bc8337d9322ea05cfb48",
+      "bytes": 1280
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-identity.log",
+      "retained": "identity.log",
+      "sha256": "feabb4add9e2ca3374e538560634d1ec97dc4f4ce89aab12f3d726e36ea9b2f6",
+      "bytes": 102
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-matrix.log",
+      "retained": "matrix.log",
+      "sha256": "f5bfa3059aad5fdddb33c5356c9bfa859a33d90f12f51ff8393cf106c56421b4",
+      "bytes": 58
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-process.log",
+      "retained": "process.log",
+      "sha256": "6faa379ef96d9f1895156c948a6325c6f454ee8d158e4c4eb73407e40b7a2ad8",
+      "bytes": 148
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-provenance.json",
+      "retained": "provenance.json",
+      "sha256": "5ce01f8ef23c2855155b14825660498f4f872e39ffc60e70c77bc1d21315ffb5",
+      "bytes": 3906
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-provenance.py",
+      "retained": "provenance.py",
+      "sha256": "2a2ae51c6e7a90e5beb4aa8135c2fad750fc5fb71ab50ac08787d996c41d7714",
+      "bytes": 4526
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-review-receipt.json",
+      "retained": "review-receipt.json",
+      "sha256": "c17f58bcf0913bf9fb0be06caac6e2b287a037e9ad486b1c5a3c0ad1c3d4e4dc",
+      "bytes": 61155
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-review.md",
+      "retained": "review.md",
+      "sha256": "2e6d19d225ce4a0cce73b39fcc0ad5e5fff7ef75b9babc4e80dc36e6b0cc2f5d",
+      "bytes": 13972
+    },
+    {
+      "original": "/tmp/symaira-fetch773-second-fix-independent-tests.log",
+      "retained": "tests.log",
+      "sha256": "eb85455cb5a3eca1c1eb4314b411e1a296df8ce2d867a1fb7b4e9306e15d6509",
+      "bytes": 13930
+    },
+    {
+      "original": "/workspace/oracles/symaira-fetch773-522-binaries/receipt.json",
+      "retained": "binary-archive-receipt.json",
+      "sha256": "bc21faa4e7484b07ea471c682ec1e964ddc89f4cb4123750005e0bdb43fedef1",
+      "bytes": 8652
+    }
+  ],
+  "policy": "Original failing and passing observations retained byte-for-byte. Binary archive is an independent owned snapshot, not a source/CI dependency."
+}

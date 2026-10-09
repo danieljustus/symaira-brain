@@ -1,0 +1,51 @@
+{
+  "controls": [
+    {
+      "name": "missing-case",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/workspace/symaira-fetch773/browse/port/harness/fetch_control_process.py\", line 289, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/workspace/symaira-fetch773/browse/port/harness/fetch_control_process.py\", line 197, in main\n    rust = execute(args.rust, selected, Path(raw) / \"rust\")\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/symaira-fetch773/browse/port/harness/fetch_control_process.py\", line 165, in execute\n    assert [record[\"id\"] for record in records] == expected, \"missing/duplicate/reordered process case\"\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: missing/duplicate/reordered process case\n",
+      "mutant_sha256": "2d765b573cea096d7153b9a20c207eb691c62dd5e21ec4ec850308683f269cc0"
+    },
+    {
+      "name": "wrong-body",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "honest fetch process comparisons: 239/251; failures: ['default-headers', 'env-http-implicit-private-allowed', 'env-http-loopback-bypass', 'env-http-all-proxy-ignored', 'env-http-explicit-overrides-env', 'literal-port-http', 'literal-port-relative-redirect', 'redirect-drop-body-headers', 'redirect-retain-body-headers', 'redirect-strip-cross-host-credentials', 'redirect-custom-referer', 'cache-first']\n",
+      "stderr": "",
+      "mutant_sha256": "4b560a72d8af22df91bcf91743afec69e898a450760963789201fa6d34749dad"
+    },
+    {
+      "name": "wrong-header",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "honest fetch process comparisons: 239/251; failures: ['default-headers', 'env-http-implicit-private-allowed', 'env-http-loopback-bypass', 'env-http-all-proxy-ignored', 'env-http-explicit-overrides-env', 'literal-port-http', 'literal-port-relative-redirect', 'redirect-drop-body-headers', 'redirect-retain-body-headers', 'redirect-strip-cross-host-credentials', 'redirect-custom-referer', 'cache-first']\n",
+      "stderr": "",
+      "mutant_sha256": "e38b26ac3f45ee01d1de88f939e0e7a2139ff02b55f6eade282e1eb0a2897cf3"
+    },
+    {
+      "name": "wrong-error",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "honest fetch process comparisons: 250/251; failures: ['body-size-7']\n",
+      "stderr": "",
+      "mutant_sha256": "234f7e4df796133c7b12df111828047a75f8ca99e66f48df444b81e360c17afa"
+    },
+    {
+      "name": "wrong-proxy-route",
+      "rejected": true,
+      "exit": 1,
+      "stdout": "honest fetch process comparisons: 213/251; failures: ['env-route-http-upper-0', 'env-route-http-lower-0', 'env-route-https-upper-0', 'env-route-https-lower-0', 'env-route-bare-proxy-0', 'env-route-no-proxy-1-2', 'env-route-no-proxy-2-0', 'env-route-no-proxy-3-0', 'env-route-no-proxy-4-2', 'env-route-no-proxy-5-0', 'env-route-no-proxy-6-2', 'env-route-no-proxy-7-2', 'env-route-no-proxy-8-0', 'env-route-no-proxy-9-0', 'env-route-no-proxy-10-0', 'env-route-no-proxy-11-0', 'env-route-no-proxy-12-0', 'env-route-no-proxy-13-0', 'env-route-no-proxy-14-0', 'env-route-review-a073-0-0', 'env-route-review-a073-3-0', 'env-route-review-a073-4-0', 'env-route-review-a073-6-0', 'env-route-review-no-proxy-0-0', 'env-route-review-no-proxy-1-0', 'env-route-review-no-proxy-2-1', 'env-route-review-no-proxy-3-1', 'env-route-review-no-proxy-4-0', 'env-route-review-no-proxy-5-0', 'env-route-review-no-proxy-6-0', 'env-route-review-no-proxy-7-0', 'env-route-review-no-proxy-8-1', 'env-route-review-no-proxy-9-0', 'env-route-review-no-proxy-10-0', 'env-route-review-no-proxy-11-0', 'env-route-review-no-proxy-12-0', 'env-route-review-no-proxy-13-0', 'env-route-upper-precedence-0']\n",
+      "stderr": "",
+      "mutant_sha256": "bc6bf9cf5f6b87e7ce81fe0ca2ad52679612ad2b99b76cf81d3e9d7b7c54d916"
+    }
+  ],
+  "rejected": 5,
+  "candidate_head": "52236234a197f00de89edbb185fc762a4f121161",
+  "candidate_dirty": false,
+  "controls_script_sha256": "0a7b20628da27fc3c7278805233c1aec818efc1da7b9f4c6dbc770ee73578417",
+  "native_binary_sha256": "5469c1e7b2ea7f1d3680aa40829bce7a5b109e371c58504e8ad0b03c53697cf6",
+  "go_binary_sha256": "8e92be70d9b908c11f47720b1bf34c5717b327c246686dbb71e03b336f820786",
+  "runner_sha256": "58856451e7ed52761f994f368674c5d97dc2393fb561471394a422a9e259ddd5"
+}

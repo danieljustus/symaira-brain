@@ -8,7 +8,7 @@ This file documents coding conventions, project standards, and Symaira-specific 
 
 ## Product Boundary
 
-**Accepted target: [PB-2026-09-09](docs/adr/0002-product-boundaries.md).** Brain owns portable agent context/control and the optional Browse and Operate modules. Browse remains actively developed; Operate is retained, not automatically replaced by Cua or Hermes. Brain GUI/CLI become the integrated credential-management surface, backed by the independently usable `symvault` service. Browser and OS-automation workers remain optional and permission-isolated; no master keys enter the gateway. Module moves and replacement UI are not yet completed. This target supersedes conflicting state-core-only and no-GUI scope restrictions below; existing commands and safety contracts remain until tested cutovers.
+**Accepted target: [PB-2026-09-09](docs/adr/0002-product-boundaries.md).** Brain owns portable agent context/control and the optional Browse, Operate and Scope modules. Browse remains actively developed; Operate is retained, not automatically replaced by Cua or Hermes. Brain GUI/CLI become the integrated credential-management surface, backed by the independently usable `symvault` service. Browser and OS-automation workers remain optional and permission-isolated; no master keys enter the gateway. Module source/direct-consumer cutovers are completed; release-distribution migration and the credential-management UI replacement remain pending. This target supersedes conflicting state-core-only and no-GUI scope restrictions below; existing commands and safety contracts remain until tested cutovers.
 
 **Symbrain is the portable agent-context layer.** It exposes the three Symaira
 *state cores* — credentials, memory/entities, and the skill SSOT — behind one
@@ -70,7 +70,7 @@ Consequences:
 
 ```
 symaira-brain/
-├── cmd/symbrain/          # CLI entrypoint (main package)
+├── cmd/symbrain/          # Go CLI entrypoint and migration oracle (main package)
 │   └── main.go
 ├── internal/              # Private packages (not importable outside this module)
 │   ├── profile/           # Profile schema (TOML), loading, validation, defaults
@@ -89,6 +89,12 @@ symaira-brain/
 │   ├── skills/            # Absorbed symskills: skill SSOT, MCP tools
 │   └── skillsrunner/      # In-process render+install pipeline used by
 │                          #   `symbrain sync` and `symbrain skills`
+├── rust/                  # Incremental native Rust crates and shared test support
+├── Cargo.toml, Cargo.lock # Root Rust workspace and locked dependencies
+├── rust-toolchain.toml    # Pinned Rust toolchain and components
+├── browse/                # Optional web-worker sources; separate module gates
+├── operate/               # Optional OS-automation worker sources
+├── scope/                 # Optional machine-inventory/diagnostics sources
 ├── Sources/               # Native SwiftUI apps (macOS + iOS)
 │   ├── SymBrainCore/      # Static library: CLI client, models, view models
 │   ├── SymBrainApp/       # macOS application (NavigationSplitView dashboard)
@@ -101,7 +107,7 @@ symaira-brain/
 │   │                      #   relicensed MIT → Apache-2.0)
 │   ├── cmd/symguard/      #   CLI entrypoint (main package)
 │   └── internal/          #   private packages: policy, capability, audit, approval, …
-├── docs/                  # Local planning docs (git-ignored, not part of the module)
+├── docs/                  # Tracked ADRs/handoffs; other private planning is ignored
 ├── project.yml            # Xcode project generation (xcodegen)
 ├── go.mod, go.sum
 ├── Makefile
@@ -110,7 +116,7 @@ symaira-brain/
 └── AGENTS.md              # This file
 ```
 
-**Rules:**
+**Go package layout rules:**
 - Use `cmd/` for the CLI entrypoint, `internal/` for all private logic.
 - No `pkg/` directory — all library code stays internal until there is a
   proven external consumer.
@@ -126,7 +132,7 @@ symaira-brain/
 ### Module and Dependencies
 
 - Module path: `github.com/danieljustus/symaira-brain`
-- Go version: 1.26+ (see `go.mod`), `CGO_ENABLED=0`.
+- Use the Go toolchain declared in `go.mod`; build with `CGO_ENABLED=0`.
 - Depends on `symaira-corekit` (pinned to a tagged release, no `replace`
   directive on `main`) for: `configkit`, `logkit`, `exitcodes`, `fsutil`,
   `versionkit`, `updatecheck`.
@@ -154,9 +160,10 @@ symaira-brain/
 
 ### Formatting
 
-- Run `gofmt -w -s .` before committing. No exceptions.
-- Use `go vet ./...` and `golangci-lint run ./...` (with `go vet` fallback)
-  via `make lint`.
+- Run `make fmt` before committing Go changes. It applies `gofmt -w -s` to
+  owned source while excluding linked checkouts and immutable migration evidence.
+- `make lint` runs `go vet ./...` and the owned-source `gofmt` check.
+  `golangci-lint` is a separate supplementary check, not invoked by that target.
 
 ---
 
@@ -172,8 +179,10 @@ symaira-brain/
 - Integration tests against the broker use a fake MCP child binary
   (JSON-RPC over stdio) checked into the repo — no test may assume a real
   Symaira binary is present (CI containers have none).
-- CI runs `go test -race ./...`. Local verification is optional but
-  recommended before pushing.
+- The Go CI gate runs `go test -race ./...`. Root Rust, optional modules,
+  Swift/native-platform and differential-evidence gates are separate; passing
+  the Go gate alone does not establish complete repository or native parity.
+  Local verification is optional but recommended before pushing.
 
 ```bash
 make test          # or: go test ./...
@@ -265,9 +274,10 @@ New configs and error messages should use `symvault://`; see
 | Data (audit log) | `~/.local/share/symbrain/` | `SYMBRAIN_*` |
 | Cache | `~/.cache/symbrain/` | `SYMBRAIN_*` |
 
-### Zero Stdio Pollution (`serve` mode)
+### Zero Stdio Pollution (`mcp` mode)
 
-When running as an MCP gateway (`symbrain serve --profile <name>`):
+When running as an MCP gateway (`symbrain mcp --profile <name>`; `serve` remains
+a deprecated compatibility alias):
 
 - stdin/stdout are the MCP JSON-RPC transport.
 - All diagnostic output goes to stderr (`corekit/logkit`, which logs to
@@ -318,8 +328,10 @@ names. Go structs use idiomatic CamelCase with `json:"snake_case"` tags.
 | `symbrain uninstall --harness <name> [--project DIR] [--dry-run]` | Remove symbrain from a harness |
 | `symbrain sync [--project DIR] [--dry-run] [<harness>...]` | Push instructions/skills to installed harnesses |
 | `symbrain memory` | Operate the embedded memory store |
+| `symbrain skills` | Operate the embedded skill library (list, status, targets, log, sync, doctor) |
+| `symbrain activity` | Read bounded activity summaries with explicit profile access |
 | `symbrain audit tail [-n N] [--profile <name>] [--json]` | Inspect the local JSONL audit log |
-| `symbrain vault` | Passthrough to symvault |
+| `symbrain vault` | Human credential create/set/delete commands and symvault passthrough |
 | `symbrain guard` | Absorbed symguard commands (decide, scan, doctor, grants, version) |
 | `symbrain version` | Print version information |
 | `symbrain help` | Show this help message |
@@ -342,9 +354,18 @@ make lint
 # Format
 make fmt
 
-# Full local check
-go vet ./... && go test -race ./... && go build -o symbrain ./cmd/symbrain
+# Go-only local check
+make lint && make test-race && make build
+
+# Root Rust checks; separate from optional-module/native-platform gates
+make rust-fast
+make rust-check
 ```
+
+`make rust-check` includes the pinned Go oracle comparisons and root Rust
+formatting, checking, Clippy, tests, audit and dependency-policy checks. It is
+not a substitute for the applicable native-platform and optional-module CI
+workflows under `.github/workflows/`.
 
 ---
 

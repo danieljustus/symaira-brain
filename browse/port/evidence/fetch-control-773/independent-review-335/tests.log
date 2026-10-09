@@ -1,0 +1,281 @@
+    Finished `test` profile [unoptimized] target(s) in 0.12s
+     Running unittests src/main.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/symbrowse-8f3b4825c2672b17)
+
+running 21 tests
+test completion::tests::hidden_completion_matches_cobra_flag_candidates_and_order ... ok
+test completion::tests::no_description_protocol_drops_candidate_descriptions_only ... ok
+test completion::tests::hidden_completion_uses_only_the_implemented_command_tree ... ok
+test completion::tests::parser_exposes_only_supported_shell_generators_and_hidden_protocol ... ok
+test tests::a11y_routes_tags_selector_and_optional_url ... ok
+test completion::tests::no_description_script_uses_cobra_no_desc_request_protocol ... ok
+test tests::mcp_rejects_unknown_engine_like_go ... ok
+test tests::browser_fetch_and_flow_commands_are_typed_dispatches ... ok
+test tests::parses_config_show ... ok
+test tests::parses_batch_flags_and_commands ... ok
+test tests::parses_mcp_daemon_autostart_flags ... ok
+test tests::parses_version_flag_permutations ... ok
+test tests::preserves_version_errors ... ok
+test tests::batch_mcp_list_profiles_matches_source_pinned_go_output ... ok
+test tests::state_key_init_parser_and_output_match_go ... ok
+test tests::unknown_public_commands_fail_instead_of_succeeding ... ok
+test upgrade::tests::stable_versions_and_major_zero_guard_match_go ... ok
+test upgrade::tests::cache_write_rejects_user_symlink_parent ... ok
+test upgrade::tests::update_hint_does_not_recommend_unimplemented_apply ... ok
+test completion::tests::cobra_scripts_match_the_pinned_go_oracle_bytes ... ok
+test upgrade::tests::local_fake_release_is_fetched_then_reused_from_go_compatible_cache ... ok
+
+test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/flow_list.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/flow_list-50661b9d7bdd3a16)
+
+running 1 test
+test flow_list_preserves_go_json_envelope_for_empty_and_populated_discovery ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/help_oracle.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/help_oracle-6f27e57768b479ed)
+
+running 1 test
+test rust_help_and_completion_follow_the_go_source_tree ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.68s
+
+     Running tests/profiles.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/profiles-9f86790ff46d3fb0)
+
+running 1 test
+test browser_profiles_match_go_cli_without_touching_browser_state ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.50s
+
+     Running tests/upgrade_check_native.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/upgrade_check_native-dd0d5df845c5615b)
+
+running 2 tests
+test native_upgrade_check_reads_fixture_cache_without_applying_or_networking ... ok
+test native_upgrade_check_failure_exits_nonzero_for_json_and_yaml ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/version.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/version-1910a0aefad97c3f)
+
+running 5 tests
+test root_version_flags_match_go_contract ... ok
+test adopted_version_renderers_preserve_fixture_bytes ... ok
+test invalid_output_and_extra_arguments_match_go_contract ... ok
+test version_text_matches_go_contract ... ok
+test structured_version_modes_match_go_contract ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running unittests src/lib.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/symbrowse_daemon-930efd900095d5c5)
+
+running 27 tests
+test client::tests::unix_connect_succeeds_for_listening_socket ... ok
+test client::tests::unix_connect_deadline_handles_saturated_backlog ... ok
+test client::tests::unavailable_errors_omit_secret_like_transport_text ... ok
+test protocol::tests::frame_and_response_omit_empty_optional_fields ... ok
+test redaction::tests::corpus_secrets_do_not_survive_any_surface ... ok
+test runtime::tests::cached_chrome_page_is_reused_with_subsecond_operation_budget ... ok
+test runtime::tests::dispatch_cache_get_returns_full_and_ranged_content ... ok
+test client::tests::terminate_child_reaps_within_bounded_cleanup_window ... ok
+test runtime::tests::dispatch_wayback_snapshots_uses_policy_checked_http ... ok
+test runtime::tests::dispatch_static_browser_open_is_engine_backed ... ok
+test protocol::tests::empty_command_and_one_mib_boundary_are_checked ... ok
+test runtime::tests::navigation_timeout_preserves_go_daemon_error ... ok
+test runtime::tests::state_capture_preserves_storage_and_bidi_cookie_fields ... ok
+test runtime::tests::unknown_commands_are_typed_errors ... ok
+test server::tests::browser_state_save_and_load_fail_before_store_access ... ok
+test server::tests::operation_context_is_cancelled_after_its_deadline ... ok
+test server::tests::paths_use_one_session_component ... ok
+test server::tests::sessions_are_path_safe ... ok
+test server::tests::status_timestamps_use_rfc3339_nano ... ok
+test session::tests::registry_isolates_profiles_and_orders_sessions ... ok
+test spec::paths::tests::cache_environment_child ... ignored, isolated environment child explicitly executed by its parent
+test runtime::tests::shutdown_timeout_is_created_inside_the_tokio_runtime ... ok
+test spec::paths::tests::origin_identity_preserves_each_invalid_byte ... ok
+test spec::tests::spec_paths_are_one_configured_tree ... ok
+test runtime::tests::fetch_url_can_store_and_cache_full_output ... ok
+test spec::paths::tests::cache_environment_uses_go_platform_fallbacks_in_isolated_children ... ok
+test runtime::tests::production_server_flow_cancellation_stops_before_followup_action ... ok
+
+test result: ok. 26 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.14s
+
+     Running tests/cancellation.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/cancellation-135d578dbded69f4)
+
+running 4 tests
+test unix::status_failure_is_preserved_without_stopping_daemon ... ok
+test unix::timed_out_client_request_is_not_retried_as_autostart ... ok
+test unix::production_runtime_cancellation_allows_same_process_restart ... ok
+test unix::late_handler_completion_does_not_emit_a_second_response ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.38s
+
+     Running tests/chrome_native.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/chrome_native-cb6b9437978bca16)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/firefox_native.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/firefox_native-38c184aae926dc85)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/lifecycle.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/lifecycle-8208ab30333fbffe)
+
+running 6 tests
+test unix::shutdown_does_not_unlink_replacement_socket ... ok
+test unix::operation_timeout_response_keeps_connection_usable_and_matches_go_oracle ... ok
+test unix::socket_lifecycle_permissions_status_and_stop ... ok
+test unix::concurrent_unix_starts_have_one_owner_and_recover_after_stop ... ok
+test unix::unix_listener_shutdown_runs_runtime_cleanup_hook ... ok
+test unix::stale_socket_is_recovered_but_live_socket_is_not_unlinked ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/platform.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/platform-da6712009c52538e)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/protocol_fixture.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/protocol_fixture-9bbb0c6168cf3657)
+
+running 1 test
+test daemon_wire_schema_matches_go_bytes ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/safari_native.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/safari_native-e77dc11cfdbbf43f)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/lib.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/symbrowse_fetch-2c5cbde74afd1853)
+
+running 4 tests
+test honest::redirect::tests::relative_and_absolute_redirects_retain_literal_authority_ports ... ok
+test client::tests::default_honest_client_shares_a_pinned_resolver_with_policy ... ok
+test batch::tests::preserves_input_order_and_partial_failures ... ok
+test honest::proxy_io::tests::protected_raw_proxy_dial_uses_the_shared_resolver_and_rejects_private_result ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/archive_http.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/archive_http-103b280d39f53dbd)
+
+running 2 tests
+test cdx_lookup_is_http_backed_and_encodes_all_query_controls ... ok
+test wayback_fetch_and_404_410_recovery_are_http_backed ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/cache_identity.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/cache_identity-8b2d3f5989adb2eb)
+
+running 1 test
+test delimiter_collision_cannot_change_proxy_route_or_attach_another_sessions_cookie_jar ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/control_contract.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/control_contract-cd5376cbd0f7aeff)
+
+running 7 tests
+test batch_boundaries_match_pinned_go_counts ... ok
+test pinned_go_control_fixture_has_provenance_and_full_boundaries ... ok
+test declared_case_ids_are_the_rust_control_corpus ... ok
+test profile_selection_matches_pinned_go_cases ... ok
+test retry_classification_and_deterministic_backoff_match_fixture ... ok
+test robots_control_cases_match_pinned_go_rules ... ok
+test static_selection_is_explicit_and_never_claims_browser_identity ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/http.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/http-d998ddc179aae314)
+
+running 13 tests
+test honest_http_methods_headers_and_body_are_preserved ... ok
+test invalid_proxy_is_rejected_before_request ... ok
+test compressed_and_decompressed_limits_are_bounded ... ok
+test proxy_peer_uses_shared_pinned_policy_before_connecting ... ok
+test http_proxy_is_used_for_a_request ... ok
+test cross_host_redirect_is_rejected_by_allowlist ... ok
+test resolver_pins_one_public_address_set_per_host ... ok
+test resolver_rejects_private_addresses_before_connecting ... ok
+test redirect_loop_is_bounded ... ok
+test redirects_are_followed_and_final_url_is_reported ... ok
+test named_sessions_persist_cookies_but_ephemeral_sessions_do_not ... ok
+test retry_retries_503_and_returns_recovered_body ... ok
+test socks5_proxy_tunnels_http_request ... ok
+
+test result: ok. 13 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/pipeline_controls.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/pipeline_controls-c71aed045a9b0f1f)
+
+running 8 tests
+test batch_boundaries_are_one_twenty_and_reject_twenty_one ... ok
+test pipeline_marks_both_not_found_statuses_for_recovery ... ok
+test frontmatter_keeps_final_url_and_schema_type ... ok
+test no_cache_disables_store_full_text_side_effects ... ok
+test pipeline_store_full_text_uses_output_cache_and_is_bounded ... ok
+test pipeline_covers_selector_raw_frontmatter_and_no_cache_controls ... ok
+test production_pipeline_uses_a_valid_response_cache_before_network ... ok
+test response_cache_expires_and_removes_stale_entries ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/proxy_uri.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/proxy_uri-9c8bfbf10af07d9b)
+
+running 3 tests
+test raw_proxy_body_limit_closes_connection_while_client_remains_alive ... ok
+test cancelling_raw_proxy_fetch_closes_its_connection ... ok
+test raw_proxy_deadline_closes_connection_while_client_remains_alive ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/render_corpus.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/render_corpus-f2a9a860335a4268)
+
+running 1 test
+test go_generated_static_vectors_match ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/retry.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/retry-f6726928a63a373f)
+
+running 6 tests
+test backoff_is_capped_and_jittered_in_the_documented_range ... ok
+test retry_after_supports_delta_seconds_and_invalid_values_fail_closed ... ok
+test retry_after_supports_future_http_date ... ok
+test transient_classification_includes_timeout_and_server_overload ... ok
+test host_limiter_keeps_circuits_independent ... ok
+test circuit_opens_and_recovers_with_successful_probes ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+     Running tests/robots.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/robots-d9be93c07a2f7395)
+
+running 5 tests
+test robots_empty_url_path_matches_root_rules ... ok
+test robots_uses_specific_agent_and_longest_rule ... ok
+test robots_preserves_query_and_allow_wins_equal_length_ties ... ok
+test robots_without_matching_group_is_allow ... ok
+test oversized_robots_body_is_rejected_while_streaming ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/static_controls.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/deps/static_controls-741c15f0991467ec)
+
+running 5 tests
+test relevance_keeps_original_order_after_top_k ... ok
+test selector_preserves_distinct_identical_nodes_without_group_duplicates ... ok
+test frontmatter_and_output_budget_are_deterministic ... ok
+test wayback_and_recovery_candidates_are_bounded_and_safe ... ok
+test html5_cleanup_preserves_metadata_and_drops_hidden_content ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests examples/control_probe.rs (/workspace/symaira-fetch773-proxy-uri/target/debug/examples/control_probe-25100d092a3f7f04)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

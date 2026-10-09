@@ -8,12 +8,19 @@ repository.workspace = true
 publish = false
 
 [dependencies]
+base64.workspace = true
+percent-encoding.workspace = true
 brotli.workspace = true
 encoding_rs.workspace = true
 flate2.workspace = true
 futures-util.workspace = true
 html5ever.workspace = true
 httpdate.workspace = true
+http.workspace = true
+hyper.workspace = true
+hyper-util.workspace = true
+native-tls.workspace = true
+tokio-native-tls.workspace = true
 markup5ever_rcdom.workspace = true
 rand.workspace = true
 reqwest.workspace = true
@@ -25,3 +32,6 @@ time.workspace = true
 tokio.workspace = true
 url.workspace = true
 ruzstd.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["test-util"] }
