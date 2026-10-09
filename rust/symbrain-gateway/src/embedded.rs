@@ -19,6 +19,7 @@ impl Gateway {
         id: Value,
         name: &str,
         args: Option<&Value>,
+        raw_arguments: Option<&serde_json::value::RawValue>,
         context: DispatchContext<'_>,
     ) -> Result<GatewayResponse, GatewayError> {
         common::check_cancel(context)?;
@@ -36,7 +37,9 @@ impl Gateway {
                 .ok_or_else(|| GatewayError::UnknownTool(name.to_string()))?;
             common::dispatch_activity(store, name, &value)
         } else if catalog::SKILLS_TOOLS.contains(&name) {
-            skills::dispatch(name, &value)
+            let result = skills::response(id, name, raw_arguments);
+            common::check_cancel(context)?;
+            return result;
         } else {
             Err(GatewayError::UnknownTool(name.to_string()))
         };

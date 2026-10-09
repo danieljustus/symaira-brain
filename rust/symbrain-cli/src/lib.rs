@@ -7,7 +7,6 @@ use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
-use symbrain_core::version::{self, VersionInfo};
 
 mod activity_cli;
 mod audit_cli;
@@ -33,10 +32,12 @@ mod profile_cli;
 mod profile_render;
 mod setup_cli;
 mod skills_cli;
+mod skills_stdout;
 mod sync_cli;
 mod usage_cli;
 mod vault_admin;
 mod vault_config;
+mod version_cli;
 
 const USAGE: &str = "symbrain — portable agent-context layer for AI harnesses\n\nUsage:\n  symbrain <command> [flags]\n\nGlobal output flags (version, sync, memory, skills, activity, profile, harness, audit, usage, and doctor):\n  --output table|json  Output format (default: table)\n  --json               Shorthand for --output json\n\nCommands:\n  init        Create XDG directories, default config, and example profiles\n  doctor      Check environment, config, profiles, and child binaries\n  setup       Download and install pinned core binaries to ~/.symaira/bin\n  profile     Manage profiles (list, show, add, remove)\n  config      Inspect and edit the global config (path, get, set)\n  harness     Inspect registered AI harnesses and their MCP servers\n  usage       AI subscription/token usage per provider\n  mcp         Run the MCP gateway over stdio for a profile (serve is a deprecated alias)\n  install     Register symbrain with a harness\n  uninstall   Remove symbrain from a harness\n  sync        Sync instructions and skills to harnesses\n  memory      Operate the embedded memory store (list, search, set, delete, rules, query-log, sync, serve)\n  skills      Operate the embedded skill library (list, status, targets, log, sync, doctor)\n  activity    Read bounded activity summaries with explicit profile access\n  audit       Inspect the audit log\n  vault       Human credential management (create <path> and set <path.field> read single-line secrets from stdin; delete requires --yes)\n  guard       Absorbed symguard commands (decide, scan, doctor, grants, version)\n\n  version     Print version information\n  help        Show this help message\n\nVault approval passthrough:\n  symbrain vault approval list [--output json]\n  symbrain vault approval decide <request-id> --approve|--deny\n\nRun 'symbrain <command> --help' for details on a specific command.\n";
 
@@ -65,13 +66,19 @@ pub fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) ->
 
 /// Runs the CLI on its actual process standard streams.
 ///
-/// Native Setup writes and Memory Set completion use this stdout identity to
-/// retain Go's Unix broken-pipe termination. Embedded writers keep ordinary errors.
+/// Native Setup writes, Memory Set completion and Skills reports use this stdout
+/// identity to retain Go's Unix broken-pipe termination. Embedded writers keep
+/// ordinary errors.
 #[must_use]
 pub fn run_stdio(args: &[OsString]) -> u8 {
-    let mut stdout = io::stdout();
     let mut stderr = io::stderr();
-    run_native(args, &mut stdout, &mut stderr, true)
+    // Only the executable's Skills fd1 boundary owns Go stdout OS semantics.
+    let mut stdout: Box<dyn Write> = if peek_command(args) == "skills" {
+        Box::new(skills_stdout::SkillsStdout::new(io::stdout()))
+    } else {
+        Box::new(io::stdout())
+    };
+    run_native(args, &mut *stdout, &mut stderr, true)
         .unwrap_or_else(|| InheritedProcessExecutor.execute(args, &mut stderr))
 }
 
@@ -133,7 +140,7 @@ fn run_native(
 
     match cmd.as_ref() {
         "help" | "--help" | "-h" => Some(write_usage(stdout)),
-        "version" => Some(run_version(rest, stdout, stderr, format)),
+        "version" => Some(version_cli::run(rest, stdout, stderr, format)),
         "config" => config_cli::run(rest, stdout, stderr),
         "profile" => profile_cli::run(rest, stdout, stderr, format),
         "audit" => Some(audit_cli::run(rest, stdout, stderr, format)),
@@ -160,7 +167,7 @@ fn run_native(
             rest, stdout, stderr, format, true,
         )),
         "memory" => Some(memory_cli::run(rest, stdout, stderr, format)),
-        "skills" => skills_cli::run(rest, stdout, stderr, format),
+        "skills" => Some(skills_cli::run(rest, stdout, stderr, format)),
         "activity" => Some(activity_cli::run(rest, stdout, stderr, format)),
         "vault" => Some(vault_admin::run(args, stdout, stderr)),
         "guard" => guard_cli::run(rest, stdout, stderr),
@@ -173,16 +180,18 @@ fn run_native(
 }
 
 /// Encodes JSON the way Go's `json.Encoder` does: compact output with `&`,
-/// `<` and `>` escaped, and no trailing newline.
+/// `<`, `>` and JavaScript line separators escaped, and no trailing newline.
 ///
 /// Go renders every CLI report through `encoding/json`, so a report that must
-/// match its bytes has to escape those three characters too.
+/// match its bytes escapes HTML characters and U+2028/U+2029 too.
 pub(crate) fn go_json<T: serde::Serialize>(value: &T) -> String {
     serde_json::to_string(value)
         .unwrap_or_default()
         .replace('&', "\\u0026")
         .replace('<', "\\u003c")
         .replace('>', "\\u003e")
+        .replace('\u{2028}', "\\u2028")
+        .replace('\u{2029}', "\\u2029")
 }
 
 fn is_output_command(cmd: &str) -> bool {
@@ -228,71 +237,6 @@ fn write_usage(stdout: &mut dyn Write) -> u8 {
     } else {
         exit::GENERIC
     }
-}
-
-fn run_version(
-    args: &[OsString],
-    stdout: &mut dyn Write,
-    stderr: &mut dyn Write,
-    format: OutputFormat,
-) -> u8 {
-    let normalized = normalize_flags(args);
-    if let Some(first) = normalized.first() {
-        let first_str = first.to_string_lossy();
-        if first_str == "--" {
-            if normalized.len() > 1 {
-                let unexpected = args
-                    .get(1)
-                    .map_or_else(|| "".into(), |a| a.to_string_lossy());
-                let _ = writeln!(
-                    stderr,
-                    "symbrain version: unexpected argument {unexpected:?}"
-                );
-                return exit::USAGE;
-            }
-        } else if first_str == "-" {
-            let _ = writeln!(stderr, "symbrain version: unexpected argument \"-\"");
-            return exit::USAGE;
-        } else if first_str.starts_with('-') {
-            let trimmed = first_str.trim_start_matches('-');
-            let name = match trimmed.split_once('=') {
-                Some((k, _)) => k,
-                None => trimmed,
-            };
-            if name == "h" || name == "help" {
-                let _ = writeln!(stderr, "Usage of version:");
-                return exit::USAGE;
-            }
-            let _ = writeln!(stderr, "flag provided but not defined: -{name}");
-            let _ = writeln!(stderr, "Usage of version:");
-            return exit::USAGE;
-        } else {
-            let _ = writeln!(
-                stderr,
-                "symbrain version: unexpected argument {first_str:?}"
-            );
-            return exit::USAGE;
-        }
-    }
-
-    let version = option_env!("SYMBRAIN_VERSION").unwrap_or("dev");
-    let info = VersionInfo::new("symbrain", version);
-    if output::render(&mut *stdout, format, &info, |w| -> io::Result<()> {
-        writeln!(w, "symbrain {version}")?;
-        writeln!(w, "  rust    {}", rustc_version())?;
-        writeln!(
-            w,
-            "  os/arch {}/{}",
-            version::current_os(),
-            version::current_arch()
-        )
-    })
-    .is_err()
-    {
-        let _ = writeln!(stderr, "symbrain version: format output");
-        return exit::GENERIC;
-    }
-    exit::OK
 }
 
 #[cfg(unix)]
@@ -368,3 +312,7 @@ pub(crate) fn rustc_version() -> &'static str {
 #[cfg(test)]
 #[path = "cli_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "skills_json_tests.rs"]
+mod skills_json_tests;

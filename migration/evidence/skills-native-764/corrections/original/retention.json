@@ -1,0 +1,1924 @@
+{
+  "immutable_head": "db9760a3d312173e8cd096d05925319a78308b48",
+  "retained_original_files": 317,
+  "additional_sdk_consumer_sources": 24,
+  "members": [
+    {
+      "original": "/workspace/symaira-skills764-independent-source/actionlint.log",
+      "archive_member": "workspace/symaira-skills764-independent-source/actionlint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/binary-source-provenance.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/binary-source-provenance.json",
+      "sha256": "8e1ef6d15dd0b4a4e6ddd45f2571642c420aaf2324d737c1c44a6ec631eb77b5",
+      "bytes": 1662
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/.github/workflows/skills-native.yml",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/.github/workflows/skills-native.yml",
+      "sha256": "268f002ca978cd87ba343698d159c010bd1483dc8146396419a6885df63cf74e",
+      "bytes": 3031
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/Cargo.lock",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/Cargo.lock",
+      "sha256": "e51a0c23bbd4ded67f71531a63d828653cdd5c4dbf4c2b4376a07c95483f78b0",
+      "bytes": 65735
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/Cargo.toml",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/Cargo.toml",
+      "sha256": "982fdf67af364bb689371f888d79e4662bcbd2d7088dec0d7a2aa85f308a0155",
+      "bytes": 2785
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/migration/contract-matrix.csv",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/migration/contract-matrix.csv",
+      "sha256": "d1e24a67aff8a4cd6c00c5a55498041aaefd4be56ce9b5c9d705df4bdeb551a8",
+      "bytes": 30391
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/Cargo.toml",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/Cargo.toml",
+      "sha256": "264401fd592b03c30f3bc5f3b0f831607a50fe91fed4d955210978c777585cf5",
+      "bytes": 1265
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/build.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/build.rs",
+      "sha256": "c7d6abd8014332091d999c1a72c5db224044694c1f4571c24572327c0da87267",
+      "bytes": 442
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/activity_args.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/activity_args.rs",
+      "sha256": "5bea6864075f6c2f26114e7c43b759d764da23e4bbbcdaa625a7835a7e02b6a7",
+      "bytes": 7320
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/activity_cli.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/activity_cli.rs",
+      "sha256": "3e332795d6aad6ef530b93edb73918d9438f50d56c41c5b4051977fcba452af6",
+      "bytes": 11371
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/activity_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/activity_tests.rs",
+      "sha256": "e097bda5f45eec2ecdf038add15ea985da8c98612cc3f72428877c276aec0980",
+      "bytes": 3394
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/activity_time.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/activity_time.rs",
+      "sha256": "ffe48f0f95f668a863b93af2f9085c230971a29dd91f3fc8ba872b66e2664404",
+      "bytes": 4835
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/audit_cli.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/audit_cli.rs",
+      "sha256": "5fdda55957e637715ef859af2c61ba40da659a7cdc32bb1230e8ba00ad2d3d1d",
+      "bytes": 7048
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/cli_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/cli_tests.rs",
+      "sha256": "3a4734eead15924813493fda3e5d5939ebc2f3190969085578e3f12100352472",
+      "bytes": 13993
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/config_cli.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/config_cli.rs",
+      "sha256": "11293458c72851b4911a24b32e65a90f59f0279197dd6a9ffe052be83b19b58a",
+      "bytes": 4527
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_checks.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_checks.rs",
+      "sha256": "de08bb41f70b4ccf2b31562d8440106e4ef9d7c1170dd990eb0452a8c6f91908",
+      "bytes": 7049
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_cli.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_cli.rs",
+      "sha256": "e5d980e72ffea8f2aae528416f32caee539fd24240365dbb709ec89093b65ac1",
+      "bytes": 9551
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_core.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_core.rs",
+      "sha256": "de5de8fc42fdb9df20034e4316e03d8dfa948d9aa1a4813fe00045585f07b1d9",
+      "bytes": 11083
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_fix.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_fix.rs",
+      "sha256": "1fc27da32d6cc7866ac6d241611240e05869e2f1021257043d0c9e7309404774",
+      "bytes": 1996
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_links.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_links.rs",
+      "sha256": "f81fd8412d0101c1b2b7a9ff38550611a3373e47ef810f514b504de6c43c797d",
+      "bytes": 13501
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_process.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_process.rs",
+      "sha256": "35ddb638017ec617fd897bdd298c20e0688407365f886e9c62c70c55995c2ade",
+      "bytes": 11074
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_render.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_render.rs",
+      "sha256": "53016c1751eac5446cad88b1e6dafe5a6d902ce5246c667dc3140154e9fa9f4a",
+      "bytes": 8785
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_types.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/doctor_types.rs",
+      "sha256": "98d0d5c3cf815f4749227fc4a7173677b67417fe5e6b202d48db60ec518a5631",
+      "bytes": 7635
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/guard_cli.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/guard_cli.rs",
+      "sha256": "08b4a2c16b53c8202f9eb8b4b2bc82317d13c67b0bf392e34bc7344ef629ce21",
+      "bytes": 10111
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/guard_doctor.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/guard_doctor.rs",
+      "sha256": "1b839af6029b11184d2d4afc348cd899df2fc1a268aa42d5b514d7934dbd3b8d",
+      "bytes": 32151
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/guard_grants.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/guard_grants.rs",
+      "sha256": "056d60b2b8b54a717fab673e8468aff5d60e19fdcae9a41753f76d9188414dc7",
+      "bytes": 6386
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/guard_grants_store.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/guard_grants_store.rs",
+      "sha256": "05daf2ce769bbe0ab6ef600eab15ef1a4d18ad595a34c026ee9e137a57b9db51",
+      "bytes": 9814
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/guard_scan.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/guard_scan.rs",
+      "sha256": "c124b318b89f7b260464dd75c4c6b6c378d0d672fef757ab2354e4f6b3573259",
+      "bytes": 15783
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/guard_scan_config.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/guard_scan_config.rs",
+      "sha256": "3f4403534bcba6ce3d0c994ba6b1120b7ea8a75ab9a1b50884d8d06c4c31a1e7",
+      "bytes": 8512
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/harness_cli.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/harness_cli.rs",
+      "sha256": "c023d4d97e11df1e32269cde6964c381c9e1e16713855e87ea529600d9a07b15",
+      "bytes": 12656
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/health_probe.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/health_probe.rs",
+      "sha256": "b4387bd297383bcd7cd20e1233a59168260f96d1c446879cda6060e42e18a200",
+      "bytes": 34013
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/init_cli.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/init_cli.rs",
+      "sha256": "f1bdc936cd4edd4d79f8de091b5cf5b22b94682362056169e35178c42ed17f8d",
+      "bytes": 9322
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/init_templates/.gitattributes",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/init_templates/.gitattributes",
+      "sha256": "ac5e4ed351bc6152b3b66427a2887bbfe7eddc1c9774e35ac7cf76cf5b31e055",
+      "bytes": 83
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/init_templates/default_config.toml",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/init_templates/default_config.toml",
+      "sha256": "42d528661b9266b3990a5a380be25e3562f86467ff34ae83efd32437d52ad605",
+      "bytes": 1514
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/init_templates/foreign-read-only.toml",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/init_templates/foreign-read-only.toml",
+      "sha256": "16607220063a636ee4c22d817ac138acce236fd6e61ce016f5f54a60bf1f7181",
+      "bytes": 1474
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/init_templates/personal.toml",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/init_templates/personal.toml",
+      "sha256": "686267ba7443a5342a785e397adf741d619b6d7bb95d59fbaa38cb6d5110054a",
+      "bytes": 339
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/init_templates/restricted.toml",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/init_templates/restricted.toml",
+      "sha256": "d71a5bcd132acfd41529e86800ff80612393dc4aaf734b46e1e7232f496c1bf9",
+      "bytes": 382
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/install_cli.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/install_cli.rs",
+      "sha256": "25474e4c87af3f78c69023b21b85472a2f20265cce0dd65d7f47f4c36f530975",
+      "bytes": 23071
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/lib.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/lib.rs",
+      "sha256": "decf6229c8fd9295893c456ca15dc8ab20ab79390988de051591bc80f21aa9ca",
+      "bytes": 15619
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/main.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/main.rs",
+      "sha256": "e6dd8093173873f5eddab3d213368e90aacad77092d03c37d5b5b1ff3426a7a6",
+      "bytes": 325
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/mcp_cli.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/mcp_cli.rs",
+      "sha256": "df13ab029d74d6b987c26139fd2b5d3679dd71ddad6a65190641e8c8ab1e6af4",
+      "bytes": 19339
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/memory_cli.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/memory_cli.rs",
+      "sha256": "78b664330aba0c79676e62000cfa9153a99831edd13d80ecc44bcaced3aabb95",
+      "bytes": 57429
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/passthrough.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/passthrough.rs",
+      "sha256": "58eb151e105af40366dd6b24fb7105401f258c9dd24b67f9106fa046eeddf3e1",
+      "bytes": 9377
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/passthrough_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/passthrough_tests.rs",
+      "sha256": "69f8d33d1bfad1682c9eb1439a41361526de0a19090c36e56df7afa1b9f9a811",
+      "bytes": 3952
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/profile_actions.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/profile_actions.rs",
+      "sha256": "347c0ba2fac9b24e6f308c91edcb042fcc39bb34e305a17522c0d533c620d3c9",
+      "bytes": 10265
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/profile_args.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/profile_args.rs",
+      "sha256": "c46a25adc43643fc94d65fd2639cfe3304d64c9a65f533beda1530b9754a5b92",
+      "bytes": 7833
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/profile_cli.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/profile_cli.rs",
+      "sha256": "84ea453ddf1981992a2e8bb660f635f5de5a46c5c9cd3ccb5af4e64eb3e886d7",
+      "bytes": 8959
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/profile_render.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/profile_render.rs",
+      "sha256": "cc348dce9a1f51a73c8b49957e6e1a0bc0682c000fbcb0fb370f88667638cf3c",
+      "bytes": 3107
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/setup_args.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/setup_args.rs",
+      "sha256": "ef62c564e91b277958420101562632027980415374fc59dcc0c76bf94d526878",
+      "bytes": 3989
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/setup_cli.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/setup_cli.rs",
+      "sha256": "e068a23610485db4caa515f11048e960b5026d6237a0c266eb0a84e6b9c0557e",
+      "bytes": 10105
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/setup_config.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/setup_config.rs",
+      "sha256": "a8338db6477d65e1bbfa9ed24556cd8b4f8f59f67d4036da1b66f04ca2d3caa0",
+      "bytes": 5338
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/skills_cli.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/skills_cli.rs",
+      "sha256": "9b89bf958283007ac687ca83570f450d1b52c50c58bd4a8d19a10f3fc5f9ec93",
+      "bytes": 2695
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/skills_cli_flags.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/skills_cli_flags.rs",
+      "sha256": "9dcbc2ecde6f5808d48a8dcb7cc424d8f912d0c777d682ad08e05388a4aa2861",
+      "bytes": 8255
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/skills_cli_list.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/skills_cli_list.rs",
+      "sha256": "fe99eccb81146989ccb8889ec43750977c5cfa0acfdfcc6ca73858dd02b239c9",
+      "bytes": 3869
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/skills_cli_misc.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/skills_cli_misc.rs",
+      "sha256": "2feb1dd12ef8ebe6152160de18025eb6c0babe9241ed41cb87b736bff82c27d3",
+      "bytes": 7626
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/skills_cli_status.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/skills_cli_status.rs",
+      "sha256": "5a48a4b3a94461cda697d2452121384f402645216ae14fced40f9d59133ccb2e",
+      "bytes": 6769
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/skills_sync_bytes.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/skills_sync_bytes.rs",
+      "sha256": "33bee3aea7b09167602fc1483a6dee6bdea81335b41a8d5a93e563ee19c70ac5",
+      "bytes": 3498
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/skills_sync_flags.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/skills_sync_flags.rs",
+      "sha256": "ff7c39a6cb28abbfc4c4a92802c4c46bd71e8b094937e8cf316d33c8f7ea5b8b",
+      "bytes": 5425
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/sync_cli.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/sync_cli.rs",
+      "sha256": "6a2378e7e22b66d3463e48719f6345bf230980e85962fa661b6d9512c726e447",
+      "bytes": 15754
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/usage_cli.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/usage_cli.rs",
+      "sha256": "51f900ee73c2a3de0b47549d63c77e7228a4f2c249b4c942c35f075398eede0a",
+      "bytes": 7325
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/usage_fetch_output_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/usage_fetch_output_tests.rs",
+      "sha256": "3ff61d31bbd27467edb8df5ea357ce12317e3df2374d3ed3e55b6728eb406482",
+      "bytes": 1856
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/vault_admin.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/vault_admin.rs",
+      "sha256": "85e8466e9e5d781368051f3f1c0a3066ff2c86eb16a9a5de3323ce9604c231da",
+      "bytes": 10774
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/vault_config.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/vault_config.rs",
+      "sha256": "1b1538509663c718b27bfbe7fde07bf89fa12e15ee933ac321e65ff0c50a175d",
+      "bytes": 4981
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/vault_response.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/src/vault_response.rs",
+      "sha256": "ad8a66f0a55f5d601c5b4da333a9253c93cf7d008aaf41fd6bd3a31430b6b65c",
+      "bytes": 3201
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/activity_cli_oracle_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/activity_cli_oracle_tests.rs",
+      "sha256": "09a446f9bb2bd75294a37e72f0fdd0cd80920e4b6082865de606add5af21bcf9",
+      "bytes": 4233
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/activity_validation_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/activity_validation_tests.rs",
+      "sha256": "b9a85ed7d37461379295b39a4554a9c8fd4fd29a3d644634e2987f435e89454a",
+      "bytes": 4097
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/cli_tree_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/cli_tree_tests.rs",
+      "sha256": "f4a9db302b39d8359150115c63b155022415dc6b08438de569dec3d2172bf85a",
+      "bytes": 17614
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/common/doctor_header.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/common/doctor_header.rs",
+      "sha256": "bbae58c3f13664fb7fb58c28f28b8f04f40ab331b55e4ccce0e10c57f55a116a",
+      "bytes": 1491
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/doctor_modules.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/doctor_modules.rs",
+      "sha256": "222b24d10fb7e237661ebc58e0ddd4258a0f985e7045511584c9b0fb06e0bb98",
+      "bytes": 8829
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/doctor_native.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/doctor_native.rs",
+      "sha256": "dba6fea31b469e640ba7aa2c8ac5d9a63b81e3105c4a77ca83b68804e5f9afcb",
+      "bytes": 9490
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/activity_cli_oracle.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/activity_cli_oracle.json",
+      "sha256": "35d22c82b110615ca1978d74249923052b9cdfcb3b2ba669690756c5619a8dd9",
+      "bytes": 3297
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/activity_validation_767.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/activity_validation_767.json",
+      "sha256": "124052ee32653f7956b235a0afb543f9e895bf5caf7b2abf7ac39626726bfd12",
+      "bytes": 242535
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/cli_tree_expectations.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/cli_tree_expectations.json",
+      "sha256": "4f13736e92bd88ffbbe26731ad9c88821d6ecd5cdc50a67431cb9c87f0c4d6d7",
+      "bytes": 49959
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/profile_remove_oracle.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/profile_remove_oracle.json",
+      "sha256": "45dab9a4fb07afc7d26085e60970ba88a1d81ccc73cd708f660f46123b48877d",
+      "bytes": 24474
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/profile_remove_oracle_darwin.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/profile_remove_oracle_darwin.json",
+      "sha256": "c4a0842ea3c0b0869eb40a39ca2a7f46f697c36027f02ed701534fe1deeb46dd",
+      "bytes": 24474
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/profile_remove_oracle_linux.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/profile_remove_oracle_linux.json",
+      "sha256": "9099e11a18e163301445d054d3d1ea49254568929203154c767d7c7bfcb8cfed",
+      "bytes": 24474
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/vault_admin_go.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/vault_admin_go.json",
+      "sha256": "202a98c14ce7c35ecab1f33f3dc1100dfe35acd3e2d72b42b9b54fefe68329bb",
+      "bytes": 77940
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/vault_unicode_go.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/fixtures/vault_unicode_go.json",
+      "sha256": "078a303a757ca31976f043be2960ae0651553d1d39921d4da8c4bc4b0a99642a",
+      "bytes": 16343
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/guard_decide_adapter.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/guard_decide_adapter.rs",
+      "sha256": "97fd3f4a1129840371ff4e8460244d985fd9134adede42183ccefbcad5ea5f61",
+      "bytes": 3415
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/guard_decide_raw_bytes.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/guard_decide_raw_bytes.rs",
+      "sha256": "3ffbfde15363dd9d3b1e0ab45313905d459e29a07d1b75ded3c648b40f375847",
+      "bytes": 5470
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/guard_doctor_oracle_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/guard_doctor_oracle_tests.rs",
+      "sha256": "cfa5c047bcba060578cc2623517bd5e794568871e7b9bdb10236fe4cdd8abeaf",
+      "bytes": 8207
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/guard_grants_native.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/guard_grants_native.rs",
+      "sha256": "52a344e1568f6e4b5a619542d1ae560ff2257dcc9acf394722b5b5b5ce3490ef",
+      "bytes": 9007
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/guard_oracle_grants.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/guard_oracle_grants.rs",
+      "sha256": "79583c621e333a2f3fc3630393fc58e262b74b69796a5b30471fb22fd2886962",
+      "bytes": 3331
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/harness_health_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/harness_health_tests.rs",
+      "sha256": "19018400b15baa4447a22c42528262707e03879f490693e2d699fe5417d1b860",
+      "bytes": 14732
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/harness_list_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/harness_list_tests.rs",
+      "sha256": "fb23c81397dbb6121970e7a1b145372ca7406a3b2dcc70313dd97fdb49de07ef",
+      "bytes": 12432
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/init_cli_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/init_cli_tests.rs",
+      "sha256": "5cf56e33be68522d26aae3ff854cf59e9e38a92467e1577d042bdda49994ee18",
+      "bytes": 13192
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/install_oracle_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/install_oracle_tests.rs",
+      "sha256": "c0eae662a3a99dd467c35ff5f533ac15a2c6af3f9650006bc07bbc5c71a19955",
+      "bytes": 12403
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/mcp_cli_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/mcp_cli_tests.rs",
+      "sha256": "859dcbfcf03910aaff2ffeccd42f6209ab411355725e7b06acabd169a9e9f0af",
+      "bytes": 40192
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/profile_cli_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/profile_cli_tests.rs",
+      "sha256": "e9fe05f8ef3cb1f691c06b07c7cb840d3e7627e474763eafe118e7a8cf6b3255",
+      "bytes": 18357
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/setup_fix_native.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/setup_fix_native.rs",
+      "sha256": "673427cb6351c4abc4c8a74a69c066e88853074e4b5789f4ecd1a0f10a0281a5",
+      "bytes": 2061
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/setup_repair_native.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/setup_repair_native.rs",
+      "sha256": "5032cf011006493cce3988b195cf8eb0b4b5a3618f30e8728239d33da765a0dd",
+      "bytes": 5781
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_doctor_native.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_doctor_native.rs",
+      "sha256": "7e5d901f8d3350cb18c46ac0ec6120f2cca98894d7c42ccbf5044c6afbddb372",
+      "bytes": 4918
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_list_native.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_list_native.rs",
+      "sha256": "81645c0197d63b376e06cb3d210b57e98743af8a0a254893424dc89fd8800945",
+      "bytes": 10889
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_log_native.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_log_native.rs",
+      "sha256": "2e7dea8571015c4c705bc526b4ac21df448659bbd8d78580f267010cbbe19d5a",
+      "bytes": 9686
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_preflight_native.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_preflight_native.rs",
+      "sha256": "55f664bbde0f55319e07af28b4606e22683b6147e960c225708f688b9fe54783",
+      "bytes": 11573
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_raw_flag_names.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_raw_flag_names.rs",
+      "sha256": "fa89831dd204f4c9dee18a2c420d26634e216570a7a6df3be59a31f8c4f7b058",
+      "bytes": 2382
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_render_drift.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_render_drift.rs",
+      "sha256": "1c4b8dea1def6a0ca5b7ebe00597991e8c53f93f21f666afa6b3c10b5d9b61f3",
+      "bytes": 12398
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_status_opencode_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_status_opencode_tests.rs",
+      "sha256": "a4fb5968969997a0e09972887f72bd8ee2b6de5d5ebac28862e62a2ec3053696",
+      "bytes": 13459
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_sync_legacy_roots.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_sync_legacy_roots.rs",
+      "sha256": "121fadf1140f25c27d90bf012b69cc8ea9b8bd66193a7afdff14a15083b288bc",
+      "bytes": 14474
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_targets_native.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_targets_native.rs",
+      "sha256": "9acbdc6258b9d2def9f10bc30fe353b5235d767b64a99d6d3b78e31165cbf294",
+      "bytes": 8867
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_windows_wide_flags.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/skills_windows_wide_flags.rs",
+      "sha256": "9062f87010a80e5adb11b643ee447cfc68fa069b6b296a8d409418b1a55abd7f",
+      "bytes": 3100
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/support/mcp_lifecycle.py",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/support/mcp_lifecycle.py",
+      "sha256": "12f6314cf0b121850d02fb572d79e6849b03a5202ede183097eeee1e8e8464ba",
+      "bytes": 2619
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/support/mcp_lifecycle.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/support/mcp_lifecycle.rs",
+      "sha256": "489acd25237ef1465ae8c6f829983e2cda0eed17aa5f4198bd29f8e405d37172",
+      "bytes": 12877
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/support/setup_child.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/support/setup_child.rs",
+      "sha256": "e73cb2e3ef5ab3b9970a881a9e29d76ab352ca90e7a618c496d394b7f9483cd2",
+      "bytes": 396
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/support/skills_preflight_process.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/support/skills_preflight_process.rs",
+      "sha256": "018f4f11644d7edbd96966b065ff2e4a43b737cdafe4e9a670edb3f94b41c7e3",
+      "bytes": 2408
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/support/skills_status_remaining.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/support/skills_status_remaining.rs",
+      "sha256": "4c54f69dab4e8a8841bbd9931b169af3b2603cdf2c1a739112da7d7eb542b705",
+      "bytes": 2270
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/support/vault_child.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/support/vault_child.rs",
+      "sha256": "e379a4f44f488389ddfb98fc9fd0ee773923955051b3c2888f1b394c7a0a2078",
+      "bytes": 1680
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/sync_native.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/sync_native.rs",
+      "sha256": "70027d172da217c991613c23284b936a42467d7df53060d8cfedba735a31a049",
+      "bytes": 5765
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/vault_admin_native.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-cli/tests/vault_admin_native.rs",
+      "sha256": "1e4a62b3d7c0d1d5ee0cbd327b7895cdc6bb99e5af9a1e42f6b382ffcdf23242",
+      "bytes": 9108
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/Cargo.toml",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/Cargo.toml",
+      "sha256": "14b3611dbac0f0722cdaa40edeef92fbf78b813d04e16dc01531ea557bffdaaf",
+      "bytes": 877
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/audit.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/audit.rs",
+      "sha256": "ed08d7765fb941d0e68c6ea497c540a0189622b8f67095a0ead2cbf50ded5bf6",
+      "bytes": 8145
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/builtin.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/builtin.rs",
+      "sha256": "e36de48c65f4ea45759b19e53622c6bdb2226e5993541ee55001aa1cec8081c5",
+      "bytes": 4149
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/catalog.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/catalog.rs",
+      "sha256": "5b869163e2b4ca84a6077a4b8ac3dee4291eb978e7aa37e4a368b7fcce0d8753",
+      "bytes": 3987
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/dispatch.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/dispatch.rs",
+      "sha256": "715a8b91a3bbb5257755164cc8552c093e72b3eab72e670cb29b97c120e2a2de",
+      "bytes": 9504
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/dispatcher_impl.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/dispatcher_impl.rs",
+      "sha256": "33f71856db53052c243d8acffb51ff6a7e761d5439999679dda7994ca41b9fe7",
+      "bytes": 631
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/activity.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/activity.rs",
+      "sha256": "b8dea6884698ab4d25219ade421aa4289343f1db3992c5c109f210d9a6d71e73",
+      "bytes": 4543
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/catalog.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/catalog.rs",
+      "sha256": "219912f7714cb7258a66af9b24d6ca140ed71d6f02cdadc83f891c6e44eb4bf6",
+      "bytes": 7221
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/common.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/common.rs",
+      "sha256": "985d2cb99a04a35851a9effd6bd57f68fede06c595b88e4b496b88978cd58dc5",
+      "bytes": 1940
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/memory.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/memory.rs",
+      "sha256": "fe7b00a875ac70adcfb0fd8027621e0e7c30f7ee766e63068bf1e596f6b973f3",
+      "bytes": 7793
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills.rs",
+      "sha256": "34f00aec5032bcbb55f01975271ffba3a27f00ffc41155ee715d347691c74788",
+      "bytes": 4373
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills_args.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills_args.rs",
+      "sha256": "2362740484c68d50951faa52865071142afee7837bf148beea1420760c44ad1c",
+      "bytes": 7681
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills_catalog.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills_catalog.rs",
+      "sha256": "3a4a23d4aa3e8dea445f842fcf9e8417758e5aeac2721e05b3d4928210eed9be",
+      "bytes": 4562
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills_library.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills_library.rs",
+      "sha256": "5ead6c8108bf337a432ea9fe22f179bba15b4b269a75a8d5791fb03800ece98c",
+      "bytes": 3733
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills_render.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills_render.rs",
+      "sha256": "f8d42e3402d20cce36ca74be4601db14c7cdc97e6b4b732dcc7932c4e9a47095",
+      "bytes": 9578
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills_status.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills_status.rs",
+      "sha256": "4e6e51b5fdf3437733fb08b5731eec29028dcdfe7908f895262024b0eae39cee",
+      "bytes": 11371
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills_target_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills_target_tests.rs",
+      "sha256": "66babefbdd5f6e2cc6aa30801c83c39a26ea7a6cd21661e7a5c965101eb5f43d",
+      "bytes": 3785
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills_versioning.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded/skills_versioning.rs",
+      "sha256": "d3adf44a5ed284e1fb3aaa9b8bbb8621d23921c1d45c0746ed9491d91e9b1870",
+      "bytes": 8143
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/embedded.rs",
+      "sha256": "5fd52a6bc09f8c9235d0e7f3a5f930a44ab09f9a7de310666a419ae34d6feab3",
+      "bytes": 1748
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/error.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/error.rs",
+      "sha256": "d36114a75c5ad4901b1f33ae4efc50206607a3a6cd531fdd2c53f080d724c13e",
+      "bytes": 5939
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/lib.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/lib.rs",
+      "sha256": "9a2305fe7824f6a95624e9cf483bf205baec97d3bbeab533f48999f3111af0e7",
+      "bytes": 11320
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/response.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/response.rs",
+      "sha256": "09ec27a388d450fbde89fc6d6f1489224648ee49d3106e7779553c765e848909",
+      "bytes": 7223
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/routing.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/src/routing.rs",
+      "sha256": "5077b45857bcf3343711f9aa819561c163fe4c0c20c7560eb0b205bbb55bd371",
+      "bytes": 5460
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/tests/fixtures/gateway_cases.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/tests/fixtures/gateway_cases.json",
+      "sha256": "66bca50697e80e96b8720c25e0054d9c127315147519104e592189b2a3fdb4cb",
+      "bytes": 13849
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/tests/gateway_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/tests/gateway_tests.rs",
+      "sha256": "e39c5abcb69a16ded876ead431b2d9d844e2e8b5d006808fa499d4f0b2d4e330",
+      "bytes": 21756
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/tests/usage_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-gateway/tests/usage_tests.rs",
+      "sha256": "6f67af7933c01e5a4514af3e56a0289ec9d06918c387997bfb2a21fb41d88ca1",
+      "bytes": 12519
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/Cargo.toml",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/Cargo.toml",
+      "sha256": "bcfc92fc9dbb91cc8d17166504d87f0655cb3099d0af895fab784bee43fa6a12",
+      "bytes": 1008
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/binary/godebug.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/binary/godebug.rs",
+      "sha256": "51bea6deeb77095424e405a812553c03644d9055c60f447fd15e31bb1552dd39",
+      "bytes": 10714
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/binary/path.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/binary/path.rs",
+      "sha256": "7ca26682080677affc51f4e0afb9f2f6046f19322f00abaf3c6af5ff94af8d9c",
+      "bytes": 9804
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/binary/windows.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/binary/windows.rs",
+      "sha256": "8021874f66032ad18c90f688a7f4b83e164e5fcbeb2490da339cb52c55003c15",
+      "bytes": 6814
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/binary/windows_lower.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/binary/windows_lower.rs",
+      "sha256": "b87aa1b9b8f44a049c0765a7675a31b3ec944aeb1cba71467488e8ada74b53c7",
+      "bytes": 7406
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/binary.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/binary.rs",
+      "sha256": "ff6904ccd272f4ecba926b9ec94f94e7e89ac7b0c81617268fdaf88920380e52",
+      "bytes": 3569
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/cap_root.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/cap_root.rs",
+      "sha256": "110c59e06ddaca95c8501d1a771127b0c433ded25c030ad796e26074c4682da8",
+      "bytes": 3224
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/config.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/config.rs",
+      "sha256": "76202ae0e30e2e09430c118b61b26db6c48b3ddbc6e3b49427dc82bb8bb78d6d",
+      "bytes": 6140
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/context_profile.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/context_profile.rs",
+      "sha256": "0634ba304295f229df2e76dd66c8b6a356a09ea7457c7e630f3f361b8bb7f756",
+      "bytes": 10909
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/discover.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/discover.rs",
+      "sha256": "c05152217cb1c288d897bc00bd2aea4ba48b2d6a1a764095b4539289bb87f845",
+      "bytes": 6780
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/encode.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/encode.rs",
+      "sha256": "cd239f90ed56bc1b666c185e066a264f7ca4c8b3787f4d414ce20c80f491b478",
+      "bytes": 3029
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/base.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/base.rs",
+      "sha256": "59f52f4710a011ed207d4191c8bc09f39cbece056aa106a860b85c29f10b30c9",
+      "bytes": 13276
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/cache.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/cache.rs",
+      "sha256": "f66aca3ac02f9193caf6ead5cbcece03afa5a3b02ed3880adf3dad97a7bb6c80",
+      "bytes": 1059
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/core.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/core.rs",
+      "sha256": "d103c299431a344dccd928f3095b3d00eb0fad0e8a17bf1d8e11d1083263b4b6",
+      "bytes": 8319
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/destination.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/destination.rs",
+      "sha256": "c2bfb87e36f3427ef353b68078cdcde8de29ff8b4bff421fe12e62b521700c1e",
+      "bytes": 7226
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/drift.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/drift.rs",
+      "sha256": "4d89fed7b088a72e2a1e72b22e2d57d44f5b716e38abbaff808f81e21bba0b6d",
+      "bytes": 8541
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/event.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/event.rs",
+      "sha256": "ccc4d7fc98ea2864cd373f3b571183bb55e9f1d1cc8e254469943612a9869fdf",
+      "bytes": 9077
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/event_decode.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/event_decode.rs",
+      "sha256": "437b0adf5c5b82da2353ca47c40c67aab9b40dc383a760a8e133adfd9e7a81e7",
+      "bytes": 2045
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/lock.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/lock.rs",
+      "sha256": "e27366e8df14c1a8582920f84b9a87cfc12d2240e520b247e5eadcc12e07768a",
+      "bytes": 9798
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/marker.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/marker.rs",
+      "sha256": "ec89498ce6c4b387b944520e7af08d3458cadb7390a2a276601d7915ca90018a",
+      "bytes": 7729
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/marker_json.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/marker_json.rs",
+      "sha256": "5c1b31e26336cb85b2434da9d75e3a5211448a7bf3bd3790a7e486fd984be2bf",
+      "bytes": 7742
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/marker_observation.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/marker_observation.rs",
+      "sha256": "1f67de72820c3d7c457da932bff500a5c69acab7e88d27ce0e0d21dc00f22482",
+      "bytes": 5689
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/marker_string.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/marker_string.rs",
+      "sha256": "9fd1e62a34d2c189d5e2f58545813acbff073b8da9f9e916ff5721e5255a4fde",
+      "bytes": 3107
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/mod.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/mod.rs",
+      "sha256": "ac4758c2419ff92d57e40bd4afe7ca6c81475f9144032513c2de456a89a81bdf",
+      "bytes": 1461
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/modes.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/modes.rs",
+      "sha256": "35f97ba22b8c24c27803a52c9c5f0d3a82d171b1350c8b0a68b307e4258e2347",
+      "bytes": 3701
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/ops.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/ops.rs",
+      "sha256": "b03e2bb7a422203b07bbe879cc729925c4d090fe2ab6728f3c78dcfeeb89439e",
+      "bytes": 10582
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/ops_symlink.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/ops_symlink.rs",
+      "sha256": "d4fe488db7458986c03f8459ee13cfe9c8d636e377b2ed3b38c4dfc7ab4d5dcb",
+      "bytes": 2644
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/render_status.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/render_status.rs",
+      "sha256": "65e9a8db1f7d6d9eb71781d7d441b08af3a201be8c2771fc18f772cbd8d61319",
+      "bytes": 3295
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/replace.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/replace.rs",
+      "sha256": "5773c467f1bd37f45e1beb2d785fd823f5e82244150da1b529f10e7ed4d1ccdf",
+      "bytes": 13903
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/replace_io.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/replace_io.rs",
+      "sha256": "6317c951bb417b84657b161a524ff685c045da8fe87dabd5fc8264ee24a8a0d6",
+      "bytes": 571
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/status.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/status.rs",
+      "sha256": "0878614ff2203bf67f69e0caa99fc267ec4908164cf106cc15028bca8d4c838a",
+      "bytes": 12129
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/status_compare.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/status_compare.rs",
+      "sha256": "e350e3a41ae9615afc98399d82e60b526a27763685bfe0e12814747b9c57ac68",
+      "bytes": 8492
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/sync.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/sync.rs",
+      "sha256": "a79cce3a2d07a42aecbed390b1f6699002c0d9d4091f29436238d0c26544b484",
+      "bytes": 11697
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/sync_lock.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/sync_lock.rs",
+      "sha256": "17855156b7cff61d024093565e86de3ea2745eb8e934bf26788969b7545e4dfe",
+      "bytes": 4263
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/sync_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/sync_tests.rs",
+      "sha256": "2a96a9936c7afaa346d0db57a6a352f28fbda350391a61220f84097a5e1810ba",
+      "bytes": 2631
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/transaction.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/transaction.rs",
+      "sha256": "4a96e00c2c13d11b3faab613ba1321f903c9f3ba7db9d9aa4afd849f78f475c0",
+      "bytes": 6848
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/uninstall.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/install/uninstall.rs",
+      "sha256": "65eae4b70f2463a62a6a92455da63ca6db28c5e93b356d5da7d0dacb3962d2a0",
+      "bytes": 6716
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/lib.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/lib.rs",
+      "sha256": "9015b5f9a6c76d9d880d6981f1dbeace0d611451353af34c2419a3a446cc1bf2",
+      "bytes": 1231
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/library.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/library.rs",
+      "sha256": "4a6eeda82fe56290ad44dc018d213d45ead8e141229a47a301181d3b4bdbf529",
+      "bytes": 7524
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/load.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/load.rs",
+      "sha256": "21bdf4a05df347f1a26b811983b3c88828657075de2ade3c7f2cc7b77024e5b4",
+      "bytes": 12516
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/load_helpers.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/load_helpers.rs",
+      "sha256": "757160ccbe672c4fb7d361f08d14dcac84d5f7d275382a3e2a8c95d545a04ec5",
+      "bytes": 3867
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/load_paths.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/load_paths.rs",
+      "sha256": "44f77965328900d6f236ff938e017baa3e457c92dc6e88c9fef46975f59a6283",
+      "bytes": 6527
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/load_read.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/load_read.rs",
+      "sha256": "4b9d1233ceb0ad0e8fb4cec530bf277e5663bfa3133b6afca4fc25590216f54c",
+      "bytes": 9933
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/load_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/load_tests.rs",
+      "sha256": "1743ae794decd2b873f36993cab88ed6f3748126f39727a7192eb8e0c61175fc",
+      "bytes": 6611
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/materialize.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/materialize.rs",
+      "sha256": "3eb65969139effabf94fa7e9d74be4d5db6bea96e52139012545a9b335dce450",
+      "bytes": 9175
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/materialize_fs.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/materialize_fs.rs",
+      "sha256": "de8845e9682b5508e50034287ebf10c63d8773fc1ae5cc1107ebe3989e2264f9",
+      "bytes": 11090
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/materialize_manifest.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/materialize_manifest.rs",
+      "sha256": "ac7dd8e7563aaafea1e049a4aea9c0c3db0e65e9ce61c1622b62a19a946530b7",
+      "bytes": 6965
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/materialize_stage.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/materialize_stage.rs",
+      "sha256": "873ac4792eca25369391de5fec548bdb55387cc8057c04022b5ad2bf492857f4",
+      "bytes": 4649
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/metadata.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/metadata.rs",
+      "sha256": "de5c019433623b087813045e59a3631f2134f780a003b04dc25fae1b851c1810",
+      "bytes": 10957
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/metadata_marker_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/metadata_marker_tests.rs",
+      "sha256": "1cb7730855a8ed2a4962457bb923bd3f4506f0d60d97763f59b9954d77db8c84",
+      "bytes": 837
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/metadata_times.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/metadata_times.rs",
+      "sha256": "c5ca71d8190daaa5ad2dd40911a5fc5a0fd90e87fc6c693419b5592a854aa073",
+      "bytes": 5314
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/model.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/model.rs",
+      "sha256": "b0ea93f7b75913f7e44979f9ef9a9a397b8a0b8680e0c7a475299062c20889e1",
+      "bytes": 7630
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/model_parse.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/model_parse.rs",
+      "sha256": "f895a7ce7c776cf3d05663bf57daa36ec5e8c2bae898a8427cccd4969c8a7bf8",
+      "bytes": 12743
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/render.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/render.rs",
+      "sha256": "b60ad4970858eb5ccfdd11163a53b9704ade8ca569a624c43e2e7573c46e81ec",
+      "bytes": 13688
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/render_variants.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/render_variants.rs",
+      "sha256": "8fbeb3ed249e2a39f13d4dcf75624eedac1cd83311ea273e9891a4cd374dc147",
+      "bytes": 2644
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/runner.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/runner.rs",
+      "sha256": "6747f7687eba97151ef82eeb88c7a850e1459b96a5f8e5f6ffb35d58ac0c8e14",
+      "bytes": 12922
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/runner_support.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/runner_support.rs",
+      "sha256": "c088f7fc5523c6d845ea7355fd99ff8a7bae66f688880d0cc6d95ce43f3e2c04",
+      "bytes": 4168
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/target.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/target.rs",
+      "sha256": "0ecfa59c673b3354e68e02c3d4184066377d5661299504bc92f13deb99e9dc6b",
+      "bytes": 6882
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/targets_status.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/targets_status.rs",
+      "sha256": "1ab10a6bc8602447dc7fce4acf59845ffa82a1ba1c2ac7c7c6725aea094389d4",
+      "bytes": 9819
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/validation.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/validation.rs",
+      "sha256": "052c60098ccc0e9dff1ac3dd4e9c05c1f9aed34ad0540383307ba593176a2787",
+      "bytes": 12520
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/variant.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/variant.rs",
+      "sha256": "3118358acf982f9891ec14687c4cd8094341592fb2f4aad0f80b1ee4a03d368e",
+      "bytes": 10721
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/variant_ops.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/variant_ops.rs",
+      "sha256": "944e7341a2eb67856a01f47ce938a024aaa1d51aa59db6c4ca86b3063436db16",
+      "bytes": 10330
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/variant_types.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/variant_types.rs",
+      "sha256": "db873fbe1c2273af4c6cce03662c7a034d3a03a5cb0e21de7c8eb4ba5795d40a",
+      "bytes": 4093
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/vcs.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/vcs.rs",
+      "sha256": "fb0d901843edfbe9edbbcad923bf9d1c228d58997ed3f5496a5db6a4bfe0b5f9",
+      "bytes": 8542
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/vcs_restore.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/vcs_restore.rs",
+      "sha256": "c9090b437dccd9c1a4252510c01836eb2867d5f16ebe71541d9b9bbb648f88d1",
+      "bytes": 7110
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/wire.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/src/wire.rs",
+      "sha256": "7e7570de7abb67ff07d65bc3965b72b99cfaf14e6b60c82eaf0d6233dc8e2d58",
+      "bytes": 3367
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/all_target_scope_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/all_target_scope_tests.rs",
+      "sha256": "6b421cb8edae604349dd4e6d27d3b5e284c155c42c8556801c1e8a378721ae1e",
+      "bytes": 7782
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/common/mod.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/common/mod.rs",
+      "sha256": "7c00acde1eddde40ee105a3a7c164a1b2d0c4ec266973fc20124c3f7835f036f",
+      "bytes": 805
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/concurrent_installs.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/concurrent_installs.rs",
+      "sha256": "e8c85370cda2dee8f0cba48a3cb710073ed2292cafd3800ba58641057206834d",
+      "bytes": 7842
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/confined_symlink_render_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/confined_symlink_render_tests.rs",
+      "sha256": "15cc37e5ee1b01fb89c0c3eeb3a0b04108e2b1339e9abd1f3094f1145290552e",
+      "bytes": 10114
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/context_profiles.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/context_profiles.rs",
+      "sha256": "9cc340235d8c157c14074fc773d26a1f113658884f8a42f71024c7204b788cca",
+      "bytes": 2157
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/event_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/event_tests.rs",
+      "sha256": "8770f14953c2d0b5893e63c9877e10da394bd737253521fd711635e486b54904",
+      "bytes": 9512
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/fixtures/install_status_oracle.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/fixtures/install_status_oracle.json",
+      "sha256": "d4166ccc00d6dbb9ce7da55e3fa70527654526623a015421158010ff70bc7367",
+      "bytes": 34094
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/fixtures/oracle_expectations.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/fixtures/oracle_expectations.json",
+      "sha256": "bc908f774253af1b3a0b099534d0f235060751b0b1aebfee358ed68bef5e27c1",
+      "bytes": 24537
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/fixtures/runner_oracle.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/fixtures/runner_oracle.json",
+      "sha256": "526111a705290097d5744ceff54011be59e5859bea2b07099e1c208ad38e102f",
+      "bytes": 11627
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/generated_artifact_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/generated_artifact_tests.rs",
+      "sha256": "995a6fb39aba305538b55ca978cbc3b85b3ec43e0e0e0f09bbc3a5b4d2bfd888",
+      "bytes": 1517
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/input_bounds.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/input_bounds.rs",
+      "sha256": "1ff790a2445abb92e62e67bbb99ff7a2db1cebb6856e388d46583e11dc0c0307",
+      "bytes": 7848
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/install_oracle_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/install_oracle_tests.rs",
+      "sha256": "b2ca31dddb0a75975e8d22722ef008ca50cbd102713922672dec797ca153ffee",
+      "bytes": 17376
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/install_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/install_tests.rs",
+      "sha256": "b0edb617b61a90643de6ab5aeb3bbc3f18fbd0ce9d840ff13d34bda401d8798d",
+      "bytes": 9128
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/metadata_precision.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/metadata_precision.rs",
+      "sha256": "217763f2c87f02814b4e93549ced117227a655e60c4ce8a0502e9fd73dd5cd73",
+      "bytes": 2577
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/model_security_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/model_security_tests.rs",
+      "sha256": "9c0e428b0588e0b210797ea935478d747355bb9c81c4c47baab2e4757d0ea317",
+      "bytes": 9187
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/model_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/model_tests.rs",
+      "sha256": "cbc8d9024cd4b584defc5e34219a23b3e73517bb38a2c777c12393c0d7bf0ddc",
+      "bytes": 8121
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/project_identity_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/project_identity_tests.rs",
+      "sha256": "1a8c3750d4f1c3cb6930dc992591ec2f6c10fc839630289984baa17681758ba7",
+      "bytes": 4910
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/recovery_uninstall_smoke.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/recovery_uninstall_smoke.rs",
+      "sha256": "b00e93f543b8f59fd41d4e7a1bbd39effab52baa78075bb473c392a2fced2d28",
+      "bytes": 4847
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/relative_root_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/relative_root_tests.rs",
+      "sha256": "93f831dbea77ca20731c97723de9be9f66856e29af61ebb377142b4664914298",
+      "bytes": 1234
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/render_drift_status.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/render_drift_status.rs",
+      "sha256": "e3a8952a32b040c90016587065d8bc2b56f1de0362bc9c091ca085ce093e924e",
+      "bytes": 11143
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/render_materialize_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/render_materialize_tests.rs",
+      "sha256": "7b80e0e99fc9fff87dd838f4a1c7e3a2ced049a6cf20ccf9cfbd2403a2191fcb",
+      "bytes": 14227
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/render_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/render_tests.rs",
+      "sha256": "7e858d058ed58909959c7a64697b8550c4f0a373458ee43c8560ec096ae3e631",
+      "bytes": 13016
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/runner_env_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/runner_env_tests.rs",
+      "sha256": "9235656c6739dbe7ed491a168591e618c2e147b5bc3d701fb4b16ebdbc7715b2",
+      "bytes": 14937
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/runner_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/runner_tests.rs",
+      "sha256": "4e2dba0ab2b557f18b9c826868b99e84e73130507256cf337491e86cb9048eef",
+      "bytes": 9905
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/status_parity_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/status_parity_tests.rs",
+      "sha256": "1624089ebb89f40df01fd12bd29b763611228715a609d54f90ebe86b965070bd",
+      "bytes": 6115
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/sync_policy_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/sync_policy_tests.rs",
+      "sha256": "dff599fc47f895ed61030ed1b465fa57b2a85169645616f600656ec415314bfb",
+      "bytes": 12040
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/variant_tests.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/variant_tests.rs",
+      "sha256": "86d9040aca24f19583caba4f4f17fb61f9297698a5f1664343e13bd71e3a6826",
+      "bytes": 12510
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/windows_roots.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/rust/symbrain-skills/tests/windows_roots.rs",
+      "sha256": "14995ed7d61e2fc9e999b422726c2fc2ef50b253929d16ba1ff02f16bacb2659",
+      "bytes": 6482
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/scripts/skills-native-oracle/README.md",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/scripts/skills-native-oracle/README.md",
+      "sha256": "e7dc16674f8bfa90ab1e661019de4ba6276d4ed5461eabce6e57ff8fbf6836c7",
+      "bytes": 1879
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/scripts/skills-native-oracle/cases.py",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/scripts/skills-native-oracle/cases.py",
+      "sha256": "aa3e39be678cdfb732fcaac5f7726e37cdaaf446cf9a3dd37916a48c2d390d53",
+      "bytes": 6740
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/scripts/skills-native-oracle/compare.py",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/scripts/skills-native-oracle/compare.py",
+      "sha256": "0cbadbb1061fce40d98fcbd5c7c986a146753ca77619f480853921a0dbb11c99",
+      "bytes": 4450
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/scripts/skills-native-oracle/fixtures.py",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/scripts/skills-native-oracle/fixtures.py",
+      "sha256": "f673448b3a2f557829a47d22c541580bf1a4a8ae14607c10c70746717ce07e06",
+      "bytes": 7128
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/candidate-source/scripts/skills-native-oracle/run.py",
+      "archive_member": "workspace/symaira-skills764-independent-source/candidate-source/scripts/skills-native-oracle/run.py",
+      "sha256": "adfd82037e43a24538455f03f4aba9ae745f74853062489614eee3af7b31b8cb",
+      "bytes": 10243
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/complete-diff.patch",
+      "archive_member": "workspace/symaira-skills764-independent-source/complete-diff.patch",
+      "sha256": "31017d162d2575d5f172a368937f9349dfa1b2c5116e221a83d66da96ebd4457",
+      "bytes": 473958
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/diff-check.log",
+      "archive_member": "workspace/symaira-skills764-independent-source/diff-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/finalize.log",
+      "archive_member": "workspace/symaira-skills764-independent-source/finalize.log",
+      "sha256": "6808e203d849f168416239dae6ec17b8d326deb38cd31d236a7bdf74075fb8b8",
+      "bytes": 327
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/finalize.py",
+      "archive_member": "workspace/symaira-skills764-independent-source/finalize.py",
+      "sha256": "d482bb1d679d1e8c54dd341d3309642b8ae38d433f41aa6854cdd844168e49ef",
+      "bytes": 4379
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/first-finalizer-open-log-receipt.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/first-finalizer-open-log-receipt.json",
+      "sha256": "2466b6007ebec254b9483cd64f41ec5bb7ca1d3621ffa723929952e290972c6f",
+      "bytes": 85831
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/first-precheck-failure.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/first-precheck-failure.json",
+      "sha256": "5db7b63b0fcfc7a9984f966c8f832df19ffaf9e9fbfd2b565fb77931627c1ba4",
+      "bytes": 596
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/handoff.md",
+      "archive_member": "workspace/symaira-skills764-independent-source/handoff.md",
+      "sha256": "1c8328ccffbc0e42f25f845b7d4d5d7c3ee94328528d06e92df9c0711041aace",
+      "bytes": 3080
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/helper-source-provenance.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/helper-source-provenance.json",
+      "sha256": "5914e54b8c44c6de41b10170b67cba9c008878e47e7b1f3e91fb8c05f60ef780",
+      "bytes": 1233
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/inspected-go-sources.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/inspected-go-sources.json",
+      "sha256": "fe8787777b2a2306865662c6c898b6df0f037391d631a4d459657a7b7b648969",
+      "bytes": 6476
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/000-skills_cli.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/000-skills_cli.rs.gz",
+      "sha256": "7a2e9c270b6c04085f2bf4c3e584ff5e9168b199a27c13db017d2fcd80b022a7",
+      "bytes": 10603
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/001-skills_sync_bytes.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/001-skills_sync_bytes.rs.gz",
+      "sha256": "f2a009a3ba419f6736b9a29ce840e4fdbe9fddfdb9fbd7d72afbcd50ce4dbf2a",
+      "bytes": 1323
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/002-skills_sync_flags.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/002-skills_sync_flags.rs.gz",
+      "sha256": "dbb6557bf3e20c15b8d3cc9c9c23d4980ee445d54760a2fa442b28e0c290412c",
+      "bytes": 1749
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/003-skills_doctor_native.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/003-skills_doctor_native.rs.gz",
+      "sha256": "8bc48e7080ac32b6f015e2a1dc18b78d28c9487eab74011dc16d1dc0bf199d7f",
+      "bytes": 1628
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/004-skills_list_native.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/004-skills_list_native.rs.gz",
+      "sha256": "7f5d6f85e0a53d2e57585f0485c87eb938cba7614beda8807b393d76f4744a52",
+      "bytes": 2922
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/005-skills_log_native.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/005-skills_log_native.rs.gz",
+      "sha256": "3a4f1a2935ff30d70b1a634a02f5ac27b5e0c6e18a441d936414eaaeee8e2ef7",
+      "bytes": 2045
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/006-skills_preflight_native.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/006-skills_preflight_native.rs.gz",
+      "sha256": "71963c8d743575f792589177aae71ae19b29e8e64f7eb5204e49c802e1f55071",
+      "bytes": 2607
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/007-skills_raw_flag_names.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/007-skills_raw_flag_names.rs.gz",
+      "sha256": "3c691adda69ab68d69a4e5861ea2feae2ec001acfc459db5617f42566b73110f",
+      "bytes": 882
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/008-skills_render_drift.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/008-skills_render_drift.rs.gz",
+      "sha256": "a55258f78a67b7bbc27e55207e7cefc7c3bcdc35df642ba34588aa0b84ccd975",
+      "bytes": 3450
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/009-skills_status_opencode_tests.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/009-skills_status_opencode_tests.rs.gz",
+      "sha256": "9d76e89e9e4df830b107305b19b3cdb9f45765876b174f0a7a82937658d288da",
+      "bytes": 2908
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/010-skills_sync_legacy_roots.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/010-skills_sync_legacy_roots.rs.gz",
+      "sha256": "4c8feee64ab4c120c6fa829f40c2176d03063c54700ac92517403094532271a4",
+      "bytes": 4547
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/011-skills_targets_native.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/011-skills_targets_native.rs.gz",
+      "sha256": "981ce819186542794ffb61a6369500184049f1e39504555e9fb51aa8cec2d2b0",
+      "bytes": 2420
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/012-skills_windows_wide_flags.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/012-skills_windows_wide_flags.rs.gz",
+      "sha256": "7ac1d002a21bdf3ee15eafe42209781f108804c1191fbba2b397ccd62aa6de8c",
+      "bytes": 1008
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/013-catalog.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/013-catalog.rs.gz",
+      "sha256": "ba0acdc8ad48490d5d06fb11026cb2dd9affe890923d5c62fdcc93871011d552",
+      "bytes": 1617
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/014-skills.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/014-skills.rs.gz",
+      "sha256": "ed487f4653e8f6eada6dd7899206a1bb5ef4e5efc78d88864fa75d2669f7cdd1",
+      "bytes": 2111
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/015-skills_status.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/015-skills_status.rs.gz",
+      "sha256": "f086f478acbada2866146d30b6aaeaf054a60c8eca88357bdf88239eb76ac8e3",
+      "bytes": 3225
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/016-metadata.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/016-metadata.rs.gz",
+      "sha256": "bcaed11f90b66903c82d3bde4ebd3e7a869545de8356a7aac8e173dc248537f4",
+      "bytes": 4568
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/additional-00-Cargo.lock.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/additional-00-Cargo.lock.gz",
+      "sha256": "dec159f30e634396f5390fdd70293196e64a67bec35b0c72710763ad8b3e9765",
+      "bytes": 15929
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/additional-01-Cargo.toml.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/additional-01-Cargo.toml.gz",
+      "sha256": "1dbbf87bdf8669522823e373c7420c1bf9f28d238f44631e90baf0601e3028ac",
+      "bytes": 391
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/additional-02-Cargo.toml.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/additional-02-Cargo.toml.gz",
+      "sha256": "9464033dd2ae57814af3f41546c626c3b62bc1e4387c5d0900c0dc2c5e85c020",
+      "bytes": 304
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/additional-03-embedded.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/additional-03-embedded.rs.gz",
+      "sha256": "af9e4c8c739ade4800f6499cfafddd32b60ec0a89e7ee35d456173d33fe19093",
+      "bytes": 575
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/additional-04-lib.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/additional-04-lib.rs.gz",
+      "sha256": "b1949fd8f82e3ba5cb1591784a18de0a7cca13403b6c9125f00bed4131f0fd3c",
+      "bytes": 557
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/additional-05-event.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/additional-05-event.rs.gz",
+      "sha256": "1e59886eb567d1132a31ecde5af6a5f4ff98c85bae28b7e0b1ea3bc22b29f651",
+      "bytes": 2612
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/additional-06-mod.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/additional-06-mod.rs.gz",
+      "sha256": "804152795c730b6d410e7eca2df6622214ec39cd5a34b165953b28da475ed7d1",
+      "bytes": 582
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/additional-07-status.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/additional-07-status.rs.gz",
+      "sha256": "284af429ed373f2d1f293755ffbef1bf85cd361e0714c9eec08fd8d04c5cc30b",
+      "bytes": 3388
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/additional-08-status_compare.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/additional-08-status_compare.rs.gz",
+      "sha256": "02874c16f0ed25340dc97480cd4f1ef822c1d545589d49c87c50c0e7a7a972db",
+      "bytes": 2577
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/additional-09-sync.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/additional-09-sync.rs.gz",
+      "sha256": "e57a1d4f5fe27ddcbd4038450d3515c1603b2a3c7648aa3c386c57b57971aff4",
+      "bytes": 4044
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/additional-10-marker.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/additional-10-marker.rs.gz",
+      "sha256": "b23e04286868ee3e79a82c44ede22bbcd98e14f18b150bc3a7153a16b815ef88",
+      "bytes": 2608
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/dispatch.rs.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/dispatch.rs.gz",
+      "sha256": "df73771f1803d32c5553ed754e2b208d9cf7d4cd45b2a62fd3e82ceea7bb1f3e",
+      "bytes": 2318
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/scope-00.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/scope-00.gz",
+      "sha256": "26d831395f9bd609a71bf5acea5a6588790075cd3e18ed96d45e270a77c5d58f",
+      "bytes": 2674
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/scope-01.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/scope-01.gz",
+      "sha256": "83ecb9e75cbfb044ca0ec2c59d7745064d2e88b0753ca0e31b69cd612b403b16",
+      "bytes": 3057
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/scope-02.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/scope-02.gz",
+      "sha256": "af24a00188bbba2bb9b587c22dfa8a6ef9e62685f81471c46bc5f592809465ee",
+      "bytes": 1919
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/scope-03.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/scope-03.gz",
+      "sha256": "02d74ed9bb1c09464bf2fcedda8258f3c4a0bc58ccd7503feab4960409e1be0c",
+      "bytes": 4967
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original/scope-04.gz",
+      "archive_member": "workspace/symaira-skills764-independent-source/original/scope-04.gz",
+      "sha256": "8022cbe6477645d0847a30b8e16165b129f444f13d656c13025482bc895558e2",
+      "bytes": 3461
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/original-go-bindings.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/original-go-bindings.json",
+      "sha256": "83205590ed870c9c19bca499c2ea54a0c7096daf6e6be1f88280443011cbef07",
+      "bytes": 197395
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/prepared-case-plan.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/prepared-case-plan.json",
+      "sha256": "14e5678c4acaee38c1df7e9182171601df26f713395114c842a9c29d841060a1",
+      "bytes": 16892
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/provenance-failed-oracle-map.log",
+      "archive_member": "workspace/symaira-skills764-independent-source/provenance-failed-oracle-map.log",
+      "sha256": "ba5e15091298742bd170ac2cfc5556db6cf8ef2d6080cd09f2a024ea13b54ab0",
+      "bytes": 948
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/provenance-failed-oracle-map.py",
+      "archive_member": "workspace/symaira-skills764-independent-source/provenance-failed-oracle-map.py",
+      "sha256": "b825c54950aab6261d8c82d465b51d3f059cfae80e0b1561c026b58b70b285cf",
+      "bytes": 2848
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/provenance.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/provenance.json",
+      "sha256": "33e4f220bce9f38bd7c4676e8ec3e2566e30d69419832e8c1d23b465d0859a6e",
+      "bytes": 549
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/provenance.log",
+      "archive_member": "workspace/symaira-skills764-independent-source/provenance.log",
+      "sha256": "557b1a17335cc3ab2b6782007074f9e711f4fffcf0156b8cc3efa0579864c604",
+      "bytes": 83
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/provenance.py",
+      "archive_member": "workspace/symaira-skills764-independent-source/provenance.py",
+      "sha256": "53f96b342d75699d47a2b9bf8086434098049788da2240bf54a54558bdc44ee7",
+      "bytes": 3204
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/000-frame.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/000-frame.rs",
+      "sha256": "4e6050efeb0dc9e9f5eceea40ffe5a4703a670f1f060baecf22da9bdf1608b21",
+      "bytes": 9165
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/001-model.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/001-model.rs",
+      "sha256": "ad821f55f2b9d69d681753f31856accfd19853aa1dab5c4e4cf4f4d27a043f7a",
+      "bytes": 5669
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/002-library.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/002-library.rs",
+      "sha256": "4a6eeda82fe56290ad44dc018d213d45ead8e141229a47a301181d3b4bdbf529",
+      "bytes": 7524
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/003-load_read.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/003-load_read.rs",
+      "sha256": "4b9d1233ceb0ad0e8fb4cec530bf277e5663bfa3133b6afca4fc25590216f54c",
+      "bytes": 9933
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/004-root.go",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/004-root.go",
+      "sha256": "67d354829e8389f1e2661817affce499776690529e0d1984e9f895dc7a92a361",
+      "bytes": 5792
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/005-frontmatter.go",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/005-frontmatter.go",
+      "sha256": "24be34af383213f0394b8bfcf11e20851f8d0f7c10a9bce07e0c799a4a28217a",
+      "bytes": 4630
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/006-library.go",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/006-library.go",
+      "sha256": "c0ae18ef314e215900cf0d0565305c40fae54120ee5496e2162fa87c41381f28",
+      "bytes": 1201
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/007-extract.go",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/007-extract.go",
+      "sha256": "d2e1e1b689f812ed8b52eff1349ceef486e7f8271e1a02b11b0904c38c594328",
+      "bytes": 2901
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/008-discover.go",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/008-discover.go",
+      "sha256": "7e73c77e7066dd88c0d981abc9625e9a69b1846596d7b2d5f3c7475af6a9b536",
+      "bytes": 6234
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/009-mcptools.go",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/009-mcptools.go",
+      "sha256": "18d79b05da9d4d419713d370ceda80137fdc851ae934e360a1010831e9a3f07f",
+      "bytes": 3750
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/010-cmd_skills.go",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/010-cmd_skills.go",
+      "sha256": "bd2a49918aa8f6a0929cba201631d8795403f5da6fefafee9c3c2b2b1f02dd1c",
+      "bytes": 17540
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/011-server.go",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/011-server.go",
+      "sha256": "f3c86d0c883c284b0153cac6ec93006ed61071097020350eac8f91341455676a",
+      "bytes": 11398
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/012-decode.go",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/012-decode.go",
+      "sha256": "a91535f18f9a2c8380448b1c84c4c2017dbe3d530a10faf8babf03494042da48",
+      "bytes": 36010
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/013-exec.go",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/013-exec.go",
+      "sha256": "0bbfd988045f66e78e7416a1a0d47016ea966c65323d2c6ca7a18cdf4b7b5df0",
+      "bytes": 44410
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/014-lp_unix.go",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/014-lp_unix.go",
+      "sha256": "5ee781400e1f04ffea869496f161555f31d1af0ca521fb77ef16f54522808746",
+      "bytes": 2076
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/015-lp_windows.go",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/015-lp_windows.go",
+      "sha256": "b43699d7c9c5fa2cfe82edb55be04b509619232ad514a34a11c481d43290a6fd",
+      "bytes": 5713
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/016-mcpserver.go",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/016-mcpserver.go",
+      "sha256": "942c732c41b83c01178a6bb1833eb214edaef40cf0a1f452c9ed63a7d59d75ec",
+      "bytes": 18563
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/017-read.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/017-read.rs",
+      "sha256": "17a2efe49e5a6937c8d7d4a5c0b9eac84453de0f86bf8e7ee421387e82341bb3",
+      "bytes": 33041
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/018-de.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/018-de.rs",
+      "sha256": "4998d7e252eb513be85b298e287048b4fb283882e9ba7df905f572f07200f3f3",
+      "bytes": 86840
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/019-Cargo.toml",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/019-Cargo.toml",
+      "sha256": "00b920255c320a278bf25b962b491263a19d8c90e12e4a91c1d823db71eabb2f",
+      "bytes": 3118
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/020-archive.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/020-archive.rs",
+      "sha256": "9f6bf8eb354d302cb24eea61213c44b34595121d52438d7250706c2392902294",
+      "bytes": 22577
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/021-entry.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/021-entry.rs",
+      "sha256": "b71f12aeb65903d8d3847756d56642b904d7b801946b7e756e948405c5343f15",
+      "bytes": 35990
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/022-entry_type.rs",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/022-entry_type.rs",
+      "sha256": "bdc7655918b97492f9f5204e9c4eee4e2c3268da398c7786342e6f993a6469c7",
+      "bytes": 6142
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/review-source/023-Cargo.toml",
+      "archive_member": "workspace/symaira-skills764-independent-source/review-source/023-Cargo.toml",
+      "sha256": "6185fe2807daac38478968f7fc596d5b82d90be70a5856f557fac4f0da53bf91",
+      "bytes": 2207
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/source-bindings.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/source-bindings.json",
+      "sha256": "0638f4146f2d68b496195edaf8a8de7fdf3fd5d553001f3ce28553f2dd56d69c",
+      "bytes": 41368
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/source-checks.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/source-checks.json",
+      "sha256": "ff090e2ab7fdaeb42cfef806f5f2bb2ead74cc4a3ae342b518f3f699d6c9b7cc",
+      "bytes": 11524
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/static-checks-failed-catalog-regex.log",
+      "archive_member": "workspace/symaira-skills764-independent-source/static-checks-failed-catalog-regex.log",
+      "sha256": "09a27c62058e814de1092732215b9aee8ef98d4ee2a9d65028be001409ec4afa",
+      "bytes": 254
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/static-checks-failed-catalog-regex.py",
+      "archive_member": "workspace/symaira-skills764-independent-source/static-checks-failed-catalog-regex.py",
+      "sha256": "50273896d95f0a802fbe2e31f08ce7d1e4c94378a4e78804ac9e2f29325b94d7",
+      "bytes": 6054
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/static-checks.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/static-checks.json",
+      "sha256": "0d37922746d0508bef61f3a03cdb992c7e0c6dbedf8ce4cb0a359eae87799984",
+      "bytes": 1458
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/static-checks.log",
+      "archive_member": "workspace/symaira-skills764-independent-source/static-checks.log",
+      "sha256": "0d37922746d0508bef61f3a03cdb992c7e0c6dbedf8ce4cb0a359eae87799984",
+      "bytes": 1458
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/static_checks.py",
+      "archive_member": "workspace/symaira-skills764-independent-source/static_checks.py",
+      "sha256": "d8a4447904b6735c4233e77a8b0e3fe907aef92847cb827cc91fbc598ba9f46a",
+      "bytes": 6440
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/symaira-skills764-source-final-handoff.json",
+      "archive_member": "workspace/symaira-skills764-independent-source/symaira-skills764-source-final-handoff.json",
+      "sha256": "eb6b96ab0bfcf39d741a80092860a42b44e06346edfb9396a1141ddd5ccdfe94",
+      "bytes": 13195
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source/symaira-skills764-source-final-handoff.md",
+      "archive_member": "workspace/symaira-skills764-independent-source/symaira-skills764-source-final-handoff.md",
+      "sha256": "02b89503c71f85c3a295d6f841040662f3805b99e2df2b2ee77f556f786044d6",
+      "bytes": 3240
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source-review-receipt.json",
+      "archive_member": "workspace/symaira-skills764-independent-source-review-receipt.json",
+      "sha256": "a8742bce5a3f670406521c4f691c5ccaab9ef0389b78d18d56cc9aff9e993a8a",
+      "bytes": 86054
+    },
+    {
+      "original": "/workspace/symaira-skills764-independent-source-review.md",
+      "archive_member": "workspace/symaira-skills764-independent-source-review.md",
+      "sha256": "5d046c9c2ac9a1949216d6c62c00b187df48bf20af50d923fb26be26725b03fd",
+      "bytes": 10298
+    }
+  ],
+  "archive_sha256": "b4bd463a0ad1e29cd25675ce78b086015452100e5ef4eca94b1720c24bf4d47d",
+  "full_roundtrip_verified": true,
+  "runtime": false
+}

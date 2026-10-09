@@ -10,8 +10,8 @@ use std::path::{Path, PathBuf};
 use super::base::{base_path_for_scope, write_snapshot_for_scope_locked};
 use super::core::install_path_for;
 use super::destination::{
-    adoption_backup, check_destination, effective_home, effective_mode, entry_exists, is_symlink,
-    is_unmanaged, read_link_at, remove_tombstone, scope_name, source_for_snapshot,
+    adoption_backup, base_project, check_destination, effective_home, effective_mode, entry_exists,
+    is_symlink, is_unmanaged, read_link_at, remove_tombstone, scope_name, source_for_snapshot,
     symlink_points_to,
 };
 use super::lock;
@@ -44,7 +44,7 @@ pub(crate) fn install_locks_for(
         target,
         scope_name(options),
         name,
-        options.project_dir.as_deref(),
+        base_project(options),
     )?;
     let mut paths = vec![destination.clone(), base.clone()];
     paths.extend_from_slice(extra);
@@ -179,7 +179,7 @@ pub(crate) fn install_target_inner_locked(
         target,
         scope_name(options),
         name,
-        options.project_dir.as_deref(),
+        base_project(options),
     )?;
     let destination_exists = entry_exists(&destination)?;
     if !(mode == "symlink" && symlink_points_to(&destination, source)?) {
@@ -248,7 +248,7 @@ pub(crate) fn install_target_inner_locked(
             &base,
             target,
             name,
-            options.project_dir.as_deref(),
+            base_project(options),
             options.fault,
         )?;
         remove_tombstone(target, name, options)
@@ -338,74 +338,4 @@ pub(crate) fn install_copy_tree(
     }
 }
 
-pub(crate) fn install_symlink(
-    source: &Path,
-    destination: &Path,
-    marker: &[u8],
-    fault: Option<FaultPoint>,
-) -> Result<(), SkillError> {
-    let parent = destination
-        .parent()
-        .ok_or_else(|| SkillError("destination has no parent".to_owned()))?;
-    let root = replace::open_trusted_dir(parent)?;
-    // Update the cache marker before publishing the link. The source is a
-    // stable, capability-rooted render cache tree, never a user destination.
-    replace::write_bytes(
-        &replace::open_trusted_dir(source)?,
-        Path::new(MARKER_FILE),
-        marker,
-        0o644,
-        fault,
-    )?;
-    #[cfg(any(unix, windows))]
-    {
-        let name = replace::safe_name(destination.file_name())?;
-        let backup = backup_existing(destination, fault)?;
-        let temp = replace::unique_name(".symskills-link-")?;
-        #[cfg(windows)]
-        // Windows directory symlinks require an absolute target here. cap-std
-        // rejects absolute link targets by design, so use the already-validated
-        // managed cache source and the trusted destination parent path.
-        let link_result = std::os::windows::fs::symlink_dir(source, parent.join(&temp));
-        #[cfg(not(windows))]
-        let link_result = root.symlink_contents(source, &temp);
-        if let Err(error) = link_result {
-            if let Some(backup) = backup {
-                let _ = restore_backup(&backup, destination);
-            }
-            return Err(SkillError(format!("create managed symlink: {error}")));
-        }
-        let result = root.rename(&temp, &root, &name).map_err(|error| {
-            let _ = root.remove_file(&temp);
-            SkillError(format!("publish managed symlink: {error}"))
-        });
-        if let Err(error) = result {
-            if let Some(backup) = backup {
-                let _ = restore_backup(&backup, destination);
-            }
-            return Err(error);
-        }
-        if fault == Some(FaultPoint::RemoveBackup) {
-            if let Some(backup) = backup {
-                let _ = remove_entry(destination);
-                restore_backup(&backup, destination)?;
-                return Err(SkillError(
-                    "injected replacement fault: RemoveBackup".to_owned(),
-                ));
-            }
-        }
-        if let Some(backup) = backup {
-            remove_tree(&backup)?;
-        }
-        Ok(())
-    }
-    #[cfg(all(not(unix), not(windows)))]
-    {
-        let _ = root;
-        let _ = fault;
-        let _ = marker;
-        Err(SkillError(
-            "symlink install is unsupported on this platform".to_owned(),
-        ))
-    }
-}
+include!("ops_symlink.rs");

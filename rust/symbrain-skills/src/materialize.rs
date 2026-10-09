@@ -74,7 +74,7 @@ pub fn materialize(
     rendered: &Rendered,
     output_root: &Path,
 ) -> Result<Materialized, SkillError> {
-    materialize_inner(bundle, rendered, output_root, None)
+    materialize_inner(bundle, rendered, output_root, None, None)
 }
 
 /// Materializes a rendered skill while injecting one deterministic I/O fault.
@@ -95,7 +95,7 @@ pub fn materialize_with_fault(
     output_root: &Path,
     operation: Option<&str>,
 ) -> Result<Materialized, SkillError> {
-    materialize_inner(bundle, rendered, output_root, operation)
+    materialize_inner(bundle, rendered, output_root, operation, None)
 }
 
 #[allow(clippy::too_many_lines)]
@@ -104,12 +104,23 @@ fn materialize_inner(
     rendered: &Rendered,
     output_root: &Path,
     fault_operation: Option<&str>,
+    comparison: Option<(&Path, &str, &[u8])>,
 ) -> Result<Materialized, SkillError> {
     let destination = open_root(output_root)
         .map_err(|error| SkillError(format!("materialize: open destination root: {error}")))?;
     validate_component(&rendered.target, "target")?;
     validate_component(&rendered.name, "skill name")?;
-    let relative = PathBuf::from(&rendered.target).join(&rendered.name);
+    let relative = comparison.map_or_else(
+        || PathBuf::from(&rendered.target).join(&rendered.name),
+        |(relative, _, _)| relative.to_path_buf(),
+    );
+    if relative.as_os_str().is_empty()
+        || relative
+            .components()
+            .any(|part| !matches!(part, Component::Normal(_)))
+    {
+        return Err(SkillError("unsafe materialization destination".into()));
+    }
     let parent = relative.parent().unwrap_or_else(|| Path::new("."));
     ensure_dir(&destination, parent)
         .map_err(|error| SkillError(format!("materialize: ensure destination parent: {error}")))?;
@@ -128,7 +139,10 @@ fn materialize_inner(
         }
     }
 
-    let hash = source_hash(bundle, rendered)?;
+    let hash = match comparison {
+        Some((_, hash, _)) => hash.to_owned(),
+        None => source_hash(bundle, rendered)?,
+    };
     let marker_path = relative.join(".symskills.json");
     let existing_marker = read_marker(&destination, &marker_path)?;
     let stage = make_sibling_dir(&destination, parent, ".symskills-stage-")
@@ -138,7 +152,7 @@ fn materialize_inner(
     let result = (|| {
         materialize_stage(bundle, rendered, &destination, &stage, fault_operation)?;
         let expected = collect_manifest(&destination, &stage)?;
-        let digest = manifest_digest(&expected)?;
+        let digest = manifest_digest(&expected, comparison.is_some())?;
         if marker_matches(existing_marker.as_ref(), &hash, &expected, &digest) {
             match collect_manifest(&destination, &relative) {
                 Ok(actual) if actual == expected => {
@@ -148,7 +162,13 @@ fn materialize_inner(
             }
         }
 
-        let marker = marker_bytes(&hash, existing_marker.clone(), &expected, &digest)?;
+        let marker = marker_bytes(
+            &hash,
+            existing_marker.clone(),
+            &expected,
+            &digest,
+            comparison.is_some(),
+        )?;
         bound_output_with_marker(&expected, &marker)?;
         write_file(
             &destination,
@@ -238,7 +258,12 @@ fn materialize_inner(
         None
     };
     match (result, cleanup_error) {
-        (Ok(value), None) => Ok(value),
+        (Ok(value), None) => {
+            if let Some((_, _, sidecar)) = comparison {
+                write_comparison_sidecar(&destination, &relative.with_extension("json"), sidecar)?;
+            }
+            Ok(value)
+        }
         (Err(error), None) => Err(error),
         (Ok(_), Some(cleanup)) => Err(SkillError(format!(
             "materialize cleanup staging tree: {cleanup}"
@@ -252,3 +277,12 @@ fn materialize_inner(
 include!("materialize_stage.rs");
 include!("materialize_manifest.rs");
 include!("materialize_fs.rs");
+include!("comparison_cache.rs");
+
+#[cfg(test)]
+#[path = "comparison_cache_tests.rs"]
+mod comparison_cache_tests;
+
+#[cfg(all(test, unix))]
+#[path = "comparison_cache_safety_tests.rs"]
+mod comparison_cache_safety_tests;

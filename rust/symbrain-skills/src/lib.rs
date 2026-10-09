@@ -3,9 +3,14 @@
 #![deny(unsafe_code)]
 #![deny(missing_docs)]
 
+mod binary;
 mod cap_root;
+pub mod config;
+pub mod context_profile;
+pub mod discover;
 mod encode;
 pub mod install;
+mod io_contract;
 pub mod library;
 mod load;
 pub mod materialize;
@@ -16,8 +21,11 @@ mod render_variants;
 pub mod runner;
 mod target;
 pub mod targets_status;
+pub mod text;
 mod validation;
 pub mod variant;
+pub mod vcs;
+pub mod wire;
 
 pub use load::{BundleLoader, load_bundle};
 pub use materialize::{Materialized, MaterializedFile, materialize, materialize_with_fault};
@@ -32,3 +40,5 @@ pub use render::{
 };
 pub use target::{config_dir, lookup, skill_root, target_names};
 pub use validation::{DEFAULT_TARGETS, is_render_blocking, validate, validate_with_targets};
+
+pub use text::GoText;

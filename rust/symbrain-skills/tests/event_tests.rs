@@ -21,7 +21,7 @@ fn event(error: String) -> OperationEvent {
         source_hash: "source".to_owned(),
         scope: "user".to_owned(),
         mode: "copy".to_owned(),
-        path: "/tmp/skill".to_owned(),
+        path: "/tmp/skill".into(),
         outcome: "ok".to_owned(),
         error,
         actor: "test".to_owned(),

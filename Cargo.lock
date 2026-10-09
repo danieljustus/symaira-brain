@@ -1767,6 +1767,7 @@ dependencies = [
  "symbrain-policy",
  "symbrain-skills",
  "symbrain-usage",
+ "tempfile",
 ]
 
 [[package]]
@@ -1837,6 +1838,7 @@ version = "0.12.1"
 dependencies = [
  "serde",
  "serde_json",
+ "symbrain-core",
 ]
 
 [[package]]
@@ -1895,11 +1897,14 @@ dependencies = [
  "fs2",
  "libc",
  "rustix",
+ "same-file",
  "serde",
  "serde_json",
  "serde_yaml_ng",
  "sha2",
+ "symbrain-core",
  "symbrain-harness",
+ "tar",
  "tempfile",
  "toml_edit",
 ]

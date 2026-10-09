@@ -36,8 +36,11 @@ pub struct OperationEvent {
     #[serde(skip_serializing_if = "String::is_empty")]
     pub mode: String,
     /// Affected destination.
-    #[serde(skip_serializing_if = "String::is_empty")]
-    pub path: String,
+    #[serde(
+        skip_serializing_if = "path_is_empty",
+        serialize_with = "crate::text::serialize_path"
+    )]
+    pub path: PathBuf,
     /// Content hash when known.
     #[serde(skip_serializing_if = "String::is_empty")]
     pub source_hash: String,
@@ -53,6 +56,10 @@ pub struct OperationEvent {
     pub actor: String,
 }
 
+fn path_is_empty(path: &Path) -> bool {
+    path.as_os_str().is_empty()
+}
+
 /// Maximum size of the current operation-event segment.
 pub const EVENT_MAX_BYTES: u64 = 1 << 20;
 const EVENT_LOCK_WAIT: Duration = Duration::from_millis(500);
@@ -61,7 +68,7 @@ const EVENT_LOCK_POLL: Duration = Duration::from_millis(10);
 /// Reads the rotated segment followed by the current segment.
 ///
 /// Blank and malformed lines are ignored, matching the Go event reader. File
-/// access errors are returned so the CLI can conservatively use its fallback.
+/// access errors are returned as native diagnostics; no foreign dispatcher runs.
 ///
 /// # Errors
 ///
@@ -73,16 +80,38 @@ pub fn read_events(
 ) -> std::io::Result<Vec<OperationEvent>> {
     let mut events = Vec::new();
     for segment in [rotated_event_path(path), path.to_owned()] {
-        let bytes = match fs::read(&segment) {
-            Ok(bytes) => bytes,
+        let parent = segment.parent().unwrap_or_else(|| Path::new("."));
+        let root = match cap_std::fs::Dir::open_ambient_dir(
+            parent,
+            ambient_authority::ambient_authority(),
+        ) {
+            Ok(root) => root,
             Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
             Err(error) => return Err(error),
         };
+        let name = Path::new(
+            segment
+                .file_name()
+                .ok_or_else(|| std::io::Error::other("event filename missing"))?,
+        );
+        if root
+            .symlink_metadata(name)
+            .is_err_and(|error| error.kind() == std::io::ErrorKind::NotFound)
+        {
+            continue;
+        }
+        let bytes = crate::load::read_limited_nofollow(
+            &root,
+            name,
+            "skill operation log",
+            crate::MAX_INPUT_SIZE,
+        )
+        .map_err(std::io::Error::other)?;
         for line in bytes.split(|byte| *byte == b'\n') {
             if line.iter().all(u8::is_ascii_whitespace) {
                 continue;
             }
-            let Ok(event) = serde_json::from_slice::<OperationEvent>(line) else {
+            let Some(event) = super::event_decode::decode(line) else {
                 continue;
             };
             if skill.is_some_and(|value| event.skill != value)
@@ -264,7 +293,7 @@ pub(crate) fn event_for_at(
         source_hash: String::new(),
         scope: scope.to_owned(),
         mode: mode.to_owned(),
-        path: path.to_string_lossy().into_owned(),
+        path: path.to_owned(),
         outcome: outcome.to_owned(),
         error: error.to_owned(),
         actor: "cli".to_owned(),

@@ -453,3 +453,60 @@ remain historical acceptance of their exact source. New native Windows wide
 CreateProcessW comparisons, unchanged Unix315 regression, affected tests/strict
 checks and independent review are pending; copied SDK source is no Windows
 runtime evidence. This does not complete broader Skills/Rust cutover.
+For #621, the native explicit-target status report adds a bounded, read-only
+library-versus-render comparison, including reference files. It compares a fresh
+target render, reports paths/hashes and unreadable caches, and labels verified
+managed cache links `linked` without changing persisted markers or sync policy.
+The original Go report is compared live for 12 clean/edited states across six
+targets, removing only these documented product extensions; no Go source or
+existing fixture is changed. See `scripts/skills-render-drift/README.md`. Native
+three-OS CI at the final candidate head remains required. Dynamic config and
+unqualified multi-target CLI fallback remain part of #764.
+
+### Remaining Skills CLI and eleven MCP tools (#764)
+
+Source preparation on normally integrated main/preflight/render-drift parents
+replaces all six Skills CLI fallback shapes and embeds all eleven actual tools.
+Populated metadata preserves timestamp precision, installation attribution and
+last-used rules; CLI configuration loads global/project/environment with whole
+result reset on failure, while embedded MCP retains Defaults-only registration.
+The native adapters share existing loader/registry/render/install/sync functions.
+Raw MCP argument order, profile selection, forward Git restore and per-skill
+locks remain explicit contracts. Original sources and all 1217 frozen Go file
+maps are retained under migration/evidence/skills-native-764.
+
+SKL-008 remains the render-observation contract; the conflicting raw-Windows
+sync follow-up ID is now SKL-009, with historical evidence unchanged. SKL-010 and
+SKL-011 record the remaining surface as source preparation only. The new native
+three-OS gate prepares 567 process pairs and three real changed-input controls;
+none has executed at this checkpoint. Conditional Go GODEBUG stack/reporting
+patterns, exact Windows process/file identity and typed TOML diagnostics remain
+open verification/implementation boundaries, not acceptance exceptions. Strict
+locked builds, affected/proper workspace tests, original Skills gates, all native
+three-OS differentials and independent review remain mandatory. Issue #764 and
+full Rust release/cutover are not completed by this source checkpoint. Decisions
+and full route inventory are in docs/adr/skills-native-surface-764.md and
+migration/skills-native-764-inventory.md.
+
+Skills764's second source-only correction retains raw path/Markdown bytes until
+presentation, applies Go JSON separator escaping, validates ordered outer MCP
+metadata before handler execution, and admits Go string forms at the actual
+known-Skills transport entry. Unix final control links stay rejected; confined
+ordinary metadata retains the original nofollow diagnostic, while discovery
+identity uses a bounded confined raw-content read. Original source, raw inputs,
+metadata and full reviews are preserved under
+migration/evidence/skills-native-764/byte-corrections. The native three-platform differential
+plans preserve 638/614 original Unix/Windows pairs and prepare 826/784 with all
+old controls plus two new actual-child input controls. These are source plans,
+not compiler/native success or completion of #764. See
+[the byte-owner decisions](docs/adr/skills-native-byte-contracts-764.md).
+
+For #621, the native explicit-target status report adds a bounded, read-only
+library-versus-render comparison, including reference files. It compares a fresh
+target render, reports paths/hashes and unreadable caches, and labels verified
+managed cache links `linked` without changing persisted markers or sync policy.
+The original Go report is compared live for 12 clean/edited states across six
+targets, removing only these documented product extensions; no Go source or
+existing fixture is changed. See `scripts/skills-render-drift/README.md`. Native
+three-OS CI at the final candidate head remains required. Dynamic config and
+unqualified multi-target CLI fallback remain part of #764.

@@ -16,7 +16,7 @@ use serde::Serialize;
 use super::base::base_path_for_scope;
 use super::destination::entry_metadata;
 use super::lock;
-use super::marker::{MarkerState, read_marker_at};
+use super::marker::MarkerState;
 use super::replace::open_trusted_dir;
 use super::status_compare::{
     compare_one, is_regular_skill_source, marker_row, read_entries, resolve_link,
@@ -53,6 +53,7 @@ pub struct InstallStatus {
     /// Installed directory name.
     pub name: String,
     /// Absolute installation path.
+    #[serde(serialize_with = "crate::text::serialize_path")]
     pub path: PathBuf,
     /// Classification.
     pub status: StatusKind,
@@ -108,13 +109,24 @@ pub struct StatusOptions {
 
 /// Scans every requested target and scope in deterministic order.
 pub fn status(options: &StatusOptions) -> Result<Vec<InstallStatus>, SkillError> {
-    status_with_loader(options, &BundleLoader::default())
+    status_with_cache(options, None)
+}
+
+/// Scans with an optional derived comparison cache, separate from `render_dir`.
+pub fn status_with_cache(
+    options: &StatusOptions,
+    cache_dir: Option<&std::path::Path>,
+) -> Result<Vec<InstallStatus>, SkillError> {
+    status_with_loader(options, &BundleLoader::default(), cache_dir)
 }
 
 pub(super) fn status_with_loader(
     options: &StatusOptions,
     loader: &BundleLoader,
+    cache_dir: Option<&std::path::Path>,
 ) -> Result<Vec<InstallStatus>, SkillError> {
+    // Go's empty CacheDir selects temporary staging; whitespace is a real path.
+    let cache_dir = cache_dir.filter(|path| !path.as_os_str().is_empty());
     let targets = if options.targets.is_empty() {
         crate::target::target_names()
     } else {
@@ -124,7 +136,7 @@ pub(super) fn status_with_loader(
     for target in targets {
         let mut one = options.clone();
         one.targets = vec![target.clone()];
-        rows.extend(status_target(&one, &target, loader)?);
+        rows.extend(status_target(&one, &target, loader, cache_dir)?);
     }
     rows.sort_by(|left, right| {
         left.target
@@ -138,6 +150,7 @@ fn status_target(
     options: &StatusOptions,
     target: &str,
     loader: &BundleLoader,
+    cache_dir: Option<&std::path::Path>,
 ) -> Result<Vec<InstallStatus>, SkillError> {
     let scope = if options.scope.is_empty() {
         "user"
@@ -234,18 +247,30 @@ fn status_target(
             }
             path.clone()
         };
-        let marker = if file_type.is_symlink() {
-            super::marker::read_marker(&installed_tree)?
+        let skill_cap = if file_type.is_symlink() {
+            open_trusted_dir(&installed_tree)?
         } else {
-            let skill_cap = root_cap
+            root_cap
                 .open_dir_nofollow(&name_os)
-                .map_err(|error| SkillError(format!("open installed skill {name}: {error}")))?;
-            read_marker_at(&skill_cap)?
+                .map_err(|error| SkillError(format!("open installed skill {name}: {error}")))?
         };
-        let MarkerState::Valid(marker) = marker else {
-            rows.push(marker_row(target, &name, path, marker));
-            continue;
+        let observation = match super::marker_observation::read(&skill_cap) {
+            Ok(Some(observation)) => observation,
+            Ok(None) => {
+                rows.push(unmanaged(target, &name, path));
+                continue;
+            }
+            Err(error) => {
+                rows.push(marker_row(
+                    target,
+                    &name,
+                    path,
+                    MarkerState::Rejected(error.0),
+                ));
+                continue;
+            }
         };
+        let marker = observation.marker;
         // A source_hash-only marker is a legacy cache marker, not an owned
         // installation. Do not silently upgrade it into a managed entry.
         let marker_for_row = marker.clone();
@@ -264,6 +289,14 @@ fn status_target(
             render_drift: Vec::new(),
             render_error: None,
         };
+        if let Some(error) = observation.error {
+            rows.push(common(
+                StatusKind::Stale,
+                Vec::new(),
+                Some(format!("reading marker {}: {error}", path.display())),
+            ));
+            continue;
+        }
         if marker.managed_by != "symskills"
             || marker.target != target
             || marker.name != name
@@ -300,6 +333,7 @@ fn status_target(
             options,
             loader,
             common,
+            cache_dir,
         ) {
             Ok(row) => rows.push(row),
             // Go status keeps a broken managed install visible as a stale

@@ -1,0 +1,120 @@
+name: Native Skills764 CLI and MCP preparation
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: skills-native-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  skills-native:
+    name: Skills CLI and eleven MCP tools (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    # Complete native inventories exceeded 45 minutes on Linux and Windows.
+    timeout-minutes: 90
+    env:
+      CARGO_BUILD_JOBS: "2"
+      CARGO_PROFILE_DEV_DEBUG: "0"
+      CARGO_PROFILE_TEST_DEBUG: "0"
+      CARGO_INCREMENTAL: "0"
+      SYMBRAIN_VERSION: dev
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: "1.26.7"
+          cache: true
+      - name: Prepare candidate dependency cache
+        shell: bash
+        run: |
+          set -euo pipefail
+          go mod download
+      - name: Build fixed unmodified Go oracle with owned home
+        shell: bash
+        run: |
+          set -euo pipefail
+          suffix=""
+          if [ "${OS:-}" = Windows_NT ]; then suffix=".exe"; fi
+          python scripts/skills-argv-oracle/build_go.py \
+            --prepare-module-cache \
+            --out "$RUNNER_TEMP/skills764-go$suffix" \
+            --receipt "$RUNNER_TEMP/skills764-go-build.json" \
+            --go-cache "$(go env GOCACHE)" --module-cache "$(go env GOMODCACHE)"
+      - name: Strict affected checks and actual native binary
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo fmt --all --check
+          cargo clippy --locked -p symbrain-core -p symbrain-skills -p symbrain-gateway -p symbrain-cli -p symbrain-mcp --all-targets -- -D warnings
+          if [ "${OS:-}" = Windows_NT ]; then
+            activity_cli_fixture="$RUNNER_TEMP/activity-cli-oracle-windows.json"
+            activity_cli_go_binary="$RUNNER_TEMP/symbrain-activity-oracle-go.exe"
+            go build -ldflags "-X main.version=dev" -o "$activity_cli_go_binary" ./cmd/symbrain
+            go run ./scripts/activity-cli-oracle -go-binary "$activity_cli_go_binary" -output "$activity_cli_fixture"
+            export SYMBRAIN_ACTIVITY_CLI_ORACLE_FIXTURE="$activity_cli_fixture"
+            export SYMBRAIN_CLI_TREE_ORACLE_FIXTURE="$RUNNER_TEMP/cli-tree-oracle-windows.json"
+            export SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE="$RUNNER_TEMP/profile-remove-oracle-windows.json"
+            export SYMBRAIN_XDG_ORACLE_FIXTURE="$RUNNER_TEMP/xdg-oracle-windows.json"
+            go run ./scripts/cli-oracle -go-binary "$activity_cli_go_binary" -output "$SYMBRAIN_CLI_TREE_ORACLE_FIXTURE"
+            go run ./scripts/profile-remove-oracle -output "$SYMBRAIN_PROFILE_REMOVE_ORACLE_FIXTURE"
+            go run ./scripts/xdg-oracle -output "$SYMBRAIN_XDG_ORACLE_FIXTURE"
+            export SYMBRAIN_SKILLS_ORACLE_FIXTURE="$RUNNER_TEMP/skills-oracle-windows.json"
+            export SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE="$RUNNER_TEMP/skills-install-oracle-windows.json"
+            export SYMBRAIN_GUARD_ORACLE_FIXTURE="$RUNNER_TEMP/guard-oracle-windows.json"
+            export SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE="$RUNNER_TEMP/guard-doctor-oracle-windows.json"
+            go run ./scripts/skills-oracle -output "$SYMBRAIN_SKILLS_ORACLE_FIXTURE"
+            go run ./scripts/skills-install-oracle -output "$SYMBRAIN_SKILLS_INSTALL_ORACLE_FIXTURE"
+            go run ./guard/scripts/guard-oracle -output "$SYMBRAIN_GUARD_ORACLE_FIXTURE"
+            go run ./guard/scripts/guard-doctor-oracle -output "$SYMBRAIN_GUARD_DOCTOR_ORACLE_FIXTURE"
+          fi
+          cargo test --locked -p symbrain-core -p symbrain-skills -p symbrain-gateway -p symbrain-cli -p symbrain-mcp
+          cargo build --locked -p symbrain-cli
+          cargo build --locked -p symbrain-skills --example git_stream_fixture
+      - name: Check owned fixture cleanup and real full-stdout prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/skills-native-oracle/test_fixture_cleanup.py
+          python scripts/skills-native-oracle/test_full_stdout.py
+          python scripts/skills-native-oracle/test_checkpoint.py
+      - name: Actual owned CLI/MCP differential and input controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          suffix=""
+          if [ "${OS:-}" = Windows_NT ]; then suffix=".exe"; fi
+          git_executable="$(command -v git)"
+          if [ "${OS:-}" = Windows_NT ]; then git_executable="$(cygpath -m "$git_executable")"; fi
+          python scripts/skills-native-oracle/run.py \
+            --go "$RUNNER_TEMP/skills764-go$suffix" \
+            --rust "${CARGO_TARGET_DIR:-target}/debug/symbrain$suffix" \
+            --git "$git_executable" \
+            --git-fixture "${CARGO_TARGET_DIR:-target}/debug/examples/git_stream_fixture$suffix" \
+            --oracle-receipt "$RUNNER_TEMP/skills764-go-build.json" \
+            --out "$RUNNER_TEMP/skills764-native.json"
+      - name: Preserve raw partial or complete evidence
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: skills764-native-${{ matrix.os }}
+          path: |
+            ${{ runner.temp }}/skills764-go-build.json
+            ${{ runner.temp }}/skills764-native.json
+            ${{ runner.temp }}/activity-cli-oracle-windows.json
+            ${{ runner.temp }}/cli-tree-oracle-windows.json
+            ${{ runner.temp }}/profile-remove-oracle-windows.json
+            ${{ runner.temp }}/xdg-oracle-windows.json
+            ${{ runner.temp }}/skills-oracle-windows.json
+            ${{ runner.temp }}/skills-install-oracle-windows.json
+            ${{ runner.temp }}/guard-oracle-windows.json
+            ${{ runner.temp }}/guard-doctor-oracle-windows.json
+          if-no-files-found: error

@@ -1,4 +1,4 @@
-//! Native `symbrain skills` empty-log and Go-fallback byte contracts.
+//! Native `symbrain skills` native log and bounded-input contracts.
 
 #![cfg(unix)]
 #![deny(unsafe_code)]
@@ -53,10 +53,13 @@ fn fallback(root: &TempDir) -> PathBuf {
     path
 }
 
-fn assert_fake_fallback(output: &Output) {
-    assert_eq!(output.status.code(), Some(23));
-    assert_eq!(output.stdout, b"fallback-stdout\n");
-    assert_eq!(output.stderr, b"fallback-stderr\n");
+fn assert_native_error(output: &Output) {
+    assert_eq!(output.status.code(), Some(1));
+    assert!(output.stdout.is_empty());
+    assert!(
+        String::from_utf8_lossy(&output.stderr)
+            .starts_with("symbrain skills log: read operation log:")
+    );
 }
 
 #[test]
@@ -129,7 +132,7 @@ corrupt
 }
 
 #[test]
-fn unavailable_log_path_uses_go_before_stdout() {
+fn unavailable_log_path_reports_native_error() {
     let root = TempDir::new().unwrap();
     let share_dir = root.path().join("home/.local/share");
     fs::create_dir_all(&share_dir).unwrap();
@@ -139,11 +142,11 @@ fn unavailable_log_path_uses_go_before_stdout() {
         .env("SYMBRAIN_GO_BINARY", fallback(&root))
         .output()
         .unwrap();
-    assert_fake_fallback(&output);
+    assert_native_error(&output);
 }
 
 #[test]
-fn log_flags_filter_and_limit_natively_but_invalid_args_use_go() {
+fn log_flags_filter_and_limit_natively_and_invalid_args_are_native() {
     for args in [
         &["skills", "log", "--skill", "demo"][..],
         &["skills", "log", "--target", "claude"][..],
@@ -171,7 +174,12 @@ fn log_flags_filter_and_limit_natively_but_invalid_args_use_go() {
         .env("SYMBRAIN_GO_BINARY", fallback(&root))
         .output()
         .unwrap();
-    assert_fake_fallback(&output);
+    assert_eq!(output.status.code(), Some(2));
+    assert!(output.stdout.is_empty());
+    assert!(
+        String::from_utf8_lossy(&output.stderr)
+            .starts_with("flag provided but not defined: -bogus\nUsage of skills log:")
+    );
 }
 
 #[test]
@@ -203,7 +211,7 @@ fn log_filters_trim_values_and_ignore_blank_filters() {
 }
 
 #[test]
-fn symlinked_log_uses_go_before_stdout() {
+fn symlinked_log_reports_native_error() {
     let root = TempDir::new().unwrap();
     let log_dir = root.path().join("home/.local/share/symskills");
     let target = root.path().join("outside-events.jsonl");
@@ -215,11 +223,11 @@ fn symlinked_log_uses_go_before_stdout() {
         .env("SYMBRAIN_GO_BINARY", fallback(&root))
         .output()
         .unwrap();
-    assert_fake_fallback(&output);
+    assert_native_error(&output);
 }
 
 #[test]
-fn symlinked_log_ancestor_uses_go_before_stdout() {
+fn symlinked_log_ancestor_is_read_without_fallback() {
     let root = TempDir::new().unwrap();
     let home = root.path().join("home");
     let real_local = home.join("real-local");
@@ -237,11 +245,13 @@ fn symlinked_log_ancestor_uses_go_before_stdout() {
         .env("SYMBRAIN_GO_BINARY", fallback(&root))
         .output()
         .unwrap();
-    assert_fake_fallback(&output);
+    assert!(output.status.success(), "{:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    assert!(String::from_utf8_lossy(&output.stdout).contains("install"));
 }
 
 #[test]
-fn unreadable_log_uses_go_before_stdout() {
+fn unreadable_log_reports_native_error() {
     let root = TempDir::new().unwrap();
     let log_dir = root.path().join("home/.local/share/symskills");
     fs::create_dir_all(&log_dir).unwrap();
@@ -255,5 +265,12 @@ fn unreadable_log_uses_go_before_stdout() {
         .env("SYMBRAIN_GO_BINARY", fallback(&root))
         .output()
         .unwrap();
-    assert_fake_fallback(&output);
+    if fs::read(&path).is_err() {
+        assert_native_error(&output);
+    } else {
+        // A privileged caller can read mode 000; match its actual access,
+        // without treating mode bits as an independent denial.
+        assert!(output.status.success(), "{:?}", output.stderr);
+        assert!(output.stderr.is_empty());
+    }
 }
