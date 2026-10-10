@@ -13,7 +13,9 @@ The checked-in sources were copied selectively from those checksum-verified crat
 
 The package-local `serde_yaml_ng` emitter adds a double-quoted scalar style and uses libyaml's four-space indentation. Its string inference selects double quotes for values that the existing YAML scalar resolver recognizes as booleans or numbers, rather than single quotes; ordinary strings retain the library's normal style. The fork makes the upstream FFI field borrows explicit where Rust 1.98 rejects implicit raw-pointer autoref; it uses no lint suppression. `symbrain-skills::encode_skill_md` emits the library bytes directly inside the frontmatter delimiters and appends the body bytes unchanged. No YAML byte postpass or global Cargo patch is used.
 
-This is an early, scoped compatibility slice, not a parity waiver. The remaining Go resolver cases, collection ordering/indentation, multiline/control handling, typed documents, caller outputs and hashes still require the cumulative acceptance gates.
+The subsequent source-bound policy includes yaml.v3's legacy boolean, base60, timestamp and numeric-string inference, supplementary Unicode escaping, and block-sequence indentation. Leading-LF strings and literal `<<` metadata keys use the explicitly approved lossless targets described in `docs/adr/skills-yaml-value-preservation-835.md`; frozen oracle data is not rewritten. No byte postpass is introduced.
+
+This remains an unaccepted scoped repair, not a parity waiver. The 740 scalar rows, ordinary render/materialize golden trees and local Skills tests have been exercised. The cumulative typed-document corpus, metadata ordering/float cases, strict vendor lint, independent review and required CLI/MCP/native gates remain outstanding. In particular, existing vendor Clippy errors are not suppressed or excluded.
 
 ## Upgrade path
 

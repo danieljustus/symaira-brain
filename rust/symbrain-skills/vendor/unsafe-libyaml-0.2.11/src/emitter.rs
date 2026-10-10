@@ -811,11 +811,8 @@ unsafe fn yaml_emitter_emit_block_sequence_item(
     first: bool,
 ) -> Success {
     if first {
-        yaml_emitter_increase_indent(
-            emitter,
-            false,
-            (*emitter).mapping_context && !(*emitter).indention,
-        );
+        // yaml.v3 emitterc.go always indents block sequences, including map values.
+        yaml_emitter_increase_indent(emitter, false, false);
     }
     if (*event).type_ == YAML_SEQUENCE_END_EVENT {
         (*emitter).indent = POP!((*emitter).indents);
@@ -1967,11 +1964,6 @@ unsafe fn yaml_emitter_write_single_quoted_scalar(
             breaks = false;
         }
     }
-    if breaks {
-        if yaml_emitter_write_indent(emitter).fail {
-            return FAIL;
-        }
-    }
     if yaml_emitter_write_indicator(
         emitter,
         b"'\0" as *const u8 as *const libc::c_char,
@@ -2276,10 +2268,6 @@ unsafe fn yaml_emitter_write_literal_scalar(
     if yaml_emitter_write_block_scalar_hints(emitter, string).fail {
         return FAIL;
     }
-    if PUT_BREAK(emitter).fail {
-        return FAIL;
-    }
-    (*emitter).indention = true;
     (*emitter).whitespace = true;
     while string.pointer != string.end {
         if IS_BREAK!(string) {

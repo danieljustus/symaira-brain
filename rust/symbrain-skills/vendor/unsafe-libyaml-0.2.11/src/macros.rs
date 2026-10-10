@@ -187,8 +187,6 @@ macro_rules! IS_PRINTABLE {
                 },
                 _ => true,
             },
-            // U+10000 ... U+10FFFF
-            0xF0..=0xF4 => true,
             _ => false,
         }
     };

@@ -99,4 +99,136 @@ mod tests {
         assert_eq!(parsed.metadata["plain"], json!("ordinary text"));
         assert_eq!(&encoded[boundary + b"\n---\n\n".len()..], body);
     }
+
+    #[derive(serde::Deserialize)]
+    struct ScalarOracleCase {
+        id: String,
+        context: String,
+        #[serde(rename = "type")]
+        value_type: String,
+        value: String,
+        expected_yaml_hex: String,
+    }
+
+    fn frontmatter_for_case(case: &ScalarOracleCase) -> Frontmatter {
+        use serde_json::{Map, Value};
+
+        let mut frontmatter = Frontmatter {
+            name: "probe".into(),
+            description: "source extracted".into(),
+            ..Frontmatter::default()
+        };
+        match case.context.as_str() {
+            "scalar" => frontmatter.description.clone_from(&case.value),
+            "mapping_key" => {
+                let mut metadata = Map::new();
+                metadata.insert(case.value.clone(), Value::String("marker".into()));
+                frontmatter.metadata = Value::Object(metadata);
+            }
+            "nested_value" => {
+                let mut outer = Map::new();
+                outer.insert("leaf".into(), Value::String(case.value.clone()));
+                let mut metadata = Map::new();
+                metadata.insert("outer".into(), Value::Object(outer));
+                frontmatter.metadata = Value::Object(metadata);
+            }
+            "nested_key" => {
+                let mut outer = Map::new();
+                outer.insert(case.value.clone(), Value::String("marker".into()));
+                let mut metadata = Map::new();
+                metadata.insert("outer".into(), Value::Object(outer));
+                frontmatter.metadata = Value::Object(metadata);
+            }
+            _ => panic!("unexpected scalar oracle context {:?}", case.context),
+        }
+        frontmatter
+    }
+
+    fn decode_hex(hex: &str) -> Vec<u8> {
+        assert_eq!(hex.len() % 2, 0, "odd-length oracle hex");
+        hex.as_bytes()
+            .chunks_exact(2)
+            .map(|pair| {
+                let digits = std::str::from_utf8(pair).expect("ASCII oracle hex");
+                u8::from_str_radix(digits, 16).expect("valid oracle hex")
+            })
+            .collect()
+    }
+
+    #[test]
+    fn all_740_go_scalar_context_cases_match_shared_encoder() {
+        #[derive(serde::Deserialize)]
+        struct ApprovedCase {
+            id: String,
+            expected_yaml_hex: String,
+        }
+        // Frozen legacy observations stay unchanged. Only these source-captured
+        // leading-LF rows use the separately approved value-preserving target.
+        let mut overrides: Vec<ApprovedCase> = serde_json::from_str(include_str!(
+            "../tests/fixtures/yaml835-leading-lf-target.json"
+        ))
+        .expect("decode approved leading-LF target");
+        assert_eq!(overrides.len(), 12);
+        let merge_keys: Vec<ApprovedCase> = serde_json::from_str(include_str!(
+            "../tests/fixtures/yaml835-merge-key-target.json"
+        ))
+        .expect("decode approved merge-key target");
+        assert_eq!(merge_keys.len(), 2);
+        overrides.extend(merge_keys);
+        let mut count = 0;
+        let mut changed = 0;
+        let mut mismatches = Vec::new();
+        let contexts = ["scalar", "mapping_key", "nested_value", "nested_key"];
+        for line in include_str!("../tests/fixtures/yaml835-shared-encoder-740.jsonl").lines() {
+            let case: ScalarOracleCase = serde_json::from_str(line).expect("decode Go oracle case");
+            assert_eq!(case.id, format!("{:03}-{}", count / 4, contexts[count % 4]));
+            assert_eq!(case.value_type, "string", "case {}", case.id);
+            let frontmatter = frontmatter_for_case(&case);
+            let legacy = decode_hex(&case.expected_yaml_hex);
+            let expected = if let Some(target) = overrides.iter().find(|row| row.id == case.id) {
+                if count / 4 == 177 {
+                    assert_eq!(case.value, "<<");
+                    assert!(matches!(
+                        case.context.as_str(),
+                        "mapping_key" | "nested_key"
+                    ));
+                } else {
+                    assert!(matches!(count / 4, 153 | 165 | 166));
+                    assert!(case.value.starts_with('\n'));
+                }
+                let target = decode_hex(&target.expected_yaml_hex);
+                assert_ne!(target, legacy, "approved exception must remain explicit");
+                changed += 1;
+                target
+            } else {
+                legacy
+            };
+            let actual = encode_skill_md(&frontmatter, &[]).expect("encode Go oracle case");
+            if actual != expected {
+                println!("byte mismatch {}: value={:?}", case.id, case.value);
+                mismatches.push(case.id.clone());
+            }
+
+            let header = std::str::from_utf8(&actual[4..actual.len() - 5])
+                .expect("generated header is UTF-8");
+            match serde_yaml_ng::from_str::<Frontmatter>(header) {
+                Ok(parsed) if parsed == frontmatter => {}
+                result => {
+                    println!("semantic mismatch {}: {result:?}", case.id);
+                    mismatches.push(format!("{}-semantic", case.id));
+                }
+            }
+            count += 1;
+        }
+        assert_eq!(count, 740);
+        assert_eq!(changed, 14);
+        println!(
+            "executed {count} source-bound scalar cases; {} mismatches",
+            mismatches.len()
+        );
+        assert!(
+            mismatches.is_empty(),
+            "Go yaml.Marshal mismatches: {mismatches:?}"
+        );
+    }
 }

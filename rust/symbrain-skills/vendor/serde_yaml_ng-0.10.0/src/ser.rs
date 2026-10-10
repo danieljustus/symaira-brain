@@ -17,6 +17,190 @@ use std::str;
 
 type Result<T, E = Error> = std::result::Result<T, E>;
 
+// These string-style checks follow yaml.v3 v3.0.1 encode.go and resolve.go.
+fn go_old_bool(value: &str) -> bool {
+    matches!(
+        value,
+        "y" | "Y"
+            | "yes"
+            | "Yes"
+            | "YES"
+            | "on"
+            | "On"
+            | "ON"
+            | "n"
+            | "N"
+            | "no"
+            | "No"
+            | "NO"
+            | "off"
+            | "Off"
+            | "OFF"
+    )
+}
+
+fn go_base60_float(value: &str) -> bool {
+    let bytes = value.as_bytes();
+    let mut index = usize::from(matches!(bytes.first(), Some(b'+') | Some(b'-')));
+    if index >= bytes.len() || !bytes[index].is_ascii_digit() {
+        return false;
+    }
+    index += 1;
+    while index < bytes.len() && (bytes[index].is_ascii_digit() || bytes[index] == b'_') {
+        index += 1;
+    }
+
+    let mut groups = 0;
+    while index < bytes.len() && bytes[index] == b':' {
+        index += 1;
+        if index >= bytes.len() {
+            return false;
+        }
+        if index + 1 < bytes.len()
+            && (b'0'..=b'5').contains(&bytes[index])
+            && bytes[index + 1].is_ascii_digit()
+        {
+            index += 2;
+        } else if bytes[index].is_ascii_digit() {
+            index += 1;
+        } else {
+            return false;
+        }
+        groups += 1;
+    }
+    if groups == 0 {
+        return false;
+    }
+    if index < bytes.len() && bytes[index] == b'.' {
+        index += 1;
+        while index < bytes.len() && (bytes[index].is_ascii_digit() || bytes[index] == b'_') {
+            index += 1;
+        }
+    }
+    index == bytes.len()
+}
+
+fn decimal_at(bytes: &[u8], start: usize, min: usize, max: usize) -> Option<(u32, usize)> {
+    let mut end = start;
+    while end < bytes.len() && end - start < max && bytes[end].is_ascii_digit() {
+        end += 1;
+    }
+    if end - start < min {
+        return None;
+    }
+    let mut value = 0;
+    for digit in &bytes[start..end] {
+        value = value * 10 + u32::from(*digit - b'0');
+    }
+    Some((value, end))
+}
+
+// Port yaml.v3 resolve.go parseTimestamp's four time.Parse layouts.
+fn go_timestamp(value: &str) -> bool {
+    let bytes = value.as_bytes();
+    let Some((year, mut index)) = decimal_at(bytes, 0, 4, 4) else {
+        return false;
+    };
+    if index != 4 || bytes.get(index) != Some(&b'-') {
+        return false;
+    }
+    index += 1;
+    let Some((month, end)) = decimal_at(bytes, index, 1, 2) else {
+        return false;
+    };
+    index = end;
+    if !(1..=12).contains(&month) || bytes.get(index) != Some(&b'-') {
+        return false;
+    }
+    index += 1;
+    let Some((day, end)) = decimal_at(bytes, index, 1, 2) else {
+        return false;
+    };
+    index = end;
+    let leap = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+    let last_day = match month {
+        2 if leap => 29,
+        2 => 28,
+        4 | 6 | 9 | 11 => 30,
+        _ => 31,
+    };
+    if day == 0 || day > last_day {
+        return false;
+    }
+    if index == bytes.len() {
+        return true;
+    }
+
+    let separator = bytes[index];
+    if !matches!(separator, b'T' | b't' | b' ') {
+        return false;
+    }
+    index += 1;
+    if separator == b' ' {
+        while bytes.get(index) == Some(&b' ') {
+            index += 1;
+        }
+    }
+
+    let Some((hour, end)) = decimal_at(bytes, index, 1, 2) else {
+        return false;
+    };
+    index = end;
+    if hour > 23 || bytes.get(index) != Some(&b':') {
+        return false;
+    }
+    index += 1;
+    let Some((minute, end)) = decimal_at(bytes, index, 1, 2) else {
+        return false;
+    };
+    index = end;
+    if minute > 59 || bytes.get(index) != Some(&b':') {
+        return false;
+    }
+    index += 1;
+    let Some((second, end)) = decimal_at(bytes, index, 1, 2) else {
+        return false;
+    };
+    index = end;
+    // Go time.Parse rejects leap seconds even in timestamp-shaped strings.
+    if second > 59 {
+        return false;
+    }
+    if matches!(bytes.get(index), Some(b'.') | Some(b',')) {
+        index += 1;
+        let fraction_start = index;
+        while index < bytes.len() && bytes[index].is_ascii_digit() {
+            index += 1;
+        }
+        if index == fraction_start {
+            return false;
+        }
+    }
+
+    if separator == b' ' {
+        return index == bytes.len();
+    }
+    if bytes.get(index) == Some(&b'Z') {
+        return index + 1 == bytes.len();
+    }
+    if !matches!(bytes.get(index), Some(b'+') | Some(b'-')) {
+        return false;
+    }
+    index += 1;
+    let Some((zone_hour, end)) = decimal_at(bytes, index, 2, 2) else {
+        return false;
+    };
+    index = end;
+    if bytes.get(index) != Some(&b':') {
+        return false;
+    }
+    index += 1;
+    let Some((zone_minute, end)) = decimal_at(bytes, index, 2, 2) else {
+        return false;
+    };
+    zone_hour <= 24 && zone_minute <= 60 && end == bytes.len()
+}
+
 /// A structure for serializing Rust values into YAML.
 ///
 /// # Example
@@ -43,6 +227,7 @@ type Result<T, E = Error> = std::result::Result<T, E>;
 /// ```
 pub struct Serializer<W> {
     depth: usize,
+    mapping_key: bool,
     state: State,
     emitter: Emitter<'static>,
     writer: PhantomData<W>,
@@ -69,6 +254,7 @@ where
         emitter.emit(Event::StreamStart).unwrap();
         Serializer {
             depth: 0,
+            mapping_key: false,
             state: State::NothingInParticular,
             emitter,
             writer: PhantomData,
@@ -352,12 +538,25 @@ where
             }
         }
 
-        let style = if value.contains('\n') {
+        let style = if (self.mapping_key && value == "<<") || value.starts_with('\n') {
+            // Approved #835 target: the frozen Go literal emitter loses this LF.
+            ScalarStyle::DoubleQuoted
+        } else if value.contains('\n') {
             ScalarStyle::Literal
+        } else if go_old_bool(value) || go_base60_float(value) || go_timestamp(value) {
+            ScalarStyle::DoubleQuoted
         } else {
+            // Go resolve removes underscores after the numeric/sign prefix check.
+            let numeric_text = if value.contains('_')
+                && matches!(value.as_bytes().first(), Some(b'0'..=b'9' | b'+' | b'-'))
+            {
+                Some(value.replace('_', ""))
+            } else {
+                None
+            };
             let result = crate::de::visit_untagged_scalar(
                 InferScalarStyle,
-                value,
+                numeric_text.as_deref().unwrap_or(value),
                 None,
                 libyaml::parser::ScalarStyle::Plain,
             );
@@ -611,7 +810,11 @@ where
         T: ?Sized + ser::Serialize,
     {
         self.flush_mapping_start()?;
-        key.serialize(&mut **self)
+        let previous = self.mapping_key;
+        self.mapping_key = true;
+        let result = key.serialize(&mut **self);
+        self.mapping_key = previous;
+        result
     }
 
     fn serialize_value<T>(&mut self, value: &T) -> Result<()>
@@ -626,7 +829,11 @@ where
         K: ?Sized + ser::Serialize,
         V: ?Sized + ser::Serialize,
     {
-        key.serialize(&mut **self)?;
+        let previous = self.mapping_key;
+        self.mapping_key = true;
+        let result = key.serialize(&mut **self);
+        self.mapping_key = previous;
+        result?;
         let tagged = matches!(self.state, State::FoundTag(_));
         value.serialize(&mut **self)?;
         if tagged {
