@@ -37,6 +37,9 @@ func (fm *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 	if err := normalized.Decode(&decoded); err != nil {
 		return err
 	}
+	if _, err := normalizeMetadataNumber(decoded.Metadata); err != nil {
+		return fmt.Errorf("normalize frontmatter metadata numbers: %w", err)
+	}
 	*fm = Frontmatter(decoded)
 	return nil
 }

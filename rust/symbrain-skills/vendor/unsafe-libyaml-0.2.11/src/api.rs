@@ -675,7 +675,7 @@ pub unsafe fn yaml_document_start_event_initialize(
             PUSH!(tag_directives_copy, value);
             value.handle = ptr::null_mut::<yaml_char_t>();
             value.prefix = ptr::null_mut::<yaml_char_t>();
-            tag_directive = tag_directive.wrapping_offset(1);
+            tag_directive = tag_directive.wrapping_add(1);
         }
     } else {
         current_block = 16203760046146113240;
@@ -1063,7 +1063,7 @@ pub unsafe fn yaml_event_delete(event: *mut yaml_event_t) {
             while tag_directive != (*event).data.document_start.tag_directives.end {
                 yaml_free((*tag_directive).handle as *mut libc::c_void);
                 yaml_free((*tag_directive).prefix as *mut libc::c_void);
-                tag_directive = tag_directive.wrapping_offset(1);
+                tag_directive = tag_directive.wrapping_add(1);
             }
             yaml_free((*event).data.document_start.tag_directives.start as *mut libc::c_void);
         }
@@ -1183,7 +1183,7 @@ pub unsafe fn yaml_document_initialize(
             PUSH!(tag_directives_copy, value);
             value.handle = ptr::null_mut::<yaml_char_t>();
             value.prefix = ptr::null_mut::<yaml_char_t>();
-            tag_directive = tag_directive.wrapping_offset(1);
+            tag_directive = tag_directive.wrapping_add(1);
         }
     } else {
         current_block = 14818589718467733107;
@@ -1253,7 +1253,7 @@ pub unsafe fn yaml_document_delete(document: *mut yaml_document_t) {
     while tag_directive != (*document).tag_directives.end {
         yaml_free((*tag_directive).handle as *mut libc::c_void);
         yaml_free((*tag_directive).prefix as *mut libc::c_void);
-        tag_directive = tag_directive.wrapping_offset(1);
+        tag_directive = tag_directive.wrapping_add(1);
     }
     yaml_free((*document).tag_directives.start as *mut libc::c_void);
     memset(
@@ -1280,7 +1280,7 @@ pub unsafe fn yaml_document_get_node(
             .nodes
             .start
             .wrapping_offset(index as isize)
-            .wrapping_offset(-1_isize);
+            .wrapping_sub(1);
     }
     ptr::null_mut::<yaml_node_t>()
 }

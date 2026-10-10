@@ -2,6 +2,9 @@
 
 use toml_edit::{DocumentMut, Item};
 
+#[path = "metadata_decode.rs"]
+mod metadata_decode;
+
 use super::{
     BTreeMap, Frontmatter, Manifest, ParsedSkill, SkillError, TargetConfig, normalize_category,
 };
@@ -185,7 +188,7 @@ fn parse_frontmatter(text: &str) -> Result<Frontmatter, SkillError> {
             })
             .collect()
     };
-    let metadata = map
+    let mut metadata = map
         .get(serde_yaml_ng::Value::String("metadata".into()))
         .map_or(
             Ok(serde_json::Value::Object(serde_json::Map::new())),
@@ -199,6 +202,7 @@ fn parse_frontmatter(text: &str) -> Result<Frontmatter, SkillError> {
                 }
             },
         )?;
+    metadata_decode::normalize(&mut metadata)?;
     Ok(Frontmatter {
         name: string("name")?,
         description: string("description")?,

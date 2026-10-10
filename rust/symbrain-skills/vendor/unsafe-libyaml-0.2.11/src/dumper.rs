@@ -221,7 +221,7 @@ unsafe fn yaml_emitter_anchor_node(emitter: *mut yaml_emitter_t, index: libc::c_
         .nodes
         .start
         .wrapping_offset(index as isize)
-        .wrapping_offset(-1_isize);
+        .wrapping_sub(1);
     let mut item: *mut yaml_node_item_t;
     let mut pair: *mut yaml_node_pair_t;
     let fresh8 =
@@ -233,7 +233,7 @@ unsafe fn yaml_emitter_anchor_node(emitter: *mut yaml_emitter_t, index: libc::c_
                 item = (*node).data.sequence.items.start;
                 while item < (*node).data.sequence.items.top {
                     yaml_emitter_anchor_node_sub(emitter, *item);
-                    item = item.wrapping_offset(1);
+                    item = item.wrapping_add(1);
                 }
             }
             YAML_MAPPING_NODE => {
@@ -241,7 +241,7 @@ unsafe fn yaml_emitter_anchor_node(emitter: *mut yaml_emitter_t, index: libc::c_
                 while pair < (*node).data.mapping.pairs.top {
                     yaml_emitter_anchor_node_sub(emitter, (*pair).key);
                     yaml_emitter_anchor_node_sub(emitter, (*pair).value);
-                    pair = pair.wrapping_offset(1);
+                    pair = pair.wrapping_add(1);
                 }
             }
             _ => {}
@@ -267,7 +267,7 @@ unsafe fn yaml_emitter_dump_node(emitter: *mut yaml_emitter_t, index: libc::c_in
         .nodes
         .start
         .wrapping_offset(index as isize)
-        .wrapping_offset(-1_isize);
+        .wrapping_sub(1);
     let anchor_id: libc::c_int = (*(*emitter).anchors.wrapping_offset((index - 1) as isize)).anchor;
     let mut anchor: *mut yaml_char_t = ptr::null_mut::<yaml_char_t>();
     if anchor_id != 0 {
@@ -383,7 +383,7 @@ unsafe fn yaml_emitter_dump_sequence(
         if yaml_emitter_dump_node(emitter, *item).fail {
             return FAIL;
         }
-        item = item.wrapping_offset(1);
+        item = item.wrapping_add(1);
     }
     memset(
         event as *mut libc::c_void,
@@ -436,7 +436,7 @@ unsafe fn yaml_emitter_dump_mapping(
         if yaml_emitter_dump_node(emitter, (*pair).value).fail {
             return FAIL;
         }
-        pair = pair.wrapping_offset(1);
+        pair = pair.wrapping_add(1);
     }
     memset(
         event as *mut libc::c_void,

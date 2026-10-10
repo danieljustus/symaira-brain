@@ -1,9 +1,15 @@
 //! Exact SKILL.md frontmatter encoding.
 
 use serde::Serialize;
-use serde_json::Value;
 
 use crate::model::{Frontmatter, SkillError};
+
+#[path = "encode_metadata.rs"]
+mod metadata;
+
+#[cfg(test)]
+#[path = "encode_documents_test.rs"]
+mod documents_tests;
 
 #[derive(Serialize)]
 struct FrontmatterOutput<'a> {
@@ -27,7 +33,7 @@ struct FrontmatterOutput<'a> {
     )]
     required_environment_variables: &'a [String],
     #[serde(skip_serializing_if = "metadata_is_empty")]
-    metadata: &'a Value,
+    metadata: metadata::Metadata<'a>,
 }
 
 fn str_is_empty(value: &&str) -> bool {
@@ -36,8 +42,8 @@ fn str_is_empty(value: &&str) -> bool {
 fn vec_is_empty(value: &&[String]) -> bool {
     value.is_empty()
 }
-fn metadata_is_empty(value: &Value) -> bool {
-    value.as_object().is_none_or(serde_json::Map::is_empty)
+fn metadata_is_empty(value: &metadata::Metadata<'_>) -> bool {
+    value.0.as_object().is_none_or(serde_json::Map::is_empty)
 }
 
 pub(crate) fn encode_skill_md(
@@ -54,7 +60,7 @@ pub(crate) fn encode_skill_md(
         compatibility: &frontmatter.compatibility,
         platforms: &frontmatter.platforms,
         required_environment_variables: &frontmatter.required_environment_variables,
-        metadata: &frontmatter.metadata,
+        metadata: metadata::Metadata(&frontmatter.metadata),
     };
     let yaml = serde_yaml_ng_skill_encoder::to_string(&output)
         .map_err(|error| SkillError(format!("encode frontmatter: {error}")))?;
@@ -147,7 +153,9 @@ mod tests {
     fn decode_hex(hex: &str) -> Vec<u8> {
         assert_eq!(hex.len() % 2, 0, "odd-length oracle hex");
         hex.as_bytes()
-            .chunks_exact(2)
+            .as_chunks::<2>()
+            .0
+            .iter()
             .map(|pair| {
                 let digits = std::str::from_utf8(pair).expect("ASCII oracle hex");
                 u8::from_str_radix(digits, 16).expect("valid oracle hex")

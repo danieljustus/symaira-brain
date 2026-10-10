@@ -45,9 +45,10 @@ macro_rules! STRING_INIT {
 macro_rules! STRING_DEL {
     ($string:expr) => {{
         yaml_free($string.start as *mut libc::c_void);
-        $string.end = ptr::null_mut::<yaml_char_t>();
-        $string.pointer = $string.end;
-        $string.start = $string.pointer;
+        // Preserve all cleanup stores, including local descriptors on error exits.
+        ptr::write(addr_of_mut!($string.end), ptr::null_mut::<yaml_char_t>());
+        ptr::write(addr_of_mut!($string.pointer), $string.end);
+        ptr::write(addr_of_mut!($string.start), $string.pointer);
     }};
 }
 
@@ -377,9 +378,9 @@ macro_rules! STACK_INIT {
 macro_rules! STACK_DEL {
     ($stack:expr) => {
         yaml_free($stack.start as *mut libc::c_void);
-        $stack.end = ptr::null_mut();
-        $stack.top = ptr::null_mut();
-        $stack.start = ptr::null_mut();
+        ptr::write(addr_of_mut!($stack.end), ptr::null_mut());
+        ptr::write(addr_of_mut!($stack.top), ptr::null_mut());
+        ptr::write(addr_of_mut!($stack.start), ptr::null_mut());
     };
 }
 
@@ -441,10 +442,10 @@ macro_rules! QUEUE_INIT {
 macro_rules! QUEUE_DEL {
     ($queue:expr) => {
         yaml_free($queue.start as *mut libc::c_void);
-        $queue.end = ptr::null_mut();
-        $queue.tail = ptr::null_mut();
-        $queue.head = ptr::null_mut();
-        $queue.start = ptr::null_mut();
+        ptr::write(addr_of_mut!($queue.end), ptr::null_mut());
+        ptr::write(addr_of_mut!($queue.tail), ptr::null_mut());
+        ptr::write(addr_of_mut!($queue.head), ptr::null_mut());
+        ptr::write(addr_of_mut!($queue.start), ptr::null_mut());
     };
 }
 

@@ -17,6 +17,9 @@ use std::str;
 
 type Result<T, E = Error> = std::result::Result<T, E>;
 
+#[path = "go_float.rs"]
+mod go_float;
+
 // These string-style checks follow yaml.v3 v3.0.1 encode.go and resolve.go.
 fn go_old_bool(value: &str) -> bool {
     matches!(
@@ -352,7 +355,7 @@ where
     }
 }
 
-impl<'a, W> ser::Serializer for &'a mut Serializer<W>
+impl<W> ser::Serializer for &mut Serializer<W>
 where
     W: io::Write,
 {
@@ -457,28 +460,30 @@ where
 
     fn serialize_f32(self, v: f32) -> Result<()> {
         let mut buffer = ryu::Buffer::new();
+        let value = match v.classify() {
+            num::FpCategory::Infinite if v.is_sign_positive() => ".inf".into(),
+            num::FpCategory::Infinite => "-.inf".into(),
+            num::FpCategory::Nan => ".nan".into(),
+            _ => go_float::finite(buffer.format_finite(v)),
+        };
         self.emit_scalar(Scalar {
             tag: None,
-            value: match v.classify() {
-                num::FpCategory::Infinite if v.is_sign_positive() => ".inf",
-                num::FpCategory::Infinite => "-.inf",
-                num::FpCategory::Nan => ".nan",
-                _ => buffer.format_finite(v),
-            },
+            value: &value,
             style: ScalarStyle::Plain,
         })
     }
 
     fn serialize_f64(self, v: f64) -> Result<()> {
         let mut buffer = ryu::Buffer::new();
+        let value = match v.classify() {
+            num::FpCategory::Infinite if v.is_sign_positive() => ".inf".into(),
+            num::FpCategory::Infinite => "-.inf".into(),
+            num::FpCategory::Nan => ".nan".into(),
+            _ => go_float::finite(buffer.format_finite(v)),
+        };
         self.emit_scalar(Scalar {
             tag: None,
-            value: match v.classify() {
-                num::FpCategory::Infinite if v.is_sign_positive() => ".inf",
-                num::FpCategory::Infinite => "-.inf",
-                num::FpCategory::Nan => ".nan",
-                _ => buffer.format_finite(v),
-            },
+            value: &value,
             style: ScalarStyle::Plain,
         })
     }
@@ -722,7 +727,7 @@ where
     }
 }
 
-impl<'a, W> ser::SerializeSeq for &'a mut Serializer<W>
+impl<W> ser::SerializeSeq for &mut Serializer<W>
 where
     W: io::Write,
 {
@@ -741,7 +746,7 @@ where
     }
 }
 
-impl<'a, W> ser::SerializeTuple for &'a mut Serializer<W>
+impl<W> ser::SerializeTuple for &mut Serializer<W>
 where
     W: io::Write,
 {
@@ -760,7 +765,7 @@ where
     }
 }
 
-impl<'a, W> ser::SerializeTupleStruct for &'a mut Serializer<W>
+impl<W> ser::SerializeTupleStruct for &mut Serializer<W>
 where
     W: io::Write,
 {
@@ -779,7 +784,7 @@ where
     }
 }
 
-impl<'a, W> ser::SerializeTupleVariant for &'a mut Serializer<W>
+impl<W> ser::SerializeTupleVariant for &mut Serializer<W>
 where
     W: io::Write,
 {
@@ -798,7 +803,7 @@ where
     }
 }
 
-impl<'a, W> ser::SerializeMap for &'a mut Serializer<W>
+impl<W> ser::SerializeMap for &mut Serializer<W>
 where
     W: io::Write,
 {
@@ -854,7 +859,7 @@ where
     }
 }
 
-impl<'a, W> ser::SerializeStruct for &'a mut Serializer<W>
+impl<W> ser::SerializeStruct for &mut Serializer<W>
 where
     W: io::Write,
 {
@@ -874,7 +879,7 @@ where
     }
 }
 
-impl<'a, W> ser::SerializeStructVariant for &'a mut Serializer<W>
+impl<W> ser::SerializeStructVariant for &mut Serializer<W>
 where
     W: io::Write,
 {

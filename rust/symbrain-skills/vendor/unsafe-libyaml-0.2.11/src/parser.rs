@@ -48,7 +48,7 @@ unsafe fn SKIP_TOKEN(parser: *mut yaml_parser_t) {
     *fresh3 = (*fresh3).wrapping_add(1);
     (*parser).stream_end_produced = (*(*parser).tokens.head).type_ == YAML_STREAM_END_TOKEN;
     let fresh4 = addr_of_mut!((*parser).tokens.head);
-    *fresh4 = (*fresh4).wrapping_offset(1);
+    *fresh4 = (*fresh4).wrapping_add(1);
 }
 
 /// Parse the input stream and produce the next parsing event.
@@ -307,16 +307,19 @@ unsafe fn yaml_parser_parse_document_start(
                 *fresh16 = tag_directives.end;
                 (*event).data.document_start.implicit = false;
                 SKIP_TOKEN(parser);
-                tag_directives.end = ptr::null_mut::<yaml_tag_directive_t>();
-                tag_directives.start = tag_directives.end;
+                ptr::write(
+                    addr_of_mut!(tag_directives.end),
+                    ptr::null_mut::<yaml_tag_directive_t>(),
+                );
+                ptr::write(addr_of_mut!(tag_directives.start), tag_directives.end);
                 return OK;
             }
         }
         yaml_free(version_directive as *mut libc::c_void);
         while tag_directives.start != tag_directives.end {
-            yaml_free((*tag_directives.end.wrapping_offset(-1_isize)).handle as *mut libc::c_void);
-            yaml_free((*tag_directives.end.wrapping_offset(-1_isize)).prefix as *mut libc::c_void);
-            tag_directives.end = tag_directives.end.wrapping_offset(-1);
+            yaml_free((*tag_directives.end.wrapping_sub(1)).handle as *mut libc::c_void);
+            yaml_free((*tag_directives.end.wrapping_sub(1)).prefix as *mut libc::c_void);
+            tag_directives.end = tag_directives.end.wrapping_sub(1);
         }
         yaml_free(tag_directives.start as *mut libc::c_void);
         FAIL
@@ -525,7 +528,7 @@ unsafe fn yaml_parser_parse_node(
                             current_block = 17728966195399430138;
                             break;
                         } else {
-                            tag_directive = tag_directive.wrapping_offset(1);
+                            tag_directive = tag_directive.wrapping_add(1);
                         }
                     }
                     if current_block != 17786380918591080555 {
@@ -1280,7 +1283,7 @@ unsafe fn yaml_parser_process_directives(
                     current_block = 17143798186130252483;
                     break;
                 }
-                default_tag_directive = default_tag_directive.wrapping_offset(1);
+                default_tag_directive = default_tag_directive.wrapping_add(1);
             }
             if current_block != 17143798186130252483 {
                 if !version_directive_ref.is_null() {
@@ -1343,7 +1346,7 @@ unsafe fn yaml_parser_append_tag_directive(
             );
             return FAIL;
         }
-        tag_directive = tag_directive.wrapping_offset(1);
+        tag_directive = tag_directive.wrapping_add(1);
     }
     copy.handle = yaml_strdup(value.handle);
     copy.prefix = yaml_strdup(value.prefix);

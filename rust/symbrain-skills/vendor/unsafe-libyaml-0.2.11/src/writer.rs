@@ -102,7 +102,7 @@ pub unsafe fn yaml_emitter_flush(emitter: *mut yaml_emitter_t) -> Success {
             *(*emitter).raw_buffer.last.wrapping_offset(low as isize) =
                 (value & 0xFF) as libc::c_uchar;
             let fresh6 = addr_of_mut!((*emitter).raw_buffer.last);
-            *fresh6 = (*fresh6).wrapping_offset(2_isize);
+            *fresh6 = (*fresh6).wrapping_add(2);
         } else {
             value = value.wrapping_sub(0x10000);
             *(*emitter).raw_buffer.last.wrapping_offset(high as isize) =
@@ -119,7 +119,7 @@ pub unsafe fn yaml_emitter_flush(emitter: *mut yaml_emitter_t) -> Success {
                 .last
                 .wrapping_offset((low + 2) as isize) = (value & 0xFF) as libc::c_uchar;
             let fresh7 = addr_of_mut!((*emitter).raw_buffer.last);
-            *fresh7 = (*fresh7).wrapping_offset(4_isize);
+            *fresh7 = (*fresh7).wrapping_add(4);
         }
     }
     if (*emitter).write_handler.expect("non-null function pointer")(

@@ -44,7 +44,7 @@ unsafe fn SKIP_LINE(parser: *mut yaml_parser_t) {
         (*parser).mark.column = 0;
         (*parser).mark.line = (*parser).mark.line.force_add(1);
         (*parser).unread = (*parser).unread.wrapping_sub(2);
-        (*parser).buffer.pointer = (*parser).buffer.pointer.wrapping_offset(2);
+        (*parser).buffer.pointer = (*parser).buffer.pointer.wrapping_add(2);
     } else if IS_BREAK!((*parser).buffer) {
         let width = WIDTH!((*parser).buffer);
         (*parser).mark.index = (*parser).mark.index.force_add(width as u64);
@@ -52,7 +52,7 @@ unsafe fn SKIP_LINE(parser: *mut yaml_parser_t) {
         (*parser).mark.line = (*parser).mark.line.force_add(1);
         (*parser).unread = (*parser).unread.wrapping_sub(1);
         (*parser).buffer.pointer = (*parser).buffer.pointer.wrapping_offset(width as isize);
-    };
+    }
 }
 
 unsafe fn READ(parser: *mut yaml_parser_t, string: *mut yaml_string_t) {
@@ -68,24 +68,24 @@ unsafe fn READ_LINE(parser: *mut yaml_parser_t, string: *mut yaml_string_t) {
     STRING_EXTEND!(*string);
     if CHECK_AT!((*parser).buffer, b'\r', 0) && CHECK_AT!((*parser).buffer, b'\n', 1) {
         *(*string).pointer = b'\n';
-        (*string).pointer = (*string).pointer.wrapping_offset(1);
-        (*parser).buffer.pointer = (*parser).buffer.pointer.wrapping_offset(2);
+        (*string).pointer = (*string).pointer.wrapping_add(1);
+        (*parser).buffer.pointer = (*parser).buffer.pointer.wrapping_add(2);
         (*parser).mark.index = (*parser).mark.index.force_add(2);
         (*parser).mark.column = 0;
         (*parser).mark.line = (*parser).mark.line.force_add(1);
         (*parser).unread = (*parser).unread.wrapping_sub(2);
     } else if CHECK_AT!((*parser).buffer, b'\r', 0) || CHECK_AT!((*parser).buffer, b'\n', 0) {
         *(*string).pointer = b'\n';
-        (*string).pointer = (*string).pointer.wrapping_offset(1);
-        (*parser).buffer.pointer = (*parser).buffer.pointer.wrapping_offset(1);
+        (*string).pointer = (*string).pointer.wrapping_add(1);
+        (*parser).buffer.pointer = (*parser).buffer.pointer.wrapping_add(1);
         (*parser).mark.index = (*parser).mark.index.force_add(1);
         (*parser).mark.column = 0;
         (*parser).mark.line = (*parser).mark.line.force_add(1);
         (*parser).unread = (*parser).unread.wrapping_sub(1);
     } else if CHECK_AT!((*parser).buffer, b'\xC2', 0) && CHECK_AT!((*parser).buffer, b'\x85', 1) {
         *(*string).pointer = b'\n';
-        (*string).pointer = (*string).pointer.wrapping_offset(1);
-        (*parser).buffer.pointer = (*parser).buffer.pointer.wrapping_offset(2);
+        (*string).pointer = (*string).pointer.wrapping_add(1);
+        (*parser).buffer.pointer = (*parser).buffer.pointer.wrapping_add(2);
         (*parser).mark.index = (*parser).mark.index.force_add(2);
         (*parser).mark.column = 0;
         (*parser).mark.line = (*parser).mark.line.force_add(1);
@@ -95,19 +95,19 @@ unsafe fn READ_LINE(parser: *mut yaml_parser_t, string: *mut yaml_string_t) {
         && (CHECK_AT!((*parser).buffer, b'\xA8', 2) || CHECK_AT!((*parser).buffer, b'\xA9', 2))
     {
         *(*string).pointer = *(*parser).buffer.pointer;
-        (*string).pointer = (*string).pointer.wrapping_offset(1);
-        (*parser).buffer.pointer = (*parser).buffer.pointer.wrapping_offset(1);
+        (*string).pointer = (*string).pointer.wrapping_add(1);
+        (*parser).buffer.pointer = (*parser).buffer.pointer.wrapping_add(1);
         *(*string).pointer = *(*parser).buffer.pointer;
-        (*string).pointer = (*string).pointer.wrapping_offset(1);
-        (*parser).buffer.pointer = (*parser).buffer.pointer.wrapping_offset(1);
+        (*string).pointer = (*string).pointer.wrapping_add(1);
+        (*parser).buffer.pointer = (*parser).buffer.pointer.wrapping_add(1);
         *(*string).pointer = *(*parser).buffer.pointer;
-        (*string).pointer = (*string).pointer.wrapping_offset(1);
-        (*parser).buffer.pointer = (*parser).buffer.pointer.wrapping_offset(1);
+        (*string).pointer = (*string).pointer.wrapping_add(1);
+        (*parser).buffer.pointer = (*parser).buffer.pointer.wrapping_add(1);
         (*parser).mark.index = (*parser).mark.index.force_add(3);
         (*parser).mark.column = 0;
         (*parser).mark.line = (*parser).mark.line.force_add(1);
         (*parser).unread = (*parser).unread.wrapping_sub(1);
-    };
+    }
 }
 
 macro_rules! READ {
@@ -195,7 +195,7 @@ pub(crate) unsafe fn yaml_parser_fetch_more_tokens(parser: *mut yaml_parser_t) -
                     need_more_tokens = true;
                     break;
                 } else {
-                    simple_key = simple_key.wrapping_offset(1);
+                    simple_key = simple_key.wrapping_add(1);
                 }
             }
         }
@@ -365,7 +365,7 @@ unsafe fn yaml_parser_stale_simple_keys(parser: *mut yaml_parser_t) -> Success {
                 (*parser).not_simple_keys += 1;
             }
         }
-        simple_key = simple_key.wrapping_offset(1);
+        simple_key = simple_key.wrapping_add(1);
     }
     OK
 }
@@ -385,7 +385,7 @@ unsafe fn yaml_parser_save_simple_key(parser: *mut yaml_parser_t) -> Success {
         if yaml_parser_remove_simple_key(parser).fail {
             return FAIL;
         }
-        *(*parser).simple_keys.top.wrapping_offset(-1_isize) = simple_key;
+        *(*parser).simple_keys.top.wrapping_sub(1) = simple_key;
         if (*parser)
             .simple_keys
             .start
@@ -399,7 +399,7 @@ unsafe fn yaml_parser_save_simple_key(parser: *mut yaml_parser_t) -> Success {
 }
 
 unsafe fn yaml_parser_remove_simple_key(parser: *mut yaml_parser_t) -> Success {
-    let simple_key: *mut yaml_simple_key_t = (*parser).simple_keys.top.wrapping_offset(-1_isize);
+    let simple_key: *mut yaml_simple_key_t = (*parser).simple_keys.top.wrapping_sub(1);
     if (*simple_key).possible {
         if (*simple_key).required {
             yaml_parser_set_scanner_error(
@@ -779,7 +779,7 @@ unsafe fn yaml_parser_fetch_key(parser: *mut yaml_parser_t) -> Success {
 unsafe fn yaml_parser_fetch_value(parser: *mut yaml_parser_t) -> Success {
     let mut token = MaybeUninit::<yaml_token_t>::uninit();
     let token = token.as_mut_ptr();
-    let simple_key: *mut yaml_simple_key_t = (*parser).simple_keys.top.wrapping_offset(-1_isize);
+    let simple_key: *mut yaml_simple_key_t = (*parser).simple_keys.top.wrapping_sub(1);
     if (*simple_key).possible {
         memset(
             token as *mut libc::c_void,
@@ -1450,7 +1450,7 @@ unsafe fn yaml_parser_scan_tag(parser: *mut yaml_parser_t, token: *mut yaml_toke
         {
             current_block = 17708497480799081542;
         } else if *handle == b'!'
-            && *handle.wrapping_offset(1_isize) != b'\0'
+            && *handle.wrapping_add(1) != b'\0'
             && *handle
                 .wrapping_offset(strlen(handle as *mut libc::c_char).wrapping_sub(1_u64) as isize)
                 == b'!'
@@ -1484,7 +1484,7 @@ unsafe fn yaml_parser_scan_tag(parser: *mut yaml_parser_t, token: *mut yaml_toke
             yaml_free(handle as *mut libc::c_void);
             handle = yaml_malloc(2_u64) as *mut yaml_char_t;
             *handle = b'!';
-            *handle.wrapping_offset(1_isize) = b'\0';
+            *handle.wrapping_add(1) = b'\0';
             if *suffix == b'\0' {
                 let tmp: *mut yaml_char_t = handle;
                 handle = suffix;
@@ -1574,8 +1574,7 @@ unsafe fn yaml_parser_scan_tag_handle(
                         READ!(parser, string);
                         current_block = 5689001924483802034;
                     } else if directive
-                        && !(*string.start == b'!'
-                            && *string.start.wrapping_offset(1_isize) == b'\0')
+                        && !(*string.start == b'!' && *string.start.wrapping_add(1) == b'\0')
                     {
                         yaml_parser_set_scanner_error(
                             parser,
@@ -1630,12 +1629,11 @@ unsafe fn yaml_parser_scan_tag_uri(
                         addr_of_mut!(string.end),
                     );
                     current_block = 14916268686031723178;
-                    continue;
                 } else {
                     if length > 1_u64 {
                         memcpy(
                             string.start as *mut libc::c_void,
-                            head.wrapping_offset(1_isize) as *const libc::c_void,
+                            head.wrapping_add(1) as *const libc::c_void,
                             length.wrapping_sub(1_u64),
                         );
                         string.pointer = string
@@ -1784,7 +1782,7 @@ unsafe fn yaml_parser_scan_uri_escapes(
         }
         let fresh368 = addr_of_mut!((*string).pointer);
         let fresh369 = *fresh368;
-        *fresh368 = (*fresh368).wrapping_offset(1);
+        *fresh368 = (*fresh368).wrapping_add(1);
         *fresh369 = octet;
         SKIP(parser);
         SKIP(parser);
@@ -1961,8 +1959,7 @@ unsafe fn yaml_parser_scan_block_scalar(
                                                 if *trailing_breaks.start == b'\0' {
                                                     STRING_EXTEND!(string);
                                                     let fresh418 = string.pointer;
-                                                    string.pointer =
-                                                        string.pointer.wrapping_offset(1);
+                                                    string.pointer = string.pointer.wrapping_add(1);
                                                     *fresh418 = b' ';
                                                 }
                                                 CLEAR!(leading_break);
@@ -2168,7 +2165,7 @@ unsafe fn yaml_parser_scan_flow_scalar(
                 {
                     STRING_EXTEND!(string);
                     let fresh521 = string.pointer;
-                    string.pointer = string.pointer.wrapping_offset(1);
+                    string.pointer = string.pointer.wrapping_add(1);
                     *fresh521 = b'\'';
                     SKIP(parser);
                     SKIP(parser);
@@ -2191,112 +2188,112 @@ unsafe fn yaml_parser_scan_flow_scalar(
                     } else if !single && CHECK!((*parser).buffer, b'\\') {
                         let mut code_length: size_t = 0_u64;
                         STRING_EXTEND!(string);
-                        match *(*parser).buffer.pointer.wrapping_offset(1_isize) {
+                        match *(*parser).buffer.pointer.wrapping_add(1) {
                             b'0' => {
                                 let fresh542 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh542 = b'\0';
                             }
                             b'a' => {
                                 let fresh543 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh543 = b'\x07';
                             }
                             b'b' => {
                                 let fresh544 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh544 = b'\x08';
                             }
                             b't' | b'\t' => {
                                 let fresh545 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh545 = b'\t';
                             }
                             b'n' => {
                                 let fresh546 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh546 = b'\n';
                             }
                             b'v' => {
                                 let fresh547 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh547 = b'\x0B';
                             }
                             b'f' => {
                                 let fresh548 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh548 = b'\x0C';
                             }
                             b'r' => {
                                 let fresh549 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh549 = b'\r';
                             }
                             b'e' => {
                                 let fresh550 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh550 = b'\x1B';
                             }
                             b' ' => {
                                 let fresh551 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh551 = b' ';
                             }
                             b'"' => {
                                 let fresh552 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh552 = b'"';
                             }
                             b'/' => {
                                 let fresh553 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh553 = b'/';
                             }
                             b'\\' => {
                                 let fresh554 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh554 = b'\\';
                             }
                             // NEL (#x85)
                             b'N' => {
                                 let fresh555 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh555 = b'\xC2';
                                 let fresh556 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh556 = b'\x85';
                             }
                             // #xA0
                             b'_' => {
                                 let fresh557 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh557 = b'\xC2';
                                 let fresh558 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh558 = b'\xA0';
                             }
                             // LS (#x2028)
                             b'L' => {
                                 let fresh559 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh559 = b'\xE2';
                                 let fresh560 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh560 = b'\x80';
                                 let fresh561 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh561 = b'\xA8';
                             }
                             // PS (#x2029)
                             b'P' => {
                                 let fresh562 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh562 = b'\xE2';
                                 let fresh563 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh563 = b'\x80';
                                 let fresh564 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh564 = b'\xA9';
                             }
                             b'x' => {
@@ -2366,40 +2363,40 @@ unsafe fn yaml_parser_scan_flow_scalar(
                             } else {
                                 if value <= 0x7F {
                                     let fresh573 = string.pointer;
-                                    string.pointer = string.pointer.wrapping_offset(1);
+                                    string.pointer = string.pointer.wrapping_add(1);
                                     *fresh573 = value as yaml_char_t;
                                 } else if value <= 0x7FF {
                                     let fresh574 = string.pointer;
-                                    string.pointer = string.pointer.wrapping_offset(1);
+                                    string.pointer = string.pointer.wrapping_add(1);
                                     *fresh574 = 0xC0_u32.force_add(value >> 6) as yaml_char_t;
                                     let fresh575 = string.pointer;
-                                    string.pointer = string.pointer.wrapping_offset(1);
+                                    string.pointer = string.pointer.wrapping_add(1);
                                     *fresh575 = 0x80_u32.force_add(value & 0x3F) as yaml_char_t;
                                 } else if value <= 0xFFFF {
                                     let fresh576 = string.pointer;
-                                    string.pointer = string.pointer.wrapping_offset(1);
+                                    string.pointer = string.pointer.wrapping_add(1);
                                     *fresh576 = 0xE0_u32.force_add(value >> 12) as yaml_char_t;
                                     let fresh577 = string.pointer;
-                                    string.pointer = string.pointer.wrapping_offset(1);
+                                    string.pointer = string.pointer.wrapping_add(1);
                                     *fresh577 =
                                         0x80_u32.force_add(value >> 6 & 0x3F) as yaml_char_t;
                                     let fresh578 = string.pointer;
-                                    string.pointer = string.pointer.wrapping_offset(1);
+                                    string.pointer = string.pointer.wrapping_add(1);
                                     *fresh578 = 0x80_u32.force_add(value & 0x3F) as yaml_char_t;
                                 } else {
                                     let fresh579 = string.pointer;
-                                    string.pointer = string.pointer.wrapping_offset(1);
+                                    string.pointer = string.pointer.wrapping_add(1);
                                     *fresh579 = 0xF0_u32.force_add(value >> 18) as yaml_char_t;
                                     let fresh580 = string.pointer;
-                                    string.pointer = string.pointer.wrapping_offset(1);
+                                    string.pointer = string.pointer.wrapping_add(1);
                                     *fresh580 =
                                         0x80_u32.force_add(value >> 12 & 0x3F) as yaml_char_t;
                                     let fresh581 = string.pointer;
-                                    string.pointer = string.pointer.wrapping_offset(1);
+                                    string.pointer = string.pointer.wrapping_add(1);
                                     *fresh581 =
                                         0x80_u32.force_add(value >> 6 & 0x3F) as yaml_char_t;
                                     let fresh582 = string.pointer;
-                                    string.pointer = string.pointer.wrapping_offset(1);
+                                    string.pointer = string.pointer.wrapping_add(1);
                                     *fresh582 = 0x80_u32.force_add(value & 0x3F) as yaml_char_t;
                                 }
                                 k = 0_u64;
@@ -2460,7 +2457,7 @@ unsafe fn yaml_parser_scan_flow_scalar(
                     if *trailing_breaks.start == b'\0' {
                         STRING_EXTEND!(string);
                         let fresh711 = string.pointer;
-                        string.pointer = string.pointer.wrapping_offset(1);
+                        string.pointer = string.pointer.wrapping_add(1);
                         *fresh711 = b' ';
                     } else {
                         JOIN!(string, trailing_breaks);
@@ -2584,7 +2581,7 @@ unsafe fn yaml_parser_scan_plain_scalar(
                             if *trailing_breaks.start == b'\0' {
                                 STRING_EXTEND!(string);
                                 let fresh717 = string.pointer;
-                                string.pointer = string.pointer.wrapping_offset(1);
+                                string.pointer = string.pointer.wrapping_add(1);
                                 *fresh717 = b' ';
                             } else {
                                 JOIN!(string, trailing_breaks);

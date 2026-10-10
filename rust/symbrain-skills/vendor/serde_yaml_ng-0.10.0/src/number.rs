@@ -464,7 +464,7 @@ impl<'de> Deserializer<'de> for Number {
     }
 }
 
-impl<'de, 'a> Deserializer<'de> for &'a Number {
+impl<'de> Deserializer<'de> for &Number {
     type Error = Error;
 
     #[inline]
@@ -552,7 +552,7 @@ impl Hash for Number {
     }
 }
 
-pub(crate) fn unexpected(number: &Number) -> Unexpected {
+pub(crate) fn unexpected(number: &Number) -> Unexpected<'_> {
     match number.n {
         N::PosInt(u) => Unexpected::Unsigned(u),
         N::NegInt(i) => Unexpected::Signed(i),
