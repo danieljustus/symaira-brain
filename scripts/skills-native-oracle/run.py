@@ -14,7 +14,8 @@ import tempfile
 import time
 
 from cases import OMIT_ARGS, cli_cases, config_cases, mcp_cases, mcp_config_cases, raw_cli_cases, correction_cases, raw_argument_cases
-from compare import matched, mcp_view, filesystem
+from compare import mcp_view, filesystem
+from ordinary_startup import PROFILES, bind as bind_startup, matched, pair as startup_pair, protocol as startup_protocol, assert_control_bootstrap
 from fixtures import remove_tree, setup, variant
 from full_stdout import full_stdout
 from output_cases import run_pairs as output_pairs, required_ids as output_ids
@@ -23,7 +24,7 @@ from byte_cases import cases as byte_cases, variant as byte_variant, input_descr
 from json_cases import cases as json_cases, run_controls as json_controls
 from eof_cases import run_controls as eof_controls
 from json_compare import json_matched
-from startup_controls import run_controls as run_startup_controls
+from startup_controls import run_controls as run_startup_controls, capture_privacy
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -75,6 +76,8 @@ class InvocationFailure(RuntimeError):
 def invoke(binary, argv, env, root, incoming=None, retained_reads=None, record=None):
     row = {} if record is None else record
     row.update(argv=[str(binary), *argv], cwd=str(root / "project"), pid=None)
+    if incoming is not None and (root / "profile.toml").read_bytes() in [value.encode() for value in PROFILES]:
+        row["startup_input"] = bind_startup(root, env)
     options = {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP} if os.name == "nt" else {"start_new_session": True}
     start = time.time()
     try:
@@ -96,6 +99,8 @@ def invoke(binary, argv, env, root, incoming=None, retained_reads=None, record=N
     end = time.time()
     row.update(exit=child.returncode, stdout_hex=stdout.hex(), stderr_hex=stderr.hex(),
                started=start, finished=end, filesystem=filesystem(root, start, end, retained_reads))
+    if incoming is not None:
+        capture_privacy(row, root)
     return row
 
 
@@ -124,6 +129,17 @@ def actual_control(go, rust, root, mcp):
     if not matched(go, rust, root, mcp):
         raise AssertionError("control needs a real matching baseline first")
     return {"baseline_matched": True, "go_exit": go["exit"], "rust_exit": rust["exit"]}
+
+
+def compare_pair(pair, root):
+    left, right = pair["go"], pair["rust"]
+    if pair["mcp"]:
+        left, right, pair["startup_classification"] = startup_pair(left, right)
+    if pair["id"].startswith("json-"):
+        assert pair["mcp"], "JSON protocol case must use MCP"
+        return (startup_protocol(pair["go"]) == startup_protocol(pair["rust"])
+                and json_matched(pair["id"], left, right, root))
+    return matched(pair["go"], pair["rust"], root, pair["mcp"])
 
 
 def main():
@@ -205,8 +221,7 @@ def main():
                     finally:
                         checkpoint(output, report)
                 try:
-                    pair["matched"] = (json_matched(name, pair["go"], pair["rust"], root) if name.startswith("json-")
-                                       else matched(pair["go"], pair["rust"], root, data is not None))
+                    pair["matched"] = compare_pair(pair, root)
                 except Exception as error:
                     pair["comparison_error"] = {"type": type(error).__name__, "message": str(error)}
                     raise
@@ -240,6 +255,7 @@ def main():
                 control["rejected"] = rejected
                 assert rejected and mutant["exit"] == (0 if data else 2), "bootstrap failure is not a negative control"
                 if data:
+                    assert_control_bootstrap(baseline["go"], mutant)
                     reply = mcp_view(mutant)[1][2]["result"]
                     assert reply["isError"] is True and "parse arguments" in reply["content"][0]["text"]
                 else:

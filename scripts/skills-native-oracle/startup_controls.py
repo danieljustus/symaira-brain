@@ -1,8 +1,11 @@
 """Bounded native startup side-effect controls for approved target behavior."""
 import json
+import os
 import shutil
+import tomllib
 
 from fixtures import environment, remove_tree, write
+from startup_privacy import capture, private
 
 MEMORY_KEY = "config/symbrain/memory/jwt.secret"
 MEMORY_KEY_DIR = "config/symbrain/memory"
@@ -32,6 +35,14 @@ CASES = (
     ("history-explicitly-disabled", False, False, False, False),
     ("memory-enabled-positive-control", True, False, False, False),
 )
+
+
+def capture_privacy(record, root):
+    profile = tomllib.loads((root / "profile.toml").read_text())["profile"]["name"]
+    assert profile in ("startup", "skills-native-764"), "unowned startup ACL profile"
+    paths = OWNED_DIRS | {MEMORY_KEY, *MEMORY_DB_FILES, "config/symbrain",
+                         f"{AUDIT_DIR}/{profile}.jsonl", f"{HISTORY_DIR}/{profile}.jsonl"}
+    capture(record, root, paths & record["filesystem"]["files"].keys())
 
 
 def _make_case(root, retained, git, case):
@@ -65,33 +76,37 @@ def _row(record, path, kind):
     return row
 
 
-def _private_file(record, path, *, exact_bytes=None):
+def _private_file(record, path, *, exact_bytes=None, allow_empty=False):
     row = _row(record, path, "file")
-    assert row["mode"] & 0o077 == 0, f"non-private startup file: {path}"
+    private(record, path)
     raw = record["filesystem"]["raw_file_hashes"].get(path)
     assert raw is not None and len(raw["sha256"]) == 64, f"raw hash missing: {path}"
-    assert raw["bytes"] > 0, f"empty startup file: {path}"
+    assert row["value"] == raw["sha256"], f"startup row/raw hash mismatch: {path}"
+    assert raw["bytes"] >= (0 if allow_empty else 1), f"empty startup file: {path}"
     if exact_bytes is not None:
         assert raw["bytes"] == exact_bytes, f"unexpected byte count for {path}"
 
 
 def _private_dir(record, path):
-    row = _row(record, path, "directory")
-    assert row["mode"] & 0o077 == 0, f"non-private startup directory: {path}"
+    _row(record, path, "directory")
+    private(record, path)
 
 
-def _optional_file(record, path, expected):
+def _optional_file(record, path, expected, *, allow_empty=False):
     files = record["filesystem"]["files"]
     assert (path in files) == expected, f"unexpected {path}: expected present={expected}"
     if expected:
-        _private_file(record, path)
+        _private_file(record, path, allow_empty=allow_empty)
 
 
-def _classify(case, go, rust):
+def _classify(case, go, rust, *, profile="startup", called=True, absent_config=False):
     _, memory_enabled, profile_audit, global_audit, patterns = case
+    assert profile in ("startup", "skills-native-764"), "unowned startup profile"
+    audit_file = f"{AUDIT_DIR}/{profile}.jsonl"
+    history_file = f"{HISTORY_DIR}/{profile}.jsonl"
     go_audit = profile_audit or global_audit  # frozen Go uses profile OR global
     rust_audit = profile_audit and global_audit  # target profile opt-out is final
-    go_history = patterns is not False  # frozen Go defaults patterns.enabled=true
+    go_history = patterns is not False and called  # empty/rejected sessions never flush
 
     _private_file(go, MEMORY_KEY, exact_bytes=65)
     _private_dir(go, MEMORY_KEY_DIR)
@@ -105,8 +120,8 @@ def _classify(case, go, rust):
     else:
         assert MEMORY_DIR not in rust["filesystem"]["files"], "disabled Rust memory created its directory"
 
-    _optional_file(go, AUDIT_FILE, go_audit)
-    _optional_file(rust, AUDIT_FILE, rust_audit)
+    _optional_file(go, audit_file, go_audit, allow_empty=not called)
+    _optional_file(rust, audit_file, rust_audit, allow_empty=not called)
     if go_audit:
         _private_dir(go, AUDIT_DIR)
     else:
@@ -116,8 +131,8 @@ def _classify(case, go, rust):
     else:
         assert AUDIT_DIR not in rust["filesystem"]["files"], "disabled Rust audit created its directory"
 
-    _optional_file(go, HISTORY_FILE, go_history)
-    _optional_file(rust, HISTORY_FILE, False)
+    _optional_file(go, history_file, go_history)
+    _optional_file(rust, history_file, False)
     if go_history:
         _private_dir(go, HISTORY_DIR)
     else:
@@ -125,6 +140,8 @@ def _classify(case, go, rust):
     assert HISTORY_DIR not in rust["filesystem"]["files"], "Rust startup recorded history"
 
     for record, owns_memory in ((go, True), (rust, memory_enabled)):
+        if owns_memory and os.name == "nt":
+            private(record, MEMORY_DIR)
         memory_rows = {
             path for path in record["filesystem"]["files"]
             if path.startswith(MEMORY_DIR + "/")
@@ -137,22 +154,28 @@ def _classify(case, go, rust):
             path for path in record["filesystem"]["files"]
             if path.startswith(AUDIT_DIR + "/")
         }
-        assert audit_rows <= (AUDIT_FILES if owns_audit else set()), audit_rows
+        assert audit_rows <= ({audit_file} if owns_audit else set()), audit_rows
     for record, owns_history in ((go, go_history), (rust, False)):
         history_rows = {
             path for path in record["filesystem"]["files"]
             if path.startswith(HISTORY_DIR + "/")
         }
-        assert history_rows <= (HISTORY_FILES if owns_history else set()), history_rows
+        assert history_rows <= ({history_file} if owns_history else set()), history_rows
 
-    for path in OWNED_DIRS | OWNED_FILES:
+    allowed = OWNED_DIRS | {MEMORY_KEY, *MEMORY_DB_FILES, audit_file, history_file}
+    if absent_config:
+        # Only the unconditional frozen JWT writer creates this ancestor in
+        # the exact absent-global-config fixture. No subtree waiver.
+        _private_dir(go, "config/symbrain")
+        assert "config/symbrain" not in rust["filesystem"]["files"]
+        allowed |= {"config/symbrain"}
+    for path in allowed:
         go_row = go["filesystem"]["files"].get(path)
         rust_row = rust["filesystem"]["files"].get(path)
         if go_row is not None and rust_row is not None:
             assert go_row["type"] == rust_row["type"], f"startup type mismatch: {path}"
             assert go_row["mode"] == rust_row["mode"], f"startup mode mismatch: {path}"
 
-    allowed = OWNED_DIRS | OWNED_FILES
     go_unclassified = {
         path: value for path, value in go["filesystem"]["files"].items()
         if path not in allowed

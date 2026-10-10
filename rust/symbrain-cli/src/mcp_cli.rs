@@ -286,6 +286,9 @@ fn resolve_profile(args: &McpArgs) -> Result<Profile, symbrain_policy::ProfileEr
 }
 
 fn load_global_audit_enabled() -> Result<bool, String> {
+    // Go validates the file before applying environment overrides. An opt-out
+    // (global or profile) must not hide malformed configuration at startup.
+    let configured = load_config_audit_enabled()?;
     if let Some(value) = env::var_os("SYMBRAIN_AUDIT_ENABLED").filter(|value| !value.is_empty()) {
         let value = value
             .to_str()
@@ -293,7 +296,10 @@ fn load_global_audit_enabled() -> Result<bool, String> {
         return parse_config_bool(value)
             .ok_or_else(|| "config: SYMBRAIN_AUDIT_ENABLED must be a boolean".to_string());
     }
+    Ok(configured)
+}
 
+fn load_config_audit_enabled() -> Result<bool, String> {
     let path = symbrain_core::xdg::config_path();
     let contents = match std::fs::read_to_string(&path) {
         Ok(contents) => contents,
@@ -312,7 +318,8 @@ fn load_global_audit_enabled() -> Result<bool, String> {
         return Ok(true);
     };
     let Some(table) = audit.as_table_like() else {
-        return Err("config: expected a table for [audit]".to_string());
+        // configkit ignores non-table sections before applying the env layer.
+        return Ok(true);
     };
     let Some(enabled) = table.get("enabled") else {
         return Ok(true);

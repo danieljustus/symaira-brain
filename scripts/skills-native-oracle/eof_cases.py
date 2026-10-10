@@ -60,7 +60,8 @@ def cases(root, incoming):
 def run_controls(report, checkpoint, binaries, root, retained, env, invoke, incoming):
     """Two genuine input changes after complete matching actual baselines."""
     import shutil
-    from compare import matched, mcp_view
+    from compare import mcp_view
+    from ordinary_startup import matched, pair as startup_pair, assert_control_bootstrap
     from json_compare import parse_view
     rows = {name: (argv, data) for name, argv, data, _ in cases(root, incoming)}
     plans = [
@@ -85,10 +86,12 @@ def run_controls(report, checkpoint, binaries, root, retained, env, invoke, inco
         finally:
             checkpoint()
         actual = parse_view(record)
+        assert_control_bootstrap(baseline['go'], record)
         assert actual[1][2]['error'] == {'code': -32700, 'message': 'Parse error: ' + expected}
         assert record['stderr_hex'] == baseline['go']['stderr_hex']
+        left, right, control['startup_classification'] = startup_pair(baseline['go'], record)
         for field in ('files', 'raw_file_hashes', 'validated_skl004_locks'):
-            assert record['filesystem'][field] == baseline['go']['filesystem'][field]
+            assert right['filesystem'][field] == left['filesystem'][field]
         control['rejected'] = baseline_view != actual
         assert control['rejected'], 'actual input EOF must change the accepted response'
         checkpoint()

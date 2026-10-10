@@ -2,6 +2,7 @@
 import os
 from cases import TARGETS
 from fixtures import remove_tree
+from ordinary_startup import assert_control_bootstrap
 
 RAW = {"ff": b"\xff", "e282": b"\xe2\x82", "c0af": b"\xc0\xaf", "literal": "\ufffd".encode()}
 BODY = {**RAW, "ordinary": b"ordinary UTF8"}
@@ -164,6 +165,7 @@ def run_controls(report, save, binaries, root, retained, env, invoke, incoming, 
             row["rejected"] = not matched(baseline["go"], row["candidate"], root, True)
             save()
             assert row["rejected"] and row["candidate"]["exit"] == 0, "bootstrap failure cannot pass a byte-owner control"
+            assert_control_bootstrap(baseline["go"], row["candidate"])
             reply = mcp_view(row["candidate"])[1][2]
             if selected:
                 assert reply["result"]["isError"] is True

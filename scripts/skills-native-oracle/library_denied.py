@@ -5,7 +5,7 @@ from pathlib import Path
 import shutil
 import stat
 
-from compare import matched
+from ordinary_startup import matched, pair as startup_pair
 from fixtures import fixture_command, remove_tree, write
 
 
@@ -79,6 +79,8 @@ def run_pairs(report, save, binaries, root, retained, env, invoke, incoming):
                     assert proof["mode_after"] == proof["mode_before"], "product changed owned permissions"
                 save()
         try:
+            if data is not None:
+                _, _, pair["startup_classification"] = startup_pair(pair["go"], pair["rust"])
             pair["matched"] = matched(pair["go"], pair["rust"], root, data is not None)
         except Exception as error:
             pair["comparison_error"] = {"type": type(error).__name__, "message": str(error)}

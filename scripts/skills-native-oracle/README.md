@@ -99,9 +99,29 @@ Passing this prerequisite does not establish Go/Rust process parity.
 
 These are explicit corrective contracts, not permission to rewrite historical
 captures or erase files/errors from comparisons. The frozen process gate stays
-strict and can still fail where its historical Go behavior conflicts with these
-boundaries. Such failures need separately reviewed corrective-contract evidence;
-a focused test pass is not Linux/macOS/Windows native acceptance.
+strict for the full protocol and unowned state. The ordinary MCP/JSON/EOF and
+permission-denied pairs now route through the same exact startup assertions as
+the five dedicated controls, rather than failing before those controls execute.
+`ordinary_startup.py` binds this exception to the exact disabled-memory/audit
+fixture, absent global config and overrides, and the fixed Go oracle. It validates
+the historical startup effects before constructing separate comparison views;
+no captured row, cache, marker, hash, input or global comparator is rewritten.
+Actual-input controls also require unchanged initialization and full catalogs.
+
+Windows startup privacy requires native owner/DACL observations from
+`startup_privacy.py`, not Unix-style mode bits. Missing/incomplete ACL probes,
+null/empty DACLs, non-owner ownership, broad allow grants and unreviewed ACE types
+fail closed; Unix keeps its strict POSIX checks. The policy's synthetic tests do
+not prove native Windows execution or target permission creation.
+
+Run the focused structural checks with
+`python -m unittest discover -s scripts/skills-native-oracle -p test_startup_controls.py`.
+Rust config-validation process regressions are in
+`mcp_profile_startup::audit_environment_override_does_not_bypass_config_validation`
+and `mcp_profile_startup::audit_environment_override_applies_after_valid_or_missing_config`.
+Compiler/CLI-MCP replay, real Windows ACL observations, all native targets and
+independent review remain required. A focused test or Go-only diagnostic pass is
+not Linux/macOS/Windows Rust acceptance.
 
 ## Checkpoint publication
 

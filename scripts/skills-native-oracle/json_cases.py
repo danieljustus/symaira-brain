@@ -60,7 +60,8 @@ def run_controls(report, checkpoint, binaries, root, retained, env, invoke, inco
     # Mutate actual candidate input after a full actual Go/native matching
     # baseline. No stored result, parser or comparator mutation is used.
     import shutil
-    from compare import matched, mcp_view
+    from compare import mcp_view
+    from ordinary_startup import matched, pair as startup_pair, assert_control_bootstrap
     from json_compare import parse_view
     rows = {name: (argv, data) for name, argv, data, _ in cases(root, incoming)}
     controls = [
@@ -83,9 +84,11 @@ def run_controls(report, checkpoint, binaries, root, retained, env, invoke, inco
         finally:
             checkpoint()
         baseline_view = mcp_view(baseline['go'])
+        assert_control_bootstrap(baseline['go'], record)
         actual = parse_view(record) if expected_code == -32700 else mcp_view(record)
         assert record['exit'] == 0 and actual[1][2]['error']['code'] == expected_code
-        assert record['filesystem']['files'] == baseline['go']['filesystem']['files']
+        left, right, control['startup_classification'] = startup_pair(baseline['go'], record)
+        assert right['filesystem']['files'] == left['filesystem']['files']
         control['rejected'] = baseline_view != actual
         assert control['rejected'], 'actual input mutation must change the accepted response'
         checkpoint()

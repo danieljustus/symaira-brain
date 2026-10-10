@@ -110,6 +110,99 @@ fn run_process(command: &mut std::process::Command, input: &[u8]) -> Output {
 }
 
 #[test]
+fn audit_environment_override_does_not_bypass_config_validation() {
+    let cases = [
+        ("malformed-toml", "[audit\n", "failed to parse"),
+        ("invalid-value", "[audit]\nenabled = \"yes\"\n", "audit.enabled"),
+        ("invalid-type", "[audit]\nenabled = []\n", "audit.enabled"),
+    ];
+    for (case, contents, expected) in cases {
+        for profile_audit in [false, true] {
+            for audit_override in ["true", "false", "invalid"] {
+                let root = TempDir::new().unwrap();
+                let config = root.path().join("config/symbrain");
+                fs::create_dir_all(&config).unwrap();
+                fs::write(config.join("config.toml"), contents).unwrap();
+                let profile = root.path().join("isolated.toml");
+                fs::write(
+                    &profile,
+                    format!("[profile]\nname = \"isolated\"\n[audit]\nenabled = {profile_audit}\n[servers.memory]\nenabled = false\n"),
+                )
+                .unwrap();
+                let mut process = super::command(
+                    &root,
+                    &["mcp", "--profile-file", profile.to_str().unwrap()],
+                );
+                process.env("SYMBRAIN_AUDIT_ENABLED", audit_override);
+                let output = run_process(&mut process, b"");
+                assert_eq!(output.status.code(), Some(2), "{case}: {output:?}");
+                assert!(output.stdout.is_empty(), "{case}: {output:?}");
+                let stderr = String::from_utf8(output.stderr).unwrap();
+                assert!(stderr.contains(expected), "{case}: {stderr}");
+                assert!(
+                    !stderr.contains("SYMBRAIN_AUDIT_ENABLED"),
+                    "file error must win: {stderr}"
+                );
+                assert!(!root.path().join("home/.local/share").exists(), "{case}");
+                assert_eq!(fs::read_dir(&config).unwrap().count(), 1, "{case}");
+                assert!(!root.path().join("cache").exists(), "{case}");
+            }
+        }
+    }
+}
+
+#[test]
+fn audit_environment_override_applies_after_valid_or_missing_config() {
+    for contents in [
+        None,
+        Some(""),
+        Some("[audit]\nenabled = false\n"),
+        Some("audit = true\n"),
+    ] {
+        let root = TempDir::new().unwrap();
+        if let Some(contents) = contents {
+            let config = root.path().join("config/symbrain");
+            fs::create_dir_all(&config).unwrap();
+            fs::write(config.join("config.toml"), contents).unwrap();
+        }
+        let profile = root.path().join("isolated.toml");
+        fs::write(
+            &profile,
+            "[profile]\nname = \"isolated\"\n[audit]\nenabled = true\n[servers.memory]\nenabled = false\n",
+        )
+        .unwrap();
+        for value in ["true", "invalid"] {
+            let mut process = super::command(
+                &root,
+                &["mcp", "--profile-file", profile.to_str().unwrap()],
+            );
+            process.env("SYMBRAIN_AUDIT_ENABLED", value);
+            let output = run_process(&mut process, b"");
+            assert_eq!(
+                output.status.code(),
+                Some(if value == "true" { 0 } else { 2 }),
+                "{output:?}"
+            );
+            assert!(output.stdout.is_empty());
+            if value == "true" {
+                assert!(output.stderr.is_empty());
+                assert!(
+                    root.path()
+                        .join("home/.local/share/symbrain/audit/isolated.jsonl")
+                        .is_file()
+                );
+            } else {
+                assert!(
+                    String::from_utf8(output.stderr)
+                        .unwrap()
+                        .contains("SYMBRAIN_AUDIT_ENABLED")
+                );
+            }
+        }
+    }
+}
+
+#[test]
 fn enabled_memory_is_initialized_and_exposed() {
     let root = TempDir::new().unwrap();
     let profile = root.path().join("memory.toml");
