@@ -56,33 +56,47 @@ pub(crate) fn encode_skill_md(
         required_environment_variables: &frontmatter.required_environment_variables,
         metadata: &frontmatter.metadata,
     };
-    let yaml = serde_yaml_ng::to_string(&output)
+    let yaml = serde_yaml_ng_skill_encoder::to_string(&output)
         .map_err(|error| SkillError(format!("encode frontmatter: {error}")))?;
-    let mut in_metadata = false;
-    let mut previous_metadata_key_indent = None;
-    let yaml = yaml
-        .lines()
-        .map(|line| {
-            if line == "metadata:" {
-                in_metadata = true;
-                previous_metadata_key_indent = None;
-                return line.to_owned();
-            }
-            if in_metadata && !line.is_empty() {
-                let indentation = line.len() - line.trim_start_matches(' ').len();
-                let content = &line[indentation..];
-                let mut output_indentation = indentation.saturating_mul(2);
-                if content.starts_with('-') && previous_metadata_key_indent == Some(indentation) {
-                    output_indentation = output_indentation.saturating_add(4);
-                }
-                previous_metadata_key_indent = content.ends_with(':').then_some(indentation);
-                return format!("{}{}", " ".repeat(output_indentation), content);
-            }
-            line.to_owned()
-        })
-        .collect::<Vec<_>>()
-        .join("\n");
-    let mut bytes = format!("---\n{yaml}\n---\n\n").into_bytes();
+    let mut bytes = Vec::new();
+    bytes.extend_from_slice(b"---\n");
+    bytes.extend_from_slice(yaml.as_bytes());
+    if !yaml.ends_with('\n') {
+        bytes.push(b'\n');
+    }
+    bytes.extend_from_slice(b"---\n\n");
     bytes.extend_from_slice(body);
     Ok(bytes)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::encode_skill_md;
+    use crate::model::Frontmatter;
+    use serde_json::json;
+
+    #[test]
+    fn numeric_json_string_is_quoted_and_ordinary_string_stays_plain() {
+        let frontmatter = Frontmatter {
+            name: "skills".into(),
+            description: "frontmatter style control".into(),
+            metadata: json!({"count": "123", "plain": "ordinary text"}),
+            ..Frontmatter::default()
+        };
+        let body = b"\0raw\r\n\xff";
+        let encoded = encode_skill_md(&frontmatter, body).expect("encode frontmatter");
+        let boundary = encoded
+            .windows(b"\n---\n".len())
+            .position(|window| window == b"\n---\n")
+            .expect("frontmatter closing marker");
+        let yaml = std::str::from_utf8(&encoded[4..boundary]).expect("UTF-8 frontmatter");
+
+        // Exact output from the pinned Go yaml.Marshal(Frontmatter) reference.
+        let expected_header = b"---\nname: skills\ndescription: frontmatter style control\nmetadata:\n    count: \"123\"\n    plain: ordinary text\n---\n\n";
+        assert_eq!(&encoded[..boundary + b"\n---\n\n".len()], expected_header);
+        let parsed: Frontmatter = serde_yaml_ng::from_str(yaml).expect("parse generated header");
+        assert_eq!(parsed.metadata["count"], json!("123"));
+        assert_eq!(parsed.metadata["plain"], json!("ordinary text"));
+        assert_eq!(&encoded[boundary + b"\n---\n\n".len()..], body);
+    }
 }
