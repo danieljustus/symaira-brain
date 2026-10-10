@@ -233,6 +233,10 @@ func optionalServerDef(alias, directBinary, cockpitCommand, override string) (se
 // gateway degrades gracefully (memory tools simply absent) instead of failing
 // the whole serve.
 func buildMemoryServer(p *profile.Profile, stderr io.Writer, version string) *memorymcp.Server {
+	if !p.Server(profile.ServerMemory).Enabled {
+		return nil
+	}
+
 	memcfg, err := memoryconfig.Load()
 	if err != nil {
 		memcfg = memoryconfig.Defaults()
