@@ -72,6 +72,16 @@ a profile opt-out. The real CLI regression
 `mcp_profile_startup::disabled_memory_and_history_do_not_create_startup_state`
 checks both opt-out and explicit audit opt-in without a Go fallback.
 
+`startup_controls.py`, invoked by this runner, adds five real Go/Rust process
+pairs for absent/false/true history configuration, audit profile/global
+precedence, and disabled/enabled memory. Each pair retains raw process and full
+filesystem observations. Only exact startup-owned memory DB/key, audit, and
+recipe-history paths can be classified as legacy-versus-target effects; all
+other response, file, mode, link, hash, and Skills render/cache differences
+remain strict mismatches. The comparator never edits captured observations or
+uses global path exclusions. The parent-owned native run must still execute and
+review these controls before claiming acceptance.
+
 Malformed transport input without a safely determined known Skills owner keeps
 the inherited JSON parser and diagnosis in both line and Content-Length modes.
 No prefix search or permissive partial parser establishes ownership. Valid

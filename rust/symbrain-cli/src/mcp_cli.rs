@@ -70,6 +70,14 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
     if !check_embedded_handlers(&profile, stderr) {
         return exit::NO_INPUT;
     }
+    let global_audit_enabled = match load_global_audit_enabled() {
+        Ok(enabled) => enabled,
+        Err(error) => {
+            let _ = writeln!(stderr, "symbrain mcp: {error}");
+            return exit::NO_INPUT;
+        }
+    };
+    let audit_enabled = profile.audit.enabled && global_audit_enabled;
 
     let mut managed = Vec::new();
     let mut backends: BTreeMap<String, Arc<dyn GatewayBackend>> = BTreeMap::new();
@@ -81,7 +89,7 @@ pub(crate) fn run(args: &[OsString], stderr: &mut dyn Write) -> u8 {
         &mut backends,
     );
 
-    let audit = if profile.audit.enabled {
+    let audit = if audit_enabled {
         match Logger::open(
             &profile.name,
             AuditConfig {
@@ -274,6 +282,56 @@ fn resolve_profile(args: &McpArgs) -> Result<Profile, symbrain_policy::ProfileEr
         load_file(path)
     } else {
         load(args.profile.as_deref().unwrap_or_default())
+    }
+}
+
+fn load_global_audit_enabled() -> Result<bool, String> {
+    if let Some(value) = env::var_os("SYMBRAIN_AUDIT_ENABLED").filter(|value| !value.is_empty()) {
+        let value = value
+            .to_str()
+            .ok_or_else(|| "config: SYMBRAIN_AUDIT_ENABLED is not valid UTF-8".to_string())?;
+        return parse_config_bool(value)
+            .ok_or_else(|| "config: SYMBRAIN_AUDIT_ENABLED must be a boolean".to_string());
+    }
+
+    let path = symbrain_core::xdg::config_path();
+    let contents = match std::fs::read_to_string(&path) {
+        Ok(contents) => contents,
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(true),
+        Err(error) => {
+            return Err(format!(
+                "config: failed to load {}: {error}",
+                path.display()
+            ));
+        }
+    };
+    let document = contents
+        .parse::<DocumentMut>()
+        .map_err(|error| format!("config: failed to parse {}: {error}", path.display()))?;
+    let Some(audit) = document.get("audit") else {
+        return Ok(true);
+    };
+    let Some(table) = audit.as_table_like() else {
+        return Err("config: expected a table for [audit]".to_string());
+    };
+    let Some(enabled) = table.get("enabled") else {
+        return Ok(true);
+    };
+    if let Some(value) = enabled.as_bool() {
+        return Ok(value);
+    }
+    if let Some(value) = enabled.as_str() {
+        return parse_config_bool(value)
+            .ok_or_else(|| "config: audit.enabled must be a boolean".to_string());
+    }
+    Err("config: audit.enabled must be a boolean".to_string())
+}
+
+fn parse_config_bool(value: &str) -> Option<bool> {
+    match value {
+        "1" | "t" | "T" | "true" | "TRUE" | "True" => Some(true),
+        "0" | "f" | "F" | "false" | "FALSE" | "False" => Some(false),
+        _ => None,
     }
 }
 

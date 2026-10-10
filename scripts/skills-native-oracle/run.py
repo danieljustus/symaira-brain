@@ -23,6 +23,7 @@ from byte_cases import cases as byte_cases, variant as byte_variant, input_descr
 from json_cases import cases as json_cases, run_controls as json_controls
 from eof_cases import run_controls as eof_controls
 from json_compare import json_matched
+from startup_controls import run_controls as run_startup_controls
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -250,6 +251,16 @@ def main():
                           binaries, root, retained, env, invoke, incoming)
             eof_controls(report, lambda: checkpoint(output, report),
                          binaries, root, retained, env, invoke, incoming)
+            run_startup_controls(
+                report,
+                lambda: checkpoint(output, report),
+                binaries,
+                owned,
+                retained,
+                binaries["git"],
+                invoke,
+                incoming,
+            )
             assert report["candidate_sources"] == source_map()
             assert report["binaries"] == {name: {"path": str(path), "sha256": sha(path)} for name, path in binaries.items()}
             report.update(status="passed", native_surface_gate_passed=True)

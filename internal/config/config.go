@@ -80,9 +80,9 @@ type UpdateCheckConfig struct {
 }
 
 // PatternsConfig controls episode recording and pattern promotion (see
-// internal/patterns). Recording is metadata-only — server and tool names,
-// never arguments or values — and nothing is exposed until a sequence
-// recurs across PromotionThreshold sessions.
+// internal/patterns). Recording is opt-in and metadata-only — server and tool
+// names, never arguments or values. Recorded sequences become promoted context
+// only after recurring across PromotionThreshold sessions.
 type PatternsConfig struct {
 	// Enabled turns session episode recording on or off entirely.
 	Enabled bool
@@ -156,12 +156,13 @@ type fileModulesConfig struct {
 
 func fileDefaults() *fileConfig {
 	enabled := true
+	patternsEnabled := false
 	identityInjection := true
 	return &fileConfig{
 		Audit:       fileAuditConfig{Enabled: &enabled, Verbose: false},
 		Gateway:     fileGatewayConfig{IdentityInjection: &identityInjection},
 		UpdateCheck: fileUpdateCheckConfig{Enabled: &enabled},
-		Patterns:    filePatternsConfig{Enabled: &enabled, PromotionThreshold: defaultPromotionThreshold},
+		Patterns:    filePatternsConfig{Enabled: &patternsEnabled, PromotionThreshold: defaultPromotionThreshold},
 	}
 }
 
@@ -195,7 +196,7 @@ func resolve(fc *fileConfig) *Config {
 		},
 		Servers: fc.Servers,
 		Patterns: PatternsConfig{
-			Enabled:            derefBool(fc.Patterns.Enabled, true),
+			Enabled:            derefBool(fc.Patterns.Enabled, false),
 			PromotionThreshold: threshold,
 		},
 		Modules: ModulesConfig{
