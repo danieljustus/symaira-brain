@@ -1,9 +1,10 @@
-"""Literal argv/output observations for registry CLI boundaries; no transport."""
+"""Literal registry CLI edges plus additive no-autostart root-session observations."""
 import base64
 import copy
 import os
 import subprocess
 from registry_cli_process import capture
+import root_session_cli
 
 UNSUPPORTED_ID_ROW = b"  id          Derive a stable, collision-free session id from the local repository layout\n"
 COMMANDS = [("session", "list"), ("session", "info"), ("daemon", "status"), ("state", "list")]
@@ -77,8 +78,9 @@ def observe(binary, root, env, progress=None):
                       [b"help", b"session", b"info"]):
         help_records.append(run(arguments))
     assert sorted(p.relative_to(root).as_posix() for p in root.rglob("*")) == before, "CLI edges created daemon/profile/state files"
+    root_session = root_session_cli.observe(run, root, env)
     return {"invalid": records, "format_errors": format_errors, "help": help_records, "no_files_created": True,
-            "raw_unix_bytes": os.name == "posix"}
+            "raw_unix_bytes": os.name == "posix", "root_session": root_session}
 
 
 def comparable_help(observed, *, go):
@@ -109,3 +111,5 @@ def compare(left, right):
     assert len(left["help"]) == len(right["help"]) == 6
     assert [comparable_help(record, go=True) for record in left["help"]] == [
         comparable_help(record, go=False) for record in right["help"]], "implemented help bytes differ"
+    root_session_cli.compare(left["root_session"], right["root_session"])
+    root_session_cli.controls(left["root_session"], right["root_session"])

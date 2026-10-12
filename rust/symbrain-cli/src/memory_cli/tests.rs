@@ -296,3 +296,37 @@ fn memory_sync_with_arguments_stays_on_go() {
         );
     }
 }
+
+#[test]
+fn default_conflict_route_admits_existing_store_but_not_creation_or_bad_hydration() {
+    let directory = fixture();
+    let path = directory.path().join("memory.sqlite");
+    let command = |database: &std::path::Path| vec![
+        OsString::from("set"), OsString::from("hello world"),
+        OsString::from("--kind"), OsString::from("reference"),
+        OsString::from("--db"), database.as_os_str().to_owned(),
+    ];
+    assert!(!requires_go_fallback(&command(&path)));
+    assert!(requires_go_fallback(&command(&directory.path().join("missing.sqlite"))));
+    let conn = Connection::open(&path).unwrap();
+    conn.execute_batch("INSERT INTO memories(id,content,scope,metadata,embedding,created_at,updated_at) VALUES('bad','hello world','global','{}','[]','invalid','invalid')").unwrap();
+    assert!(requires_go_fallback(&command(&path)));
+    assert_eq!(conn.query_row("SELECT COUNT(*) FROM memories", [], |row| row.get::<_, i64>(0)).unwrap(), 1);
+}
+
+#[test]
+fn prefilter_admission_keeps_creation_and_malformed_reads_on_go() {
+    let directory = fixture();
+    let path = directory.path().join("memory.sqlite");
+    assert!(!Store::direct_prefilter_supported(&directory.path().join("absent.sqlite")));
+    assert_eq!(Store::direct_prefilter_supported(&path), usize::BITS == 64);
+    let conn = Connection::open(&path).unwrap();
+    conn.execute_batch("INSERT INTO memories(id,content,scope,metadata,embedding,created_at,updated_at) VALUES('bad','retained','global','{}','[]','invalid','invalid')").unwrap();
+    assert!(!Store::direct_prefilter_supported(&path));
+    assert_eq!(conn.query_row("SELECT created_at FROM memories WHERE id='bad'", [], |row| row.get::<_, String>(0)).unwrap(), "invalid");
+    for limit in [i64::MIN, -1, 0, 17, i64::MAX / 4 + 1, i64::MAX] {
+        let args = [OsString::from("query"), OsString::from(format!("--limit={limit}"))];
+        let parsed = flags::parse(&args, "search", &mut Vec::new()).unwrap();
+        assert_eq!(parsed.limit, limit, "do not clamp before Go's signed multiplication");
+    }
+}

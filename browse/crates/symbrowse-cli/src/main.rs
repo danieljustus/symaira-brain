@@ -5,6 +5,7 @@ mod completion;
 mod daemon_state;
 use daemon_state::{run_daemon_lifecycle, run_state_operation};
 mod help_catalog;
+mod root_session;
 mod upgrade;
 
 use std::{
@@ -165,7 +166,8 @@ fn main() -> ExitCode {
             &args[1..],
         ));
     }
-    match parse(&args) {
+    let mut parse_error_format = Format::Text;
+    match parse_with_output(&args, &mut parse_error_format) {
         Ok(Action::Help(text)) => write_stdout(&text),
         Ok(Action::Completion {
             shell,
@@ -249,8 +251,12 @@ fn main() -> ExitCode {
             format,
         }) => run_flow(session, path, inputs, dry_run, format),
         Err(error) => {
-            let _ = writeln!(io::stderr(), "{}", error.message);
-            ExitCode::from(error.exit_code)
+            let code = if error.exit_code == 2 {
+                ErrorCode::InvalidArgs
+            } else {
+                ErrorCode::Internal
+            };
+            write_batch_error(parse_error_format, code, &error.message, error.exit_code)
         }
     }
 }
@@ -1294,6 +1300,10 @@ fn completion_help() -> &'static str {
 }
 
 fn parse(args: &[OsString]) -> Result<Action, ParseError> {
+    parse_with_output(args, &mut Format::Text)
+}
+
+fn parse_with_output(args: &[OsString], error_format: &mut Format) -> Result<Action, ParseError> {
     let values: Vec<String> = args
         .iter()
         .map(|value| value.to_string_lossy().into_owned())
@@ -1307,6 +1317,7 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
             no_descriptions: values[0] == "__completeNoDesc",
         });
     }
+    root_session::validate(&values, top_command_index(&values), error_format)?;
     if root_version_requested(&values)? {
         return Ok(Action::RootVersion);
     }
@@ -1315,20 +1326,30 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
     {
         return parse_completion(&values, command_index);
     }
-    if let Some(help_index) = values
-        .iter()
-        .take_while(|value| value.as_str() != "--")
-        .position(|value| matches!(value.as_str(), "-h" | "--help"))
-    {
-        let Some(command_index) = top_command_index(&values[..help_index]) else {
+    if root_session::help_requested(&values)? {
+        let Some(command_index) = top_command_index(&values) else {
             return Ok(Action::Help(root_help()));
         };
         let command = values[command_index].as_str();
-        let suffix = values[command_index + 1..help_index]
-            .iter()
+        let tokens = root_session::token_indices(&values);
+        let help_index = tokens.iter().copied()
+            .find(|&index| root_session::is_help_flag(&values[index]))
+            .unwrap_or(values.len());
+        let suffix = tokens
+            .into_iter()
+            .filter(|&index| index > command_index && index < help_index)
+            .map(|index| values[index].as_str())
             .filter(|value| !value.starts_with('-'))
-            .map(String::as_str)
             .collect::<Vec<_>>();
+        // The help target is the discovered command, not a positional word
+        // consumed by stripFlags (help is installed only after discovery).
+        let suffix = if matches!(command, "daemon" | "session" | "state") {
+            let discovered = root_session::child_index(&values, command_index)
+                .map(|index| vec![values[index].as_str()]).unwrap_or_default();
+            if discovered.first() == Some(&"key") { suffix } else { discovered }
+        } else {
+            suffix
+        };
         if command == "help" {
             return Ok(Action::Help(help_for_path(&suffix)));
         }
@@ -1387,7 +1408,8 @@ fn parse(args: &[OsString]) -> Result<Action, ParseError> {
 }
 
 fn root_version_requested(values: &[String]) -> Result<bool, ParseError> {
-    for value in values.iter().take_while(|value| value.as_str() != "--") {
+    for index in root_session::token_indices(values) {
+        let value = &values[index];
         if matches!(value.as_str(), "-v" | "--version") {
             return Ok(true);
         }
@@ -1399,49 +1421,7 @@ fn root_version_requested(values: &[String]) -> Result<bool, ParseError> {
 }
 
 fn top_command_index(values: &[String]) -> Option<usize> {
-    let mut index = 0;
-    while index < values.len() {
-        let value = &values[index];
-        if value == "--" {
-            return (index + 1 < values.len()).then_some(index + 1);
-        }
-        if matches!(value.as_str(), "--json" | "-v" | "--version")
-            || value.starts_with("--json=")
-            || value.starts_with("--version=")
-        {
-            index += 1;
-            continue;
-        }
-        if matches!(
-            value.as_str(),
-            "--output"
-                | "--log-level"
-                | "--log-format"
-                | "--config-dir"
-                | "--cache-dir"
-                | "--state-dir"
-                | "--executable-path"
-        ) {
-            index += 2;
-            continue;
-        }
-        if value.starts_with("--output=")
-            || value.starts_with("--log-level=")
-            || value.starts_with("--log-format=")
-            || value.starts_with("--config-dir=")
-            || value.starts_with("--cache-dir=")
-            || value.starts_with("--state-dir=")
-            || value.starts_with("--executable-path=")
-        {
-            index += 1;
-            continue;
-        }
-        if value.starts_with('-') {
-            return None;
-        }
-        return Some(index);
-    }
-    None
+    root_session::command_index(values, 0, "")
 }
 
 fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, ParseError> {
@@ -1452,17 +1432,26 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
         name.to_owned()
     };
     let mut session = "default".to_owned();
-    let mut format = Format::Text;
+    let mut output = "text".to_owned();
+    let mut json = false;
     let mut positional = Vec::new();
     let mut args = serde_json::Map::new();
-    let mut index = command_index + 1;
+    let mut index = 0;
     while index < values.len() {
+        if index == command_index {
+            index += 1;
+            continue;
+        }
         let value = &values[index];
         match value.as_str() {
-            "--json" => format = Format::Json,
+            "--" => {
+                positional.extend_from_slice(&values[index + 1..]);
+                break;
+            }
+            "--json" => json = true,
             "--output" => {
                 index += 1;
-                format = parse_format(required_value(values, index, "--output")?)?;
+                output = required_value(values, index, "--output")?.to_owned();
             }
             "--session" => {
                 index += 1;
@@ -1570,7 +1559,8 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
                 args.insert(key, serde_json::Value::Bool(true));
             }
             value if value.starts_with("--session=") => session = value[10..].to_owned(),
-            value if value.starts_with("--output=") => format = parse_format(&value[9..])?,
+            value if value.starts_with("--output=") => output = value[9..].to_owned(),
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             value if value.starts_with("--kind=") => {
                 args.insert("kind".into(), serde_json::Value::String(value[7..].into()));
             }
@@ -1706,7 +1696,11 @@ fn parse_dispatch(values: &[String], command_index: usize) -> Result<Action, Par
         session,
         command,
         args: serde_json::Value::Object(args),
-        format,
+        format: if json {
+            Format::Json
+        } else {
+            parse_format(&output)?
+        },
     })
 }
 
@@ -1770,23 +1764,23 @@ fn parse_tools(values: &[String], index: usize) -> Result<Action, ParseError> {
 }
 
 fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
-    let (subcommand, mut i) = match values.get(index + 1) {
-        None => ("list", index + 1),
-        Some(value) if value.starts_with('-') => ("list", index + 1),
-        Some(value) => (value.as_str(), index + 2),
-    };
-    let mut format = Format::Text;
+    let subcommand_index = root_session::command_index(values, index + 1, "flow");
+    let subcommand = subcommand_index.map_or("list", |i| values[i].as_str());
+    let mut output = "text".to_owned();
+    let mut json = false;
     let mut path = None;
     let mut session = "default".to_owned();
     let mut dry_run = false;
     let mut inputs = BTreeMap::new();
+    let mut i = 0;
     while i < values.len() {
         match values[i].as_str() {
-            "--json" => format = Format::Json,
+            _ if i == index || Some(i) == subcommand_index => {}
+            "--json" => json = true,
             "--dry-run" => dry_run = true,
             "--output" => {
                 i += 1;
-                format = parse_format(required_value(values, i, "--output")?)?;
+                output = required_value(values, i, "--output")?.to_owned();
             }
             "--session" => {
                 i += 1;
@@ -1801,6 +1795,9 @@ fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
                 })?;
                 inputs.insert(key.to_owned(), value.to_owned());
             }
+            value if value.starts_with("--session=") => session = value[10..].to_owned(),
+            value if value.starts_with("--output=") => output = value[9..].to_owned(),
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             value if value.starts_with("--input=") => {
                 let pair = &value[8..];
                 let (key, val) = pair.split_once('=').ok_or_else(|| ParseError {
@@ -1825,6 +1822,11 @@ fn parse_flow(values: &[String], index: usize) -> Result<Action, ParseError> {
         }
         i += 1;
     }
+    let format = if json {
+        Format::Json
+    } else {
+        parse_format(&output)?
+    };
     match subcommand {
         "list" if path.is_none() => Ok(Action::FlowList { format }),
         "validate" => path
@@ -1861,16 +1863,35 @@ fn parse_daemon(
     let mut mode = String::new();
     let mut ssrf = None;
     let mut allow_private = None;
-    let (mut output, mut json) = daemon_state::global_output(values, daemon_index)?;
+    let mut output = "text".to_owned();
+    let mut json = false;
     let mut subcommand = None;
-    let mut index = daemon_index + 1;
+    let lifecycle_index = root_session::child_index(values, daemon_index);
+    let mut index = 0;
     while index < values.len() {
         match values[index].as_str() {
-            value @ ("status" | "stop") => {
-                if subcommand.is_none() {
-                    subcommand = Some(value);
-                }
+            _ if index == daemon_index => {}
+            "--" if index + 1 == values.len() => break,
+            "--" => {
+                return Err(ParseError {
+                    message: format!(
+                        "unknown command {:?} for \"symbrowse daemon{}\"",
+                        values[index + 1],
+                        subcommand.map_or(String::new(), |s| format!(" {s}"))
+                    ),
+                    exit_code: 2,
+                });
             }
+            value @ ("status" | "stop") if Some(index) == lifecycle_index => {
+                subcommand = Some(value);
+            }
+            value if root_session::is_help_flag(value) => {}
+            flag @ ("--restore" | "--profile") if lifecycle_index.is_some() => {
+                index += 1;
+                required_value(values, index, flag)?;
+            }
+            value if lifecycle_index.is_some()
+                && (value.starts_with("--restore=") || value.starts_with("--profile=")) => {}
             "--session" => {
                 index += 1;
                 required_value(values, index, "--session")?;
@@ -1918,7 +1939,6 @@ fn parse_daemon(
                     exit_code: 2,
                 });
             }
-            "daemon" => {}
             value => {
                 return Err(ParseError {
                     message: format!("unknown command {value:?} for daemon"),
@@ -1955,6 +1975,8 @@ fn parse_daemon(
 
 fn parse_mcp(values: &[String], mcp_index: usize) -> Result<Action, ParseError> {
     let mut session = String::from("default");
+    let mut output = "text".to_owned();
+    let mut json = false;
     let mut profiles = String::from("core");
     let mut list_profiles = false;
     let mut allow_private = false;
@@ -1981,10 +2003,16 @@ fn parse_mcp(values: &[String], mcp_index: usize) -> Result<Action, ParseError> 
                 index += 1;
                 engine = Some(required_value(values, index, "--engine")?.to_owned());
             }
+            "--output" => {
+                index += 1;
+                output = required_value(values, index, "--output")?.to_owned();
+            }
+            "--json" => json = true,
             _ if value.starts_with("--session=") => session = value[10..].to_owned(),
             _ if value.starts_with("--tools=") => profiles = value[8..].to_owned(),
             _ if value.starts_with("--engine=") => engine = Some(value[9..].to_owned()),
-            _ if value == "--json" || value.starts_with("--json=") => {}
+            _ if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
+            _ if value.starts_with("--output=") => output = value[9..].to_owned(),
             _ if value.starts_with('-') => {
                 return Err(ParseError {
                     message: format!("unknown flag: {value}"),
@@ -1999,6 +2027,9 @@ fn parse_mcp(values: &[String], mcp_index: usize) -> Result<Action, ParseError> 
             }
         }
         index += 1;
+    }
+    if !json {
+        parse_format(&output)?;
     }
     if let Some(value) = engine.as_deref()
         && !matches!(value, "chrome" | "static" | "safari-attach" | "safari-bidi")
@@ -2029,12 +2060,37 @@ fn parse_state_lifecycle(
 ) -> Result<Action, ParseError> {
     let mut subcommand = None;
     let mut session = OsString::from("default");
-    let (mut output, mut json) = daemon_state::global_output(values, state_index)?;
+    let mut output = "text".to_owned();
+    let mut json = false;
     let mut name = None;
     let mut older_than = None;
-    let mut index = state_index + 1;
+    let mut index = 0;
     while index < values.len() {
         match values[index].as_str() {
+            _ if index == state_index => {}
+            "--" => {
+                if subcommand.is_none() {
+                    return Ok(Action::Help(command_help("state", &[]).unwrap()));
+                }
+                if let Some(value) = values.get(index + 1) {
+                    if subcommand
+                        .is_some_and(|s| matches!(s, "save" | "load" | "show" | "clear"))
+                        && name.is_none()
+                        && index + 2 == values.len()
+                    {
+                        name = Some(value.to_owned());
+                    } else {
+                        return Err(ParseError {
+                            message: format!(
+                                "unknown command {value:?} for \"symbrowse state{}\"",
+                                subcommand.map_or(String::new(), |s| format!(" {s}"))
+                            ),
+                            exit_code: 2,
+                        });
+                    }
+                }
+                break;
+            }
             "--json" => json = true,
             "--output" => {
                 index += 1;
@@ -2045,6 +2101,7 @@ fn parse_state_lifecycle(
                 required_value(values, index, "--session")?;
                 session = daemon_state::session_value(&raw[index], false);
             }
+            value if root_session::is_help_flag(value) => {}
             "--older-than" => {
                 index += 1;
                 older_than = Some(
@@ -2078,10 +2135,9 @@ fn parse_state_lifecycle(
         }
         index += 1;
     }
-    let subcommand = subcommand.ok_or_else(|| ParseError {
-        message: "state requires a subcommand".into(),
-        exit_code: 2,
-    })?;
+    let Some(subcommand) = subcommand else {
+        return Ok(Action::Help(command_help("state", &[]).unwrap()));
+    };
     if subcommand == "key" {
         return parse_state(values, state_index);
     }
@@ -2115,20 +2171,14 @@ fn parse_state_lifecycle(
 }
 
 fn parse_state(values: &[String], state_index: usize) -> Result<Action, ParseError> {
-    let key_index = values
-        .iter()
-        .enumerate()
-        .skip(state_index + 1)
-        .find_map(|(index, value)| (value == "key").then_some(index))
+    let key_index = root_session::command_index(values, state_index + 1, "state")
+        .filter(|&index| values[index] == "key")
         .ok_or_else(|| ParseError {
             message: "state requires a subcommand".to_owned(),
             exit_code: 2,
         })?;
-    let init_index = values
-        .iter()
-        .enumerate()
-        .skip(key_index + 1)
-        .find_map(|(index, value)| (value == "init").then_some(index))
+    let init_index = root_session::command_index(values, key_index + 1, "key")
+        .filter(|&index| values[index] == "init")
         .ok_or_else(|| ParseError {
             message: "state key requires a subcommand".to_owned(),
             exit_code: 2,
@@ -2149,6 +2199,11 @@ fn parse_state(values: &[String], state_index: usize) -> Result<Action, ParseErr
                 index += 1;
                 output = required_value(values, index, "--output")?.to_owned();
             }
+            "--session" => {
+                index += 1;
+                required_value(values, index, "--session")?;
+            }
+            _ if value.starts_with("--session=") => {}
             _ if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             _ if value.starts_with("--output=") => output = value[9..].to_owned(),
             _ if value.starts_with('-') => {
@@ -2447,6 +2502,223 @@ mod tests {
     use std::ffi::OsString;
 
     use sha2::{Digest, Sha256};
+
+    #[test]
+    fn root_session_review_regressions_preserve_flag_errors_and_help_precedence() {
+        // R2c: an unknown child leaves the group selected, not a fabricated leaf.
+        for group in ["daemon", "session", "state"] {
+            let help = parse(&args(&[group, "--help"])).unwrap();
+            assert!(matches!(&help, Action::Help(_)));
+            for prefix in [vec![], vec!["--session=alpha"], vec!["--session", "alpha"]] {
+                for suffix in [vec!["not-a-command", "--help"],
+                    vec!["--help=true", "not-a-command"],
+                    vec!["--help", "not-a-command"],
+                    vec!["not-a-command", "status", "--help"],
+                    vec!["--json", "not-a-command", "--help"],
+                    vec!["--output=yaml", "--help=true", "not-a-command"]] {
+                    let mut values = prefix.clone();
+                    values.push(group);
+                    values.extend(suffix);
+                    assert_eq!(parse(&args(&values)).unwrap(), help, "{values:?}");
+                }
+                for (suffix, message, expected) in [
+                    (vec!["not-a-command", "--bogus=x", "--help"], "unknown flag: --bogus", Format::Text),
+                    (vec!["--help=true", "not-a-command", "--bogus=x"], "unknown flag: --bogus", Format::Text),
+                    (vec!["--json", "not-a-command", "--bogus=x", "--help"], "unknown flag: --bogus", Format::Json),
+                    (vec!["not-a-command", "--bogus=x", "--json", "--help"], "unknown flag: --bogus", Format::Text),
+                    (vec!["not-a-command", "--help", "--session"], "flag needs an argument: --session", Format::Text),
+                ] {
+                    let mut values = prefix.clone();
+                    values.push(group);
+                    values.extend(suffix);
+                    let mut format = Format::Text;
+                    let error = super::parse_with_output(&args(&values), &mut format).unwrap_err();
+                    assert_eq!((error.message.as_str(), error.exit_code, format), (message, 1, expected), "{values:?}");
+                }
+            }
+        }
+        for (group, verb) in [("daemon", "status"), ("daemon", "stop"),
+            ("session", "list"), ("session", "info"), ("state", "list"), ("state", "show")] {
+            let help = parse(&args(&[group, verb, "--help"])).unwrap();
+            for prefix in [vec![], vec!["--session=alpha"]] {
+                let mut values = prefix;
+                values.extend([group, verb, "not-a-command", "--help"]);
+                assert_eq!(parse(&args(&values)).unwrap(), help, "{values:?}");
+            }
+        }
+        for flag in ["--ssrf", "--allow-private", "--headless", "--mcp-mode"] {
+            assert_eq!(parse(&args(&["--session=alpha", "daemon", flag, "not-a-command", "--help"])),
+                parse(&args(&["daemon", "--help"])));
+        }
+        let error = parse(&args(&["--session=alpha", "daemon", "not-a-command", "--help", "--restore"])).unwrap_err();
+        assert_eq!((error.message.as_str(), error.exit_code), ("flag needs an argument: --restore", 1));
+
+        // R4: exact native DaemonProxy argv, parser only, not a Go success case.
+        for (mode_args, mode) in [(vec!["--mode", "browser"], "browser"),
+            (vec!["--mode=browser"], "browser"), (vec!["--mode", "--help"], "--help"),
+            (vec!["--mode=first", "--mode", "browser", "--help=false"], "browser")] {
+            let mut values = vec!["daemon", "--session", "alpha", "--ssrf", "--mcp-mode"];
+            values.extend(mode_args);
+            assert_eq!(parse(&args(&values)), Ok(Action::DaemonRun {
+                session: "alpha".into(), mode: mode.into(), engine: String::new(),
+                ssrf: Some(true), allow_private: None, format: Format::Text,
+            }), "{values:?}");
+        }
+        for mode_args in [vec!["--mode", "browser"], vec!["--mode=browser"]] {
+            for verb in ["status", "stop"] {
+                for between in [false, true] {
+                    let mut values = vec!["--session=alpha", "daemon"];
+                    if !between { values.push(verb); }
+                    values.extend(mode_args.iter().copied());
+                    if between { values.push(verb); }
+                    for help in [false, true] {
+                        let mut probe = values.clone();
+                        if help { probe.push("--help"); }
+                        let error = parse(&args(&probe)).unwrap_err();
+                        assert_eq!((error.message.as_str(), error.exit_code), ("unknown flag: --mode", 1), "{probe:?}");
+                    }
+                }
+            }
+            for suffix in [vec!["--help"], vec!["--help=true"], vec!["--help=false", "--help"]] {
+                let mut values = vec!["--session=alpha", "daemon"];
+                values.extend(mode_args.iter().copied());
+                values.extend(suffix);
+                let error = parse(&args(&values)).unwrap_err();
+                assert_eq!((error.message.as_str(), error.exit_code), ("unknown flag: --mode", 1), "{values:?}");
+            }
+        }
+        for group in ["daemon", "session", "state"] {
+            let help = parse(&args(&[group, "--help"])).unwrap();
+            assert!(matches!(&help, Action::Help(_)));
+            for suffix in [vec!["--help"], vec!["--help=true"], vec!["--json", "--help"],
+                vec!["--output=yaml", "--help"], vec!["--help", "--session", "--json"],
+                vec!["--help", "--", "--bogus=x"]] {
+                let mut values = vec!["--session=alpha", group];
+                values.extend(suffix);
+                assert_eq!(parse(&args(&values)).unwrap(), help, "{values:?}");
+            }
+            for prefix in [vec![], vec!["--session=alpha"]] {
+                for (suffix, message, expected) in [
+                    (vec!["--bogus=x", "--help"], "unknown flag: --bogus", Format::Text),
+                    (vec!["--help", "--bogus=x"], "unknown flag: --bogus", Format::Text),
+                    (vec!["--json", "--bogus=x", "--help"], "unknown flag: --bogus", Format::Json),
+                    (vec!["--bogus=x", "--json", "--help"], "unknown flag: --bogus", Format::Text),
+                    (vec!["--output=yaml", "--bogus=x", "--help"], "unknown flag: --bogus", Format::Yaml),
+                    (vec!["--help", "--session"], "flag needs an argument: --session", Format::Text),
+                    (vec!["--json", "--help", "--output"], "flag needs an argument: --output", Format::Json),
+                    (vec!["--help", "-x", "value"], "unknown shorthand flag: 'x' in -x", Format::Text),
+                ] {
+                    let mut values = prefix.clone();
+                    values.push(group);
+                    values.extend(suffix);
+                    let mut format = Format::Text;
+                    let error = super::parse_with_output(&args(&values), &mut format).unwrap_err();
+                    assert_eq!((error.message.as_str(), error.exit_code, format), (message, 1, expected), "{values:?}");
+                }
+            }
+        }
+        for (suffix, expected) in [
+            (vec!["--help", "--restore"], Format::Text),
+            (vec!["--json", "--help", "--restore"], Format::Json),
+            (vec!["--output=yaml", "--help", "--restore"], Format::Yaml),
+        ] {
+            let mut values = vec!["--session=alpha", "daemon"];
+            values.extend(suffix);
+            let mut format = Format::Text;
+            let error = super::parse_with_output(&args(&values), &mut format).unwrap_err();
+            assert_eq!((error.message.as_str(), error.exit_code, format), ("flag needs an argument: --restore", 1, expected));
+        }
+        for flag in ["--ssrf", "--allow-private", "--headless", "--mcp-mode"] {
+            for spelling in [flag.to_owned(), format!("{flag}=true")] {
+                assert_eq!(parse(&args(&["--session=alpha", "daemon", &spelling, "--help"])),
+                    parse(&args(&["daemon", "--help"])));
+            }
+        }
+        for flag in ["--restore", "--profile", "--allowed-domains", "--engine", "--cdp-endpoint"] {
+            assert_eq!(parse(&args(&["--session=alpha", "daemon", flag, "--json", "--help"])),
+                parse(&args(&["daemon", "--help"])));
+        }
+        for command in [vec!["daemon", "status"], vec!["session", "info"], vec!["state", "list"],
+            vec!["daemon"], vec!["session"], vec!["state"], vec!["mcp"], vec!["flow", "run"], vec!["open"]] {
+            for (output, expected) in [(vec![], Format::Text), (vec!["--output=text"], Format::Text),
+                (vec!["--output=yaml"], Format::Yaml), (vec!["--output=json"], Format::Json),
+                (vec!["--output=invalid"], Format::Text)] {
+                for previous in [vec![], vec!["--json"], vec!["--json=true"]] {
+                    let mut values = output.clone();
+                    values.push("--session=alpha");
+                    values.extend(command.iter().copied());
+                    values.extend(previous);
+                    values.extend(["--json=not-bool", "--json", "--help"]);
+                    let mut format = Format::Text;
+                    let error = super::parse_with_output(&args(&values), &mut format).unwrap_err();
+                    assert_eq!(error.message, "invalid argument \"not-bool\" for \"--json\" flag: strconv.ParseBool: parsing \"not-bool\": invalid syntax", "{values:?}");
+                    assert_eq!((error.exit_code, format), (1, expected), "{values:?}");
+                }
+            }
+        }
+        // Shared non-inspection help paths still ignore arguments after help;
+        // do not exercise the browser, MCP server or flow runner here.
+        for command in ["open", "mcp", "flow"] {
+            assert_eq!(parse(&args(&[command, "--help", "not-executed"])),
+                parse(&args(&[command, "--help"])));
+        }
+        for flag in ["--ssrf", "--allow-private", "--headless", "--mcp-mode"] {
+            for spelling in [flag.to_owned(), format!("{flag}=true")] {
+                for between in [false, true] {
+                    let mut values = vec!["--session=alpha", "daemon"];
+                    values.extend(if between { vec![spelling.as_str(), "status"] }
+                        else { vec!["status", spelling.as_str()] });
+                    for help in [false, true] {
+                        let mut probe = values.clone();
+                        if help { probe.push("--help"); }
+                        let error = parse(&args(&probe)).unwrap_err();
+                        assert_eq!(error.message, format!("unknown flag: {flag}"), "{probe:?}");
+                        assert_eq!(error.exit_code, 1);
+                    }
+                }
+            }
+        }
+        for (values, message, expected) in [
+            (vec!["--session=alpha", "daemon", "status", "-x", "value", "--help"], "unknown shorthand flag: 'x' in -x", Format::Text),
+            (vec!["--session=alpha", "daemon", "status", "--help", "--restore"], "flag needs an argument: --restore", Format::Text),
+            (vec!["--session=alpha", "daemon", "status", "--json", "--help", "--profile"], "flag needs an argument: --profile", Format::Json),
+            (vec!["--bogus=x", "--json", "--session=alpha", "version"], "unknown flag: --bogus", Format::Text),
+            (vec!["--json", "--bogus=x", "--session=alpha", "version"], "unknown flag: --bogus", Format::Json),
+            (vec!["--output=yaml", "--bogus=x", "--session=alpha", "version"], "unknown flag: --bogus", Format::Yaml),
+        ] {
+            let mut format = Format::Text;
+            let error = super::parse_with_output(&args(&values), &mut format).unwrap_err();
+            assert_eq!((error.message.as_str(), error.exit_code, format), (message, 1, expected), "{values:?}");
+        }
+        for (group, verb) in [("daemon", "status"), ("session", "list"), ("session", "info"), ("state", "list")] {
+            let help = parse(&args(&[group, verb, "--help"])).unwrap();
+            for suffix in [vec!["--help=true"], vec!["-h=true"], vec!["--help=false", "--help"], vec!["-", "--help"], vec!["--help", "-"], vec!["--help=1"]] {
+                for prefix in [vec![], vec!["--session=alpha"]] {
+                    let mut values = prefix;
+                    values.extend([group, verb]);
+                    values.extend(suffix.iter().copied());
+                    assert_eq!(parse(&args(&values)).unwrap(), help, "{values:?}");
+                }
+            }
+            let normal = parse(&args(&["--session=alpha", group, verb])).unwrap();
+            for suffix in [vec!["--help=false"], vec!["--help", "--help=false"], vec!["-h", "-h=false"], vec!["--help=0"], vec!["-hh=false"]] {
+                let mut values = vec!["--session=alpha", group, verb];
+                values.extend(suffix);
+                assert_eq!(parse(&args(&values)).unwrap(), normal, "{values:?}");
+            }
+            for suffix in [vec!["--help=maybe"], vec!["--help", "--json", "--help=maybe"]] {
+                let mut values = vec!["--session=alpha", group, verb];
+                values.extend(suffix);
+                let error = parse(&args(&values)).unwrap_err();
+                assert_eq!(error.exit_code, 1);
+                assert_eq!(error.message, "invalid argument \"maybe\" for \"-h, --help\" flag: strconv.ParseBool: parsing \"maybe\": invalid syntax");
+            }
+        }
+        for flag in ["--restore", "--profile"] {
+            assert_eq!(parse(&args(&["--session=alpha", "daemon", flag, "--help", "status"])),
+                parse(&args(&["--session=alpha", "daemon", "status"])));
+        }
+    }
 
     #[test]
     fn a11y_routes_tags_selector_and_optional_url() {

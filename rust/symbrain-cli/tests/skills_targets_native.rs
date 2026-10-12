@@ -162,7 +162,12 @@ fn target_binary_is_reported_as_evidence_natively() {
     let root = TempDir::new().unwrap();
     let bin_dir = root.path().join("bin");
     std::fs::create_dir_all(&bin_dir).unwrap();
-    let binary = bin_dir.join("opencode");
+    // Windows Go LookPath searches PATHEXT candidates, not extensionless files.
+    let binary = bin_dir.join(if cfg!(windows) {
+        "opencode.exe"
+    } else {
+        "opencode"
+    });
     std::fs::write(&binary, b"placeholder").unwrap();
     #[cfg(unix)]
     {
@@ -182,9 +187,8 @@ fn target_binary_is_reported_as_evidence_natively() {
 }
 
 #[test]
-fn scope_flag_is_native_but_config_stays_on_go() {
-    // `--scope user` is the default scan, `--scope project` resolves the
-    // workspace roots; only a dynamic symskills config still needs Go.
+fn scope_and_config_forms_are_native() {
+    // Scope resolves workspace roots; config does not register custom targets.
     let root = TempDir::new().unwrap();
     let user = run(&root, &["skills", "targets", "--json"]).stdout;
     let explicit = run(&root, &["skills", "targets", "--scope", "user", "--json"]);
@@ -216,12 +220,12 @@ fn scope_flag_is_native_but_config_stays_on_go() {
         .env("SYMSKILLS_LIBRARY_DIR", "/different/library")
         .output()
         .unwrap();
-    assert_eq!(configured.status.code(), Some(1));
-    assert!(String::from_utf8_lossy(&configured.stderr).contains("no Go fallback was found"));
+    assert!(configured.status.success(), "{:?}", configured.stderr);
+    assert!(configured.stderr.is_empty());
 }
 
 #[test]
-fn config_file_targets_variant_keeps_go_fallback_before_output() {
+fn untagged_config_targets_preserve_the_six_go_registered_targets() {
     let root = TempDir::new().unwrap();
     std::fs::create_dir_all(root.path().join("config/symskills")).unwrap();
     std::fs::write(
@@ -229,8 +233,16 @@ fn config_file_targets_variant_keeps_go_fallback_before_output() {
         b"[[targets]]\nname = \"custom\"\nskill_root_user = \"/tmp/custom\"\n",
     )
     .unwrap();
-    let output = run(&root, &["skills", "targets"]);
-    assert_eq!(output.status.code(), Some(1));
-    assert!(output.stdout.is_empty());
-    assert!(String::from_utf8_lossy(&output.stderr).contains("no Go fallback was found"));
+    let output = run(&root, &["skills", "targets", "--json"]);
+    assert!(output.status.success(), "{:?}", output.stderr);
+    assert!(output.stderr.is_empty());
+    let report: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
+    assert_eq!(report["targets"].as_array().unwrap().len(), 6);
+    assert!(
+        report["targets"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|row| row["target"] != "custom")
+    );
 }

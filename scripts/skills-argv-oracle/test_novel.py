@@ -165,7 +165,7 @@ class SourceOutputSource(unittest.TestCase):
 
     def test_actual_source_profile_has_equal_early_return_and_explicit_owner(self):
         result = qualify(PARENT_REFS[0], self.parent, self.current)
-        self.assertEqual(result["qualification"], "source806-d07")
+        self.assertEqual(result["qualification"], "skills813-main-bc6e42b")
         self.assertFalse(result["go_parity_claim"])
         self.assertEqual(early_blocks(self.parent[CLI], False), early_blocks(self.current[CLI], True))
         self.assertNotEqual(self.parent[CLI], self.current[CLI])

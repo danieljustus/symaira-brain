@@ -1,0 +1,30 @@
+{
+  "source_adaptation_only": true,
+  "runtime_proof": false,
+  "files": [
+    {
+      "original_path": "/workspace/symaira-daemon772-state-key-discovery-mask/browse/crates/symbrowse-core/src/key_sources/startup_discovery/path.rs",
+      "original_sha256": "551c5493b4b63a8c19318d31f4966d0e293b12d9ba98108fe25efed61ef12321",
+      "adapted_path": "rust/symbrain-skills/src/binary/path.rs",
+      "original_head": "7e5c4561c82803403b579d011fb687bbe254d32a"
+    },
+    {
+      "original_path": "/workspace/symaira-daemon772-state-key-discovery-mask/browse/crates/symbrowse-core/src/key_sources/startup_discovery/godebug.rs",
+      "original_sha256": "0b4645a823188bfb2453e18568cc1e7ab09a8348250e63a804cefb8084362f71",
+      "adapted_path": "rust/symbrain-skills/src/binary/godebug.rs",
+      "original_head": "7e5c4561c82803403b579d011fb687bbe254d32a"
+    },
+    {
+      "original_path": "/workspace/symaira-daemon772-state-key-discovery-mask/browse/crates/symbrowse-core/src/key_sources/startup_discovery/windows.rs",
+      "original_sha256": "bb1c6c7293e628b11bba99ebef534f1f251526058e0778b83b8d94dd5d8b0561",
+      "adapted_path": "rust/symbrain-skills/src/binary/windows.rs",
+      "original_head": "7e5c4561c82803403b579d011fb687bbe254d32a"
+    },
+    {
+      "original_path": "/workspace/symaira-daemon772-state-key-discovery-mask/browse/crates/symbrowse-core/src/key_sources/startup_discovery/windows_lower.rs",
+      "original_sha256": "b87aa1b9b8f44a049c0765a7675a31b3ec944aeb1cba71467488e8ada74b53c7",
+      "adapted_path": "rust/symbrain-skills/src/binary/windows_lower.rs",
+      "original_head": "7e5c4561c82803403b579d011fb687bbe254d32a"
+    }
+  ]
+}

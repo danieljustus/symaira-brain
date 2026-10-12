@@ -11,6 +11,9 @@ use rusqlite::Row;
 
 use crate::gojson::{self, Members};
 
+#[path = "cli_conflict_json.rs"]
+mod conflict_json;
+
 /// Column list of the shipped full-row projection (30 columns).
 pub(crate) const SEARCH_COLUMNS: &str = "id, content, scope, metadata, embedding, \
      embedding_binary, embedding_source, embedding_model, embedding_quantization, created_at, \
@@ -88,16 +91,51 @@ pub struct SearchRow {
 impl SearchRow {
     /// Reads one full memory row in the shipped column order.
     pub(crate) fn from_row(row: &Row<'_>) -> rusqlite::Result<Self> {
-        let embedding_binary: Option<Vec<u8>> = row.get(5)?;
+        let _: Option<Vec<u8>> = row.get(5)?;
         let embedding: Vec<f32> = crate::rows::json(row, 4)?;
         if embedding.iter().any(|value| !value.is_finite()) {
             return Err(rusqlite::Error::InvalidQuery);
         }
+        Self::from_decoded(row, crate::rows::json(row, 3)?, embedding)
+    }
+
+    /// Conflict checks must not turn malformed stored fields into decisions.
+    pub(crate) fn from_conflict_row(row: &Row<'_>) -> rusqlite::Result<Self> {
+        // scanMemory scans the complete SQL row in projection order before
+        // populateMemoryFields decodes metadata, then embedding JSON. Keep
+        // scalar and time failures ahead of either decoder, not only times.
+        for index in 0..30 {
+            match index {
+                5 => { let _: Option<Vec<u8>> = row.get(index)?; }
+                9 | 10 => conflict_time(row, index, true)?,
+                18 | 19 | 22 | 24 | 25 | 29 => conflict_time(row, index, false)?,
+                16 | 20 => { let _: Option<String> = row.get(index)?; }
+                17 | 28 => { let _: f64 = row.get(index)?; }
+                23 => { let _: i64 = row.get(index)?; }
+                _ => { let _: String = row.get(index)?; }
+            }
+        }
+        let raw: String = row.get(4)?;
+        // Go validates metadata before decoding the embedding.
+        let metadata = conflict_metadata(row, 3)?;
+        let embedding = conflict_json::embedding(&raw)
+            .map_err(|error| conflict_json::row_error(4, error))?;
+        // Go's Memory.Importance and CompositeScore retain float64. Only the
+        // final composite score and cosine/threshold comparisons narrow to f32.
+        Self::from_decoded(row, metadata, embedding)
+    }
+
+    fn from_decoded(
+        row: &Row<'_>,
+        metadata: serde_json::Map<String, serde_json::Value>,
+        embedding: Vec<f32>,
+    ) -> rusqlite::Result<Self> {
+        let embedding_binary: Option<Vec<u8>> = row.get(5)?;
         Ok(Self {
             id: row.get(0)?,
             content: row.get(1)?,
             scope: row.get(2)?,
-            metadata: crate::rows::json(row, 3)?,
+            metadata,
             // The shipped full scan omits `embedding_dim` and derives the
             // length from the vector itself.
             embedding_dim: i64::try_from(embedding.len()).unwrap_or_default(),
@@ -190,6 +228,32 @@ impl SearchRow {
         members.time_if_present("prev_access", self.prev_access);
         members.finish()
     }
+}
+
+pub(crate) fn conflict_metadata(
+    row: &Row<'_>,
+    index: usize,
+) -> rusqlite::Result<serde_json::Map<String, serde_json::Value>> {
+    let raw: String = row.get(index)?;
+    // Typed decoding checks even a malformed value replaced by a later key.
+    let map = conflict_json::metadata(&raw).map_err(|error| conflict_json::row_error(index, error))?;
+    Ok(map.into_iter().map(|(key, value)| {
+        (key, serde_json::Value::String(value.unwrap_or_default()))
+    }).collect())
+}
+
+pub(crate) fn conflict_time(row: &Row<'_>, index: usize, required: bool) -> rusqlite::Result<()> {
+    let value: Option<String> = row.get(index)?;
+    if value.as_ref().is_none_or(|value| !crate::cli_delete_admission::canonical_time(value))
+        && (required || value.is_some())
+    {
+        let name = row.as_ref().column_name(index)?;
+        let source = if value.is_some() { "string" } else { "<nil>" };
+        return Err(conflict_json::row_error(index, format!(
+            "sql: Scan error on column index {index}, name \"{name}\": unsupported Scan, storing driver.Value type {source} into type *time.Time"
+        )));
+    }
+    Ok(())
 }
 
 /// One scored search result.

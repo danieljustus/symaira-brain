@@ -10,6 +10,8 @@
 !/docs/handoffs/
 /docs/handoffs/*
 !/docs/handoffs/end-work-cloud.md
+!/docs/handoffs/2026-10-12-rust-continuation.md
+!/docs/handoffs/2026-10-12-rust-inputs.json
 .DS_Store
 /symbrain
 coverage.out

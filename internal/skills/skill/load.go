@@ -26,6 +26,13 @@ func LoadBundle(root string) (*Bundle, error) {
 		return nil, err
 	}
 
+	// A rejected control file must not leak the newly held directory capability.
+	loaded := false
+	defer func() {
+		if !loaded {
+			_ = rootCap.Close()
+		}
+	}()
 	raw, err := readRootFile(rootCap, "SKILL.md", "SKILL.md", MaxInputSize)
 	if err != nil {
 		return nil, err
@@ -36,7 +43,7 @@ func LoadBundle(root string) (*Bundle, error) {
 	}
 
 	manifest := Manifest{Targets: map[string]TargetConfig{}}
-	if _, statErr := rootCap.Stat("symskills.toml"); statErr == nil {
+	if _, statErr := rootCap.Lstat("symskills.toml"); statErr == nil {
 		manifestRaw, readErr := readRootFile(rootCap, "symskills.toml", "symskills.toml", MaxInputSize)
 		if readErr != nil {
 			return nil, readErr
@@ -75,6 +82,7 @@ func LoadBundle(root string) (*Bundle, error) {
 	}
 	normalized := strings.ReplaceAll(string(raw), "\r\n", "\n")
 	bodyOffset := strings.Count(normalized[:len(normalized)-len(body)], "\n")
+	loaded = true
 	return &Bundle{
 		Root:           abs,
 		rootCap:        rootCap,

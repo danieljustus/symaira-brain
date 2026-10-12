@@ -1,14 +1,12 @@
-//! Vector retrieval pipeline for `memory search` under the shipped defaults.
+//! Vector retrieval pipeline for `memory search` under the shipped CLI weights.
 //!
 //! The shipped `SearchMemories` runs with `DefaultRankingWeights()`: candidate
 //! selection expands the query into adjacent LSH buckets, rows are hydrated
 //! and scored by cosine similarity plus recency and importance, and the
-//! returned ids are recorded as accesses. Two defaults keep this slice small
-//! and are relied on deliberately: the Hamming prefilter is opt-in
-//! (`hybrid_search.prefilter_enabled`, default off) and the spreading bonus is
-//! opt-in (`ranking.spreading_weight`, default 0). Any dynamic memory
-//! configuration keeps the whole command on the shipped implementation, so
-//! only the default path has to be reproduced here.
+//! returned ids are recorded as accesses. The CLI always uses default ranking
+//! weights, independently of configured service weights. Hamming selection is
+//! a separate opt-in entry point; existing HTTP and conflict callers retain
+//! their original no-prefilter paths. Spreading remains outside this slice.
 //!
 //! One honest limit: recency uses a wall-clock read in each process, so a score
 //! near an `f32` rounding midpoint can differ between sequential Go/Rust runs.
@@ -20,6 +18,15 @@ use rusqlite::Connection;
 
 use crate::model::StoreError;
 use crate::search_rows::{SEARCH_COLUMNS, SearchHit, SearchRow};
+
+#[path = "retrieval_prefilter.rs"]
+mod prefilter;
+
+enum SearchMode {
+    Default,
+    Conflict,
+    Prefilter(isize),
+}
 
 /// Candidate ceiling of the shipped bucket scan.
 const MAX_CANDIDATES: usize = 2000;
@@ -40,6 +47,7 @@ const RECENCY_HALF_LIFE: f64 = 30.0;
 struct Candidate {
     id: String,
     embedding_dim: i64,
+    embedding_binary: Option<Vec<u8>>,
 }
 
 /// Runs the shipped retrieval pipeline for a prepared query vector.
@@ -65,8 +73,32 @@ pub(crate) fn search_checked(
     limit: usize,
     admitted: impl Fn(&SearchRow) -> bool,
 ) -> Result<Vec<SearchHit>, StoreError> {
+    search_inner(conn, query_vector, query_source, scope, limit, admitted, SearchMode::Default)
+}
+
+/// Conflict recall shares ranking/LSH but requires Go-compatible hydration.
+pub(crate) fn search_for_conflict(
+    conn: &Connection,
+    query_vector: &[f32],
+    query_source: &str,
+    scope: &str,
+    limit: usize,
+) -> Result<Vec<SearchHit>, StoreError> {
+    search_inner(conn, query_vector, query_source, scope, limit, |_| true, SearchMode::Conflict)
+}
+
+fn search_inner(
+    conn: &Connection,
+    query_vector: &[f32],
+    query_source: &str,
+    scope: &str,
+    limit: usize,
+    admitted: impl Fn(&SearchRow) -> bool,
+    mode: SearchMode,
+) -> Result<Vec<SearchHit>, StoreError> {
+    let strict = !matches!(mode, SearchMode::Default);
     let buckets = buckets_for(query_vector)?;
-    let candidates = candidates(conn, &buckets, query_source, scope)?;
+    let candidates = candidates(conn, &buckets, query_source, scope, strict)?;
     let candidates: Vec<Candidate> = candidates
         .into_iter()
         .filter(|candidate| Some(candidate.embedding_dim) == i64::try_from(query_vector.len()).ok())
@@ -75,11 +107,12 @@ pub(crate) fn search_checked(
         return Ok(Vec::new());
     }
 
-    let ids: Vec<String> = candidates
-        .into_iter()
-        .map(|candidate| candidate.id)
-        .collect();
-    let mut hits = hydrate(conn, &ids, query_vector)?;
+    let ids = if let SearchMode::Prefilter(signed_limit) = mode {
+        prefilter::select(candidates, query_vector, signed_limit)
+    } else {
+        candidates.into_iter().map(|candidate| candidate.id).collect()
+    };
+    let mut hits = hydrate(conn, &ids, query_vector, strict)?;
     score_and_rank(&mut hits, query_vector);
     hits.truncate(limit);
     if hits.iter().any(|hit| !admitted(&hit.memory)) {
@@ -87,7 +120,9 @@ pub(crate) fn search_checked(
             "read requires the unported memory pipeline".into(),
         ));
     }
-    track_access(conn, &hits)?;
+    // Go explicitly treats retrieval feedback as best-effort, including
+    // recall inside the conflict checker. Hydration errors above are fatal.
+    let _ = track_access(conn, &hits);
     Ok(hits)
 }
 
@@ -105,6 +140,7 @@ fn candidates(
     buckets: &[i64],
     query_source: &str,
     scope: &str,
+    strict: bool,
 ) -> Result<Vec<Candidate>, StoreError> {
     let mut candidates = Vec::new();
     let mut start = 0;
@@ -117,7 +153,11 @@ fn candidates(
         let tail = ") AND (tier != 'working' OR expires_at IS NULL OR expires_at > \
              datetime('now')) AND review_status = 'approved' AND retired_at IS NULL \
              ORDER BY created_at DESC";
-        let projection = "id, embedding_binary, embedding_dim";
+        let projection = if strict {
+            "id, embedding_binary, embedding_dim, metadata, created_at, valid_from, valid_to, superseded_by"
+        } else {
+            "id, embedding_binary, embedding_dim"
+        };
         let (sql, mut arguments) = if scope.is_empty() {
             (
                 format!("SELECT {projection} FROM memories WHERE {filter}{placeholders}{tail}"),
@@ -137,10 +177,22 @@ fn candidates(
 
         let mut statement = conn.prepare(&sql)?;
         let rows = statement.query_map(rusqlite::params_from_iter(arguments.iter()), |row| {
-            Ok(Candidate {
-                id: row.get(0)?,
-                embedding_dim: row.get::<_, Option<i64>>(2)?.unwrap_or(0),
-            })
+            let id = row.get(0)?;
+            // Default readers historically do not decode this projection.
+            // Preserve that boundary; strict conflict reads already did.
+            let embedding_binary = if strict { row.get(1)? } else { None };
+            let embedding_dim = row.get::<_, Option<i64>>(2)?.unwrap_or(0);
+            if strict {
+                // Go scans every projected SQL value before metadata JSON.
+                // In particular a later invalid timestamp wins over bad JSON.
+                let _: String = row.get(3)?;
+                crate::search_rows::conflict_time(row, 4, true)?;
+                crate::search_rows::conflict_time(row, 5, false)?;
+                crate::search_rows::conflict_time(row, 6, false)?;
+                let _: Option<String> = row.get(7)?;
+                crate::search_rows::conflict_metadata(row, 3)?;
+            }
+            Ok(Candidate { id, embedding_dim, embedding_binary })
         })?;
         for row in rows {
             candidates.push(row?);
@@ -160,6 +212,7 @@ fn hydrate(
     conn: &Connection,
     ids: &[String],
     query_vector: &[f32],
+    strict: bool,
 ) -> Result<Vec<SearchHit>, StoreError> {
     let mut hits = Vec::new();
     for chunk in ids.chunks(BATCH_SIZE) {
@@ -169,7 +222,11 @@ fn hydrate(
         );
         let mut statement = conn.prepare(&sql)?;
         let rows = statement.query_map(rusqlite::params_from_iter(chunk.iter()), |row| {
-            SearchRow::from_row(row)
+            if strict {
+                SearchRow::from_conflict_row(row)
+            } else {
+                SearchRow::from_row(row)
+            }
         })?;
         let mut hydrated: Vec<(String, SearchRow)> = Vec::new();
         for row in rows {
@@ -236,7 +293,7 @@ fn composite_score(
 }
 
 /// The shipped `CosineSimilarity`, accumulated in `float64` and narrowed once.
-fn cosine_similarity(left: &[f32], right: &[f32]) -> f32 {
+pub(crate) fn cosine_similarity(left: &[f32], right: &[f32]) -> f32 {
     if left.len() != right.len() || left.is_empty() {
         return 0.0;
     }

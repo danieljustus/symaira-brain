@@ -233,9 +233,11 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--go", type=Path, help="optional prebuilt immutable oracle; SHA recorded")
     parser.add_argument("--rust", type=Path)
-    parser.add_argument("--family", choices=("all", "arguments", "configuration", "seeded_reads", "configured_search", "database_paths", "corrupt_reads"), default="all")
+    parser.add_argument("--family", choices=("all", "arguments", "configuration", "seeded_reads", "configured_search", "database_paths", "corrupt_reads", "prefilter_search"), default="all")
     parser.add_argument("--report", type=Path)
     args = parser.parse_args()
+    if args.family == "prefilter_search" and (args.report is None or not __debug__):
+        parser.error("prefilter_search requires --report and enabled assertions")
     repo = Path(__file__).resolve().parents[2]
     rust = (args.rust or repo / "target/debug" / ("symbrain.exe" if os.name == "nt" else "symbrain")).resolve()
     archive = run(["git", "archive", ORACLE], repo).stdout
@@ -264,6 +266,7 @@ def main():
         reflected = run(["go", "run", "./scripts/memory-cli-oracle-schema"], source, env).stdout
         expected_fields = [(field["name"], field["kind"]) for field in json.loads(reflected)]
         records = []
+        prefilter_controls = []
         if args.family in ("all", "arguments"):
             arguments(go, rust, records)
         if args.family in ("all", "configuration"):
@@ -276,6 +279,10 @@ def main():
             records.extend(path_cases.run(go, rust, output, snapshot, isolated_env))
         if args.family in ("all", "corrupt_reads"):
             records.extend(corrupt_reads.run(go, rust, output, snapshot, isolated_env))
+        # Explicitly additive: preserve the original all-family identities/counts.
+        if args.family == "prefilter_search":
+            import prefilter_search
+            prefilter_controls = prefilter_search.execute(go, rust, args.report, records)
         candidate_files = set(run(["git", "ls-files", "--cached", "--others", "--exclude-standard",
                                    "rust/symbrain-cli", "rust/symbrain-memory", "Cargo.toml", "Cargo.lock",
                                    "scripts/memory-cli-oracle", ".github/workflows/memory-cli-native.yml"], repo)
@@ -294,6 +301,9 @@ def main():
             operator_home_used=False,
             fallback_available=any(record.get("fallback_available", False) for record in records),
             cases=len(records), passed=sum(record["match"] for record in records), records=records)
+        if args.family == "prefilter_search":
+            report.update(prefilter_controls=prefilter_controls, native_acceptance=False,
+                          compiler_input_closure="REQUIRED at owning gate; hashes alone are insufficient")
         if args.report:
             args.report.write_text(json.dumps(report, indent=2) + "\n")
         print(json.dumps({key: value for key, value in report.items()

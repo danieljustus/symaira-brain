@@ -93,11 +93,7 @@ func (s *Server) ServeIO(ctx context.Context, r io.Reader, w io.Writer) error {
 	}
 
 	var auditLog auditSink
-	auditEnabled := s.profile.Audit.Enabled
-	if s.cfg != nil {
-		auditEnabled = auditEnabled || s.cfg.Audit.Enabled
-	}
-	if auditEnabled {
+	if s.auditEnabled() {
 		verb := false
 		if s.cfg != nil {
 			verb = s.cfg.Audit.Verbose

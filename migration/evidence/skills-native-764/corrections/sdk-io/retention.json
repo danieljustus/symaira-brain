@@ -1,0 +1,71 @@
+{
+  "kind": "additive exact SDK IO/error/signal source references; no actual native proof",
+  "files": [
+    {
+      "source": "/workspace/toolchains/go1.26.7/src/os/file.go",
+      "sdk": "Go1.26.7 retained source, not executed",
+      "archive": "migration/evidence/skills-native-764/corrections/sdk-io/os__file.go.gz",
+      "sha256": "85a4adcd383c9947d6133b65ccd01e95b68ce1d07b8474b7b7aad8ca9f3b8139",
+      "archive_sha256": "d5e003d469ac7d9004ba605b8a59610c5030552729766ae809b2b99811d5c97e",
+      "bytes": 30167
+    },
+    {
+      "source": "/workspace/toolchains/go1.26.7/src/os/root_unix.go",
+      "sdk": "Go1.26.7 retained source, not executed",
+      "archive": "migration/evidence/skills-native-764/corrections/sdk-io/os__root_unix.go.gz",
+      "sha256": "f1e303059d837c46c1be94b44ac1e65073c6f6c8278a2056776092aee297bf67",
+      "archive_sha256": "e95b7c712fb2a2e228527463a8632779e4ad560f007834a36f3ed03a5c6116cd",
+      "bytes": 9131
+    },
+    {
+      "source": "/workspace/toolchains/go1.26.7/src/os/root_windows.go",
+      "sdk": "Go1.26.7 retained source, not executed",
+      "archive": "migration/evidence/skills-native-764/corrections/sdk-io/os__root_windows.go.gz",
+      "sha256": "1040d73d258146ba16cdeab572423129d45bb7adb3784a5da62d0cea0b54ff59",
+      "archive_sha256": "0fe790b29e9b5078b0e0f636193c47881cb5c90b14a8a2ea7b0dd09a742e2d2e",
+      "bytes": 13539
+    },
+    {
+      "source": "/workspace/toolchains/go1.26.7/src/os/stat_unix.go",
+      "sdk": "Go1.26.7 retained source, not executed",
+      "archive": "migration/evidence/skills-native-764/corrections/sdk-io/os__stat_unix.go.gz",
+      "sha256": "fa12fa05805074520f72342648764d156193805d6ddfa663af938145769a204a",
+      "archive_sha256": "92a432ec1f4059e2e4931c6c669622fd38821afdecbf34a0adbd18f1f17d71e6",
+      "bytes": 1244
+    },
+    {
+      "source": "/workspace/toolchains/go1.26.7/src/os/stat_windows.go",
+      "sdk": "Go1.26.7 retained source, not executed",
+      "archive": "migration/evidence/skills-native-764/corrections/sdk-io/os__stat_windows.go.gz",
+      "sha256": "90f01ab7b8a973df1c4588c3b40fae737c6d23d6548a1805e5f213e38def6df4",
+      "archive_sha256": "ba961f8a7062e426db9142e39a097f64abe426bc291dea4885f7339c70ed1f54",
+      "bytes": 5485
+    },
+    {
+      "source": "/workspace/toolchains/go1.26.7/src/os/dir_unix.go",
+      "sdk": "Go1.26.7 retained source, not executed",
+      "archive": "migration/evidence/skills-native-764/corrections/sdk-io/os__dir_unix.go.gz",
+      "sha256": "0de1bd5b40affb85fb104b4f04589fcaad093cd4b8165f6b2161427f7935bad0",
+      "archive_sha256": "cc84934413948efc3e06a8337a7e4f8cfd6d7ff69389423ba49b9551d189fd77",
+      "bytes": 5058
+    },
+    {
+      "source": "/workspace/toolchains/go1.26.7/src/os/dir_windows.go",
+      "sdk": "Go1.26.7 retained source, not executed",
+      "archive": "migration/evidence/skills-native-764/corrections/sdk-io/os__dir_windows.go.gz",
+      "sha256": "bed7533115f62133558144ff8e3e5944a8c6f02338b4fbd29f453d85f6145a8c",
+      "archive_sha256": "4424f531eba4e82be9f88012e445ac2c8b745a0372e590fad112fe96795b77f9",
+      "bytes": 7868
+    },
+    {
+      "source": "/workspace/toolchains/go1.26.7/src/runtime/signal_unix.go",
+      "sdk": "Go1.26.7 retained source, not executed",
+      "archive": "migration/evidence/skills-native-764/corrections/sdk-io/runtime__signal_unix.go.gz",
+      "sha256": "bea6344606adbcc50bfbdb6989bd3f1743ff8a7a8cd4fd66a35b9ae065f9dc53",
+      "archive_sha256": "52045ee2eebf2ca069e73f0b0d72259f254ddf2d23d9c28f435a770f4b88bb3d",
+      "bytes": 46872
+    }
+  ],
+  "roundtrips_verified": 8,
+  "SDK_execution": false
+}

@@ -26,7 +26,7 @@ mod routing;
 pub use catalog::{CatalogAssembly, build_catalog};
 pub use error::{BackendError, GatewayError, join_content};
 pub use response::{GatewayResponse, ListedTool, ToolAnnotations};
-use response::{ToolsResult, builtin_tool, usage_tool};
+use response::{ToolsResult, builtin_tool};
 pub use routing::{
     forward_entry, forward_entry_with_context, inject_identity, joined_text, route_tool,
     route_tool_with_context,
@@ -255,11 +255,8 @@ impl Gateway {
     #[must_use]
     pub fn tools(&self) -> Vec<ListedTool> {
         let mut tools = vec![builtin_tool("bootstrap"), builtin_tool("patterns")];
-        if self.usage_allowed {
-            tools.push(usage_tool());
-        }
-        tools.extend(self.catalog.exposed().map(ListedTool::from_entry));
         tools.extend(self.embedded_tools());
+        tools.extend(self.catalog.exposed().map(ListedTool::from_entry));
         tools
     }
 

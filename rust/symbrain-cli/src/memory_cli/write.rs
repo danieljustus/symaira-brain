@@ -54,8 +54,9 @@ pub(super) fn run_set(
         Err(code) => return code,
     };
 
-    // This route is gated to non-redacting, extraction-free writes with no
-    // conflict checker (staged writes bypass it in Go regardless of config).
+    // Routing admits the deterministic checker only. Staged writes bypass it;
+    // provider verdicts, redaction and secondary extraction remain delegated.
+    let config = super::config::load();
     let request = symbrain_memory::DirectWrite {
         content: content.to_owned(),
         scope: scope.clone(),
@@ -63,8 +64,8 @@ pub(super) fn run_set(
         metadata: parse_metadata(&parsed.text("metadata")).unwrap_or_default(),
         author: parsed.text("author"),
         staged,
-        quantize_binary: super::config::load().quantize_binary,
-        conflict_enabled: super::config::load().conflict_enabled,
+        quantize_binary: config.quantize_binary,
+        conflict_enabled: config.conflict_enabled,
         entities: parsed
             .text("entities")
             .split(',')
@@ -73,10 +74,17 @@ pub(super) fn run_set(
             .map(str::to_owned)
             .collect(),
     };
-    let config = super::config::load();
     let generator =
         symbrain_memory::EmbeddingGenerator::new(&config.ollama_url, &config.ollama_model);
-    match store.set_direct_cli(&request, &generator) {
+    match store.set_direct_cli_with_conflict(
+        &request,
+        &generator,
+        config.conflict_contradiction.unwrap_or(0.80),
+        config.conflict_near_dup.unwrap_or(0.95),
+        config.conflict_max_candidates.unwrap_or(10),
+        // run_stdio owns both real streams; embedded callers pass false.
+        &mut |message, attributes| conflict_diagnostic(stderr, process_stdout, message, attributes),
+    ) {
         Ok(id) => super::write_output::finish_set(
             super::write_output::SetReply {
                 id: &id,
@@ -154,7 +162,7 @@ pub(super) fn go_json_string(value: &str) -> String {
 }
 
 /// Admission is conservative: untouched Go remains the oracle for redaction,
-/// extraction, conflict resolution and invalid metadata JSON diagnostics.
+/// extraction, provider verdicts and invalid metadata JSON diagnostics.
 pub(super) fn direct_write_supported(parsed: &flags::Args) -> bool {
     // Go can store raw non-UTF8 actor/entity bytes in SQLite. The native
     // string model cannot claim those states by silently replacing the bytes.
@@ -162,7 +170,7 @@ pub(super) fn direct_write_supported(parsed: &flags::Args) -> bool {
         return false;
     }
     let config = super::config::load();
-    if !parsed.staged && config.conflict_enabled {
+    if !config.deterministic_conflict_supported(parsed.staged) {
         return false;
     }
     let content = flags::go_string(&flags::bytes(&parsed.positional[0]));
@@ -197,4 +205,61 @@ fn parse_metadata(raw: &str) -> Option<std::collections::BTreeMap<String, String
             .map(|(key, value)| (key, value.unwrap_or_default()))
             .collect(),
     )
+}
+
+fn conflict_diagnostic(stderr: &mut dyn Write, process_stdio: bool, message: &str, attributes: &[(&str, &str)]) {
+    // The frozen executable uses slog's default handler and log.LstdFlags,
+    // not logkit's separate configured logger. os.Stderr applies epipecheck
+    // before slog can ignore the error, just as os.Stdout does.
+    let mut line = format!("{} {message}", chrono::Local::now().format("%Y/%m/%d %H:%M:%S"));
+    for (name, value) in attributes {
+        line.push_str(&format!(" {name}={}", diagnostic_value(value)));
+    }
+    if let Err(error) = writeln!(stderr, "{line}") {
+        crate::stdio_output::pipe_boundary(&error, process_stdio);
+    }
+}
+
+fn diagnostic_value(value: &str) -> String {
+    let quoted = symbrain_core::config::format_go_quoted_bytes(value.as_bytes());
+    // Backslash alone does not require quoting in slog's text handler. Any
+    // other Go quote escape, Unicode space, ASCII space or '=' does.
+    let plain_quoted = format!("\"{}\"", value.replace('\\', "\\\\"));
+    if value.is_empty() || quoted != plain_quoted
+        || value.chars().any(|ch| ch.is_whitespace() || ch == '=' || ch == '\u{fffd}')
+    {
+        quoted
+    } else {
+        value.to_owned()
+    }
+}
+
+#[cfg(test)]
+mod diagnostic_tests {
+    use super::*;
+
+    #[test]
+    fn diagnostics_keep_go_quoting_and_ignore_failed_sink() {
+        for (value, expected) in [("id", "id"), ("a\\b", "a\\b"), ("", "\"\""),
+            ("a=b", "\"a=b\""), ("a\n", "\"a\\n\""), ("\u{a0}", "\"\\u00a0\""),
+            ("\u{fffd}", "\"\u{fffd}\"")] {
+            assert_eq!(diagnostic_value(value), expected);
+        }
+        struct Failed(Option<i32>);
+        impl std::io::Write for Failed {
+            fn write(&mut self, _: &[u8]) -> std::io::Result<usize> {
+                Err(self.0.map_or_else(
+                    || std::io::ErrorKind::BrokenPipe.into(),
+                    std::io::Error::from_raw_os_error,
+                ))
+            }
+            fn flush(&mut self) -> std::io::Result<()> { Ok(()) }
+        }
+        // Injected writers never signal, even with a raw EPIPE. A synthetic
+        // BrokenPipe and non-EPIPE OS errors also stay best-effort in stdio.
+        for (code, process_stdio) in [(None, false), (None, true), (Some(32), false), (Some(28), true)] {
+            conflict_diagnostic(&mut Failed(code), process_stdio,
+                "INFO conflict: duplicate write deduplicated", &[("id", "existing")]);
+        }
+    }
 }

@@ -1,0 +1,50 @@
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "Action completed."
+    }
+  ],
+  "structuredContent": {
+    "issue": {
+      "url": "https://github.com/danieljustus/symaira-brain/issues/764",
+      "title": "skills: native list/status/targets for every library state and the skills MCP tools",
+      "issue_number": 764,
+      "body": "## Context\nThe Rust CLI still routes to the Go binary through `run_go_fallback` (`rust/symbrain-cli/src/lib.rs`) whenever a module's `requires_go_fallback` returns true. `skills_cli.rs` sends to Go: populated `skills list` (metadata/created/modified/per-target installs/last-used table), `skills status` with dynamic config or non-default scopes/targets, `skills targets` with arguments, and other verbs. The skills MCP tools (`internal/skills/mcptools`, symskills) are Go. Open defects to fix in Rust: #621 (render drift/permanent stale), #490 (confined symlink rendering), #476 (bounded bundle parsing), #457 (concurrent registry updates).\n\n## Scope\n- Port the remaining CLI shapes and the MCP tools with Go-oracle fixtures; fix #621/#490/#476/#457 as documented deviations.\n- Remove `skills_cli::requires_go_fallback`.\n\n## Acceptance\n- Skills CLI and MCP differentials pass on native three-OS CI; no `skills` path reaches Go.\n\n---\n**Part of:** #731\n**Agent notes:** work in an isolated worktree off current `main`; read `AGENTS.md` and the migration ledger first. Until Go is removed, parity evidence must come from real Go-oracle fixtures generated in disposable HOME/XDG roots (no operator credentials). Update the ledger/contract-matrix rows touched by this issue in the same PR. Skipped, zero-case or cross-compiled-only runs are not evidence.\n",
+      "state": "open",
+      "user": {
+        "login": "danieljustus",
+        "name": "danieljustus",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/88160656?v=4",
+        "id": 88160656
+      },
+      "assignees": null,
+      "labels": [
+        {
+          "name": "priority: high",
+          "color": "b60205",
+          "description": "Planning priority"
+        },
+        {
+          "name": "group: rust-migration",
+          "color": "0E8A16",
+          "description": "Go→Rust migration and cutover"
+        }
+      ],
+      "milestone": null,
+      "state_reason": null,
+      "comments": 0,
+      "created_at": "2026-10-02T06:54:38Z",
+      "updated_at": "2026-10-02T06:54:38Z",
+      "closed_at": null,
+      "display_url": "https://github.com/danieljustus/symaira-brain/issues/764",
+      "display_title": "skills: native list/status/targets for every library state and the skills MCP tools"
+    },
+    "url": "https://github.com/danieljustus/symaira-brain/issues/764",
+    "title": "skills: native list/status/targets for every library state and the skills MCP tools",
+    "display_url": "https://github.com/danieljustus/symaira-brain/issues/764",
+    "display_title": "skills: native list/status/targets for every library state and the skills MCP tools"
+  },
+  "isError": false
+}

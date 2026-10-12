@@ -83,33 +83,6 @@ pub(super) fn render_result(
     render_envelope(envelope, format, status)
 }
 
-/// Preserve root output flags consumed before a lifecycle command group.
-pub(super) fn global_output(
-    values: &[String],
-    command_index: usize,
-) -> Result<(String, bool), ParseError> {
-    let mut output = "text".to_owned();
-    let mut json = false;
-    let mut index = 0;
-    while index < command_index {
-        match values[index].as_str() {
-            "--json" => json = true,
-            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
-            "--output" => {
-                index += 1;
-                output = required_value(values, index, "--output")?.to_owned();
-            }
-            value if value.starts_with("--output=") => output = value[9..].to_owned(),
-            // Values of unrelated accepted root flags are not output flags.
-            "--log-level" | "--log-format" | "--config-dir" | "--cache-dir" | "--state-dir"
-            | "--executable-path" => index += 1,
-            _ => {}
-        }
-        index += 1;
-    }
-    Ok((output, json))
-}
-
 /// Called only at an accepted parser flag's actual value index.
 pub(super) fn session_value(value: &OsStr, inline: bool) -> OsString {
     if !inline {
@@ -184,6 +157,21 @@ pub(super) fn parse_session(
     while index < values.len() {
         match values[index].as_str() {
             _ if index == command_index => {}
+            "--" => {
+                if subcommand.is_none() {
+                    return Ok(Action::Help(help(None)));
+                }
+                if let Some(value) = values.get(index + 1) {
+                    return Err(ParseError {
+                        message: format!(
+                            "unknown command {value:?} for \"symbrowse session {}\"",
+                            subcommand.as_deref().unwrap_or("")
+                        ),
+                        exit_code: 2,
+                    });
+                }
+                break;
+            }
             "--session" => {
                 index += 1;
                 required_value(values, index, "--session")?;
@@ -192,13 +180,14 @@ pub(super) fn parse_session(
             value if value.starts_with("--session=") => {
                 session = session_value(&raw[index], true);
             }
-            "--json" | "--json=true" => json = true,
-            "--json=false" => json = false,
+            "--json" => json = true,
+            value if value.starts_with("--json=") => json = parse_bool("--json", &value[7..])?,
             "--output" => {
                 index += 1;
                 output = required_value(values, index, "--output")?.to_owned();
             }
             value if value.starts_with("--output=") => output = value[9..].to_owned(),
+            value if super::root_session::is_help_flag(value) => {}
             "list" | "info" if index > command_index && subcommand.is_none() => {
                 subcommand = Some(values[index].clone());
             }

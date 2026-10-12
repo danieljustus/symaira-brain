@@ -1,11 +1,8 @@
 //! Library inventory behind `symbrain skills list`.
 //!
-//! The native slice deliberately covers libraries whose entries all load
-//! cleanly: Go reports a per-entry issue with cap-std error text when a
-//! `SKILL.md` is missing, unreadable or malformed, and that text is not
-//! reproducible here. [`super::install`] callers therefore keep such libraries
-//! on Go (see the CLI fallback gate) — the issue shape below exists so the
-//! report type is complete, not as a byte-compatible error path.
+//! Each bundle has a confined root and the shared bounded read budget. Ordinary
+//! read errors retain Go's operation/relative document label; resource-bound
+//! and special-file refusals keep the pinned corrective contracts.
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -30,7 +27,7 @@ pub struct LibraryEntry {
     /// Canonicalized frontmatter category.
     pub category: String,
     /// Absolute skill directory.
-    pub path: String,
+    pub path: PathBuf,
 }
 
 #[derive(Debug)]
@@ -106,8 +103,13 @@ pub fn list_library(library_dir: &Path) -> (Vec<LibraryEntry>, Vec<Issue>) {
                     }
                     .to_owned(),
                     severity: "error".to_owned(),
-                    message: error.to_string(),
-                    path: library_dir.display().to_string(),
+                    message: match &error {
+                        LibraryReadError::Io(error) => {
+                            crate::io_contract::path_error("open", library_dir, error)
+                        }
+                        LibraryReadError::InputBound => error.to_string().into(),
+                    },
+                    path: crate::GoText::from_path(library_dir),
                 }],
             );
         }
@@ -120,8 +122,8 @@ pub fn list_library(library_dir: &Path) -> (Vec<LibraryEntry>, Vec<Issue>) {
                 vec![Issue {
                     code: "library_read".to_owned(),
                     severity: "error".to_owned(),
-                    message: error.to_string(),
-                    path: library_dir.display().to_string(),
+                    message: crate::io_contract::path_error("open", library_dir, &error),
+                    path: crate::GoText::from_path(library_dir),
                 }],
             );
         }
@@ -132,16 +134,29 @@ pub fn list_library(library_dir: &Path) -> (Vec<LibraryEntry>, Vec<Issue>) {
     let mut issues = Vec::new();
     for entry in entries {
         let root = entry.path();
-        if !root.is_dir() {
+        if !entry.file_type().is_ok_and(|kind| kind.is_dir()) {
             continue;
         }
         let name = entry.file_name();
-        let issue_path = name.to_string_lossy().into_owned();
-        let relative = PathBuf::from(&name).join("SKILL.md");
+        let issue_path = crate::GoText::from_path(Path::new(&name));
+        let bundle_cap = match library_cap.open_dir(&name) {
+            Ok(directory) => directory,
+            Err(error) => {
+                let message = crate::io_contract::path_error("open", &root, &error)
+                    .prefixed("open skill root: ");
+                issues.push(Issue {
+                    code: "skill_load".into(),
+                    severity: "error".into(),
+                    message,
+                    path: issue_path.clone(),
+                });
+                continue;
+            }
+        };
         let bytes = match read_skill_document(
-            &library_cap,
-            &relative,
-            &format!("{issue_path}/SKILL.md"),
+            &bundle_cap,
+            Path::new("SKILL.md"),
+            "SKILL.md",
             Some(&mut budget),
         ) {
             Ok(bytes) => bytes,
@@ -167,14 +182,14 @@ pub fn list_library(library_dir: &Path) -> (Vec<LibraryEntry>, Vec<Issue>) {
             name: frontmatter.name,
             description: frontmatter.description,
             category: normalize_category(&frontmatter.category),
-            path: absolute(&root),
+            path: std::path::absolute(&root).unwrap_or(root),
         });
     }
     canonicalize_categories(&mut loaded);
     (loaded, issues)
 }
 
-fn load_issue(error: &impl std::fmt::Display, path: &str, rejected: bool) -> Issue {
+fn load_issue(error: &impl std::fmt::Display, path: &crate::GoText, rejected: bool) -> Issue {
     Issue {
         code: if rejected {
             "skill_input_rejected"
@@ -183,8 +198,8 @@ fn load_issue(error: &impl std::fmt::Display, path: &str, rejected: bool) -> Iss
         }
         .to_owned(),
         severity: "error".to_owned(),
-        message: error.to_string(),
-        path: path.to_owned(),
+        message: error.to_string().into(),
+        path: path.clone(),
     }
 }
 
@@ -211,11 +226,4 @@ fn canonicalize_categories(entries: &mut [LibraryEntry]) {
 /// Trims and collapses category whitespace without changing the spelling.
 fn normalize_category(category: &str) -> String {
     category.split_whitespace().collect::<Vec<_>>().join(" ")
-}
-
-fn absolute(path: &Path) -> String {
-    std::path::absolute(path)
-        .unwrap_or_else(|_| path.to_path_buf())
-        .display()
-        .to_string()
 }

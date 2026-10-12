@@ -337,18 +337,24 @@ fn compose_body(
     bundle: &Bundle,
     target_name: &str,
     config: &TargetConfig,
-) -> Result<String, SkillError> {
+) -> Result<Vec<u8>, SkillError> {
     let prepend = overlay_text(bundle, target_name, "prepend.md", &config.prepend)?;
     let append = overlay_text(bundle, target_name, "append.md", &config.append)?;
     let mut parts = Vec::new();
     if !prepend.trim().is_empty() {
-        parts.push(prepend.trim_end_matches('\n').to_owned());
+        parts.push(prepend.trim_end_matches('\n').as_bytes().to_vec());
     }
-    parts.push(bundle.body.trim_end_matches('\n').to_owned());
+    let mut body = bundle.body.as_bytes();
+    while body.last() == Some(&b'\n') {
+        body = &body[..body.len() - 1];
+    }
+    parts.push(body.to_vec());
     if !append.trim().is_empty() {
-        parts.push(append.trim_end_matches('\n').to_owned());
+        parts.push(append.trim_end_matches('\n').as_bytes().to_vec());
     }
-    Ok(format!("{}\n", parts.join("\n\n")))
+    let mut body = parts.join(b"\n\n".as_slice());
+    body.push(b'\n');
+    Ok(body)
 }
 
 fn overlay_text(

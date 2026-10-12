@@ -18,7 +18,16 @@ impl Store {
     /// Returns a `StoreError` when validation, SQLite, or filesystem access fails.
     pub fn open(path: &Path) -> Result<Self, StoreError> {
         if let Some(parent) = path.parent() {
-            fs::create_dir_all(parent)
+            let mut builder = fs::DirBuilder::new();
+            builder.recursive(true);
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::DirBuilderExt;
+                // Match memory/paths: private at creation, existing modes intact.
+                builder.mode(0o700);
+            }
+            builder
+                .create(parent)
                 .map_err(|error| StoreError::Io(format!("create memory directory: {error}")))?;
         }
         let store = Self::configure(Connection::open(path)?)?;

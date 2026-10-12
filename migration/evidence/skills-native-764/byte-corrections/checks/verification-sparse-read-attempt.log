@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/workspace/symaira-skills764-byte-contracts/migration/evidence/skills-native-764/byte-corrections/checks/verify_source.py", line 153, in <module>
+    if __name__ == '__main__': main()
+                               ^^^^^^
+  File "/workspace/symaira-skills764-byte-contracts/migration/evidence/skills-native-764/byte-corrections/checks/verify_source.py", line 84, in main
+    raw = (ROOT/name).read_bytes(); assert raw == parent(name)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1019, in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/workspace/symaira-skills764-byte-contracts/browse/Cargo.toml'

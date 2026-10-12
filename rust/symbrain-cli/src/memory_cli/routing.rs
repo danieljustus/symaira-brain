@@ -43,10 +43,13 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
     }
     // Valid operations still retain configuration/DB and governed-write gates
     // until their source-bound process contracts are completed.
-    if verb == "search" && super::config::load().prefilter {
+    let prefilter = verb == "search" && super::config::load().prefilter;
+    let path = resolve_db_path(Some(&parsed.raw("db")));
+    // SOURCE_ONLY cutover preparation: publication requires real process
+    // parity. Keep creation, machine-int and malformed-row boundaries on Go.
+    if prefilter && !symbrain_memory::Store::direct_prefilter_supported(&path) {
         return true;
     }
-    let path = resolve_db_path(Some(&parsed.raw("db")));
     if !database_path_is_usable(&path) {
         return true;
     }
@@ -61,6 +64,12 @@ pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
         return true;
     }
     if verb == "set" {
+        let config = super::config::load();
+        if !parsed.staged && config.conflict_enabled
+            && !symbrain_memory::Store::direct_conflict_supported(&path, &parsed.text("scope"))
+        {
+            return true;
+        }
         let entities = parsed
             .text("entities")
             .split(',')

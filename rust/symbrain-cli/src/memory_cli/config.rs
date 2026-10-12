@@ -15,6 +15,10 @@ pub(super) struct Config {
     pub ollama_model: String,
     pub prefilter: bool,
     pub conflict_enabled: bool,
+    pub conflict_provider: String,
+    pub conflict_contradiction: Option<f64>,
+    pub conflict_near_dup: Option<f64>,
+    pub conflict_max_candidates: Option<i64>,
     pub quantize_binary: bool,
 }
 
@@ -26,6 +30,10 @@ impl Default for Config {
             ollama_model: "nomic-embed-text".to_owned(),
             prefilter: false,
             conflict_enabled: true,
+            conflict_provider: String::new(),
+            conflict_contradiction: Some(0.80),
+            conflict_near_dup: Some(0.95),
+            conflict_max_candidates: Some(10),
             quantize_binary: false,
         }
     }
@@ -100,6 +108,16 @@ fn merge(config: &mut Config, path: &std::path::Path) -> Option<()> {
             apply(config, path, value);
         } else if let Some(value) = item.as_bool() {
             apply(config, path, if value { "true" } else { "false" });
+        } else if let Some(value) = item.as_integer() {
+            apply(config, path, &value.to_string());
+        } else if let Some(value) = item.as_float() {
+            if path == "conflict.max_candidates" {
+                // Go converts TOML floats to int. Leave this representation
+                // delegated until its platform-dependent range is exercised.
+                config.conflict_max_candidates = None;
+            } else {
+                apply(config, path, &value.to_string());
+            }
         }
     }
     Some(())
@@ -123,9 +141,86 @@ fn apply(config: &mut Config, path: &str, value: &str) {
         "conflict.enabled" => {
             config.conflict_enabled = config_value::parse_bool(value).unwrap_or(true);
         }
+        "conflict.llm_provider" => value.clone_into(&mut config.conflict_provider),
+        "conflict.contradiction_threshold" => {
+            config.conflict_contradiction = conflict_float(value);
+        }
+        "conflict.near_dup_threshold" => config.conflict_near_dup = conflict_float(value),
+        "conflict.max_candidates" => config.conflict_max_candidates = value.parse().ok(),
         "hybrid_search.quantize_to_binary" => {
             config.quantize_binary = config_value::parse_bool(value).unwrap_or(false);
         }
         _ => {}
+    }
+}
+
+fn conflict_float(value: &str) -> Option<f64> {
+    // Validation remains configkit-compatible. Valid but unsupported hex and
+    // nonfinite representations retain Go, never silently select defaults.
+    value.replace('_', "").parse::<f64>().ok().filter(|v| v.is_finite())
+}
+
+impl Config {
+    pub(super) fn deterministic_conflict_supported(&self, staged: bool) -> bool {
+        self.conflict_provider.is_empty()
+            && (staged || !self.conflict_enabled || (!self.prefilter
+                && self.conflict_contradiction.is_some()
+                && self.conflict_near_dup.is_some()
+                && self.conflict_max_candidates.is_some()))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn deterministic_admission_preserves_unsupported_configurations() {
+        let mut config = Config::default();
+        assert!(config.deterministic_conflict_supported(false));
+        for provider in ["ollama", "openai", " "] {
+            apply(&mut config, "conflict.llm_provider", provider);
+            assert!(!config.deterministic_conflict_supported(false));
+            assert!(!config.deterministic_conflict_supported(true));
+        }
+        config.conflict_provider.clear();
+        for text in ["0x1.ep-1", "NaN", "+Inf"] {
+            apply(&mut config, "conflict.near_dup_threshold", text);
+            assert!(!config.deterministic_conflict_supported(false));
+            assert!(config.deterministic_conflict_supported(true));
+        }
+        apply(&mut config, "conflict.near_dup_threshold", "0.9_5");
+        assert_eq!(config.conflict_near_dup, Some(0.95));
+        config.prefilter = true;
+        assert!(!config.deterministic_conflict_supported(false));
+        config.conflict_enabled = false;
+        assert!(config.deterministic_conflict_supported(false));
+    }
+
+    #[test]
+    fn numeric_file_and_string_overrides_keep_configkit_zero_semantics() {
+        let directory = tempfile::tempdir().unwrap();
+        let file = directory.path().join("config.toml");
+        let mut config = Config::default();
+        std::fs::write(&file, "[conflict]\nnear_dup_threshold=0.91\ncontradiction_threshold=0.7\nmax_candidates=3\n").unwrap();
+        merge(&mut config, &file).unwrap();
+        assert_eq!(config.conflict_near_dup, Some(0.91));
+        assert_eq!(config.conflict_contradiction, Some(0.7));
+        assert_eq!(config.conflict_max_candidates, Some(3));
+        std::fs::write(&file, "[conflict]\nenabled=false\nnear_dup_threshold=0\nmax_candidates=0\n").unwrap();
+        merge(&mut config, &file).unwrap();
+        assert!(config.conflict_enabled);
+        assert_eq!(config.conflict_near_dup, Some(0.91));
+        assert_eq!(config.conflict_max_candidates, Some(3));
+        // Environment/string values are not zero-skipped; checker normalizes.
+        apply(&mut config, "conflict.near_dup_threshold", "0");
+        apply(&mut config, "conflict.max_candidates", "-1");
+        assert_eq!(config.conflict_near_dup, Some(0.0));
+        assert_eq!(config.conflict_max_candidates, Some(-1));
+        std::fs::write(&file, "[conflict]\nmax_candidates=1.5\n").unwrap();
+        merge(&mut config, &file).unwrap();
+        assert!(!config.deterministic_conflict_supported(false));
+        apply(&mut config, "conflict.max_candidates", "2");
+        assert!(config.deterministic_conflict_supported(false));
     }
 }

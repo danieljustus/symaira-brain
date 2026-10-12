@@ -23,7 +23,7 @@ fn normalize_issue(code: &str, severity: &str, message: impl Into<String>, path:
     Issue {
         code: code.into(),
         severity: severity.into(),
-        message: message.into(),
+        message: Into::<String>::into(message).into(),
         path: path.into(),
     }
 }
@@ -216,7 +216,7 @@ pub fn validate_with_targets(bundle: &Bundle, known_targets: &[String]) -> Vec<I
     for path in paths {
         let markdown_text;
         let (text, offset) = if path == "SKILL.md" {
-            (&bundle.body as &str, bundle.body_line_offset)
+            (bundle.body.as_str(), bundle.body_line_offset)
         } else {
             markdown_text = String::from_utf8_lossy(&bundle.markdown[&path]);
             (markdown_text.as_ref(), 0)

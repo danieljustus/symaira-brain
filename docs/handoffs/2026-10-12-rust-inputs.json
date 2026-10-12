@@ -1,0 +1,30 @@
+{
+  "base_code_commit": "dfa42dc32859b4da636054d215dc6a80d619a959",
+  "wip_source_sha256": {
+    "browse/crates/symbrowse-cli/src/daemon_state.rs": "eeaa498ce8ff5c4f1f8b386b6a8cf493d808ac531fdaebab2e01d69f2e740998",
+    "browse/crates/symbrowse-cli/src/main.rs": "e4c18c67d3e6465222c0f1e26953503e58aaac81f0ad2f12b66b0307ed70b62e",
+    "browse/crates/symbrowse-cli/src/root_session.rs": "d85036b20eb247dc1960c14a8cb3c6238f0740e3c7ce19ff0be0606329eff4ae",
+    "browse/port/harness/daemon_registry_cli.py": "89c8f4a5f81b2d8df673dccafee1f6d433929aed01331c48acc36c21908d4c13",
+    "browse/port/harness/root_session_cli.py": "fb2b2f53bff43236aad0a6486fc39e352e14e82cc0198f7f8dd863ef5e07464a",
+    "rust/symbrain-cli/src/memory_cli/config.rs": "8650321e0f92a04235d50a18f90a6e8081692c6d729be4bd2ccf3099537a6713",
+    "rust/symbrain-cli/src/memory_cli/routing.rs": "7fc945014e27a4391558ddce03b99e8645a45d0710d2ded81ccf3dbad474e72b",
+    "rust/symbrain-cli/src/memory_cli/search.rs": "8b779ecba233e340419dd7485f24dc3318a8bbc4ab6367c95bf9007c4ecfcb12",
+    "rust/symbrain-cli/src/memory_cli/tests.rs": "41d536c827d2a5282d7d9e2898e5f18cbaa7ab501aaddfa73c7a0d0e2229d8a9",
+    "rust/symbrain-cli/src/memory_cli/write.rs": "95bc8da7c3950dd841af9c7291c3277ea8845455584ad48147c3251d6f7c0f79",
+    "rust/symbrain-memory/src/cli_conflict.rs": "9445bb7606872fd466112db32477c61f04d26655917a9614a1f20dfbf9050b26",
+    "rust/symbrain-memory/src/cli_conflict_json.rs": "63e9d61b038dcd70351ba6d70fea6a5e6a64eb7471fd693f279384f4c75bb218",
+    "rust/symbrain-memory/src/cli_conflict_tests.rs": "ee2042cf7c7d3d3bd49b6fda8e9897916c07d18cf6469225b837094e79397820",
+    "rust/symbrain-memory/src/cli_write.rs": "018f57ed9ac03867fa217335d2b321000178d5e60849d882071ac42dbc8b43b7",
+    "rust/symbrain-memory/src/retrieval.rs": "2007b1e9da3357569da332de690dd3247b3cec1c60095fa771ccaf95c3fda3ff",
+    "rust/symbrain-memory/src/retrieval_prefilter.rs": "f43f992c1babe0edd70f8a4c8f2173c2d12b8eba75dd42bf63752e49b7fcfd66",
+    "rust/symbrain-memory/src/search_rows.rs": "1ca8f8561c7c74f8bebf8dcb05db506d1089da28fdcb149217d125e0cda3ad66",
+    "scripts/memory-cli-oracle/PREFILTER-CONTRACT.md": "81d986cefbdb4aea87bcdb39c7be47943b6447a1d44ca58dab5eaa4cbcc05d05",
+    "scripts/memory-cli-oracle/WRITE-CONTRACT.md": "f437fddafe93ec7af3ae1b1e9f35c3ca3078bd4ee8a2e1204f94ec3510ef1d25",
+    "scripts/memory-cli-oracle/conflict_writes.py": "ef1d0c0375b2249a9face39ae6bf3a632a5c2e1c29003890e7005ab3fd24cf95",
+    "scripts/memory-cli-oracle/prefilter_search.py": "eee48d85c0f17de70a0190337880e1588908f756a644bd71ab527e35cd550c05",
+    "scripts/memory-cli-oracle/replay.py": "fc527b7050924499318640e0adde3dec76303734e825dbebc003b9e76034d3d7",
+    "scripts/memory-cli-oracle/write_boundaries.py": "f65dd4db2081c93cbe12f8ec82e88dc0973ee9b03e9f344e0006fdfb11bd7760",
+    "scripts/memory-cli-oracle/write_gate.py": "040758e1e1ec33588a92ef24438678a73d6f200cc4c086434b10f1798706823c"
+  },
+  "scope": "Preserved source bytes, not runtime acceptance; no source changes made for closeout."
+}

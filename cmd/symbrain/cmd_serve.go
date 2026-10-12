@@ -228,11 +228,14 @@ func optionalServerDef(alias, directBinary, cockpitCommand, override string) (se
 }
 
 // buildMemoryServer opens the embedded memory runtime (config + SQLite DB
-// + JWT provider) and returns its MCP server, attributed to the given brain
-// profile. It returns nil when the memory core cannot be initialized, so the
-// gateway degrades gracefully (memory tools simply absent) instead of failing
-// the whole serve.
+// + JWT provider) only when the selected profile enables memory. It returns nil
+// when memory is disabled or cannot be initialized, so the gateway degrades
+// gracefully (memory tools are absent) instead of failing the whole serve.
 func buildMemoryServer(p *profile.Profile, stderr io.Writer, version string) *memorymcp.Server {
+	if !p.Server(profile.ServerMemory).Enabled {
+		return nil
+	}
+
 	memcfg, err := memoryconfig.Load()
 	if err != nil {
 		memcfg = memoryconfig.Defaults()

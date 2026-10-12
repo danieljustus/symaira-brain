@@ -42,6 +42,7 @@ func TestLoad_MissingFileYieldsDefaults(t *testing.T) {
 		cfg.Audit != want.Audit ||
 		cfg.Gateway != want.Gateway ||
 		cfg.UpdateCheck != want.UpdateCheck ||
+		cfg.Patterns != want.Patterns ||
 		cfg.Servers != want.Servers {
 		t.Fatalf("Load() = %+v, want defaults %+v", cfg, want)
 	}
@@ -84,8 +85,8 @@ binary_path = "/opt/symvault/symvault"
 	if cfg.UpdateCheck.Enabled != true {
 		t.Errorf("UpdateCheck.Enabled = %v, want true (default)", cfg.UpdateCheck.Enabled)
 	}
-	if cfg.Patterns.Enabled != true || cfg.Patterns.PromotionThreshold != 3 {
-		t.Errorf("Patterns = %+v, want {Enabled:true PromotionThreshold:3} (defaults)", cfg.Patterns)
+	if cfg.Patterns.Enabled || cfg.Patterns.PromotionThreshold != 3 {
+		t.Errorf("Patterns = %+v, want {Enabled:false PromotionThreshold:3} (opt-in default)", cfg.Patterns)
 	}
 }
 
@@ -106,6 +107,19 @@ promotion_threshold = 5
 	}
 	if cfg.Patterns.PromotionThreshold != 5 {
 		t.Errorf("Patterns.PromotionThreshold = %d, want 5", cfg.Patterns.PromotionThreshold)
+	}
+}
+
+func TestLoad_PatternsExplicitOptIn(t *testing.T) {
+	home := withHome(t)
+	writeConfig(t, home, "[patterns]\nenabled = true\n")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error = %v, want nil", err)
+	}
+	if !cfg.Patterns.Enabled {
+		t.Error("Patterns.Enabled = false, want explicit opt-in to enable history")
 	}
 }
 
@@ -149,6 +163,15 @@ func TestLoad_EnvOverridesFileAndDefaults(t *testing.T) {
 			verify: func(t *testing.T, cfg *Config) {
 				if cfg.Audit.Enabled {
 					t.Errorf("Audit.Enabled = true, want false")
+				}
+			},
+		},
+		{
+			name: "env explicitly opts into patterns",
+			envs: map[string]string{"SYMBRAIN_PATTERNS_ENABLED": "true"},
+			verify: func(t *testing.T, cfg *Config) {
+				if !cfg.Patterns.Enabled {
+					t.Error("Patterns.Enabled = false, want true from explicit environment opt-in")
 				}
 			},
 		},

@@ -5,7 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"log/slog"
+	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -79,6 +82,71 @@ func auditProfile() *profile.Profile {
 	p := testProfile()
 	p.Audit.Enabled = true
 	return p
+}
+
+func TestAuditEnabledEffectiveConfig(t *testing.T) {
+	for _, tc := range []struct {
+		name           string
+		profileEnabled bool
+		globalEnabled  *bool
+		want           bool
+	}{
+		{name: "profile opt-out defeats global default", profileEnabled: false, globalEnabled: boolPointer(true), want: false},
+		{name: "global disable vetoes profile opt-in", profileEnabled: true, globalEnabled: boolPointer(false), want: false},
+		{name: "profile opt-in without global config", profileEnabled: true, want: true},
+		{name: "both explicitly enabled", profileEnabled: true, globalEnabled: boolPointer(true), want: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			p := testProfile()
+			p.Audit.Enabled = tc.profileEnabled
+			var cfg *config.Config
+			if tc.globalEnabled != nil {
+				cfg = &config.Config{Audit: config.AuditConfig{Enabled: *tc.globalEnabled}}
+			}
+			server := New(p, nil, slog.Default(), cfg, "dev")
+			if got := server.auditEnabled(); got != tc.want {
+				t.Errorf("auditEnabled() = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+func boolPointer(value bool) *bool { return &value }
+
+func TestServeIO_AuditOptOutSkipsStartup(t *testing.T) {
+	for _, tc := range []struct {
+		name           string
+		profileEnabled bool
+		globalEnabled  bool
+	}{
+		{name: "profile opt-out beats global default", profileEnabled: false, globalEnabled: true},
+		{name: "global disable vetoes profile", profileEnabled: true, globalEnabled: false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			dataHome := t.TempDir()
+			t.Setenv("XDG_DATA_HOME", dataHome)
+			opened := false
+			overrideAuditOpen(t, func(string, audit.Config) (auditSink, error) {
+				opened = true
+				return nil, errors.New("unexpected audit open")
+			})
+
+			p := testProfile()
+			p.Audit.Enabled = tc.profileEnabled
+			cfg := &config.Config{Audit: config.AuditConfig{Enabled: tc.globalEnabled}}
+			server := New(p, nil, slog.Default(), cfg, "dev")
+			input := strings.NewReader("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\"}\n")
+			if err := server.ServeIO(context.Background(), input, io.Discard); err != nil {
+				t.Fatalf("ServeIO: %v", err)
+			}
+			if opened {
+				t.Fatal("disabled effective audit configuration opened the logger")
+			}
+			if _, err := os.Stat(filepath.Join(dataHome, "symbrain", "audit")); !os.IsNotExist(err) {
+				t.Errorf("disabled effective audit configuration created the audit directory: err=%v", err)
+			}
+		})
+	}
 }
 
 func initializeRequest(id float64) map[string]any {
@@ -157,7 +225,7 @@ func TestServeIO_AuditOpenFailure(t *testing.T) {
 	vault := newManagedFake(t, "vault",
 		`[{"name":"health","description":"healthcheck"}]`)
 
-	// cfg != nil exercises the global-audit merge branch in ServeIO.
+	// cfg != nil exercises the global audit gate in ServeIO.
 	cfg := &config.Config{Audit: config.AuditConfig{Enabled: true, Verbose: true}}
 	s := New(auditProfile(), map[string]*broker.ManagedServer{"vault": vault}, slog.New(rec), cfg, "dev")
 

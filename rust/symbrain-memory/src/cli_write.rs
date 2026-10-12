@@ -5,8 +5,11 @@ use chrono::Utc;
 use rusqlite::{Connection, OptionalExtension, params};
 use std::collections::BTreeMap;
 
+#[path = "cli_conflict.rs"]
+mod conflict;
+
 /// A validated direct CLI write. The caller must retain Go fallback for PII,
-/// secondary extraction and enabled conflict checking.
+/// secondary extraction and non-deterministic conflict configurations.
 pub struct DirectWrite {
     pub content: String,
     pub scope: String,
@@ -20,7 +23,7 @@ pub struct DirectWrite {
 }
 
 impl Store {
-    /// Persists the extraction-free, conflict-free CLI service contract.
+    /// Persists the extraction-free CLI contract with default conflict settings.
     ///
     /// # Errors
     /// Returns a SQLite or embedding representation error.
@@ -29,12 +32,38 @@ impl Store {
         request: &DirectWrite,
         generator: &EmbeddingGenerator,
     ) -> Result<String, StoreError> {
-        self.set_direct_service(
+        self.set_direct_cli_with_conflict(request, generator, 0.80, 0.95, 10, &mut |_, _| {})
+    }
+
+    /// Persists a CLI write using the configured deterministic conflict tiers.
+    /// The caller must reject verdict providers and enabled Hamming prefilters.
+    /// Diagnostics are delivered synchronously before subsequent callbacks or
+    /// returned errors; only the CLI caller renders them to its stderr sink.
+    ///
+    /// # Errors
+    /// Returns a persistence/governance error. Checker failures store both.
+    pub fn set_direct_cli_with_conflict(
+        &self,
+        request: &DirectWrite,
+        generator: &EmbeddingGenerator,
+        contradiction: f64,
+        near_dup: f64,
+        max_candidates: i64,
+        diagnostic: &mut dyn FnMut(&str, &[(&str, &str)]),
+    ) -> Result<String, StoreError> {
+        let checker = (!request.staged && request.conflict_enabled).then_some(conflict::Config {
+            contradiction,
+            near_dup,
+            max_candidates,
+        });
+        self.set_direct(
             request,
             generator,
             "symbrain-cli",
             Some(&request.kind),
             true,
+            checker,
+            diagnostic,
         )
     }
 
@@ -46,12 +75,34 @@ impl Store {
         kind: Option<&str>,
         audit_enabled: bool,
     ) -> Result<String, StoreError> {
+        // Keep the existing HTTP/service boundary: this entry point never
+        // opts into the newly prepared CLI conflict checker.
+        if !request.staged && request.conflict_enabled {
+            return Err(StoreError::Invalid(
+                "direct CLI write requires the delegated Go pipeline".into(),
+            ));
+        }
+        self.set_direct(request, generator, source_tool, kind, audit_enabled, None, &mut |_, _| {})
+    }
+
+    // Keep service audit policy and CLI diagnostics separate without changing
+    // DirectWrite or making HTTP callers opt into the CLI conflict contract.
+    #[allow(clippy::too_many_arguments)]
+    fn set_direct(
+        &self,
+        request: &DirectWrite,
+        generator: &EmbeddingGenerator,
+        source_tool: &str,
+        kind: Option<&str>,
+        audit_enabled: bool,
+        checker: Option<conflict::Config>,
+        diagnostic: &mut dyn FnMut(&str, &[(&str, &str)]),
+    ) -> Result<String, StoreError> {
         if !crate::direct_content_supported(&request.content)
             || request
                 .metadata
                 .values()
                 .any(|value| !crate::direct_text_supported(value))
-            || (!request.staged && request.conflict_enabled)
             || !["", "global", "project", "agent", "user", "session"]
                 .contains(&request.scope.as_str())
             || kind
@@ -102,20 +153,38 @@ impl Store {
             .quantize_binary
             .then(|| sign_bits(&embedding.vector));
         let metadata = go_json(&metadata)?;
-        let id = crate::write::new_uuid();
+        let mut id = crate::write::new_uuid();
         let created_at = timestamp();
         let conn = self.lock()?;
-        // Go preserves Prepare creation time and observes Save update time.
-        let updated_at = timestamp();
-        conn.execute(
-            "INSERT INTO memories(id,content,scope,metadata,embedding,embedding_binary,embedding_dim,embedding_source,embedding_model,embedding_quantization,content_hash,lsh_hash,created_at,updated_at,created_by,updated_by,created_session,updated_session,consolidation_status,consolidated_into_id,importance,valid_from,valid_to,superseded_by,tier,expires_at,access_count,last_access,prev_access,review_status,kind,decay_factor,retired_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'','','raw',NULL,0,?,NULL,NULL,'long_term',NULL,1,NULL,NULL,'approved','',1,NULL)",
-            params![id, request.content, scope, metadata, embedding_json(&embedding.vector), binary,
-                i64::try_from(embedding.vector.len()).unwrap_or(768), embedding.source, model, "",
-                crate::write::content_hash(&request.content), crate::lsh::compute_lsh(&embedding.vector).map_err(StoreError::Invalid)?,
-                created_at, updated_at, request.author, request.author, valid_from],
-        ).map_err(|error| StoreError::Invalid(format!("failed to save memory: {error}")))?;
-        if audit_enabled {
-            audit(&conn, "set", &id, scope, "", &request.author, "");
+        // Check errors discard the entire plan, as in storeWithConflictCheck.
+        // Successful recall has already recorded its best-effort accesses.
+        let plan = checker.map_or_else(conflict::Plan::default, |config| {
+            match conflict::check(&conn, config, &id, &request.content, scope, &embedding) {
+                Ok(plan) => plan,
+                Err(error) => {
+                    diagnostic("WARN conflict check degraded; storing memory unchanged", &[("error", &error.to_string())]);
+                    conflict::Plan::None
+                }
+            }
+        });
+        if let conflict::Plan::Repeat(existing) = &plan {
+            id.clone_from(existing);
+            diagnostic("INFO conflict: duplicate write deduplicated", &[("id", &id)]);
+        } else {
+            plan.before_save(&conn, &id, scope, &request.author, diagnostic);
+            // Go observes creation before checking, and update at SaveMemory.
+            let updated_at = timestamp();
+            conn.execute(
+                "INSERT INTO memories(id,content,scope,metadata,embedding,embedding_binary,embedding_dim,embedding_source,embedding_model,embedding_quantization,content_hash,lsh_hash,created_at,updated_at,created_by,updated_by,created_session,updated_session,consolidation_status,consolidated_into_id,importance,valid_from,valid_to,superseded_by,tier,expires_at,access_count,last_access,prev_access,review_status,kind,decay_factor,retired_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'','','raw',NULL,0,?,NULL,NULL,'long_term',NULL,1,NULL,NULL,'approved','',1,NULL)",
+                params![id, request.content, scope, metadata, embedding_json(&embedding.vector), binary,
+                    i64::try_from(embedding.vector.len()).unwrap_or(768), embedding.source, model, "",
+                    crate::write::content_hash(&request.content), crate::lsh::compute_lsh(&embedding.vector).map_err(StoreError::Invalid)?,
+                    created_at, updated_at, request.author, request.author, valid_from],
+            ).map_err(|error| StoreError::Invalid(format!("failed to save memory: {error}")))?;
+            if audit_enabled {
+                audit(&conn, "set", &id, scope, "", &request.author, "");
+            }
+            plan.after_save(&conn, &id, scope, &request.author, &created_at, diagnostic);
         }
         crate::cli_entity::link(&conn, &id, &request.entities, &request.author);
         if let Some(kind) = kind {
@@ -179,9 +248,7 @@ pub(crate) fn audit(
     author: &str,
     detail: &str,
 ) {
-    let nonempty = |value: &str| (!value.is_empty()).then(|| value.to_owned());
-    let _ = conn.execute("INSERT INTO audit_log(id,action,memory_id,scope,session,actor,detail,created_at) VALUES(?,?,?,?,?,?,?,?)",
-        params![crate::write::new_uuid(), action, nonempty(id), nonempty(scope), nonempty(session), nonempty(author), nonempty(detail), timestamp()]);
+    let _ = conflict::audit_result(conn, action, id, scope, session, author, detail);
 }
 
 pub(crate) fn go_json(value: &impl serde::Serialize) -> Result<String, StoreError> {

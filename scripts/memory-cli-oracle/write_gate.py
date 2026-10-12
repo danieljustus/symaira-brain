@@ -14,6 +14,7 @@ import replay
 import writes
 import write_boundaries
 import write_failures
+import conflict_writes
 
 
 def main():
@@ -39,10 +40,25 @@ def main():
         fallback_source.write_bytes((repo/'scripts/memory-cli-oracle/write_fallback.go.txt').read_bytes())
         fallback=root/('fallback.exe' if os.name=='nt' else 'fallback')
         replay.run(['go','build','-o',str(fallback),'./scripts/memory-write-fallback'],source,env)
-        writes.execute(go,rust,reports/'writes.json')
-        deletes.execute(go,rust,reports/'deletes.json')
-        write_boundaries.execute(go,rust,fallback,reports/'fallback-boundaries.json')
-        write_failures.execute(go,rust,reports/'write-failures.json')
+        # Retain every original input/control and raw failure. The original
+        # default-conflict input now compares actual native output/exit/state;
+        # all other original boundaries still prove literal Go delegation.
+        gate_failures=[]
+        for name,run,arguments in (
+            ('writes',writes.execute,(go,rust,reports/'writes.json')),
+            ('deletes',deletes.execute,(go,rust,reports/'deletes.json')),
+            ('deterministic-conflicts',conflict_writes.execute,(go,rust,reports/'conflicts.json')),
+            ('conflict-boundaries',conflict_writes.boundaries,(go,rust,fallback,reports/'conflict-boundaries.json')),
+            ('fallback-boundaries',write_boundaries.execute,(go,rust,fallback,reports/'fallback-boundaries.json')),
+            ('write-failures',write_failures.execute,(go,rust,reports/'write-failures.json')),
+        ):
+            try:
+                run(*arguments)
+            except Exception:
+                import traceback
+                failure=traceback.format_exc()
+                (reports/(name+'-failure.txt')).write_text(failure,encoding='utf-8')
+                gate_failures.append(name)
         controls=[]
         expected={'identity':'one returned primary row','audit':'actual Go/native write state differs','exit':'native set exit must be zero'}
         for mode in ('identity','audit','exit'):
@@ -61,9 +77,11 @@ def main():
                      candidate_source_sha256={name:replay.digest((repo/name).read_bytes()) for name in sorted(set(files))},
                      frozen_go_source_sha256={str(path.relative_to(source)):replay.digest(path.read_bytes()) for path in sorted(source.rglob('*.go')) if not str(path.relative_to(source)).startswith(('scripts/memory-write-control/','scripts/memory-write-fallback/'))},
                      corekit_configkit_sha256=replay.CONFIGKIT_SHA,go_mod_sha256=replay.digest((source/'go.mod').read_bytes()),go_sum_sha256=replay.digest((source/'go.sum').read_bytes()),
-                     controls=controls,operator_home_used=False,operator_credentials_in_runtime=False,embedding_endpoints_owned=True,paid_endpoints_used=False,
+                     controls=controls,gate_failures=gate_failures,operator_home_used=False,operator_credentials_in_runtime=False,embedding_endpoints_owned=True,paid_endpoints_used=False,
                      report_sha256={path.name:replay.digest(path.read_bytes()) for path in sorted(reports.iterdir()) if path.is_file() and path.name!='receipt.json'})
         writes.save_json(reports/'receipt.json',receipt)
+        if gate_failures:
+            raise RuntimeError(('write suites failed; raw failures retained',gate_failures))
 
 
 if __name__=='__main__': main()

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prove conservative routes actually delegate Go and preserve literal replies."""
+"""Prove delegated replies and the original deterministic native boundary."""
 import json
 from contextlib import closing
 from pathlib import Path
@@ -7,6 +7,7 @@ import sqlite3
 import tempfile
 import replay
 import writes
+import conflict_writes
 
 
 def execute(go,rust,wrapper,report):
@@ -33,7 +34,8 @@ def execute(go,rust,wrapper,report):
             with tempfile.TemporaryDirectory(prefix='memory-write-boundary-') as temporary:
                 root=Path(temporary); env=writes.environment(root); path=root/'memory.db'; trace=root/'delegated.json'
                 env.update(SYMMEMORY_OLLAMA_URL=f'http://127.0.0.1:{server.server_port}/api/embeddings',SYMMEMORY_CONFLICT_ENABLED='false')
-                assert replay.output(go,['list','--db',str(path)],root,env)['exit']==0
+                preparation=replay.output(go,['list','--db',str(path)],root,env)
+                assert preparation['exit']==0
                 if name=='default-conflict': env.pop('SYMMEMORY_CONFLICT_ENABLED')
                 if mutation:
                     with closing(sqlite3.connect(path)) as db, db:
@@ -44,6 +46,16 @@ def execute(go,rust,wrapper,report):
                 if name=='new-file': path=root/'new.db'
                 args=[verb,content,'--db',str(path),'--json',*extra]
                 if verb=='set': args+=['--kind','fact']
+                if name=='default-conflict':
+                    # Keep this exact original input, defaults, Go-created empty
+                    # store and original embedding handler. No probe or reseed.
+                    case=dict(name=name,query=content,outcome='new',kind='reference',format='json',model='nomic-embed-text')
+                    assert before['memories']==[]
+                    writes.Embeddings.mode='success'
+                    record=conflict_writes.compare_pair(go,rust,root,env,path,args,case,[],
+                        writes.Embeddings,report,[dict(args=['list','--db',str(path)],result=preparation)],records)
+                    records.append(dict(record,name=name,native=True))
+                    continue
                 env.update(SYMBRAIN_GO_BINARY=str(wrapper),MEMORY_CLI_FALLBACK_GO=str(go),MEMORY_CLI_FALLBACK_RECEIPT=str(trace))
                 output=replay.output(rust,args,root,env)
                 assert trace.is_file(), ('not delegated',name,output)
@@ -56,5 +68,7 @@ def execute(go,rust,wrapper,report):
                 records.append(dict(name=name,match=True,transcript=output,delegated=delegated,database_before=before,database_after=after,database_unchanged=unchanged))
     finally:
         server.shutdown(); server.server_close(); thread.join()
-    writes.save_json(report,dict(cases=records,passed=len(records),total=len(records)))
-    print(json.dumps(dict(fallback_boundaries=len(records))))
+    native=sum(record.get('native',False) for record in records)
+    writes.save_json(report,dict(cases=records,passed=len(records),total=len(records),native_pairs=native,delegated_observations=len(records)-native))
+    assert len(records)==len(scenarios) and native==1
+    print(json.dumps(dict(fallback_boundaries=len(records)-native,native_pairs=native)))

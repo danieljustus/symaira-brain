@@ -1,0 +1,343 @@
+{
+  "kind": "SOURCE_ONLY author handoff verification; no Cargo, Go SDK execution, products, providers, targets, ports or native approval",
+  "source_head": "625e746a9ab9e31f631458244c7f82d6e1754457",
+  "original_head": "db9760a3d312173e8cd096d05925319a78308b48",
+  "original_worktree_still_clean": true,
+  "retained_members_verified": 319,
+  "original_review_files": 317,
+  "original_SDK_consumer_references": 24,
+  "additional_SDK_source_roundtrips": 8,
+  "original_Go_files_byte_identical": 1217,
+  "changed_files": [
+    {
+      "path": ".github/workflows/skills-native.yml",
+      "sha256": "a4ce7e10f5e8abbab7b96f610723a1b794c116dc2f94d7f6306207ac88e30fa9",
+      "bytes": 3241
+    },
+    {
+      "path": "docs/adr/native-skills-source-corrections-764.md",
+      "sha256": "d4121413c0bfdead2e3ea143d1cca441bf4473c92869d8af80d82a19fa43fb63",
+      "bytes": 7770
+    },
+    {
+      "path": "docs/adr/skills-native-surface-764.md",
+      "sha256": "4ded76e9ff547394b7c26eba74b9b2f327ffcba75230fbb0b272c176dd2b47c6",
+      "bytes": 6446
+    },
+    {
+      "path": "migration/contract-matrix.csv",
+      "sha256": "84e80d38c7526487a58e325ec125ecc30006c2d5af87607ba6bf1c8844574c7f",
+      "bytes": 30471
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/original/original-review.tar.gz",
+      "sha256": "b4bd463a0ad1e29cd25675ce78b086015452100e5ef4eca94b1720c24bf4d47d",
+      "bytes": 903890
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/original/retention.json",
+      "sha256": "a3cc7d6ac803eab87dc305ba3a755387dd794b6a6b064df1db906e8fe979dc44",
+      "bytes": 116465
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/sdk-io/os__dir_unix.go.gz",
+      "sha256": "cc84934413948efc3e06a8337a7e4f8cfd6d7ff69389423ba49b9551d189fd77",
+      "bytes": 2155
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/sdk-io/os__dir_windows.go.gz",
+      "sha256": "4424f531eba4e82be9f88012e445ac2c8b745a0372e590fad112fe96795b77f9",
+      "bytes": 3084
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/sdk-io/os__file.go.gz",
+      "sha256": "d5e003d469ac7d9004ba605b8a59610c5030552729766ae809b2b99811d5c97e",
+      "bytes": 9205
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/sdk-io/os__root_unix.go.gz",
+      "sha256": "e95b7c712fb2a2e228527463a8632779e4ad560f007834a36f3ed03a5c6116cd",
+      "bytes": 2819
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/sdk-io/os__root_windows.go.gz",
+      "sha256": "0fe790b29e9b5078b0e0f636193c47881cb5c90b14a8a2ea7b0dd09a742e2d2e",
+      "bytes": 4177
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/sdk-io/os__stat_unix.go.gz",
+      "sha256": "92a432ec1f4059e2e4931c6c669622fd38821afdecbf34a0adbd18f1f17d71e6",
+      "bytes": 526
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/sdk-io/os__stat_windows.go.gz",
+      "sha256": "ba961f8a7062e426db9142e39a097f64abe426bc291dea4885f7339c70ed1f54",
+      "bytes": 2122
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/sdk-io/retention.json",
+      "sha256": "6fd1a628b5522194ced2ff3ab777c4415c38515888e47fedee13f2c886f01aff",
+      "bytes": 3625
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/sdk-io/runtime__signal_unix.go.gz",
+      "sha256": "52045ee2eebf2ca069e73f0b0d72259f254ddf2d23d9c28f435a770f4b88bb3d",
+      "bytes": 14962
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/source-checks/actionlint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/source-checks/check.py",
+      "sha256": "fdf5c5bcc97c1a5f8a94bba84bfd0a80f4d5b4097df549492614147560251d54",
+      "bytes": 6715
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/source-checks/diff-check.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/source-checks/initial-inline-failure.log",
+      "sha256": "89f87ae858412a6a1249e19463d8d3ea44c193c96c790af7db96a01af972902c",
+      "bytes": 542
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/source-checks/rustfmt.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/source-checks/static-checks.json",
+      "sha256": "0205c67cb4a592197486237bef65de28f9113205ca6c35a0b470ac466a6309bd",
+      "bytes": 29884
+    },
+    {
+      "path": "migration/evidence/skills-native-764/corrections/source-checks/static-checks.log",
+      "sha256": "fbe4fba3c6b068958a35955e6d06539e6980b1ae56260e1417ed066530544ca9",
+      "bytes": 121
+    },
+    {
+      "path": "migration/implementation-plan.md",
+      "sha256": "fd5bbf4d674e90f68205a2880a29011d0f7861539e08ffbdba8c5f58d0dad327",
+      "bytes": 160951
+    },
+    {
+      "path": "migration/skills-native-764-inventory.md",
+      "sha256": "729379c955685baf34f588a37734b5579d31b0b36796abb450d09aeae9234b4f",
+      "bytes": 4662
+    },
+    {
+      "path": "rust/symbrain-cli/src/lib.rs",
+      "sha256": "029bbcfd06eb8adbb428bcdbdb50a9038bed8929af25965aa518b69e139d743d",
+      "bytes": 13809
+    },
+    {
+      "path": "rust/symbrain-cli/src/main.rs",
+      "sha256": "3e94f3f39e073b32151350707bc0416a3d01bba19903a0e5ad4a2cb47cf4fff7",
+      "bytes": 222
+    },
+    {
+      "path": "rust/symbrain-cli/src/skills_cli.rs",
+      "sha256": "8dee6be72837db136c46816ef633d5029e124ea100c71260788fbb55db2591c3",
+      "bytes": 3137
+    },
+    {
+      "path": "rust/symbrain-cli/src/skills_cli_list.rs",
+      "sha256": "5003cfe38deaecd22d58646ae1fa09a4a22cc8747afe11835860d1f684e6efc5",
+      "bytes": 4084
+    },
+    {
+      "path": "rust/symbrain-cli/src/skills_cli_misc.rs",
+      "sha256": "11dcbc5ae59dc4365583a169c88d5131cffd3d9c8892a1a2f4caa3152edc02df",
+      "bytes": 8132
+    },
+    {
+      "path": "rust/symbrain-cli/src/skills_cli_status.rs",
+      "sha256": "12ec4de33783326cfc670a5e622156c772e4bef8ba15753958dc239c303a3f67",
+      "bytes": 7159
+    },
+    {
+      "path": "rust/symbrain-cli/src/skills_report_tests.rs",
+      "sha256": "575885f44ecc837e4c7705eee1e419642568e5da07b030d970fc2917c4c69eaa",
+      "bytes": 2707
+    },
+    {
+      "path": "rust/symbrain-cli/src/skills_stdout.rs",
+      "sha256": "8c4353052baa0ba5a2f3bdc35949bd156f637e20cf657c090bd42a7ba4affc47",
+      "bytes": 1255
+    },
+    {
+      "path": "rust/symbrain-cli/src/version_cli.rs",
+      "sha256": "374d7686f45d16031641bac268dae988d77bc031bf50d90db7eb5f363672c709",
+      "bytes": 2491
+    },
+    {
+      "path": "rust/symbrain-cli/tests/skills_raw_transport.rs",
+      "sha256": "ff05e4d560581079c8b952c99e1783813a00dc237a86aa2e06f4bf6be4ebaf79",
+      "bytes": 5173
+    },
+    {
+      "path": "rust/symbrain-gateway/src/dispatch.rs",
+      "sha256": "991aadd1946f06ebe767b90f6469f4f7ed81691b0222bdbc339cffb4327f571a",
+      "bytes": 10819
+    },
+    {
+      "path": "rust/symbrain-gateway/src/embedded/catalog.rs",
+      "sha256": "e78c4ed7575a610ee7c87d218985df65676d2f448a1253ae962fc91060875a03",
+      "bytes": 6965
+    },
+    {
+      "path": "rust/symbrain-gateway/src/embedded/skills_args.rs",
+      "sha256": "49a9c034f69ce90c51635bb932c35721b22c0f15894f500aebdc3e9333a40d4e",
+      "bytes": 9220
+    },
+    {
+      "path": "rust/symbrain-mcp/src/frame.rs",
+      "sha256": "b5d60225cd057e516becd835c20f08e6a2a4fcdbb4db897b704839530ae4b9d3",
+      "bytes": 11165
+    },
+    {
+      "path": "rust/symbrain-mcp/src/lib.rs",
+      "sha256": "9bfbf455591b119ed87cf401dfbaf0a975e6427a9a54775dca1c27f76f006103",
+      "bytes": 653
+    },
+    {
+      "path": "rust/symbrain-mcp/src/raw_skills.rs",
+      "sha256": "67576d1976a4ff887687058a9693097ad93195634e4a0bdd6abae70a8f46a930",
+      "bytes": 1088
+    },
+    {
+      "path": "rust/symbrain-skills/examples/git_stream_fixture.rs",
+      "sha256": "6e79908da22897806d16d1593012dfe9d35e75be91ffbfae73d34b65c8bcd0ec",
+      "bytes": 1721
+    },
+    {
+      "path": "rust/symbrain-skills/src/discover.rs",
+      "sha256": "0477ab926cacbc489382ec76d4364e3457273a2694754335e15e592927d9f734",
+      "bytes": 7937
+    },
+    {
+      "path": "rust/symbrain-skills/src/io_contract.rs",
+      "sha256": "ddf6962c9d7fa42bc55d7cf434e6f41999d2534fba2adcf0a95ee2acbe31463c",
+      "bytes": 1751
+    },
+    {
+      "path": "rust/symbrain-skills/src/lib.rs",
+      "sha256": "d2616fd2550d1b3d4cf4a09f70b27ddbbebeb2ae41e31e7656280aff661b064c",
+      "bytes": 1248
+    },
+    {
+      "path": "rust/symbrain-skills/src/library.rs",
+      "sha256": "d1c80a6f98de6b470c39cec21109d8a1f02cd554100a11142b51c17a3dfd4e80",
+      "bytes": 7695
+    },
+    {
+      "path": "rust/symbrain-skills/src/load_read.rs",
+      "sha256": "7574943fa62c1920b2ea9cc12ac072e7ac1005fbd90c9744d1ecdcdae0f4160d",
+      "bytes": 9722
+    },
+    {
+      "path": "rust/symbrain-skills/src/vcs.rs",
+      "sha256": "0920c0681e68fc8f5ba1bff25f7d895564fbd9567dfe9d68c6e3c1a0efbbccfa",
+      "bytes": 5037
+    },
+    {
+      "path": "rust/symbrain-skills/src/vcs_process.rs",
+      "sha256": "f0ef490eebee4c6e1650f8e11b87d7544f398029bb20bbeccfe5de0251afa060",
+      "bytes": 5055
+    },
+    {
+      "path": "rust/symbrain-skills/src/vcs_restore.rs",
+      "sha256": "7efa207ab8dab1366c87cf1d39bc058353dff04d4d303d29e504b88f0733dfaa",
+      "bytes": 7084
+    },
+    {
+      "path": "rust/symbrain-skills/src/wire.rs",
+      "sha256": "feed66ca1b17de81afc8afda033b00cbb1c6074b30d0a2a8664f37ab9f5fb766",
+      "bytes": 3653
+    },
+    {
+      "path": "rust/symbrain-skills/tests/discovery_read_contract.rs",
+      "sha256": "147006679922dd5586f32f680acc55a1748f707b0ef7c25e0b6ef84ef86af27e",
+      "bytes": 3774
+    },
+    {
+      "path": "scripts/skills-native-oracle/cases.py",
+      "sha256": "e9e253aa40754c588da320bbfca5f84b4af507620490b85299f7ba2e9789fd1e",
+      "bytes": 8139
+    },
+    {
+      "path": "scripts/skills-native-oracle/compare.py",
+      "sha256": "0f9836bbfac4d821eb3dadf103c9727dad66c238d10734047abd9b7e54331d55",
+      "bytes": 5893
+    },
+    {
+      "path": "scripts/skills-native-oracle/fixtures.py",
+      "sha256": "b5405fae9a6db3a76eceb9c52422d47d16ac0f771452698503bab311535c5d71",
+      "bytes": 8779
+    },
+    {
+      "path": "scripts/skills-native-oracle/library_denied.py",
+      "sha256": "87da656f4d46a06f28a9cb9ab3a490133913c048e3683084b78bb184ea7e8729",
+      "bytes": 4709
+    },
+    {
+      "path": "scripts/skills-native-oracle/output_cases.py",
+      "sha256": "fc053a4b6b8da658060ef1f38c2bcc001b5980f97ef1ee645e9b53179e5c187a",
+      "bytes": 4192
+    },
+    {
+      "path": "scripts/skills-native-oracle/run.py",
+      "sha256": "ff0636b88eb98b11aa90cf2293ef2ce807b60b0ecbf8573888298adf3bab82d3",
+      "bytes": 13349
+    }
+  ],
+  "source_check_bindings_reverified": 50,
+  "source_checks": {
+    "static-checks.log": {
+      "sha256": "fbe4fba3c6b068958a35955e6d06539e6980b1ae56260e1417ed066530544ca9",
+      "bytes": 121
+    },
+    "static-checks.json": {
+      "sha256": "0205c67cb4a592197486237bef65de28f9113205ca6c35a0b470ac466a6309bd",
+      "bytes": 29884
+    },
+    "check.py": {
+      "sha256": "fdf5c5bcc97c1a5f8a94bba84bfd0a80f4d5b4097df549492614147560251d54",
+      "bytes": 6715
+    },
+    "initial-inline-failure.log": {
+      "sha256": "89f87ae858412a6a1249e19463d8d3ea44c193c96c790af7db96a01af972902c",
+      "bytes": 542
+    },
+    "rustfmt.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "actionlint.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "diff-check.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  },
+  "new_Rust_test_declarations_prepared": 11,
+  "original_pairs_retained": 567,
+  "prepared_pairs": {
+    "Linux": 638,
+    "Darwin": 638,
+    "Windows": 614
+  },
+  "original_child_input_controls_prepared": 3,
+  "actual_runtime_pairs": 0,
+  "actual_Rust_tests": 0,
+  "target": null,
+  "compiler_or_endpoint_owned": false,
+  "GitHub_writes": false,
+  "different_author_review": "required"
+}

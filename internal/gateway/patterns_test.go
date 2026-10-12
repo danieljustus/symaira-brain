@@ -213,3 +213,11 @@ func TestServeIO_NoRecordingWhenDisabled(t *testing.T) {
 		t.Error("episode store created although [patterns] enabled=false")
 	}
 }
+
+func TestServeIO_NoRecordingByDefault(t *testing.T) {
+	home := withDataHome(t)
+	runOneSession(t, config.Defaults(), []string{"vault_health"})
+	if _, err := os.Stat(patternsStorePath(home, "test")); !os.IsNotExist(err) {
+		t.Errorf("episode store exists with default [patterns] configuration: err=%v", err)
+	}
+}
