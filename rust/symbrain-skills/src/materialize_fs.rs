@@ -42,10 +42,12 @@ fn collect_files(
     Ok(())
 }
 
+#[cfg(not(windows))]
 use fs2::FileExt;
 #[cfg(unix)]
 use std::os::fd::AsFd;
 
+#[cfg(not(windows))]
 fn lock_destination(root: &Dir, parent: &Path, destination: &Path) -> io::Result<std::fs::File> {
     let name = destination
         .file_name()
@@ -57,6 +59,8 @@ fn lock_destination(root: &Dir, parent: &Path, destination: &Path) -> io::Result
         .write(true)
         .create(true)
         .follow(FollowSymlinks::No);
+    #[cfg(unix)]
+    options.mode(0o600);
     let file = {
         let mut opened = None;
         for attempt in 0..16 {
@@ -88,6 +92,66 @@ fn lock_destination(root: &Dir, parent: &Path, destination: &Path) -> io::Result
     Ok(file)
 }
 
+#[cfg(windows)]
+fn lock_destination(root: &Dir, parent: &Path, destination: &Path) -> io::Result<std::fs::File> {
+    lock_destination_windows(
+        root,
+        parent,
+        destination,
+        std::time::Duration::from_secs(30),
+    )
+}
+
+#[cfg(windows)]
+fn lock_destination_windows(
+    root: &Dir,
+    parent: &Path,
+    destination: &Path,
+    timeout: std::time::Duration,
+) -> io::Result<std::fs::File> {
+    use cap_std::fs::OpenOptionsExt;
+    use std::time::{Duration, Instant};
+
+    const FILE_FLAG_DELETE_ON_CLOSE: u32 = 0x0400_0000;
+    const FILE_SHARE_READ: u32 = 1;
+    const FILE_SHARE_WRITE: u32 = 2;
+    let name = destination
+        .file_name()
+        .ok_or_else(|| io::Error::new(io::ErrorKind::InvalidInput, "destination has no name"))?;
+    let path = parent.join(format!(".symskills-lock-{}", name.to_string_lossy()));
+    let deadline = Instant::now() + timeout;
+    let mut options = OpenOptions::new();
+    options
+        .read(true)
+        .write(true)
+        .create_new(true)
+        .follow(FollowSymlinks::No)
+        // Frozen Go Windows uses pathname ownership, not an advisory lock.
+        // Kernel-owned cleanup removes only our handle's file. Denying delete
+        // sharing prevents replacement/unlink while this lock is held.
+        .share_mode(FILE_SHARE_READ | FILE_SHARE_WRITE)
+        .custom_flags(FILE_FLAG_DELETE_ON_CLOSE);
+    loop {
+        match root.open_with(&path, &options) {
+            Ok(file) => return Ok(file.into_std()),
+            Err(error) if error.kind() == io::ErrorKind::AlreadyExists => {
+                let remaining = deadline.saturating_duration_since(Instant::now());
+                if remaining.is_zero() {
+                    return Err(io::Error::new(
+                        io::ErrorKind::TimedOut,
+                        format!(
+                            "timed out acquiring render lock for {}",
+                            destination.display()
+                        ),
+                    ));
+                }
+                std::thread::sleep(remaining.min(Duration::from_millis(10)));
+            }
+            Err(error) => return Err(error),
+        }
+    }
+}
+
 fn open_root(path: &Path) -> io::Result<Dir> {
     let absolute = std::path::absolute(path)?;
     let absolute = normalize_system_alias(&absolute);
@@ -97,7 +161,10 @@ fn open_root(path: &Path) -> io::Result<Dir> {
             if matches!(component, Component::Prefix(_) | Component::RootDir) {
                 continue;
             }
-            return Err(io::Error::new(io::ErrorKind::InvalidInput, "unsafe destination root"));
+            return Err(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                "unsafe destination root",
+            ));
         };
         match open_child_nofollow(&root, Path::new(name)) {
             Ok(child) => root = child,
@@ -105,7 +172,10 @@ fn open_root(path: &Path) -> io::Result<Dir> {
                 root.create_dir(name).map_err(|error| {
                     io::Error::new(
                         error.kind(),
-                        format!("create destination component {}: {error}", name.to_string_lossy()),
+                        format!(
+                            "create destination component {}: {error}",
+                            name.to_string_lossy()
+                        ),
                     )
                 })?;
                 root = open_child_nofollow(&root, Path::new(name))?;
@@ -116,7 +186,7 @@ fn open_root(path: &Path) -> io::Result<Dir> {
     Ok(root)
 }
 
-fn normalize_system_alias(path: &Path) -> PathBuf {
+pub(crate) fn normalize_system_alias(path: &Path) -> PathBuf {
     let text = path.to_string_lossy();
     for (alias, real) in [("/var", "/private/var"), ("/tmp", "/private/tmp")] {
         if (text == alias || text.starts_with(&format!("{alias}/")))
@@ -130,7 +200,6 @@ fn normalize_system_alias(path: &Path) -> PathBuf {
     }
     path.to_path_buf()
 }
-
 
 fn ensure_dir(root: &Dir, relative: &Path) -> io::Result<()> {
     let mut current = root.try_clone()?;

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -81,6 +82,34 @@ func TestResolveServeProfile_Errors(t *testing.T) {
 			t.Fatal("resolveServeProfile() error = nil, want error for a missing file")
 		}
 	})
+}
+
+func TestBuildMemoryServerDisabledDoesNotInitializeState(t *testing.T) {
+	home := withServeHome(t)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, ".config"))
+	t.Setenv("XDG_DATA_HOME", filepath.Join(home, ".local", "share"))
+	t.Setenv("JWT_SECRET_KEY", "")
+
+	profilePath := filepath.Join(t.TempDir(), "disabled.toml")
+	if err := os.WriteFile(profilePath, []byte("[profile]\nname = \"disabled\"\n\n[servers.memory]\nenabled = false\n"), 0o600); err != nil {
+		t.Fatalf("write profile: %v", err)
+	}
+	p, err := resolveServeProfile("", profilePath)
+	if err != nil {
+		t.Fatalf("resolve disabled profile: %v", err)
+	}
+
+	got := buildMemoryServer(p, io.Discard, "test")
+	if got != nil {
+		t.Error("buildMemoryServer() returned a server for disabled memory")
+	}
+	entries, err := os.ReadDir(home)
+	if err != nil {
+		t.Fatalf("read isolated home: %v", err)
+	}
+	if len(entries) != 0 {
+		t.Fatalf("disabled memory initialization created persistent home state: %v", entries)
+	}
 }
 
 // TestRun_McpAndServeDispatch verifies that `symbrain mcp` routes to the

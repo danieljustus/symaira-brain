@@ -1,0 +1,14 @@
+Traceback (most recent call last):
+  File "/workspace/symaira-skills764-byte-contracts/migration/evidence/skills-native-764/byte-corrections/checks/retain_boundaries.py", line 54, in <module>
+    if __name__=='__main__': main()
+                             ^^^^^^
+  File "/workspace/symaira-skills764-byte-contracts/migration/evidence/skills-native-764/byte-corrections/checks/retain_boundaries.py", line 32, in main
+    assert json.loads((directory/'.cargo-checksum.json').read_bytes())['package'] == selected['checksum']
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1019, in read_bytes
+    with self.open(mode='rb') as f:
+         ^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/pathlib.py", line 1013, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/home/agent/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cap-std-4.0.3/.cargo-checksum.json'

@@ -1,0 +1,283 @@
+//! Profile and global audit settings produce effective startup effects.
+use std::fs;
+use std::io::Write;
+use std::process::Output;
+
+use serde_json::Value;
+use tempfile::TempDir;
+
+#[test]
+fn disabled_memory_and_history_do_not_create_startup_state() {
+    let cases = [
+        ("profile-opt-out", false, true, None, false),
+        ("explicit-audit-opt-in", true, true, None, true),
+        ("global-audit-disabled", true, false, None, false),
+        ("environment-audit-opt-in", true, false, Some("true"), true),
+        (
+            "environment-audit-opt-out",
+            true,
+            true,
+            Some("false"),
+            false,
+        ),
+        (
+            "profile-vetoes-environment",
+            false,
+            true,
+            Some("true"),
+            false,
+        ),
+    ];
+    for (case, profile_audit, global_audit, audit_override, expect_audit) in cases {
+        let root = TempDir::new().unwrap();
+        let config = root.path().join("config/symbrain");
+        fs::create_dir_all(&config).unwrap();
+        fs::write(
+            config.join("config.toml"),
+            format!("[audit]\nenabled = {global_audit}\n"),
+        )
+        .unwrap();
+        let profile = root.path().join("isolated.toml");
+        fs::write(
+            &profile,
+            format!(
+                "[profile]\nname = \"isolated\"\n\n[audit]\nenabled = {profile_audit}\n\n[servers.memory]\nenabled = false\n\n[servers.skills]\nenabled = true\n"
+            ),
+        )
+        .unwrap();
+        let input = concat!(
+            "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\"}\n",
+            "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\"}\n",
+            "{\"jsonrpc\":\"2.0\",\"id\":3,\"method\":\"tools/call\",\"params\":{\"name\":\"skills_list\",\"arguments\":{}}}\n",
+            "{\"jsonrpc\":\"2.0\",\"id\":4,\"method\":\"tools/call\",\"params\":{\"name\":\"patterns\",\"arguments\":{}}}\n",
+        );
+        let mut process =
+            super::command(&root, &["mcp", "--profile-file", profile.to_str().unwrap()]);
+        if let Some(value) = audit_override {
+            process.env("SYMBRAIN_AUDIT_ENABLED", value);
+        }
+        let output = run_process(&mut process, input.as_bytes());
+        assert!(output.status.success(), "{case}: {:?}", output.stderr);
+        assert!(output.stderr.is_empty(), "{case}: {:?}", output.stderr);
+        let responses: Vec<Value> = output
+            .stdout
+            .split(|byte| *byte == b'\n')
+            .filter(|line| !line.is_empty())
+            .map(|line| serde_json::from_slice(line).unwrap())
+            .collect();
+        assert_eq!(responses.len(), 4, "{case}");
+        assert_eq!(responses[0]["result"]["serverInfo"]["name"], "symbrain");
+        let tools = responses[1]["result"]["tools"].as_array().unwrap();
+        assert!(tools.iter().any(|tool| tool["name"] == "skills_list"));
+        assert!(!tools.iter().any(|tool| {
+            let name = tool["name"].as_str().unwrap();
+            name.starts_with("memory_") || name.starts_with("activity_")
+        }));
+        assert_eq!(responses[2]["result"]["isError"], false);
+        assert_eq!(responses[3]["result"]["isError"], false);
+
+        let data = root.path().join("home/.local/share");
+        if expect_audit {
+            let audit = data.join("symbrain/audit/isolated.jsonl");
+            assert!(audit.is_file(), "{case}: expected explicit audit state");
+            assert_eq!(
+                fs::read_dir(data.join("symbrain")).unwrap().count(),
+                1,
+                "{case}"
+            );
+            assert_eq!(
+                fs::read_dir(data.join("symbrain/audit")).unwrap().count(),
+                1,
+                "{case}"
+            );
+        } else {
+            assert!(
+                !data.exists(),
+                "{case}: disabled features created data state"
+            );
+        }
+        assert_eq!(fs::read_dir(&config).unwrap().count(), 1, "{case}");
+        assert!(!root.path().join("cache").exists(), "{case}");
+        assert!(!root.path().join("state").exists(), "{case}");
+    }
+}
+
+fn run_process(command: &mut std::process::Command, input: &[u8]) -> Output {
+    let mut child = command.spawn().unwrap();
+    child.stdin.as_mut().unwrap().write_all(input).unwrap();
+    drop(child.stdin.take());
+    child.wait_with_output().unwrap()
+}
+
+#[test]
+fn audit_environment_override_does_not_bypass_config_validation() {
+    let cases = [
+        ("malformed-toml", "[audit\n", "failed to parse"),
+        (
+            "invalid-value",
+            "[audit]\nenabled = \"yes\"\n",
+            "audit.enabled",
+        ),
+        ("invalid-type", "[audit]\nenabled = []\n", "audit.enabled"),
+    ];
+    for (case, contents, expected) in cases {
+        for profile_audit in [false, true] {
+            for audit_override in ["true", "false", "invalid"] {
+                let root = TempDir::new().unwrap();
+                let config = root.path().join("config/symbrain");
+                fs::create_dir_all(&config).unwrap();
+                fs::write(config.join("config.toml"), contents).unwrap();
+                let profile = root.path().join("isolated.toml");
+                fs::write(
+                    &profile,
+                    format!("[profile]\nname = \"isolated\"\n[audit]\nenabled = {profile_audit}\n[servers.memory]\nenabled = false\n"),
+                )
+                .unwrap();
+                let mut process =
+                    super::command(&root, &["mcp", "--profile-file", profile.to_str().unwrap()]);
+                process.env("SYMBRAIN_AUDIT_ENABLED", audit_override);
+                let output = run_process(&mut process, b"");
+                assert_eq!(output.status.code(), Some(2), "{case}: {output:?}");
+                assert!(output.stdout.is_empty(), "{case}: {output:?}");
+                let stderr = String::from_utf8(output.stderr).unwrap();
+                assert!(stderr.contains(expected), "{case}: {stderr}");
+                assert!(
+                    !stderr.contains("SYMBRAIN_AUDIT_ENABLED"),
+                    "file error must win: {stderr}"
+                );
+                assert!(!root.path().join("home/.local/share").exists(), "{case}");
+                assert_eq!(fs::read_dir(&config).unwrap().count(), 1, "{case}");
+                assert!(!root.path().join("cache").exists(), "{case}");
+            }
+        }
+    }
+}
+
+#[test]
+fn audit_environment_override_applies_after_valid_or_missing_config() {
+    for contents in [
+        None,
+        Some(""),
+        Some("[audit]\nenabled = false\n"),
+        Some("audit = true\n"),
+    ] {
+        let root = TempDir::new().unwrap();
+        if let Some(contents) = contents {
+            let config = root.path().join("config/symbrain");
+            fs::create_dir_all(&config).unwrap();
+            fs::write(config.join("config.toml"), contents).unwrap();
+        }
+        let profile = root.path().join("isolated.toml");
+        fs::write(
+            &profile,
+            "[profile]\nname = \"isolated\"\n[audit]\nenabled = true\n[servers.memory]\nenabled = false\n",
+        )
+        .unwrap();
+        for value in ["true", "invalid"] {
+            let mut process =
+                super::command(&root, &["mcp", "--profile-file", profile.to_str().unwrap()]);
+            process.env("SYMBRAIN_AUDIT_ENABLED", value);
+            let output = run_process(&mut process, b"");
+            assert_eq!(
+                output.status.code(),
+                Some(if value == "true" { 0 } else { 2 }),
+                "{output:?}"
+            );
+            assert!(output.stdout.is_empty());
+            if value == "true" {
+                assert!(output.stderr.is_empty());
+                assert!(
+                    root.path()
+                        .join("home/.local/share/symbrain/audit/isolated.jsonl")
+                        .is_file()
+                );
+            } else {
+                assert!(
+                    String::from_utf8(output.stderr)
+                        .unwrap()
+                        .contains("SYMBRAIN_AUDIT_ENABLED")
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn enabled_memory_is_initialized_and_exposed() {
+    let root = TempDir::new().unwrap();
+    let profile = root.path().join("memory.toml");
+    fs::write(
+        &profile,
+        "[profile]\nname = \"memory-on\"\n\n[audit]\nenabled = false\n\n[servers.memory]\nenabled = true\nmode = \"read_only\"\n[servers.skills]\nenabled = true\n[servers.usage]\nenabled = true\n",
+    )
+    .unwrap();
+    let input = concat!(
+        "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"initialize\"}\n",
+        "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/list\"}\n",
+    );
+    let output = super::run_with_input(
+        &root,
+        &["mcp", "--profile-file", profile.to_str().unwrap()],
+        input.as_bytes(),
+    );
+    assert!(output.status.success(), "stderr: {:?}", output.stderr);
+    let responses: Vec<Value> = output
+        .stdout
+        .split(|byte| *byte == b'\n')
+        .filter(|line| !line.is_empty())
+        .map(|line| serde_json::from_slice(line).unwrap())
+        .collect();
+    assert_eq!(responses.len(), 2);
+    let tools = responses[1]["result"]["tools"].as_array().unwrap();
+    assert!(tools.iter().any(|tool| {
+        tool["name"]
+            .as_str()
+            .is_some_and(|name| name.starts_with("memory_"))
+    }));
+    let database = root
+        .path()
+        .join("home/.local/share/symbrain/memory/default.db");
+    let mut expected = vec!["bootstrap", "patterns"];
+    expected.extend(symbrain_mcp::SKILLS_TOOL_NAMES);
+    expected.extend([
+        "get_ai_usage",
+        "memory_get",
+        "memory_search",
+        "memory_list",
+        "entity_list",
+        "entity_resolve",
+        "graph_neighbors",
+    ]);
+    assert_eq!(
+        tools
+            .iter()
+            .map(|tool| tool["name"].as_str().unwrap())
+            .collect::<Vec<_>>(),
+        expected,
+        "complete tools/list must retain Go registration order"
+    );
+    assert!(
+        database.is_file(),
+        "enabled memory did not create its database"
+    );
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        assert_eq!(
+            fs::metadata(database.parent().unwrap())
+                .unwrap()
+                .permissions()
+                .mode()
+                & 0o777,
+            0o700,
+            "new memory directory must be private"
+        );
+    }
+    assert!(
+        !root
+            .path()
+            .join("home/.config/symbrain/memory/jwt.secret")
+            .exists(),
+        "native memory startup must not create legacy JWT key state"
+    );
+}

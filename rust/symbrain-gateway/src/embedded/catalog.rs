@@ -1,5 +1,7 @@
+#[path = "skills_catalog.rs"]
+mod skills_catalog;
 use crate::Gateway;
-use crate::response::{ListedTool, ToolAnnotations};
+use crate::response::{ListedTool, ToolAnnotations, usage_tool};
 use symbrain_policy::Profile;
 
 pub(crate) const MEMORY_TOOLS: &[&str] = &[
@@ -17,14 +19,7 @@ pub(crate) const MEMORY_TOOLS: &[&str] = &[
     "query_log",
 ];
 pub(crate) const ACTIVITY_TOOLS: &[&str] = &["activity_search", "activity_get", "activity_status"];
-pub(crate) const SKILLS_TOOLS: &[&str] = &[
-    "skills_list",
-    "skills_inspect",
-    "skills_validate",
-    "skills_render_plan",
-    "skills_install",
-    "skills_targets_status",
-];
+pub(crate) use symbrain_mcp::SKILLS_TOOL_NAMES as SKILLS_TOOLS;
 
 fn schema(name: &str) -> Box<serde_json::value::RawValue> {
     let text = match name {
@@ -51,6 +46,9 @@ fn schema(name: &str) -> Box<serde_json::value::RawValue> {
 }
 
 fn listed(name: &str) -> ListedTool {
+    if SKILLS_TOOLS.contains(&name) {
+        return skills_catalog::listed(name);
+    }
     if let Some(tool) = super::memory_catalog::listed(name) {
         return tool;
     }
@@ -83,6 +81,13 @@ fn listed(name: &str) -> ListedTool {
 impl Gateway {
     pub(crate) fn embedded_tools(&self) -> Vec<ListedTool> {
         let mut tools = Vec::new();
+        // Preserve ServeIO registration order: Skills, Usage, Memory, children.
+        if self.skills_allowed {
+            tools.extend(self.skills_tool_names.iter().map(|name| listed(name)));
+        }
+        if self.usage_allowed {
+            tools.push(usage_tool());
+        }
         if self.memory.is_some() {
             tools.extend(
                 MEMORY_TOOLS
@@ -99,9 +104,6 @@ impl Gateway {
                     }))
                     .map(|name| listed(name)),
             );
-        }
-        if self.skills_allowed {
-            tools.extend(self.skills_tool_names.iter().map(|name| listed(name)));
         }
         tools
     }

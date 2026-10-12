@@ -40,8 +40,8 @@ func TestLoadBundleRejectsControlFileSymlinks(t *testing.T) {
 	if err := os.Symlink(outside, filepath.Join(root, "SKILL.md")); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := LoadBundle(root); err == nil || !strings.Contains(err.Error(), "path escapes from parent") {
-		t.Fatalf("expected control-file symlink rejection, got %v", err)
+	if _, err := LoadBundle(root); err == nil || err.Error() != "read SKILL.md: openat SKILL.md: too many levels of symbolic links" {
+		t.Fatalf("expected kernel nofollow control-file rejection, got %v", err)
 	}
 }
 

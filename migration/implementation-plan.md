@@ -1,5 +1,22 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
+## Current Skills package checkpoint, 2026-10-11
+
+Task t_d390e914 reuses reviewed local candidate149c39e75 rather than rebuilding
+the #834/#835/#856 repairs. Four real Rust startup tests pass on this candidate.
+Fresh Go/Rust startup controls exposed a shared catalog registration-order
+defect when Memory and Skills are enabled together; its correction preserves
+Go's Skills, Usage, Memory, child order instead of sorting the comparator.
+
+The owner approved only volatile Git-index stat differences. SKL-013 and
+`docs/adr/skills-owned-git-index-stat.md` bind this to exact owned restore inputs,
+retain raw index bytes, and reject nonvolatile or unsupported structures.
+Full original cases and controls, strict checks and independent current-source
+review remain required. Linux/Windows native acceptance, #830/#831/#832/#833,
+whole Brain/Browse/Guard, publication and cutover are not complete.
+Current command/exits/artifacts live in the assigned external
+`coordination-20261011/brain/package-handoff.json`.
+
 
 ## Native memory evidence and atomic schema increment — 2026-10-03
 
@@ -2039,6 +2056,19 @@ Go remains the production enforcement path until the full Guard-specific matrix 
 
 The migration is complete only when every row in `migration/contract-matrix.csv` is green, no command invokes Go, the supported release matrix passes, Swift clients work unchanged at their public boundary, and the Rust release has a verified rollback to the last Go release.
 
+
+### Skills764 isolated source correction after REQUEST_CHANGES
+
+The immutable db9760 review remains authoritative historical failure evidence.
+The successor retains all317 independent originals/24 SDK and consumer references
+losslessly before addressing all seven P2 source owners: catalog order, checked
+report writes and actual fd1 ownership, raw MCP ingress, observed Lstat types,
+confined library diagnostics, separate bounded Git archive streams, and durable
+pair/error journaling. Original567 cases remain, with638 Unix/614 Windows total
+prepared pairs and three unchanged real-input controls. Eleven new Rust test
+declarations and native3 workflow coverage are prepared. All actual runtime,
+strict compile, original preflight/render gates, native3 and different-author
+acceptance remain mandatory. See `docs/adr/native-skills-source-corrections-764.md`.
 
 ### 2026-10-03: independently corrected daemon acceptance (#772 / #801)
 

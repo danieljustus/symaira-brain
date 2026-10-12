@@ -46,6 +46,12 @@ migration/evidence/guard-raw-paths-770/independent-806/*.log binary
 
 migration/evidence/guard-doctor-boundaries-770/final-9603/*.log binary
 
+# F7/F8/F9 independent exact protocol inputs retain literal CRLF/native bytes.
+scripts/skills-native-oracle/json-review-inputs/** binary
+
+# Exact F10 independent EOF line/framed inputs retain their original wire bytes.
+scripts/skills-native-oracle/eof-review-inputs/** binary
+
 # Preserve original native CI log bytes, including CRLF.
 migration/evidence/usage-files-windows-runner/*.log binary
 

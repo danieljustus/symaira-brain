@@ -1,0 +1,82 @@
+{
+  "source": "86118925",
+  "files": [
+    {
+      "path": "Cargo.lock",
+      "sha256": "95657aeeba4f12cde301afa9aaf6b01b021b0d7892ed4cad6907a1db390785c0",
+      "bytes": 65682,
+      "archive": "migration/evidence/skills-native-764/original/additional-00-Cargo.lock.gz",
+      "archive_sha256": "dec159f30e634396f5390fdd70293196e64a67bec35b0c72710763ad8b3e9765"
+    },
+    {
+      "path": "rust/symbrain-skills/Cargo.toml",
+      "sha256": "4d0fcb29f4fee6202896e535170f1767cec5752331106fd71190d08458b0d1bb",
+      "bytes": 862,
+      "archive": "migration/evidence/skills-native-764/original/additional-01-Cargo.toml.gz",
+      "archive_sha256": "1dbbf87bdf8669522823e373c7420c1bf9f28d238f44631e90baf0601e3028ac"
+    },
+    {
+      "path": "rust/symbrain-gateway/Cargo.toml",
+      "sha256": "a4b54f28815c364d6e2da31067bad5fa9c2b820c228413b94069938e547260aa",
+      "bytes": 851,
+      "archive": "migration/evidence/skills-native-764/original/additional-02-Cargo.toml.gz",
+      "archive_sha256": "9464033dd2ae57814af3f41546c626c3b62bc1e4387c5d0900c0dc2c5e85c020"
+    },
+    {
+      "path": "rust/symbrain-gateway/src/embedded.rs",
+      "sha256": "ee3cef46ec1257598f0e358caa732a80ac0b64c35e595c52de056a91736167e6",
+      "bytes": 1591,
+      "archive": "migration/evidence/skills-native-764/original/additional-03-embedded.rs.gz",
+      "archive_sha256": "af9e4c8c739ade4800f6499cfafddd32b60ec0a89e7ee35d456173d33fe19093"
+    },
+    {
+      "path": "rust/symbrain-skills/src/lib.rs",
+      "sha256": "a6b2e37669f58043cd39a1a50e9ec130742ed476a52f5d095b320618c5b3b4a9",
+      "bytes": 1133,
+      "archive": "migration/evidence/skills-native-764/original/additional-04-lib.rs.gz",
+      "archive_sha256": "b1949fd8f82e3ba5cb1591784a18de0a7cca13403b6c9125f00bed4131f0fd3c"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/event.rs",
+      "sha256": "a7b626d3803ac47aa888a670d4a134ecfcbe87f095c55e85be63dd0ca8bb3905",
+      "bytes": 8357,
+      "archive": "migration/evidence/skills-native-764/original/additional-05-event.rs.gz",
+      "archive_sha256": "1e59886eb567d1132a31ecde5af6a5f4ff98c85bae28b7e0b1ea3bc22b29f651"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/mod.rs",
+      "sha256": "0d142dd06bdb1572eefed8b30106a9578b3522d1bf1d2fd2a32ca3bde96c12a6",
+      "bytes": 1335,
+      "archive": "migration/evidence/skills-native-764/original/additional-06-mod.rs.gz",
+      "archive_sha256": "804152795c730b6d410e7eca2df6622214ec39cd5a34b165953b28da475ed7d1"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/status.rs",
+      "sha256": "88f14bf8c76b193fdbd75f841c75221438dbf85794a345d05327f1a6adda010c",
+      "bytes": 11531,
+      "archive": "migration/evidence/skills-native-764/original/additional-07-status.rs.gz",
+      "archive_sha256": "284af429ed373f2d1f293755ffbef1bf85cd361e0714c9eec08fd8d04c5cc30b"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/status_compare.rs",
+      "sha256": "8d9eadb8163d73d6d316f0784e0465aa6f85d84c8a635a5b974d423c47842137",
+      "bytes": 8367,
+      "archive": "migration/evidence/skills-native-764/original/additional-08-status_compare.rs.gz",
+      "archive_sha256": "02874c16f0ed25340dc97480cd4f1ef822c1d545589d49c87c50c0e7a7a972db"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/sync.rs",
+      "sha256": "a083bf3552af351d7331690de0c59e5282b362999a9bd1b15c9b5d222cea6f40",
+      "bytes": 13929,
+      "archive": "migration/evidence/skills-native-764/original/additional-09-sync.rs.gz",
+      "archive_sha256": "e57a1d4f5fe27ddcbd4038450d3515c1603b2a3c7648aa3c386c57b57971aff4"
+    },
+    {
+      "path": "rust/symbrain-skills/src/install/marker.rs",
+      "sha256": "ec89498ce6c4b387b944520e7af08d3458cadb7390a2a276601d7915ca90018a",
+      "bytes": 7729,
+      "archive": "migration/evidence/skills-native-764/original/additional-10-marker.rs.gz",
+      "archive_sha256": "b23e04286868ee3e79a82c44ede22bbcd98e14f18b150bc3a7153a16b815ef88"
+    }
+  ]
+}

@@ -11,6 +11,7 @@ repository.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 serde_yaml_ng.workspace = true
+serde_yaml_ng_skill_encoder = { package = "serde_yaml_ng", version = "=0.10.0", path = "vendor/serde_yaml_ng-0.10.0" }
 toml_edit.workspace = true
 cap-std = "=4.0.3"
 cap-fs-ext = "=4.0.3"
@@ -20,10 +21,15 @@ libc.workspace = true
 ambient-authority = "=0.0.2"
 sha2.workspace = true
 symbrain-harness.workspace = true
+symbrain-core.workspace = true
 tempfile.workspace = true
+tar = { version = "=0.4.46", default-features = false }
 
 [target.'cfg(unix)'.dependencies]
 rustix = { version = "=1.1.4", features = ["fs"] }
+
+[target.'cfg(windows)'.dependencies]
+same-file = "=1.0.6"
 
 [dev-dependencies]
 tempfile.workspace = true

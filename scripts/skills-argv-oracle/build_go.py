@@ -12,9 +12,11 @@ import subprocess
 import sys
 import tempfile
 
+import skills_reference
+from skills_reference import FROZEN, TOOLCHAIN, HISTORICAL, CORRECTED, REFERENCES, source_commit, require_source
+from compiler_inputs import collect as compiler_inputs, documents
+
 ROOT = Path(__file__).resolve().parents[2]
-FROZEN = "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
-TOOLCHAIN = "go1.26.7"
 
 
 def digest(data):
@@ -83,7 +85,8 @@ def run(argv, env, report, cwd=None, timeout=120):
 
 def source_map(git, source, env, report):
     index = run([git, "ls-files", "--stage", "-z"], env, report, source)
-    tree = run([git, "ls-tree", "-r", "-z", FROZEN], env, report, source)
+    reference = report.get("reference", HISTORICAL)
+    tree = run([git, "ls-tree", "-r", "-z", source_commit(reference)], env, report, source)
     expected = {}
     for item in tree.split(b"\0"):
         if item:
@@ -120,6 +123,7 @@ def source_map(git, source, env, report):
                      "sha256": digest(payload), "bytes": len(payload)})
     if indexed != expected:
         raise ValueError("frozen source index/tree file sets differ")
+    require_source(rows, reference)
     return rows
 
 
@@ -132,6 +136,10 @@ def prepare_module_cache(go, git, source, env, report):
         "GOSUMDB": preparation_env["GOSUMDB"],
         "status": "started", "build_network": False}
     run([go, "mod", "download"], preparation_env, report, source, timeout=300)
+    # Lazy loading limits argument-free download to go.mod's requirements.
+    # Warm the full graph's .mod prerequisites here, never in the offline proof.
+    documents(run([go, "list", "-mod=readonly", "-m", "-json", "all"],
+                  preparation_env, report, source, timeout=300))
     rows = source_map(git, source, env, report)
     report["source_after_cache_preparation"] = rows
     if rows != report["source_before"]:
@@ -142,6 +150,8 @@ def prepare_module_cache(go, git, source, env, report):
 
 
 def build(args, out, report):
+    reference = report.get("reference", HISTORICAL)
+    frozen = source_commit(reference)
     git = shutil.which("git")
     go = shutil.which("go")
     if not git or not go:
@@ -178,15 +188,20 @@ def build(args, out, report):
         report["candidate_head"] = run([git, "rev-parse", "HEAD"], env, report, ROOT).decode().strip()
         if run([git, "status", "--porcelain"], env, report, ROOT):
             raise ValueError("candidate source checkout must be clean")
+        if reference == CORRECTED:
+            anchored = run([git, "rev-parse", "--verify", f"{skills_reference.CORRECTED_ANCHOR}^{{commit}}"],
+                           env, report, ROOT).decode().strip()
+            if anchored != frozen:
+                raise ValueError("corrected source is not at its reviewed durable anchor")
         source = owned / "source"
         run([git, "-c", "protocol.allow=never", "-c", "protocol.file.allow=always",
              "clone", "--shared", "--no-checkout", "--", ROOT, source], env, report)
         run([git, "config", "core.autocrlf", "false"], env, report, source)
         run([git, "config", "core.filemode", "false" if os.name == "nt" else "true"], env, report, source)
-        run([git, "checkout", "--detach", FROZEN], env, report, source)
+        run([git, "checkout", "--detach", frozen], env, report, source)
         if not (source / ".git").is_dir():
             raise ValueError("owned oracle needs a real .git directory")
-        if run([git, "rev-parse", "HEAD"], env, report, source).decode().strip() != FROZEN:
+        if run([git, "rev-parse", "HEAD"], env, report, source).decode().strip() != frozen:
             raise ValueError("unexpected oracle revision")
         report["source_before"] = source_map(git, source, env, report)
         if run([git, "status", "--porcelain"], env, report, source):
@@ -194,6 +209,8 @@ def build(args, out, report):
         if args.prepare_module_cache:
             prepare_module_cache(go, git, source, env, report)
         run([go, "mod", "verify"], env, report, source, timeout=300)
+        if reference == CORRECTED:
+            report["compiler_inputs_before"] = compiler_inputs(go, source, env, report, run)
         floor((owned, out.parent, args.go_cache))
         run([go, "build", "-p=2", "-mod=readonly", "-buildvcs=true", "-o", out,
              "./cmd/symbrain"], env, report, source, timeout=900)
@@ -202,11 +219,16 @@ def build(args, out, report):
             raise ValueError("oracle build changed source bytes or modes")
         if run([git, "status", "--porcelain"], env, report, source):
             raise ValueError("frozen fixture must remain clean after build")
+        if reference == CORRECTED:
+            run([go, "mod", "verify"], env, report, source, timeout=300)
+            report["compiler_inputs_after"] = compiler_inputs(go, source, env, report, run)
+            if report["compiler_inputs_before"] != report["compiler_inputs_after"]:
+                raise ValueError("corrected compiler/module/SDK inputs changed during build")
         information = run([go, "version", "-m", out], env, report).decode()
         settings = {line.strip().split("\t", 1)[1] for line in information.splitlines()
                     if line.strip().startswith("build\t")}
         if information.splitlines()[0].split()[-1] != TOOLCHAIN or not {
-                "vcs=git", f"vcs.revision={FROZEN}", "vcs.modified=false", "CGO_ENABLED=0"} <= settings:
+                "vcs=git", f"vcs.revision={frozen}", "vcs.modified=false", "CGO_ENABLED=0"} <= settings:
             raise ValueError("oracle build lacks exact pinned unmodified VCS metadata")
         report.update(go_build_info=information, output_sha256=digest(out.read_bytes()),
                       output_bytes=out.stat().st_size, git_directory=True, status="passed")
@@ -214,6 +236,7 @@ def build(args, out, report):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--reference", choices=REFERENCES, default=HISTORICAL)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--receipt", type=Path, required=True)
     parser.add_argument("--go-cache", type=Path, required=True)
@@ -230,9 +253,12 @@ def main():
     out, receipt = output_path(args.out), output_path(args.receipt)
     if out == receipt:
         raise ValueError("binary and receipt outputs must be distinct")
-    report = {"frozen": FROZEN, "toolchain": TOOLCHAIN, "builder_sha256": digest(Path(__file__).read_bytes()),
+    report = {"reference": args.reference, "toolchain": TOOLCHAIN, "builder_sha256": digest(Path(__file__).read_bytes()),
+              "builder_inputs": {name: digest(Path(__file__).with_name(name).read_bytes())
+                                 for name in ("build_go.py", "skills_reference.py", "compiler_inputs.py")},
               "output": str(out), "commands": [], "status": "failed", "native_windows": os.name == "nt"}
     try:
+        report["frozen"] = source_commit(args.reference)
         build(args, out, report)
     except Exception as error:
         report["error"] = f"{type(error).__name__}: {error}"

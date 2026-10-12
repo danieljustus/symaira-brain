@@ -8,10 +8,49 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+
+	"golang.org/x/sys/unix"
 )
 
 func openRootFile(root *os.Root, name string) (*os.File, error) {
+	if name == "SKILL.md" || name == "symskills.toml" {
+		return openControlFile(root, name)
+	}
 	return root.OpenFile(name, os.O_RDONLY|syscall.O_NONBLOCK|syscall.O_NOFOLLOW, 0)
+}
+
+// os.Root.OpenFile resolves a final symlink even when passed O_NOFOLLOW.
+// Keep the directory capability alive across the kernel basename-only open;
+// never reopen its ambient spelling (which may have been renamed/replaced).
+func openControlFile(root *os.Root, name string) (*os.File, error) {
+	if name != "SKILL.md" && name != "symskills.toml" {
+		return nil, &os.PathError{Op: "openat", Path: name, Err: os.ErrInvalid}
+	}
+	directory, err := root.Open(".")
+	if err != nil {
+		return nil, err
+	}
+	defer directory.Close()
+	raw, err := directory.SyscallConn()
+	if err != nil {
+		return nil, err
+	}
+	fd := -1
+	var openErr error
+	controlErr := raw.Control(func(parentFD uintptr) {
+		fd, openErr = unix.Openat(int(parentFD), name,
+			unix.O_RDONLY|unix.O_NONBLOCK|unix.O_NOFOLLOW|unix.O_CLOEXEC, 0)
+	})
+	if controlErr != nil {
+		if fd >= 0 {
+			_ = unix.Close(fd)
+		}
+		return nil, &os.PathError{Op: "openat", Path: name, Err: controlErr}
+	}
+	if openErr != nil {
+		return nil, &os.PathError{Op: "openat", Path: name, Err: openErr}
+	}
+	return os.NewFile(uintptr(fd), name), nil
 }
 
 func openRootChildNoFollow(parent *os.Root, name string) (*os.Root, error) {

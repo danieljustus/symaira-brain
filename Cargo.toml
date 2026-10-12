@@ -20,6 +20,10 @@ members = [
     "rust/symbrain-guard-core",
     "rust/symguard-cli",
 ]
+exclude = [
+    "rust/symbrain-skills/vendor/serde_yaml_ng-0.10.0",
+    "rust/symbrain-skills/vendor/unsafe-libyaml-0.2.11",
+]
 resolver = "2"
 
 [workspace.package]

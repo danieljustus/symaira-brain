@@ -1,0 +1,29 @@
+{
+  "runtime_proof": false,
+  "files": [
+    {
+      "parent_head": "86118925",
+      "original_path": "rust/symbrain-guard-core/src/external_json.rs",
+      "original_sha256": "98d431108b16547dc6f741ae6c928e82a844834ff2ba5364a00e5826bdcf4aea",
+      "bytes": 7821,
+      "adapted_path": "rust/symbrain-skills/src/install/marker_json.rs",
+      "purpose": "private syntax or per-byte Go JSON codec only; no Guard policy edge"
+    },
+    {
+      "parent_head": "86118925",
+      "original_path": "rust/symbrain-guard-core/src/capability_wire.rs",
+      "original_sha256": "eeee0bb77e5aa4c0bf8c39c69dc73b9beb87dd88c46cd7ded273336bc8052d27",
+      "bytes": 7606,
+      "adapted_path": "rust/symbrain-skills/src/install/marker_string.rs",
+      "purpose": "private syntax or per-byte Go JSON codec only; no Guard policy edge"
+    },
+    {
+      "parent_head": "86118925",
+      "original_path": "rust/symbrain-guard-core/src/external_decision.rs",
+      "original_sha256": "00036f841a6a0afa5fba154b44404a04e041e64d6592f8f154a0b53965732224",
+      "bytes": 12698,
+      "adapted_path": "rust/symbrain-skills/src/install/marker_string.rs",
+      "purpose": "private syntax or per-byte Go JSON codec only; no Guard policy edge"
+    }
+  ]
+}

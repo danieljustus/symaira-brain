@@ -123,8 +123,18 @@ func (r *episodeRecorder) Episode() patterns.Episode {
 	}
 }
 
+// auditEnabled combines the profile grant with the global kill switch. A
+// profile opt-out must not be re-enabled by the global default.
+func (s *Server) auditEnabled() bool {
+	if !s.profile.Audit.Enabled {
+		return false
+	}
+	return s.cfg == nil || s.cfg.Audit.Enabled
+}
+
 // patternsEnabled reports whether episode recording is active. It is off
-// when no config is attached (tests) or when [patterns] enabled=false.
+// when no config is attached or when [patterns] enabled=false; defaults are
+// opt-out, so persistence requires an explicit configuration opt-in.
 func (s *Server) patternsEnabled() bool {
 	return s.cfg != nil && s.cfg.Patterns.Enabled
 }

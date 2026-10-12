@@ -25,6 +25,17 @@ data = json.loads(path.read_text())
 assert data['go_oracle_ref'] == ref and data['total'] == len(data['cases']) == 12
 assert all(case['existing_report_matches'] for case in data['cases'])
 assert len({(case['target'], case['state']) for case in data['cases']}) == 12
+lock_path = path.with_suffix('.locks.json')
+locks = json.loads(lock_path.read_text())
+assert locks['go_oracle_ref'] == ref and locks['total'] == len(locks['cases']) == 12
+assert {(case['target'], case['order']) for case in locks['cases']} == {(target, order) for target in ('claude', 'codex', 'cursor', 'opencode', 'openclaw', 'hermes') for order in ('rust-go-rust', 'go-rust-go')}
+for case in locks['cases']:
+    assert [step['producer'] for step in case['steps']] == case['order'].split('-')
+    assert case['equality']['existing_report_matches'] is True
+    assert all(step['exit'] == 0 and step['stderr_empty'] is True for step in case['steps'])
+    if sys.platform == 'win32':
+        assert all(step['lock_paths'] == [] for step in case['steps'])
+data['render_lock_operation_orders'] = locks
 data['runtime'] = platform.platform()
 data['candidate_head'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
 data['candidate_dirty'] = bool(subprocess.check_output(['git', 'status', '--porcelain'], text=True).strip())
@@ -38,7 +49,9 @@ data['candidate_source_sha256'] = {name: hashlib.sha256(Path(name).read_bytes())
     'rust/symbrain-skills/src/install/drift.rs',
     'rust/symbrain-cli/tests/skills_render_drift.rs', 'rust/symbrain-skills/tests/render_drift_status.rs',
     'scripts/skills-render-drift/run.sh', 'scripts/skills_render_contract.py',
-    'scripts/rust-differential.py', 'scripts/test_skills_render_contract.py')}
+    'scripts/rust-differential.py', 'scripts/test_skills_render_contract.py',
+    'rust/symbrain-cli/tests/support/skills_render_lock.rs',
+    'rust/symbrain-skills/src/materialize_fs.rs', 'rust/symbrain-skills/src/materialize_lock_windows_tests.rs')}
 data['intentional_extensions'] = ['render_status', 'render_drift', 'render_error', 'verified symlink presentation mode: linked']
 data['comparison'] = 'actual process success, empty stderr, full existing report equality after removing only the explicit #621 extensions'
 path.write_text(json.dumps(data, indent=2) + '\n')

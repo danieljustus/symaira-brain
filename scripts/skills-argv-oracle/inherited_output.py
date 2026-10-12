@@ -34,7 +34,16 @@ SOURCE_HASHES = {
     CLI: "b4fa7a9df8312bb72cca213bb26b867537f8f916fa30ea6c140e446a57c3f2e2",
     CORE: GUARD_CORE_HASH,
 }
+# Reviewed #813 integration: Skills fd1 wrapper in run_stdio, byte-identical
+# version_cli move, go_json U+2028/9 escaping and core go_json_float module.
+# The global-output early path is unchanged; actual process parity still applies.
+SKILLS_HASHES = {
+    **SOURCE_HASHES,
+    CLI: "5cc53d39ced3d9b424b902bef1c7b663fc4e32c281e8f1c4c93d65432ac3f076",
+    CORE: "30a4a1014ca860498705f6632473f47df05cd115237ed6d0ae025a94cf88d263",
+}
 PROFILES = {
+    "skills813-main-bc6e42b": SKILLS_HASHES,
     "source806-d07": SOURCE_HASHES,
     "original-parent": PARENT_HASHES,
     "memory803-5a4": MEMORY_HASHES,
@@ -78,7 +87,7 @@ def qualify(reference, parent, current):
     if len(profiles) != 1:
         raise ValueError("inherited output current owner needs explicit source review")
     parent_blocks = early_blocks(parent[CLI], False)
-    current_blocks = early_blocks(current[CLI], current_hashes[CLI] in (MEMORY_HASHES[CLI], SOURCE_HASHES[CLI]))
+    current_blocks = early_blocks(current[CLI], current_hashes[CLI] in (MEMORY_HASHES[CLI], SOURCE_HASHES[CLI], SKILLS_HASHES[CLI]))
     if parent_blocks != current_blocks:
         raise ValueError("inherited early output path differs from actual parent source")
     return {

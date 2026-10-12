@@ -17,31 +17,28 @@ func (fm *Frontmatter) UnmarshalYAML(value *yaml.Node) error {
 		return err
 	}
 
-	normalized := make(map[string]any, len(fields))
-	for name, node := range fields {
-		if isStringFrontmatterField(name) {
-			text, err := decodeStringFrontmatterField(name, node)
-			if err != nil {
-				return err
-			}
-			normalized[name] = text
+	// Normalize only the string-field nodes. A marshal/unmarshal round trip
+	// would consume leading LF values through yaml.v3's literal emitter.
+	normalized := *value
+	normalized.Content = append([]*yaml.Node(nil), value.Content...)
+	for i := 0; i+1 < len(normalized.Content); i += 2 {
+		name := normalized.Content[i].Value
+		if !isStringFrontmatterField(name) {
 			continue
 		}
-		var field any
-		if err := node.Decode(&field); err != nil {
-			return fmt.Errorf("frontmatter field %q: %w", name, err)
+		text, err := decodeStringFrontmatterField(name, fields[name])
+		if err != nil {
+			return err
 		}
-		normalized[name] = field
-	}
-
-	data, err := yaml.Marshal(normalized)
-	if err != nil {
-		return fmt.Errorf("normalize frontmatter: %w", err)
+		normalized.Content[i+1] = &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: text}
 	}
 	type frontmatter Frontmatter
 	var decoded frontmatter
-	if err := yaml.Unmarshal(data, &decoded); err != nil {
+	if err := normalized.Decode(&decoded); err != nil {
 		return err
+	}
+	if _, err := normalizeMetadataNumber(decoded.Metadata); err != nil {
+		return fmt.Errorf("normalize frontmatter metadata numbers: %w", err)
 	}
 	*fm = Frontmatter(decoded)
 	return nil

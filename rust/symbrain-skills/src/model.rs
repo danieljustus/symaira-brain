@@ -153,7 +153,7 @@ pub struct Bundle {
     /// Field `manifest`.
     pub manifest: Manifest,
     /// Field `body`.
-    pub body: String,
+    pub body: crate::GoText,
     /// Field `resources`.
     pub resources: Vec<Resource>,
     /// Markdown resources outside overlays, preserved as raw bytes like Go strings.
@@ -173,7 +173,7 @@ pub struct ParsedSkill {
     /// Field `frontmatter`.
     pub frontmatter: Frontmatter,
     /// Field `body`.
-    pub body: String,
+    pub body: crate::GoText,
     /// Field `body_line_offset`.
     pub body_line_offset: usize,
 }
@@ -187,10 +187,10 @@ pub struct Issue {
     /// Field `severity`.
     pub severity: String,
     /// Field `message`.
-    pub message: String,
-    #[serde(skip_serializing_if = "String::is_empty", default)]
+    pub message: crate::GoText,
+    #[serde(skip_serializing_if = "crate::GoText::is_empty", default)]
     /// Field `path`.
-    pub path: String,
+    pub path: crate::GoText,
 }
 
 #[path = "model_parse.rs"]
