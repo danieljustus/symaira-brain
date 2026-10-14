@@ -64,3 +64,10 @@ restores and verifies the current bytes even if the build fails. CI then runs
 all three executables and JSON evidence. This is a native CI build; portable
 tests and source review cannot establish the Windows runtime result. See
 `docs/adr/skills-native-supplemental-plan-794.md` for the exact ownership contract.
+
+The candidate cache may no longer contain dependencies removed since the
+immutable parent. Pass `--prepare-registry-cache` on a fresh runner to record a
+separate `cargo fetch --locked` phase against that parent's original lockfile.
+Every source blob and mode and the clean Git state are verified again after
+preparation. Compilation still uses `CARGO_NET_OFFLINE=true` and `--offline`;
+neither the frozen lockfile nor the candidate's advisory policy is changed.

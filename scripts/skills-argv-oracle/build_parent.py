@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""CI-only native immutable parent build using the existing current Cargo cache."""
+"""CI-only offline immutable parent build with optional locked cache preparation."""
 import argparse
 import hashlib
 import json
@@ -53,6 +53,19 @@ def source_files(git, source, reference, env, report):
     return rows
 
 
+def prepare_registry_cache(cargo, git, source, env, report):
+    """Fetch the immutable parent's locked dependencies before its offline build."""
+    preparation_env = dict(env, CARGO_NET_OFFLINE="false")
+    report["registry_cache_preparation"] = {"status": "started", "build_network": False}
+    run([cargo, "fetch", "--locked"], preparation_env, report, source, timeout=300)
+    rows = source_files(git, source, report["source_ref"], env, report)
+    report["source_after_cache_preparation"] = rows
+    if rows != report["source_before"] or run(
+            [git, "status", "--porcelain"], env, report, source):
+        raise ValueError("registry cache preparation changed the immutable parent fixture")
+    report["registry_cache_preparation"]["status"] = "passed"
+
+
 def build(args, current, saved, parent, report):
     target = args.target.resolve()
     expected = target / "debug" / ("symbrain.exe" if os.name == "nt" else "symbrain")
@@ -98,6 +111,8 @@ def build(args, current, saved, parent, report):
         report["source_before"] = source_files(git, source, report["source_ref"], env, report)
         if run([git, "status", "--porcelain"], env, report, source):
             raise ValueError("parent fixture must be clean")
+        if args.prepare_registry_cache:
+            prepare_registry_cache(cargo, git, source, env, report)
         floor((target, saved.parent))
         run([cargo, "build", "--locked", "--offline", "-p", "symbrain-cli", "--bin", "symbrain"],
             env, report, source, timeout=1800)
@@ -113,6 +128,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ["current", "target", "saved-current", "parent", "receipt"]:
         parser.add_argument(f"--{name}", type=Path, required=True)
+    parser.add_argument("--prepare-registry-cache", action="store_true",
+                        help="explicitly fetch locked parent dependencies before the offline build")
     args = parser.parse_args()
     os.umask(0o022)
     def interrupted(number, _frame):
