@@ -102,3 +102,29 @@ fn yaml_environment_is_not_merged() {
     .expect("YAML");
     assert!(parsed["s"].env.is_empty());
 }
+
+#[test]
+fn yaml_dependency_preserves_typed_fields_and_aliases() {
+    let fields = "    command: '2'\n    args: [text, '2', 2, true, null, yes]\n    env: {QUOTED: '2', INTEGER: 2, BOOLEAN: true, ABSENT: null, WORD: yes}\n";
+    for input in [
+        format!("mcpServers:\n  s:\n{fields}"),
+        format!("defaults: &defaults\n{fields}mcpServers:\n  s: *defaults\n"),
+    ] {
+        let parsed = parse_config(input.as_bytes(), "mcpServers").expect("typed YAML config");
+        assert_eq!(parsed["s"].command, "2");
+        assert_eq!(parsed["s"].args, ["text", "2", "yes"]);
+        assert_eq!(
+            parsed["s"].env,
+            BTreeMap::from([
+                (String::from("QUOTED"), String::from("2")),
+                (String::from("WORD"), String::from("yes")),
+            ])
+        );
+    }
+    for malformed in ["mcpServers: [unclosed", "mcpServers: *missing"] {
+        let error = parse_config(malformed.as_bytes(), "mcpServers")
+            .err()
+            .expect("invalid YAML rejected");
+        assert!(error.starts_with("parse YAML:"));
+    }
+}

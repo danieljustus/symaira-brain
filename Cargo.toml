@@ -39,7 +39,8 @@ rustix = { version = "=1.1.4", features = ["fs", "process", "system"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.145", features = ["raw_value"] }
 signal-hook = "=0.3.18"
-serde_yaml_ng = "0.10.0"
+# Keep both consumers' YAML API while using the maintained YAML organization fork.
+serde_yaml_ng = { package = "yaml_serde", version = "=0.10.7" }
 sha2 = "0.10.9"
 rusqlite = { version = "0.40.2", features = ["bundled"] }
 regex = "1"
