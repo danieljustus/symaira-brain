@@ -178,7 +178,10 @@ fn extract_zip(
         let mut entry = archive
             .by_index(index)
             .map_err(|error| ManagedError::Archive(format!("zip: {error}")))?;
-        let raw_name = entry.name().to_string();
+        let raw_name = entry
+            .name()
+            .map_err(|error| ManagedError::Archive(format!("zip entry name: {error}")))?
+            .into_owned();
         let path = safe_archive_path(&raw_name).map_err(|error| {
             ManagedError::Archive(format!("unsafe zip entry {raw_name:?}: {error}"))
         })?;

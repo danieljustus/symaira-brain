@@ -17,7 +17,7 @@ symbrain-core.workspace = true
 tar = { version = "=0.4.46", default-features = false }
 tempfile.workspace = true
 ureq.workspace = true
-zip = { version = "=8.6.0", default-features = false, features = ["deflate-flate2"] }
+zip = { version = "=9.0.4", default-features = false, features = ["deflate-flate2"] }
 
 [lints.rust]
 unsafe_code = "deny"
