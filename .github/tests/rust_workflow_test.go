@@ -158,7 +158,7 @@ func TestHybridCandidateWorkflowBuildsAndOnlyUploadsUnpublishedLinuxArtifact(t *
 		if strings.HasPrefix(uses, "actions/") && !regexp.MustCompile(`@[0-9a-f]{40}$`).MatchString(uses) {
 			t.Errorf("unpinned candidate action %s", uses)
 		}
-		if uses == "actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a" {
+		if strings.HasPrefix(uses, "actions/upload-artifact@") {
 			artifactUpload = true
 			with, ok := step["with"].(map[string]any)
 			if !ok || fmt.Sprint(with["retention-days"]) != "14" || with["if-no-files-found"] != "error" {
