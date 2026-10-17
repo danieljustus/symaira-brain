@@ -3,7 +3,7 @@
 #[cfg(unix)]
 use std::fs;
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::{Component, Path, PathBuf};
 
 use flate2::read::GzDecoder;
@@ -98,6 +98,10 @@ pub fn safe_archive_path(name: &str) -> Result<PathBuf, ManagedError> {
 
 /// Extracts exactly the selected binary bytes from tar.gz or zip.
 ///
+/// ZIP archives must have unique raw entry names, including non-candidates.
+/// This is intentionally stricter than the Go consumer, which accepts repeated
+/// safe non-candidates: deduplication must not hide entries from validation.
+///
 /// # Errors
 /// Rejects malformed archives, unsafe paths, links, non-regular candidates,
 /// duplicate exact entries, ambiguous basename fallbacks, and missing binaries.
@@ -170,8 +174,14 @@ fn extract_zip(
     arch: &str,
 ) -> Result<Vec<u8>, ManagedError> {
     let file = File::open(archive_path)?;
+    let mut directory_reader = file.try_clone()?;
     let mut archive = zip::ZipArchive::new(file)
         .map_err(|error| ManagedError::Archive(format!("zip: {error}")))?;
+    validate_zip_directory(
+        &mut directory_reader,
+        archive.central_directory_start(),
+        &archive.metadata(),
+    )?;
     let target = PathBuf::from(core.binary_path_in_archive(os, arch));
     let mut selection = Selection::default();
     for index in 0..archive.len() {
@@ -211,6 +221,59 @@ fn extract_zip(
     }
     selection.finish(&core.binary_name)
 }
+
+fn validate_zip_directory(
+    reader: &mut (impl Read + Seek),
+    mut position: u64,
+    metadata: &zip::read::ZipArchiveMetadata,
+) -> Result<(), ManagedError> {
+    let file_len = reader.seek(SeekFrom::End(0))?;
+    // zip 9 keeps only the last raw-name record in an insertion-ordered map.
+    // Its parser reads contiguous central records: every overwritten record
+    // therefore leaves a gap before a surviving record (or changes their order).
+    // Check that none disappeared, using raw lengths, not decoded comments.
+    for index in 0..metadata.len() {
+        let entry = metadata
+            .entry(index)
+            .map_err(|error| ManagedError::Archive(format!("zip: {error}")))?;
+        if entry.central_header_start() != position {
+            return Err(ManagedError::Archive("duplicate raw zip entry".into()));
+        }
+        position = zip_record_end(reader, position, file_len)
+            .map_err(|error| ManagedError::Archive(format!("zip directory: {error}")))?;
+    }
+    Ok(())
+}
+
+fn zip_record_end(
+    reader: &mut (impl Read + Seek),
+    start: u64,
+    file_len: u64,
+) -> std::io::Result<u64> {
+    let invalid = || std::io::Error::new(std::io::ErrorKind::InvalidData, "invalid central record");
+    let fixed_end = start
+        .checked_add(46)
+        .filter(|end| *end <= file_len)
+        .ok_or_else(invalid)?;
+    reader.seek(SeekFrom::Start(start))?;
+    let mut header = [0; 46];
+    reader.read_exact(&mut header)?;
+    if &header[..4] != b"PK\x01\x02" {
+        return Err(invalid());
+    }
+    let variable_len = [28, 30, 32]
+        .into_iter()
+        .map(|offset| u64::from(u16::from_le_bytes([header[offset], header[offset + 1]])))
+        .sum::<u64>();
+    fixed_end
+        .checked_add(variable_len)
+        .filter(|end| *end <= file_len)
+        .ok_or_else(invalid)
+}
+
+#[cfg(test)]
+#[path = "archive_zip_directory_tests.rs"]
+mod zip_directory_tests;
 
 #[derive(Default)]
 struct Selection {
