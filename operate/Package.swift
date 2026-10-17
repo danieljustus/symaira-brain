@@ -13,7 +13,7 @@ let package = Package(
         .executable(name: "symoperate", targets: ["symoperate"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/danieljustus/symaira-appkit.git", exact: "0.14.2"),
+        .package(url: "https://github.com/danieljustus/symaira-appkit.git", exact: "0.15.0"),
         .package(path: "../history"),
     ],
     targets: [
