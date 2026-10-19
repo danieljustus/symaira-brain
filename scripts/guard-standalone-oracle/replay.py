@@ -79,7 +79,7 @@ def cases():
         add("doctor-" + state, ["doctor"], state)
     for state in ["invalid-anchor-shape", "decode-before-validation", "multiple-invalid-defaults", "unknown-key"]:
         add("doctor-unported-" + state, ["doctor"], state,
-            "parity" if state in ["invalid-anchor-shape", "unknown-key"] else "native-fail-closed")
+            "parity" if state in ["invalid-anchor-shape", "unknown-key"] else "approved-deviation")
     for state in ANCHORS:
         add("doctor-anchor-" + state, ["doctor"], "anchor:" + state)
     add("decide-help", ["decide", "--help"])
@@ -232,14 +232,42 @@ def comparable(o):
         k: (v["mode"], v["normalized_hex"]) for k, v in o["files"].items()}
 
 
+ALIAS_MESSAGE = b": toml: a known field has an unsupported type or a case-insensitive alias"
+
+
+def compare_approved_deviation(go, rust):
+    """Approved in #770: only the detail of a doctor error row may differ from Go.
+
+    Exit code, stderr, file state and every other stdout line must match. A
+    differing row must keep Go's row label and error frame (at least three
+    `: `-separated tokens, e.g. `config: parse <path>: toml: `)."""
+    assert go["exit_code"] == rust["exit_code"] == 1, "exit code differs"
+    assert go["normalized_stderr_hex"] == rust["normalized_stderr_hex"], "stderr differs"
+    assert comparable(go)[3] == comparable(rust)[3], "file state differs"
+    left = bytes.fromhex(go["normalized_stdout_hex"]).split(b"\n")
+    right = bytes.fromhex(rust["normalized_stdout_hex"]).split(b"\n")
+    assert len(left) == len(right), "doctor report rows differ"
+    for g, r in zip(left, right):
+        if g != r:
+            prefix = os.path.commonprefix([g, r])
+            assert b"error: " in prefix and prefix.count(b": ") >= 3, "deviation outside the error detail"
+    return "matched" if left == right else "approved-deviation"
+
+
+def compare_approved_stricter(go, rust):
+    """Approved in #770: Go accepts case-insensitive aliases of known fields;
+    Rust reports the configuration as invalid instead of guessing a binding."""
+    assert go["exit_code"] == 0 and rust["exit_code"] == 1, "unexpected exit codes"
+    assert rust["stderr_hex"] == "", "native warning before the decoder error"
+    report = bytes.fromhex(rust["normalized_stdout_hex"])
+    assert any(line.startswith(b"  config ") and line.endswith(ALIAS_MESSAGE) for line in report.split(b"\n"))
+    assert b"  policy           not loaded (config error)\n" in report
+    return "approved-stricter"
+
+
 def compare(case, go, rust):
-    if case["contract"] == "native-fail-closed":
-        assert rust["exit_code"] == 1
-        if case["state"] != "unknown-key":
-            assert go["exit_code"] == 1
-        assert rust["stdout_hex"] == ""
-        assert bytes.fromhex(rust["stderr_hex"]) == b"symguard doctor: unsupported native diagnostic state; no legacy fallback is available\n"
-        return "native-fail-closed-remaining-port"
+    if case["contract"] == "approved-deviation":
+        return compare_approved_deviation(go, rust)
     if case["contract"] == "audit-fail-closed":
         for o in [go, rust]:
             assert o["exit_code"] == 0 and o["stderr_hex"] == ""
@@ -288,16 +316,16 @@ def main():
                   binaries_sha256=dict(go=digest(go.read_bytes()), rust=digest(rust.read_bytes())),
                   total=len(results), matched=sum(r["disposition"] == "matched" for r in results),
                   supplemental_anchor_inputs_hex={k: v.hex() for k, v in ANCHORS.items()},
-                  remaining_native_diagnostic_states=[r["id"] for r in results if r["contract"] == "native-fail-closed"],
+                  approved_deviation_states=[r["id"] for r in results if r["contract"] == "approved-deviation"],
                   audit_diagnostic_deviations=[r["id"] for r in results if r["contract"] == "audit-fail-closed"], results=results,
-                  explicit_limits=["unported doctor diagnostic states", "inherited decision audit failure diagnostic",
+                  explicit_limits=["approved doctor detail deviations (#770)", "inherited decision audit failure diagnostic",
                                    "platform-specific broken output", "full malformed discovery/config error boundaries",
                                    "unshipped library capabilities are not CLI paths"])
     report.parent.mkdir(parents=True, exist_ok=True)
     report.write_text(json.dumps(output, indent=2) + "\n")
     failures = [r["id"] + ": " + r["disposition"] for r in results if r["disposition"].startswith("failed")]
     assert not failures, "\n".join(failures)
-    print(f"{len(results)} actual standalone process cases; {output['matched']} full matches; {len(output['remaining_native_diagnostic_states'])} remaining doctor diagnostic states and {len(output['audit_diagnostic_deviations'])} audit diagnostic deviations explicitly retained")
+    print(f"{len(results)} actual standalone process cases; {output['matched']} full matches; {len(output['approved_deviation_states'])} approved doctor detail deviations and {len(output['audit_diagnostic_deviations'])} audit diagnostic deviations explicitly retained")
 
 
 if __name__ == "__main__":

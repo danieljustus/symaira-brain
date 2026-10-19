@@ -1,4 +1,4 @@
-//! The actual Brain compatibility adapter must buffer warnings before fallback.
+//! The actual Brain compatibility adapter renders every doctor state natively.
 use std::{fs, process::Command};
 #[cfg(unix)]
 #[path = "support/raw_fixture_admission.rs"]
@@ -30,29 +30,50 @@ fn config_path(directory: &std::path::Path, role: &str) -> std::path::PathBuf {
     directory.join("config.toml")
 }
 
+fn contains(haystack: &[u8], needle: &[u8]) -> bool {
+    haystack
+        .windows(needle.len())
+        .any(|window| window == needle)
+}
+
+/// Runs inside the isolated child process for one role.
+fn assert_child_role(role: &str) {
+    let mut stdout = Vec::new();
+    let mut stderr = Vec::new();
+    let outcome = brain_adapter::run(&["doctor".into()], &mut stdout, &mut stderr);
+    if role == "type" {
+        // Go stops at the decoder error, before any undecoded-key warning.
+        assert_eq!(outcome, Some(1), "stdout={stdout:?}, stderr={stderr:?}");
+        assert!(stdout.starts_with(b"symguard doctor\n"));
+        assert!(contains(
+            &stdout,
+            b"toml: a known field has an unsupported type"
+        ));
+        assert!(stderr.is_empty());
+    } else {
+        assert_eq!(
+            outcome,
+            Some(u8::from(matches!(role, "semantic" | "discovery"))),
+            "role {role}: stdout={stdout:?}, stderr={stderr:?}"
+        );
+        if role == "discovery" {
+            assert!(contains(&stdout, b"error: discovery: cursor ("));
+            assert!(contains(&stdout, b"): [unsupported] parse JSON: "));
+        }
+        assert!(stdout.starts_with(b"symguard doctor\n"));
+        assert!(stderr.starts_with(b"config: warning: unknown key \"owned\" in "));
+        assert!(!stderr.strip_suffix(b"\n").unwrap().contains(&b'\n'));
+        #[cfg(unix)]
+        if role == "raw" {
+            assert!(stderr.windows(2).any(|bytes| bytes == b"\xe2\x82"));
+        }
+    }
+}
+
 #[test]
 fn brain_doctor_warning_admission() {
     if let Ok(role) = std::env::var("OWNED_GUARD_WARNING_ROLE") {
-        let mut stdout = Vec::new();
-        let mut stderr = Vec::new();
-        let outcome = brain_adapter::run(&["doctor".into()], &mut stdout, &mut stderr);
-        if matches!(role.as_str(), "type" | "discovery") {
-            assert_eq!(outcome, None);
-            assert!(stdout.is_empty() && stderr.is_empty());
-        } else {
-            assert_eq!(
-                outcome,
-                Some(u8::from(role == "semantic")),
-                "role {role}: stdout={stdout:?}, stderr={stderr:?}"
-            );
-            assert!(stdout.starts_with(b"symguard doctor\n"));
-            assert!(stderr.starts_with(b"config: warning: unknown key \"owned\" in "));
-            assert!(!stderr.strip_suffix(b"\n").unwrap().contains(&b'\n'));
-            #[cfg(unix)]
-            if role == "raw" {
-                assert!(stderr.windows(2).any(|bytes| bytes == b"\xe2\x82"));
-            }
-        }
+        assert_child_role(&role);
         return;
     }
     let mut executed_roles = Vec::new();

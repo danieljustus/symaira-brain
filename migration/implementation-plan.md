@@ -1,6 +1,20 @@
 # Symaira Brain Go-to-Rust Migration Implementation Plan
 
 
+## Guard doctor approved deviations — 2026-10-19
+
+Every remaining doctor refusal is now rendered natively, as approved by the
+maintainer in #770: Go's row, frame and exit code are kept and only the
+non-reproducible detail text is native and deterministic. Case-insensitive
+aliases of known fields are rejected instead of guessing Go's binding (stricter
+than Go). The standalone oracle replaces the refusal assertion with the shared
+`approved-deviation` and `approved-stricter` contracts; local macOS receipts:
+124 process cases (2 approved), 78 boundary cases (11 approved), 53 warning
+cases (8 approved, 3 stricter) and 23 config-path cases (4 approved), all
+mutants rejected. See the [ADR](../docs/adr/guard-doctor-approved-deviations-770.md).
+Native Linux/macOS/Windows CI remains required; #769 and the rest of #770's
+acceptance stay open.
+
 ## Native memory evidence and atomic schema increment — 2026-10-03
 
 #758 now has a local grounded-evidence implementation and additive pinned-Go
