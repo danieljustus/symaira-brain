@@ -1,6 +1,8 @@
 # ADR 0011: Restore standalone Guard through a shared Guard command crate
 
 Status: scoped implementation decision for #770; full migration acceptance remains open.
+The fail-closed doctor clause below is superseded by
+[the approved doctor deviations](guard-doctor-approved-deviations-770.md).
 
 ## Context
 

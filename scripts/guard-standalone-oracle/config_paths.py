@@ -8,7 +8,6 @@ import sys
 import tempfile
 import time
 import replay
-import config_warnings
 import kernel_admission
 from config_path_journal import Journal
 
@@ -149,8 +148,6 @@ def observe(binary, case, root, native, journal=None):
 def compare(case, go, native):
     if case['contract'] == 'gated':
         assert go['exit_code'] == 1
-        assert native['exit_code'] == 1 and not native['stdout_hex']
-        assert bytes.fromhex(native['stderr_hex']) == config_warnings.UNSUPPORTED, 'warning before fallback'
         warning = b'config: warning: unknown key ' in bytes.fromhex(go['stderr_hex'])
         assert warning == (case['state'] == 'discovery')
         if case['state'] == 'discovery':
@@ -159,7 +156,8 @@ def compare(case, go, native):
             stdout = bytes.fromhex(go['stdout_hex'])
             assert b'error: discovery: cursor (' in stdout, 'malformed Cursor not reached'
             assert b"[unsupported] parse JSON: invalid character 'b' looking for beginning of object key string" in stdout
-        return 'native-fail-closed-remaining-port'
+        # Approved in #770: native typed/discovery detail text; everything else matches Go.
+        return replay.compare_approved_deviation(go, native)
     assert replay.comparable(go) == replay.comparable(native), 'config owner/warning filename/report/exit/state differs'
     expected = expected_owner(case, os.name)
     assert expected in bytes.fromhex(native['stderr_hex']), 'wrong selected owner'
@@ -241,7 +239,7 @@ def run(go, native, report, journal):
                 candidate_dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=replay.ROOT)),
                 observed_native_source_override=os.environ.get('OWNED_NATIVE_EXECUTABLE_SOURCE'),
                 total=len(rows),kernel_admissions=admissions,unavailable_results=unexecuted,accounting=ledger,accounting_control=account_control,matched=sum(row['disposition']=='matched' for row in rows),
-                gated=sum(row['disposition'].startswith('native-fail-closed') for row in rows),results=rows,controls=[mutant],
+                gated=sum(row['disposition']=='approved-deviation' for row in rows),results=rows,controls=[mutant],
                 binaries_sha256=dict(go=replay.digest(go.read_bytes()),native=replay.digest(native.read_bytes())),
                 source_sha256={str(path.relative_to(replay.ROOT)):replay.digest(path.read_bytes()) for path in [
                     Path(__file__),Path(__file__).with_name('config_path_journal.py'),Path(__file__).with_name('kernel_admission.py'),replay.ROOT/'rust/symguard-cli/src/doctor/config.rs',
@@ -249,11 +247,11 @@ def run(go, native, report, journal):
                     replay.ROOT/'rust/symguard-cli/src/guard_path_windows.rs']},
                 inapplicable_unix_raw_cases=['xdg-raw-dotdot','home-raw-dotdot'] if os.name=='nt' else [],
                 limits=['Native macOS/Windows exact-source CI remains required','no full770/769 acceptance',
-                        'Explicit overrides retain OS path interpretation','typed/discovery states remain delegated'])
+                        'Explicit overrides retain OS path interpretation','typed/discovery states differ from Go only in approved detail text (#770)'])
     report.write_text(json.dumps(output,indent=2)+'\n')
     assert not [row for row in rows if row['disposition'].startswith('failed')], 'see complete raw config-path receipt'
     journal.complete(output)
-    print(f'config paths{len(rows)}: {output["matched"]} full/{output["gated"]} gated; actual owner mutant rejected')
+    print(f'config paths{len(rows)}: {output["matched"]} full/{output["gated"]} approved deviations; actual owner mutant rejected')
 
 
 def main():

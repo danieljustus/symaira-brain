@@ -7,7 +7,7 @@ use symbrain_core::exit;
 const USAGE: &str = "symguard — local-first security gateway for AI agents\n\nUsage:\n  symguard <command> [flags]\n\nCommands:\n  version   Print version and build info\n  doctor    Check system health and configuration\n  decide    Read a JSON decision request from stdin, write the decision to stdout\n  grants    List and revoke standing grants\n  scan      Discover MCP servers across supported AI clients\n  help      Show this help message\n\nRun 'symguard <command> --help' for details on a specific command.\n";
 
 /// Runs the standalone Guard without invoking Brain or a legacy executable.
-/// Unsupported doctor states fail closed until their native diagnostics port.
+/// Every command, including all doctor states, is native.
 pub fn run_standalone(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {
     let Some(verb) = args.first() else {
         let _ = stdout.write_all(USAGE.as_bytes());

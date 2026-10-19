@@ -8,7 +8,6 @@ import unittest
 from unittest.mock import patch
 
 import config_paths
-import config_warnings
 import kernel_admission
 
 
@@ -94,14 +93,21 @@ class ConfigPathFixtures(unittest.TestCase):
                                          else b'lexical_owner')
 
     def test_discovery_gate_rejects_an_earlier_missing_hermes_parent(self):
+        def observed(stdout):
+            warning = b'config: warning: unknown key "lexical_owner"\n'.hex()
+            return dict(exit_code=1, stdout_hex=stdout.hex(), stderr_hex=warning, normalized_stdout_hex=stdout.hex(),
+                        normalized_stderr_hex=warning, files={})
         case = dict(contract='gated', state='discovery')
-        native = dict(exit_code=1, stdout_hex='', stderr_hex=config_warnings.UNSUPPORTED.hex())
-        go = dict(exit_code=1, stdout_hex=b'error: discovery: hermes (owned): [unsupported] read failed'.hex(),
-                  stderr_hex=b'config: warning: unknown key "lexical_owner"\n'.hex())
+        row = b'  mcp servers      error: discovery: cursor (owned): [unsupported] parse JSON: '
+        native = observed(row + b'key must be a string at line 1 column 2\n')
+        go = observed(b'  mcp servers      error: discovery: hermes (owned): [unsupported] read failed\n')
         with self.assertRaisesRegex(AssertionError, 'malformed Cursor not reached'):
             config_paths.compare(case, go, native)
-        go['stdout_hex'] = b"error: discovery: cursor (owned): [unsupported] parse JSON: invalid character 'b' looking for beginning of object key string".hex()
-        self.assertEqual(config_paths.compare(case, go, native), 'native-fail-closed-remaining-port')
+        go = observed(row + b"invalid character 'b' looking for beginning of object key string\n")
+        self.assertEqual(config_paths.compare(case, go, native), 'approved-deviation')
+        native['normalized_stderr_hex'] = ''
+        with self.assertRaisesRegex(AssertionError, 'stderr differs'):
+            config_paths.compare(case, go, native)
 
 
 if __name__ == '__main__':
