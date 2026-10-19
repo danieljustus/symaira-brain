@@ -61,37 +61,57 @@ impl ConfigOutcome {
     }
 }
 
-/// Ports proven `config.Load()` states. `None` means a decoder diagnostic,
-/// type or map-order-dependent failure remains Go-owned. Warnings are returned
-/// only after typed decoding and buffered until the whole doctor is admitted.
-pub(super) fn load_config(path: &Path) -> Option<ConfigOutcome> {
-    // File selection preserves Windows UTF16, but Core GoText's Windows byte
-    // projection is not yet WTF8-exact. Delegate before reading/emitting text.
-    #[cfg(windows)]
-    path.to_str()?;
+/// Ports every `config.Load()` state. Where Go's decoder text cannot be
+/// reproduced, the message is native and deterministic (#770). Warnings are
+/// returned only after typed decoding, as in Go.
+pub(super) fn load_config(path: &Path) -> ConfigOutcome {
     let text = match fs::read_to_string(path) {
         Ok(text) => text,
         Err(error) if error.kind() == io::ErrorKind::NotFound => {
-            return Some(ConfigOutcome::silent(ConfigState::Missing));
+            return ConfigOutcome::silent(ConfigState::Missing);
         }
-        Err(_) => return None,
+        Err(error) => {
+            return ConfigOutcome::silent(ConfigState::ParseError(format!(
+                "open {}: {}",
+                path.display(),
+                crate::guard_scan::io_detail(&error)
+            )));
+        }
     };
     let doc = match Document::parse(text.as_str()) {
         Ok(doc) => doc,
         Err(error) => {
-            let diagnostic = go_missing_equals_diagnostic(&text, &error)?;
-            return Some(ConfigOutcome::silent(ConfigState::ParseError(format!(
-                "toml: {diagnostic}"
-            ))));
+            let diagnostic = go_missing_equals_diagnostic(&text, &error)
+                .unwrap_or_else(|| native_syntax_diagnostic(&text, &error));
+            return ConfigOutcome::silent(ConfigState::ParseError(format!("toml: {diagnostic}")));
         }
     };
-    let decoded = decode_config(doc.as_table())?;
-    let warnings = warnings::collect(doc.as_table(), path)?;
-    let state = match decoded.validate()? {
+    let Some(decoded) = decode_config(doc.as_table()) else {
+        return ConfigOutcome::silent(ConfigState::ParseError(
+            "toml: a known field has an unsupported type or a case-insensitive alias".into(),
+        ));
+    };
+    // Spans are always present on a parsed document; `None` cannot carry a warning.
+    let warnings = warnings::collect(doc.as_table(), path).unwrap_or_default();
+    let state = match decoded.validate() {
         Ok(loaded) => ConfigState::Loaded(loaded),
         Err(error) => ConfigState::ValidationError(error),
     };
-    Some(ConfigOutcome { state, warnings })
+    ConfigOutcome { state, warnings }
+}
+
+/// `toml_edit`'s message with Go's `line N:` prefix; Go's parser words it differently.
+fn native_syntax_diagnostic(text: &str, error: &toml_edit::TomlError) -> String {
+    let message = error.message().lines().next().unwrap_or_default();
+    match error.span() {
+        Some(span) => {
+            // Byte-wise, so an offset inside a multi-byte character cannot panic.
+            let before = &text.as_bytes()[..span.start.min(text.len())];
+            let line = before.split(|&byte| byte == b'\n').count();
+            format!("line {line}: {message}")
+        }
+        None => message.to_owned(),
+    }
 }
 
 /// Maps only `toml_edit`'s missing-`=` error with a printable ASCII offender;
@@ -121,5 +141,5 @@ pub(super) fn go_missing_equals_diagnostic(
 /// Healthy configuration helper used by the native fixture tests.
 #[cfg(test)]
 pub(super) fn parse_and_validate(doc: &DocumentMut) -> Option<LoadedConfig> {
-    decode_config(doc.as_table())?.validate()?.ok()
+    decode_config(doc.as_table())?.validate().ok()
 }

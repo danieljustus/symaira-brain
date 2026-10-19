@@ -118,7 +118,7 @@ fn standalone_decide_keeps_private_guard_audit_state() {
 }
 
 #[test]
-fn unsupported_doctor_config_is_explicitly_fail_closed() {
+fn wrongly_typed_doctor_config_is_a_native_parse_error() {
     let root = TempDir::new().unwrap();
     let config = root.path().join("config/symguard");
     fs::create_dir_all(&config).unwrap();
@@ -129,10 +129,110 @@ fn unsupported_doctor_config_is_explicitly_fail_closed() {
     .unwrap();
     let result = run(&root, &["doctor"], b"");
     assert_eq!(result.status.code(), Some(1));
-    assert!(result.stdout.is_empty());
-    assert_eq!(
-        result.stderr,
-        b"symguard doctor: unsupported native diagnostic state; no legacy fallback is available\n"
+    let stdout = String::from_utf8(result.stdout).unwrap();
+    assert!(
+        stdout.lines().any(
+            |line| line.starts_with("  config           error: config: parse ")
+                && line.ends_with(
+                    ": toml: a known field has an unsupported type or a case-insensitive alias"
+                )
+        ),
+        "{stdout}"
     );
+    assert!(stdout.contains("  policy           not loaded (config error)\n"));
+    assert!(result.stderr.is_empty());
     assert!(!root.path().join("data").exists());
+}
+
+fn doctor_with_config(text: &str) -> (Option<i32>, String) {
+    let root = TempDir::new().unwrap();
+    let config = root.path().join("config/symguard");
+    fs::create_dir_all(&config).unwrap();
+    fs::write(config.join("config.toml"), text).unwrap();
+    let result = run(&root, &["doctor"], b"");
+    assert!(result.stderr.is_empty(), "{:?}", result.stderr);
+    (
+        result.status.code(),
+        String::from_utf8(result.stdout).unwrap(),
+    )
+}
+
+fn config_row(stdout: &str) -> &str {
+    stdout
+        .lines()
+        .find(|line| line.starts_with("  config "))
+        .expect("config row")
+}
+
+#[test]
+fn unported_toml_syntax_errors_are_native_parse_errors() {
+    let (code, stdout) = doctor_with_config("not [valid = toml\n");
+    assert_eq!(code, Some(1));
+    let row = config_row(&stdout);
+    assert!(
+        row.contains("error: config: parse ") && row.contains(": toml: line 1: "),
+        "{row}"
+    );
+}
+
+#[test]
+fn several_invalid_defaults_report_the_first_key_deterministically() {
+    let text = "[defaults]\nzeta = \"bad\"\nalpha = \"worse\"\nmid = \"also\"\n";
+    let (code, first) = doctor_with_config(text);
+    assert_eq!(code, Some(1));
+    assert!(
+        config_row(&first).ends_with(": defaults.\"alpha\": invalid decision \"worse\" (allowed: allow, ask, deny, redact, readonly, sandbox)"),
+        "{first}"
+    );
+    // Identical apart from the per-run temporary config path.
+    let detail = |stdout: &str| {
+        config_row(stdout)
+            .rsplit_once("config.toml")
+            .unwrap()
+            .1
+            .to_owned()
+    };
+    assert_eq!(detail(&doctor_with_config(text).1), detail(&first));
+}
+
+#[cfg(unix)]
+#[test]
+fn unreadable_audit_log_is_a_native_stat_error() {
+    let root = TempDir::new().unwrap();
+    // The audit log's parent is a regular file, so stat fails with ENOTDIR.
+    fs::create_dir_all(root.path().join("data")).unwrap();
+    fs::write(root.path().join("data/symguard"), b"").unwrap();
+    let result = run(&root, &["doctor"], b"");
+    let stdout = String::from_utf8(result.stdout).unwrap();
+    let row = stdout
+        .lines()
+        .find(|line| line.starts_with("  audit log "))
+        .unwrap();
+    assert!(
+        row.contains("error: stat ") && row.ends_with("/symguard/audit.log: Not a directory"),
+        "{row}"
+    );
+    assert_eq!(result.status.code(), Some(1));
+}
+
+// Windows reports missing parent directories of other sources first.
+#[cfg(unix)]
+#[test]
+fn server_without_command_or_url_is_a_native_discovery_error() {
+    let root = TempDir::new().unwrap();
+    let cursor = root.path().join("home/.cursor");
+    fs::create_dir_all(&cursor).unwrap();
+    fs::write(cursor.join("mcp.json"), br#"{"mcpServers":{"empty":{}}}"#).unwrap();
+    let result = run(&root, &["doctor"], b"");
+    let stdout = String::from_utf8(result.stdout).unwrap();
+    let row = stdout
+        .lines()
+        .find(|line| line.starts_with("  mcp servers "))
+        .unwrap();
+    assert!(
+        row.contains("error: discovery: cursor (")
+            && row.ends_with("): [unsupported] server \"empty\" is missing both command and url"),
+        "{row}"
+    );
+    assert_eq!(result.status.code(), Some(1));
 }
