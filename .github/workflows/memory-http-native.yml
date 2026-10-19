@@ -60,7 +60,8 @@ jobs:
           task_scratch="$RUNNER_TEMP/memory-http-dom-runtime"
           mkdir -p "$task_scratch"
           npm install --prefix "$task_scratch" --ignore-scripts --no-audit --no-fund jsdom@26.1.0
-          export MEMORY_HTTP_NODE="$(command -v node)"
+          MEMORY_HTTP_NODE="$(command -v node)"
+          export MEMORY_HTTP_NODE
           export MEMORY_HTTP_SCRATCH="$task_scratch"
           python3 - <<'PY'
           import os, subprocess
