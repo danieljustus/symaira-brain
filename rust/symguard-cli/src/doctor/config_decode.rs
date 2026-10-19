@@ -15,63 +15,62 @@ pub(super) struct DecodedConfig {
 }
 
 impl DecodedConfig {
-    /// `None` preserves the Go map-order gate when several defaults fail.
-    pub(super) fn validate(self) -> Option<Result<LoadedConfig, String>> {
-        let invalid: Vec<_> = self
+    /// Go reports one invalid default in map-range order, which differs between
+    /// runs. Rust reports the first in key order (deliberate deviation, #770).
+    pub(super) fn validate(self) -> Result<LoadedConfig, String> {
+        let invalid = self
             .defaults
             .iter()
             .filter(|(_, value)| !DECISIONS.contains(&value.as_str()))
-            .collect();
-        if invalid.len() > 1 {
-            return None;
-        }
-        if let Some((name, value)) = invalid.first() {
-            return Some(Err(format!(
+            .min_by(|a, b| a.0.cmp(&b.0));
+        if let Some((name, value)) = invalid {
+            return Err(format!(
                 "defaults.{}: invalid decision {} (allowed: allow, ask, deny, redact, readonly, sandbox)",
                 quote(name),
                 quote(value)
-            )));
+            ));
         }
         for (index, (decision, criteria)) in self.rules.iter().enumerate() {
             if !DECISIONS.contains(&decision.as_str()) {
-                return Some(Err(format!(
+                return Err(format!(
                     "rules[{index}].decision: invalid decision {}",
                     quote(decision)
-                )));
+                ));
             }
             if !criteria {
-                return Some(Err(format!(
+                return Err(format!(
                     "rules[{index}]: match must specify at least one criterion (server, tool, capability, command_contains)"
-                )));
+                ));
             }
         }
         // Go resolves an explicit zero to three before applying this check.
         if self.enabled && self.threshold != 0 && self.threshold < 2 {
-            return Some(Err(format!(
+            return Err(format!(
                 "sequence.threshold: must be at least 2 when sequence is enabled (got {})",
                 self.threshold
-            )));
+            ));
         }
         for (index, entry) in self.allowlist.iter().enumerate() {
             if entry.path.is_empty() {
-                return Some(Err(format!("spawn.allowlist[{index}]: path is required")));
+                return Err(format!("spawn.allowlist[{index}]: path is required"));
             }
             if !Path::new(&entry.path).is_absolute() {
-                return Some(Err(format!(
+                return Err(format!(
                     "spawn.allowlist[{index}]: path {} must be absolute",
                     quote(&entry.path)
-                )));
+                ));
             }
         }
-        Some(Ok(LoadedConfig {
+        Ok(LoadedConfig {
             rules: self.rules.len(),
             allowlist: self.allowlist,
-        }))
+        })
     }
 }
 
 /// Decode every known field first: Go TOML type errors precede validation.
-/// Unknown fields are ignored by Go; unproven case-fold aliases remain gated.
+/// Unknown fields are ignored by Go; `None` (wrong type, case-fold alias) is
+/// reported as one native parse error by the caller.
 pub(super) fn decode_config(doc: &Table) -> Option<DecodedConfig> {
     known_keys(
         doc,

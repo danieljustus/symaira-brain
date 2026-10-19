@@ -18,36 +18,40 @@ pub(super) struct Discovered {
 
 /// Ports `discovery.DiscoverAll()`. Missing files are skipped except for
 /// Windows path-not-found errors, which Go's string-based missing-file check
-/// surfaces as an `mcp servers error: discovery: …` report. Unreproducible
-/// parser errors still gate to the Go fallback.
+/// surfaces as an `mcp servers error: discovery: …` report, as do parser
+/// errors and entries without `command` or `url`.
 pub(super) enum DiscoveryOutcome {
     Servers(Vec<Discovered>),
     Error(String),
 }
 
-pub(super) fn discover_all() -> Option<DiscoveryOutcome> {
+pub(super) fn discover_all() -> DiscoveryOutcome {
     let mut servers = Vec::new();
     for source in guard_scan::SOURCES {
         let path = guard_scan::source_path(source);
+        // Go turns the first unsupported finding into `discovery: <finding>`.
+        let unsupported = |message: String| {
+            DiscoveryOutcome::Error(format!(
+                "discovery: {} ({}): [unsupported] {message}",
+                source.client,
+                path.display()
+            ))
+        };
         let data = match fs::read(&path) {
             Ok(data) => data,
             Err(error) if guard_scan::missing_source_is_silent(&error) => continue,
-            Err(error) => {
-                return Some(DiscoveryOutcome::Error(format!(
-                    "discovery: {} ({}): [unsupported] {}",
-                    source.client,
-                    path.display(),
-                    guard_scan::read_error_message(&path, &error)
-                )));
-            }
+            Err(error) => return unsupported(guard_scan::read_error_message(&path, &error)),
         };
-        let entries = guard_scan_config::parse_config(&data, source.key).ok()?;
+        // Parser wording is native; Go's JSON/YAML decoders word it differently (#770).
+        let entries = match guard_scan_config::parse_config(&data, source.key) {
+            Ok(entries) => entries,
+            Err(error) => return unsupported(error),
+        };
         for (name, entry) in entries {
             let command = entry.command_or_url();
             if command.is_empty() {
-                // Go: StatusUnsupported "server %q is missing both command
-                // and url" → DiscoverAll returns an error.
-                return None;
+                let name = symbrain_core::config::format_go_quoted(std::ffi::OsStr::new(&name));
+                return unsupported(format!("server {name} is missing both command and url"));
             }
             servers.push(Discovered {
                 name,
@@ -59,7 +63,7 @@ pub(super) fn discover_all() -> Option<DiscoveryOutcome> {
             });
         }
     }
-    Some(DiscoveryOutcome::Servers(servers))
+    DiscoveryOutcome::Servers(servers)
 }
 
 // ---------------------------------------------------------------------------

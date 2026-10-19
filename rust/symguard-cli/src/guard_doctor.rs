@@ -10,23 +10,24 @@
 //!   `PlaintextSecretKeys`, `LooksLikeSecret`.
 //! * `guard/internal/audit` — `DefaultAnchorPath` + `ReadCheckpoint`.
 //!
-//! # Gating
+//! # Deviations from Go
 //!
-//! Every state whose bytes this port cannot reproduce exactly is detected
-//! *before any output is written*, and `run` returns `None` so the caller
-//! falls back to the Go binary. A false "needs Go" is always preferred over
-//! a false clean report, because a wrong answer here hides real
-//! spawn-allowlist and plaintext-secret findings. The gates are:
+//! Every doctor state is native; there is no Go fallback. Where Go's bytes are
+//! not reproducible, the state keeps Go's row, frame and exit code and only the
+//! detail text is native and deterministic (approved in #770):
 //!
-//! * TOML syntax/type errors except the simple missing-`=` diagnostic,
-//!   unproven case-fold aliases and multiple invalid defaults with Go map ordering;
-//!   known semantic validation errors are rendered natively;
-//! * unsupported audit-anchor Unicode decoding still gates; known typed JSON
-//!   failures preserve Go's first field error and original numeric spelling;
-//! * any discovery source that exists but fails to read or parse, or an
-//!   entry with neither `command` nor `url` — Go turns those into an
-//!   `mcp servers  error: discovery: …` line carrying the upstream parser's
-//!   message.
+//! * I/O errors (config, audit log, anchor, discovery sources) print the
+//!   platform error text without Rust's ` (os error N)` suffix instead of Go's
+//!   syscall wording.
+//! * TOML syntax errors other than missing `=` print `toml_edit`'s message with
+//!   Go's `line N:` prefix; known fields with a wrong type or a case-insensitive
+//!   alias print one fixed `toml:` parse message.
+//! * Several invalid `defaults.*` values: Go reports one in map-range order;
+//!   Rust reports the first in key order.
+//! * Anchor strings the typed decoder cannot classify like Go print one fixed
+//!   `json:` message.
+//! * Discovery parse errors carry the native JSON/YAML parser's message.
+//! * Windows paths that are not valid UTF-16 are rendered through `GoText`.
 //!
 //! Deliberate deviation (#640): Go prints a server's plaintext secret keys
 //! in Go map-range order, which is not stable between two Go runs. Rust
@@ -47,11 +48,9 @@ use discovery::{
     DiscoveryOutcome, check_servers, discover_all, print_secret_risks, print_server_checks,
 };
 
-/// Runs `symbrain guard doctor`. Returns `None` when any part of this
-/// machine's state cannot be reproduced byte-for-byte, so the caller falls
-/// back to the Go binary.
-pub(crate) fn run(stdout: &mut dyn Write, stderr: &mut dyn Write) -> Option<u8> {
-    let report = build_report()?;
+/// Runs `symbrain guard doctor`.
+pub(crate) fn run(stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {
+    let report = build_report();
     // Go emits these after typed decoding and before validation. Flush only
     // once the whole native report is admitted, so delegation cannot duplicate
     // warnings or expose a partial native result.
@@ -59,7 +58,7 @@ pub(crate) fn run(stdout: &mut dyn Write, stderr: &mut dyn Write) -> Option<u8> 
         let _ = stderr.write_all(warning.as_ref());
     }
     let _ = stdout.write_all(&report.stdout);
-    Some(report.code)
+    report.code
 }
 
 struct DoctorReport {
@@ -78,11 +77,10 @@ impl DoctorReport {
     }
 }
 
-/// Builds the whole report in memory. `None` means "fall back to Go" — no
-/// byte is written in that case, by construction.
-fn build_report() -> Option<DoctorReport> {
-    let config = load_config(&config_path())?;
-    let audit = audit_status(&super::audit_path())?;
+/// Builds the whole report in memory before any byte is written.
+fn build_report() -> DoctorReport {
+    let config = load_config(&config_path());
+    let audit = audit_status(&super::audit_path());
     let warnings = config.warnings;
     let (config_status, loaded) = describe_config(config.state);
 
@@ -127,14 +125,13 @@ fn build_report() -> Option<DoctorReport> {
     }
     row("audit log", audit.0.as_ref());
 
-    if loaded.is_none() {
+    let Some(loaded) = loaded else {
         let issues = 2 + usize::from(audit.1);
         let _ = writeln!(out, "\n{issues} issue(s) found. See details above.");
-        return Some(DoctorReport::new(out, warnings, exit::GENERIC));
-    }
-    let loaded = loaded?;
+        return DoctorReport::new(out, warnings, exit::GENERIC);
+    };
 
-    let discovery = discover_all()?;
+    let discovery = discover_all();
     let (servers, discovery_error) = match discovery {
         DiscoveryOutcome::Servers(servers) => (servers, None),
         DiscoveryOutcome::Error(error) => (Vec::new(), Some(error)),
@@ -184,10 +181,10 @@ fn build_report() -> Option<DoctorReport> {
         out.extend_from_slice(
             b"All basic checks passed. Run 'symguard scan' after setup for full diagnostics.\n",
         );
-        return Some(DoctorReport::new(out, warnings, exit::OK));
+        return DoctorReport::new(out, warnings, exit::OK);
     }
     let _ = writeln!(out, "{problems} issue(s) found. See details above.");
-    Some(DoctorReport::new(out, warnings, exit::GENERIC))
+    DoctorReport::new(out, warnings, exit::GENERIC)
 }
 
 fn describe_config(config: ConfigState) -> (GoText, Option<LoadedConfig>) {

@@ -10,10 +10,9 @@ import time
 import replay
 import kernel_admission
 
-UNSUPPORTED = b'symguard doctor: unsupported native diagnostic state; no legacy fallback is available\n'
 CONTROL_CASES = [('drop-warning', 'unknown-root-array'), ('reorder-warnings', 'unknown-all-order'),
                  ('deduplicate-warnings', 'unknown-root-array'), ('leak-type-warning', 'type-error-after-warning'),
-                 ('double-delegation-warning', 'warning-discovery-delegation')]
+                 ('drop-discovery-warning', 'warning-discovery-delegation')]
 
 
 def cases():
@@ -123,12 +122,11 @@ def observe(binary, case, root, native):
 
 def compare(case, go, native):
     if case['contract'] == 'gated':
-        assert native['exit_code'] == 1 and not native['stdout_hex']
-        assert bytes.fromhex(native['stderr_hex']) == UNSUPPORTED, 'warning leaked before admission'
         warning = b'config: warning: unknown key ' in bytes.fromhex(go['stderr_hex'])
         assert warning == (case['gate'] != 'type'), 'Go typed-decode/warning boundary changed'
-        assert go['exit_code'] == (0 if case['gate'] == 'alias' else 1)
-        return 'native-fail-closed-remaining-port'
+        if case['gate'] == 'alias':
+            return replay.compare_approved_stricter(go, native)
+        return replay.compare_approved_deviation(go, native)
     assert replay.comparable(go) == replay.comparable(native), 'ordered warning/report/exit/state differs'
     return 'matched'
 
@@ -140,14 +138,11 @@ def controls(go, native, root, selected):
         wrapper = base/'mutant.py'
         wrapper.write_text("""import subprocess,sys
 p=subprocess.run([NATIVE,*sys.argv[1:]],capture_output=True)
-if MODE=='double-delegation-warning':
-    assert p.returncode==1 and not p.stdout and p.stderr==UNSUPPORTED
-    p=subprocess.run([GO,*sys.argv[1:]],capture_output=True)
-    lines=p.stderr.splitlines(keepends=True)
-    assert p.returncode==1 and len(lines)==1 and lines[0].startswith(b'config: warning: unknown key ')
-    stderr=lines[0]+p.stderr
+if MODE=='drop-discovery-warning':
+    assert p.returncode==1 and p.stdout and p.stderr.startswith(b'config: warning: unknown key ')
+    stderr=b''
 elif MODE=='leak-type-warning':
-    assert p.returncode==1 and not p.stdout and p.stderr==UNSUPPORTED
+    assert p.returncode==1 and p.stdout and not p.stderr
     stderr=b'config: warning: unknown key "owned" leaked before decode\\n'+p.stderr
 else:
     lines=p.stderr.splitlines(keepends=True)
@@ -159,18 +154,13 @@ else:
         stderr=b''.join(dict.fromkeys(lines))
     assert stderr!=p.stderr
 sys.stdout.buffer.write(p.stdout);sys.stderr.buffer.write(stderr);sys.exit(p.returncode)
-""".replace('NATIVE', repr(str(native))).replace('UNSUPPORTED', repr(UNSUPPORTED))
-            .replace('GO', repr(str(go))).replace('MODE', repr(mode)), encoding='utf-8')
+""".replace('NATIVE', repr(str(native))).replace('MODE', repr(mode)), encoding='utf-8')
         case = selected[ident]
         left = observe(go, case, base/'go', False)
-        right = observe(wrapper, case, base/'native', mode != 'double-delegation-warning')
+        right = observe(wrapper, case, base/'native', True)
         assert right['exit_code'] == (1 if case['contract'] == 'gated' else 0), 'mutant failed incidentally'
         try:
-            if mode == 'double-delegation-warning':
-                assert right['stdout_hex'] and bytes.fromhex(right['stderr_hex']).count(b'config: warning: unknown key ') == 2
-                assert replay.comparable(left) == replay.comparable(right), 'duplicate delegated warning'
-            else:
-                compare(case, left, right)
+            compare(case, left, right)
         except AssertionError as error:
             rows.append(dict(id=mode, rejected=True, diagnostic=str(error), go=left, mutated_native=right,
                              wrapper_sha256=replay.digest(wrapper.read_bytes())))
@@ -212,7 +202,7 @@ def main():
     output = dict(candidate_head=subprocess.check_output(['git','rev-parse','HEAD'], cwd=replay.ROOT, text=True).strip(),
                   candidate_dirty=bool(subprocess.check_output(['git','status','--porcelain'], cwd=replay.ROOT)),
                   total=len(rows), matched=sum(r['disposition']=='matched' for r in rows),
-                  gated=sum(r['disposition'].startswith('native-fail-closed') for r in rows), results=rows,
+                  deviations=sum(r['disposition'] in ('approved-deviation', 'approved-stricter') for r in rows), results=rows,
                   requested_total=len(selected), kernel_admissions=admissions,
                   unavailable_results=unexecuted, accounting=ledger, accounting_control=account_control,
                   repeated_go_runs=repeated, repeated_distinct_stderr=1, controls=mutants,
@@ -224,13 +214,14 @@ def main():
                       Path(__file__), Path(__file__).with_name('kernel_admission.py'), replay.ROOT/'rust/symguard-cli/src/doctor/config_warnings.rs',
                       replay.ROOT/'rust/symguard-cli/src/doctor/config.rs', replay.ROOT/'rust/symguard-cli/src/doctor/config_decode.rs',
                       replay.ROOT/'rust/symguard-cli/src/guard_doctor.rs', replay.ROOT/'rust/symguard-cli/src/lib.rs']},
-                  limits=['typed/case-fold/malformed-discovery/map-order states stay delegated without native warnings',
+                  limits=['typed/malformed-discovery/map-order states differ from Go only in approved detail text (#770)',
+                          'case-insensitive field aliases are rejected natively; Go accepts them (approved stricter, #770)',
                           'Linux raw Unix config paths are actual byte proofs; native Windows/macOS still required',
                           'No reclassification of original50 nondeterministic defaults; no full770/769 closure'])
     report.write_text(json.dumps(output, indent=2)+'\n', encoding='utf-8')
     failures = [r['id']+': '+r['disposition'] for r in rows if r['disposition'].startswith('failed')]
     assert not failures, failures
-    print(f'actual warning cases{len(rows)}: {output["matched"]} matches/{output["gated"]} retained gates; repeats10/1order; actual mutants{len(mutants)} rejected')
+    print(f'actual warning cases{len(rows)}: {output["matched"]} matches/{output["deviations"]} approved deviations; repeats10/1order; actual mutants{len(mutants)} rejected')
 
 
 if __name__ == '__main__':

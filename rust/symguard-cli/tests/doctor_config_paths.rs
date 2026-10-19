@@ -1,4 +1,4 @@
-//! Exact Brain adapter: generated config owner and empty-stream delegation.
+//! Exact Brain adapter: generated config owner bytes for every doctor state.
 use std::{fs, process::Command};
 #[path = "../../symbrain-cli/src/guard_cli.rs"]
 #[expect(
@@ -11,18 +11,20 @@ mod brain_adapter;
 mod windows_discovery;
 
 #[test]
-fn generated_owner_and_delegation_are_shared_by_brain() {
+fn generated_config_owner_is_shared_by_brain() {
     if let Ok(role) = std::env::var("OWNED_GUARD_CONFIG_PATH_ROLE") {
         let mut stdout = Vec::new();
         let mut stderr = Vec::new();
         let result = brain_adapter::run(&["doctor".into()], &mut stdout, &mut stderr);
-        if role == "typed" || role == "discovery" {
-            assert_eq!(result, None);
-            assert!(stdout.is_empty() && stderr.is_empty());
+        if role == "typed" {
+            // Go stops at the decoder error, before any undecoded-key warning.
+            assert_eq!(result, Some(1), "stdout={stdout:?}, stderr={stderr:?}");
+            assert!(stdout.starts_with(b"symguard doctor\n"));
+            assert!(stderr.is_empty());
         } else {
             assert_eq!(
                 result,
-                Some(u8::from(role == "semantic")),
+                Some(u8::from(matches!(role.as_str(), "semantic" | "discovery"))),
                 "role {role}: stdout={stdout:?}, stderr={stderr:?}"
             );
             assert!(stdout.starts_with(b"symguard doctor\n"));
@@ -85,7 +87,7 @@ fn generated_owner_and_delegation_are_shared_by_brain() {
         command
             .args([
                 "--exact",
-                "generated_owner_and_delegation_are_shared_by_brain",
+                "generated_config_owner_is_shared_by_brain",
                 "--nocapture",
             ])
             .env_clear()
@@ -189,16 +191,14 @@ fn windows_discovery_file_and_parent_errors_keep_doctor_contract() {
 
 #[cfg(windows)]
 #[test]
-fn raw_windows_config_path_delegates_before_output() {
+fn raw_windows_config_path_is_rendered_natively() {
     use std::os::windows::ffi::OsStringExt;
     if std::env::var_os("OWNED_RAW_WINDOWS_CONFIG").is_some() {
         let mut stdout = Vec::new();
         let mut stderr = Vec::new();
-        assert_eq!(
-            brain_adapter::run(&["doctor".into()], &mut stdout, &mut stderr),
-            None
-        );
-        assert!(stdout.is_empty() && stderr.is_empty());
+        let outcome = brain_adapter::run(&["doctor".into()], &mut stdout, &mut stderr);
+        assert!(outcome.is_some(), "stdout={stdout:?}, stderr={stderr:?}");
+        assert!(stdout.starts_with(b"symguard doctor\n"));
         return;
     }
     let root = tempfile::tempdir().unwrap();
@@ -210,7 +210,7 @@ fn raw_windows_config_path_delegates_before_output() {
     command
         .args([
             "--exact",
-            "raw_windows_config_path_delegates_before_output",
+            "raw_windows_config_path_is_rendered_natively",
             "--nocapture",
         ])
         .env_clear()

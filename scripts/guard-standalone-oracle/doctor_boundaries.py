@@ -87,7 +87,7 @@ def cases():
     return ([dict(id='table-'+name, kind='config', data=data.encode(), contract='parity') for name,data in tables]
             +[dict(id='anchor-'+name,kind='anchor',data=data,contract='parity') for name,data in anchors]
             +[dict(id='gated-'+name,kind='config',data=data.encode(),
-                   contract='parity' if name in ['unknown-root', 'unknown-inline'] else 'native-fail-closed')
+                   contract='parity' if name in ['unknown-root', 'unknown-inline'] else 'approved-deviation')
               for name,data in gated])
 
 
@@ -120,13 +120,8 @@ def observe(binary, case, root, native):
 
 
 def compare(case,left,right):
-    if case['contract']=='native-fail-closed':
-        assert right['exit_code']==1 and not right['stdout_hex']
-        assert bytes.fromhex(right['stderr_hex'])==b'symguard doctor: unsupported native diagnostic state; no legacy fallback is available\n'
-        assert left['exit_code']==(0 if 'unknown' in case['id'] else 1)
-        if 'unknown' in case['id']:
-            assert bytes.fromhex(left['stderr_hex']).startswith(b'config: warning: unknown key ')
-        return 'native-fail-closed-remaining-port'
+    if case['contract']=='approved-deviation':
+        return replay.compare_approved_deviation(left,right)
     assert replay.comparable(left)==replay.comparable(right),'doctor stdout/stderr/exit/state differs'
     return 'matched'
 
@@ -176,11 +171,11 @@ def main():
             except AssertionError as error:disposition='failed: '+str(error)
             rows.append(dict(id=case['id'],kind=case['kind'],contract=case['contract'],input_hex=case['data'].hex(),disposition=disposition,**pair))
         mutations=controls(go,rust,root,{c['id']:c for c in selected})
-    output=dict(candidate_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=replay.ROOT,text=True).strip(),candidate_dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=replay.ROOT)),total=len(rows),matched=sum(r['disposition']=='matched' for r in rows),gated=sum(r['disposition'].startswith('native-fail-closed') for r in rows),results=rows,controls=mutations,runner_sha256=replay.digest(Path(__file__).read_bytes()),binaries_sha256=dict(go=replay.digest(go.read_bytes()),rust=replay.digest(rust.read_bytes())))
+    output=dict(candidate_head=subprocess.check_output(['git','rev-parse','HEAD'],cwd=replay.ROOT,text=True).strip(),candidate_dirty=bool(subprocess.check_output(['git','status','--porcelain'],cwd=replay.ROOT)),total=len(rows),matched=sum(r['disposition']=='matched' for r in rows),deviations=sum(r['disposition']=='approved-deviation' for r in rows),results=rows,controls=mutations,runner_sha256=replay.digest(Path(__file__).read_bytes()),binaries_sha256=dict(go=replay.digest(go.read_bytes()),rust=replay.digest(rust.read_bytes())))
     report.write_text(json.dumps(output,indent=2)+'\n',encoding='utf-8')
     failures=[r['id']+':'+r['disposition'] for r in rows if r['disposition'].startswith('failed')]
     assert not failures,failures
-    print(f'doctor additive cases{len(rows)}: {output["matched"]} matches/{output["gated"]} explicit gates; actual mutants{len(mutations)} rejected')
+    print(f'doctor additive cases{len(rows)}: {output["matched"]} matches/{output["deviations"]} approved deviations; actual mutants{len(mutations)} rejected')
 
 
 if __name__=='__main__':main()

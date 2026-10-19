@@ -282,14 +282,21 @@ pub(crate) fn missing_source_is_silent(error: &io::Error) -> bool {
 
 /// Formats the read diagnostic emitted by Go's os.ReadFile `PathError`.
 pub(crate) fn read_error_message(path: &std::path::Path, error: &io::Error) -> String {
-    let mut detail = error.to_string();
-    if let Some(code) = error.raw_os_error() {
-        let suffix = format!(" (os error {code})");
-        if let Some(without_code) = detail.strip_suffix(&suffix) {
-            detail = without_code.to_owned();
-        }
-    }
-    format!("read failed: open {}: {detail}", path.display())
+    format!("read failed: open {}: {}", path.display(), io_detail(error))
+}
+
+/// The platform error text without Rust's ` (os error N)` suffix. Go prints its
+/// own syscall text instead, so wording may differ (documented deviation, #770).
+pub(crate) fn io_detail(error: &io::Error) -> String {
+    let detail = error.to_string();
+    error
+        .raw_os_error()
+        .and_then(|code| {
+            detail
+                .strip_suffix(&format!(" (os error {code})"))
+                .map(str::to_owned)
+        })
+        .unwrap_or(detail)
 }
 
 pub(crate) fn source_path(source: Source) -> PathBuf {
