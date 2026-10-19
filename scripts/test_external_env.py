@@ -80,6 +80,29 @@ exec "$3" -c "$4"
             self.assertTrue(Path(env[name]).is_relative_to(self.volume), name)
         self.assertEqual(env["SYMAIRA_EXTERNAL_ENV_READY"], "1")
 
+    def test_default_ignores_dangling_legacy_runtime(self):
+        legacy = self.volume / "tmp"
+        legacy.symlink_to(self.volume / "missing", target_is_directory=True)
+        self.env.pop("SYMAIRA_EXTERNAL_RUNTIME_ROOT")
+        result = self.run_shell()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        env = json.loads(result.stdout)
+        self.assertEqual(env["TMPDIR"], str(self.volume / "Dev/tmp/symbrain/run"))
+        self.assertTrue(legacy.is_symlink())
+        self.assertFalse(legacy.exists())
+
+    def test_rejects_dangling_runtime_and_ancestor_before_creating_paths(self):
+        self.runtime.symlink_to(self.volume / "missing", target_is_directory=True)
+        for path in (self.runtime, self.runtime / "child"):
+            with self.subTest(path=path):
+                self.env["SYMAIRA_EXTERNAL_RUNTIME_ROOT"] = str(path)
+                result = self.run_shell()
+                self.assertEqual(result.returncode, 2, result.stderr)
+                self.assertIn("contains a dangling symlink", result.stderr)
+                self.assertEqual(result.stdout, "")
+                self.assertFalse(self.base.exists())
+                self.assertFalse((self.volume / "missing").exists())
+
     def test_rejects_runtime_outside_volume(self):
         self.env["SYMAIRA_EXTERNAL_RUNTIME_ROOT"] = str(self.root / "outside")
         result = self.run_shell()

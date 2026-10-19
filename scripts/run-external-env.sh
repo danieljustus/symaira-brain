@@ -16,6 +16,10 @@ validate_external_path() {
 
   parent=$candidate
   while [[ ! -e $parent ]]; do
+    if [[ -L $parent ]]; then
+      echo "$name contains a dangling symlink: $parent" >&2
+      return 2
+    fi
     next=$(dirname "$parent")
     if [[ $next == "$parent" ]]; then
       echo "cannot resolve $name: $candidate" >&2
@@ -70,7 +74,8 @@ external_env() {
 
   local base mounted runtime_root evidence repair_output worktree_root worktree_key
   base=${SYMAIRA_EXTERNAL_BASE:-$SYMAIRA_NVME_ROOT/Dev/Symaira_Dev/builds/symaira-brain}
-  runtime_root=${SYMAIRA_EXTERNAL_RUNTIME_ROOT:-$SYMAIRA_NVME_ROOT/tmp}
+  # Keep the canonical project/context path short enough for native Unix sockets.
+  runtime_root=${SYMAIRA_EXTERNAL_RUNTIME_ROOT:-$SYMAIRA_NVME_ROOT/Dev/tmp/symbrain/run}
   mounted=$(df -P "$SYMAIRA_NVME_ROOT" 2>/dev/null | awk 'NR == 2 {print $NF}')
   if [[ "$mounted" != "$SYMAIRA_NVME_ROOT" ]]; then
     echo "external build storage is not mounted at $SYMAIRA_NVME_ROOT" >&2
