@@ -11,7 +11,8 @@ import (
 
 // The Rust release candidate pipeline must stay separate from the published
 // v* release until the cutover (#782): no tag or push trigger, read-only
-// token, no secrets and no release, tag or tap publication.
+// token, no release, tag or tap publication, and signing only on explicit
+// opt-in.
 func TestRustReleaseWorkflowBuildsAllTargetsWithoutPublishing(t *testing.T) {
 	raw := repositoryFile(t, ".github/workflows/rust-release.yml")
 	var w workflow
@@ -30,10 +31,40 @@ func TestRustReleaseWorkflowBuildsAllTargetsWithoutPublishing(t *testing.T) {
 		t.Errorf("permissions = %v, want contents: read only", w.Permissions)
 	}
 	text := string(raw)
-	for _, forbidden := range []string{"secrets.", "gh release", "git tag", "git push", "id-token", "contents: write", "homebrew-tap"} {
+	for _, forbidden := range []string{"gh release", "git tag", "git push", "contents: write", "homebrew-tap"} {
 		if strings.Contains(text, forbidden) {
 			t.Errorf("workflow must not contain %q", forbidden)
 		}
+	}
+	// Secrets and OIDC are confined to the opt-in signing job.
+	var jobs struct {
+		Jobs map[string]map[string]any `yaml:"jobs"`
+	}
+	if err := yaml.Unmarshal(raw, &jobs); err != nil {
+		t.Fatal(err)
+	}
+	for name, body := range jobs.Jobs {
+		encoded, err := yaml.Marshal(body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		privileged := strings.Contains(string(encoded), "secrets.") || strings.Contains(string(encoded), "id-token") ||
+			body["environment"] != nil
+		if name != "sign" && privileged {
+			t.Errorf("job %s must not use secrets, id-token or an environment", name)
+		}
+	}
+	sign := jobs.Jobs["sign"]
+	if sign["if"] != "github.event_name == 'workflow_dispatch' && inputs.sign" || sign["environment"] != "release" {
+		t.Errorf("sign job must run only on dispatch with sign=true in the release environment: if=%v environment=%v", sign["if"], sign["environment"])
+	}
+	if permissions, _ := sign["permissions"].(map[string]any); len(permissions) != 2 ||
+		permissions["contents"] != "read" || permissions["id-token"] != "write" {
+		t.Errorf("sign job permissions = %v, want contents: read and id-token: write", sign["permissions"])
+	}
+	inputs, _ := w.On["workflow_dispatch"]["inputs"].(map[string]any)
+	if signInput, _ := inputs["sign"].(map[string]any); signInput["default"] != false || signInput["type"] != "boolean" {
+		t.Errorf("sign input must be a boolean defaulting to false: %v", inputs["sign"])
 	}
 	for _, line := range regexp.MustCompile(`(?m)^\s*-?\s*uses:\s*(\S+)`).FindAllStringSubmatch(text, -1) {
 		if !regexp.MustCompile(`@[0-9a-f]{40}$`).MatchString(line[1]) {
@@ -62,7 +93,8 @@ func TestRustReleaseWorkflowBuildsAllTargetsWithoutPublishing(t *testing.T) {
 	if !slices.Equal(platforms, want) {
 		t.Errorf("build platforms = %v, want %v", platforms, want)
 	}
-	for _, command := range []string{"smoke.py", "-hybrid-candidate-check -platforms all", "cyclonedx-json"} {
+	for _, command := range []string{"smoke.py", "-hybrid-candidate-check -platforms all", "cyclonedx-json",
+		"notarize-and-verify.sh", "cosign verify-blob", "--options runtime"} {
 		if !strings.Contains(text, command) {
 			t.Errorf("missing release gate %q", command)
 		}

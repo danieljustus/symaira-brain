@@ -10,11 +10,14 @@ if [ "${1:-}" = '--verify-only' ]; then
   shift
 fi
 artifact=${1:?artifact path required}
-kind=${2:?app or dmg required}
+kind=${2:?app, dmg or bin required}
 case "$kind" in
   app) test -d "$artifact" ;;
   dmg) test -f "$artifact" ;;
-  *) echo 'expected app or dmg' >&2; exit 1 ;;
+  # A bare command-line executable: notarized via a zip, but Apple cannot staple
+  # a ticket to it and Gatekeeper's assessment does not apply.
+  bin) test -f "$artifact"; : "${BIN_IDENTIFIER:?BIN_IDENTIFIER is required for bin}" ;;
+  *) echo 'expected app, dmg or bin' >&2; exit 1 ;;
 esac
 if [[ ! ${TEAM_ID:-} =~ ^[A-Z0-9]{10}$ ]]; then
   echo 'a ten-character Apple TEAM_ID is required' >&2
@@ -25,6 +28,8 @@ verify_signature() {
   local requirement="anchor apple generic and certificate leaf[subject.OU] = \"$TEAM_ID\""
   if [ "$kind" = app ]; then
     requirement="$requirement and identifier \"com.symaira.brain\""
+  elif [ "$kind" = bin ]; then
+    requirement="$requirement and identifier \"$BIN_IDENTIFIER\""
   fi
   codesign --verify --deep --strict --verbose=2 "$artifact"
   codesign --verify --strict --verbose=2 -R "$requirement" "$artifact"
@@ -35,7 +40,7 @@ if [ "$verify_only" = false ]; then
   receipt_prefix=${3:?owned receipt prefix required}
   : "${NOTARY_API_KEY_ID:?}" "${NOTARY_API_ISSUER_ID:?}" "${API_KEY_PATH:?}"
   submission=$artifact
-  if [ "$kind" = app ]; then
+  if [ "$kind" != dmg ]; then
     submission="$receipt_prefix.zip"
     ditto -c -k --sequesterRsrc --keepParent "$artifact" "$submission"
   fi
@@ -48,7 +53,13 @@ if [ "$verify_only" = false ]; then
     --output-format json > "$receipt_prefix-info.json"
   python3 "$script_root/verify-notary-receipt.py" "$receipt_prefix-info.json" \
     --expected-id "$submission_id" > /dev/null
-  xcrun stapler staple "$artifact"
+  if [ "$kind" != bin ]; then
+    xcrun stapler staple "$artifact"
+  fi
+fi
+if [ "$kind" = bin ]; then
+  verify_signature
+  exit 0
 fi
 xcrun stapler validate "$artifact"
 verify_signature

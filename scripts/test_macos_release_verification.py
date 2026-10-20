@@ -43,7 +43,7 @@ class ReleaseVerification(unittest.TestCase):
                 path = binary / name
                 path.write_text(FAKE)
                 path.chmod(0o700)
-            artifact = root / ("Symaira Brain.app" if kind == "app" else "release.dmg")
+            artifact = root / {"app": "Symaira Brain.app", "dmg": "release.dmg", "bin": "symbrain"}[kind]
             if kind == "app":
                 artifact.mkdir()
             else:
@@ -51,7 +51,8 @@ class ReleaseVerification(unittest.TestCase):
             trace = root / "trace"
             env = dict(os.environ, PATH=str(binary) + os.pathsep + os.environ["PATH"],
                        TRACE=str(trace), TEAM_ID="M4744F3TAA", NOTARY_API_KEY_ID="synthetic",
-                       NOTARY_API_ISSUER_ID="synthetic", API_KEY_PATH=str(root / "synthetic.p8"))
+                       NOTARY_API_ISSUER_ID="synthetic", API_KEY_PATH=str(root / "synthetic.p8"),
+                       BIN_IDENTIFIER="com.symaira.brain.cli")
             env.update(overrides or {})
             args = ["--verify-only"] if verify_only else []
             args += [str(artifact), kind, str(root / "notary")]
@@ -100,6 +101,28 @@ class ReleaseVerification(unittest.TestCase):
 
     def test_invalid_team_prevents_any_external_execution(self):
         result, records, _ = self.replay(overrides={"TEAM_ID": 'wrong"team'})
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(records, [])
+
+    def test_binary_requires_identity_submission_and_readback_without_stapling(self):
+        result, records, receipts = self.replay("bin")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        stages = [stage for stage, _ in records]
+        self.assertEqual(stages, ["signature", "signature", "ditto", "notarytool-submit", "notarytool-info",
+                                  "signature", "signature", "publish"])
+        self.assertEqual(json.loads(receipts["notary-info.json"])["id"], SUBMISSION)
+        self.assertTrue(any('identifier "com.symaira.brain.cli"' in arg for _, args in records for arg in args))
+
+    def test_binary_failures_and_nonaccepted_readback_prevent_publication(self):
+        for override in ({"FAIL_STAGE": "signature"}, {"FAIL_STAGE": "ditto"}, {"FAIL_STAGE": "notarytool-submit"},
+                         {"FAIL_STAGE": "notarytool-info"}, {"NOTARY_STATUS": "Invalid"}, {"WRONG_ID": "1"}):
+            with self.subTest(override=override):
+                result, records, _ = self.replay("bin", overrides=override)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertNotIn("publish", [x[0] for x in records])
+
+    def test_binary_without_identifier_prevents_any_external_execution(self):
+        result, records, _ = self.replay("bin", overrides={"BIN_IDENTIFIER": ""})
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(records, [])
 
