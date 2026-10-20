@@ -443,7 +443,7 @@ fn send_http(
     }
     let mut response = request
         .send(body.as_slice())
-        .map_err(|error| map_ureq_error(&error))?;
+        .map_err(|error| deadline_aware(map_ureq_error(&error), deadline))?;
     let status = response.status().as_u16();
     if (300..400).contains(&status) {
         return Err(HttpFailure::Redirect);
@@ -626,6 +626,18 @@ fn map_ureq_error(error: &UreqError) -> HttpFailure {
     }
 }
 
+/// ureq 3.4.1 truncates a single address's connect budget to whole milliseconds and
+/// reports a connect that expires in the unused remainder as `Io(ConnectionRefused)`
+/// instead of `Timeout`. A connection failure at an exhausted deadline is a timeout.
+fn deadline_aware(failure: HttpFailure, deadline: Instant) -> HttpFailure {
+    if matches!(failure, HttpFailure::Connection) && remaining(deadline) <= DEADLINE_EXHAUSTED_SLACK
+    {
+        HttpFailure::Timeout
+    } else {
+        failure
+    }
+}
+
 fn map_io_error(error: &io::Error) -> HttpFailure {
     if error.kind() == io::ErrorKind::TimedOut {
         return HttpFailure::Timeout;
@@ -642,6 +654,8 @@ fn map_io_error(error: &io::Error) -> HttpFailure {
         HttpFailure::Connection
     }
 }
+
+const DEADLINE_EXHAUSTED_SLACK: Duration = Duration::from_millis(2);
 
 fn remaining(deadline: Instant) -> Duration {
     deadline.saturating_duration_since(Instant::now())
@@ -903,6 +917,47 @@ mod tests {
             assert_eq!(result.probe_method, Some("initialize"));
             assert!(result.latency_ms.is_some());
             assert!(!result.error.contains("response-canary"));
+        }
+    }
+
+    #[test]
+    fn connection_failure_at_exhausted_deadline_is_a_timeout() {
+        let exhausted = Instant::now();
+        assert!(matches!(
+            deadline_aware(HttpFailure::Connection, exhausted),
+            HttpFailure::Timeout
+        ));
+        let ample = Instant::now() + Duration::from_secs(5);
+        assert!(matches!(
+            deadline_aware(HttpFailure::Connection, ample),
+            HttpFailure::Connection
+        ));
+        assert!(matches!(
+            deadline_aware(HttpFailure::Redirect, exhausted),
+            HttpFailure::Redirect
+        ));
+    }
+
+    // Linux drops SYNs once the accept backlog is full, so the connect stalls until
+    // the deadline: the exact path that ureq misreports as a refused connection.
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn http_connect_stalled_until_deadline_is_a_timeout() {
+        let listener = std::net::TcpListener::bind(("127.0.0.1", 0)).unwrap();
+        let address = listener.local_addr().unwrap();
+        let mut held = Vec::new();
+        while let Ok(stream) =
+            std::net::TcpStream::connect_timeout(&address, Duration::from_millis(20))
+        {
+            held.push(stream);
+            assert!(held.len() < 4096, "accept backlog never filled");
+        }
+        let url = format!("http://{address}/mcp");
+        // Whether ureq misreports depends on sub-millisecond timing; sweep budgets.
+        for millis in 60..=80 {
+            let result = probe_http_with_timeout(&url, Duration::from_millis(millis));
+            assert_eq!(result.outcome, HealthOutcome::Unhealthy);
+            assert_eq!(result.error, "MCP HTTP probe timed out", "{millis} ms");
         }
     }
 

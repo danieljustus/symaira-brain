@@ -11,6 +11,8 @@ on:
     paths-ignore:
       - 'LICENSE'
       - '.github/ISSUE_TEMPLATE/**'
+  # The merge queue runs the same checks on the queued merge commit.
+  merge_group:
   schedule:
     - cron: '30 5 * * 1'
   workflow_dispatch:
@@ -1584,8 +1586,8 @@ jobs:
       - name: Detect Scope package changes
         id: scope
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
@@ -1680,8 +1682,8 @@ jobs:
       - name: Detect Operate package changes
         id: operate
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
@@ -1765,8 +1767,8 @@ jobs:
       - name: Detect Browse package changes
         id: browse
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
@@ -1831,7 +1833,7 @@ jobs:
 
   # Exercise Browse's Windows named-pipe daemon tests on a native runner.
   browse-windows-daemon:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request' || github.event_name == 'merge_group' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     timeout-minutes: 20
     runs-on: windows-2025
     permissions:
@@ -1928,8 +1930,8 @@ jobs:
       - name: Detect Swift-related changes
         id: swift
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
         run: |
           set -euo pipefail
           if [ -z "${BASE_SHA:-}" ] || [ "${BASE_SHA:-}" = "0000000000000000000000000000000000000000" ]; then
@@ -2121,7 +2123,7 @@ jobs:
           go run ./scripts/dist-oracle -candidate-check -version "$version" -assets "$candidate_dir"
 
   coverage:
-    if: github.event_name == 'pull_request' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: github.event_name == 'pull_request' || github.event_name == 'merge_group' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     needs: build-test
     runs-on: ubuntu-latest
     steps:
