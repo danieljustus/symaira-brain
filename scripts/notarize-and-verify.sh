@@ -32,7 +32,8 @@ verify_signature() {
     requirement="$requirement and identifier \"$BIN_IDENTIFIER\""
   fi
   codesign --verify --deep --strict --verbose=2 "$artifact"
-  codesign --verify --strict --verbose=2 -R "$requirement" "$artifact"
+  # A leading "=" makes codesign read the requirement as text, not as a file path.
+  codesign --verify --strict --verbose=2 -R "=$requirement" "$artifact"
 }
 
 verify_signature

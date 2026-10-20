@@ -22,6 +22,7 @@ with open(os.environ['TRACE'],'a') as log: log.write(json.dumps([stage,args])+'\
 if stage==os.environ.get('FAIL_STAGE'): sys.exit(23)
 if stage=='signature':
     expected='certificate leaf[subject.OU] = "M4744F3TAA"'
+    if '-R' in args and not args[args.index('-R')+1].startswith('='): sys.exit(25)  # codesign: file path
     if '-R' in args and expected not in args[args.index('-R')+1]: sys.exit(24)
     if '-R' not in args and '--deep' not in args: sys.exit(24)
 if stage in ('notarytool-submit','notarytool-info'):
