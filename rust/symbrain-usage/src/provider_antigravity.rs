@@ -8,10 +8,19 @@ use crate::{
 use chrono::Utc;
 use std::sync::Arc;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 pub(super) struct AntigravityCandidate {
     pub(super) pid: u32,
     pub(super) csrf_token: Option<String>,
+}
+
+impl std::fmt::Debug for AntigravityCandidate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("AntigravityCandidate")
+            .field("pid", &self.pid)
+            .field("csrf_token", &"[REDACTED]")
+            .finish()
+    }
 }
 
 pub(super) fn parse_antigravity_candidates(process_list: &str) -> Vec<AntigravityCandidate> {
