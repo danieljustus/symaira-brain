@@ -168,7 +168,7 @@ fn is_executable_file(path: &Path) -> bool {
     }
 }
 
-fn path_lookup(binary: &OsStr) -> Option<PathBuf> {
+pub(crate) fn path_lookup(binary: &OsStr) -> Option<PathBuf> {
     let paths = env::var_os("PATH")?;
     path_lookup_in(binary, env::split_paths(&paths))
 }

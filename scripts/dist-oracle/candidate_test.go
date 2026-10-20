@@ -140,7 +140,7 @@ func TestHybridCandidateArchiveRequiresBothBinariesAndExactChecksum(t *testing.T
 	if err := os.WriteFile(filepath.Join(assets, "checksums.txt"), []byte(checksums), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if err := checkHybridCandidateArtifacts(version, assets); err != nil {
+	if err := checkHybridCandidateArtifacts(version, assets, []string{"linux/amd64"}); err != nil {
 		t.Fatalf("valid hybrid candidate rejected: %v", err)
 	}
 
@@ -148,14 +148,29 @@ func TestHybridCandidateArchiveRequiresBothBinariesAndExactChecksum(t *testing.T
 	if err := os.WriteFile(filepath.Join(assets, "checksums.txt"), []byte(badChecksum), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if err := checkHybridCandidateArtifacts(version, assets); err == nil || !strings.Contains(err.Error(), "digest mismatch") {
+	if err := checkHybridCandidateArtifacts(version, assets, []string{"linux/amd64"}); err == nil || !strings.Contains(err.Error(), "digest mismatch") {
 		t.Fatalf("bad checksum error = %v, want digest mismatch", err)
 	}
 
 	if err := os.WriteFile(filepath.Join(assets, "unexpected.txt"), []byte("extra"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	if err := checkHybridCandidateArtifacts(version, assets); err == nil || !strings.Contains(err.Error(), "must contain exactly") {
+	if err := checkHybridCandidateArtifacts(version, assets, []string{"linux/amd64"}); err == nil || !strings.Contains(err.Error(), "must contain exactly") {
 		t.Fatalf("extra asset error = %v, want exact asset-set rejection", err)
+	}
+}
+
+func TestHybridPlatformsAcceptAllOrKnownPairsOnly(t *testing.T) {
+	all, err := parseHybridPlatforms("all")
+	if err != nil || len(all) != 6 {
+		t.Fatalf("all = %v, %v; want six release targets", all, err)
+	}
+	if got, err := parseHybridPlatforms("linux/amd64,windows/arm64"); err != nil || len(got) != 2 {
+		t.Fatalf("explicit list = %v, %v", got, err)
+	}
+	for _, bad := range []string{"linux/riscv64", "linux/amd64,linux/amd64", ""} {
+		if _, err := parseHybridPlatforms(bad); err == nil {
+			t.Fatalf("%q accepted", bad)
+		}
 	}
 }

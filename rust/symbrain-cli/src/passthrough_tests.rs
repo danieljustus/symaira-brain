@@ -102,6 +102,18 @@ fn path_lookup_finds_binary_in_ordered_path_entry() {
 }
 
 #[test]
+fn packaged_go_fallback_is_found_next_to_symbrain() {
+    // Release archives ship `symbrain-go` (`.exe` on Windows) beside `symbrain`.
+    let root = tempfile::tempdir().expect("tempdir");
+    let name = format!("symbrain-go{}", std::env::consts::EXE_SUFFIX);
+    executable(&root.path().join(&name), "");
+    assert_eq!(
+        path_lookup_in(OsStr::new("symbrain-go"), vec![root.path().to_path_buf()]),
+        Some(root.path().join(name))
+    );
+}
+
+#[test]
 fn windows_path_extensions_match_go_defaults() {
     assert_eq!(
         windows_executable_names("symvault", Some("")),

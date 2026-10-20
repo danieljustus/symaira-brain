@@ -350,15 +350,8 @@ fn go_fallback_binary() -> Option<PathBuf> {
     if let Some(path) = env::var_os("SYMBRAIN_GO_BINARY") {
         return Some(PathBuf::from(path));
     }
-    path_lookup(OsStr::new("symbrain-go"))
-}
-
-fn path_lookup(binary: &OsStr) -> Option<PathBuf> {
-    env::var_os("PATH").and_then(|paths| {
-        env::split_paths(&paths)
-            .map(|dir| dir.join(binary))
-            .find(|candidate| candidate.is_file())
-    })
+    // Shared lookup: honours PATHEXT, so a packaged `symbrain-go.exe` is found on Windows.
+    passthrough::path_lookup(OsStr::new("symbrain-go"))
 }
 
 pub(crate) fn rustc_version() -> &'static str {

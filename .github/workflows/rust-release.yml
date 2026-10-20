@@ -1,0 +1,160 @@
+# Rust release candidate pipeline (#730). Builds the six release archives with
+# the Rust CLI and its packaged Go fallback, verifies them against the release
+# archive contract and smoke-tests each one on its native platform.
+#
+# This pipeline never creates a tag, release or tap update: the published v*
+# release is still produced by release.yml from GoReleaser. Making the Rust
+# archives the default release is #782.
+
+name: Rust release candidate
+
+on:
+  workflow_dispatch: {}
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/rust-release.yml"
+      - "scripts/rust-release/**"
+      - "scripts/dist-oracle/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-release-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      epoch: ${{ steps.version.outputs.epoch }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Determine unpublished candidate version
+        id: version
+        run: |
+          set -euo pipefail
+          base="$(python3 -c 'import tomllib; print(tomllib.load(open("Cargo.toml", "rb"))["workspace"]["package"]["version"])')"
+          sha="$(git rev-parse HEAD)"
+          {
+            echo "version=${base}-candidate.${sha:0:12}"
+            echo "epoch=$(git show -s --format=%ct HEAD)"
+          } >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: version
+    name: build (${{ matrix.os }}/${{ matrix.arch }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Ubuntu 22.04 keeps the glibc floor at 2.35 for the dynamically linked CLI.
+          - { os: linux, arch: amd64, runner: ubuntu-22.04 }
+          - { os: linux, arch: arm64, runner: ubuntu-22.04-arm }
+          - { os: darwin, arch: amd64, runner: macos-15-intel }
+          - { os: darwin, arch: arm64, runner: macos-15 }
+          - { os: windows, arch: amd64, runner: windows-2025 }
+          - { os: windows, arch: arm64, runner: windows-11-arm }
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+      SOURCE_DATE_EPOCH: ${{ needs.version.outputs.epoch }}
+      MACOSX_DEPLOYMENT_TARGET: "12.0"
+      EXE: ${{ matrix.os == 'windows' && '.exe' || '' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.13"
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: false
+
+      - name: Resolve pinned Rust toolchain
+        run: rustup show active-toolchain
+
+      - name: Build Rust CLI
+        env:
+          SYMBRAIN_VERSION: ${{ env.VERSION }}
+        run: cargo build --locked --release -p symbrain-cli
+
+      - name: Build Go fallback
+        env:
+          CGO_ENABLED: "0"
+        run: go build -trimpath -ldflags "-s -w -X main.version=$VERSION" -o "$RUNNER_TEMP/symbrain-go$EXE" ./cmd/symbrain
+
+      - name: Package archive
+        run: >-
+          python scripts/rust-release/package.py archive --version "$VERSION"
+          --os "${{ matrix.os }}" --arch "${{ matrix.arch }}"
+          --rust "target/release/symbrain$EXE" --go "$RUNNER_TEMP/symbrain-go$EXE"
+          --out "$RUNNER_TEMP/dist"
+
+      - name: Smoke-test the extracted archive
+        run: python scripts/rust-release/smoke.py --archive-dir "$RUNNER_TEMP/dist" --version "$VERSION"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: rust-release-${{ matrix.os }}-${{ matrix.arch }}
+          path: ${{ runner.temp }}/dist/
+          if-no-files-found: error
+          retention-days: 14
+
+  bundle:
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: rust-release-*
+          path: ${{ runner.temp }}/dist
+          merge-multiple: true
+
+      - name: Write checksums
+        run: python3 scripts/rust-release/package.py checksums --dir "$RUNNER_TEMP/dist"
+
+      - name: Verify the archive contract for all six platforms
+        run: go run ./scripts/dist-oracle -hybrid-candidate-check -platforms all -version "$VERSION" -assets "$RUNNER_TEMP/dist"
+
+      - name: Install Syft
+        uses: anchore/sbom-action/download-syft@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+
+      - name: Generate CycloneDX SBOMs
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/sbom"
+          for archive in "$RUNNER_TEMP"/dist/symbrain_*; do
+            name="$(basename "$archive")"
+            syft "$archive" --output "cyclonedx-json=$RUNNER_TEMP/sbom/$name.sbom.json"
+            python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["bomFormat"]=="CycloneDX" and d.get("components"), sys.argv[1]' "$RUNNER_TEMP/sbom/$name.sbom.json"
+          done
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: rust-release-candidate-${{ needs.version.outputs.version }}
+          path: |
+            ${{ runner.temp }}/dist/
+            ${{ runner.temp }}/sbom/
+          if-no-files-found: error
+          retention-days: 14

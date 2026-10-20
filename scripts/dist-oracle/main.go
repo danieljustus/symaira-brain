@@ -344,6 +344,7 @@ func main() {
 	check := flag.Bool("check", false, "run the contract gate and exit non-zero on any failed assertion")
 	candidateCheck := flag.Bool("candidate-check", false, "verify local candidate archives and checksums without a release")
 	hybridCandidateCheck := flag.Bool("hybrid-candidate-check", false, "verify one unpublished Linux Rust/Go candidate archive and checksum")
+	hybridPlatformList := flag.String("platforms", "linux/amd64", "hybrid candidate platforms: \"all\" or comma-separated os/arch pairs")
 	assetsDir := flag.String("assets", "", "directory containing candidate archives and checksums.txt")
 	version := flag.String("version", "", "candidate version without the v prefix")
 	manifestPath := flag.String("manifest", defaultManifest, "path to the pinned release manifest JSON")
@@ -357,11 +358,16 @@ func main() {
 			os.Exit(2)
 		}
 		if *hybridCandidateCheck {
-			if err := checkHybridCandidateArtifacts(*version, resolvePath(*assetsDir)); err != nil {
+			platforms, err := parseHybridPlatforms(*hybridPlatformList)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "dist-oracle: %v\n", err)
+				os.Exit(2)
+			}
+			if err := checkHybridCandidateArtifacts(*version, resolvePath(*assetsDir), platforms); err != nil {
 				fmt.Fprintf(os.Stderr, "dist-oracle: hybrid candidate artifacts: %v\n", err)
 				os.Exit(1)
 			}
-			fmt.Printf("hybrid-candidate-artifacts: PASS symbrain_%s_linux_amd64.tar.gz and exact SHA-256 manifest\n", *version)
+			fmt.Printf("hybrid-candidate-artifacts: PASS %d archives (%s) for %s and exact SHA-256 manifest\n", len(platforms), strings.Join(platforms, ","), *version)
 			fmt.Println("not-run: release signatures, SBOMs, Homebrew metadata/install, DMG, and publication")
 			return
 		}

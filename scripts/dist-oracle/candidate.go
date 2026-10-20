@@ -129,9 +129,9 @@ func checkCandidateArtifacts(cfg *goreleaserConfig, version, assetsDir string) e
 	return nil
 }
 
-// hybridCandidateMembers is the exact Linux transition-package contract. The
-// Rust CLI is symbrain; symbrain-go is the executable oracle for commands that
-// have not completed migration.
+// hybridCandidateMembers is the exact transition-package contract. The Rust
+// CLI is symbrain; symbrain-go is the executable oracle for commands that have
+// not completed migration. Windows members carry the .exe suffix.
 var hybridCandidateMembers = []string{
 	"AGENTS.md",
 	"LICENSE",
@@ -140,26 +140,59 @@ var hybridCandidateMembers = []string{
 	"symbrain-go",
 }
 
-// checkHybridCandidateArtifacts validates one unpublished Linux hybrid
-// candidate archive and its SHA-256 file. It makes no release, signing, SBOM,
-// Homebrew, DMG, or publication claim.
-func checkHybridCandidateArtifacts(version, assetsDir string) error {
+// hybridPlatforms is every release target of .goreleaser.yml.
+var hybridPlatforms = []string{
+	"darwin/amd64", "darwin/arm64", "linux/amd64", "linux/arm64", "windows/amd64", "windows/arm64",
+}
+
+// parseHybridPlatforms accepts "all" or a comma-separated list of os/arch pairs.
+func parseHybridPlatforms(value string) ([]string, error) {
+	if value == "all" {
+		return hybridPlatforms, nil
+	}
+	known := setOf(hybridPlatforms)
+	var platforms []string
+	for _, platform := range strings.Split(value, ",") {
+		if _, ok := known[platform]; !ok {
+			return nil, fmt.Errorf("unknown platform %q", platform)
+		}
+		platforms = append(platforms, platform)
+	}
+	if len(setOf(platforms)) != len(platforms) {
+		return nil, fmt.Errorf("duplicate platform in %q", value)
+	}
+	return platforms, nil
+}
+
+// checkHybridCandidateArtifacts validates unpublished Rust/Go candidate
+// archives for the given platforms and their SHA-256 file. It makes no
+// release, signing, SBOM, Homebrew, DMG, or publication claim.
+func checkHybridCandidateArtifacts(version, assetsDir string, platforms []string) error {
 	if version == "" || strings.ContainsAny(version, "/\\\x00") {
 		return fmt.Errorf("invalid candidate version %q", version)
 	}
-	archiveName := fmt.Sprintf("symbrain_%s_linux_amd64.tar.gz", version)
+	expected := make(map[string][]string, len(platforms))
+	for _, platform := range platforms {
+		goos, goarch, _ := strings.Cut(platform, "/")
+		name := fmt.Sprintf("symbrain_%s_%s_%s.tar.gz", version, goos, goarch)
+		members := hybridCandidateMembers
+		if goos == "windows" {
+			name = strings.TrimSuffix(name, ".tar.gz") + ".zip"
+			members = []string{"AGENTS.md", "LICENSE", "README.md", "symbrain.exe", "symbrain-go.exe"}
+		}
+		expected[name] = members
+	}
 	entries, err := os.ReadDir(assetsDir)
 	if err != nil {
 		return fmt.Errorf("read hybrid candidate directory: %w", err)
 	}
-	wantNames := map[string]struct{}{archiveName: {}, "checksums.txt": {}}
-	if len(entries) != len(wantNames) {
-		return fmt.Errorf("hybrid candidate must contain exactly %s and checksums.txt (got %d entries)", archiveName, len(entries))
+	if len(entries) != len(expected)+1 {
+		return fmt.Errorf("hybrid candidate must contain exactly %d archives and checksums.txt (got %d entries)", len(expected), len(entries))
 	}
 	files := make(map[string]string, len(entries))
 	for _, entry := range entries {
 		name := entry.Name()
-		if _, ok := wantNames[name]; !ok {
+		if _, ok := expected[name]; !ok && name != "checksums.txt" {
 			return fmt.Errorf("unexpected hybrid candidate asset %q", name)
 		}
 		info, err := entry.Info()
@@ -171,31 +204,36 @@ func checkHybridCandidateArtifacts(version, assetsDir string) error {
 		}
 		files[name] = filepath.Join(assetsDir, name)
 	}
-	members, err := candidateArchiveMembers(files[archiveName], archiveName)
-	if err != nil {
-		return err
+	if _, ok := files["checksums.txt"]; !ok {
+		return fmt.Errorf("hybrid candidate is missing checksums.txt")
 	}
-	if len(members) != len(hybridCandidateMembers) {
-		return fmt.Errorf("archive %s has members %v, want %v", archiveName, members, hybridCandidateMembers)
-	}
-	wantMembers := setOf(hybridCandidateMembers)
-	for _, member := range members {
-		if _, ok := wantMembers[member]; !ok {
-			return fmt.Errorf("archive %s has unexpected member %q", archiveName, member)
+	checksums := make(map[string]string, len(expected))
+	for name, want := range expected {
+		members, err := candidateArchiveMembers(files[name], name)
+		if err != nil {
+			return err
 		}
-		delete(wantMembers, member)
+		if len(members) != len(want) {
+			return fmt.Errorf("archive %s has members %v, want %v", name, members, want)
+		}
+		wantMembers := setOf(want)
+		for _, member := range members {
+			if _, ok := wantMembers[member]; !ok {
+				return fmt.Errorf("archive %s has unexpected member %q", name, member)
+			}
+			delete(wantMembers, member)
+		}
+		if len(wantMembers) != 0 {
+			return fmt.Errorf("archive %s is missing members %v", name, sortedKeys(wantMembers))
+		}
+		data, err := os.ReadFile(files[name])
+		if err != nil {
+			return fmt.Errorf("read hybrid candidate archive: %w", err)
+		}
+		digest := sha256.Sum256(data)
+		checksums[name] = hex.EncodeToString(digest[:])
 	}
-	if len(wantMembers) != 0 {
-		return fmt.Errorf("archive %s is missing members %v", archiveName, sortedKeys(wantMembers))
-	}
-	data, err := os.ReadFile(files[archiveName])
-	if err != nil {
-		return fmt.Errorf("read hybrid candidate archive: %w", err)
-	}
-	digest := sha256.Sum256(data)
-	return verifyCandidateChecksums(files["checksums.txt"], map[string]string{
-		archiveName: hex.EncodeToString(digest[:]),
-	}, nil)
+	return verifyCandidateChecksums(files["checksums.txt"], checksums, nil)
 }
 
 func candidateArchiveMembers(path, name string) ([]string, error) {
