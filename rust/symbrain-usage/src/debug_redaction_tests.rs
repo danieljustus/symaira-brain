@@ -1,4 +1,4 @@
-use super::Provider;
+use super::{AntigravityCandidate, Provider};
 use crate::AuthStatus;
 use crate::transport::{FixtureTransport, Request, Response, Transport};
 
@@ -38,7 +38,11 @@ fn debug_formats_redact_secrets_without_mutating_values() {
         headers: [("x-debug".into(), CREDENTIAL.into())].into(),
     };
     let fixture = FixtureTransport::new([("test-provider".into(), response.clone())].into());
-    let nested = (&provider, &request, &response, &fixture);
+    let candidate = AntigravityCandidate {
+        pid: 123,
+        csrf_token: Some(CREDENTIAL.into()),
+    };
+    let nested = (&provider, &request, &response, &fixture, &candidate);
 
     let nested_output = format!("{nested:?}\n{nested:#?}");
     for sentinel in SENSITIVE_VALUES {
@@ -91,14 +95,12 @@ fn debug_formats_redact_secrets_without_mutating_values() {
         (CREDENTIAL.as_bytes(), Some(CREDENTIAL))
     );
 
+    assert_eq!(candidate.pid, 123);
+    assert_eq!(candidate.csrf_token.as_deref(), Some(CREDENTIAL));
+
     let fixture_response = fixture.request(request.clone()).expect("fixture response");
-    assert_eq!(
-        (
-            fixture_response.body.as_slice(),
-            fixture_response.headers.get("x-debug").map(String::as_str),
-        ),
-        (CREDENTIAL.as_bytes(), Some(CREDENTIAL))
-    );
+    assert_eq!(fixture_response.body, response.body);
+    assert_eq!(fixture_response.headers, response.headers);
     let recorded_request = fixture.requests();
     assert_eq!(recorded_request.len(), 1);
     assert_eq!(
