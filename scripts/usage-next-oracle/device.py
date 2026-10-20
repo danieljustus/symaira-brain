@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 import os
+import platform
 import re
 from pathlib import Path
 import shutil
@@ -13,6 +14,13 @@ from cli_build import build
 
 FROZEN='dcddcef0df5789123c7c9a7ebe6e01f10e941f2c'
 sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+def execution_metadata(env, source):
+    return dict(
+        go_sdk=subprocess.check_output(['go','version'],env=env,cwd=source,text=True,encoding='utf-8').strip(),
+        rust_sdk=subprocess.check_output(['rustc','-Vv'],env=env,text=True,encoding='utf-8'),
+        native_platforms=f'{platform.system()} {platform.machine()} execution only; other native platforms require separate acceptance',
+    )
+
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('output',type=Path);args=parser.parse_args();output=args.output.resolve();output.parent.mkdir(parents=True,exist_ok=True)
     repo=Path(__file__).resolve().parents[2];evidence=output.with_suffix('.evidence');evidence.mkdir(exist_ok=True)
@@ -107,7 +115,7 @@ def main():
             paths=[p for p in paths if p.is_file()];source_hashes={str(p.relative_to(repo)):sha(p)for p in paths}
             if not dirty:
                 for p in paths:assert p.read_bytes()==subprocess.check_output(['git','show',head+':'+p.relative_to(repo).as_posix()],cwd=repo)
-            receipt=dict(candidate_head=head,candidate_dirty=dirty,oracle_commit=FROZEN,frozen_source_sha256=frozen,source_sha256=source_hashes,cases=64,original_device_cases=39,exhaustive_trim_cases=25,full_native_reports=57,retained_gates=7,remote_status_strategy_cases=84,provider_test_binaries=provider_binaries,negative_controls=controls,argv=argv,argv_controls=argv_controls,cli_build=cli_build,native=native,wire_observations=observations,evidence_sha256={str(p.name):sha(p)for p in evidence.iterdir()if p.is_file()},go_sdk=subprocess.check_output(['go','version'],text=True, encoding='utf-8').strip(),rust_sdk=subprocess.check_output(['rustc','-Vv'],text=True, encoding='utf-8'),native_platforms='Linux author proof only; fresh native macOS/Windows required',clock_policy='All actual Go/native snapshot fetched_at retained and bounded by invocation; canonicalization uses the invocation clock plus exact OpenCode3600/86400 second reset offsets relative to actual fetched_at. No fixed/runtime equality claim.',wire_policy='Exact provider-added header bytes except inherited OpenCode X-Server-Instance runtime/fixed identity, request line/body and response compared. All full raw wire requests retained; inherited transport default/header serialization differences are explicit, not exact wire parity.',private_seam='Test-only trust root and resolver/dial pin original HTTPS public hostnames to owned loopback TLS peer, certificate hostname verified; no provider/operator network. Production execute/parser unchanged. Fast TLS proof does not establish deadline/cancel parity.')
+            receipt=dict(candidate_head=head,candidate_dirty=dirty,oracle_commit=FROZEN,frozen_source_sha256=frozen,source_sha256=source_hashes,cases=64,original_device_cases=39,exhaustive_trim_cases=25,full_native_reports=57,retained_gates=7,remote_status_strategy_cases=84,provider_test_binaries=provider_binaries,negative_controls=controls,argv=argv,argv_controls=argv_controls,cli_build=cli_build,native=native,wire_observations=observations,evidence_sha256={str(p.name):sha(p)for p in evidence.iterdir()if p.is_file()},**execution_metadata(env,source),clock_policy='All actual Go/native snapshot fetched_at retained and bounded by invocation; canonicalization uses the invocation clock plus exact OpenCode3600/86400 second reset offsets relative to actual fetched_at. No fixed/runtime equality claim.',wire_policy='Exact provider-added header bytes except inherited OpenCode X-Server-Instance runtime/fixed identity, request line/body and response compared. All full raw wire requests retained; inherited transport default/header serialization differences are explicit, not exact wire parity.',private_seam='Test-only trust root and resolver/dial pin original HTTPS public hostnames to owned loopback TLS peer, certificate hostname verified; no provider/operator network. Production execute/parser unchanged. Fast TLS proof does not establish deadline/cancel parity.')
             output.write_text(json.dumps(receipt,indent=2)+'\n', encoding='utf-8');print('PASS64/57 full native,7 gated; owned TLS comparisons',len(observations))
         finally:
             if peer:
