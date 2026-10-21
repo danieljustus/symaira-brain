@@ -1,0 +1,105 @@
+    Checking libc v0.2.189
+    Checking serde_core v1.0.229
+    Checking zmij v1.0.23
+    Checking num-traits v0.2.19
+    Checking generic-array v0.14.7
+    Checking io-lifetimes v3.0.1
+    Checking io-lifetimes v2.0.4
+    Checking errno v0.3.14
+    Checking getrandom v0.3.3
+    Checking block-buffer v0.10.4
+    Checking rustix v1.1.4
+    Checking crypto-common v0.1.7
+    Checking cpufeatures v0.2.17
+    Checking digest v0.10.7
+    Checking io-extras v0.19.0
+    Checking aws-lc-sys v0.45.0
+    Checking sha2 v0.10.9
+    Checking serde v1.0.229
+    Checking serde_json v1.0.151
+    Checking getrandom v0.2.17
+    Checking chrono v0.4.45
+    Checking yaml_serde v0.10.7
+    Checking tempfile v3.27.0
+    Checking fs-set-times v0.20.3
+    Checking ring v0.17.14
+    Checking cap-primitives v4.0.3
+    Checking aws-lc-rs v1.18.1
+    Checking symbrain-core v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-core)
+    Checking cap-std v4.0.3
+    Checking cap-fs-ext v4.0.3
+    Checking httparse v1.10.1
+    Checking symbrain-harness v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-harness)
+    Checking fs2 v0.4.3
+    Checking ureq-proto v0.6.2
+    Checking hmac v0.12.1
+    Checking symbrain-skills v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-skills)
+    Checking rustls-webpki v0.103.16
+    Checking zerofrom v0.1.8
+    Checking symbrain-policy v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-policy)
+    Checking yoke v0.8.3
+    Checking signal-hook-registry v1.4.8
+    Checking zerovec v0.11.8
+    Checking rustls v0.23.46
+    Checking socket2 v0.6.5
+    Checking mio v1.2.3
+    Checking zerotrie v0.2.5
+    Checking tinystr v0.8.4
+    Checking tokio v1.53.1
+    Checking potential_utf v0.1.6
+    Checking icu_locale_core v2.3.0
+    Checking icu_collections v2.3.0
+    Checking futures-util v0.3.34
+    Checking icu_provider v2.3.1
+    Checking icu_normalizer_data v2.3.0
+    Checking icu_properties_data v2.3.0
+    Checking hkdf v0.12.4
+    Checking icu_properties v2.3.0
+    Checking ureq v3.4.1
+    Checking icu_normalizer v2.3.0
+    Checking system-configuration-sys v0.6.0
+    Checking symbrain-guard-core v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-guard-core)
+    Checking idna_adapter v1.2.2
+    Checking symbrain-audit v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-audit)
+    Checking core-foundation v0.9.4
+    Checking hyper v1.11.1
+    Checking idna v1.1.0
+    Checking system-configuration v0.7.0
+    Checking core-foundation v0.10.1
+    Checking security-framework-sys v2.17.0
+    Checking tower v0.5.3
+    Checking url v2.5.8
+    Checking security-framework v3.7.0
+    Checking hyper-util v0.1.21
+    Checking tokio-rustls v0.26.6
+    Checking thiserror v2.0.20
+    Checking tower-http v0.6.11
+    Checking crc32fast v1.5.1
+    Checking rustls-platform-verifier v0.7.1
+    Checking tokio-util v0.7.19
+    Checking flate2 v1.1.10
+    Checking hyper-rustls v0.27.10
+    Checking libsqlite3-sys v0.38.2
+    Checking reqwest v0.13.4
+    Checking nix v0.31.3
+    Checking symaira-core-secretref v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+    Checking symbrain-activity v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-activity)
+    Checking filetime v0.2.29
+    Checking rusqlite v0.40.2
+    Checking tar v0.4.46
+    Checking symaira-core-llm v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+    Checking zip v9.0.4
+    Checking symbrain-mcp v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-mcp)
+    Checking symbrain-usage v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-usage)
+    Checking symguard-cli v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symguard-cli)
+    Checking symbrain-memory v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-memory)
+    Checking symbrain-instructions v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-instructions)
+    Checking symbrain-patterns v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-patterns)
+    Checking symbrain-managed v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-managed)
+    Checking symbrain-broker v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-broker)
+    Checking symbrain-catalog v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-catalog)
+    Checking symbrain-adapter v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-adapter)
+    Checking signal-hook v0.3.18
+    Checking symbrain-gateway v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-gateway)
+    Checking symbrain-cli v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-cli)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 13.47s
