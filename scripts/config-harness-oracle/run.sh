@@ -15,4 +15,7 @@ report="${1:?usage: scripts/config-harness-oracle/run.sh OUTPUT_JSON [--record-f
 shift
 ./scripts/run-go-oracle.sh "$oracle_ref" build -o "$go_binary" ./cmd/symbrain
 cargo build -p symbrain-cli --bin symbrain --locked
+rm -f "$report"
 python3 scripts/config-harness-oracle/replay.py "$go_binary" "$rust_binary" "$report" "$@"
+# A replay that silently ran another suite exits 0 without writing a report.
+test -s "$report" || { echo "config-harness oracle wrote no report: $report" >&2; exit 1; }

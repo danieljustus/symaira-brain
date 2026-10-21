@@ -68,7 +68,7 @@ Existing coverage: HAR-006/007, `harness_*` in rust-differential (never exercise
 
 ## Remaining after slice 1 (not done)
 
-1. D1 `harness list` still routes to Go for any inventory `config.error` other than the frozen JSON message, including project paths with `..` components or non-directories (JSON Decoder syntax errors; TOML errors; path errors).
+1. D1 `harness list` still routes to Go for any inventory `config.error` other than the frozen JSON message, including cleaned project paths that keep a leading `..` and symlinked or non-directory project roots (JSON Decoder syntax errors; TOML errors; path errors).
    Related open residuals (not routing, recorded in HAR-008): `install`/`uninstall`/`sync` with a `..`-bearing `--project` (`./x/../`, `../project`) still differ from Go (Rust rejects parent components in the trusted root; measured, pre-existing); a non-UTF-8 `-project` is displayed lossily (U+FFFD) where Go prints the raw bytes (Unix only; Windows argv cannot carry raw bytes).
 2. A1–A3, A5 module predicates (setup/doctor config-failure boundary, usage report transports, memory serve/sync/etc.).
 3. A8 skills (out of scope here).

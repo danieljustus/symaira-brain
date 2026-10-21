@@ -47,12 +47,19 @@ that contains evidence files only. Evidence recorded earlier for `de6530b`
   (21 cases) all pass.
 * Not covered / open (recorded in HAR-008): `harness list` still routes to Go
   for any inventory `config.error` other than the frozen JSON message
-  (including project paths with `..` components or non-directories);
+  (including cleaned project paths that keep a leading `..` and symlinked or non-directory project roots);
   `install`/`uninstall`/`sync` with a `..`-bearing `--project` (`./x/../`,
-  `../project`) differ from Go (measured; pre-existing, not changed here); a
+  `../project`) differ from Go (measured; pre-existing, not changed here), Rust
+  refusing with exit 1 where Go succeeds; `sync --dry-run --json` prints an
+  uncleaned `--project` (`a//b`, `a/./b`, `./a/.`) where Go prints it cleaned;
+  `install`/`uninstall`/`sync` refuse symlinked or non-directory project roots
+  that Go accepts (hardening direction, pre-existing); a
   non-UTF-8 `-project` is displayed lossily (Unix only); the probe-panic exit
   code is an intentional divergence (Go aborts with exit 2 and a trace, Rust
-  exits 1), unit-tested but not oracle-compared.
+  exits 1), unit-tested but not oracle-compared. The seeded health projection
+  (`scripts/harness_health_contract.py`) enforces row identity, order, status
+  and the exact redacted diagnostic, but not text-table column padding or JSON
+  key order.
 * The oracle is wired into `rust-migration`, `rust-migration-macos` and
   `rust-migration-windows` in `.github/workflows/ci.yml`; exact-head native
   CI runs are still pending. This is not evidence of native three-OS CI.

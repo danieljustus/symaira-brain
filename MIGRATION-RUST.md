@@ -492,8 +492,8 @@ the oracle is wired into the `rust-migration`, `rust-migration-macos` and
 `rust-migration-windows` jobs of `ci.yml`, but exact-head native
 Linux/macOS/Windows CI runs are still pending; no three-OS claim is made.
 Still routed to Go (#769 open): in `harness list`, any inventory `config.error`
-other than the frozen JSON message, including project paths with `..`
-components or non-directories (needs Go `encoding/json` Decoder and
+other than the frozen JSON message, including cleaned project paths that
+keep a leading `..` and symlinked or non-directory project roots (needs Go `encoding/json` Decoder and
 BurntSushi/toml error text and Go's project-path behaviour), and the
 setup/doctor/usage/memory/skills predicates. Intentional divergence: Go has no
 `recover` in `harness health`, so an unrecovered probe panic aborts Go with
