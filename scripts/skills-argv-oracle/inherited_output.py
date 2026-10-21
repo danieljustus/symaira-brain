@@ -31,9 +31,10 @@ MEMORY_HASHES = {
 GUARD_CORE_HASH = "4df524358123e41fb3a7959de3dd3064e477dd738bf8b36faf4cec961dc77d75"
 SOURCE_HASHES = {
     **MEMORY_HASHES,
-    # Reviewed after #889: only go_fallback_binary changed (PATHEXT-aware lookup);
-    # the early output blocks are still byte-equal to the parent.
-    CLI: "0ec6f9b2f06a07d01d28a48843774f2c661b2ab3d0761c054269dffb2766245d",
+    # Reviewed after #889: only go_fallback_binary changed (PATHEXT-aware lookup).
+    # Reviewed after #765: only the `setup`/`doctor` Go-fallback dispatch arms
+    # were removed. The early output blocks are still byte-equal to the parent.
+    CLI: "02e3bb0cfc35eb6f22156cbe758660547a1e0b22b3c2dbab98bb8518601d6e92",
     CORE: GUARD_CORE_HASH,
 }
 PROFILES = {
