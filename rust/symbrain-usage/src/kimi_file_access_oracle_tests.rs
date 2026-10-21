@@ -6,7 +6,9 @@
 //! with a cleared environment, so process-global `HOME`/`KIMI_CODE_HOME` are
 //! never mutated in the test binary. Every case must keep the report native
 //! (no Go route) and report exactly Go's `configured`/`auth_status`.
-#![cfg(unix)]
+//! macOS only: the gate is removed only there (see `kimi_file_requires_go`).
+//! Run as a non-root user; root bypasses the mode-000 cases.
+#![cfg(target_os = "macos")]
 
 use super::{kimi, needs_go_fallback};
 use serde_json::{Value, json};

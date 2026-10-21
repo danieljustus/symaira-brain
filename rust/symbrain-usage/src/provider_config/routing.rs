@@ -55,15 +55,18 @@ pub fn needs_go_fallback() -> bool {
         // remaining gate until native target receipts define the contract.
         return true;
     }
-    // Go's Kimi reader and the native reader share one capability-rooted
-    // contract (final-component symlinks, non-regular files, oversize and
-    // permission failures all yield no CLI token), so unsafe file shapes need
-    // no Go route. Only a token with an internal control byte does.
+    // On macOS Go's Kimi reader and the native reader share one
+    // capability-rooted contract (symlinks, non-regular files, oversize and
+    // permission failures all yield no CLI token; a FIFO is a deliberate
+    // native non-blocking divergence because Go's open blocks), so unsafe file
+    // shapes need no Go route there. See kimi_file_requires_go for the other
+    // targets. A token with an internal control byte always routes to Go.
     let kimi_path = credential_join(&kimi_cli_home(), "credentials/kimi-code.json");
     let kimi_cli = kimi_file_token_candidate(&kimi_path);
-    if kimi_cli
-        .as_ref()
-        .is_some_and(|token| token.bytes().any(|byte| byte.is_ascii_control()))
+    if kimi_file_requires_go(&kimi_path)
+        || kimi_cli
+            .as_ref()
+            .is_some_and(|token| token.bytes().any(|byte| byte.is_ascii_control()))
     {
         return true;
     }

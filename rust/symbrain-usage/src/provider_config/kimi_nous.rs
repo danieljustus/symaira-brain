@@ -33,6 +33,21 @@ fn kimi_file_token_candidate(path: &Path) -> Option<String> {
         .flatten()
 }
 
+// Invalid regular JSON is native missing credentials. Unsafe file access is
+// native only where Go-derived evidence exists (#768, macOS). On Linux
+// cap-std's openat2(RESOLVE_BENEATH|O_NOFOLLOW) rejects an in-root relative
+// symlink that Go's os.Root follows, and Windows has no evidence yet, so those
+// targets keep the Go route for unsafe shapes.
+#[cfg(not(target_os = "macos"))]
+fn kimi_file_requires_go(path: &Path) -> bool {
+    read_optional_credential_file(path).is_err()
+}
+
+#[cfg(target_os = "macos")]
+fn kimi_file_requires_go(_path: &Path) -> bool {
+    false
+}
+
 /// Preserve Go's trimmed device bytes for the proven regular UTF-8 family.
 /// Invalid UTF-8, internal ASCII controls and unsafe file access retain Go;
 /// Unicode bytes require full request/report and actual wire evidence.
