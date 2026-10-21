@@ -2,12 +2,19 @@ name: Browse flow-list parity
 
 on:
   pull_request:
+    paths:
+      - 'browse/**'
+      - '.github/workflows/browse-flow-list.yml'
   push:
     branches: [main]
     paths:
       - 'browse/**'
       - '.github/workflows/browse-flow-list.yml'
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read

@@ -2,12 +2,19 @@ name: Browse browser-profile parity
 
 on:
   pull_request:
+    paths:
+      - 'browse/**'
+      - '.github/workflows/browse-profiles.yml'
   push:
     branches: [main]
     paths:
       - 'browse/**'
       - '.github/workflows/browse-profiles.yml'
   workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
