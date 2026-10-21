@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -156,10 +157,17 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	kimiFileAccessOracle, err := buildKimiFileAccessOracle()
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+	// The Kimi file-access cases use POSIX modes and symlinks. The fixture is
+	// recorded on Unix and its Rust replay is macOS-only, so Windows neither
+	// rebuilds, checks nor rewrites it.
+	kimiFileAccessSupported := runtime.GOOS != "windows"
+	var kimiFileAccessOracle kimiFileAccessOracleFixture
+	if kimiFileAccessSupported {
+		kimiFileAccessOracle, err = buildKimiFileAccessOracle()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 	}
 	claudeAdminReport, err := buildClaudeAdminAuthenticatedReport(fixtures["claude-admin"])
 	if err != nil {
@@ -279,9 +287,11 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		if err := checkJSON(*kimiFileAccessOutput, kimiFileAccessOracle); err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			os.Exit(1)
+		if kimiFileAccessSupported {
+			if err := checkJSON(*kimiFileAccessOutput, kimiFileAccessOracle); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(1)
+			}
 		}
 		if err := checkJSON(*claudeAdminReportOutput, claudeAdminReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
@@ -386,9 +396,11 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	if err := writeJSON(*kimiFileAccessOutput, kimiFileAccessOracle); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+	if kimiFileAccessSupported {
+		if err := writeJSON(*kimiFileAccessOutput, kimiFileAccessOracle); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 	}
 	if err := writeJSON(*claudeAdminReportOutput, claudeAdminReport); err != nil {
 		fmt.Fprintln(os.Stderr, err)
