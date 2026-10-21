@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Same immutable revision as the sibling replay oracles; cmd/symbrain and
-# internal/ are byte-identical to it at the candidate base.
-oracle_ref=dcddcef0df5789123c7c9a7ebe6e01f10e941f2c
+# The candidate base (CoreKit v0.18.2), as for the setup-repair, setup-source
+# and doctor-repair oracles.
+oracle_ref=0541e64a36d83bac8e5e4f8c4136033c03db83ae
 work_dir="$(mktemp -d "${RUNNER_TEMP:-${TMPDIR:-/tmp}}/config-harness-769.XXXXXX")"
 trap 'rm -rf "$work_dir"' EXIT
 go_binary="$work_dir/symbrain-go"

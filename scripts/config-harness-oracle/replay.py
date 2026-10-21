@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-ORACLE_REF = "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
+ORACLE_REF = "0541e64a36d83bac8e5e4f8c4136033c03db83ae"
 sys.path.insert(0, str(ROOT / "scripts"))
 spec = importlib.util.spec_from_file_location("cfgh_legacy", ROOT / "scripts/rust-differential.py")
 legacy = importlib.util.module_from_spec(spec)

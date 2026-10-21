@@ -6,7 +6,7 @@ Method: every `None`/`return None` in `rust/symbrain-cli/src` (and
 `rust/symguard-cli/src/lib.rs`) was traced to `run_native -> None ->
 run_go_fallback` (lib.rs `run_with_executor` / `run_stdio`), not grepped.
 Line numbers are for the base revision unless marked *(after)*.
-Go oracle ref for all rows: `dcddcef0df5789123c7c9a7ebe6e01f10e941f2c`
+Go oracle ref for all rows: `0541e64a36d83bac8e5e4f8c4136033c03db83ae`
 (`git diff --quiet <ref> HEAD -- cmd/symbrain internal` exits 0 at base).
 
 Real Go-routing reaches Go only via `run_go_fallback` (lib.rs:318), which is

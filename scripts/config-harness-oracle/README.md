@@ -1,7 +1,6 @@
 `run.sh OUTPUT_JSON [--record-fixture PATH]` compiles the production Go CLI from
-immutable `dcddcef0df5789123c7c9a7ebe6e01f10e941f2c` (the revision shared by the
-sibling replay oracles; `cmd/symbrain` and `internal/` are byte-identical to it
-at the #769 base), compiles the candidate Rust CLI, and replays 290 cases in
+immutable `0541e64a36d83bac8e5e4f8c4136033c03db83ae` (the #769 base, with CoreKit v0.18.2,
+as for the setup-repair, setup-source and doctor-repair oracles), compiles the candidate Rust CLI, and replays 290 cases in
 disposable per-case HOME/XDG/project roots:
 
 * 116 new argv-grammar shapes for `config`, `harness`, `harness list` and

@@ -469,8 +469,7 @@ both commands' flag handling; `unknown subcommand`/`unexpected argument` use
 Go's `%q` byte quoting.
 
 Evidence: `scripts/config-harness-oracle/run.sh OUT.json` compiles the Go CLI
-from immutable `dcddcef0…` (identical to the candidate for `cmd/symbrain` and
-`internal/`) and replays 290 cases (116 new shapes plus 174 existing
+from immutable `0541e64a…` (the candidate base, with CoreKit v0.18.2) and replays 290 cases (116 new shapes plus 174 existing
 `config_*`/`harness_*` differential cases; the two `harness_health_initialize*`
 probes that use `SYMBRAIN_GO_BINARY` as their fake server are excluded) in
 disposable HOME/XDG roots. Every
