@@ -24,9 +24,15 @@ CLI observation, missing Go evidence, changed full report and duplicate case IDs
 Partial evidence/logs are retained on failure; native three-OS CI uploads them for
 14 days. Current Linux alone does not prove native macOS/Windows behavior.
 
-Unsupported/unreadable file access, non-ASCII or invalid-UTF8 device values,
-HOME mismatch on Windows, distinct eligible map tokens, automatic host Keychain,
-base/workspace overrides and numeric JWT overflow keep their existing gates.
+Unsupported/unreadable access to the Kimi device id file, non-ASCII or
+invalid-UTF8 device values, HOME mismatch on Windows, distinct eligible map
+tokens, automatic host Keychain, base/workspace overrides and numeric JWT
+overflow keep their existing gates. On macOS, unsafe Kimi CLI credential file
+shapes (symlink, directory, permission denied, oversize) are native since #768
+and pinned by `scripts/usage-oracle` (`kimi_file_access_oracle.json`); a FIFO
+is a deliberate native non-blocking divergence (Go's open blocks). Linux keeps
+the Go route because cap-std rejects an in-root relative symlink that Go's
+`os.Root` follows; Windows keeps it until Windows evidence exists.
 The shared capability reader supplies bounded regular-file/nonblocking access;
 its inherited Unix safety differences and pending Windows root proof remain in
 the parent ADRs. #768 stays open beyond this bounded file increment.
