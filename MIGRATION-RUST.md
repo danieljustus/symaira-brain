@@ -191,6 +191,16 @@ must still succeed at the published head before acceptance. The conservative
 credential-source fallback restrictions documented in `usage_cli.rs` remain;
 this does not complete the broader #768 cutover.
 
+A first #768 increment removes the Kimi CLI credential file-access gate on
+macOS only: 16 Go-generated cases in
+`rust/symbrain-usage/tests/fixtures/kimi_file_access_oracle.json` (symlink,
+directory, ENOTDIR, permission denied, oversize, in-root relative symlink)
+match native routing and Go's configured/auth status. Linux keeps the Go route
+because cap-std's `openat2(RESOLVE_BENEATH|O_NOFOLLOW)` rejects an in-root
+relative symlink that Go's `os.Root` follows; Windows keeps it until Windows
+evidence exists. A FIFO credential is a deliberate native non-blocking
+divergence (Go's open blocks).
+
 The native MCP foundation now models JSON-RPC null/omission semantics and
 accepts both newline-delimited and `Content-Length` framing with the Go
 implementation's 1 MiB bounds. Gateway dispatch is implemented natively;
