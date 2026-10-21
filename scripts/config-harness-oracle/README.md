@@ -1,12 +1,21 @@
 `run.sh OUTPUT_JSON [--record-fixture PATH]` compiles the production Go CLI from
 immutable `0541e64a36d83bac8e5e4f8c4136033c03db83ae` (the #769 base, with CoreKit v0.18.2,
-as for the setup-repair, setup-source and doctor-repair oracles), compiles the candidate Rust CLI, and replays 290 cases in
+as for the setup-repair, setup-source and doctor-repair oracles), compiles the candidate Rust CLI, and replays 324 cases in
 disposable per-case HOME/XDG/project roots:
 
 * 116 new argv-grammar shapes for `config`, `harness`, `harness list` and
   `harness health` (help spellings, undefined and bad-syntax flags, bare dash,
   `--` terminator, empty and repeated values, flags before verbs, raw
   non-UTF-8 bytes);
+* 34 seeded harness cases (`cfgh-seeded-health-*`, `cfgh-seeded-list-*`): a
+  `~/.claude.json` with a stdio server whose command is missing and an HTTP
+  server on closed loopback port 1, plus a project `.mcp.json`, replayed with
+  empty/repeated/matching/non-matching `--harness` and absolute and relative
+  (`.`, `./`, `./x/../`) `--project` values. Probes fail fast and offline; each
+  run must finish within 8 s. `harness list` is byte-exact; `harness health`
+  server rows (harness, server, config path, unhealthy status, order) must be
+  identical and only the diagnostics follow the HAR-007 redaction
+  (`scripts/harness_health_contract.py`); no-server output is byte-exact;
 * 174 existing `config_*` / `harness_*` cases from `scripts/rust-differential.py`.
   `harness_health_initialize` and `harness_health_initialize_json` are excluded
   because they use `SYMBRAIN_GO_BINARY` as their fake MCP server; the main
@@ -24,9 +33,15 @@ and listed explicitly in its `SKIP` output and in the report's `skipped` map.
 observations (only cases whose output contains no fixture-root path). The
 cargo test `config_harness_native` replays that file without a Go toolchain.
 
-Negative control: mutating one diagnostic string in
-`rust/symbrain-cli/src/go_flags.rs` (`flag provided but not defined` ->
-`flag provided but undefined`) makes this oracle fail 21 cases and the cargo
-fixture test fail. Reports are kept under `migration/evidence/config-harness-769/`.
-This oracle is not yet wired into CI; exact-head native Linux/macOS/Windows runs
-are required before any three-OS claim.
+Negative controls (each run on the committed tree with one production line
+mutated, then restored): `flag provided but not defined` -> `flag provided but
+undefined` in `rust/symbrain-cli/src/go_flags.rs` fails 22 cases (21 new + 1
+legacy `harness_list_unknown_flag`) and the cargo fixture test; dropping the
+empty-`--harness` filter in `harness_cli.rs` fails 10 seeded health cases and
+`empty_harness_filter_probes_every_server_like_go`; dropping the lexical clean in
+`Harness::project_config_path` fails 10 seeded cases and
+`relative_project_config_path_is_cleaned_like_go`. Reports are kept under
+`migration/evidence/config-harness-769/`.
+The oracle is wired into the `rust-migration`, `rust-migration-macos` and
+`rust-migration-windows` jobs of `.github/workflows/ci.yml`; exact-head native
+Linux/macOS/Windows runs are still pending, so no three-OS claim is made.
