@@ -114,3 +114,27 @@ fn go_bool_and_int_spellings() {
         "cannot parse \"x\" as bool: strconv.ParseBool: parsing \"x\": invalid syntax"
     );
 }
+
+/// Go `os.ReadFile` on a directory: Unix opens it and the read fails with
+/// `EISDIR`; Windows (`FILE_FLAG_BACKUP_SEMANTICS`) opens it and the read fails
+/// with `ERROR_INVALID_FUNCTION`, "Incorrect function.". The wording is taken
+/// from the OS error code so the check also holds on a localized Windows.
+#[test]
+fn directory_config_reports_the_read_failure_like_go() {
+    let root = tempfile::tempdir().unwrap();
+    let config = root.path().join("config.toml");
+    std::fs::create_dir(&config).unwrap();
+    let shown = config.display().to_string();
+    let detail = if cfg!(windows) {
+        symbrain_managed::format_io_error(&std::io::Error::from_raw_os_error(1))
+    } else {
+        "is a directory".to_owned()
+    };
+    let mut modules = [false; 3];
+    let error = merge_file(&mut modules, &config, shown.as_bytes()).unwrap_err();
+    assert_eq!(
+        String::from_utf8_lossy(&error),
+        format!("failed to parse {shown}: read {shown}: {detail}")
+    );
+    assert!(config.is_dir());
+}

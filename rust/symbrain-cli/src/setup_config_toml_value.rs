@@ -30,7 +30,10 @@ pub(super) fn value_message(
     }
     let Some(first) = value.chars().next() else {
         return if statement.newline {
-            with_key("expected value but found '\\n' instead")
+            with_key(&format!(
+                "expected value but found {} instead",
+                quote_rune(Some(statement.break_char()))
+            ))
         } else {
             with_key("unexpected EOF; expected value")
         };
@@ -107,7 +110,11 @@ fn string_message(
         }
     }
     if statement.newline {
-        Some(envelope(line, Some(key), "strings cannot contain newlines"))
+        Some(envelope(
+            statement.line_before_break(),
+            Some(key),
+            "strings cannot contain newlines",
+        ))
     } else {
         Some(envelope(
             line,
@@ -172,9 +179,12 @@ fn word_message(
     let all_digits = !digits.is_empty() && digits.bytes().all(|b| b.is_ascii_digit());
     let message = if digits.is_empty() && statement.newline {
         return Some(envelope(
-            line + 1,
+            statement.line_after_break(),
             Some(key),
-            "expected a digit but got '\\n'",
+            &format!(
+                "expected a digit but got {}",
+                quote_rune(Some(statement.break_char()))
+            ),
         ));
     } else if all_digits && word.parse::<i64>().is_err() {
         format!("{word} is out of range for int64")

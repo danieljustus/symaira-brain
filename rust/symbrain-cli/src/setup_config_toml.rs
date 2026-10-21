@@ -128,6 +128,32 @@ struct Statement<'a> {
     text: &'a str,
     /// Whether a newline follows the statement (false at EOF).
     newline: bool,
+    /// Whether the line break is `\r\n`. The Go lexer consumes `\r` as the
+    /// line terminator (`isNL`) and only counts a line when it later reads the
+    /// `\n`, so every diagnostic that names the break differs from the `\n`
+    /// spelling in its character and (for the two `errorf`/`errorPrevLine`
+    /// families below) in its line number.
+    crlf: bool,
+}
+
+impl Statement<'_> {
+    /// The line-break character the Go lexer reports for this statement.
+    fn break_char(&self) -> char {
+        if self.crlf { '\r' } else { '\n' }
+    }
+
+    /// Line of an `errorf` raised after consuming the break: `\n` already
+    /// advanced the lexer's line counter, `\r` has not.
+    fn line_after_break(&self) -> usize {
+        self.line + usize::from(!self.crlf)
+    }
+
+    /// Line of an `errorPrevLine` raised after consuming the break: it steps
+    /// back one line from the counter, which only `\n` advanced, so `\r\n`
+    /// reports the line before the statement (line 0 for the first line).
+    fn line_before_break(&self) -> usize {
+        self.line - usize::from(self.crlf)
+    }
 }
 
 fn statement_at(text: &str, line: usize) -> Option<Statement<'_>> {
@@ -136,11 +162,15 @@ fn statement_at(text: &str, line: usize) -> Option<Statement<'_>> {
         if index + 1 == line {
             let newline = raw.ends_with('\n');
             let body = raw.strip_suffix('\n').unwrap_or(raw);
+            // A `\r` only pairs with the `\n` that follows it; at EOF it is a
+            // lone carriage return.
+            let crlf = newline && body.ends_with('\r');
             return Some(Statement {
                 line,
                 offset,
-                text: body.strip_suffix('\r').unwrap_or(body),
+                text: if crlf { &body[..body.len() - 1] } else { body },
                 newline,
+                crlf,
             });
         }
         offset += raw.len();
@@ -240,9 +270,13 @@ fn key_message(
         other => {
             let first = trimmed.chars().next();
             if segments.is_empty() && matches!(first, Some('"' | '\'')) {
-                return Some(envelope(line, None, "strings cannot contain newlines"));
+                return Some(envelope(
+                    statement.line_before_break(),
+                    None,
+                    "strings cannot contain newlines",
+                ));
             }
-            let found = other.or(Some('\n'));
+            let found = other.or(Some(statement.break_char()));
             let key = if segments.is_empty() {
                 None
             } else {
@@ -321,9 +355,12 @@ fn header_message(statement: &Statement<'_>, ctx_key: &str, header: &str) -> Opt
             })
         }
         None if statement.newline => Some(envelope(
-            line + 1,
+            statement.line_after_break(),
             Some(ctx_key),
-            "expected '.' or ']' to end table name, but got '\\n' instead",
+            &format!(
+                "expected '.' or ']' to end table name, but got {} instead",
+                quote_rune(Some(statement.break_char()))
+            ),
         )),
         None => Some(envelope(
             line,

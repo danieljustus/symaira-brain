@@ -211,8 +211,8 @@ def configure(case,root,go,tool):
         home=root/os.fsdecode(b"home\xff\xe2\x82");(home/".symaira").mkdir(parents=True)
         (home/".symaira/bin").write_bytes(b"owned obstruction");env["HOME"]=str(home)
     if case.get("config"):
-        cfg=Path(env["XDG_CONFIG_HOME"])/"symbrain/config.toml";cfg.parent.mkdir();cfg.write_text(case["config"])
-    if case.get("project"):(Path(env["PROJECT"])/".symbrain.toml").write_text(case["project"])
+        cfg=Path(env["XDG_CONFIG_HOME"])/"symbrain/config.toml";cfg.parent.mkdir();cfg.write_bytes(case["config"].encode())
+    if case.get("project"):(Path(env["PROJECT"])/".symbrain.toml").write_bytes(case["project"].encode())
     env.update(case.get("env",{}))
     if case.get("home_lexical"):
         lexical=case["home_lexical"];home=env["HOME"]

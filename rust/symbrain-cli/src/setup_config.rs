@@ -162,7 +162,7 @@ fn merge_file(modules: &mut [bool; 3], path: &Path, shown: &[u8]) -> Result<(), 
         return Ok(());
     }
     let parse_failure = |detail: &str| file_error(shown, "failed to parse", detail);
-    let mut file = std::fs::File::open(path).map_err(|error| {
+    let mut file = open_read_only(path).map_err(|error| {
         parse_failure(&format!(
             "open {}: {}",
             String::from_utf8_lossy(shown),
@@ -180,6 +180,34 @@ fn merge_file(modules: &mut [bool; 3], path: &Path, shown: &[u8]) -> Result<(), 
     let document = toml_syntax::parse(&bytes).map_err(|detail| parse_failure(&detail))?;
     apply_document(modules, &document)
         .map_err(|detail| file_error(shown, "failed to apply", &detail))
+}
+
+/// Opens `path` for reading the way Go's `os.Open` does.
+///
+/// On Windows Go's `syscall.Open` passes `FILE_FLAG_BACKUP_SEMANTICS` and shares
+/// reads/writes, so a directory opens successfully and the following read fails
+/// with `ERROR_INVALID_FUNCTION` (`read <path>: Incorrect function.`). Rust's
+/// default open of a directory is refused with `ERROR_ACCESS_DENIED`, which
+/// would print `open <path>: Access is denied.` instead. Using the real flags,
+/// rather than synthesising the message, keeps genuine open failures (such as a
+/// denied file) reported as `open`, exactly as Go does. Unix opens directories
+/// read-only already and fails the read with `is a directory`.
+fn open_read_only(path: &Path) -> std::io::Result<std::fs::File> {
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::OpenOptionsExt;
+        const FILE_FLAG_BACKUP_SEMANTICS: u32 = 0x0200_0000;
+        const FILE_SHARE_READ_WRITE: u32 = 3;
+        std::fs::OpenOptions::new()
+            .read(true)
+            .share_mode(FILE_SHARE_READ_WRITE)
+            .custom_flags(FILE_FLAG_BACKUP_SEMANTICS)
+            .open(path)
+    }
+    #[cfg(not(windows))]
+    {
+        std::fs::File::open(path)
+    }
 }
 
 fn apply_document(modules: &mut [bool; 3], document: &DocumentMut) -> Result<(), String> {

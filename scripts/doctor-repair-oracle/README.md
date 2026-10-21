@@ -56,7 +56,15 @@ leaf and for each Go dynamic type (`[]interface {}`, `time.Time`,
 (`ParseBool`, `ParseInt`, out of range), field order, a project-file failure
 after a valid global file, `SYMBRAIN_*` overrides (including present-but-empty),
 non-UTF-8, UTF-16 and NUL input, a configuration path that is a directory, and
-a missing managed directory. Stdout, the exact stderr tail, the exit code (2)
+a missing managed directory. Configuration documents are written as explicit
+bytes (never `write_text`, which would turn `\n` into CRLF on Windows), and
+explicit `\r\n` rows pin that the Go lexer treats `\r` as the line break (its
+diagnostics name `'\r'`; `errorPrevLine` sites report line 0 on the first line).
+On Windows the directory row additionally pins that Go's read-only directory
+handle opens and fails the read (`read <path>: Incorrect function.`). Lone `\r`
+not followed by `\n` is Go's control-character error at the first such byte; the
+native reader does not reproduce that wording yet (no oracle row reaches it).
+Stdout, the exact stderr tail, the exit code (2)
 and the full managed-directory snapshot (nothing written) are compared.
 Ordering cases pin that the `--from-source` root/flag checks precede loading and
 that loading precedes module selection; control cases pin valid configurations.

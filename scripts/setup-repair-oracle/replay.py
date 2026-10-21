@@ -142,7 +142,7 @@ def cases():
             legacy.setup_correct_managed_binaries(root, env)
             path = Path(env["XDG_CONFIG_HOME"]) / 'symbrain/config.toml'
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(text)
+            path.write_bytes(text.encode())  # no platform newline translation
         result.append(legacy.Case(f"repair-module-config-{index}",
             ("setup", "--fix", "--allow-unsigned", "--json"), setup=configured, mutating=True))
     for json_out in (False,True):

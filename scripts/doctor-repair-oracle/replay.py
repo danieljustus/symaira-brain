@@ -40,6 +40,11 @@ def build_probe(root):
     return binary
 
 
+def document_bytes(document):
+    """Configuration bytes exactly as written in the case, on every OS."""
+    return document if isinstance(document, bytes) else document.encode("utf-8")
+
+
 def configure(case, root, env, probe):
     if case.escaping_home:
         home = root / case.escaping_home
@@ -71,12 +76,12 @@ def configure(case, root, env, probe):
         path.parent.mkdir(parents=True)
         if case.config_directory:
             path.mkdir()
-        elif isinstance(case.config, bytes):
-            path.write_bytes(case.config)
         else:
-            path.write_text(case.config)
+            # Explicit bytes: write_text would turn "\n" into CRLF on Windows and
+            # change the input; CRLF is exercised by cases that spell "\r\n".
+            path.write_bytes(document_bytes(case.config))
     if case.project_config is not None:
-        (Path(env["PROJECT"]) / ".symbrain.toml").write_text(case.project_config)
+        (Path(env["PROJECT"]) / ".symbrain.toml").write_bytes(document_bytes(case.project_config))
     if case.home_mode:
         home_key = "USERPROFILE" if os.name == "nt" else "HOME"
         if case.home_mode == "unset":env.pop(home_key, None)

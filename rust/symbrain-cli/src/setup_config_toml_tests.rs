@@ -38,6 +38,21 @@ const CORPUS: &[(&str, &[u8], Option<&str>)] = &[
     ("multi-line-2", b"\x6f\x6b\x20\x3d\x20\x31\x0a\x62\x61\x64\x20\x62\x61\x64\x20\x3d\x20\x32\x0a", Some("toml: line 2: expected '.' or '=', but got 'b' instead")),
     ("line3", b"\x0a\x0a\x78\x20\x3d\x20\x3d\x20\x31\x0a", Some("toml: line 3 (last key \"x\"): expected value but found '=' instead")),
     ("crlf", b"\x61\x20\x3d\x20\x31\x0d\x0a\x62\x20\x3d\x20\x3d\x20\x32\x0d\x0a", Some("toml: line 2 (last key \"b\"): expected value but found '=' instead")),
+    // `\r\n` line endings, measured with the same Go loader: the lexer treats `\r`
+    // as the line break, so messages that name the break say `'\r'`, `errorf`
+    // sites keep the statement's line and `errorPrevLine` sites report one
+    // line less than the `\n` spelling (line 0 on the first line).
+    ("crlf-novalue", b"[modules]\r\nbrowse =\r\n", Some("toml: line 2 (last key \"modules.browse\"): expected value but found '\\r' instead")),
+    ("crlf-novalue-blank", b"a = \t\r\n", Some("toml: line 1 (last key \"a\"): expected value but found '\\r' instead")),
+    ("crlf-novalue-after-lf", b"a = 1\nb =\r\n", Some("toml: line 2 (last key \"b\"): expected value but found '\\r' instead")),
+    ("crlf-barekey", b"browse\r\n", Some("toml: line 1: expected '.' or '=', but got '\\r' instead")),
+    ("crlf-tbl-unclosed", b"[modules\r\n", Some("toml: line 1: expected '.' or ']' to end table name, but got '\\r' instead")),
+    ("crlf-aot-unclosed", b"[[a\r\nb=1\r\n", Some("toml: line 1: expected '.' or ']' to end table name, but got '\\r' instead")),
+    ("crlf-tbl-after-comment", b"[a] # c\r\n[b\r\n", Some("toml: line 2 (last key \"a\"): expected '.' or ']' to end table name, but got '\\r' instead")),
+    ("crlf-plus", b"a = +\r\n", Some("toml: line 1 (last key \"a\"): expected a digit but got '\\r'")),
+    ("crlf-unterm-str", b"a = \"abc\r\n", Some("toml: line 0 (last key \"a\"): strings cannot contain newlines")),
+    ("crlf-unterm-literal", b"a = 'x\r\n", Some("toml: line 0 (last key \"a\"): strings cannot contain newlines")),
+    ("crlf-qkey-unterm", b"\"abc\r\n", Some("toml: line 0: strings cannot contain newlines")),
     ("nested-key", b"\x5b\x6d\x6f\x64\x75\x6c\x65\x73\x5d\x0a\x62\x72\x6f\x77\x73\x65\x20\x3d\x20\x3d\x20\x74\x72\x75\x65\x0a", Some("toml: line 2 (last key \"modules.browse\"): expected value but found '=' instead")),
     ("tbl-key", b"\x5b\x61\x5d\x0a\x62\x20\x3d\x20\x0a", Some("toml: line 2 (last key \"a.b\"): expected value but found '\\n' instead")),
     ("arr-mixed-ok", b"\x61\x20\x3d\x20\x5b\x31\x2c\x20\x22\x78\x22\x5d\x0a", None),

@@ -11,7 +11,7 @@ class Case:
     provenance: bytes | str | None = None
     config: str | bytes | None = None
     config_directory: bool = False
-    project_config: str | None = None
+    project_config: str | bytes | None = None
     env: tuple[tuple[str, str], ...] = ()
     probe_exit: int = 0
     probe_wait: int = 0
@@ -210,6 +210,15 @@ INVALID_CONFIGS = (
     ("utf16", b"\xff\xfea\x00 \x00=\x00 \x001\x00\n\x00", None, ()),
     ("nul", b"a = 1\x00\n", None, ()),
     ("syntax-no-value", "[modules]\nbrowse =\n", None, ()),
+    # Explicit CRLF documents. The Go lexer takes `\r` as the line break, so the
+    # diagnostics name '\r' and some line numbers shift (even to line 0); the
+    # harness writes these bytes verbatim so every OS replays the same input.
+    ("crlf-syntax-no-value", b"[modules]\r\nbrowse =\r\n", None, ()),
+    ("crlf-table-unclosed", b"[modules\r\nbrowse = true\r\n", None, ()),
+    ("crlf-bare-key", b"[modules]\r\nbrowse\r\n", None, ()),
+    ("crlf-digit-expected", b"[patterns]\r\npromotion_threshold = +\r\n", None, ()),
+    ("crlf-unterminated-string", b"default_profile = \"abc\r\n", None, ()),
+    ("crlf-project-no-value", None, b"[modules]\r\nbrowse =\r\n", ()),
     ("duplicate-key", "[a]\nb = 1\nb = 2\n", None, ()),
 )
 
@@ -238,6 +247,8 @@ def invalid_configuration_cases():
         Case("config-control-setup-fix", args=("setup", "--fix")),
         Case("config-control-setup-fix-false-clears-true", args=("setup", "--fix", "--json"),
              config="[modules]\nbrowse = true\n", project_config="[modules]\nbrowse = false\n"),
+        Case("config-control-crlf-valid", args=("setup", "--fix", "--json"),
+             config=b"[modules]\r\nbrowse = true\r\n", project_config=b"[modules]\r\nbrowse = false\r\n"),
         Case("config-control-doctor-fix-utf8-bom", config=b"\xef\xbb\xbf[modules]\nbrowse = false\n"),
     ))
     return result
