@@ -156,6 +156,10 @@ def fixture_entry(case, observation):
 
 
 def main():
+    # Re-exec through the external-storage wrapper here, not inside
+    # legacy.main(): its own re-exec would restart rust-differential.py and
+    # replay the legacy suite instead of this corpus, then exit 0 with no report.
+    legacy.ensure_external_environment(__file__)
     args = sys.argv[1:]
     fixture_path = None
     if "--record-fixture" in args:
