@@ -52,8 +52,9 @@ that contains evidence files only. Evidence recorded earlier for `de6530b`
   `../project`) differ from Go (measured; pre-existing, not changed here), Rust
   refusing with exit 1 where Go succeeds; `sync --dry-run --json` prints an
   uncleaned `--project` (`a//b`, `a/./b`, `./a/.`) where Go prints it cleaned;
-  `install`/`uninstall`/`sync` refuse symlinked or non-directory project roots
-  that Go accepts (hardening direction, pre-existing); a
+  `install`/`uninstall` refuse a symlinked project root that Go accepts (exit 1
+  vs 0, pre-existing); non-directory roots, and `sync` with a symlinked or
+  non-directory root, are refused by both with differing stderr text; a
   non-UTF-8 `-project` is displayed lossily (Unix only); the probe-panic exit
   code is an intentional divergence (Go aborts with exit 2 and a trace, Rust
   exits 1), unit-tested but not oracle-compared. The seeded health projection
