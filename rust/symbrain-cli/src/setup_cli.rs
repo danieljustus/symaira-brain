@@ -19,28 +19,6 @@ use flags::{SetupArgs, parse_args};
 #[path = "setup_source.rs"]
 mod source;
 
-/// Preserve full typed configuration diagnostics until their native cutover.
-pub(crate) fn requires_go_fallback(args: &[OsString]) -> bool {
-    parse_args(args, &mut Vec::new()).is_ok_and(|parsed| {
-        if crate::managed_home::bin_dir().is_none() {
-            return false;
-        }
-        let source = !parsed.from_source.is_empty();
-        if source && (parsed.fix || parsed.allow_unsigned) {
-            return false;
-        }
-        if !source && !parsed.modules.is_empty() {
-            return false;
-        }
-        // Go validates the source root before loading configuration.
-        if source && !source::valid_root(&parsed.from_source) {
-            return false;
-        }
-        (parsed.fix || source)
-            && (!crate::vault_config::valid_configuration() || enabled_cores().is_err())
-    })
-}
-
 #[derive(Serialize)]
 struct SetupReport {
     bin_dir: GoText,
@@ -152,8 +130,11 @@ fn run_setup(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) 
             } else {
                 "symbrain setup"
             };
-            let _ = writeln!(stderr, "{prefix}: {error}");
-            return exit::GENERIC;
+            // Go prints `%v` of the CLIError and exits with its NoInput code.
+            let _ = write!(stderr, "{prefix}: ");
+            let _ = stderr.write_all(error.as_ref());
+            let _ = writeln!(stderr);
+            return exit::NO_INPUT;
         }
     };
     if parsed.fix {

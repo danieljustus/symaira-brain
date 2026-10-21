@@ -1,0 +1,568 @@
+//! `BurntSushi/toml` v1.6.0 syntax diagnostics as surfaced by corekit's `configkit`.
+//!
+//! `toml_edit` decides whether a document is syntactically valid (both follow
+//! TOML 1.1). When it rejects a document, the message is reconstructed in the
+//! Go parser's wording for the statement shapes whose Go output was measured
+//! against the real loader (see `setup_config_toml_tests.rs`). Any other shape
+//! keeps the Go envelope (`toml: line N: ...`) around the `toml_edit` text,
+//! because the exact Go lexer message is unknown; that residual and the two
+//! documents the dialects disagree on are recorded in the oracle README.
+use symbrain_core::config::format_go_quoted_bytes;
+use toml_edit::DocumentMut;
+
+/// Parses a config file the way `toml.DecodeFile` decides validity.
+pub(super) fn parse(bytes: &[u8]) -> Result<DocumentMut, String> {
+    let mut data = bytes;
+    if data.starts_with(&[0xff, 0xfe]) || data.starts_with(&[0xfe, 0xff]) {
+        data = &data[2..];
+    } else if data.starts_with(&[0xef, 0xbb, 0xbf]) {
+        data = &data[3..];
+    }
+    if data.iter().take(6).any(|byte| *byte == 0) {
+        return Err("toml: line 1: files cannot contain NULL bytes; probably using UTF-16; TOML files must be UTF-8".into());
+    }
+    let text = match std::str::from_utf8(data) {
+        Ok(text) => text,
+        Err(error) => return Err(invalid_utf8(data, error.valid_up_to())),
+    };
+    text.parse::<DocumentMut>().map_err(|error| {
+        let offset = error.span().map_or(text.len(), |span| span.start);
+        diagnose(text, offset, error.message())
+    })
+}
+
+fn invalid_utf8(data: &[u8], offset: usize) -> String {
+    let line = data[..offset].split(|byte| *byte == b'\n').count();
+    let start = data[..offset]
+        .iter()
+        .rposition(|byte| *byte == b'\n')
+        .map_or(0, |index| index + 1);
+    let prefix = String::from_utf8_lossy(&data[start..offset]);
+    let message = format!("invalid UTF-8 byte: 0x{:x}", data[offset]);
+    // A byte after `=` is lexed as part of a value, so the key is known.
+    if let Some(index) = prefix.find('=') {
+        let (_, segments) = scan_key(&prefix[..index]);
+        return envelope(line, Some(&segments.join(".")), &message);
+    }
+    envelope(line, None, &message)
+}
+
+fn envelope(line: usize, last_key: Option<&str>, message: &str) -> String {
+    match last_key.filter(|key| !key.is_empty()) {
+        Some(key) => format!(
+            "toml: line {line} (last key {}): {message}",
+            format_go_quoted_bytes(key.as_bytes())
+        ),
+        None => format!("toml: line {line}: {message}"),
+    }
+}
+
+/// Go `%q` for a rune, as used inside the lexer messages.
+fn quote_rune(character: Option<char>) -> String {
+    match character {
+        None => "'\\x00'".into(),
+        Some('\n') => "'\\n'".into(),
+        Some('\t') => "'\\t'".into(),
+        Some('\r') => "'\\r'".into(),
+        Some('\'') => "'\\''".into(),
+        Some('\\') => "'\\\\'".into(),
+        Some(c) if c.is_control() => format!("'\\x{:02x}'", c as u32),
+        Some(c) => format!("'{c}'"),
+    }
+}
+
+/// Splits `text` into raw key segments up to the first unparsable character.
+/// Returns the byte offset where scanning stopped.
+fn scan_key(text: &str) -> (usize, Vec<String>) {
+    let bytes = text.as_bytes();
+    let blank = |position: usize| matches!(bytes.get(position), Some(b' ' | b'\t'));
+    let mut segments = Vec::new();
+    let mut position = 0;
+    loop {
+        while blank(position) {
+            position += 1;
+        }
+        let start = position;
+        if matches!(bytes.get(position), Some(b'"' | b'\'')) {
+            let quote = bytes[position];
+            position += 1;
+            let begin = position;
+            while position < bytes.len() && bytes[position] != quote {
+                position += 1;
+            }
+            if position >= bytes.len() {
+                return (start, segments);
+            }
+            segments.push(text[begin..position].to_owned());
+            position += 1;
+        } else {
+            while position < bytes.len()
+                && (bytes[position].is_ascii_alphanumeric()
+                    || matches!(bytes[position], b'_' | b'-'))
+            {
+                position += 1;
+            }
+            if position == start {
+                return (start, segments);
+            }
+            segments.push(text[start..position].to_owned());
+        }
+        while blank(position) {
+            position += 1;
+        }
+        if bytes.get(position) == Some(&b'.') {
+            position += 1;
+        } else {
+            return (position, segments);
+        }
+    }
+}
+
+struct Statement<'a> {
+    line: usize,
+    /// Byte offset of the statement within the document.
+    offset: usize,
+    text: &'a str,
+    /// Whether a newline follows the statement (false at EOF).
+    newline: bool,
+}
+
+fn statement_at(text: &str, line: usize) -> Option<Statement<'_>> {
+    let mut offset = 0;
+    for (index, raw) in text.split_inclusive('\n').enumerate() {
+        if index + 1 == line {
+            let newline = raw.ends_with('\n');
+            let body = raw.strip_suffix('\n').unwrap_or(raw);
+            return Some(Statement {
+                line,
+                offset,
+                text: body.strip_suffix('\r').unwrap_or(body),
+                newline,
+            });
+        }
+        offset += raw.len();
+    }
+    None
+}
+
+/// Table path in force before `line`.
+fn context(text: &str, line: usize) -> Vec<String> {
+    let mut path = Vec::new();
+    for raw in text.lines().take(line.saturating_sub(1)) {
+        let trimmed = raw.trim_start_matches([' ', '\t']);
+        if let Some(rest) = trimmed.strip_prefix('[') {
+            let (_, segments) = scan_key(rest.strip_prefix('[').unwrap_or(rest));
+            if !segments.is_empty() {
+                path = segments;
+            }
+        }
+    }
+    path
+}
+
+fn diagnose(text: &str, offset: usize, upstream: &str) -> String {
+    let line = text.as_bytes()[..offset.min(text.len())]
+        .split(|byte| *byte == b'\n')
+        .count();
+    // A string left open on the previous line surfaces on the next one in
+    // `toml_edit`, but the Go lexer reports the line that opened it.
+    for candidate in [line.saturating_sub(1), line] {
+        if candidate == 0 {
+            continue;
+        }
+        let Some(statement) = statement_at(text, candidate) else {
+            continue;
+        };
+        let ctx = context(text, candidate);
+        let hint = if candidate == line || upstream.contains("multi-line") {
+            upstream
+        } else {
+            ""
+        };
+        if let Some(message) = statement_message(&statement, &ctx, text, hint)
+            && (candidate == line
+                || message.contains("strings cannot contain newlines")
+                || message.contains("expected '\"\"\"'"))
+        {
+            return message;
+        }
+    }
+    // Wording of this shape was not measured against the Go lexer.
+    envelope(line, None, upstream)
+}
+
+fn statement_message(
+    statement: &Statement<'_>,
+    ctx: &[String],
+    whole: &str,
+    upstream: &str,
+) -> Option<String> {
+    let trimmed = statement.text.trim_start_matches([' ', '\t']);
+    if trimmed.is_empty() || trimmed.starts_with('#') {
+        return None;
+    }
+    if upstream.contains("duplicate key") || upstream.contains("redefin") {
+        return Some(duplicate(statement, ctx, trimmed));
+    }
+    let ctx_key = ctx.join(".");
+    if let Some(header) = trimmed.strip_prefix('[') {
+        return header_message(statement, &ctx_key, header);
+    }
+    if upstream.contains("multi-line") {
+        return multiline_message(statement, ctx, trimmed);
+    }
+    key_message(statement, ctx, &ctx_key, trimmed, whole)
+}
+
+fn key_message(
+    statement: &Statement<'_>,
+    ctx: &[String],
+    ctx_key: &str,
+    trimmed: &str,
+    whole: &str,
+) -> Option<String> {
+    let line = statement.line;
+    let (end, segments) = scan_key(trimmed);
+    let mut after = trimmed[end..].chars();
+    match after.next() {
+        Some('=') => {}
+        None if segments.is_empty() => return None,
+        None if !statement.newline => {
+            return Some(envelope(
+                line,
+                None,
+                "unexpected EOF; expected key separator '='",
+            ));
+        }
+        other => {
+            let first = trimmed.chars().next();
+            if segments.is_empty() && matches!(first, Some('"' | '\'')) {
+                return Some(envelope(line, None, "strings cannot contain newlines"));
+            }
+            let found = other.or(Some('\n'));
+            let key = if segments.is_empty() {
+                None
+            } else {
+                Some(ctx_key)
+            };
+            return Some(envelope(
+                line,
+                key.or(Some(ctx_key)),
+                &format!("expected '.' or '=', but got {} instead", quote_rune(found)),
+            ));
+        }
+    }
+    if segments.is_empty() {
+        return Some(envelope(
+            line,
+            None,
+            "unexpected '=': key name appears blank",
+        ));
+    }
+    let mut full = ctx.to_vec();
+    full.extend(segments);
+    let key = full.join(".");
+    let value = after.as_str().trim_start_matches([' ', '\t']);
+    value_message(statement, ctx_key, &key, value, whole)
+}
+
+fn duplicate(statement: &Statement<'_>, ctx: &[String], trimmed: &str) -> String {
+    if let Some(header) = trimmed.strip_prefix('[') {
+        let (_, segments) = scan_key(header.strip_prefix('[').unwrap_or(header));
+        let parent = segments[..segments.len().saturating_sub(1)].join(".");
+        return envelope(
+            statement.line,
+            Some(&parent),
+            &format!("Key '{}' has already been defined.", segments.join(".")),
+        );
+    }
+    let (_, segments) = scan_key(trimmed);
+    let mut full = ctx.to_vec();
+    full.extend(segments);
+    let key = full.join(".");
+    envelope(
+        statement.line,
+        Some(&key),
+        &format!("Key '{key}' has already been defined."),
+    )
+}
+
+fn header_message(statement: &Statement<'_>, ctx_key: &str, header: &str) -> Option<String> {
+    let header = header.strip_prefix('[').unwrap_or(header);
+    let (end, segments) = scan_key(header);
+    let after = &header[end..];
+    let line = statement.line;
+    let empty = segments.is_empty() || header[..end].trim_end().ends_with('.');
+    if empty && after.starts_with(']') {
+        return Some(envelope(
+            line,
+            None,
+            "unexpected end of table name (table names cannot be empty)",
+        ));
+    }
+    match after.chars().next() {
+        Some(']') => {
+            let tail = after[1..].trim_start_matches([' ', '\t']);
+            let tail = tail.strip_prefix(']').unwrap_or(tail);
+            tail.trim_start_matches([' ', '\t']).chars().next().and_then(|c| {
+                (c != '#').then(|| {
+                    envelope(
+                        line,
+                        Some(&segments.join(".")),
+                        &format!(
+                            "expected a top-level item to end with a newline, comment, or EOF, but got {} instead",
+                            quote_rune(Some(c))
+                        ),
+                    )
+                })
+            })
+        }
+        None if statement.newline => Some(envelope(
+            line + 1,
+            Some(ctx_key),
+            "expected '.' or ']' to end table name, but got '\\n' instead",
+        )),
+        None => Some(envelope(
+            line,
+            None,
+            "expected '.' or ']' to end table name, but got '\\x00' instead",
+        )),
+        Some(c) => Some(envelope(
+            line,
+            Some(ctx_key),
+            &format!(
+                "expected '.' or ']' to end table name, but got {} instead",
+                quote_rune(Some(c))
+            ),
+        )),
+    }
+}
+
+fn multiline_message(statement: &Statement<'_>, ctx: &[String], trimmed: &str) -> Option<String> {
+    let (end, segments) = scan_key(trimmed);
+    let value = trimmed[end..]
+        .strip_prefix('=')?
+        .trim_start_matches([' ', '\t']);
+    if !value.starts_with("\"\"\"") {
+        // Only the basic multi-line delimiter was measured against Go.
+        return None;
+    }
+    let mut full = ctx.to_vec();
+    full.extend(segments);
+    Some(envelope(
+        statement.line,
+        Some(&full.join(".")),
+        "unexpected EOF; expected '\"\"\"'",
+    ))
+}
+
+fn value_message(
+    statement: &Statement<'_>,
+    ctx_key: &str,
+    key: &str,
+    value: &str,
+    whole: &str,
+) -> Option<String> {
+    let line = statement.line;
+    let with_key = |message: &str| Some(envelope(line, Some(key), message));
+    if value.starts_with("\"\"\"") || value.starts_with("'''") {
+        return None;
+    }
+    if let Some(control) = statement
+        .text
+        .chars()
+        .find(|c| c.is_control() && *c != '\t')
+    {
+        return with_key(&format!(
+            "TOML files cannot contain control characters: '0x{:02x}'",
+            control as u32
+        ));
+    }
+    let Some(first) = value.chars().next() else {
+        return if statement.newline {
+            with_key("expected value but found '\\n' instead")
+        } else {
+            with_key("unexpected EOF; expected value")
+        };
+    };
+    match first {
+        '=' | ']' | ',' | '#' | '}' => with_key(&format!(
+            "expected value but found {} instead",
+            quote_rune(Some(first))
+        )),
+        '"' | '\'' => string_message(statement, ctx_key, key, value, first),
+        '[' => {
+            let from = statement.offset + statement.text.len() - value.len();
+            array_message(statement, key, &whole[from..])
+        }
+        '{' => {
+            let inner = value[1..].trim();
+            if inner.contains('}') {
+                return None;
+            }
+            let (_, segments) = scan_key(inner);
+            let full = if segments.is_empty() {
+                key.to_owned()
+            } else {
+                format!("{key}.{}", segments.join("."))
+            };
+            Some(envelope(
+                line,
+                Some(&full),
+                "expected a comma or an inline table terminator '}', but got end of file instead",
+            ))
+        }
+        _ => word_message(statement, ctx_key, key, value),
+    }
+}
+
+fn string_message(
+    statement: &Statement<'_>,
+    ctx_key: &str,
+    key: &str,
+    value: &str,
+    quote: char,
+) -> Option<String> {
+    let line = statement.line;
+    let mut chars = value[1..].char_indices();
+    while let Some((index, c)) = chars.next() {
+        if c == quote {
+            // The string is complete; any trailing token ends the statement.
+            let rest = value[index + 2..].trim_start_matches([' ', '\t']);
+            return rest.chars().next().and_then(|c| {
+                (c != '#').then(|| {
+                    envelope(
+                        line,
+                        Some(ctx_key),
+                        &format!(
+                            "expected a top-level item to end with a newline, comment, or EOF, but got {} instead",
+                            quote_rune(Some(c))
+                        ),
+                    )
+                })
+            });
+        }
+        if quote == '"' && c == '\\' {
+            match chars.next().map(|(_, escaped)| escaped) {
+                Some('b' | 't' | 'n' | 'f' | 'r' | '"' | '\\' | 'u' | 'U' | 'e' | 'x') => {}
+                Some(other) => {
+                    return Some(envelope(
+                        line,
+                        Some(key),
+                        &format!("invalid escape in string '\\{other}'"),
+                    ));
+                }
+                None => break,
+            }
+        }
+    }
+    if statement.newline {
+        Some(envelope(line, Some(key), "strings cannot contain newlines"))
+    } else {
+        Some(envelope(
+            line,
+            Some(key),
+            &format!(
+                "unexpected EOF; expected {}",
+                if quote == '"' { "'\"'" } else { "\"'\"" }
+            ),
+        ))
+    }
+}
+
+fn array_message(statement: &Statement<'_>, key: &str, remainder: &str) -> Option<String> {
+    let depth = remainder.chars().fold(0_i32, |depth, c| match c {
+        '[' => depth + 1,
+        ']' => depth - 1,
+        _ => depth,
+    });
+    if depth <= 0 {
+        return None;
+    }
+    let last = remainder.trim_end().chars().last().unwrap_or('[');
+    let message = if matches!(last, ',' | '[') {
+        "unexpected EOF; expected value"
+    } else {
+        "expected a comma (',') or array terminator (']'), but got end of file"
+    };
+    Some(envelope(statement.line, Some(key), message))
+}
+
+fn word_message(
+    statement: &Statement<'_>,
+    ctx_key: &str,
+    key: &str,
+    value: &str,
+) -> Option<String> {
+    let line = statement.line;
+    let end = value
+        .find(|c: char| c.is_whitespace() || matches!(c, ',' | ']' | '}' | '#' | '='))
+        .unwrap_or(value.len());
+    let word = &value[..end];
+    let rest = value[end..].trim_start_matches([' ', '\t']);
+    let quoted = format_go_quoted_bytes(word.as_bytes());
+    if word.starts_with('.') {
+        return Some(envelope(
+            line,
+            Some(key),
+            "floats must start with a digit, not '.'",
+        ));
+    }
+    if matches!(word, "true" | "false") {
+        return None;
+    }
+    if !word.starts_with(|c: char| c.is_ascii_digit() || matches!(c, '+' | '-')) {
+        return Some(envelope(
+            line,
+            Some(key),
+            &format!("expected value but found {quoted} instead"),
+        ));
+    }
+    let digits = word.trim_start_matches(['+', '-']);
+    let all_digits = !digits.is_empty() && digits.bytes().all(|b| b.is_ascii_digit());
+    let message = if digits.is_empty() && statement.newline {
+        return Some(envelope(
+            line + 1,
+            Some(key),
+            "expected a digit but got '\\n'",
+        ));
+    } else if all_digits && word.parse::<i64>().is_err() {
+        format!("{word} is out of range for int64")
+    } else if digits.len() > 1 && digits.starts_with('0') && all_digits {
+        format!("Invalid integer {quoted}: cannot have leading zeroes")
+    } else if word.ends_with('_') {
+        format!("Invalid integer {quoted}: underscores must be surrounded by digits")
+    } else if word.ends_with('.') {
+        format!("Invalid float {quoted}: '.' must be followed by one or more digits")
+    } else if let Some(hex) = word.strip_prefix("0x") {
+        let bad = hex.char_indices().find(|(_, c)| !c.is_ascii_hexdigit())?;
+        format!(
+            "not a hexadecimal number: '0x{}'",
+            &hex[..bad.0 + bad.1.len_utf8()]
+        )
+    } else if word.len() >= 10 && word.as_bytes().get(4) == Some(&b'-') {
+        format!("invalid datetime: {quoted}")
+    } else if all_digits && (rest.is_empty() || rest.starts_with('#')) {
+        return None;
+    } else {
+        // `1 2` and `12abc` end the value early; the next token is reported.
+        let token = if all_digits {
+            rest.chars().next()
+        } else {
+            word.chars().find(|c| !c.is_ascii_digit())
+        };
+        return Some(envelope(
+            line,
+            Some(ctx_key),
+            &format!(
+                "expected a top-level item to end with a newline, comment, or EOF, but got {} instead",
+                quote_rune(token)
+            ),
+        ));
+    };
+    Some(envelope(line, Some(key), &message))
+}
+
+#[cfg(test)]
+#[path = "setup_config_toml_tests.rs"]
+mod tests;

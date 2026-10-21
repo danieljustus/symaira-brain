@@ -137,10 +137,8 @@ fn run_native(
         "config" => config_cli::run(rest, stdout, stderr),
         "profile" => profile_cli::run(rest, stdout, stderr, format),
         "audit" => Some(audit_cli::run(rest, stdout, stderr, format)),
-        "setup" if setup_cli::requires_go_fallback(rest) => None,
         "setup" if process_stdout => Some(setup_cli::run_with_stdout(rest, stdout, stderr, true)),
         "setup" => Some(setup_cli::run(rest, stdout, stderr)),
-        "doctor" if doctor_cli::requires_go_fallback(rest) => None,
         "doctor" if process_stdout => Some(doctor_cli::run_with_stdout(
             rest, stdout, stderr, format, true,
         )),

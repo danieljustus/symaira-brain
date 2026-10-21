@@ -19,7 +19,7 @@ from pathlib import Path
 from cases import cases
 
 ROOT = Path(__file__).resolve().parents[2]
-ORACLE = "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
+ORACLE = "0541e64a36d83bac8e5e4f8c4136033c03db83ae"
 sys.path.insert(0, str(ROOT / "scripts"))
 spec = importlib.util.spec_from_file_location("doctor_legacy", ROOT / "scripts/rust-differential.py")
 legacy = importlib.util.module_from_spec(spec)
@@ -66,10 +66,15 @@ def configure(case, root, env, probe):
         env["DOCTOR_SIGNATURE_RECEIPT"] = str(root / "signature-invocations")
     for key, value in case.env:
         env[key] = value
-    if case.config is not None:
+    if case.config is not None or case.config_directory:
         path = Path(env["XDG_CONFIG_HOME"]) / "symbrain/config.toml"
         path.parent.mkdir(parents=True)
-        path.write_text(case.config)
+        if case.config_directory:
+            path.mkdir()
+        elif isinstance(case.config, bytes):
+            path.write_bytes(case.config)
+        else:
+            path.write_text(case.config)
     if case.project_config is not None:
         (Path(env["PROJECT"]) / ".symbrain.toml").write_text(case.project_config)
     if case.home_mode:

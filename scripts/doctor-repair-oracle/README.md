@@ -1,7 +1,8 @@
-`run.sh OUTPUT_JSON` builds the complete frozen production Go CLI from
-`dcddcef0df5789123c7c9a7ebe6e01f10e941f2c`, builds the candidate Rust CLI,
-and compares real `doctor --fix` subprocesses with an absent Go fallback.
-It replays 285 cases on Linux, 274 on macOS and 269 on Windows (Unix signals/permissions
+`run.sh OUTPUT_JSON` builds the complete production Go CLI from
+`0541e64a36d83bac8e5e4f8c4136033c03db83ae` (the #765 base; CoreKit v0.18.2), builds the
+candidate Rust CLI, and compares real `doctor --fix`, `setup --fix` and
+`setup --from-source` subprocesses with an absent Go fallback.
+It replays 518 cases on Linux, 507 on macOS and 502 on Windows (Unix signals/permissions
 and Windows large exitcodes have separate native fixtures). A supplemental native
 Go fixture supplies version responses; it never changes the oracle, production Go or frozen cases.
 
@@ -39,8 +40,47 @@ for 14 days. Linux evidence alone does not establish macOS/Windows acceptance.
 
 Native Cargo tests independently run with no Go CLI and no release host,
 checking that source/corrupt records and binaries stay unchanged, optional
-cores are selected, failed downloads continue, and invalid full configuration
-continues through the existing Go loader boundary without creating the managed
-binary directory. Full configuration-failure diagnostics and source/module
-build lifecycle remain open in #765. The decision and reasons are recorded in
-`docs/adr/2026-10-03-native-doctor-repair.md`.
+cores are selected, failed downloads continue, and invalid full configuration is
+diagnosed natively without creating the managed binary directory. The decision
+and reasons are recorded in `docs/adr/2026-10-03-native-doctor-repair.md`.
+
+## Invalid-configuration cases (#765)
+
+233 cases (`config-error-*`, `config-order-*`, `config-control-*`) run the Go
+`config.Load()` failure paths for eight entry points (`setup`, `setup --fix`
+with and without `--json`, `setup --from-source .` with and without `--modules`,
+`doctor --fix` with `--json` and `--force-release`) against 26 rejected
+configurations: TOML syntax errors, wrong value types for every `fileConfig`
+leaf and for each Go dynamic type (`[]interface {}`, `time.Time`,
+`map[string]interface {}`, `[]map[string]interface {}`), string conversions
+(`ParseBool`, `ParseInt`, out of range), field order, a project-file failure
+after a valid global file, `SYMBRAIN_*` overrides (including present-but-empty),
+non-UTF-8, UTF-16 and NUL input, a configuration path that is a directory, and
+a missing managed directory. Stdout, the exact stderr tail, the exit code (2)
+and the full managed-directory snapshot (nothing written) are compared.
+Ordering cases pin that the `--from-source` root/flag checks precede loading and
+that loading precedes module selection; control cases pin valid configurations.
+
+### Oracle revision
+
+The pin moved from the frozen `dcddcef0` (CoreKit v0.17.0, which skipped
+zero-valued TOML fields and empty environment values) to the #765 base, whose
+`go.mod` requires CoreKit v0.18.2 (present values, including `false`, `0`,
+`""`, are converted and applied; `os.LookupEnv` replaces the non-empty check).
+The only Go difference in `internal/config`, `cmd/symbrain` setup/doctor,
+`internal/managed` and `internal/xdg` between the two revisions is that
+dependency bump, so the existing cases (`config-3`, `config-4`,
+`nonzero-config-merge`, `env-browse-`) now compare against the shipped
+behavior: a later `browse = false` clears an earlier `true`, and `0`/`""`/an
+empty `SYMBRAIN_MODULES_BROWSE` are rejected. Other oracles that still pin
+`dcddcef0` are unaffected.
+
+### Measured residuals (parser dialect)
+
+`toml_edit` (TOML 1.1) decides syntax validity; Go's wording is reconstructed
+for the statement shapes in `setup_config_toml_tests.rs` (86 recorded real-Go
+outcomes, all executed, 84 reproduced byte for byte). Two documents are accepted by one parser and rejected
+by the other and are listed as `UNMATCHED` there: `a.b = 1` followed by `a = 2`
+(Go accepts, Rust reports a duplicate key) and a newline inside an inline-table
+value (Go rejects, Rust accepts). Syntax errors of other shapes keep Go's
+`toml: line N: ` envelope with the `toml_edit` message text.

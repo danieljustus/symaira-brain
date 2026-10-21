@@ -83,10 +83,6 @@ struct ResultRow {
     error: symbrain_managed::GoText,
 }
 
-pub(super) fn valid_root(root: &OsStr) -> bool {
-    absolute(root).is_ok_and(|root| root.is_dir())
-}
-
 fn absolute(root: &OsStr) -> Result<PathBuf, String> {
     let root = Path::new(root);
     let joined = if root.is_absolute() {
@@ -109,9 +105,15 @@ fn absolute(root: &OsStr) -> Result<PathBuf, String> {
     Ok(clean)
 }
 
-fn select(modules: &[u8]) -> Result<Vec<Spec>, String> {
+fn select(modules: &[u8]) -> Result<Vec<Spec>, Vec<u8>> {
+    // Go loads the configuration even when --modules overrides it, and a load
+    // failure precedes every module diagnostic.
+    let enabled = super::enabled_cores().map_err(|error| {
+        let mut message = b"load config: ".to_vec();
+        message.extend_from_slice(error.as_ref());
+        message
+    })?;
     let mut wanted: BTreeSet<Vec<u8>> = if modules.is_empty() {
-        let enabled = super::enabled_cores()?;
         SPECS
             .iter()
             .filter(|spec| enabled.get(spec.binary).copied().unwrap_or(false))
@@ -126,7 +128,7 @@ fn select(modules: &[u8]) -> Result<Vec<Spec>, String> {
             .collect()
     };
     if wanted.is_empty() {
-        return Err("no modules selected: enable modules in config ([modules] browse/operate/scope) or pass --modules browse,operate,scope".into());
+        return Err(b"no modules selected: enable modules in config ([modules] browse/operate/scope) or pass --modules browse,operate,scope".to_vec());
     }
     let mut specs = Vec::new();
     for spec in SPECS {
@@ -138,7 +140,8 @@ fn select(modules: &[u8]) -> Result<Vec<Spec>, String> {
         return Err(format!(
             "unknown module {} (known: browse, operate, scope)",
             symbrain_core::config::format_go_quoted_bytes(unknown)
-        ));
+        )
+        .into_bytes());
     }
     Ok(specs)
 }

@@ -97,23 +97,32 @@ fn source_installs_are_preserved_without_a_go_binary_or_release_host() {
             "repair changed an intentional build"
         );
     }
-    invalid_configuration_keeps_the_go_loader_boundary(&child, root.path());
+    invalid_configuration_is_diagnosed_natively(root.path());
 }
 
-fn invalid_configuration_keeps_the_go_loader_boundary(child: &Path, root: &Path) {
-    for (index, config) in [
-        "[audit]\nenabled = []\n",
-        "[modules]\nbrowse = 1\n",
-        "invalid = [",
+fn invalid_configuration_is_diagnosed_natively(root: &Path) {
+    // Expected tails are the real Go loader's text (corekit v0.18.2).
+    for (index, (config, tail)) in [
+        (
+            "[audit]\nenabled = []\n",
+            "failed to apply {config}: field \"audit\": field \"enabled\": cannot convert []interface {} to bool",
+        ),
+        (
+            "[modules]\nbrowse = 1\n",
+            "failed to apply {config}: field \"modules\": field \"browse\": cannot convert int64 to bool",
+        ),
+        (
+            "invalid = [",
+            "failed to parse {config}: toml: line 1 (last key \"invalid\"): unexpected EOF; expected value",
+        ),
     ]
     .into_iter()
     .enumerate()
     {
         let case = root.join(format!("config-error-{index}"));
-        let config_dir = case.join("config/symbrain");
-        fs::create_dir_all(&config_dir).unwrap();
-        fs::write(config_dir.join("config.toml"), config).unwrap();
-        let receipt = case.join("go-call");
+        let config_path = case.join("config/symbrain/config.toml");
+        fs::create_dir_all(config_path.parent().unwrap()).unwrap();
+        fs::write(&config_path, config).unwrap();
         let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
         command
             .args(["setup", "--fix", "--json"])
@@ -125,15 +134,23 @@ fn invalid_configuration_keeps_the_go_loader_boundary(child: &Path, root: &Path)
             .env("XDG_DATA_HOME", case.join("data"))
             .env("XDG_CACHE_HOME", case.join("cache"))
             .env("PATH", case.join("no-tools"))
-            .env("SYMBRAIN_GO_BINARY", child)
-            .env("SETUP_FALLBACK_RECEIPT", &receipt);
+            .env("SYMBRAIN_GO_BINARY", case.join("no-go"));
         for variable in ["SystemRoot", "WINDIR", "LLVM_PROFILE_FILE"] {
             if let Some(value) = std::env::var_os(variable) {
                 command.env(variable, value);
             }
         }
-        assert_eq!(command.output().unwrap().status.code(), Some(42));
-        assert_eq!(fs::read_to_string(receipt).unwrap(), "setup\n--fix\n--json");
+        let output = command.output().unwrap();
+        let shown = config_path.display().to_string();
+        let tail = tail.replace("{config}", &shown);
+        assert_eq!(output.status.code(), Some(2), "{config:?}");
+        assert!(output.stdout.is_empty());
+        assert_eq!(
+            String::from_utf8(output.stderr).unwrap(),
+            format!(
+                "symbrain setup --fix: config: failed to load {shown}: global config error: {tail}\n"
+            )
+        );
         assert!(!case.join("home/.symaira/bin").exists());
     }
 }

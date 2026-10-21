@@ -138,7 +138,7 @@ fn doctor_repair_preserves_source_and_corruption_and_continues_failures() {
             "failed downloads changed original bytes"
         );
     }
-    config_failures_keep_go_boundary(root.path(), &child);
+    config_failures_are_diagnosed_natively(root.path());
 }
 
 fn prepare(case: &Path, child: &Path, provenance: &[u8]) -> PathBuf {
@@ -192,28 +192,37 @@ fn run(case: &Path, flags: &[&str], fallback: Option<&Path>) -> Output {
     command.output().unwrap()
 }
 
-fn config_failures_keep_go_boundary(root: &Path, child: &Path) {
-    for (index, text) in [
-        "[audit]\nenabled = []",
-        "[modules]\nbrowse = 1",
-        "invalid = [",
+fn config_failures_are_diagnosed_natively(root: &Path) {
+    // Expected tails are the real Go loader's text (corekit v0.18.2).
+    for (index, (text, tail)) in [
+        (
+            "[audit]\nenabled = []",
+            "failed to apply {config}: field \"audit\": field \"enabled\": cannot convert []interface {} to bool",
+        ),
+        (
+            "[modules]\nbrowse = 1",
+            "failed to apply {config}: field \"modules\": field \"browse\": cannot convert int64 to bool",
+        ),
+        (
+            "invalid = [",
+            "failed to parse {config}: toml: line 1 (last key \"invalid\"): unexpected EOF; expected value",
+        ),
     ]
     .into_iter()
     .enumerate()
     {
         let case = root.join(format!("bad-config-{index}"));
-        let config = case.join("config/symbrain");
-        fs::create_dir_all(&config).unwrap();
-        fs::write(config.join("config.toml"), text).unwrap();
+        let config = case.join("config/symbrain/config.toml");
+        fs::create_dir_all(config.parent().unwrap()).unwrap();
+        fs::write(&config, text).unwrap();
+        let output = run(&case, &["--fix", "--force-release"], None);
+        let shown = config.display().to_string();
+        let tail = tail.replace("{config}", &shown);
+        assert_eq!(output.status.code(), Some(2), "{text:?}");
+        assert_eq!(output.stdout, b"symbrain doctor --fix\n\n");
         assert_eq!(
-            run(&case, &["--fix", "--force-release"], Some(child))
-                .status
-                .code(),
-            Some(42)
-        );
-        assert_eq!(
-            fs::read_to_string(case.join("go-call")).unwrap(),
-            "doctor\n--fix\n--force-release"
+            String::from_utf8(output.stderr).unwrap(),
+            format!("  \u{2717}  config: failed to load {shown}: global config error: {tail}\n")
         );
         assert!(!case.join("home/.symaira/bin").exists());
     }
