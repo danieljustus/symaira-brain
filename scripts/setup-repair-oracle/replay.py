@@ -236,7 +236,7 @@ def main():
     code = legacy.main()
     assert len(observations) == 2 * len(selected), "incomplete process replay"
     data = {
-        "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c",
+        "go_oracle_ref": "0541e64a36d83bac8e5e4f8c4136033c03db83ae",
         "candidate_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "candidate_dirty": bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT)),
         "runtime": platform.platform(), "total": len(selected), "exit": code,

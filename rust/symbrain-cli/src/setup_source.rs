@@ -2,7 +2,7 @@
 use std::collections::BTreeSet;
 use std::ffi::OsStr;
 use std::io::Write;
-use std::path::{Component, Path, PathBuf};
+use std::path::{Path, PathBuf};
 
 use serde::Serialize;
 use symbrain_core::exit;
@@ -92,17 +92,7 @@ fn absolute(root: &OsStr) -> Result<PathBuf, String> {
             .map_err(|error| error.to_string())?
             .join(root)
     };
-    let mut clean = PathBuf::new();
-    for part in joined.components() {
-        match part {
-            Component::CurDir => {}
-            Component::ParentDir => {
-                clean.pop();
-            }
-            other => clean.push(other.as_os_str()),
-        }
-    }
-    Ok(clean)
+    Ok(super::config::lexical_clean(&joined))
 }
 
 fn select(modules: &[u8]) -> Result<Vec<Spec>, Vec<u8>> {

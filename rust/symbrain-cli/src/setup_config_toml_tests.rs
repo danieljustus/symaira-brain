@@ -89,18 +89,29 @@ const CORPUS: &[(&str, &[u8], Option<&str>)] = &[
     ("bool-cap", b"\x61\x20\x3d\x20\x54\x72\x75\x65\x0a", Some("toml: line 1 (last key \"a\"): expected value but found \"True\" instead")),
     ("uni-val", b"\x61\x20\x3d\x20\xc3\xa9\x0a", Some("toml: line 1 (last key \"a\"): expected value but found \"é\" instead")),
     ("uni-key", b"\xc3\xa9\x20\xc3\xa9\x20\x3d\x20\x31\x0a", Some("toml: line 1: expected '.' or '=', but got 'é' instead")),
+    ("dotted-hdr-1", b"\x61\x2e\x62\x2e\x63\x20\x3d\x20\x31\x0a\x5b\x61\x2e\x62\x5d\x0a\x64\x20\x3d\x20\x32\x0a", None),
+    ("dotted-hdr-2", b"\x61\x2e\x62\x20\x3d\x20\x31\x0a\x5b\x61\x5d\x0a\x63\x20\x3d\x20\x32\x0a", None),
+    ("inline-dotted", b"\x61\x20\x3d\x20\x7b\x78\x3d\x31\x7d\x0a\x61\x2e\x79\x20\x3d\x20\x32\x0a", None),
+    ("leap-second", b"\x61\x20\x3d\x20\x31\x39\x37\x39\x2d\x30\x35\x2d\x32\x37\x54\x30\x30\x3a\x30\x30\x3a\x36\x30\x5a\x0a", Some("toml: line 1 (last key \"a\"): invalid datetime: \"1979-05-27T00:00:60Z\"")),
 ];
 
 /// Shapes whose Go lexer wording was not reproduced; `toml_edit` text is kept.
+/// Every entry must still mismatch (see `unmatched_entries_are_not_stale`).
 const UNMATCHED: &[&str] = &[
     // BurntSushi accepts a dotted key later redefined as a scalar; toml_edit rejects it.
     "dotted-conflict",
     // BurntSushi rejects a newline inside an inline table value; toml_edit (TOML 1.1) accepts it.
     "inline-newline",
+    // BurntSushi accepts dotted keys and later tables that reopen the same path;
+    // toml_edit rejects the header/dotted-key conflict (class documented in the oracle README).
+    "dotted-hdr-1",
+    "dotted-hdr-2",
+    "inline-dotted",
+    // BurntSushi rejects second 60; toml_edit accepts leap seconds.
+    "leap-second",
 ];
 
-#[test]
-fn corpus_matches_the_recorded_go_outcomes() {
+fn mismatches() -> Vec<String> {
     let mut mismatches = Vec::new();
     for (name, input, expected) in CORPUS {
         let actual = parse(input).err();
@@ -108,22 +119,54 @@ fn corpus_matches_the_recorded_go_outcomes() {
             mismatches.push(format!("{name}: go={expected:?} rust={actual:?}"));
         }
     }
-    let unexpected: Vec<&String> = mismatches
-        .iter()
-        .filter(|line| {
-            !UNMATCHED
-                .iter()
-                .any(|name| line.starts_with(&format!("{name}:")))
-        })
+    mismatches
+}
+
+fn is_listed(line: &str, name: &str) -> bool {
+    line.starts_with(&format!("{name}:"))
+}
+
+#[test]
+fn corpus_matches_the_recorded_go_outcomes() {
+    let unexpected: Vec<String> = mismatches()
+        .into_iter()
+        .filter(|line| !UNMATCHED.iter().any(|name| is_listed(line, name)))
         .collect();
     assert!(
         unexpected.is_empty(),
         "{} mismatches:\n{}",
         unexpected.len(),
-        unexpected
-            .iter()
-            .map(|l| l.as_str())
-            .collect::<Vec<_>>()
-            .join("\n")
+        unexpected.join("\n")
     );
+}
+
+#[test]
+fn unmatched_entries_are_not_stale() {
+    let found = mismatches();
+    for name in UNMATCHED {
+        assert!(
+            CORPUS.iter().any(|(corpus, ..)| corpus == name),
+            "UNMATCHED lists {name}, which is not in CORPUS"
+        );
+        assert!(
+            found.iter().any(|line| is_listed(line, name)),
+            "UNMATCHED entry {name} now matches Go; remove it from the allowlist"
+        );
+    }
+}
+
+/// Go (`BurntSushi/toml` v1.6.0) accepts arbitrarily deep inline tables and
+/// arrays (measured to 10000 levels); `toml_edit` stops after 80. The pin
+/// fails if that limit moves so the README residual is revisited.
+#[test]
+fn recursion_limit_is_a_documented_residual() {
+    let tables = |depth: usize| format!("a = {}1{}\n", "{b=".repeat(depth), "}".repeat(depth));
+    let arrays = |depth: usize| format!("a = {}{}\n", "[".repeat(depth), "]".repeat(depth));
+    for build in [&tables as &dyn Fn(usize) -> String, &arrays] {
+        assert!(parse(build(80).as_bytes()).is_ok());
+        assert_eq!(
+            parse(build(81).as_bytes()).unwrap_err(),
+            "toml: line 1: cannot recurse further; max recursion depth met"
+        );
+    }
 }

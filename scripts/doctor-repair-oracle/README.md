@@ -72,15 +72,30 @@ The only Go difference in `internal/config`, `cmd/symbrain` setup/doctor,
 dependency bump, so the existing cases (`config-3`, `config-4`,
 `nonzero-config-merge`, `env-browse-`) now compare against the shipped
 behavior: a later `browse = false` clears an earlier `true`, and `0`/`""`/an
-empty `SYMBRAIN_MODULES_BROWSE` are rejected. Other oracles that still pin
-`dcddcef0` are unaffected.
+empty `SYMBRAIN_MODULES_BROWSE` are rejected. The setup-repair and setup-source
+oracles moved to the same revision (their module-config cases exercise the same
+loader); oracles unrelated to configuration loading still pin `dcddcef0`.
 
 ### Measured residuals (parser dialect)
 
 `toml_edit` (TOML 1.1) decides syntax validity; Go's wording is reconstructed
-for the statement shapes in `setup_config_toml_tests.rs` (86 recorded real-Go
-outcomes, all executed, 84 reproduced byte for byte). Two documents are accepted by one parser and rejected
-by the other and are listed as `UNMATCHED` there: `a.b = 1` followed by `a = 2`
-(Go accepts, Rust reports a duplicate key) and a newline inside an inline-table
-value (Go rejects, Rust accepts). Syntax errors of other shapes keep Go's
-`toml: line N: ` envelope with the `toml_edit` message text.
+for the statement shapes in `setup_config_toml_tests.rs` (90 recorded real-Go
+outcomes from the 0541e64a binary, all executed, 84 reproduced byte for byte).
+The other 6 are listed as `UNMATCHED`; the test fails if any of them starts
+matching (stale allowlist) or is missing from the corpus. Syntax errors of other
+shapes keep Go's `toml: line N: ` envelope with the `toml_edit` message text.
+Known disagreements, each observed from the real Go binary:
+
+- **Dotted-key / header conflicts** (Go accepts, Rust rejects as a duplicate or
+  extension error): `a.b = 1` then `a = 2`; `a.b.c = 1\n[a.b]\nd = 2`;
+  `a.b = 1\n[a]\nc = 2`; `a = {x=1}\na.y = 2`. In these cases native
+  `setup --fix`/`doctor --fix` stop with a config error where Go proceeds.
+- **Newline inside an inline-table value** (`a = {x=\n1}`): Go rejects, Rust
+  accepts (TOML 1.1).
+- **Leap second** `a = 1979-05-27T00:00:60Z`: Go rejects with
+  `invalid datetime: "1979-05-27T00:00:60Z"`, Rust accepts it.
+- **Recursion limit**: `toml_edit` rejects more than 80 nested inline tables
+  (`a = {b={b=...1...}}`) or 80 nested arrays with
+  `toml: line 1: cannot recurse further; max recursion depth met`; Go accepted
+  every depth tried (up to 10000). The limit is pinned by
+  `recursion_limit_is_a_documented_residual`.

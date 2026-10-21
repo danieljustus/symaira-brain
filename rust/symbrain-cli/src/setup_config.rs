@@ -7,7 +7,7 @@
 //! with the exact Go error text.
 use std::collections::BTreeMap;
 use std::io::Read;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 use symbrain_core::config::{format_go_quoted_bytes, os_bytes};
 use toml_edit::{DocumentMut, Item, TableLike, Value};
@@ -91,8 +91,13 @@ pub(crate) fn enabled_cores() -> Result<BTreeMap<String, bool>, ConfigError> {
     merge_file(&mut modules, &global).map_err(|inner| wrap("global config error: ", inner))?;
     // configkit skips the project layer when the working directory is unknown.
     if let Some(directory) = go_getwd() {
-        merge_file(&mut modules, &directory.join(".symbrain.toml"))
-            .map_err(|inner| wrap("project config error: ", inner))?;
+        // Go's `filepath.Join` lexically cleans, so `$PWD` spellings such as
+        // `/root//project` or `/root/project/../project` show as one path.
+        merge_file(
+            &mut modules,
+            &lexical_clean(&directory.join(".symbrain.toml")),
+        )
+        .map_err(|inner| wrap("project config error: ", inner))?;
     }
     apply_environment(&mut modules).map_err(|inner| wrap("env override error: ", inner))?;
     Ok(MODULES
@@ -101,6 +106,22 @@ pub(crate) fn enabled_cores() -> Result<BTreeMap<String, bool>, ConfigError> {
         .filter(|(_, enabled)| *enabled)
         .map(|((_, core), _)| ((*core).to_owned(), true))
         .collect())
+}
+
+/// Go `filepath.Clean` for an absolute path: drops `.` and empty components and
+/// resolves `..` lexically without touching the filesystem.
+pub(super) fn lexical_clean(path: &Path) -> PathBuf {
+    let mut clean = PathBuf::new();
+    for part in path.components() {
+        match part {
+            Component::CurDir => {}
+            Component::ParentDir => {
+                clean.pop();
+            }
+            other => clean.push(other.as_os_str()),
+        }
+    }
+    clean
 }
 
 /// Go `os.Getwd`: a valid `$PWD` wins over the kernel's physical path.
