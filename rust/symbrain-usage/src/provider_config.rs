@@ -78,3 +78,7 @@ mod copilot_kimi_oracle_tests;
 #[cfg(test)]
 #[path = "device_oracle_tests.rs"]
 mod device_oracle_tests;
+
+#[cfg(test)]
+#[path = "kimi_file_access_oracle_tests.rs"]
+mod kimi_file_access_oracle_tests;

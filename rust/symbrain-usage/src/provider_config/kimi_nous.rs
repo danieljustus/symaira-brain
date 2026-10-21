@@ -33,12 +33,6 @@ fn kimi_file_token_candidate(path: &Path) -> Option<String> {
         .flatten()
 }
 
-// Invalid regular JSON is native missing credentials. Keep unsupported file
-// access on Go until its own source-bound filesystem evidence is accepted.
-fn kimi_file_requires_go(path: &Path) -> bool {
-    read_optional_credential_file(path).is_err()
-}
-
 /// Preserve Go's trimmed device bytes for the proven regular UTF-8 family.
 /// Invalid UTF-8, internal ASCII controls and unsafe file access retain Go;
 /// Unicode bytes require full request/report and actual wire evidence.

@@ -15,6 +15,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/danieljustus/symaira-brain/internal/usage"
@@ -90,6 +92,7 @@ func main() {
 	copilotFileTokenOutput := flag.String("copilot-file-token-output", "rust/symbrain-usage/tests/fixtures/copilot_file_token_oracle.json", "Copilot credential file parser cases")
 	nousFileTokenOutput := flag.String("nous-file-token-output", "rust/symbrain-usage/tests/fixtures/nous_file_token_oracle.json", "Nous auth.json parser cases")
 	kimiFileTokenOutput := flag.String("kimi-file-token-output", "rust/symbrain-usage/tests/fixtures/kimi_file_token_oracle.json", "Kimi CLI credential parser cases")
+	kimiFileAccessOutput := flag.String("kimi-file-access-output", "rust/symbrain-usage/tests/fixtures/kimi_file_access_oracle.json", "Kimi CLI credential filesystem-access cases")
 	claudeAdminReportOutput := flag.String("claude-admin-report-output", "rust/symbrain-usage/tests/fixtures/claude_admin_authenticated_report.json", "authenticated Claude Admin report path")
 	claudeOAuthReportOutput := flag.String("claude-oauth-report-output", "rust/symbrain-usage/tests/fixtures/claude_oauth_authenticated_report.json", "authenticated Claude OAuth report path")
 	codexReportOutput := flag.String("codex-report-output", "rust/symbrain-usage/tests/fixtures/codex_authenticated_report.json", "authenticated Codex report path")
@@ -149,6 +152,11 @@ func main() {
 		os.Exit(1)
 	}
 	kimiFileTokenOracle, err := buildKimiFileTokenOracle()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	kimiFileAccessOracle, err := buildKimiFileAccessOracle()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -271,6 +279,10 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
+		if err := checkJSON(*kimiFileAccessOutput, kimiFileAccessOracle); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 		if err := checkJSON(*claudeAdminReportOutput, claudeAdminReport); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
@@ -371,6 +383,10 @@ func main() {
 		os.Exit(1)
 	}
 	if err := writeJSON(*kimiFileTokenOutput, kimiFileTokenOracle); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := writeJSON(*kimiFileAccessOutput, kimiFileAccessOracle); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -633,6 +649,192 @@ func buildKimiFileTokenOracle() (kimiFileTokenOracleFixture, error) {
 		})
 	}
 	return fixture, nil
+}
+
+type kimiFileAccessEntry struct {
+	Path     string `json:"path"`
+	Kind     string `json:"kind"`
+	Contents string `json:"contents,omitempty"`
+	PadTo    int    `json:"pad_to,omitempty"`
+	Target   string `json:"target,omitempty"`
+	Mode     string `json:"mode,omitempty"`
+}
+
+type kimiFileAccessOracleFixture struct {
+	SchemaVersion int                        `json:"schema_version"`
+	Cases         []kimiFileAccessOracleCase `json:"cases"`
+}
+
+type kimiFileAccessOracleCase struct {
+	ID         string                `json:"id"`
+	Entries    []kimiFileAccessEntry `json:"entries"`
+	Env        map[string]string     `json:"env,omitempty"`
+	Configured bool                  `json:"configured"`
+	AuthStatus usage.AuthStatus      `json:"auth_status"`
+}
+
+// buildKimiFileAccessOracle exercises the shipped Kimi constructor against
+// owned filesystem shapes under disposable per-case HOME roots. Entry paths
+// are relative to HOME; "$HOME" in env values and symlink targets expands to
+// that root. The process environment is restored after every case, and the
+// whole corpus is built twice to prove the observations are deterministic.
+func buildKimiFileAccessOracle() (kimiFileAccessOracleFixture, error) {
+	first, err := buildKimiFileAccessOracleOnce()
+	if err != nil {
+		return kimiFileAccessOracleFixture{}, err
+	}
+	second, err := buildKimiFileAccessOracleOnce()
+	if err != nil {
+		return kimiFileAccessOracleFixture{}, err
+	}
+	a, _ := json.Marshal(first)
+	b, _ := json.Marshal(second)
+	if !bytes.Equal(a, b) {
+		return kimiFileAccessOracleFixture{}, fmt.Errorf("Kimi file access oracle is not deterministic")
+	}
+	return first, nil
+}
+
+func buildKimiFileAccessOracleOnce() (kimiFileAccessOracleFixture, error) {
+	if os.Geteuid() == 0 {
+		return kimiFileAccessOracleFixture{}, fmt.Errorf("Kimi file access oracle needs a non-root user: permission cases are meaningless as root")
+	}
+	const token = `{"access_token":"synthetic-kimi-access"}`
+	const credential = ".kimi-code/credentials/kimi-code.json"
+	const legacy = ".kimi/credentials/kimi-code.json"
+	regular := func(path, contents string) kimiFileAccessEntry {
+		return kimiFileAccessEntry{Path: path, Kind: "file", Contents: contents}
+	}
+	link := func(path, target string) kimiFileAccessEntry {
+		return kimiFileAccessEntry{Path: path, Kind: "symlink", Target: target}
+	}
+	cases := []struct {
+		id      string
+		entries []kimiFileAccessEntry
+		env     map[string]string
+	}{
+		{id: "regular-file-control", entries: []kimiFileAccessEntry{regular(credential, token)}},
+		{id: "regular-file-at-size-limit", entries: []kimiFileAccessEntry{{Path: credential, Kind: "file", Contents: token, PadTo: 64 << 10}}},
+		{id: "regular-file-over-size-limit", entries: []kimiFileAccessEntry{{Path: credential, Kind: "file", Contents: token, PadTo: 64<<10 + 1}}},
+		{id: "symlink-to-valid-file", entries: []kimiFileAccessEntry{regular("elsewhere/token.json", token), link(credential, "$HOME/elsewhere/token.json")}},
+		{id: "relative-symlink-inside-credentials-directory-is-followed", entries: []kimiFileAccessEntry{regular(".kimi-code/credentials/real.json", token), link(credential, "real.json")}},
+		{id: "dangling-symlink", entries: []kimiFileAccessEntry{link(credential, "$HOME/elsewhere/absent.json")}},
+		{id: "directory-at-credential-path", entries: []kimiFileAccessEntry{{Path: credential, Kind: "dir"}}},
+		{id: "credentials-directory-is-a-file", entries: []kimiFileAccessEntry{regular(".kimi-code/credentials", token)}},
+		{id: "file-mode-000", entries: []kimiFileAccessEntry{regular(credential, token), {Path: credential, Kind: "chmod", Mode: "000"}}},
+		{id: "credentials-directory-mode-000", entries: []kimiFileAccessEntry{regular(credential, token), {Path: ".kimi-code/credentials", Kind: "chmod", Mode: "000"}}},
+		{id: "intermediate-directory-symlink-is-followed", entries: []kimiFileAccessEntry{regular("store/credentials/kimi-code.json", token), link(".kimi-code", "$HOME/store")}},
+		{id: "legacy-only-regular-control", entries: []kimiFileAccessEntry{regular(legacy, token)}},
+		{id: "current-symlink-masks-valid-legacy", entries: []kimiFileAccessEntry{regular("elsewhere/token.json", token), link(credential, "$HOME/elsewhere/token.json"), regular(legacy, token)}},
+		{id: "current-directory-masks-valid-legacy", entries: []kimiFileAccessEntry{{Path: credential, Kind: "dir"}, regular(legacy, token)}},
+		{id: "explicit-home-symlink", entries: []kimiFileAccessEntry{regular("elsewhere/token.json", token), link("owned-kimi/credentials/kimi-code.json", "$HOME/elsewhere/token.json"), regular(credential, token)}, env: map[string]string{"KIMI_CODE_HOME": "$HOME/owned-kimi"}},
+		{id: "explicit-home-regular-control", entries: []kimiFileAccessEntry{regular("owned-kimi/credentials/kimi-code.json", token)}, env: map[string]string{"KIMI_CODE_HOME": "$HOME/owned-kimi"}},
+	}
+	managed := []string{"HOME", "USERPROFILE", "KIMI_CODE_HOME", "KIMI_CODE_API_KEY", "KIMI_AUTH_TOKEN", "KIMI_CODE_BASE_URL"}
+	saved := map[string]*string{}
+	for _, name := range managed {
+		if value, ok := os.LookupEnv(name); ok {
+			copyValue := value
+			saved[name] = &copyValue
+		} else {
+			saved[name] = nil
+		}
+	}
+	defer func() {
+		for _, name := range managed {
+			if saved[name] == nil {
+				_ = os.Unsetenv(name)
+			} else {
+				_ = os.Setenv(name, *saved[name])
+			}
+		}
+	}()
+	fixture := kimiFileAccessOracleFixture{SchemaVersion: 1}
+	for _, input := range cases {
+		observed, err := runKimiFileAccessCase(managed, input.entries, input.env)
+		if err != nil {
+			return kimiFileAccessOracleFixture{}, fmt.Errorf("%s: %w", input.id, err)
+		}
+		observed.ID = input.id
+		observed.Entries = input.entries
+		observed.Env = input.env
+		fixture.Cases = append(fixture.Cases, observed)
+	}
+	return fixture, nil
+}
+
+func runKimiFileAccessCase(managed []string, entries []kimiFileAccessEntry, env map[string]string) (kimiFileAccessOracleCase, error) {
+	root, err := os.MkdirTemp("", "symbrain-kimi-access-oracle-")
+	if err != nil {
+		return kimiFileAccessOracleCase{}, err
+	}
+	home := filepath.Join(root, "home")
+	defer func() {
+		_ = filepath.WalkDir(root, func(path string, entry os.DirEntry, err error) error {
+			if err == nil && entry.IsDir() {
+				_ = os.Chmod(path, 0o700)
+			}
+			return nil
+		})
+		_ = os.RemoveAll(root)
+	}()
+	if err := os.MkdirAll(home, 0o700); err != nil {
+		return kimiFileAccessOracleCase{}, err
+	}
+	expand := func(value string) string { return strings.ReplaceAll(value, "$HOME", home) }
+	for _, entry := range entries {
+		path := filepath.Join(home, entry.Path)
+		switch entry.Kind {
+		case "file":
+			if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+				return kimiFileAccessOracleCase{}, err
+			}
+			contents := entry.Contents
+			if entry.PadTo > len(contents) {
+				contents += strings.Repeat(" ", entry.PadTo-len(contents))
+			}
+			if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
+				return kimiFileAccessOracleCase{}, err
+			}
+		case "dir":
+			if err := os.MkdirAll(path, 0o700); err != nil {
+				return kimiFileAccessOracleCase{}, err
+			}
+		case "symlink":
+			if err := os.MkdirAll(filepath.Dir(path), 0o700); err != nil {
+				return kimiFileAccessOracleCase{}, err
+			}
+			if err := os.Symlink(expand(entry.Target), path); err != nil {
+				return kimiFileAccessOracleCase{}, err
+			}
+		case "chmod":
+			mode, err := strconv.ParseUint(entry.Mode, 8, 32)
+			if err != nil {
+				return kimiFileAccessOracleCase{}, err
+			}
+			if err := os.Chmod(path, os.FileMode(mode)); err != nil {
+				return kimiFileAccessOracleCase{}, err
+			}
+		default:
+			return kimiFileAccessOracleCase{}, fmt.Errorf("unknown entry kind %q", entry.Kind)
+		}
+	}
+	for _, name := range managed {
+		_ = os.Unsetenv(name)
+	}
+	if err := os.Setenv("HOME", home); err != nil {
+		return kimiFileAccessOracleCase{}, err
+	}
+	if err := os.Setenv("USERPROFILE", home); err != nil {
+		return kimiFileAccessOracleCase{}, err
+	}
+	for name, value := range env {
+		if err := os.Setenv(name, expand(value)); err != nil {
+			return kimiFileAccessOracleCase{}, err
+		}
+	}
+	provider := usage.NewKimiProvider(nil)
+	return kimiFileAccessOracleCase{Configured: provider.IsConfigured(), AuthStatus: provider.AuthStatus()}, nil
 }
 
 func buildCopilotFileTokenOracle() (copilotFileTokenOracleFixture, error) {
