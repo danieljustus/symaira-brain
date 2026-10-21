@@ -112,3 +112,119 @@ fn go_recorded_shapes_are_native_without_a_go_fallback() {
     };
     assert_eq!(executed, expected_executed);
 }
+
+/// Runs the native CLI in a disposable root seeded like the oracle's
+/// `setup_seeded_harness`: a stdio server `a` with a missing command and an
+/// HTTP server `b` on a closed loopback port in `~/.claude.json`, plus a
+/// project-local stdio server `p` in `project/.mcp.json`.
+fn seeded_output(root: &std::path::Path, args: &[&str]) -> std::process::Output {
+    let started = std::time::Instant::now();
+    let output = Command::new(env!("CARGO_BIN_EXE_symbrain"))
+        .env_clear()
+        .envs(coverage::profile_environment())
+        .env("HOME", root.join("home"))
+        .env("USERPROFILE", root.join("home"))
+        .env("XDG_CONFIG_HOME", root.join("config"))
+        .env("XDG_DATA_HOME", root.join("data"))
+        .env("XDG_CACHE_HOME", root.join("cache"))
+        .env("PATH", "/usr/bin:/bin")
+        .env("SYMBRAIN_GO_BINARY", root.join("absent-go-fallback"))
+        .env("LC_ALL", "C.UTF-8")
+        .env("TZ", "UTC")
+        .current_dir(root.join("project"))
+        .args(args)
+        .output()
+        .unwrap();
+    assert!(
+        started.elapsed() < std::time::Duration::from_secs(8),
+        "{args:?}: probe was not bounded"
+    );
+    output
+}
+
+fn seeded_root() -> (TempDir, std::path::PathBuf) {
+    let root = TempDir::new().unwrap();
+    let path = root.path().canonicalize().unwrap();
+    for dir in ["home", "config", "data", "cache", "project"] {
+        std::fs::create_dir_all(path.join(dir)).unwrap();
+    }
+    std::fs::write(
+        path.join("home/.claude.json"),
+        r#"{"mcpServers":{"a":{"command":"symaira-missing-mcp-fixture","args":["x"]},"b":{"type":"http","url":"http://127.0.0.1:1/mcp"}}}"#,
+    )
+    .unwrap();
+    std::fs::write(
+        path.join("project/.mcp.json"),
+        r#"{"mcpServers":{"p":{"command":"symaira-missing-mcp-fixture"}}}"#,
+    )
+    .unwrap();
+    (root, path)
+}
+
+fn server_rows(stdout: &[u8]) -> Vec<(String, String)> {
+    String::from_utf8(stdout.to_vec())
+        .unwrap()
+        .lines()
+        .map(|line| {
+            let mut fields = line.split_whitespace();
+            fields.next().expect("status glyph");
+            let harness = fields.next().expect("harness").to_owned();
+            (harness, fields.next().expect("server").to_owned())
+        })
+        .collect()
+}
+
+/// Go's probeHarnessHealth only filters on a non-empty `--harness` value, so an
+/// empty value (like an empty `--project`) means "no filter" (#769 review F1).
+#[test]
+fn empty_harness_filter_probes_every_server_like_go() {
+    let (_guard, root) = seeded_root();
+    let all = seeded_output(&root, &["harness", "health", "-project", "."]);
+    assert_eq!(all.status.code(), Some(0));
+    let want = [("claude", "a"), ("claude", "b"), ("claude", "p")]
+        .map(|(harness, server)| (harness.to_owned(), server.to_owned()));
+    assert_eq!(server_rows(&all.stdout), want);
+
+    for args in [
+        &["-harness="][..],
+        &["-harness", ""],
+        &["--harness", ""],
+        &["-harness", "claude", "-harness="],
+        &["-harness=", "-harness", "claude"],
+        &["-harness", "claude"],
+    ] {
+        let mut argv = vec!["harness", "health", "-project", "."];
+        argv.extend_from_slice(args);
+        let output = seeded_output(&root, &argv);
+        assert_eq!(output.status.code(), Some(0), "{argv:?}");
+        assert_eq!(output.stdout, all.stdout, "{argv:?}");
+    }
+    for args in [&["-harness", "nope"][..], &["-harness", "cursor"]] {
+        let mut argv = vec!["harness", "health", "-project", "."];
+        argv.extend_from_slice(args);
+        let output = seeded_output(&root, &argv);
+        assert_eq!(output.status.code(), Some(0), "{argv:?}");
+        assert_eq!(output.stdout, b"no MCP servers found\n", "{argv:?}");
+    }
+}
+
+/// Go's `filepath.Join` cleans the displayed project config path, so a relative
+/// `--project` never prints `./.mcp.json` (#769 review F2).
+#[test]
+fn relative_project_config_path_is_cleaned_like_go() {
+    let (_guard, root) = seeded_root();
+    for project in [".", "./", "./x/../"] {
+        let output = seeded_output(&root, &["harness", "list", "-project", project]);
+        assert_eq!(output.status.code(), Some(0), "{project:?}");
+        let text = String::from_utf8(output.stdout).unwrap();
+        assert!(
+            text.contains("  project\t.mcp.json\tparsed\tservers=p[stdio]\n"),
+            "{project:?}: {text}"
+        );
+        assert!(!text.contains("./.mcp.json"), "{project:?}: {text}");
+    }
+    let health = seeded_output(&root, &["harness", "health", "-project", "./"]);
+    let text = String::from_utf8(health.stdout).unwrap();
+    assert!(text.contains(" .mcp.json: "), "{text}");
+    assert!(!text.contains("./.mcp.json"), "{text}");
+}

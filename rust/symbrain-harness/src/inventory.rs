@@ -154,12 +154,9 @@ pub fn profile_bindings(profile: &str, project_dir: Option<&Path>) -> BindingSca
             }),
         }
         if let Some((project, path)) = project_dir.as_deref().and_then(|project| {
-            harness.project_config_path(project).map(|mut path| {
-                if project == Path::new(".") {
-                    path = PathBuf::from(".mcp.json");
-                }
-                (project, path)
-            })
+            harness
+                .project_config_path(project)
+                .map(|path| (project, path))
         }) {
             if let Some(error) = project_root_error(project) {
                 result.errors.push(BindingScanError {

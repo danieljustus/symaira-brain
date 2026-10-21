@@ -212,8 +212,11 @@ fn run_health(
         );
         return exit::USAGE;
     }
+    // Go's probeHarnessHealth filters with `name != "" && item.Name != name`,
+    // so an empty --harness value (like an empty --project) means no filter.
     let harness_name = parsed
         .value("harness")
+        .filter(|name| !name.is_empty())
         .map(|name| name.to_string_lossy().into_owned());
     let project_dir = project_flag(&parsed);
 
@@ -238,19 +241,11 @@ fn run_health(
         }
     }
 
-    let probe_results = std::thread::scope(|scope| {
-        let handles = probes
-            .into_iter()
-            .map(|probe| scope.spawn(move || probe_health(probe)))
-            .collect::<Vec<_>>();
-        handles
-            .into_iter()
-            .map(|handle| handle.join().ok())
-            .collect::<Option<Vec<_>>>()
-    });
-    let Some(mut entries) = probe_results else {
-        // Go's goroutines cannot panic out of the report; a Rust worker panic
-        // is an internal failure, never a reason to re-run the Go binary.
+    let Some(mut entries) = run_probes(probes, probe_health) else {
+        // Go has no recover here: an unrecovered probe panic aborts the Go
+        // process with exit 2 and a goroutine trace. Rust deliberately exits 1
+        // with this fixed message instead (HAR-008 intentional divergence); a
+        // worker panic is an internal failure, never a reason to re-run Go.
         let _ = writeln!(stderr, "symbrain harness health: probe worker panicked");
         return exit::GENERIC;
     };
@@ -301,6 +296,29 @@ fn run_health(
     exit::OK
 }
 
+/// Probes every server concurrently; `None` when any worker panicked.
+///
+/// Every worker is joined before the results are combined: a scoped thread
+/// that panics and is never joined would re-panic when the scope ends.
+fn run_probes<F>(probes: Vec<HealthProbe>, probe: F) -> Option<Vec<HarnessHealthEntry>>
+where
+    F: Fn(HealthProbe) -> HarnessHealthEntry + Sync,
+{
+    std::thread::scope(|scope| {
+        let probe = &probe;
+        let handles = probes
+            .into_iter()
+            .map(|item| scope.spawn(move || probe(item)))
+            .collect::<Vec<_>>();
+        handles
+            .into_iter()
+            .map(|handle| handle.join().ok())
+            .collect::<Vec<_>>()
+            .into_iter()
+            .collect()
+    })
+}
+
 struct HealthProbe {
     harness: String,
     config: String,
@@ -319,5 +337,60 @@ fn probe_health(probe: HealthProbe) -> HarnessHealthEntry {
         probe_method: result.probe_method,
         latency_ms: result.latency_ms,
         error: result.error,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn probe(name: &str) -> HealthProbe {
+        HealthProbe {
+            harness: "claude".to_owned(),
+            config: "config.json".to_owned(),
+            server: ServerInfo {
+                name: name.to_owned(),
+                ..ServerInfo::default()
+            },
+        }
+    }
+
+    fn healthy(probe: HealthProbe) -> HarnessHealthEntry {
+        HarnessHealthEntry {
+            harness: probe.harness,
+            config: probe.config,
+            server: probe.server.name,
+            transport: probe.server.transport,
+            healthy: true,
+            outcome: HealthOutcome::Healthy,
+            probe_method: None,
+            latency_ms: None,
+            error: String::new(),
+        }
+    }
+
+    #[test]
+    fn probes_keep_every_entry_when_no_worker_panics() {
+        let entries = run_probes(vec![probe("a"), probe("b")], healthy).expect("no panic");
+        let names = entries
+            .iter()
+            .map(|e| e.server.as_str())
+            .collect::<Vec<_>>();
+        assert_eq!(names, ["a", "b"]);
+    }
+
+    #[test]
+    fn a_panicking_worker_yields_none_instead_of_unwinding() {
+        let panicking = |probe: HealthProbe| -> HarnessHealthEntry {
+            assert_ne!(probe.server.name, "boom", "injected probe failure");
+            healthy(probe)
+        };
+        assert!(run_probes(vec![probe("a"), probe("boom")], panicking).is_none());
+    }
+
+    #[test]
+    fn several_panicking_workers_do_not_re_panic_the_scope() {
+        let all_panic = |_: HealthProbe| -> HarnessHealthEntry { panic!("injected probe failure") };
+        assert!(run_probes(vec![probe("x"), probe("y"), probe("z")], all_panic).is_none());
     }
 }

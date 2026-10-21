@@ -15,6 +15,7 @@ import os
 import platform
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -24,6 +25,11 @@ spec = importlib.util.spec_from_file_location("cfgh_legacy", ROOT / "scripts/rus
 legacy = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = legacy
 spec.loader.exec_module(legacy)
+from harness_health_contract import SEEDED_HEALTH_PREFIX  # noqa: E402  (needs scripts/ on sys.path)
+
+# Seeded cases bound every probe: a hang must fail instead of waiting for the
+# shared harness timeout. Rust itself caps a probe at 5 s.
+SEEDED_PROBE_BUDGET_S = 8.0
 
 CONFIG_SHAPES = [
     ("-h",), ("--h",), ("-help",), ("--help",), ("-help=1",), ("-x",), ("--x",), ("---x",),
@@ -53,6 +59,36 @@ HEALTH_ONLY = [
     ("-harness", "-project"), ("--harness", b"\xff"), ("-harness", "cursor", "-x"),
 ]
 
+# Seeded harness configs (#769 review F1/F2). Every server fails fast and
+# offline: a stdio command that is not on PATH and an HTTP endpoint on a closed
+# loopback port (Go never probes HTTP, Rust gets connection refused).
+SEEDED_GLOBAL = {"mcpServers": {
+    "a": {"command": "symaira-missing-mcp-fixture", "args": ["x"]},
+    "b": {"type": "http", "url": "http://127.0.0.1:1/mcp"},
+}}
+SEEDED_PROJECT = {"mcpServers": {"p": {"command": "symaira-missing-mcp-fixture"}}}
+SEEDED_HEALTH = [
+    (), ("-harness=",), ("-harness", ""), ("--harness", ""), ("-harness", "claude"),
+    ("-harness", "nope"), ("-harness", "claude", "-harness="), ("-harness=", "-harness", "claude"),
+    ("-harness", "cursor"), ("-project", "PROJECT"), ("-project", "PROJECT", "-harness="),
+    ("-project", "PROJECT", "-harness", ""), ("-project", "PROJECT", "-harness", "claude"),
+    ("-project", "PROJECT", "-harness", "nope"), ("-project", ".", "-harness="),
+    ("-project", "./"), ("-project", "./x/../", "-harness", "claude"),
+    ("--json",), ("--json", "-harness="), ("--json", "-harness", "nope"),
+    ("--json", "-project", "PROJECT", "-harness="), ("--json", "-project", ".", "-harness", ""),
+]
+SEEDED_LIST = [
+    (), ("-project=",), ("-project", ""), ("-project", "PROJECT"), ("-project", "."),
+    ("-project", "./"), ("-project", "./x/../"), ("--json",), ("--json", "-project", "PROJECT"),
+    ("--json", "-project", "."), ("--json", "-project", "./"), ("--json", "-project", "./x/../"),
+]
+
+
+def setup_seeded_harness(root, env):
+    home = Path(env["HOME"])
+    (home / ".claude.json").write_text(json.dumps(SEEDED_GLOBAL), encoding="utf-8")
+    (root / "project" / ".mcp.json").write_text(json.dumps(SEEDED_PROJECT), encoding="utf-8")
+
 
 def new_cases():
     cases = []
@@ -65,6 +101,12 @@ def new_cases():
         shapes = FLAG_SHAPES + (HEALTH_ONLY if verb == "health" else [])
         for index, argv in enumerate(shapes):
             cases.append(legacy.Case(f"cfgh-{verb}-{index}", ("harness", verb, *argv)))
+    for index, argv in enumerate(SEEDED_HEALTH):
+        cases.append(legacy.Case(f"{SEEDED_HEALTH_PREFIX}{index}", ("harness", "health", *argv),
+                                 setup=setup_seeded_harness))
+    for index, argv in enumerate(SEEDED_LIST):
+        cases.append(legacy.Case(f"cfgh-seeded-list-{index}", ("harness", "list", *argv),
+                                 setup=setup_seeded_harness))
     return cases
 
 
@@ -100,7 +142,8 @@ def text_field(name, data):
 def fixture_entry(case, observation):
     """Root-independent Go bytes for a case, or None when paths appear."""
     out, err = observation["stdout"], observation["stderr"]
-    if b"<root>" in out or b"<root>" in err:
+    # Seeded cases depend on files the cargo fixture test does not create.
+    if case.name.startswith("cfgh-seeded-") or b"<root>" in out or b"<root>" in err:
         return None
     return {
         "name": case.name,
@@ -134,7 +177,9 @@ def main():
     actual_run = legacy.run
 
     def recorded_run(binary, argv, env, stdin=None, pty=False):
+        started = time.perf_counter()
         completed = actual_run(binary, argv, env, stdin, pty)
+        elapsed = time.perf_counter() - started
         if Path(binary).resolve() in (Path(go).resolve(), Path(rust).resolve()):
             fixture_root = Path(env["PROJECT"]).parent
             observations.append({
@@ -142,6 +187,7 @@ def main():
                 "exit": completed.returncode,
                 "stdout": legacy.normalize_fixture_root(completed.stdout, fixture_root),
                 "stderr": legacy.normalize_fixture_root(completed.stderr, fixture_root),
+                "elapsed_s": elapsed,
             })
         return completed
 
@@ -151,11 +197,17 @@ def main():
     assert len(observations) == 2 * len(executed), "incomplete process replay"
     pairs = list(zip(observations[0::2], observations[1::2]))
     assert all(a["binary"] == "go" and b["binary"] == "rust" for a, b in pairs)
-    # Legacy cases may carry documented per-case normalizations (HAR-007), so
-    # the independent raw-byte cross-check covers the new corpus only.
+    # Legacy cases and the seeded health cases carry documented HAR-007
+    # normalizations, so the independent raw-byte cross-check covers the rest
+    # of the new corpus.
     mismatched = [case.name for case, (a, b) in zip(executed, pairs)
-                  if case.name.startswith("cfgh-") and (a["exit"], a["stdout"], a["stderr"]) != (b["exit"], b["stdout"], b["stderr"])]
+                  if case.name.startswith("cfgh-") and not case.name.startswith(SEEDED_HEALTH_PREFIX)
+                  and (a["exit"], a["stdout"], a["stderr"]) != (b["exit"], b["stdout"], b["stderr"])]
     assert not mismatched or code, "byte mismatch not reflected in the harness verdict"
+    seeded_elapsed = [o["elapsed_s"] for case, pair in zip(executed, pairs) for o in pair
+                      if case.name.startswith("cfgh-seeded-")]
+    assert seeded_elapsed, "seeded harness cases did not run"
+    assert max(seeded_elapsed) < SEEDED_PROBE_BUDGET_S, f"seeded probe took {max(seeded_elapsed):.2f}s"
     data = {
         "go_oracle_ref": ORACLE_REF,
         "candidate_head": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
@@ -163,6 +215,8 @@ def main():
         "runtime": platform.platform(), "selected": len(cases), "executed": len(executed),
         "skipped": skip_report, "exit": code, "matches": code == 0, "mismatched": mismatched,
         "new_cases": sum(case.name.startswith("cfgh-") for case in executed),
+        "seeded_cases": sum(case.name.startswith("cfgh-seeded-") for case in executed),
+        "max_seeded_elapsed_s": round(max(seeded_elapsed), 3),
         "legacy_cases": sum(not case.name.startswith("cfgh-") for case in executed),
         "observations": [{"binary": o["binary"], "exit": o["exit"],
                           "stdout_sha256": hashlib.sha256(o["stdout"]).hexdigest(),
