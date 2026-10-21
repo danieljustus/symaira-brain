@@ -290,6 +290,15 @@ The setup repair acceptance runner compares 151 real Go/Rust processes and full
 fixture filesystems with no Go fallback. Source builds, module flags and doctor
 repair remain open in #765; all three native CI receipts are required before
 merging this repair increment.
+#765 removes the remaining Go fallback of `setup` and `doctor --fix` for
+invalid typed configuration: Rust reconstructs Go's TOML, environment and
+filesystem diagnostics. The setup-repair, setup-source and doctor-repair
+oracles now all pin Go `0541e64a36d83bac8e5e4f8c4136033c03db83ae` (CoreKit
+v0.18.2, which no longer skips zero values); local macOS runs match 179, 95 and
+507 cases. Parser-dialect residuals (dotted-key/header conflicts, leap
+seconds, the 80-level `toml_edit` recursion limit) are listed in
+`scripts/doctor-repair-oracle/README.md`; native Linux and Windows receipts
+come from exact-head CI.
 
 Rust skill input hardening (#476) checks control-file and normalized frontmatter
 bounds before allocating the full document or parsing YAML. Resource traversal
