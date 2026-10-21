@@ -12,6 +12,10 @@ on:
       - 'browse/**'
       - '.github/workflows/browse-fetch-native.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   fetch-contract:
     strategy:

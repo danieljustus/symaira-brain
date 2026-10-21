@@ -25,6 +25,49 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Hosted macOS runners queue for hours, so the macOS jobs start only when the
+  # diff can affect them. scripts/ci-changed-areas.sh maps changed paths to
+  # `native` and `gui`; a path it does not know sets both. A job skipped by
+  # `if:` still reports its check, so the required `gui` check keeps reporting.
+  # A failed `changes` job runs everything (`!= 'false'`), never skips it.
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    outputs:
+      native: ${{ steps.detect.outputs.native }}
+      gui: ${{ steps.detect.outputs.gui }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Check the path-to-job table
+        run: ./scripts/test-ci-changed-areas.sh
+
+      - name: Detect affected jobs
+        id: detect
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          # A pull request compares its head with the merge base; a push
+          # compares with the previous tip. Anything else (new branch, force
+          # push, schedule, dispatch, merge queue) runs every job. The fallback
+          # path is a CI-wiring path, which the table maps to every job.
+          if [ "$EVENT_NAME" = pull_request ]; then
+            git diff --name-only "$BASE_SHA...$HEAD_SHA" > "$RUNNER_TEMP/changed.txt"
+          elif [ "$EVENT_NAME" = push ] && [[ "$BASE_SHA" =~ ^[0-9a-f]{40}$ ]] \
+            && git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
+            git diff --name-only "$BASE_SHA" "$HEAD_SHA" > "$RUNNER_TEMP/changed.txt"
+          else
+            echo ".github/workflows/ci.yml" > "$RUNNER_TEMP/changed.txt"
+          fi
+          echo "Changed paths:"
+          cat "$RUNNER_TEMP/changed.txt"
+          ./scripts/ci-changed-areas.sh < "$RUNNER_TEMP/changed.txt" | tee -a "$GITHUB_OUTPUT"
+
   # Fail if any action is referenced by mutable tag instead of SHA.
   # Keeps the supply-chain surface small — tag moves are caught here.
   pin-check:
@@ -508,6 +551,8 @@ jobs:
   # Windows remains explicitly tracked in the contract matrix until the
   # portable Go-oracle launcher and native runner coverage are available.
   rust-migration-macos:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.native != 'false' }}
     runs-on: macos-15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -1198,6 +1243,8 @@ jobs:
           python3 scripts/mcp-differential.py "$RUNNER_TEMP/symbrain-go-mcp.exe" target/debug/symbrain.exe
 
   rust-mcp-fuzz-smoke:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.native != 'false' }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
@@ -1244,6 +1291,8 @@ jobs:
   # Init is a production Rust path; run the genuine Go comparison on each OS.
   rust-init-native:
     # Windows workspace tests took 26-38 min on recent main pushes and hit 40 on PR #809.
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.native != 'false' }}
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -1905,10 +1954,13 @@ jobs:
   # jobs above run on ubuntu-latest and never exercise xcodebuild, so a
   # Swift compile error or a failing SymBrainCoreTests used to surface only
   # at release time (precedent: v0.5.1 GUI release-asset failure, #212,
-  # fixed by #215). Path-filtered inside the job so Go-only PRs do not pay
-  # macOS runner cost, while the check itself always reports so it can be
-  # required by the main protection ruleset.
+  # fixed by #215). The job is skipped through `changes` unless the diff can
+  # affect the app (scripts/ci-changed-areas.sh), so Go/Rust-only and docs-only
+  # PRs do not queue for a macOS runner. A skipped job still reports `gui`, which
+  # the main protection ruleset requires.
   gui:
+    needs: changes
+    if: ${{ !cancelled() && needs.changes.outputs.gui != 'false' }}
     runs-on: macos-26
     permissions:
       contents: read
@@ -1927,38 +1979,16 @@ jobs:
             *) echo "::error::Expected Xcode 26 or newer, got: $XCODE_VERSION"; exit 1 ;;
           esac
 
-      - name: Detect Swift-related changes
-        id: swift
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.event.merge_group.head_sha || github.sha }}
-        run: |
-          set -euo pipefail
-          if [ -z "${BASE_SHA:-}" ] || [ "${BASE_SHA:-}" = "0000000000000000000000000000000000000000" ]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          if git diff --name-only "$BASE_SHA...$HEAD_SHA" | \
-             grep -Eq '^(Sources/|Tests/|project\.yml|SymBrain\.xcodeproj/|assets/app-icon/|scripts/check-app-icons\.sh$)'; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Install XcodeGen
-        if: steps.swift.outputs.changed == 'true'
         run: brew list xcodegen >/dev/null 2>&1 || brew install xcodegen
 
       - name: Generate Xcode project
-        if: steps.swift.outputs.changed == 'true'
         run: xcodegen generate
 
       - name: Verify native AppIcon sources
-        if: steps.swift.outputs.changed == 'true'
         run: bash scripts/check-app-icons.sh
 
       - name: Build SymBrain app
-        if: steps.swift.outputs.changed == 'true'
         run: |
           xcodebuild -project SymBrain.xcodeproj \
             -scheme SymBrain \
@@ -1968,11 +1998,9 @@ jobs:
             build
 
       - name: Verify compiled macOS AppIcon
-        if: steps.swift.outputs.changed == 'true'
         run: bash scripts/check-app-icons.sh --bundle "$RUNNER_TEMP/SymBrain-macos-derived-data/Build/Products/Debug/Symaira Brain.app" --platform macOS
 
       - name: Build and test SymBrainCore
-        if: steps.swift.outputs.changed == 'true'
         run: |
           xcodebuild -project SymBrain.xcodeproj \
             -scheme SymBrainCore \
@@ -1982,13 +2010,11 @@ jobs:
             build test
 
       - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
-        if: steps.swift.outputs.changed == 'true'
         with:
           go-version-file: go.mod
           cache: true
 
       - name: Compare GUI JSON decoding against Go and Rust binaries
-        if: steps.swift.outputs.changed == 'true'
         run: |
           set -euo pipefail
           go build -o "$RUNNER_TEMP/symbrain-go" ./cmd/symbrain
@@ -2033,7 +2059,6 @@ jobs:
           done
 
       - name: Resolve pinned iOS simulator
-        if: steps.swift.outputs.changed == 'true'
         id: sim
         run: |
           set -euo pipefail
@@ -2042,7 +2067,6 @@ jobs:
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
 
       - name: Build SymBrainMobile
-        if: steps.swift.outputs.changed == 'true'
         run: |
           xcodebuild -project SymBrain.xcodeproj \
             -scheme SymBrainMobile \
@@ -2052,7 +2076,6 @@ jobs:
             build
 
       - name: Verify compiled iOS AppIcon
-        if: steps.swift.outputs.changed == 'true'
         run: bash scripts/check-app-icons.sh --bundle "$RUNNER_TEMP/SymBrain-ios-derived-data/Build/Products/Debug-iphonesimulator/Symaira Brain.app" --platform iOS
 
   # Validates .goreleaser.yml on main, scheduled and manual runs, so a
