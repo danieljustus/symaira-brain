@@ -453,3 +453,35 @@ remain historical acceptance of their exact source. New native Windows wide
 CreateProcessW comparisons, unchanged Unix315 regression, affected tests/strict
 checks and independent review are pending; copied SDK source is no Windows
 runtime evidence. This does not complete broader Skills/Rust cutover.
+
+
+### `config` / `harness` argv grammar without a Go fallback (#769 slice 1)
+
+Inventory: `brain-769-inventory.md` in the night-run evidence directory lists
+every `None` that reaches `run_go_fallback`. `audit`, `install`, `mcp` and
+`passthrough` contain no Go routing (their `None`s are parser helpers); `guard`
+is native and its `Option` is unreachable. This slice removes the `config`
+`_ => None` arm and the `harness health` worker-panic re-run, and fixes
+`harness` verb/list/health argument grammar that had diverged from Go (`harness
+-h|--help|help`, `list --`, `list -`, `list --=x`, `list -h`, `--project=`).
+A shared byte-exact model of Go's `flag.FlagSet.Parse` (`go_flags.rs`) now owns
+both commands' flag handling; `unknown subcommand`/`unexpected argument` use
+Go's `%q` byte quoting.
+
+Evidence: `scripts/config-harness-oracle/run.sh OUT.json` compiles the Go CLI
+from immutable `dcddcef0…` (identical to the candidate for `cmd/symbrain` and
+`internal/`) and replays 290 cases (116 new shapes plus 174 existing
+`config_*`/`harness_*` differential cases; the two `harness_health_initialize*`
+probes that use `SYMBRAIN_GO_BINARY` as their fake server are excluded) in
+disposable HOME/XDG roots. Every
+Rust process has an absent Go fallback; stdout, stderr, exit and mutating-case
+filesystem manifests must match. A negative control (one diagnostic string
+mutated) fails 21 cases and the fixture test. `rust/symbrain-cli/tests/
+config_harness_native.rs` replays 100 Go-recorded root-independent shapes
+without Go. Contract rows CLI-011 and HAR-008; reports are under
+`migration/evidence/config-harness-769/`. Local macOS only: exact-head native
+Linux/macOS/Windows CI is required and the oracle is not yet wired into
+`ci.yml` (workflow edits were out of scope). Still routed to Go (#769 open):
+`harness list` inventory parse errors other than the frozen JSON `invalid
+character 'n'` (needs Go `encoding/json` Decoder and BurntSushi/toml error
+text), and the setup/doctor/usage/memory/skills predicates.

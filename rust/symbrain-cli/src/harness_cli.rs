@@ -5,10 +5,12 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use serde::Serialize;
+use symbrain_core::config::format_go_quoted;
 use symbrain_core::exit;
 use symbrain_core::output::{self, OutputFormat};
 use symbrain_harness::{ServerInfo, list};
 
+use crate::go_flags::{FlagSet, Parsed};
 use crate::health_probe::{HEALTH_SCHEMA_VERSION, HealthOutcome, probe_server};
 
 const HARNESS_USAGE: &str = "symbrain harness — inspect configured AI harnesses
@@ -48,27 +50,19 @@ const HARNESS_LIST_FLAGS: &str = "Usage of harness list:\n  -project string\n   
 const HARNESS_HEALTH_FLAGS: &str = "Usage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n";
 
 /// Runs `symbrain harness`.
+///
+/// Mirrors Go's `cmdHarnessWithFormat`: only `list` and `health` are verbs;
+/// every other first argument (including `-h`, `--help` and `help`) prints the
+/// usage to stderr with the no-input exit code.
 pub fn run(
     args: &[OsString],
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> Option<u8> {
-    if args.is_empty() {
-        let _ = write!(stderr, "{HARNESS_USAGE}");
-        return Some(exit::USAGE);
-    }
-
-    let verb = args[0].to_string_lossy();
-    let rest = &args[1..];
-
-    match verb.as_ref() {
-        "-h" | "--help" | "help" => {
-            let _ = write!(stdout, "{HARNESS_USAGE}");
-            Some(exit::OK)
-        }
-        "list" => run_list(rest, stdout, stderr, format),
-        "health" => run_health(rest, stdout, stderr, format),
+    match args.first().and_then(|verb| verb.to_str()) {
+        Some("list") => run_list(&args[1..], stdout, stderr, format),
+        Some("health") => Some(run_health(&args[1..], stdout, stderr, format)),
         _ => {
             let _ = write!(stderr, "{HARNESS_USAGE}");
             Some(exit::USAGE)
@@ -82,49 +76,23 @@ fn run_list(
     stderr: &mut dyn Write,
     format: OutputFormat,
 ) -> Option<u8> {
-    let mut project_dir: Option<PathBuf> = None;
-    let mut i = 0;
-    while i < args.len() {
-        let arg = args[i].to_string_lossy();
-        let (name, inline) = arg
-            .split_once('=')
-            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
-        match name {
-            "-project" | "--project" => {
-                let value = if let Some(value) = inline {
-                    value.to_owned()
-                } else {
-                    // The shipped command parses with the Go flag package,
-                    // which reports a missing value and prints the flag-set
-                    // usage.
-                    let Some(value) = args.get(i + 1) else {
-                        let _ = writeln!(stderr, "flag needs an argument: -project");
-                        let _ = write!(stderr, "{HARNESS_LIST_FLAGS}");
-                        return Some(exit::USAGE);
-                    };
-                    i += 1;
-                    value.to_string_lossy().into_owned()
-                };
-                project_dir = Some(PathBuf::from(value));
-            }
-            _ if name.starts_with('-') => {
-                // The flag package prints the name without its dashes.
-                let _ = writeln!(
-                    stderr,
-                    "flag provided but not defined: -{}",
-                    name.trim_start_matches('-')
-                );
-                let _ = write!(stderr, "{HARNESS_LIST_FLAGS}");
-                return Some(exit::USAGE);
-            }
-            _ => {
-                // A bare argument is the shipped command's own diagnostic.
-                let _ = writeln!(stderr, "symbrain harness list: unexpected argument {arg:?}");
-                return Some(exit::USAGE);
-            }
-        }
-        i += 1;
+    let flags = FlagSet {
+        string_flags: &["project"],
+        usage: HARNESS_LIST_FLAGS,
+    };
+    let normalized = crate::normalize_flags(args);
+    let Ok(parsed) = flags.parse(&normalized, stderr) else {
+        return Some(exit::USAGE);
+    };
+    if let Some(unexpected) = parsed.rest.first() {
+        let _ = writeln!(
+            stderr,
+            "symbrain harness list: unexpected argument {}",
+            format_go_quoted(unexpected)
+        );
+        return Some(exit::USAGE);
     }
+    let project_dir = project_flag(&parsed);
 
     let inventory = list(project_dir.as_deref());
     if inventory.harnesses.iter().any(|harness| {
@@ -147,6 +115,14 @@ fn run_list(
     }
 
     Some(exit::OK)
+}
+
+/// Go treats an empty `-project` value as "no project directory".
+fn project_flag(parsed: &Parsed) -> Option<PathBuf> {
+    parsed
+        .value("project")
+        .filter(|value| !value.is_empty())
+        .map(PathBuf::from)
 }
 
 fn go_json_inventory_error(error: &str) -> bool {
@@ -219,73 +195,27 @@ fn run_health(
     stdout: &mut dyn Write,
     stderr: &mut dyn Write,
     format: OutputFormat,
-) -> Option<u8> {
-    let mut harness_name: Option<String> = None;
-    let mut project_dir: Option<PathBuf> = None;
-
-    let mut i = 0;
-    while i < args.len() {
-        let arg = args[i].to_string_lossy();
-        if matches!(arg.as_ref(), "-h" | "--h" | "-help" | "--help") {
-            let _ = write!(stderr, "{HARNESS_HEALTH_FLAGS}");
-            return Some(exit::USAGE);
-        }
-        if arg == "--" {
-            if let Some(value) = args.get(i + 1) {
-                let value = value.to_string_lossy();
-                let _ = writeln!(
-                    stderr,
-                    "symbrain harness health: unexpected argument {value:?}"
-                );
-                return Some(exit::USAGE);
-            }
-            break;
-        }
-        let (name, inline) = arg
-            .split_once('=')
-            .map_or((arg.as_ref(), None), |(name, value)| (name, Some(value)));
-        match name {
-            "-harness" | "--harness" | "-project" | "--project" => {
-                let value = if let Some(value) = inline {
-                    value.to_owned()
-                } else {
-                    let Some(value) = args.get(i + 1) else {
-                        let _ = writeln!(
-                            stderr,
-                            "flag needs an argument: -{}",
-                            name.trim_start_matches('-')
-                        );
-                        let _ = write!(stderr, "{HARNESS_HEALTH_FLAGS}");
-                        return Some(exit::USAGE);
-                    };
-                    i += 1;
-                    value.to_string_lossy().into_owned()
-                };
-                if name.ends_with("harness") {
-                    harness_name = Some(value);
-                } else {
-                    project_dir = Some(PathBuf::from(value));
-                }
-            }
-            _ if name.starts_with('-') => {
-                let _ = writeln!(
-                    stderr,
-                    "flag provided but not defined: -{}",
-                    name.trim_start_matches('-')
-                );
-                let _ = write!(stderr, "{HARNESS_HEALTH_FLAGS}");
-                return Some(exit::USAGE);
-            }
-            _ => {
-                let _ = writeln!(
-                    stderr,
-                    "symbrain harness health: unexpected argument {arg:?}"
-                );
-                return Some(exit::USAGE);
-            }
-        }
-        i += 1;
+) -> u8 {
+    let flags = FlagSet {
+        string_flags: &["harness", "project"],
+        usage: HARNESS_HEALTH_FLAGS,
+    };
+    let normalized = crate::normalize_flags(args);
+    let Ok(parsed) = flags.parse(&normalized, stderr) else {
+        return exit::USAGE;
+    };
+    if let Some(unexpected) = parsed.rest.first() {
+        let _ = writeln!(
+            stderr,
+            "symbrain harness health: unexpected argument {}",
+            format_go_quoted(unexpected)
+        );
+        return exit::USAGE;
     }
+    let harness_name = parsed
+        .value("harness")
+        .map(|name| name.to_string_lossy().into_owned());
+    let project_dir = project_flag(&parsed);
 
     let inventory = list(project_dir.as_deref());
     let mut probes = Vec::new();
@@ -318,7 +248,12 @@ fn run_health(
             .map(|handle| handle.join().ok())
             .collect::<Option<Vec<_>>>()
     });
-    let mut entries = probe_results?;
+    let Some(mut entries) = probe_results else {
+        // Go's goroutines cannot panic out of the report; a Rust worker panic
+        // is an internal failure, never a reason to re-run the Go binary.
+        let _ = writeln!(stderr, "symbrain harness health: probe worker panicked");
+        return exit::GENERIC;
+    };
 
     entries.sort_by(|left, right| {
         (
@@ -360,10 +295,10 @@ fn run_health(
     });
     if let Err(error) = result {
         let _ = writeln!(stderr, "symbrain harness health: format output: {error}");
-        return Some(exit::GENERIC);
+        return exit::GENERIC;
     }
 
-    Some(exit::OK)
+    exit::OK
 }
 
 struct HealthProbe {

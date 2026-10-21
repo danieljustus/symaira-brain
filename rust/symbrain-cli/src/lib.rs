@@ -17,6 +17,7 @@ mod stdio_output;
 
 pub use cli_flags::normalize_flags;
 mod doctor_cli;
+mod go_flags;
 mod go_json_escape;
 pub mod guard_cli;
 mod harness_cli;
@@ -134,7 +135,7 @@ fn run_native(
     match cmd.as_ref() {
         "help" | "--help" | "-h" => Some(write_usage(stdout)),
         "version" => Some(run_version(rest, stdout, stderr, format)),
-        "config" => config_cli::run(rest, stdout, stderr),
+        "config" => Some(config_cli::run(rest, stdout, stderr)),
         "profile" => profile_cli::run(rest, stdout, stderr, format),
         "audit" => Some(audit_cli::run(rest, stdout, stderr, format)),
         "setup" if setup_cli::requires_go_fallback(rest) => None,

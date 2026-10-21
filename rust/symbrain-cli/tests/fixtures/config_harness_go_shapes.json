@@ -1,0 +1,1208 @@
+{
+ "cases": [
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d68"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-0",
+   "raw_bytes": false,
+   "stderr": "symbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d2d68"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-1",
+   "raw_bytes": false,
+   "stderr": "symbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d68656c70"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-2",
+   "raw_bytes": false,
+   "stderr": "symbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d2d68656c70"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-3",
+   "raw_bytes": false,
+   "stderr": "symbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d68656c703d31"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-4",
+   "raw_bytes": false,
+   "stderr": "symbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-5",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -x\nsymbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d2d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-6",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -x\nsymbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d2d2d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-7",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -x\nsymbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d2d2d2d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-8",
+   "raw_bytes": false,
+   "stderr": "bad flag syntax: ---x\nsymbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d2d3d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-9",
+   "raw_bytes": false,
+   "stderr": "bad flag syntax: -=x\nsymbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d3d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-10",
+   "raw_bytes": false,
+   "stderr": "bad flag syntax: -=x\nsymbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d783d31"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-11",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -x\nsymbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d2d783d31"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-12",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -x\nsymbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-13",
+   "raw_bytes": false,
+   "stderr": "symbrain config: unknown subcommand \"-\" (want path, get, or set)\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d2d",
+    "2d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-14",
+   "raw_bytes": false,
+   "stderr": "symbrain config: unknown subcommand \"-x\" (want path, get, or set)\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d2d",
+    "2d2d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-15",
+   "raw_bytes": false,
+   "stderr": "symbrain config: unknown subcommand \"--x\" (want path, get, or set)\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d2d",
+    "2d"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-16",
+   "raw_bytes": false,
+   "stderr": "symbrain config: unknown subcommand \"-\" (want path, get, or set)\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d2d",
+    "66726f626e6963617465"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-17",
+   "raw_bytes": false,
+   "stderr": "symbrain config: unknown subcommand \"frobnicate\" (want path, get, or set)\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d78",
+    "70617468"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-18",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -x\nsymbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d68",
+    "70617468"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-19",
+   "raw_bytes": false,
+   "stderr": "symbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d2d"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-20",
+   "raw_bytes": false,
+   "stderr": "symbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d6a736f6e",
+    "70617468"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-23",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -json\nsymbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d2d6a736f6e",
+    "70617468"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-24",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -json\nsymbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d2d6f7574707574",
+    "6a736f6e",
+    "70617468"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-25",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -output\nsymbrain config \u2014 inspect and edit the global config file\n\nUsage:\n  symbrain config path                 Print the global config file path\n  symbrain config get [key]            Print the stored value for a dotted key\n                                       (no key: print the whole file)\n  symbrain config set <key> <value>    Set a dotted key; values are typed as\n                                       bool, integer, or string\n  symbrain config set --preview ...    Show the change without writing\n                                       (writes <config>.bak before mutation)\n  symbrain config set --no-backup ...  Explicitly opt out of the backup\n\nKeys live under ~/.config/symbrain/config.toml, e.g. default_profile,\naudit.enabled, audit.verbose, gateway.identity_injection,\nupdatecheck.enabled, patterns.enabled, patterns.promotion_threshold,\nservers.vault.binary_path, servers.operate.binary_path,\nservers.scope.binary_path, modules.browse, modules.operate, modules.scope.\n\nmodules.* selects optional capability modules (default: all disabled).\nEnabling one only changes what 'symbrain setup'/'symbrain doctor --fix'\ninstall; it does not change any profile's tool exposure on its own.\n\nNote: get/set operate on the global file as stored. The config loader also\nmerges a project-local .symbrain.toml and SYMBRAIN_* environment overrides\non top when commands run. Creating the file is 'symbrain init'; profiles\nhave their own commands ('symbrain profile ...').\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "70617468",
+    "2d68"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-26",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "symbrain config path: unexpected argument \"-h\"\n"
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "66726f626e6963617465",
+    "2d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-27",
+   "raw_bytes": false,
+   "stderr": "symbrain config: unknown subcommand \"frobnicate\" (want path, get, or set)\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "ff"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-28",
+   "raw_bytes": true,
+   "stderr": "symbrain config: unknown subcommand \"\\xff\" (want path, get, or set)\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2dff"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-29",
+   "raw_bytes": true,
+   "stderr_hex": "666c61672070726f766964656420627574206e6f7420646566696e65643a202dff0a73796d627261696e20636f6e66696720e2809420696e737065637420616e6420656469742074686520676c6f62616c20636f6e6669672066696c650a0a55736167653a0a202073796d627261696e20636f6e666967207061746820202020202020202020202020202020205072696e742074686520676c6f62616c20636f6e6669672066696c6520706174680a202073796d627261696e20636f6e66696720676574205b6b65795d2020202020202020202020205072696e74207468652073746f7265642076616c756520666f72206120646f74746564206b65790a202020202020202020202020202020202020202020202020202020202020202020202020202020286e6f206b65793a207072696e74207468652077686f6c652066696c65290a202073796d627261696e20636f6e66696720736574203c6b65793e203c76616c75653e20202020536574206120646f74746564206b65793b2076616c756573206172652074797065642061730a202020202020202020202020202020202020202020202020202020202020202020202020202020626f6f6c2c20696e74656765722c206f7220737472696e670a202073796d627261696e20636f6e66696720736574202d2d70726576696577202e2e2e2020202053686f7720746865206368616e676520776974686f75742077726974696e670a20202020202020202020202020202020202020202020202020202020202020202020202020202028777269746573203c636f6e6669673e2e62616b206265666f7265206d75746174696f6e290a202073796d627261696e20636f6e66696720736574202d2d6e6f2d6261636b7570202e2e2e20204578706c696369746c79206f7074206f7574206f6620746865206261636b75700a0a4b657973206c69766520756e646572207e2f2e636f6e6669672f73796d627261696e2f636f6e6669672e746f6d6c2c20652e672e2064656661756c745f70726f66696c652c0a61756469742e656e61626c65642c2061756469742e766572626f73652c20676174657761792e6964656e746974795f696e6a656374696f6e2c0a757064617465636865636b2e656e61626c65642c207061747465726e732e656e61626c65642c207061747465726e732e70726f6d6f74696f6e5f7468726573686f6c642c0a736572766572732e7661756c742e62696e6172795f706174682c20736572766572732e6f7065726174652e62696e6172795f706174682c0a736572766572732e73636f70652e62696e6172795f706174682c206d6f64756c65732e62726f7773652c206d6f64756c65732e6f7065726174652c206d6f64756c65732e73636f70652e0a0a6d6f64756c65732e2a2073656c65637473206f7074696f6e616c206361706162696c697479206d6f64756c6573202864656661756c743a20616c6c2064697361626c6564292e0a456e61626c696e67206f6e65206f6e6c79206368616e6765732077686174202773796d627261696e207365747570272f2773796d627261696e20646f63746f72202d2d666978270a696e7374616c6c3b20697420646f6573206e6f74206368616e676520616e792070726f66696c65277320746f6f6c206578706f73757265206f6e20697473206f776e2e0a0a4e6f74653a206765742f736574206f706572617465206f6e2074686520676c6f62616c2066696c652061732073746f7265642e2054686520636f6e666967206c6f6164657220616c736f0a6d657267657320612070726f6a6563742d6c6f63616c202e73796d627261696e2e746f6d6c20616e642053594d425241494e5f2a20656e7669726f6e6d656e74206f76657272696465730a6f6e20746f70207768656e20636f6d6d616e64732072756e2e204372656174696e67207468652066696c65206973202773796d627261696e20696e6974273b2070726f66696c65730a68617665207468656972206f776e20636f6d6d616e647320282773796d627261696e2070726f66696c65202e2e2e27292e0a",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "636166c3a9ff"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-30",
+   "raw_bytes": true,
+   "stderr": "symbrain config: unknown subcommand \"caf\u00e9\\xff\" (want path, get, or set)\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "636f6e666967",
+    "2d2d",
+    "ff"
+   ],
+   "exit": 2,
+   "name": "cfgh-config-31",
+   "raw_bytes": true,
+   "stderr": "symbrain config: unknown subcommand \"\\xff\" (want path, get, or set)\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "2d68"
+   ],
+   "exit": 2,
+   "name": "cfgh-harness-0",
+   "raw_bytes": false,
+   "stderr": "symbrain harness \u2014 inspect configured AI harnesses\n\nUsage:\n  symbrain harness list [--project DIR]\n  symbrain harness health [--harness NAME] [--project DIR]\n\nThe global --output table|json flag (or --json) selects the output format.\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "2d2d68656c70"
+   ],
+   "exit": 2,
+   "name": "cfgh-harness-1",
+   "raw_bytes": false,
+   "stderr": "symbrain harness \u2014 inspect configured AI harnesses\n\nUsage:\n  symbrain harness list [--project DIR]\n  symbrain harness health [--harness NAME] [--project DIR]\n\nThe global --output table|json flag (or --json) selects the output format.\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "68656c70"
+   ],
+   "exit": 2,
+   "name": "cfgh-harness-2",
+   "raw_bytes": false,
+   "stderr": "symbrain harness \u2014 inspect configured AI harnesses\n\nUsage:\n  symbrain harness list [--project DIR]\n  symbrain harness health [--harness NAME] [--project DIR]\n\nThe global --output table|json flag (or --json) selects the output format.\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "2d68656c70"
+   ],
+   "exit": 2,
+   "name": "cfgh-harness-3",
+   "raw_bytes": false,
+   "stderr": "symbrain harness \u2014 inspect configured AI harnesses\n\nUsage:\n  symbrain harness list [--project DIR]\n  symbrain harness health [--harness NAME] [--project DIR]\n\nThe global --output table|json flag (or --json) selects the output format.\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "66726f626e6963617465"
+   ],
+   "exit": 2,
+   "name": "cfgh-harness-4",
+   "raw_bytes": false,
+   "stderr": "symbrain harness \u2014 inspect configured AI harnesses\n\nUsage:\n  symbrain harness list [--project DIR]\n  symbrain harness health [--harness NAME] [--project DIR]\n\nThe global --output table|json flag (or --json) selects the output format.\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "4c495354"
+   ],
+   "exit": 2,
+   "name": "cfgh-harness-5",
+   "raw_bytes": false,
+   "stderr": "symbrain harness \u2014 inspect configured AI harnesses\n\nUsage:\n  symbrain harness list [--project DIR]\n  symbrain harness health [--harness NAME] [--project DIR]\n\nThe global --output table|json flag (or --json) selects the output format.\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "2d2d6a736f6e"
+   ],
+   "exit": 2,
+   "name": "cfgh-harness-6",
+   "raw_bytes": false,
+   "stderr": "symbrain harness \u2014 inspect configured AI harnesses\n\nUsage:\n  symbrain harness list [--project DIR]\n  symbrain harness health [--harness NAME] [--project DIR]\n\nThe global --output table|json flag (or --json) selects the output format.\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "ff"
+   ],
+   "exit": 2,
+   "name": "cfgh-harness-10",
+   "raw_bytes": true,
+   "stderr": "symbrain harness \u2014 inspect configured AI harnesses\n\nUsage:\n  symbrain harness list [--project DIR]\n  symbrain harness health [--harness NAME] [--project DIR]\n\nThe global --output table|json flag (or --json) selects the output format.\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374ff"
+   ],
+   "exit": 2,
+   "name": "cfgh-harness-11",
+   "raw_bytes": true,
+   "stderr": "symbrain harness \u2014 inspect configured AI harnesses\n\nUsage:\n  symbrain harness list [--project DIR]\n  symbrain harness health [--harness NAME] [--project DIR]\n\nThe global --output table|json flag (or --json) selects the output format.\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d68"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-0",
+   "raw_bytes": false,
+   "stderr": "Usage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d2d68"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-1",
+   "raw_bytes": false,
+   "stderr": "Usage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d68656c70"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-2",
+   "raw_bytes": false,
+   "stderr": "Usage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d2d68656c70"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-3",
+   "raw_bytes": false,
+   "stderr": "Usage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d68656c703d31"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-4",
+   "raw_bytes": false,
+   "stderr": "Usage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d2d626f677573"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-5",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -bogus\nUsage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d626f6775733d31"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-6",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -bogus\nUsage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d2d2d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-7",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -x\nUsage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d2d3d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-8",
+   "raw_bytes": false,
+   "stderr": "bad flag syntax: -=x\nUsage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d3d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-9",
+   "raw_bytes": false,
+   "stderr": "bad flag syntax: -=x\nUsage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-10",
+   "raw_bytes": false,
+   "stderr": "symbrain harness list: unexpected argument \"-\"\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d2d",
+    "78"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-12",
+   "raw_bytes": false,
+   "stderr": "symbrain harness list: unexpected argument \"x\"\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d2d",
+    "2d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-13",
+   "raw_bytes": false,
+   "stderr": "symbrain harness list: unexpected argument \"-x\"\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "78"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-14",
+   "raw_bytes": false,
+   "stderr": "symbrain harness list: unexpected argument \"x\"\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "78",
+    "2d626f677573"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-15",
+   "raw_bytes": false,
+   "stderr": "symbrain harness list: unexpected argument \"x\"\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d626f677573",
+    "78"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-16",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -bogus\nUsage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d70726f6a656374"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-17",
+   "raw_bytes": false,
+   "stderr": "flag needs an argument: -project\nUsage of harness list:\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2d70726f6a656374",
+    "2d2d",
+    "78"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-26",
+   "raw_bytes": false,
+   "stderr": "symbrain harness list: unexpected argument \"x\"\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "ff"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-29",
+   "raw_bytes": true,
+   "stderr": "symbrain harness list: unexpected argument \"\\xff\"\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6c697374",
+    "2dff"
+   ],
+   "exit": 2,
+   "name": "cfgh-list-30",
+   "raw_bytes": true,
+   "stderr_hex": "666c61672070726f766964656420627574206e6f7420646566696e65643a202dff0a5573616765206f66206861726e657373206c6973743a0a20202d70726f6a65637420737472696e670a202020200970726f6a656374206469726563746f727920746f20696e737065637420666f722070726f6a6563742d6c6f63616c206861726e65737320636f6e6669670a",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d68"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-0",
+   "raw_bytes": false,
+   "stderr": "Usage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d68"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-1",
+   "raw_bytes": false,
+   "stderr": "Usage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d68656c70"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-2",
+   "raw_bytes": false,
+   "stderr": "Usage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d68656c70"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-3",
+   "raw_bytes": false,
+   "stderr": "Usage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d68656c703d31"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-4",
+   "raw_bytes": false,
+   "stderr": "Usage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d626f677573"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-5",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -bogus\nUsage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d626f6775733d31"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-6",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -bogus\nUsage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d2d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-7",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -x\nUsage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d3d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-8",
+   "raw_bytes": false,
+   "stderr": "bad flag syntax: -=x\nUsage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d3d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-9",
+   "raw_bytes": false,
+   "stderr": "bad flag syntax: -=x\nUsage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-10",
+   "raw_bytes": false,
+   "stderr": "symbrain harness health: unexpected argument \"-\"\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-11",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d",
+    "78"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-12",
+   "raw_bytes": false,
+   "stderr": "symbrain harness health: unexpected argument \"x\"\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d",
+    "2d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-13",
+   "raw_bytes": false,
+   "stderr": "symbrain harness health: unexpected argument \"-x\"\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "78"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-14",
+   "raw_bytes": false,
+   "stderr": "symbrain harness health: unexpected argument \"x\"\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "78",
+    "2d626f677573"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-15",
+   "raw_bytes": false,
+   "stderr": "symbrain harness health: unexpected argument \"x\"\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d626f677573",
+    "78"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-16",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -bogus\nUsage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d70726f6a656374"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-17",
+   "raw_bytes": false,
+   "stderr": "flag needs an argument: -project\nUsage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d70726f6a6563743d"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-18",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d70726f6a656374",
+    ""
+   ],
+   "exit": 0,
+   "name": "cfgh-health-19",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d70726f6a656374",
+    "2f6e6f6e6578697374656e742d636667682d70726f6a656374"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-20",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d70726f6a6563743d2f6e6f6e6578697374656e742d636667682d70726f6a656374"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-21",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d70726f6a656374",
+    "50524f4a454354"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-22",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d70726f6a656374",
+    "61",
+    "2d70726f6a656374",
+    "62"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-23",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d70726f6a656374",
+    "2d68"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-24",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d70726f6a656374",
+    "2d2d"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-25",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d70726f6a656374",
+    "2d2d",
+    "78"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-26",
+   "raw_bytes": false,
+   "stderr": "symbrain harness health: unexpected argument \"x\"\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d6a736f6e"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-27",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "{\"servers\":null}\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d6f75747075743d6a736f6e"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-28",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "{\"servers\":null}\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "ff"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-29",
+   "raw_bytes": true,
+   "stderr": "symbrain harness health: unexpected argument \"\\xff\"\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2dff"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-30",
+   "raw_bytes": true,
+   "stderr_hex": "666c61672070726f766964656420627574206e6f7420646566696e65643a202dff0a5573616765206f66206861726e657373206865616c74683a0a20202d6861726e65737320737472696e670a20202020096f6e6c792070726f62652073657276657273206f662074686973206861726e6573730a20202d70726f6a65637420737472696e670a202020200970726f6a656374206469726563746f727920746f20696e737065637420666f722070726f6a6563742d6c6f63616c206861726e65737320636f6e6669670a",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d6861726e657373"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-31",
+   "raw_bytes": false,
+   "stderr": "flag needs an argument: -harness\nUsage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d6861726e657373"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-32",
+   "raw_bytes": false,
+   "stderr": "flag needs an argument: -harness\nUsage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d6861726e6573733d"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-33",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d6861726e657373",
+    ""
+   ],
+   "exit": 0,
+   "name": "cfgh-health-34",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d6861726e6573733d6e6f7065"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-35",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d6861726e657373",
+    "636c61756465"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-36",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d6861726e657373",
+    "636c61756465",
+    "2d2d70726f6a656374",
+    "50524f4a454354"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-37",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d6861726e657373",
+    "2d70726f6a656374"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-38",
+   "raw_bytes": false,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d2d6861726e657373",
+    "ff"
+   ],
+   "exit": 0,
+   "name": "cfgh-health-39",
+   "raw_bytes": true,
+   "stderr": "",
+   "stdout": "no MCP servers found\n"
+  },
+  {
+   "argv_hex": [
+    "6861726e657373",
+    "6865616c7468",
+    "2d6861726e657373",
+    "637572736f72",
+    "2d78"
+   ],
+   "exit": 2,
+   "name": "cfgh-health-40",
+   "raw_bytes": false,
+   "stderr": "flag provided but not defined: -x\nUsage of harness health:\n  -harness string\n    \tonly probe servers of this harness\n  -project string\n    \tproject directory to inspect for project-local harness config\n",
+   "stdout": ""
+  }
+ ],
+ "go_oracle_ref": "dcddcef0df5789123c7c9a7ebe6e01f10e941f2c"
+}
