@@ -94,7 +94,7 @@ func TestRustReleaseWorkflowBuildsAllTargetsWithoutPublishing(t *testing.T) {
 		t.Errorf("build platforms = %v, want %v", platforms, want)
 	}
 	for _, command := range []string{"smoke.py", "-hybrid-candidate-check -platforms all", "cyclonedx-json",
-		"notarize-and-verify.sh", "cosign verify-blob", "--options runtime"} {
+		"notarize-and-verify.sh", "cosign verify-blob", "--options runtime", "manifests.py"} {
 		if !strings.Contains(text, command) {
 			t.Errorf("missing release gate %q", command)
 		}
