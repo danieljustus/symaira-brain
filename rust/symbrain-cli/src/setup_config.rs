@@ -12,6 +12,8 @@ use std::path::{Component, Path, PathBuf};
 use symbrain_core::config::{format_go_quoted_bytes, os_bytes};
 use toml_edit::{DocumentMut, Item, TableLike, Value};
 
+#[path = "setup_config_path.rs"]
+mod go_path;
 #[path = "setup_config_toml.rs"]
 mod toml_syntax;
 
@@ -80,24 +82,25 @@ enum Converted {
 pub(crate) fn enabled_cores() -> Result<BTreeMap<String, bool>, ConfigError> {
     let mut modules = [false; 3];
     let global = symbrain_core::xdg::config_path();
+    // Go prints `filepath.Join(..)` text; the file system keeps the real path.
+    let global_shown = go_path::printed(&global);
     let wrap = |layer: &str, inner: Vec<u8>| {
         let mut message = b"config: failed to load ".to_vec();
-        message.extend_from_slice(&os_bytes(global.as_os_str()));
+        message.extend_from_slice(&global_shown);
         message.extend_from_slice(b": ");
         message.extend_from_slice(layer.as_bytes());
         message.extend_from_slice(&inner);
         ConfigError(message)
     };
-    merge_file(&mut modules, &global).map_err(|inner| wrap("global config error: ", inner))?;
+    merge_file(&mut modules, &global, &global_shown)
+        .map_err(|inner| wrap("global config error: ", inner))?;
     // configkit skips the project layer when the working directory is unknown.
     if let Some(directory) = go_getwd() {
         // Go's `filepath.Join` lexically cleans, so `$PWD` spellings such as
         // `/root//project` or `/root/project/../project` show as one path.
-        merge_file(
-            &mut modules,
-            &lexical_clean(&directory.join(".symbrain.toml")),
-        )
-        .map_err(|inner| wrap("project config error: ", inner))?;
+        let project = lexical_clean(&directory.join(".symbrain.toml"));
+        merge_file(&mut modules, &project, &go_path::printed(&project))
+            .map_err(|inner| wrap("project config error: ", inner))?;
     }
     apply_environment(&mut modules).map_err(|inner| wrap("env override error: ", inner))?;
     Ok(MODULES
@@ -149,7 +152,8 @@ fn file_error(shown: &[u8], verb: &str, detail: &str) -> Vec<u8> {
     message
 }
 
-fn merge_file(modules: &mut [bool; 3], path: &Path) -> Result<(), Vec<u8>> {
+/// Reads `path`; `shown` is the text Go prints for it in every message.
+fn merge_file(modules: &mut [bool; 3], path: &Path, shown: &[u8]) -> Result<(), Vec<u8>> {
     // `os.IsNotExist` is ENOENT only; every other stat error falls through to
     // the read, which then reports its own cause.
     if let Err(error) = std::fs::metadata(path)
@@ -157,12 +161,11 @@ fn merge_file(modules: &mut [bool; 3], path: &Path) -> Result<(), Vec<u8>> {
     {
         return Ok(());
     }
-    let shown = os_bytes(path.as_os_str()).into_owned();
-    let parse_failure = |detail: &str| file_error(&shown, "failed to parse", detail);
+    let parse_failure = |detail: &str| file_error(shown, "failed to parse", detail);
     let mut file = std::fs::File::open(path).map_err(|error| {
         parse_failure(&format!(
             "open {}: {}",
-            String::from_utf8_lossy(&shown),
+            String::from_utf8_lossy(shown),
             symbrain_managed::format_io_error(&error)
         ))
     })?;
@@ -170,13 +173,13 @@ fn merge_file(modules: &mut [bool; 3], path: &Path) -> Result<(), Vec<u8>> {
     file.read_to_end(&mut bytes).map_err(|error| {
         parse_failure(&format!(
             "read {}: {}",
-            String::from_utf8_lossy(&shown),
+            String::from_utf8_lossy(shown),
             symbrain_managed::format_io_error(&error)
         ))
     })?;
     let document = toml_syntax::parse(&bytes).map_err(|detail| parse_failure(&detail))?;
     apply_document(modules, &document)
-        .map_err(|detail| file_error(&shown, "failed to apply", &detail))
+        .map_err(|detail| file_error(shown, "failed to apply", &detail))
 }
 
 fn apply_document(modules: &mut [bool; 3], document: &DocumentMut) -> Result<(), String> {

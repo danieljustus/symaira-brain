@@ -120,7 +120,9 @@ fn invalid_configuration_is_diagnosed_natively(root: &Path) {
     .enumerate()
     {
         let case = root.join(format!("config-error-{index}"));
-        let config_path = case.join("config/symbrain/config.toml");
+        // Go prints `filepath.Join(xdg, "symbrain", "config.toml")`, i.e. `filepath.Clean`
+        // output: separate components keep every Windows separator a `\`, as Go does.
+        let config_path = case.join("config").join("symbrain").join("config.toml");
         fs::create_dir_all(config_path.parent().unwrap()).unwrap();
         fs::write(&config_path, config).unwrap();
         let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
@@ -166,4 +168,47 @@ fn snapshot(directory: &Path) -> std::collections::BTreeMap<String, Vec<u8>> {
             )
         })
         .collect()
+}
+
+/// Go prints `filepath.Join(xdg, ..)` (a `filepath.Clean`), so on Windows an
+/// `XDG_CONFIG_HOME` spelled with `/` is printed with `\`. Rust's `Path::join`
+/// would keep the `/`; the expected text follows Go's `Clean` source, whose
+/// Windows byte logic is covered by `src/setup_config_path_tests.rs`.
+#[cfg(windows)]
+#[test]
+fn forward_slash_xdg_root_is_printed_with_backslashes_like_go() {
+    let root = tempfile::tempdir().unwrap();
+    let case = root.path().join("slash-xdg");
+    let config_path = case.join("config").join("symbrain").join("config.toml");
+    fs::create_dir_all(config_path.parent().unwrap()).unwrap();
+    fs::write(&config_path, "[audit]\nenabled = []\n").unwrap();
+    let slashed = case.join("config").to_str().unwrap().replace('\\', "/");
+    let mut command = Command::new(env!("CARGO_BIN_EXE_symbrain"));
+    command
+        .args(["setup", "--fix", "--json"])
+        .env_clear()
+        .current_dir(&case)
+        .env("HOME", case.join("home"))
+        .env("USERPROFILE", case.join("home"))
+        .env("XDG_CONFIG_HOME", &slashed)
+        .env("XDG_DATA_HOME", case.join("data"))
+        .env("XDG_CACHE_HOME", case.join("cache"))
+        .env("PATH", case.join("no-tools"))
+        .env("SYMBRAIN_GO_BINARY", case.join("no-go"));
+    for variable in ["SystemRoot", "WINDIR", "LLVM_PROFILE_FILE"] {
+        if let Some(value) = std::env::var_os(variable) {
+            command.env(variable, value);
+        }
+    }
+    let output = command.output().unwrap();
+    let shown = config_path.display().to_string();
+    assert!(!shown.contains('/'), "{shown}");
+    assert_eq!(output.status.code(), Some(2));
+    assert!(output.stdout.is_empty());
+    assert_eq!(
+        String::from_utf8(output.stderr).unwrap(),
+        format!(
+            "symbrain setup --fix: config: failed to load {shown}: global config error: failed to apply {shown}: field \"audit\": field \"enabled\": cannot convert []interface {{}} to bool\n"
+        )
+    );
 }

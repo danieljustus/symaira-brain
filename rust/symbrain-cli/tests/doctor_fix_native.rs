@@ -212,7 +212,9 @@ fn config_failures_are_diagnosed_natively(root: &Path) {
     .enumerate()
     {
         let case = root.join(format!("bad-config-{index}"));
-        let config = case.join("config/symbrain/config.toml");
+        // Go prints `filepath.Join(xdg, "symbrain", "config.toml")`, i.e. `filepath.Clean`
+        // output: separate components keep every Windows separator a `\`, as Go does.
+        let config = case.join("config").join("symbrain").join("config.toml");
         fs::create_dir_all(config.parent().unwrap()).unwrap();
         fs::write(&config, text).unwrap();
         let output = run(&case, &["--fix", "--force-release"], None);
