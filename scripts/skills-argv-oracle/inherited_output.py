@@ -36,8 +36,13 @@ SOURCE_HASHES = {
     # `config` dispatch arm (now always native) and the removed `setup`/`doctor`
     # Go-fallback dispatch arms changed. The early output blocks are still
     # byte-equal to the parent.
-    CLI: "2f9b7bb6f25ca1ac09315a7aa3a703f722b07ad11c79d9b2c800bc5c193ebdb8",
+    # Reviewed after #769 slice 2: the `harness` dispatch arm is always native
+    # (`Some(harness_cli::run(..))`), and render_json additionally escapes
+    # U+2028/U+2029 like Go's encoding/json. Neither touches the early output
+    # blocks or the inherited error text.
+    CLI: "9c970c6ec279f8c030eb8baadb1ed4b8c1be689d49851d0b863e1ee0ae5157be",
     CORE: GUARD_CORE_HASH,
+    OUTPUT: "b0b663cacd0d38c47d8198550dce40af6af8f312733c9eaad5c2b67a9f4ab9c1",
 }
 PROFILES = {
     "source806-d07": SOURCE_HASHES,
