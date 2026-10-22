@@ -386,6 +386,19 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Go/Rust native config and harness process parity
+        shell: bash
+        run: scripts/config-harness-oracle/run.sh "$RUNNER_TEMP/config-harness-parity.json"
+
+      - name: Preserve config and harness process parity evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: config-harness-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/config-harness-parity.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Credentialed usage requests, report JSON and table parity
         shell: bash
         run: scripts/usage-fetch-oracle/run.sh "$RUNNER_TEMP/usage-fetch-620.json"
@@ -686,6 +699,19 @@ jobs:
         with:
           name: setup-repair-parity-${{ runner.os }}
           path: ${{ runner.temp }}/setup-repair-parity.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Go/Rust native config and harness process parity
+        shell: bash
+        run: scripts/config-harness-oracle/run.sh "$RUNNER_TEMP/config-harness-parity.json"
+
+      - name: Preserve config and harness process parity evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: config-harness-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/config-harness-parity.json
           if-no-files-found: error
           retention-days: 14
 
@@ -1102,6 +1128,19 @@ jobs:
         with:
           name: setup-repair-parity-${{ runner.os }}
           path: ${{ runner.temp }}/setup-repair-parity.json
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Go/Rust native config and harness process parity
+        shell: bash
+        run: scripts/config-harness-oracle/run.sh "$RUNNER_TEMP/config-harness-parity.json"
+
+      - name: Preserve config and harness process parity evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: config-harness-parity-${{ runner.os }}
+          path: ${{ runner.temp }}/config-harness-parity.json
           if-no-files-found: error
           retention-days: 14
 

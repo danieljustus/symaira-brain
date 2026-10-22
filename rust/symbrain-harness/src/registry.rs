@@ -3,6 +3,7 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
+use crate::inventory_read::clean_path;
 use crate::{HarnessError, relative_path, resolve_path, trusted_root};
 
 /// Canonical server key written into harness configurations.
@@ -225,8 +226,12 @@ impl Harness {
 
     #[must_use]
     /// Resolves the project-local configuration path when supported.
+    ///
+    /// Like Go's `filepath.Join`, the displayed path is lexically cleaned, so
+    /// `.` yields `.mcp.json` rather than `./.mcp.json`.
     pub fn project_config_path(&self, project_dir: &Path) -> Option<PathBuf> {
-        self.supports_project.then(|| project_dir.join(".mcp.json"))
+        self.supports_project
+            .then(|| clean_path(&project_dir.join(".mcp.json")))
     }
 
     #[must_use]
@@ -393,4 +398,53 @@ pub fn names() -> Vec<String> {
         .collect::<Vec<_>>();
     result.sort();
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn display(project: &str) -> String {
+        lookup("claude")
+            .unwrap()
+            .project_config_path(Path::new(project))
+            .unwrap()
+            .to_str()
+            .unwrap()
+            .to_owned()
+    }
+
+    /// Expected values are Go `filepath.Join(dir, ".mcp.json")` results.
+    #[test]
+    fn project_config_path_is_cleaned_like_go_filepath_join() {
+        for (project, want) in [
+            (".", ".mcp.json"),
+            ("./", ".mcp.json"),
+            ("./x/../", ".mcp.json"),
+            ("a//b", "a/b/.mcp.json"),
+            ("a/b/", "a/b/.mcp.json"),
+            ("a/./b", "a/b/.mcp.json"),
+            ("..", "../.mcp.json"),
+            ("../p/", "../p/.mcp.json"),
+            ("/proj", "/proj/.mcp.json"),
+            ("/", "/.mcp.json"),
+        ] {
+            let want = if cfg!(windows) {
+                want.replace('/', "\\")
+            } else {
+                want.to_owned()
+            };
+            assert_eq!(display(project), want, "{project:?}");
+        }
+    }
+
+    #[test]
+    fn harnesses_without_a_project_config_have_no_project_path() {
+        assert!(
+            lookup("cursor")
+                .unwrap()
+                .project_config_path(Path::new("."))
+                .is_none()
+        );
+    }
 }

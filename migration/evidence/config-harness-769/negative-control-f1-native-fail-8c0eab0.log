@@ -1,0 +1,24 @@
+   Compiling symbrain-cli v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-cli)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.31s
+     Running tests/config_harness_native.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/cargo-target/e616fdceea145a39/debug/deps/config_harness_native-fcb0fa54090fb70e)
+
+running 1 test
+test empty_harness_filter_probes_every_server_like_go ... FAILED
+
+failures:
+
+---- empty_harness_filter_probes_every_server_like_go stdout ----
+
+thread 'empty_harness_filter_probes_every_server_like_go' (35055751) panicked at rust/symbrain-cli/tests/config_harness_native.rs:200:9:
+assertion `left == right` failed: ["harness", "health", "-project", ".", "-harness="]
+  left: [110, 111, 32, 77, 67, 80, 32, 115, 101, 114, 118, 101, 114, 115, 32, 102, 111, 117, 110, 100, 10]
+ right: [32, 32, 226, 156, 151, 32, 32, 99, 108, 97, 117, 100, 101, 32, 32, 32, 32, 32, 32, 32, 97, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 86, 111, 108, 117, 109, 101, 115, 47, 49, 84, 66, 95, 78, 86, 77, 101, 95, 83, 78, 56, 53, 48, 88, 47, 68, 101, 118, 47, 116, 109, 112, 47, 115, 121, 109, 98, 114, 97, 105, 110, 47, 114, 117, 110, 47, 46, 116, 109, 112, 108, 75, 80, 103, 82, 89, 47, 104, 111, 109, 101, 47, 46, 99, 108, 97, 117, 100, 101, 46, 106, 115, 111, 110, 58, 32, 115, 101, 114, 118, 101, 114, 32, 99, 111, 109, 109, 97, 110, 100, 32, 119, 97, 115, 32, 110, 111, 116, 32, 102, 111, 117, 110, 100, 10, 32, 32, 226, 156, 151, 32, 32, 99, 108, 97, 117, 100, 101, 32, 32, 32, 32, 32, 32, 32, 98, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 47, 86, 111, 108, 117, 109, 101, 115, 47, 49, 84, 66, 95, 78, 86, 77, 101, 95, 83, 78, 56, 53, 48, 88, 47, 68, 101, 118, 47, 116, 109, 112, 47, 115, 121, 109, 98, 114, 97, 105, 110, 47, 114, 117, 110, 47, 46, 116, 109, 112, 108, 75, 80, 103, 82, 89, 47, 104, 111, 109, 101, 47, 46, 99, 108, 97, 117, 100, 101, 46, 106, 115, 111, 110, 58, 32, 77, 67, 80, 32, 72, 84, 84, 80, 32, 114, 101, 113, 117, 101, 115, 116, 32, 102, 97, 105, 108, 101, 100, 10, 32, 32, 226, 156, 151, 32, 32, 99, 108, 97, 117, 100, 101, 32, 32, 32, 32, 32, 32, 32, 112, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 46, 109, 99, 112, 46, 106, 115, 111, 110, 58, 32, 115, 101, 114, 118, 101, 114, 32, 99, 111, 109, 109, 97, 110, 100, 32, 119, 97, 115, 32, 110, 111, 116, 32, 102, 111, 117, 110, 100, 10]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    empty_harness_filter_probes_every_server_like_go
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.44s
+
+error: test failed, to rerun pass `-p symbrain-cli --test config_harness_native`

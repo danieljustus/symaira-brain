@@ -99,7 +99,10 @@ pub(super) fn inspect(
     }
 }
 
-pub(super) fn clean_path(path: &Path) -> PathBuf {
+/// Lexical equivalent of Go's `filepath.Clean`: no filesystem access, `.` and
+/// empty components dropped, `..` folded into a preceding real component,
+/// leading `..` kept, `..` at a root dropped, and an empty result spelled `.`.
+pub(crate) fn clean_path(path: &Path) -> PathBuf {
     let mut result = PathBuf::new();
     for component in path.components() {
         match component {
@@ -147,5 +150,43 @@ mod tests {
             clean_path(Path::new("./project/../sibling")),
             Path::new("sibling")
         );
+    }
+
+    #[test]
+    fn clean_path_matches_go_filepath_clean() {
+        // Expected values are Go's `filepath.Clean` results.
+        for (input, want) in [
+            ("", "."),
+            (".", "."),
+            ("./", "."),
+            ("./.", "."),
+            ("./x/../", "."),
+            ("a//b", "a/b"),
+            ("a/b/", "a/b"),
+            ("a/./b/.", "a/b"),
+            ("a/b/../..", "."),
+            ("..", ".."),
+            ("../", ".."),
+            ("../..", "../.."),
+            ("/", "/"),
+            ("//", "/"),
+            ("/..", "/"),
+            ("/../x", "/x"),
+            ("/a/../..", "/"),
+            ("/a//b/", "/a/b"),
+        ] {
+            // Path equality ignores repeated and trailing separators, so
+            // compare the spelling.
+            let want = if cfg!(windows) {
+                want.replace('/', "\\")
+            } else {
+                want.to_owned()
+            };
+            assert_eq!(
+                clean_path(Path::new(input)).to_str().unwrap(),
+                want,
+                "{input:?}"
+            );
+        }
     }
 }
