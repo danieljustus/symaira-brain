@@ -145,3 +145,28 @@ tree (`candidate_dirty` false in the report). Go oracle unchanged:
   `GetFileAttributesEx`/`CreateFile` texts) is not oracle-compared locally;
   POSIX-only cases are skipped there by the shared harness. `install`,
   `uninstall` and `sync` residuals recorded in slice 1 were not re-measured.
+
+## Review fixes: unbounded nesting and dotted keys (`*-deep-nesting-fix.*`)
+
+* Independent review reproduced Rust stack overflows on deeply nested TOML
+  (`harness list`, `install`, `uninstall`) and JSON (`install`/`uninstall`) and a
+  cubic slowdown for long TOML dotted keys. Fixed in `symbrain-harness`
+  (see `MIGRATION-RUST.md`, "Review fixes").
+* `oracle-pass-deep-nesting-fix.log` / `oracle-report-deep-nesting-fix.json`:
+  `scripts/config-harness-oracle/run.sh` exit 0, **940** parity cases (924 + 8
+  new TOML shapes as table and `--json`). The report says `candidate_dirty:
+  true` because it was produced before the fix commit existed; the tree was
+  byte-identical to the commit apart from `cargo fmt` whitespace in
+  `parser.rs`/`json.rs` and the ledger/evidence files.
+* `cargo-test-symbrain-cli-harness-core-deep-nesting-fix.log`: `cargo test -p
+  symbrain-cli -p symbrain-harness -p symbrain-core --locked` exit 0, 439
+  passed. `clippy-workspace-deep-nesting-fix.log`: workspace clippy
+  `--all-targets -D warnings` exit 0. `setup-repair-oracle-deep-nesting-fix.log`:
+  179 parity cases pass.
+* Negative control: with the old `parser.rs` and `json.rs` restored, the
+  deep-TOML and deep-JSON cargo tests abort with `has overflowed its stack` and
+  the dotted-key test does not finish within 100 s.
+* Not re-run after the fix: the 504-case `rust-differential`, profile-remove and
+  install oracles (the touched modules are `harness list`/parse paths only; the
+  install paths share `json.rs::marshal`, covered by the golden tests in
+  `harness_tests.rs`).

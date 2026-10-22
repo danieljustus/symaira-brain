@@ -537,10 +537,10 @@ leading-`..` and symlinked/non-directory project-root shapes previously routed
 to Go. Go has no JSON value-count, string-size or depth limit below the 8 MiB
 cap, so the older Rust-only limit tests were replaced.
 
-Evidence: the config-harness oracle (same pin `0541e64a…`) now replays 924 cases
-(324 slice-1 + 600 `cfgh-parse-*`: 108 JSON, 166 TOML codex configs, 5
+Evidence: the config-harness oracle (same pin `0541e64a…`) now replays 940 cases
+(324 slice-1 + 616 `cfgh-parse-*`: 108 JSON, 174 TOML codex configs, 5
 multi-file and 21 POSIX read-error shapes, each as table and `--json`, across
-claude, claude-desktop, cursor, opencode, antigravity and codex); 924/924
+claude, claude-desktop, cursor, opencode, antigravity and codex); 940/940
 match byte-for-byte on a clean tree with an absent `SYMBRAIN_GO_BINARY`.
 `--record-parse-fixture` produces `rust/symbrain-harness/tests/fixtures/go_parse_errors.json`
 (271 Go observations) that `go_parse_errors` replays without Go. Negative
@@ -557,3 +557,41 @@ Local macOS only: exact-head native Linux/macOS/Windows CI is pending and no
 three-OS claim is made; Windows OS-specific read-error wording is not compared.
 Still open under #769: the setup/doctor/usage/memory/skills Go routes and the
 slice-1 `install`/`uninstall`/`sync` project-path residuals (not re-measured).
+
+#### Review fixes: unbounded nesting and dotted-key cost (#769 slice 2)
+
+Independent review found that Go (`encoding/json` Decoder, BurntSushi/toml)
+accepts any nesting depth below the 8 MiB cap while the Rust port recursed on
+the native stack, and that long TOML dotted keys were cubic. Fixed in
+`symbrain-harness`:
+
+* `go_toml/parser.rs`: `Parser::value` walks arrays and inline tables with an
+  explicit frame stack instead of recursion; `Value` has iterative `Drop`,
+  `Clone` and a non-recursive `Debug`. A 100,000-deep array, an unterminated
+  one, and 1,500-deep inline tables no longer overflow a 256 KiB test stack.
+* Dotted keys: key components are shared (`Rc<str>`), the context is truncated
+  instead of cloned per component, and `setValue`/`addContext` descend the
+  mapping once instead of re-walking it from the root per path element. A
+  1,000-component key went from 36.7 s to 0.02 s (release); 30,000 components
+  take 28.8 s against 36.1 s in Go (both are quadratic in Go's algorithm).
+* `json.rs`: `marshal` writes nested documents with an explicit stack (the
+  `go_json` decoder and the JSON `Value` drop were already iterative).
+  `install`/`uninstall` of a 100,000-deep JSON config now match Go instead of
+  aborting with a stack overflow.
+* `go_read.rs`: directory components are walked as raw bytes, so a parent
+  directory whose name is not UTF-8 is opened by its real name (the lossy
+  conversion looked for a different, absent directory). The unit test cannot
+  create such a directory on APFS and returns early there; it only runs on
+  file systems that accept non-UTF-8 names.
+
+The oracle gains 8 deep/long-key TOML shapes (16 cases: 940 parity cases pass)
+and `go_parse_errors` gains four small-stack cargo tests that overflow or hang
+without the fixes. Residuals, all measured and unchanged by this fix: (1) a
+deeply nested array of tables ending in a pending `install`/`uninstall` is
+parsed by Go but `toml_edit`, the format-preserving edit backend, rejects
+nesting beyond roughly 90 levels, so Rust exits 2 with `not valid toml;
+refusing` and writes nothing (`harness list` is exact at any depth); (2) JSON
+output above `MAX_CONFIG_BYTES` is refused on write by Rust while Go writes it
+(18 MB output of a 3,000-deep config); (3) inline tables nested inside arrays
+stay super-linear (12,000 levels: 43.9 s vs 13.8 s in Go, 3,000 levels: 3.0 s
+vs 1.2 s) because Rust clones the finished subtree where Go shares the map.
