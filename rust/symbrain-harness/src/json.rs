@@ -1,8 +1,6 @@
 pub(crate) use crate::json_parser::{Object, Value};
 use crate::{Entry, ServerInfo};
 
-pub(crate) use crate::json_parser::parse;
-
 pub(crate) fn marshal(value: &Value) -> Vec<u8> {
     let mut output = String::new();
     marshal_value(&mut output, value, "");

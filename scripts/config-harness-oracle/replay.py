@@ -21,6 +21,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 ORACLE_REF = "0541e64a36d83bac8e5e4f8c4136033c03db83ae"
 sys.path.insert(0, str(ROOT / "scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import parse_cases  # noqa: E402  (corpus beside this script)
 spec = importlib.util.spec_from_file_location("cfgh_legacy", ROOT / "scripts/rust-differential.py")
 legacy = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = legacy
@@ -90,6 +92,38 @@ def setup_seeded_harness(root, env):
     (root / "project" / ".mcp.json").write_text(json.dumps(SEEDED_PROJECT), encoding="utf-8")
 
 
+# case name -> (harness, config bytes, family) for the cargo fixture of single-file parse cases.
+PARSE_RECORD: dict[str, tuple[str, bytes, str]] = {}
+MODES = (("table", ("harness", "list")), ("json", ("harness", "list", "--json")))
+
+
+def parse_corpus_cases():
+    """#769 slice 2 (D1): every config parse/read error family, table and JSON."""
+    cases = []
+    for index, (family, harness, data) in enumerate(parse_cases.JSON_CASES):
+        for mode, argv in MODES:
+            name = f"cfgh-parse-json-{index:03d}-{family}-{mode}"
+            cases.append(legacy.Case(name, argv, setup=parse_cases.single_setup(harness, data)))
+            if mode == "json":
+                PARSE_RECORD[name] = (harness, data, family)
+    for index, (family, data) in enumerate(parse_cases.TOML_CASES):
+        for mode, argv in MODES:
+            name = f"cfgh-parse-toml-{index:03d}-{family}-{mode}"
+            cases.append(legacy.Case(name, argv, setup=parse_cases.single_setup("codex", data)))
+            if mode == "json":
+                PARSE_RECORD[name] = ("codex", data, family)
+    for index, (family, files, project) in enumerate(parse_cases.MULTI_CASES):
+        for mode, argv in MODES:
+            extra = ("--project", "PROJECT") if project is not None else ()
+            cases.append(legacy.Case(f"cfgh-parse-multi-{index:03d}-{family}-{mode}", (*argv, *extra),
+                                     setup=parse_cases.multi_setup(files, project)))
+    for index, (family, setup, extra) in enumerate(parse_cases.IO_CASES):
+        for mode, argv in MODES:
+            cases.append(legacy.Case(f"cfgh-parse-io-{index:03d}-{family}-{mode}", (*argv, *extra),
+                                     setup=setup, posix_only=True))
+    return cases
+
+
 def new_cases():
     cases = []
     for index, argv in enumerate(CONFIG_SHAPES):
@@ -107,6 +141,7 @@ def new_cases():
     for index, argv in enumerate(SEEDED_LIST):
         cases.append(legacy.Case(f"cfgh-seeded-list-{index}", ("harness", "list", *argv),
                                  setup=setup_seeded_harness))
+    cases.extend(parse_corpus_cases())
     return cases
 
 
@@ -166,8 +201,13 @@ def main():
         at = args.index("--record-fixture")
         fixture_path = args[at + 1]
         del args[at:at + 2]
+    parse_fixture_path = None
+    if "--record-parse-fixture" in args:
+        at = args.index("--record-parse-fixture")
+        parse_fixture_path = args[at + 1]
+        del args[at:at + 2]
     if len(args) != 3:
-        raise SystemExit("usage: replay.py GO_BINARY RUST_BINARY REPORT_JSON [--record-fixture PATH]")
+        raise SystemExit("usage: replay.py GO_BINARY RUST_BINARY REPORT_JSON [--record-fixture PATH] [--record-parse-fixture PATH]")
     go, rust, report = args
     cases = selected_cases()
     assert len({case.name for case in cases}) == len(cases)
@@ -219,6 +259,7 @@ def main():
         "runtime": platform.platform(), "selected": len(cases), "executed": len(executed),
         "skipped": skip_report, "exit": code, "matches": code == 0, "mismatched": mismatched,
         "new_cases": sum(case.name.startswith("cfgh-") for case in executed),
+        "parse_cases": sum(case.name.startswith("cfgh-parse-") for case in executed),
         "seeded_cases": sum(case.name.startswith("cfgh-seeded-") for case in executed),
         "max_seeded_elapsed_s": round(max(seeded_elapsed), 3),
         "legacy_cases": sum(not case.name.startswith("cfgh-") for case in executed),
@@ -234,7 +275,7 @@ def main():
     }
     names = subprocess.check_output(
         ["git", "ls-tree", "-r", "--name-only", ORACLE_REF, "--", "cmd/symbrain", "internal/harness",
-         "internal/config", "go.mod", "go.sum"], cwd=ROOT, text=True).splitlines()
+         "internal/config", "internal/safefs", "go.mod", "go.sum"], cwd=ROOT, text=True).splitlines()
     data["go_source_sha256"] = {name: hashlib.sha256(subprocess.check_output(
         ["git", "show", f"{ORACLE_REF}:{name}"], cwd=ROOT)).hexdigest()
         for name in names if name.endswith(".go") or name in ("go.mod", "go.sum")}
@@ -243,6 +284,21 @@ def main():
         entries = [entry for case, (go_obs, _) in zip(executed, pairs)
                    if case.name.startswith("cfgh-") and (entry := fixture_entry(case, go_obs))]
         Path(fixture_path).write_text(json.dumps(
+            {"go_oracle_ref": ORACLE_REF, "cases": entries}, indent=1, sort_keys=True) + "\n")
+    if parse_fixture_path and code == 0:
+        entries = []
+        for case, (go_obs, _) in zip(executed, pairs):
+            if case.name not in PARSE_RECORD:
+                continue
+            harness, content, family = PARSE_RECORD[case.name]
+            if len(content) > 4096:
+                continue  # deep-nesting stress inputs are generated by the cargo tests instead
+            inventory = json.loads(go_obs["stdout"])
+            config = next(item for item in inventory["harnesses"] if item["name"] == harness)["global"]
+            config.pop("path", None)
+            entries.append({"name": case.name, "harness": harness, "family": family,
+                            "content_hex": content.hex(), "expected": config})
+        Path(parse_fixture_path).write_text(json.dumps(
             {"go_oracle_ref": ORACLE_REF, "cases": entries}, indent=1, sort_keys=True) + "\n")
     return code
 

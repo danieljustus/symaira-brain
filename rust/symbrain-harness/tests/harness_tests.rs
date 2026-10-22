@@ -344,34 +344,32 @@ fn backup_preserves_non_utf8_path_bytes() {
     );
 }
 #[test]
-fn parsers_reject_excessive_input_shapes() {
+fn parsers_follow_go_for_large_json_shapes_and_deep_nesting() {
+    // Go's encoding/json has no value-count or string-size limit below the 8 MiB
+    // read cap, so large-but-valid documents must parse (#769).
     let json_harness = lookup("claude").unwrap();
     let many_values = format!(
         "{{\"mcpServers\":{{\"x\":{{\"args\":[{}]}}}}}}",
         (0..100_001).map(|_| "0").collect::<Vec<_>>().join(",")
     );
-    let Err(error) = parse(json_harness, many_values.as_bytes()) else {
-        panic!("excessive JSON value count was accepted");
-    };
-    assert!(error.to_string().contains("maximum JSON value count"));
+    assert!(parse(json_harness, many_values.as_bytes()).is_ok());
     let long_string = format!(
         "{{\"mcpServers\":{{\"x\":{{\"command\":\"{}\"}}}}}}",
         "x".repeat(1 << 20)
     );
-    let Err(error) = parse(json_harness, long_string.as_bytes()) else {
-        panic!("excessive JSON string size was accepted");
-    };
-    assert!(error.to_string().contains("maximum JSON string size"));
-}
-#[test]
-fn parsers_reject_excessive_depth_and_redact_malformed_toml_values() {
-    let json_harness = lookup("claude").unwrap();
+    assert!(parse(json_harness, long_string.as_bytes()).is_ok());
+    // Go's token decoder enforces no depth limit (oracle cases `deep-ok`,
+    // `deep-eof`, `deep-mismatch`): 20 000 unclosed `[` followed by `}` is an
+    // ordinary syntax error, not a depth error.
     let nested = format!("{{\"mcpServers\":{{\"x\":{}}}}}", "[".repeat(20_000));
     let Err(json_error) = parse(json_harness, nested.as_bytes()) else {
         panic!("deeply nested JSON was accepted");
     };
-    let json_error = json_error.to_string();
-    assert!(json_error.contains("maximum nesting depth"));
+    assert_eq!(
+        json_error.to_string(),
+        "JSON parse error: invalid character '}' looking for beginning of value"
+    );
+    // Malformed TOML never echoes the offending value into the diagnostic.
     let toml_harness = lookup("codex").unwrap();
     let secret = "should-never-appear-in-diagnostics";
     let malformed = format!("token = \"{secret}\n");
@@ -380,7 +378,7 @@ fn parsers_reject_excessive_depth_and_redact_malformed_toml_values() {
     };
     let toml_error = toml_error.to_string();
     assert!(!toml_error.contains(secret));
-    assert!(toml_error.contains("invalid basic string"));
+    assert!(toml_error.contains("strings cannot contain newlines"));
 }
 #[test]
 fn failed_remove_is_rollback_safe() {

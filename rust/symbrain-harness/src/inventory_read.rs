@@ -1,6 +1,7 @@
 use std::path::{Path, PathBuf};
 
-use crate::{AtomicFile, ConfigInventory, Format, Harness, parse};
+use crate::go_read::ReadFailure;
+use crate::{ConfigInventory, Format, Harness, ServerInfo};
 
 pub(super) fn inspect(
     harness: &Harness,
@@ -17,18 +18,9 @@ pub(super) fn inspect(
         };
     };
     let path_string = path.to_string_lossy().into_owned();
-    let Some((trusted_root, relative_path)) = capability else {
-        return ConfigInventory {
-            path: path_string,
-            exists: false,
-            parsed: false,
-            error: Some("resolve config capability".into()),
-            servers: Vec::new(),
-        };
-    };
-    let capability = match AtomicFile::open(&trusted_root, &relative_path, path, false) {
-        Ok(capability) => capability,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+    let bytes = match crate::go_read::read_config(&path, capability) {
+        Ok(bytes) => bytes,
+        Err(ReadFailure::NotFound) => {
             return ConfigInventory {
                 path: path_string,
                 exists: false,
@@ -37,65 +29,63 @@ pub(super) fn inspect(
                 servers: Vec::new(),
             };
         }
-        Err(error) => {
+        Err(ReadFailure::Message(message)) => {
+            // Go sets `Exists` only after a successful read.
             return ConfigInventory {
                 path: path_string,
                 exists: false,
                 parsed: false,
-                error: Some(error.to_string()),
+                error: Some(message),
                 servers: Vec::new(),
             };
         }
     };
-    let snapshot = match capability.read_snapshot() {
-        Ok(snapshot) => snapshot,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
-            return ConfigInventory {
-                path: path_string,
-                exists: false,
-                parsed: false,
-                error: None,
-                servers: Vec::new(),
-            };
-        }
-        Err(error) => {
+    let servers = match decode_servers(harness, &bytes) {
+        Ok(servers) => servers,
+        Err(detail) => {
             return ConfigInventory {
                 path: path_string,
                 exists: true,
                 parsed: false,
-                error: Some(error.to_string()),
+                error: Some(crate::inventory::parse_error_message(harness, &detail)),
                 servers: Vec::new(),
             };
         }
     };
-    let document = match parse(harness, &snapshot.bytes) {
-        Ok(document) => document,
-        Err(error) => {
-            let error = if harness.format == Format::Json {
-                crate::inventory::format_parse_error(harness, &snapshot.bytes, &error)
-            } else {
-                error.to_string()
-            };
-            return ConfigInventory {
-                path: path_string,
-                exists: true,
-                parsed: false,
-                error: Some(error),
-                servers: Vec::new(),
-            };
-        }
-    };
-    let servers = document
-        .server_names()
-        .into_iter()
-        .filter_map(|name| document.server_info(&name))
-        .collect();
     ConfigInventory {
         path: path_string,
         exists: true,
         parsed: true,
         error: None,
         servers,
+    }
+}
+
+/// Decodes a config exactly like Go's `Parse` and lists its servers.
+fn decode_servers(harness: &Harness, bytes: &[u8]) -> Result<Vec<ServerInfo>, String> {
+    let key = harness.server_key().unwrap_or_default();
+    match harness.format {
+        Format::Json => {
+            let root = crate::go_json::decode_object(bytes)?;
+            let Some(servers) = crate::json::server_map(&root, key) else {
+                return Ok(Vec::new());
+            };
+            let mut names = servers.keys.clone();
+            names.sort();
+            Ok(names
+                .iter()
+                .filter_map(|name| {
+                    servers
+                        .get(name)
+                        .and_then(|value| crate::json::server_info(name, value))
+                })
+                .collect())
+        }
+        Format::Toml => Ok(crate::go_toml::server_infos(
+            &crate::go_toml::decode_object(bytes)?,
+            key,
+        )),
+        Format::Unsupported => Err("harness does not support MCP configuration".to_owned()),
     }
 }
 

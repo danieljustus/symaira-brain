@@ -153,7 +153,7 @@ fn run_native(
         "usage" if usage_cli::requires_go_fallback(rest) => None,
         "usage" => Some(usage_cli::run(rest, stdout, stderr, format)),
         "init" => Some(init_cli::run(rest, stdout, stderr)),
-        "harness" => harness_cli::run(rest, stdout, stderr, format),
+        "harness" => Some(harness_cli::run(rest, stdout, stderr, format)),
         "sync" if sync_cli::requires_go_fallback(rest) => None,
         "sync" => Some(sync_cli::run(rest, stdout, stderr, format)),
         "memory" if memory_cli::requires_go_fallback(rest) => None,

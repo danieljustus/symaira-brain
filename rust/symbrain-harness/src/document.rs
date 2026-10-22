@@ -60,15 +60,21 @@ pub fn parse(harness: &Harness, data: &[u8]) -> Result<Document, HarnessError> {
     }
     let backend = match harness.format {
         Format::Json => Backend::Json {
-            root: json::parse(data)?,
+            root: crate::go_json::decode_object(data).map_err(HarnessError::Json)?,
             servers_key: key,
         },
-        Format::Toml => Backend::Toml {
-            document: std::str::from_utf8(data)
-                .map_err(|_| HarnessError::Toml("input is not UTF-8".into()))?
-                .parse::<toml_edit::DocumentMut>()?,
-            servers_key: key,
-        },
+        Format::Toml => {
+            // Go's BurntSushi/toml decides validity and the error text; the
+            // `toml_edit` model below only serves format-preserving edits.
+            crate::go_toml::decode_object(data).map_err(HarnessError::Toml)?;
+            let text = data.strip_prefix(&[0xEF, 0xBB, 0xBF][..]).unwrap_or(data);
+            Backend::Toml {
+                document: std::str::from_utf8(text)
+                    .map_err(|_| HarnessError::Toml("input is not UTF-8".into()))?
+                    .parse::<toml_edit::DocumentMut>()?,
+                servers_key: key,
+            }
+        }
         Format::Unsupported => {
             return Err(HarnessError::Unsupported(
                 "harness does not support MCP configuration".into(),

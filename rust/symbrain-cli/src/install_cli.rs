@@ -380,7 +380,7 @@ fn install_into(
                     stderr,
                     "symbrain install: {}: {}",
                     location.path.display(),
-                    format_parse_error(harness, &original, &error)
+                    format_parse_error(harness, &error)
                 );
                 return exit::NO_INPUT;
             }
@@ -563,7 +563,7 @@ fn uninstall_from(
                 stderr,
                 "symbrain uninstall: {}: {}",
                 location.path.display(),
-                format_parse_error(harness, &original, &error)
+                format_parse_error(harness, &error)
             );
             return exit::NO_INPUT;
         }
@@ -643,10 +643,9 @@ fn uninstall_from(
     exit::OK
 }
 
-fn format_parse_error(harness: &Harness, original: &[u8], error: &HarnessError) -> String {
+fn format_parse_error(harness: &Harness, error: &HarnessError) -> String {
     let detail = match error {
-        HarnessError::Json(message) => go_json_error_detail(original, message),
-        HarnessError::Toml(message) => message.clone(),
+        HarnessError::Json(message) | HarnessError::Toml(message) => message.clone(),
         _ => error.to_string(),
     };
     let format = harness.format.to_string();
@@ -654,20 +653,6 @@ fn format_parse_error(harness: &Harness, original: &[u8], error: &HarnessError) 
         "harness: {} config is not valid {format}; refusing to edit a config symbrain cannot parse: parse {format}: {detail}",
         harness.name
     )
-}
-
-fn go_json_error_detail(original: &[u8], message: &str) -> String {
-    let prefix = "expected `\"` at byte ";
-    if let Some(position) = message
-        .strip_prefix(prefix)
-        .and_then(|value| value.parse::<usize>().ok())
-    {
-        return original.get(position).map_or_else(
-            || message.to_owned(),
-            |byte| format!("invalid character '{}'", *byte as char),
-        );
-    }
-    message.to_owned()
 }
 
 #[cfg(test)]

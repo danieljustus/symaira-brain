@@ -159,6 +159,8 @@ pub fn render_json<W: Write, T: Serialize + ?Sized>(mut writer: W, value: &T) ->
             .replace('&', "\\u0026")
             .replace('<', "\\u003c")
             .replace('>', "\\u003e")
+            .replace('\u{2028}', "\\u2028")
+            .replace('\u{2029}', "\\u2029")
     )?;
     Ok(())
 }

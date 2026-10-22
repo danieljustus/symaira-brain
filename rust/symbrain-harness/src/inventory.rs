@@ -236,7 +236,7 @@ fn add_binding(
                 path: path.to_string_lossy().into_owned(),
                 error: format!(
                     "parse configuration: {}",
-                    format_parse_error(harness, &snapshot.bytes, &error)
+                    format_parse_error(harness, &error)
                 ),
             });
             return;
@@ -254,35 +254,18 @@ fn add_binding(
     }
 }
 
-pub(crate) fn format_parse_error(
-    harness: &Harness,
-    original: &[u8],
-    error: &crate::HarnessError,
-) -> String {
+pub(crate) fn format_parse_error(harness: &Harness, error: &crate::HarnessError) -> String {
     let detail = match error {
-        crate::HarnessError::Json(message) => go_json_error_detail(original, message),
-        crate::HarnessError::Toml(message) => message.clone(),
+        crate::HarnessError::Json(message) | crate::HarnessError::Toml(message) => message.clone(),
         other => other.to_string(),
     };
+    parse_error_message(harness, &detail)
+}
+
+/// Go's `wrapParseError` text around a decoder's error message.
+pub(crate) fn parse_error_message(harness: &Harness, detail: &str) -> String {
     format!(
         "harness: {} config is not valid {}; refusing to edit a config symbrain cannot parse: parse {}: {detail}",
         harness.name, harness.format, harness.format
     )
-}
-
-fn go_json_error_detail(original: &[u8], message: &str) -> String {
-    let prefix = "expected `\"` at byte ";
-    if let Some(position) = message
-        .strip_prefix(prefix)
-        .and_then(|value| value.parse::<usize>().ok())
-    {
-        if position == 1 && original.starts_with(b"{not") {
-            return "invalid character 'n'".to_owned();
-        }
-        return original.get(position).map_or_else(
-            || message.to_owned(),
-            |byte| format!("invalid character '{}'", *byte as char),
-        );
-    }
-    message.to_owned()
 }
