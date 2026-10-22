@@ -1,0 +1,4 @@
+./scripts/run-go-oracle.sh "HEAD" run ./scripts/install-oracle -check
+PASS: install oracle deterministic check passed (21 cases)
+./scripts/run-go-oracle.sh "HEAD" run ./scripts/profile-remove-oracle -check
+PASS: profile remove oracle deterministic check passed (20 cases)

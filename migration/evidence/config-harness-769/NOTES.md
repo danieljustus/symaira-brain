@@ -62,8 +62,12 @@ that contains evidence files only. Evidence recorded earlier for `de6530b`
   and the exact redacted diagnostic, but not text-table column padding or JSON
   key order.
 * The oracle is wired into `rust-migration`, `rust-migration-macos` and
-  `rust-migration-windows` in `.github/workflows/ci.yml`; exact-head native
-  CI runs are still pending. This is not evidence of native three-OS CI.
+  `rust-migration-windows` in `.github/workflows/ci.yml`. Native receipt
+  (added in slice 3): the slice-1 merge commit `e328ca77e` (PR #901) passed
+  main-push CI run 39715748422 (workflow `CI`, conclusion success), with the
+  step "Go/Rust native config and harness process parity" green on
+  `rust-migration`, `rust-migration-macos` and `rust-migration-windows` and
+  `rust-init-native` green on ubuntu-latest, macos-15 and windows-2025.
 * The pre-change baseline measurements (exit 1 `start Go fallback` for every
   config flag shape, wrong bytes for `harness -h|--help|help`, ...) were taken
   in-session and not retained as a file.
@@ -140,11 +144,16 @@ tree (`candidate_dirty` false in the report). Go oracle unchanged:
   `symbrain-audit raw::tests::rejects_non_regular_targets_without_blocking`,
   which requires `SYMAIRA_EXTERNAL_RUNTIME_ROOT` on local macOS (crate not
   touched); the other 1114 pass.
-* Open: exact-head native Linux/macOS/Windows CI for the 924-case oracle is
-  pending (no three-OS claim). Windows-specific read-error wording (Go's
-  `GetFileAttributesEx`/`CreateFile` texts) is not oracle-compared locally;
-  POSIX-only cases are skipped there by the shared harness. `install`,
-  `uninstall` and `sync` residuals recorded in slice 1 were not re-measured.
+* Native receipt (added in slice 3): the exact PR head `9bf5ed337` (PR #903,
+  squash-merged as `1991381c1` with an identical tree) passed the full `CI`
+  workflow in pull-request run 39765433476 (conclusion success), including the
+  oracle step on `rust-migration`, `rust-migration-macos` and
+  `rust-migration-windows` and `rust-init-native` on ubuntu-latest, macos-15
+  and windows-2025. Windows-specific read-error wording (Go's
+  `GetFileAttributesEx`/`CreateFile` texts) is still not oracle-compared;
+  POSIX-only cases are skipped there by the shared harness. The `install`,
+  `uninstall` and `sync` residuals recorded in slice 1 were measured and
+  closed in slice 3.
 
 ## Review fixes: unbounded nesting and dotted keys (`*-deep-nesting-fix.*`)
 
@@ -170,3 +179,37 @@ tree (`candidate_dirty` false in the report). Go oracle unchanged:
   install oracles (the touched modules are `harness list`/parse paths only; the
   install paths share `json.rs::marshal`, covered by the golden tests in
   `harness_tests.rs`).
+
+
+# #769 slice 3 evidence (`--project` path shapes for install, uninstall and sync; local macOS arm64, Go 1.26.7)
+
+Candidate: `39b9b4609ea84acbcf8d27059820a449bff50667` (branch
+`issue/769-project-path-s3`, base `1991381c1`; code in `fa4d8207b` and
+`39b9b4609`, docs and this directory committed afterwards, so every `*-slice3-39b9b46.*`
+file was produced from a clean tree, `candidate_dirty` false). Go oracle
+unchanged: `0541e64a36d83bac8e5e4f8c4136033c03db83ae`.
+
+* `oracle-report-slice3-39b9b46.json` / `oracle-pass-slice3-39b9b46.log`:
+  `scripts/config-harness-oracle/run.sh` exit 0, 1915/1915 executed (940
+  earlier + 975 `cfgh-project-*`), `skipped` and `mismatched` empty, Rust
+  fallback absent. `--record-project-fixture` re-recorded
+  `rust/symbrain-cli/tests/fixtures/project_path_go_shapes.json` byte-identically
+  (820 cases).
+* `pre-fix-project-corpus-baseline-1991381.log`: the same project corpus
+  (without the 7 inline shapes, 936 cases) replayed against the unmodified base
+  binary: 543 cases differ from Go (55 of 78 shapes). This is the measured
+  "before" for the table in `MIGRATION-RUST.md`.
+* `negative-control-{symlink-root,sync-clean,json-invalid-byte}-oracle-fail-slice3-fa4d820.log`:
+  one-line mutations of the committed tree, filtered replays of the same
+  oracle cases (28/48, 5/42, 9/72 failing), restored with `git checkout`; run at
+  `fa4d8207b`, the Unix code of `39b9b4609` is identical (only the Windows
+  `physical_root` stub differs).
+* `cargo-test-symbrain-cli-harness-core-instructions-adapter-slice3-39b9b46.log`
+  (471 passed), `clippy-workspace-slice3-39b9b46.log`,
+  `setup-repair-oracle-slice3-39b9b46.log` (179 cases),
+  `install-profile-remove-oracle-check-slice3-39b9b46.log`,
+  `rust-differential-slice3-39b9b46.log` (504 cases),
+  `skills-argv-oracle-unittest-slice3-39b9b46.log` (26 tests). `cargo fmt
+  --check` and `make lint` exit 0 (not retained as files).
+* Windows/Linux: not run locally. The new oracle cases are `posix_only`
+  (skipped on Windows); see the residuals in `MIGRATION-RUST.md` (slice 3).
