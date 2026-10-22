@@ -1,0 +1,35 @@
+   Compiling symbrain-harness v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769b/rust/symbrain-harness)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.83s
+     Running tests/go_parse_errors.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/night-769b/debug/deps/go_parse_errors-dbb1e8f8428c3160)
+
+running 3 tests
+test parse_error_messages_use_go_wording ... FAILED
+test go_recorded_parse_results_are_reproduced_without_a_go_binary ... FAILED
+test deeply_nested_json_is_parsed_and_dropped_without_overflowing_the_stack ... ok
+
+failures:
+
+---- parse_error_messages_use_go_wording stdout ----
+
+thread 'parse_error_messages_use_go_wording' (39487771) panicked at rust/symbrain-harness/tests/go_parse_errors.rs:143:9:
+assertion `left == right` failed
+  left: String("harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' looking for begining of value")
+ right: "harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' looking for beginning of value"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+---- go_recorded_parse_results_are_reproduced_without_a_go_binary stdout ----
+
+thread 'go_recorded_parse_results_are_reproduced_without_a_go_binary' (39487770) panicked at rust/symbrain-harness/tests/go_parse_errors.rs:70:9:
+assertion `left == right` failed: "cfgh-parse-json-025-top-close-brace-json" ("top-close-brace")
+  left: Object {"error": String("harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' looking for begining of value"), "exists": Bool(true), "parsed": Bool(false), "servers": Array []}
+ right: Object {"error": String("harness: claude config is not valid json; refusing to edit a config symbrain cannot parse: parse json: invalid character '}' looking for beginning of value"), "exists": Bool(true), "parsed": Bool(false), "servers": Array []}
+
+
+failures:
+    go_recorded_parse_results_are_reproduced_without_a_go_binary
+    parse_error_messages_use_go_wording
+
+test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+error: test failed, to rerun pass `-p symbrain-harness --test go_parse_errors`
+cargo exit 101

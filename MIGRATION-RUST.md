@@ -501,13 +501,48 @@ reports are under `migration/evidence/config-harness-769/`. Local macOS only:
 the oracle is wired into the `rust-migration`, `rust-migration-macos` and
 `rust-migration-windows` jobs of `ci.yml`, but exact-head native
 Linux/macOS/Windows CI runs are still pending; no three-OS claim is made.
-Still routed to Go (#769 open): in `harness list`, any inventory `config.error`
-other than the frozen JSON message, including cleaned project paths that
-keep a leading `..` and symlinked or non-directory project roots (needs Go `encoding/json` Decoder and
-BurntSushi/toml error text and Go's project-path behaviour), and the
-setup/doctor/usage/memory/skills predicates. Intentional divergence: Go has no
+Still routed to Go (#769 open): the
+setup/doctor/usage/memory/skills predicates (`harness list` is closed by slice 2 below). Intentional divergence: Go has no
 `recover` in `harness health`, so an unrecovered probe panic aborts Go with
 exit 2 and a trace; Rust exits 1 with a fixed message (unit-tested via
 `run_probes`). Open residuals: `install`/`uninstall`/`sync` with a `..`-bearing
 `--project` still differ from Go, and a non-UTF-8 `-project` is displayed
 lossily (Unix only).
+
+### `harness list` config parse errors without a Go fallback (#769 slice 2 / D1)
+
+`harness list [--json]` no longer has a Go fallback: the `return None` after
+`list()` and the `go_json_inventory_error` filter (which accepted only the
+frozen `invalid character 'n'` error) are gone. Every inventory `config.error`
+is produced natively in `symbrain-harness`: `go_json.rs` ports the
+`encoding/json` `Decoder.Token` flow used by `decodeJSONObject`
+(`internal/harness/ordered_map.go`), `go_toml/` is a line-for-line port of the
+BurntSushi/toml v1.6.0 lexer and parser errors (`toml: line N (last key "k"):
+...`, datetime/number/redefinition errors), `go_read.rs` reproduces the safefs
+open/stat/size-limit wording and `open PATH: errno` texts, and `go_quote.rs`
+shares Go's `%q`/rune quoting. JSON output now escapes U+2028/U+2029 like Go
+and config paths are cleaned lexically like `filepath.Join`, which closes the
+leading-`..` and symlinked/non-directory project-root shapes previously routed
+to Go. Go has no JSON value-count, string-size or depth limit below the 8 MiB
+cap, so the older Rust-only limit tests were replaced.
+
+Evidence: the config-harness oracle (same pin `0541e64a…`) now replays 924 cases
+(324 slice-1 + 600 `cfgh-parse-*`: 108 JSON, 166 TOML codex configs, 5
+multi-file and 21 POSIX read-error shapes, each as table and `--json`, across
+claude, claude-desktop, cursor, opencode, antigravity and codex); 924/924
+match byte-for-byte on a clean tree with an absent `SYMBRAIN_GO_BINARY`.
+`--record-parse-fixture` produces `rust/symbrain-harness/tests/fixtures/go_parse_errors.json`
+(271 Go observations) that `go_parse_errors` replays without Go. Negative
+controls: a one-word JSON message mutation fails 46 oracle cases and two cargo
+tests, a TOML lexer message mutation fails 6 oracle cases and two cargo tests,
+an errno-text mutation fails 26 oracle cases. `cargo test -p symbrain-cli -p
+symbrain-harness -p symbrain-core --locked` 423 passed, workspace clippy
+`-D warnings`, fmt, the 504-case rust-differential and the profile-remove and
+install oracles pass; `symbrain-audit`'s environment-gated
+`rejects_non_regular_targets_without_blocking` needs
+`SYMAIRA_EXTERNAL_RUNTIME_ROOT` locally. Contract rows HAR-008 (updated) and
+HAR-009; reports under `migration/evidence/config-harness-769/*-slice2-9121b82.*`.
+Local macOS only: exact-head native Linux/macOS/Windows CI is pending and no
+three-OS claim is made; Windows OS-specific read-error wording is not compared.
+Still open under #769: the setup/doctor/usage/memory/skills Go routes and the
+slice-1 `install`/`uninstall`/`sync` project-path residuals (not re-measured).
