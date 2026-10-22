@@ -37,13 +37,13 @@ use std::time::Duration;
 pub(crate) fn configure(mut conn: Connection) -> Result<Store, StoreError> {
     // The shipped opener applies these three pragmas through its DSN on the
     // first ping, so their failures carry its doubled open wording.
-    conn.busy_timeout(Duration::from_secs(5))
-        .map_err(crate::store::go_open_failure)?;
+    let pragmas = |error| crate::store::go_open_failure(error, crate::store::OpenPhase::Pragmas);
+    conn.busy_timeout(Duration::from_secs(5)).map_err(pragmas)?;
     conn.execute_batch("PRAGMA foreign_keys=ON;")
-        .map_err(crate::store::go_open_failure)?;
+        .map_err(pragmas)?;
     // WAL transitions have lock-upgrade paths that skip SQLite's busy handler.
     // Retry only that autocommit pragma within the same five-second budget.
-    crate::wal_open::ensure_wal(&conn).map_err(crate::store::go_open_failure)?;
+    crate::wal_open::ensure_wal(&conn).map_err(pragmas)?;
     conn.execute_batch("PRAGMA secure_delete=ON;")?;
     // Reserve the writer before inspecting schema. A deferred read snapshot
     // cannot be upgraded after another opener commits (BUSY_SNAPSHOT517), and

@@ -762,18 +762,31 @@ prefix instead of the earlier Rust-only `symbrain memory: open database:`.
 exists but is not a regular file, are native: a fresh store has no rows to
 hydrate, so no Go admission applies; directories get `0700` and the new
 database `0600`, as in Go. Non-regular existing paths (`/dev/null`, a FIFO)
-are opened by SQLite without blocking and fail in the first WAL pragma; the
-native opener now maps that to Go's doubled wording with the primary code
-(`unable to open database file (14)` for `/dev/null`, `disk I/O error (10)` for
-a FIFO on macOS), so no routing exception is needed. A directory as database
+are opened by SQLite without blocking and fail while connecting; the native
+opener maps that to Go's doubled wording, so no routing exception is needed.
+The printed SQLite code depends on the environment, and Go and Rust agree in
+each one (live replay): `/dev/null` is `unable to open database file (14)` on
+the local macOS 27 host but `attempt to write a readonly database (1544)` on
+Linux as a non-root user (and on the GitHub macOS runner, where the failed
+check showed the masked `(8)`); a FIFO is `disk I/O error (10)` on macOS and
+Linux. The rule behind the codes: the shipped driver enables SQLite extended
+result codes only after `sqlite3_open_v2` returned, so a failure inside the
+open call (FIFO header read, directory as database) prints the primary code,
+while a failure of the DSN pragmas that follow (busy-timeout, foreign keys,
+WAL) prints the extended code SQLite returned (`1544` =
+`SQLITE_READONLY_DIRECTORY`). `go_open_failure` takes the phase for this
+reason; `rusqlite` enables extended codes for the open call as well, so the
+open phase masks to the primary code. Native `cargo test` pins only the shape
+`<text> (<code>)`, never a code list. A directory as database
 path keeps `unable to open database file (14)`. A regular non-SQLite file under
 `set`/`query-log` now also prints Go's doubled `file is not a database (26)`.
-The primary-code rendering is proven only for these observed cases (and
-read-only DELETE-mode `(8)`, malformed `(11)`). Go prints extended codes or a
-suffix in other connect-phase cases, which are not claimed: a locked database
-gives Go `(5) (SQLITE_BUSY)` versus Rust `(5)` (Rust also waits about 11 s
-against Go's 5 s), and a WAL database in a read-only directory gives Go
-extended code `1544` versus Rust `8`.
+The code rendering is proven only for these observed cases (and read-only
+DELETE-mode `(8)`, malformed `(11)`). Go prints a suffix in other
+connect-phase cases, which is not claimed: a locked database gives Go
+`(5) (SQLITE_BUSY)` versus Rust `(5)` (Rust also waits about 11 s against Go's
+5 s). A WAL database in a read-only directory is a pragma-phase failure like
+Linux `/dev/null`, so the phase rule above now renders its extended code
+`1544` too; that scenario is not in the replayed families.
 
 Evidence: `scripts/memory-cli-oracle/creation_cases.py` (new `store_creation`
 family of `replay.py`, part of `--family all`, so the existing three-OS
@@ -783,9 +796,12 @@ modes) between the immutable Go `dcddcef0`
 CLI and the Rust CLI with an absent `SYMBRAIN_GO_BINARY`: stdout, stderr, exit
 and the full created tree including permission bits. The original 34 matched on macOS/APFS and on
 Linux/ext4-overlay in Docker `rust:1.98-bookworm` as `--user 1000:1000` against the
-Go oracle cross-built for linux/arm64; the review-fix additions (14 non-regular /
-non-SQLite scenarios, 3 macOS root-owned-symlink scenarios) are 51/51 on macOS with
-Go `go1.26.7` and are LINUX-UNVERIFIED locally (see residuals). Go
+Go oracle. After the CI failure of the first review fix (Linux and GitHub macOS
+printed `(8)` for `/dev/null` where the test expected 14 or 10) the Linux run
+of the whole family found a real parity bug: Go prints `(1544)` there, Rust
+`(8)`, six scenarios differing (42/48). The pragma-phase extended-code rule above
+fixes it: `store_creation` is 48/48 on Linux/arm64 in Docker (`go1.26.7`,
+`--user 1000:1000`) and 51/51 on macOS; `--family all` is 672/672 on macOS. Go
 itself does not differ between the two platforms except for a symlink's own
 mode (0755 APFS, 0777 ext4), which is excluded from the comparison; no per-OS
 fixtures are needed because the live Go replay runs on every runner. Before the
@@ -794,7 +810,7 @@ directories instead of `0700`, and Rust-only error text). Negative controls
 (`creation_controls.py`, wired into CI): three real-process mutants wrapping the
 native CLI (directory mode `0700`->`0755`, one stderr byte, a success exit
 rewritten to 7) are each rejected by the replay through exactly their own field
-(15, 34 and 13 rejected cases). `rust/symbrain-cli/tests/memory_store_creation.rs`
+(18, 51 and 15 rejected of 51 cases on macOS). `rust/symbrain-cli/tests/memory_store_creation.rs`
 holds the Go-recorded bytes and modes natively for plain `cargo test`. The
 retired `new-file` delegation case of `write_boundaries.py` is removed because
 the route is now native. Contract row MEM-CLI-003.
@@ -815,11 +831,24 @@ database (26)` for `set`/`query-log`) are proven byte-equal. Other failures are
 NOT claimed: `list`/`rules`/`delete`/`search` on an existing non-SQLite regular
 file still go to Go through the admission gate, busy/locked, read-only-media,
 later-phase (secure-delete, migration) and Windows error wording are not
-compared, and the FIFO/`/dev/null` codes were only observed on macOS.
+compared. The FIFO/`/dev/null` codes are observed on macOS 27 and Linux/arm64
+only; Windows has no such scenario.
 
 Local evidence only; exact-head native Linux/macOS/Windows CI is pending. The
 Windows branch of `safe_mkdir_all` is a code port of the Windows `SafeMkdirAll`
-and its error wording is not compared. Still routed to Go (#769 open):
+and its error wording is not compared. Windows CI fix: the first port inspected
+every `std::path::Component`, including the volume prefix. `canonicalize`
+returns `\\?\D:\...` there, and a metadata call on the bare `\\?\D:` names the
+volume device rather than its root directory, so it was not a directory and
+`activity status` (and every other native `Store::open` on a canonicalized
+path) failed with `path is not a regular file`. Go's `SafeMkdirAll` starts at
+`VolumeName + separator` and walks only the names below it; the port now plans
+the walk in the pure `walk_plan` (prefix/root parts are never inspected, `.`/`..`
+follow the lexical clean), covered by platform-independent unit tests and
+type-checked for `x86_64-pc-windows-msvc`. The cause is derived from the
+std/Win32 semantics and the Go source, not observed on a Windows host; the
+activity oracle test now prints exit, stdout and stderr on any mismatch so a
+remaining Windows failure is diagnosable from the CI log. Still routed to Go (#769 open):
 `memory serve`, `memory sync <args>`, `set` with unsupported write shapes,
 `search` with `prefilter`, reads/deletes on a database outside the native
 decoder domain, and the usage/skills/setup/doctor routes.

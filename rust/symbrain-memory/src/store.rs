@@ -10,21 +10,42 @@ use crate::model::{Memory, Store, StoreError};
 use crate::rows::{row_memory, row_memory_score};
 const MAX_LIST_RESULTS: usize = 1000;
 
+/// Which part of the shipped opener's connect phase failed.
+///
+/// The shipped driver switches on SQLite extended result codes only after
+/// `sqlite3_open_v2` returned, so a failure inside the open call (header read
+/// of a FIFO, a directory as database) reports the primary code, while a
+/// failure of the DSN pragmas that follow (busy-timeout, foreign keys, WAL)
+/// reports the extended code SQLite returned (#769). `rusqlite` enables
+/// extended codes for the open call too, so the open phase masks them.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum OpenPhase {
+    /// `sqlite3_open_v2` itself.
+    Open,
+    /// The pragmas the shipped DSN applies on its first ping.
+    Pragmas,
+}
+
 /// Maps a failure of the shipped opener's connect phase (file open plus the
 /// busy-timeout, foreign-key and WAL pragmas its DSN applies on the first
-/// ping) to the opener's doubled wording with the primary SQLite code. Other
-/// errors keep their native shape.
-pub(crate) fn go_open_failure(error: rusqlite::Error) -> StoreError {
+/// ping) to the opener's doubled wording with the code the shipped driver
+/// prints for `phase`. Other errors keep their native shape.
+pub(crate) fn go_open_failure(error: rusqlite::Error, phase: OpenPhase) -> StoreError {
     const OPEN: &str = "failed to open sqlite database";
     match error {
         rusqlite::Error::SqliteFailure(failure, _) => {
             // The shipped driver prints the primary code's fixed description,
             // not the connection message that may append the offending path.
-            // Proven only for the replayed cases (8, 10, 11, 14, 26); Go adds
-            // extended codes or a `(SQLITE_BUSY)` suffix elsewhere (#769).
+            // Proven only for the replayed cases (8, 10, 11, 14, 26, and the
+            // Linux `/dev/null` extended code 1544); Go adds a `(SQLITE_BUSY)`
+            // suffix elsewhere (#769).
             let primary = failure.extended_code & 0xff;
             let detail = rusqlite::ffi::code_to_str(primary);
-            StoreError::Io(format!("{OPEN}: {OPEN}: {detail} ({primary})"))
+            let code = match phase {
+                OpenPhase::Open => primary,
+                OpenPhase::Pragmas => failure.extended_code,
+            };
+            StoreError::Io(format!("{OPEN}: {OPEN}: {detail} ({code})"))
         }
         other => StoreError::Sql(other),
     }
@@ -43,7 +64,8 @@ impl Store {
                 "{OPEN}: failed to create database directory: {error}"
             ))
         })?;
-        let connection = Connection::open(path).map_err(go_open_failure)?;
+        let connection =
+            Connection::open(path).map_err(|error| go_open_failure(error, OpenPhase::Open))?;
         let store = Self::configure(connection)?;
         #[cfg(unix)]
         crate::migration::secure_files(path)?;
@@ -328,26 +350,57 @@ mod tests {
 
 #[cfg(test)]
 mod open_failure_tests {
-    use super::go_open_failure;
+    use super::{OpenPhase, go_open_failure};
     use rusqlite::ffi;
+
+    fn failure(extended: i32) -> rusqlite::Error {
+        rusqlite::Error::SqliteFailure(
+            ffi::Error::new(extended),
+            Some("connection message with /some/path".to_owned()),
+        )
+    }
 
     #[test]
     fn connect_phase_failures_use_the_shipped_doubled_wording() {
-        for (extended, text) in [
-            (ffi::SQLITE_CANTOPEN, "unable to open database file (14)"),
-            (ffi::SQLITE_IOERR_FSTAT, "disk I/O error (10)"),
-            (ffi::SQLITE_NOTADB, "file is not a database (26)"),
+        const WRAP: &str = "failed to open sqlite database: failed to open sqlite database: ";
+        // (extended code SQLite returned, open-phase text, pragma-phase text)
+        for (extended, open, pragmas) in [
+            (
+                ffi::SQLITE_CANTOPEN,
+                "unable to open database file (14)",
+                "unable to open database file (14)",
+            ),
+            // FIFO header read fails inside `sqlite3_open_v2`: Go prints 10.
+            (
+                ffi::SQLITE_IOERR_READ,
+                "disk I/O error (10)",
+                "disk I/O error (266)",
+            ),
+            (
+                ffi::SQLITE_NOTADB,
+                "file is not a database (26)",
+                "file is not a database (26)",
+            ),
+            // Linux `/dev/null`: the WAL pragma fails; Go prints the
+            // extended code 1544.
+            (
+                ffi::SQLITE_READONLY_DIRECTORY,
+                "attempt to write a readonly database (8)",
+                "attempt to write a readonly database (1544)",
+            ),
         ] {
-            let error = rusqlite::Error::SqliteFailure(
-                ffi::Error::new(extended),
-                Some("connection message with /some/path".to_owned()),
+            assert_eq!(
+                go_open_failure(failure(extended), OpenPhase::Open).to_string(),
+                format!("{WRAP}{open}"),
+                "open phase {extended}"
             );
             assert_eq!(
-                go_open_failure(error).to_string(),
-                format!("failed to open sqlite database: failed to open sqlite database: {text}")
+                go_open_failure(failure(extended), OpenPhase::Pragmas).to_string(),
+                format!("{WRAP}{pragmas}"),
+                "pragma phase {extended}"
             );
         }
-        let other = go_open_failure(rusqlite::Error::QueryReturnedNoRows);
+        let other = go_open_failure(rusqlite::Error::QueryReturnedNoRows, OpenPhase::Open);
         assert!(matches!(other, crate::model::StoreError::Sql(_)));
     }
 }

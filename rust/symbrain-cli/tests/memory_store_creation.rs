@@ -185,13 +185,23 @@ fn read_only_parent_reports_directory_and_file_errors() {
     std::fs::set_permissions(&ro, std::fs::Permissions::from_mode(0o700)).expect("cleanup");
 }
 
+/// Splits `<prefix><description> (<code>)\n` into its description and code.
+fn description_and_code(stderr: &str) -> Option<(&str, u32)> {
+    let body = stderr.strip_suffix(")\n")?;
+    let (description, code) = body.rsplit_once(" (")?;
+    Some((description, code.parse().ok()?))
+}
+
 #[test]
 fn non_regular_database_paths_report_the_shipped_doubled_open_error() {
-    // Go opens FIFOs and `/dev/null` without blocking and fails in the first
-    // WAL pragma: macOS records `unable to open database file (14)` for
-    // `/dev/null` and `disk I/O error (10)` for a FIFO (the live Go replay
-    // compares the exact bytes on every runner); no verb may fall back to Go
-    // (absent here) or print a bare SQLite message.
+    // Go opens FIFOs and `/dev/null` without blocking and fails while
+    // connecting; no verb may fall back to Go (absent here) or print a bare
+    // SQLite message. The SQLite code is environment-dependent (`/dev/null`:
+    // `unable to open database file (14)` on macOS, `attempt to write a
+    // readonly database (1544)` on Linux as a non-root user), so this test
+    // pins only the shape; the live Go replay (`store_creation` family of
+    // `scripts/memory-cli-oracle/replay.py`) compares the exact bytes on
+    // every runner.
     let (_guard, root) = temp();
     let fifo = root.join("fifo");
     let status = Command::new("/usr/bin/mkfifo")
@@ -214,12 +224,31 @@ fn non_regular_database_paths_report_the_shipped_doubled_open_error() {
             let prefix = format!("symbrain memory {verb}: open memory database: {wrap}");
             assert_eq!(result.code, 1, "{verb} {database}: {}", result.stderr);
             assert_eq!(result.stdout, "", "{verb} {database}");
+            let detail = result
+                .stderr
+                .strip_prefix(&prefix)
+                .unwrap_or_else(|| panic!("{verb} {database}: {}", result.stderr));
+            let (description, code) = description_and_code(detail)
+                .unwrap_or_else(|| panic!("{verb} {database}: not `<text> (<code>)`: {detail:?}"));
             assert!(
-                result.stderr.starts_with(&prefix)
-                    && (result.stderr.ends_with(" (14)\n") || result.stderr.ends_with(" (10)\n")),
-                "{verb} {database}: {}",
-                result.stderr
+                !description.is_empty() && !description.contains([':', '<']) && code > 0,
+                "{verb} {database}: {detail:?}"
             );
         }
+    }
+}
+
+#[test]
+fn description_and_code_parses_only_the_shipped_shape() {
+    assert_eq!(
+        description_and_code("disk I/O error (10)\n"),
+        Some(("disk I/O error", 10))
+    );
+    assert_eq!(
+        description_and_code("attempt to write a readonly database (1544)\n"),
+        Some(("attempt to write a readonly database", 1544))
+    );
+    for bad in ["", "no code\n", "text (x)\n", "text (1)", "(1)\n"] {
+        assert_eq!(description_and_code(bad), None, "{bad:?}");
     }
 }
