@@ -1,0 +1,527 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling libc v0.2.189
+   Compiling unicode-ident v1.0.24
+   Compiling quote v1.0.47
+   Compiling cfg-if v1.0.4
+   Compiling bitflags v2.13.1
+   Compiling itoa v1.0.18
+   Compiling core-foundation-sys v0.8.7
+   Compiling find-msvc-tools v0.1.12
+   Compiling errno v0.3.14
+   Compiling shlex v2.0.1
+   Compiling syn v3.0.5
+   Compiling once_cell v1.21.4
+   Compiling serde_core v1.0.229
+   Compiling jobserver v0.1.35
+   Compiling rustix v1.1.4
+   Compiling cc v1.4.5
+   Compiling serde v1.0.229
+   Compiling memchr v2.8.3
+   Compiling pkg-config v0.3.34
+   Compiling subtle v2.6.1
+   Compiling synstructure v0.14.0
+   Compiling zmij v1.0.23
+   Compiling foldhash v0.2.0
+   Compiling serde_json v1.0.151
+   Compiling hashbrown v0.17.1
+   Compiling bytes v1.12.1
+   Compiling cmake v0.1.58
+   Compiling serde_derive v1.0.229
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zerofrom v0.1.8
+   Compiling stable_deref_trait v1.2.1
+   Compiling autocfg v1.5.1
+   Compiling version_check v0.9.5
+   Compiling fs_extra v1.3.0
+   Compiling dunce v1.0.5
+   Compiling num-traits v0.2.19
+   Compiling generic-array v0.14.7
+   Compiling aws-lc-sys v0.45.0
+   Compiling yoke v0.8.3
+   Compiling getrandom v0.3.3
+   Compiling equivalent v1.0.2
+   Compiling indexmap v2.14.2
+   Compiling zerovec-derive v0.11.6
+   Compiling ipnet v2.12.2
+   Compiling typenum v1.20.1
+   Compiling zerovec v0.11.8
+   Compiling displaydoc v0.2.7
+   Compiling ring v0.17.14
+   Compiling iana-time-zone v0.1.65
+   Compiling aws-lc-rs v1.18.1
+   Compiling pin-project-lite v0.2.17
+   Compiling zeroize v1.9.0
+   Compiling winnow v1.0.4
+   Compiling fastrand v2.5.0
+   Compiling chrono v0.4.45
+   Compiling tempfile v3.27.0
+   Compiling toml_parser v1.1.3+spec-1.1.0
+   Compiling http v1.5.0
+   Compiling futures-core v0.3.34
+   Compiling io-lifetimes v3.0.1
+   Compiling toml_writer v1.1.2+spec-1.1.0
+   Compiling io-lifetimes v2.0.4
+   Compiling toml_datetime v1.1.1+spec-1.1.0
+   Compiling toml_edit v0.25.13+spec-1.1.0
+   Compiling rustls-pki-types v1.15.1
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling signal-hook-registry v1.4.8
+   Compiling getrandom v0.2.17
+   Compiling io-extras v0.19.0
+   Compiling untrusted v0.9.0
+   Compiling smallvec v1.16.0
+   Compiling httparse v1.10.1
+   Compiling digest v0.10.7
+   Compiling tinystr v0.8.4
+   Compiling tokio-macros v2.7.2
+   Compiling socket2 v0.6.5
+   Compiling mio v1.2.3
+   Compiling litemap v0.8.3
+   Compiling writeable v0.6.4
+   Compiling log v0.4.34
+   Compiling rustls v0.23.46
+   Compiling cap-primitives v4.0.3
+   Compiling percent-encoding v2.3.2
+   Compiling icu_locale_core v2.3.0
+   Compiling tokio v1.53.1
+   Compiling fs-set-times v0.20.3
+   Compiling zerotrie v0.2.5
+   Compiling potential_utf v0.1.6
+   Compiling ambient-authority v0.0.2
+   Compiling cap-std v4.0.3
+   Compiling utf8_iter v1.0.4
+   Compiling icu_properties_data v2.3.0
+   Compiling icu_normalizer_data v2.3.0
+   Compiling maybe-owned v0.3.4
+   Compiling icu_collections v2.3.0
+   Compiling icu_provider v2.3.1
+   Compiling futures-macro v0.3.34
+   Compiling cpufeatures v0.2.17
+   Compiling futures-task v0.3.34
+   Compiling slab v0.4.12
+   Compiling base64 v0.23.1
+   Compiling futures-util v0.3.34
+   Compiling sha2 v0.10.9
+   Compiling symbrain-core v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-core)
+   Compiling http-body v1.1.0
+   Compiling system-configuration-sys v0.6.0
+   Compiling cap-fs-ext v4.0.3
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_properties v2.3.0
+   Compiling try-lock v0.2.5
+   Compiling tower-service v0.3.3
+   Compiling want v0.3.1
+   Compiling futures-channel v0.3.34
+   Compiling tracing-core v0.1.36
+   Compiling core-foundation v0.9.4
+   Compiling idna_adapter v1.2.2
+   Compiling httpdate v1.0.3
+   Compiling atomic-waker v1.1.2
+   Compiling idna v1.1.0
+   Compiling hyper v1.11.1
+   Compiling system-configuration v0.7.0
+   Compiling tracing v0.1.44
+   Compiling ureq-proto v0.6.2
+   Compiling form_urlencoded v1.2.2
+   Compiling webpki-roots v1.0.10
+   Compiling sync_wrapper v1.0.2
+   Compiling core-foundation v0.10.1
+   Compiling security-framework-sys v2.17.0
+   Compiling base64 v0.22.1
+   Compiling vcpkg v0.2.15
+   Compiling utf8-zero v0.8.1
+   Compiling thiserror v2.0.20
+   Compiling tower-layer v0.3.3
+   Compiling tower v0.5.3
+   Compiling libsqlite3-sys v0.38.2
+   Compiling security-framework v3.7.0
+   Compiling url v2.5.8
+   Compiling hyper-util v0.1.21
+   Compiling hmac v0.12.1
+   Compiling thiserror-impl v2.0.20
+   Compiling aho-corasick v1.1.5
+   Compiling regex-syntax v0.8.11
+   Compiling crc32fast v1.5.1
+   Compiling cfg_aliases v0.2.2
+   Compiling nix v0.31.3
+   Compiling regex-automata v0.4.18
+   Compiling tower-http v0.6.11
+   Compiling symbrain-policy v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-policy)
+   Compiling http-body-util v0.1.5
+   Compiling futures-sink v0.3.34
+   Compiling ryu v1.0.23
+   Compiling simd-adler32 v0.3.10
+   Compiling libyaml-rs v0.3.0
+   Compiling adler2 v2.0.1
+   Compiling miniz_oxide v0.9.1
+   Compiling yaml_serde v0.10.7
+   Compiling tokio-util v0.7.19
+   Compiling regex v1.13.1
+   Compiling symaira-core-secretref v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+   Compiling symbrain-harness v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-harness)
+   Compiling hashlink v0.12.1
+   Compiling fallible-iterator v0.3.0
+   Compiling symaira-core-exit v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+   Compiling fallible-streaming-iterator v0.1.9
+   Compiling rusqlite v0.40.2
+   Compiling flate2 v1.1.10
+   Compiling symbrain-activity v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-activity)
+   Compiling hkdf v0.12.4
+   Compiling symbrain-audit v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-audit)
+   Compiling symbrain-mcp v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-mcp)
+   Compiling filetime v0.2.29
+   Compiling fs2 v0.4.3
+   Compiling typed-path v0.12.3
+   Compiling signal-hook v0.3.18
+   Compiling symbrain-skills v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-skills)
+   Compiling zip v9.0.4
+   Compiling symbrain-broker v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-broker)
+   Compiling tar v0.4.46
+   Compiling symbrain-guard-core v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-guard-core)
+   Compiling symbrain-catalog v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-catalog)
+   Compiling symbrain-instructions v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-instructions)
+   Compiling symbrain-patterns v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-patterns)
+   Compiling symbrain-adapter v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-adapter)
+   Compiling symguard-cli v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symguard-cli)
+   Compiling rustls-webpki v0.103.16
+   Compiling tokio-rustls v0.26.6
+   Compiling ureq v3.4.1
+   Compiling rustls-platform-verifier v0.7.1
+   Compiling hyper-rustls v0.27.10
+   Compiling reqwest v0.13.4
+   Compiling symbrain-usage v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-usage)
+   Compiling symaira-core-llm v0.0.0 (https://github.com/danieljustus/symaira-corekit?rev=04d1411adb57aa602b992509121011aa7666ff1a#04d1411a)
+   Compiling symbrain-managed v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-managed)
+   Compiling symbrain-memory v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-memory)
+   Compiling symbrain-gateway v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-gateway)
+   Compiling symbrain-cli v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-cli)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 52.04s
+PASS config_path
+PASS config_path_extra
+PASS config_path_unexpected_double
+PASS config_path_unexpected_single
+PASS config_path_unexpected_terminator
+PASS config_path_no_env
+PASS config_path_relative_xdg
+PASS config_get_no_file
+PASS config_get_no_file_key
+PASS config_get_raw_ff_key
+PASS config_get_raw_latin1_key
+PASS config_get_raw_nel_key
+PASS config_get_raw_nbsp_key
+PASS config_get_raw_zwsp_key
+PASS config_get_raw_line_separator_key
+PASS config_get_raw_bom_key
+PASS config_get_raw_quote_backslash_control_key
+PASS config_get_unicode_key
+PASS config_get_unicode_replacement_key
+PASS config_get_unicode_emoji_key
+PASS config_get_unicode_cjk_key
+PASS config_get_unicode_nel_key
+PASS config_get_unicode_nbsp_key
+PASS config_get_unicode_zwsp_key
+PASS config_get_unicode_line_separator_key
+PASS config_get_unicode_bom_key
+PASS config_get_whole_file
+PASS config_get_whole_file_malformed
+PASS config_get_terminator
+PASS config_get_string
+PASS config_get_bool_true
+PASS config_get_bool_false
+PASS config_get_int
+PASS config_get_dotted_three
+PASS config_get_table
+PASS config_get_table_nested
+PASS config_get_inline_table
+PASS config_get_inline_table_leaf
+PASS config_get_list
+PASS config_get_empty_list
+PASS config_get_empty_table
+PASS config_get_missing_key
+PASS config_get_malformed_key
+PASS config_get_extra_arg
+PASS config_get_raw_extra_arg
+PASS config_get_extra_arg_flag
+PASS config_get_key_flag
+PASS config_get_home_variant
+PASS config_get_unreadable_file
+PASS config_get_unreadable_file_key
+PASS config_get_float_pos_zero
+PASS config_get_float_neg_zero
+PASS config_get_float_pos_inf
+PASS config_get_float_pos_inf_plus
+PASS config_get_float_neg_inf
+PASS config_get_float_nan
+PASS config_get_float_pos_nan
+PASS config_get_float_neg_nan
+PASS config_get_float_large
+PASS config_get_float_large2
+PASS config_get_float_small
+PASS config_get_float_small2
+PASS config_get_float_large_neg
+PASS config_get_float_large2_neg
+PASS config_get_float_small_neg
+PASS config_get_float_small2_neg
+PASS config_get_float_sci1
+PASS config_get_float_sci2
+PASS config_get_float_pi
+PASS config_get_float_boundary_below_large
+PASS config_get_float_boundary_above_small
+PASS config_get_float_boundary_below_small
+PASS config_get_odt_z
+PASS config_get_odt_z_lower
+PASS config_get_odt_space_z
+PASS config_get_odt_frac_micro_z
+PASS config_get_odt_frac_milli_z
+PASS config_get_odt_frac_nano_z
+PASS config_get_odt_frac_trailing_z
+PASS config_get_odt_frac_zero_z
+PASS config_get_odt_no_sec_z
+PASS config_get_odt_pos_offset
+PASS config_get_odt_neg_offset
+PASS config_get_odt_offset_zero
+PASS config_get_odt_offset_neg_zero
+PASS config_get_odt_space_offset
+PASS config_get_odt_frac_micro_offset
+PASS config_get_odt_frac_half_hour_offset
+PASS config_get_odt_frac_trailing_offset
+PASS config_get_odt_no_sec_offset
+PASS config_get_ldt
+PASS config_get_ldt_space
+PASS config_get_ldt_lower
+PASS config_get_ldt_frac_micro
+PASS config_get_ldt_frac_milli
+PASS config_get_ldt_frac_nano
+PASS config_get_ldt_frac_trailing
+PASS config_get_ldt_frac_zero
+PASS config_get_ldt_no_sec
+PASS config_get_ld
+PASS config_get_ld_today
+PASS config_get_ld_year_one
+PASS config_get_lt
+PASS config_get_lt_frac_micro
+PASS config_get_lt_frac_milli
+PASS config_get_lt_frac_nano
+PASS config_get_lt_frac_trailing
+PASS config_get_lt_frac_zero
+PASS config_get_lt_no_sec
+PASS config_set_fallback (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_no_args
+PASS config_set_one_arg
+PASS config_set_three_args
+PASS config_set_empty_key
+PASS config_set_new_string (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_true (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_false (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_1 (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_0 (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_t (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_f (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_T (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_F (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_TRUE (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_FALSE (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_True (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_bool_False (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_int (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_int_neg (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_string_float (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_nested (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_new_deep_nested (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_existing_update (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_existing_parent_mode (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_existing_sample (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_terminator (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_type_conflict
+PASS config_set_malformed_existing
+PASS config_set_unreadable_file
+PASS config_unrelated_subcommand_fallback
+PASS config_no_subcommand_fallback
+PASS config_set_raw_ff_key (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_raw_latin1_key (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_raw_dotted_key (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_raw_type_conflict
+PASS config_set_inline_leaf (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_inline_new_key (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_nested_inline_leaf (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_nested_inline_new_key (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_sample_nested_inline (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_floats_preserve_existing (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_floats_update_neg_zero (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_floats_update_large (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_datetime_preserve_existing (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_complex_preserve (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_quoted_key_update (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_array_of_tables_add_field
+PASS config_set_symlink (stdout, stderr, exit code, fs manifest/modes)
+PASS config_set_readonly_dir
+PASS harness_list_empty
+PASS harness_list_empty_json
+PASS harness_list_installed
+PASS harness_list_installed_json
+PASS harness_list_foreign_json
+PASS harness_list_malformed_json
+PASS harness_list_unknown_flag
+PASS harness_unknown_subcommand
+PASS harness_health_empty_json
+PASS harness_health_malformed_json
+PASS harness_health_malformed_json_response
+ACCEPTED HAR-007 harness_health_missing_command (validated versioned health contract)
+PASS harness_health_missing_command
+ACCEPTED HAR-007 harness_health_missing_command_json (validated versioned health contract)
+PASS harness_health_missing_command_json
+PASS harness_health_filter_json
+PASS harness_health_unknown_harness
+PASS cfgh-config-0 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-1 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-2 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-3 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-4 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-5 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-6 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-7 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-8 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-9 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-10 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-11 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-12 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-13 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-14 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-15 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-16 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-17 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-18 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-19 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-20 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-21 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-22 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-23 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-24 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-25 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-26 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-27 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-28 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-29 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-30 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-config-31 (stdout, stderr, exit code, fs manifest/modes)
+PASS cfgh-harness-0
+PASS cfgh-harness-1
+PASS cfgh-harness-2
+PASS cfgh-harness-3
+PASS cfgh-harness-4
+PASS cfgh-harness-5
+PASS cfgh-harness-6
+PASS cfgh-harness-7
+PASS cfgh-harness-8
+PASS cfgh-harness-9
+PASS cfgh-harness-10
+PASS cfgh-harness-11
+PASS cfgh-list-0
+PASS cfgh-list-1
+PASS cfgh-list-2
+PASS cfgh-list-3
+PASS cfgh-list-4
+PASS cfgh-list-5
+PASS cfgh-list-6
+PASS cfgh-list-7
+PASS cfgh-list-8
+PASS cfgh-list-9
+PASS cfgh-list-10
+PASS cfgh-list-11
+PASS cfgh-list-12
+PASS cfgh-list-13
+PASS cfgh-list-14
+PASS cfgh-list-15
+PASS cfgh-list-16
+PASS cfgh-list-17
+PASS cfgh-list-18
+PASS cfgh-list-19
+PASS cfgh-list-20
+PASS cfgh-list-21
+PASS cfgh-list-22
+PASS cfgh-list-23
+PASS cfgh-list-24
+PASS cfgh-list-25
+PASS cfgh-list-26
+PASS cfgh-list-27
+PASS cfgh-list-28
+PASS cfgh-list-29
+PASS cfgh-list-30
+PASS cfgh-health-0
+PASS cfgh-health-1
+PASS cfgh-health-2
+PASS cfgh-health-3
+PASS cfgh-health-4
+PASS cfgh-health-5
+PASS cfgh-health-6
+PASS cfgh-health-7
+PASS cfgh-health-8
+PASS cfgh-health-9
+PASS cfgh-health-10
+PASS cfgh-health-11
+PASS cfgh-health-12
+PASS cfgh-health-13
+PASS cfgh-health-14
+PASS cfgh-health-15
+PASS cfgh-health-16
+PASS cfgh-health-17
+PASS cfgh-health-18
+PASS cfgh-health-19
+PASS cfgh-health-20
+PASS cfgh-health-21
+PASS cfgh-health-22
+PASS cfgh-health-23
+PASS cfgh-health-24
+PASS cfgh-health-25
+PASS cfgh-health-26
+PASS cfgh-health-27
+PASS cfgh-health-28
+PASS cfgh-health-29
+PASS cfgh-health-30
+PASS cfgh-health-31
+PASS cfgh-health-32
+PASS cfgh-health-33
+PASS cfgh-health-34
+PASS cfgh-health-35
+PASS cfgh-health-36
+PASS cfgh-health-37
+PASS cfgh-health-38
+PASS cfgh-health-39
+PASS cfgh-health-40
+PASS cfgh-seeded-health-0
+PASS cfgh-seeded-health-1
+PASS cfgh-seeded-health-2
+PASS cfgh-seeded-health-3
+PASS cfgh-seeded-health-4
+PASS cfgh-seeded-health-5
+PASS cfgh-seeded-health-6
+PASS cfgh-seeded-health-7
+PASS cfgh-seeded-health-8
+PASS cfgh-seeded-health-9
+PASS cfgh-seeded-health-10
+PASS cfgh-seeded-health-11
+PASS cfgh-seeded-health-12
+PASS cfgh-seeded-health-13
+PASS cfgh-seeded-health-14
+PASS cfgh-seeded-health-15
+PASS cfgh-seeded-health-16
+PASS cfgh-seeded-health-17
+PASS cfgh-seeded-health-18
+PASS cfgh-seeded-health-19
+PASS cfgh-seeded-health-20
+PASS cfgh-seeded-health-21
+PASS cfgh-seeded-list-0
+PASS cfgh-seeded-list-1
+PASS cfgh-seeded-list-2
+PASS cfgh-seeded-list-3
+PASS cfgh-seeded-list-4
+PASS cfgh-seeded-list-5
+PASS cfgh-seeded-list-6
+PASS cfgh-seeded-list-7
+PASS cfgh-seeded-list-8
+PASS cfgh-seeded-list-9
+PASS cfgh-seeded-list-10
+PASS cfgh-seeded-list-11
+324 parity cases passed

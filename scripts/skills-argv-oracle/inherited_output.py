@@ -32,9 +32,11 @@ GUARD_CORE_HASH = "4df524358123e41fb3a7959de3dd3064e477dd738bf8b36faf4cec961dc77
 SOURCE_HASHES = {
     **MEMORY_HASHES,
     # Reviewed after #889: only go_fallback_binary changed (PATHEXT-aware lookup).
-    # Reviewed after #765: only the `setup`/`doctor` Go-fallback dispatch arms
-    # were removed. The early output blocks are still byte-equal to the parent.
-    CLI: "02e3bb0cfc35eb6f22156cbe758660547a1e0b22b3c2dbab98bb8518601d6e92",
+    # Reviewed after #769 slice 1 and #765 together: only `mod go_flags;`, the
+    # `config` dispatch arm (now always native) and the removed `setup`/`doctor`
+    # Go-fallback dispatch arms changed. The early output blocks are still
+    # byte-equal to the parent.
+    CLI: "2f9b7bb6f25ca1ac09315a7aa3a703f722b07ad11c79d9b2c800bc5c193ebdb8",
     CORE: GUARD_CORE_HASH,
 }
 PROFILES = {

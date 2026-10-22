@@ -191,6 +191,16 @@ must still succeed at the published head before acceptance. The conservative
 credential-source fallback restrictions documented in `usage_cli.rs` remain;
 this does not complete the broader #768 cutover.
 
+A first #768 increment removes the Kimi CLI credential file-access gate on
+macOS only: 16 Go-generated cases in
+`rust/symbrain-usage/tests/fixtures/kimi_file_access_oracle.json` (symlink,
+directory, ENOTDIR, permission denied, oversize, in-root relative symlink)
+match native routing and Go's configured/auth status. Linux keeps the Go route
+because cap-std's `openat2(RESOLVE_BENEATH|O_NOFOLLOW)` rejects an in-root
+relative symlink that Go's `os.Root` follows; Windows keeps it until Windows
+evidence exists. A FIFO credential is a deliberate native non-blocking
+divergence (Go's open blocks).
+
 The native MCP foundation now models JSON-RPC null/omission semantics and
 accepts both newline-delimited and `Content-Length` framing with the Go
 implementation's 1 MiB bounds. Gateway dispatch is implemented natively;
@@ -462,3 +472,51 @@ remain historical acceptance of their exact source. New native Windows wide
 CreateProcessW comparisons, unchanged Unix315 regression, affected tests/strict
 checks and independent review are pending; copied SDK source is no Windows
 runtime evidence. This does not complete broader Skills/Rust cutover.
+
+
+### `config` / `harness` argv grammar without a Go fallback (#769 slice 1)
+
+Inventory: `brain-769-inventory.md` in the night-run evidence directory lists
+every `None` that reaches `run_go_fallback`. `audit`, `install`, `mcp` and
+`passthrough` contain no Go routing (their `None`s are parser helpers); `guard`
+is native and its `Option` is unreachable. This slice removes the `config`
+`_ => None` arm and the `harness health` worker-panic re-run, and fixes
+`harness` verb/list/health argument grammar that had diverged from Go (`harness
+-h|--help|help`, `list --`, `list -`, `list --=x`, `list -h`, `--project=`).
+A shared byte-exact model of Go's `flag.FlagSet.Parse` (`go_flags.rs`) now owns
+both commands' flag handling; `unknown subcommand`/`unexpected argument` use
+Go's `%q` byte quoting.
+
+Evidence: `scripts/config-harness-oracle/run.sh OUT.json` compiles the Go CLI
+from immutable `0541e64a…` (the candidate base, with CoreKit v0.18.2) and replays 324 cases (150 new: 116 argv-grammar shapes plus 34 seeded
+harness cases; and 174 existing `config_*`/`harness_*` differential cases; the two `harness_health_initialize*`
+probes that use `SYMBRAIN_GO_BINARY` as their fake server are excluded) in
+disposable HOME/XDG roots. The seeded cases write `~/.claude.json` (a stdio
+server with a missing command and an HTTP server on a closed loopback port) and
+a project `.mcp.json`, then run `harness health` with empty, repeated,
+matching and non-matching `--harness` values and absolute/relative `--project`,
+and `harness list` with relative projects; each run is wall-clock bounded.
+Health server rows are compared by identity under HAR-007 (only the redacted
+diagnostics differ); `harness list` is byte-exact. Every
+Rust process has an absent Go fallback; stdout, stderr, exit and mutating-case
+filesystem manifests must match. Negative controls: one diagnostic string
+mutated fails 22 cases (21 new + 1 legacy) and the fixture test; reverting the
+empty `--harness` fix fails 10 seeded health cases and its native test;
+reverting the project-path cleaning fails 10 seeded cases and its native test.
+`rust/symbrain-cli/tests/config_harness_native.rs` replays 100 Go-recorded
+root-independent shapes without Go and holds the seeded empty-filter and
+relative-project contracts natively. Contract rows CLI-011 and HAR-008;
+reports are under `migration/evidence/config-harness-769/`. Local macOS only:
+the oracle is wired into the `rust-migration`, `rust-migration-macos` and
+`rust-migration-windows` jobs of `ci.yml`, but exact-head native
+Linux/macOS/Windows CI runs are still pending; no three-OS claim is made.
+Still routed to Go (#769 open): in `harness list`, any inventory `config.error`
+other than the frozen JSON message, including cleaned project paths that
+keep a leading `..` and symlinked or non-directory project roots (needs Go `encoding/json` Decoder and
+BurntSushi/toml error text and Go's project-path behaviour), and the
+setup/doctor/usage/memory/skills predicates. Intentional divergence: Go has no
+`recover` in `harness health`, so an unrecovered probe panic aborts Go with
+exit 2 and a trace; Rust exits 1 with a fixed message (unit-tested via
+`run_probes`). Open residuals: `install`/`uninstall`/`sync` with a `..`-bearing
+`--project` still differ from Go, and a non-UTF-8 `-project` is displayed
+lossily (Unix only).

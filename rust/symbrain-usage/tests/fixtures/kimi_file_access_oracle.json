@@ -1,0 +1,307 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "regular-file-control",
+      "entries": [
+        {
+          "path": ".kimi-code/credentials/kimi-code.json",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}"
+        }
+      ],
+      "configured": true,
+      "auth_status": {
+        "status": "available",
+        "detail": "Kimi Code CLI is signed in",
+        "source": "cli"
+      }
+    },
+    {
+      "id": "regular-file-at-size-limit",
+      "entries": [
+        {
+          "path": ".kimi-code/credentials/kimi-code.json",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}",
+          "pad_to": 65536
+        }
+      ],
+      "configured": true,
+      "auth_status": {
+        "status": "available",
+        "detail": "Kimi Code CLI is signed in",
+        "source": "cli"
+      }
+    },
+    {
+      "id": "regular-file-over-size-limit",
+      "entries": [
+        {
+          "path": ".kimi-code/credentials/kimi-code.json",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}",
+          "pad_to": 65537
+        }
+      ],
+      "configured": false,
+      "auth_status": {
+        "status": "missing",
+        "detail": "No Kimi Code CLI credentials found"
+      }
+    },
+    {
+      "id": "symlink-to-valid-file",
+      "entries": [
+        {
+          "path": "elsewhere/token.json",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}"
+        },
+        {
+          "path": ".kimi-code/credentials/kimi-code.json",
+          "kind": "symlink",
+          "target": "$HOME/elsewhere/token.json"
+        }
+      ],
+      "configured": false,
+      "auth_status": {
+        "status": "missing",
+        "detail": "No Kimi Code CLI credentials found"
+      }
+    },
+    {
+      "id": "relative-symlink-inside-credentials-directory-is-followed",
+      "entries": [
+        {
+          "path": ".kimi-code/credentials/real.json",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}"
+        },
+        {
+          "path": ".kimi-code/credentials/kimi-code.json",
+          "kind": "symlink",
+          "target": "real.json"
+        }
+      ],
+      "configured": true,
+      "auth_status": {
+        "status": "available",
+        "detail": "Kimi Code CLI is signed in",
+        "source": "cli"
+      }
+    },
+    {
+      "id": "dangling-symlink",
+      "entries": [
+        {
+          "path": ".kimi-code/credentials/kimi-code.json",
+          "kind": "symlink",
+          "target": "$HOME/elsewhere/absent.json"
+        }
+      ],
+      "configured": false,
+      "auth_status": {
+        "status": "missing",
+        "detail": "No Kimi Code CLI credentials found"
+      }
+    },
+    {
+      "id": "directory-at-credential-path",
+      "entries": [
+        {
+          "path": ".kimi-code/credentials/kimi-code.json",
+          "kind": "dir"
+        }
+      ],
+      "configured": false,
+      "auth_status": {
+        "status": "missing",
+        "detail": "No Kimi Code CLI credentials found"
+      }
+    },
+    {
+      "id": "credentials-directory-is-a-file",
+      "entries": [
+        {
+          "path": ".kimi-code/credentials",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}"
+        }
+      ],
+      "configured": false,
+      "auth_status": {
+        "status": "missing",
+        "detail": "No Kimi Code CLI credentials found"
+      }
+    },
+    {
+      "id": "file-mode-000",
+      "entries": [
+        {
+          "path": ".kimi-code/credentials/kimi-code.json",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}"
+        },
+        {
+          "path": ".kimi-code/credentials/kimi-code.json",
+          "kind": "chmod",
+          "mode": "000"
+        }
+      ],
+      "configured": false,
+      "auth_status": {
+        "status": "missing",
+        "detail": "No Kimi Code CLI credentials found"
+      }
+    },
+    {
+      "id": "credentials-directory-mode-000",
+      "entries": [
+        {
+          "path": ".kimi-code/credentials/kimi-code.json",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}"
+        },
+        {
+          "path": ".kimi-code/credentials",
+          "kind": "chmod",
+          "mode": "000"
+        }
+      ],
+      "configured": false,
+      "auth_status": {
+        "status": "missing",
+        "detail": "No Kimi Code CLI credentials found"
+      }
+    },
+    {
+      "id": "intermediate-directory-symlink-is-followed",
+      "entries": [
+        {
+          "path": "store/credentials/kimi-code.json",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}"
+        },
+        {
+          "path": ".kimi-code",
+          "kind": "symlink",
+          "target": "$HOME/store"
+        }
+      ],
+      "configured": true,
+      "auth_status": {
+        "status": "available",
+        "detail": "Kimi Code CLI is signed in",
+        "source": "cli"
+      }
+    },
+    {
+      "id": "legacy-only-regular-control",
+      "entries": [
+        {
+          "path": ".kimi/credentials/kimi-code.json",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}"
+        }
+      ],
+      "configured": true,
+      "auth_status": {
+        "status": "available",
+        "detail": "Kimi Code CLI is signed in",
+        "source": "cli"
+      }
+    },
+    {
+      "id": "current-symlink-masks-valid-legacy",
+      "entries": [
+        {
+          "path": "elsewhere/token.json",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}"
+        },
+        {
+          "path": ".kimi-code/credentials/kimi-code.json",
+          "kind": "symlink",
+          "target": "$HOME/elsewhere/token.json"
+        },
+        {
+          "path": ".kimi/credentials/kimi-code.json",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}"
+        }
+      ],
+      "configured": false,
+      "auth_status": {
+        "status": "missing",
+        "detail": "No Kimi Code CLI credentials found"
+      }
+    },
+    {
+      "id": "current-directory-masks-valid-legacy",
+      "entries": [
+        {
+          "path": ".kimi-code/credentials/kimi-code.json",
+          "kind": "dir"
+        },
+        {
+          "path": ".kimi/credentials/kimi-code.json",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}"
+        }
+      ],
+      "configured": false,
+      "auth_status": {
+        "status": "missing",
+        "detail": "No Kimi Code CLI credentials found"
+      }
+    },
+    {
+      "id": "explicit-home-symlink",
+      "entries": [
+        {
+          "path": "elsewhere/token.json",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}"
+        },
+        {
+          "path": "owned-kimi/credentials/kimi-code.json",
+          "kind": "symlink",
+          "target": "$HOME/elsewhere/token.json"
+        },
+        {
+          "path": ".kimi-code/credentials/kimi-code.json",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}"
+        }
+      ],
+      "env": {
+        "KIMI_CODE_HOME": "$HOME/owned-kimi"
+      },
+      "configured": false,
+      "auth_status": {
+        "status": "missing",
+        "detail": "No Kimi Code CLI credentials found"
+      }
+    },
+    {
+      "id": "explicit-home-regular-control",
+      "entries": [
+        {
+          "path": "owned-kimi/credentials/kimi-code.json",
+          "kind": "file",
+          "contents": "{\"access_token\":\"synthetic-kimi-access\"}"
+        }
+      ],
+      "env": {
+        "KIMI_CODE_HOME": "$HOME/owned-kimi"
+      },
+      "configured": true,
+      "auth_status": {
+        "status": "available",
+        "detail": "Kimi Code CLI is signed in",
+        "source": "cli"
+      }
+    }
+  ]
+}

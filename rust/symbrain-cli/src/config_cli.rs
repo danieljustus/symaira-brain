@@ -1,8 +1,11 @@
 use std::ffi::OsString;
 use std::io::Write;
 
+use symbrain_core::config::format_go_quoted;
 use symbrain_core::exit;
 use symbrain_core::xdg;
+
+use crate::go_flags::FlagSet;
 
 const CONFIG_USAGE: &str = r"symbrain config — inspect and edit the global config file
 
@@ -32,46 +35,35 @@ on top when commands run. Creating the file is 'symbrain init'; profiles
 have their own commands ('symbrain profile ...').
 ";
 
-pub(crate) fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> Option<u8> {
+/// Runs `symbrain config`, mirroring Go's `cmdConfig`: an argument-less
+/// `flag.FlagSet` parse (so `-h` and unknown flags print the usage), then the
+/// first positional selects the subcommand.
+pub(crate) fn run(args: &[OsString], stdout: &mut dyn Write, stderr: &mut dyn Write) -> u8 {
     let normalized = super::normalize_flags(args);
-    let (subcommand, sub_args) = if normalized.first().is_some_and(|a| a == "--") {
-        let sub = normalized.get(1).map(|s| s.to_string_lossy());
-        let sub_args = if normalized.len() > 2 {
-            &normalized[2..]
-        } else {
-            &[]
-        };
-        (sub, sub_args)
-    } else {
-        let sub = normalized.first().map(|s| s.to_string_lossy());
-        let sub_args = if normalized.len() > 1 {
-            &normalized[1..]
-        } else {
-            &[]
-        };
-        (sub, sub_args)
+    let flags = FlagSet {
+        string_flags: &[],
+        usage: CONFIG_USAGE,
+    };
+    let Ok(parsed) = flags.parse(&normalized, stderr) else {
+        return exit::NO_INPUT;
+    };
+    let Some((subcommand, sub_args)) = parsed.rest.split_first() else {
+        let _ = write!(stderr, "{CONFIG_USAGE}");
+        return exit::NO_INPUT;
     };
 
-    match subcommand.as_deref() {
-        Some("path") => Some(run_path(sub_args, stdout)),
-        Some("get") => Some(symbrain_core::config::run_config_get(
-            sub_args, stdout, stderr,
-        )),
-        Some("set") => Some(symbrain_core::config::run_config_set(
-            sub_args, stdout, stderr,
-        )),
-        Some(sub) if !sub.starts_with('-') => {
+    match subcommand.to_str() {
+        Some("path") => run_path(sub_args, stdout),
+        Some("get") => symbrain_core::config::run_config_get(sub_args, stdout, stderr),
+        Some("set") => symbrain_core::config::run_config_set(sub_args, stdout, stderr),
+        _ => {
             let _ = writeln!(
                 stderr,
-                "symbrain config: unknown subcommand {sub:?} (want path, get, or set)"
+                "symbrain config: unknown subcommand {} (want path, get, or set)",
+                format_go_quoted(subcommand)
             );
-            Some(exit::NO_INPUT)
+            exit::NO_INPUT
         }
-        None => {
-            let _ = write!(stderr, "{CONFIG_USAGE}");
-            Some(exit::NO_INPUT)
-        }
-        _ => None,
     }
 }
 
@@ -96,7 +88,7 @@ fn run_path(args: &[OsString], stdout: &mut dyn Write) -> u8 {
 mod tests {
     use super::*;
 
-    fn execute(args: &[&str]) -> (Option<u8>, String, String) {
+    fn execute(args: &[&str]) -> (u8, String, String) {
         let args = args.iter().map(OsString::from).collect::<Vec<_>>();
         let mut stdout = Vec::new();
         let mut stderr = Vec::new();
@@ -111,7 +103,7 @@ mod tests {
     #[test]
     fn no_subcommand_matches_go_usage() {
         let (code, stdout, stderr) = execute(&[]);
-        assert_eq!(code, Some(exit::NO_INPUT));
+        assert_eq!(code, exit::NO_INPUT);
         assert!(stdout.is_empty());
         assert_eq!(stderr, CONFIG_USAGE);
     }
@@ -119,7 +111,7 @@ mod tests {
     #[test]
     fn unknown_subcommand_matches_go_error() {
         let (code, stdout, stderr) = execute(&["frobnicate"]);
-        assert_eq!(code, Some(exit::NO_INPUT));
+        assert_eq!(code, exit::NO_INPUT);
         assert!(stdout.is_empty());
         assert_eq!(
             stderr,

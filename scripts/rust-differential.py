@@ -26,7 +26,12 @@ from typing import Callable
 
 from external_env import ensure_external_environment
 from differential_journal import Journal
-from harness_health_contract import HEALTH_DEVIATIONS, legacy_health_view
+from harness_health_contract import (
+    HEALTH_DEVIATIONS,
+    SEEDED_HEALTH_PREFIX,
+    legacy_health_rows_view,
+    legacy_health_view,
+)
 from skills_render_contract import RENDER_DEVIATIONS, legacy_render_view
 if os.name == "posix":
     import pty
@@ -3282,6 +3287,12 @@ def main() -> int:
                         failures.append(f"{case.name}: HAR-007 health contract failed: {err}")
                         continue
                     print(f"ACCEPTED HAR-007 {case.name} (validated versioned health contract)")
+                if case.name.startswith(SEEDED_HEALTH_PREFIX):
+                    try:
+                        rust_stdout = legacy_health_rows_view(case.name, go_stdout, rust_stdout)
+                    except (AssertionError, ValueError, TypeError, KeyError) as err:
+                        failures.append(f"{case.name}: HAR-007 seeded health rows failed: {err}")
+                        continue
                 if case.name in RENDER_DEVIATIONS:
                     try:
                         rust_stdout = legacy_render_view(case.name, go_stdout, rust_stdout, rust_root)

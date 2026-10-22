@@ -1,0 +1,41 @@
+   Compiling symbrain-cli v0.12.1 (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/Repos/symaira-brain/.worktrees/night-769/rust/symbrain-cli)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.29s
+     Running tests/config_harness_native.rs (/Volumes/1TB_NVMe_SN850X/Dev/Symaira_Dev/builds/symaira-brain/cargo-target/e616fdceea145a39/debug/deps/config_harness_native-fcb0fa54090fb70e)
+
+running 1 test
+test relative_project_config_path_is_cleaned_like_go ... FAILED
+
+failures:
+
+---- relative_project_config_path_is_cleaned_like_go stdout ----
+
+thread 'relative_project_config_path_is_cleaned_like_go' (35064344) panicked at rust/symbrain-cli/tests/config_harness_native.rs:220:9:
+".": claude	Claude Code
+  global	/Volumes/1TB_NVMe_SN850X/Dev/tmp/symbrain/run/.tmplT4sw1/home/.claude.json	parsed	servers=a[stdio],b[http]
+  project	./.mcp.json	parsed	servers=p[stdio]
+
+claude-desktop	Claude Desktop
+  global	/Volumes/1TB_NVMe_SN850X/Dev/tmp/symbrain/run/.tmplT4sw1/home/Library/Application Support/Claude/claude_desktop_config.json	missing	servers=(none)
+
+cursor	Cursor
+  global	/Volumes/1TB_NVMe_SN850X/Dev/tmp/symbrain/run/.tmplT4sw1/home/.cursor/mcp.json	missing	servers=(none)
+
+opencode	OpenCode
+  global	/Volumes/1TB_NVMe_SN850X/Dev/tmp/symbrain/run/.tmplT4sw1/config/opencode/config.json	missing	servers=(none)
+
+codex	Codex CLI
+  global	/Volumes/1TB_NVMe_SN850X/Dev/tmp/symbrain/run/.tmplT4sw1/home/.codex/config.toml	missing	servers=(none)
+
+antigravity	Antigravity
+  global	/Volumes/1TB_NVMe_SN850X/Dev/tmp/symbrain/run/.tmplT4sw1/home/.gemini/config/mcp_config.json	missing	servers=(none)
+
+
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    relative_project_config_path_is_cleaned_like_go
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.45s
+
+error: test failed, to rerun pass `-p symbrain-cli --test config_harness_native`
