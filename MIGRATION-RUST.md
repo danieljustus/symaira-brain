@@ -545,6 +545,10 @@ and `data/symbrain/skills/base/`. Negative controls run against the fixed code:
 `Path::join` for the library dir (17 cases fail), no link confinement (26 fail),
 the old `confined_link` (10 fail). Not included: the vendored YAML encoder (#835), the catalog
 reorder of Skills before Usage, audit arguments of repaired values.
+Known residual vulnerability, identical in Go (#918): a relative `../`-repeated
+`name` still lets `skills_restore` extract over (even dry-run) or commit into, and
+`skills_history` read, any repository the user can write. Rust reproduces Go's
+effects exactly and writes nowhere Go cannot; the fix needs Go and Rust together.
 
 ### Skills sync Windows raw argv follow-up (#793 / #794)
 

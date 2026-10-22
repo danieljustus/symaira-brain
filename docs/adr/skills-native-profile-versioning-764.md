@@ -66,10 +66,17 @@ process, no `symskills` binary.
 * The shared install layer writes `output_digest`/`output_manifest` into
   `.symskills.json` and names its lock files differently from Go; the replay
   compares every other marker field and ignores lock files.
-* `skills_restore` with a traversing name (`../library/alpha`) reproduces Go's
-  extraction/staging path (`filepath.Join(tmp, name)`), which writes outside
-  the temporary directory in both implementations. This is Go behavior kept for
-  parity and is a candidate Go fix, not a native feature.
+* **Known Go vulnerability kept for parity (#918).** A relative traversing
+  name (`../` repeated, e.g. `"../"*40 + "<absolute repo path>"`) is cleaned by
+  `filepath.Join(library, name)` and `filepath.Join(tmp, name)` to the same
+  directory outside both. `skills_restore` then extracts the revision over the
+  working tree of any git repository the user can write, even with
+  `dry_run:true`, and with `dry_run:false` commits there; `skills_history`
+  reads that repository's log. Go and Rust have identical filesystem effects
+  (independent review probe, 81b594a01); Rust writes nowhere Go cannot. Any MCP
+  client allowed to call these tools can trigger it. The fix (reject a `name`
+  that is not a single local path segment, before any filesystem access) must
+  land in Go and Rust together and is not part of this slice.
 * Rust adds input bounds Go lacks (16 MiB profile, entry and git-output
   limits). Invalid UTF-8 in git output is decoded lossily where Go escapes it.
 * Windows path cleaning is unix-style lexical; the replay is `cfg(unix)`.
