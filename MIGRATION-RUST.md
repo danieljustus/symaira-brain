@@ -483,8 +483,13 @@ Evidence is local: `scripts/skills-native-oracle/raw_layer_oracle.py` records
 330 cases from the real Go `symbrain mcp` (pinned ref 9bf83c3f2, Go 1.26.7) into
 `rust/symbrain-cli/tests/fixtures/skills_raw_go_oracle.json`, and
 `skills_raw_oracle` replays them natively; `record`/`check` prove the fixture
-equals Go's actual replies. Four cases whose `name` is not a Skills tool belong to
-the inherited generic decoder and are asserted to still diverge. Native
+equals Go's actual replies; this needs `GOTOOLCHAIN=go1.26.7` (#912). 326 of
+the 330 cases match. Four recorded cases whose `name` is not a Skills tool
+represent a wider class: every `tools/call` whose name is not one of the eleven
+Skills tools (other tool names with typed `_meta` errors, a missing name, `name`
+as array or number, non-object params) still uses the inherited generic decoder
+and diverges from Go's outer error. The four are asserted to differ, not how.
+Native
 Linux/macOS/Windows CI is pending. The #813 `skills_raw_transport` failure at
 line 68 was not a layer defect: under `cargo llvm-cov` the test's `env_clear`
 dropped `LLVM_PROFILE_FILE`, so the instrumented child wrote a `.profraw` into

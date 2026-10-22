@@ -38,9 +38,15 @@ transport reproduces that for the eleven Skills tool names only:
   layer already recognises their names, so their outer errors match Go.
 * Handler-level typed argument decoding (Go's anonymous argument structs) is
   later work.
-* Four recorded cases (`name` is a number / lone surrogate) diverge from Go
-  because they belong to the inherited decoder; the oracle test asserts the
-  divergence so it cannot be forgotten.
+* Every `tools/call` whose name is not one of the eleven Skills tools keeps the
+  inherited generic decoder and diverges from Go's outer error (a class, not a
+  fixed set: other names with typed `_meta` errors, a missing name, `name` as an
+  array or number, non-object params). Four representative cases are recorded
+  and asserted to differ so the class cannot be forgotten; the assertion does
+  not pin how they differ.
+* The oracle `check` compares the full `go version` string and builds the
+  working tree, so it must run with `GOTOOLCHAIN=go1.26.7` on darwin/arm64
+  and only while Go sources equal the pinned ref (#912).
 
 ## Evidence rule
 
