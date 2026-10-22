@@ -173,6 +173,14 @@ pub fn raw_skills_arguments(raw: Option<&RawValue>) -> serde_json::Value {
     })
 }
 
+/// The raw handler arguments with invalid UTF-8 and unpaired surrogates in
+/// strings replaced by U+FFFD (Go's decoder), keeping member order and
+/// duplicates so a typed decoder can reproduce Go's first-error semantics.
+#[must_use]
+pub fn raw_skills_repaired(raw: &RawValue) -> String {
+    strings::repair(raw.get().as_bytes(), true)
+}
+
 pub(crate) fn transport_request(bytes: &[u8]) -> Option<Result<crate::Request, String>> {
     if let Err(error) = syntax::validate(bytes) {
         // Ownership of an error is not permission to admit a request. The

@@ -499,6 +499,33 @@ Skills tools, handler-level typed argument decoding, the vendored YAML fork and
 the #834 startup-state changes. Decisions: `docs/adr/skills-native-raw-transport-764.md`.
 
 
+### Skills MCP profile, discovery and versioning tools (#764 slice b)
+
+The five remaining Go Skills tools -- `skills_profile_list`,
+`skills_profile_resolve`, `skills_discover_sources`, `skills_history`,
+`skills_restore` -- are native, salvaged from PR #813 and rewritten against
+current main without the vendored YAML fork. Handler-level typed argument
+decoding, `exitcodes` kinds in `_meta`, Go's compact HTML-escaped JSON and
+field order, per-skill `git` history/forward restore (dry-run default, dirty
+refusal, snapshot commit, pre-write validation, `sync=true` re-install) and
+Go-exact catalog metadata are covered. Decisions and residuals:
+`docs/adr/skills-native-profile-versioning-764.md`.
+
+Evidence is local: `scripts/skills-native-oracle/tools_oracle.py` records 141
+cases from the real Go `symbrain mcp` (pinned ref 3d9a89e7a, Go 1.26.7 via
+`GOTOOLCHAIN=go1.26.7`, isolated HOME/XDG, pinned git identity/dates) into
+`rust/symbrain-cli/tests/fixtures/skills_tools_go_oracle.json`; `record`/`check`
+prove the fixture equals Go's actual behavior. The replay test
+`skills_tools_oracle` recreates each pre-state (files, links, git repositories,
+Go-made installs for `sync=true`), requires byte-identical reply lines and an
+identical post-call tree (modes, hashes, links, git log/status), compares the
+five `tools/list` entries byte for byte, and carries four negative controls plus
+two implementation mutations that were run and failed as intended (skipped
+working-tree cleanup: 10 cases differ; limit default and JSON escaping: 12
+differ). Green on macOS and in `rust:1.98-bookworm` as uid 1000; native Windows
+CI is pending. Not included: the vendored YAML encoder (#835), the catalog
+reorder of Skills before Usage, audit arguments of repaired values.
+
 ### Skills sync Windows raw argv follow-up (#793 / #794)
 
 Source preparation corrects the earlier Windows replacement assumption: pinned
