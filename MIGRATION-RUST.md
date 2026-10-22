@@ -451,6 +451,20 @@ separately unported. Three actual output mutants test the new boundaries. These
 selected states do not inventory all unsupported TOML/discovery/I/O shapes. Native three-OS acceptance, remaining diagnostics and release
 are still pending; #770 stays open. Production Go and frozen fixtures are unchanged.
 
+The #770 command-tree inventory is now a Go-derived, machine-checked fixture
+(`migration/evidence/guard-command-tree-770/inventory.json`, SEC-009). It lists
+nine paths (root dispatcher, `version`, `doctor`, `decide`, `grants`, `grants list`,
+`grants revoke`, `scan`, `help`) walked from the actual Go oracle help tree and
+cross-checked against the frozen source's dispatcher cases and flag literals.
+All 80 recorded probes (help, `-h`, unknown word/flag, `--`, flag-before/after-positional
+forms) match byte-for-byte between Go and the native `symguard`; the result is 9
+native, 0 unported, 0 Go fallback. `proxy`, `spawn`, `approval`, `proposal`,
+`sequence`, `discovery` and `update` are library packages without a command case,
+so they are not CLI paths; `archguard`, `proposal`, `update` (never invoked by any
+command) and the `spawn` package remain unported as libraries and are listed in the
+fixture. `symguard-cli/tests/command_tree.rs` replays the fixture without Go.
+Native three-OS CI results and the remaining library ports are still pending.
+
 
 
 For #621, the native explicit-target status report adds a bounded, read-only

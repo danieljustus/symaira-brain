@@ -84,3 +84,11 @@ corpora stay required. Final source maps, logs, copied probe bytes and exact
 executable roles are retained under
 `migration/evidence/guard-doctor-config-paths-770/final-5bb`; native three-platform
 CI and independent review remain pending.
+
+**Command tree (#770 slice 1).** `command_tree.py GO RUST REPORT GO_SOURCE [--write-fixture]` walks the
+Go oracle's help tree, cross-checks it against the frozen source's dispatcher cases and flag
+literals, executes every path/flag/positional/`--` form against both binaries in disposable roots and
+requires zero unported paths. It verifies (never rewrites) the committed
+`migration/evidence/guard-command-tree-770/inventory.json`, and rejects four actual process mutants
+(help text, silent success, usage exit code, JSON key) and three fixture mutants. `run.sh` writes
+the `-command-tree.json` receipt; the Go-free replay lives in `rust/symguard-cli/tests/command_tree.rs`.

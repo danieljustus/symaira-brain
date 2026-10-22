@@ -15,6 +15,25 @@ Reference: unchanged Go `dcddcef0df5789123c7c9a7ebe6e01f10e941f2c`, `cmd/symbrai
 
 The expanded process runner executes all124 selected cases rather than skipping unsupported doctor states. Current Linux proof has121 complete output/exit/persistence matches after validated runtime fields. Three selected TOML states assert explicit failure and remain unported: decoder type text before semantic validation, multiple invalid defaults with Go map ordering, and unknown-key warnings. Windows audit-open wording retains the explicit deny-only comparison until native proof supports a safe port. These counts describe the selected corpus, not every remaining diagnostic branch. Unsupported TOML syntax/type/representation, config and anchor I/O, anchor Unicode replacement, malformed discovery boundaries and output failure still need complete inventories/proof. The frozen decision suite's platform-specific broken-output case is not counted here and remains an explicit acceptance task. No zero-unported claim, issue closure, release or Go removal follows from this inventory.
 
+## Machine-checked command tree (slice 1)
+
+`migration/evidence/guard-command-tree-770/inventory.json` is generated from the Go oracle
+(`scripts/guard-standalone-oracle/command_tree.py --write-fixture`, frozen `dcddcef0`,
+`GOTOOLCHAIN=go1.26.7`) and verified without writing by the same script in `run.sh`, which also
+runs every probe against the native binary. It records the help-tree walk (nine paths), the
+package flag literals (`--format`, `--all`, `--json`, `--help`, `-h`), the dispatcher cases, each
+probe's Go stdout/stderr/exit and the classification of all fourteen `guard/internal` packages
+(imported by a command / not imported / Rust owner). `symguard-cli/tests/command_tree.rs` replays
+the same probes against the Rust process with no Go toolchain. Result on macOS arm64: 9 paths,
+9 native, 0 unported, 0 fallback, 80 probes matched, four actual process mutants and three
+fixture mutants rejected. Native Linux/Windows runs are pending CI.
+
+Library-only state (not command paths): `approval`, `capability`, `policy`, `sequence` are not
+imported by any command and are owned by `symbrain-guard-core`; `archguard` and `proposal` are
+not imported and have no Rust port; `spawn` is used only by `doctor` and is ported inside
+the native doctor; `update` is imported by `version` but `CheckLatest` is called by no command
+(the frozen tree has no `main`), so there is no network update check to port.
+
 See [ADR 0011](../docs/adr/0011-standalone-rust-guard.md) and [reproduction](../scripts/guard-standalone-oracle/README.md).
 
 
